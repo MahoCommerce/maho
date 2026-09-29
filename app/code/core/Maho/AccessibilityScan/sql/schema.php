@@ -17,135 +17,28 @@ use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\SchemaEditor;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
+use Maho\Db\Schema;
 
 return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('accessibilityscan_scan')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('scan_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('status')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(20)
-                    ->setDefaultValue('pending')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('wcag_level')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(3)
-                    ->setDefaultValue('AA')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('triggered_by')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(16)
-                    ->setDefaultValue('manual')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('url')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(2048)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('total_violations')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('violations_critical')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('violations_serious')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('violations_moderate')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('violations_minor')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('incomplete_count')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('error_message')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('started_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('completed_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
+            ->addColumn(Schema::column('scan_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('status', Types::STRING, length: 20, default: 'pending'))
+            ->addColumn(Schema::column('wcag_level', Types::STRING, length: 3, default: 'AA'))
+            ->addColumn(Schema::column('triggered_by', Types::STRING, length: 16, default: 'manual'))
+            ->addColumn(Schema::column('url', Types::STRING, length: 2048))
+            ->addColumn(Schema::column('total_violations', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('violations_critical', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('violations_serious', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('violations_moderate', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('violations_minor', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('incomplete_count', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('error_message', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('started_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('completed_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('scan_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('status'))
@@ -157,91 +50,17 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('accessibilityscan_page')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('page_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('scan_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('viewport')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(16)
-                    ->setDefaultValue('desktop')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('url')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(2048)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('page_title')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('status')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(20)
-                    ->setDefaultValue('pending')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('screenshot_path')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('page_width')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('page_height')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('violation_count')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('scanned_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('page_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('scan_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('viewport', Types::STRING, length: 16, default: 'desktop'))
+            ->addColumn(Schema::column('url', Types::STRING, length: 2048))
+            ->addColumn(Schema::column('page_title', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('status', Types::STRING, length: 20, default: 'pending'))
+            ->addColumn(Schema::column('screenshot_path', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('page_width', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('page_height', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('violation_count', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('scanned_at', Types::DATETIME_MUTABLE, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('page_id')->create())
             ->addForeignKeyConstraint(
                 ForeignKeyConstraint::editor()
@@ -262,140 +81,23 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('accessibilityscan_violation')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('violation_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('scan_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('axe_rule_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(64)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('impact')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(16)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('wcag_level')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(3)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('wcag_criteria')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('description')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('help_url')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(512)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('html_snippet')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('css_selector')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('failure_summary')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('template_file')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('template_line')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('viewports')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(64)
-                    ->setDefaultValue('')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('element_rects')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('ai_suggestion')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('ai_diff')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('violation_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('scan_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('axe_rule_id', Types::STRING, length: 64))
+            ->addColumn(Schema::column('impact', Types::STRING, length: 16, notNull: false))
+            ->addColumn(Schema::column('wcag_level', Types::STRING, length: 3, notNull: false))
+            ->addColumn(Schema::column('wcag_criteria', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('description', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('help_url', Types::STRING, length: 512, notNull: false))
+            ->addColumn(Schema::column('html_snippet', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('css_selector', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('failure_summary', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('template_file', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('template_line', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('viewports', Types::STRING, length: 64, default: ''))
+            ->addColumn(Schema::column('element_rects', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('ai_suggestion', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('ai_diff', Types::TEXT, length: 65535, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('violation_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('axe_rule_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('impact'))

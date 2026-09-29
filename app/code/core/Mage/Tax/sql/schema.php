@@ -17,33 +17,15 @@ use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\SchemaEditor;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
+use Maho\Db\Schema;
 
 return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('tax_class')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('class_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('class_name')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('class_type')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(8)
-                    ->setDefaultValue('CUSTOMER')
-                    ->create(),
-            )
+            ->addColumn(Schema::column('class_id', Types::SMALLINT, autoincrement: true))
+            ->addColumn(Schema::column('class_name', Types::STRING, length: 255))
+            ->addColumn(Schema::column('class_type', Types::STRING, length: 8, default: 'CUSTOMER'))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('class_id')->create())
             ->setComment('Tax Class')
             ->create(),
@@ -52,39 +34,11 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('tax_calculation_rule')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('tax_calculation_rule_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('priority')
-                    ->setTypeName(Types::INTEGER)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('position')
-                    ->setTypeName(Types::INTEGER)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('calculate_subtotal')
-                    ->setTypeName(Types::INTEGER)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('tax_calculation_rule_id', Types::INTEGER, autoincrement: true))
+            ->addColumn(Schema::column('code', Types::STRING, length: 255))
+            ->addColumn(Schema::column('priority', Types::INTEGER))
+            ->addColumn(Schema::column('position', Types::INTEGER))
+            ->addColumn(Schema::column('calculate_subtotal', Types::INTEGER, default: 0))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('tax_calculation_rule_id')
@@ -99,72 +53,15 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('tax_calculation_rate')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('tax_calculation_rate_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('tax_country_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(2)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('tax_region_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('tax_postcode')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(21)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('rate')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('zip_is_range')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('zip_from')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('zip_to')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('tax_calculation_rate_id', Types::INTEGER, autoincrement: true))
+            ->addColumn(Schema::column('tax_country_id', Types::STRING, length: 2))
+            ->addColumn(Schema::column('tax_region_id', Types::INTEGER))
+            ->addColumn(Schema::column('tax_postcode', Types::STRING, length: 21, notNull: false))
+            ->addColumn(Schema::column('code', Types::STRING, length: 255))
+            ->addColumn(Schema::column('rate', Types::DECIMAL, precision: 12, scale: 4))
+            ->addColumn(Schema::column('zip_is_range', Types::SMALLINT, notNull: false))
+            ->addColumn(Schema::column('zip_from', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('zip_to', Types::INTEGER, unsigned: true, notNull: false))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('tax_calculation_rate_id')
@@ -183,37 +80,11 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('tax_calculation')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('tax_calculation_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('tax_calculation_rate_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('tax_calculation_rule_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_tax_class_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('product_tax_class_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('tax_calculation_id', Types::INTEGER, autoincrement: true))
+            ->addColumn(Schema::column('tax_calculation_rate_id', Types::INTEGER))
+            ->addColumn(Schema::column('tax_calculation_rule_id', Types::INTEGER))
+            ->addColumn(Schema::column('customer_tax_class_id', Types::SMALLINT))
+            ->addColumn(Schema::column('product_tax_class_id', Types::SMALLINT))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('tax_calculation_id')
@@ -270,33 +141,10 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('tax_calculation_rate_title')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('tax_calculation_rate_title_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('tax_calculation_rate_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('value')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('tax_calculation_rate_title_id', Types::INTEGER, autoincrement: true))
+            ->addColumn(Schema::column('tax_calculation_rate_id', Types::INTEGER))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true))
+            ->addColumn(Schema::column('value', Types::STRING, length: 255))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('tax_calculation_rate_title_id')
@@ -332,65 +180,14 @@ return function (SchemaEditor $schema): void {
         $schema->addTable(
             Table::editor()
                 ->setUnquotedName($tableName)
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('id')
-                        ->setTypeName(Types::INTEGER)
-                        ->setUnsigned(true)
-                        ->setAutoincrement(true)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('period')
-                        ->setTypeName(Types::DATE_MUTABLE)
-                        ->setNotNull(false)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('store_id')
-                        ->setTypeName(Types::SMALLINT)
-                        ->setUnsigned(true)
-                        ->setNotNull(false)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('code')
-                        ->setTypeName(Types::STRING)
-                        ->setLength(255)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('order_status')
-                        ->setTypeName(Types::STRING)
-                        ->setLength(50)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('percent')
-                        ->setTypeName(Types::SMALLFLOAT)
-                        ->setNotNull(false)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('orders_count')
-                        ->setTypeName(Types::INTEGER)
-                        ->setUnsigned(true)
-                        ->setDefaultValue(0)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('tax_base_amount_sum')
-                        ->setTypeName(Types::SMALLFLOAT)
-                        ->setNotNull(false)
-                        ->create(),
-                )
+                ->addColumn(Schema::column('id', Types::INTEGER, unsigned: true, autoincrement: true))
+                ->addColumn(Schema::column('period', Types::DATE_MUTABLE, notNull: false))
+                ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, notNull: false))
+                ->addColumn(Schema::column('code', Types::STRING, length: 255))
+                ->addColumn(Schema::column('order_status', Types::STRING, length: 50))
+                ->addColumn(Schema::column('percent', Types::SMALLFLOAT, notNull: false))
+                ->addColumn(Schema::column('orders_count', Types::INTEGER, unsigned: true, default: 0))
+                ->addColumn(Schema::column('tax_base_amount_sum', Types::SMALLFLOAT, notNull: false))
                 ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('id')->create())
                 ->addIndex(
                     Index::editor()
@@ -415,36 +212,10 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('sales_order_tax_item')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('tax_item_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('tax_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('item_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('tax_percent')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('tax_item_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('tax_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('item_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('tax_percent', Types::DECIMAL, precision: 12, scale: 4))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('tax_item_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('tax_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('item_id'))

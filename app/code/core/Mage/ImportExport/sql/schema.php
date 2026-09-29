@@ -18,43 +18,16 @@ use Doctrine\DBAL\Schema\SchemaEditor;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Schema\TableEditor;
 use Doctrine\DBAL\Types\Types;
+use Maho\Db\Schema;
 
 return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('importexport_importdata')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(50)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('behavior')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(10)
-                    ->setDefaultValue('append')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('data')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(2147483648)
-                    ->setNotNull(false)
-                    ->setDefaultValue('')
-                    ->create(),
-            )
+            ->addColumn(Schema::column('id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('entity', Types::STRING, length: 50))
+            ->addColumn(Schema::column('behavior', Types::STRING, length: 10, default: 'append'))
+            ->addColumn(Schema::column('data', Types::TEXT, length: 2147483648, notNull: false, default: ''))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('id')->create())
             ->setComment('Import Data Table')
             ->create(),

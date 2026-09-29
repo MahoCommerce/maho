@@ -19,95 +19,23 @@ use Doctrine\DBAL\Schema\SchemaEditor;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Schema\TableEditor;
 use Doctrine\DBAL\Types\Types;
+use Maho\Db\Schema;
 
 return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('paypal_webhook_event')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('event_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('paypal_event_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(64)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('event_type')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(128)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('resource_type')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(64)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('resource_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(64)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('summary')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('status')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->setDefaultValue('received')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('payload')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('error_message')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('processed_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('event_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('paypal_event_id', Types::STRING, length: 64))
+            ->addColumn(Schema::column('event_type', Types::STRING, length: 128))
+            ->addColumn(Schema::column('resource_type', Types::STRING, length: 64, notNull: false))
+            ->addColumn(Schema::column('resource_id', Types::STRING, length: 64, notNull: false))
+            ->addColumn(Schema::column('summary', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('status', Types::STRING, length: 32, default: 'received'))
+            ->addColumn(Schema::column('payload', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('error_message', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('processed_at', Types::DATETIME_MUTABLE, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('event_id')->create())
             ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('paypal_event_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('event_type'))
@@ -119,105 +47,19 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('paypal_vault_token')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('token_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('paypal_token_id')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('paypal_token_id_hash')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(64)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('payment_source_type')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('card_last_four')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('card_brand')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('card_expiry')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(7)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('payer_email')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('label')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_active')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(1)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('updated_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
+            ->addColumn(Schema::column('token_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('customer_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('paypal_token_id', Types::TEXT, length: 65535))
+            ->addColumn(Schema::column('paypal_token_id_hash', Types::STRING, length: 64, notNull: false))
+            ->addColumn(Schema::column('payment_source_type', Types::STRING, length: 32))
+            ->addColumn(Schema::column('card_last_four', Types::STRING, length: 4, notNull: false))
+            ->addColumn(Schema::column('card_brand', Types::STRING, length: 32, notNull: false))
+            ->addColumn(Schema::column('card_expiry', Types::STRING, length: 7, notNull: false))
+            ->addColumn(Schema::column('payer_email', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('label', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('is_active', Types::SMALLINT, unsigned: true, default: 1))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('updated_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('token_id')->create())
             ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('paypal_token_id_hash'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('customer_id'))
@@ -235,28 +77,12 @@ return function (SchemaEditor $schema): void {
 
     // Paypal grafts a paypal_order_id column + index onto Mage_Sales' quote/order payment tables, kept here so module removal stays one delete.
     $schema->modifyTableByUnquotedName('sales_flat_quote_payment', static function (TableEditor $quotePayment): void {
-        $quotePayment->addColumn(
-            Column::editor()
-                ->setUnquotedName('paypal_order_id')
-                ->setTypeName(Types::STRING)
-                ->setLength(64)
-                ->setNotNull(false)
-                ->setComment('PayPal Order ID')
-                ->create(),
-        );
+        $quotePayment->addColumn(Schema::column('paypal_order_id', Types::STRING, length: 64, notNull: false, comment: 'PayPal Order ID'));
         $quotePayment->addIndex(Index::editor()->setUnquotedColumnNames('paypal_order_id'));
     });
 
     $schema->modifyTableByUnquotedName('sales_flat_order_payment', static function (TableEditor $orderPayment): void {
-        $orderPayment->addColumn(
-            Column::editor()
-                ->setUnquotedName('paypal_order_id')
-                ->setTypeName(Types::STRING)
-                ->setLength(64)
-                ->setNotNull(false)
-                ->setComment('PayPal Order ID')
-                ->create(),
-        );
+        $orderPayment->addColumn(Schema::column('paypal_order_id', Types::STRING, length: 64, notNull: false, comment: 'PayPal Order ID'));
         $orderPayment->addIndex(Index::editor()->setUnquotedColumnNames('paypal_order_id'));
     });
 };

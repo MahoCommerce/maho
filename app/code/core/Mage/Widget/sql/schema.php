@@ -17,43 +17,16 @@ use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\SchemaEditor;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
+use Maho\Db\Schema;
 
 return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('widget')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('widget_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('widget_code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('widget_type')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('parameters')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('widget_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('widget_code', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('widget_type', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('parameters', Types::TEXT, length: 65535, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('widget_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('widget_code'))
             ->setComment('Preconfigured Widgets')
@@ -63,62 +36,13 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('widget_instance')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('instance_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('instance_type')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('package_theme')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('title')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_ids')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setDefaultValue('0')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('widget_parameters')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('sort_order')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('instance_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('instance_type', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('package_theme', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('title', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('store_ids', Types::STRING, length: 255, default: '0'))
+            ->addColumn(Schema::column('widget_parameters', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('sort_order', Types::SMALLINT, unsigned: true, default: 0))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('instance_id')->create())
             ->setComment('Instances of Widget for Package Theme')
             ->create(),
@@ -127,70 +51,14 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('widget_instance_page')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('page_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('instance_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('page_group')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('layout_handle')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('block_reference')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('page_for')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entities')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('page_template')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('page_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('instance_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('page_group', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('layout_handle', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('block_reference', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('page_for', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('entities', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('page_template', Types::STRING, length: 255, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('page_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('instance_id'))
             ->addForeignKeyConstraint(
@@ -209,22 +77,8 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('widget_instance_page_layout')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('page_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('layout_update_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('page_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('layout_update_id', Types::INTEGER, unsigned: true, default: 0))
             ->addIndex(Index::editor()->setUnquotedColumnNames('page_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('layout_update_id'))
             ->addIndex(

@@ -20,7 +20,7 @@ use Tests\MahoBackendTestCase;
  *
  * Only core modules are checked, so a third-party module on a customer install
  * cannot fail `composer test`. A former name recorded through
- * Maho\Db\Schema\Renamer keeps its old prefix forever and is never read here.
+ * Maho\Db\Schema::renamed() keeps its old prefix forever and is never read here.
  */
 
 uses(MahoBackendTestCase::class);

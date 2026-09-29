@@ -15,73 +15,20 @@ use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\SchemaEditor;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
+use Maho\Db\Schema;
 
 return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('adminnotification_inbox')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('notification_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('severity')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('date_added')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('title')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('description')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('url')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_read')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_remove')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('notification_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('severity', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('date_added', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('title', Types::STRING, length: 255))
+            ->addColumn(Schema::column('description', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('url', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('is_read', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('is_remove', Types::SMALLINT, unsigned: true, default: 0))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('notification_id')

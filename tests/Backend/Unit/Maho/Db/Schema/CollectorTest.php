@@ -18,6 +18,7 @@ use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Schema\TableEditor;
 use Doctrine\DBAL\Types\Types;
 use Maho\Db\Schema\Collector;
+use Maho\Db\Schema as MahoSchema;
 use Maho\Db\Schema\Renamer;
 
 /**
@@ -107,7 +108,7 @@ it('keeps the unprefixed FK and index names under a table prefix', function () {
 
 it('prefixes the recorded former table names', function () {
     $table = finalizeCollectorTable(
-        collectorTable('api_idempotency_key')->setOptions(Renamer::renamed(from: 'maho_api_idempotency_keys'))->create(),
+        collectorTable('api_idempotency_key')->setOptions(MahoSchema::renamed(from: 'maho_api_idempotency_keys'))->create(),
         'pfx_',
     );
 

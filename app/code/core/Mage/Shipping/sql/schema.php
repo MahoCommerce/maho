@@ -15,83 +15,21 @@ use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\SchemaEditor;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
+use Maho\Db\Schema;
 
 return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('shipping_tablerate')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('pk')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('website_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('dest_country_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(4)
-                    ->setDefaultValue('0')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('dest_region_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('dest_zip')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(10)
-                    ->setDefaultValue('*')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('condition_name')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(20)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('condition_value')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('price')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('cost')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
+            ->addColumn(Schema::column('pk', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('website_id', Types::INTEGER, default: 0))
+            ->addColumn(Schema::column('dest_country_id', Types::STRING, length: 4, default: '0'))
+            ->addColumn(Schema::column('dest_region_id', Types::INTEGER, default: 0))
+            ->addColumn(Schema::column('dest_zip', Types::STRING, length: 10, default: '*'))
+            ->addColumn(Schema::column('condition_name', Types::STRING, length: 20))
+            ->addColumn(Schema::column('condition_value', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('price', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('cost', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('pk')->create())
             ->addIndex(
                 Index::editor()

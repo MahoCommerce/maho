@@ -18,40 +18,16 @@ use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\SchemaEditor;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
+use Maho\Db\Schema;
 
 return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('api2_acl_role')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('updated_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('role_name')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('updated_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('role_name', Types::STRING, length: 255))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('created_at'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('updated_at'))
@@ -62,20 +38,8 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('api2_acl_user')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('admin_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('role_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('admin_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('role_id', Types::INTEGER, unsigned: true))
             ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('admin_id'))
             ->addForeignKeyConstraint(
                 ForeignKeyConstraint::editor()
@@ -102,36 +66,10 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('api2_acl_rule')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('role_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('resource_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('privilege')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(20)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('role_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('resource_id', Types::STRING, length: 255))
+            ->addColumn(Schema::column('privilege', Types::STRING, length: 20, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create())
             ->addIndex(
                 Index::editor()
@@ -154,43 +92,11 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('api2_acl_attribute')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('user_type')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(20)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('resource_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('operation')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(20)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('allowed_attributes')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('user_type', Types::STRING, length: 20))
+            ->addColumn(Schema::column('resource_id', Types::STRING, length: 255))
+            ->addColumn(Schema::column('operation', Types::STRING, length: 20))
+            ->addColumn(Schema::column('allowed_attributes', Types::TEXT, length: 65535, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('user_type'))
             ->addIndex(

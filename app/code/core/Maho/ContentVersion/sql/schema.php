@@ -16,62 +16,19 @@ use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\SchemaEditor;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
+use Maho\Db\Schema;
 
 return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('content_version')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('version_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_type')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(50)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('version_number')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('content_data')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(16777215)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('editor')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(100)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
+            ->addColumn(Schema::column('version_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('entity_type', Types::STRING, length: 50))
+            ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('version_number', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('content_data', Types::TEXT, length: 16777215))
+            ->addColumn(Schema::column('editor', Types::STRING, length: 100, notNull: false))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('version_id')->create())
             ->addIndex(
                 Index::editor()

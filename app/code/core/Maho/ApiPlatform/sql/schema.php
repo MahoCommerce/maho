@@ -19,68 +19,19 @@ use Doctrine\DBAL\Schema\SchemaEditor;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Schema\TableEditor;
 use Doctrine\DBAL\Types\Types;
-use Maho\Db\Schema\Renamer;
+use Maho\Db\Schema;
 
 return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('api_role')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('role_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('parent_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('tree_level')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('sort_order')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('role_type')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(1)
-                    ->setDefaultValue('0')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('user_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('role_name')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(50)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('role_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('parent_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('tree_level', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('sort_order', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('role_type', Types::STRING, length: 1, default: '0'))
+            ->addColumn(Schema::column('user_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('role_name', Types::STRING, length: 50, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('role_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('parent_id', 'sort_order'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('tree_level'))
@@ -91,62 +42,13 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('api_rule')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('rule_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('role_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('resource_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('api_privileges')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(20)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('assert_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('role_type')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(1)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('api_permission')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(10)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('rule_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('role_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('resource_id', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('api_privileges', Types::STRING, length: 20, notNull: false))
+            ->addColumn(Schema::column('assert_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('role_type', Types::STRING, length: 1, notNull: false))
+            ->addColumn(Schema::column('api_permission', Types::STRING, length: 10, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rule_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('resource_id', 'role_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('role_id', 'resource_id'))
@@ -166,116 +68,20 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('api_user')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('user_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('firstname')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('lastname')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('email')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(128)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('username')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(40)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('api_key')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('modified')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('lognum')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('reload_acl_flag')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_active')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setDefaultValue(1)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('client_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(64)
-                    ->setNotNull(false)
-                    ->setComment('OAuth2 Client ID')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('client_secret')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->setComment('OAuth2 Client Secret (bcrypt hashed)')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('allowed_store_ids')
-                    ->setTypeName(Types::TEXT)
-                    ->setNotNull(false)
-                    ->setComment('JSON array of store ids the API user is restricted to; null/empty = all stores')
-                    ->create(),
-            )
+            ->addColumn(Schema::column('user_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('firstname', Types::STRING, length: 32, notNull: false))
+            ->addColumn(Schema::column('lastname', Types::STRING, length: 32, notNull: false))
+            ->addColumn(Schema::column('email', Types::STRING, length: 128, notNull: false))
+            ->addColumn(Schema::column('username', Types::STRING, length: 40, notNull: false))
+            ->addColumn(Schema::column('api_key', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('created', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('modified', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('lognum', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('reload_acl_flag', Types::SMALLINT, default: 0))
+            ->addColumn(Schema::column('is_active', Types::SMALLINT, default: 1))
+            ->addColumn(Schema::column('client_id', Types::STRING, length: 64, notNull: false, comment: 'OAuth2 Client ID'))
+            ->addColumn(Schema::column('client_secret', Types::STRING, length: 255, notNull: false, comment: 'OAuth2 Client Secret (bcrypt hashed)'))
+            ->addColumn(Schema::column('allowed_store_ids', Types::TEXT, notNull: false, comment: 'JSON array of store ids the API user is restricted to; null/empty = all stores'))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('user_id')->create())
             ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('client_id'))
             ->setComment('Api Users')
@@ -284,104 +90,29 @@ return function (SchemaEditor $schema): void {
 
     // Per-order one-time token for guest order lookup (getGuestOrder / /guestOrder).
     $schema->modifyTableByUnquotedName('sales_flat_order', static function (TableEditor $order): void {
-        $order->addColumn(
-            Column::editor()
-                ->setUnquotedName('guest_access_token')
-                ->setTypeName(Types::STRING)
-                ->setLength(64)
-                ->setNotNull(false)
-                ->setComment('Guest order access token (hex, issued at order placement)')
-                ->create(),
-        );
+        $order->addColumn(Schema::column('guest_access_token', Types::STRING, length: 64, notNull: false, comment: 'Guest order access token (hex, issued at order placement)'));
         $order->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('guest_access_token'));
     });
 
     // Secure masked ID for guest cart access.
     $schema->modifyTableByUnquotedName('sales_flat_quote', static function (TableEditor $quote): void {
-        $quote->addColumn(
-            Column::editor()
-                ->setUnquotedName('masked_quote_id')
-                ->setTypeName(Types::STRING)
-                ->setLength(64)
-                ->setNotNull(false)
-                ->setComment('Secure masked ID for guest cart access')
-                ->create(),
-        );
+        $quote->addColumn(Schema::column('masked_quote_id', Types::STRING, length: 64, notNull: false, comment: 'Secure masked ID for guest cart access'));
         $quote->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('masked_quote_id'));
     });
 
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('api_idempotency_key')
-            ->setOptions(Renamer::renamed(from: 'maho_api_idempotency_keys'))
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('idempotency_key')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('user_scope')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(100)
-                    ->setComment('User Scope (e.g. customer:123 or admin:5)')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('request_path')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('request_method')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(10)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('response_code')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setComment('Response HTTP Status Code')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('response_body')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(16777215)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('response_headers')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->setComment('Response Headers (JSON)')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->create(),
-            )
+            ->setOptions(Schema::renamed(from: 'maho_api_idempotency_keys'))
+            ->addColumn(Schema::column('id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('idempotency_key', Types::STRING, length: 255))
+            ->addColumn(Schema::column('user_scope', Types::STRING, length: 100, comment: 'User Scope (e.g. customer:123 or admin:5)'))
+            ->addColumn(Schema::column('request_path', Types::STRING, length: 255))
+            ->addColumn(Schema::column('request_method', Types::STRING, length: 10))
+            ->addColumn(Schema::column('response_code', Types::SMALLINT, unsigned: true, comment: 'Response HTTP Status Code'))
+            ->addColumn(Schema::column('response_body', Types::TEXT, length: 16777215, notNull: false))
+            ->addColumn(Schema::column('response_headers', Types::TEXT, length: 65535, notNull: false, comment: 'Response Headers (JSON)'))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('id')->create())
             ->addIndex(
                 Index::editor()
@@ -398,23 +129,9 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('api_revoked_token')
-            ->setOptions(Renamer::renamed(from: 'maho_api_revoked_tokens'))
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('jti')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(64)
-                    ->setComment('JWT ID (hex)')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('expires_at')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setComment('Token expiry (unix timestamp)')
-                    ->create(),
-            )
+            ->setOptions(Schema::renamed(from: 'maho_api_revoked_tokens'))
+            ->addColumn(Schema::column('jti', Types::STRING, length: 64, comment: 'JWT ID (hex)'))
+            ->addColumn(Schema::column('expires_at', Types::INTEGER, unsigned: true, comment: 'Token expiry (unix timestamp)'))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('jti')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('expires_at'))
             ->setComment('API Revoked JWT Tokens')
@@ -427,84 +144,16 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('api_oauth_client')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('client_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(64)
-                    ->setComment('Public client identifier')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('client_secret_hash')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->setComment('Hashed client secret; null for public clients')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('client_name')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('redirect_uris')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setComment('JSON array of exact redirect URIs')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('grant_types')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setComment('Comma separated grant types')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('token_endpoint_auth_method')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->setDefaultValue('none')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_trusted')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->setComment('Consent screen omits the unverified warning when set')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('last_used_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('client_id', Types::STRING, length: 64, comment: 'Public client identifier'))
+            ->addColumn(Schema::column('client_secret_hash', Types::STRING, length: 255, notNull: false, comment: 'Hashed client secret; null for public clients'))
+            ->addColumn(Schema::column('client_name', Types::STRING, length: 255))
+            ->addColumn(Schema::column('redirect_uris', Types::TEXT, length: 65535, comment: 'JSON array of exact redirect URIs'))
+            ->addColumn(Schema::column('grant_types', Types::STRING, length: 255, comment: 'Comma separated grant types'))
+            ->addColumn(Schema::column('token_endpoint_auth_method', Types::STRING, length: 32, default: 'none'))
+            ->addColumn(Schema::column('is_trusted', Types::SMALLINT, unsigned: true, default: 0, comment: 'Consent screen omits the unverified warning when set'))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE))
+            ->addColumn(Schema::column('last_used_at', Types::DATETIME_MUTABLE, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create())
             ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('client_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('created_at'))
@@ -519,139 +168,23 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('api_oauth_token')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('parent_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->setComment('Consent row for a code/refresh; previous token in a rotation chain')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('client_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(64)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('parent_id', Types::INTEGER, unsigned: true, notNull: false, comment: 'Consent row for a code/refresh; previous token in a rotation chain'))
+            ->addColumn(Schema::column('client_id', Types::STRING, length: 64))
             // Null while a request waits for approval: nobody has consented yet.
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('admin_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('type')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(16)
-                    ->setComment('pending, code, refresh or consent')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('token_hash')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(64)
-                    ->setNotNull(false)
-                    ->setComment('SHA-256 of the code or refresh token; null for consent rows')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('scope')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('resource')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->setComment('RFC 8707 resource indicator the token is bound to')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('redirect_uri')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->setComment('The exact URI a code was issued against')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('state')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->setComment('The client CSRF value, echoed back on the redirect')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('code_challenge')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(128)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('code_challenge_method')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(8)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('revoked')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('expires_at')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->setComment('Unix timestamp; null for consent rows, which do not expire')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('used_at')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->setComment('Unix timestamp of first use; a second use is a replay')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('admin_id', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('type', Types::STRING, length: 16, comment: 'pending, code, refresh or consent'))
+            ->addColumn(Schema::column('token_hash', Types::STRING, length: 64, notNull: false, comment: 'SHA-256 of the code or refresh token; null for consent rows'))
+            ->addColumn(Schema::column('scope', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('resource', Types::STRING, length: 255, notNull: false, comment: 'RFC 8707 resource indicator the token is bound to'))
+            ->addColumn(Schema::column('redirect_uri', Types::STRING, length: 255, notNull: false, comment: 'The exact URI a code was issued against'))
+            ->addColumn(Schema::column('state', Types::STRING, length: 255, notNull: false, comment: 'The client CSRF value, echoed back on the redirect'))
+            ->addColumn(Schema::column('code_challenge', Types::STRING, length: 128, notNull: false))
+            ->addColumn(Schema::column('code_challenge_method', Types::STRING, length: 8, notNull: false))
+            ->addColumn(Schema::column('revoked', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('expires_at', Types::INTEGER, unsigned: true, notNull: false, comment: 'Unix timestamp; null for consent rows, which do not expire'))
+            ->addColumn(Schema::column('used_at', Types::INTEGER, unsigned: true, notNull: false, comment: 'Unix timestamp of first use; a second use is a replay'))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create())
             ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('token_hash'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('client_id', 'admin_id', 'type'))

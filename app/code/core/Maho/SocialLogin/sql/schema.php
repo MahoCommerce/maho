@@ -17,61 +17,19 @@ use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\SchemaEditor;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
+use Maho\Db\Schema;
 
 return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('social_login_identity')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('identity_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('website_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('provider')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('provider_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('provider_email')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('identity_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('customer_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('website_id', Types::SMALLINT, unsigned: true))
+            ->addColumn(Schema::column('provider', Types::STRING, length: 32))
+            ->addColumn(Schema::column('provider_id', Types::STRING, length: 255))
+            ->addColumn(Schema::column('provider_email', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('identity_id')->create())
             ->addIndex(
                 Index::editor()

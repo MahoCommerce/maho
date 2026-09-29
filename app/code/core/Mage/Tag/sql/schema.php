@@ -17,50 +17,17 @@ use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\SchemaEditor;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
+use Maho\Db\Schema;
 
 return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('tag')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('tag_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('name')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('status')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('first_customer_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('first_store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('tag_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('name', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('status', Types::SMALLINT, default: 0))
+            ->addColumn(Schema::column('first_customer_id', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('first_store_id', Types::SMALLINT, unsigned: true, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('tag_id')->create())
             ->addForeignKeyConstraint(
                 ForeignKeyConstraint::editor()
@@ -87,61 +54,13 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('tag_relation')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('tag_relation_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('tag_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('product_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(1)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('active')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(1)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('tag_relation_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('tag_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('customer_id', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('product_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 1))
+            ->addColumn(Schema::column('active', Types::SMALLINT, unsigned: true, default: 1))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, notNull: false))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('tag_relation_id')
@@ -199,70 +118,14 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('tag_summary')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('tag_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customers')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('products')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('uses')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('historical_uses')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('popularity')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_popularity')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('tag_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('customers', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('products', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('uses', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('historical_uses', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('popularity', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('base_popularity', Types::INTEGER, unsigned: true, default: 0))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('tag_id', 'store_id')
@@ -295,30 +158,9 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('tag_properties')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('tag_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_popularity')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('tag_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('base_popularity', Types::INTEGER, unsigned: true, default: 0))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('tag_id', 'store_id')

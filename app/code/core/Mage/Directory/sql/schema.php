@@ -17,35 +17,15 @@ use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\SchemaEditor;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
+use Maho\Db\Schema;
 
 return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('directory_country')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('country_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(2)
-                    ->setDefaultValue('')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('iso2_code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(2)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('iso3_code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(3)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('country_id', Types::STRING, length: 2, default: ''))
+            ->addColumn(Schema::column('iso2_code', Types::STRING, length: 2, notNull: false))
+            ->addColumn(Schema::column('iso3_code', Types::STRING, length: 3, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('country_id')->create())
             ->setComment('Directory Country')
             ->create(),
@@ -54,37 +34,10 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('directory_country_format')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('country_format_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('country_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(2)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('type')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(30)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('format')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('country_format_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('country_id', Types::STRING, length: 2, notNull: false))
+            ->addColumn(Schema::column('type', Types::STRING, length: 30, notNull: false))
+            ->addColumn(Schema::column('format', Types::TEXT, length: 65535))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('country_format_id')
@@ -98,38 +51,10 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('directory_country_region')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('region_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('country_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(4)
-                    ->setDefaultValue('0')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('default_name')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('region_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('country_id', Types::STRING, length: 4, default: '0'))
+            ->addColumn(Schema::column('code', Types::STRING, length: 32, notNull: false))
+            ->addColumn(Schema::column('default_name', Types::STRING, length: 255, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('region_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('country_id'))
             ->setComment('Directory Country Region')
@@ -139,30 +64,9 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('directory_country_region_name')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('locale')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(8)
-                    ->setDefaultValue('')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('region_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('name')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('locale', Types::STRING, length: 8, default: ''))
+            ->addColumn(Schema::column('region_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('name', Types::STRING, length: 255, notNull: false))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('locale', 'region_id')
@@ -185,30 +89,9 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('directory_country_name')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('locale')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(8)
-                    ->setDefaultValue('')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('country_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(2)
-                    ->setDefaultValue('')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('name')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('locale', Types::STRING, length: 8, default: ''))
+            ->addColumn(Schema::column('country_id', Types::STRING, length: 2, default: ''))
+            ->addColumn(Schema::column('name', Types::STRING, length: 255, notNull: false))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('locale', 'country_id')
@@ -231,31 +114,9 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('directory_currency_rate')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('currency_from')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(3)
-                    ->setDefaultValue('')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('currency_to')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(3)
-                    ->setDefaultValue('')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('rate')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(24)
-                    ->setScale(12)
-                    ->setDefaultValue('0.000000000000')
-                    ->create(),
-            )
+            ->addColumn(Schema::column('currency_from', Types::STRING, length: 3, default: ''))
+            ->addColumn(Schema::column('currency_to', Types::STRING, length: 3, default: ''))
+            ->addColumn(Schema::column('rate', Types::DECIMAL, precision: 24, scale: 12, default: '0.000000000000'))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('currency_from', 'currency_to')

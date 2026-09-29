@@ -16,82 +16,21 @@ use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\SchemaEditor;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
+use Maho\Db\Schema;
 
 return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('product_alert_price')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('alert_price_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('product_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('price')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('website_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('add_date')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('last_send_date')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('send_count')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('status')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('alert_price_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('customer_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('product_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('price', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('website_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('add_date', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('last_send_date', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('send_count', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('status', Types::SMALLINT, unsigned: true, default: 0))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('alert_price_id')
@@ -134,68 +73,14 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('product_alert_stock')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('alert_stock_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('product_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('website_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('add_date')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('send_date')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('send_count')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('status')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('alert_stock_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('customer_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('product_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('website_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('add_date', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('send_date', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('send_count', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('status', Types::SMALLINT, unsigned: true, default: 0))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('alert_stock_id')

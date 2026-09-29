@@ -15,6 +15,7 @@ use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
 use Maho\Db\Schema\Applier;
+use Maho\Db\Schema as MahoSchema;
 use Maho\Db\Schema\Renamer;
 use Maho\Db\Schema\UnsupportedMigrationException;
 
@@ -39,7 +40,7 @@ function renameProbeTable(
 ): Table {
     $options = ['engine' => 'InnoDB', 'charset' => 'utf8', 'collation' => 'utf8_general_ci'];
     if ($withHistory) {
-        $options += Renamer::renamed(from: RENAME_OLD_TABLE, columns: ['customer_email' => 'legacy_email']);
+        $options += MahoSchema::renamed(from: RENAME_OLD_TABLE, columns: ['customer_email' => 'legacy_email']);
     }
 
     return Table::editor()

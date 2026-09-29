@@ -18,34 +18,15 @@ use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\SchemaEditor;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
+use Maho\Db\Schema;
 
 return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('core_resource')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(50)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('version')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(50)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('data_version')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(50)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('code', Types::STRING, length: 50))
+            ->addColumn(Schema::column('version', Types::STRING, length: 50, notNull: false))
+            ->addColumn(Schema::column('data_version', Types::STRING, length: 50, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('code')->create())
             ->setComment('Resources')
             ->create(),
@@ -54,55 +35,12 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('core_website')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('website_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('name')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(64)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('sort_order')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('default_group_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_default')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('website_id', Types::SMALLINT, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('code', Types::STRING, length: 32, notNull: false))
+            ->addColumn(Schema::column('name', Types::STRING, length: 64, notNull: false))
+            ->addColumn(Schema::column('sort_order', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('default_group_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('is_default', Types::SMALLINT, unsigned: true, notNull: false, default: 0))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('website_id')->create())
             ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('code'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('sort_order'))
@@ -114,45 +52,11 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('core_store_group')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('group_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('website_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('name')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('root_category_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('default_store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('group_id', Types::SMALLINT, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('website_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('name', Types::STRING, length: 255))
+            ->addColumn(Schema::column('root_category_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('default_store_id', Types::SMALLINT, unsigned: true, default: 0))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('group_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('website_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('default_store_id'))
@@ -172,61 +76,13 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('core_store')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('website_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('group_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('name')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('sort_order')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_active')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('code', Types::STRING, length: 32, notNull: false))
+            ->addColumn(Schema::column('website_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('group_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('name', Types::STRING, length: 255))
+            ->addColumn(Schema::column('sort_order', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('is_active', Types::SMALLINT, unsigned: true, default: 0))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('store_id')->create())
             ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('code'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('website_id'))
@@ -257,52 +113,12 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('core_config_data')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('config_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('scope')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(8)
-                    ->setDefaultValue('default')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('scope_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('path')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setDefaultValue('general')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('value')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('updated_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('config_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('scope', Types::STRING, length: 8, default: 'default'))
+            ->addColumn(Schema::column('scope_id', Types::INTEGER, default: 0))
+            ->addColumn(Schema::column('path', Types::STRING, length: 255, default: 'general'))
+            ->addColumn(Schema::column('value', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('updated_at', Types::DATETIME_MUTABLE, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('config_id')->create())
             ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('scope', 'scope_id', 'path'))
             ->setComment('Config Data')
@@ -312,97 +128,18 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('core_email_template')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('template_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('template_code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(150)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('template_text')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('template_styles')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('template_type')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('template_subject')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(200)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('template_sender_name')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(200)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('template_sender_email')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(200)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('added_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('modified_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('orig_template_code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(200)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('orig_template_variables')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('template_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('template_code', Types::STRING, length: 150))
+            ->addColumn(Schema::column('template_text', Types::TEXT, length: 65535))
+            ->addColumn(Schema::column('template_styles', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('template_type', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('template_subject', Types::STRING, length: 200))
+            ->addColumn(Schema::column('template_sender_name', Types::STRING, length: 200, notNull: false))
+            ->addColumn(Schema::column('template_sender_email', Types::STRING, length: 200, notNull: false))
+            ->addColumn(Schema::column('added_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('modified_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('orig_template_code', Types::STRING, length: 200, notNull: false))
+            ->addColumn(Schema::column('orig_template_variables', Types::TEXT, length: 65535, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('template_id')->create())
             ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('template_code'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('added_at'))
@@ -414,37 +151,10 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('core_layout_update')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('layout_update_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('handle')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('xml')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('sort_order')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('layout_update_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('handle', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('xml', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('sort_order', Types::SMALLINT, default: 0))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('layout_update_id')
@@ -458,54 +168,12 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('core_layout_link')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('layout_link_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('area')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(64)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('package')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(64)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('theme')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(64)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('layout_update_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('layout_link_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('area', Types::STRING, length: 64, notNull: false))
+            ->addColumn(Schema::column('package', Types::STRING, length: 64, notNull: false))
+            ->addColumn(Schema::column('theme', Types::STRING, length: 64, notNull: false))
+            ->addColumn(Schema::column('layout_update_id', Types::INTEGER, unsigned: true, default: 0))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('layout_link_id')
@@ -542,28 +210,9 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('core_session')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('session_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('session_expires')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('session_data')
-                    ->setTypeName(Types::BLOB)
-                    ->setLength(2097152)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('session_id', Types::STRING, length: 255))
+            ->addColumn(Schema::column('session_expires', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('session_data', Types::BLOB, length: 2097152))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('session_id')->create())
             ->setComment('Database Sessions Storage')
             ->create(),
@@ -572,53 +221,12 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('core_translate')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('key_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('string')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setDefaultValue('Translate String')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('translate')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('locale')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(20)
-                    ->setDefaultValue('en_US')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('crc_string')
-                    ->setTypeName(Types::BIGINT)
-                    ->setDefaultValue(crc32('Translate String'))
-                    ->create(),
-            )
+            ->addColumn(Schema::column('key_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('string', Types::STRING, length: 255, default: 'Translate String'))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('translate', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('locale', Types::STRING, length: 20, default: 'en_US'))
+            ->addColumn(Schema::column('crc_string', Types::BIGINT, default: crc32('Translate String')))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('key_id')->create())
             ->addIndex(
                 Index::editor()
@@ -642,71 +250,14 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('core_url_rewrite')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('url_rewrite_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('id_path')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('request_path')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('target_path')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_system')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->setDefaultValue(1)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('options')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('description')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('url_rewrite_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('id_path', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('request_path', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('target_path', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('is_system', Types::SMALLINT, unsigned: true, notNull: false, default: 1))
+            ->addColumn(Schema::column('options', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('description', Types::STRING, length: 255, notNull: false))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('url_rewrite_id')
@@ -737,42 +288,11 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('core_url_gone')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('gone_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('request_path')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_type')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('deleted_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('gone_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('request_path', Types::STRING, length: 255))
+            ->addColumn(Schema::column('entity_type', Types::STRING, length: 32))
+            ->addColumn(Schema::column('deleted_at', Types::DATETIME_MUTABLE))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('gone_id')->create())
             ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('request_path', 'store_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('deleted_at'))
@@ -793,43 +313,11 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('design_change')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('design_change_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('design')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('date_from')
-                    ->setTypeName(Types::DATE_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('date_to')
-                    ->setTypeName(Types::DATE_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('design_change_id', Types::INTEGER, autoincrement: true))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('design', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('date_from', Types::DATE_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('date_to', Types::DATE_MUTABLE, notNull: false))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('design_change_id')
@@ -852,30 +340,9 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('core_variable')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('variable_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('name')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('variable_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('code', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('name', Types::STRING, length: 255, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('variable_id')->create())
             ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('code'))
             ->setComment('Variables')
@@ -885,46 +352,11 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('core_variable_value')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('value_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('variable_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('plain_value')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('html_value')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('value_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('variable_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('plain_value', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('html_value', Types::TEXT, length: 65535, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('value_id')->create())
             ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('variable_id', 'store_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('variable_id'))
@@ -954,42 +386,11 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('core_cache')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(200)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('data')
-                    ->setTypeName(Types::BLOB)
-                    ->setLength(2097152)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('create_time')
-                    ->setTypeName(Types::INTEGER)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('update_time')
-                    ->setTypeName(Types::INTEGER)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('expire_time')
-                    ->setTypeName(Types::INTEGER)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('id', Types::STRING, length: 200))
+            ->addColumn(Schema::column('data', Types::BLOB, length: 2097152, notNull: false))
+            ->addColumn(Schema::column('create_time', Types::INTEGER, notNull: false))
+            ->addColumn(Schema::column('update_time', Types::INTEGER, notNull: false))
+            ->addColumn(Schema::column('expire_time', Types::INTEGER, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('expire_time'))
             ->setComment('Caches')
@@ -999,20 +400,8 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('core_cache_tag')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('tag')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(100)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('cache_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(200)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('tag', Types::STRING, length: 100))
+            ->addColumn(Schema::column('cache_id', Types::STRING, length: 200))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('tag', 'cache_id')
@@ -1026,20 +415,8 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('core_cache_option')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('value')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('code', Types::STRING, length: 32))
+            ->addColumn(Schema::column('value', Types::SMALLINT, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('code')->create())
             ->setComment('Cache Options')
             ->create(),
@@ -1048,44 +425,11 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('core_flag')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('flag_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('flag_code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('state')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('flag_data')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('last_update')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
+            ->addColumn(Schema::column('flag_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('flag_code', Types::STRING, length: 255))
+            ->addColumn(Schema::column('state', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('flag_data', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('last_update', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('flag_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('last_update'))
             ->setComment('Flag')
@@ -1095,73 +439,15 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('core_email_queue')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('message_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_type')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(128)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('event_type')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(128)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('message_body_hash')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(64)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('message_body')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(1048576)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('message_parameters')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('processed_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('message_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('entity_type', Types::STRING, length: 128, notNull: false))
+            ->addColumn(Schema::column('event_type', Types::STRING, length: 128, notNull: false))
+            ->addColumn(Schema::column('message_body_hash', Types::STRING, length: 64))
+            ->addColumn(Schema::column('message_body', Types::TEXT, length: 1048576))
+            ->addColumn(Schema::column('message_parameters', Types::TEXT, length: 65535))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('processed_at', Types::DATETIME_MUTABLE, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('message_id')->create())
             ->addIndex(
                 Index::editor()
@@ -1174,42 +460,11 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('core_email_queue_recipients')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('recipient_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('message_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('recipient_email')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(128)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('recipient_name')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('email_type')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('recipient_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('message_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('recipient_email', Types::STRING, length: 128))
+            ->addColumn(Schema::column('recipient_name', Types::STRING, length: 255))
+            ->addColumn(Schema::column('email_type', Types::SMALLINT, default: 0))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('recipient_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('recipient_email'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('email_type'))
@@ -1234,99 +489,18 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('core_email_log')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('log_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('subject')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setDefaultValue('')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('email_to')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('email_from')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setDefaultValue('')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('email_cc')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('email_bcc')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('template')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('content_type')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(4)
-                    ->setDefaultValue('html')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('email_body')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(16777215)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('status')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(10)
-                    ->setDefaultValue('sent')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('error_message')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
+            ->addColumn(Schema::column('log_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('subject', Types::STRING, length: 255, default: ''))
+            ->addColumn(Schema::column('email_to', Types::TEXT, length: 65535))
+            ->addColumn(Schema::column('email_from', Types::STRING, length: 255, default: ''))
+            ->addColumn(Schema::column('email_cc', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('email_bcc', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('template', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('content_type', Types::STRING, length: 4, default: 'html'))
+            ->addColumn(Schema::column('email_body', Types::TEXT, length: 16777215))
+            ->addColumn(Schema::column('status', Types::STRING, length: 10, default: 'sent'))
+            ->addColumn(Schema::column('error_message', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('log_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('created_at'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('status'))

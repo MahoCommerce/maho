@@ -15,129 +15,32 @@ use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\SchemaEditor;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
-use Maho\Db\Schema\Renamer;
+use Maho\Db\Schema;
 
 return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('queue_message')
-            ->setOptions(Renamer::renamed(from: 'maho_queue_message'))
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('message_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('queue')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(64)
-                    ->setDefaultValue('default')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('status')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(16)
-                    ->setDefaultValue('pending')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('message_class')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->create(),
-            )
+            ->setOptions(Schema::renamed(from: 'maho_queue_message'))
+            ->addColumn(Schema::column('message_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('queue', Types::STRING, length: 64, default: 'default'))
+            ->addColumn(Schema::column('status', Types::STRING, length: 16, default: 'pending'))
+            ->addColumn(Schema::column('message_class', Types::STRING, length: 255))
             // MEDIUMTEXT on MySQL: serialized message bodies can exceed the 64KB TEXT cap.
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('body')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(16777215)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('error_message')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('retries')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('dedupe_key')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(64)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('body', Types::TEXT, length: 16777215))
+            ->addColumn(Schema::column('error_message', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('retries', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('dedupe_key', Types::STRING, length: 64, notNull: false))
             // W3C trace context of the dispatching request, so the consumer span joins its trace
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('trace_context')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(1024)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('available_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('claimed_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('claim_token')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('processed_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
+            ->addColumn(Schema::column('trace_context', Types::STRING, length: 1024, notNull: false))
+            ->addColumn(Schema::column('available_at', Types::DATETIME_MUTABLE))
+            ->addColumn(Schema::column('claimed_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('claim_token', Types::STRING, length: 32, notNull: false))
+            ->addColumn(Schema::column('processed_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
             // Transport keeps updated_at current on every write; the on-update
             // auto-bump is cross-engine unsafe (PgSQL/SQLite downgrade silently).
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('updated_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
+            ->addColumn(Schema::column('updated_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('message_id')->create())
             // (status, available_at, queue) serves unfiltered polls and countDue's date
             // bound; (status, queue, available_at) lets a pool worker's queue IN (...)

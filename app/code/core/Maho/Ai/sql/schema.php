@@ -16,203 +16,40 @@ use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\SchemaEditor;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
-use Maho\Db\Schema\Renamer;
+use Maho\Db\Schema;
 
 return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('ai_task')
-            ->setOptions(Renamer::renamed(from: 'maho_ai_task'))
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('task_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('consumer')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(64)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('action')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('task_type')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(16)
-                    ->setDefaultValue('completion')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('status')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(16)
-                    ->setDefaultValue('pending')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('priority')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(16)
-                    ->setDefaultValue('background')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('platform')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('model')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(128)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('system_prompt')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->setOptions(Schema::renamed(from: 'maho_ai_task'))
+            ->addColumn(Schema::column('task_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('consumer', Types::STRING, length: 64))
+            ->addColumn(Schema::column('action', Types::STRING, length: 32))
+            ->addColumn(Schema::column('task_type', Types::STRING, length: 16, default: 'completion'))
+            ->addColumn(Schema::column('status', Types::STRING, length: 16, default: 'pending'))
+            ->addColumn(Schema::column('priority', Types::STRING, length: 16, default: 'background'))
+            ->addColumn(Schema::column('platform', Types::STRING, length: 32, notNull: false))
+            ->addColumn(Schema::column('model', Types::STRING, length: 128, notNull: false))
+            ->addColumn(Schema::column('system_prompt', Types::TEXT, length: 65535, notNull: false))
             // messages / context / response use MEDIUMTEXT (16M) because image
             // tasks stash base64 source images in `context` (~70-200KB each) and
             // long-form completions blow past MySQL's 64KB TEXT cap.
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('messages')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(16777215)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('context')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(16777215)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('response')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(16777215)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('callback_class')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('callback_method')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(64)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('input_tokens')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('output_tokens')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('error_message')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('retries')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('max_retries')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(3)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('admin_user_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('started_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('completed_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('messages', Types::TEXT, length: 16777215, notNull: false))
+            ->addColumn(Schema::column('context', Types::TEXT, length: 16777215, notNull: false))
+            ->addColumn(Schema::column('response', Types::TEXT, length: 16777215, notNull: false))
+            ->addColumn(Schema::column('callback_class', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('callback_method', Types::STRING, length: 64, notNull: false))
+            ->addColumn(Schema::column('input_tokens', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('output_tokens', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('error_message', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('retries', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('max_retries', Types::SMALLINT, unsigned: true, default: 3))
+            ->addColumn(Schema::column('admin_user_id', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('started_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('completed_at', Types::DATETIME_MUTABLE, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('task_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('status', 'priority', 'created_at'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('task_type'))
@@ -225,74 +62,16 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('ai_usage')
-            ->setOptions(Renamer::renamed(from: 'maho_ai_usage'))
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('usage_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('consumer')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(64)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('platform')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('model')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(128)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('period_date')
-                    ->setTypeName(Types::DATE_MUTABLE)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('request_count')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('input_tokens')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('output_tokens')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
+            ->setOptions(Schema::renamed(from: 'maho_ai_usage'))
+            ->addColumn(Schema::column('usage_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('consumer', Types::STRING, length: 64))
+            ->addColumn(Schema::column('platform', Types::STRING, length: 32))
+            ->addColumn(Schema::column('model', Types::STRING, length: 128))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('period_date', Types::DATE_MUTABLE))
+            ->addColumn(Schema::column('request_count', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('input_tokens', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('output_tokens', Types::INTEGER, unsigned: true, default: 0))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('usage_id')->create())
             ->addIndex(
                 Index::editor()
@@ -306,84 +85,19 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('ai_vector')
-            ->setOptions(Renamer::renamed(from: 'maho_ai_vector'))
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('vector_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_type')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('platform')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('model')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(128)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('dimensions')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('vector')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(16777215)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
+            ->setOptions(Schema::renamed(from: 'maho_ai_vector'))
+            ->addColumn(Schema::column('vector_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('entity_type', Types::STRING, length: 32))
+            ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('platform', Types::STRING, length: 32, notNull: false))
+            ->addColumn(Schema::column('model', Types::STRING, length: 128, notNull: false))
+            ->addColumn(Schema::column('dimensions', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('vector', Types::TEXT, length: 16777215))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
             // Model _beforeSave() keeps updated_at current; the on-update
             // auto-bump is cross-engine unsafe (PgSQL/SQLite downgrade silently).
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('updated_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
+            ->addColumn(Schema::column('updated_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('vector_id')->create())
             ->addIndex(
                 Index::editor()

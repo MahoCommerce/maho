@@ -18,1159 +18,147 @@ use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\SchemaEditor;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
+use Maho\Db\Schema;
 
 return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('sales_flat_order')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('state')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('status')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('coupon_code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('protect_code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('shipping_description')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_virtual')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_discount_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_discount_canceled')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_discount_invoiced')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_discount_refunded')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_grand_total')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_shipping_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_shipping_canceled')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_shipping_invoiced')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_shipping_refunded')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_shipping_tax_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_shipping_tax_refunded')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_subtotal')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_subtotal_canceled')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_subtotal_invoiced')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_subtotal_refunded')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_tax_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_tax_canceled')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_tax_invoiced')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_tax_refunded')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_to_global_rate')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_to_order_rate')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_total_canceled')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_total_invoiced')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_total_invoiced_cost')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_total_offline_refunded')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_total_online_refunded')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_total_paid')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_total_qty_ordered')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_total_refunded')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('discount_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('discount_canceled')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('discount_invoiced')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('discount_refunded')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('grand_total')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('shipping_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('shipping_canceled')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('shipping_invoiced')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('shipping_refunded')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('shipping_tax_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('shipping_tax_refunded')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_to_base_rate')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_to_order_rate')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('subtotal')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('subtotal_canceled')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('subtotal_invoiced')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('subtotal_refunded')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('tax_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('tax_canceled')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('tax_invoiced')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('tax_refunded')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('total_canceled')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('total_invoiced')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('total_offline_refunded')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('total_online_refunded')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('total_paid')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('total_qty_ordered')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('total_refunded')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('can_ship_partially')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('can_ship_partially_item')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_is_guest')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_note_notify')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('billing_address_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_group_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('edit_increment')
-                    ->setTypeName(Types::INTEGER)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('email_sent')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('forced_shipment_with_invoice')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('payment_auth_expiration')
-                    ->setTypeName(Types::INTEGER)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('quote_address_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('quote_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('shipping_address_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('adjustment_negative')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('adjustment_positive')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_adjustment_negative')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_adjustment_positive')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_shipping_discount_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_subtotal_incl_tax')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_total_due')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('payment_authorization_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('shipping_discount_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('subtotal_incl_tax')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('total_due')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('weight')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_dob')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('increment_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(50)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('applied_rule_ids')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_currency_code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(3)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_email')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_firstname')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_lastname')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_middlename')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_prefix')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_suffix')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_taxvat')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('discount_description')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('ext_customer_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('ext_order_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('global_currency_code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(3)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('hold_before_state')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('hold_before_status')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('order_currency_code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('original_increment_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(50)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('relation_child_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('relation_child_real_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('relation_parent_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('relation_parent_real_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('remote_ip')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('shipping_method')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_currency_code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(3)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_name')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('x_forwarded_for')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_note')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('updated_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('total_item_count')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_gender')
-                    ->setTypeName(Types::INTEGER)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('hidden_tax_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_hidden_tax_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('shipping_hidden_tax_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_shipping_hidden_tax_amnt')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('hidden_tax_invoiced')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_hidden_tax_invoiced')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('hidden_tax_refunded')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_hidden_tax_refunded')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('shipping_incl_tax')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_shipping_incl_tax')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('coupon_rule_name')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('state', Types::STRING, length: 32, notNull: false))
+            ->addColumn(Schema::column('status', Types::STRING, length: 32, notNull: false))
+            ->addColumn(Schema::column('coupon_code', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('protect_code', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('shipping_description', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('is_virtual', Types::SMALLINT, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('customer_id', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('base_discount_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_discount_canceled', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_discount_invoiced', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_discount_refunded', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_grand_total', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_shipping_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_shipping_canceled', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_shipping_invoiced', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_shipping_refunded', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_shipping_tax_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_shipping_tax_refunded', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_subtotal', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_subtotal_canceled', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_subtotal_invoiced', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_subtotal_refunded', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_tax_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_tax_canceled', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_tax_invoiced', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_tax_refunded', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_to_global_rate', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_to_order_rate', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_total_canceled', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_total_invoiced', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_total_invoiced_cost', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_total_offline_refunded', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_total_online_refunded', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_total_paid', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_total_qty_ordered', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_total_refunded', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('discount_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('discount_canceled', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('discount_invoiced', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('discount_refunded', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('grand_total', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('shipping_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('shipping_canceled', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('shipping_invoiced', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('shipping_refunded', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('shipping_tax_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('shipping_tax_refunded', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('store_to_base_rate', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('store_to_order_rate', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('subtotal', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('subtotal_canceled', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('subtotal_invoiced', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('subtotal_refunded', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('tax_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('tax_canceled', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('tax_invoiced', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('tax_refunded', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('total_canceled', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('total_invoiced', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('total_offline_refunded', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('total_online_refunded', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('total_paid', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('total_qty_ordered', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('total_refunded', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('can_ship_partially', Types::SMALLINT, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('can_ship_partially_item', Types::SMALLINT, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('customer_is_guest', Types::SMALLINT, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('customer_note_notify', Types::SMALLINT, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('billing_address_id', Types::INTEGER, notNull: false))
+            ->addColumn(Schema::column('customer_group_id', Types::SMALLINT, notNull: false))
+            ->addColumn(Schema::column('edit_increment', Types::INTEGER, notNull: false))
+            ->addColumn(Schema::column('email_sent', Types::SMALLINT, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('forced_shipment_with_invoice', Types::SMALLINT, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('payment_auth_expiration', Types::INTEGER, notNull: false))
+            ->addColumn(Schema::column('quote_address_id', Types::INTEGER, notNull: false))
+            ->addColumn(Schema::column('quote_id', Types::INTEGER, notNull: false))
+            ->addColumn(Schema::column('shipping_address_id', Types::INTEGER, notNull: false))
+            ->addColumn(Schema::column('adjustment_negative', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('adjustment_positive', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_adjustment_negative', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_adjustment_positive', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_shipping_discount_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_subtotal_incl_tax', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_total_due', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('payment_authorization_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('shipping_discount_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('subtotal_incl_tax', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('total_due', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('weight', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('customer_dob', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('increment_id', Types::STRING, length: 50, notNull: false))
+            ->addColumn(Schema::column('applied_rule_ids', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('base_currency_code', Types::STRING, length: 3, notNull: false))
+            ->addColumn(Schema::column('customer_email', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('customer_firstname', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('customer_lastname', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('customer_middlename', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('customer_prefix', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('customer_suffix', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('customer_taxvat', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('discount_description', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('ext_customer_id', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('ext_order_id', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('global_currency_code', Types::STRING, length: 3, notNull: false))
+            ->addColumn(Schema::column('hold_before_state', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('hold_before_status', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('order_currency_code', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('original_increment_id', Types::STRING, length: 50, notNull: false))
+            ->addColumn(Schema::column('relation_child_id', Types::STRING, length: 32, notNull: false))
+            ->addColumn(Schema::column('relation_child_real_id', Types::STRING, length: 32, notNull: false))
+            ->addColumn(Schema::column('relation_parent_id', Types::STRING, length: 32, notNull: false))
+            ->addColumn(Schema::column('relation_parent_real_id', Types::STRING, length: 32, notNull: false))
+            ->addColumn(Schema::column('remote_ip', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('shipping_method', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('store_currency_code', Types::STRING, length: 3, notNull: false))
+            ->addColumn(Schema::column('store_name', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('x_forwarded_for', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('customer_note', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('updated_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('total_item_count', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('customer_gender', Types::INTEGER, notNull: false))
+            ->addColumn(Schema::column('hidden_tax_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_hidden_tax_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('shipping_hidden_tax_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_shipping_hidden_tax_amnt', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('hidden_tax_invoiced', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_hidden_tax_invoiced', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('hidden_tax_refunded', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_hidden_tax_refunded', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('shipping_incl_tax', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_shipping_incl_tax', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('coupon_rule_name', Types::STRING, length: 255, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('status'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('state'))
@@ -1208,135 +196,22 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('sales_flat_order_grid')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('status')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_name')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_grand_total')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_total_paid')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('grand_total')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('total_paid')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('increment_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(50)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_currency_code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(3)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('order_currency_code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('shipping_name')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('billing_name')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('updated_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('status', Types::STRING, length: 32, notNull: false))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('store_name', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('customer_id', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('base_grand_total', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_total_paid', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('grand_total', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('total_paid', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('increment_id', Types::STRING, length: 50, notNull: false))
+            ->addColumn(Schema::column('base_currency_code', Types::STRING, length: 3, notNull: false))
+            ->addColumn(Schema::column('order_currency_code', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('shipping_name', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('billing_name', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('updated_at', Types::DATETIME_MUTABLE, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('status'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
@@ -1384,200 +259,31 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('sales_flat_order_address')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('parent_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_address_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('quote_address_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('region_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('region')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('postcode')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('lastname')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('street')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('city')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('email')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('telephone')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('country_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(2)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('firstname')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('address_type')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('prefix')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('middlename')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('suffix')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('company')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('vat_id')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('vat_is_valid')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('vat_request_id')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('vat_request_date')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('vat_request_success')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('parent_id', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('customer_address_id', Types::INTEGER, notNull: false))
+            ->addColumn(Schema::column('quote_address_id', Types::INTEGER, notNull: false))
+            ->addColumn(Schema::column('region_id', Types::INTEGER, notNull: false))
+            ->addColumn(Schema::column('customer_id', Types::INTEGER, notNull: false))
+            ->addColumn(Schema::column('region', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('postcode', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('lastname', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('street', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('city', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('email', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('telephone', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('country_id', Types::STRING, length: 2, notNull: false))
+            ->addColumn(Schema::column('firstname', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('address_type', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('prefix', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('middlename', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('suffix', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('company', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('vat_id', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('vat_is_valid', Types::SMALLINT, notNull: false))
+            ->addColumn(Schema::column('vat_request_id', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('vat_request_date', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('vat_request_success', Types::SMALLINT, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('parent_id'))
             ->addForeignKeyConstraint(
@@ -1596,67 +302,14 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('sales_flat_order_status_history')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('parent_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_customer_notified')
-                    ->setTypeName(Types::INTEGER)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_visible_on_front')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('comment')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('status')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_name')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('parent_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('is_customer_notified', Types::INTEGER, notNull: false))
+            ->addColumn(Schema::column('is_visible_on_front', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('comment', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('status', Types::STRING, length: 32, notNull: false))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('entity_name', Types::STRING, length: 32, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('parent_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('created_at'))
@@ -1676,631 +329,76 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('sales_flat_order_item')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('item_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('order_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('parent_item_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('quote_item_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('updated_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('product_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('product_type')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('product_options')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('weight')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_virtual')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('sku')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('name')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('description')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('applied_rule_ids')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('additional_data')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('free_shipping')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_qty_decimal')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('no_discount')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('qty_backordered')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('qty_canceled')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('qty_invoiced')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('qty_ordered')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('qty_refunded')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('qty_shipped')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_cost')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('price')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_price')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('original_price')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_original_price')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('tax_percent')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('tax_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_tax_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('tax_invoiced')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_tax_invoiced')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('discount_percent')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('discount_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_discount_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('discount_invoiced')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_discount_invoiced')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('amount_refunded')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_amount_refunded')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('row_total')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_row_total')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('row_invoiced')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_row_invoiced')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('row_weight')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_tax_before_discount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('tax_before_discount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('ext_order_item_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('locked_do_invoice')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('locked_do_ship')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('price_incl_tax')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_price_incl_tax')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('row_total_incl_tax')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_row_total_incl_tax')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('hidden_tax_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_hidden_tax_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('hidden_tax_invoiced')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_hidden_tax_invoiced')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('hidden_tax_refunded')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_hidden_tax_refunded')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_nominal')
-                    ->setTypeName(Types::INTEGER)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('tax_canceled')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('hidden_tax_canceled')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('tax_refunded')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_tax_refunded')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('discount_refunded')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_discount_refunded')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('item_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('order_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('parent_item_id', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('quote_item_id', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('updated_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('product_id', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('product_type', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('product_options', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('weight', Types::DECIMAL, precision: 12, scale: 4, notNull: false, default: '0.0000'))
+            ->addColumn(Schema::column('is_virtual', Types::SMALLINT, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('sku', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('name', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('description', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('applied_rule_ids', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('additional_data', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('free_shipping', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('is_qty_decimal', Types::SMALLINT, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('no_discount', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('qty_backordered', Types::DECIMAL, precision: 12, scale: 4, notNull: false, default: '0.0000'))
+            ->addColumn(Schema::column('qty_canceled', Types::DECIMAL, precision: 12, scale: 4, notNull: false, default: '0.0000'))
+            ->addColumn(Schema::column('qty_invoiced', Types::DECIMAL, precision: 12, scale: 4, notNull: false, default: '0.0000'))
+            ->addColumn(Schema::column('qty_ordered', Types::DECIMAL, precision: 12, scale: 4, notNull: false, default: '0.0000'))
+            ->addColumn(Schema::column('qty_refunded', Types::DECIMAL, precision: 12, scale: 4, notNull: false, default: '0.0000'))
+            ->addColumn(Schema::column('qty_shipped', Types::DECIMAL, precision: 12, scale: 4, notNull: false, default: '0.0000'))
+            ->addColumn(Schema::column('base_cost', Types::DECIMAL, precision: 12, scale: 4, notNull: false, default: '0.0000'))
+            ->addColumn(Schema::column('price', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('base_price', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('original_price', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_original_price', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('tax_percent', Types::DECIMAL, precision: 12, scale: 4, notNull: false, default: '0.0000'))
+            ->addColumn(Schema::column('tax_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false, default: '0.0000'))
+            ->addColumn(Schema::column('base_tax_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false, default: '0.0000'))
+            ->addColumn(Schema::column('tax_invoiced', Types::DECIMAL, precision: 12, scale: 4, notNull: false, default: '0.0000'))
+            ->addColumn(Schema::column('base_tax_invoiced', Types::DECIMAL, precision: 12, scale: 4, notNull: false, default: '0.0000'))
+            ->addColumn(Schema::column('discount_percent', Types::DECIMAL, precision: 12, scale: 4, notNull: false, default: '0.0000'))
+            ->addColumn(Schema::column('discount_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false, default: '0.0000'))
+            ->addColumn(Schema::column('base_discount_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false, default: '0.0000'))
+            ->addColumn(Schema::column('discount_invoiced', Types::DECIMAL, precision: 12, scale: 4, notNull: false, default: '0.0000'))
+            ->addColumn(Schema::column('base_discount_invoiced', Types::DECIMAL, precision: 12, scale: 4, notNull: false, default: '0.0000'))
+            ->addColumn(Schema::column('amount_refunded', Types::DECIMAL, precision: 12, scale: 4, notNull: false, default: '0.0000'))
+            ->addColumn(Schema::column('base_amount_refunded', Types::DECIMAL, precision: 12, scale: 4, notNull: false, default: '0.0000'))
+            ->addColumn(Schema::column('row_total', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('base_row_total', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('row_invoiced', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('base_row_invoiced', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('row_weight', Types::DECIMAL, precision: 12, scale: 4, notNull: false, default: '0.0000'))
+            ->addColumn(Schema::column('base_tax_before_discount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('tax_before_discount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('ext_order_item_id', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('locked_do_invoice', Types::SMALLINT, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('locked_do_ship', Types::SMALLINT, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('price_incl_tax', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_price_incl_tax', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('row_total_incl_tax', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_row_total_incl_tax', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('hidden_tax_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_hidden_tax_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('hidden_tax_invoiced', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_hidden_tax_invoiced', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('hidden_tax_refunded', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_hidden_tax_refunded', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('is_nominal', Types::INTEGER, default: 0))
+            ->addColumn(Schema::column('tax_canceled', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('hidden_tax_canceled', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('tax_refunded', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_tax_refunded', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('discount_refunded', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_discount_refunded', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('item_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('order_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
@@ -2332,462 +430,61 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('sales_flat_order_payment')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('parent_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_shipping_captured')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('shipping_captured')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('amount_refunded')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_amount_paid')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('amount_canceled')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_amount_authorized')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_amount_paid_online')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_amount_refunded_online')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_shipping_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('shipping_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('amount_paid')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('amount_authorized')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_amount_ordered')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_shipping_refunded')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('shipping_refunded')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_amount_refunded')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('amount_ordered')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_amount_canceled')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('quote_payment_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('additional_data')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('cc_exp_month')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('cc_ss_start_year')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('echeck_bank_name')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('method')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('cc_debug_request_body')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('cc_secure_verify')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('protection_eligibility')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('cc_approval')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('cc_last4')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('cc_status_description')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('echeck_type')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('cc_debug_response_serialized')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('cc_ss_start_month')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('echeck_account_type')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('last_trans_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('cc_cid_status')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('cc_owner')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('cc_type')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('po_number')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('cc_exp_year')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('cc_status')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('echeck_routing_number')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('account_status')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('anet_trans_method')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('cc_debug_response_body')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('cc_ss_issue')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('echeck_account_name')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('cc_avs_status')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('cc_number_enc')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('cc_trans_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('paybox_request_number')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('address_status')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('additional_information')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('parent_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('base_shipping_captured', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('shipping_captured', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('amount_refunded', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_amount_paid', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('amount_canceled', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_amount_authorized', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_amount_paid_online', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_amount_refunded_online', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_shipping_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('shipping_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('amount_paid', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('amount_authorized', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_amount_ordered', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_shipping_refunded', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('shipping_refunded', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_amount_refunded', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('amount_ordered', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_amount_canceled', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('quote_payment_id', Types::INTEGER, notNull: false))
+            ->addColumn(Schema::column('additional_data', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('cc_exp_month', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('cc_ss_start_year', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('echeck_bank_name', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('method', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('cc_debug_request_body', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('cc_secure_verify', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('protection_eligibility', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('cc_approval', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('cc_last4', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('cc_status_description', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('echeck_type', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('cc_debug_response_serialized', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('cc_ss_start_month', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('echeck_account_type', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('last_trans_id', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('cc_cid_status', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('cc_owner', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('cc_type', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('po_number', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('cc_exp_year', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('cc_status', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('echeck_routing_number', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('account_status', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('anet_trans_method', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('cc_debug_response_body', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('cc_ss_issue', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('echeck_account_name', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('cc_avs_status', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('cc_number_enc', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('cc_trans_id', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('paybox_request_number', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('address_status', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('additional_information', Types::TEXT, length: 65535, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('parent_id'))
             ->addForeignKeyConstraint(
@@ -2807,121 +504,21 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('sales_flat_shipment')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('total_weight')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('total_qty')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('email_sent')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('order_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('shipping_address_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('billing_address_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('shipment_status')
-                    ->setTypeName(Types::INTEGER)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('increment_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(50)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('updated_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('packages')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('shipping_label')
-                    ->setTypeName(Types::BLOB)
-                    ->setLength(2097152)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('total_weight', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('total_qty', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('email_sent', Types::SMALLINT, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('order_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('customer_id', Types::INTEGER, notNull: false))
+            ->addColumn(Schema::column('shipping_address_id', Types::INTEGER, notNull: false))
+            ->addColumn(Schema::column('billing_address_id', Types::INTEGER, notNull: false))
+            ->addColumn(Schema::column('shipment_status', Types::INTEGER, notNull: false))
+            ->addColumn(Schema::column('increment_id', Types::STRING, length: 50, notNull: false))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('updated_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('packages', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('shipping_label', Types::BLOB, length: 2097152, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('total_qty'))
@@ -2955,82 +552,16 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('sales_flat_shipment_grid')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('total_qty')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('order_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('shipment_status')
-                    ->setTypeName(Types::INTEGER)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('increment_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(50)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('order_increment_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(50)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('order_created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('shipping_name')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('total_qty', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('order_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('shipment_status', Types::INTEGER, notNull: false))
+            ->addColumn(Schema::column('increment_id', Types::STRING, length: 50, notNull: false))
+            ->addColumn(Schema::column('order_increment_id', Types::STRING, length: 50, notNull: false))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('order_created_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('shipping_name', Types::STRING, length: 255, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('total_qty'))
@@ -3067,103 +598,18 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('sales_flat_shipment_item')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('parent_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('row_total')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('price')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('weight')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('qty')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('product_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('order_item_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('additional_data')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('description')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('name')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('sku')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('parent_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('row_total', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('price', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('weight', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('qty', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('product_id', Types::INTEGER, notNull: false))
+            ->addColumn(Schema::column('order_item_id', Types::INTEGER, notNull: false))
+            ->addColumn(Schema::column('additional_data', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('description', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('name', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('sku', Types::STRING, length: 255, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('parent_id'))
             ->addForeignKeyConstraint(
@@ -3183,92 +629,17 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('sales_flat_shipment_track')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('parent_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('weight')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('qty')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('order_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('track_number')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('description')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('title')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('carrier_code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('updated_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('parent_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('weight', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('qty', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('order_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('track_number', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('description', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('title', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('carrier_code', Types::STRING, length: 32, notNull: false))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('updated_at', Types::DATETIME_MUTABLE, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('parent_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('order_id'))
@@ -3290,51 +661,12 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('sales_flat_shipment_comment')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('parent_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_customer_notified')
-                    ->setTypeName(Types::INTEGER)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_visible_on_front')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('comment')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('parent_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('is_customer_notified', Types::INTEGER, notNull: false))
+            ->addColumn(Schema::column('is_visible_on_front', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('comment', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('created_at'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('parent_id'))
@@ -3356,378 +688,50 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('sales_flat_invoice')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_grand_total')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('shipping_tax_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('tax_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_tax_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_to_order_rate')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_shipping_tax_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_discount_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_to_order_rate')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('grand_total')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('shipping_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('subtotal_incl_tax')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_subtotal_incl_tax')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_to_base_rate')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_shipping_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('total_qty')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_to_global_rate')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('subtotal')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_subtotal')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('discount_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('billing_address_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_used_for_refund')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('order_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('email_sent')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('can_void_flag')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('state')
-                    ->setTypeName(Types::INTEGER)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('shipping_address_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_currency_code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(3)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('transaction_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('order_currency_code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(3)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_currency_code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(3)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('global_currency_code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(3)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('increment_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(50)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('updated_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('hidden_tax_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_hidden_tax_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('shipping_hidden_tax_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_shipping_hidden_tax_amnt')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('shipping_incl_tax')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_shipping_incl_tax')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_total_refunded')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('discount_description')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('base_grand_total', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('shipping_tax_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('tax_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_tax_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('store_to_order_rate', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_shipping_tax_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_discount_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_to_order_rate', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('grand_total', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('shipping_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('subtotal_incl_tax', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_subtotal_incl_tax', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('store_to_base_rate', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_shipping_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('total_qty', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_to_global_rate', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('subtotal', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_subtotal', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('discount_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('billing_address_id', Types::INTEGER, notNull: false))
+            ->addColumn(Schema::column('is_used_for_refund', Types::SMALLINT, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('order_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('email_sent', Types::SMALLINT, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('can_void_flag', Types::SMALLINT, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('state', Types::INTEGER, notNull: false))
+            ->addColumn(Schema::column('shipping_address_id', Types::INTEGER, notNull: false))
+            ->addColumn(Schema::column('store_currency_code', Types::STRING, length: 3, notNull: false))
+            ->addColumn(Schema::column('transaction_id', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('order_currency_code', Types::STRING, length: 3, notNull: false))
+            ->addColumn(Schema::column('base_currency_code', Types::STRING, length: 3, notNull: false))
+            ->addColumn(Schema::column('global_currency_code', Types::STRING, length: 3, notNull: false))
+            ->addColumn(Schema::column('increment_id', Types::STRING, length: 50, notNull: false))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('updated_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('hidden_tax_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_hidden_tax_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('shipping_hidden_tax_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_shipping_hidden_tax_amnt', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('shipping_incl_tax', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_shipping_incl_tax', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_total_refunded', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('discount_description', Types::STRING, length: 255, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('grand_total'))
@@ -3761,123 +765,21 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('sales_flat_invoice_grid')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_grand_total')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('grand_total')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('order_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('state')
-                    ->setTypeName(Types::INTEGER)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_currency_code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(3)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('order_currency_code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(3)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_currency_code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(3)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('global_currency_code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(3)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('increment_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(50)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('order_increment_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(50)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('order_created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('billing_name')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('base_grand_total', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('grand_total', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('order_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('state', Types::INTEGER, notNull: false))
+            ->addColumn(Schema::column('store_currency_code', Types::STRING, length: 3, notNull: false))
+            ->addColumn(Schema::column('order_currency_code', Types::STRING, length: 3, notNull: false))
+            ->addColumn(Schema::column('base_currency_code', Types::STRING, length: 3, notNull: false))
+            ->addColumn(Schema::column('global_currency_code', Types::STRING, length: 3, notNull: false))
+            ->addColumn(Schema::column('increment_id', Types::STRING, length: 50, notNull: false))
+            ->addColumn(Schema::column('order_increment_id', Types::STRING, length: 50, notNull: false))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('order_created_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('billing_name', Types::STRING, length: 255, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('grand_total'))
@@ -3914,211 +816,30 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('sales_flat_invoice_item')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('parent_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_price')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('tax_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_row_total')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('discount_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('row_total')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_discount_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('price_incl_tax')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_tax_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_price_incl_tax')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('qty')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_cost')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('price')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_row_total_incl_tax')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('row_total_incl_tax')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('product_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('order_item_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('additional_data')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('description')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('sku')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('name')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('hidden_tax_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_hidden_tax_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('parent_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('base_price', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('tax_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_row_total', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('discount_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('row_total', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_discount_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('price_incl_tax', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_tax_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_price_incl_tax', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('qty', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_cost', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('price', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_row_total_incl_tax', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('row_total_incl_tax', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('product_id', Types::INTEGER, notNull: false))
+            ->addColumn(Schema::column('order_item_id', Types::INTEGER, notNull: false))
+            ->addColumn(Schema::column('additional_data', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('description', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('sku', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('name', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('hidden_tax_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_hidden_tax_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('parent_id'))
             ->addForeignKeyConstraint(
@@ -4138,52 +859,12 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('sales_flat_invoice_comment')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('parent_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_customer_notified')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_visible_on_front')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('comment')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('parent_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('is_customer_notified', Types::SMALLINT, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('is_visible_on_front', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('comment', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('created_at'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('parent_id'))
@@ -4205,412 +886,54 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('sales_flat_creditmemo')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('adjustment_positive')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_shipping_tax_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_to_order_rate')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_discount_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_to_order_rate')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('grand_total')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_adjustment_negative')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_subtotal_incl_tax')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('shipping_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('subtotal_incl_tax')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('adjustment_negative')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_shipping_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_to_base_rate')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_to_global_rate')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_adjustment')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_subtotal')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('discount_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('subtotal')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('adjustment')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_grand_total')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_adjustment_positive')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_tax_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('shipping_tax_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('tax_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('order_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('email_sent')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('creditmemo_status')
-                    ->setTypeName(Types::INTEGER)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('state')
-                    ->setTypeName(Types::INTEGER)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('shipping_address_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('billing_address_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('invoice_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_currency_code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(3)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('order_currency_code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(3)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_currency_code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(3)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('global_currency_code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(3)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('transaction_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('increment_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(50)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('updated_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('hidden_tax_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_hidden_tax_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('shipping_hidden_tax_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_shipping_hidden_tax_amnt')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('shipping_incl_tax')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_shipping_incl_tax')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('discount_description')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('adjustment_positive', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_shipping_tax_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('store_to_order_rate', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_discount_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_to_order_rate', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('grand_total', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_adjustment_negative', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_subtotal_incl_tax', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('shipping_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('subtotal_incl_tax', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('adjustment_negative', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_shipping_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('store_to_base_rate', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_to_global_rate', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_adjustment', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_subtotal', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('discount_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('subtotal', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('adjustment', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_grand_total', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_adjustment_positive', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_tax_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('shipping_tax_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('tax_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('order_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('email_sent', Types::SMALLINT, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('creditmemo_status', Types::INTEGER, notNull: false))
+            ->addColumn(Schema::column('state', Types::INTEGER, notNull: false))
+            ->addColumn(Schema::column('shipping_address_id', Types::INTEGER, notNull: false))
+            ->addColumn(Schema::column('billing_address_id', Types::INTEGER, notNull: false))
+            ->addColumn(Schema::column('invoice_id', Types::INTEGER, notNull: false))
+            ->addColumn(Schema::column('store_currency_code', Types::STRING, length: 3, notNull: false))
+            ->addColumn(Schema::column('order_currency_code', Types::STRING, length: 3, notNull: false))
+            ->addColumn(Schema::column('base_currency_code', Types::STRING, length: 3, notNull: false))
+            ->addColumn(Schema::column('global_currency_code', Types::STRING, length: 3, notNull: false))
+            ->addColumn(Schema::column('transaction_id', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('increment_id', Types::STRING, length: 50, notNull: false))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('updated_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('hidden_tax_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_hidden_tax_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('shipping_hidden_tax_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_shipping_hidden_tax_amnt', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('shipping_incl_tax', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_shipping_incl_tax', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('discount_description', Types::STRING, length: 255, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('order_id'))
@@ -4644,173 +967,27 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('sales_flat_creditmemo_grid')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_to_order_rate')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_to_order_rate')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('grand_total')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_to_base_rate')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_to_global_rate')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_grand_total')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('order_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('creditmemo_status')
-                    ->setTypeName(Types::INTEGER)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('state')
-                    ->setTypeName(Types::INTEGER)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('invoice_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_currency_code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(3)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('order_currency_code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(3)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_currency_code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(3)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('global_currency_code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(3)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('increment_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(50)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('order_increment_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(50)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('order_created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('billing_name')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('store_to_order_rate', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_to_order_rate', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('grand_total', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('store_to_base_rate', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_to_global_rate', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_grand_total', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('order_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('creditmemo_status', Types::INTEGER, notNull: false))
+            ->addColumn(Schema::column('state', Types::INTEGER, notNull: false))
+            ->addColumn(Schema::column('invoice_id', Types::INTEGER, notNull: false))
+            ->addColumn(Schema::column('store_currency_code', Types::STRING, length: 3, notNull: false))
+            ->addColumn(Schema::column('order_currency_code', Types::STRING, length: 3, notNull: false))
+            ->addColumn(Schema::column('base_currency_code', Types::STRING, length: 3, notNull: false))
+            ->addColumn(Schema::column('global_currency_code', Types::STRING, length: 3, notNull: false))
+            ->addColumn(Schema::column('increment_id', Types::STRING, length: 50, notNull: false))
+            ->addColumn(Schema::column('order_increment_id', Types::STRING, length: 50, notNull: false))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('order_created_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('billing_name', Types::STRING, length: 255, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('grand_total'))
@@ -4849,211 +1026,30 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('sales_flat_creditmemo_item')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('parent_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_price')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('tax_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_row_total')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('discount_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('row_total')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_discount_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('price_incl_tax')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_tax_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_price_incl_tax')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('qty')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_cost')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('price')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_row_total_incl_tax')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('row_total_incl_tax')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('product_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('order_item_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('additional_data')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('description')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('sku')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('name')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('hidden_tax_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_hidden_tax_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('parent_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('base_price', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('tax_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_row_total', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('discount_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('row_total', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_discount_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('price_incl_tax', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_tax_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_price_incl_tax', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('qty', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_cost', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('price', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_row_total_incl_tax', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('row_total_incl_tax', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('product_id', Types::INTEGER, notNull: false))
+            ->addColumn(Schema::column('order_item_id', Types::INTEGER, notNull: false))
+            ->addColumn(Schema::column('additional_data', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('description', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('sku', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('name', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('hidden_tax_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_hidden_tax_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('parent_id'))
             ->addForeignKeyConstraint(
@@ -5073,51 +1069,12 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('sales_flat_creditmemo_comment')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('parent_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_customer_notified')
-                    ->setTypeName(Types::INTEGER)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_visible_on_front')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('comment')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('parent_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('is_customer_notified', Types::INTEGER, notNull: false))
+            ->addColumn(Schema::column('is_visible_on_front', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('comment', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('created_at'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('parent_id'))
@@ -5139,410 +1096,54 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('sales_flat_quote')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('updated_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('converted_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_active')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->setDefaultValue(1)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_virtual')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('items_count')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('items_qty')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('orig_order_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_to_base_rate')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_to_quote_rate')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_currency_code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_currency_code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('quote_currency_code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('grand_total')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_grand_total')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('checkout_method')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_tax_class_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_group_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_email')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_prefix')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(40)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_firstname')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_middlename')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(40)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_lastname')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_suffix')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(40)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_dob')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_note')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_note_notify')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->setDefaultValue(1)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_is_guest')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('remote_ip')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('applied_rule_ids')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('reserved_order_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(64)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('password_hash')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('coupon_code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('global_currency_code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_to_global_rate')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_to_quote_rate')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_taxvat')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_gender')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('subtotal')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_subtotal')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('subtotal_with_discount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_subtotal_with_discount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_changed')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('trigger_recollect')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('ext_shipping_info')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('updated_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('converted_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('is_active', Types::SMALLINT, unsigned: true, notNull: false, default: 1))
+            ->addColumn(Schema::column('is_virtual', Types::SMALLINT, unsigned: true, notNull: false, default: 0))
+            ->addColumn(Schema::column('items_count', Types::INTEGER, unsigned: true, notNull: false, default: 0))
+            ->addColumn(Schema::column('items_qty', Types::DECIMAL, precision: 12, scale: 4, notNull: false, default: '0.0000'))
+            ->addColumn(Schema::column('orig_order_id', Types::INTEGER, unsigned: true, notNull: false, default: 0))
+            ->addColumn(Schema::column('store_to_base_rate', Types::DECIMAL, precision: 12, scale: 4, notNull: false, default: '0.0000'))
+            ->addColumn(Schema::column('store_to_quote_rate', Types::DECIMAL, precision: 12, scale: 4, notNull: false, default: '0.0000'))
+            ->addColumn(Schema::column('base_currency_code', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('store_currency_code', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('quote_currency_code', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('grand_total', Types::DECIMAL, precision: 12, scale: 4, notNull: false, default: '0.0000'))
+            ->addColumn(Schema::column('base_grand_total', Types::DECIMAL, precision: 12, scale: 4, notNull: false, default: '0.0000'))
+            ->addColumn(Schema::column('checkout_method', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('customer_id', Types::INTEGER, unsigned: true, notNull: false, default: 0))
+            ->addColumn(Schema::column('customer_tax_class_id', Types::INTEGER, unsigned: true, notNull: false, default: 0))
+            ->addColumn(Schema::column('customer_group_id', Types::INTEGER, unsigned: true, notNull: false, default: 0))
+            ->addColumn(Schema::column('customer_email', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('customer_prefix', Types::STRING, length: 40, notNull: false))
+            ->addColumn(Schema::column('customer_firstname', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('customer_middlename', Types::STRING, length: 40, notNull: false))
+            ->addColumn(Schema::column('customer_lastname', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('customer_suffix', Types::STRING, length: 40, notNull: false))
+            ->addColumn(Schema::column('customer_dob', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('customer_note', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('customer_note_notify', Types::SMALLINT, unsigned: true, notNull: false, default: 1))
+            ->addColumn(Schema::column('customer_is_guest', Types::SMALLINT, unsigned: true, notNull: false, default: 0))
+            ->addColumn(Schema::column('remote_ip', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('applied_rule_ids', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('reserved_order_id', Types::STRING, length: 64, notNull: false))
+            ->addColumn(Schema::column('password_hash', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('coupon_code', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('global_currency_code', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('base_to_global_rate', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_to_quote_rate', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('customer_taxvat', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('customer_gender', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('subtotal', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_subtotal', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('subtotal_with_discount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_subtotal_with_discount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('is_changed', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('trigger_recollect', Types::SMALLINT, default: 0))
+            ->addColumn(Schema::column('ext_shipping_info', Types::TEXT, length: 65535, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('customer_id', 'store_id', 'is_active'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
@@ -5562,507 +1163,66 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('sales_flat_quote_address')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('address_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('quote_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('updated_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('save_in_address_book')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setNotNull(false)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_address_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('address_type')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('email')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('prefix')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(40)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('firstname')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('middlename')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(40)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('lastname')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('suffix')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(40)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('company')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('street')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('city')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('region')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('region_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('postcode')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('country_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('telephone')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('same_as_billing')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('free_shipping')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('collect_shipping_rates')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('shipping_method')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('shipping_description')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('weight')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('subtotal')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_subtotal')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('subtotal_with_discount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_subtotal_with_discount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('tax_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_tax_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('shipping_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_shipping_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('shipping_tax_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_shipping_tax_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('discount_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_discount_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('grand_total')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_grand_total')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_notes')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('applied_taxes')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('discount_description')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('shipping_discount_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_shipping_discount_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('subtotal_incl_tax')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_subtotal_total_incl_tax')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('hidden_tax_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_hidden_tax_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('shipping_hidden_tax_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_shipping_hidden_tax_amnt')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('shipping_incl_tax')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_shipping_incl_tax')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('vat_id')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('vat_is_valid')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('vat_request_id')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('vat_request_date')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('vat_request_success')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('address_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('quote_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('updated_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('customer_id', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('save_in_address_book', Types::SMALLINT, notNull: false, default: 0))
+            ->addColumn(Schema::column('customer_address_id', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('address_type', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('email', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('prefix', Types::STRING, length: 40, notNull: false))
+            ->addColumn(Schema::column('firstname', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('middlename', Types::STRING, length: 40, notNull: false))
+            ->addColumn(Schema::column('lastname', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('suffix', Types::STRING, length: 40, notNull: false))
+            ->addColumn(Schema::column('company', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('street', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('city', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('region', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('region_id', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('postcode', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('country_id', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('telephone', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('same_as_billing', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('free_shipping', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('collect_shipping_rates', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('shipping_method', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('shipping_description', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('weight', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('subtotal', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('base_subtotal', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('subtotal_with_discount', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('base_subtotal_with_discount', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('tax_amount', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('base_tax_amount', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('shipping_amount', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('base_shipping_amount', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('shipping_tax_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_shipping_tax_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('discount_amount', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('base_discount_amount', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('grand_total', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('base_grand_total', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('customer_notes', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('applied_taxes', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('discount_description', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('shipping_discount_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_shipping_discount_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('subtotal_incl_tax', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_subtotal_total_incl_tax', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('hidden_tax_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_hidden_tax_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('shipping_hidden_tax_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_shipping_hidden_tax_amnt', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('shipping_incl_tax', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_shipping_incl_tax', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('vat_id', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('vat_is_valid', Types::SMALLINT, notNull: false))
+            ->addColumn(Schema::column('vat_request_id', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('vat_request_date', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('vat_request_success', Types::SMALLINT, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('address_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('quote_id'))
             ->addForeignKeyConstraint(
@@ -6081,383 +1241,49 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('sales_flat_quote_item')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('item_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('quote_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('updated_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('product_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('parent_item_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_virtual')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('sku')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('name')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('description')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('applied_rule_ids')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('additional_data')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('free_shipping')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_qty_decimal')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('no_discount')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('weight')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('qty')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('price')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_price')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('custom_price')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('discount_percent')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('discount_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_discount_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('tax_percent')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('tax_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_tax_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('row_total')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_row_total')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('row_total_with_discount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('row_weight')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('product_type')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_tax_before_discount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('tax_before_discount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('original_custom_price')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('redirect_url')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_cost')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('price_incl_tax')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_price_incl_tax')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('row_total_incl_tax')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_row_total_incl_tax')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('hidden_tax_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_hidden_tax_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('item_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('quote_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('updated_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('product_id', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('parent_item_id', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('is_virtual', Types::SMALLINT, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('sku', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('name', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('description', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('applied_rule_ids', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('additional_data', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('free_shipping', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('is_qty_decimal', Types::SMALLINT, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('no_discount', Types::SMALLINT, unsigned: true, notNull: false, default: 0))
+            ->addColumn(Schema::column('weight', Types::DECIMAL, precision: 12, scale: 4, notNull: false, default: '0.0000'))
+            ->addColumn(Schema::column('qty', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('price', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('base_price', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('custom_price', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('discount_percent', Types::DECIMAL, precision: 12, scale: 4, notNull: false, default: '0.0000'))
+            ->addColumn(Schema::column('discount_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false, default: '0.0000'))
+            ->addColumn(Schema::column('base_discount_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false, default: '0.0000'))
+            ->addColumn(Schema::column('tax_percent', Types::DECIMAL, precision: 12, scale: 4, notNull: false, default: '0.0000'))
+            ->addColumn(Schema::column('tax_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false, default: '0.0000'))
+            ->addColumn(Schema::column('base_tax_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false, default: '0.0000'))
+            ->addColumn(Schema::column('row_total', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('base_row_total', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('row_total_with_discount', Types::DECIMAL, precision: 12, scale: 4, notNull: false, default: '0.0000'))
+            ->addColumn(Schema::column('row_weight', Types::DECIMAL, precision: 12, scale: 4, notNull: false, default: '0.0000'))
+            ->addColumn(Schema::column('product_type', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('base_tax_before_discount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('tax_before_discount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('original_custom_price', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('redirect_url', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('base_cost', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('price_incl_tax', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_price_incl_tax', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('row_total_incl_tax', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_row_total_incl_tax', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('hidden_tax_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_hidden_tax_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('item_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('parent_item_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('product_id'))
@@ -6506,344 +1332,45 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('sales_flat_quote_address_item')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('address_item_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('parent_item_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('quote_address_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('quote_item_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('updated_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('applied_rule_ids')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('additional_data')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('weight')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('qty')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('discount_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('tax_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('row_total')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_row_total')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('row_total_with_discount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_discount_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_tax_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('row_weight')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('product_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('super_product_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('parent_product_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('sku')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('image')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('name')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('description')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('free_shipping')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_qty_decimal')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('price')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('discount_percent')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('no_discount')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('tax_percent')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_price')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_cost')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('price_incl_tax')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_price_incl_tax')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('row_total_incl_tax')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_row_total_incl_tax')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('hidden_tax_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_hidden_tax_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('address_item_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('parent_item_id', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('quote_address_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('quote_item_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('updated_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('applied_rule_ids', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('additional_data', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('weight', Types::DECIMAL, precision: 12, scale: 4, notNull: false, default: '0.0000'))
+            ->addColumn(Schema::column('qty', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('discount_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false, default: '0.0000'))
+            ->addColumn(Schema::column('tax_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false, default: '0.0000'))
+            ->addColumn(Schema::column('row_total', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('base_row_total', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('row_total_with_discount', Types::DECIMAL, precision: 12, scale: 4, notNull: false, default: '0.0000'))
+            ->addColumn(Schema::column('base_discount_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false, default: '0.0000'))
+            ->addColumn(Schema::column('base_tax_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false, default: '0.0000'))
+            ->addColumn(Schema::column('row_weight', Types::DECIMAL, precision: 12, scale: 4, notNull: false, default: '0.0000'))
+            ->addColumn(Schema::column('product_id', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('super_product_id', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('parent_product_id', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('sku', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('image', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('name', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('description', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('free_shipping', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('is_qty_decimal', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('price', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('discount_percent', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('no_discount', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('tax_percent', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_price', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_cost', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('price_incl_tax', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_price_incl_tax', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('row_total_incl_tax', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_row_total_incl_tax', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('hidden_tax_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('base_hidden_tax_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('address_item_id')
@@ -6887,43 +1414,11 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('sales_flat_quote_item_option')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('option_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('item_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('product_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('value')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('option_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('item_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('product_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('code', Types::STRING, length: 255))
+            ->addColumn(Schema::column('value', Types::TEXT, length: 65535, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('option_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('item_id'))
             ->addForeignKeyConstraint(
@@ -6944,160 +1439,25 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('sales_flat_quote_payment')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('payment_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('quote_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('updated_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('method')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('cc_type')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('cc_number_enc')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('cc_last4')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('cc_cid_enc')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('cc_owner')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('cc_exp_month')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('cc_exp_year')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('cc_ss_owner')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('cc_ss_start_month')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('cc_ss_start_year')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('po_number')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('additional_data')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('cc_ss_issue')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('additional_information')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('payment_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('quote_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('updated_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('method', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('cc_type', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('cc_number_enc', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('cc_last4', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('cc_cid_enc', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('cc_owner', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('cc_exp_month', Types::SMALLINT, unsigned: true, notNull: false, default: 0))
+            ->addColumn(Schema::column('cc_exp_year', Types::SMALLINT, unsigned: true, notNull: false, default: 0))
+            ->addColumn(Schema::column('cc_ss_owner', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('cc_ss_start_month', Types::SMALLINT, unsigned: true, notNull: false, default: 0))
+            ->addColumn(Schema::column('cc_ss_start_year', Types::SMALLINT, unsigned: true, notNull: false, default: 0))
+            ->addColumn(Schema::column('po_number', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('additional_data', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('cc_ss_issue', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('additional_information', Types::TEXT, length: 65535, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('payment_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('quote_id'))
             ->addForeignKeyConstraint(
@@ -7116,101 +1476,18 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('sales_flat_quote_shipping_rate')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('rate_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('address_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('updated_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('carrier')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('carrier_title')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('method')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('method_description')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('price')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('error_message')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('method_title')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('rate_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('address_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('updated_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('carrier', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('carrier_title', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('code', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('method', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('method_description', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('price', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('error_message', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('method_title', Types::TEXT, length: 65535, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rate_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('address_id'))
             ->addForeignKeyConstraint(
@@ -7231,80 +1508,15 @@ return function (SchemaEditor $schema): void {
         $schema->addTable(
             Table::editor()
                 ->setUnquotedName($tableName)
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('id')
-                        ->setTypeName(Types::INTEGER)
-                        ->setUnsigned(true)
-                        ->setAutoincrement(true)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('period')
-                        ->setTypeName(Types::DATE_MUTABLE)
-                        ->setNotNull(false)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('store_id')
-                        ->setTypeName(Types::SMALLINT)
-                        ->setUnsigned(true)
-                        ->setNotNull(false)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('order_status')
-                        ->setTypeName(Types::STRING)
-                        ->setLength(50)
-                        ->setDefaultValue('')
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('orders_count')
-                        ->setTypeName(Types::INTEGER)
-                        ->setDefaultValue(0)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('orders_invoiced')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setNotNull(false)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('invoiced')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setNotNull(false)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('invoiced_captured')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setNotNull(false)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('invoiced_not_captured')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setNotNull(false)
-                        ->create(),
-                )
+                ->addColumn(Schema::column('id', Types::INTEGER, unsigned: true, autoincrement: true))
+                ->addColumn(Schema::column('period', Types::DATE_MUTABLE, notNull: false))
+                ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, notNull: false))
+                ->addColumn(Schema::column('order_status', Types::STRING, length: 50, default: ''))
+                ->addColumn(Schema::column('orders_count', Types::INTEGER, default: 0))
+                ->addColumn(Schema::column('orders_invoiced', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+                ->addColumn(Schema::column('invoiced', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+                ->addColumn(Schema::column('invoiced_captured', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+                ->addColumn(Schema::column('invoiced_not_captured', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
                 ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('id')->create())
                 ->addIndex(
                     Index::editor()
@@ -7331,179 +1543,26 @@ return function (SchemaEditor $schema): void {
         $schema->addTable(
             Table::editor()
                 ->setUnquotedName($tableName)
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('id')
-                        ->setTypeName(Types::INTEGER)
-                        ->setUnsigned(true)
-                        ->setAutoincrement(true)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('period')
-                        ->setTypeName(Types::DATE_MUTABLE)
-                        ->setNotNull(false)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('store_id')
-                        ->setTypeName(Types::SMALLINT)
-                        ->setUnsigned(true)
-                        ->setNotNull(false)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('order_status')
-                        ->setTypeName(Types::STRING)
-                        ->setLength(50)
-                        ->setDefaultValue('')
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('orders_count')
-                        ->setTypeName(Types::INTEGER)
-                        ->setDefaultValue(0)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('total_qty_ordered')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setDefaultValue('0.0000')
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('total_qty_invoiced')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setDefaultValue('0.0000')
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('total_income_amount')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setDefaultValue('0.0000')
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('total_revenue_amount')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setDefaultValue('0.0000')
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('total_profit_amount')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setDefaultValue('0.0000')
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('total_invoiced_amount')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setDefaultValue('0.0000')
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('total_canceled_amount')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setDefaultValue('0.0000')
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('total_paid_amount')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setDefaultValue('0.0000')
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('total_refunded_amount')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setDefaultValue('0.0000')
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('total_tax_amount')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setDefaultValue('0.0000')
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('total_tax_amount_actual')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setDefaultValue('0.0000')
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('total_shipping_amount')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setDefaultValue('0.0000')
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('total_shipping_amount_actual')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setDefaultValue('0.0000')
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('total_discount_amount')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setDefaultValue('0.0000')
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('total_discount_amount_actual')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setDefaultValue('0.0000')
-                        ->create(),
-                )
+                ->addColumn(Schema::column('id', Types::INTEGER, unsigned: true, autoincrement: true))
+                ->addColumn(Schema::column('period', Types::DATE_MUTABLE, notNull: false))
+                ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, notNull: false))
+                ->addColumn(Schema::column('order_status', Types::STRING, length: 50, default: ''))
+                ->addColumn(Schema::column('orders_count', Types::INTEGER, default: 0))
+                ->addColumn(Schema::column('total_qty_ordered', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+                ->addColumn(Schema::column('total_qty_invoiced', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+                ->addColumn(Schema::column('total_income_amount', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+                ->addColumn(Schema::column('total_revenue_amount', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+                ->addColumn(Schema::column('total_profit_amount', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+                ->addColumn(Schema::column('total_invoiced_amount', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+                ->addColumn(Schema::column('total_canceled_amount', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+                ->addColumn(Schema::column('total_paid_amount', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+                ->addColumn(Schema::column('total_refunded_amount', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+                ->addColumn(Schema::column('total_tax_amount', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+                ->addColumn(Schema::column('total_tax_amount_actual', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+                ->addColumn(Schema::column('total_shipping_amount', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+                ->addColumn(Schema::column('total_shipping_amount_actual', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+                ->addColumn(Schema::column('total_discount_amount', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+                ->addColumn(Schema::column('total_discount_amount_actual', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
                 ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('id')->create())
                 ->addIndex(
                     Index::editor()
@@ -7529,85 +1588,16 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('sales_payment_transaction')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('transaction_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('parent_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('order_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('payment_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('txn_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(100)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('parent_txn_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(100)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('txn_type')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(15)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_closed')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(1)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('additional_information')
-                    ->setTypeName(Types::BLOB)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('transaction_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('parent_id', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('order_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('payment_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('txn_id', Types::STRING, length: 100, notNull: false))
+            ->addColumn(Schema::column('parent_txn_id', Types::STRING, length: 100, notNull: false))
+            ->addColumn(Schema::column('txn_type', Types::STRING, length: 15, notNull: false))
+            ->addColumn(Schema::column('is_closed', Types::SMALLINT, unsigned: true, default: 1))
+            ->addColumn(Schema::column('additional_information', Types::BLOB, length: 65535, notNull: false))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, notNull: false))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('transaction_id')
@@ -7657,71 +1647,14 @@ return function (SchemaEditor $schema): void {
         $schema->addTable(
             Table::editor()
                 ->setUnquotedName($tableName)
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('id')
-                        ->setTypeName(Types::INTEGER)
-                        ->setUnsigned(true)
-                        ->setAutoincrement(true)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('period')
-                        ->setTypeName(Types::DATE_MUTABLE)
-                        ->setNotNull(false)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('store_id')
-                        ->setTypeName(Types::SMALLINT)
-                        ->setUnsigned(true)
-                        ->setNotNull(false)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('order_status')
-                        ->setTypeName(Types::STRING)
-                        ->setLength(50)
-                        ->setDefaultValue('')
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('orders_count')
-                        ->setTypeName(Types::INTEGER)
-                        ->setDefaultValue(0)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('refunded')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setNotNull(false)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('online_refunded')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setNotNull(false)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('offline_refunded')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setNotNull(false)
-                        ->create(),
-                )
+                ->addColumn(Schema::column('id', Types::INTEGER, unsigned: true, autoincrement: true))
+                ->addColumn(Schema::column('period', Types::DATE_MUTABLE, notNull: false))
+                ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, notNull: false))
+                ->addColumn(Schema::column('order_status', Types::STRING, length: 50, default: ''))
+                ->addColumn(Schema::column('orders_count', Types::INTEGER, default: 0))
+                ->addColumn(Schema::column('refunded', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+                ->addColumn(Schema::column('online_refunded', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+                ->addColumn(Schema::column('offline_refunded', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
                 ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('id')->create())
                 ->addIndex(
                     Index::editor()
@@ -7748,70 +1681,14 @@ return function (SchemaEditor $schema): void {
         $schema->addTable(
             Table::editor()
                 ->setUnquotedName($tableName)
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('id')
-                        ->setTypeName(Types::INTEGER)
-                        ->setUnsigned(true)
-                        ->setAutoincrement(true)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('period')
-                        ->setTypeName(Types::DATE_MUTABLE)
-                        ->setNotNull(false)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('store_id')
-                        ->setTypeName(Types::SMALLINT)
-                        ->setUnsigned(true)
-                        ->setNotNull(false)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('order_status')
-                        ->setTypeName(Types::STRING)
-                        ->setLength(50)
-                        ->setDefaultValue('')
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('shipping_description')
-                        ->setTypeName(Types::STRING)
-                        ->setLength(255)
-                        ->setNotNull(false)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('orders_count')
-                        ->setTypeName(Types::INTEGER)
-                        ->setDefaultValue(0)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('total_shipping')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setNotNull(false)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('total_shipping_actual')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setNotNull(false)
-                        ->create(),
-                )
+                ->addColumn(Schema::column('id', Types::INTEGER, unsigned: true, autoincrement: true))
+                ->addColumn(Schema::column('period', Types::DATE_MUTABLE, notNull: false))
+                ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, notNull: false))
+                ->addColumn(Schema::column('order_status', Types::STRING, length: 50, default: ''))
+                ->addColumn(Schema::column('shipping_description', Types::STRING, length: 255, notNull: false))
+                ->addColumn(Schema::column('orders_count', Types::INTEGER, default: 0))
+                ->addColumn(Schema::column('total_shipping', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+                ->addColumn(Schema::column('total_shipping_actual', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
                 ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('id')->create())
                 ->addIndex(
                     Index::editor()
@@ -7839,79 +1716,15 @@ return function (SchemaEditor $schema): void {
         $schema->addTable(
             Table::editor()
                 ->setUnquotedName($tableName)
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('id')
-                        ->setTypeName(Types::INTEGER)
-                        ->setUnsigned(true)
-                        ->setAutoincrement(true)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('period')
-                        ->setTypeName(Types::DATE_MUTABLE)
-                        ->setNotNull(false)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('store_id')
-                        ->setTypeName(Types::SMALLINT)
-                        ->setUnsigned(true)
-                        ->setNotNull(false)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('product_id')
-                        ->setTypeName(Types::INTEGER)
-                        ->setUnsigned(true)
-                        ->setNotNull(false)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('product_type_id')
-                        ->setTypeName(Types::STRING)
-                        ->setLength(32)
-                        ->setDefaultValue('simple')
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('product_name')
-                        ->setTypeName(Types::STRING)
-                        ->setLength(255)
-                        ->setNotNull(false)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('product_price')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setDefaultValue('0.0000')
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('qty_ordered')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setDefaultValue('0.0000')
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('rating_pos')
-                        ->setTypeName(Types::SMALLINT)
-                        ->setUnsigned(true)
-                        ->setDefaultValue(0)
-                        ->create(),
-                )
+                ->addColumn(Schema::column('id', Types::INTEGER, unsigned: true, autoincrement: true))
+                ->addColumn(Schema::column('period', Types::DATE_MUTABLE, notNull: false))
+                ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, notNull: false))
+                ->addColumn(Schema::column('product_id', Types::INTEGER, unsigned: true, notNull: false))
+                ->addColumn(Schema::column('product_type_id', Types::STRING, length: 32, default: 'simple'))
+                ->addColumn(Schema::column('product_name', Types::STRING, length: 255, notNull: false))
+                ->addColumn(Schema::column('product_price', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+                ->addColumn(Schema::column('qty_ordered', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+                ->addColumn(Schema::column('rating_pos', Types::SMALLINT, unsigned: true, default: 0))
                 ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('id')->create())
                 ->addIndex(
                     Index::editor()
@@ -7946,72 +1759,15 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('sales_billing_agreement')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('agreement_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('method_code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('reference_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('status')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(20)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('updated_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('agreement_label')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('agreement_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('customer_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('method_code', Types::STRING, length: 32))
+            ->addColumn(Schema::column('reference_id', Types::STRING, length: 32))
+            ->addColumn(Schema::column('status', Types::STRING, length: 20))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('updated_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('agreement_label', Types::STRING, length: 255, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('agreement_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('customer_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
@@ -8041,20 +1797,8 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('sales_billing_agreement_order')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('agreement_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('order_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('agreement_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('order_id', Types::INTEGER, unsigned: true))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('agreement_id', 'order_id')
@@ -8086,262 +1830,39 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('sales_recurring_profile')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('profile_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('state')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(20)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('method_code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('updated_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('reference_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('subscriber_name')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(150)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('start_datetime')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('internal_reference_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(42)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('schedule_description')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('suspension_threshold')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('bill_failed_later')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('period_unit')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(20)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('period_frequency')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('period_max_cycles')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('billing_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('trial_period_unit')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(20)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('trial_period_frequency')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('trial_period_max_cycles')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('trial_billing_amount')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('currency_code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(3)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('shipping_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('tax_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('init_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('init_may_fail')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('order_info')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('order_item_info')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('billing_address_info')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('shipping_address_info')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('profile_vendor_info')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('additional_info')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('profile_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('state', Types::STRING, length: 20))
+            ->addColumn(Schema::column('customer_id', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('method_code', Types::STRING, length: 32))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('updated_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('reference_id', Types::STRING, length: 32, notNull: false))
+            ->addColumn(Schema::column('subscriber_name', Types::STRING, length: 150, notNull: false))
+            ->addColumn(Schema::column('start_datetime', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('internal_reference_id', Types::STRING, length: 42))
+            ->addColumn(Schema::column('schedule_description', Types::STRING, length: 255))
+            ->addColumn(Schema::column('suspension_threshold', Types::SMALLINT, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('bill_failed_later', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('period_unit', Types::STRING, length: 20))
+            ->addColumn(Schema::column('period_frequency', Types::SMALLINT, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('period_max_cycles', Types::SMALLINT, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('billing_amount', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('trial_period_unit', Types::STRING, length: 20, notNull: false))
+            ->addColumn(Schema::column('trial_period_frequency', Types::SMALLINT, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('trial_period_max_cycles', Types::SMALLINT, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('trial_billing_amount', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('currency_code', Types::STRING, length: 3))
+            ->addColumn(Schema::column('shipping_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('tax_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('init_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('init_may_fail', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('order_info', Types::TEXT, length: 65535))
+            ->addColumn(Schema::column('order_item_info', Types::TEXT, length: 65535))
+            ->addColumn(Schema::column('billing_address_info', Types::TEXT, length: 65535))
+            ->addColumn(Schema::column('shipping_address_info', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('profile_vendor_info', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('additional_info', Types::TEXT, length: 65535, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('profile_id')->create())
             ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('internal_reference_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('customer_id'))
@@ -8372,30 +1893,9 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('sales_recurring_profile_order')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('link_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('profile_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('order_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('link_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('profile_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('order_id', Types::INTEGER, unsigned: true, default: 0))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('link_id')->create())
             ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('profile_id', 'order_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('order_id'))
@@ -8426,99 +1926,18 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('sales_order_tax')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('tax_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('order_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('title')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('percent')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('priority')
-                    ->setTypeName(Types::INTEGER)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('position')
-                    ->setTypeName(Types::INTEGER)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('process')
-                    ->setTypeName(Types::SMALLINT)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_real_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('hidden')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('tax_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('order_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('code', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('title', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('percent', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('priority', Types::INTEGER))
+            ->addColumn(Schema::column('position', Types::INTEGER))
+            ->addColumn(Schema::column('base_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('process', Types::SMALLINT))
+            ->addColumn(Schema::column('base_real_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('hidden', Types::SMALLINT, unsigned: true, default: 0))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('tax_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('order_id', 'priority', 'position'))
             ->addForeignKeyConstraint(
@@ -8538,29 +1957,9 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('sales_order_status')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('status')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('label')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(128)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('color')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(20)
-                    ->setNotNull(false)
-                    ->setComment('Status Color')
-                    ->create(),
-            )
+            ->addColumn(Schema::column('status', Types::STRING, length: 32))
+            ->addColumn(Schema::column('label', Types::STRING, length: 128))
+            ->addColumn(Schema::column('color', Types::STRING, length: 20, notNull: false, comment: 'Status Color'))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('status')->create())
             ->setComment('Sales Order Status')
             ->create(),
@@ -8570,28 +1969,9 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('sales_order_status_state')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('status')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('state')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_default')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('status', Types::STRING, length: 32))
+            ->addColumn(Schema::column('state', Types::STRING, length: 32))
+            ->addColumn(Schema::column('is_default', Types::SMALLINT, unsigned: true, default: 0))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('status', 'state')
@@ -8614,27 +1994,9 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('sales_order_status_label')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('status')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('label')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(128)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('status', Types::STRING, length: 32))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true))
+            ->addColumn(Schema::column('label', Types::STRING, length: 128))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('status', 'store_id')

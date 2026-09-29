@@ -16,140 +16,29 @@ use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\SchemaEditor;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
+use Maho\Db\Schema;
 
 return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('revocation_request')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('request_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('order_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('order_reference')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(64)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_name')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('email')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('reason')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('verified')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('received_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('ip')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(45)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('user_agent')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(512)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('locale')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(16)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('processed_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('processed_status')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('admin_note')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('suppressed_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('suppressed_reason')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(64)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('request_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('order_id', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('order_reference', Types::STRING, length: 64))
+            ->addColumn(Schema::column('customer_name', Types::STRING, length: 255))
+            ->addColumn(Schema::column('email', Types::STRING, length: 255))
+            ->addColumn(Schema::column('reason', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('verified', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('received_at', Types::DATETIME_MUTABLE))
+            ->addColumn(Schema::column('ip', Types::STRING, length: 45, notNull: false))
+            ->addColumn(Schema::column('user_agent', Types::STRING, length: 512, notNull: false))
+            ->addColumn(Schema::column('locale', Types::STRING, length: 16, notNull: false))
+            ->addColumn(Schema::column('processed_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('processed_status', Types::STRING, length: 32, notNull: false))
+            ->addColumn(Schema::column('admin_note', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('suppressed_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('suppressed_reason', Types::STRING, length: 64, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('request_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('store_id', 'received_at'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('email'))

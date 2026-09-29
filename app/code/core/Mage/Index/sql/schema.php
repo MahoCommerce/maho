@@ -18,63 +18,19 @@ use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\SchemaEditor;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
+use Maho\Db\Schema;
 
 return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('index_event')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('event_id')
-                    ->setTypeName(Types::BIGINT)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('type')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(64)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(64)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_pk')
-                    ->setTypeName(Types::BIGINT)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('old_data')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(2097152)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('new_data')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(2097152)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('event_id', Types::BIGINT, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('type', Types::STRING, length: 64))
+            ->addColumn(Schema::column('entity', Types::STRING, length: 64))
+            ->addColumn(Schema::column('entity_pk', Types::BIGINT, notNull: false))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('old_data', Types::TEXT, length: 2097152, notNull: false))
+            ->addColumn(Schema::column('new_data', Types::TEXT, length: 2097152, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('event_id')->create())
             ->addIndex(
                 Index::editor()
@@ -88,51 +44,12 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('index_process')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('process_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('indexer_code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('status')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(15)
-                    ->setDefaultValue('pending')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('started_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('ended_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('mode')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(9)
-                    ->setDefaultValue('real_time')
-                    ->create(),
-            )
+            ->addColumn(Schema::column('process_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('indexer_code', Types::STRING, length: 32))
+            ->addColumn(Schema::column('status', Types::STRING, length: 15, default: 'pending'))
+            ->addColumn(Schema::column('started_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('ended_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('mode', Types::STRING, length: 9, default: 'real_time'))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('process_id')->create())
             ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('indexer_code'))
             ->setComment('Index Process')
@@ -142,28 +59,9 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('index_process_event')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('process_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('event_id')
-                    ->setTypeName(Types::BIGINT)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('status')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(7)
-                    ->setDefaultValue('new')
-                    ->create(),
-            )
+            ->addColumn(Schema::column('process_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('event_id', Types::BIGINT, unsigned: true))
+            ->addColumn(Schema::column('status', Types::STRING, length: 7, default: 'new'))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('process_id', 'event_id')

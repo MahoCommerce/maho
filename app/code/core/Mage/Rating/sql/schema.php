@@ -17,26 +17,14 @@ use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\SchemaEditor;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
+use Maho\Db\Schema;
 
 return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('rating_entity')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(64)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('entity_id', Types::SMALLINT, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('entity_code', Types::STRING, length: 64))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create())
             ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('entity_code'))
             ->setComment('Rating entities')
@@ -46,37 +34,10 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('rating')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('rating_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('rating_code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(64)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('position')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('rating_id', Types::SMALLINT, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('entity_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('rating_code', Types::STRING, length: 64))
+            ->addColumn(Schema::column('position', Types::SMALLINT, unsigned: true, default: 0))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rating_id')->create())
             ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('rating_code'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('entity_id'))
@@ -96,45 +57,11 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('rating_option')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('option_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('rating_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('value')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('position')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('option_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('rating_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('code', Types::STRING, length: 32))
+            ->addColumn(Schema::column('value', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('position', Types::SMALLINT, unsigned: true, default: 0))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('option_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('rating_id'))
             ->addForeignKeyConstraint(
@@ -153,85 +80,16 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('rating_option_vote')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('vote_id')
-                    ->setTypeName(Types::BIGINT)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('option_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('remote_ip')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(50)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('remote_ip_long')
-                    ->setTypeName(Types::BINARY)
-                    ->setLength(16)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_pk_value')
-                    ->setTypeName(Types::BIGINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('rating_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('review_id')
-                    ->setTypeName(Types::BIGINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('percent')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('value')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('vote_id', Types::BIGINT, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('option_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('remote_ip', Types::STRING, length: 50, notNull: false))
+            ->addColumn(Schema::column('remote_ip_long', Types::BINARY, length: 16, notNull: false))
+            ->addColumn(Schema::column('customer_id', Types::INTEGER, unsigned: true, notNull: false, default: 0))
+            ->addColumn(Schema::column('entity_pk_value', Types::BIGINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('rating_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('review_id', Types::BIGINT, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('percent', Types::SMALLINT, default: 0))
+            ->addColumn(Schema::column('value', Types::SMALLINT, default: 0))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('vote_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('option_id'))
             ->addForeignKeyConstraint(
@@ -259,68 +117,14 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('rating_option_vote_aggregated')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('primary_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('rating_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_pk_value')
-                    ->setTypeName(Types::BIGINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('vote_count')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('vote_value_sum')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('percent')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('percent_approved')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setNotNull(false)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('primary_id', Types::INTEGER, autoincrement: true))
+            ->addColumn(Schema::column('rating_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('entity_pk_value', Types::BIGINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('vote_count', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('vote_value_sum', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('percent', Types::SMALLINT, default: 0))
+            ->addColumn(Schema::column('percent_approved', Types::SMALLINT, notNull: false, default: 0))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('primary_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('rating_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
@@ -349,22 +153,8 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('rating_store')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('rating_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('rating_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('rating_id', 'store_id')
@@ -395,29 +185,9 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('rating_title')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('rating_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('value')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('rating_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('value', Types::STRING, length: 255))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('rating_id', 'store_id')

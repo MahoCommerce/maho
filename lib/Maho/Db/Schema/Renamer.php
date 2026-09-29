@@ -24,7 +24,7 @@ use Doctrine\DBAL\Schema\Table;
  *
  *     Table::editor()
  *         ->setUnquotedName('sales_flat_order')
- *         ->setOptions(Renamer::renamed(from: 'sales_order', columns: ['customer_email' => 'customer_mail']))
+ *         ->setOptions(Maho\Db\Schema::renamed(from: 'sales_order', columns: ['customer_email' => 'customer_mail']))
  *
  * That lands in one table option, which this class depends on for three DBAL
  * properties: Table::edit() copies options, so the prefix rebuild preserves
@@ -52,36 +52,6 @@ use Doctrine\DBAL\Schema\Table;
 final class Renamer
 {
     public const OPTION = 'maho_previous_names';
-
-    /**
-     * The table options that record what a table and its columns used to be
-     * called. Pass the result to TableEditor::setOptions().
-     *
-     * @param string|list<string> $from former table name(s), newest-first
-     * @param array<string, string|list<string>> $columns current column name => former name(s), newest-first
-     * @return array<string, mixed>
-     */
-    public static function renamed(string|array $from = [], array $columns = []): array
-    {
-        $history = ['table' => [], 'columns' => []];
-
-        foreach ((array) $from as $name) {
-            if (!in_array($name, $history['table'], true)) {
-                $history['table'][] = $name;
-            }
-        }
-
-        foreach ($columns as $current => $previous) {
-            $history['columns'][$current] ??= [];
-            foreach ((array) $previous as $name) {
-                if (!in_array($name, $history['columns'][$current], true)) {
-                    $history['columns'][$current][] = $name;
-                }
-            }
-        }
-
-        return [self::OPTION => $history];
-    }
 
     /**
      * @return list<string> newest-first
@@ -459,8 +429,8 @@ final class Renamer
     private static function malformed(): never
     {
         throw new UnsupportedMigrationException(sprintf(
-            'A "%s" table option does not carry the shape Renamer::renamed() writes. '
-            . 'Declare previous names through Renamer::renamed() instead of writing the option by hand.',
+            'A "%s" table option does not carry the shape Maho\Db\Schema::renamed() writes. '
+            . 'Declare previous names through Maho\Db\Schema::renamed() instead of writing the option by hand.',
             self::OPTION,
         ));
     }

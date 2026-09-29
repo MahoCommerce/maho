@@ -16,35 +16,15 @@ use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\SchemaEditor;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
+use Maho\Db\Schema;
 
 return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('api_assert')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('assert_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('assert_type')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(20)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('assert_data')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('assert_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('assert_type', Types::STRING, length: 20, notNull: false))
+            ->addColumn(Schema::column('assert_data', Types::TEXT, length: 65535, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('assert_id')->create())
             ->setComment('Api ACL Asserts')
             ->create(),
@@ -53,28 +33,9 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('api_session')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('user_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('logdate')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('sessid')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(40)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('user_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('logdate', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('sessid', Types::STRING, length: 40, notNull: false))
             ->addIndex(Index::editor()->setUnquotedColumnNames('user_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('sessid'))
             ->addForeignKeyConstraint(

@@ -18,141 +18,29 @@ use Doctrine\DBAL\Schema\SchemaEditor;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Schema\TableEditor;
 use Doctrine\DBAL\Types\Types;
+use Maho\Db\Schema;
 
 return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('giftcard')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('giftcard_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(64)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('status')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->setDefaultValue('active')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('balance')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('initial_balance')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('recipient_name')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('recipient_email')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('sender_name')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('sender_email')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('message')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('purchase_order_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('purchase_order_item_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('expires_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('updated_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('email_scheduled_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('email_sent_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('giftcard_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('code', Types::STRING, length: 64))
+            ->addColumn(Schema::column('status', Types::STRING, length: 32, default: 'active'))
+            ->addColumn(Schema::column('balance', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('initial_balance', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('recipient_name', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('recipient_email', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('sender_name', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('sender_email', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('message', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('purchase_order_id', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('purchase_order_item_id', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('expires_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE))
+            ->addColumn(Schema::column('updated_at', Types::DATETIME_MUTABLE))
+            ->addColumn(Schema::column('email_scheduled_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('email_sent_at', Types::DATETIME_MUTABLE, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('giftcard_id')->create())
             ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('code'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('status'))
@@ -175,85 +63,16 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('giftcard_history')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('history_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('giftcard_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('action')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('base_amount')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('balance_before')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('balance_after')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('order_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('admin_user_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('comment')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('history_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('giftcard_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('action', Types::STRING, length: 32))
+            ->addColumn(Schema::column('base_amount', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('balance_before', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('balance_after', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('order_id', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('admin_user_id', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('comment', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('history_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('giftcard_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('giftcard_id', 'created_at'))
@@ -282,141 +101,33 @@ return function (SchemaEditor $schema): void {
 
     // Giftcard grafts its columns onto Mage_Sales tables, kept here so module removal stays one delete.
     $schema->modifyTableByUnquotedName('sales_flat_quote', static function (TableEditor $quote): void {
-        $quote->addColumn(
-            Column::editor()
-                ->setUnquotedName('giftcard_codes')
-                ->setTypeName(Types::TEXT)
-                ->setLength(65535)
-                ->setNotNull(false)
-                ->setComment('Applied Gift Card Codes (JSON)')
-                ->create(),
-        );
-        $quote->addColumn(
-            Column::editor()
-                ->setUnquotedName('giftcard_amount')
-                ->setTypeName(Types::DECIMAL)
-                ->setPrecision(12)
-                ->setScale(4)
-                ->setNotNull(false)
-                ->setDefaultValue('0.0000')
-                ->setComment('Gift Card Discount Amount')
-                ->create(),
-        );
-        $quote->addColumn(
-            Column::editor()
-                ->setUnquotedName('base_giftcard_amount')
-                ->setTypeName(Types::DECIMAL)
-                ->setPrecision(12)
-                ->setScale(4)
-                ->setNotNull(false)
-                ->setDefaultValue('0.0000')
-                ->setComment('Base Gift Card Discount Amount')
-                ->create(),
-        );
+        $quote->addColumn(Schema::column('giftcard_codes', Types::TEXT, length: 65535, notNull: false, comment: 'Applied Gift Card Codes (JSON)'));
+        $quote->addColumn(Schema::column('giftcard_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false, default: '0.0000', comment: 'Gift Card Discount Amount'));
+        $quote->addColumn(Schema::column('base_giftcard_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false, default: '0.0000', comment: 'Base Gift Card Discount Amount'));
     });
 
     $schema->modifyTableByUnquotedName('sales_flat_order', static function (TableEditor $order): void {
-        $order->addColumn(
-            Column::editor()
-                ->setUnquotedName('giftcard_codes')
-                ->setTypeName(Types::TEXT)
-                ->setLength(65535)
-                ->setNotNull(false)
-                ->setComment('Applied Gift Card Codes (JSON)')
-                ->create(),
-        );
-        $order->addColumn(
-            Column::editor()
-                ->setUnquotedName('giftcard_amount')
-                ->setTypeName(Types::DECIMAL)
-                ->setPrecision(12)
-                ->setScale(4)
-                ->setNotNull(false)
-                ->setDefaultValue('0.0000')
-                ->setComment('Gift Card Discount Amount')
-                ->create(),
-        );
-        $order->addColumn(
-            Column::editor()
-                ->setUnquotedName('base_giftcard_amount')
-                ->setTypeName(Types::DECIMAL)
-                ->setPrecision(12)
-                ->setScale(4)
-                ->setNotNull(false)
-                ->setDefaultValue('0.0000')
-                ->setComment('Base Gift Card Discount Amount')
-                ->create(),
-        );
+        $order->addColumn(Schema::column('giftcard_codes', Types::TEXT, length: 65535, notNull: false, comment: 'Applied Gift Card Codes (JSON)'));
+        $order->addColumn(Schema::column('giftcard_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false, default: '0.0000', comment: 'Gift Card Discount Amount'));
+        $order->addColumn(Schema::column('base_giftcard_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false, default: '0.0000', comment: 'Base Gift Card Discount Amount'));
     });
 
     $schema->modifyTableByUnquotedName('sales_flat_invoice', static function (TableEditor $invoice): void {
-        $invoice->addColumn(
-            Column::editor()
-                ->setUnquotedName('giftcard_amount')
-                ->setTypeName(Types::DECIMAL)
-                ->setPrecision(12)
-                ->setScale(4)
-                ->setNotNull(false)
-                ->setDefaultValue('0.0000')
-                ->setComment('Gift Card Amount')
-                ->create(),
-        );
-        $invoice->addColumn(
-            Column::editor()
-                ->setUnquotedName('base_giftcard_amount')
-                ->setTypeName(Types::DECIMAL)
-                ->setPrecision(12)
-                ->setScale(4)
-                ->setNotNull(false)
-                ->setDefaultValue('0.0000')
-                ->setComment('Base Gift Card Amount')
-                ->create(),
-        );
+        $invoice->addColumn(Schema::column('giftcard_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false, default: '0.0000', comment: 'Gift Card Amount'));
+        $invoice->addColumn(Schema::column('base_giftcard_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false, default: '0.0000', comment: 'Base Gift Card Amount'));
     });
 
     $schema->modifyTableByUnquotedName('sales_flat_creditmemo', static function (TableEditor $creditmemo): void {
-        $creditmemo->addColumn(
-            Column::editor()
-                ->setUnquotedName('giftcard_amount')
-                ->setTypeName(Types::DECIMAL)
-                ->setPrecision(12)
-                ->setScale(4)
-                ->setNotNull(false)
-                ->setDefaultValue('0.0000')
-                ->setComment('Gift Card Amount')
-                ->create(),
-        );
-        $creditmemo->addColumn(
-            Column::editor()
-                ->setUnquotedName('base_giftcard_amount')
-                ->setTypeName(Types::DECIMAL)
-                ->setPrecision(12)
-                ->setScale(4)
-                ->setNotNull(false)
-                ->setDefaultValue('0.0000')
-                ->setComment('Base Gift Card Amount')
-                ->create(),
-        );
+        $creditmemo->addColumn(Schema::column('giftcard_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false, default: '0.0000', comment: 'Gift Card Amount'));
+        $creditmemo->addColumn(Schema::column('base_giftcard_amount', Types::DECIMAL, precision: 12, scale: 4, notNull: false, default: '0.0000', comment: 'Base Gift Card Amount'));
     });
 
     // Websites a card is valid on; redemption is a membership check.
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('giftcard_website')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('giftcard_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('website_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('giftcard_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('website_id', Types::SMALLINT, unsigned: true))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('giftcard_id', 'website_id')

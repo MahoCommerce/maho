@@ -16,63 +16,19 @@ use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\SchemaEditor;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
+use Maho\Db\Schema;
 
 return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('dataflow_session')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('session_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('user_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_date')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('file')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('type')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('direction')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('comment')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('session_id', Types::INTEGER, autoincrement: true))
+            ->addColumn(Schema::column('user_id', Types::INTEGER))
+            ->addColumn(Schema::column('created_date', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('file', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('type', Types::STRING, length: 32, notNull: false))
+            ->addColumn(Schema::column('direction', Types::STRING, length: 32, notNull: false))
+            ->addColumn(Schema::column('comment', Types::STRING, length: 255, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('session_id')->create())
             ->setComment('Dataflow Session')
             ->create(),
@@ -81,42 +37,11 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('dataflow_import_data')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('import_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('session_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('serial_number')
-                    ->setTypeName(Types::INTEGER)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('value')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('status')
-                    ->setTypeName(Types::INTEGER)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('import_id', Types::INTEGER, autoincrement: true))
+            ->addColumn(Schema::column('session_id', Types::INTEGER, notNull: false))
+            ->addColumn(Schema::column('serial_number', Types::INTEGER, default: 0))
+            ->addColumn(Schema::column('value', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('status', Types::INTEGER, default: 0))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('import_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('session_id'))
             ->addForeignKeyConstraint(
@@ -135,84 +60,16 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('dataflow_profile')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('profile_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('name')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('updated_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('actions_xml')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('gui_data')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('direction')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(6)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_type')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(64)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('data_transfer')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(11)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('profile_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('name', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('updated_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('actions_xml', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('gui_data', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('direction', Types::STRING, length: 6, notNull: false))
+            ->addColumn(Schema::column('entity_type', Types::STRING, length: 64, notNull: false))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('data_transfer', Types::STRING, length: 11, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('profile_id')->create())
             ->setComment('Dataflow Profile')
             ->create(),
@@ -221,45 +78,11 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('dataflow_profile_history')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('history_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('profile_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('action_code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(64)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('user_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('performed_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('history_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('profile_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('action_code', Types::STRING, length: 64, notNull: false))
+            ->addColumn(Schema::column('user_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('performed_at', Types::DATETIME_MUTABLE, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('history_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('profile_id'))
             ->addForeignKeyConstraint(
@@ -278,53 +101,12 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('dataflow_batch')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('batch_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('profile_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('adapter')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(128)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('params')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('batch_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('profile_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('adapter', Types::STRING, length: 128, notNull: false))
+            ->addColumn(Schema::column('params', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('batch_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('profile_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
@@ -352,38 +134,10 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('dataflow_batch_export')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('batch_export_id')
-                    ->setTypeName(Types::BIGINT)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('batch_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('batch_data')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(2147483648)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('status')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('batch_export_id', Types::BIGINT, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('batch_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('batch_data', Types::TEXT, length: 2147483648, notNull: false))
+            ->addColumn(Schema::column('status', Types::SMALLINT, unsigned: true, default: 0))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('batch_export_id')
@@ -405,38 +159,10 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('dataflow_batch_import')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('batch_import_id')
-                    ->setTypeName(Types::BIGINT)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('batch_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('batch_data')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(2147483648)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('status')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('batch_import_id', Types::BIGINT, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('batch_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('batch_data', Types::TEXT, length: 2147483648, notNull: false))
+            ->addColumn(Schema::column('status', Types::SMALLINT, unsigned: true, default: 0))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('batch_import_id')

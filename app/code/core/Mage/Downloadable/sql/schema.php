@@ -18,98 +18,23 @@ use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\SchemaEditor;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
+use Maho\Db\Schema;
 
 return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('downloadable_link')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('link_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('product_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('sort_order')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('number_of_downloads')
-                    ->setTypeName(Types::INTEGER)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_shareable')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('link_url')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('link_file')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('link_type')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(20)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('sample_url')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('sample_file')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('sample_type')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(20)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('link_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('product_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('sort_order', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('number_of_downloads', Types::INTEGER, notNull: false))
+            ->addColumn(Schema::column('is_shareable', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('link_url', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('link_file', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('link_type', Types::STRING, length: 20, notNull: false))
+            ->addColumn(Schema::column('sample_url', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('sample_file', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('sample_type', Types::STRING, length: 20, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('link_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('product_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('product_id', 'sort_order'))
@@ -129,39 +54,10 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('downloadable_link_price')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('price_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('link_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('website_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('price')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
+            ->addColumn(Schema::column('price_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('link_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('website_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('price', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('price_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('link_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('website_id'))
@@ -190,86 +86,16 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('downloadable_link_purchased')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('purchased_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('order_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('order_increment_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(50)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('order_item_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('updated_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('product_name')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('product_sku')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('link_section_title')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('purchased_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('order_id', Types::INTEGER, unsigned: true, notNull: false, default: 0))
+            ->addColumn(Schema::column('order_increment_id', Types::STRING, length: 50, notNull: false))
+            ->addColumn(Schema::column('order_item_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('updated_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('customer_id', Types::INTEGER, unsigned: true, notNull: false, default: 0))
+            ->addColumn(Schema::column('product_name', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('product_sku', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('link_section_title', Types::STRING, length: 255, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('purchased_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('order_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('order_item_id'))
@@ -299,134 +125,22 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('downloadable_link_purchased_item')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('item_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('purchased_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('order_item_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('product_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('link_hash')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('number_of_downloads_bought')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('number_of_downloads_used')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('link_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('link_title')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_shareable')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('link_url')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('link_file')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('link_type')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('status')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(50)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('updated_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
+            ->addColumn(Schema::column('item_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('purchased_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('order_item_id', Types::INTEGER, unsigned: true, notNull: false, default: 0))
+            ->addColumn(Schema::column('product_id', Types::INTEGER, unsigned: true, notNull: false, default: 0))
+            ->addColumn(Schema::column('link_hash', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('number_of_downloads_bought', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('number_of_downloads_used', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('link_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('link_title', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('is_shareable', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('link_url', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('link_file', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('link_type', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('status', Types::STRING, length: 50, notNull: false))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('updated_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('item_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('link_hash'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('order_item_id'))
@@ -456,38 +170,10 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('downloadable_link_title')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('title_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('link_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('title')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('title_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('link_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('title', Types::STRING, length: 255, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('title_id')->create())
             ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('link_id', 'store_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('link_id'))
@@ -517,54 +203,12 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('downloadable_sample')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('sample_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('product_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('sample_url')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('sample_file')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('sample_type')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(20)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('sort_order')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('sample_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('product_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('sample_url', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('sample_file', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('sample_type', Types::STRING, length: 20, notNull: false))
+            ->addColumn(Schema::column('sort_order', Types::INTEGER, unsigned: true, default: 0))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('sample_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('product_id'))
             ->addForeignKeyConstraint(
@@ -583,38 +227,10 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('downloadable_sample_title')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('title_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('sample_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('title')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('title_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('sample_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('title', Types::STRING, length: 255, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('title_id')->create())
             ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('sample_id', 'store_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('sample_id'))
@@ -644,45 +260,11 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('catalog_product_index_price_downlod_idx')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_group_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('website_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('min_price')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('max_price')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
+            ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('customer_group_id', Types::SMALLINT, unsigned: true))
+            ->addColumn(Schema::column('website_id', Types::SMALLINT, unsigned: true))
+            ->addColumn(Schema::column('min_price', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('max_price', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('entity_id', 'customer_group_id', 'website_id')
@@ -695,45 +277,11 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('catalog_product_index_price_downlod_tmp')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_group_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('website_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('min_price')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('max_price')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
+            ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('customer_group_id', Types::SMALLINT, unsigned: true))
+            ->addColumn(Schema::column('website_id', Types::SMALLINT, unsigned: true))
+            ->addColumn(Schema::column('min_price', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('max_price', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('entity_id', 'customer_group_id', 'website_id')

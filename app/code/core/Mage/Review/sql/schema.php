@@ -17,26 +17,14 @@ use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\SchemaEditor;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
+use Maho\Db\Schema;
 
 return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('review_entity')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('entity_id', Types::SMALLINT, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('entity_code', Types::STRING, length: 32))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create())
             ->setComment('Review entities')
             ->create(),
@@ -45,21 +33,8 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('review_status')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('status_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('status_code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('status_id', Types::SMALLINT, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('status_code', Types::STRING, length: 32))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('status_id')->create())
             ->setComment('Review statuses')
             ->create(),
@@ -68,45 +43,11 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('review')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('review_id')
-                    ->setTypeName(Types::BIGINT)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_pk_value')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('status_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('review_id', Types::BIGINT, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('entity_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('entity_pk_value', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('status_id', Types::SMALLINT, unsigned: true, default: 0))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('review_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('entity_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('status_id'))
@@ -136,60 +77,13 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('review_detail')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('detail_id')
-                    ->setTypeName(Types::BIGINT)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('review_id')
-                    ->setTypeName(Types::BIGINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('title')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('detail')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('nickname')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(128)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('detail_id', Types::BIGINT, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('review_id', Types::BIGINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, notNull: false, default: 0))
+            ->addColumn(Schema::column('title', Types::STRING, length: 255))
+            ->addColumn(Schema::column('detail', Types::TEXT, length: 65535))
+            ->addColumn(Schema::column('nickname', Types::STRING, length: 128))
+            ->addColumn(Schema::column('customer_id', Types::INTEGER, unsigned: true, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('detail_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('review_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
@@ -229,49 +123,12 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('review_entity_summary')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('primary_id')
-                    ->setTypeName(Types::BIGINT)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_pk_value')
-                    ->setTypeName(Types::BIGINT)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_type')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('reviews_count')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('rating_summary')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('primary_id', Types::BIGINT, autoincrement: true))
+            ->addColumn(Schema::column('entity_pk_value', Types::BIGINT, default: 0))
+            ->addColumn(Schema::column('entity_type', Types::SMALLINT, default: 0))
+            ->addColumn(Schema::column('reviews_count', Types::SMALLINT, default: 0))
+            ->addColumn(Schema::column('rating_summary', Types::SMALLINT, default: 0))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('primary_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
             ->addForeignKeyConstraint(
@@ -290,20 +147,8 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('review_store')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('review_id')
-                    ->setTypeName(Types::BIGINT)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('review_id', Types::BIGINT, unsigned: true))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('review_id', 'store_id')

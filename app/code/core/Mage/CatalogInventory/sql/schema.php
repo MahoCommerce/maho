@@ -17,27 +17,14 @@ use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\SchemaEditor;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
+use Maho\Db\Schema;
 
 return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('cataloginventory_stock')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('stock_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('stock_name')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('stock_id', Types::SMALLINT, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('stock_name', Types::STRING, length: 255, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('stock_id')->create())
             ->setComment('Cataloginventory Stock')
             ->create(),
@@ -46,211 +33,31 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('cataloginventory_stock_item')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('item_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('product_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('stock_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('qty')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('min_qty')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('use_config_min_qty')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(1)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_qty_decimal')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('backorders')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('use_config_backorders')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(1)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('min_sale_qty')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('1.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('use_config_min_sale_qty')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(1)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('max_sale_qty')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('use_config_max_sale_qty')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(1)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_in_stock')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('low_stock_date')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('notify_stock_qty')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('use_config_notify_stock_qty')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(1)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('manage_stock')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('use_config_manage_stock')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(1)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('stock_status_changed_auto')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('use_config_qty_increments')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(1)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('qty_increments')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('use_config_enable_qty_inc')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(1)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('enable_qty_increments')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_decimal_divided')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('item_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('product_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('stock_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('qty', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('min_qty', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('use_config_min_qty', Types::SMALLINT, unsigned: true, default: 1))
+            ->addColumn(Schema::column('is_qty_decimal', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('backorders', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('use_config_backorders', Types::SMALLINT, unsigned: true, default: 1))
+            ->addColumn(Schema::column('min_sale_qty', Types::DECIMAL, precision: 12, scale: 4, default: '1.0000'))
+            ->addColumn(Schema::column('use_config_min_sale_qty', Types::SMALLINT, unsigned: true, default: 1))
+            ->addColumn(Schema::column('max_sale_qty', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('use_config_max_sale_qty', Types::SMALLINT, unsigned: true, default: 1))
+            ->addColumn(Schema::column('is_in_stock', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('low_stock_date', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('notify_stock_qty', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('use_config_notify_stock_qty', Types::SMALLINT, unsigned: true, default: 1))
+            ->addColumn(Schema::column('manage_stock', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('use_config_manage_stock', Types::SMALLINT, unsigned: true, default: 1))
+            ->addColumn(Schema::column('stock_status_changed_auto', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('use_config_qty_increments', Types::SMALLINT, unsigned: true, default: 1))
+            ->addColumn(Schema::column('qty_increments', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('use_config_enable_qty_inc', Types::SMALLINT, unsigned: true, default: 1))
+            ->addColumn(Schema::column('enable_qty_increments', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('is_decimal_divided', Types::SMALLINT, unsigned: true, default: 0))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('item_id')->create())
             ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('product_id', 'stock_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('product_id'))
@@ -280,43 +87,11 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('cataloginventory_stock_status')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('product_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('website_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('stock_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('qty')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('stock_status')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('product_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('website_id', Types::SMALLINT, unsigned: true))
+            ->addColumn(Schema::column('stock_id', Types::SMALLINT, unsigned: true))
+            ->addColumn(Schema::column('qty', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('stock_status', Types::SMALLINT, unsigned: true))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('product_id', 'website_id', 'stock_id')
@@ -359,43 +134,11 @@ return function (SchemaEditor $schema): void {
         $schema->addTable(
             Table::editor()
                 ->setUnquotedName($tableName)
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('product_id')
-                        ->setTypeName(Types::INTEGER)
-                        ->setUnsigned(true)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('website_id')
-                        ->setTypeName(Types::SMALLINT)
-                        ->setUnsigned(true)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('stock_id')
-                        ->setTypeName(Types::SMALLINT)
-                        ->setUnsigned(true)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('qty')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setDefaultValue('0.0000')
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('stock_status')
-                        ->setTypeName(Types::SMALLINT)
-                        ->setUnsigned(true)
-                        ->create(),
-                )
+                ->addColumn(Schema::column('product_id', Types::INTEGER, unsigned: true))
+                ->addColumn(Schema::column('website_id', Types::SMALLINT, unsigned: true))
+                ->addColumn(Schema::column('stock_id', Types::SMALLINT, unsigned: true))
+                ->addColumn(Schema::column('qty', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+                ->addColumn(Schema::column('stock_status', Types::SMALLINT, unsigned: true))
                 ->addPrimaryKeyConstraint(
                     PrimaryKeyConstraint::editor()
                         ->setUnquotedColumnNames('product_id', 'website_id', 'stock_id')

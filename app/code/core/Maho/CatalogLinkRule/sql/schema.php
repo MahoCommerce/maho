@@ -16,115 +16,26 @@ use Doctrine\DBAL\Schema\SchemaEditor;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Schema\TableEditor;
 use Doctrine\DBAL\Types\Types;
+use Maho\Db\Schema;
 
 return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('catalog_product_link_rule')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('rule_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('name')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('description')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('link_type_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_active')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('priority')
-                    ->setTypeName(Types::INTEGER)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('sort_order')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(50)
-                    ->setDefaultValue('random')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('max_links')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('from_date')
-                    ->setTypeName(Types::DATE_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('to_date')
-                    ->setTypeName(Types::DATE_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('source_conditions_serialized')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('target_conditions_serialized')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('updated_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
+            ->addColumn(Schema::column('rule_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('name', Types::STRING, length: 255))
+            ->addColumn(Schema::column('description', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('link_type_id', Types::SMALLINT, unsigned: true))
+            ->addColumn(Schema::column('is_active', Types::SMALLINT, default: 0))
+            ->addColumn(Schema::column('priority', Types::INTEGER, default: 0))
+            ->addColumn(Schema::column('sort_order', Types::STRING, length: 50, default: 'random'))
+            ->addColumn(Schema::column('max_links', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('from_date', Types::DATE_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('to_date', Types::DATE_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('source_conditions_serialized', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('target_conditions_serialized', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('updated_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rule_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('is_active', 'priority', 'link_type_id'))
             ->setComment('Catalog Product Link Rules')
@@ -135,16 +46,7 @@ return function (SchemaEditor $schema): void {
     // leaving manually assigned links untouched (NULL = manually assigned). Owned
     // here rather than in Mage_Catalog because it only exists for this module.
     $schema->modifyTableByUnquotedName('catalog_product_link', static function (TableEditor $productLink): void {
-        $productLink->addColumn(
-            Column::editor()
-                ->setUnquotedName('rule_id')
-                ->setTypeName(Types::INTEGER)
-                ->setUnsigned(true)
-                ->setNotNull(false)
-                ->setDefaultValue(null)
-                ->setComment('Catalog link rule that generated this link (NULL = manually assigned)')
-                ->create(),
-        );
+        $productLink->addColumn(Schema::column('rule_id', Types::INTEGER, unsigned: true, notNull: false, default: null, comment: 'Catalog link rule that generated this link (NULL = manually assigned)'));
         $productLink->addIndex(Index::editor()->setUnquotedColumnNames('rule_id'));
     });
 };

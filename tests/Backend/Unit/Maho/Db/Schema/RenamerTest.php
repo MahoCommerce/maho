@@ -17,6 +17,7 @@ use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
+use Maho\Db\Schema as MahoSchema;
 use Maho\Db\Schema\Renamer;
 use Maho\Db\Schema\UnsupportedMigrationException;
 
@@ -82,7 +83,7 @@ it('records nothing until asked', function () {
 });
 
 it('records a former table name and a former column name in one option', function () {
-    $options = Renamer::renamed(from: 'sales_order', columns: ['customer_email' => 'customer_mail']);
+    $options = MahoSchema::renamed(from: 'sales_order', columns: ['customer_email' => 'customer_mail']);
 
     expect($options)->toBe([Renamer::OPTION => [
         'table' => ['sales_order'],
@@ -95,7 +96,7 @@ it('records a former table name and a former column name in one option', functio
 });
 
 it('keeps a rename chain newest-first and ignores a repeated name', function () {
-    $table = renamerTable('c', Renamer::renamed(
+    $table = renamerTable('c', MahoSchema::renamed(
         from: ['b', 'a', 'b'],
         columns: ['customer_email' => ['second', 'first', 'second']],
     ));
@@ -105,7 +106,7 @@ it('keeps a rename chain newest-first and ignores a repeated name', function () 
 });
 
 it('prefixes recorded table names but never column names', function () {
-    $options = Renamer::renamed(from: 'sales_order', columns: ['customer_email' => 'customer_mail']);
+    $options = MahoSchema::renamed(from: 'sales_order', columns: ['customer_email' => 'customer_mail']);
 
     $table = renamerTable('sales_flat_order', Renamer::applyPrefix($options, 'pfx_'));
 
@@ -114,7 +115,7 @@ it('prefixes recorded table names but never column names', function () {
 });
 
 it('leaves the history alone when no prefix is configured', function () {
-    $options = Renamer::renamed(from: 'old');
+    $options = MahoSchema::renamed(from: 'old');
 
     expect(Renamer::applyPrefix($options, ''))->toBe($options);
 });
@@ -126,7 +127,7 @@ it('leaves options without a history alone', function () {
 it('survives the rebuild Collector uses to apply the table prefix', function () {
     $table = renamerTable(
         'sales_flat_order',
-        Renamer::renamed(from: 'sales_order', columns: ['customer_email' => 'customer_mail']),
+        MahoSchema::renamed(from: 'sales_order', columns: ['customer_email' => 'customer_mail']),
     );
 
     // Mirrors Collector::finalizeTable().
@@ -140,13 +141,13 @@ it('refuses a hand-written history that is not the shape renamed() writes', func
     $table = renamerTable('t', [Renamer::OPTION => ['table' => 'old']]);
 
     expect(fn() => Renamer::previousTableNames($table))
-        ->toThrow(UnsupportedMigrationException::class, 'Renamer::renamed()');
+        ->toThrow(UnsupportedMigrationException::class, 'MahoSchema::renamed()');
 });
 
 it('never reaches the DDL of any supported platform', function () {
     $table = renamerTable(
         'sales_flat_order',
-        Renamer::renamed(from: 'sales_order', columns: ['customer_email' => 'customer_mail']),
+        MahoSchema::renamed(from: 'sales_order', columns: ['customer_email' => 'customer_mail']),
     );
 
     foreach ([new MySQLPlatform(), new PostgreSQLPlatform(), new SQLitePlatform()] as $platform) {
@@ -163,7 +164,7 @@ it('never reaches the DDL of any supported platform', function () {
 it('accepts a history that names nothing declared', function () {
     $schema = renamerSchema(renamerTable(
         'sales_flat_order',
-        Renamer::renamed(from: 'sales_order', columns: ['customer_email' => 'customer_mail']),
+        MahoSchema::renamed(from: 'sales_order', columns: ['customer_email' => 'customer_mail']),
     ));
 
     Renamer::validate($schema);
@@ -174,7 +175,7 @@ it('accepts a history that names nothing declared', function () {
 it('refuses a table alias that names another declared table', function () {
     $schema = renamerSchema(
         renamerTable('sales_order'),
-        renamerTable('sales_flat_order', Renamer::renamed(from: 'sales_order')),
+        renamerTable('sales_flat_order', MahoSchema::renamed(from: 'sales_order')),
     );
 
     expect(fn() => Renamer::validate($schema))
@@ -183,8 +184,8 @@ it('refuses a table alias that names another declared table', function () {
 
 it('refuses two tables that claim the same alias', function () {
     $schema = renamerSchema(
-        renamerTable('a', Renamer::renamed(from: 'shared_old')),
-        renamerTable('b', Renamer::renamed(from: 'shared_old')),
+        renamerTable('a', MahoSchema::renamed(from: 'shared_old')),
+        renamerTable('b', MahoSchema::renamed(from: 'shared_old')),
     );
 
     expect(fn() => Renamer::validate($schema))
@@ -192,14 +193,14 @@ it('refuses two tables that claim the same alias', function () {
 });
 
 it('refuses a column history that names an undeclared column', function () {
-    $schema = renamerSchema(renamerTable('t', Renamer::renamed(columns: ['no_such_column' => 'old'])));
+    $schema = renamerSchema(renamerTable('t', MahoSchema::renamed(columns: ['no_such_column' => 'old'])));
 
     expect(fn() => Renamer::validate($schema))
         ->toThrow(UnsupportedMigrationException::class, 'the table declares no such column');
 });
 
 it('refuses a column alias that names another declared column', function () {
-    $schema = renamerSchema(renamerTable('t', Renamer::renamed(columns: ['customer_email' => 'entity_id'])));
+    $schema = renamerSchema(renamerTable('t', MahoSchema::renamed(columns: ['customer_email' => 'entity_id'])));
 
     expect(fn() => Renamer::validate($schema))
         ->toThrow(UnsupportedMigrationException::class, 'is itself a declared column');
@@ -208,7 +209,7 @@ it('refuses a column alias that names another declared column', function () {
 it('refuses two columns of one table that claim the same alias', function () {
     $schema = renamerSchema(renamerTable(
         't',
-        Renamer::renamed(columns: ['customer_email' => 'shared_old', 'other' => 'shared_old']),
+        MahoSchema::renamed(columns: ['customer_email' => 'shared_old', 'other' => 'shared_old']),
         'other',
     ));
 
@@ -219,7 +220,7 @@ it('refuses two columns of one table that claim the same alias', function () {
 // --- planTableRenames() --------------------------------------------------
 
 it('renames a table when only the former name exists', function () {
-    $schema = renamerSchema(renamerTable('sales_flat_order', Renamer::renamed(from: 'sales_order')));
+    $schema = renamerSchema(renamerTable('sales_flat_order', MahoSchema::renamed(from: 'sales_order')));
 
     $result = Renamer::planTableRenames(new MySQLPlatform(), $schema, renamerLive(['sales_order']));
 
@@ -228,7 +229,7 @@ it('renames a table when only the former name exists', function () {
 });
 
 it('emits the same rename form on every supported platform', function () {
-    $schema = renamerSchema(renamerTable('new_name', Renamer::renamed(from: 'old_name')));
+    $schema = renamerSchema(renamerTable('new_name', MahoSchema::renamed(from: 'old_name')));
 
     foreach ([new MySQLPlatform(), new PostgreSQLPlatform(), new SQLitePlatform()] as $platform) {
         $result = Renamer::planTableRenames($platform, $schema, renamerLive(['old_name']));
@@ -240,7 +241,7 @@ it('emits the same rename form on every supported platform', function () {
 });
 
 it('skips a table rename that already ran', function () {
-    $schema = renamerSchema(renamerTable('sales_flat_order', Renamer::renamed(from: 'sales_order')));
+    $schema = renamerSchema(renamerTable('sales_flat_order', MahoSchema::renamed(from: 'sales_order')));
 
     $result = Renamer::planTableRenames(new MySQLPlatform(), $schema, renamerLive(['sales_flat_order']));
 
@@ -249,13 +250,13 @@ it('skips a table rename that already ran', function () {
 });
 
 it('skips a table rename when neither name exists', function () {
-    $schema = renamerSchema(renamerTable('sales_flat_order', Renamer::renamed(from: 'sales_order')));
+    $schema = renamerSchema(renamerTable('sales_flat_order', MahoSchema::renamed(from: 'sales_order')));
 
     expect(Renamer::planTableRenames(new MySQLPlatform(), $schema, renamerLive([]))['sql'])->toBe([]);
 });
 
 it('refuses a table rename when both names exist', function () {
-    $schema = renamerSchema(renamerTable('sales_flat_order', Renamer::renamed(from: 'sales_order')));
+    $schema = renamerSchema(renamerTable('sales_flat_order', MahoSchema::renamed(from: 'sales_order')));
 
     expect(fn() => Renamer::planTableRenames(
         new MySQLPlatform(),
@@ -265,14 +266,14 @@ it('refuses a table rename when both names exist', function () {
 });
 
 it('refuses a table rename when two former names exist', function () {
-    $schema = renamerSchema(renamerTable('c', Renamer::renamed(from: ['b', 'a'])));
+    $schema = renamerSchema(renamerTable('c', MahoSchema::renamed(from: ['b', 'a'])));
 
     expect(fn() => Renamer::planTableRenames(new MySQLPlatform(), $schema, renamerLive(['a', 'b'])))
         ->toThrow(UnsupportedMigrationException::class, 'all exist');
 });
 
 it('matches a former table name case-insensitively but renames the live spelling', function () {
-    $schema = renamerSchema(renamerTable('sales_flat_order', Renamer::renamed(from: 'sales_order')));
+    $schema = renamerSchema(renamerTable('sales_flat_order', MahoSchema::renamed(from: 'sales_order')));
 
     $result = Renamer::planTableRenames(new MySQLPlatform(), $schema, renamerLive(['Sales_Order']));
 
@@ -281,7 +282,7 @@ it('matches a former table name case-insensitively but renames the live spelling
 });
 
 it('refuses a table rename when the live destination differs only in case', function () {
-    $schema = renamerSchema(renamerTable('sales_flat_order', Renamer::renamed(from: 'sales_order')));
+    $schema = renamerSchema(renamerTable('sales_flat_order', MahoSchema::renamed(from: 'sales_order')));
 
     expect(fn() => Renamer::planTableRenames(
         new MySQLPlatform(),
@@ -291,7 +292,7 @@ it('refuses a table rename when the live destination differs only in case', func
 });
 
 it('follows a rename chain to whichever former name survived', function () {
-    $schema = renamerSchema(renamerTable('c', Renamer::renamed(from: ['b', 'a'])));
+    $schema = renamerSchema(renamerTable('c', MahoSchema::renamed(from: ['b', 'a'])));
 
     $result = Renamer::planTableRenames(new MySQLPlatform(), $schema, renamerLive(['a']));
 
@@ -366,7 +367,7 @@ function renamerLiveTable(string $oldColumnName): Table
 }
 
 it('renames a live column and moves the primary key and index with it', function () {
-    $target = renamerTable('sales_flat_order', Renamer::renamed(columns: ['customer_email' => 'customer_mail']));
+    $target = renamerTable('sales_flat_order', MahoSchema::renamed(columns: ['customer_email' => 'customer_mail']));
 
     $result = Renamer::renameLiveColumns(new MySQLPlatform(), renamerLiveTable('customer_mail'), $target);
 
@@ -398,7 +399,7 @@ it('moves a foreign key with the renamed column', function () {
                 ->setUnsigned(true)
                 ->create(),
         )
-        ->setOptions(Renamer::renamed(columns: ['store_id' => 'old_store_id']))
+        ->setOptions(MahoSchema::renamed(columns: ['store_id' => 'old_store_id']))
         ->create();
 
     $result = Renamer::renameLiveColumns(new MySQLPlatform(), $live, $target);
@@ -408,7 +409,7 @@ it('moves a foreign key with the renamed column', function () {
 });
 
 it('emits the same column rename form on every supported platform', function () {
-    $target = renamerTable('sales_flat_order', Renamer::renamed(columns: ['customer_email' => 'customer_mail']));
+    $target = renamerTable('sales_flat_order', MahoSchema::renamed(columns: ['customer_email' => 'customer_mail']));
 
     foreach ([new MySQLPlatform(), new PostgreSQLPlatform(), new SQLitePlatform()] as $platform) {
         $result = Renamer::renameLiveColumns($platform, renamerLiveTable('customer_mail'), $target);
@@ -420,7 +421,7 @@ it('emits the same column rename form on every supported platform', function () 
 });
 
 it('skips a column rename that already ran', function () {
-    $target = renamerTable('sales_flat_order', Renamer::renamed(columns: ['customer_email' => 'customer_mail']));
+    $target = renamerTable('sales_flat_order', MahoSchema::renamed(columns: ['customer_email' => 'customer_mail']));
 
     $result = Renamer::renameLiveColumns(new MySQLPlatform(), renamerLiveTable('customer_email'), $target);
 
@@ -429,7 +430,7 @@ it('skips a column rename that already ran', function () {
 });
 
 it('skips a column rename when neither name exists', function () {
-    $target = renamerTable('sales_flat_order', Renamer::renamed(columns: ['customer_email' => 'customer_mail']));
+    $target = renamerTable('sales_flat_order', MahoSchema::renamed(columns: ['customer_email' => 'customer_mail']));
 
     $live = Table::editor()
         ->setUnquotedName('sales_flat_order')
@@ -446,7 +447,7 @@ it('skips a column rename when neither name exists', function () {
 });
 
 it('refuses a column rename when both columns exist', function () {
-    $target = renamerTable('sales_flat_order', Renamer::renamed(columns: ['customer_email' => 'customer_mail']));
+    $target = renamerTable('sales_flat_order', MahoSchema::renamed(columns: ['customer_email' => 'customer_mail']));
 
     $live = renamerLiveTable('customer_mail')->edit()
         ->addColumn(

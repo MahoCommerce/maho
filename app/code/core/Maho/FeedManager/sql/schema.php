@@ -18,78 +18,21 @@ use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\SchemaEditor;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
+use Maho\Db\Schema;
 
 return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('feedmanager_destination')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('destination_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('name')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('type')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(50)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('config')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_enabled')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(1)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('last_upload_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('last_upload_status')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(20)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('updated_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
+            ->addColumn(Schema::column('destination_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('name', Types::STRING, length: 255))
+            ->addColumn(Schema::column('type', Types::STRING, length: 50))
+            ->addColumn(Schema::column('config', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('is_enabled', Types::SMALLINT, unsigned: true, default: 1))
+            ->addColumn(Schema::column('last_upload_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('last_upload_status', Types::STRING, length: 20, notNull: false))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('updated_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('destination_id')
@@ -104,403 +47,55 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('feedmanager_feed')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('feed_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('name')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('platform')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(50)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_enabled')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(1)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('filename')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('file_format')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(10)
-                    ->setDefaultValue('xml')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('generation_time')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(8)
-                    ->setDefaultValue('03:00:00')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('configurable_mode')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(20)
-                    ->setDefaultValue('children_only')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('destination_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('auto_upload')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('schedule')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(50)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('product_filters')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('conditions_serialized')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(1048576)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('exclude_disabled')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(1)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('exclude_out_of_stock')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(1)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('include_product_types')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->setDefaultValue('simple')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('condition_groups')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(1048576)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('xml_header')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('xml_item_template')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('xml_footer')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('xml_item_tag')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(50)
-                    ->setNotNull(false)
-                    ->setDefaultValue('item')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('xml_structure')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('csv_columns')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('csv_delimiter')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(5)
-                    ->setNotNull(false)
-                    ->setDefaultValue(',')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('csv_enclosure')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(5)
-                    ->setNotNull(false)
-                    ->setDefaultValue('"')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('csv_include_header')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->setDefaultValue(1)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('json_structure')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('json_root_key')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(50)
-                    ->setNotNull(false)
-                    ->setDefaultValue('products')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('format_preset')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->setNotNull(false)
-                    ->setDefaultValue('english')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('price_currency')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(10)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('price_decimals')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->setDefaultValue(2)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('price_decimal_point')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(5)
-                    ->setNotNull(false)
-                    ->setDefaultValue('.')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('price_thousands_sep')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(5)
-                    ->setNotNull(false)
-                    ->setDefaultValue('')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('price_currency_suffix')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(1)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('tax_mode')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(10)
-                    ->setNotNull(false)
-                    ->setDefaultValue('incl')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('use_parent_value')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->setDefaultValue(1)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('exclude_category_url')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->setDefaultValue(1)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('no_image_url')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(500)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('gzip_compression')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('notification_mode')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(20)
-                    ->setDefaultValue('none')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('notification_frequency')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(20)
-                    ->setDefaultValue('once_until_success')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('notification_email')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('notification_sent')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('last_generated_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('last_product_count')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('last_file_size')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('updated_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
+            ->addColumn(Schema::column('feed_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('name', Types::STRING, length: 255))
+            ->addColumn(Schema::column('platform', Types::STRING, length: 50))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true))
+            ->addColumn(Schema::column('is_enabled', Types::SMALLINT, unsigned: true, default: 1))
+            ->addColumn(Schema::column('filename', Types::STRING, length: 255))
+            ->addColumn(Schema::column('file_format', Types::STRING, length: 10, default: 'xml'))
+            ->addColumn(Schema::column('generation_time', Types::STRING, length: 8, default: '03:00:00'))
+            ->addColumn(Schema::column('configurable_mode', Types::STRING, length: 20, default: 'children_only'))
+            ->addColumn(Schema::column('destination_id', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('auto_upload', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('schedule', Types::STRING, length: 50, notNull: false))
+            ->addColumn(Schema::column('product_filters', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('conditions_serialized', Types::TEXT, length: 1048576, notNull: false))
+            ->addColumn(Schema::column('exclude_disabled', Types::SMALLINT, unsigned: true, default: 1))
+            ->addColumn(Schema::column('exclude_out_of_stock', Types::SMALLINT, unsigned: true, default: 1))
+            ->addColumn(Schema::column('include_product_types', Types::STRING, length: 255, notNull: false, default: 'simple'))
+            ->addColumn(Schema::column('condition_groups', Types::TEXT, length: 1048576, notNull: false))
+            ->addColumn(Schema::column('xml_header', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('xml_item_template', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('xml_footer', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('xml_item_tag', Types::STRING, length: 50, notNull: false, default: 'item'))
+            ->addColumn(Schema::column('xml_structure', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('csv_columns', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('csv_delimiter', Types::STRING, length: 5, notNull: false, default: ','))
+            ->addColumn(Schema::column('csv_enclosure', Types::STRING, length: 5, notNull: false, default: '"'))
+            ->addColumn(Schema::column('csv_include_header', Types::SMALLINT, unsigned: true, notNull: false, default: 1))
+            ->addColumn(Schema::column('json_structure', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('json_root_key', Types::STRING, length: 50, notNull: false, default: 'products'))
+            ->addColumn(Schema::column('format_preset', Types::STRING, length: 32, notNull: false, default: 'english'))
+            ->addColumn(Schema::column('price_currency', Types::STRING, length: 10, notNull: false))
+            ->addColumn(Schema::column('price_decimals', Types::SMALLINT, unsigned: true, notNull: false, default: 2))
+            ->addColumn(Schema::column('price_decimal_point', Types::STRING, length: 5, notNull: false, default: '.'))
+            ->addColumn(Schema::column('price_thousands_sep', Types::STRING, length: 5, notNull: false, default: ''))
+            ->addColumn(Schema::column('price_currency_suffix', Types::SMALLINT, unsigned: true, default: 1))
+            ->addColumn(Schema::column('tax_mode', Types::STRING, length: 10, notNull: false, default: 'incl'))
+            ->addColumn(Schema::column('use_parent_value', Types::SMALLINT, unsigned: true, notNull: false, default: 1))
+            ->addColumn(Schema::column('exclude_category_url', Types::SMALLINT, unsigned: true, notNull: false, default: 1))
+            ->addColumn(Schema::column('no_image_url', Types::STRING, length: 500, notNull: false))
+            ->addColumn(Schema::column('gzip_compression', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('notification_mode', Types::STRING, length: 20, default: 'none'))
+            ->addColumn(Schema::column('notification_frequency', Types::STRING, length: 20, default: 'once_until_success'))
+            ->addColumn(Schema::column('notification_email', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('notification_sent', Types::SMALLINT, default: 0))
+            ->addColumn(Schema::column('last_generated_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('last_product_count', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('last_file_size', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('updated_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('feed_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('platform'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('is_enabled'))
@@ -529,65 +124,14 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('feedmanager_attribute_mapping')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('mapping_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('feed_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('platform_attribute')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(100)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('source_type')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(20)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('source_value')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('conditions')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('transformers')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('sort_order')
-                    ->setTypeName(Types::INTEGER)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('mapping_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('feed_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('platform_attribute', Types::STRING, length: 100))
+            ->addColumn(Schema::column('source_type', Types::STRING, length: 20))
+            ->addColumn(Schema::column('source_value', Types::TEXT, length: 65535))
+            ->addColumn(Schema::column('conditions', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('transformers', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('sort_order', Types::INTEGER, default: 0))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('mapping_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('feed_id', 'platform_attribute'))
             ->addForeignKeyConstraint(
@@ -605,42 +149,11 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('feedmanager_category_mapping')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('mapping_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('platform')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(50)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('category_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('platform_category_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(100)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('platform_category_path')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(500)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('mapping_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('platform', Types::STRING, length: 50))
+            ->addColumn(Schema::column('category_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('platform_category_id', Types::STRING, length: 100))
+            ->addColumn(Schema::column('platform_category_path', Types::STRING, length: 500))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('mapping_id')->create())
             ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('platform', 'category_id'))
             ->addForeignKeyConstraint(
@@ -658,113 +171,20 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('feedmanager_log')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('log_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('feed_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('started_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('completed_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('status')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(20)
-                    ->setDefaultValue('running')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('product_count')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('error_count')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('errors')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('file_path')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('file_size')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('upload_status')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(20)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('uploaded_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('upload_message')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(500)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('destination_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('log_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('feed_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('started_at', Types::DATETIME_MUTABLE))
+            ->addColumn(Schema::column('completed_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('status', Types::STRING, length: 20, default: 'running'))
+            ->addColumn(Schema::column('product_count', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('error_count', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('errors', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('file_path', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('file_size', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('upload_status', Types::STRING, length: 20, notNull: false))
+            ->addColumn(Schema::column('uploaded_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('upload_message', Types::STRING, length: 500, notNull: false))
+            ->addColumn(Schema::column('destination_id', Types::INTEGER, unsigned: true, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('log_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('feed_id', 'started_at'))
             ->addForeignKeyConstraint(
@@ -782,82 +202,16 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('feedmanager_dynamic_rule')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('rule_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('name')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(100)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('description')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_system')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_enabled')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(1)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('cases')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(16777215)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('sort_order')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('updated_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
+            ->addColumn(Schema::column('rule_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('name', Types::STRING, length: 255))
+            ->addColumn(Schema::column('code', Types::STRING, length: 100))
+            ->addColumn(Schema::column('description', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('is_system', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('is_enabled', Types::SMALLINT, unsigned: true, default: 1))
+            ->addColumn(Schema::column('cases', Types::TEXT, length: 16777215, notNull: false))
+            ->addColumn(Schema::column('sort_order', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('updated_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rule_id')->create())
             ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('code'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('is_enabled', 'sort_order'))

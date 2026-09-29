@@ -19,81 +19,22 @@ use Doctrine\DBAL\Schema\SchemaEditor;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Schema\TableEditor;
 use Doctrine\DBAL\Types\Types;
+use Maho\Db\Schema;
 
 return function (SchemaEditor $schema): void {
     // catalog_product_entity (alias catalog/product) — root product EAV table.
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('catalog_product_entity')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_type_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('attribute_set_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('type_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->setDefaultValue('simple')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('sku')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(64)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('has_options')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('required_options')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('updated_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('entity_type_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('attribute_set_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('type_id', Types::STRING, length: 32, default: 'simple'))
+            ->addColumn(Schema::column('sku', Types::STRING, length: 64, notNull: false))
+            ->addColumn(Schema::column('has_options', Types::SMALLINT, default: 0))
+            ->addColumn(Schema::column('required_options', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('updated_at', Types::DATETIME_MUTABLE, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('entity_type_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('attribute_set_id'))
@@ -124,55 +65,31 @@ return function (SchemaEditor $schema): void {
     // entity_type_id is SMALLINT for datetime/decimal/gallery but INTEGER for int/text/varchar (a historical inconsistency, preserved).
     $productValueTables = [
         'catalog_product_entity_datetime' => [
-            'value' => Column::editor()
-                ->setUnquotedName('value')
-                ->setTypeName(Types::DATETIME_MUTABLE)
-                ->setNotNull(false)
-                ->create(),
+            'value' => Schema::column('value', Types::DATETIME_MUTABLE, notNull: false),
             'entityTypeIdType' => Types::SMALLINT,
             'hasValueIndex' => false,
             'comment' => 'Catalog Product Datetime Attribute Backend Table',
         ],
         'catalog_product_entity_decimal' => [
-            'value' => Column::editor()
-                ->setUnquotedName('value')
-                ->setTypeName(Types::DECIMAL)
-                ->setPrecision(12)
-                ->setScale(4)
-                ->setNotNull(false)
-                ->create(),
+            'value' => Schema::column('value', Types::DECIMAL, precision: 12, scale: 4, notNull: false),
             'entityTypeIdType' => Types::SMALLINT,
             'hasValueIndex' => false,
             'comment' => 'Catalog Product Decimal Attribute Backend Table',
         ],
         'catalog_product_entity_int' => [
-            'value' => Column::editor()
-                ->setUnquotedName('value')
-                ->setTypeName(Types::INTEGER)
-                ->setNotNull(false)
-                ->create(),
+            'value' => Schema::column('value', Types::INTEGER, notNull: false),
             'entityTypeIdType' => Types::INTEGER,
             'hasValueIndex' => false,
             'comment' => 'Catalog Product Integer Attribute Backend Table',
         ],
         'catalog_product_entity_text' => [
-            'value' => Column::editor()
-                ->setUnquotedName('value')
-                ->setTypeName(Types::TEXT)
-                ->setLength(65535)
-                ->setNotNull(false)
-                ->create(),
+            'value' => Schema::column('value', Types::TEXT, length: 65535, notNull: false),
             'entityTypeIdType' => Types::INTEGER,
             'hasValueIndex' => false,
             'comment' => 'Catalog Product Text Attribute Backend Table',
         ],
         'catalog_product_entity_varchar' => [
-            'value' => Column::editor()
-                ->setUnquotedName('value')
-                ->setTypeName(Types::STRING)
-                ->setLength(255)
-                ->setNotNull(false)
-                ->create(),
+            'value' => Schema::column('value', Types::STRING, length: 255, notNull: false),
             'entityTypeIdType' => Types::INTEGER,
             'hasValueIndex' => false,
             'comment' => 'Catalog Product Varchar Attribute Backend Table',
@@ -182,45 +99,11 @@ return function (SchemaEditor $schema): void {
         $schema->addTable(
             Table::editor()
                 ->setUnquotedName($tableName)
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('value_id')
-                        ->setTypeName(Types::INTEGER)
-                        ->setAutoincrement(true)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('entity_type_id')
-                        ->setTypeName($spec['entityTypeIdType'])
-                        ->setUnsigned(true)
-                        ->setDefaultValue(0)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('attribute_id')
-                        ->setTypeName(Types::SMALLINT)
-                        ->setUnsigned(true)
-                        ->setDefaultValue(0)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('store_id')
-                        ->setTypeName(Types::SMALLINT)
-                        ->setUnsigned(true)
-                        ->setDefaultValue(0)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('entity_id')
-                        ->setTypeName(Types::INTEGER)
-                        ->setUnsigned(true)
-                        ->setDefaultValue(0)
-                        ->create(),
-                )
+                ->addColumn(Schema::column('value_id', Types::INTEGER, autoincrement: true))
+                ->addColumn(Schema::column('entity_type_id', $spec['entityTypeIdType'], unsigned: true, default: 0))
+                ->addColumn(Schema::column('attribute_id', Types::SMALLINT, unsigned: true, default: 0))
+                ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
+                ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true, default: 0))
                 ->addColumn($spec['value'])
                 ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('value_id')->create())
                 ->addIndex(
@@ -267,60 +150,13 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('catalog_product_entity_gallery')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('value_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_type_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('attribute_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('position')
-                    ->setTypeName(Types::INTEGER)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('value')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('value_id', Types::INTEGER, autoincrement: true))
+            ->addColumn(Schema::column('entity_type_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('attribute_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('position', Types::INTEGER, default: 0))
+            ->addColumn(Schema::column('value', Types::STRING, length: 255, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('value_id')->create())
             ->addIndex(
                 Index::editor()
@@ -365,78 +201,16 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('catalog_category_entity')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_type_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('attribute_set_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('parent_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('updated_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('path')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('position')
-                    ->setTypeName(Types::INTEGER)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('level')
-                    ->setTypeName(Types::INTEGER)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('children_count')
-                    ->setTypeName(Types::INTEGER)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('entity_type_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('attribute_set_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('parent_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('updated_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('path', Types::STRING, length: 255))
+            ->addColumn(Schema::column('position', Types::INTEGER))
+            ->addColumn(Schema::column('level', Types::INTEGER, default: 0))
+            ->addColumn(Schema::column('children_count', Types::INTEGER))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('level'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('path', 'entity_id'))
@@ -447,47 +221,23 @@ return function (SchemaEditor $schema): void {
     // Category value tables (datetime/decimal/int/text/varchar).
     $categoryValueTables = [
         'catalog_category_entity_datetime' => [
-            'value' => Column::editor()
-                ->setUnquotedName('value')
-                ->setTypeName(Types::DATETIME_MUTABLE)
-                ->setNotNull(false)
-                ->create(),
+            'value' => Schema::column('value', Types::DATETIME_MUTABLE, notNull: false),
             'comment' => 'Catalog Category Datetime Attribute Backend Table',
         ],
         'catalog_category_entity_decimal' => [
-            'value' => Column::editor()
-                ->setUnquotedName('value')
-                ->setTypeName(Types::DECIMAL)
-                ->setPrecision(12)
-                ->setScale(4)
-                ->setNotNull(false)
-                ->create(),
+            'value' => Schema::column('value', Types::DECIMAL, precision: 12, scale: 4, notNull: false),
             'comment' => 'Catalog Category Decimal Attribute Backend Table',
         ],
         'catalog_category_entity_int' => [
-            'value' => Column::editor()
-                ->setUnquotedName('value')
-                ->setTypeName(Types::INTEGER)
-                ->setNotNull(false)
-                ->create(),
+            'value' => Schema::column('value', Types::INTEGER, notNull: false),
             'comment' => 'Catalog Category Integer Attribute Backend Table',
         ],
         'catalog_category_entity_text' => [
-            'value' => Column::editor()
-                ->setUnquotedName('value')
-                ->setTypeName(Types::TEXT)
-                ->setLength(65535)
-                ->setNotNull(false)
-                ->create(),
+            'value' => Schema::column('value', Types::TEXT, length: 65535, notNull: false),
             'comment' => 'Catalog Category Text Attribute Backend Table',
         ],
         'catalog_category_entity_varchar' => [
-            'value' => Column::editor()
-                ->setUnquotedName('value')
-                ->setTypeName(Types::STRING)
-                ->setLength(255)
-                ->setNotNull(false)
-                ->create(),
+            'value' => Schema::column('value', Types::STRING, length: 255, notNull: false),
             'comment' => 'Catalog Category Varchar Attribute Backend Table',
         ],
     ];
@@ -495,45 +245,11 @@ return function (SchemaEditor $schema): void {
         $schema->addTable(
             Table::editor()
                 ->setUnquotedName($tableName)
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('value_id')
-                        ->setTypeName(Types::INTEGER)
-                        ->setAutoincrement(true)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('entity_type_id')
-                        ->setTypeName(Types::SMALLINT)
-                        ->setUnsigned(true)
-                        ->setDefaultValue(0)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('attribute_id')
-                        ->setTypeName(Types::SMALLINT)
-                        ->setUnsigned(true)
-                        ->setDefaultValue(0)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('store_id')
-                        ->setTypeName(Types::SMALLINT)
-                        ->setUnsigned(true)
-                        ->setDefaultValue(0)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('entity_id')
-                        ->setTypeName(Types::INTEGER)
-                        ->setUnsigned(true)
-                        ->setDefaultValue(0)
-                        ->create(),
-                )
+                ->addColumn(Schema::column('value_id', Types::INTEGER, autoincrement: true))
+                ->addColumn(Schema::column('entity_type_id', Types::SMALLINT, unsigned: true, default: 0))
+                ->addColumn(Schema::column('attribute_id', Types::SMALLINT, unsigned: true, default: 0))
+                ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
+                ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true, default: 0))
                 ->addColumn($spec['value'])
                 ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('value_id')->create())
                 ->addIndex(
@@ -580,29 +296,9 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('catalog_category_product')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('category_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('product_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('position')
-                    ->setTypeName(Types::INTEGER)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('category_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('product_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('position', Types::INTEGER, default: 0))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('category_id', 'product_id')
@@ -634,52 +330,12 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('catalog_category_product_index')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('category_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('product_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('position')
-                    ->setTypeName(Types::INTEGER)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_parent')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('visibility')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('category_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('product_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('position', Types::INTEGER, notNull: false))
+            ->addColumn(Schema::column('is_parent', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('visibility', Types::SMALLINT, unsigned: true))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('category_id', 'product_id', 'store_id')
@@ -725,46 +381,11 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('catalog_compare_item')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('catalog_compare_item_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('visitor_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('product_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('catalog_compare_item_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('visitor_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('customer_id', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('product_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, notNull: false))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('catalog_compare_item_id')
@@ -810,20 +431,8 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('catalog_product_website')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('product_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('website_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('product_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('website_id', Types::SMALLINT, unsigned: true))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('product_id', 'website_id')
@@ -856,30 +465,9 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('catalog_product_enabled_index')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('product_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('visibility')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('product_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('visibility', Types::SMALLINT, unsigned: true, default: 0))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('product_id', 'store_id')
@@ -912,23 +500,8 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('catalog_product_link_type')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('link_type_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->setNotNull(false)
-                    ->setDefaultValue(null)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('link_type_id', Types::SMALLINT, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('code', Types::STRING, length: 32, notNull: false, default: null))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('link_type_id')->create())
             ->setComment('Catalog Product Link Type Table')
             ->create(),
@@ -938,38 +511,10 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('catalog_product_link')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('link_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('product_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('linked_product_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('link_type_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('link_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('product_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('linked_product_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('link_type_id', Types::SMALLINT, unsigned: true, default: 0))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('link_id')->create())
             ->addIndex(
                 Index::editor()
@@ -1014,40 +559,10 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('catalog_product_link_attribute')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('product_link_attribute_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('link_type_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('product_link_attribute_code')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->setNotNull(false)
-                    ->setDefaultValue(null)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('data_type')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->setNotNull(false)
-                    ->setDefaultValue(null)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('product_link_attribute_id', Types::SMALLINT, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('link_type_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('product_link_attribute_code', Types::STRING, length: 32, notNull: false, default: null))
+            ->addColumn(Schema::column('data_type', Types::STRING, length: 32, notNull: false, default: null))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('product_link_attribute_id')
@@ -1071,38 +586,10 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('catalog_product_link_attribute_decimal')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('value_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('product_link_attribute_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('link_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('value')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
+            ->addColumn(Schema::column('value_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('product_link_attribute_id', Types::SMALLINT, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('link_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('value', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('value_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('product_link_attribute_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('link_id'))
@@ -1140,36 +627,10 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('catalog_product_link_attribute_int')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('value_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('product_link_attribute_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('link_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('value')
-                    ->setTypeName(Types::INTEGER)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('value_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('product_link_attribute_id', Types::SMALLINT, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('link_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('value', Types::INTEGER, default: 0))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('value_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('product_link_attribute_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('link_id'))
@@ -1181,37 +642,10 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('catalog_product_link_attribute_varchar')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('value_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('product_link_attribute_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('link_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('value')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('value_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('product_link_attribute_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('link_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('value', Types::STRING, length: 255, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('value_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('product_link_attribute_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('link_id'))
@@ -1247,38 +681,10 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('catalog_product_super_attribute')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('product_super_attribute_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('product_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('attribute_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('position')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('product_super_attribute_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('product_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('attribute_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('position', Types::SMALLINT, unsigned: true, default: 0))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('product_super_attribute_id')
@@ -1301,47 +707,11 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('catalog_product_super_attribute_label')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('value_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('product_super_attribute_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('use_default')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('value')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('value_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('product_super_attribute_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('use_default', Types::SMALLINT, unsigned: true, notNull: false, default: 0))
+            ->addColumn(Schema::column('value', Types::STRING, length: 255, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('value_id')->create())
             ->addIndex(
                 Index::editor()
@@ -1378,57 +748,12 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('catalog_product_super_attribute_pricing')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('value_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('product_super_attribute_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('value_index')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->setDefaultValue(null)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_percent')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('pricing_value')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('website_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('value_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('product_super_attribute_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('value_index', Types::STRING, length: 255, notNull: false, default: null))
+            ->addColumn(Schema::column('is_percent', Types::SMALLINT, unsigned: true, notNull: false, default: 0))
+            ->addColumn(Schema::column('pricing_value', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('website_id', Types::SMALLINT, unsigned: true, default: 0))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('value_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('product_super_attribute_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('website_id'))
@@ -1459,30 +784,9 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('catalog_product_super_link')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('link_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('product_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('parent_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('link_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('product_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('parent_id', Types::INTEGER, unsigned: true, default: 0))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('link_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('parent_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('product_id'))
@@ -1512,62 +816,13 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('catalog_product_entity_tier_price')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('value_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('all_groups')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(1)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_group_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('qty')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('1.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('value')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('website_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('value_id', Types::INTEGER, autoincrement: true))
+            ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('all_groups', Types::SMALLINT, unsigned: true, default: 1))
+            ->addColumn(Schema::column('customer_group_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('qty', Types::DECIMAL, precision: 12, scale: 4, default: '1.0000'))
+            ->addColumn(Schema::column('value', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('website_id', Types::SMALLINT, unsigned: true))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('value_id')->create())
             ->addIndex(
                 Index::editor()
@@ -1611,61 +866,13 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('catalog_product_entity_group_price')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('value_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('all_groups')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(1)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_group_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('value')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('website_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_percent')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('value_id', Types::INTEGER, autoincrement: true))
+            ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('all_groups', Types::SMALLINT, unsigned: true, default: 1))
+            ->addColumn(Schema::column('customer_group_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('value', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('website_id', Types::SMALLINT, unsigned: true))
+            ->addColumn(Schema::column('is_percent', Types::SMALLINT, unsigned: true, default: 0))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('value_id')->create())
             ->addIndex(
                 Index::editor()
@@ -1710,38 +917,10 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('catalog_product_entity_media_gallery')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('value_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('attribute_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('value')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('value_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('attribute_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('value', Types::STRING, length: 255, notNull: false))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('value_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('attribute_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('entity_id'))
@@ -1771,46 +950,11 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('catalog_product_entity_media_gallery_value')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('value_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('label')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('position')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('disabled')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('value_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('label', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('position', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('disabled', Types::SMALLINT, unsigned: true, default: 0))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('value_id', 'store_id')
@@ -1843,86 +987,16 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('catalog_product_option')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('option_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('product_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('type')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(50)
-                    ->setNotNull(false)
-                    ->setDefaultValue(null)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_require')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setDefaultValue(1)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('sku')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(64)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('max_characters')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('file_extension')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(50)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('image_size_x')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('image_size_y')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('sort_order')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('option_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('product_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('type', Types::STRING, length: 50, notNull: false, default: null))
+            ->addColumn(Schema::column('is_require', Types::SMALLINT, default: 1))
+            ->addColumn(Schema::column('sku', Types::STRING, length: 64, notNull: false))
+            ->addColumn(Schema::column('max_characters', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('file_extension', Types::STRING, length: 50, notNull: false))
+            ->addColumn(Schema::column('image_size_x', Types::SMALLINT, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('image_size_y', Types::SMALLINT, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('sort_order', Types::INTEGER, unsigned: true, default: 0))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('option_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('product_id'))
             ->addForeignKeyConstraint(
@@ -1942,47 +1016,11 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('catalog_product_option_price')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('option_price_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('option_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('price')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('price_type')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(7)
-                    ->setDefaultValue('fixed')
-                    ->create(),
-            )
+            ->addColumn(Schema::column('option_price_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('option_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('price', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('price_type', Types::STRING, length: 7, default: 'fixed'))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('option_price_id')
@@ -2017,39 +1055,10 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('catalog_product_option_title')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('option_title_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('option_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('title')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->setDefaultValue(null)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('option_title_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('option_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('title', Types::STRING, length: 255, notNull: false, default: null))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('option_title_id')
@@ -2084,38 +1093,10 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('catalog_product_option_type_value')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('option_type_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('option_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('sku')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(64)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('sort_order')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('option_type_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('option_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('sku', Types::STRING, length: 64, notNull: false))
+            ->addColumn(Schema::column('sort_order', Types::INTEGER, unsigned: true, default: 0))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('option_type_id')
@@ -2139,47 +1120,11 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('catalog_product_option_type_price')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('option_type_price_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('option_type_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('price')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setDefaultValue('0.0000')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('price_type')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(7)
-                    ->setDefaultValue('fixed')
-                    ->create(),
-            )
+            ->addColumn(Schema::column('option_type_price_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('option_type_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('price', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('price_type', Types::STRING, length: 7, default: 'fixed'))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('option_type_price_id')
@@ -2218,39 +1163,10 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('catalog_product_option_type_title')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('option_type_title_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('option_type_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('title')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->setDefaultValue(null)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('option_type_title_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('option_type_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('title', Types::STRING, length: 255, notNull: false, default: null))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('option_type_title_id')
@@ -2289,164 +1205,26 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('catalog_eav_attribute')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('attribute_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('frontend_input_renderer')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_global')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(1)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_visible')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(1)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_searchable')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_filterable')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_filterable_multiple')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_comparable')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_visible_on_front')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_html_allowed_on_front')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_used_for_price_rules')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_filterable_in_search')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('used_in_product_listing')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('used_for_sort_by')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_configurable')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(1)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('apply_to')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_visible_in_advanced_search')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('position')
-                    ->setTypeName(Types::INTEGER)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_wysiwyg_enabled')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_used_for_promo_rules')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('attribute_id', Types::SMALLINT, unsigned: true))
+            ->addColumn(Schema::column('frontend_input_renderer', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('is_global', Types::SMALLINT, unsigned: true, default: 1))
+            ->addColumn(Schema::column('is_visible', Types::SMALLINT, unsigned: true, default: 1))
+            ->addColumn(Schema::column('is_searchable', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('is_filterable', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('is_filterable_multiple', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('is_comparable', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('is_visible_on_front', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('is_html_allowed_on_front', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('is_used_for_price_rules', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('is_filterable_in_search', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('used_in_product_listing', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('used_for_sort_by', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('is_configurable', Types::SMALLINT, unsigned: true, default: 1))
+            ->addColumn(Schema::column('apply_to', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('is_visible_in_advanced_search', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('position', Types::INTEGER, default: 0))
+            ->addColumn(Schema::column('is_wysiwyg_enabled', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('is_used_for_promo_rules', Types::SMALLINT, unsigned: true, default: 0))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('attribute_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('used_for_sort_by'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('used_in_product_listing'))
@@ -2467,20 +1245,8 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('catalog_product_relation')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('parent_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('child_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('parent_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('child_id', Types::INTEGER, unsigned: true))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('parent_id', 'child_id')
@@ -2512,34 +1278,10 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('catalog_product_index_eav')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('attribute_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('value')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('attribute_id', Types::SMALLINT, unsigned: true))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true))
+            ->addColumn(Schema::column('value', Types::INTEGER, unsigned: true))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('entity_id', 'attribute_id', 'store_id', 'value')
@@ -2583,35 +1325,10 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('catalog_product_index_eav_decimal')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('attribute_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('value')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('attribute_id', Types::SMALLINT, unsigned: true))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true))
+            ->addColumn(Schema::column('value', Types::DECIMAL, precision: 12, scale: 4))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('entity_id', 'attribute_id', 'store_id')
@@ -2655,90 +1372,16 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('catalog_product_index_price')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_group_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('website_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('tax_class_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('price')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('final_price')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('min_price')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('max_price')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('tier_price')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('group_price')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('customer_group_id', Types::SMALLINT, unsigned: true))
+            ->addColumn(Schema::column('website_id', Types::SMALLINT, unsigned: true))
+            ->addColumn(Schema::column('tax_class_id', Types::SMALLINT, unsigned: true, notNull: false, default: 0))
+            ->addColumn(Schema::column('price', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('final_price', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('min_price', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('max_price', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('tier_price', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+            ->addColumn(Schema::column('group_price', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('entity_id', 'customer_group_id', 'website_id')
@@ -2783,36 +1426,10 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('catalog_product_index_tier_price')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_group_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('website_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('min_price')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('customer_group_id', Types::SMALLINT, unsigned: true))
+            ->addColumn(Schema::column('website_id', Types::SMALLINT, unsigned: true))
+            ->addColumn(Schema::column('min_price', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('entity_id', 'customer_group_id', 'website_id')
@@ -2854,36 +1471,10 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('catalog_product_index_group_price')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_group_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('website_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('price')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('customer_group_id', Types::SMALLINT, unsigned: true))
+            ->addColumn(Schema::column('website_id', Types::SMALLINT, unsigned: true))
+            ->addColumn(Schema::column('price', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('entity_id', 'customer_group_id', 'website_id')
@@ -2926,28 +1517,9 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('catalog_product_index_website')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('website_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('website_date')
-                    ->setTypeName(Types::DATE_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('rate')
-                    ->setTypeName(Types::SMALLFLOAT)
-                    ->setNotNull(false)
-                    ->setDefaultValue(1.0)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('website_id', Types::SMALLINT, unsigned: true))
+            ->addColumn(Schema::column('website_date', Types::DATE_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('rate', Types::SMALLFLOAT, notNull: false, default: 1.0))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('website_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('website_date'))
             ->addForeignKeyConstraint(
@@ -2968,61 +1540,13 @@ return function (SchemaEditor $schema): void {
         $schema->addTable(
             Table::editor()
                 ->setUnquotedName($tableName)
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('parent_id')
-                        ->setTypeName(Types::INTEGER)
-                        ->setUnsigned(true)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('child_id')
-                        ->setTypeName(Types::INTEGER)
-                        ->setUnsigned(true)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('customer_group_id')
-                        ->setTypeName(Types::SMALLINT)
-                        ->setUnsigned(true)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('website_id')
-                        ->setTypeName(Types::SMALLINT)
-                        ->setUnsigned(true)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('price')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setNotNull(false)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('tier_price')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setNotNull(false)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('group_price')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setNotNull(false)
-                        ->create(),
-                )
+                ->addColumn(Schema::column('parent_id', Types::INTEGER, unsigned: true))
+                ->addColumn(Schema::column('child_id', Types::INTEGER, unsigned: true))
+                ->addColumn(Schema::column('customer_group_id', Types::SMALLINT, unsigned: true))
+                ->addColumn(Schema::column('website_id', Types::SMALLINT, unsigned: true))
+                ->addColumn(Schema::column('price', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+                ->addColumn(Schema::column('tier_price', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+                ->addColumn(Schema::column('group_price', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
                 ->addPrimaryKeyConstraint(
                     PrimaryKeyConstraint::editor()
                         ->setUnquotedColumnNames('parent_id', 'child_id', 'customer_group_id', 'website_id')
@@ -3038,63 +1562,13 @@ return function (SchemaEditor $schema): void {
         $schema->addTable(
             Table::editor()
                 ->setUnquotedName($tableName)
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('entity_id')
-                        ->setTypeName(Types::INTEGER)
-                        ->setUnsigned(true)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('customer_group_id')
-                        ->setTypeName(Types::SMALLINT)
-                        ->setUnsigned(true)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('website_id')
-                        ->setTypeName(Types::SMALLINT)
-                        ->setUnsigned(true)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('min_price')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setNotNull(false)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('max_price')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setNotNull(false)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('tier_price')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setNotNull(false)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('group_price')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setNotNull(false)
-                        ->create(),
-                )
+                ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true))
+                ->addColumn(Schema::column('customer_group_id', Types::SMALLINT, unsigned: true))
+                ->addColumn(Schema::column('website_id', Types::SMALLINT, unsigned: true))
+                ->addColumn(Schema::column('min_price', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+                ->addColumn(Schema::column('max_price', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+                ->addColumn(Schema::column('tier_price', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+                ->addColumn(Schema::column('group_price', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
                 ->addPrimaryKeyConstraint(
                     PrimaryKeyConstraint::editor()
                         ->setUnquotedColumnNames('entity_id', 'customer_group_id', 'website_id')
@@ -3110,108 +1584,18 @@ return function (SchemaEditor $schema): void {
         $schema->addTable(
             Table::editor()
                 ->setUnquotedName($tableName)
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('entity_id')
-                        ->setTypeName(Types::INTEGER)
-                        ->setUnsigned(true)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('customer_group_id')
-                        ->setTypeName(Types::SMALLINT)
-                        ->setUnsigned(true)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('website_id')
-                        ->setTypeName(Types::SMALLINT)
-                        ->setUnsigned(true)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('tax_class_id')
-                        ->setTypeName(Types::SMALLINT)
-                        ->setUnsigned(true)
-                        ->setNotNull(false)
-                        ->setDefaultValue(0)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('orig_price')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setNotNull(false)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('price')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setNotNull(false)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('min_price')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setNotNull(false)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('max_price')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setNotNull(false)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('tier_price')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setNotNull(false)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('base_tier')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setNotNull(false)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('group_price')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setNotNull(false)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('base_group_price')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setNotNull(false)
-                        ->create(),
-                )
+                ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true))
+                ->addColumn(Schema::column('customer_group_id', Types::SMALLINT, unsigned: true))
+                ->addColumn(Schema::column('website_id', Types::SMALLINT, unsigned: true))
+                ->addColumn(Schema::column('tax_class_id', Types::SMALLINT, unsigned: true, notNull: false, default: 0))
+                ->addColumn(Schema::column('orig_price', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+                ->addColumn(Schema::column('price', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+                ->addColumn(Schema::column('min_price', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+                ->addColumn(Schema::column('max_price', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+                ->addColumn(Schema::column('tier_price', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+                ->addColumn(Schema::column('base_tier', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+                ->addColumn(Schema::column('group_price', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+                ->addColumn(Schema::column('base_group_price', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
                 ->addPrimaryKeyConstraint(
                     PrimaryKeyConstraint::editor()
                         ->setUnquotedColumnNames('entity_id', 'customer_group_id', 'website_id')
@@ -3227,63 +1611,13 @@ return function (SchemaEditor $schema): void {
         $schema->addTable(
             Table::editor()
                 ->setUnquotedName($tableName)
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('entity_id')
-                        ->setTypeName(Types::INTEGER)
-                        ->setUnsigned(true)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('customer_group_id')
-                        ->setTypeName(Types::SMALLINT)
-                        ->setUnsigned(true)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('website_id')
-                        ->setTypeName(Types::SMALLINT)
-                        ->setUnsigned(true)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('min_price')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setNotNull(false)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('max_price')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setNotNull(false)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('tier_price')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setNotNull(false)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('group_price')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setNotNull(false)
-                        ->create(),
-                )
+                ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true))
+                ->addColumn(Schema::column('customer_group_id', Types::SMALLINT, unsigned: true))
+                ->addColumn(Schema::column('website_id', Types::SMALLINT, unsigned: true))
+                ->addColumn(Schema::column('min_price', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+                ->addColumn(Schema::column('max_price', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+                ->addColumn(Schema::column('tier_price', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+                ->addColumn(Schema::column('group_price', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
                 ->addPrimaryKeyConstraint(
                     PrimaryKeyConstraint::editor()
                         ->setUnquotedColumnNames('entity_id', 'customer_group_id', 'website_id')
@@ -3299,71 +1633,14 @@ return function (SchemaEditor $schema): void {
         $schema->addTable(
             Table::editor()
                 ->setUnquotedName($tableName)
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('entity_id')
-                        ->setTypeName(Types::INTEGER)
-                        ->setUnsigned(true)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('customer_group_id')
-                        ->setTypeName(Types::SMALLINT)
-                        ->setUnsigned(true)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('website_id')
-                        ->setTypeName(Types::SMALLINT)
-                        ->setUnsigned(true)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('option_id')
-                        ->setTypeName(Types::INTEGER)
-                        ->setUnsigned(true)
-                        ->setDefaultValue(0)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('min_price')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setNotNull(false)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('max_price')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setNotNull(false)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('tier_price')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setNotNull(false)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('group_price')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setNotNull(false)
-                        ->create(),
-                )
+                ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true))
+                ->addColumn(Schema::column('customer_group_id', Types::SMALLINT, unsigned: true))
+                ->addColumn(Schema::column('website_id', Types::SMALLINT, unsigned: true))
+                ->addColumn(Schema::column('option_id', Types::INTEGER, unsigned: true, default: 0))
+                ->addColumn(Schema::column('min_price', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+                ->addColumn(Schema::column('max_price', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+                ->addColumn(Schema::column('tier_price', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+                ->addColumn(Schema::column('group_price', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
                 ->addPrimaryKeyConstraint(
                     PrimaryKeyConstraint::editor()
                         ->setUnquotedColumnNames('entity_id', 'customer_group_id', 'website_id', 'option_id')
@@ -3380,34 +1657,10 @@ return function (SchemaEditor $schema): void {
         $schema->addTable(
             Table::editor()
                 ->setUnquotedName($tableName)
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('entity_id')
-                        ->setTypeName(Types::INTEGER)
-                        ->setUnsigned(true)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('attribute_id')
-                        ->setTypeName(Types::SMALLINT)
-                        ->setUnsigned(true)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('store_id')
-                        ->setTypeName(Types::SMALLINT)
-                        ->setUnsigned(true)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('value')
-                        ->setTypeName(Types::INTEGER)
-                        ->setUnsigned(true)
-                        ->create(),
-                )
+                ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true))
+                ->addColumn(Schema::column('attribute_id', Types::SMALLINT, unsigned: true))
+                ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true))
+                ->addColumn(Schema::column('value', Types::INTEGER, unsigned: true))
                 ->addPrimaryKeyConstraint(
                     PrimaryKeyConstraint::editor()
                         ->setUnquotedColumnNames('entity_id', 'attribute_id', 'store_id', 'value')
@@ -3425,35 +1678,10 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('catalog_product_index_eav_decimal_idx')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('attribute_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('value')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('attribute_id', Types::SMALLINT, unsigned: true))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true))
+            ->addColumn(Schema::column('value', Types::DECIMAL, precision: 12, scale: 4))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('entity_id', 'attribute_id', 'store_id', 'value')
@@ -3470,35 +1698,10 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('catalog_product_index_eav_decimal_tmp')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('attribute_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_id')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('value')
-                    ->setTypeName(Types::DECIMAL)
-                    ->setPrecision(12)
-                    ->setScale(4)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('attribute_id', Types::SMALLINT, unsigned: true))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true))
+            ->addColumn(Schema::column('value', Types::DECIMAL, precision: 12, scale: 4))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('entity_id', 'attribute_id', 'store_id')
@@ -3517,90 +1720,16 @@ return function (SchemaEditor $schema): void {
         $schema->addTable(
             Table::editor()
                 ->setUnquotedName($tableName)
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('entity_id')
-                        ->setTypeName(Types::INTEGER)
-                        ->setUnsigned(true)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('customer_group_id')
-                        ->setTypeName(Types::SMALLINT)
-                        ->setUnsigned(true)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('website_id')
-                        ->setTypeName(Types::SMALLINT)
-                        ->setUnsigned(true)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('tax_class_id')
-                        ->setTypeName(Types::SMALLINT)
-                        ->setUnsigned(true)
-                        ->setNotNull(false)
-                        ->setDefaultValue(0)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('price')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setNotNull(false)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('final_price')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setNotNull(false)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('min_price')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setNotNull(false)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('max_price')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setNotNull(false)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('tier_price')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setNotNull(false)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('group_price')
-                        ->setTypeName(Types::DECIMAL)
-                        ->setPrecision(12)
-                        ->setScale(4)
-                        ->setNotNull(false)
-                        ->create(),
-                )
+                ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true))
+                ->addColumn(Schema::column('customer_group_id', Types::SMALLINT, unsigned: true))
+                ->addColumn(Schema::column('website_id', Types::SMALLINT, unsigned: true))
+                ->addColumn(Schema::column('tax_class_id', Types::SMALLINT, unsigned: true, notNull: false, default: 0))
+                ->addColumn(Schema::column('price', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+                ->addColumn(Schema::column('final_price', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+                ->addColumn(Schema::column('min_price', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+                ->addColumn(Schema::column('max_price', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+                ->addColumn(Schema::column('tier_price', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
+                ->addColumn(Schema::column('group_price', Types::DECIMAL, precision: 12, scale: 4, notNull: false))
                 ->addPrimaryKeyConstraint(
                     PrimaryKeyConstraint::editor()
                         ->setUnquotedColumnNames('entity_id', 'customer_group_id', 'website_id')
@@ -3619,52 +1748,12 @@ return function (SchemaEditor $schema): void {
         $schema->addTable(
             Table::editor()
                 ->setUnquotedName($tableName)
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('category_id')
-                        ->setTypeName(Types::INTEGER)
-                        ->setUnsigned(true)
-                        ->setDefaultValue(0)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('product_id')
-                        ->setTypeName(Types::INTEGER)
-                        ->setUnsigned(true)
-                        ->setDefaultValue(0)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('position')
-                        ->setTypeName(Types::INTEGER)
-                        ->setDefaultValue(0)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('is_parent')
-                        ->setTypeName(Types::SMALLINT)
-                        ->setUnsigned(true)
-                        ->setDefaultValue(0)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('store_id')
-                        ->setTypeName(Types::SMALLINT)
-                        ->setUnsigned(true)
-                        ->setDefaultValue(0)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('visibility')
-                        ->setTypeName(Types::SMALLINT)
-                        ->setUnsigned(true)
-                        ->create(),
-                )
+                ->addColumn(Schema::column('category_id', Types::INTEGER, unsigned: true, default: 0))
+                ->addColumn(Schema::column('product_id', Types::INTEGER, unsigned: true, default: 0))
+                ->addColumn(Schema::column('position', Types::INTEGER, default: 0))
+                ->addColumn(Schema::column('is_parent', Types::SMALLINT, unsigned: true, default: 0))
+                ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
+                ->addColumn(Schema::column('visibility', Types::SMALLINT, unsigned: true))
                 ->addIndex(Index::editor()->setUnquotedColumnNames('product_id', 'category_id', 'store_id'))
                 ->setComment("Catalog Category Product Indexer {$suffix} Table")
                 ->create(),
@@ -3676,22 +1765,8 @@ return function (SchemaEditor $schema): void {
         $schema->addTable(
             Table::editor()
                 ->setUnquotedName($tableName)
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('product_id')
-                        ->setTypeName(Types::INTEGER)
-                        ->setUnsigned(true)
-                        ->setDefaultValue(0)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('visibility')
-                        ->setTypeName(Types::INTEGER)
-                        ->setUnsigned(true)
-                        ->setDefaultValue(0)
-                        ->create(),
-                )
+                ->addColumn(Schema::column('product_id', Types::INTEGER, unsigned: true, default: 0))
+                ->addColumn(Schema::column('visibility', Types::INTEGER, unsigned: true, default: 0))
                 ->addIndex(Index::editor()->setUnquotedColumnNames('product_id', 'visibility'))
                 ->setComment("Catalog Category Product Enabled Indexer {$suffix} Table")
                 ->create(),
@@ -3703,23 +1778,8 @@ return function (SchemaEditor $schema): void {
         $schema->addTable(
             Table::editor()
                 ->setUnquotedName($tableName)
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('category_id')
-                        ->setTypeName(Types::INTEGER)
-                        ->setUnsigned(true)
-                        ->setDefaultValue(0)
-                        ->create(),
-                )
-                ->addColumn(
-                    Column::editor()
-                        ->setUnquotedName('path')
-                        ->setTypeName(Types::STRING)
-                        ->setLength(255)
-                        ->setNotNull(false)
-                        ->setDefaultValue(null)
-                        ->create(),
-                )
+                ->addColumn(Schema::column('category_id', Types::INTEGER, unsigned: true, default: 0))
+                ->addColumn(Schema::column('path', Types::STRING, length: 255, notNull: false, default: null))
                 ->addIndex(Index::editor()->setUnquotedColumnNames('category_id'))
                 ->addIndex(Index::editor()->setUnquotedColumnNames('path', 'category_id'))
                 ->setComment("Catalog Category Anchor Indexer {$suffix} Table")
@@ -3730,30 +1790,9 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('catalog_category_anc_products_index_idx')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('category_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('product_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('position')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('category_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('product_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('position', Types::INTEGER, unsigned: true, notNull: false))
             ->addIndex(Index::editor()->setUnquotedColumnNames('category_id', 'product_id', 'position'))
             ->setComment('Catalog Category Anchor Product Indexer Index Table')
             ->create(),
@@ -3762,30 +1801,9 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('catalog_category_anc_products_index_tmp')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('category_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('product_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('position')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('category_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('product_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('position', Types::INTEGER, unsigned: true, notNull: false))
             ->addIndex(Index::editor()->setUnquotedColumnNames('category_id', 'product_id', 'position'))
             ->setComment('Catalog Category Anchor Product Indexer Temp Table')
             ->create(),
@@ -3794,59 +1812,13 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('catalog_category_dynamic_rule')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('rule_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('category_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('conditions_serialized')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(2097152)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('parent_resolution')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(20)
-                    ->setDefaultValue('none')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('is_active')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(1)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('updated_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
+            ->addColumn(Schema::column('rule_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('category_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('conditions_serialized', Types::TEXT, length: 2097152, notNull: false))
+            ->addColumn(Schema::column('parent_resolution', Types::STRING, length: 20, default: 'none'))
+            ->addColumn(Schema::column('is_active', Types::SMALLINT, unsigned: true, default: 1))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('updated_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rule_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('category_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('is_active'))
@@ -3865,22 +1837,8 @@ return function (SchemaEditor $schema): void {
 
     // Catalog grafts category_id / product_id onto Mage_Core's core_url_rewrite so URL rewrite cleanup follows category/product deletion.
     $schema->modifyTableByUnquotedName('core_url_rewrite', static function (TableEditor $urlRewrite): void {
-        $urlRewrite->addColumn(
-            Column::editor()
-                ->setUnquotedName('category_id')
-                ->setTypeName(Types::INTEGER)
-                ->setUnsigned(true)
-                ->setNotNull(false)
-                ->create(),
-        );
-        $urlRewrite->addColumn(
-            Column::editor()
-                ->setUnquotedName('product_id')
-                ->setTypeName(Types::INTEGER)
-                ->setUnsigned(true)
-                ->setNotNull(false)
-                ->create(),
-        );
+        $urlRewrite->addColumn(Schema::column('category_id', Types::INTEGER, unsigned: true, notNull: false));
+        $urlRewrite->addColumn(Schema::column('product_id', Types::INTEGER, unsigned: true, notNull: false));
         $urlRewrite->addForeignKeyConstraint(
             ForeignKeyConstraint::editor()
                 ->setUnquotedReferencingColumnNames('category_id')

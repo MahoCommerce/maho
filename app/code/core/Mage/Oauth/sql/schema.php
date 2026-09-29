@@ -18,105 +18,26 @@ use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\SchemaEditor;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
+use Maho\Db\Schema;
 
 return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('oauth_consumer')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('updated_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('name')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('updated_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('name', Types::STRING, length: 255))
             // Mage_Oauth_Model_Consumer::KEY_LENGTH = 32
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('key')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('key', Types::STRING, length: 32))
             // Mage_Oauth_Model_Consumer::SECRET_LENGTH = 32
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('secret')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('callback_url')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('rejected_callback_url')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('store_ids')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->setComment('Allowed store IDs (JSON array or "all")')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('last_used_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->setComment('Last API usage timestamp')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('expires_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setNotNull(false)
-                    ->setComment('Token expiration date')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('api_role_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->setComment('API Role ID for permission management')
-                    ->create(),
-            )
+            ->addColumn(Schema::column('secret', Types::STRING, length: 32))
+            ->addColumn(Schema::column('callback_url', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('rejected_callback_url', Types::STRING, length: 255))
+            ->addColumn(Schema::column('store_ids', Types::TEXT, length: 65535, notNull: false, comment: 'Allowed store IDs (JSON array or "all")'))
+            ->addColumn(Schema::column('last_used_at', Types::DATETIME_MUTABLE, notNull: false, comment: 'Last API usage timestamp'))
+            ->addColumn(Schema::column('expires_at', Types::DATETIME_MUTABLE, notNull: false, comment: 'Token expiration date'))
+            ->addColumn(Schema::column('api_role_id', Types::INTEGER, unsigned: true, notNull: false, comment: 'API Role ID for permission management'))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create())
             ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('key'))
             ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('secret'))
@@ -139,99 +60,21 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('oauth_token')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('consumer_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('admin_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('customer_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('type')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(16)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('consumer_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('admin_id', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('customer_id', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('type', Types::STRING, length: 16))
             // Mage_Oauth_Model_Token::LENGTH_TOKEN = 32
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('token')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('token', Types::STRING, length: 32))
             // Mage_Oauth_Model_Token::LENGTH_SECRET = 32
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('secret')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('secret', Types::STRING, length: 32))
             // Mage_Oauth_Model_Token::LENGTH_VERIFIER = 32
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('verifier')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('callback_url')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('revoked')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('authorized')
-                    ->setTypeName(Types::SMALLINT)
-                    ->setUnsigned(true)
-                    ->setDefaultValue(0)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
+            ->addColumn(Schema::column('verifier', Types::STRING, length: 32, notNull: false))
+            ->addColumn(Schema::column('callback_url', Types::STRING, length: 255))
+            ->addColumn(Schema::column('revoked', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('authorized', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('consumer_id'))
             ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('token'))
@@ -269,20 +112,8 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('oauth_nonce')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('nonce')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(32)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('timestamp')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->create(),
-            )
+            ->addColumn(Schema::column('nonce', Types::STRING, length: 32))
+            ->addColumn(Schema::column('timestamp', Types::INTEGER, unsigned: true))
             ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('nonce'))
             ->create(),
     );

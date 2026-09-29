@@ -17,122 +17,26 @@ use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\SchemaEditor;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
+use Maho\Db\Schema;
 
 return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('adminactivitylog_activity')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('activity_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('action_group_id')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(64)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('user_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('consumer_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->setComment('OAuth Consumer ID (for API actions)')
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('username')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(40)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('action_type')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(50)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_type')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('entity_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('old_data')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('new_data')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('ip_address')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(45)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('user_agent')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('request_url')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
+            ->addColumn(Schema::column('activity_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('action_group_id', Types::STRING, length: 64, notNull: false))
+            ->addColumn(Schema::column('user_id', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('consumer_id', Types::INTEGER, unsigned: true, notNull: false, comment: 'OAuth Consumer ID (for API actions)'))
+            ->addColumn(Schema::column('username', Types::STRING, length: 40, notNull: false))
+            ->addColumn(Schema::column('action_type', Types::STRING, length: 50))
+            ->addColumn(Schema::column('entity_type', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('old_data', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('new_data', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('ip_address', Types::STRING, length: 45, notNull: false))
+            ->addColumn(Schema::column('user_agent', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('request_url', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('activity_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('user_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('consumer_id'))
@@ -166,67 +70,14 @@ return function (SchemaEditor $schema): void {
     $schema->addTable(
         Table::editor()
             ->setUnquotedName('adminactivitylog_login')
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('login_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setAutoincrement(true)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('user_id')
-                    ->setTypeName(Types::INTEGER)
-                    ->setUnsigned(true)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('username')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(40)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('type')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(20)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('ip_address')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(45)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('user_agent')
-                    ->setTypeName(Types::TEXT)
-                    ->setLength(65535)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('failure_reason')
-                    ->setTypeName(Types::STRING)
-                    ->setLength(255)
-                    ->setNotNull(false)
-                    ->create(),
-            )
-            ->addColumn(
-                Column::editor()
-                    ->setUnquotedName('created_at')
-                    ->setTypeName(Types::DATETIME_MUTABLE)
-                    ->setDefaultValue(new CurrentTimestamp())
-                    ->create(),
-            )
+            ->addColumn(Schema::column('login_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('user_id', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('username', Types::STRING, length: 40))
+            ->addColumn(Schema::column('type', Types::STRING, length: 20))
+            ->addColumn(Schema::column('ip_address', Types::STRING, length: 45, notNull: false))
+            ->addColumn(Schema::column('user_agent', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('failure_reason', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('login_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('user_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('username'))
