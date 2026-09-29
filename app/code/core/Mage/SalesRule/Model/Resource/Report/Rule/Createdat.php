@@ -108,7 +108,7 @@ class Mage_SalesRule_Model_Resource_Report_Rule_Createdat extends Mage_Reports_M
 
             $select = $adapter->select();
             $select->from(['source_table' => $sourceTable], $columns)
-                 ->where('coupon_code IS NOT NULL');
+                 ->where("coupon_code <> ''");
 
             // Filter by date range directly on source column (WHERE is evaluated before GROUP BY,
             // so we can't use the 'period' alias here - it doesn't exist yet)
