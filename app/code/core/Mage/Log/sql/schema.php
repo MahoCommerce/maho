@@ -8,121 +8,144 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
+use Doctrine\DBAL\Schema\Index;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
-use Doctrine\DBAL\Schema\Schema;
+use Doctrine\DBAL\Schema\SchemaEditor;
+use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
 
-return function (Schema $schema): void {
-    $customer = $schema->createTable('log_customer');
-    $customer->addColumn('log_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $customer->addColumn('visitor_id', Types::BIGINT, ['unsigned' => true, 'notnull' => false]);
-    $customer->addColumn('customer_id', Types::INTEGER, ['default' => 0]);
-    $customer->addColumn('login_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
-    $customer->addColumn('logout_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
-    $customer->addColumn('store_id', Types::SMALLINT, ['unsigned' => true]);
-    $customer->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('log_id')->create(),
+return function (SchemaEditor $schema): void {
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('log_customer')
+            ->addColumn(Column::editor()->setUnquotedName('log_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('visitor_id')->setTypeName(Types::BIGINT)->setUnsigned(true)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('customer_id')->setTypeName(Types::INTEGER)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('login_at')->setTypeName(Types::DATETIME_MUTABLE)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('logout_at')->setTypeName(Types::DATETIME_MUTABLE)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('store_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('log_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('visitor_id'))
+            ->setComment('Log Customers Table')
+            ->create(),
     );
-    $customer->addIndex(['visitor_id']);
-    $customer->setComment('Log Customers Table');
 
-    $quote = $schema->createTable('log_quote');
-    $quote->addColumn('quote_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $quote->addColumn('visitor_id', Types::BIGINT, ['unsigned' => true, 'notnull' => false]);
-    $quote->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
-    $quote->addColumn('deleted_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
-    $quote->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('quote_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('log_quote')
+            ->addColumn(Column::editor()->setUnquotedName('quote_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('visitor_id')->setTypeName(Types::BIGINT)->setUnsigned(true)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('created_at')->setTypeName(Types::DATETIME_MUTABLE)->setDefaultValue(new CurrentTimestamp())->create())
+            ->addColumn(Column::editor()->setUnquotedName('deleted_at')->setTypeName(Types::DATETIME_MUTABLE)->setNotNull(false)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('quote_id')->create())
+            ->setComment('Log Quotes Table')
+            ->create(),
     );
-    $quote->setComment('Log Quotes Table');
 
-    $summary = $schema->createTable('log_summary');
-    $summary->addColumn('summary_id', Types::BIGINT, ['unsigned' => true, 'autoincrement' => true]);
-    $summary->addColumn('store_id', Types::SMALLINT, ['unsigned' => true]);
-    $summary->addColumn('type_id', Types::SMALLINT, ['unsigned' => true, 'notnull' => false]);
-    $summary->addColumn('visitor_count', Types::INTEGER, ['default' => 0]);
-    $summary->addColumn('customer_count', Types::INTEGER, ['default' => 0]);
-    $summary->addColumn('add_date', Types::DATETIME_MUTABLE, ['notnull' => false]);
-    $summary->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('summary_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('log_summary')
+            ->addColumn(Column::editor()->setUnquotedName('summary_id')->setTypeName(Types::BIGINT)->setUnsigned(true)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('store_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('type_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('visitor_count')->setTypeName(Types::INTEGER)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('customer_count')->setTypeName(Types::INTEGER)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('add_date')->setTypeName(Types::DATETIME_MUTABLE)->setNotNull(false)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('summary_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('add_date', 'store_id'))
+            ->setComment('Log Summary Table')
+            ->create(),
     );
-    $summary->addIndex(['add_date', 'store_id']);
-    $summary->setComment('Log Summary Table');
 
-    $summaryType = $schema->createTable('log_summary_type');
-    $summaryType->addColumn('type_id', Types::SMALLINT, ['unsigned' => true, 'autoincrement' => true]);
-    $summaryType->addColumn('type_code', Types::STRING, ['length' => 64, 'notnull' => false]);
-    $summaryType->addColumn('period', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $summaryType->addColumn('period_type', Types::STRING, ['length' => 6, 'default' => 'MINUTE']);
-    $summaryType->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('type_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('log_summary_type')
+            ->addColumn(Column::editor()->setUnquotedName('type_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('type_code')->setTypeName(Types::STRING)->setLength(64)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('period')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('period_type')->setTypeName(Types::STRING)->setLength(6)->setDefaultValue('MINUTE')->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('type_id')->create())
+            ->setComment('Log Summary Types Table')
+            ->create(),
     );
-    $summaryType->setComment('Log Summary Types Table');
 
-    $url = $schema->createTable('log_url');
-    $url->addColumn('url_id', Types::BIGINT, ['unsigned' => true, 'default' => 0]);
-    $url->addColumn('visitor_id', Types::BIGINT, ['unsigned' => true, 'notnull' => false]);
-    $url->addColumn('visit_time', Types::DATETIME_MUTABLE, ['notnull' => false]);
-    // No primary key: upgrade-1.6.0.0-1.6.1.0 dropped the PRIMARY on url_id and
-    // replaced it with a plain index (log_url is a high-write append log).
-    $url->addIndex(['visitor_id']);
-    $url->addIndex(['url_id']);
-    $url->setComment('Log URL Table');
-
-    $urlInfo = $schema->createTable('log_url_info');
-    $urlInfo->addColumn('url_id', Types::BIGINT, ['unsigned' => true, 'autoincrement' => true]);
-    $urlInfo->addColumn('url', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $urlInfo->addColumn('referer', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $urlInfo->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('url_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('log_url')
+            ->addColumn(Column::editor()->setUnquotedName('url_id')->setTypeName(Types::BIGINT)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('visitor_id')->setTypeName(Types::BIGINT)->setUnsigned(true)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('visit_time')->setTypeName(Types::DATETIME_MUTABLE)->setNotNull(false)->create())
+            // No primary key: upgrade-1.6.0.0-1.6.1.0 dropped the PRIMARY on url_id and
+            // replaced it with a plain index (log_url is a high-write append log).
+            ->addIndex(Index::editor()->setUnquotedColumnNames('visitor_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('url_id'))
+            ->setComment('Log URL Table')
+            ->create(),
     );
-    $urlInfo->setComment('Log URL Info Table');
 
-    $visitor = $schema->createTable('log_visitor');
-    $visitor->addColumn('visitor_id', Types::BIGINT, ['unsigned' => true, 'autoincrement' => true]);
-    $visitor->addColumn('session_id', Types::STRING, ['length' => 64, 'notnull' => false]);
-    $visitor->addColumn('first_visit_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
-    $visitor->addColumn('last_visit_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
-    $visitor->addColumn('last_url_id', Types::BIGINT, ['unsigned' => true, 'default' => 0]);
-    $visitor->addColumn('store_id', Types::SMALLINT, ['unsigned' => true]);
-    $visitor->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('visitor_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('log_url_info')
+            ->addColumn(Column::editor()->setUnquotedName('url_id')->setTypeName(Types::BIGINT)->setUnsigned(true)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('url')->setTypeName(Types::STRING)->setLength(255)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('referer')->setTypeName(Types::STRING)->setLength(255)->setNotNull(false)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('url_id')->create())
+            ->setComment('Log URL Info Table')
+            ->create(),
     );
-    $visitor->addIndex(['first_visit_at', 'store_id']);
-    $visitor->addIndex(['last_visit_at']);
-    $visitor->addIndex(['last_url_id']);
-    $visitor->setComment('Log Visitors Table');
 
-    $visitorInfo = $schema->createTable('log_visitor_info');
-    $visitorInfo->addColumn('visitor_id', Types::BIGINT, ['unsigned' => true, 'default' => 0]);
-    $visitorInfo->addColumn('http_referer', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $visitorInfo->addColumn('http_user_agent', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $visitorInfo->addColumn('http_accept_charset', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $visitorInfo->addColumn('http_accept_language', Types::STRING, ['length' => 255, 'notnull' => false]);
-    // server_addr / remote_addr stored as binary IP addresses (4 or 16 bytes). VARBINARY(16) on MySQL, bytea on PgSQL.
-    $visitorInfo->addColumn('server_addr', Types::BINARY, ['length' => 16, 'notnull' => false]);
-    $visitorInfo->addColumn('remote_addr', Types::BINARY, ['length' => 16, 'notnull' => false]);
-    $visitorInfo->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('visitor_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('log_visitor')
+            ->addColumn(Column::editor()->setUnquotedName('visitor_id')->setTypeName(Types::BIGINT)->setUnsigned(true)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('session_id')->setTypeName(Types::STRING)->setLength(64)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('first_visit_at')->setTypeName(Types::DATETIME_MUTABLE)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('last_visit_at')->setTypeName(Types::DATETIME_MUTABLE)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('last_url_id')->setTypeName(Types::BIGINT)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('store_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('visitor_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('first_visit_at', 'store_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('last_visit_at'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('last_url_id'))
+            ->setComment('Log Visitors Table')
+            ->create(),
     );
-    $visitorInfo->addIndex(['remote_addr']);
-    $visitorInfo->setComment('Log Visitor Info Table');
 
-    $visitorOnline = $schema->createTable('log_visitor_online');
-    $visitorOnline->addColumn('visitor_id', Types::BIGINT, ['unsigned' => true, 'autoincrement' => true]);
-    $visitorOnline->addColumn('visitor_type', Types::STRING, ['length' => 1]);
-    // remote_addr stored as binary IP. VARBINARY(16) on MySQL, bytea on PgSQL.
-    $visitorOnline->addColumn('remote_addr', Types::BINARY, ['length' => 16, 'notnull' => false]);
-    $visitorOnline->addColumn('first_visit_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
-    $visitorOnline->addColumn('last_visit_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
-    $visitorOnline->addColumn('customer_id', Types::INTEGER, ['unsigned' => true, 'notnull' => false]);
-    $visitorOnline->addColumn('last_url', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $visitorOnline->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('visitor_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('log_visitor_info')
+            ->addColumn(Column::editor()->setUnquotedName('visitor_id')->setTypeName(Types::BIGINT)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('http_referer')->setTypeName(Types::STRING)->setLength(255)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('http_user_agent')->setTypeName(Types::STRING)->setLength(255)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('http_accept_charset')->setTypeName(Types::STRING)->setLength(255)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('http_accept_language')->setTypeName(Types::STRING)->setLength(255)->setNotNull(false)->create())
+            // server_addr / remote_addr stored as binary IP addresses (4 or 16 bytes). VARBINARY(16) on MySQL, bytea on PgSQL.
+            ->addColumn(Column::editor()->setUnquotedName('server_addr')->setTypeName(Types::BINARY)->setLength(16)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('remote_addr')->setTypeName(Types::BINARY)->setLength(16)->setNotNull(false)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('visitor_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('remote_addr'))
+            ->setComment('Log Visitor Info Table')
+            ->create(),
     );
-    $visitorOnline->addIndex(['visitor_type']);
-    $visitorOnline->addIndex(['first_visit_at', 'last_visit_at']);
-    $visitorOnline->addIndex(['customer_id']);
-    $visitorOnline->setComment('Log Visitor Online Table');
+
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('log_visitor_online')
+            ->addColumn(Column::editor()->setUnquotedName('visitor_id')->setTypeName(Types::BIGINT)->setUnsigned(true)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('visitor_type')->setTypeName(Types::STRING)->setLength(1)->create())
+            // remote_addr stored as binary IP. VARBINARY(16) on MySQL, bytea on PgSQL.
+            ->addColumn(Column::editor()->setUnquotedName('remote_addr')->setTypeName(Types::BINARY)->setLength(16)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('first_visit_at')->setTypeName(Types::DATETIME_MUTABLE)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('last_visit_at')->setTypeName(Types::DATETIME_MUTABLE)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('customer_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('last_url')->setTypeName(Types::STRING)->setLength(255)->setNotNull(false)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('visitor_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('visitor_type'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('first_visit_at', 'last_visit_at'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('customer_id'))
+            ->setComment('Log Visitor Online Table')
+            ->create(),
+    );
 };

@@ -8,35 +8,49 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Schema\Column;
+use Doctrine\DBAL\Schema\ForeignKeyConstraint;
+use Doctrine\DBAL\Schema\ForeignKeyConstraint\ReferentialAction;
+use Doctrine\DBAL\Schema\Index;
+use Doctrine\DBAL\Schema\Index\IndexType;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
-use Doctrine\DBAL\Schema\Schema;
+use Doctrine\DBAL\Schema\SchemaEditor;
+use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
 
-return function (Schema $schema): void {
-    $identity = $schema->createTable('social_login_identity');
-    $identity->addColumn('identity_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $identity->addColumn('customer_id', Types::INTEGER, ['unsigned' => true]);
-    $identity->addColumn('website_id', Types::SMALLINT, ['unsigned' => true]);
-    $identity->addColumn('provider', Types::STRING, ['length' => 32]);
-    $identity->addColumn('provider_id', Types::STRING, ['length' => 255]);
-    $identity->addColumn('provider_email', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $identity->addColumn('created_at', Types::DATETIME_MUTABLE);
-    $identity->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('identity_id')->create(),
+return function (SchemaEditor $schema): void {
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('social_login_identity')
+            ->addColumn(Column::editor()->setUnquotedName('identity_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('customer_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('website_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('provider')->setTypeName(Types::STRING)->setLength(32)->create())
+            ->addColumn(Column::editor()->setUnquotedName('provider_id')->setTypeName(Types::STRING)->setLength(255)->create())
+            ->addColumn(Column::editor()->setUnquotedName('provider_email')->setTypeName(Types::STRING)->setLength(255)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('created_at')->setTypeName(Types::DATETIME_MUTABLE)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('identity_id')->create())
+            ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('provider', 'provider_id', 'website_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('customer_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('customer_id')
+                    ->setUnquotedReferencedTableName('customer_entity')
+                    ->setUnquotedReferencedColumnNames('entity_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('website_id')
+                    ->setUnquotedReferencedTableName('core_website')
+                    ->setUnquotedReferencedColumnNames('website_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Social Login Provider Identities')
+            ->create(),
     );
-    $identity->addUniqueIndex(['provider', 'provider_id', 'website_id']);
-    $identity->addIndex(['customer_id']);
-    $identity->addForeignKeyConstraint(
-        'customer_entity',
-        ['customer_id'],
-        ['entity_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $identity->addForeignKeyConstraint(
-        'core_website',
-        ['website_id'],
-        ['website_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $identity->setComment('Social Login Provider Identities');
 };

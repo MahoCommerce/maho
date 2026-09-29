@@ -8,29 +8,31 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
+use Doctrine\DBAL\Schema\Index;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
-use Doctrine\DBAL\Schema\Schema;
+use Doctrine\DBAL\Schema\SchemaEditor;
+use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
 
-return function (Schema $schema): void {
-    $t = $schema->createTable('adminnotification_inbox');
-
-    $t->addColumn('notification_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $t->addColumn('severity', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $t->addColumn('date_added', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
-    $t->addColumn('title', Types::STRING, ['length' => 255]);
-    $t->addColumn('description', Types::TEXT, ['length' => 65535, 'notnull' => false]);
-    $t->addColumn('url', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $t->addColumn('is_read', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $t->addColumn('is_remove', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-
-    $t->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('notification_id')->create(),
+return function (SchemaEditor $schema): void {
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('adminnotification_inbox')
+            ->addColumn(Column::editor()->setUnquotedName('notification_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('severity')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('date_added')->setTypeName(Types::DATETIME_MUTABLE)->setDefaultValue(new CurrentTimestamp())->create())
+            ->addColumn(Column::editor()->setUnquotedName('title')->setTypeName(Types::STRING)->setLength(255)->create())
+            ->addColumn(Column::editor()->setUnquotedName('description')->setTypeName(Types::TEXT)->setLength(65535)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('url')->setTypeName(Types::STRING)->setLength(255)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('is_read')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('is_remove')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('notification_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('severity'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('is_read'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('is_remove'))
+            ->setComment('Adminnotification Inbox')
+            ->create(),
     );
-    $t->addIndex(['severity']);
-    $t->addIndex(['is_read']);
-    $t->addIndex(['is_remove']);
-
-    $t->setComment('Adminnotification Inbox');
 };

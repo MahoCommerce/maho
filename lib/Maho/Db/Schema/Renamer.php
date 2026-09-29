@@ -22,15 +22,16 @@ use Doctrine\DBAL\Schema\Table;
  * plus an add. The author supplies the missing identity link on the table the
  * rename produced, newest name first:
  *
- *     $t = $schema->createTable('sales_flat_order');
- *     Renamer::renamed($t, from: 'sales_order', columns: ['customer_email' => 'customer_mail']);
+ *     Table::editor()
+ *         ->setUnquotedName('sales_flat_order')
+ *         ->setOptions(Renamer::renamed(from: 'sales_order', columns: ['customer_email' => 'customer_mail']))
  *
  * That lands in one table option, which this class depends on for three DBAL
  * properties: Table::edit() copies options, so the prefix rebuild preserves
  * them; every platform builds DDL options from a closed allowlist, so an
  * unknown key never reaches a CREATE TABLE; and the Comparator never diffs
- * options, so the key causes no churn. DBAL's own Table::renameColumn() map is
- * unusable here, since TableEditor does not carry it and
+ * options, so the key causes no churn. DBAL's own rename map from
+ * TableEditor::renameColumn() is unusable here: it lasts for one edit only, and
  * Canonicalizer::preserveUndeclaredColumns() moves the old column into the
  * target before the Comparator could read it.
  *
@@ -53,15 +54,16 @@ final class Renamer
     public const OPTION = 'maho_previous_names';
 
     /**
-     * Record what $target and its columns used to be called. Repeated calls
-     * append, so a module can extend a history another module declared.
+     * The table options that record what a table and its columns used to be
+     * called. Pass the result to TableEditor::setOptions().
      *
      * @param string|list<string> $from former table name(s), newest-first
      * @param array<string, string|list<string>> $columns current column name => former name(s), newest-first
+     * @return array<string, mixed>
      */
-    public static function renamed(Table $target, string|array $from = [], array $columns = []): void
+    public static function renamed(string|array $from = [], array $columns = []): array
     {
-        $history = self::read($target);
+        $history = ['table' => [], 'columns' => []];
 
         foreach ((array) $from as $name) {
             if (!in_array($name, $history['table'], true)) {
@@ -78,7 +80,7 @@ final class Renamer
             }
         }
 
-        $target->addOption(self::OPTION, $history);
+        return [self::OPTION => $history];
     }
 
     /**
@@ -99,17 +101,22 @@ final class Renamer
 
     /**
      * Authors declare unprefixed names throughout, so the recorded table names
-     * move with the ones Collector::rebuildWithPrefix() rewrites.
+     * move with the ones Collector::finalizeTable() rewrites.
+     *
+     * @param array<string, mixed> $options table options
+     * @return array<string, mixed>
      */
-    public static function applyPrefix(Table $table, string $prefix): void
+    public static function applyPrefix(array $options, string $prefix): array
     {
-        if ($prefix === '' || !$table->hasOption(self::OPTION)) {
-            return;
+        if ($prefix === '' || !isset($options[self::OPTION])) {
+            return $options;
         }
 
-        $history = self::read($table);
+        $history = self::normalize($options[self::OPTION]);
         $history['table'] = array_map(static fn(string $name): string => $prefix . $name, $history['table']);
-        $table->addOption(self::OPTION, $history);
+        $options[self::OPTION] = $history;
+
+        return $options;
     }
 
     /**
@@ -453,7 +460,7 @@ final class Renamer
     {
         throw new UnsupportedMigrationException(sprintf(
             'A "%s" table option does not carry the shape Renamer::renamed() writes. '
-            . 'Declare previous names through Renamer::renamed() instead of addOption().',
+            . 'Declare previous names through Renamer::renamed() instead of writing the option by hand.',
             self::OPTION,
         ));
     }

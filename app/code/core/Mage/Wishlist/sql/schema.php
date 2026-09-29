@@ -8,78 +8,105 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Schema\Column;
+use Doctrine\DBAL\Schema\ForeignKeyConstraint;
+use Doctrine\DBAL\Schema\ForeignKeyConstraint\ReferentialAction;
+use Doctrine\DBAL\Schema\Index;
+use Doctrine\DBAL\Schema\Index\IndexType;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
-use Doctrine\DBAL\Schema\Schema;
+use Doctrine\DBAL\Schema\SchemaEditor;
+use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
 
-return function (Schema $schema): void {
-    $wishlist = $schema->createTable('wishlist');
-    $wishlist->addColumn('wishlist_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $wishlist->addColumn('customer_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $wishlist->addColumn('shared', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $wishlist->addColumn('sharing_code', Types::STRING, ['length' => 32, 'notnull' => false]);
-    $wishlist->addColumn('updated_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
-    $wishlist->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('wishlist_id')->create(),
+return function (SchemaEditor $schema): void {
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('wishlist')
+            ->addColumn(Column::editor()->setUnquotedName('wishlist_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('customer_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('shared')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('sharing_code')->setTypeName(Types::STRING)->setLength(32)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('updated_at')->setTypeName(Types::DATETIME_MUTABLE)->setNotNull(false)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('wishlist_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('shared'))
+            ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('customer_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('customer_id')
+                    ->setUnquotedReferencedTableName('customer_entity')
+                    ->setUnquotedReferencedColumnNames('entity_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Wishlist main Table')
+            ->create(),
     );
-    $wishlist->addIndex(['shared']);
-    $wishlist->addUniqueIndex(['customer_id']);
-    $wishlist->addForeignKeyConstraint(
-        'customer_entity',
-        ['customer_id'],
-        ['entity_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $wishlist->setComment('Wishlist main Table');
 
-    $item = $schema->createTable('wishlist_item');
-    $item->addColumn('wishlist_item_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $item->addColumn('wishlist_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $item->addColumn('product_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $item->addColumn('store_id', Types::SMALLINT, ['unsigned' => true, 'notnull' => false]);
-    $item->addColumn('added_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
-    $item->addColumn('description', Types::TEXT, ['length' => 65535, 'notnull' => false]);
-    $item->addColumn('qty', Types::DECIMAL, ['precision' => 12, 'scale' => 4]);
-    $item->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('wishlist_item_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('wishlist_item')
+            ->addColumn(Column::editor()->setUnquotedName('wishlist_item_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('wishlist_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('product_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('store_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('added_at')->setTypeName(Types::DATETIME_MUTABLE)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('description')->setTypeName(Types::TEXT)->setLength(65535)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('qty')->setTypeName(Types::DECIMAL)->setPrecision(12)->setScale(4)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('wishlist_item_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('wishlist_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('product_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('wishlist_id')
+                    ->setUnquotedReferencedTableName('wishlist')
+                    ->setUnquotedReferencedColumnNames('wishlist_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('product_id')
+                    ->setUnquotedReferencedTableName('catalog_product_entity')
+                    ->setUnquotedReferencedColumnNames('entity_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('store_id')
+                    ->setUnquotedReferencedTableName('core_store')
+                    ->setUnquotedReferencedColumnNames('store_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::SET_NULL)
+                    ->create(),
+            )
+            ->setComment('Wishlist items')
+            ->create(),
     );
-    $item->addIndex(['wishlist_id']);
-    $item->addIndex(['product_id']);
-    $item->addIndex(['store_id']);
-    $item->addForeignKeyConstraint(
-        'wishlist',
-        ['wishlist_id'],
-        ['wishlist_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $item->addForeignKeyConstraint(
-        'catalog_product_entity',
-        ['product_id'],
-        ['entity_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $item->addForeignKeyConstraint(
-        'core_store',
-        ['store_id'],
-        ['store_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'],
-    );
-    $item->setComment('Wishlist items');
 
-    $itemOption = $schema->createTable('wishlist_item_option');
-    $itemOption->addColumn('option_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $itemOption->addColumn('wishlist_item_id', Types::INTEGER, ['unsigned' => true]);
-    $itemOption->addColumn('product_id', Types::INTEGER, ['unsigned' => true]);
-    $itemOption->addColumn('code', Types::STRING, ['length' => 255]);
-    $itemOption->addColumn('value', Types::TEXT, ['length' => 65535, 'notnull' => false]);
-    $itemOption->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('option_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('wishlist_item_option')
+            ->addColumn(Column::editor()->setUnquotedName('option_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('wishlist_item_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('product_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('code')->setTypeName(Types::STRING)->setLength(255)->create())
+            ->addColumn(Column::editor()->setUnquotedName('value')->setTypeName(Types::TEXT)->setLength(65535)->setNotNull(false)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('option_id')->create())
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('wishlist_item_id')
+                    ->setUnquotedReferencedTableName('wishlist_item')
+                    ->setUnquotedReferencedColumnNames('wishlist_item_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Wishlist Item Option Table')
+            ->create(),
     );
-    $itemOption->addForeignKeyConstraint(
-        'wishlist_item',
-        ['wishlist_item_id'],
-        ['wishlist_item_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $itemOption->setComment('Wishlist Item Option Table');
 };

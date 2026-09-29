@@ -8,81 +8,105 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Schema\Column;
+use Doctrine\DBAL\Schema\ForeignKeyConstraint;
+use Doctrine\DBAL\Schema\ForeignKeyConstraint\ReferentialAction;
+use Doctrine\DBAL\Schema\Index;
+use Doctrine\DBAL\Schema\Index\IndexType;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
-use Doctrine\DBAL\Schema\Schema;
+use Doctrine\DBAL\Schema\SchemaEditor;
+use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
 
-return function (Schema $schema): void {
-    $country = $schema->createTable('directory_country');
-    $country->addColumn('country_id', Types::STRING, ['length' => 2, 'default' => '']);
-    $country->addColumn('iso2_code', Types::STRING, ['length' => 2, 'notnull' => false]);
-    $country->addColumn('iso3_code', Types::STRING, ['length' => 3, 'notnull' => false]);
-    $country->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('country_id')->create(),
+return function (SchemaEditor $schema): void {
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('directory_country')
+            ->addColumn(Column::editor()->setUnquotedName('country_id')->setTypeName(Types::STRING)->setLength(2)->setDefaultValue('')->create())
+            ->addColumn(Column::editor()->setUnquotedName('iso2_code')->setTypeName(Types::STRING)->setLength(2)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('iso3_code')->setTypeName(Types::STRING)->setLength(3)->setNotNull(false)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('country_id')->create())
+            ->setComment('Directory Country')
+            ->create(),
     );
-    $country->setComment('Directory Country');
 
-    $countryFormat = $schema->createTable('directory_country_format');
-    $countryFormat->addColumn('country_format_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $countryFormat->addColumn('country_id', Types::STRING, ['length' => 2,  'notnull' => false]);
-    $countryFormat->addColumn('type', Types::STRING, ['length' => 30, 'notnull' => false]);
-    $countryFormat->addColumn('format', Types::TEXT, ['length' => 65535]);
-    $countryFormat->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('country_format_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('directory_country_format')
+            ->addColumn(Column::editor()->setUnquotedName('country_format_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('country_id')->setTypeName(Types::STRING)->setLength(2)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('type')->setTypeName(Types::STRING)->setLength(30)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('format')->setTypeName(Types::TEXT)->setLength(65535)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('country_format_id')->create())
+            ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('country_id', 'type'))
+            ->setComment('Directory Country Format')
+            ->create(),
     );
-    $countryFormat->addUniqueIndex(['country_id', 'type']);
-    $countryFormat->setComment('Directory Country Format');
 
-    $countryRegion = $schema->createTable('directory_country_region');
-    $countryRegion->addColumn('region_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $countryRegion->addColumn('country_id', Types::STRING, ['length' => 4,   'default' => '0']);
-    $countryRegion->addColumn('code', Types::STRING, ['length' => 32,  'notnull' => false]);
-    $countryRegion->addColumn('default_name', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $countryRegion->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('region_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('directory_country_region')
+            ->addColumn(Column::editor()->setUnquotedName('region_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('country_id')->setTypeName(Types::STRING)->setLength(4)->setDefaultValue('0')->create())
+            ->addColumn(Column::editor()->setUnquotedName('code')->setTypeName(Types::STRING)->setLength(32)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('default_name')->setTypeName(Types::STRING)->setLength(255)->setNotNull(false)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('region_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('country_id'))
+            ->setComment('Directory Country Region')
+            ->create(),
     );
-    $countryRegion->addIndex(['country_id']);
-    $countryRegion->setComment('Directory Country Region');
 
-    $regionName = $schema->createTable('directory_country_region_name');
-    $regionName->addColumn('locale', Types::STRING, ['length' => 8, 'default' => '']);
-    $regionName->addColumn('region_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $regionName->addColumn('name', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $regionName->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('locale', 'region_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('directory_country_region_name')
+            ->addColumn(Column::editor()->setUnquotedName('locale')->setTypeName(Types::STRING)->setLength(8)->setDefaultValue('')->create())
+            ->addColumn(Column::editor()->setUnquotedName('region_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('name')->setTypeName(Types::STRING)->setLength(255)->setNotNull(false)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('locale', 'region_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('region_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('region_id')
+                    ->setUnquotedReferencedTableName('directory_country_region')
+                    ->setUnquotedReferencedColumnNames('region_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Directory Country Region Name')
+            ->create(),
     );
-    $regionName->addIndex(['region_id']);
-    $regionName->addForeignKeyConstraint(
-        'directory_country_region',
-        ['region_id'],
-        ['region_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $regionName->setComment('Directory Country Region Name');
 
-    $countryName = $schema->createTable('directory_country_name');
-    $countryName->addColumn('locale', Types::STRING, ['length' => 8,   'default' => '']);
-    $countryName->addColumn('country_id', Types::STRING, ['length' => 2,   'default' => '']);
-    $countryName->addColumn('name', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $countryName->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('locale', 'country_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('directory_country_name')
+            ->addColumn(Column::editor()->setUnquotedName('locale')->setTypeName(Types::STRING)->setLength(8)->setDefaultValue('')->create())
+            ->addColumn(Column::editor()->setUnquotedName('country_id')->setTypeName(Types::STRING)->setLength(2)->setDefaultValue('')->create())
+            ->addColumn(Column::editor()->setUnquotedName('name')->setTypeName(Types::STRING)->setLength(255)->setNotNull(false)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('locale', 'country_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('country_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('country_id')
+                    ->setUnquotedReferencedTableName('directory_country')
+                    ->setUnquotedReferencedColumnNames('country_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Directory Country Name')
+            ->create(),
     );
-    $countryName->addIndex(['country_id']);
-    $countryName->addForeignKeyConstraint(
-        'directory_country',
-        ['country_id'],
-        ['country_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $countryName->setComment('Directory Country Name');
 
-    $currencyRate = $schema->createTable('directory_currency_rate');
-    $currencyRate->addColumn('currency_from', Types::STRING, ['length' => 3, 'default' => '']);
-    $currencyRate->addColumn('currency_to', Types::STRING, ['length' => 3, 'default' => '']);
-    $currencyRate->addColumn('rate', Types::DECIMAL, ['precision' => 24, 'scale' => 12, 'default' => '0.000000000000']);
-    $currencyRate->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('currency_from', 'currency_to')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('directory_currency_rate')
+            ->addColumn(Column::editor()->setUnquotedName('currency_from')->setTypeName(Types::STRING)->setLength(3)->setDefaultValue('')->create())
+            ->addColumn(Column::editor()->setUnquotedName('currency_to')->setTypeName(Types::STRING)->setLength(3)->setDefaultValue('')->create())
+            ->addColumn(Column::editor()->setUnquotedName('rate')->setTypeName(Types::DECIMAL)->setPrecision(24)->setScale(12)->setDefaultValue('0.000000000000')->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('currency_from', 'currency_to')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('currency_to'))
+            ->setComment('Directory Currency Rate')
+            ->create(),
     );
-    $currencyRate->addIndex(['currency_to']);
-    $currencyRate->setComment('Directory Currency Rate');
 };

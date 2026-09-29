@@ -8,126 +8,167 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
+use Doctrine\DBAL\Schema\ForeignKeyConstraint;
+use Doctrine\DBAL\Schema\ForeignKeyConstraint\ReferentialAction;
+use Doctrine\DBAL\Schema\Index;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
-use Doctrine\DBAL\Schema\Schema;
+use Doctrine\DBAL\Schema\SchemaEditor;
+use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
 
-return function (Schema $schema): void {
-    $entity = $schema->createTable('review_entity');
-    $entity->addColumn('entity_id', Types::SMALLINT, ['unsigned' => true, 'autoincrement' => true]);
-    $entity->addColumn('entity_code', Types::STRING, ['length' => 32]);
-    $entity->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create(),
+return function (SchemaEditor $schema): void {
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('review_entity')
+            ->addColumn(Column::editor()->setUnquotedName('entity_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('entity_code')->setTypeName(Types::STRING)->setLength(32)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create())
+            ->setComment('Review entities')
+            ->create(),
     );
-    $entity->setComment('Review entities');
 
-    $status = $schema->createTable('review_status');
-    $status->addColumn('status_id', Types::SMALLINT, ['unsigned' => true, 'autoincrement' => true]);
-    $status->addColumn('status_code', Types::STRING, ['length' => 32]);
-    $status->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('status_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('review_status')
+            ->addColumn(Column::editor()->setUnquotedName('status_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('status_code')->setTypeName(Types::STRING)->setLength(32)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('status_id')->create())
+            ->setComment('Review statuses')
+            ->create(),
     );
-    $status->setComment('Review statuses');
 
-    $review = $schema->createTable('review');
-    $review->addColumn('review_id', Types::BIGINT, ['unsigned' => true, 'autoincrement' => true]);
-    $review->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
-    $review->addColumn('entity_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $review->addColumn('entity_pk_value', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $review->addColumn('status_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $review->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('review_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('review')
+            ->addColumn(Column::editor()->setUnquotedName('review_id')->setTypeName(Types::BIGINT)->setUnsigned(true)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('created_at')->setTypeName(Types::DATETIME_MUTABLE)->setDefaultValue(new CurrentTimestamp())->create())
+            ->addColumn(Column::editor()->setUnquotedName('entity_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('entity_pk_value')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('status_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('review_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('entity_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('status_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('entity_pk_value'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('entity_id')
+                    ->setUnquotedReferencedTableName('review_entity')
+                    ->setUnquotedReferencedColumnNames('entity_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('status_id')
+                    ->setUnquotedReferencedTableName('review_status')
+                    ->setUnquotedReferencedColumnNames('status_id')
+                    ->setOnUpdateAction(ReferentialAction::NO_ACTION)
+                    ->setOnDeleteAction(ReferentialAction::NO_ACTION)
+                    ->create(),
+            )
+            ->setComment('Review base information')
+            ->create(),
     );
-    $review->addIndex(['entity_id']);
-    $review->addIndex(['status_id']);
-    $review->addIndex(['entity_pk_value']);
-    $review->addForeignKeyConstraint(
-        'review_entity',
-        ['entity_id'],
-        ['entity_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $review->addForeignKeyConstraint(
-        'review_status',
-        ['status_id'],
-        ['status_id'],
-        ['onUpdate' => 'NO ACTION', 'onDelete' => 'NO ACTION'],
-    );
-    $review->setComment('Review base information');
 
-    $detail = $schema->createTable('review_detail');
-    $detail->addColumn('detail_id', Types::BIGINT, ['unsigned' => true, 'autoincrement' => true]);
-    $detail->addColumn('review_id', Types::BIGINT, ['unsigned' => true, 'default' => 0]);
-    $detail->addColumn('store_id', Types::SMALLINT, ['unsigned' => true, 'notnull' => false, 'default' => 0]);
-    $detail->addColumn('title', Types::STRING, ['length' => 255]);
-    $detail->addColumn('detail', Types::TEXT, ['length' => 65535]);
-    $detail->addColumn('nickname', Types::STRING, ['length' => 128]);
-    $detail->addColumn('customer_id', Types::INTEGER, ['unsigned' => true, 'notnull' => false]);
-    $detail->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('detail_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('review_detail')
+            ->addColumn(Column::editor()->setUnquotedName('detail_id')->setTypeName(Types::BIGINT)->setUnsigned(true)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('review_id')->setTypeName(Types::BIGINT)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('store_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setNotNull(false)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('title')->setTypeName(Types::STRING)->setLength(255)->create())
+            ->addColumn(Column::editor()->setUnquotedName('detail')->setTypeName(Types::TEXT)->setLength(65535)->create())
+            ->addColumn(Column::editor()->setUnquotedName('nickname')->setTypeName(Types::STRING)->setLength(128)->create())
+            ->addColumn(Column::editor()->setUnquotedName('customer_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setNotNull(false)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('detail_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('review_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('customer_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('customer_id')
+                    ->setUnquotedReferencedTableName('customer_entity')
+                    ->setUnquotedReferencedColumnNames('entity_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::SET_NULL)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('review_id')
+                    ->setUnquotedReferencedTableName('review')
+                    ->setUnquotedReferencedColumnNames('review_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('store_id')
+                    ->setUnquotedReferencedTableName('core_store')
+                    ->setUnquotedReferencedColumnNames('store_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::SET_NULL)
+                    ->create(),
+            )
+            ->setComment('Review detail information')
+            ->create(),
     );
-    $detail->addIndex(['review_id']);
-    $detail->addIndex(['store_id']);
-    $detail->addIndex(['customer_id']);
-    $detail->addForeignKeyConstraint(
-        'customer_entity',
-        ['customer_id'],
-        ['entity_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'],
-    );
-    $detail->addForeignKeyConstraint(
-        'review',
-        ['review_id'],
-        ['review_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $detail->addForeignKeyConstraint(
-        'core_store',
-        ['store_id'],
-        ['store_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'],
-    );
-    $detail->setComment('Review detail information');
 
     // Physical table name is review_entity_summary (config alias review/review_aggregate).
-    $summary = $schema->createTable('review_entity_summary');
-    $summary->addColumn('primary_id', Types::BIGINT, ['autoincrement' => true]);
-    $summary->addColumn('entity_pk_value', Types::BIGINT, ['default' => 0]);
-    $summary->addColumn('entity_type', Types::SMALLINT, ['default' => 0]);
-    $summary->addColumn('reviews_count', Types::SMALLINT, ['default' => 0]);
-    $summary->addColumn('rating_summary', Types::SMALLINT, ['default' => 0]);
-    $summary->addColumn('store_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $summary->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('primary_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('review_entity_summary')
+            ->addColumn(Column::editor()->setUnquotedName('primary_id')->setTypeName(Types::BIGINT)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('entity_pk_value')->setTypeName(Types::BIGINT)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('entity_type')->setTypeName(Types::SMALLINT)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('reviews_count')->setTypeName(Types::SMALLINT)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('rating_summary')->setTypeName(Types::SMALLINT)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('store_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('primary_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('store_id')
+                    ->setUnquotedReferencedTableName('core_store')
+                    ->setUnquotedReferencedColumnNames('store_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Review aggregates')
+            ->create(),
     );
-    $summary->addIndex(['store_id']);
-    $summary->addForeignKeyConstraint(
-        'core_store',
-        ['store_id'],
-        ['store_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $summary->setComment('Review aggregates');
 
-    $store = $schema->createTable('review_store');
-    $store->addColumn('review_id', Types::BIGINT, ['unsigned' => true]);
-    $store->addColumn('store_id', Types::SMALLINT, ['unsigned' => true]);
-    $store->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('review_id', 'store_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('review_store')
+            ->addColumn(Column::editor()->setUnquotedName('review_id')->setTypeName(Types::BIGINT)->setUnsigned(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('store_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('review_id', 'store_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('review_id')
+                    ->setUnquotedReferencedTableName('review')
+                    ->setUnquotedReferencedColumnNames('review_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('store_id')
+                    ->setUnquotedReferencedTableName('core_store')
+                    ->setUnquotedReferencedColumnNames('store_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Review Store')
+            ->create(),
     );
-    $store->addIndex(['store_id']);
-    $store->addForeignKeyConstraint(
-        'review',
-        ['review_id'],
-        ['review_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $store->addForeignKeyConstraint(
-        'core_store',
-        ['store_id'],
-        ['store_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $store->setComment('Review Store');
 };

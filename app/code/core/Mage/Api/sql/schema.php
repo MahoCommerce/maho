@@ -8,31 +8,45 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Schema\Column;
+use Doctrine\DBAL\Schema\ForeignKeyConstraint;
+use Doctrine\DBAL\Schema\ForeignKeyConstraint\ReferentialAction;
+use Doctrine\DBAL\Schema\Index;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
-use Doctrine\DBAL\Schema\Schema;
+use Doctrine\DBAL\Schema\SchemaEditor;
+use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
 
-return function (Schema $schema): void {
-    $assert = $schema->createTable('api_assert');
-    $assert->addColumn('assert_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $assert->addColumn('assert_type', Types::STRING, ['length' => 20, 'notnull' => false]);
-    $assert->addColumn('assert_data', Types::TEXT, ['length' => 65535, 'notnull' => false]);
-    $assert->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('assert_id')->create(),
+return function (SchemaEditor $schema): void {
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('api_assert')
+            ->addColumn(Column::editor()->setUnquotedName('assert_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('assert_type')->setTypeName(Types::STRING)->setLength(20)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('assert_data')->setTypeName(Types::TEXT)->setLength(65535)->setNotNull(false)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('assert_id')->create())
+            ->setComment('Api ACL Asserts')
+            ->create(),
     );
-    $assert->setComment('Api ACL Asserts');
 
-    $session = $schema->createTable('api_session');
-    $session->addColumn('user_id', Types::INTEGER, ['unsigned' => true]);
-    $session->addColumn('logdate', Types::DATETIME_MUTABLE, ['notnull' => false]);
-    $session->addColumn('sessid', Types::STRING, ['length' => 40, 'notnull' => false]);
-    $session->addIndex(['user_id']);
-    $session->addIndex(['sessid']);
-    $session->addForeignKeyConstraint(
-        'api_user',
-        ['user_id'],
-        ['user_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('api_session')
+            ->addColumn(Column::editor()->setUnquotedName('user_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('logdate')->setTypeName(Types::DATETIME_MUTABLE)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('sessid')->setTypeName(Types::STRING)->setLength(40)->setNotNull(false)->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('user_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('sessid'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('user_id')
+                    ->setUnquotedReferencedTableName('api_user')
+                    ->setUnquotedReferencedColumnNames('user_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Api Sessions')
+            ->create(),
     );
-    $session->setComment('Api Sessions');
 };

@@ -9,12 +9,13 @@ declare(strict_types=1);
 
 namespace Maho\Db\Schema;
 
+use Doctrine\DBAL\Schema\ColumnEditor;
 use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
 use Doctrine\DBAL\Schema\Index;
+use Doctrine\DBAL\Schema\Name\UnqualifiedName;
 use Doctrine\DBAL\Schema\Table;
-use Doctrine\DBAL\Types\FloatType;
-use Doctrine\DBAL\Types\SmallFloatType;
-use Doctrine\DBAL\Types\Type;
+use Doctrine\DBAL\Schema\TableEditor;
+use Doctrine\DBAL\Types\Types;
 
 /**
  * Reduce an introspected table and its declarative target to the same
@@ -41,8 +42,8 @@ use Doctrine\DBAL\Types\Type;
  *     counterpart (see stripPhantomIndexes()).
  *
  * The equivalence applied here is purely representational, so it never hides a
- * genuine structural difference. Methods mutate the passed tables in place;
- * both are built fresh per plan() (introspection / Collector).
+ * genuine structural difference. DBAL tables are immutable, so each step
+ * records its change on a TableEditor and reconcile() returns the new tables.
  */
 final class Canonicalizer
 {
@@ -52,21 +53,34 @@ final class Canonicalizer
      * @param list<string> $physicalLiveIndexNames Names of the indexes that
      *        physically exist on the live table (from introspectTableIndexes),
      *        used to tell a real index from a DBAL-synthesized phantom.
+     * @return array{Table, Table} the reconciled live and target tables
      */
-    public static function reconcile(Table $live, Table $target, array $physicalLiveIndexNames): void
+    public static function reconcile(Table $live, Table $target, array $physicalLiveIndexNames): array
     {
-        self::stripPhantomIndexes($live, $physicalLiveIndexNames);
-        self::alignIndexNames($live, $target);
-        self::alignTableCharset($live, $target);
-        self::stripColumnComments($live);
-        self::stripColumnComments($target);
-        self::reconcileColumns($live, $target);
-        self::preserveUndeclaredColumns($live, $target);
+        $physical = array_fill_keys(array_map(strtolower(...), $physicalLiveIndexNames), true);
+        $liveEditor = $live->edit();
+        $targetEditor = $target->edit();
+
+        foreach (self::alignIndexNames($live, $target, $physical) as [$from, $to]) {
+            $liveEditor->renameIndex($from, $to);
+            $physical[strtolower($to->toString())] = true;
+        }
+        self::alignTableCharset($live, $target, $targetEditor);
+        self::stripColumnComments($live, $liveEditor);
+        self::stripColumnComments($target, $targetEditor);
+        self::reconcileColumns($live, $target, $liveEditor);
+        self::preserveUndeclaredColumns($live, $target, $targetEditor);
         // Only columns are preserved, not indexes/FKs. An undeclared index or FK
         // on a managed table is legacy cruft the migration normalizes away (the
         // declarative target is the canonical structure); declare it in a
         // schema.php to keep it. Columns differ: they hold data, so dropping one
         // is irreversible loss.
+
+        // Last: TableEditor::create() synthesizes the implicit FK indexes again.
+        $live = $liveEditor->create();
+        self::stripPhantomIndexes($live, $physical);
+
+        return [$live, $targetEditor->create()];
     }
 
     /**
@@ -87,20 +101,27 @@ final class Canonicalizer
      * physical index list (introspectTableIndexes). The primary key is never a
      * phantom.
      *
-     * @param list<string> $physicalIndexNames
+     * @param array<string, true> $physical lowercased physical index names
      */
-    private static function stripPhantomIndexes(Table $table, array $physicalIndexNames): void
+    private static function stripPhantomIndexes(Table $table, array $physical): void
     {
-        $physical = array_map(strtolower(...), $physicalIndexNames);
         foreach ($table->getIndexes() as $index) {
-            if (self::isPrimaryIndex($table, $index)) {
-                continue;
-            }
-            $name = $index->getObjectName()->toString();
-            if (!in_array(strtolower($name), $physical, true)) {
-                $table->dropIndex($name);
+            if (self::isPhantom($table, $index, $physical)) {
+                // TableEditor has no replacement: Table::edit() leaves out an
+                // implicit FK index and TableEditor::create() adds it again.
+                // @phpstan-ignore method.deprecated
+                $table->dropIndex($index->getObjectName()->toString());
             }
         }
+    }
+
+    /**
+     * @param array<string, true> $physical lowercased physical index names
+     */
+    private static function isPhantom(Table $table, Index $index, array $physical): bool
+    {
+        return !self::isPrimaryIndex($table, $index)
+            && !isset($physical[strtolower($index->getObjectName()->toString())]);
     }
 
     /**
@@ -110,9 +131,16 @@ final class Canonicalizer
      * name, so this realignment is invisible to a structural comparison and
      * removes the rename churn the Comparator would otherwise generate (every
      * legacy index name differs from DBAL's autogenerated one).
+     *
+     * A phantom never claims a target name: the target index it matches must
+     * still be created.
+     *
+     * @param array<string, true> $physical lowercased physical index names
+     * @return list<array{UnqualifiedName, UnqualifiedName}> live index renames, from => to
      */
-    private static function alignIndexNames(Table $live, Table $target): void
+    private static function alignIndexNames(Table $live, Table $target, array $physical): array
     {
+        $renames = [];
         $usedTargetNames = [];
         $targetBySignature = [];
         foreach ($target->getIndexes() as $index) {
@@ -121,14 +149,14 @@ final class Canonicalizer
             }
             // Keep all candidates per signature; a single signature can name
             // more than one structurally-identical target index.
-            $targetBySignature[self::indexSignature($index)][] = $index->getObjectName()->toString();
+            $targetBySignature[self::indexSignature($index)][] = $index->getObjectName();
         }
         if ($targetBySignature === []) {
-            return;
+            return [];
         }
 
         foreach ($live->getIndexes() as $index) {
-            if (self::isPrimaryIndex($live, $index)) {
+            if (self::isPrimaryIndex($live, $index) || self::isPhantom($live, $index, $physical)) {
                 continue;
             }
             $signature = self::indexSignature($index);
@@ -137,7 +165,7 @@ final class Canonicalizer
             // If the live name is already a valid target name for this signature,
             // claim it and move on — never rename a correctly-named index.
             $candidates = $targetBySignature[$signature] ?? [];
-            $matchLower = array_map(strtolower(...), $candidates);
+            $matchLower = array_map(static fn(UnqualifiedName $name): string => strtolower($name->toString()), $candidates);
             if (in_array(strtolower($liveName), $matchLower, true)) {
                 $usedTargetNames[strtolower($liveName)] = true;
                 continue;
@@ -147,14 +175,17 @@ final class Canonicalizer
             // not already present on the live table (renaming onto an existing
             // name would collide).
             foreach ($candidates as $candidate) {
-                if (isset($usedTargetNames[strtolower($candidate)]) || $live->hasIndex($candidate)) {
+                $candidateName = $candidate->toString();
+                if (isset($usedTargetNames[strtolower($candidateName)]) || $live->hasIndex($candidateName)) {
                     continue;
                 }
-                $live->renameIndex($liveName, $candidate);
-                $usedTargetNames[strtolower($candidate)] = true;
+                $renames[] = [$index->getObjectName(), $candidate];
+                $usedTargetNames[strtolower($candidateName)] = true;
                 break;
             }
         }
+
+        return $renames;
     }
 
     /**
@@ -166,7 +197,7 @@ final class Canonicalizer
      * drops a column's charset/collation when it equals the *table's* — by a
      * strict string compare (array_diff_assoc). A legacy install reports its
      * tables as 'utf8mb3', while the declarative target sets the legacy adapter's
-     * historical alias 'utf8' (see Collector::applyTableDefaults). The two are
+     * historical alias 'utf8' (see Collector::finalizeTable). The two are
      * the same charset, but the literal strings differ, so for a column added to
      * a legacy core table by a third-party module (introspected as utf8mb3, then
      * merged into the target by preserveUndeclaredColumns) the Comparator strips
@@ -179,8 +210,9 @@ final class Canonicalizer
      * genuine table charset migration (e.g. utf8mb3 to utf8mb4) keeps differing
      * strings so the Comparator still emits it.
      */
-    private static function alignTableCharset(Table $live, Table $target): void
+    private static function alignTableCharset(Table $live, Table $target, TableEditor $targetEditor): void
     {
+        $aligned = [];
         foreach (['charset', 'collation'] as $option) {
             if (!$live->hasOption($option) || !$target->hasOption($option)) {
                 continue;
@@ -188,8 +220,14 @@ final class Canonicalizer
             $liveValue = (string) $live->getOption($option);
             $targetValue = (string) $target->getOption($option);
             if ($liveValue !== $targetValue && self::charsetSynonyms($liveValue, $targetValue)) {
-                $target->addOption($option, $liveValue);
+                $aligned[$option] = $liveValue;
             }
+        }
+
+        if ($aligned !== []) {
+            // Table::edit() moves the comment out of the options, so keep it out.
+            $options = array_diff_key($target->getOptions(), ['comment' => true]);
+            $targetEditor->setOptions([...$options, ...$aligned]);
         }
     }
 
@@ -219,7 +257,7 @@ final class Canonicalizer
     private static function indexSignature(Index $index): string
     {
         $columns = array_map(
-            static fn($column): string => strtolower(trim($column->getColumnName()->toString(), '"`'))
+            static fn($column): string => strtolower($column->getColumnName()->getIdentifier()->getValue())
                 . ':' . ($column->getLength() ?? ''),
             $index->getIndexedColumns(),
         );
@@ -232,10 +270,14 @@ final class Canonicalizer
      * dump ignores them, and they are the largest single source of phantom
      * column diffs.
      */
-    private static function stripColumnComments(Table $table): void
+    private static function stripColumnComments(Table $table, TableEditor $editor): void
     {
         foreach ($table->getColumns() as $column) {
-            $column->setComment('');
+            if ($column->getComment() !== '') {
+                $editor->modifyColumn($column->getObjectName(), static function (ColumnEditor $columnEditor): void {
+                    $columnEditor->setComment('');
+                });
+            }
         }
     }
 
@@ -246,7 +288,7 @@ final class Canonicalizer
      * nullability change, a different default value) are left untouched so the
      * Comparator still emits them.
      */
-    private static function reconcileColumns(Table $live, Table $target): void
+    private static function reconcileColumns(Table $live, Table $target, TableEditor $liveEditor): void
     {
         foreach ($target->getColumns() as $targetColumn) {
             $name = $targetColumn->getObjectName()->toString();
@@ -254,6 +296,7 @@ final class Canonicalizer
                 continue;
             }
             $liveColumn = $live->getColumn($name);
+            $sameType = $liveColumn->getTypeName() === $targetColumn->getTypeName();
 
             // Only reconcile the default when the types already match. When the
             // type itself changes (e.g. boolean to smallint), the default changes
@@ -261,21 +304,12 @@ final class Canonicalizer
             // default here would make the two look equal and suppress the
             // Comparator's SET DEFAULT, leaving the migrated column without the
             // target default.
-            if ($liveColumn->getType()::class === $targetColumn->getType()::class
-                && self::defaultsEquivalent($liveColumn->getDefault(), $targetColumn->getDefault())
-            ) {
-                $liveColumn->setDefault($targetColumn->getDefault());
-            }
+            $alignDefault = $sameType && self::defaultsEquivalent($liveColumn->getDefault(), $targetColumn->getDefault());
 
             // MySQL reports a storage precision/scale for float/double columns
             // (e.g. 22/0) that the declarative schema never sets. Align them so
             // DOUBLE(22,0) vs DOUBLE stops re-emitting forever.
-            if ($liveColumn->getType() instanceof FloatType && $targetColumn->getType() instanceof FloatType
-                || $liveColumn->getType() instanceof SmallFloatType && $targetColumn->getType() instanceof SmallFloatType
-            ) {
-                $liveColumn->setPrecision($targetColumn->getPrecision());
-                $liveColumn->setScale($targetColumn->getScale());
-            }
+            $alignFloat = $sameType && in_array($targetColumn->getTypeName(), [Types::FLOAT, Types::SMALLFLOAT], true);
 
             // Postgres represents an autoincrement column the legacy installer
             // created as SERIAL (a nextval(...) default), the declarative schema
@@ -286,12 +320,27 @@ final class Canonicalizer
             // avoids rebuilding the live sequence — which would restart its
             // counter and collide with existing rows.
             $liveDefault = $liveColumn->getDefault();
-            if ($targetColumn->getAutoincrement() && !$liveColumn->getAutoincrement()
-                && is_string($liveDefault) && str_starts_with(strtolower($liveDefault), 'nextval(')
-            ) {
-                $liveColumn->setAutoincrement(true);
-                $liveColumn->setDefault($targetColumn->getDefault());
+            $alignIdentity = $targetColumn->getAutoincrement() && !$liveColumn->getAutoincrement()
+                && is_string($liveDefault) && str_starts_with(strtolower($liveDefault), 'nextval(');
+
+            if (!$alignDefault && !$alignFloat && !$alignIdentity) {
+                continue;
             }
+
+            $liveEditor->modifyColumn(
+                $liveColumn->getObjectName(),
+                static function (ColumnEditor $column) use ($targetColumn, $alignDefault, $alignFloat, $alignIdentity): void {
+                    if ($alignDefault || $alignIdentity) {
+                        $column->setDefaultValue($targetColumn->getDefault());
+                    }
+                    if ($alignFloat) {
+                        $column->setPrecision($targetColumn->getPrecision())->setScale($targetColumn->getScale());
+                    }
+                    if ($alignIdentity) {
+                        $column->setAutoincrement(true);
+                    }
+                },
+            );
         }
     }
 
@@ -330,30 +379,16 @@ final class Canonicalizer
      * denylist. For a clean core install there are no undeclared columns, so
      * this is a no-op and full parity with a fresh install is preserved.
      *
-     * The merged column is copied from the (already comment-stripped) live
-     * column, so the Comparator then sees it as equal.
+     * The merged column is a comment-stripped copy of the live column, so the
+     * Comparator then sees it as equal.
      */
-    private static function preserveUndeclaredColumns(Table $live, Table $target): void
+    private static function preserveUndeclaredColumns(Table $live, Table $target, TableEditor $targetEditor): void
     {
         foreach ($live->getColumns() as $column) {
             if ($target->hasColumn($column->getObjectName()->toString())) {
                 continue;
             }
-            // Column::toArray() flattens platform options (charset, collation,
-            // ...) into the top level, but Table::addColumn() only accepts the
-            // generic column options and rejects the rest. Keep the generic
-            // keys; route everything else back through platformOptions.
-            $generic = ['default', 'notnull', 'length', 'precision', 'scale', 'fixed', 'unsigned', 'autoincrement', 'columnDefinition', 'comment', 'values'];
-            $options = array_intersect_key($column->toArray(), array_flip($generic));
-            $platformOptions = [];
-            if ($column->getCharset() !== null) {
-                $platformOptions['charset'] = $column->getCharset();
-            }
-            if ($column->getCollation() !== null) {
-                $platformOptions['collation'] = $column->getCollation();
-            }
-            $options['platformOptions'] = $platformOptions;
-            $target->addColumn($column->getObjectName()->toString(), Type::lookupName($column->getType()), $options);
+            $targetEditor->addColumn($column->edit()->setComment('')->create());
         }
     }
 

@@ -8,201 +8,259 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Schema\Column;
+use Doctrine\DBAL\Schema\ForeignKeyConstraint;
+use Doctrine\DBAL\Schema\ForeignKeyConstraint\ReferentialAction;
+use Doctrine\DBAL\Schema\Index;
+use Doctrine\DBAL\Schema\Index\IndexType;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
-use Doctrine\DBAL\Schema\Schema;
+use Doctrine\DBAL\Schema\SchemaEditor;
+use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
 
-return function (Schema $schema): void {
-    $rule = $schema->createTable('catalogrule');
-    $rule->addColumn('rule_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $rule->addColumn('name', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $rule->addColumn('description', Types::TEXT, ['length' => 65535, 'notnull' => false]);
-    $rule->addColumn('from_date', Types::DATE_MUTABLE, ['notnull' => false]);
-    $rule->addColumn('to_date', Types::DATE_MUTABLE, ['notnull' => false]);
-    $rule->addColumn('is_active', Types::SMALLINT, ['default' => 0]);
-    $rule->addColumn('conditions_serialized', Types::TEXT, ['length' => 2097152, 'notnull' => false]);
-    $rule->addColumn('actions_serialized', Types::TEXT, ['length' => 2097152, 'notnull' => false]);
-    $rule->addColumn('stop_rules_processing', Types::SMALLINT, ['default' => 1]);
-    $rule->addColumn('sort_order', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $rule->addColumn('simple_action', Types::STRING, ['length' => 32, 'notnull' => false]);
-    $rule->addColumn('discount_amount', Types::DECIMAL, ['precision' => 12, 'scale' => 4, 'default' => '0.0000']);
-    $rule->addColumn('sub_is_enable', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $rule->addColumn('sub_simple_action', Types::STRING, ['length' => 32, 'notnull' => false]);
-    $rule->addColumn('sub_discount_amount', Types::DECIMAL, ['precision' => 12, 'scale' => 4, 'default' => '0.0000']);
-    $rule->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rule_id')->create(),
+return function (SchemaEditor $schema): void {
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('catalogrule')
+            ->addColumn(Column::editor()->setUnquotedName('rule_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('name')->setTypeName(Types::STRING)->setLength(255)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('description')->setTypeName(Types::TEXT)->setLength(65535)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('from_date')->setTypeName(Types::DATE_MUTABLE)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('to_date')->setTypeName(Types::DATE_MUTABLE)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('is_active')->setTypeName(Types::SMALLINT)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('conditions_serialized')->setTypeName(Types::TEXT)->setLength(2097152)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('actions_serialized')->setTypeName(Types::TEXT)->setLength(2097152)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('stop_rules_processing')->setTypeName(Types::SMALLINT)->setDefaultValue(1)->create())
+            ->addColumn(Column::editor()->setUnquotedName('sort_order')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('simple_action')->setTypeName(Types::STRING)->setLength(32)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('discount_amount')->setTypeName(Types::DECIMAL)->setPrecision(12)->setScale(4)->setDefaultValue('0.0000')->create())
+            ->addColumn(Column::editor()->setUnquotedName('sub_is_enable')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('sub_simple_action')->setTypeName(Types::STRING)->setLength(32)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('sub_discount_amount')->setTypeName(Types::DECIMAL)->setPrecision(12)->setScale(4)->setDefaultValue('0.0000')->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rule_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('is_active', 'sort_order', 'to_date', 'from_date'))
+            ->setComment('CatalogRule')
+            ->create(),
     );
-    $rule->addIndex(['is_active', 'sort_order', 'to_date', 'from_date']);
-    $rule->setComment('CatalogRule');
 
-    $ruleProduct = $schema->createTable('catalogrule_product');
-    $ruleProduct->addColumn('rule_product_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $ruleProduct->addColumn('rule_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $ruleProduct->addColumn('from_time', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $ruleProduct->addColumn('to_time', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $ruleProduct->addColumn('customer_group_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $ruleProduct->addColumn('product_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $ruleProduct->addColumn('action_operator', Types::STRING, ['length' => 10, 'notnull' => false, 'default' => 'to_fixed']);
-    $ruleProduct->addColumn('action_amount', Types::DECIMAL, ['precision' => 12, 'scale' => 4, 'default' => '0.0000']);
-    $ruleProduct->addColumn('action_stop', Types::SMALLINT, ['default' => 0]);
-    $ruleProduct->addColumn('sort_order', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $ruleProduct->addColumn('website_id', Types::SMALLINT, ['unsigned' => true]);
-    $ruleProduct->addColumn('sub_simple_action', Types::STRING, ['length' => 32, 'notnull' => false]);
-    $ruleProduct->addColumn('sub_discount_amount', Types::DECIMAL, ['precision' => 12, 'scale' => 4, 'default' => '0.0000']);
-    $ruleProduct->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rule_product_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('catalogrule_product')
+            ->addColumn(Column::editor()->setUnquotedName('rule_product_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('rule_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('from_time')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('to_time')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('customer_group_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('product_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('action_operator')->setTypeName(Types::STRING)->setLength(10)->setNotNull(false)->setDefaultValue('to_fixed')->create())
+            ->addColumn(Column::editor()->setUnquotedName('action_amount')->setTypeName(Types::DECIMAL)->setPrecision(12)->setScale(4)->setDefaultValue('0.0000')->create())
+            ->addColumn(Column::editor()->setUnquotedName('action_stop')->setTypeName(Types::SMALLINT)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('sort_order')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('website_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('sub_simple_action')->setTypeName(Types::STRING)->setLength(32)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('sub_discount_amount')->setTypeName(Types::DECIMAL)->setPrecision(12)->setScale(4)->setDefaultValue('0.0000')->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rule_product_id')->create())
+            ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('rule_id', 'from_time', 'to_time', 'website_id', 'customer_group_id', 'product_id', 'sort_order'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('rule_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('customer_group_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('website_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('from_time'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('to_time'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('product_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('product_id')
+                    ->setUnquotedReferencedTableName('catalog_product_entity')
+                    ->setUnquotedReferencedColumnNames('entity_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('customer_group_id')
+                    ->setUnquotedReferencedTableName('customer_group')
+                    ->setUnquotedReferencedColumnNames('customer_group_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('rule_id')
+                    ->setUnquotedReferencedTableName('catalogrule')
+                    ->setUnquotedReferencedColumnNames('rule_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('website_id')
+                    ->setUnquotedReferencedTableName('core_website')
+                    ->setUnquotedReferencedColumnNames('website_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('CatalogRule Product')
+            ->create(),
     );
-    $ruleProduct->addUniqueIndex(
-        ['rule_id', 'from_time', 'to_time', 'website_id', 'customer_group_id', 'product_id', 'sort_order'],
-    );
-    $ruleProduct->addIndex(['rule_id']);
-    $ruleProduct->addIndex(['customer_group_id']);
-    $ruleProduct->addIndex(['website_id']);
-    $ruleProduct->addIndex(['from_time']);
-    $ruleProduct->addIndex(['to_time']);
-    $ruleProduct->addIndex(['product_id']);
-    $ruleProduct->addForeignKeyConstraint(
-        'catalog_product_entity',
-        ['product_id'],
-        ['entity_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $ruleProduct->addForeignKeyConstraint(
-        'customer_group',
-        ['customer_group_id'],
-        ['customer_group_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $ruleProduct->addForeignKeyConstraint(
-        'catalogrule',
-        ['rule_id'],
-        ['rule_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $ruleProduct->addForeignKeyConstraint(
-        'core_website',
-        ['website_id'],
-        ['website_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $ruleProduct->setComment('CatalogRule Product');
 
-    $rulePrice = $schema->createTable('catalogrule_product_price');
-    $rulePrice->addColumn('rule_product_price_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $rulePrice->addColumn('rule_date', Types::DATE_MUTABLE);
-    $rulePrice->addColumn('customer_group_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $rulePrice->addColumn('product_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $rulePrice->addColumn('rule_price', Types::DECIMAL, ['precision' => 12, 'scale' => 4, 'default' => '0.0000']);
-    $rulePrice->addColumn('website_id', Types::SMALLINT, ['unsigned' => true]);
-    $rulePrice->addColumn('latest_start_date', Types::DATE_MUTABLE, ['notnull' => false]);
-    $rulePrice->addColumn('earliest_end_date', Types::DATE_MUTABLE, ['notnull' => false]);
-    $rulePrice->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rule_product_price_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('catalogrule_product_price')
+            ->addColumn(Column::editor()->setUnquotedName('rule_product_price_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('rule_date')->setTypeName(Types::DATE_MUTABLE)->create())
+            ->addColumn(Column::editor()->setUnquotedName('customer_group_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('product_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('rule_price')->setTypeName(Types::DECIMAL)->setPrecision(12)->setScale(4)->setDefaultValue('0.0000')->create())
+            ->addColumn(Column::editor()->setUnquotedName('website_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('latest_start_date')->setTypeName(Types::DATE_MUTABLE)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('earliest_end_date')->setTypeName(Types::DATE_MUTABLE)->setNotNull(false)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rule_product_price_id')->create())
+            ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('rule_date', 'website_id', 'customer_group_id', 'product_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('customer_group_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('website_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('product_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('product_id')
+                    ->setUnquotedReferencedTableName('catalog_product_entity')
+                    ->setUnquotedReferencedColumnNames('entity_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('customer_group_id')
+                    ->setUnquotedReferencedTableName('customer_group')
+                    ->setUnquotedReferencedColumnNames('customer_group_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('website_id')
+                    ->setUnquotedReferencedTableName('core_website')
+                    ->setUnquotedReferencedColumnNames('website_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('CatalogRule Product Price')
+            ->create(),
     );
-    $rulePrice->addUniqueIndex(
-        ['rule_date', 'website_id', 'customer_group_id', 'product_id'],
-    );
-    $rulePrice->addIndex(['customer_group_id']);
-    $rulePrice->addIndex(['website_id']);
-    $rulePrice->addIndex(['product_id']);
-    $rulePrice->addForeignKeyConstraint(
-        'catalog_product_entity',
-        ['product_id'],
-        ['entity_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $rulePrice->addForeignKeyConstraint(
-        'customer_group',
-        ['customer_group_id'],
-        ['customer_group_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $rulePrice->addForeignKeyConstraint(
-        'core_website',
-        ['website_id'],
-        ['website_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $rulePrice->setComment('CatalogRule Product Price');
 
-    $affected = $schema->createTable('catalogrule_affected_product');
-    $affected->addColumn('product_id', Types::INTEGER, ['unsigned' => true]);
-    $affected->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('product_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('catalogrule_affected_product')
+            ->addColumn(Column::editor()->setUnquotedName('product_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('product_id')->create())
+            ->setComment('CatalogRule Affected Product')
+            ->create(),
     );
-    $affected->setComment('CatalogRule Affected Product');
 
-    $groupWebsite = $schema->createTable('catalogrule_group_website');
-    $groupWebsite->addColumn('rule_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $groupWebsite->addColumn('customer_group_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $groupWebsite->addColumn('website_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $groupWebsite->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rule_id', 'customer_group_id', 'website_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('catalogrule_group_website')
+            ->addColumn(Column::editor()->setUnquotedName('rule_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('customer_group_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('website_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rule_id', 'customer_group_id', 'website_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('rule_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('customer_group_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('website_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('customer_group_id')
+                    ->setUnquotedReferencedTableName('customer_group')
+                    ->setUnquotedReferencedColumnNames('customer_group_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('rule_id')
+                    ->setUnquotedReferencedTableName('catalogrule')
+                    ->setUnquotedReferencedColumnNames('rule_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('website_id')
+                    ->setUnquotedReferencedTableName('core_website')
+                    ->setUnquotedReferencedColumnNames('website_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('CatalogRule Group Website')
+            ->create(),
     );
-    $groupWebsite->addIndex(['rule_id']);
-    $groupWebsite->addIndex(['customer_group_id']);
-    $groupWebsite->addIndex(['website_id']);
-    $groupWebsite->addForeignKeyConstraint(
-        'customer_group',
-        ['customer_group_id'],
-        ['customer_group_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $groupWebsite->addForeignKeyConstraint(
-        'catalogrule',
-        ['rule_id'],
-        ['rule_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $groupWebsite->addForeignKeyConstraint(
-        'core_website',
-        ['website_id'],
-        ['website_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $groupWebsite->setComment('CatalogRule Group Website');
 
-    $ruleWebsite = $schema->createTable('catalogrule_website');
-    $ruleWebsite->addColumn('rule_id', Types::INTEGER, ['unsigned' => true]);
-    $ruleWebsite->addColumn('website_id', Types::SMALLINT, ['unsigned' => true]);
-    $ruleWebsite->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rule_id', 'website_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('catalogrule_website')
+            ->addColumn(Column::editor()->setUnquotedName('rule_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('website_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rule_id', 'website_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('rule_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('website_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('rule_id')
+                    ->setUnquotedReferencedTableName('catalogrule')
+                    ->setUnquotedReferencedColumnNames('rule_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('website_id')
+                    ->setUnquotedReferencedTableName('core_website')
+                    ->setUnquotedReferencedColumnNames('website_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Catalog Rules To Websites Relations')
+            ->create(),
     );
-    $ruleWebsite->addIndex(['rule_id']);
-    $ruleWebsite->addIndex(['website_id']);
-    $ruleWebsite->addForeignKeyConstraint(
-        'catalogrule',
-        ['rule_id'],
-        ['rule_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $ruleWebsite->addForeignKeyConstraint(
-        'core_website',
-        ['website_id'],
-        ['website_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $ruleWebsite->setComment('Catalog Rules To Websites Relations');
 
-    $ruleCustomerGroup = $schema->createTable('catalogrule_customer_group');
-    $ruleCustomerGroup->addColumn('rule_id', Types::INTEGER, ['unsigned' => true]);
-    $ruleCustomerGroup->addColumn('customer_group_id', Types::SMALLINT, ['unsigned' => true]);
-    $ruleCustomerGroup->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rule_id', 'customer_group_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('catalogrule_customer_group')
+            ->addColumn(Column::editor()->setUnquotedName('rule_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('customer_group_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rule_id', 'customer_group_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('rule_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('customer_group_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('rule_id')
+                    ->setUnquotedReferencedTableName('catalogrule')
+                    ->setUnquotedReferencedColumnNames('rule_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('customer_group_id')
+                    ->setUnquotedReferencedTableName('customer_group')
+                    ->setUnquotedReferencedColumnNames('customer_group_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Catalog Rules To Customer Groups Relations')
+            ->create(),
     );
-    $ruleCustomerGroup->addIndex(['rule_id']);
-    $ruleCustomerGroup->addIndex(['customer_group_id']);
-    $ruleCustomerGroup->addForeignKeyConstraint(
-        'catalogrule',
-        ['rule_id'],
-        ['rule_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $ruleCustomerGroup->addForeignKeyConstraint(
-        'customer_group',
-        ['customer_group_id'],
-        ['customer_group_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $ruleCustomerGroup->setComment('Catalog Rules To Customer Groups Relations');
 };

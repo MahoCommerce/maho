@@ -1329,168 +1329,81 @@ class Sqlite extends AbstractPdoAdapter
     /**
      * Drop the Foreign Key from table
      *
-     * SQLite doesn't support ALTER TABLE DROP FOREIGN KEY directly.
-     * This method recreates the table without the specified foreign key.
+     * SQLite has no ALTER TABLE DROP FOREIGN KEY, so the table is rebuilt
+     * without it. A foreign key matches by its name, or by the name
+     * getForeignKeyName() gives its columns: an older rebuild left foreign keys
+     * without a name.
      */
     #[\Override]
     public function dropForeignKey(string $tableName, string $fkName, ?string $schemaName = null): self
     {
         $actualTableName = $this->_getTableName($tableName, $schemaName);
 
-        // Get current foreign keys
-        $foreignKeys = $this->getForeignKeys($actualTableName, $schemaName);
-
-        // Check if the FK exists
-        // SQLite doesn't preserve FK constraint names, so we need to match by:
-        // 1. The stored FK_NAME (if it exists)
-        // 2. The array key
-        // 3. Generating what the FK name WOULD be based on structure
-        $fkNameUpper = strtoupper($fkName);
-        $foundFk = false;
-        $newForeignKeys = [];
-
-        foreach ($foreignKeys as $key => $fk) {
-            $isMatch = false;
-
-            // Check by stored name
-            $existingFkName = strtoupper($fk['FK_NAME'] ?? '');
-            if ($existingFkName !== '' && $existingFkName === $fkNameUpper) {
-                $isMatch = true;
-            }
-
-            // Check by array key
-            if (!$isMatch && strtoupper($key) === $fkNameUpper) {
-                $isMatch = true;
-            }
-
-            // Check by generating expected FK name from structure
-            if (!$isMatch && !empty($fk['COLUMN_NAME']) && !empty($fk['REF_TABLE_NAME']) && !empty($fk['REF_COLUMN_NAME'])) {
-                $generatedName = $this->getForeignKeyName(
-                    $actualTableName,
-                    $fk['COLUMN_NAME'],
-                    $fk['REF_TABLE_NAME'],
-                    $fk['REF_COLUMN_NAME'],
-                );
-                if (strtoupper($generatedName) === $fkNameUpper) {
-                    $isMatch = true;
-                }
-            }
-
-            if (!$isMatch) {
-                $newForeignKeys[$key] = $fk;
-            } else {
-                $foundFk = true;
-            }
-        }
-
-        // If FK wasn't found, nothing to do
-        if (!$foundFk) {
-            return $this;
-        }
-
-        // Get current table columns
-        $describe = $this->describeTable($actualTableName, $schemaName);
-
-        // Build column definitions for CREATE TABLE
-        $columnDefs = [];
-        $columnNames = [];
-
-        foreach ($describe as $colName => $colInfo) {
-            $columnNames[] = $this->quoteIdentifier($colName);
-            $existingDef = [
-                'TYPE' => $colInfo['DATA_TYPE'],
-                'LENGTH' => $colInfo['LENGTH'],
-                'NULLABLE' => $colInfo['NULLABLE'],
-                'DEFAULT' => $colInfo['DEFAULT'],
-                'PRIMARY' => $colInfo['PRIMARY'],
-                'IDENTITY' => $colInfo['IDENTITY'],
-            ];
-            $columnDefs[] = $this->quoteIdentifier($colName) . ' ' . $this->_getColumnDefinition($existingDef);
-        }
-
-        // Get indexes (excluding PRIMARY)
-        $indexes = $this->getIndexList($actualTableName, $schemaName);
-        $indexDefs = [];
-        foreach ($indexes as $indexData) {
-            if ($indexData['KEY_NAME'] === 'PRIMARY' || $indexData['INDEX_TYPE'] === AdapterInterface::INDEX_TYPE_PRIMARY) {
-                continue;
-            }
-            $indexDefs[] = $indexData;
-        }
-
-        // Build foreign key definitions (without the one we're dropping)
-        $fkDefs = [];
-        foreach ($newForeignKeys as $fk) {
-            $fkDefs[] = sprintf(
-                'FOREIGN KEY (%s) REFERENCES %s(%s) ON DELETE %s ON UPDATE %s',
-                $this->quoteIdentifier($fk['COLUMN_NAME']),
-                $this->quoteIdentifier($fk['REF_TABLE_NAME']),
-                $this->quoteIdentifier($fk['REF_COLUMN_NAME']),
-                $fk['ON_DELETE'],
-                $fk['ON_UPDATE'],
-            );
-        }
-
-        // Create temporary table name
-        $tempTableName = $actualTableName . '_temp_' . uniqid();
-
-        $allDefs = array_merge($columnDefs, $fkDefs);
-        $createSql = sprintf(
-            'CREATE TABLE %s (%s)',
-            $this->quoteIdentifier($tempTableName),
-            implode(', ', $allDefs),
-        );
-
-        // Execute table recreation using native SQLite transaction
         $this->_connect();
-        $conn = $this->_connection;
+        $table = $this->_connection->createSchemaManager()->introspectTableByUnquotedName($actualTableName);
 
-        try {
-            $conn->executeStatement('PRAGMA foreign_keys = OFF');
-            $conn->executeStatement('BEGIN TRANSACTION');
-
-            $conn->executeStatement($createSql);
-
-            $copySql = sprintf(
-                'INSERT INTO %s (%s) SELECT %s FROM %s',
-                $this->quoteIdentifier($tempTableName),
-                implode(', ', $columnNames),
-                implode(', ', $columnNames),
-                $this->quoteIdentifier($actualTableName),
-            );
-            $conn->executeStatement($copySql);
-
-            $conn->executeStatement(sprintf('DROP TABLE %s', $this->quoteIdentifier($actualTableName)));
-
-            $conn->executeStatement(sprintf(
-                'ALTER TABLE %s RENAME TO %s',
-                $this->quoteIdentifier($tempTableName),
-                $this->quoteIdentifier($actualTableName),
-            ));
-
-            foreach ($indexDefs as $indexData) {
-                $indexType = $indexData['INDEX_TYPE'] === AdapterInterface::INDEX_TYPE_UNIQUE ? 'UNIQUE ' : '';
-                $indexSql = sprintf(
-                    'CREATE %sINDEX %s ON %s (%s)',
-                    $indexType,
-                    $this->quoteIdentifier($indexData['KEY_NAME']),
-                    $this->quoteIdentifier($actualTableName),
-                    implode(', ', array_map($this->quoteIdentifier(...), $indexData['COLUMNS_LIST'])),
-                );
-                $conn->executeStatement($indexSql);
+        $kept = [];
+        foreach ($table->getForeignKeys() as $foreignKey) {
+            if (!$this->isForeignKeyNamed($actualTableName, $foreignKey, $fkName)) {
+                $kept[] = $foreignKey;
             }
-
-            $conn->executeStatement('COMMIT');
-            $conn->executeStatement('PRAGMA foreign_keys = ON');
-        } catch (\Exception $e) {
-            $conn->executeStatement('ROLLBACK');
-            $conn->executeStatement('PRAGMA foreign_keys = ON');
-            throw new \Maho\Db\Exception(sprintf('Failed to drop foreign key: %s', $e->getMessage()), 0, $e);
         }
 
-        $this->resetDdlCache($actualTableName, $schemaName);
+        if (count($kept) < count($table->getForeignKeys())) {
+            $this->rebuildTable($table, $table->edit()->setForeignKeyConstraints(...$kept)->create());
+            $this->resetDdlCache($actualTableName, $schemaName);
+        }
 
         return $this;
+    }
+
+    private function isForeignKeyNamed(string $tableName, \Doctrine\DBAL\Schema\ForeignKeyConstraint $foreignKey, string $fkName): bool
+    {
+        $name = $foreignKey->getObjectName()?->getIdentifier()->getValue();
+        if ($name !== null && strcasecmp($name, $fkName) === 0) {
+            return true;
+        }
+
+        $columns = $foreignKey->getReferencingColumnNames();
+        $referencedColumns = $foreignKey->getReferencedColumnNames();
+        if (count($columns) !== 1 || count($referencedColumns) !== 1) {
+            return false;
+        }
+
+        return strcasecmp($this->getForeignKeyName(
+            $tableName,
+            $columns[0]->getIdentifier()->getValue(),
+            $foreignKey->getReferencedTableName()->getUnqualifiedName()->getValue(),
+            $referencedColumns[0]->getIdentifier()->getValue(),
+        ), $fkName) === 0;
+    }
+
+    /**
+     * Apply the change from $table to $newTable. SQLite rebuilds the table:
+     * DBAL copies it aside, drops it and creates it again. With foreign keys on,
+     * that DROP TABLE deletes the rows of every child table that cascades, so
+     * the rebuild runs with foreign keys off, in one transaction.
+     */
+    private function rebuildTable(\Doctrine\DBAL\Schema\Table $table, \Doctrine\DBAL\Schema\Table $newTable): void
+    {
+        $schemaManager = $this->_connection->createSchemaManager();
+        $diff = $schemaManager->createComparator()->compareTables($table, $newTable);
+        if ($diff->isEmpty()) {
+            return;
+        }
+
+        // The pragma is a no-op inside a transaction, so it is set first.
+        $foreignKeys = (int) $this->_connection->fetchOne('PRAGMA foreign_keys') === 1;
+        if ($foreignKeys) {
+            $this->_connection->executeStatement('PRAGMA foreign_keys = OFF');
+        }
+        try {
+            $this->_connection->transactional(static fn() => $schemaManager->alterTable($diff));
+        } finally {
+            if ($foreignKeys) {
+                $this->_connection->executeStatement('PRAGMA foreign_keys = ON');
+            }
+        }
     }
 
     /**
@@ -1563,7 +1476,8 @@ class Sqlite extends AbstractPdoAdapter
     /**
      * Change the column name and definition
      *
-     * SQLite 3.25+ supports ALTER TABLE RENAME COLUMN
+     * SQLite 3.25+ renames a column in place. modifyColumn() then applies the
+     * definition, which needs a table rebuild.
      *
      * @throws \Maho\Db\Exception
      */
@@ -1598,9 +1512,9 @@ class Sqlite extends AbstractPdoAdapter
             $this->resetDdlCache($tableName, $schemaName);
         }
 
-        // Note: SQLite doesn't support changing column type via ALTER TABLE
-        // Type changes would require table recreation, which Doctrine DBAL handles
-        // For now, we just handle the rename
+        if ($definition) {
+            $this->modifyColumn($tableName, $newColumnName, $definition, $flushData, $schemaName);
+        }
 
         return $this;
     }
@@ -1629,24 +1543,13 @@ class Sqlite extends AbstractPdoAdapter
         $definition = array_change_key_case($definition, CASE_UPPER);
 
         $this->_connect();
-        $schemaManager = $this->_connection->createSchemaManager();
-        $comparator = $schemaManager->createComparator();
-
-        // Introspect the current table
-        $table = $schemaManager->introspectTableByUnquotedName($actualTableName);
+        $table = $this->_connection->createSchemaManager()->introspectTableByUnquotedName($actualTableName);
 
         // The closure comes from AbstractPdoAdapter, so all three adapters edit a column the same way.
-        $newTable = $table->edit()->modifyColumn(
+        $this->rebuildTable($table, $table->edit()->modifyColumn(
             \Doctrine\DBAL\Schema\Name\UnqualifiedName::unquoted($columnName),
             $this->_buildColumnEditorClosure($definition),
-        )
-            ->create();
-
-        // Compare and apply changes - DBAL handles table recreation for SQLite
-        $diff = $comparator->compareTables($table, $newTable);
-        if (!$diff->isEmpty()) {
-            $schemaManager->alterTable($diff);
-        }
+        )->create());
 
         $this->resetDdlCache($actualTableName, $schemaName);
 
@@ -2296,10 +2199,9 @@ class Sqlite extends AbstractPdoAdapter
      */
     protected function _getIndexesDefinition(\Maho\Db\Ddl\Table $table): array
     {
-        // SQLite unique constraints should be created as named indexes (CREATE UNIQUE INDEX)
-        // rather than anonymous inline constraints (UNIQUE (...)) because:
-        // 1. DBAL cannot introspect anonymous inline constraints
-        // 2. Named indexes are required for insertOnDuplicate's ON CONFLICT detection
+        // SQLite unique constraints are created as named indexes (CREATE UNIQUE INDEX)
+        // rather than anonymous inline constraints (UNIQUE (...)): insertOnDuplicate's
+        // ON CONFLICT detection needs a named index.
         // Unique indexes are created in createTable() after the table is created
         return [];
     }
@@ -2719,18 +2621,8 @@ class Sqlite extends AbstractPdoAdapter
         $pkEditor->setIsClustered(false);
         $primaryKeyConstraint = $pkEditor->create();
 
-        // Create a new table with the primary key using the public editor API
-        // Use setPrimaryKeyConstraint to replace any existing primary key
-        $newTable = $oldTable->edit()
-            ->setPrimaryKeyConstraint($primaryKeyConstraint)
-            ->create();
-
-        // Use DBAL's comparator to generate the table diff
-        $comparator = $schemaManager->createComparator();
-        $tableDiff = $comparator->compareTables($oldTable, $newTable);
-
-        // Let DBAL handle the table recreation
-        $schemaManager->alterTable($tableDiff);
+        // setPrimaryKeyConstraint() replaces any existing primary key
+        $this->rebuildTable($oldTable, $oldTable->edit()->setPrimaryKeyConstraint($primaryKeyConstraint)->create());
 
         $this->resetDdlCache($tableName, $schemaName);
 
@@ -2797,10 +2689,7 @@ class Sqlite extends AbstractPdoAdapter
         }
 
         $this->_connect();
-        $schemaManager = $this->_connection->createSchemaManager();
-        $comparator = $schemaManager->createComparator();
-
-        $table = $schemaManager->introspectTableByUnquotedName($actualTableName);
+        $table = $this->_connection->createSchemaManager()->introspectTableByUnquotedName($actualTableName);
 
         // Map action strings to ReferentialAction enum
         $actionMap = [
@@ -2824,13 +2713,7 @@ class Sqlite extends AbstractPdoAdapter
             ->setOnUpdateAction($onUpdateAction)
             ->create();
 
-        $newTable = $table->edit()->addForeignKeyConstraint($fk)->create();
-
-        // Compare and apply changes - DBAL handles table recreation for SQLite
-        $diff = $comparator->compareTables($table, $newTable);
-        if (!$diff->isEmpty()) {
-            $schemaManager->alterTable($diff);
-        }
+        $this->rebuildTable($table, $table->edit()->addForeignKeyConstraint($fk)->create());
 
         $this->resetDdlCache($actualTableName, $schemaName);
 

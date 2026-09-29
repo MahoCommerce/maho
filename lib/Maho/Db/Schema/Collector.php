@@ -9,10 +9,14 @@ declare(strict_types=1);
 
 namespace Maho\Db\Schema;
 
-use Doctrine\DBAL\Schema\Name\OptionallyQualifiedName;
+use Closure;
 use Doctrine\DBAL\Schema\Schema;
+use Doctrine\DBAL\Schema\SchemaEditor;
+use Doctrine\DBAL\Schema\Table;
 use Mage;
 use Maho;
+use ReflectionFunction;
+use ReflectionNamedType;
 use RuntimeException;
 
 final class Collector
@@ -45,43 +49,49 @@ final class Collector
 
     /**
      * Walk every active module, load its sql/schema.php closure if present,
-     * and let each closure contribute tables to a shared Schema. Then apply
+     * and let each closure add tables to one shared SchemaEditor. Then apply
      * the configured table_prefix and the default table options Maho's legacy
      * adapter uses (charset/collation).
      *
-     * Module load order respects depends_on, so a later module can
-     * $schema->getTable('foo') on a table defined by an earlier one.
+     * Module load order respects depends_on, so a later module can call
+     * $schema->modifyTableByUnquotedName('foo', ...) on a table defined by an
+     * earlier one.
      *
      * @return array{0: Schema, 1: list<string>} the final target schema, and the names of modules that contributed
      */
     public static function collect(): array
     {
-        $schema = new Schema();
+        $editor = Schema::editor();
         $contributors = [];
         foreach (self::sourceFiles() as $modName => $file) {
             $closure = require $file;
             if (!is_callable($closure)) {
                 throw new RuntimeException(
-                    "Expected $file to return a callable that mutates the Schema, got " . get_debug_type($closure),
+                    "Expected $file to return a callable that adds tables to the SchemaEditor, got " . get_debug_type($closure),
                 );
             }
 
-            $closure($schema);
+            self::declare($closure, $editor);
             $contributors[] = $modName;
         }
 
-        $schema = self::rebuildWithPrefix($schema);
-        self::applyTableDefaults($schema);
+        $prefix = self::tablePrefix();
+        $tables = [];
+        foreach ($editor->create()->getTables() as $table) {
+            $declared = $table->hasOption('engine') ? (string) $table->getOption('engine') : null;
+            if ($declared !== null && strcasecmp($declared, 'InnoDB') !== 0) {
+                Mage::log(sprintf(
+                    'Declarative schema: table "%s" declares storage engine "%s"; forced to InnoDB. '
+                    . 'Non-InnoDB engines hold no foreign keys, and writing them inside a transaction '
+                    . 'fails under MySQL 8.4+ (enforce_gtid_consistency=ON, SQLSTATE 1785).',
+                    $table->getObjectName()->getUnqualifiedName()->getValue(),
+                    $declared,
+                ), Mage::LOG_NOTICE);
+            }
 
-        foreach (self::enforceInnoDbEngine($schema) as $tableName => $declared) {
-            Mage::log(sprintf(
-                'Declarative schema: table "%s" declares storage engine "%s"; forced to InnoDB. '
-                . 'Non-InnoDB engines hold no foreign keys, and writing them inside a transaction '
-                . 'fails under MySQL 8.4+ (enforce_gtid_consistency=ON, SQLSTATE 1785).',
-                $tableName,
-                $declared,
-            ), Mage::LOG_NOTICE);
+            $tables[] = self::finalizeTable($table, $prefix);
         }
+        $schema = Schema::editor()->setTables(...$tables)->create();
 
         // The implicit single-column indexes DBAL adds on FK local columns
         // (Table::_addForeignKeyConstraint) are kept. DBAL's Index::isFulfilledBy
@@ -99,45 +109,65 @@ final class Collector
     }
 
     /**
-     * Apply the same table-level charset/collation Maho's legacy adapter emits
-     * (Maho\Db\Ddl\Table::$_options defaults to charset=utf8, collate=utf8_general_ci).
-     * Without this, MySQL refuses foreign keys between a declarative table
-     * (database-default charset, often utf8mb4) and a legacy table (utf8).
-     *
-     * Authors may still override per table via $table->addOption('charset', ...).
+     * Run one schema.php closure. A closure written before DBAL 4.5 takes a
+     * Schema and changes it in place, so it gets one built from the editor,
+     * and its tables go back into the editor.
      */
-    private static function applyTableDefaults(Schema $schema): void
+    private static function declare(callable $closure, SchemaEditor $editor): void
     {
-        foreach ($schema->getTables() as $table) {
-            if (!$table->hasOption('charset')) {
-                $table->addOption('charset', 'utf8');
-            }
-            if (!$table->hasOption('collation')) {
-                $table->addOption('collation', 'utf8_general_ci');
-            }
+        $type = (new ReflectionFunction(Closure::fromCallable($closure))->getParameters()[0] ?? null)?->getType();
+        if ($type instanceof ReflectionNamedType && $type->getName() === SchemaEditor::class) {
+            $closure($editor);
+            return;
         }
+
+        $schema = $editor->create();
+        $closure($schema);
+        $editor->setTables(...$schema->getTables());
     }
 
     /**
-     * Force every declared table to InnoDB. Set unconditionally, not just when an
-     * author names something else: DBAL emits no ENGINE clause for a table that
-     * declares none, which silently inherits @@default_storage_engine. Inert on
-     * PostgreSQL and SQLite, like the charset/collation defaults above.
+     * Bring a declared table to its final form:
      *
-     * @return array<string, string> table name => the engine it declared, when not InnoDB
+     *  - Name each unnamed foreign key. DBAL keys it under the name that
+     *    Table::addForeignKeyConstraint() generates (lowercased), so installs
+     *    keep the FK_<hash> names they had before the editor API.
+     *  - Apply the table prefix to the table and to each referenced table.
+     *    Schema authors declare unprefixed names; the prefix lives in
+     *    app/etc/local.xml.
+     *  - Apply the charset/collation of Maho's legacy adapter
+     *    (Maho\Db\Ddl\Table::$_options defaults to charset=utf8,
+     *    collate=utf8_general_ci). Without it, MySQL refuses foreign keys between
+     *    a declarative table (database-default charset, often utf8mb4) and a
+     *    legacy table (utf8). A table may declare its own charset or collation.
+     *  - Force InnoDB, even when the table declares no engine: DBAL then emits
+     *    no ENGINE clause and the table inherits @@default_storage_engine. Inert
+     *    on PostgreSQL and SQLite.
      */
-    private static function enforceInnoDbEngine(Schema $schema): array
+    private static function finalizeTable(Table $table, string $prefix): Table
     {
-        $overridden = [];
-        foreach ($schema->getTables() as $table) {
-            $declared = $table->hasOption('engine') ? (string) $table->getOption('engine') : null;
-            if ($declared !== null && strcasecmp($declared, 'InnoDB') !== 0) {
-                $overridden[$table->getObjectName()->getUnqualifiedName()->getValue()] = $declared;
+        $foreignKeys = [];
+        foreach ($table->getForeignKeys() as $key => $foreignKey) {
+            $editor = $foreignKey->edit();
+            if ($foreignKey->getObjectName() === null) {
+                $editor->setUnquotedName(strtoupper((string) $key));
             }
-            $table->addOption('engine', 'InnoDB');
+            // getValue() rather than toString(): the latter wraps quoted
+            // identifiers in quotes, which would corrupt the concatenation.
+            $referenced = $foreignKey->getReferencedTableName()->getUnqualifiedName()->getValue();
+            $foreignKeys[] = $editor->setUnquotedReferencedTableName($prefix . $referenced)->create();
         }
 
-        return $overridden;
+        // Table::edit() moves the comment out of the options, so keep it out.
+        $options = array_diff_key($table->getOptions(), ['comment' => true]);
+        $options += ['charset' => 'utf8', 'collation' => 'utf8_general_ci'];
+        $options['engine'] = 'InnoDB';
+
+        return $table->edit()
+            ->setUnquotedName($prefix . $table->getObjectName()->getUnqualifiedName()->getValue())
+            ->setForeignKeyConstraints(...$foreignKeys)
+            ->setOptions(Renamer::applyPrefix($options, $prefix))
+            ->create();
     }
 
     /**
@@ -146,49 +176,5 @@ final class Collector
     public static function tablePrefix(): string
     {
         return (string) Mage::getConfig()->getTablePrefix();
-    }
-
-    /**
-     * Apply the configured table_prefix to table names and FK references.
-     * Schema authors declare unprefixed names (matching M2's db_schema.xml
-     * convention); the prefix lives in app/etc/local.xml.
-     *
-     * DBAL 4.x's Schema::renameTable only updates the legacy _name field and
-     * leaves the parsed-identifier API stale, so we rebuild via Table::edit()
-     * to get fresh OptionallyQualifiedName instances. When the prefix is
-     * empty we return the original schema as-is.
-     */
-    private static function rebuildWithPrefix(Schema $schema): Schema
-    {
-        $prefix = (string) Mage::getConfig()->getTablePrefix();
-
-        if ($prefix === '') {
-            return $schema;
-        }
-
-        $newTables = [];
-        foreach ($schema->getTables() as $old) {
-            $newFks = [];
-            foreach ($old->getForeignKeys() as $fk) {
-                // getValue() rather than toString(): the latter wraps quoted
-                // identifiers in quotes, which would corrupt the concatenation.
-                $newFks[] = $fk->edit()
-                    ->setReferencedTableName(
-                        OptionallyQualifiedName::unquoted($prefix . $fk->getReferencedTableName()->getUnqualifiedName()->getValue()),
-                    )
-                    ->create();
-            }
-
-            $new = $old->edit()
-                ->setName(OptionallyQualifiedName::unquoted($prefix . $old->getObjectName()->getUnqualifiedName()->getValue()))
-                ->setForeignKeyConstraints(...$newFks)
-                ->create();
-
-            Renamer::applyPrefix($new, $prefix);
-
-            $newTables[] = $new;
-        }
-
-        return new Schema($newTables);
     }
 }

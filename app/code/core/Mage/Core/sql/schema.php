@@ -8,317 +8,463 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
+use Doctrine\DBAL\Schema\ForeignKeyConstraint;
+use Doctrine\DBAL\Schema\ForeignKeyConstraint\ReferentialAction;
+use Doctrine\DBAL\Schema\Index;
+use Doctrine\DBAL\Schema\Index\IndexType;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
-use Doctrine\DBAL\Schema\Schema;
+use Doctrine\DBAL\Schema\SchemaEditor;
+use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
 
-return function (Schema $schema): void {
-    $resource = $schema->createTable('core_resource');
-    $resource->addColumn('code', Types::STRING, ['length' => 50]);
-    $resource->addColumn('version', Types::STRING, ['length' => 50, 'notnull' => false]);
-    $resource->addColumn('data_version', Types::STRING, ['length' => 50, 'notnull' => false]);
-    $resource->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('code')->create(),
+return function (SchemaEditor $schema): void {
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('core_resource')
+            ->addColumn(Column::editor()->setUnquotedName('code')->setTypeName(Types::STRING)->setLength(50)->create())
+            ->addColumn(Column::editor()->setUnquotedName('version')->setTypeName(Types::STRING)->setLength(50)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('data_version')->setTypeName(Types::STRING)->setLength(50)->setNotNull(false)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('code')->create())
+            ->setComment('Resources')
+            ->create(),
     );
-    $resource->setComment('Resources');
 
-    $website = $schema->createTable('core_website');
-    $website->addColumn('website_id', Types::SMALLINT, ['unsigned' => true, 'autoincrement' => true]);
-    $website->addColumn('code', Types::STRING, ['length' => 32, 'notnull' => false]);
-    $website->addColumn('name', Types::STRING, ['length' => 64, 'notnull' => false]);
-    $website->addColumn('sort_order', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $website->addColumn('default_group_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $website->addColumn('is_default', Types::SMALLINT, ['unsigned' => true, 'notnull' => false, 'default' => 0]);
-    $website->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('website_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('core_website')
+            ->addColumn(Column::editor()->setUnquotedName('website_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('code')->setTypeName(Types::STRING)->setLength(32)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('name')->setTypeName(Types::STRING)->setLength(64)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('sort_order')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('default_group_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('is_default')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setNotNull(false)->setDefaultValue(0)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('website_id')->create())
+            ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('code'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('sort_order'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('default_group_id'))
+            ->setComment('Websites')
+            ->create(),
     );
-    $website->addUniqueIndex(['code']);
-    $website->addIndex(['sort_order']);
-    $website->addIndex(['default_group_id']);
-    $website->setComment('Websites');
 
-    $storeGroup = $schema->createTable('core_store_group');
-    $storeGroup->addColumn('group_id', Types::SMALLINT, ['unsigned' => true, 'autoincrement' => true]);
-    $storeGroup->addColumn('website_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $storeGroup->addColumn('name', Types::STRING, ['length' => 255]);
-    $storeGroup->addColumn('root_category_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $storeGroup->addColumn('default_store_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $storeGroup->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('group_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('core_store_group')
+            ->addColumn(Column::editor()->setUnquotedName('group_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('website_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('name')->setTypeName(Types::STRING)->setLength(255)->create())
+            ->addColumn(Column::editor()->setUnquotedName('root_category_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('default_store_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('group_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('website_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('default_store_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('website_id')
+                    ->setUnquotedReferencedTableName('core_website')
+                    ->setUnquotedReferencedColumnNames('website_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Store Groups')
+            ->create(),
     );
-    $storeGroup->addIndex(['website_id']);
-    $storeGroup->addIndex(['default_store_id']);
-    $storeGroup->addForeignKeyConstraint('core_website', ['website_id'], ['website_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
-    $storeGroup->setComment('Store Groups');
 
-    $store = $schema->createTable('core_store');
-    $store->addColumn('store_id', Types::SMALLINT, ['unsigned' => true, 'autoincrement' => true]);
-    $store->addColumn('code', Types::STRING, ['length' => 32, 'notnull' => false]);
-    $store->addColumn('website_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $store->addColumn('group_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $store->addColumn('name', Types::STRING, ['length' => 255]);
-    $store->addColumn('sort_order', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $store->addColumn('is_active', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $store->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('store_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('core_store')
+            ->addColumn(Column::editor()->setUnquotedName('store_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('code')->setTypeName(Types::STRING)->setLength(32)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('website_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('group_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('name')->setTypeName(Types::STRING)->setLength(255)->create())
+            ->addColumn(Column::editor()->setUnquotedName('sort_order')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('is_active')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('store_id')->create())
+            ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('code'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('website_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('is_active', 'sort_order'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('group_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('group_id')
+                    ->setUnquotedReferencedTableName('core_store_group')
+                    ->setUnquotedReferencedColumnNames('group_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('website_id')
+                    ->setUnquotedReferencedTableName('core_website')
+                    ->setUnquotedReferencedColumnNames('website_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Stores')
+            ->create(),
     );
-    $store->addUniqueIndex(['code']);
-    $store->addIndex(['website_id']);
-    $store->addIndex(['is_active', 'sort_order']);
-    $store->addIndex(['group_id']);
-    $store->addForeignKeyConstraint('core_store_group', ['group_id'], ['group_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
-    $store->addForeignKeyConstraint('core_website', ['website_id'], ['website_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
-    $store->setComment('Stores');
 
-    $config = $schema->createTable('core_config_data');
-    $config->addColumn('config_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $config->addColumn('scope', Types::STRING, ['length' => 8, 'default' => 'default']);
-    $config->addColumn('scope_id', Types::INTEGER, ['default' => 0]);
-    $config->addColumn('path', Types::STRING, ['length' => 255, 'default' => 'general']);
-    $config->addColumn('value', Types::TEXT, ['length' => 65535, 'notnull' => false]);
-    $config->addColumn('updated_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
-    $config->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('config_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('core_config_data')
+            ->addColumn(Column::editor()->setUnquotedName('config_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('scope')->setTypeName(Types::STRING)->setLength(8)->setDefaultValue('default')->create())
+            ->addColumn(Column::editor()->setUnquotedName('scope_id')->setTypeName(Types::INTEGER)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('path')->setTypeName(Types::STRING)->setLength(255)->setDefaultValue('general')->create())
+            ->addColumn(Column::editor()->setUnquotedName('value')->setTypeName(Types::TEXT)->setLength(65535)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('updated_at')->setTypeName(Types::DATETIME_MUTABLE)->setNotNull(false)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('config_id')->create())
+            ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('scope', 'scope_id', 'path'))
+            ->setComment('Config Data')
+            ->create(),
     );
-    $config->addUniqueIndex(['scope', 'scope_id', 'path']);
-    $config->setComment('Config Data');
 
-    $emailTemplate = $schema->createTable('core_email_template');
-    $emailTemplate->addColumn('template_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $emailTemplate->addColumn('template_code', Types::STRING, ['length' => 150]);
-    $emailTemplate->addColumn('template_text', Types::TEXT, ['length' => 65535]);
-    $emailTemplate->addColumn('template_styles', Types::TEXT, ['length' => 65535, 'notnull' => false]);
-    $emailTemplate->addColumn('template_type', Types::INTEGER, ['unsigned' => true, 'notnull' => false]);
-    $emailTemplate->addColumn('template_subject', Types::STRING, ['length' => 200]);
-    $emailTemplate->addColumn('template_sender_name', Types::STRING, ['length' => 200, 'notnull' => false]);
-    $emailTemplate->addColumn('template_sender_email', Types::STRING, ['length' => 200, 'notnull' => false]);
-    $emailTemplate->addColumn('added_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
-    $emailTemplate->addColumn('modified_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
-    $emailTemplate->addColumn('orig_template_code', Types::STRING, ['length' => 200, 'notnull' => false]);
-    $emailTemplate->addColumn('orig_template_variables', Types::TEXT, ['length' => 65535, 'notnull' => false]);
-    $emailTemplate->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('template_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('core_email_template')
+            ->addColumn(Column::editor()->setUnquotedName('template_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('template_code')->setTypeName(Types::STRING)->setLength(150)->create())
+            ->addColumn(Column::editor()->setUnquotedName('template_text')->setTypeName(Types::TEXT)->setLength(65535)->create())
+            ->addColumn(Column::editor()->setUnquotedName('template_styles')->setTypeName(Types::TEXT)->setLength(65535)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('template_type')->setTypeName(Types::INTEGER)->setUnsigned(true)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('template_subject')->setTypeName(Types::STRING)->setLength(200)->create())
+            ->addColumn(Column::editor()->setUnquotedName('template_sender_name')->setTypeName(Types::STRING)->setLength(200)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('template_sender_email')->setTypeName(Types::STRING)->setLength(200)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('added_at')->setTypeName(Types::DATETIME_MUTABLE)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('modified_at')->setTypeName(Types::DATETIME_MUTABLE)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('orig_template_code')->setTypeName(Types::STRING)->setLength(200)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('orig_template_variables')->setTypeName(Types::TEXT)->setLength(65535)->setNotNull(false)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('template_id')->create())
+            ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('template_code'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('added_at'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('modified_at'))
+            ->setComment('Email Templates')
+            ->create(),
     );
-    $emailTemplate->addUniqueIndex(['template_code']);
-    $emailTemplate->addIndex(['added_at']);
-    $emailTemplate->addIndex(['modified_at']);
-    $emailTemplate->setComment('Email Templates');
 
-    $layoutUpdate = $schema->createTable('core_layout_update');
-    $layoutUpdate->addColumn('layout_update_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $layoutUpdate->addColumn('handle', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $layoutUpdate->addColumn('xml', Types::TEXT, ['length' => 65535, 'notnull' => false]);
-    $layoutUpdate->addColumn('sort_order', Types::SMALLINT, ['default' => 0]);
-    $layoutUpdate->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('layout_update_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('core_layout_update')
+            ->addColumn(Column::editor()->setUnquotedName('layout_update_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('handle')->setTypeName(Types::STRING)->setLength(255)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('xml')->setTypeName(Types::TEXT)->setLength(65535)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('sort_order')->setTypeName(Types::SMALLINT)->setDefaultValue(0)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('layout_update_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('handle'))
+            ->setComment('Layout Updates')
+            ->create(),
     );
-    $layoutUpdate->addIndex(['handle']);
-    $layoutUpdate->setComment('Layout Updates');
 
-    $layoutLink = $schema->createTable('core_layout_link');
-    $layoutLink->addColumn('layout_link_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $layoutLink->addColumn('store_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $layoutLink->addColumn('area', Types::STRING, ['length' => 64, 'notnull' => false]);
-    $layoutLink->addColumn('package', Types::STRING, ['length' => 64, 'notnull' => false]);
-    $layoutLink->addColumn('theme', Types::STRING, ['length' => 64, 'notnull' => false]);
-    $layoutLink->addColumn('layout_update_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $layoutLink->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('layout_link_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('core_layout_link')
+            ->addColumn(Column::editor()->setUnquotedName('layout_link_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('store_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('area')->setTypeName(Types::STRING)->setLength(64)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('package')->setTypeName(Types::STRING)->setLength(64)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('theme')->setTypeName(Types::STRING)->setLength(64)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('layout_update_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('layout_link_id')->create())
+            ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('store_id', 'package', 'theme', 'layout_update_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('layout_update_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('store_id')
+                    ->setUnquotedReferencedTableName('core_store')
+                    ->setUnquotedReferencedColumnNames('store_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('layout_update_id')
+                    ->setUnquotedReferencedTableName('core_layout_update')
+                    ->setUnquotedReferencedColumnNames('layout_update_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Layout Link')
+            ->create(),
     );
-    $layoutLink->addUniqueIndex(['store_id', 'package', 'theme', 'layout_update_id']);
-    $layoutLink->addIndex(['layout_update_id']);
-    $layoutLink->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
-    $layoutLink->addForeignKeyConstraint('core_layout_update', ['layout_update_id'], ['layout_update_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
-    $layoutLink->setComment('Layout Link');
 
-    $session = $schema->createTable('core_session');
-    $session->addColumn('session_id', Types::STRING, ['length' => 255]);
-    $session->addColumn('session_expires', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $session->addColumn('session_data', Types::BLOB, ['length' => 2097152]);
-    $session->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('session_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('core_session')
+            ->addColumn(Column::editor()->setUnquotedName('session_id')->setTypeName(Types::STRING)->setLength(255)->create())
+            ->addColumn(Column::editor()->setUnquotedName('session_expires')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('session_data')->setTypeName(Types::BLOB)->setLength(2097152)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('session_id')->create())
+            ->setComment('Database Sessions Storage')
+            ->create(),
     );
-    $session->setComment('Database Sessions Storage');
 
-    $translate = $schema->createTable('core_translate');
-    $translate->addColumn('key_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $translate->addColumn('string', Types::STRING, ['length' => 255, 'default' => 'Translate String']);
-    $translate->addColumn('store_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $translate->addColumn('translate', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $translate->addColumn('locale', Types::STRING, ['length' => 20, 'default' => 'en_US']);
-    $translate->addColumn('crc_string', Types::BIGINT, ['default' => crc32('Translate String')]);
-    $translate->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('key_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('core_translate')
+            ->addColumn(Column::editor()->setUnquotedName('key_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('string')->setTypeName(Types::STRING)->setLength(255)->setDefaultValue('Translate String')->create())
+            ->addColumn(Column::editor()->setUnquotedName('store_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('translate')->setTypeName(Types::STRING)->setLength(255)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('locale')->setTypeName(Types::STRING)->setLength(20)->setDefaultValue('en_US')->create())
+            ->addColumn(Column::editor()->setUnquotedName('crc_string')->setTypeName(Types::BIGINT)->setDefaultValue(crc32('Translate String'))->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('key_id')->create())
+            ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('store_id', 'locale', 'crc_string', 'string'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('store_id')
+                    ->setUnquotedReferencedTableName('core_store')
+                    ->setUnquotedReferencedColumnNames('store_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Translations')
+            ->create(),
     );
-    $translate->addUniqueIndex(['store_id', 'locale', 'crc_string', 'string']);
-    $translate->addIndex(['store_id']);
-    $translate->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
-    $translate->setComment('Translations');
 
-    $urlRewrite = $schema->createTable('core_url_rewrite');
-    $urlRewrite->addColumn('url_rewrite_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $urlRewrite->addColumn('store_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $urlRewrite->addColumn('id_path', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $urlRewrite->addColumn('request_path', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $urlRewrite->addColumn('target_path', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $urlRewrite->addColumn('is_system', Types::SMALLINT, ['unsigned' => true, 'notnull' => false, 'default' => 1]);
-    $urlRewrite->addColumn('options', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $urlRewrite->addColumn('description', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $urlRewrite->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('url_rewrite_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('core_url_rewrite')
+            ->addColumn(Column::editor()->setUnquotedName('url_rewrite_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('store_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('id_path')->setTypeName(Types::STRING)->setLength(255)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('request_path')->setTypeName(Types::STRING)->setLength(255)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('target_path')->setTypeName(Types::STRING)->setLength(255)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('is_system')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setNotNull(false)->setDefaultValue(1)->create())
+            ->addColumn(Column::editor()->setUnquotedName('options')->setTypeName(Types::STRING)->setLength(255)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('description')->setTypeName(Types::STRING)->setLength(255)->setNotNull(false)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('url_rewrite_id')->create())
+            ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('request_path', 'store_id'))
+            ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('id_path', 'is_system', 'store_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('target_path', 'store_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('id_path'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('store_id')
+                    ->setUnquotedReferencedTableName('core_store')
+                    ->setUnquotedReferencedColumnNames('store_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Url Rewrites')
+            ->create(),
     );
-    $urlRewrite->addUniqueIndex(['request_path', 'store_id']);
-    $urlRewrite->addUniqueIndex(['id_path', 'is_system', 'store_id']);
-    $urlRewrite->addIndex(['target_path', 'store_id']);
-    $urlRewrite->addIndex(['id_path']);
-    $urlRewrite->addIndex(['store_id']);
-    $urlRewrite->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
-    $urlRewrite->setComment('Url Rewrites');
 
-    $urlGone = $schema->createTable('core_url_gone');
-    $urlGone->addColumn('gone_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $urlGone->addColumn('store_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $urlGone->addColumn('request_path', Types::STRING, ['length' => 255]);
-    $urlGone->addColumn('entity_type', Types::STRING, ['length' => 32]);
-    $urlGone->addColumn('deleted_at', Types::DATETIME_MUTABLE);
-    $urlGone->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('gone_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('core_url_gone')
+            ->addColumn(Column::editor()->setUnquotedName('gone_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('store_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('request_path')->setTypeName(Types::STRING)->setLength(255)->create())
+            ->addColumn(Column::editor()->setUnquotedName('entity_type')->setTypeName(Types::STRING)->setLength(32)->create())
+            ->addColumn(Column::editor()->setUnquotedName('deleted_at')->setTypeName(Types::DATETIME_MUTABLE)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('gone_id')->create())
+            ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('request_path', 'store_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('deleted_at'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('store_id')
+                    ->setUnquotedReferencedTableName('core_store')
+                    ->setUnquotedReferencedColumnNames('store_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Gone Urls')
+            ->create(),
     );
-    $urlGone->addUniqueIndex(['request_path', 'store_id']);
-    $urlGone->addIndex(['deleted_at']);
-    $urlGone->addIndex(['store_id']);
-    $urlGone->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
-    $urlGone->setComment('Gone Urls');
 
-    $designChange = $schema->createTable('design_change');
-    $designChange->addColumn('design_change_id', Types::INTEGER, ['autoincrement' => true]);
-    $designChange->addColumn('store_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $designChange->addColumn('design', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $designChange->addColumn('date_from', Types::DATE_MUTABLE, ['notnull' => false]);
-    $designChange->addColumn('date_to', Types::DATE_MUTABLE, ['notnull' => false]);
-    $designChange->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('design_change_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('design_change')
+            ->addColumn(Column::editor()->setUnquotedName('design_change_id')->setTypeName(Types::INTEGER)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('store_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('design')->setTypeName(Types::STRING)->setLength(255)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('date_from')->setTypeName(Types::DATE_MUTABLE)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('date_to')->setTypeName(Types::DATE_MUTABLE)->setNotNull(false)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('design_change_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('store_id')
+                    ->setUnquotedReferencedTableName('core_store')
+                    ->setUnquotedReferencedColumnNames('store_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Design Changes')
+            ->create(),
     );
-    $designChange->addIndex(['store_id']);
-    $designChange->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
-    $designChange->setComment('Design Changes');
 
-    $variable = $schema->createTable('core_variable');
-    $variable->addColumn('variable_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $variable->addColumn('code', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $variable->addColumn('name', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $variable->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('variable_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('core_variable')
+            ->addColumn(Column::editor()->setUnquotedName('variable_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('code')->setTypeName(Types::STRING)->setLength(255)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('name')->setTypeName(Types::STRING)->setLength(255)->setNotNull(false)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('variable_id')->create())
+            ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('code'))
+            ->setComment('Variables')
+            ->create(),
     );
-    $variable->addUniqueIndex(['code']);
-    $variable->setComment('Variables');
 
-    $variableValue = $schema->createTable('core_variable_value');
-    $variableValue->addColumn('value_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $variableValue->addColumn('variable_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $variableValue->addColumn('store_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $variableValue->addColumn('plain_value', Types::TEXT, ['length' => 65535, 'notnull' => false]);
-    $variableValue->addColumn('html_value', Types::TEXT, ['length' => 65535, 'notnull' => false]);
-    $variableValue->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('value_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('core_variable_value')
+            ->addColumn(Column::editor()->setUnquotedName('value_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('variable_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('store_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('plain_value')->setTypeName(Types::TEXT)->setLength(65535)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('html_value')->setTypeName(Types::TEXT)->setLength(65535)->setNotNull(false)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('value_id')->create())
+            ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('variable_id', 'store_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('variable_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('store_id')
+                    ->setUnquotedReferencedTableName('core_store')
+                    ->setUnquotedReferencedColumnNames('store_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('variable_id')
+                    ->setUnquotedReferencedTableName('core_variable')
+                    ->setUnquotedReferencedColumnNames('variable_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Variable Value')
+            ->create(),
     );
-    $variableValue->addUniqueIndex(['variable_id', 'store_id']);
-    $variableValue->addIndex(['variable_id']);
-    $variableValue->addIndex(['store_id']);
-    $variableValue->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
-    $variableValue->addForeignKeyConstraint('core_variable', ['variable_id'], ['variable_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
-    $variableValue->setComment('Variable Value');
 
-    $cache = $schema->createTable('core_cache');
-    $cache->addColumn('id', Types::STRING, ['length' => 200]);
-    $cache->addColumn('data', Types::BLOB, ['length' => 2097152, 'notnull' => false]);
-    $cache->addColumn('create_time', Types::INTEGER, ['notnull' => false]);
-    $cache->addColumn('update_time', Types::INTEGER, ['notnull' => false]);
-    $cache->addColumn('expire_time', Types::INTEGER, ['notnull' => false]);
-    $cache->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('core_cache')
+            ->addColumn(Column::editor()->setUnquotedName('id')->setTypeName(Types::STRING)->setLength(200)->create())
+            ->addColumn(Column::editor()->setUnquotedName('data')->setTypeName(Types::BLOB)->setLength(2097152)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('create_time')->setTypeName(Types::INTEGER)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('update_time')->setTypeName(Types::INTEGER)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('expire_time')->setTypeName(Types::INTEGER)->setNotNull(false)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('expire_time'))
+            ->setComment('Caches')
+            ->create(),
     );
-    $cache->addIndex(['expire_time']);
-    $cache->setComment('Caches');
 
-    $cacheTag = $schema->createTable('core_cache_tag');
-    $cacheTag->addColumn('tag', Types::STRING, ['length' => 100]);
-    $cacheTag->addColumn('cache_id', Types::STRING, ['length' => 200]);
-    $cacheTag->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('tag', 'cache_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('core_cache_tag')
+            ->addColumn(Column::editor()->setUnquotedName('tag')->setTypeName(Types::STRING)->setLength(100)->create())
+            ->addColumn(Column::editor()->setUnquotedName('cache_id')->setTypeName(Types::STRING)->setLength(200)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('tag', 'cache_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('cache_id'))
+            ->setComment('Tag Caches')
+            ->create(),
     );
-    $cacheTag->addIndex(['cache_id']);
-    $cacheTag->setComment('Tag Caches');
 
-    $cacheOption = $schema->createTable('core_cache_option');
-    $cacheOption->addColumn('code', Types::STRING, ['length' => 32]);
-    $cacheOption->addColumn('value', Types::SMALLINT, ['notnull' => false]);
-    $cacheOption->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('code')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('core_cache_option')
+            ->addColumn(Column::editor()->setUnquotedName('code')->setTypeName(Types::STRING)->setLength(32)->create())
+            ->addColumn(Column::editor()->setUnquotedName('value')->setTypeName(Types::SMALLINT)->setNotNull(false)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('code')->create())
+            ->setComment('Cache Options')
+            ->create(),
     );
-    $cacheOption->setComment('Cache Options');
 
-    $flag = $schema->createTable('core_flag');
-    $flag->addColumn('flag_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $flag->addColumn('flag_code', Types::STRING, ['length' => 255]);
-    $flag->addColumn('state', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $flag->addColumn('flag_data', Types::TEXT, ['length' => 65535, 'notnull' => false]);
-    $flag->addColumn('last_update', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
-    $flag->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('flag_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('core_flag')
+            ->addColumn(Column::editor()->setUnquotedName('flag_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('flag_code')->setTypeName(Types::STRING)->setLength(255)->create())
+            ->addColumn(Column::editor()->setUnquotedName('state')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('flag_data')->setTypeName(Types::TEXT)->setLength(65535)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('last_update')->setTypeName(Types::DATETIME_MUTABLE)->setDefaultValue(new CurrentTimestamp())->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('flag_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('last_update'))
+            ->setComment('Flag')
+            ->create(),
     );
-    $flag->addIndex(['last_update']);
-    $flag->setComment('Flag');
 
-    $emailQueue = $schema->createTable('core_email_queue');
-    $emailQueue->addColumn('message_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $emailQueue->addColumn('entity_id', Types::INTEGER, ['unsigned' => true, 'notnull' => false]);
-    $emailQueue->addColumn('entity_type', Types::STRING, ['length' => 128, 'notnull' => false]);
-    $emailQueue->addColumn('event_type', Types::STRING, ['length' => 128, 'notnull' => false]);
-    $emailQueue->addColumn('message_body_hash', Types::STRING, ['length' => 64]);
-    $emailQueue->addColumn('message_body', Types::TEXT, ['length' => 1048576]);
-    $emailQueue->addColumn('message_parameters', Types::TEXT, ['length' => 65535]);
-    $emailQueue->addColumn('created_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
-    $emailQueue->addColumn('processed_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
-    $emailQueue->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('message_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('core_email_queue')
+            ->addColumn(Column::editor()->setUnquotedName('message_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('entity_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('entity_type')->setTypeName(Types::STRING)->setLength(128)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('event_type')->setTypeName(Types::STRING)->setLength(128)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('message_body_hash')->setTypeName(Types::STRING)->setLength(64)->create())
+            ->addColumn(Column::editor()->setUnquotedName('message_body')->setTypeName(Types::TEXT)->setLength(1048576)->create())
+            ->addColumn(Column::editor()->setUnquotedName('message_parameters')->setTypeName(Types::TEXT)->setLength(65535)->create())
+            ->addColumn(Column::editor()->setUnquotedName('created_at')->setTypeName(Types::DATETIME_MUTABLE)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('processed_at')->setTypeName(Types::DATETIME_MUTABLE)->setNotNull(false)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('message_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('entity_id', 'entity_type', 'event_type', 'message_body_hash'))
+            ->setComment('Email Queue')
+            ->create(),
     );
-    $emailQueue->addIndex(['entity_id', 'entity_type', 'event_type', 'message_body_hash']);
-    $emailQueue->setComment('Email Queue');
 
-    $emailRecipients = $schema->createTable('core_email_queue_recipients');
-    $emailRecipients->addColumn('recipient_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $emailRecipients->addColumn('message_id', Types::INTEGER, ['unsigned' => true]);
-    $emailRecipients->addColumn('recipient_email', Types::STRING, ['length' => 128]);
-    $emailRecipients->addColumn('recipient_name', Types::STRING, ['length' => 255]);
-    $emailRecipients->addColumn('email_type', Types::SMALLINT, ['default' => 0]);
-    $emailRecipients->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('recipient_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('core_email_queue_recipients')
+            ->addColumn(Column::editor()->setUnquotedName('recipient_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('message_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('recipient_email')->setTypeName(Types::STRING)->setLength(128)->create())
+            ->addColumn(Column::editor()->setUnquotedName('recipient_name')->setTypeName(Types::STRING)->setLength(255)->create())
+            ->addColumn(Column::editor()->setUnquotedName('email_type')->setTypeName(Types::SMALLINT)->setDefaultValue(0)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('recipient_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('recipient_email'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('email_type'))
+            ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('message_id', 'recipient_email', 'email_type'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('message_id')
+                    ->setUnquotedReferencedTableName('core_email_queue')
+                    ->setUnquotedReferencedColumnNames('message_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Email Queue')
+            ->create(),
     );
-    $emailRecipients->addIndex(['recipient_email']);
-    $emailRecipients->addIndex(['email_type']);
-    $emailRecipients->addUniqueIndex(['message_id', 'recipient_email', 'email_type']);
-    $emailRecipients->addForeignKeyConstraint('core_email_queue', ['message_id'], ['message_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
-    $emailRecipients->setComment('Email Queue');
 
-    $emailLog = $schema->createTable('core_email_log');
-    $emailLog->addColumn('log_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $emailLog->addColumn('subject', Types::STRING, ['length' => 255, 'default' => '']);
-    $emailLog->addColumn('email_to', Types::TEXT, ['length' => 65535]);
-    $emailLog->addColumn('email_from', Types::STRING, ['length' => 255, 'default' => '']);
-    $emailLog->addColumn('email_cc', Types::TEXT, ['length' => 65535, 'notnull' => false]);
-    $emailLog->addColumn('email_bcc', Types::TEXT, ['length' => 65535, 'notnull' => false]);
-    $emailLog->addColumn('template', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $emailLog->addColumn('content_type', Types::STRING, ['length' => 4, 'default' => 'html']);
-    $emailLog->addColumn('email_body', Types::TEXT, ['length' => 16777215]);
-    $emailLog->addColumn('status', Types::STRING, ['length' => 10, 'default' => 'sent']);
-    $emailLog->addColumn('error_message', Types::TEXT, ['length' => 65535, 'notnull' => false]);
-    $emailLog->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
-    $emailLog->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('log_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('core_email_log')
+            ->addColumn(Column::editor()->setUnquotedName('log_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('subject')->setTypeName(Types::STRING)->setLength(255)->setDefaultValue('')->create())
+            ->addColumn(Column::editor()->setUnquotedName('email_to')->setTypeName(Types::TEXT)->setLength(65535)->create())
+            ->addColumn(Column::editor()->setUnquotedName('email_from')->setTypeName(Types::STRING)->setLength(255)->setDefaultValue('')->create())
+            ->addColumn(Column::editor()->setUnquotedName('email_cc')->setTypeName(Types::TEXT)->setLength(65535)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('email_bcc')->setTypeName(Types::TEXT)->setLength(65535)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('template')->setTypeName(Types::STRING)->setLength(255)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('content_type')->setTypeName(Types::STRING)->setLength(4)->setDefaultValue('html')->create())
+            ->addColumn(Column::editor()->setUnquotedName('email_body')->setTypeName(Types::TEXT)->setLength(16777215)->create())
+            ->addColumn(Column::editor()->setUnquotedName('status')->setTypeName(Types::STRING)->setLength(10)->setDefaultValue('sent')->create())
+            ->addColumn(Column::editor()->setUnquotedName('error_message')->setTypeName(Types::TEXT)->setLength(65535)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('created_at')->setTypeName(Types::DATETIME_MUTABLE)->setDefaultValue(new CurrentTimestamp())->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('log_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('created_at'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('status'))
+            ->setComment('Email Log')
+            ->create(),
     );
-    $emailLog->addIndex(['created_at']);
-    $emailLog->addIndex(['status']);
-    $emailLog->setComment('Email Log');
 };

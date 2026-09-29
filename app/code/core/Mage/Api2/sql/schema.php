@@ -8,69 +8,94 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
+use Doctrine\DBAL\Schema\ForeignKeyConstraint;
+use Doctrine\DBAL\Schema\ForeignKeyConstraint\ReferentialAction;
+use Doctrine\DBAL\Schema\Index;
+use Doctrine\DBAL\Schema\Index\IndexType;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
-use Doctrine\DBAL\Schema\Schema;
+use Doctrine\DBAL\Schema\SchemaEditor;
+use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
 
-return function (Schema $schema): void {
-    $role = $schema->createTable('api2_acl_role');
-    $role->addColumn('entity_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $role->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
-    $role->addColumn('updated_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
-    $role->addColumn('role_name', Types::STRING, ['length' => 255]);
-    $role->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create(),
+return function (SchemaEditor $schema): void {
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('api2_acl_role')
+            ->addColumn(Column::editor()->setUnquotedName('entity_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('created_at')->setTypeName(Types::DATETIME_MUTABLE)->setDefaultValue(new CurrentTimestamp())->create())
+            ->addColumn(Column::editor()->setUnquotedName('updated_at')->setTypeName(Types::DATETIME_MUTABLE)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('role_name')->setTypeName(Types::STRING)->setLength(255)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('created_at'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('updated_at'))
+            ->setComment('Api2 Global ACL Roles')
+            ->create(),
     );
-    $role->addIndex(['created_at']);
-    $role->addIndex(['updated_at']);
-    $role->setComment('Api2 Global ACL Roles');
 
-    $user = $schema->createTable('api2_acl_user');
-    $user->addColumn('admin_id', Types::INTEGER, ['unsigned' => true]);
-    $user->addColumn('role_id', Types::INTEGER, ['unsigned' => true]);
-    $user->addUniqueIndex(['admin_id']);
-    $user->addForeignKeyConstraint(
-        'admin_user',
-        ['admin_id'],
-        ['user_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('api2_acl_user')
+            ->addColumn(Column::editor()->setUnquotedName('admin_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('role_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->create())
+            ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('admin_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('admin_id')
+                    ->setUnquotedReferencedTableName('admin_user')
+                    ->setUnquotedReferencedColumnNames('user_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('role_id')
+                    ->setUnquotedReferencedTableName('api2_acl_role')
+                    ->setUnquotedReferencedColumnNames('entity_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Api2 Global ACL Users')
+            ->create(),
     );
-    $user->addForeignKeyConstraint(
-        'api2_acl_role',
-        ['role_id'],
-        ['entity_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $user->setComment('Api2 Global ACL Users');
 
-    $rule = $schema->createTable('api2_acl_rule');
-    $rule->addColumn('entity_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $rule->addColumn('role_id', Types::INTEGER, ['unsigned' => true]);
-    $rule->addColumn('resource_id', Types::STRING, ['length' => 255]);
-    $rule->addColumn('privilege', Types::STRING, ['length' => 20, 'notnull' => false]);
-    $rule->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('api2_acl_rule')
+            ->addColumn(Column::editor()->setUnquotedName('entity_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('role_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('resource_id')->setTypeName(Types::STRING)->setLength(255)->create())
+            ->addColumn(Column::editor()->setUnquotedName('privilege')->setTypeName(Types::STRING)->setLength(20)->setNotNull(false)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create())
+            ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('role_id', 'resource_id', 'privilege'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('role_id')
+                    ->setUnquotedReferencedTableName('api2_acl_role')
+                    ->setUnquotedReferencedColumnNames('entity_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Api2 Global ACL Rules')
+            ->create(),
     );
-    $rule->addUniqueIndex(['role_id', 'resource_id', 'privilege']);
-    $rule->addForeignKeyConstraint(
-        'api2_acl_role',
-        ['role_id'],
-        ['entity_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $rule->setComment('Api2 Global ACL Rules');
 
-    $attribute = $schema->createTable('api2_acl_attribute');
-    $attribute->addColumn('entity_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $attribute->addColumn('user_type', Types::STRING, ['length' => 20]);
-    $attribute->addColumn('resource_id', Types::STRING, ['length' => 255]);
-    $attribute->addColumn('operation', Types::STRING, ['length' => 20]);
-    $attribute->addColumn('allowed_attributes', Types::TEXT, ['length' => 65535, 'notnull' => false]);
-    $attribute->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('api2_acl_attribute')
+            ->addColumn(Column::editor()->setUnquotedName('entity_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('user_type')->setTypeName(Types::STRING)->setLength(20)->create())
+            ->addColumn(Column::editor()->setUnquotedName('resource_id')->setTypeName(Types::STRING)->setLength(255)->create())
+            ->addColumn(Column::editor()->setUnquotedName('operation')->setTypeName(Types::STRING)->setLength(20)->create())
+            ->addColumn(Column::editor()->setUnquotedName('allowed_attributes')->setTypeName(Types::TEXT)->setLength(65535)->setNotNull(false)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('user_type'))
+            ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('user_type', 'resource_id', 'operation'))
+            ->setComment('Api2 Filter ACL Attributes')
+            ->create(),
     );
-    $attribute->addIndex(['user_type']);
-    $attribute->addUniqueIndex(['user_type', 'resource_id', 'operation']);
-    $attribute->setComment('Api2 Filter ACL Attributes');
 };

@@ -8,8 +8,9 @@
 declare(strict_types=1);
 
 use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
-use Doctrine\DBAL\Schema\Schema;
+use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\Table;
+use Doctrine\DBAL\Schema\TableEditor;
 use Doctrine\DBAL\Types\Types;
 use Maho\Db\Schema\Applier;
 
@@ -27,9 +28,9 @@ function invokeApplier(string $method, array $args): mixed
     return $ref->invoke(null, ...$args);
 }
 
-function pgTable(string $name): Table
+function pgTable(string $name): TableEditor
 {
-    return (new Schema())->createTable($name);
+    return Table::editor()->setUnquotedName($name);
 }
 
 it('quotes a digit-leading legacy index name in ALTER INDEX ... RENAME', function () {
@@ -55,10 +56,12 @@ it('leaves a non-rename statement untouched', function () {
 it('appends USING NULL for a bytea type change', function () {
     $platform = new PostgreSQLPlatform();
 
-    $live = pgTable('log_visitor_info');
-    $live->addColumn('remote_addr', Types::BIGINT, ['notnull' => false]);
-    $target = pgTable('log_visitor_info');
-    $target->addColumn('remote_addr', Types::BLOB, ['notnull' => false]);
+    $live = pgTable('log_visitor_info')
+        ->addColumn(Column::editor()->setUnquotedName('remote_addr')->setTypeName(Types::BIGINT)->setNotNull(false)->create())
+        ->create();
+    $target = pgTable('log_visitor_info')
+        ->addColumn(Column::editor()->setUnquotedName('remote_addr')->setTypeName(Types::BLOB)->setNotNull(false)->create())
+        ->create();
 
     $statements = ['ALTER TABLE "log_visitor_info" ALTER "remote_addr" TYPE BYTEA'];
     $result = invokeApplier('fixPostgresColumnTypeChanges', [$platform, [$live], [$target], $statements]);
@@ -69,10 +72,12 @@ it('appends USING NULL for a bytea type change', function () {
 it('casts through integer and re-sets the default for a boolean to smallint change', function () {
     $platform = new PostgreSQLPlatform();
 
-    $live = pgTable('t');
-    $live->addColumn('flag', Types::BOOLEAN, ['default' => false]);
-    $target = pgTable('t');
-    $target->addColumn('flag', Types::SMALLINT, ['default' => 0]);
+    $live = pgTable('t')
+        ->addColumn(Column::editor()->setUnquotedName('flag')->setTypeName(Types::BOOLEAN)->setDefaultValue(false)->create())
+        ->create();
+    $target = pgTable('t')
+        ->addColumn(Column::editor()->setUnquotedName('flag')->setTypeName(Types::SMALLINT)->setDefaultValue(0)->create())
+        ->create();
 
     $statements = ['ALTER TABLE "t" ALTER "flag" TYPE SMALLINT'];
     $result = invokeApplier('fixPostgresColumnTypeChanges', [$platform, [$live], [$target], $statements]);
@@ -88,13 +93,37 @@ it('casts through integer and re-sets the default for a boolean to smallint chan
 it('passes through a type change that has an implicit cast', function () {
     $platform = new PostgreSQLPlatform();
 
-    $live = pgTable('t');
-    $live->addColumn('amount', Types::FLOAT, ['notnull' => false]);
-    $target = pgTable('t');
-    $target->addColumn('amount', Types::FLOAT, ['notnull' => false]);
+    $live = pgTable('t')
+        ->addColumn(Column::editor()->setUnquotedName('amount')->setTypeName(Types::FLOAT)->setNotNull(false)->create())
+        ->create();
+    $target = pgTable('t')
+        ->addColumn(Column::editor()->setUnquotedName('amount')->setTypeName(Types::FLOAT)->setNotNull(false)->create())
+        ->create();
 
     $statements = ['ALTER TABLE "t" ALTER "amount" TYPE DOUBLE PRECISION'];
     $result = invokeApplier('fixPostgresColumnTypeChanges', [$platform, [$live], [$target], $statements]);
 
     expect($result)->toBe(['ALTER TABLE "t" ALTER "amount" TYPE DOUBLE PRECISION']);
+});
+
+it('finds the type of a type change that also carries a COLLATE clause', function () {
+    $platform = new PostgreSQLPlatform();
+
+    $live = pgTable('log_visitor_info')
+        ->addColumn(Column::editor()->setUnquotedName('remote_addr')->setTypeName(Types::BIGINT)->setNotNull(false)->create())
+        ->create();
+    $target = pgTable('log_visitor_info')
+        ->addColumn(Column::editor()->setUnquotedName('remote_addr')->setTypeName(Types::BLOB)->setNotNull(false)->create())
+        ->create();
+
+    $statements = ['ALTER TABLE "log_visitor_info" ALTER "remote_addr" TYPE BYTEA COLLATE "C"'];
+    $result = invokeApplier('fixPostgresColumnTypeChanges', [$platform, [$live], [$target], $statements]);
+
+    expect($result)->toBe(['ALTER TABLE "log_visitor_info" ALTER "remote_addr" TYPE BYTEA COLLATE "C" USING NULL']);
+});
+
+it('unescapes a quote inside the old index name of a rename', function () {
+    $result = invokeApplier('quotePostgresRenameIndexNames', [new PostgreSQLPlatform(), ['ALTER INDEX "a""b" RENAME TO "IDX_NEW"']]);
+
+    expect($result[0])->toBe('ALTER INDEX "a""b" RENAME TO "IDX_NEW"');
 });

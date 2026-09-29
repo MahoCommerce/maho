@@ -8,89 +8,114 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Schema\Column;
+use Doctrine\DBAL\Schema\ForeignKeyConstraint;
+use Doctrine\DBAL\Schema\ForeignKeyConstraint\ReferentialAction;
+use Doctrine\DBAL\Schema\Index;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
-use Doctrine\DBAL\Schema\Schema;
+use Doctrine\DBAL\Schema\SchemaEditor;
+use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
 
-return function (Schema $schema): void {
-    $block = $schema->createTable('cms_block');
-    $block->addColumn('block_id', Types::SMALLINT, ['autoincrement' => true]);
-    $block->addColumn('title', Types::STRING, ['length' => 255]);
-    $block->addColumn('identifier', Types::STRING, ['length' => 255]);
-    $block->addColumn('content', Types::TEXT, ['length' => 2097152, 'notnull' => false]);
-    $block->addColumn('creation_time', Types::DATETIME_MUTABLE, ['notnull' => false]);
-    $block->addColumn('update_time', Types::DATETIME_MUTABLE, ['notnull' => false]);
-    $block->addColumn('is_active', Types::SMALLINT, ['default' => 1]);
-    $block->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('block_id')->create(),
+return function (SchemaEditor $schema): void {
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('cms_block')
+            ->addColumn(Column::editor()->setUnquotedName('block_id')->setTypeName(Types::SMALLINT)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('title')->setTypeName(Types::STRING)->setLength(255)->create())
+            ->addColumn(Column::editor()->setUnquotedName('identifier')->setTypeName(Types::STRING)->setLength(255)->create())
+            ->addColumn(Column::editor()->setUnquotedName('content')->setTypeName(Types::TEXT)->setLength(2097152)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('creation_time')->setTypeName(Types::DATETIME_MUTABLE)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('update_time')->setTypeName(Types::DATETIME_MUTABLE)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('is_active')->setTypeName(Types::SMALLINT)->setDefaultValue(1)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('block_id')->create())
+            ->setComment('CMS Block Table')
+            ->create(),
     );
-    $block->setComment('CMS Block Table');
 
-    $blockStore = $schema->createTable('cms_block_store');
-    $blockStore->addColumn('block_id', Types::SMALLINT);
-    $blockStore->addColumn('store_id', Types::SMALLINT, ['unsigned' => true]);
-    $blockStore->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('block_id', 'store_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('cms_block_store')
+            ->addColumn(Column::editor()->setUnquotedName('block_id')->setTypeName(Types::SMALLINT)->create())
+            ->addColumn(Column::editor()->setUnquotedName('store_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('block_id', 'store_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('block_id')
+                    ->setUnquotedReferencedTableName('cms_block')
+                    ->setUnquotedReferencedColumnNames('block_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('store_id')
+                    ->setUnquotedReferencedTableName('core_store')
+                    ->setUnquotedReferencedColumnNames('store_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('CMS Block To Store Linkage Table')
+            ->create(),
     );
-    $blockStore->addIndex(['store_id']);
-    $blockStore->addForeignKeyConstraint(
-        'cms_block',
-        ['block_id'],
-        ['block_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $blockStore->addForeignKeyConstraint(
-        'core_store',
-        ['store_id'],
-        ['store_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $blockStore->setComment('CMS Block To Store Linkage Table');
 
-    $page = $schema->createTable('cms_page');
-    $page->addColumn('page_id', Types::SMALLINT, ['autoincrement' => true]);
-    $page->addColumn('title', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $page->addColumn('root_template', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $page->addColumn('meta_keywords', Types::TEXT, ['length' => 65535, 'notnull' => false]);
-    $page->addColumn('meta_description', Types::TEXT, ['length' => 65535, 'notnull' => false]);
-    $page->addColumn('identifier', Types::STRING, ['length' => 100, 'notnull' => false, 'default' => null]);
-    $page->addColumn('content_heading', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $page->addColumn('content', Types::TEXT, ['length' => 2097152, 'notnull' => false]);
-    $page->addColumn('creation_time', Types::DATETIME_MUTABLE, ['notnull' => false]);
-    $page->addColumn('update_time', Types::DATETIME_MUTABLE, ['notnull' => false]);
-    $page->addColumn('is_active', Types::SMALLINT, ['default' => 1]);
-    $page->addColumn('sort_order', Types::SMALLINT, ['default' => 0]);
-    $page->addColumn('layout_update_xml', Types::TEXT, ['length' => 65535, 'notnull' => false]);
-    $page->addColumn('custom_theme', Types::STRING, ['length' => 100, 'notnull' => false]);
-    $page->addColumn('custom_root_template', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $page->addColumn('custom_layout_update_xml', Types::TEXT, ['length' => 65535, 'notnull' => false]);
-    $page->addColumn('custom_theme_from', Types::DATE_MUTABLE, ['notnull' => false]);
-    $page->addColumn('custom_theme_to', Types::DATE_MUTABLE, ['notnull' => false]);
-    $page->addColumn('meta_robots', Types::STRING, ['length' => 50, 'notnull' => false]);
-    $page->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('page_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('cms_page')
+            ->addColumn(Column::editor()->setUnquotedName('page_id')->setTypeName(Types::SMALLINT)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('title')->setTypeName(Types::STRING)->setLength(255)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('root_template')->setTypeName(Types::STRING)->setLength(255)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('meta_keywords')->setTypeName(Types::TEXT)->setLength(65535)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('meta_description')->setTypeName(Types::TEXT)->setLength(65535)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('identifier')->setTypeName(Types::STRING)->setLength(100)->setNotNull(false)->setDefaultValue(null)->create())
+            ->addColumn(Column::editor()->setUnquotedName('content_heading')->setTypeName(Types::STRING)->setLength(255)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('content')->setTypeName(Types::TEXT)->setLength(2097152)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('creation_time')->setTypeName(Types::DATETIME_MUTABLE)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('update_time')->setTypeName(Types::DATETIME_MUTABLE)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('is_active')->setTypeName(Types::SMALLINT)->setDefaultValue(1)->create())
+            ->addColumn(Column::editor()->setUnquotedName('sort_order')->setTypeName(Types::SMALLINT)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('layout_update_xml')->setTypeName(Types::TEXT)->setLength(65535)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('custom_theme')->setTypeName(Types::STRING)->setLength(100)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('custom_root_template')->setTypeName(Types::STRING)->setLength(255)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('custom_layout_update_xml')->setTypeName(Types::TEXT)->setLength(65535)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('custom_theme_from')->setTypeName(Types::DATE_MUTABLE)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('custom_theme_to')->setTypeName(Types::DATE_MUTABLE)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('meta_robots')->setTypeName(Types::STRING)->setLength(50)->setNotNull(false)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('page_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('identifier'))
+            ->setComment('CMS Page Table')
+            ->create(),
     );
-    $page->addIndex(['identifier']);
-    $page->setComment('CMS Page Table');
 
-    $pageStore = $schema->createTable('cms_page_store');
-    $pageStore->addColumn('page_id', Types::SMALLINT);
-    $pageStore->addColumn('store_id', Types::SMALLINT, ['unsigned' => true]);
-    $pageStore->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('page_id', 'store_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('cms_page_store')
+            ->addColumn(Column::editor()->setUnquotedName('page_id')->setTypeName(Types::SMALLINT)->create())
+            ->addColumn(Column::editor()->setUnquotedName('store_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('page_id', 'store_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('page_id')
+                    ->setUnquotedReferencedTableName('cms_page')
+                    ->setUnquotedReferencedColumnNames('page_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('store_id')
+                    ->setUnquotedReferencedTableName('core_store')
+                    ->setUnquotedReferencedColumnNames('store_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('CMS Page To Store Linkage Table')
+            ->create(),
     );
-    $pageStore->addIndex(['store_id']);
-    $pageStore->addForeignKeyConstraint(
-        'cms_page',
-        ['page_id'],
-        ['page_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $pageStore->addForeignKeyConstraint(
-        'core_store',
-        ['store_id'],
-        ['store_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $pageStore->setComment('CMS Page To Store Linkage Table');
 };

@@ -8,20 +8,26 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
+use Doctrine\DBAL\Schema\Index;
+use Doctrine\DBAL\Schema\Index\IndexType;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
-use Doctrine\DBAL\Schema\Schema;
+use Doctrine\DBAL\Schema\SchemaEditor;
+use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
 
-return function (Schema $schema): void {
-    $image = $schema->createTable('mediacleaner_image');
-    $image->addColumn('image_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $image->addColumn('type', Types::STRING, ['length' => 32]);
-    $image->addColumn('path', Types::STRING, ['length' => 255]);
-    $image->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
-    $image->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('image_id')->create(),
+return function (SchemaEditor $schema): void {
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('mediacleaner_image')
+            ->addColumn(Column::editor()->setUnquotedName('image_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('type')->setTypeName(Types::STRING)->setLength(32)->create())
+            ->addColumn(Column::editor()->setUnquotedName('path')->setTypeName(Types::STRING)->setLength(255)->create())
+            ->addColumn(Column::editor()->setUnquotedName('created_at')->setTypeName(Types::DATETIME_MUTABLE)->setDefaultValue(new CurrentTimestamp())->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('image_id')->create())
+            ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('type', 'path'))
+            ->setComment('Media Cleaner orphan files')
+            ->create(),
     );
-    $image->addUniqueIndex(['type', 'path']);
-    $image->setComment('Media Cleaner orphan files');
 };

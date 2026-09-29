@@ -51,14 +51,14 @@ it('declares no core table with a vendor prefix', function () {
     // which a store may legitimately set to maho_. Running the closures one at
     // a time attributes each new table to the module that created it; a graft
     // onto another module's table adds no name.
-    $schema = new Schema();
+    $schema = Schema::editor();
     $seen = [];
     $offenders = [];
 
     foreach (Collector::sourceFiles() as $module => $file) {
         (require $file)($schema);
 
-        foreach ($schema->getTables() as $table) {
+        foreach ($schema->create()->getTables() as $table) {
             $name = $table->getObjectName()->getUnqualifiedName()->getValue();
             if (isset($seen[$name])) {
                 continue;

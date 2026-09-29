@@ -8,23 +8,26 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
-use Doctrine\DBAL\Schema\Schema;
+use Doctrine\DBAL\Schema\SchemaEditor;
+use Doctrine\DBAL\Schema\Table;
+use Doctrine\DBAL\Schema\TableEditor;
 use Doctrine\DBAL\Types\Types;
 
-return function (Schema $schema): void {
-    $message = $schema->createTable('gift_message');
-    $message->addColumn('gift_message_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $message->addColumn('customer_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $message->addColumn('sender', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $message->addColumn('recipient', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $message->addColumn('message', Types::TEXT, ['length' => 65535, 'notnull' => false]);
-
-    $message->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('gift_message_id')->create(),
+return function (SchemaEditor $schema): void {
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('gift_message')
+            ->addColumn(Column::editor()->setUnquotedName('gift_message_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('customer_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('sender')->setTypeName(Types::STRING)->setLength(255)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('recipient')->setTypeName(Types::STRING)->setLength(255)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('message')->setTypeName(Types::TEXT)->setLength(65535)->setNotNull(false)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('gift_message_id')->create())
+            ->setComment('Gift Message')
+            ->create(),
     );
-
-    $message->setComment('Gift Message');
 
     // Graft the gift_message_id reference onto the sales/quote tables owned by
     // Mage_Sales (depends_on guarantees those tables already exist in the shared
@@ -39,8 +42,12 @@ return function (Schema $schema): void {
         'sales_flat_order',
         'sales_flat_order_item',
     ] as $tableName) {
-        $schema->getTable($tableName)->addColumn('gift_message_id', Types::INTEGER, ['notnull' => false]);
+        $schema->modifyTableByUnquotedName($tableName, static function (TableEditor $table): void {
+            $table->addColumn(Column::editor()->setUnquotedName('gift_message_id')->setTypeName(Types::INTEGER)->setNotNull(false)->create());
+        });
     }
 
-    $schema->getTable('sales_flat_order_item')->addColumn('gift_message_available', Types::INTEGER, ['notnull' => false]);
+    $schema->modifyTableByUnquotedName('sales_flat_order_item', static function (TableEditor $table): void {
+        $table->addColumn(Column::editor()->setUnquotedName('gift_message_available')->setTypeName(Types::INTEGER)->setNotNull(false)->create());
+    });
 };

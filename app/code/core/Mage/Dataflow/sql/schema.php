@@ -8,134 +8,167 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Schema\Column;
+use Doctrine\DBAL\Schema\ForeignKeyConstraint;
+use Doctrine\DBAL\Schema\ForeignKeyConstraint\ReferentialAction;
+use Doctrine\DBAL\Schema\Index;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
-use Doctrine\DBAL\Schema\Schema;
+use Doctrine\DBAL\Schema\SchemaEditor;
+use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
 
-return function (Schema $schema): void {
-    $session = $schema->createTable('dataflow_session');
-    $session->addColumn('session_id', Types::INTEGER, ['autoincrement' => true]);
-    $session->addColumn('user_id', Types::INTEGER);
-    $session->addColumn('created_date', Types::DATETIME_MUTABLE, ['notnull' => false]);
-    $session->addColumn('file', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $session->addColumn('type', Types::STRING, ['length' => 32, 'notnull' => false]);
-    $session->addColumn('direction', Types::STRING, ['length' => 32, 'notnull' => false]);
-    $session->addColumn('comment', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $session->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('session_id')->create(),
+return function (SchemaEditor $schema): void {
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('dataflow_session')
+            ->addColumn(Column::editor()->setUnquotedName('session_id')->setTypeName(Types::INTEGER)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('user_id')->setTypeName(Types::INTEGER)->create())
+            ->addColumn(Column::editor()->setUnquotedName('created_date')->setTypeName(Types::DATETIME_MUTABLE)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('file')->setTypeName(Types::STRING)->setLength(255)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('type')->setTypeName(Types::STRING)->setLength(32)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('direction')->setTypeName(Types::STRING)->setLength(32)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('comment')->setTypeName(Types::STRING)->setLength(255)->setNotNull(false)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('session_id')->create())
+            ->setComment('Dataflow Session')
+            ->create(),
     );
-    $session->setComment('Dataflow Session');
 
-    $import = $schema->createTable('dataflow_import_data');
-    $import->addColumn('import_id', Types::INTEGER, ['autoincrement' => true]);
-    $import->addColumn('session_id', Types::INTEGER, ['notnull' => false]);
-    $import->addColumn('serial_number', Types::INTEGER, ['default' => 0]);
-    $import->addColumn('value', Types::TEXT, ['length' => 65535, 'notnull' => false]);
-    $import->addColumn('status', Types::INTEGER, ['default' => 0]);
-    $import->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('import_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('dataflow_import_data')
+            ->addColumn(Column::editor()->setUnquotedName('import_id')->setTypeName(Types::INTEGER)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('session_id')->setTypeName(Types::INTEGER)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('serial_number')->setTypeName(Types::INTEGER)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('value')->setTypeName(Types::TEXT)->setLength(65535)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('status')->setTypeName(Types::INTEGER)->setDefaultValue(0)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('import_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('session_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('session_id')
+                    ->setUnquotedReferencedTableName('dataflow_session')
+                    ->setUnquotedReferencedColumnNames('session_id')
+                    ->setOnUpdateAction(ReferentialAction::NO_ACTION)
+                    ->setOnDeleteAction(ReferentialAction::NO_ACTION)
+                    ->create(),
+            )
+            ->setComment('Dataflow Import Data')
+            ->create(),
     );
-    $import->addIndex(['session_id']);
-    $import->addForeignKeyConstraint(
-        'dataflow_session',
-        ['session_id'],
-        ['session_id'],
-        ['onUpdate' => 'NO ACTION', 'onDelete' => 'NO ACTION'],
-    );
-    $import->setComment('Dataflow Import Data');
 
-    $profile = $schema->createTable('dataflow_profile');
-    $profile->addColumn('profile_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $profile->addColumn('name', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $profile->addColumn('created_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
-    $profile->addColumn('updated_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
-    $profile->addColumn('actions_xml', Types::TEXT, ['length' => 65535, 'notnull' => false]);
-    $profile->addColumn('gui_data', Types::TEXT, ['length' => 65535, 'notnull' => false]);
-    $profile->addColumn('direction', Types::STRING, ['length' => 6, 'notnull' => false]);
-    $profile->addColumn('entity_type', Types::STRING, ['length' => 64, 'notnull' => false]);
-    $profile->addColumn('store_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $profile->addColumn('data_transfer', Types::STRING, ['length' => 11, 'notnull' => false]);
-    $profile->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('profile_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('dataflow_profile')
+            ->addColumn(Column::editor()->setUnquotedName('profile_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('name')->setTypeName(Types::STRING)->setLength(255)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('created_at')->setTypeName(Types::DATETIME_MUTABLE)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('updated_at')->setTypeName(Types::DATETIME_MUTABLE)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('actions_xml')->setTypeName(Types::TEXT)->setLength(65535)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('gui_data')->setTypeName(Types::TEXT)->setLength(65535)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('direction')->setTypeName(Types::STRING)->setLength(6)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('entity_type')->setTypeName(Types::STRING)->setLength(64)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('store_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('data_transfer')->setTypeName(Types::STRING)->setLength(11)->setNotNull(false)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('profile_id')->create())
+            ->setComment('Dataflow Profile')
+            ->create(),
     );
-    $profile->setComment('Dataflow Profile');
 
-    $history = $schema->createTable('dataflow_profile_history');
-    $history->addColumn('history_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $history->addColumn('profile_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $history->addColumn('action_code', Types::STRING, ['length' => 64, 'notnull' => false]);
-    $history->addColumn('user_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $history->addColumn('performed_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
-    $history->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('history_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('dataflow_profile_history')
+            ->addColumn(Column::editor()->setUnquotedName('history_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('profile_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('action_code')->setTypeName(Types::STRING)->setLength(64)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('user_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('performed_at')->setTypeName(Types::DATETIME_MUTABLE)->setNotNull(false)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('history_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('profile_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('profile_id')
+                    ->setUnquotedReferencedTableName('dataflow_profile')
+                    ->setUnquotedReferencedColumnNames('profile_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Dataflow Profile History')
+            ->create(),
     );
-    $history->addIndex(['profile_id']);
-    $history->addForeignKeyConstraint(
-        'dataflow_profile',
-        ['profile_id'],
-        ['profile_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $history->setComment('Dataflow Profile History');
 
-    $batch = $schema->createTable('dataflow_batch');
-    $batch->addColumn('batch_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $batch->addColumn('profile_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $batch->addColumn('store_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $batch->addColumn('adapter', Types::STRING, ['length' => 128, 'notnull' => false]);
-    $batch->addColumn('params', Types::TEXT, ['length' => 65535, 'notnull' => false]);
-    $batch->addColumn('created_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
-    $batch->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('batch_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('dataflow_batch')
+            ->addColumn(Column::editor()->setUnquotedName('batch_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('profile_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('store_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('adapter')->setTypeName(Types::STRING)->setLength(128)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('params')->setTypeName(Types::TEXT)->setLength(65535)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('created_at')->setTypeName(Types::DATETIME_MUTABLE)->setNotNull(false)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('batch_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('profile_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('created_at'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('profile_id')
+                    ->setUnquotedReferencedTableName('dataflow_profile')
+                    ->setUnquotedReferencedColumnNames('profile_id')
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('store_id')
+                    ->setUnquotedReferencedTableName('core_store')
+                    ->setUnquotedReferencedColumnNames('store_id')
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Dataflow Batch')
+            ->create(),
     );
-    $batch->addIndex(['profile_id']);
-    $batch->addIndex(['store_id']);
-    $batch->addIndex(['created_at']);
-    $batch->addForeignKeyConstraint(
-        'dataflow_profile',
-        ['profile_id'],
-        ['profile_id'],
-        ['onDelete' => 'CASCADE'],
-    );
-    $batch->addForeignKeyConstraint(
-        'core_store',
-        ['store_id'],
-        ['store_id'],
-        ['onDelete' => 'CASCADE'],
-    );
-    $batch->setComment('Dataflow Batch');
 
-    $batchExport = $schema->createTable('dataflow_batch_export');
-    $batchExport->addColumn('batch_export_id', Types::BIGINT, ['unsigned' => true, 'autoincrement' => true]);
-    $batchExport->addColumn('batch_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $batchExport->addColumn('batch_data', Types::TEXT, ['length' => 2147483648, 'notnull' => false]);
-    $batchExport->addColumn('status', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $batchExport->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('batch_export_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('dataflow_batch_export')
+            ->addColumn(Column::editor()->setUnquotedName('batch_export_id')->setTypeName(Types::BIGINT)->setUnsigned(true)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('batch_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('batch_data')->setTypeName(Types::TEXT)->setLength(2147483648)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('status')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('batch_export_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('batch_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('batch_id')
+                    ->setUnquotedReferencedTableName('dataflow_batch')
+                    ->setUnquotedReferencedColumnNames('batch_id')
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Dataflow Batch Export')
+            ->create(),
     );
-    $batchExport->addIndex(['batch_id']);
-    $batchExport->addForeignKeyConstraint(
-        'dataflow_batch',
-        ['batch_id'],
-        ['batch_id'],
-        ['onDelete' => 'CASCADE'],
-    );
-    $batchExport->setComment('Dataflow Batch Export');
 
-    $batchImport = $schema->createTable('dataflow_batch_import');
-    $batchImport->addColumn('batch_import_id', Types::BIGINT, ['unsigned' => true, 'autoincrement' => true]);
-    $batchImport->addColumn('batch_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $batchImport->addColumn('batch_data', Types::TEXT, ['length' => 2147483648, 'notnull' => false]);
-    $batchImport->addColumn('status', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $batchImport->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('batch_import_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('dataflow_batch_import')
+            ->addColumn(Column::editor()->setUnquotedName('batch_import_id')->setTypeName(Types::BIGINT)->setUnsigned(true)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('batch_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('batch_data')->setTypeName(Types::TEXT)->setLength(2147483648)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('status')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('batch_import_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('batch_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('batch_id')
+                    ->setUnquotedReferencedTableName('dataflow_batch')
+                    ->setUnquotedReferencedColumnNames('batch_id')
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Dataflow Batch Import')
+            ->create(),
     );
-    $batchImport->addIndex(['batch_id']);
-    $batchImport->addForeignKeyConstraint(
-        'dataflow_batch',
-        ['batch_id'],
-        ['batch_id'],
-        ['onDelete' => 'CASCADE'],
-    );
-    $batchImport->setComment('Dataflow Batch Import');
 };

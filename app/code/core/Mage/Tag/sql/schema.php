@@ -8,125 +8,167 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Schema\Column;
+use Doctrine\DBAL\Schema\ForeignKeyConstraint;
+use Doctrine\DBAL\Schema\ForeignKeyConstraint\ReferentialAction;
+use Doctrine\DBAL\Schema\Index;
+use Doctrine\DBAL\Schema\Index\IndexType;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
-use Doctrine\DBAL\Schema\Schema;
+use Doctrine\DBAL\Schema\SchemaEditor;
+use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
 
-return function (Schema $schema): void {
-    $tag = $schema->createTable('tag');
-    $tag->addColumn('tag_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $tag->addColumn('name', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $tag->addColumn('status', Types::SMALLINT, ['default' => 0]);
-    $tag->addColumn('first_customer_id', Types::INTEGER, ['unsigned' => true, 'notnull' => false]);
-    $tag->addColumn('first_store_id', Types::SMALLINT, ['unsigned' => true, 'notnull' => false]);
-    $tag->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('tag_id')->create(),
+return function (SchemaEditor $schema): void {
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('tag')
+            ->addColumn(Column::editor()->setUnquotedName('tag_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('name')->setTypeName(Types::STRING)->setLength(255)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('status')->setTypeName(Types::SMALLINT)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('first_customer_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('first_store_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setNotNull(false)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('tag_id')->create())
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('first_customer_id')
+                    ->setUnquotedReferencedTableName('customer_entity')
+                    ->setUnquotedReferencedColumnNames('entity_id')
+                    ->setOnUpdateAction(ReferentialAction::NO_ACTION)
+                    ->setOnDeleteAction(ReferentialAction::SET_NULL)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('first_store_id')
+                    ->setUnquotedReferencedTableName('core_store')
+                    ->setUnquotedReferencedColumnNames('store_id')
+                    ->setOnUpdateAction(ReferentialAction::NO_ACTION)
+                    ->setOnDeleteAction(ReferentialAction::SET_NULL)
+                    ->create(),
+            )
+            ->setComment('Tag')
+            ->create(),
     );
-    $tag->addForeignKeyConstraint(
-        'customer_entity',
-        ['first_customer_id'],
-        ['entity_id'],
-        ['onUpdate' => 'NO ACTION', 'onDelete' => 'SET NULL'],
-    );
-    $tag->addForeignKeyConstraint(
-        'core_store',
-        ['first_store_id'],
-        ['store_id'],
-        ['onUpdate' => 'NO ACTION', 'onDelete' => 'SET NULL'],
-    );
-    $tag->setComment('Tag');
 
-    $relation = $schema->createTable('tag_relation');
-    $relation->addColumn('tag_relation_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $relation->addColumn('tag_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $relation->addColumn('customer_id', Types::INTEGER, ['unsigned' => true, 'notnull' => false]);
-    $relation->addColumn('product_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $relation->addColumn('store_id', Types::SMALLINT, ['unsigned' => true, 'default' => 1]);
-    $relation->addColumn('active', Types::SMALLINT, ['unsigned' => true, 'default' => 1]);
-    $relation->addColumn('created_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
-    $relation->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('tag_relation_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('tag_relation')
+            ->addColumn(Column::editor()->setUnquotedName('tag_relation_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('tag_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('customer_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('product_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('store_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(1)->create())
+            ->addColumn(Column::editor()->setUnquotedName('active')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(1)->create())
+            ->addColumn(Column::editor()->setUnquotedName('created_at')->setTypeName(Types::DATETIME_MUTABLE)->setNotNull(false)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('tag_relation_id')->create())
+            ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('tag_id', 'customer_id', 'product_id', 'store_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('product_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('tag_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('customer_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('customer_id')
+                    ->setUnquotedReferencedTableName('customer_entity')
+                    ->setUnquotedReferencedColumnNames('entity_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('product_id')
+                    ->setUnquotedReferencedTableName('catalog_product_entity')
+                    ->setUnquotedReferencedColumnNames('entity_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('store_id')
+                    ->setUnquotedReferencedTableName('core_store')
+                    ->setUnquotedReferencedColumnNames('store_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('tag_id')
+                    ->setUnquotedReferencedTableName('tag')
+                    ->setUnquotedReferencedColumnNames('tag_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Tag Relation')
+            ->create(),
     );
-    $relation->addUniqueIndex(
-        ['tag_id', 'customer_id', 'product_id', 'store_id'],
-    );
-    $relation->addIndex(['product_id']);
-    $relation->addIndex(['tag_id']);
-    $relation->addIndex(['customer_id']);
-    $relation->addIndex(['store_id']);
-    $relation->addForeignKeyConstraint(
-        'customer_entity',
-        ['customer_id'],
-        ['entity_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $relation->addForeignKeyConstraint(
-        'catalog_product_entity',
-        ['product_id'],
-        ['entity_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $relation->addForeignKeyConstraint(
-        'core_store',
-        ['store_id'],
-        ['store_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $relation->addForeignKeyConstraint(
-        'tag',
-        ['tag_id'],
-        ['tag_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $relation->setComment('Tag Relation');
 
-    $summary = $schema->createTable('tag_summary');
-    $summary->addColumn('tag_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $summary->addColumn('store_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $summary->addColumn('customers', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $summary->addColumn('products', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $summary->addColumn('uses', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $summary->addColumn('historical_uses', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $summary->addColumn('popularity', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $summary->addColumn('base_popularity', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $summary->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('tag_id', 'store_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('tag_summary')
+            ->addColumn(Column::editor()->setUnquotedName('tag_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('store_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('customers')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('products')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('uses')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('historical_uses')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('popularity')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('base_popularity')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('tag_id', 'store_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('tag_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('store_id')
+                    ->setUnquotedReferencedTableName('core_store')
+                    ->setUnquotedReferencedColumnNames('store_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('tag_id')
+                    ->setUnquotedReferencedTableName('tag')
+                    ->setUnquotedReferencedColumnNames('tag_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Tag Summary')
+            ->create(),
     );
-    $summary->addIndex(['store_id']);
-    $summary->addIndex(['tag_id']);
-    $summary->addForeignKeyConstraint(
-        'core_store',
-        ['store_id'],
-        ['store_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $summary->addForeignKeyConstraint(
-        'tag',
-        ['tag_id'],
-        ['tag_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $summary->setComment('Tag Summary');
 
-    $properties = $schema->createTable('tag_properties');
-    $properties->addColumn('tag_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $properties->addColumn('store_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $properties->addColumn('base_popularity', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $properties->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('tag_id', 'store_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('tag_properties')
+            ->addColumn(Column::editor()->setUnquotedName('tag_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('store_id')->setTypeName(Types::SMALLINT)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addColumn(Column::editor()->setUnquotedName('base_popularity')->setTypeName(Types::INTEGER)->setUnsigned(true)->setDefaultValue(0)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('tag_id', 'store_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('store_id')
+                    ->setUnquotedReferencedTableName('core_store')
+                    ->setUnquotedReferencedColumnNames('store_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('tag_id')
+                    ->setUnquotedReferencedTableName('tag')
+                    ->setUnquotedReferencedColumnNames('tag_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Tag Properties')
+            ->create(),
     );
-    $properties->addIndex(['store_id']);
-    $properties->addForeignKeyConstraint(
-        'core_store',
-        ['store_id'],
-        ['store_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $properties->addForeignKeyConstraint(
-        'tag',
-        ['tag_id'],
-        ['tag_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $properties->setComment('Tag Properties');
 };

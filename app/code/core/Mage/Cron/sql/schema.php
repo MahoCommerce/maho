@@ -8,28 +8,30 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
+use Doctrine\DBAL\Schema\Index;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
-use Doctrine\DBAL\Schema\Schema;
+use Doctrine\DBAL\Schema\SchemaEditor;
+use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
 
-return function (Schema $schema): void {
-    $t = $schema->createTable('cron_schedule');
-
-    $t->addColumn('schedule_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $t->addColumn('job_code', Types::STRING, ['length' => 255, 'default' => '0']);
-    $t->addColumn('status', Types::STRING, ['length' => 7,   'default' => 'pending']);
-    $t->addColumn('messages', Types::TEXT, ['length' => 65535, 'notnull' => false]);
-    $t->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
-    $t->addColumn('scheduled_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
-    $t->addColumn('executed_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
-    $t->addColumn('finished_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
-
-    $t->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('schedule_id')->create(),
+return function (SchemaEditor $schema): void {
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('cron_schedule')
+            ->addColumn(Column::editor()->setUnquotedName('schedule_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
+            ->addColumn(Column::editor()->setUnquotedName('job_code')->setTypeName(Types::STRING)->setLength(255)->setDefaultValue('0')->create())
+            ->addColumn(Column::editor()->setUnquotedName('status')->setTypeName(Types::STRING)->setLength(7)->setDefaultValue('pending')->create())
+            ->addColumn(Column::editor()->setUnquotedName('messages')->setTypeName(Types::TEXT)->setLength(65535)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('created_at')->setTypeName(Types::DATETIME_MUTABLE)->setDefaultValue(new CurrentTimestamp())->create())
+            ->addColumn(Column::editor()->setUnquotedName('scheduled_at')->setTypeName(Types::DATETIME_MUTABLE)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('executed_at')->setTypeName(Types::DATETIME_MUTABLE)->setNotNull(false)->create())
+            ->addColumn(Column::editor()->setUnquotedName('finished_at')->setTypeName(Types::DATETIME_MUTABLE)->setNotNull(false)->create())
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('schedule_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('job_code'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('scheduled_at', 'status'))
+            ->setComment('Cron Schedule')
+            ->create(),
     );
-    $t->addIndex(['job_code']);
-    $t->addIndex(['scheduled_at', 'status']);
-
-    $t->setComment('Cron Schedule');
 };

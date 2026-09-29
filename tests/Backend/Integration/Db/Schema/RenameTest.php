@@ -7,8 +7,12 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Schema\Column;
+use Doctrine\DBAL\Schema\ForeignKeyConstraint;
+use Doctrine\DBAL\Schema\Index;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\Schema;
+use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
 use Maho\Db\Schema\Applier;
 use Maho\Db\Schema\Renamer;
@@ -27,47 +31,58 @@ const RENAME_OLD_TABLE = 'maho_rename_probe_old';
 const RENAME_NEW_TABLE = 'maho_rename_probe_new';
 const RENAME_CHILD_TABLE = 'maho_rename_probe_child';
 
+function renameProbeTable(
+    string $table,
+    string $emailColumn,
+    bool $withHistory,
+    string $index = 'IDX_MAHO_PROBE_EMAIL',
+): Table {
+    $options = ['engine' => 'InnoDB', 'charset' => 'utf8', 'collation' => 'utf8_general_ci'];
+    if ($withHistory) {
+        $options += Renamer::renamed(from: RENAME_OLD_TABLE, columns: ['customer_email' => 'legacy_email']);
+    }
+
+    return Table::editor()
+        ->setUnquotedName($table)
+        ->addColumn(Column::editor()->setUnquotedName('entity_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
+        ->addColumn(Column::editor()->setUnquotedName($emailColumn)->setTypeName(Types::STRING)->setLength(255)->setNotNull(false)->create())
+        ->addIndex(Index::editor()->setUnquotedName($index)->setUnquotedColumnNames($emailColumn)->create())
+        ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create())
+        ->setOptions($options)
+        ->create();
+}
+
 function renameProbeSchema(
     string $table,
     string $emailColumn,
     bool $withHistory,
     string $index = 'IDX_MAHO_PROBE_EMAIL',
 ): Schema {
-    $schema = new Schema();
-    $probe = $schema->createTable($table);
-    $probe->addColumn('entity_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $probe->addColumn($emailColumn, Types::STRING, ['length' => 255, 'notnull' => false]);
-    $probe->addIndex([$emailColumn], $index);
-    $probe->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create(),
-    );
-    $probe->addOption('engine', 'InnoDB');
-    $probe->addOption('charset', 'utf8');
-    $probe->addOption('collation', 'utf8_general_ci');
-
-    if ($withHistory) {
-        Renamer::renamed($probe, from: RENAME_OLD_TABLE, columns: ['customer_email' => 'legacy_email']);
-    }
-
-    return $schema;
+    return Schema::editor()->addTable(renameProbeTable($table, $emailColumn, $withHistory, $index))->create();
 }
 
 function renameProbeSchemaWithChild(string $table, string $emailColumn, bool $withHistory): Schema
 {
-    $schema = renameProbeSchema($table, $emailColumn, $withHistory);
+    $child = Table::editor()
+        ->setUnquotedName(RENAME_CHILD_TABLE)
+        ->addColumn(Column::editor()->setUnquotedName('entity_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->setAutoincrement(true)->create())
+        ->addColumn(Column::editor()->setUnquotedName('parent_id')->setTypeName(Types::INTEGER)->setUnsigned(true)->create())
+        ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create())
+        ->addForeignKeyConstraint(
+            ForeignKeyConstraint::editor()
+                ->setUnquotedName('FK_MAHO_PROBE_CHILD')
+                ->setUnquotedReferencingColumnNames('parent_id')
+                ->setUnquotedReferencedTableName($table)
+                ->setUnquotedReferencedColumnNames('entity_id')
+                ->create(),
+        )
+        ->setOptions(['engine' => 'InnoDB', 'charset' => 'utf8', 'collation' => 'utf8_general_ci'])
+        ->create();
 
-    $child = $schema->createTable(RENAME_CHILD_TABLE);
-    $child->addColumn('entity_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $child->addColumn('parent_id', Types::INTEGER, ['unsigned' => true]);
-    $child->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create(),
-    );
-    $child->addForeignKeyConstraint($table, ['parent_id'], ['entity_id'], [], 'FK_MAHO_PROBE_CHILD');
-    $child->addOption('engine', 'InnoDB');
-    $child->addOption('charset', 'utf8');
-    $child->addOption('collation', 'utf8_general_ci');
-
-    return $schema;
+    return Schema::editor()
+        ->addTable(renameProbeTable($table, $emailColumn, $withHistory))
+        ->addTable($child)
+        ->create();
 }
 
 beforeEach(function () {
