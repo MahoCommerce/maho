@@ -130,7 +130,7 @@ class Maho_Queue_Model_Cron
             escapeshellarg(Mage::getBaseDir() . '/maho'),
             escapeshellarg($pool->name),
             $index,
-            escapeshellarg(Mage::getBaseDir('var') . '/log/queue-worker.log'),
+            escapeshellarg(Mage::getBaseDir('log') . '/queue-worker.log'),
         ));
     }
 }
