@@ -30,33 +30,27 @@ class Mage_CatalogSearch_Model_Resource_Helper_Pgsql extends Mage_Eav_Model_Reso
     }
 
     /**
-     * Prepare Terms
+     * Split $str into words for plainto_tsquery() in chooseFulltext().
+     *
+     * A word that is shorter than $minWordLength is dropped.
      *
      * @param string $str The source string
-     * @param int $maxWordLength
+     * @param int $maxWordLength The maximum number of words
      * @return array (0=>words, 1=>terms)
      */
-    public function prepareTerms($str, $maxWordLength = 0)
+    public function prepareTerms($str, $maxWordLength = 0, int $minWordLength = 0)
     {
-        $words = [0 => ''];
         $terms = [];
-
-        // Simple word extraction for PostgreSQL full-text search
         preg_match_all('/[\w]+/u', $str, $matches);
-
         foreach ($matches[0] as $word) {
-            $word = trim($word);
-            if (strlen($word)) {
+            if (mb_strlen($word) >= $minWordLength) {
                 $terms[$word] = $word;
-                $words[] = $word;
             }
         }
-
         if ($maxWordLength && count($terms) > $maxWordLength) {
             $terms = array_slice($terms, 0, $maxWordLength);
         }
-
-        return [$words, $terms];
+        return [array_values($terms), $terms];
     }
 
     /**
