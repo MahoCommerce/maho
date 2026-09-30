@@ -29,29 +29,27 @@ class Mage_CatalogSearch_Model_Resource_Helper_Mysql extends Mage_Eav_Model_Reso
      * Split $str into words for MATCH ... AGAINST (:query IN BOOLEAN MODE).
      *
      * Each word goes into double quotes, so MySQL never reads a character of it as a boolean operator.
-     * A word that holds only operator or bracket characters is dropped.
+     * A word that holds only operator or bracket characters, or that is shorter than $minWordLength, is dropped.
      *
      * @param string $str The source string
-     * @param int $maxWordLength
+     * @param int $maxWordLength The maximum number of words
      * @return array (0=>words, 1=>terms)
      */
-    public function prepareTerms($str, $maxWordLength = 0)
+    public function prepareTerms($str, $maxWordLength = 0, int $minWordLength = 0)
     {
-        $words = [];
         $terms = [];
         preg_match_all('/([\(\)]|[\"\'][^"\']*[\"\']|[^\s\"\(\)]*)/uis', $str, $matches);
         foreach ($matches[1] as $word) {
             $word = str_replace('"', '', trim($word));
-            if (strspn($word, '+-|<>~*()') === strlen($word)) {
+            if (strspn($word, '+-|<>~*()') === strlen($word) || mb_strlen($word) < $minWordLength) {
                 continue;
             }
             $terms[$word] = $word;
-            $words[] = '"' . $word . '"';
         }
         if ($maxWordLength && count($terms) > $maxWordLength) {
             $terms = array_slice($terms, 0, $maxWordLength);
         }
-        return [$words, $terms];
+        return [array_map(fn($term) => '"' . $term . '"', array_values($terms)), $terms];
     }
 
     /**

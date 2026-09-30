@@ -31,29 +31,27 @@ class Mage_CatalogSearch_Model_Resource_Helper_Sqlite extends Mage_Eav_Model_Res
     /**
      * Split $str into words for the LIKE condition of chooseFulltext().
      *
-     * A word that holds only operator or bracket characters is dropped.
+     * A word that holds only operator or bracket characters, or that is shorter than $minWordLength, is dropped.
      *
      * @param string $str The source string
-     * @param int $maxWordLength
+     * @param int $maxWordLength The maximum number of words
      * @return array (0=>words, 1=>terms)
      */
-    public function prepareTerms($str, $maxWordLength = 0)
+    public function prepareTerms($str, $maxWordLength = 0, int $minWordLength = 0)
     {
-        $words = [];
         $terms = [];
         preg_match_all('/([\(\)]|[\"\'][^"\']*[\"\']|[^\s\"\(\)]*)/uis', $str, $matches);
         foreach ($matches[1] as $word) {
             $word = str_replace('"', '', trim($word));
-            if (strspn($word, '+-|<>~*()') === strlen($word)) {
+            if (strspn($word, '+-|<>~*()') === strlen($word) || mb_strlen($word) < $minWordLength) {
                 continue;
             }
             $terms[$word] = $word;
-            $words[] = $word;
         }
         if ($maxWordLength && count($terms) > $maxWordLength) {
             $terms = array_slice($terms, 0, $maxWordLength);
         }
-        return [$words, $terms];
+        return [array_values($terms), $terms];
     }
 
     /**
