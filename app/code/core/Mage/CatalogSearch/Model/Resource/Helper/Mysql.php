@@ -26,7 +26,10 @@ class Mage_CatalogSearch_Model_Resource_Helper_Mysql extends Mage_Eav_Model_Reso
     }
 
     /**
-     * Prepare Terms
+     * Build the boolean mode expression for $str.
+     *
+     * A term goes into double quotes. An operator stays only when a term or "(" follows it, and a ")"
+     * stays only when it closes a "(". MySQL rejects any other operator or bracket with error 1064.
      *
      * @param string $str The source string
      * @param int $maxWordLength
@@ -34,49 +37,44 @@ class Mage_CatalogSearch_Model_Resource_Helper_Mysql extends Mage_Eav_Model_Reso
      */
     public function prepareTerms($str, $maxWordLength = 0)
     {
-        $boolWords = [
-            '+' => '+',
-            '-' => '-',
-            '|' => '|',
-            '<' => '<',
-            '>' => '>',
-            '~' => '~',
-            '*' => '*',
-        ];
-        $brackets = [
-            '('       => '(',
-            ')'       => ')',
-        ];
-        $words = [0 => ''];
+        $operators = ['+', '-', '|', '<', '>', '~'];
+        $words = [];
         $terms = [];
+        $operator = null;
+        $openBrackets = 0;
         preg_match_all('/([\(\)]|[\"\'][^"\']*[\"\']|[^\s\"\(\)]*)/uis', $str, $matches);
-        $isOpenBracket = 0;
         foreach ($matches[1] as $word) {
             $word = trim($word);
-            if (strlen($word)) {
-                $word = str_replace('"', '', $word);
-                $isBool = in_array(strtoupper($word), $boolWords);
-                $isBracket = in_array($word, $brackets);
-                if (!$isBool && !$isBracket) {
-                    $terms[$word] = $word;
-                    $word = '"' . $word . '"';
-                    $words[] = $word;
-                } elseif ($isBracket) {
-                    if ($word === '(') {
-                        $isOpenBracket++;
-                    } else {
-                        $isOpenBracket--;
-                    }
-                    $words[] = $word;
-                } elseif ($isBool) {
+            if ($word === '' || $word === '*') {
+                continue;
+            }
+            if (in_array($word, $operators, true)) {
+                $operator = $word;
+                continue;
+            }
+            if ($word === ')') {
+                if ($openBrackets > 0) {
+                    $openBrackets--;
                     $words[] = $word;
                 }
+                $operator = null;
+                continue;
             }
+            if ($operator !== null) {
+                $words[] = $operator;
+                $operator = null;
+            }
+            if ($word === '(') {
+                $openBrackets++;
+            } else {
+                $word = str_replace('"', '', $word);
+                $terms[$word] = $word;
+                $word = '"' . $word . '"';
+            }
+            $words[] = $word;
         }
-        if ($isOpenBracket > 0) {
-            $words[] = sprintf("%')" . $isOpenBracket . 's', '');
-        } elseif ($isOpenBracket < 0) {
-            $words[0] = sprintf("%'(" . $isOpenBracket . 's', '');
+        if ($openBrackets > 0) {
+            $words[] = str_repeat(')', $openBrackets);
         }
         if ($maxWordLength && count($terms) > $maxWordLength) {
             $terms = array_slice($terms, 0, $maxWordLength);
