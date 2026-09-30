@@ -12,6 +12,7 @@ namespace Maho\Db\Schema;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Platforms\AbstractMySQLPlatform;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
+use Doctrine\DBAL\Platforms\MariaDBPlatform;
 use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
 use Doctrine\DBAL\Platforms\SQLitePlatform;
 use Doctrine\DBAL\Schema\Comparator;
@@ -168,17 +169,17 @@ final class Applier
 
         // Conversions lead the batch: InnoDB refuses a foreign key referencing a
         // MyISAM table (errno 150), which FOREIGN_KEY_CHECKS=0 does not lift.
-        [$declaredCharsets, $undeclaredCharsets] = $withTableConversions
+        [$firstCharsets, $lastCharsets] = $withTableConversions
             ? self::charsetConversions($connection, $platform, $tablePrefix, $introspectedTables)
             : [[], []];
         $conversions = $withTableConversions
-            ? array_merge(self::engineConversions($connection, $platform, $tablePrefix), $declaredCharsets)
+            ? array_merge(self::engineConversions($connection, $platform, $tablePrefix), $firstCharsets)
             : [];
 
         // Conversions keep the lead: both scans run before any rename, so their
         // statements name the tables as they still stand. An undeclared table goes
         // last, so a conversion that fails there does not stop the declared changes.
-        return array_merge($conversions, $tableRenames['sql'], $columnRenames, $creates, $alters, $undeclaredCharsets);
+        return array_merge($conversions, $tableRenames['sql'], $columnRenames, $creates, $alters, $lastCharsets);
     }
 
     /**
@@ -186,7 +187,7 @@ final class Applier
      * engine pass: the Comparator never diffs table options.
      *
      * @param array<string, Table> $declaredTables live name => introspected live table
-     * @return array{list<string>, list<string>} the declared tables, then the undeclared tables
+     * @return array{list<string>, list<string>} the statements that start the plan, then the statements that end it
      */
     private static function charsetConversions(
         Connection $connection,
@@ -198,7 +199,74 @@ final class Applier
             return [[], []];
         }
 
-        return self::charsetConversionStatements($platform, self::legacyCharsetTables($connection, $tablePrefix), $declaredTables);
+        $tables = self::legacyCharsetTables($connection, $tablePrefix);
+        [$dropKeys, $addKeys, $keyTables] = self::legacyCharsetForeignKeys($connection, $platform, $tables);
+        // An undeclared table in one of those keys converts before the key comes back.
+        $keyedUndeclared = array_diff_key(array_intersect_key($tables, $keyTables), $declaredTables);
+        [$declared, $undeclared] = self::charsetConversionStatements($platform, array_diff_key($tables, $keyedUndeclared), $declaredTables);
+
+        return [
+            array_merge($dropKeys, $declared, self::charsetConversionStatements($platform, $keyedUndeclared, [])[1], $addKeys),
+            $undeclared,
+        ];
+    }
+
+    /**
+     * MariaDB refuses to change the charset of a column in a foreign key, even with
+     * FOREIGN_KEY_CHECKS=0. Drop each such key before the conversions, and add it again after.
+     *
+     * @param array<string, string> $tables name => table collation
+     * @return array{list<string>, list<string>, array<string, true>} the DROP statements, the ADD statements, the tables in the keys
+     */
+    private static function legacyCharsetForeignKeys(Connection $connection, AbstractPlatform $platform, array $tables): array
+    {
+        if (!$platform instanceof MariaDBPlatform || $tables === []) {
+            return [[], [], []];
+        }
+
+        $rows = $connection->fetchAllAssociative(
+            'SELECT k.TABLE_NAME, k.CONSTRAINT_NAME, k.COLUMN_NAME, k.REFERENCED_TABLE_NAME, k.REFERENCED_COLUMN_NAME,'
+            . ' r.UPDATE_RULE, r.DELETE_RULE, c.CHARACTER_SET_NAME AS CHILD_CHARSET, p.CHARACTER_SET_NAME AS PARENT_CHARSET'
+            . ' FROM information_schema.KEY_COLUMN_USAGE k'
+            . ' JOIN information_schema.REFERENTIAL_CONSTRAINTS r ON r.CONSTRAINT_SCHEMA = k.CONSTRAINT_SCHEMA'
+            . ' AND r.TABLE_NAME = k.TABLE_NAME AND r.CONSTRAINT_NAME = k.CONSTRAINT_NAME'
+            . ' JOIN information_schema.COLUMNS c ON c.TABLE_SCHEMA = k.TABLE_SCHEMA'
+            . ' AND c.TABLE_NAME = k.TABLE_NAME AND c.COLUMN_NAME = k.COLUMN_NAME'
+            . ' JOIN information_schema.COLUMNS p ON p.TABLE_SCHEMA = k.REFERENCED_TABLE_SCHEMA'
+            . ' AND p.TABLE_NAME = k.REFERENCED_TABLE_NAME AND p.COLUMN_NAME = k.REFERENCED_COLUMN_NAME'
+            . ' WHERE k.TABLE_SCHEMA = DATABASE()'
+            . ' ORDER BY k.TABLE_NAME, k.CONSTRAINT_NAME, k.ORDINAL_POSITION',
+        );
+        $keys = [];
+        foreach ($rows as $row) {
+            $keys[$row['TABLE_NAME'] . '.' . $row['CONSTRAINT_NAME']][] = $row;
+        }
+        $quote = $platform->quoteSingleIdentifier(...);
+        $drops = $adds = $keyTables = [];
+        foreach ($keys as $columns) {
+            $key = $columns[0];
+            // Take the whole key when one of its columns, on either side, is still utf8mb3.
+            $charsets = array_merge(array_column($columns, 'CHILD_CHARSET'), array_column($columns, 'PARENT_CHARSET'));
+            if ((!isset($tables[$key['TABLE_NAME']]) && !isset($tables[$key['REFERENCED_TABLE_NAME']]))
+                || array_intersect($charsets, ['utf8', 'utf8mb3']) === []
+            ) {
+                continue;
+            }
+            $drops[] = sprintf('ALTER TABLE %s DROP FOREIGN KEY %s', $quote($key['TABLE_NAME']), $quote($key['CONSTRAINT_NAME']));
+            $adds[] = sprintf(
+                'ALTER TABLE %s ADD CONSTRAINT %s FOREIGN KEY (%s) REFERENCES %s (%s) ON DELETE %s ON UPDATE %s',
+                $quote($key['TABLE_NAME']),
+                $quote($key['CONSTRAINT_NAME']),
+                implode(', ', array_map($quote, array_column($columns, 'COLUMN_NAME'))),
+                $quote($key['REFERENCED_TABLE_NAME']),
+                implode(', ', array_map($quote, array_column($columns, 'REFERENCED_COLUMN_NAME'))),
+                $key['DELETE_RULE'],
+                $key['UPDATE_RULE'],
+            );
+            $keyTables[$key['TABLE_NAME']] = $keyTables[$key['REFERENCED_TABLE_NAME']] = true;
+        }
+
+        return [$drops, $adds, $keyTables];
     }
 
     /**

@@ -53,7 +53,7 @@ function charsetProbeColumns(Mysql $adapter, string $table): array
     $columns = [];
     $rows = $adapter->fetchAll(
         'SELECT COLUMN_NAME, CHARACTER_SET_NAME, DATA_TYPE FROM information_schema.COLUMNS'
-        . ' WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ?',
+        . ' WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? ORDER BY ORDINAL_POSITION',
         [$table],
     );
     foreach ($rows as $row) {
