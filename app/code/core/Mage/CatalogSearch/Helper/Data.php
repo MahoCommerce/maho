@@ -304,8 +304,12 @@ class Mage_CatalogSearch_Helper_Data extends Mage_Core_Helper_Abstract
         if ($searchType == Mage_CatalogSearch_Model_Fulltext::SEARCH_TYPE_COMBINE
             || $searchType == Mage_CatalogSearch_Model_Fulltext::SEARCH_TYPE_LIKE
         ) {
-            $wordsFull = $stringHelper->splitWords($this->getQueryText(), true);
-            $wordsLike = $stringHelper->splitWords($this->getQueryText(), true, $this->getMaxQueryWords());
+            $minWordLength = (int) $this->getMinQueryLength();
+            $wordsFull = array_filter(
+                $stringHelper->splitWords($this->getQueryText(), true),
+                fn($word) => mb_strlen($word) >= $minWordLength,
+            );
+            $wordsLike = array_slice($wordsFull, 0, (int) $this->getMaxQueryWords() ?: null);
             if (count($wordsFull) > count($wordsLike)) {
                 $wordsCut = array_map($this->escapeHtml(...), array_diff($wordsFull, $wordsLike));
                 $this->addNoteMessage(

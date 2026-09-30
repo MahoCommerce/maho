@@ -22,70 +22,36 @@ class Mage_CatalogSearch_Model_Resource_Helper_Sqlite extends Mage_Eav_Model_Res
         // SQLite has no MATCH AGAINST. Wrap the bound :query with % wildcards
         // so LIKE matches the term anywhere inside data_index, without the
         // wildcards LIKE requires an exact full-string match and never hits.
-        $field = new Maho\Db\Expr('CASE WHEN ' . $alias . ".data_index LIKE '%' || :query || '%' THEN 1 ELSE 0 END");
+        // NULLIF makes an empty :query match no row, as MATCH AGAINST('') does on MySQL.
+        $field = new Maho\Db\Expr('CASE WHEN ' . $alias . ".data_index LIKE '%' || NULLIF(:query, '') || '%' THEN 1 ELSE 0 END");
         $select->columns(['relevance' => $field]);
         return $field;
     }
 
     /**
-     * Prepare Terms
+     * Split $str into words for the LIKE condition of chooseFulltext().
+     *
+     * A word that holds only operator or bracket characters, or that is shorter than $minWordLength, is dropped.
      *
      * @param string $str The source string
-     * @param int $maxWordLength
+     * @param int $maxWordLength The maximum number of words
      * @return array (0=>words, 1=>terms)
      */
-    public function prepareTerms($str, $maxWordLength = 0)
+    public function prepareTerms($str, $maxWordLength = 0, int $minWordLength = 0)
     {
-        $boolWords = [
-            '+' => '+',
-            '-' => '-',
-            '|' => '|',
-            '<' => '<',
-            '>' => '>',
-            '~' => '~',
-            '*' => '*',
-        ];
-        $brackets = [
-            '('       => '(',
-            ')'       => ')',
-        ];
-        $words = [0 => ''];
         $terms = [];
         preg_match_all('/([\(\)]|[\"\'][^"\']*[\"\']|[^\s\"\(\)]*)/uis', $str, $matches);
-        $isOpenBracket = 0;
         foreach ($matches[1] as $word) {
-            $word = trim($word);
-            if (strlen($word)) {
-                $word = str_replace('"', '', $word);
-                $isBool = in_array(strtoupper($word), $boolWords);
-                $isBracket = in_array($word, $brackets);
-                if (!$isBool && !$isBracket) {
-                    // SQLite uses LIKE, not MySQL boolean-mode MATCH AGAINST,
-                    // so don't quote-wrap the word, quotes would become
-                    // literal characters in the LIKE comparison.
-                    $terms[$word] = $word;
-                    $words[] = $word;
-                } elseif ($isBracket) {
-                    if ($word === '(') {
-                        $isOpenBracket++;
-                    } else {
-                        $isOpenBracket--;
-                    }
-                    $words[] = $word;
-                } elseif ($isBool) {
-                    $words[] = $word;
-                }
+            $word = str_replace('"', '', trim($word));
+            if (strspn($word, '+-|<>~*()') === strlen($word) || mb_strlen($word) < $minWordLength) {
+                continue;
             }
-        }
-        if ($isOpenBracket > 0) {
-            $words[] = sprintf("%')" . $isOpenBracket . 's', '');
-        } elseif ($isOpenBracket < 0) {
-            $words[0] = sprintf("%'(" . $isOpenBracket . 's', '');
+            $terms[$word] = $word;
         }
         if ($maxWordLength && count($terms) > $maxWordLength) {
             $terms = array_slice($terms, 0, $maxWordLength);
         }
-        return [$words, $terms];
+        return [array_values($terms), $terms];
     }
 
     /**
