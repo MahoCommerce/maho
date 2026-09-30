@@ -13,6 +13,7 @@ use Doctrine\DBAL\Schema\Name\OptionallyQualifiedName;
 use Doctrine\DBAL\Schema\Schema;
 use Mage;
 use Maho;
+use Maho\Db\Adapter\Pdo\Mysql;
 use RuntimeException;
 
 final class Collector
@@ -100,9 +101,9 @@ final class Collector
 
     /**
      * Apply the same table-level charset/collation Maho's legacy adapter emits
-     * (Maho\Db\Ddl\Table::$_options defaults to charset=utf8, collate=utf8_general_ci).
-     * Without this, MySQL refuses foreign keys between a declarative table
-     * (database-default charset, often utf8mb4) and a legacy table (utf8).
+     * (Maho\Db\Ddl\Table::$_options). Without this, a declarative table takes the
+     * database default, and MySQL refuses a VARCHAR foreign key between it and a
+     * legacy table whose charset or collation differs.
      *
      * Authors may still override per table via $table->addOption('charset', ...).
      */
@@ -110,10 +111,10 @@ final class Collector
     {
         foreach ($schema->getTables() as $table) {
             if (!$table->hasOption('charset')) {
-                $table->addOption('charset', 'utf8');
+                $table->addOption('charset', Mysql::DEFAULT_CHARSET);
             }
             if (!$table->hasOption('collation')) {
-                $table->addOption('collation', 'utf8_general_ci');
+                $table->addOption('collation', Mysql::DEFAULT_COLLATION);
             }
         }
     }

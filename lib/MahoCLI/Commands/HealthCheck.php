@@ -179,6 +179,25 @@ class HealthCheck extends BaseMahoCommand
     }
 
     /**
+     * Tables that still hold utf8mb3 text, name => table collation. Empty on
+     * PostgreSQL and SQLite, which already store 4-byte characters.
+     *
+     * @return array<string, string>
+     */
+    public static function findLegacyCharsetTables(): array
+    {
+        $adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
+        if (!($adapter instanceof \Maho\Db\Adapter\Pdo\Mysql)) {
+            return [];
+        }
+
+        return \Maho\Db\Schema\Applier::legacyCharsetTables(
+            $adapter->getConnection(),
+            \Maho\Db\Schema\Collector::tablePrefix(),
+        );
+    }
+
+    /**
      * Tables holding enough reclaimable free space to be worth a rebuild.
      * Works on all three backends, each measuring its own form of bloat.
      *
@@ -1180,6 +1199,26 @@ class HealthCheck extends BaseMahoCommand
         }
 
         try {
+            $legacyCharsets = self::findLegacyCharsetTables();
+            $checks[] = [
+                'check' => 'Table Charset',
+                'severity' => empty($legacyCharsets) ? 'ok' : 'warning',
+                'details' => empty($legacyCharsets) ? '' : sprintf(
+                    '%d table(s) are utf8mb3 (%s). Text with an emoji or another 4-byte character cannot be saved '
+                    . 'in them. Run "./maho migrate" to convert them to utf8mb4.',
+                    count($legacyCharsets),
+                    implode(', ', array_keys($legacyCharsets)),
+                ),
+            ];
+        } catch (\Exception) {
+            $checks[] = [
+                'check' => 'Table Charset',
+                'severity' => 'error',
+                'details' => 'Unable to check table charsets.',
+            ];
+        }
+
+        try {
             $bloated = self::findBloatedTables();
             $checks[] = [
                 'check' => 'Table Optimization',
@@ -2035,6 +2074,7 @@ class HealthCheck extends BaseMahoCommand
 
         $this->checkZeroDates($output, $checkZeroDates);
         $this->checkTableEngines($output);
+        $this->checkTableCharsets($output);
         $this->checkTableBloat($output);
 
         if ($hasErrors) {
@@ -2186,6 +2226,34 @@ class HealthCheck extends BaseMahoCommand
         ));
         foreach ($tables as $table => $engine) {
             $output->writeln(sprintf('- %s (%s)', $table, $engine));
+        }
+        $output->writeln('Run: ./maho migrate');
+        $output->writeln('');
+    }
+
+    private function checkTableCharsets(OutputInterface $output): void
+    {
+        $output->write('Checking table charsets... ');
+
+        $adapter = \Mage::getSingleton('core/resource')->getConnection('core_read');
+        if (!($adapter instanceof \Maho\Db\Adapter\Pdo\Mysql)) {
+            $output->writeln('<info>OK (MySQL/MariaDB only check)</info>');
+            return;
+        }
+
+        $tables = self::findLegacyCharsetTables();
+        if ($tables === []) {
+            $output->writeln('<info>OK</info>');
+            return;
+        }
+
+        $output->writeln('');
+        $output->writeln(sprintf(
+            '<comment>Warning: %d table(s) are utf8mb3, so text with an emoji or another 4-byte character cannot be saved in them:</comment>',
+            count($tables),
+        ));
+        foreach ($tables as $table => $collation) {
+            $output->writeln(sprintf('- %s (%s)', $table, $collation));
         }
         $output->writeln('Run: ./maho migrate');
         $output->writeln('');

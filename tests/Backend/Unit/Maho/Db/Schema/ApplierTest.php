@@ -211,3 +211,49 @@ it('skips the engine pass entirely on PostgreSQL and SQLite', function (string $
     'postgres' => PostgreSQLPlatform::class,
     'sqlite' => SQLitePlatform::class,
 ]);
+
+// --- charset conversions ------------------------------------------------
+
+it('converts an undeclared utf8mb3 table with CONVERT TO', function () {
+    $result = invokeApplierMethod('charsetConversionStatements', [
+        new MySQLPlatform(),
+        ['thirdparty_log' => 'utf8mb3_general_ci', 'thirdparty_key' => 'utf8_bin'],
+        [],
+    ]);
+
+    expect($result)->toBe([
+        'ALTER TABLE `thirdparty_log` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci',
+        'ALTER TABLE `thirdparty_key` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_bin',
+    ]);
+});
+
+it('converts each utf8mb3 column of a declared table and keeps its type', function () {
+    // CONVERT TO would widen TEXT to MEDIUMTEXT, and the declared TEXT would then
+    // make the diff plan a change back on every run.
+    $live = applierTable('cms_block');
+    $live->addColumn('block_id', Types::INTEGER, ['unsigned' => true]);
+    $live->addColumn('title', Types::STRING, ['length' => 255, 'default' => "it's", 'comment' => 'Block title', 'platformOptions' => ['charset' => 'utf8mb3', 'collation' => 'utf8mb3_general_ci']]);
+    $live->addColumn('content', Types::TEXT, ['length' => 65535, 'notnull' => false, 'platformOptions' => ['charset' => 'utf8mb3', 'collation' => 'utf8mb3_bin']]);
+    $live->addColumn('identifier', Types::STRING, ['length' => 255, 'platformOptions' => ['charset' => 'utf8mb4', 'collation' => 'utf8mb4_general_ci']]);
+
+    $result = invokeApplierMethod('charsetConversionStatements', [
+        new MySQLPlatform(),
+        ['cms_block' => 'utf8mb3_general_ci'],
+        ['cms_block' => $live],
+    ]);
+
+    expect($result)->toBe([
+        'ALTER TABLE `cms_block` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,'
+        . " MODIFY `title` VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'it''s' COMMENT 'Block title',"
+        . ' MODIFY `content` TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL',
+    ]);
+});
+
+it('skips the charset pass entirely on PostgreSQL and SQLite', function (string $platformClass) {
+    $connection = DriverManager::getConnection(['driver' => 'pdo_sqlite', 'memory' => true]);
+
+    expect(invokeApplierMethod('charsetConversions', [$connection, new $platformClass(), '', []]))->toBe([]);
+})->with([
+    'postgres' => PostgreSQLPlatform::class,
+    'sqlite' => SQLitePlatform::class,
+]);

@@ -16,16 +16,10 @@ function searchHelperForQuery(string $queryText): Mage_CatalogSearch_Helper_Data
 }
 
 describe('getQueryText', function () {
-    it('removes 4-byte characters that the query column cannot store', function () {
+    it('keeps 4-byte characters, which the utf8mb4 query column stores', function () {
         $helper = searchHelperForQuery("\u{1F449}\u{1F3FB} acc6.top \u{1F448}\u{1F3FB} comprar");
 
-        expect($helper->getQueryText())->toBe('acc6.top  comprar');
-    });
-
-    it('returns an empty query when the text is only 4-byte characters', function () {
-        $helper = searchHelperForQuery("\u{1F449}\u{1F3FB}");
-
-        expect($helper->getQueryText())->toBe('');
+        expect($helper->getQueryText())->toBe("\u{1F449}\u{1F3FB} acc6.top \u{1F448}\u{1F3FB} comprar");
     });
 
     it('keeps accented and non-latin characters', function () {

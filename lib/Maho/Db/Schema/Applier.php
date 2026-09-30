@@ -36,10 +36,10 @@ final class Applier
      * The introspected current schema is scoped to only the tables declared in
      * $target, so unrelated existing tables are never considered for DROP.
      *
-     * $tablePrefix scopes the storage-engine pass, which is the one part of the
-     * plan that looks beyond the declared tables. Pass '' when the database
-     * belongs to Maho alone, or $withEngineConversions = false to drop that
-     * pass entirely, for a caller asking only whether the *declared* schema
+     * $tablePrefix scopes the storage-engine and charset passes, the parts of
+     * the plan that look beyond the declared tables. Pass '' when the database
+     * belongs to Maho alone, or $withTableConversions = false to drop those
+     * passes entirely, for a caller asking only whether the *declared* schema
      * is behind (see Status::isConverged).
      *
      * @return list<string> SQL statements (empty when no changes are needed)
@@ -48,7 +48,7 @@ final class Applier
         Connection $connection,
         Schema $target,
         string $tablePrefix = '',
-        bool $withEngineConversions = true,
+        bool $withTableConversions = true,
     ): array {
         $schemaManager = $connection->createSchemaManager();
         $platform = $connection->getDatabasePlatform();
@@ -74,6 +74,7 @@ final class Applier
         $tableRenames = Renamer::planTableRenames($platform, $target, $existing);
         $columnRenames = [];
 
+        $introspectedTables = [];
         $existingTables = [];
         $tablesToCreate = [];
         $tablesToAlter = [];
@@ -83,6 +84,8 @@ final class Applier
             $liveName = $tableRenames['sources'][$name] ?? $name;
             if (isset($existing[$liveName])) {
                 $liveTable = $schemaManager->introspectTableByUnquotedName($liveName);
+                // A clone: reconcile() below strips the comments, and the charset pass must keep them.
+                $introspectedTables[$liveName] = clone $liveTable;
                 if ($liveName !== $name) {
                     $liveTable = $liveTable->edit()
                         ->setName($targetTable->getObjectName())
@@ -165,13 +168,142 @@ final class Applier
 
         // Conversions lead the batch: InnoDB refuses a foreign key referencing a
         // MyISAM table (errno 150), which FOREIGN_KEY_CHECKS=0 does not lift.
-        $conversions = $withEngineConversions
-            ? self::engineConversions($connection, $platform, $tablePrefix)
+        $conversions = $withTableConversions
+            ? array_merge(
+                self::engineConversions($connection, $platform, $tablePrefix),
+                self::charsetConversions($connection, $platform, $tablePrefix, $introspectedTables),
+            )
             : [];
 
-        // Conversions keep the lead: legacyEngineTables() scans before any
-        // rename runs, so its statements name the tables as they still stand.
+        // Conversions keep the lead: both scans run before any rename, so their
+        // statements name the tables as they still stand.
         return array_merge($conversions, $tableRenames['sql'], $columnRenames, $creates, $alters);
+    }
+
+    /**
+     * Convert every live utf8mb3 table to utf8mb4, for the same reason as the
+     * engine pass: the Comparator never diffs table options.
+     *
+     * @param array<string, Table> $declaredTables live name => introspected live table
+     * @return list<string>
+     */
+    private static function charsetConversions(
+        Connection $connection,
+        AbstractPlatform $platform,
+        string $tablePrefix,
+        array $declaredTables,
+    ): array {
+        if (!$platform instanceof AbstractMySQLPlatform) {
+            return [];
+        }
+
+        return self::charsetConversionStatements($platform, self::legacyCharsetTables($connection, $tablePrefix), $declaredTables);
+    }
+
+    /**
+     * Live tables that still hold utf8mb3 text, name => table collation. A table
+     * qualifies when its default is utf8mb3, or when its default is utf8mb4 and
+     * a column is still utf8mb3. Tables in other charsets are left alone: only
+     * utf8mb3 to utf8mb4 is lossless. Scans the whole database like
+     * legacyEngineTables(), since a VARCHAR foreign key needs both sides in one
+     * charset. Callers must have established that the connection is MySQL or
+     * MariaDB.
+     *
+     * @return array<string, string>
+     */
+    public static function legacyCharsetTables(Connection $connection, string $tablePrefix = ''): array
+    {
+        $collations = $connection->fetchAllKeyValue(
+            'SELECT TABLE_NAME, TABLE_COLLATION FROM information_schema.TABLES'
+            . " WHERE TABLE_SCHEMA = DATABASE() AND TABLE_TYPE = 'BASE TABLE'"
+            . ' ORDER BY TABLE_NAME',
+        );
+        $withLegacyColumns = array_flip($connection->fetchFirstColumn(
+            'SELECT DISTINCT TABLE_NAME FROM information_schema.COLUMNS'
+            . " WHERE TABLE_SCHEMA = DATABASE() AND CHARACTER_SET_NAME IN ('utf8', 'utf8mb3')",
+        ));
+
+        $tables = [];
+        foreach ($collations as $name => $collation) {
+            $collation = (string) $collation;
+            if ($tablePrefix !== '' && !str_starts_with($name, $tablePrefix)) {
+                continue;
+            }
+            if (self::isUtf8mb3Collation($collation)
+                || (str_starts_with($collation, 'utf8mb4_') && isset($withLegacyColumns[$name]))
+            ) {
+                $tables[$name] = $collation;
+            }
+        }
+
+        return $tables;
+    }
+
+    /**
+     * A declared table gets one MODIFY per utf8mb3 column, rendered from the
+     * live column, so each column keeps its type. CONVERT TO would widen TEXT
+     * to MEDIUMTEXT, and the declarative diff would then never converge. An
+     * undeclared table has no target to diverge from, so it takes CONVERT TO.
+     *
+     * @param array<string, string> $tables name => table collation
+     * @param array<string, Table> $declaredTables live name => introspected live table
+     * @return list<string>
+     */
+    private static function charsetConversionStatements(AbstractPlatform $platform, array $tables, array $declaredTables): array
+    {
+        $statements = [];
+        foreach ($tables as $name => $collation) {
+            $tableDefault = sprintf(
+                'CHARACTER SET utf8mb4 COLLATE %s',
+                self::utf8mb4Collation($collation),
+            );
+            $quotedName = $platform->quoteSingleIdentifier($name);
+
+            if (!isset($declaredTables[$name])) {
+                $statements[] = sprintf('ALTER TABLE %s CONVERT TO %s', $quotedName, $tableDefault);
+                continue;
+            }
+
+            $parts = ['DEFAULT ' . $tableDefault];
+            foreach ($declaredTables[$name]->getColumns() as $column) {
+                $columnCollation = (string) $column->getCollation();
+                if (!self::isUtf8mb3Collation($columnCollation)) {
+                    continue;
+                }
+                // Built from public API: DBAL marks its column declaration helpers @internal.
+                $part = sprintf(
+                    'MODIFY %s %s CHARACTER SET utf8mb4 COLLATE %s %s',
+                    $platform->quoteSingleIdentifier($column->getObjectName()->getIdentifier()->getValue()),
+                    $column->getType()->getSQLDeclaration($column->toArray(), $platform),
+                    self::utf8mb4Collation($columnCollation),
+                    $column->getNotnull() ? 'NOT NULL' : 'NULL',
+                );
+                if ($column->getDefault() !== null) {
+                    $part .= ' DEFAULT ' . $platform->quoteStringLiteral((string) $column->getDefault());
+                }
+                if ($column->getComment() !== '') {
+                    $part .= ' COMMENT ' . $platform->quoteStringLiteral($column->getComment());
+                }
+                $parts[] = $part;
+            }
+            $statements[] = sprintf('ALTER TABLE %s %s', $quotedName, implode(', ', $parts));
+        }
+
+        return $statements;
+    }
+
+    private static function isUtf8mb3Collation(string $collation): bool
+    {
+        return preg_match('/^utf8(mb3)?_/', $collation) === 1;
+    }
+
+    /**
+     * The utf8mb4 twin of a utf8mb3 collation: utf8_general_ci and
+     * utf8mb3_general_ci both become utf8mb4_general_ci.
+     */
+    private static function utf8mb4Collation(string $collation): string
+    {
+        return preg_replace('/^utf8(mb3)?_/', 'utf8mb4_', $collation) ?? $collation;
     }
 
     /**

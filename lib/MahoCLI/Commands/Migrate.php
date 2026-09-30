@@ -64,6 +64,7 @@ class Migrate extends BaseMahoCommand
                     ));
                 } else {
                     $this->warnDestructive($output, $sql);
+                    $this->warnCharsetConversions($output, $sql);
                     Applier::execute($adapter, $sql);
                     $output->writeln(sprintf(
                         '✓ Applied declarative schema (%d module(s), %d statement(s) executed)',
@@ -245,6 +246,31 @@ class Migrate extends BaseMahoCommand
     }
 
     /**
+     * Say how many tables the plan converts to utf8mb4. Each conversion rebuilds
+     * the table and blocks writes to it, so a large store can take a long time.
+     *
+     * @param list<string> $sql
+     */
+    private function warnCharsetConversions(OutputInterface $output, array $sql): void
+    {
+        $count = count(array_filter($sql, $this->isCharsetConversion(...)));
+        if ($count === 0) {
+            return;
+        }
+
+        $output->writeln(sprintf(
+            '<comment>Converting %d table(s) to utf8mb4.</comment> Each table is rebuilt, and writes to it'
+            . ' wait until its rebuild ends.',
+            $count,
+        ));
+    }
+
+    private function isCharsetConversion(string $stmt): bool
+    {
+        return preg_match('/^\s*ALTER\s+TABLE\s+\S+\s+(?:CONVERT\s+TO|DEFAULT)\s+CHARACTER\s+SET\s+utf8mb4\b/i', $stmt) === 1;
+    }
+
+    /**
      * Reduce the raw plan to one readable line per change. A SQLite table
      * rebuild (drop + recreate + reinsert) collapses to a single "rebuilt"
      * line; every other statement is flattened to a compact verb form. Pass
@@ -327,6 +353,11 @@ class Migrate extends BaseMahoCommand
         }
         if (preg_match('/^CREATE\s+TABLE\s+[`"]?([^`"\s(]+)/i', $stmt, $m)) {
             return ['text' => "create table {$m[1]}", 'destructive' => false];
+        }
+        if ($this->isCharsetConversion($stmt)
+            && preg_match('/^ALTER\s+TABLE\s+[`"]?([^`"\s]+?)[`"]?\s/i', $stmt, $m)
+        ) {
+            return ['text' => "convert table {$m[1]} to utf8mb4", 'destructive' => false];
         }
         if (preg_match('/^CREATE\s+(UNIQUE\s+)?INDEX\s+[`"]?([^`"\s]+?)[`"]?\s+ON\s+[`"]?([^`"\s(]+)[`"]?\s*\(([^)]*)\)/i', $stmt, $m)) {
             $kind = $m[1] !== '' ? 'unique index' : 'index';
