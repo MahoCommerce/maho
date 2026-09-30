@@ -99,6 +99,6 @@
             timezone: document.querySelector('#timezone').value,
             currency: document.querySelector('#currency').value
         });
-        window.location.href = `<?= $this->getChangeUrl() ?>locale/${localeSelect.value}/?${params}`;
+        window.location.href = <?= $this->jsEscape($this->getChangeUrl()) ?> + `locale/${localeSelect.value}/?${params}`;
     });
 </script>
