@@ -201,7 +201,7 @@ final class Applier
 
         $tables = self::legacyCharsetTables($connection, $tablePrefix);
         [$dropKeys, $addKeys, $keyTables] = self::legacyCharsetForeignKeys($connection, $platform, $tables);
-        // An undeclared table in one of those keys converts before the key comes back.
+        // Convert an undeclared table in a dropped key before the ADD statement for that key.
         $keyedUndeclared = array_diff_key(array_intersect_key($tables, $keyTables), $declaredTables);
         [$declared, $undeclared] = self::charsetConversionStatements($platform, array_diff_key($tables, $keyedUndeclared), $declaredTables);
 

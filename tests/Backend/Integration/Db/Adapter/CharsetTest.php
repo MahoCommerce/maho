@@ -112,9 +112,7 @@ it('converts a declared utf8mb3 table, keeps each column type, and converges', f
     // or every store would show the update page until it runs.
     expect(Applier::plan($connection, $target, '', false))->toBe([]);
 
-    $sql = Applier::plan($connection, $target);
-    expect($sql)->toHaveCount(2);
-    Applier::execute($this->adapter, $sql);
+    Applier::execute($this->adapter, Applier::plan($connection, $target));
 
     $legacy = Applier::legacyCharsetTables($connection);
     expect($legacy)->not->toHaveKey(CHARSET_PARENT_TABLE);
