@@ -22,7 +22,8 @@ class Mage_CatalogSearch_Model_Resource_Helper_Sqlite extends Mage_Eav_Model_Res
         // SQLite has no MATCH AGAINST. Wrap the bound :query with % wildcards
         // so LIKE matches the term anywhere inside data_index, without the
         // wildcards LIKE requires an exact full-string match and never hits.
-        $field = new Maho\Db\Expr('CASE WHEN ' . $alias . ".data_index LIKE '%' || :query || '%' THEN 1 ELSE 0 END");
+        // NULLIF makes an empty :query match no row, as MATCH AGAINST('') does on MySQL.
+        $field = new Maho\Db\Expr('CASE WHEN ' . $alias . ".data_index LIKE '%' || NULLIF(:query, '') || '%' THEN 1 ELSE 0 END");
         $select->columns(['relevance' => $field]);
         return $field;
     }
