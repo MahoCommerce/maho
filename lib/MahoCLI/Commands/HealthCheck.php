@@ -937,6 +937,33 @@ class HealthCheck extends BaseMahoCommand
     }
 
     /**
+     * Detect the `SET NAMES utf8` that older installers wrote to `<initStatements>`
+     * in `app/etc/local.xml`. Maho skips it and connects with utf8mb4, so the line
+     * has no effect and the operator can delete it.
+     *
+     * @return ?array{file: string, statement: string}
+     */
+    public static function findLegacyCharsetInitStatement(): ?array
+    {
+        $file = MAHO_ROOT_DIR . '/app/etc/local.xml';
+        if (!is_file($file)) {
+            return null;
+        }
+
+        $xml = self::loadXmlFile($file);
+        if ($xml === false) {
+            return null;
+        }
+
+        $statement = trim((string) ($xml->global->resources->default_setup->connection->initStatements ?? ''));
+        if (!\Mage_Core_Model_Resource::isLegacyCharsetStatement($statement)) {
+            return null;
+        }
+
+        return ['file' => 'app/etc/local.xml', 'statement' => $statement];
+    }
+
+    /**
      * @param list<array{module: string, file?: string, frontName?: string, area?: string, count?: int}> $findings
      */
     private static function formatLegacyXmlSummary(string $label, array $findings, string $attribute): string
@@ -1416,6 +1443,17 @@ class HealthCheck extends BaseMahoCommand
                 $legacyAdminPath['frontName'],
                 $legacyAdminPath['file'],
                 $legacyAdminPath['frontName'],
+            ),
+        ];
+
+        $legacyInitStatement = self::findLegacyCharsetInitStatement();
+        $checks[] = [
+            'check' => 'Legacy Init Statement in local.xml',
+            'severity' => $legacyInitStatement === null ? 'ok' : 'warning',
+            'details' => $legacyInitStatement === null ? '' : sprintf(
+                'Found <initStatements>%s</initStatements> in %s. Maho skips it and connects with utf8mb4. Delete this element.',
+                $legacyInitStatement['statement'],
+                $legacyInitStatement['file'],
             ),
         ];
 
@@ -2053,6 +2091,21 @@ class HealthCheck extends BaseMahoCommand
                 '  Replace it with <admin><base_path>%s</base_path>, or run: ./maho legacy:migrate-routes',
                 $legacyAdminPath['frontName'],
             ));
+            $output->writeln('');
+        }
+
+        $output->write('Checking app/etc/local.xml init statement... ');
+        $legacyInitStatement = self::findLegacyCharsetInitStatement();
+        if ($legacyInitStatement === null) {
+            $output->writeln('<info>OK</info>');
+        } else {
+            $output->writeln('');
+            $output->writeln(sprintf(
+                '<comment>Warning: Found <initStatements>%s</initStatements> in %s.</comment>',
+                $legacyInitStatement['statement'],
+                $legacyInitStatement['file'],
+            ));
+            $output->writeln('  Maho skips it and connects with utf8mb4. Delete this element.');
             $output->writeln('');
         }
 
