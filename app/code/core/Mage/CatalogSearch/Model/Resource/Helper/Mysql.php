@@ -26,10 +26,10 @@ class Mage_CatalogSearch_Model_Resource_Helper_Mysql extends Mage_Eav_Model_Reso
     }
 
     /**
-     * Build the boolean mode expression for $str.
+     * Split $str into words for MATCH ... AGAINST (:query IN BOOLEAN MODE).
      *
-     * A term goes into double quotes. An operator stays only when a term or "(" follows it, and a ")"
-     * stays only when it closes a "(". MySQL rejects any other operator or bracket with error 1064.
+     * Each word goes into double quotes, so MySQL never reads a character of it as a boolean operator.
+     * A word that holds only operator or bracket characters is dropped.
      *
      * @param string $str The source string
      * @param int $maxWordLength
@@ -37,44 +37,16 @@ class Mage_CatalogSearch_Model_Resource_Helper_Mysql extends Mage_Eav_Model_Reso
      */
     public function prepareTerms($str, $maxWordLength = 0)
     {
-        $operators = ['+', '-', '|', '<', '>', '~'];
         $words = [];
         $terms = [];
-        $operator = null;
-        $openBrackets = 0;
         preg_match_all('/([\(\)]|[\"\'][^"\']*[\"\']|[^\s\"\(\)]*)/uis', $str, $matches);
         foreach ($matches[1] as $word) {
-            $word = trim($word);
-            if ($word === '' || $word === '*') {
+            $word = str_replace('"', '', trim($word));
+            if (strspn($word, '+-|<>~*()') === strlen($word)) {
                 continue;
             }
-            if (in_array($word, $operators, true)) {
-                $operator = $word;
-                continue;
-            }
-            if ($word === ')') {
-                if ($openBrackets > 0) {
-                    $openBrackets--;
-                    $words[] = $word;
-                }
-                $operator = null;
-                continue;
-            }
-            if ($operator !== null) {
-                $words[] = $operator;
-                $operator = null;
-            }
-            if ($word === '(') {
-                $openBrackets++;
-            } else {
-                $word = str_replace('"', '', $word);
-                $terms[$word] = $word;
-                $word = '"' . $word . '"';
-            }
-            $words[] = $word;
-        }
-        if ($openBrackets > 0) {
-            $words[] = str_repeat(')', $openBrackets);
+            $terms[$word] = $word;
+            $words[] = '"' . $word . '"';
         }
         if ($maxWordLength && count($terms) > $maxWordLength) {
             $terms = array_slice($terms, 0, $maxWordLength);
