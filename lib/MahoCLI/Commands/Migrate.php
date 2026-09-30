@@ -65,6 +65,7 @@ class Migrate extends BaseMahoCommand
                 } else {
                     $this->warnDestructive($output, $sql);
                     $this->warnCharsetConversions($output, $sql);
+                    $this->warnDroppedKeys($output, $sql);
                     Applier::execute($adapter, $sql);
                     $output->writeln(sprintf(
                         '✓ Applied declarative schema (%d module(s), %d statement(s) executed)',
@@ -263,6 +264,40 @@ class Migrate extends BaseMahoCommand
             . ' wait until its rebuild ends.',
             $count,
         ));
+    }
+
+    /**
+     * Print and log the ADD statement of each foreign key that the plan drops and
+     * adds back. A schema change cannot be undone, so a run that stops between
+     * the two statements loses the key.
+     *
+     * @param list<string> $sql
+     */
+    private function warnDroppedKeys(OutputInterface $output, array $sql): void
+    {
+        $key = '/^\s*ALTER\s+TABLE\s+(\S+)\s+%s\s+(\S+)/i';
+        $keyName = static fn(array $m): string => trim($m[1], '`"') . '.' . trim($m[2], '`"');
+        $dropped = [];
+        foreach ($sql as $stmt) {
+            if (preg_match(sprintf($key, 'DROP\s+FOREIGN\s+KEY'), $stmt, $m)) {
+                $dropped[$keyName($m)] = true;
+            }
+        }
+        $adds = array_values(array_filter($sql, static fn(string $stmt): bool => preg_match(sprintf($key, 'ADD\s+CONSTRAINT'), $stmt, $m) === 1
+            && isset($dropped[$keyName($m)])));
+        if ($adds === []) {
+            return;
+        }
+
+        $message = sprintf(
+            'This run drops and adds back %d foreign key(s). If it stops before the end, run these statements to restore them:',
+            count($adds),
+        );
+        $output->writeln('<comment>' . $message . '</comment>');
+        foreach ($adds as $add) {
+            $output->writeln('  ' . $add . ';');
+        }
+        Mage::log($message . "\n" . implode(";\n", $adds) . ';', Mage::LOG_WARNING, 'migrate.log', true);
     }
 
     private function isCharsetConversion(string $stmt): bool
