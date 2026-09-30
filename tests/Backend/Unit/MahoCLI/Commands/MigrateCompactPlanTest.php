@@ -66,3 +66,13 @@ it('treats an additive ALTER as non-destructive', function () {
     expect($r['text'])->toStartWith('alter catalog_product_link:');
     expect($r['destructive'])->toBeFalse();
 });
+
+it('renders a charset conversion as one short line', function (string $sql) {
+    $r = compactStatement($sql);
+    expect($r['text'])->toBe('convert table sales_flat_order to utf8mb4');
+    expect($r['destructive'])->toBeFalse();
+})->with([
+    'undeclared table' => ['ALTER TABLE `sales_flat_order` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci'],
+    'declared table' => ['ALTER TABLE `sales_flat_order` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,'
+        . ' MODIFY `customer_email` VARCHAR(255) CHARACTER SET utf8mb4 DEFAULT NULL COLLATE `utf8mb4_general_ci`'],
+]);

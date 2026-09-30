@@ -16,7 +16,7 @@ function searchHelperForQuery(string $queryText): Mage_CatalogSearch_Helper_Data
 }
 
 describe('getQueryText', function () {
-    it('removes 4-byte characters that the query column cannot store', function () {
+    it('removes 4-byte characters such as emoji', function () {
         $helper = searchHelperForQuery("\u{1F449}\u{1F3FB} acc6.top \u{1F448}\u{1F3FB} comprar");
 
         expect($helper->getQueryText())->toBe('acc6.top  comprar');
