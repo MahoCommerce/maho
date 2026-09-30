@@ -168,16 +168,17 @@ final class Applier
 
         // Conversions lead the batch: InnoDB refuses a foreign key referencing a
         // MyISAM table (errno 150), which FOREIGN_KEY_CHECKS=0 does not lift.
+        [$declaredCharsets, $undeclaredCharsets] = $withTableConversions
+            ? self::charsetConversions($connection, $platform, $tablePrefix, $introspectedTables)
+            : [[], []];
         $conversions = $withTableConversions
-            ? array_merge(
-                self::engineConversions($connection, $platform, $tablePrefix),
-                self::charsetConversions($connection, $platform, $tablePrefix, $introspectedTables),
-            )
+            ? array_merge(self::engineConversions($connection, $platform, $tablePrefix), $declaredCharsets)
             : [];
 
         // Conversions keep the lead: both scans run before any rename, so their
-        // statements name the tables as they still stand.
-        return array_merge($conversions, $tableRenames['sql'], $columnRenames, $creates, $alters);
+        // statements name the tables as they still stand. An undeclared table goes
+        // last, so a conversion that fails there does not stop the declared changes.
+        return array_merge($conversions, $tableRenames['sql'], $columnRenames, $creates, $alters, $undeclaredCharsets);
     }
 
     /**
@@ -185,7 +186,7 @@ final class Applier
      * engine pass: the Comparator never diffs table options.
      *
      * @param array<string, Table> $declaredTables live name => introspected live table
-     * @return list<string>
+     * @return array{list<string>, list<string>} the declared tables, then the undeclared tables
      */
     private static function charsetConversions(
         Connection $connection,
@@ -194,7 +195,7 @@ final class Applier
         array $declaredTables,
     ): array {
         if (!$platform instanceof AbstractMySQLPlatform) {
-            return [];
+            return [[], []];
         }
 
         return self::charsetConversionStatements($platform, self::legacyCharsetTables($connection, $tablePrefix), $declaredTables);
@@ -247,11 +248,12 @@ final class Applier
      *
      * @param array<string, string> $tables name => table collation
      * @param array<string, Table> $declaredTables live name => introspected live table
-     * @return list<string>
+     * @return array{list<string>, list<string>} the declared tables, then the undeclared tables
      */
     private static function charsetConversionStatements(AbstractPlatform $platform, array $tables, array $declaredTables): array
     {
         $statements = [];
+        $undeclared = [];
         foreach ($tables as $name => $collation) {
             $tableDefault = sprintf(
                 'CHARACTER SET utf8mb4 COLLATE %s',
@@ -260,7 +262,7 @@ final class Applier
             $quotedName = $platform->quoteSingleIdentifier($name);
 
             if (!isset($declaredTables[$name])) {
-                $statements[] = sprintf('ALTER TABLE %s CONVERT TO %s', $quotedName, $tableDefault);
+                $undeclared[] = sprintf('ALTER TABLE %s CONVERT TO %s', $quotedName, $tableDefault);
                 continue;
             }
 
@@ -289,7 +291,7 @@ final class Applier
             $statements[] = sprintf('ALTER TABLE %s %s', $quotedName, implode(', ', $parts));
         }
 
-        return $statements;
+        return [$statements, $undeclared];
     }
 
     private static function isUtf8mb3Collation(string $collation): bool

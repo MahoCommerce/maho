@@ -221,10 +221,10 @@ it('converts an undeclared utf8mb3 table with CONVERT TO', function () {
         [],
     ]);
 
-    expect($result)->toBe([
+    expect($result)->toBe([[], [
         'ALTER TABLE `thirdparty_log` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci',
         'ALTER TABLE `thirdparty_key` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_bin',
-    ]);
+    ]]);
 });
 
 it('converts each utf8mb3 column of a declared table and keeps its type', function () {
@@ -242,17 +242,17 @@ it('converts each utf8mb3 column of a declared table and keeps its type', functi
         ['cms_block' => $live],
     ]);
 
-    expect($result)->toBe([
+    expect($result)->toBe([[
         'ALTER TABLE `cms_block` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,'
         . " MODIFY `title` VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'it''s' COMMENT 'Block title',"
         . ' MODIFY `content` TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL',
-    ]);
+    ], []]);
 });
 
 it('skips the charset pass entirely on PostgreSQL and SQLite', function (string $platformClass) {
     $connection = DriverManager::getConnection(['driver' => 'pdo_sqlite', 'memory' => true]);
 
-    expect(invokeApplierMethod('charsetConversions', [$connection, new $platformClass(), '', []]))->toBe([]);
+    expect(invokeApplierMethod('charsetConversions', [$connection, new $platformClass(), '', []]))->toBe([[], []]);
 })->with([
     'postgres' => PostgreSQLPlatform::class,
     'sqlite' => SQLitePlatform::class,
