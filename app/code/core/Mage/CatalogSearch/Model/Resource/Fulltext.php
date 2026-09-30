@@ -388,7 +388,8 @@ class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resourc
         $adapter = $this->_getWriteAdapter();
         $searchType = $object->getSearchType($query->getStoreId());
 
-        $preparedTerms = $searchHelper->prepareTerms($queryText, $query->getMaxQueryWords());
+        $minWordLength = (int) $query->getMinQueryLength();
+        $preparedTerms = $searchHelper->prepareTerms($queryText, $query->getMaxQueryWords(), $minWordLength);
 
         $bind = [];
         $like = [];
@@ -397,14 +398,20 @@ class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resourc
             || $searchType == Mage_CatalogSearch_Model_Fulltext::SEARCH_TYPE_COMBINE
         ) {
             $helper = Mage::getResourceHelper('core');
-            $words = Mage::helper('core/string')->splitWords($queryText, true, $query->getMaxQueryWords());
-            foreach ($words as $word) {
+            $words = array_filter(
+                Mage::helper('core/string')->splitWords($queryText, true),
+                fn($word) => mb_strlen($word) >= $minWordLength,
+            );
+            foreach (array_slice($words, 0, (int) $query->getMaxQueryWords() ?: null) as $word) {
                 $like[] = $helper->getCILike('s.data_index', $word, ['position' => 'any']);
             }
 
             if ($like) {
                 $separator = Mage::getStoreConfig(Mage_CatalogSearch_Model_Fulltext::XML_PATH_CATALOG_SEARCH_SEPARATOR);
                 $likeCond = '(' . implode(' ' . $separator . ' ', $like) . ')';
+            } elseif ($searchType == Mage_CatalogSearch_Model_Fulltext::SEARCH_TYPE_LIKE) {
+                $this->_foundData = [];
+                return $this;
             }
         }
 
