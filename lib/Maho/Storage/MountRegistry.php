@@ -24,8 +24,8 @@ final class MountRegistry
 {
     public const XML_PATH_MOUNTS = 'global/storage/mounts';
 
-    /** @var array<string, MountDefinition>|null */
-    private static ?array $definitions = null;
+    /** @var array<string, MountDefinition> */
+    private static array $definitions = [];
 
     /** @var array<string, Mount> */
     private static array $mounts = [];
@@ -40,7 +40,7 @@ final class MountRegistry
             return self::$mounts[$name];
         }
 
-        $definition = self::definitions()[$name] ?? throw UnknownMountException::forName($name, self::names());
+        $definition = self::definition($name) ?? throw UnknownMountException::forName($name, self::names());
 
         return self::$mounts[$name] = self::build($definition);
     }
@@ -51,7 +51,7 @@ final class MountRegistry
      */
     public static function getDeclaredLocalMount(string $name): ?Mount
     {
-        $definition = self::definitions()[$name] ?? throw UnknownMountException::forName($name, self::names());
+        $definition = self::definition($name) ?? throw UnknownMountException::forName($name, self::names());
         if ($definition->path === null || $definition->path === '') {
             return null;
         }
@@ -65,7 +65,7 @@ final class MountRegistry
 
     public static function has(string $name): bool
     {
-        return isset(self::$mounts[$name]) || isset(self::definitions()[$name]);
+        return isset(self::$mounts[$name]) || in_array($name, self::declaredNames(), true);
     }
 
     /**
@@ -73,7 +73,7 @@ final class MountRegistry
      */
     public static function names(): array
     {
-        return array_values(array_unique(array_merge(array_keys(self::$mounts), array_keys(self::definitions()))));
+        return array_values(array_unique(array_merge(array_keys(self::$mounts), self::declaredNames())));
     }
 
     /** Replaces the mount with that name for the rest of the request. Tests use it. */
@@ -84,29 +84,39 @@ final class MountRegistry
 
     public static function reset(): void
     {
-        self::$definitions = null;
+        self::$definitions = [];
         self::$mounts = [];
     }
 
     /**
-     * @return array<string, MountDefinition>
+     * The declaration of one mount, built when its name is first asked for, so a bad
+     * declaration of one module breaks only its own mount.
      */
-    private static function definitions(): array
+    private static function definition(string $name): ?MountDefinition
     {
-        if (self::$definitions !== null) {
-            return self::$definitions;
+        if (isset(self::$definitions[$name])) {
+            return self::$definitions[$name];
         }
 
-        $definitions = [];
-        $config = \Mage::getConfig();
-        $node = $config?->getNode(self::XML_PATH_MOUNTS);
-        if ($node instanceof \Mage_Core_Model_Config_Element) {
-            foreach ($node->children() as $name => $child) {
-                $definitions[(string) $name] = MountDefinition::fromElement((string) $name, $child, \Mage::getBaseDir(...));
-            }
+        $child = \Mage::getConfig()?->getNode(self::XML_PATH_MOUNTS . '/' . $name);
+        if (!$child instanceof \Mage_Core_Model_Config_Element) {
+            return null;
         }
 
-        return self::$definitions = $definitions;
+        return self::$definitions[$name] = MountDefinition::fromElement($name, $child, \Mage::getBaseDir(...));
+    }
+
+    /**
+     * @return list<string>
+     */
+    private static function declaredNames(): array
+    {
+        $node = \Mage::getConfig()?->getNode(self::XML_PATH_MOUNTS);
+        if (!$node instanceof \Mage_Core_Model_Config_Element) {
+            return [];
+        }
+
+        return array_map(strval(...), array_keys(iterator_to_array($node->children(), true)));
     }
 
     private static function build(MountDefinition $definition): Mount

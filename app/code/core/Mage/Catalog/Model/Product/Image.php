@@ -748,13 +748,13 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
         $mount = $this->getMount();
         $baseDir = Mage::getSingleton('catalog/product_media_config')->getBaseMediaStoragePath() . '/watermark';
         $candidates = [
-            $baseDir . '/stores/' . Mage::app()->getStore()->getId() . $file,
-            $baseDir . '/websites/' . Mage::app()->getWebsite()->getId() . $file,
-            $baseDir . '/default/' . $file,
-            $baseDir . '/' . $file,
+            '/stores/' . Mage::app()->getStore()->getId() . $file,
+            '/websites/' . Mage::app()->getWebsite()->getId() . $file,
+            '/default/' . $file,
+            '/' . $file,
         ];
         foreach ($candidates as $candidate) {
-            $key = \Maho\Io::getPathWithinMount($mount, $baseDir, substr($candidate, strlen($baseDir)));
+            $key = \Maho\Io::getPathWithinMount($mount, $baseDir, $candidate);
             if ($key !== null && $mount->fileExists($key)) {
                 return Maho::getImageManager()->decodeBinary($mount->read($key));
             }

@@ -128,9 +128,9 @@ describe('FeedManager on the media and feeds mounts', function () {
             }
 
             #[\Override]
-            protected function _uploadFeed(Maho_FeedManager_Model_Feed $feed, ?Maho_FeedManager_Model_Log $log = null, ?string $localPath = null): void
+            protected function _uploadFeed(Maho_FeedManager_Model_Feed $feed, Maho_FeedManager_Model_Log $log, string $localPath): void
             {
-                $this->uploaded = $localPath === null ? null : (string) file_get_contents($localPath);
+                $this->uploaded = (string) file_get_contents($localPath);
             }
         };
 

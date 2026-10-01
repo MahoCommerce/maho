@@ -10617,7 +10617,7 @@ parameters:
 		-
 			rawMessage: 'Parameter #2 $code of class Exception constructor expects int, string given.'
 			identifier: argument.type
-			count: 2
+			count: 1
 			path: app/code/core/Mage/Downloadable/Model/Link/Api/Uploader.php
 
 		-

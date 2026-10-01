@@ -24,10 +24,14 @@ describe('Mage_Catalog_Model_Observer image resize', function () {
         Mage::register('_singleton/catalog/product_image_resizer', $this->resizer);
         $this->observer = new Mage_Catalog_Model_Observer();
 
-        $this->importEvent = function (string $behavior): \Maho\Event\Observer {
+        $this->importEvent = function (string $behavior, bool $expectsIds): \Maho\Event\Observer {
             $adapter = $this->createMock(Mage_ImportExport_Model_Import_Entity_Product::class);
             $adapter->method('getBehavior')->willReturn($behavior);
-            $adapter->method('getAffectedEntityIds')->willReturn([7, 9]);
+            if ($expectsIds) {
+                $adapter->expects($this->once())->method('getAffectedEntityIds')->with(true)->willReturn([7, 9]);
+            } else {
+                $adapter->expects($this->never())->method('getAffectedEntityIds');
+            }
             return new \Maho\Event\Observer(['event' => new \Maho\Event(['adapter' => $adapter])]);
         };
         $this->saveEvent = function (array $origData, array $data): \Maho\Event\Observer {
@@ -41,13 +45,13 @@ describe('Mage_Catalog_Model_Observer image resize', function () {
     });
 
     it('queues the products of an import', function (): void {
-        $this->observer->queueImportedProductImageResize(($this->importEvent)(Mage_ImportExport_Model_Import::BEHAVIOR_APPEND));
+        $this->observer->queueImportedProductImageResize(($this->importEvent)(Mage_ImportExport_Model_Import::BEHAVIOR_APPEND, true));
 
         expect($this->resizer->queued)->toBe([[7, 9]]);
     });
 
     it('queues nothing for an import that deletes products', function (): void {
-        $this->observer->queueImportedProductImageResize(($this->importEvent)(Mage_ImportExport_Model_Import::BEHAVIOR_DELETE));
+        $this->observer->queueImportedProductImageResize(($this->importEvent)(Mage_ImportExport_Model_Import::BEHAVIOR_DELETE, false));
 
         expect($this->resizer->queued)->toBe([]);
     });

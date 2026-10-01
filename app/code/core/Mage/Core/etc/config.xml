@@ -16,9 +16,10 @@ SPDX-License-Identifier: AFL-3.0
         <lock>
             <backend>file</backend>
         </lock>
-        <!-- Storage mounts (Mage::getStorage('media')). A module declares its own mount here
-             with a local <path>; local.xml overrides any mount by name to point it at a bucket
-             (see local.xml.template). No <adapter> block means the local disk. -->
+        <!-- Storage mounts (Mage::getStorage('media')). A module declares its mount in its own
+             config.xml with <dir> and an optional <path>. local.xml overrides any mount by name
+             to point it at a bucket (see local.xml.template). No <adapter> block means the
+             local disk. -->
         <storage>
             <mounts>
                 <media>

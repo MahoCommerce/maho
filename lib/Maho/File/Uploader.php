@@ -245,7 +245,7 @@ class Uploader
     {
         $this->_validateFile();
 
-        $directory = trim(str_replace('\\', '/', $directory), '/');
+        $directory = self::joinPath($directory);
         $this->_result = false;
 
         $fileName = self::getCorrectFileName($newFileName ?? $this->_file['name']);
@@ -301,16 +301,10 @@ class Uploader
         if (!is_uploaded_file($tmpPath)) {
             return false;
         }
-        $this->_writeToMount($mount, $path, $tmpPath);
+        $mount->copyFromLocalFile($tmpPath, $path);
         unlink($tmpPath);
 
         return true;
-    }
-
-    /** Streams the local file $sourcePath to $path on $mount. */
-    protected function _writeToMount(Mount $mount, string $path, string $sourcePath): void
-    {
-        $mount->copyFromLocalFile($sourcePath, $path);
     }
 
     /**

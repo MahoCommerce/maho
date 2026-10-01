@@ -23,9 +23,10 @@ use League\Flysystem\UrlGeneration\TemporaryUrlGenerator;
  * Every Flysystem operation is available. Cloud semantics differ from a local
  * disk and are not hidden: `move()` on S3 is a server-side copy plus a delete,
  * there are no locks, no seek and no partial reads. A deep listContents()
- * returns folders on some adapters only, so use listFiles() for the files. Review each call site for those assumptions instead of
- * relying on the mount. Use moveAtomic() for a file that a web server or a
- * crawler can read while it is written.
+ * returns folders on some adapters only, so use listFiles() for the files.
+ * Review each call site for those assumptions instead of relying on the
+ * mount. Use moveAtomic() for a file that a web server or a crawler can read
+ * while it is written.
  */
 final class Mount extends Filesystem
 {
@@ -115,7 +116,7 @@ final class Mount extends Filesystem
     }
 
     /**
-     * Stream the local file $sourcePath to $path on $mount.
+     * Stream the local file $sourcePath to $path on this mount.
      *
      * @throws StorageException when the local file cannot be read
      */

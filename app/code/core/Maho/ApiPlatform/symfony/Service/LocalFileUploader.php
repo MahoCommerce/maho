@@ -18,7 +18,7 @@ namespace Maho\ApiPlatform\Service;
  * or streams it to a storage mount.
  * The file name, the extension check and the validators of the parent stay the same.
  */
-final class LocalFileUploader extends \Mage_Core_Model_File_Uploader
+class LocalFileUploader extends \Mage_Core_Model_File_Uploader
 {
     public function __construct(string $path, string $fileName)
     {
@@ -43,7 +43,7 @@ final class LocalFileUploader extends \Mage_Core_Model_File_Uploader
     #[\Override]
     protected function _storeFile(\Maho\Storage\Mount $mount, string $path): bool
     {
-        $this->_writeToMount($mount, $path, $this->_file['tmp_name']);
+        $mount->copyFromLocalFile($this->_file['tmp_name'], $path);
         unlink($this->_file['tmp_name']);
 
         return true;

@@ -81,16 +81,16 @@ final class ProductCustomOptionProvider extends \Maho\ApiPlatform\Provider
         $mimeType = $value['type'] ?? 'application/octet-stream';
         $fileName = $value['title'] ?? 'file';
 
-        $content = stream_get_contents($file['stream']);
+        $content = (string) stream_get_contents($file['stream']);
         fclose($file['stream']);
 
         return new Response(
-            $content === false ? '' : $content,
+            $content,
             Response::HTTP_OK,
             [
                 'Content-Type' => $mimeType,
                 'Content-Disposition' => 'attachment; filename="' . addslashes($fileName) . '"',
-                'Content-Length' => (string) strlen($content === false ? '' : $content),
+                'Content-Length' => (string) strlen($content),
                 'Cache-Control' => 'private, max-age=3600',
             ],
         );

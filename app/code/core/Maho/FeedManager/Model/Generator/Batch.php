@@ -173,18 +173,6 @@ class Maho_FeedManager_Model_Generator_Batch
                 ];
             }
 
-            // Check if already completed
-            if ($this->_state['status'] === self::STATUS_COMPLETED) {
-                return [
-                    'status' => self::STATUS_COMPLETED,
-                    'progress' => (int) $this->_state['product_count'],
-                    'total' => (int) $this->_state['total_products'],
-                    'batches_processed' => (int) $this->_state['batches_processed'],
-                    'batches_total' => (int) $this->_state['batches_total'],
-                    'message' => 'Generation already completed',
-                ];
-            }
-
             // Load feed and log
             $this->_feed = Mage::getModel('feedmanager/feed')->load($this->_state['feed_id']);
             if (!$this->_feed->getId()) {
@@ -336,7 +324,6 @@ class Maho_FeedManager_Model_Generator_Batch
             // Handle upload if configured
             $uploadResult = $this->_handleUpload($tempPath);
 
-            $this->_state['status'] = self::STATUS_COMPLETED;
             $this->_deleteJob();
 
             Mage::log(
@@ -374,7 +361,7 @@ class Maho_FeedManager_Model_Generator_Batch
     {
         $this->_jobId = $jobId;
 
-        // Acquire exclusive lock — block until any in-progress batch finishes
+        // Acquire an exclusive lock and wait until an in-progress batch finishes
         if (!$this->_acquireStateLock()) {
             return ['status' => 'error', 'message' => 'Could not acquire lock, a batch may be processing'];
         }

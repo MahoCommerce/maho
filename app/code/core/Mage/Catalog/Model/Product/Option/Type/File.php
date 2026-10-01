@@ -805,10 +805,9 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
     {
         $mount = Mage::getStorage('custom_options');
 
-        // Directory listing and hotlink secure. A bucket relies on its own visibility instead.
-        $htaccess = '.htaccess';
-        if ($mount->isLocal() && !$mount->fileExists($htaccess)) {
-            $mount->write($htaccess, "Order deny,allow\nDeny from all");
+        // Deny web access to the local folder. A bucket uses its own visibility.
+        if ($mount->isLocal() && !$mount->fileExists('.htaccess')) {
+            $mount->write('.htaccess', "Order deny,allow\nDeny from all");
         }
     }
 
@@ -846,17 +845,6 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
             return $matches[0];
         }
         return null;
-    }
-
-    /**
-     * Simple check if file is image
-     *
-     * @param array|string $fileInfo - either file data from $_FILES or file path
-     * @return bool
-     */
-    protected function _isImage($fileInfo)
-    {
-        return is_array($fileInfo) && str_contains((string) $fileInfo['type'], 'image/');
     }
 
     /**

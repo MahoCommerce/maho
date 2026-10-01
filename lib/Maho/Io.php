@@ -162,7 +162,7 @@ abstract class Io implements IoInterface
         if ($file === '' || str_contains($file, "\0") || str_contains($directory, "\0")) {
             return null;
         }
-        $directory = trim(str_replace('\\', '/', $directory), '/');
+        $directory = File\Uploader::joinPath($directory);
         $file = ltrim(str_replace('\\', '/', $file), '/');
 
         $root = $mount->localRoot();

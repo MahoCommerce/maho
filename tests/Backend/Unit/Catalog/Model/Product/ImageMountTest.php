@@ -11,8 +11,27 @@ use League\Flysystem\Local\LocalFilesystemAdapter;
 use Maho\Storage\Mount;
 use Maho\Storage\MountRegistry;
 use Maho\Storage\Url\StoreBaseUrlGenerator;
+use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 
 uses(Tests\MahoBackendTestCase::class);
+
+function imageMountTestHeader(Mage_Core_Controller_Response_Http $response, string $name): ?string
+{
+    foreach ($response->getHeaders() as $header) {
+        if (strcasecmp($header['name'], $name) === 0) {
+            return $header['value'];
+        }
+    }
+    return null;
+}
+
+/** The Cache-Control directives, sorted. Symfony reorders them and adds "private" when "public" is absent. */
+function imageMountTestCacheControl(Mage_Core_Controller_Response_Http $response): array
+{
+    $directives = array_map(trim(...), explode(',', (string) imageMountTestHeader($response, 'Cache-Control')));
+    sort($directives);
+    return $directives;
+}
 
 describe('product image URLs and the image route on the media mount', function () {
     beforeEach(function (): void {
@@ -273,5 +292,99 @@ describe('product image URLs and the image route on the media mount', function (
 
         expect(fn() => $this->resizer->resize('/r/e/red.png', $sizes))->not->toThrow(\Throwable::class)
             ->and($this->resizer->resize('/r/e/red.png', $sizes))->toBe(0);
+    });
+
+    it('serves a recorded size from the image route with a long cache life', function (): void {
+        ($this->writePng)('catalog/product/r/e/red.png', 400, 200);
+        $key = ($this->keyOf)(($this->urlFor)('/r/e/red.png'));
+        $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create('/media/' . $key));
+        $request->setParam('path', substr($key, strlen(Mage_Catalog_Model_Product_Image::CACHE_DIRECTORY . '/')));
+        $response = new Mage_Core_Controller_Response_Http();
+
+        new Mage_Catalog_Product_ImageController($request, $response)->cacheAction();
+
+        expect($response->getHttpResponseCode())->toBe(200)
+            ->and(imageMountTestCacheControl($response))->toBe(['max-age=31536000', 'public'])
+            ->and(getimagesizefromstring((string) $response->getBody())[0])->toBe(120)
+            ->and($this->mount->fileExists($key))->toBeTrue();
+    });
+
+    it('redirects the image route to the placeholder when the source is missing, with no cache', function (): void {
+        $key = ($this->keyOf)(($this->urlFor)('/n/o/nofile.jpg'));
+        $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create('/media/' . $key));
+        $request->setParam('path', substr($key, strlen(Mage_Catalog_Model_Product_Image::CACHE_DIRECTORY . '/')));
+        $response = new Mage_Core_Controller_Response_Http();
+
+        new Mage_Catalog_Product_ImageController($request, $response)->cacheAction();
+
+        expect($response->getHttpResponseCode())->toBe(302)
+            ->and(imageMountTestCacheControl($response))->toContain('no-store')->not->toContain('public')
+            ->and(imageMountTestHeader($response, 'Location'))->toEndWith('/images/catalog/product/placeholder.svg');
+    });
+
+    it('answers 404 on the image route for a size that no template recorded', function (): void {
+        $path = '1/small_image/999x/' . str_repeat('a', 32) . '/n/o/nofile.jpg' . $this->extension;
+        $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create('/media/catalog/product/cache/' . $path));
+        $request->setParam('path', $path);
+        $response = new Mage_Core_Controller_Response_Http();
+
+        new Mage_Catalog_Product_ImageController($request, $response)->cacheAction();
+
+        expect($response->getHttpResponseCode())->toBe(404);
+    });
+
+    it('records the size of an old signed resize URL and redirects to the cache URL', function (): void {
+        $helper = new class extends Mage_Catalog_Helper_Image {
+            public function params(): array
+            {
+                return $this->_getModel()->getTransformParams();
+            }
+        };
+        $params = $helper->init(Mage::getModel('catalog/product')->setData('small_image', '/n/o/nofile.jpg'), 'small_image')
+            ->resize(120)->params();
+        parse_str(Maho::signImageResizeRequest($params, Mage::getEncryptionKeyAsHex()), $query);
+        $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create('/core/index/resize', 'GET', $query));
+        $response = new Mage_Core_Controller_Response_Http();
+
+        new Mage_Core_IndexController($request, $response)->resizeAction();
+
+        $location = (string) imageMountTestHeader($response, 'Location');
+        $recorded = Mage::getSingleton('catalog/product_image_size')->createImage(($this->keyOf)($location));
+
+        expect($response->getHttpResponseCode())->toBe(301)
+            ->and($recorded)->not->toBeNull()
+            ->and($location)->toBe(($this->urlFor)('/n/o/nofile.jpg'));
+    });
+
+    it('gives an SVG the public URL of its source, with no resize and no recorded size', function (): void {
+        $table = Mage::getSingleton('core/resource')->getTableName('catalog/product_image_size');
+
+        $url = ($this->urlFor)('/l/o/logo.svg');
+
+        expect($url)->toBe($this->mount->publicUrl('catalog/product/l/o/logo.svg'))
+            ->and((int) $this->connection->fetchOne($this->connection->select()->from($table, new \Maho\Db\Expr('COUNT(*)'))))->toBe(0);
+    });
+
+    it('reads a remote source one time when two roles use the same gallery file', function (): void {
+        $productId = ($this->galleryProduct)('/g/a/gallery.png');
+        ($this->urlFor)('/o/t/other.png', 'image', 300);
+        ($this->urlFor)('/o/t/other.png', 'thumbnail', 75);
+        $adapter = new class ($this->root) extends LocalFilesystemAdapter {
+            /** @var array<string, int> */
+            public array $reads = [];
+
+            #[\Override]
+            public function read(string $path): string
+            {
+                $this->reads[$path] = ($this->reads[$path] ?? 0) + 1;
+                return parent::read($path);
+            }
+        };
+        MountRegistry::register(new Mount('media', $adapter, null, new StoreBaseUrlGenerator('media')));
+
+        $count = Mage::getModel('catalog/product_image_resizer')->resizeProducts([$productId]);
+
+        expect($count)->toBe(2)
+            ->and($adapter->reads['catalog/product/g/a/gallery.png'] ?? 0)->toBe(1);
     });
 });

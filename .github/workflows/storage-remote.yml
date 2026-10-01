@@ -1,8 +1,8 @@
 name: Storage buckets
 
 # Runs the storage mount tests against bucket emulators: S3Mock for S3 and Azurite for Azure
-# Blob Storage. The MinIO images are no longer public. The GCS test builds the adapter and its public URL, because no emulator
-# works with the Google client without extra options. The suite needs no database: the tests
+# Blob Storage. The MinIO images are no longer public. The GCS test builds the adapter and
+# its public URL, because no emulator works with the Google client without extra options. The suite needs no database: the tests
 # build their mounts directly, so no ./maho install runs here.
 
 # Only the storage code can break these tests, so the job stays off every other pull request.
@@ -15,6 +15,7 @@ on:
       - 'tests/Backend/Unit/Maho/Storage/**'
       - '.github/workflows/storage-remote.yml'
       - 'composer.json'
+      - 'composer.lock'
   pull_request:
     paths: *storage_paths
   workflow_dispatch:

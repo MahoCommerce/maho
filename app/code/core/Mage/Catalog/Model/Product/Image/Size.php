@@ -95,6 +95,7 @@ class Mage_Catalog_Model_Product_Image_Size
      * with the configured image extension, or when its source leaves catalog/product. The
      * current store becomes the store of the size, because the output extension and the
      * watermark come from the store config.
+     * A size path has 4 segments with a width and height, and 3 without.
      */
     public function createImage(string $resizedPath): ?Mage_Catalog_Model_Product_Image
     {

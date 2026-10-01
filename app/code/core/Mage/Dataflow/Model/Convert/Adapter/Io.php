@@ -23,35 +23,6 @@ class Mage_Dataflow_Model_Convert_Adapter_Io extends Mage_Dataflow_Model_Convert
 
             $ioConfig = $this->getVars();
             switch (strtolower($this->getVar('type', 'file'))) {
-                case 'file':
-                    $path = \Symfony\Component\Filesystem\Path::makeAbsolute(
-                        $this->getVar('path'),
-                        Mage::getBaseDir(),
-                    );
-
-                    if (Mage::helper('dataflow')->getStorageLocation((string) $this->getVar('path')) === null) {
-                        Mage::throwException(
-                            Mage::helper('dataflow')->__('Path "%s" is not allowed. Files must be in var/export or var/import.', $ioConfig['path']),
-                        );
-                    }
-
-                    $this->_resource->checkAndCreateFolder($path);
-
-                    $realPath = realpath($path);
-
-                    if ($realPath === false) {
-                        $message = Mage::helper('dataflow')->__('The destination folder "%s" does not exist or there is no access to create it.', $ioConfig['path']);
-                        Mage::throwException($message);
-                    } elseif (!is_dir($realPath)) {
-                        $message = Mage::helper('dataflow')->__('Destination folder "%s" is not a directory.', $realPath);
-                        Mage::throwException($message);
-                    } elseif ($forWrite && !is_writable($realPath)) {
-                        $message = Mage::helper('dataflow')->__('Destination folder "%s" is not writable.', $realPath);
-                        Mage::throwException($message);
-                    } else {
-                        $ioConfig['path'] = rtrim($realPath, DS);
-                    }
-                    break;
                 default:
                     $ioConfig['path'] = rtrim($this->getVar('path'), '/');
                     break;

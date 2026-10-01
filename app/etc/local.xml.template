@@ -67,8 +67,9 @@ SPDX-License-Identifier: AFL-3.0
             env vars) when you leave the credentials out. azure always needs a connection_string.
             The URLs of media follow the Base Media URL of the store config, also on a bucket. To
             serve media from a CDN, set Base Media URL to the CDN, as with a local disk; every
-            template and extension then gets the CDN URL. The CDN must send a miss below
-            catalog/product/cache/ to the store host, which creates the resized image. <public_url>
+            template and extension then gets the CDN URL. When the CDN does not have a file below
+            catalog/product/cache/, it must send the request to the store host, which creates
+            the resized image. <public_url>
             is only for a mount of your own with no <url_type>: it is the URL that serves its
             files, and without it the adapter builds the bucket URL. Do not set it on media or
             sitemaps. Add <visibility>public</visibility> only on a bucket with ACLs enabled: it

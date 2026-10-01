@@ -21,7 +21,7 @@ class UploaderStorageTestUploader extends Uploader
     #[\Override]
     protected function _storeFile(Mount $mount, string $path): bool
     {
-        $this->_writeToMount($mount, $path, $this->_file['tmp_name']);
+        $mount->copyFromLocalFile($this->_file['tmp_name'], $path);
         unlink($this->_file['tmp_name']);
         return true;
     }

@@ -23,7 +23,13 @@ describe('storage:migrate', function () {
         $this->root = sys_get_temp_dir() . '/maho_storage_migrate_' . uniqid();
         mkdir($this->root . '/source/downloadable/files', 0777, true);
         mkdir($this->root . '/target', 0777, true);
+        mkdir($this->root . '/source/catalog/product/cache/1', 0777, true);
+        mkdir($this->root . '/source/catalog/swatches', 0777, true);
+        mkdir($this->root . '/source/tmp', 0777, true);
         file_put_contents($this->root . '/source/a.jpg', 'a');
+        file_put_contents($this->root . '/source/catalog/product/cache/1/x.jpg', 'x');
+        file_put_contents($this->root . '/source/catalog/swatches/s.png', 's');
+        file_put_contents($this->root . '/source/tmp/y.jpg', 'y');
         file_put_contents($this->root . '/source/downloadable/files/private.zip', 'secret');
 
         Mage::getConfig()->setNode('global/storage/mounts/media/path', $this->root . '/source', true);
@@ -55,6 +61,25 @@ describe('storage:migrate', function () {
         expect($status)->toBe(Command::SUCCESS)
             ->and($this->target->read('a.jpg'))->toBe('a')
             ->and($this->target->fileExists('downloadable/files/private.zip'))->toBeFalse();
+    });
+
+    it('leaves the caches that Maho creates again out of the media copy', function (): void {
+        $status = $this->tester->execute(['mounts' => ['media']]);
+
+        expect($status)->toBe(Command::SUCCESS)
+            ->and($this->tester->getDisplay())->toContain('catalog/product/cache')
+            ->and($this->target->fileExists('catalog/product/cache/1/x.jpg'))->toBeFalse()
+            ->and($this->target->fileExists('catalog/swatches/s.png'))->toBeFalse()
+            ->and($this->target->fileExists('tmp/y.jpg'))->toBeFalse();
+    });
+
+    it('copies the caches of the media mount with --include-cache', function (): void {
+        $status = $this->tester->execute(['mounts' => ['media'], '--include-cache' => true]);
+
+        expect($status)->toBe(Command::SUCCESS)
+            ->and($this->target->read('catalog/product/cache/1/x.jpg'))->toBe('x')
+            ->and($this->target->read('catalog/swatches/s.png'))->toBe('s')
+            ->and($this->target->read('tmp/y.jpg'))->toBe('y');
     });
 
     it('does not copy the sitemaps mount, whose local folder is public/', function (): void {

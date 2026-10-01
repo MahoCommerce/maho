@@ -2125,7 +2125,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
      * @param bool $withImagesOnly Only the products whose rows set an image column
      * @return array
      */
-    public function getAffectedEntityIds($withImagesOnly = false)
+    public function getAffectedEntityIds(bool $withImagesOnly = false)
     {
         $productIds = [];
         $productId = null;

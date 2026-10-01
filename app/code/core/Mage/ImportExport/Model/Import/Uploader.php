@@ -254,7 +254,7 @@ class Mage_ImportExport_Model_Import_Uploader extends Mage_Core_Model_File_Uploa
         if ($sourceFile === false) {
             return false;
         }
-        $this->_writeToMount($mount, $path, $sourceFile);
+        $mount->copyFromLocalFile($sourceFile, $path);
 
         return true;
     }

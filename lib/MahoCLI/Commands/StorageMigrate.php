@@ -31,11 +31,11 @@ class StorageMigrate extends BaseMahoCommand
         SymfonyStyle $io,
         #[Argument(description: 'Mounts to migrate, for example media. Default: every mount that local.xml points at a remote adapter')]
         array $mounts = [],
-        #[Option(description: 'Show what would be copied, and copy nothing', name: 'dry-run')]
+        #[Option(description: 'Show what would be copied, and copy nothing')]
         bool $dryRun = false,
-        #[Option(description: 'Also copy the caches that Maho creates again on demand, such as the resized product images', name: 'include-cache')]
+        #[Option(description: 'Also copy the caches that Maho creates again on demand, such as the resized product images')]
         bool $includeCache = false,
-        #[Option(description: 'A folder of the mount that is not copied. Repeat it for more folders', name: 'exclude')]
+        #[Option(description: 'A folder of the mount that is not copied. Repeat it for more folders')]
         array $exclude = [],
     ): int {
         $this->initMaho();

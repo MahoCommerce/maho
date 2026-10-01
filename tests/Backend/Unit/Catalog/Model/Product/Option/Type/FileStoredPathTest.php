@@ -80,3 +80,57 @@ describe('Mage_Catalog_Model_Product_Option_Type_File::resolveStoragePath()', fu
         expect($this->model->resolveStoragePath([], 'quote_path'))->toBeNull();
     });
 });
+
+describe('Mage_Catalog_Model_Product_Option_Type_File on the custom_options mount', function () {
+    beforeEach(function (): void {
+        $this->root = sys_get_temp_dir() . '/maho_custom_options_' . uniqid();
+        mkdir($this->root, 0777, true);
+        $this->mount = new \Maho\Storage\Mount('custom_options', new \League\Flysystem\Local\LocalFilesystemAdapter($this->root), $this->root);
+        \Maho\Storage\MountRegistry::register($this->mount);
+        $this->mount->write('quote/a/b/h.txt', 'Q');
+        $this->mount->write('order/a/b/h.txt', 'O');
+        $this->model = Mage::getModel('catalog/product_option_type_file');
+        $this->value = [
+            'quote_path' => $this->model->getQuoteTargetDir(true) . '/a/b/h.txt',
+            'order_path' => $this->model->getOrderTargetDir(true) . '/a/b/h.txt',
+        ];
+    });
+
+    afterEach(function (): void {
+        \Maho\Storage\MountRegistry::reset();
+        $items = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($this->root, FilesystemIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::CHILD_FIRST,
+        );
+        foreach ($items as $item) {
+            $item->isDir() ? rmdir($item->getPathname()) : unlink($item->getPathname());
+        }
+        rmdir($this->root);
+    });
+
+    it('opens the order copy of a stored file before the quote copy', function (): void {
+        $file = $this->model->openStoredFile($this->value);
+
+        expect($file)->not->toBeNull()
+            ->and(stream_get_contents($file['stream']))->toBe('O')
+            ->and($file['size'])->toBe(1);
+    });
+
+    it('copies the quote file to the order directory of the mount', function (): void {
+        $this->mount->delete('order/a/b/h.txt');
+        $option = Mage::getModel('sales/quote_item_option')->setValue(Mage::helper('core')->jsonEncode($this->value));
+        $this->model->setConfigurationItemOption($option);
+
+        $this->model->copyQuoteToOrder();
+
+        expect($this->mount->read('order/a/b/h.txt'))->toBe('Q')
+            ->and($this->mount->read('quote/a/b/h.txt'))->toBe('Q');
+    });
+
+    it('deletes the quote copy and keeps the order copy', function (): void {
+        $this->model->deleteQuoteFile($this->value);
+
+        expect($this->mount->fileExists('quote/a/b/h.txt'))->toBeFalse()
+            ->and($this->mount->fileExists('order/a/b/h.txt'))->toBeTrue();
+    });
+});
