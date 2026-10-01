@@ -78,25 +78,38 @@ class Mage_ImportExport_Model_Import_Uploader extends Mage_Core_Model_File_Uploa
      */
     public function move($fileName)
     {
-        $filePath = realpath($this->getTmpDir() . DS . $fileName);
-        if ($filePath === false) {
-            Mage::throwException("File '{$fileName}' was not found in " . $this->getTmpDir());
-        }
-        $copy = $filePath;
-        if (!$this->_trustedMedia) {
-            // The image validator re-samples the file it checks in place, so work on a copy and leave the source untouched
-            $copy = Mage_ImportExport_Model_Import::getWorkingDir() . uniqid('upload-', true) . '-' . basename($filePath);
-            if (!copy($filePath, $copy)) {
-                Mage::throwException("File '{$fileName}' could not be copied to the working folder");
-            }
-        }
+        $mount = Mage::getStorage('media');
+        $filePath = false;
+        $fetched = null;
+        $copy = null;
         try {
+            if ($this->getTmpDir() === '') {
+                // With no local folder the images are below import/ on the media mount, so the file is borrowed as a local copy
+                $source = \Maho\Io::getPathWithinMount($mount, 'import', $fileName);
+                if ($source !== null && $mount->fileExists($source)) {
+                    $fetched = Mage_ImportExport_Model_Import::getWorkingDir() . uniqid('import-', true) . '-' . basename($fileName);
+                    $mount->copyToLocalFile($source, $fetched);
+                    $filePath = $fetched;
+                }
+            } else {
+                $filePath = realpath($this->getTmpDir() . DS . $fileName);
+            }
+            if ($filePath === false) {
+                Mage::throwException("File '{$fileName}' was not found in " . ($this->getTmpDir() ?: 'import/ on the media mount'));
+            }
+            $copy = $filePath;
+            if (!$this->_trustedMedia) {
+                // The image validator re-samples the file it checks in place, so work on a copy and leave the source untouched
+                $copy = Mage_ImportExport_Model_Import::getWorkingDir() . uniqid('upload-', true) . '-' . basename($fileName);
+                if (!copy($filePath, $copy)) {
+                    Mage::throwException("File '{$fileName}' could not be copied to the working folder");
+                }
+            }
             $this->_setUploadFile($copy);
-            $this->_file['name'] = basename($filePath);
+            $this->_file['name'] = basename($fileName);
             $this->_validateFile();
             $this->_validated = true;
             // The validator re-samples the copy, so only the validated bytes can match a file stored by an earlier run
-            $mount = Mage::getStorage('media');
             $correctName = strtolower(self::getCorrectFileName($this->_file['name']));
             $existing = str_replace(DS, '/', self::getDispretionPath($correctName)) . '/' . $correctName;
             $destination = self::joinPath($this->getDestStoragePath(), $existing);
@@ -111,8 +124,11 @@ class Mage_ImportExport_Model_Import_Uploader extends Mage_Core_Model_File_Uploa
             }
         } finally {
             $this->_validated = false;
-            if ($copy !== $filePath && is_file($copy)) {
+            if ($copy !== null && $copy !== $filePath && is_file($copy)) {
                 unlink($copy);
+            }
+            if ($fetched !== null && is_file($fetched)) {
+                unlink($fetched);
             }
         }
         $result['name'] = self::getCorrectFileName($result['name']);

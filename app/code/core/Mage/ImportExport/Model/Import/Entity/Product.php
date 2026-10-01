@@ -1656,8 +1656,10 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
             $this->_fileUploader->setTrustedMedia((bool) ($this->_parameters['trusted_media'] ?? false));
             $this->_fileUploader->init();
 
-            $tmpDir     = $this->_parameters['media_dir'] ?? Mage::getConfig()->getOptions()->getMediaDir() . '/import';
-            if (!$this->_fileUploader->setTmpDir($tmpDir)) {
+            // With no media_dir the images are below import/ on the media mount, which has no local folder on a bucket
+            $root = Mage::getStorage('media')->localRoot();
+            $tmpDir = $this->_parameters['media_dir'] ?? ($root === null ? null : $root . '/import');
+            if ($tmpDir !== null && !$this->_fileUploader->setTmpDir($tmpDir)) {
                 Mage::throwException("File directory '{$tmpDir}' is not readable.");
             }
             $this->_fileUploader->setDestStoragePath(
