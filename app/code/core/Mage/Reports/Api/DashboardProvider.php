@@ -190,17 +190,19 @@ final class DashboardProvider extends ReportProviderBase
         $case .= ' ELSE ' . (count($buckets) - 1) . ' END';
 
         $select = $collection->getSelect();
-        $select->columns(['bucket' => new \Maho\Db\Expr($case)])
-            ->where('main_table.created_at >= ?', \DateTimeImmutable::createFromInterface($from)->setTimezone($utc)->format(\Mage_Core_Model_Locale::DATETIME_FORMAT))
-            ->where('main_table.created_at <= ?', \DateTimeImmutable::createFromInterface($to)->setTimezone($utc)->format(\Mage_Core_Model_Locale::DATETIME_FORMAT))
-            ->group(new \Maho\Db\Expr($case));
+        $select->where('main_table.created_at >= ?', \DateTimeImmutable::createFromInterface($from)->setTimezone($utc)->format(\Mage_Core_Model_Locale::DATETIME_FORMAT))
+            ->where('main_table.created_at <= ?', \DateTimeImmutable::createFromInterface($to)->setTimezone($utc)->format(\Mage_Core_Model_Locale::DATETIME_FORMAT));
+        // A CASE needs one WHEN, so one bucket takes the single total row with no group
+        if (count($buckets) > 1) {
+            $select->columns(['bucket' => new \Maho\Db\Expr($case)])->group(new \Maho\Db\Expr($case));
+        }
         if ($query->scoped) {
             $select->where('main_table.store_id IN (?)', $query->storeIds);
         }
 
         $values = [];
         foreach ($adapter->fetchAll($select) as $row) {
-            $key = $buckets[(int) $row['bucket']]['key'] ?? null;
+            $key = $buckets[(int) ($row['bucket'] ?? 0)]['key'] ?? null;
             if ($key !== null) {
                 $values[$key] = ['orders' => (int) $row['quantity'], 'revenue' => (float) $row['revenue']];
             }
