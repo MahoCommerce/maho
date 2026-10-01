@@ -9,6 +9,7 @@
 declare(strict_types=1);
 
 use League\Flysystem\FilesystemException;
+use League\Flysystem\Local\LocalFilesystemAdapter;
 use Maho\Storage\Mount;
 
 class Maho_MediaCleaner_Adminhtml_MediacleanerController extends Mage_Adminhtml_Controller_Action
@@ -237,13 +238,8 @@ class Maho_MediaCleaner_Adminhtml_MediacleanerController extends Mage_Adminhtml_
     public function flushvarimportexportAction(): void
     {
         $dir = Mage_ImportExport_Model_Import::getWorkingDir();
-        $flushed = \Maho\Io\File::rmdirRecursive($dir, true);
-        @mkdir($dir);
-        if ($flushed) {
-            $this->_getSession()->addSuccess($this->__('%s was successfully flushed', 'var/importexport'));
-        } else {
-            $this->_getSession()->addError($this->__('It was not possible to delete one or more files from the %s folder.', 'var/importexport'));
-        }
+        $adapter = new LocalFilesystemAdapter($dir, linkHandling: LocalFilesystemAdapter::SKIP_LINKS);
+        $this->flushDirectory(new Mount('importexport', $adapter, $dir), '', 'var/importexport');
         $this->_redirect('*/*');
     }
 

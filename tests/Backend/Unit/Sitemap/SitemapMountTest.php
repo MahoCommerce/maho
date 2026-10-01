@@ -167,7 +167,7 @@ describe('Mage_Sitemap_Model_Sitemap on the sitemaps mount', function () {
         if ($fileExists) {
             $mount->write('sitemaps/sitemap.xml', '<sitemapindex/>');
         }
-        $row = new \Maho\DataObject([
+        $row = Mage::getModel('sitemap/sitemap')->setData([
             'sitemap_path' => '/sitemaps/',
             'sitemap_filename' => 'sitemap.xml',
             'store_id' => $this->storeId,

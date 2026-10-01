@@ -635,16 +635,17 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
         try {
             $value = Mage::helper('core/unserializeArray')->unserialize($quoteOption->getValue());
             if (!is_array($value)) {
-                throw new Exception();
+                return $this;
             }
             $mount = Mage::getStorage('custom_options');
             $quotePath = $this->resolveStoragePath($value, 'quote_path');
             $orderPath = $this->resolveStoragePath($value, 'order_path');
             if ($quotePath === null || $orderPath === null || !$mount->fileExists($quotePath)) {
-                throw new Exception();
+                return $this;
             }
             $mount->copy($quotePath, $orderPath);
-        } catch (Exception) {
+        } catch (Exception $e) {
+            Mage::logException($e);
         }
         return $this;
     }
