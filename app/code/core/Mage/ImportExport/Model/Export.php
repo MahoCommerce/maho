@@ -8,6 +8,8 @@
  * @package Mage_ImportExport
  */
 
+declare(strict_types=1);
+
 class Mage_ImportExport_Model_Export extends Mage_ImportExport_Model_Abstract
 {
     public const FILTER_ELEMENT_GROUP = 'export_filter';
