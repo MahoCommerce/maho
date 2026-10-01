@@ -98,22 +98,6 @@ it('creates a tree below the root, applies store overrides and reruns without du
     rmdir($mediaDir);
 });
 
-it('reads the root, path and store_code columns of the first sample data packs', function (): void {
-    $root = categoriesRootName();
-    $path = categoriesCsv([
-        ['root', 'path', 'store_code', 'name'],
-        [$root, 'imp-cat', '', 'Imp Cat'],
-        [$root, 'imp-cat', Mage::app()->getStore(1)->getCode(), 'Imp Cat Store'],
-    ]);
-
-    (new Categories())->import($path);
-
-    $category = categoriesFind('imp-cat');
-    expect($category->getName())->toBe('Imp Cat');
-    expect(Mage::getModel('catalog/category')->setStoreId(1)->load($category->getId())->getName())->toBe('Imp Cat Store');
-    unlink($path);
-});
-
 it('reads back the file of export:categories', function (): void {
     $root = categoriesRootName();
     $source = categoriesCsv([['_root', '_path', 'name', 'description'], [$root, 'imp-cat', 'Imp Cat', 'Exported text']]);

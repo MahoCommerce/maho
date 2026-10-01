@@ -18,15 +18,6 @@ class Categories extends AbstractImportExportImporter
 {
     public const OPTION_MEDIA_DIR = \Mage_ImportExport_Model_Import_Entity_Category::PARAM_MEDIA_DIR;
 
-    /**
-     * The column names of the first sample data packs. Drop them when maho-sample-data uses the new names.
-     */
-    private const LEGACY_COLUMNS = [
-        'root' => \Mage_ImportExport_Model_Import_Entity_Category::COL_ROOT,
-        'path' => \Mage_ImportExport_Model_Import_Entity_Category::COL_PATH,
-        'store_code' => \Mage_ImportExport_Model_Import_Entity_Category::COL_STORE,
-    ];
-
     #[\Override]
     protected function entityCode(): string
     {
@@ -58,16 +49,7 @@ class Categories extends AbstractImportExportImporter
     #[\Override]
     protected function prepare(CsvFile $file, array $options): array
     {
-        $rows = [];
-        foreach (parent::prepare($file, $options) as $line => $row) {
-            foreach (self::LEGACY_COLUMNS as $legacy => $column) {
-                if (array_key_exists($legacy, $row) && !array_key_exists($column, $row)) {
-                    $row[$column] = $row[$legacy];
-                    unset($row[$legacy]);
-                }
-            }
-            $rows[$line] = $row;
-        }
+        $rows = parent::prepare($file, $options);
         uasort($rows, fn(array $a, array $b): int => $this->order($a) <=> $this->order($b));
         return $rows;
     }
