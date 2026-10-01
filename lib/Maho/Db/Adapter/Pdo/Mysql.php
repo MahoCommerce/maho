@@ -22,6 +22,13 @@ class Mysql extends AbstractPdoAdapter
     // MySQL-specific constants
     public const DDL_CACHE_PREFIX      = 'DB_PDO_MYSQL_DDL';
     public const DDL_CACHE_TAG         = 'DB_PDO_MYSQL_DDL';
+    /**
+     * The charset and collation of every connection and every table. The legacy
+     * and declarative table defaults must stay equal, or MySQL refuses a VARCHAR
+     * foreign key between the two kinds of table.
+     */
+    public const DEFAULT_CHARSET       = 'utf8mb4';
+    public const DEFAULT_COLLATION     = 'utf8mb4_general_ci';
 
     /**
      * Default class name for a DB statement.
@@ -178,7 +185,14 @@ class Mysql extends AbstractPdoAdapter
             $sqlMode = implode(',', $modes);
         }
         $this->_connection->executeStatement('SET SQL_MODE=' . $this->_connection->quote($sqlMode));
-        $this->_connection->executeStatement("SET time_zone = '+00:00'");
+
+        // The DSN sets only the charset. The server then picks its own default
+        // collation (utf8mb4_0900_ai_ci on MySQL 8), which differs from the tables.
+        $session = "time_zone = '+00:00'";
+        if (($this->_config['charset'] ?? self::DEFAULT_CHARSET) === self::DEFAULT_CHARSET) {
+            $session .= ', collation_connection = ' . $this->_connection->quote(self::DEFAULT_COLLATION);
+        }
+        $this->_connection->executeStatement('SET ' . $session);
     }
 
     /**
@@ -254,7 +268,7 @@ class Mysql extends AbstractPdoAdapter
             'user' => $this->_config['username'] ?? '',
             'password' => $this->_config['password'] ?? '',
             'dbname' => $this->_config['dbname'] ?? '',
-            'charset' => $this->_config['charset'] ?? 'utf8',
+            'charset' => $this->_config['charset'] ?? self::DEFAULT_CHARSET,
         ];
 
         if (isset($this->_config['unix_socket'])) {

@@ -21,7 +21,9 @@ class Mage_Core_Model_Resource_Type_Db_Pdo_Mysql extends Mage_Core_Model_Resourc
 
         $conn = $this->_getDbAdapterInstance($configArr);
 
-        if (!empty($configArr['initStatements']) && $conn) {
+        if (!empty($configArr['initStatements']) && $conn
+            && !Mage_Core_Model_Resource::isLegacyCharsetStatement($configArr['initStatements'])
+        ) {
             $conn->query($configArr['initStatements']);
         }
 

@@ -115,14 +115,14 @@ it('prefixes the recorded former table names', function () {
     expect(Renamer::previousTableNames($table))->toBe(['pfx_maho_api_idempotency_keys']);
 });
 
-it('applies the legacy charset and collation unless the table declares its own', function () {
+it('gives a table utf8mb4 when it declares no charset, and keeps an explicit one', function () {
     $default = finalizeCollectorTable(collectorTable('plain')->create());
-    $declared = finalizeCollectorTable(collectorTable('own')->setOptions(['charset' => 'utf8mb4'])->create());
+    $declared = finalizeCollectorTable(collectorTable('own')->setOptions(['charset' => 'latin1'])->create());
 
-    expect($default->getOption('charset'))->toBe('utf8');
-    expect($default->getOption('collation'))->toBe('utf8_general_ci');
-    expect($declared->getOption('charset'))->toBe('utf8mb4');
-    expect($declared->getOption('collation'))->toBe('utf8_general_ci');
+    expect($default->getOption('charset'))->toBe('utf8mb4');
+    expect($default->getOption('collation'))->toBe('utf8mb4_general_ci');
+    expect($declared->getOption('charset'))->toBe('latin1');
+    expect($declared->getOption('collation'))->toBe('utf8mb4_general_ci');
 });
 
 it('overrides a declared non-InnoDB engine', function () {

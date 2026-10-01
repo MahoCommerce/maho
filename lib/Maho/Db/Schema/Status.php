@@ -62,11 +62,12 @@ final class Status
      * A plan that cannot be computed counts as pending: it needs a human, and
      * `./maho migrate --dry-run` is where they get told why.
      *
-     * Storage-engine conversions are deliberately left out of the verdict.
-     * They are the one part of the plan that looks beyond the declared tables
-     * (Applier::legacyEngineTables scans the whole database), so a stray
-     * MyISAM table belonging to a third-party module would otherwise report
-     * the declared schema as behind. `./maho migrate` still converts them.
+     * Storage-engine and charset conversions are deliberately left out of the
+     * verdict. They are the parts of the plan that look beyond the declared
+     * tables (Applier::legacyEngineTables and legacyCharsetTables scan the whole
+     * database), so a stray MyISAM or utf8mb3 table belonging to a third-party
+     * module would otherwise report the declared schema as behind. A store also
+     * keeps serving until the operator runs `./maho migrate`, which converts them.
      */
     public static function isConverged(AdapterInterface $adapter, ?string $fingerprint = null): bool
     {

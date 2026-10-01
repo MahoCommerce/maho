@@ -269,10 +269,32 @@ it('aligns the target table charset to a utf8/utf8mb3 synonym so the diff conver
     expect($target->getComment())->toBe('Kept');
 });
 
-it('keeps a genuine table charset migration (utf8mb3 to utf8mb4)', function () {
+it('aligns a utf8mb3 table that the charset pass has not converted yet', function (string $liveCharset, string $targetCharset) {
+    // The Comparator never emits a table charset change, and Applier's charset
+    // pass converts the table. Unaligned, an undeclared column merged onto the
+    // table would get a CHANGE back to its old charset on every plan.
     $live = canonTable('t')
         ->addColumn(canonColumn('id', Types::INTEGER)->setUnsigned(true)->create())
-        ->setOptions(['charset' => 'utf8mb3', 'collation' => 'utf8mb3_general_ci'])
+        ->setOptions(['charset' => $liveCharset, 'collation' => $liveCharset . '_general_ci'])
+        ->create();
+    $target = canonTable('t')
+        ->addColumn(canonColumn('id', Types::INTEGER)->setUnsigned(true)->create())
+        ->setOptions(['charset' => $targetCharset, 'collation' => $targetCharset . '_general_ci'])
+        ->create();
+
+    [, $target] = Canonicalizer::reconcile($live, $target, []);
+
+    expect($target->getOption('charset'))->toBe($liveCharset);
+    expect($target->getOption('collation'))->toBe($liveCharset . '_general_ci');
+})->with([
+    'utf8mb3 live, utf8mb4 target' => ['utf8mb3', 'utf8mb4'],
+    'utf8mb4 live, utf8 target' => ['utf8mb4', 'utf8'],
+]);
+
+it('keeps a table charset or collation outside the utf8 family', function (string $liveCharset, string $liveCollation) {
+    $live = canonTable('t')
+        ->addColumn(canonColumn('id', Types::INTEGER)->setUnsigned(true)->create())
+        ->setOptions(['charset' => $liveCharset, 'collation' => $liveCollation])
         ->create();
     $target = canonTable('t')
         ->addColumn(canonColumn('id', Types::INTEGER)->setUnsigned(true)->create())
@@ -281,7 +303,8 @@ it('keeps a genuine table charset migration (utf8mb3 to utf8mb4)', function () {
 
     [, $target] = Canonicalizer::reconcile($live, $target, []);
 
-    // A real charset change must survive — not aligned away.
-    expect($target->getOption('charset'))->toBe('utf8mb4');
     expect($target->getOption('collation'))->toBe('utf8mb4_general_ci');
-});
+})->with([
+    'latin1' => ['latin1', 'latin1_swedish_ci'],
+    'other collation' => ['utf8mb3', 'utf8mb3_unicode_ci'],
+]);

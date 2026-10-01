@@ -38,7 +38,7 @@ function renameProbeTable(
     bool $withHistory,
     string $index = 'IDX_MAHO_PROBE_EMAIL',
 ): Table {
-    $options = ['engine' => 'InnoDB', 'charset' => 'utf8', 'collation' => 'utf8_general_ci'];
+    $options = ['engine' => 'InnoDB', 'charset' => 'utf8mb4', 'collation' => 'utf8mb4_general_ci'];
     if ($withHistory) {
         $options += MahoSchema::renamed(from: RENAME_OLD_TABLE, columns: ['customer_email' => 'legacy_email']);
     }
@@ -104,7 +104,7 @@ function renameProbeSchemaWithChild(string $table, string $emailColumn, bool $wi
                 ->setUnquotedReferencedColumnNames('entity_id')
                 ->create(),
         )
-        ->setOptions(['engine' => 'InnoDB', 'charset' => 'utf8', 'collation' => 'utf8_general_ci'])
+        ->setOptions(['engine' => 'InnoDB', 'charset' => 'utf8mb4', 'collation' => 'utf8mb4_general_ci'])
         ->create();
 
     return Schema::editor()

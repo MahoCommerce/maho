@@ -141,9 +141,9 @@
 </div>
 
 <script type="module">
-    const postUrl = '<?= $this->getPostUrl() ?>';
-    const progressUrl = '<?= $this->getProgressUrl() ?>';
-    const nextUrl = '<?= $this->getNextStepUrl() ?>';
+    const postUrl = <?= $this->jsEscape($this->getPostUrl()) ?>;
+    const progressUrl = <?= $this->jsEscape($this->getProgressUrl()) ?>;
+    const nextUrl = <?= $this->jsEscape($this->getNextStepUrl()) ?>;
 
     const pageHead = document.getElementById('page-head');
     const formContainer = document.getElementById('sampledata-form-container');
@@ -225,7 +225,7 @@
 
             pollProgress();
         } catch (e) {
-            showError('<?= $this->__('Failed to start installation. Please try again.') ?>');
+            showError(<?= $this->jsEscape($this->__('Failed to start installation. Please try again.')) ?>);
         }
     }
 

@@ -2084,11 +2084,6 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
         return $this->setData('message', $value);
     }
 
-    public function setMethod(?string $value): static
-    {
-        return $this->setData('method', $value);
-    }
-
     public function getNotificationResult(): ?bool
     {
         $value = $this->getData('notification_result');

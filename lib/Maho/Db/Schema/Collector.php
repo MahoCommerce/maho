@@ -15,6 +15,7 @@ use Doctrine\DBAL\Schema\SchemaEditor;
 use Doctrine\DBAL\Schema\Table;
 use Mage;
 use Maho;
+use Maho\Db\Adapter\Pdo\Mysql;
 use ReflectionFunction;
 use ReflectionNamedType;
 use RuntimeException;
@@ -136,10 +137,10 @@ final class Collector
      *    Schema authors declare unprefixed names; the prefix lives in
      *    app/etc/local.xml.
      *  - Apply the charset/collation of Maho's legacy adapter
-     *    (Maho\Db\Ddl\Table::$_options defaults to charset=utf8,
-     *    collate=utf8_general_ci). Without it, MySQL refuses foreign keys between
-     *    a declarative table (database-default charset, often utf8mb4) and a
-     *    legacy table (utf8). A table may declare its own charset or collation.
+     *    (Maho\Db\Ddl\Table::$_options). Without it, a declarative table takes
+     *    the database default, and MySQL refuses a VARCHAR foreign key between it
+     *    and a legacy table whose charset or collation differs. A table may
+     *    declare its own charset or collation.
      *  - Force InnoDB, even when the table declares no engine: DBAL then emits
      *    no ENGINE clause and the table inherits @@default_storage_engine. Inert
      *    on PostgreSQL and SQLite.
@@ -160,7 +161,7 @@ final class Collector
 
         // Table::edit() moves the comment out of the options, so keep it out.
         $options = array_diff_key($table->getOptions(), ['comment' => true]);
-        $options += ['charset' => 'utf8', 'collation' => 'utf8_general_ci'];
+        $options += ['charset' => Mysql::DEFAULT_CHARSET, 'collation' => Mysql::DEFAULT_COLLATION];
         $options['engine'] = 'InnoDB';
 
         return $table->edit()
