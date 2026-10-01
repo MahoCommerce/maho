@@ -94,7 +94,7 @@ class Mage_ImportExport_Model_Export extends Mage_ImportExport_Model_Abstract
 
             if (isset($validWriters[$this->getFileFormat()])) {
                 try {
-                    $_writer = Mage::getModel($validWriters[$this->getFileFormat()]['model']);
+                    $_writer = Mage::getModel($validWriters[$this->getFileFormat()]['model'], $this->getDestination() ?? []);
                     if (!$_writer instanceof Mage_ImportExport_Model_Export_Adapter_Abstract) {
                         Mage::throwException(
                             Mage::helper('importexport')->__('Adapter object must be an instance of %s', 'Mage_ImportExport_Model_Export_Adapter_Abstract'),
@@ -240,6 +240,20 @@ class Mage_ImportExport_Model_Export extends Mage_ImportExport_Model_Abstract
             Mage::throwException(Mage::helper('importexport')->__('File format is unknown'));
         }
         return $this->_data['file_format'];
+    }
+
+    /**
+     * The file that the writer fills. Without one, the writer uses a temporary file.
+     */
+    public function getDestination(): ?string
+    {
+        $value = $this->getData('destination');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setDestination(?string $value): static
+    {
+        return $this->setData('destination', $value);
     }
 
     /**
