@@ -18,11 +18,11 @@ abstract class Mage_ImportExport_Model_Export_Entity_Abstract
     protected $_attributeValues = [];
 
     /**
-     * Attribute code to its values. Only attributes with options and only default store values used.
+     * Codes of the attributes that the export writes.
      *
-     * @var array
+     * @var list<string>|null
      */
-    protected static $attrCodes = null;
+    protected ?array $attrCodes = null;
 
     /**
      * DB connection.
@@ -202,7 +202,7 @@ abstract class Mage_ImportExport_Model_Export_Entity_Abstract
      */
     protected function _getExportAttrCodes()
     {
-        if (self::$attrCodes === null) {
+        if ($this->attrCodes === null) {
             if (!empty($this->_parameters[Mage_ImportExport_Model_Export::FILTER_ELEMENT_SKIP])
                     && is_array($this->_parameters[Mage_ImportExport_Model_Export::FILTER_ELEMENT_SKIP])
             ) {
@@ -219,9 +219,9 @@ abstract class Mage_ImportExport_Model_Export_Entity_Abstract
                     $attrCodes[] = $attribute->getAttributeCode();
                 }
             }
-            self::$attrCodes = $attrCodes;
+            $this->attrCodes = $attrCodes;
         }
-        return self::$attrCodes;
+        return $this->attrCodes;
     }
 
     /**

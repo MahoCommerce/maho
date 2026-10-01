@@ -18,7 +18,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
     name: 'import:categories',
-    description: 'Create or update categories from a CSV file keyed by root name and url key path',
+    description: 'Create or update categories from a CSV file in the Import/Export layout',
 )]
 class ImportCategories extends BaseMahoCommand
 {
@@ -26,15 +26,17 @@ class ImportCategories extends BaseMahoCommand
 
     public function __invoke(
         OutputInterface $output,
-        #[Argument(description: 'Path to categories.csv (root, path, name, ...)')]
+        #[Argument(description: 'Path to categories.csv (_root, _path, name, ... or category_id, parent_id, name, ...)')]
         string $csv,
-        #[Option(description: 'Folder holding the category pictures (default: media/catalog/category next to the CSV)')]
+        #[Option(description: 'Folder holding the category pictures (default: media/catalog/category next to the CSV, when it exists)')]
         ?string $mediaDir = null,
+        #[Option(description: 'append, replace or delete')]
+        string $behavior = 'append',
         #[Option(description: self::DRY_RUN_DESCRIPTION)]
         bool $dryRun = false,
     ): int {
         $this->initMaho();
-        $options = [];
+        $options = [Categories::OPTION_BEHAVIOR => $behavior];
         if ($mediaDir !== null) {
             $options[Categories::OPTION_MEDIA_DIR] = $mediaDir;
         }
