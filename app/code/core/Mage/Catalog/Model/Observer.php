@@ -76,7 +76,7 @@ class Mage_Catalog_Model_Observer
         /** @var Mage_ImportExport_Model_Import_Entity_Product $adapter */
         $adapter = $observer->getEvent()->getAdapter();
         if ($adapter->getBehavior() !== Mage_ImportExport_Model_Import::BEHAVIOR_DELETE) {
-            Mage::getSingleton('catalog/product_image_resizer')->queue($adapter->getAffectedEntityIds());
+            Mage::getSingleton('catalog/product_image_resizer')->queue($adapter->getAffectedEntityIds(true));
         }
     }
 

@@ -644,8 +644,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
                 throw new Exception();
             }
             $mount->copy($quotePath, $orderPath);
-        } catch (Exception $e) {
-            Mage::logException($e);
+        } catch (Exception) {
         }
         return $this;
     }

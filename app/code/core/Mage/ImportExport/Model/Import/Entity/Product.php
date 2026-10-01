@@ -2120,23 +2120,30 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
     /**
      * Get array of affected products
      *
+     * @param bool $withImagesOnly Only the products whose rows set an image column
      * @return array
      */
-    public function getAffectedEntityIds()
+    public function getAffectedEntityIds($withImagesOnly = false)
     {
         $productIds = [];
+        $productId = null;
         while ($bunch = $this->_dataSourceModel->getNextBunch()) {
             foreach ($bunch as $rowNum => $rowData) {
                 if (!$this->isRowAllowedToImport($rowData, $rowNum)) {
                     continue;
                 }
-                if (!isset($this->_newSku[$rowData[self::COL_SKU]]['entity_id'])) {
-                    continue;
+                if (isset($this->_newSku[$rowData[self::COL_SKU]]['entity_id'])) {
+                    $productId = $this->_newSku[$rowData[self::COL_SKU]]['entity_id'];
+                    if (!$withImagesOnly) {
+                        $productIds[] = $productId;
+                    }
                 }
-                $productIds[] = $this->_newSku[$rowData[self::COL_SKU]]['entity_id'];
+                if ($withImagesOnly && $productId !== null && array_any($this->_imagesArrayKeys, fn($col) => !empty($rowData[$col]))) {
+                    $productIds[$productId] = $productId;
+                }
             }
         }
-        return $productIds;
+        return array_values($productIds);
     }
 
     /**

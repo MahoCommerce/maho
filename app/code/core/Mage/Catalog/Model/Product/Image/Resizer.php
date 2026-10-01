@@ -85,13 +85,17 @@ class Mage_Catalog_Model_Product_Image_Resizer
                     foreach (self::GALLERY_ROLES as $role) {
                         array_push($files[$role], ...$galleryFiles[(int) $product->getId()] ?? []);
                     }
+                    $fileSizes = [];
                     foreach ($files as $role => $roleFiles) {
                         $params = $sizes->getParamsFor($storeId, $role);
                         foreach (array_unique(array_filter($roleFiles, is_string(...))) as $file) {
                             if ($file !== '' && $file !== 'no_selection') {
-                                $count += $this->resizeFile($file, $params);
+                                $fileSizes[$file] = array_merge($fileSizes[$file] ?? [], $params);
                             }
                         }
+                    }
+                    foreach ($fileSizes as $file => $params) {
+                        $count += $this->resizeFile((string) $file, $params);
                     }
                 }
             }

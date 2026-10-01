@@ -24,7 +24,8 @@ class Mage_Adminhtml_Block_Sitemap_Grid_Renderer_Link extends Mage_Adminhtml_Blo
             Mage::app()->getStore($row->getStoreId())->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB) . $fileName,
         );
 
-        $sitemap = Mage::getModel('sitemap/sitemap')->setData($row->getData());
+        /** @var Mage_Sitemap_Model_Sitemap $sitemap */
+        $sitemap = $row;
         $path = $sitemap->getStoragePath();
         $mount = $sitemap->getMount();
         // A bucket answers each check with a request, so the grid trusts the generation time there
