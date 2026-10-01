@@ -143,7 +143,7 @@ abstract class AbstractImportExportImporter extends AbstractImporter
         }
         $injected = $this->injectedColumns();
         // An exported file may carry an injected column already; the importer's value wins
-        $columns = array_values(array_diff($file->getColumns(), array_keys($injected)));
+        $columns = array_values(array_diff(array_keys(array_first($rows)), array_keys($injected)));
         fputcsv($handle, array_merge($columns, array_keys($injected)), escape: '\\');
         foreach ($rows as $row) {
             $values = [];
