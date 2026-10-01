@@ -11,6 +11,8 @@ declare(strict_types=1);
 
 namespace Maho\Db\Ddl;
 
+use Maho\Db\Adapter\Pdo\Mysql;
+
 class Table
 {
     /**
@@ -178,8 +180,8 @@ class Table
      */
     protected array $_options = [
         'type'          => 'INNODB',
-        'charset'       => 'utf8',
-        'collate'       => 'utf8_general_ci',
+        'charset'       => Mysql::DEFAULT_CHARSET,
+        'collate'       => Mysql::DEFAULT_COLLATION,
 
     ];
 

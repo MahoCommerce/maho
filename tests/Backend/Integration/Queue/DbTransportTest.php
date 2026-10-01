@@ -51,6 +51,14 @@ it('roundtrips send, get, and ack', function () {
     expect(fetchQueueRows())->toHaveCount(0);
 });
 
+it('queues a message that holds 4-byte characters (#1487)', function () {
+    QueueManager::dispatch(makeEmailMessage("\u{1F60A} Hi, question about my order"));
+
+    $envelopes = [...QueueManager::dbTransport()->get()];
+    expect($envelopes)->toHaveCount(1);
+    expect($envelopes[0]->getMessage()->subject)->toBe("\u{1F60A} Hi, question about my order");
+});
+
 it('claims a message atomically so a second consumer gets nothing', function () {
     QueueManager::dispatch(makeEmailMessage());
 

@@ -26,62 +26,30 @@ class Mage_CatalogSearch_Model_Resource_Helper_Mysql extends Mage_Eav_Model_Reso
     }
 
     /**
-     * Prepare Terms
+     * Split $str into words for MATCH ... AGAINST (:query IN BOOLEAN MODE).
+     *
+     * Each word goes into double quotes, so MySQL never reads a character of it as a boolean operator.
+     * A word that holds only operator or bracket characters, or that is shorter than $minWordLength, is dropped.
      *
      * @param string $str The source string
-     * @param int $maxWordLength
+     * @param int $maxWordLength The maximum number of words
      * @return array (0=>words, 1=>terms)
      */
-    public function prepareTerms($str, $maxWordLength = 0)
+    public function prepareTerms($str, $maxWordLength = 0, int $minWordLength = 0)
     {
-        $boolWords = [
-            '+' => '+',
-            '-' => '-',
-            '|' => '|',
-            '<' => '<',
-            '>' => '>',
-            '~' => '~',
-            '*' => '*',
-        ];
-        $brackets = [
-            '('       => '(',
-            ')'       => ')',
-        ];
-        $words = [0 => ''];
         $terms = [];
         preg_match_all('/([\(\)]|[\"\'][^"\']*[\"\']|[^\s\"\(\)]*)/uis', $str, $matches);
-        $isOpenBracket = 0;
         foreach ($matches[1] as $word) {
-            $word = trim($word);
-            if (strlen($word)) {
-                $word = str_replace('"', '', $word);
-                $isBool = in_array(strtoupper($word), $boolWords);
-                $isBracket = in_array($word, $brackets);
-                if (!$isBool && !$isBracket) {
-                    $terms[$word] = $word;
-                    $word = '"' . $word . '"';
-                    $words[] = $word;
-                } elseif ($isBracket) {
-                    if ($word === '(') {
-                        $isOpenBracket++;
-                    } else {
-                        $isOpenBracket--;
-                    }
-                    $words[] = $word;
-                } elseif ($isBool) {
-                    $words[] = $word;
-                }
+            $word = str_replace('"', '', trim($word));
+            if (strspn($word, '+-|<>~*()') === strlen($word) || mb_strlen($word) < $minWordLength) {
+                continue;
             }
-        }
-        if ($isOpenBracket > 0) {
-            $words[] = sprintf("%')" . $isOpenBracket . 's', '');
-        } elseif ($isOpenBracket < 0) {
-            $words[0] = sprintf("%'(" . $isOpenBracket . 's', '');
+            $terms[$word] = $word;
         }
         if ($maxWordLength && count($terms) > $maxWordLength) {
             $terms = array_slice($terms, 0, $maxWordLength);
         }
-        return [$words, $terms];
+        return [array_map(fn($term) => '"' . $term . '"', array_values($terms)), $terms];
     }
 
     /**

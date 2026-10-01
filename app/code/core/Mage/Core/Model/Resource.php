@@ -250,6 +250,16 @@ class Mage_Core_Model_Resource
     }
 
     /**
+     * Tell if $statement is the `SET NAMES utf8` that older installers wrote to
+     * local.xml. It sets the connection back to utf8mb3, and the adapter already
+     * sets utf8mb4, so the caller must not run it.
+     */
+    public static function isLegacyCharsetStatement(string $statement): bool
+    {
+        return preg_match('/^\s*SET\s+NAMES\s+([\'"`]?)utf8(mb3)?\1\s*;?\s*$/i', $statement) === 1;
+    }
+
+    /**
      * Create new connection adapter instance by connection type and config
      *
      * @param string $type the connection type
@@ -275,7 +285,7 @@ class Mage_Core_Model_Resource
             $connection = new $className($config);
             if ($connection instanceof \Maho\Db\Adapter\AdapterInterface) {
                 // run after initialization statements
-                if (!empty($config['initStatements'])) {
+                if (!empty($config['initStatements']) && !self::isLegacyCharsetStatement($config['initStatements'])) {
                     $connection->query($config['initStatements']);
                 }
             } else {

@@ -42,8 +42,8 @@ function renameProbeSchema(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create(),
     );
     $probe->addOption('engine', 'InnoDB');
-    $probe->addOption('charset', 'utf8');
-    $probe->addOption('collation', 'utf8_general_ci');
+    $probe->addOption('charset', 'utf8mb4');
+    $probe->addOption('collation', 'utf8mb4_general_ci');
 
     if ($withHistory) {
         Renamer::renamed($probe, from: RENAME_OLD_TABLE, columns: ['customer_email' => 'legacy_email']);
@@ -64,8 +64,8 @@ function renameProbeSchemaWithChild(string $table, string $emailColumn, bool $wi
     );
     $child->addForeignKeyConstraint($table, ['parent_id'], ['entity_id'], [], 'FK_MAHO_PROBE_CHILD');
     $child->addOption('engine', 'InnoDB');
-    $child->addOption('charset', 'utf8');
-    $child->addOption('collation', 'utf8_general_ci');
+    $child->addOption('charset', 'utf8mb4');
+    $child->addOption('collation', 'utf8mb4_general_ci');
 
     return $schema;
 }

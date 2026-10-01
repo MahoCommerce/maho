@@ -252,7 +252,7 @@ class PestTestRunner
         $this->executeCommand($this->getMysqlCommand('DROP DATABASE IF EXISTS `' . $this->testDbName . '`;'));
 
         // Create new test database
-        $this->executeCommand($this->getMysqlCommand('CREATE DATABASE `' . $this->testDbName . '`;'));
+        $this->executeCommand($this->getMysqlCommand('CREATE DATABASE `' . $this->testDbName . '` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;'));
         echo "✓ Created test database\n";
 
         $this->installMaho('mysql');

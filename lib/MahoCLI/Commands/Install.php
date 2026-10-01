@@ -13,6 +13,7 @@ use Exception;
 use Locale;
 use Mage;
 use Mage_Install_Model_Installer_Console;
+use Maho\Db\Adapter\Pdo\Mysql;
 use Maho\Import\SampleData\Installer as SampleDataInstaller;
 use Maho\Import\SampleData\Package;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -215,7 +216,7 @@ class Install extends BaseMahoCommand
                 if ($isPostgres) {
                     $dsn = "pgsql:host={$dbHost};dbname={$dbName}";
                 } else {
-                    $dsn = "mysql:host={$dbHost};dbname={$dbName};charset=utf8";
+                    $dsn = "mysql:host={$dbHost};dbname={$dbName};charset=" . Mysql::DEFAULT_CHARSET;
                 }
                 $pdo = new \PDO($dsn, $dbUser, $dbPass);
                 $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);

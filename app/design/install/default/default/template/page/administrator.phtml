@@ -111,7 +111,7 @@
     // Validate password confirmation matches
     function validatePasswordMatch() {
         if (confirmation.value !== password.value) {
-            confirmation.setCustomValidity('<?= $this->quoteEscape($this->__('Passwords do not match.')) ?>');
+            confirmation.setCustomValidity(<?= $this->jsEscape($this->__('Passwords do not match.')) ?>);
         } else {
             confirmation.setCustomValidity('');
         }
