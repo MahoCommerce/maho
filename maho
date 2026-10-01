@@ -59,6 +59,10 @@ $application->addCommand(new \MahoCLI\Commands\IndexReindex());
 $application->addCommand(new \MahoCLI\Commands\IndexReindexAll());
 $application->addCommand(new \MahoCLI\Commands\IndexReindexProduct());
 
+$application->addCommand(new \MahoCLI\Commands\ExportCategories());
+$application->addCommand(new \MahoCLI\Commands\ExportCustomers());
+$application->addCommand(new \MahoCLI\Commands\ExportProducts());
+
 $application->addCommand(new \MahoCLI\Commands\ImportAttributes());
 $application->addCommand(new \MahoCLI\Commands\ImportBlog());
 $application->addCommand(new \MahoCLI\Commands\ImportCategories());

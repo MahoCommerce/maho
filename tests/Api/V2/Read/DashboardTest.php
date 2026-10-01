@@ -94,6 +94,21 @@ describe('Dashboard', function (): void {
         }
     });
 
+    it('has one chart point for the month when the month starts today', function (): void {
+        $today = Mage::app()->getLocale()->utcToStore(Mage_Core_Model_App::ADMIN_STORE_ID);
+        $config = Mage::getModel('core/config');
+        $original = (string) Mage::getStoreConfig('reports/dashboard/mtd_start', 0);
+        $config->saveConfig('reports/dashboard/mtd_start', $today->format('j'), 'default', 0);
+        Mage::app()->getCache()->cleanType('config');
+
+        try {
+            expect(dashboardGet('sections=chart&period=1m')['chart']['points'])->toHaveCount(1);
+        } finally {
+            $config->saveConfig('reports/dashboard/mtd_start', $original, 'default', 0);
+            Mage::app()->getCache()->cleanType('config');
+        }
+    });
+
     it('returns only the listed sections', function (): void {
         $json = dashboardGet('sections=totals,lastOrders');
         expect(array_keys($json))->toBe(['period', 'timezone', 'currency', 'source', 'scope', 'totals', 'lastOrders']);

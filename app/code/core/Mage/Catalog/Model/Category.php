@@ -171,7 +171,7 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
      * Move category
      *
      * @param   int $parentId new parent category id
-     * @param   int $afterCategoryId category id after which we have put current category
+     * @param   int|null $afterCategoryId category id after which we have put current category
      * @return  Mage_Catalog_Model_Category
      */
     public function move($parentId, $afterCategoryId)
