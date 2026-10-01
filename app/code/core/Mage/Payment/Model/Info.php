@@ -201,4 +201,175 @@ class Mage_Payment_Model_Info extends Mage_Core_Model_Abstract
             $this->_additionalInformation = [];
         }
     }
+<<<<<<< HEAD
+=======
+
+    public function getAdditionalData(): ?string
+    {
+        $value = $this->getData('additional_data');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setAdditionalData(?string $value): static
+    {
+        return $this->setData('additional_data', $value);
+    }
+
+    public function getCcCid(): ?string
+    {
+        $value = $this->getData('cc_cid');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCcCid(?string $value): static
+    {
+        return $this->setData('cc_cid', $value);
+    }
+
+    public function getCcExpMonth(): ?string
+    {
+        $value = $this->getData('cc_exp_month');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCcExpMonth(?string $value): static
+    {
+        return $this->setData('cc_exp_month', $value);
+    }
+
+    public function getCcExpYear(): ?string
+    {
+        $value = $this->getData('cc_exp_year');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCcExpYear(?string $value): static
+    {
+        return $this->setData('cc_exp_year', $value);
+    }
+
+    public function getCcLast4(): ?string
+    {
+        $value = $this->getData('cc_last4');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCcLast4(?string $value): static
+    {
+        return $this->setData('cc_last4', $value);
+    }
+
+    public function getCcNumber(): ?string
+    {
+        $value = $this->getData('cc_number');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCcNumber(?string $value): static
+    {
+        return $this->setData('cc_number', $value);
+    }
+
+    public function getCcNumberEnc(): ?string
+    {
+        $value = $this->getData('cc_number_enc');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCcNumberEnc(?string $value): static
+    {
+        return $this->setData('cc_number_enc', $value);
+    }
+
+    public function getCcOwner(): ?string
+    {
+        $value = $this->getData('cc_owner');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCcOwner(?string $value): static
+    {
+        return $this->setData('cc_owner', $value);
+    }
+
+    public function getCcSsIssue(): ?string
+    {
+        $value = $this->getData('cc_ss_issue');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCcSsIssue(?string $value): static
+    {
+        return $this->setData('cc_ss_issue', $value);
+    }
+
+    public function getCcSsStartMonth(): ?string
+    {
+        $value = $this->getData('cc_ss_start_month');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCcSsStartMonth(?string $value): static
+    {
+        return $this->setData('cc_ss_start_month', $value);
+    }
+
+    public function getCcSsStartYear(): ?string
+    {
+        $value = $this->getData('cc_ss_start_year');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCcSsStartYear(?string $value): static
+    {
+        return $this->setData('cc_ss_start_year', $value);
+    }
+
+    public function getCcType(): ?string
+    {
+        $value = $this->getData('cc_type');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCcType(?string $value): static
+    {
+        return $this->setData('cc_type', $value);
+    }
+
+    public function getCcCidEnc(): ?string
+    {
+        $value = $this->getData('cc_cid_enc');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getMethod(): ?string
+    {
+        $value = $this->getData('method');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setMethod(?string $value): static
+    {
+        if ($value !== $this->getMethod()) {
+            $this->unsetData('method_instance');
+        }
+        return $this->setData('method', $value);
+    }
+
+    public function setMethodInstance(Mage_Payment_Model_Method_Abstract $value): static
+    {
+        return $this->setData('method_instance', $value);
+    }
+
+    public function getPoNumber(): ?string
+    {
+        $value = $this->getData('po_number');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setPoNumber(?string $value): static
+    {
+        return $this->setData('po_number', $value);
+    }
+>>>>>>> 54acc3c (Fixed the payment method instance cache that ignored a later setMethod() and made importData() refuse a valid method (#1498))
 }

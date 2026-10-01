@@ -210,4 +210,129 @@ class Mage_Sales_Model_Quote_Payment extends Mage_Payment_Model_Info
         $method = parent::getMethodInstance();
         return $method->setStore($this->getQuote()->getStore());
     }
+<<<<<<< HEAD
+=======
+
+    public function setCcCidEnc(?string $value): static
+    {
+        return $this->setData('cc_cid_enc', $value);
+    }
+
+    public function getCcSsOwner(): ?string
+    {
+        $value = $this->getData('cc_ss_owner');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCcSsOwner(?string $value): static
+    {
+        return $this->setData('cc_ss_owner', $value);
+    }
+
+    public function getCustomerPaymentId(): ?int
+    {
+        $value = $this->getData('customer_payment_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCustomerPaymentId(?int $value): static
+    {
+        return $this->setData('customer_payment_id', $value);
+    }
+
+    public function getCybersourceToken(): ?string
+    {
+        $value = $this->getData('cybersource_token');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCybersourceToken(?string $value): static
+    {
+        return $this->setData('cybersource_token', $value);
+    }
+
+    public function getIdealIssuerId(): ?string
+    {
+        $value = $this->getData('ideal_issuer_id');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setIdealIssuerId(?string $value): static
+    {
+        return $this->setData('ideal_issuer_id', $value);
+    }
+
+    public function getIdealIssuerList(): ?string
+    {
+        $value = $this->getData('ideal_issuer_list');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setIdealIssuerList(?string $value): static
+    {
+        return $this->setData('ideal_issuer_list', $value);
+    }
+
+    public function getPaypalCorrelationId(): ?string
+    {
+        $value = $this->getData('paypal_correlation_id');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setPaypalCorrelationId(?string $value): static
+    {
+        return $this->setData('paypal_correlation_id', $value);
+    }
+
+    public function getPaypalPayerId(): ?string
+    {
+        $value = $this->getData('paypal_payer_id');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setPaypalPayerId(?string $value): static
+    {
+        return $this->setData('paypal_payer_id', $value);
+    }
+
+    public function getPaypalPayerStatus(): ?string
+    {
+        $value = $this->getData('paypal_payer_status');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setPaypalPayerStatus(?string $value): static
+    {
+        return $this->setData('paypal_payer_status', $value);
+    }
+
+    public function getQuoteId(): ?int
+    {
+        $value = $this->getData('quote_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setQuoteId(?int $value): static
+    {
+        return $this->setData('quote_id', $value);
+    }
+
+    public function getStoreId(): ?int
+    {
+        $value = $this->getData('store_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setStoreId(?int $value): static
+    {
+        return $this->setData('store_id', $value);
+    }
+
+    public function getUpdatedAt(): ?string
+    {
+        $value = $this->getData('updated_at');
+        return $value === null ? null : (string) $value;
+    }
+
+>>>>>>> 54acc3c (Fixed the payment method instance cache that ignored a later setMethod() and made importData() refuse a valid method (#1498))
 }

@@ -1724,4 +1724,690 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
         }
         return false;
     }
+<<<<<<< HEAD
+=======
+
+    public function getAccountStatus(): ?string
+    {
+        $value = $this->getData('account_status');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setAccountStatus(?string $value): static
+    {
+        return $this->setData('account_status', $value);
+    }
+
+    public function getAddressStatus(): ?string
+    {
+        $value = $this->getData('address_status');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setAddressStatus(?string $value): static
+    {
+        return $this->setData('address_status', $value);
+    }
+
+    public function getAmountAuthorized(): ?float
+    {
+        $value = $this->getData('amount_authorized');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setAmountAuthorized(?float $value): static
+    {
+        return $this->setData('amount_authorized', $value);
+    }
+
+    public function getAmountCanceled(): ?float
+    {
+        $value = $this->getData('amount_canceled');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setAmountCanceled(?float $value): static
+    {
+        return $this->setData('amount_canceled', $value);
+    }
+
+    public function getAmountOrdered(): ?float
+    {
+        $value = $this->getData('amount_ordered');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setAmountOrdered(?float $value): static
+    {
+        return $this->setData('amount_ordered', $value);
+    }
+
+    public function getAmountPaid(): ?float
+    {
+        $value = $this->getData('amount_paid');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setAmountPaid(?float $value): static
+    {
+        return $this->setData('amount_paid', $value);
+    }
+
+    public function getAmountRefunded(): ?float
+    {
+        $value = $this->getData('amount_refunded');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setAmountRefunded(?float $value): static
+    {
+        return $this->setData('amount_refunded', $value);
+    }
+
+    public function getAnetTransMethod(): ?string
+    {
+        $value = $this->getData('anet_trans_method');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setAnetTransMethod(?string $value): static
+    {
+        return $this->setData('anet_trans_method', $value);
+    }
+
+    public function getBaseAmountAuthorized(): ?float
+    {
+        $value = $this->getData('base_amount_authorized');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseAmountAuthorized(?float $value): static
+    {
+        return $this->setData('base_amount_authorized', $value);
+    }
+
+    public function getBaseAmountCanceled(): ?float
+    {
+        $value = $this->getData('base_amount_canceled');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseAmountCanceled(?float $value): static
+    {
+        return $this->setData('base_amount_canceled', $value);
+    }
+
+    public function getBaseAmountOrdered(): ?float
+    {
+        $value = $this->getData('base_amount_ordered');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseAmountOrdered(?float $value): static
+    {
+        return $this->setData('base_amount_ordered', $value);
+    }
+
+    public function getBaseAmountPaid(): ?float
+    {
+        $value = $this->getData('base_amount_paid');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseAmountPaid(?float $value): static
+    {
+        return $this->setData('base_amount_paid', $value);
+    }
+
+    public function getBaseAmountPaidOnline(): ?float
+    {
+        $value = $this->getData('base_amount_paid_online');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseAmountPaidOnline(?float $value): static
+    {
+        return $this->setData('base_amount_paid_online', $value);
+    }
+
+    public function getBaseAmountRefunded(): ?float
+    {
+        $value = $this->getData('base_amount_refunded');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseAmountRefunded(?float $value): static
+    {
+        return $this->setData('base_amount_refunded', $value);
+    }
+
+    public function getBaseAmountRefundedOnline(): ?float
+    {
+        $value = $this->getData('base_amount_refunded_online');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseAmountRefundedOnline(?float $value): static
+    {
+        return $this->setData('base_amount_refunded_online', $value);
+    }
+
+    public function getBaseShippingAmount(): ?float
+    {
+        $value = $this->getData('base_shipping_amount');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseShippingAmount(?float $value): static
+    {
+        return $this->setData('base_shipping_amount', $value);
+    }
+
+    public function getBaseShippingCaptured(): ?float
+    {
+        $value = $this->getData('base_shipping_captured');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseShippingCaptured(?float $value): static
+    {
+        return $this->setData('base_shipping_captured', $value);
+    }
+
+    public function getBaseShippingRefunded(): ?float
+    {
+        $value = $this->getData('base_shipping_refunded');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setBaseShippingRefunded(?float $value): static
+    {
+        return $this->setData('base_shipping_refunded', $value);
+    }
+
+    public function getBillingAgreementData(): ?array
+    {
+        return $this->getData('billing_agreement_data');
+    }
+
+    public function getCcApproval(): ?string
+    {
+        $value = $this->getData('cc_approval');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCcApproval(?string $value): static
+    {
+        return $this->setData('cc_approval', $value);
+    }
+
+    public function getCcAvsStatus(): ?string
+    {
+        $value = $this->getData('cc_avs_status');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCcAvsStatus(?string $value): static
+    {
+        return $this->setData('cc_avs_status', $value);
+    }
+
+    public function getCcCidStatus(): ?string
+    {
+        $value = $this->getData('cc_cid_status');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCcCidStatus(?string $value): static
+    {
+        return $this->setData('cc_cid_status', $value);
+    }
+
+    public function getCcDebugRequestBody(): ?string
+    {
+        $value = $this->getData('cc_debug_request_body');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCcDebugRequestBody(?string $value): static
+    {
+        return $this->setData('cc_debug_request_body', $value);
+    }
+
+    public function getCcDebugResponseBody(): ?string
+    {
+        $value = $this->getData('cc_debug_response_body');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCcDebugResponseBody(?string $value): static
+    {
+        return $this->setData('cc_debug_response_body', $value);
+    }
+
+    public function getCcDebugResponseSerialized(): ?string
+    {
+        $value = $this->getData('cc_debug_response_serialized');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCcDebugResponseSerialized(?string $value): static
+    {
+        return $this->setData('cc_debug_response_serialized', $value);
+    }
+
+    public function getCcStatus(): ?string
+    {
+        $value = $this->getData('cc_status');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCcStatus(?string $value): static
+    {
+        return $this->setData('cc_status', $value);
+    }
+
+    public function getCcStatusDescription(): ?string
+    {
+        $value = $this->getData('cc_status_description');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCcStatusDescription(?string $value): static
+    {
+        return $this->setData('cc_status_description', $value);
+    }
+
+    public function getCcTransId(): ?string
+    {
+        $value = $this->getData('cc_trans_id');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCcTransId(?string $value): static
+    {
+        return $this->setData('cc_trans_id', $value);
+    }
+
+    public function setCreatedCreditmemo(?Mage_Sales_Model_Order_Creditmemo $value): static
+    {
+        return $this->setData('created_creditmemo', $value);
+    }
+
+    public function setCreatedInvoice(?Mage_Sales_Model_Order_Invoice $value): static
+    {
+        return $this->setData('created_invoice', $value);
+    }
+
+    public function setCreatedTransaction(?Mage_Sales_Model_Order_Payment_Transaction $value): static
+    {
+        return $this->setData('created_transaction', $value);
+    }
+
+    public function setCreditmemo(?Mage_Sales_Model_Order_Creditmemo $value): static
+    {
+        return $this->setData('creditmemo', $value);
+    }
+
+    public function getCurrencyCode(): ?string
+    {
+        $value = $this->getData('currency_code');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getCustomerPaymentId(): ?int
+    {
+        $value = $this->getData('customer_payment_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCustomerPaymentId(?int $value): static
+    {
+        return $this->setData('customer_payment_id', $value);
+    }
+
+    public function getCybersourceToken(): ?string
+    {
+        $value = $this->getData('cybersource_token');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCybersourceToken(?string $value): static
+    {
+        return $this->setData('cybersource_token', $value);
+    }
+
+    public function getEcheckAccountName(): ?string
+    {
+        $value = $this->getData('echeck_account_name');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setEcheckAccountName(?string $value): static
+    {
+        return $this->setData('echeck_account_name', $value);
+    }
+
+    public function getEcheckAccountType(): ?string
+    {
+        $value = $this->getData('echeck_account_type');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setEcheckAccountType(?string $value): static
+    {
+        return $this->setData('echeck_account_type', $value);
+    }
+
+    public function getEcheckBankName(): ?string
+    {
+        $value = $this->getData('echeck_bank_name');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setEcheckBankName(?string $value): static
+    {
+        return $this->setData('echeck_bank_name', $value);
+    }
+
+    public function getEcheckRoutingNumber(): ?string
+    {
+        $value = $this->getData('echeck_routing_number');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setEcheckRoutingNumber(?string $value): static
+    {
+        return $this->setData('echeck_routing_number', $value);
+    }
+
+    public function getEcheckType(): ?string
+    {
+        $value = $this->getData('echeck_type');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setEcheckType(?string $value): static
+    {
+        return $this->setData('echeck_type', $value);
+    }
+
+    public function getFlo2cashAccountId(): ?string
+    {
+        $value = $this->getData('flo2cash_account_id');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setFlo2cashAccountId(?string $value): static
+    {
+        return $this->setData('flo2cash_account_id', $value);
+    }
+
+    public function getForcedState(): ?string
+    {
+        $value = $this->getData('forced_state');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getIsFraudDetected(): ?bool
+    {
+        $value = $this->getData('is_fraud_detected');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getIdealIssuerId(): ?string
+    {
+        $value = $this->getData('ideal_issuer_id');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setIdealIssuerId(?string $value): static
+    {
+        return $this->setData('ideal_issuer_id', $value);
+    }
+
+    public function getIdealIssuerTitle(): ?string
+    {
+        $value = $this->getData('ideal_issuer_title');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setIdealIssuerTitle(?string $value): static
+    {
+        return $this->setData('ideal_issuer_title', $value);
+    }
+
+    public function getIdealTransactionChecked(): ?int
+    {
+        $value = $this->getData('ideal_transaction_checked');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setIdealTransactionChecked(?int $value): static
+    {
+        return $this->setData('ideal_transaction_checked', $value);
+    }
+
+    public function getIncrementId(): ?string
+    {
+        $value = $this->getData('increment_id');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setIsFraudDetected(?bool $value = true): static
+    {
+        return $this->setData('is_fraud_detected', $value);
+    }
+
+    public function getIsTransactionApproved(): ?bool
+    {
+        $value = $this->getData('is_transaction_approved');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getIsTransactionClosed(): ?bool
+    {
+        $value = $this->getData('is_transaction_closed');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getIsTransactionDenied(): ?bool
+    {
+        $value = $this->getData('is_transaction_denied');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getIsTransactionPending(): ?bool
+    {
+        $value = $this->getData('is_transaction_pending');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getLastTransId(): ?string
+    {
+        $value = $this->getData('last_trans_id');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setLastTransId(?string $value): static
+    {
+        return $this->setData('last_trans_id', $value);
+    }
+
+    public function getMessage(): ?string
+    {
+        $value = $this->getData('message');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setMessage(?string $value): static
+    {
+        return $this->setData('message', $value);
+    }
+
+    public function getNotificationResult(): ?bool
+    {
+        $value = $this->getData('notification_result');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getParentId(): ?int
+    {
+        $value = $this->getData('parent_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setParentId(?int $value): static
+    {
+        return $this->setData('parent_id', $value);
+    }
+
+    public function getParentTransactionId(): ?string
+    {
+        $value = $this->getData('parent_transaction_id');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setParentTransactionId(?string $value): static
+    {
+        return $this->setData('parent_transaction_id', $value);
+    }
+
+    public function getPayboxQuestionNumber(): ?string
+    {
+        $value = $this->getData('paybox_question_number');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setPayboxQuestionNumber(?string $value): static
+    {
+        return $this->setData('paybox_question_number', $value);
+    }
+
+    public function getPayboxRequestNumber(): ?string
+    {
+        $value = $this->getData('paybox_request_number');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setPayboxRequestNumber(?string $value): static
+    {
+        return $this->setData('paybox_request_number', $value);
+    }
+
+    public function getPreparedMessage(): Mage_Sales_Model_Order_Status_History|string|null
+    {
+        return $this->getData('prepared_message');
+    }
+
+    public function getProtectionEligibility(): ?string
+    {
+        $value = $this->getData('protection_eligibility');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setProtectionEligibility(?string $value): static
+    {
+        return $this->setData('protection_eligibility', $value);
+    }
+
+    public function getQuotePaymentId(): ?int
+    {
+        $value = $this->getData('quote_payment_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setQuotePaymentId(?int $value): static
+    {
+        return $this->setData('quote_payment_id', $value);
+    }
+
+    public function setRefundTransactionId(?string $value): static
+    {
+        return $this->setData('refund_transaction_id', $value);
+    }
+
+    public function getShippingAmount(): ?float
+    {
+        $value = $this->getData('shipping_amount');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setShippingAmount(?float $value): static
+    {
+        return $this->setData('shipping_amount', $value);
+    }
+
+    public function getShippingCaptured(): ?float
+    {
+        $value = $this->getData('shipping_captured');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setShippingCaptured(?float $value): static
+    {
+        return $this->setData('shipping_captured', $value);
+    }
+
+    public function getShippingRefunded(): ?float
+    {
+        $value = $this->getData('shipping_refunded');
+        return $value === null ? null : (float) $value;
+    }
+
+    public function setShippingRefunded(?float $value): static
+    {
+        return $this->setData('shipping_refunded', $value);
+    }
+
+    public function getShouldCloseParentTransaction(): ?bool
+    {
+        $value = $this->getData('should_close_parent_transaction');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setShouldCloseParentTransaction(?bool $value = true): static
+    {
+        return $this->setData('should_close_parent_transaction', $value);
+    }
+
+    public function getSkipOrderProcessing(): ?bool
+    {
+        $value = $this->getData('skip_order_processing');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getSkipTransactionCreation(): ?bool
+    {
+        $value = $this->getData('skip_transaction_creation');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getStoreId(): ?int
+    {
+        $value = $this->getData('store_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setStoreId(?int $value): static
+    {
+        return $this->setData('store_id', $value);
+    }
+
+    public function getTransactionId(): ?string
+    {
+        $value = $this->getData('transaction_id');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setTransactionId(?string $value): static
+    {
+        return $this->setData('transaction_id', $value);
+    }
+
+    public function setVoidTransactionId(?string $value): static
+    {
+        return $this->setData('void_transaction_id', $value);
+    }
+>>>>>>> 54acc3c (Fixed the payment method instance cache that ignored a later setMethod() and made importData() refuse a valid method (#1498))
 }
