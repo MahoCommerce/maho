@@ -50,11 +50,12 @@ class Mage_ImportExport_Model_Category_KeyMap
     }
 
     /**
-     * @return array{0: string, 1: string}|null The root name and the path, or null when the category has no key.
+     * @return array{0: string, 1: string}|null The root name and the path, or null when the category does not own a key.
      */
     public function getKey(int $categoryId): ?array
     {
-        return $this->keys[$categoryId] ?? null;
+        $key = $this->keys[$categoryId] ?? null;
+        return $key !== null && $this->getId(...$key) === $categoryId ? $key : null;
     }
 
     /**
