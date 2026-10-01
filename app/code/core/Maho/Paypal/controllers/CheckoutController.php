@@ -199,11 +199,8 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
         $result = ['success' => false];
 
         try {
-            $quote = Mage::getSingleton('checkout/session')->getQuote();
-
-            if (!$quote->getIsActive()) {
-                Mage::throwException(Mage::helper('paypal')->__('This order has already been placed.'));
-            }
+            // Load an inactive quote too: the webhook can place the order before this request takes the lock.
+            $quote = Mage::getSingleton('checkout/session')->setLoadInactive()->getQuote();
 
             // Prefer the PayPal order ID sent by the frontend (the one the user actually
             // approved in the popup) over the quote's stored value, which can be stale
