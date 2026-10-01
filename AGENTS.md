@@ -73,12 +73,20 @@ and add a new `upgrade-X.Y.Z-A.B.C.php` (or `maho-X.Y.Z.php`) script. Fresh inst
 install plus every upgrade in sequence, so the new script repairs both fresh and existing
 installs. This applies even to "obvious cleanups" (e.g. adding a missing explicit `default`).
 
+**Declarative tables**: `sql/schema.php` returns a closure that takes a DBAL `SchemaEditor`. Add a
+table with `$schema->addTable(Table::editor()->...->create())`. Extend a table of another module
+with `$schema->modifyTableByUnquotedName()`. Add a column with `Maho\Db\Schema::column()`: it takes
+the name, the type, and named arguments for the `ColumnEditor` setters. Do not use the DBAL `Schema`,
+`Table` or `Column` mutators: DBAL 4.5 deprecates them. Leave index and foreign key names unset, and pass the
+`Index::editor()` itself (not its `create()`): DBAL names the index, `Collector` names the foreign key.
+
 **Renames** are invisible to a structural diff, so declare them in `sql/schema.php` on the
 table the rename produced. Rename the object as usual, then record what it used to be called:
 
 ```php
-$t = $schema->createTable('sales_flat_order');
-Renamer::renamed($t, from: 'sales_order', columns: ['customer_email' => 'customer_mail']);
+Table::editor()
+    ->setUnquotedName('sales_flat_order')
+    ->setOptions(Schema::renamed(from: 'sales_order', columns: ['customer_email' => 'customer_mail']))
 ```
 
 `from:` and each `columns:` value take one name or a newest-first list: a column renamed `a` to
@@ -88,7 +96,7 @@ Drop entries once upgrades from that release are no longer supported.
 **Never use a vendor prefix in an identifier.** A table, a store-config section, a cron id and an
 observer id take the name of the module or the domain, not `maho` or `mage`: `blog_post_entity`,
 `feedmanager_feed`, `paypal_webhook_event`, section `feedmanager`. A former name recorded through
-`Renamer` is the one exception, since it must stay verbatim.
+`Schema::renamed()` is the one exception, since it must stay verbatim.
 `tests/Backend/Unit/Maho/NamingConventionTest.php` enforces this for core modules.
 
 ### Typed accessors

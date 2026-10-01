@@ -8,45 +8,114 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Schema\Column;
+use Doctrine\DBAL\Schema\ForeignKeyConstraint;
+use Doctrine\DBAL\Schema\ForeignKeyConstraint\ReferentialAction;
+use Doctrine\DBAL\Schema\Index;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
-use Doctrine\DBAL\Schema\Schema;
+use Doctrine\DBAL\Schema\SchemaEditor;
+use Doctrine\DBAL\Schema\Table;
+use Doctrine\DBAL\Schema\TableEditor;
 use Doctrine\DBAL\Types\Types;
+use Maho\Db\Schema;
 
-return function (Schema $schema): void {
-    $tax = $schema->createTable('weee_tax');
-    $tax->addColumn('value_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $tax->addColumn('website_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $tax->addColumn('entity_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $tax->addColumn('country', Types::STRING, ['length' => 2, 'notnull' => false]);
-    $tax->addColumn('value', Types::DECIMAL, ['precision' => 12, 'scale' => 4, 'default' => '0.0000']);
-    $tax->addColumn('state', Types::STRING, ['length' => 255, 'default' => '*']);
-    $tax->addColumn('attribute_id', Types::SMALLINT, ['unsigned' => true]);
-    $tax->addColumn('entity_type_id', Types::SMALLINT, ['unsigned' => true]);
-    $tax->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('value_id')->create(),
+return function (SchemaEditor $schema): void {
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('weee_tax')
+            ->addColumn(Schema::column('value_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('website_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('country', Types::STRING, length: 2, notNull: false))
+            ->addColumn(Schema::column('value', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('state', Types::STRING, length: 255, default: '*'))
+            ->addColumn(Schema::column('attribute_id', Types::SMALLINT, unsigned: true))
+            ->addColumn(Schema::column('entity_type_id', Types::SMALLINT, unsigned: true))
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('value_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('website_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('entity_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('country'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('attribute_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('country')
+                    ->setUnquotedReferencedTableName('directory_country')
+                    ->setUnquotedReferencedColumnNames('country_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('website_id')
+                    ->setUnquotedReferencedTableName('core_website')
+                    ->setUnquotedReferencedColumnNames('website_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('entity_id')
+                    ->setUnquotedReferencedTableName('catalog_product_entity')
+                    ->setUnquotedReferencedColumnNames('entity_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('attribute_id')
+                    ->setUnquotedReferencedTableName('eav_attribute')
+                    ->setUnquotedReferencedColumnNames('attribute_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Weee Tax')
+            ->create(),
     );
-    $tax->addIndex(['website_id']);
-    $tax->addIndex(['entity_id']);
-    $tax->addIndex(['country']);
-    $tax->addIndex(['attribute_id']);
-    $tax->addForeignKeyConstraint('directory_country', ['country'], ['country_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
-    $tax->addForeignKeyConstraint('core_website', ['website_id'], ['website_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
-    $tax->addForeignKeyConstraint('catalog_product_entity', ['entity_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
-    $tax->addForeignKeyConstraint('eav_attribute', ['attribute_id'], ['attribute_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
-    $tax->setComment('Weee Tax');
 
-    $discount = $schema->createTable('weee_discount');
-    $discount->addColumn('entity_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $discount->addColumn('website_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $discount->addColumn('customer_group_id', Types::SMALLINT, ['unsigned' => true]);
-    $discount->addColumn('value', Types::DECIMAL, ['precision' => 12, 'scale' => 4, 'default' => '0.0000']);
-    $discount->addIndex(['website_id']);
-    $discount->addIndex(['entity_id']);
-    $discount->addIndex(['customer_group_id']);
-    $discount->addForeignKeyConstraint('core_website', ['website_id'], ['website_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
-    $discount->addForeignKeyConstraint('customer_group', ['customer_group_id'], ['customer_group_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
-    $discount->addForeignKeyConstraint('catalog_product_entity', ['entity_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
-    $discount->setComment('Weee Discount');
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('weee_discount')
+            ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('website_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('customer_group_id', Types::SMALLINT, unsigned: true))
+            ->addColumn(Schema::column('value', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('website_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('entity_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('customer_group_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('website_id')
+                    ->setUnquotedReferencedTableName('core_website')
+                    ->setUnquotedReferencedColumnNames('website_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('customer_group_id')
+                    ->setUnquotedReferencedTableName('customer_group')
+                    ->setUnquotedReferencedColumnNames('customer_group_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('entity_id')
+                    ->setUnquotedReferencedTableName('catalog_product_entity')
+                    ->setUnquotedReferencedColumnNames('entity_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Weee Discount')
+            ->create(),
+    );
 
     // Graft the WEEE tax columns onto the flat sales/quote item tables owned by
     // Mage_Sales (depends_on guarantees those tables already exist). The legacy
@@ -69,10 +138,11 @@ return function (Schema $schema): void {
         'sales_flat_invoice_item',
         'sales_flat_creditmemo_item',
     ] as $tableName) {
-        $table = $schema->getTable($tableName);
-        $table->addColumn('weee_tax_applied', Types::TEXT, ['length' => 65535, 'notnull' => false]);
-        foreach ($decimalColumns as $column) {
-            $table->addColumn($column, Types::DECIMAL, ['precision' => 12, 'scale' => 4, 'notnull' => false]);
-        }
+        $schema->modifyTableByUnquotedName($tableName, static function (TableEditor $table) use ($decimalColumns): void {
+            $table->addColumn(Schema::column('weee_tax_applied', Types::TEXT, length: 65535, notNull: false));
+            foreach ($decimalColumns as $column) {
+                $table->addColumn(Schema::column($column, Types::DECIMAL, precision: 12, scale: 4, notNull: false));
+            }
+        });
     }
 };

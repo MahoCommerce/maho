@@ -111,7 +111,9 @@ class UnclaimedTableScanner
 
             foreach ($unclaimed as $index => $table) {
                 $bare = str_starts_with($table, $prefix) ? substr($table, strlen($prefix)) : $table;
-                if (preg_match('/createTable\(\s*[\'"]' . preg_quote($bare, '/') . '[\'"]/', $source) === 1) {
+                // Table::editor()->setUnquotedName() since DBAL 4.5, Schema::createTable() before it.
+                $declaration = '/(?:Table::editor\(\)\s*->setUnquotedName|createTable)\(\s*[\'"]' . preg_quote($bare, '/') . '[\'"]/';
+                if (preg_match($declaration, $source) === 1) {
                     $disabled[] = ['table' => $table, 'module' => $module];
                     unset($unclaimed[$index]);
                 }

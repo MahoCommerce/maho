@@ -15,11 +15,13 @@ use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Platforms\MariaDBPlatform;
 use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
 use Doctrine\DBAL\Platforms\SQLitePlatform;
+use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\Comparator;
 use Doctrine\DBAL\Schema\DefaultExpression;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Schema\Table;
-use Doctrine\DBAL\Types\BooleanType;
+use Doctrine\DBAL\Types\Type;
+use Doctrine\DBAL\Types\Types;
 use Maho\Db\Adapter\AdapterInterface;
 
 final class Applier
@@ -108,7 +110,7 @@ final class Applier
                 foreach ($schemaManager->introspectTableIndexesByUnquotedName($liveName) as $index) {
                     $physicalIndexNames[] = $index->getObjectName()->toString();
                 }
-                Canonicalizer::reconcile($liveTable, $targetTable, $physicalIndexNames);
+                [$liveTable, $targetTable] = Canonicalizer::reconcile($liveTable, $targetTable, $physicalIndexNames);
                 $existingTables[] = $liveTable;
                 $tablesToAlter[] = $targetTable;
             } else {
@@ -143,8 +145,8 @@ final class Applier
                 // target instead of applying a comparator diff (see sqliteAlters()).
                 $alters = array_merge($alters, self::sqliteAlters($platform, $comparator, $existingTables, $tablesToAlter));
             } else {
-                $current = new Schema($existingTables);
-                $alterTarget = new Schema($tablesToAlter);
+                $current = Schema::editor()->setTables(...$existingTables)->create();
+                $alterTarget = Schema::editor()->setTables(...$tablesToAlter)->create();
                 $diff = $comparator->compareSchemas($current, $alterTarget);
                 foreach ($platform->getAlterSchemaSQL($diff) as $stmt) {
                     $alters[] = $stmt;
@@ -344,7 +346,7 @@ final class Applier
                 $part = sprintf(
                     'MODIFY %s %s CHARACTER SET utf8mb4 COLLATE %s %s',
                     $platform->quoteSingleIdentifier($column->getObjectName()->getIdentifier()->getValue()),
-                    $column->getType()->getSQLDeclaration($column->toArray(), $platform),
+                    Type::getType($column->getTypeName())->getSQLDeclaration($column->toArray(true), $platform),
                     self::utf8mb4Collation($columnCollation),
                     $column->getNotnull() ? 'NOT NULL' : 'NULL',
                 );
@@ -491,19 +493,19 @@ final class Applier
      */
     private static function sqliteRebuildTable(SQLitePlatform $platform, Table $live, Table $target): array
     {
-        $tableName = self::unquote($target->getObjectName()->toString());
+        $tableName = self::tableName($target);
         $quoted = $platform->quoteSingleIdentifier($tableName);
         $temp = $platform->quoteSingleIdentifier('__maho_tmp_' . $tableName);
 
         $targetColumns = [];
         foreach ($target->getColumns() as $column) {
-            $targetColumns[strtolower(self::unquote($column->getObjectName()->toString()))] = true;
+            $targetColumns[strtolower(self::columnName($column))] = true;
         }
 
         $liveColumns = [];
         $shared = [];
         foreach ($live->getColumns() as $column) {
-            $name = self::unquote($column->getObjectName()->toString());
+            $name = self::columnName($column);
             $liveColumns[strtolower($name)] = true;
             if (isset($targetColumns[strtolower($name)])) {
                 $shared[] = $platform->quoteSingleIdentifier($name);
@@ -524,7 +526,7 @@ final class Applier
         // A new NOT NULL column with no default can't be backfilled for existing
         // rows; refuse with guidance rather than emit an INSERT that fails.
         foreach ($target->getColumns() as $column) {
-            $name = self::unquote($column->getObjectName()->toString());
+            $name = self::columnName($column);
             if (!isset($liveColumns[strtolower($name)]) && $column->getNotnull()
                 && $column->getDefault() === null && !$column->getAutoincrement()
             ) {
@@ -552,12 +554,26 @@ final class Applier
     }
 
     /**
-     * Strip surrounding identifier quotes (introspection quotes names; the
-     * declarative schema leaves them bare).
+     * The raw table name. Introspection marks names as quoted, the declarative
+     * schema leaves them bare, so compare values, never toString().
      */
-    private static function unquote(string $identifier): string
+    private static function tableName(Table $table): string
     {
-        return trim($identifier, '"`');
+        return $table->getObjectName()->getUnqualifiedName()->getValue();
+    }
+
+    private static function columnName(Column $column): string
+    {
+        return $column->getObjectName()->getIdentifier()->getValue();
+    }
+
+    /**
+     * The raw value of a name that DBAL wrote into PostgreSQL SQL: DBAL quotes
+     * it with double quotes and doubles a double quote inside it.
+     */
+    private static function unquotePostgresName(string $sql): string
+    {
+        return preg_match('/^"(.*)"$/s', $sql, $m) === 1 ? str_replace('""', '"', $m[1]) : $sql;
     }
 
     /**
@@ -599,7 +615,7 @@ final class Applier
                 'ALTER TABLE %s MODIFY %s %s AUTO_INCREMENT NOT NULL',
                 $target->getObjectName()->toString(),
                 $autoColumn->getObjectName()->toString(),
-                $autoColumn->getType()->getSQLDeclaration($autoColumn->toArray(), $platform),
+                Type::getType($autoColumn->getTypeName())->getSQLDeclaration($autoColumn->toArray(true), $platform),
             );
         }
 
@@ -647,10 +663,10 @@ final class Applier
         }
 
         return array_map(static function (string $stmt) use ($constraintTable, $platform, $renamedTo): string {
-            if (preg_match('/^\s*DROP\s+INDEX\s+(?:CONCURRENTLY\s+)?(?:IF\s+EXISTS\s+)?"?([^"\s;]+)"?\s*;?\s*$/i', $stmt, $m) !== 1) {
+            if (preg_match('/^\s*DROP\s+INDEX\s+(?:CONCURRENTLY\s+)?(?:IF\s+EXISTS\s+)?(\S+?)\s*;?\s*$/i', $stmt, $m) !== 1) {
                 return $stmt;
             }
-            $name = $m[1];
+            $name = self::unquotePostgresName($m[1]);
             if (!isset($constraintTable[$name])) {
                 return $stmt;
             }
@@ -689,7 +705,7 @@ final class Applier
                 return $stmt;
             }
 
-            return $m[1] . $platform->quoteSingleIdentifier(trim($m[2], '"')) . $m[3];
+            return $m[1] . $platform->quoteSingleIdentifier(self::unquotePostgresName($m[2])) . $m[3];
         }, $statements);
     }
 
@@ -731,38 +747,39 @@ final class Applier
         $liveColumnTypes = [];
         $liveDefaults = [];
         foreach ($liveTables as $table) {
-            $tableName = strtolower(trim($table->getObjectName()->toString(), '"'));
+            $tableName = strtolower(self::tableName($table));
             foreach ($table->getColumns() as $column) {
-                $columnName = strtolower(trim($column->getObjectName()->toString(), '"'));
-                $liveColumnTypes[$tableName][$columnName] = $column->getType();
+                $columnName = strtolower(self::columnName($column));
+                $liveColumnTypes[$tableName][$columnName] = $column->getTypeName();
                 $liveDefaults[$tableName][$columnName] = $column->getDefault();
             }
         }
         $targetDefaults = [];
         foreach ($targetTables as $table) {
-            $tableName = strtolower(trim($table->getObjectName()->toString(), '"'));
+            $tableName = strtolower(self::tableName($table));
             foreach ($table->getColumns() as $column) {
-                $columnName = strtolower(trim($column->getObjectName()->toString(), '"'));
+                $columnName = strtolower(self::columnName($column));
                 $targetDefaults[$tableName][$columnName] = $column->getDefault();
             }
         }
 
         $result = [];
         foreach ($statements as $stmt) {
-            if (preg_match('/^ALTER\s+TABLE\s+(\S+)\s+ALTER\s+(\S+)\s+TYPE\s+(.+?)\s*$/i', $stmt, $m) !== 1) {
+            // DBAL 4.5 appends a COLLATE clause when the collation changes too.
+            if (preg_match('/^ALTER\s+TABLE\s+(\S+)\s+ALTER\s+(\S+)\s+TYPE\s+(.+?)(?:\s+COLLATE\s+\S+)?\s*$/i', $stmt, $m) !== 1) {
                 $result[] = $stmt;
                 continue;
             }
             $table = $m[1];
             $column = $m[2];
-            $newType = strtoupper(trim($m[3]));
-            $tableKey = strtolower(trim($table, '"'));
-            $columnKey = strtolower(trim($column, '"'));
+            $newType = strtoupper($m[3]);
+            $tableKey = strtolower(self::unquotePostgresName($table));
+            $columnKey = strtolower(self::unquotePostgresName($column));
             $liveType = $liveColumnTypes[$tableKey][$columnKey] ?? null;
 
             if ($newType === 'BYTEA') {
                 $using = 'NULL';
-            } elseif ($liveType instanceof BooleanType) {
+            } elseif ($liveType === Types::BOOLEAN) {
                 $using = "{$column}::integer";
             } else {
                 $result[] = $stmt;
@@ -805,7 +822,7 @@ final class Applier
         }
 
         return array_map(
-            static fn($name): string => strtolower(trim($name->toString(), '"`')),
+            static fn($name): string => strtolower($name->getIdentifier()->getValue()),
             $primaryKey->getColumnNames(),
         );
     }

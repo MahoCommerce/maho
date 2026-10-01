@@ -38,7 +38,7 @@ it('converts a table that a migrated store would still have on MyISAM', function
     try {
         expect(Applier::legacyEngineTables($adapter->getConnection()))->toHaveKey($table, 'MyISAM');
 
-        foreach (Applier::plan($adapter->getConnection(), new Doctrine\DBAL\Schema\Schema()) as $statement) {
+        foreach (Applier::plan($adapter->getConnection(), Doctrine\DBAL\Schema\Schema::editor()->create()) as $statement) {
             $adapter->query($statement);
         }
 
