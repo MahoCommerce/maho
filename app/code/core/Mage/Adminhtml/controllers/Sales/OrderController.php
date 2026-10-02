@@ -731,10 +731,19 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
         $address    = Mage::getModel('sales/order_address')->load($addressId);
         $data       = $this->getRequest()->getPost();
         if ($data && $address->getId()) {
-            $address->addData($data);
+            // The form sends no region_id for a country without regions, so clear the old one
+            $address->addData($data + ['region_id' => null]);
             try {
-                $address->implodeStreetAddress()
-                    ->save();
+                $address->implodeStreetAddress();
+                $errors = $address->getFormatErrors();
+                if ($errors) {
+                    foreach ($errors as $error) {
+                        $this->_getSession()->addError($error);
+                    }
+                    $this->_redirect('*/*/address', ['address_id' => $address->getId()]);
+                    return;
+                }
+                $address->save();
                 $this->_getSession()->addSuccess(Mage::helper('sales')->__('The order address has been updated.'));
                 $this->_redirect('*/*/view', ['order_id' => $address->getParentId()]);
                 return;

@@ -76,6 +76,9 @@ SPDX-License-Identifier: AFL-3.0
         <validate-zip-international translate="message">
             <message>Please enter a valid zip code.</message>
         </validate-zip-international>
+        <validate-postcode-format translate="message">
+            <message>Please enter a valid zip/postal code.</message>
+        </validate-postcode-format>
         <validate-date-au translate="message">
             <message>Please use this date format: dd/mm/yyyy. For example 17/03/2006 for the 17th of March, 2006.</message>
         </validate-date-au>

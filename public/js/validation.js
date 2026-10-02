@@ -596,6 +596,10 @@ Validation.addAllThese([
     ['validate-zip-international', 'Please enter a valid zip code.', v => {
         return true;
     }],
+    ['validate-postcode-format', 'Please enter a valid zip/postal code.', (v, elm) => {
+        const pattern = elm.dataset.postcodePattern;
+        return Validation.get('IsEmpty').test(v) || !pattern || new RegExp(`^(?:${pattern})$`, 'i').test(v.trim());
+    }],
     ['validate-date-au', 'Please use this date format: dd/mm/yyyy. For example 17/03/2006 for the 17th of March, 2006.', v => {
         if (Validation.get('IsEmpty').test(v)) return true;
         const regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
