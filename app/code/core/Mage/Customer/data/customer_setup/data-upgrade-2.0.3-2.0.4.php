@@ -12,7 +12,7 @@ declare(strict_types=1);
 $installer = $this;
 $installer->startSetup();
 
-// The admin address forms follow sort_order: the country comes first, so it can drive the other fields
+// The admin address forms use sort_order. The country comes first because it sets the postcode and region rules
 $sortOrders = [
     'country_id' => 70,
     'region'     => 72,
