@@ -18,7 +18,6 @@ SPDX-License-Identifier: AFL-3.0
                     <password/>
                     <dbname>maho</dbname>
                     <engine>mysql</engine>
-                    <initStatements>SET NAMES utf8</initStatements>
                     <active>0</active>
                     <persistent>0</persistent>
                 </connection>

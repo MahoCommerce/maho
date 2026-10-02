@@ -29,7 +29,7 @@ afterEach(function (): void {
     $testUrlKeys = [
         'test-import-%',
         'level1', 'level2', 'level3',
-        'auto-generated-key-',
+        'auto-generated-key',
         'test-scope', 'another-category',
         'test-category', 'test-multistore',
         'to-delete',
@@ -273,10 +273,10 @@ it('generates url_key from name when missing', function (): void {
 
     createAndImportCsv($csvData);
 
-    $category = findCategoryByUrlKey('auto-generated-key-');
+    $category = findCategoryByUrlKey('auto-generated-key');
     expect($category)->not->toBeNull()
         ->and($category->getName())->toBe('Auto Generated Key!')
-        ->and($category->getUrlKey())->toBe('auto-generated-key-');
+        ->and($category->getUrlKey())->toBe('auto-generated-key');
 });
 
 it('handles scope resolution correctly', function (): void {

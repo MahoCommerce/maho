@@ -215,11 +215,6 @@ class Mage_Sales_Model_Quote_Payment extends Mage_Payment_Model_Info
         return $this->setData('ideal_issuer_list', $value);
     }
 
-    public function setMethod(?string $value): static
-    {
-        return $this->setData('method', $value);
-    }
-
     public function getPaypalCorrelationId(): ?string
     {
         $value = $this->getData('paypal_correlation_id');

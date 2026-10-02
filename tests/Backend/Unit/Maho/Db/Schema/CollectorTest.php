@@ -54,3 +54,15 @@ it('does not report a table that already declares InnoDB in any casing', functio
     expect(invokeCollectorMethod('enforceInnoDbEngine', [$schema]))->toBe([]);
     expect($schema->getTable('already')->getOption('engine'))->toBe('InnoDB');
 });
+
+it('gives a table utf8mb4 when it declares no charset, and keeps an explicit one', function () {
+    $schema = new Schema();
+    $schema->createTable('plain');
+    $schema->createTable('explicit')->addOption('charset', 'latin1');
+
+    invokeCollectorMethod('applyTableDefaults', [$schema]);
+
+    expect($schema->getTable('plain')->getOption('charset'))->toBe('utf8mb4');
+    expect($schema->getTable('plain')->getOption('collation'))->toBe('utf8mb4_general_ci');
+    expect($schema->getTable('explicit')->getOption('charset'))->toBe('latin1');
+});
