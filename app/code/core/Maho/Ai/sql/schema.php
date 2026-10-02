@@ -94,4 +94,51 @@ return function (Schema $schema): void {
     );
     $vector->addIndex(['entity_type', 'entity_id']);
     $vector->setComment('Maho AI - Entity Embedding Vectors');
+
+    $conversation = $schema->createTable('ai_conversation');
+    $conversation->addColumn('conversation_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
+    $conversation->addColumn('admin_user_id', Types::INTEGER, ['unsigned' => true]);
+    $conversation->addColumn('store_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
+    $conversation->addColumn('title', Types::STRING, ['length' => 255, 'notnull' => false]);
+    $conversation->addColumn('platform', Types::STRING, ['length' => 32, 'notnull' => false]);
+    $conversation->addColumn('model', Types::STRING, ['length' => 128, 'notnull' => false]);
+    $conversation->addColumn('status', Types::STRING, ['length' => 16, 'default' => 'active']);
+    $conversation->addColumn('context_route', Types::STRING, ['length' => 128, 'notnull' => false]);
+    $conversation->addColumn('context_entity_type', Types::STRING, ['length' => 32, 'notnull' => false]);
+    $conversation->addColumn('context_entity_id', Types::INTEGER, ['unsigned' => true, 'notnull' => false]);
+    $conversation->addColumn('locked_until', Types::DATETIME_MUTABLE, ['notnull' => false]);
+    $conversation->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
+    $conversation->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
+    $conversation->addPrimaryKeyConstraint(
+        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('conversation_id')->create(),
+    );
+    $conversation->addIndex(['admin_user_id', 'updated_at']);
+    $conversation->setComment('Maho AI Assistant Conversations');
+
+    $message = $schema->createTable('ai_conversation_message');
+    $message->addColumn('message_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
+    $message->addColumn('conversation_id', Types::INTEGER, ['unsigned' => true]);
+    $message->addColumn('role', Types::STRING, ['length' => 16]);
+    $message->addColumn('content', Types::TEXT, ['length' => 16777215, 'notnull' => false]);
+    $message->addColumn('tool_calls', Types::TEXT, ['length' => 16777215, 'notnull' => false]);
+    $message->addColumn('tool_call_id', Types::STRING, ['length' => 64, 'notnull' => false]);
+    $message->addColumn('tool_name', Types::STRING, ['length' => 128, 'notnull' => false]);
+    $message->addColumn('tool_arguments', Types::TEXT, ['length' => 16777215, 'notnull' => false]);
+    $message->addColumn('tool_status', Types::STRING, ['length' => 16, 'notnull' => false]);
+    $message->addColumn('is_write', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
+    $message->addColumn('input_tokens', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
+    $message->addColumn('output_tokens', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
+    $message->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
+    $message->addPrimaryKeyConstraint(
+        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('message_id')->create(),
+    );
+    $message->addIndex(['conversation_id', 'message_id']);
+    $message->addIndex(['tool_status']);
+    $message->addForeignKeyConstraint(
+        'ai_conversation',
+        ['conversation_id'],
+        ['conversation_id'],
+        ['onDelete' => 'CASCADE'],
+    );
+    $message->setComment('Maho AI Assistant Conversation Messages');
 };

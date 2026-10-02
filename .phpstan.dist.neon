@@ -26,6 +26,9 @@ parameters:
         - php
         - phtml
 
+    stubFiles:
+        - .phpstan.stubs/SymfonyAiTool.stub
+
     paths:
         - app
         - lib

@@ -2,7 +2,7 @@
 <config>
     <modules>
         <Maho_Ai>
-            <version>1.0.1</version>
+            <version>1.1.0</version>
         </Maho_Ai>
     </modules>
 
@@ -24,6 +24,12 @@
                     <vector>
                         <table>ai_vector</table>
                     </vector>
+                    <conversation>
+                        <table>ai_conversation</table>
+                    </conversation>
+                    <conversation_message>
+                        <table>ai_conversation_message</table>
+                    </conversation_message>
                 </entities>
             </ai_resource>
         </models>
@@ -157,6 +163,15 @@
                 <auto_embed_categories>0</auto_embed_categories>
                 <!-- Per-provider embed model defaults intentionally absent (see general). -->
             </embed>
+            <chat>
+                <enabled>0</enabled>
+                <platform></platform>
+                <model></model>
+                <max_tool_calls>20</max_tool_calls>
+                <history_messages>40</history_messages>
+                <tool_result_max_chars>16000</tool_result_max_chars>
+                <excluded_sections>reports</excluded_sections>
+            </chat>
             <image>
                 <enabled>0</enabled>
                 <default_platform>openai</default_platform>

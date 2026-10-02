@@ -27,6 +27,11 @@ SPDX-License-Identifier: OSL-3.0
                             <sort_order>30</sort_order>
                             <action>adminhtml/ai/reindex</action>
                         </reindex>
+                        <chat translate="title" module="ai">
+                            <title>Assistant Conversations</title>
+                            <sort_order>40</sort_order>
+                            <action>adminhtml/ai_chat/index</action>
+                        </chat>
                     </children>
                 </ai>
             </children>
@@ -54,6 +59,10 @@ SPDX-License-Identifier: OSL-3.0
                                         <title>Embeddings</title>
                                         <sort_order>30</sort_order>
                                     </reindex>
+                                    <chat translate="title" module="ai">
+                                        <title>Assistant</title>
+                                        <sort_order>40</sort_order>
+                                    </chat>
                                 </children>
                             </ai>
                             <config>

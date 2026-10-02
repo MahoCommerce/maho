@@ -15,6 +15,7 @@ use ApiPlatform\Metadata\HttpOperation;
 use Maho\ApiPlatform\Exception\ApiException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -116,8 +117,7 @@ class ApiExceptionListener implements EventSubscriberInterface
         if ($exception instanceof AccessDeniedException || $exception instanceof MetadataAccessDeniedException) {
             // If user is not authenticated at all, return 401
             // Check for Bearer token specifically (Basic auth is site-level, not API auth)
-            $hasBearerToken = $request !== null
-                && str_starts_with($request->headers->get('Authorization', ''), 'Bearer ');
+            $hasBearerToken = $this->hasCredentials($request);
             // Use the exception class to recognize "not authenticated" rather
             // than matching on the message string (Symfony has rephrased it
             // before; a security-component upgrade silently flips 401 ↔ 403).
@@ -186,8 +186,7 @@ class ApiExceptionListener implements EventSubscriberInterface
             // exception's own message is preserved (even for 401).
             $customErrorCode = $exception->getHeaders()['X-Api-Error-Code'] ?? null;
 
-            $hasBearerToken = $request !== null
-                && str_starts_with($request->headers->get('Authorization', ''), 'Bearer ');
+            $hasBearerToken = $this->hasCredentials($request);
             // A bare 403 with no Bearer token usually means "authenticate"
             // (Basic auth is site-level, not API auth), so surface it as 401.
             // But an endpoint that deliberately chose 403 — e.g. a public,
@@ -303,6 +302,25 @@ class ApiExceptionListener implements EventSubscriberInterface
     /**
      * Only show debug info when both Symfony debug mode AND Maho developer mode are active
      */
+    /**
+     * Whether the caller presented credentials, so a refusal is a 403 and not a 401. A
+     * bearer token counts, and so does the admin session cookie that the bridge verified
+     * on an `/api/admin/` request.
+     */
+    private function hasCredentials(?Request $request): bool
+    {
+        if ($request === null) {
+            return false;
+        }
+        if (str_starts_with($request->headers->get('Authorization', ''), 'Bearer ')) {
+            return true;
+        }
+
+        return str_contains($request->getPathInfo(), '/api/admin/')
+            && ($_SERVER['MAHO_IS_ADMIN'] ?? '') === '1'
+            && isset($_SERVER['MAHO_API_BRIDGE_TOKEN']);
+    }
+
     private function showDebug(): bool
     {
         return $this->debug && \Mage::getIsDeveloperMode();

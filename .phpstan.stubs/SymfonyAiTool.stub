@@ -1,0 +1,47 @@
+<?php
+
+namespace Symfony\AI\Platform\Tool;
+
+final class ExecutionReference
+{
+    public function __construct(
+        private string $class,
+        private string $method = '__invoke',
+    ) {
+    }
+
+    public function getClass(): string
+    {
+    }
+
+    public function getMethod(): string
+    {
+    }
+}
+
+/**
+ * Overrides the vendor `JsonSchema` shape, which describes only flat properties. A tool
+ * schema that carries nested `items` or `properties` is still a valid JSON Schema.
+ */
+final class Tool
+{
+    /**
+     * @param array<string, mixed>|null $parameters
+     * @param array<string, mixed>      $metadata
+     */
+    public function __construct(
+        private readonly ExecutionReference $reference,
+        private readonly string $name,
+        private readonly string $description,
+        private readonly ?array $parameters = null,
+        private readonly array $metadata = [],
+    ) {
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    public function getParameters(): ?array
+    {
+    }
+}

@@ -1,0 +1,431 @@
+/*
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ */
+
+.ai-chat-toggle {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 900;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border: 1px solid var(--maho-border);
+    border-radius: 999px;
+    background: var(--maho-night);
+    color: var(--maho-chartreuse);
+    font: 600 13px/1 var(--maho-font-sans);
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, .25);
+}
+
+.ai-chat-toggle:hover {
+    background: var(--maho-night-raised);
+}
+
+body.ai-chat-open .ai-chat-toggle {
+    display: none;
+}
+
+.ai-chat-panel {
+    overscroll-behavior: contain;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 901;
+    display: flex;
+    flex-direction: column;
+    width: min(560px, 100vw);
+    background: var(--maho-surface);
+    border-left: 1px solid var(--maho-border);
+    box-shadow: -8px 0 30px rgba(0, 0, 0, .15);
+    color: var(--maho-ink);
+    font-family: var(--maho-font-sans);
+}
+
+.ai-chat-panel[hidden] {
+    display: none;
+}
+
+.ai-chat-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--maho-border-soft);
+    background: var(--maho-surface-raised);
+}
+
+.ai-chat-title {
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.ai-chat-conversations {
+    flex: 1;
+    min-width: 0;
+    padding: 4px 6px;
+    border: 1px solid var(--maho-control-border);
+    border-radius: 6px;
+    background: var(--maho-control-bg);
+    color: var(--maho-control-ink);
+    font-size: 12px;
+}
+
+.ai-chat-icon-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 1px solid var(--maho-border-soft);
+    border-radius: 6px;
+    background: var(--maho-surface);
+    color: var(--maho-ink-soft);
+    cursor: pointer;
+}
+
+.ai-chat-icon-button svg,
+.ai-chat-toggle svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 2;
+}
+
+.ai-chat-toggle svg {
+    width: 20px;
+    height: 20px;
+}
+
+.ai-chat-icon-button:hover {
+    border-color: var(--maho-border-strong);
+    color: var(--maho-ink);
+}
+
+/* deep-chat sizes its inner container with height: 100%, so the host needs a percentage height, not a flex basis. */
+#ai-chat {
+    display: block;
+    flex: 1 1 auto;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+    border: 0;
+    border-radius: 0;
+    background: var(--maho-surface);
+    color: var(--maho-ink);
+    font-family: var(--maho-font-sans);
+    font-size: 13px;
+}
+
+/* Step cards: one per tool call. */
+.ai-chat-step {
+    margin: 2px 0;
+    padding: 6px 10px;
+    border: 1px solid var(--maho-border-soft);
+    border-left-width: 3px;
+    border-radius: 6px;
+    background: var(--maho-surface-sunken);
+    font-size: 12px;
+    color: var(--maho-ink-soft);
+}
+
+.ai-chat-step summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    list-style: none;
+}
+
+.ai-chat-step summary::-webkit-details-marker {
+    display: none;
+}
+
+.ai-chat-step-status {
+    flex: none;
+    min-width: 58px;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 10px;
+    letter-spacing: .04em;
+}
+
+.ai-chat-step-title {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ai-chat-step-running { border-left-color: var(--maho-info); }
+.ai-chat-step-running .ai-chat-step-status { color: var(--maho-info); }
+.ai-chat-step-done { border-left-color: var(--maho-success); }
+.ai-chat-step-done .ai-chat-step-status { color: var(--maho-success); }
+.ai-chat-step-error { border-left-color: var(--maho-error); }
+.ai-chat-step-error .ai-chat-step-status { color: var(--maho-error); }
+.ai-chat-step-denied,
+.ai-chat-step-cancelled { border-left-color: var(--maho-ink-faint); opacity: .8; }
+.ai-chat-step-pending { border-left-color: var(--maho-warning); }
+.ai-chat-step-pending .ai-chat-step-status { color: var(--maho-warning); }
+
+/* Arguments: one label and value per row. */
+.ai-chat-args {
+    margin: 6px 0 0;
+    padding: 6px 8px;
+    border-radius: 4px;
+    background: var(--maho-surface);
+    color: var(--maho-ink);
+    font-size: 12px;
+}
+
+.ai-chat-arg {
+    display: grid;
+    grid-template-columns: minmax(70px, 30%) 1fr;
+    gap: 2px 10px;
+    padding: 3px 0;
+}
+
+.ai-chat-arg-block {
+    grid-template-columns: 1fr;
+}
+
+.ai-chat-arg dd pre {
+    margin: 0;
+    max-height: 240px;
+    overflow: auto;
+    font-family: var(--maho-font-mono, ui-monospace, monospace);
+    font-size: 11px;
+    line-height: 1.4;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* The preview box is a small page: its own text color, and no layout bleed into the panel. */
+.ai-chat-html-preview {
+    margin: 2px 0 4px;
+    padding: 8px;
+    max-height: 320px;
+    overflow: auto;
+    border: 1px solid var(--maho-border-soft);
+    border-radius: 4px;
+    background: #fff;
+    color: #222;
+    font-size: 12px;
+    line-height: 1.4;
+    contain: content;
+}
+
+.ai-chat-html-preview img {
+    max-width: 100%;
+    height: auto;
+}
+
+.ai-chat-html-preview a {
+    color: inherit;
+    text-decoration: underline;
+    pointer-events: none;
+}
+
+.ai-chat-arg + .ai-chat-arg {
+    border-top: 1px solid var(--maho-border-soft);
+}
+
+.ai-chat-arg dt {
+    color: var(--maho-ink-muted);
+    overflow-wrap: anywhere;
+}
+
+.ai-chat-arg dd {
+    margin: 0;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+}
+
+.ai-chat-arg-long summary {
+    cursor: pointer;
+    color: var(--maho-ink-soft);
+    list-style: none;
+}
+
+.ai-chat-arg-long summary::-webkit-details-marker {
+    display: none;
+}
+
+.ai-chat-arg-long summary::before {
+    content: '▸ ';
+    color: var(--maho-ink-muted);
+}
+
+.ai-chat-arg-long[open] summary::before {
+    content: '▾ ';
+}
+
+.ai-chat-arg-long pre {
+    margin: 4px 0 0;
+    padding: 6px 8px;
+    max-height: 240px;
+    overflow: auto;
+    border-radius: 4px;
+    background: var(--maho-surface-sunken);
+    color: var(--maho-ink);
+    font-family: var(--maho-font-mono, ui-monospace, monospace);
+    font-size: 11px;
+    line-height: 1.4;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.ai-chat-step-args,
+.ai-chat-step-preview {
+    margin: 6px 0 0;
+    padding: 6px 8px;
+    max-height: 180px;
+    overflow: auto;
+    border-radius: 4px;
+    background: var(--maho-surface);
+    color: var(--maho-ink);
+    font-family: var(--maho-font-mono, ui-monospace, monospace);
+    font-size: 11px;
+    line-height: 1.4;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.ai-chat-badge {
+    flex: none;
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: var(--maho-error-bg);
+    border: 1px solid var(--maho-error-border);
+    color: var(--maho-error-strong);
+    font-size: 10px;
+    font-weight: 600;
+}
+
+/* Confirmation card: the write tools that wait for the administrator. */
+.ai-chat-confirm {
+    margin: 4px 0;
+    padding: 10px 12px;
+    border: 1px solid var(--maho-warning-border);
+    border-radius: 8px;
+    background: var(--maho-warning-bg);
+    color: var(--maho-ink);
+    font-size: 12px;
+}
+
+.ai-chat-confirm-settled {
+    border-color: var(--maho-border-soft);
+    background: var(--maho-surface-sunken);
+    color: var(--maho-ink-muted);
+}
+
+.ai-chat-confirm-title {
+    margin: 0 0 8px;
+    font-weight: 600;
+}
+
+.ai-chat-confirm-list,
+.ai-chat-confirm-settled ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ai-chat-confirm-row + .ai-chat-confirm-row {
+    margin-top: 8px;
+}
+
+.ai-chat-confirm-row label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+}
+
+.ai-chat-confirm-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.ai-chat-approve,
+.ai-chat-deny {
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--maho-border);
+    font: 600 12px var(--maho-font-sans);
+    cursor: pointer;
+}
+
+.ai-chat-approve {
+    background: var(--maho-accent);
+    border-color: var(--maho-accent-strong);
+    color: #fff;
+}
+
+.ai-chat-deny {
+    background: var(--maho-surface);
+    color: var(--maho-ink);
+}
+
+.ai-chat-error {
+    margin: 4px 0;
+    padding: 8px 12px;
+    border: 1px solid var(--maho-error-border);
+    border-radius: 8px;
+    background: var(--maho-error-bg);
+    color: var(--maho-error-strong);
+    font-size: 12px;
+}
+
+.ai-chat-turn-end,
+.message-bubble:has(> .ai-chat-turn-end) {
+    display: none;
+}
+
+.ai-chat-thinking {
+    color: var(--maho-ink-muted);
+    font-size: 12px;
+    font-style: italic;
+}
+
+.ai-chat-thinking::after {
+    content: '';
+    display: inline-block;
+    width: 1.2em;
+    text-align: left;
+    animation: ai-chat-dots 1.2s steps(4, end) infinite;
+}
+
+@keyframes ai-chat-dots {
+    0% { content: ''; }
+    25% { content: '.'; }
+    50% { content: '..'; }
+    75% { content: '...'; }
+}
+
+@media (max-width: 720px) {
+    .ai-chat-panel {
+        width: 100vw;
+    }
+}
+
+/* Inside the deep-chat shadow root: the message list must not hand its scroll to the page. */
+#messages {
+    overscroll-behavior: contain;
+}
+
+/* Inside the deep-chat shadow root: a code block in an answer wraps instead of widening the bubble. */
+.message-bubble pre {
+    max-width: 100%;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+}

@@ -66,6 +66,17 @@ class Maho_Ai_Model_Platform_Symfony implements
         return $text;
     }
 
+    /** The Symfony AI platform behind this provider, for callers that need tool calling or streaming. */
+    public function getPlatform(): PlatformInterface
+    {
+        return $this->platform;
+    }
+
+    public function getDefaultChatModel(): string
+    {
+        return $this->defaultChatModel;
+    }
+
     #[\Override]
     public function getLastTokenUsage(): array
     {
@@ -356,8 +367,25 @@ class Maho_Ai_Model_Platform_Symfony implements
         }
         $chatModel = (string) Mage::getStoreConfig('ai/general/openrouter_model', $storeId);
 
+        // The bridge ships a static model list that ages quickly; register the configured
+        // id on top so a newer model still resolves, with the capabilities every
+        // OpenRouter chat model offers.
+        $additional = [];
+        if ($chatModel !== '') {
+            $additional[$chatModel] = [
+                'class' => \Symfony\AI\Platform\Bridge\Generic\CompletionsModel::class,
+                'capabilities' => [
+                    \Symfony\AI\Platform\Capability::INPUT_MESSAGES,
+                    \Symfony\AI\Platform\Capability::OUTPUT_TEXT,
+                    \Symfony\AI\Platform\Capability::OUTPUT_STREAMING,
+                    \Symfony\AI\Platform\Capability::TOOL_CALLING,
+                ],
+            ];
+        }
+        $catalog = new \Symfony\AI\Platform\Bridge\OpenRouter\ModelCatalog($additional);
+
         return new self(
-            platform: \Symfony\AI\Platform\Bridge\OpenRouter\Factory::createPlatform($apiKey),
+            platform: \Symfony\AI\Platform\Bridge\OpenRouter\Factory::createPlatform($apiKey, modelCatalog: $catalog),
             platformCode: Maho_Ai_Model_Platform::OPENROUTER,
             defaultChatModel: $chatModel,
         );

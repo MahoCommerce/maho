@@ -335,8 +335,8 @@ class Kernel extends BaseKernel
                     'pattern' => '^/api/docs',
                     'security' => false,
                 ],
-                'api_admin_graphql' => [
-                    'pattern' => '^/api/admin/graphql',
+                'api_admin' => [
+                    'pattern' => '^/api/admin/',
                     'stateless' => true,
                     'provider' => 'maho_admin',
                     'custom_authenticators' => [
@@ -363,7 +363,7 @@ class Kernel extends BaseKernel
             'access_control' => [
                 ['path' => '^/api/docs', 'roles' => 'PUBLIC_ACCESS'],
                 ['path' => '^/api/graphql', 'roles' => 'PUBLIC_ACCESS'],
-                ['path' => '^/api/admin/graphql', 'roles' => 'IS_AUTHENTICATED_FULLY'],
+                ['path' => '^/api/admin/', 'roles' => 'IS_AUTHENTICATED_FULLY'],
                 ['path' => '^/api', 'roles' => 'PUBLIC_ACCESS'],
             ],
         ]);
@@ -529,24 +529,12 @@ class Kernel extends BaseKernel
     }
 
     /**
-     * Orientation text the model reads before touching any tool. Does more work than
-     * any individual tool description, so it stays short and concrete.
+     * Orientation text the model reads before touching any tool. The admin chat
+     * assistant shares it, see {@see \Maho_ApiPlatform_Helper_Data::mcpInstructions()}.
      */
     private function mcpInstructions(): string
     {
-        $store = \Mage::app()->getDefaultStoreView();
-        $name = (string) \Mage::getStoreConfig('general/store_information/name') ?: (string) $store?->getFrontendName();
-        $currency = (string) $store?->getBaseCurrencyCode();
-
-        return implode("\n", array_filter([
-            'Maho Commerce store data and operations: catalog, inventory, pricing, orders and customers.',
-            $name === '' ? null : sprintf('Store: %s.', $name),
-            $currency === '' ? null : sprintf('Read the "currency" field of any response that carries one: cart and order amounts are in the currency named there, which is not always %1$s. Where no currency is given, amounts are in %1$s, the base currency of the default website; other websites may differ.', $currency),
-            'IDs are Maho entity IDs, not SKUs or increment IDs; look an entity up by its identifying field before writing to it.',
-            'Multi-store installs select a store view by its store code, never by name.',
-            'List tools are paginated and return one page at a time; ask for the next page rather than assuming the first is complete.',
-            'Tools mirror the REST API one-to-one, so a call is refused exactly when the same REST request would be.',
-        ]));
+        return \Mage::helper('apiplatform')->mcpInstructions();
     }
 
     /**
@@ -583,6 +571,11 @@ class Kernel extends BaseKernel
             $routes->import('.', 'mcp');
         }
         $routes->import($this->getProjectDir() . '/Controller/', 'attribute');
+        // A module controller under Api/ declares its routes with #[Route] like the
+        // project ones; the admin firewall covers it when its path starts with /api/admin/.
+        foreach (ModuleApiDiscovery::discover()['namespaces'] as $baseDir) {
+            $routes->import($baseDir, 'attribute');
+        }
     }
 
     /**

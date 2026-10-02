@@ -27,6 +27,13 @@ return [
         'lastname', 'middlename', 'postcode', 'prefix', 'region', 'regionId', 'street', 'suffix',
         'telephone', 'updatedAt', 'vatId',
     ],
+    'AdminRole' => [
+        'extensions', 'id', 'resources', 'roleName', 'userCount',
+    ],
+    'AdminUser' => [
+        'email', 'extensions', 'firstname', 'id', 'isActive', 'lastname', 'logdate', 'roleId',
+        'roleName', 'username',
+    ],
     'AttributeSet' => [
         'attributeCodes', 'attributeSetName', 'extensions', 'groups', 'id',
     ],
@@ -50,6 +57,9 @@ return [
     'BundleOption' => [
         'extensions', 'id', 'position', 'required', 'selections', 'title', 'type',
     ],
+    'CacheType' => [
+        'code', 'description', 'enabled', 'extensions', 'invalidated', 'label', 'tags',
+    ],
     'Cart' => [
         'appliedCoupon', 'appliedGiftcards', 'availablePaymentMethods', 'availableShippingMethods',
         'billingAddress', 'cartRecreated', 'createdAt', 'currency', 'customerEmail', 'customerId',
@@ -60,9 +70,9 @@ return [
     'CartPriceRule' => [
         'actions', 'applyToShipping', 'conditions', 'couponCode', 'couponCount', 'couponType',
         'customerGroupIds', 'description', 'discountAmount', 'discountQty', 'discountStep',
-        'extensions', 'fromDate', 'id', 'isActive', 'isRss', 'name', 'primaryCouponId',
-        'simpleAction', 'simpleFreeShipping', 'sortOrder', 'stopRulesProcessing', 'storeLabels',
-        'timesUsed', 'toDate', 'usesPerCoupon', 'usesPerCustomer', 'websiteIds',
+        'extensions', 'fromDate', 'id', 'isActive', 'isRss', 'name', 'primaryCouponId', 'simpleAction',
+        'simpleFreeShipping', 'sortOrder', 'stopRulesProcessing', 'storeLabels', 'timesUsed', 'toDate',
+        'usesPerCoupon', 'usesPerCustomer', 'websiteIds',
     ],
     'CartPriceRuleConditionMetadata' => [
         'extensions', 'locale', 'roots', 'rule', 'scope', 'types', 'unchanged', 'version',
@@ -71,14 +81,19 @@ return [
         'attribute', 'extensions', 'items', 'itemsPerPage', 'page', 'totalItems', 'type',
     ],
     'CartPriceRuleCoupon' => [
-        'code', 'createdAt', 'expirationDate', 'extensions', 'id', 'isPrimary', 'timesUsed',
-        'type', 'usageLimit', 'usagePerCustomer',
+        'code', 'createdAt', 'expirationDate', 'extensions', 'id', 'isPrimary', 'timesUsed', 'type',
+        'usageLimit', 'usagePerCustomer',
     ],
     'CartsAbandonedReport' => [
         'extensions', 'report',
     ],
     'CartsProductsReport' => [
         'extensions', 'report',
+    ],
+    'CatalogPriceRule' => [
+        'conditions', 'customerGroupIds', 'description', 'discountAmount', 'extensions', 'fromDate',
+        'id', 'isActive', 'name', 'simpleAction', 'sortOrder', 'stopRulesProcessing',
+        'subDiscountAmount', 'subIsEnable', 'subSimpleAction', 'toDate', 'websiteIds',
     ],
     'Category' => [
         'availableSortBy', 'children', 'childrenCount', 'childrenIds', 'cmsBlock', 'createdAt',
@@ -97,6 +112,10 @@ return [
         'metaDescription', 'metaKeywords', 'metaRobots', 'pageLayout', 'sortOrder', 'status', 'stores',
         'title', 'updatedAt',
     ],
+    'ConfigSetting' => [
+        'extensions', 'frontendType', 'groupLabel', 'inherited', 'isSensitive', 'label', 'path',
+        'scope', 'scopeCode', 'sectionLabel', 'value',
+    ],
     'ConfigurableSetup' => [
         'childProductIds', 'extensions', 'id', 'superAttributes',
     ],
@@ -110,18 +129,18 @@ return [
     'Coupon' => [
         'applyToShipping', 'code', 'createdAt', 'customerGroupIds', 'description', 'discountAmount',
         'discountPreview', 'discountQty', 'discountStep', 'discountType', 'expirationDate',
-        'extensions', 'fromDate', 'id', 'isActive', 'isPrimary', 'isValid', 'minimumSubtotal',
-        'ruleId', 'ruleName', 'simpleFreeShipping', 'sortOrder', 'stopRulesProcessing', 'timesUsed',
-        'toDate', 'type', 'usageLimit', 'usagePerCustomer', 'validationMessage', 'websiteIds',
+        'extensions', 'fromDate', 'id', 'isActive', 'isPrimary', 'isValid', 'minimumSubtotal', 'ruleId',
+        'ruleName', 'simpleFreeShipping', 'sortOrder', 'stopRulesProcessing', 'timesUsed', 'toDate',
+        'type', 'usageLimit', 'usagePerCustomer', 'validationMessage', 'websiteIds',
     ],
     'CreditMemo' => [
         'adjustment', 'adjustmentNegative', 'adjustmentPositive', 'baseAdjustment', 'baseCurrencyCode',
         'baseDiscountAmount', 'baseGrandTotal', 'baseShippingAmount', 'baseSubtotal', 'baseTaxAmount',
-        'billingName', 'comment', 'comments', 'createdAt', 'creditmemoStatus', 'currency', 'discountAmount',
-        'discountDescription', 'emailSent', 'extensions', 'grandTotal', 'hiddenTaxAmount', 'id',
-        'incrementId', 'invoiceId', 'items', 'orderCurrencyCode', 'orderId', 'orderIncrementId',
-        'shippingAmount', 'shippingInclTax', 'shippingTaxAmount', 'state', 'storeId', 'subtotal',
-        'subtotalInclTax', 'taxAmount', 'transactionId', 'updatedAt',
+        'billingName', 'comment', 'comments', 'createdAt', 'creditmemoStatus', 'currency',
+        'discountAmount', 'discountDescription', 'emailSent', 'extensions', 'grandTotal',
+        'hiddenTaxAmount', 'id', 'incrementId', 'invoiceId', 'items', 'orderCurrencyCode', 'orderId',
+        'orderIncrementId', 'shippingAmount', 'shippingInclTax', 'shippingTaxAmount', 'state',
+        'storeId', 'subtotal', 'subtotalInclTax', 'taxAmount', 'transactionId', 'updatedAt',
     ],
     'Currency' => [
         'code', 'exchangeRate', 'extensions', 'symbol',
@@ -150,15 +169,23 @@ return [
     'DashboardVisitors' => [
         'days', 'extensions',
     ],
+    'DesignChange' => [
+        'dateFrom', 'dateTo', 'design', 'extensions', 'id', 'storeId',
+    ],
     'DownloadableLink' => [
         'extensions', 'id', 'isShareable', 'linkType', 'linkUrl', 'numberOfDownloads', 'price',
         'sampleType', 'sampleUrl', 'sortOrder', 'title',
     ],
+    'EmailTemplate' => [
+        'addedAt', 'extensions', 'id', 'modifiedAt', 'origTemplateCode', 'origTemplateVariables',
+        'templateCode', 'templateSenderEmail', 'templateSenderName', 'templateStyles',
+        'templateSubject', 'templateText', 'templateType',
+    ],
     'GiftCard' => [
         'balance', 'code', 'createdAt', 'currencyCode', 'emailScheduledAt', 'emailSentAt', 'expiresAt',
         'extensions', 'history', 'id', 'initialBalance', 'message', 'purchaseOrderId',
-        'purchaseOrderItemId', 'recipientEmail', 'recipientName', 'senderEmail', 'senderName',
-        'status', 'updatedAt', 'websiteIds',
+        'purchaseOrderItemId', 'recipientEmail', 'recipientName', 'senderEmail', 'senderName', 'status',
+        'updatedAt', 'websiteIds',
     ],
     'GlobalSearch' => [
         'extensions', 'query',
@@ -166,13 +193,17 @@ return [
     'GroupedProductLink' => [
         'childProductId', 'childProductName', 'childProductSku', 'extensions', 'id', 'position', 'qty',
     ],
+    'IndexProcess' => [
+        'description', 'endedAt', 'extensions', 'id', 'indexerCode', 'mode', 'name', 'startedAt',
+        'status', 'updateRequired',
+    ],
     'Invoice' => [
         'baseDiscountAmount', 'baseGrandTotal', 'baseShippingAmount', 'baseSubtotal', 'baseTaxAmount',
-        'billingName', 'canVoidFlag', 'comments', 'createdAt', 'currency', 'discountAmount', 'discountDescription',
-        'emailSent', 'extensions', 'grandTotal', 'id', 'incrementId', 'isUsedForRefund', 'items',
-        'orderId', 'orderIncrementId', 'pdfUrl', 'shippingAmount', 'shippingInclTax', 'state',
-        'stateName', 'storeId', 'subtotal', 'subtotalInclTax', 'taxAmount', 'totalQty',
-        'transactionId', 'updatedAt',
+        'billingName', 'canVoidFlag', 'comments', 'createdAt', 'currency', 'discountAmount',
+        'discountDescription', 'emailSent', 'extensions', 'grandTotal', 'id', 'incrementId',
+        'isUsedForRefund', 'items', 'orderId', 'orderIncrementId', 'pdfUrl', 'shippingAmount',
+        'shippingInclTax', 'state', 'stateName', 'storeId', 'subtotal', 'subtotalInclTax', 'taxAmount',
+        'totalQty', 'transactionId', 'updatedAt',
     ],
     'LayeredFilter' => [
         'code', 'extensions', 'label', 'multiple', 'options', 'position', 'type',
@@ -202,24 +233,23 @@ return [
         'currency', 'customOptions', 'description', 'downloadableLinks', 'extensions', 'finalPrice',
         'giftMessageAvailable', 'giftcardAmountCurrency', 'giftcardAmounts', 'giftcardIsMessageAllowed',
         'giftcardMaxAmount', 'giftcardMinAmount', 'giftcardType', 'groupedProducts', 'gtin',
-        'hasRequiredOptions', 'id',
-        'imageLabel', 'imageUrl', 'isActive', 'linksPurchasedSeparately', 'linksTitle', 'mediaGallery',
-        'metaDescription', 'metaKeywords', 'metaRobots', 'metaTitle', 'minimalPrice', 'mpn', 'msrp',
-        'msrpDisplayActualPriceType', 'msrpEnabled', 'name', 'newsFromDate', 'newsToDate',
-        'optionsContainer', 'pageLayout', 'price', 'priceType', 'priceView', 'relatedProducts',
-        'reviewCount', 'samplesTitle', 'shipmentType', 'shortDescription', 'sku', 'skuType',
-        'smallImageLabel', 'smallImageUrl', 'specialFromDate', 'specialPrice', 'specialToDate',
-        'status', 'stockItem', 'stockQty', 'stockStatus', 'taxClassId', 'thumbnailLabel',
-        'thumbnailUrl', 'tierPrices', 'type', 'updatedAt', 'upsellProducts', 'urlKey', 'urlPath',
-        'variants', 'visibility', 'websiteIds', 'weight', 'weightType',
+        'hasRequiredOptions', 'id', 'imageLabel', 'imageUrl', 'isActive', 'linksPurchasedSeparately',
+        'linksTitle', 'mediaGallery', 'metaDescription', 'metaKeywords', 'metaRobots', 'metaTitle',
+        'minimalPrice', 'mpn', 'msrp', 'msrpDisplayActualPriceType', 'msrpEnabled', 'name',
+        'newsFromDate', 'newsToDate', 'optionsContainer', 'pageLayout', 'price', 'priceType',
+        'priceView', 'relatedProducts', 'reviewCount', 'samplesTitle', 'shipmentType',
+        'shortDescription', 'sku', 'skuType', 'smallImageLabel', 'smallImageUrl', 'specialFromDate',
+        'specialPrice', 'specialToDate', 'status', 'stockItem', 'stockQty', 'stockStatus', 'taxClassId',
+        'thumbnailLabel', 'thumbnailUrl', 'tierPrices', 'type', 'updatedAt', 'upsellProducts', 'urlKey',
+        'urlPath', 'variants', 'visibility', 'websiteIds', 'weight', 'weightType',
     ],
     'ProductAttribute' => [
         'applyTo', 'attributeCode', 'backendType', 'defaultValue', 'extensions', 'frontendClass',
         'frontendInput', 'frontendLabel', 'id', 'isComparable', 'isConfigurable', 'isFilterable',
         'isFilterableInSearch', 'isGlobal', 'isHtmlAllowedOnFront', 'isRequired', 'isSearchable',
         'isUnique', 'isUsedForPriceRules', 'isUserDefined', 'isVisibleInAdvancedSearch',
-        'isVisibleOnFront', 'isWysiwygEnabled', 'note', 'options', 'position', 'scope',
-        'usedForSortBy', 'usedInProductListing',
+        'isVisibleOnFront', 'isWysiwygEnabled', 'note', 'options', 'position', 'scope', 'usedForSortBy',
+        'usedInProductListing',
     ],
     'ProductCustomOption' => [
         'extensions', 'fileExtensions', 'id', 'imageSizeX', 'imageSizeY', 'maxCharacters', 'price',
@@ -257,9 +287,9 @@ return [
         'ratings', 'status', 'stores', 'title',
     ],
     'RevocationRequest' => [
-        'customerName', 'email', 'extensions', 'id', 'orderId', 'orderReference',
-        'processedAt', 'processedStatus', 'reason', 'receivedAt', 'storeId', 'suppressedAt',
-        'suppressedReason', 'verified',
+        'customerName', 'email', 'extensions', 'id', 'orderId', 'orderReference', 'processedAt',
+        'processedStatus', 'reason', 'receivedAt', 'storeId', 'suppressedAt', 'suppressedReason',
+        'verified',
     ],
     'SalesCouponsReport' => [
         'extensions', 'report',
@@ -305,8 +335,8 @@ return [
     'StoreConfig' => [
         'allowedCountries', 'baseCurrencyCode', 'baseMediaUrl', 'baseUrl', 'cmsHomePage',
         'defaultDescription', 'defaultDisplayCurrencyCode', 'defaultTitle', 'extensions', 'id',
-        'isGuestCheckoutAllowed', 'locale', 'logoAlt', 'logoUrl', 'newsletterEnabled',
-        'reviewsEnabled', 'storeCode', 'storeName', 'timezone', 'weightUnit', 'wishlistEnabled',
+        'isGuestCheckoutAllowed', 'locale', 'logoAlt', 'logoUrl', 'newsletterEnabled', 'reviewsEnabled',
+        'storeCode', 'storeName', 'timezone', 'weightUnit', 'wishlistEnabled',
     ],
     'TaxClass' => [
         'className', 'classType', 'extensions', 'id',
@@ -319,8 +349,18 @@ return [
         'calculateSubtotal', 'code', 'customerTaxClassIds', 'extensions', 'id', 'position', 'priority',
         'productTaxClassIds', 'taxRateIds',
     ],
+    'Theme' => [
+        'area', 'extensions', 'id', 'isDefault', 'package', 'theme',
+    ],
     'UrlResolveResult' => [
         'extensions', 'id', 'identifier', 'redirectType', 'redirectUrl', 'type',
+    ],
+    'UrlRewrite' => [
+        'categoryId', 'description', 'extensions', 'id', 'idPath', 'isSystem', 'options', 'productId',
+        'requestPath', 'storeId', 'targetPath',
+    ],
+    'WidgetType' => [
+        'description', 'directive', 'extensions', 'id', 'isEmailCompatible', 'name', 'parameters', 'type',
     ],
     'WishlistItem' => [
         'addedAt', 'description', 'extensions', 'id', 'inStock', 'productFinalPrice', 'productId',

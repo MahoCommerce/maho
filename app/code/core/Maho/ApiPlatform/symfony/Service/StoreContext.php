@@ -161,6 +161,27 @@ final class StoreContext implements ResetInterface
     }
 
     /**
+     * Run $callback as if the caller had requested $storeId for this one call, then
+     * restore both the app scope and the explicit request. An in-process tool call
+     * uses this: it has no request of its own to carry ?store=.
+     */
+    public static function withExplicitStore(int $storeId, \Closure $callback): mixed
+    {
+        $previousCurrent = self::$currentStoreId;
+        $previousExplicit = self::$explicitStoreId;
+        try {
+            return self::withStore($storeId, static function () use ($storeId, $callback): mixed {
+                self::setExplicitStore($storeId);
+
+                return $callback();
+            });
+        } finally {
+            self::$currentStoreId = $previousCurrent;
+            self::$explicitStoreId = $previousExplicit;
+        }
+    }
+
+    /**
      * Get the current store ID. Once ensured, this reads the live app scope,
      * so a store switch made in core code cannot desync the two answers.
      */

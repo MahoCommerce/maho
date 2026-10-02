@@ -404,6 +404,23 @@ class Maho_Ai_Helper_Data extends Mage_Core_Helper_Abstract
         return \Composer\InstalledVersions::isInstalled('symfony/ai-platform');
     }
 
+    /**
+     * The admin assistant needs the base toggle, its own toggle, the MCP tool layer of
+     * the API and the Symfony AI agent package.
+     */
+    public function isChatEnabled(?int $storeId = null): bool
+    {
+        return $this->isEnabled($storeId)
+            && Mage::getStoreConfigFlag('ai/chat/enabled', $storeId)
+            && Mage::helper('apiplatform')->isMcpAvailable()
+            && class_exists(\Symfony\AI\Agent\Agent::class);
+    }
+
+    public function isChatAllowed(): bool
+    {
+        return Mage::getSingleton('admin/session')->isAllowed('system/ai/chat');
+    }
+
     private function getFactory(): Maho_Ai_Model_Platform_Factory
     {
         return Mage::getSingleton('ai/platform_factory');
@@ -416,7 +433,7 @@ class Maho_Ai_Helper_Data extends Mage_Core_Helper_Abstract
      * not permitted") and the original throwable is logged so the full
      * stack remains in the exception log for debugging.
      */
-    private function translateProviderException(
+    public function translateProviderException(
         \Symfony\AI\Platform\Exception\ExceptionInterface $e,
         string $platformCode,
     ): Mage_Core_Exception {

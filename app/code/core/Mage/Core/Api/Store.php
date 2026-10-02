@@ -51,6 +51,8 @@ use Maho\ApiPlatform\CrudResource;
             processor: StoreProcessor::class,
             security: 'true',
             description: 'Switch current store context',
+            // A session switch means nothing to a stateless MCP client, and an agent mistakes it for a write.
+            extraProperties: ['maho_mcp' => false],
         ),
     ],
 )]
