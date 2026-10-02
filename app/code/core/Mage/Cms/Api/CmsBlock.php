@@ -87,6 +87,7 @@ class CmsBlock extends CrudResource
     public ?bool $isActive = null;
 
     /** @var int[]|null */
+    #[ApiProperty(description: 'Store view ids the block belongs to. 0 means every store view. Several blocks can share an identifier, one per store view, and the store view\'s own block wins over the one for every store view.')]
     public ?array $stores = null;
 
     #[ApiProperty(writable: false, extraProperties: ['modelField' => 'creation_time'])]

@@ -107,6 +107,10 @@ class Maho_Ai_Model_Chat_ToolExecutor implements ToolExecutorInterface
 
         ($this->onRoundComplete)(self::unique($toolCalls), $results);
 
+        if ($this->toolbox->takeToolsetChange()) {
+            throw new Maho_Ai_Model_Chat_ToolsetChanged(self::unique($toolCalls));
+        }
+
         return $ordered;
     }
 }

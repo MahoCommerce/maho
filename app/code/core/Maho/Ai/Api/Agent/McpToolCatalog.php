@@ -17,9 +17,9 @@ use ApiPlatform\JsonSchema\SchemaFactory;
 use ApiPlatform\JsonSchema\SchemaFactoryInterface;
 use ApiPlatform\Mcp\Security\ElementAccessCheckerInterface;
 use ApiPlatform\Metadata\McpTool;
+use Maho\Config\ApiResource as MahoApiResource;
 use ApiPlatform\Metadata\Resource\Factory\ResourceMetadataCollectionFactoryInterface;
 use ApiPlatform\Metadata\Resource\Factory\ResourceNameCollectionFactoryInterface;
-use Maho\Config\ApiResource as MahoApiResource;
 use Symfony\AI\Platform\Tool\ExecutionReference;
 use Symfony\AI\Platform\Tool\Tool;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -40,6 +40,9 @@ final class McpToolCatalog
     private ?array $tools = null;
 
     /** @var array<string, string> alias => MCP tool name */
+    /** JSON Schema keywords every chat provider accepts in a tool parameter. */
+    private const SCHEMA_KEYWORDS = ['type', 'description', 'enum', 'properties', 'required', 'items', 'anyOf', 'oneOf', 'minimum', 'maximum', 'minLength', 'maxLength', 'minItems', 'maxItems'];
+
     /** Argument every MCP tool takes: the store view code, since an in-process call has no request to carry ?store=. */
     public const STORE_ARGUMENT = 'store';
 
@@ -60,11 +63,14 @@ final class McpToolCatalog
      * @param list<string> $excludedSections snake_case section prefixes to leave out, for example `reports`
      * @return list<Tool>
      */
-    public function tools(array $excludedSections = []): array
+    public function tools(array $excludedSections = [], ?array $sections = null): array
     {
         $tools = [];
         foreach ($this->all() as $name => $mcp) {
             if ($this->inSection($name, $excludedSections) || !$this->accessChecker->isGranted($name)) {
+                continue;
+            }
+            if ($sections !== null && !in_array(self::section($name), $sections, true)) {
                 continue;
             }
 
@@ -83,6 +89,32 @@ final class McpToolCatalog
         }
 
         return $tools;
+    }
+
+    /** The section of a tool: the first segment of its name, such as "catalog" in catalog_products_list. */
+    public static function section(string $name): string
+    {
+        return explode('_', $name, 2)[0];
+    }
+
+    /**
+     * The sections the current administrator can use, each with the names of its tools.
+     *
+     * @param list<string> $excludedSections
+     * @return array<string, list<string>>
+     */
+    public function sections(array $excludedSections = []): array
+    {
+        $sections = [];
+        foreach (array_keys($this->all()) as $name) {
+            if ($this->inSection($name, $excludedSections) || !$this->accessChecker->isGranted($name)) {
+                continue;
+            }
+            $sections[self::section($name)][] = $this->alias($name);
+        }
+        ksort($sections);
+
+        return $sections;
     }
 
     /** The MCP tool behind a name or an alias the model used, null when unknown. */
@@ -126,13 +158,15 @@ final class McpToolCatalog
         $this->tools = [];
         foreach ($this->resourceNameCollectionFactory->create() as $resourceClass) {
             foreach ($this->resourceMetadataCollectionFactory->create($resourceClass) as $resource) {
-                // A customer-scoped resource answers for the customer behind a customer
-                // token. An admin has none, so its tools only produce errors.
-                if ($resource instanceof MahoApiResource && $resource->mahoCustomerScoped) {
-                    continue;
-                }
+                // A customer-scoped resource (cart, wishlist, order, address, review) serves the
+                // storefront session. An administrator has none, so its public writes, such as a
+                // guest cart, are not tools; its reads and its admin operations are.
+                $customerScoped = $resource instanceof MahoApiResource && $resource->mahoCustomerScoped;
                 foreach ($resource->getMcp() ?? [] as $mcp) {
-                    if (!$mcp instanceof McpTool || $this->isCustomerSelfScoped($mcp)) {
+                    if (!$mcp instanceof McpTool || $this->isCustomerSelfScoped($mcp) || self::isCustomerOnly($mcp)) {
+                        continue;
+                    }
+                    if ($customerScoped && !self::grantsAdmin($mcp) && ($mcp->getAnnotations()['readOnlyHint'] ?? false) !== true) {
                         continue;
                     }
                     $this->tools[(string) $mcp->getName()] = $mcp;
@@ -148,6 +182,22 @@ final class McpToolCatalog
         $uri = (string) $mcp->getUriTemplate();
 
         return str_contains($uri, '/me/') || str_ends_with($uri, '/me') || str_ends_with($uri, '/me{._format}');
+    }
+
+    /** Security that names the customer role and grants nothing to an administrator or a backend permission. */
+    private static function isCustomerOnly(McpTool $mcp): bool
+    {
+        return str_contains((string) $mcp->getSecurity(), 'ROLE_CUSTOMER') && !self::grantsAdmin($mcp);
+    }
+
+    /** Security that lets an administrator or a backend permission through. */
+    private static function grantsAdmin(McpTool $mcp): bool
+    {
+        $security = (string) $mcp->getSecurity();
+
+        return str_contains($security, 'ROLE_ADMIN')
+            || str_contains($security, 'has_backend_access')
+            || preg_match('#is_granted\(\'[a-z0-9_-]+/(read|write|create|update|delete)\'\)#', $security) === 1;
     }
 
     /**
@@ -204,9 +254,39 @@ final class McpToolCatalog
         if ($mcp === null) {
             return $arguments;
         }
-        $properties = $this->parameters($mcp)['properties'];
+        $schema = $this->parameters($mcp);
+        $properties = is_array($schema['properties']) ? $schema['properties'] : [];
+        $required = is_array($schema['required']) ? $schema['required'] : [];
 
-        return self::coerceProperties($arguments, is_array($properties) ? $properties : []);
+        return self::coerceProperties(self::prune($arguments, $properties, $required, $this->isReadOnly($nameOrAlias)), $properties);
+    }
+
+    /**
+     * Drop the placeholders a model sends for parameters it does not need: an empty string,
+     * null or an empty list, and 0 or -1 for an optional number in a read tool. A required
+     * parameter stays, so the API reports it instead of a silent mismatch.
+     *
+     * @param array<string, mixed> $arguments
+     * @param array<string, array<string, mixed>> $properties
+     * @param list<string> $required
+     * @return array<string, mixed>
+     */
+    private static function prune(array $arguments, array $properties, array $required, bool $readOnly): array
+    {
+        foreach ($arguments as $name => $value) {
+            if (in_array($name, $required, true)) {
+                continue;
+            }
+            $empty = $value === null || $value === '' || $value === [];
+            if (!$empty && $readOnly && in_array($properties[$name]['type'] ?? null, ['integer', 'number'], true)) {
+                $empty = in_array($value, [0, 0.0, -1, '0', '-1', ''], true);
+            }
+            if ($empty) {
+                unset($arguments[$name]);
+            }
+        }
+
+        return $arguments;
     }
 
     /**
@@ -279,7 +359,7 @@ final class McpToolCatalog
 
         $properties[self::STORE_ARGUMENT] ??= [
             'type' => 'string',
-            'description' => 'Store view code the call runs in, such as "default". Omit it for the default store view.',
+            'description' => 'Store view code the call runs in, such as "default-it". Omit it unless the administrator named a store or a language, or the page scope is a store view: a write without it goes to the default scope, which applies to every store view without a value of its own.',
         ];
 
         return [
@@ -304,7 +384,8 @@ final class McpToolCatalog
             if (!is_array($property)) {
                 continue;
             }
-            unset($property['$ref'], $property['readOnly'], $property['example'], $property['deprecated'], $property['owl:maxCardinality']);
+            // Gemini rejects any keyword outside its subset, such as writeOnly or format, so only the common core stays.
+            $property = array_intersect_key($property, array_flip(self::SCHEMA_KEYWORDS));
             if (isset($property['properties']) && is_array($property['properties'])) {
                 $property['properties'] = $this->plainProperties($property['properties']);
             }

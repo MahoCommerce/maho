@@ -43,7 +43,7 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
         ),
         new GetCollection(
             uriTemplate: '/customers',
-            description: 'Get customer collection, newest first. Filters: search (every word must match part of the email, first name, last name, or an address telephone), email (exact), telephone (prefix), groupId, websiteId',
+            description: 'Get customer collection, newest first. Filters: search (every word must match part of the email, first name, last name, or an address telephone), email (exact), telephone (prefix), groupId, websiteId, createdFrom and createdTo (registration date, UTC)',
             security: "is_granted('ROLE_ADMIN') or is_granted('customers/read')",
         ),
         new Post(
@@ -102,6 +102,8 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
                 'telephone' => ['type' => 'String', 'description' => 'Address telephone that starts with this value'],
                 'groupId' => ['type' => 'Int', 'description' => 'Filter by customer group ID'],
                 'websiteId' => ['type' => 'Int', 'description' => 'Filter by website ID'],
+                'createdFrom' => ['type' => 'String', 'description' => 'Registered at or after this UTC date or datetime; a bare date means from 00:00:00'],
+                'createdTo' => ['type' => 'String', 'description' => 'Registered at or before this UTC date or datetime; a bare date includes the whole day'],
                 'pageSize' => ['type' => 'Int', 'description' => 'Number of results per page'],
                 'page' => ['type' => 'Int', 'description' => 'Page number'],
             ],

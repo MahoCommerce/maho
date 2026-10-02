@@ -29,6 +29,17 @@ body.ai-chat-open .ai-chat-toggle {
     display: none;
 }
 
+:root {
+    --ai-chat-width: 440px;
+}
+
+/* On a wide screen the open panel docks: the page shrinks instead of being covered. */
+@media (min-width: 1200px) {
+    body.ai-chat-open {
+        padding-right: var(--ai-chat-width);
+    }
+}
+
 .ai-chat-panel {
     overscroll-behavior: contain;
     position: fixed;
@@ -38,10 +49,10 @@ body.ai-chat-open .ai-chat-toggle {
     z-index: 901;
     display: flex;
     flex-direction: column;
-    width: min(560px, 100vw);
+    width: min(var(--ai-chat-width), 100vw);
     background: var(--maho-surface);
     border-left: 1px solid var(--maho-border);
-    box-shadow: -8px 0 30px rgba(0, 0, 0, .15);
+    box-shadow: -8px 0 30px rgba(0, 0, 0, .08);
     color: var(--maho-ink);
     font-family: var(--maho-font-sans);
 }
@@ -428,4 +439,135 @@ body.ai-chat-open .ai-chat-toggle {
     overflow-x: auto;
     white-space: pre-wrap;
     word-break: break-word;
+}
+
+/* A form control the assistant filled in: the administrator sees what to review. The outline sits inside the box, so no parent clips it. */
+.ai-chat-prefilled {
+    outline: 2px solid var(--maho-chartreuse);
+    outline-offset: -2px;
+    border-radius: inherit;
+}
+
+.ai-chat-note {
+    margin: 4px 0;
+    padding: 8px 10px;
+    border: 1px solid var(--maho-warning-border);
+    border-radius: 8px;
+    background: var(--maho-warning-bg);
+    color: var(--maho-ink);
+    font-size: 12px;
+}
+
+/* Greeting card, shown as the intro message inside the deep-chat shadow root. */
+.ai-chat-intro {
+    margin: 18px auto 8px;
+    padding: 22px 20px 16px;
+    max-width: 440px;
+    border: 1px solid var(--maho-border-soft);
+    border-radius: 14px;
+    background: var(--maho-surface-raised);
+    color: var(--maho-ink);
+    text-align: center;
+}
+
+.ai-chat-intro-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    margin-bottom: 10px;
+    border-radius: 50%;
+    background: var(--maho-chartreuse);
+    color: var(--maho-ink);
+}
+
+.ai-chat-intro-icon svg {
+    width: 22px;
+    height: 22px;
+}
+
+.ai-chat-intro-title {
+    margin: 0 0 6px;
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.ai-chat-intro-text {
+    margin: 0 0 14px;
+    color: var(--maho-ink-soft);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.ai-chat-intro-label {
+    margin: 0 0 8px;
+    color: var(--maho-ink-muted);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+.ai-chat-intro-examples {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+}
+
+.ai-chat-example {
+    padding: 6px 11px;
+    border: 1px solid var(--maho-border);
+    border-radius: 999px;
+    background: var(--maho-surface);
+    color: var(--maho-ink);
+    font: inherit;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.ai-chat-example:hover {
+    border-color: var(--maho-border-strong);
+    background: var(--maho-surface-sunken);
+}
+
+.ai-chat-intro-hint {
+    margin: 14px 0 0;
+    color: var(--maho-ink-faint);
+    font-size: 11px;
+}
+
+/* The intro bubble is a card of its own, not a grey message bubble. */
+.message-bubble:has(> .ai-chat-intro) {
+    background: transparent;
+    padding: 0;
+    max-width: 100%;
+    width: 100%;
+}
+
+/* After the first message the greeting is one quiet line. */
+.ai-chat-intro.ai-chat-intro-compact {
+    margin: 6px auto 0;
+    padding: 6px 12px;
+    border-color: transparent;
+    background: transparent;
+}
+
+.ai-chat-intro-compact .ai-chat-intro-icon,
+.ai-chat-intro-compact .ai-chat-intro-text,
+.ai-chat-intro-compact .ai-chat-intro-label,
+.ai-chat-intro-compact .ai-chat-intro-examples,
+.ai-chat-intro-compact .ai-chat-intro-hint {
+    display: none;
+}
+
+.ai-chat-intro-compact .ai-chat-intro-title {
+    margin: 0;
+    color: var(--maho-ink-faint);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: .04em;
+    text-transform: uppercase;
 }

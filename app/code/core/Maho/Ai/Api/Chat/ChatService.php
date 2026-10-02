@@ -14,14 +14,19 @@ namespace Maho\Ai\Api\Chat;
 
 use Mage_Admin_Model_User;
 use Maho\Ai\Api\Agent\AgentFactory;
+use Maho\Ai\Api\Agent\McpToolCatalog;
 use Maho\Ai\Api\Agent\McpToolbox;
 use Maho_Ai_Model_Chat_ConfirmationRequired;
 use Maho_Ai_Model_Chat_MessageBagBuilder;
 use Maho_Ai_Model_Chat_SseWriter;
 use Maho_Ai_Model_Chat_SystemPrompt;
 use Maho_Ai_Model_Chat_ToolExecutor;
+use Maho_Ai_Model_Chat_ToolsetChanged;
 use Maho_Ai_Model_Conversation;
 use Maho_Ai_Model_Conversation_Message as Message;
+use Symfony\AI\Agent\Agent;
+use Symfony\AI\Agent\Execution\Execution;
+use Symfony\AI\Platform\Message\MessageBag;
 use Symfony\AI\Agent\Execution\Update\Progress;
 use Symfony\AI\Agent\Toolbox\ToolResult;
 use Symfony\AI\Platform\Exception\ExceptionInterface as PlatformException;
@@ -128,52 +133,27 @@ final class ChatService
         };
 
         try {
+            $this->toolbox->enableSections($this->initialSections($conversation, $pageContext, $this->lastUserMessage($conversation)));
             $prompt = new Maho_Ai_Model_Chat_SystemPrompt()->build($admin, $pageContext, $storeId);
             $executor = new Maho_Ai_Model_Chat_ToolExecutor($this->toolbox, $persistRound);
-            $agent = $this->agentFactory->create($prompt, $executor, $storeId);
             $limit = max(2, (int) \Mage::getStoreConfig('ai/chat/history_messages', $storeId));
-            $bag = new Maho_Ai_Model_Chat_MessageBagBuilder()->build($conversation, $limit);
 
-            $execution = $agent->call($bag, ['stream' => true]);
-            foreach ($execution as $update) {
-                if (!$update instanceof Progress) {
-                    continue;
+            // A round that loaded tool sections ends the run: the runner resolves the tool
+            // list once, so the agent starts again with the new set and the stored history.
+            $restarts = 0;
+            do {
+                $restart = false;
+                $agent = $this->agentFactory->create($prompt, $executor, $storeId);
+                $bag = new Maho_Ai_Model_Chat_MessageBagBuilder()->build($conversation, $limit);
+                try {
+                    $execution = $this->stream($agent, $bag, $sse, $roundText);
+                } catch (Maho_Ai_Model_Chat_ToolsetChanged) {
+                    $restart = ++$restarts < 4;
+                    if (!$restart) {
+                        throw new \Mage_Core_Exception(\Mage::helper('ai')->__('The assistant loaded tools too many times in one turn.'));
+                    }
                 }
-                $payload = $update->getPayload();
-                switch ($update->getStage()) {
-                    case 'model_request':
-                        $roundText = '';
-                        break;
-                    case 'delta':
-                        if ($payload instanceof TextDelta && $payload->getText() !== '') {
-                            $roundText .= $payload->getText();
-                            $sse->event('delta', ['text' => $payload->getText()]);
-                        }
-                        break;
-                    case 'tool_call':
-                        if ($payload instanceof ToolCall) {
-                            $sse->event('tool_call', $this->describeCall($payload->getId(), $payload->getName(), $payload->getArguments()));
-                        }
-                        break;
-                    case 'tool_result':
-                        if ($payload instanceof ToolResult) {
-                            $text = (string) $payload->getResult();
-                            $sse->event('tool_result', [
-                                'id' => $payload->getToolCall()->getId(),
-                                'ok' => !McpToolbox::isErrorText($text),
-                                'preview' => $this->preview($text),
-                            ]);
-                            $url = $this->toolbox->takeNavigation();
-                            if ($url !== null) {
-                                $sse->event('navigate', ['url' => $url]);
-                            }
-                        }
-                        break;
-                }
-                if ($sse->isClientGone()) {
-                    $execution->cancel();
-                }
-            }
+            } while ($restart);
 
             if ($sse->isClientGone()) {
                 return;
@@ -228,6 +208,165 @@ final class ChatService
             $sse->event('done', ['state' => 'error', 'conversation_id' => (int) $conversation->getId()]);
         }
     }
+
+    /** Run the agent once and forward its progress as SSE events. */
+    private function stream(Agent $agent, MessageBag $bag, Maho_Ai_Model_Chat_SseWriter $sse, string &$roundText): Execution
+    {
+        $execution = $agent->call($bag, ['stream' => true]);
+        foreach ($execution as $update) {
+            if (!$update instanceof Progress) {
+                continue;
+            }
+            $payload = $update->getPayload();
+            switch ($update->getStage()) {
+                case 'model_request':
+                    $roundText = '';
+                    break;
+                case 'delta':
+                    if ($payload instanceof TextDelta && $payload->getText() !== '') {
+                        $roundText .= $payload->getText();
+                        $sse->event('delta', ['text' => $payload->getText()]);
+                    }
+                    break;
+                case 'tool_call':
+                    if ($payload instanceof ToolCall) {
+                        $sse->event('tool_call', $this->describeCall($payload->getId(), $payload->getName(), $payload->getArguments()));
+                    }
+                    break;
+                case 'tool_result':
+                    if ($payload instanceof ToolResult) {
+                        $text = (string) $payload->getResult();
+                        $sse->event('tool_result', [
+                            'id' => $payload->getToolCall()->getId(),
+                            'ok' => !McpToolbox::isErrorText($text),
+                            'preview' => $this->preview($text),
+                        ]);
+                        $navigation = $this->toolbox->takeNavigation();
+                        if ($navigation !== null) {
+                            $sse->event(isset($navigation['steps']) ? 'page_action' : 'navigate', $navigation);
+                        }
+                    }
+                    break;
+            }
+            if ($sse->isClientGone()) {
+                $execution->cancel();
+            }
+        }
+
+        return $execution;
+    }
+
+    /**
+     * The tool sections to load before the first model request: the section of the admin
+     * page the administrator is on, and every section this conversation used before.
+     *
+     * @param array<string, mixed> $pageContext
+     * @return list<string>
+     */
+    private function initialSections(Maho_Ai_Model_Conversation $conversation, array $pageContext, string $userMessage): array
+    {
+        $sections = [];
+        $route = (string) ($pageContext['route'] ?? $conversation->getContextRoute() ?? '');
+        $controller = explode('/', $route)[0];
+        foreach (self::ROUTE_SECTIONS as $prefix => $section) {
+            if ($controller === $prefix || str_starts_with($controller, $prefix . '_')) {
+                $sections[] = $section;
+                break;
+            }
+        }
+        foreach ($conversation->messagesCollection()->getItems() as $message) {
+            if ($message->getRole() !== Message::ROLE_TOOL) {
+                continue;
+            }
+            $name = (string) $message->getToolName();
+            if ($name === McpToolbox::ENABLE_NAME) {
+                array_push($sections, ...array_filter((array) ($message->getToolArguments()['sections'] ?? []), is_string(...)));
+            } elseif (!McpToolbox::isLocal($name)) {
+                $sections[] = McpToolCatalog::section($name);
+            }
+        }
+        // Last in the list is first in the budget: the sections the request names, best match last.
+        array_push($sections, ...$this->sectionsNamedIn($userMessage));
+
+        return array_values(array_unique(array_reverse(array_values(array_unique(array_reverse($sections))))));
+    }
+
+    private function lastUserMessage(Maho_Ai_Model_Conversation $conversation): string
+    {
+        $text = '';
+        foreach ($conversation->messagesCollection()->getItems() as $message) {
+            if ($message->getRole() === Message::ROLE_USER) {
+                $text = (string) $message->getContent();
+            }
+        }
+
+        return $text;
+    }
+
+    /**
+     * The sections whose tool names share a word with the request: "the home page" names
+     * content_cms_pages_list, "orders from yesterday" names sales_orders_list. A model that
+     * finds the tool loaded does not have to ask for it first.
+     *
+     * @return list<string>
+     */
+    private function sectionsNamedIn(string $userMessage): array
+    {
+        $words = [];
+        foreach (preg_split('/[^\p{L}\p{N}]+/u', mb_strtolower($userMessage)) ?: [] as $word) {
+            if (mb_strlen($word) >= 3) {
+                $words[self::singular($word)] = true;
+            }
+        }
+        if ($words === []) {
+            return [];
+        }
+        $scores = [];
+        foreach ($this->toolbox->sections() as $section => $names) {
+            foreach ($names as $name) {
+                $segments = explode('_', $name);
+                array_shift($segments);
+                array_pop($segments);
+                foreach (array_unique($segments) as $segment) {
+                    if (isset($words[self::singular($segment)])) {
+                        $scores[$section] = ($scores[$section] ?? 0) + 1;
+                    }
+                }
+            }
+        }
+        asort($scores);
+
+        return array_keys($scores);
+    }
+
+    private static function singular(string $word): string
+    {
+        return match (true) {
+            str_ends_with($word, 'ies') => substr($word, 0, -3) . 'y',
+            str_ends_with($word, 'ses') || str_ends_with($word, 'xes') => substr($word, 0, -2),
+            str_ends_with($word, 's') && !str_ends_with($word, 'ss') => substr($word, 0, -1),
+            default => $word,
+        };
+    }
+
+    /** Admin controller prefix => tool section. */
+    private const ROUTE_SECTIONS = [
+        'catalog' => 'catalog',
+        'cms' => 'content',
+        'blog' => 'content',
+        'widget' => 'content',
+        'sales' => 'sales',
+        'customer' => 'customers',
+        'promo' => 'promotions',
+        'tax' => 'tax',
+        'newsletter' => 'other',
+        'report' => 'reports',
+        'system' => 'system',
+        'permissions' => 'system',
+        'cache' => 'system',
+        'process' => 'system',
+        'urlrewrite' => 'catalog',
+    ];
 
     /**
      * Store one tool round: the assistant message that asked for the calls, a tool row

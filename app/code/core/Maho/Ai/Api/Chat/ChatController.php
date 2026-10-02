@@ -120,7 +120,7 @@ final class ChatController
 
     /**
      * @param array<string, mixed> $input
-     * @return array{route: string, entity_type: string, entity_id: int|string|null, entity_label: string, store: string}
+     * @return array{route: string, entity_type: string, entity_id: int|string|null, entity_label: string, store: string, screen: string}
      */
     private function context(array $input): array
     {
@@ -133,12 +133,13 @@ final class ChatController
             'entity_id' => is_scalar($id) && (string) $id !== '' ? (ctype_digit((string) $id) ? (int) $id : mb_substr((string) $id, 0, 64)) : null,
             'entity_label' => mb_substr(trim((string) ($raw['entity_label'] ?? '')), 0, 200),
             'store' => mb_substr(trim((string) ($raw['store'] ?? '')), 0, 32),
+            'screen' => mb_substr(trim((string) preg_replace('/[^\P{C}\n]+/u', ' ', (string) ($raw['screen'] ?? ''))), 0, 4000),
         ];
     }
 
     /**
      * @param array<string, mixed> $input
-     * @param array{route: string, entity_type: string, entity_id: int|string|null, entity_label: string, store: string} $context
+     * @param array{route: string, entity_type: string, entity_id: int|string|null, entity_label: string, store: string, screen: string} $context
      */
     private function conversation(array $input, Mage_Admin_Model_User $admin, array $context, bool $create): Maho_Ai_Model_Conversation
     {

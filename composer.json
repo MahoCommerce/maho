@@ -80,7 +80,7 @@
         "symfony/ai-platform": "^0.14",
         "symfony/mcp-bundle": "^0.13",
         "nyholm/psr7": "^1.8",
-        "symfony/ai-open-router-platform": "^0.14"
+        "symfony/ai-generic-platform": "^0.14"
     },
     "replace": {
         "magento-hackathon/magento-composer-installer": "^99.99",

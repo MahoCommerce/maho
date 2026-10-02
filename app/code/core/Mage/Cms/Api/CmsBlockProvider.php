@@ -123,17 +123,25 @@ final class CmsBlockProvider extends CrudProvider
 
         $collection->setOrder('block_id', 'ASC');
 
+        // The store view's own record wins over the one for every store view (store 0),
+        // which wins over a record of another store view: the same order the storefront uses.
         $currentStoreId = StoreContext::getStoreId();
         $match = null;
+        $shared = null;
         foreach ($collection as $block) {
             $resource = $block->getResource();
-            if (method_exists($resource, 'lookupStoreIds')
-                && StoreContext::isAvailableForStore($resource->lookupStoreIds($block->getId()), $currentStoreId)
-            ) {
+            $storeIds = method_exists($resource, 'lookupStoreIds') ? array_map(intval(...), $resource->lookupStoreIds($block->getId())) : [];
+            if (in_array($currentStoreId, $storeIds, true)) {
                 $match = $block;
                 break;
             }
+            if (in_array(0, $storeIds, true)) {
+                $shared ??= $block;
+            }
             $match ??= $block;
+        }
+        if ($shared !== null && ($match === null || !in_array($currentStoreId, array_map(intval(...), $match->getResource()->lookupStoreIds($match->getId())), true))) {
+            $match = $shared;
         }
 
         if ($match === null) {

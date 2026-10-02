@@ -90,6 +90,8 @@ class CustomerService
         ?array $websiteIds = null,
         ?int $groupId = null,
         ?int $websiteId = null,
+        ?string $createdFrom = null,
+        ?string $createdTo = null,
     ): array {
         $resource = \Mage::getSingleton('core/resource');
         $adapter = $resource->getConnection('core_read');
@@ -103,6 +105,12 @@ class CustomerService
         }
         if ($groupId !== null) {
             $select->where('c.group_id = ?', $groupId);
+        }
+        if ($createdFrom !== null) {
+            $select->where('c.created_at >= ?', $createdFrom);
+        }
+        if ($createdTo !== null) {
+            $select->where('c.created_at <= ?', $createdTo);
         }
         if ($email !== null && $email !== '') {
             $select->where('c.email = ?', $email);

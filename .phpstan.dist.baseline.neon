@@ -14983,12 +14983,6 @@ parameters:
 			path: app/code/core/Maho/Ai/Model/Platform/Symfony.php
 
 		-
-			rawMessage: 'Call to static method createPlatform() on an unknown class Symfony\AI\Platform\Bridge\Generic\Factory.'
-			identifier: class.notFound
-			count: 1
-			path: app/code/core/Maho/Ai/Model/Platform/Symfony.php
-
-		-
 			rawMessage: 'Call to static method createPlatform() on an unknown class Symfony\AI\Platform\Bridge\Mistral\Factory.'
 			identifier: class.notFound
 			count: 1
@@ -15008,6 +15002,12 @@ parameters:
 
 		-
 			rawMessage: 'Call to static method createPlatform() on an unknown class Symfony\AI\Platform\Bridge\OpenRouter\Factory.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/Ai/Model/Platform/Symfony.php
+
+		-
+			rawMessage: 'Instantiated class Symfony\AI\Platform\Bridge\OpenRouter\ModelCatalog not found.'
 			identifier: class.notFound
 			count: 1
 			path: app/code/core/Maho/Ai/Model/Platform/Symfony.php

@@ -126,6 +126,7 @@ class CmsPage extends CrudResource
     public ?bool $isActive = null;
 
     /** @var int[]|null */
+    #[ApiProperty(description: 'Store view ids the page belongs to. 0 means every store view. Several pages can share an identifier, one per store view, and the store view\'s own page wins over the one for every store view. Filter the list with the store code to get the page one store view shows.')]
     public ?array $stores = null;
 
     #[ApiProperty(writable: false, extraProperties: ['modelField' => 'creation_time'])]

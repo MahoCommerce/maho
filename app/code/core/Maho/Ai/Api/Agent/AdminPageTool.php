@@ -28,6 +28,91 @@ use Symfony\AI\Platform\Tool\Tool;
 final class AdminPageTool
 {
     public const NAME = 'admin_open_page';
+    public const FILL_NAME = 'admin_fill_form';
+    public const ACTION_NAME = 'admin_page_action';
+    public const NAMES = [self::NAME, self::FILL_NAME, self::ACTION_NAME];
+    public const ACTIONS = ['click', 'open_tab', 'set_field'];
+
+    public static function title(string $name): string
+    {
+        return match ($name) {
+            self::FILL_NAME => 'Fill admin form',
+            self::ACTION_NAME => 'Act on the page',
+            default => 'Open admin page',
+        };
+    }
+
+    /**
+     * The page action tool: one click, tab switch or field change on the page the
+     * administrator has open, performed by the panel after the answer. The panel resolves
+     * the target against the visible elements only, the ones the screen digest listed.
+     */
+    public function actionTool(): Tool
+    {
+        return new Tool(
+            new ExecutionReference(self::class, 'act'),
+            self::ACTION_NAME,
+            'Act on the admin page the administrator has open, after you answer: open a tab by its name, set a form field by its label or name, click a button by its label (for example "Save Page" when the administrator says "save"). Use the buttons, tabs and fields listed under what the administrator sees; never guess a label. Up to three steps in order, and a click must be the last step because the page may reload. The next message shows you the result.',
+            [
+                'type' => 'object',
+                'properties' => [
+                    'steps' => [
+                        'type' => 'array',
+                        'description' => 'The steps, in order. Example: set the Comment field, then click Submit Comment.',
+                        'minItems' => 1,
+                        'maxItems' => 3,
+                        'items' => [
+                            'type' => 'object',
+                            'properties' => [
+                                'action' => ['type' => 'string', 'description' => 'What to do.', 'enum' => self::ACTIONS],
+                                'target' => ['type' => 'string', 'description' => 'The button label, the tab name, or the field label or name, as shown on the page.'],
+                                'value' => ['type' => 'string', 'description' => 'The value to set, for set_field only.'],
+                            ],
+                            'required' => ['action', 'target'],
+                        ],
+                    ],
+                ],
+                'required' => ['steps'],
+                'additionalProperties' => false,
+            ],
+            ['title' => self::title(self::ACTION_NAME), 'read_only' => true, 'destructive' => false, 'local' => true],
+        );
+    }
+
+    /**
+     * @param array<string, mixed> $arguments
+     * @return array{ok: bool, text: string, steps?: list<array{action: string, target: string, value: string|null}>}
+     */
+    public function act(array $arguments): array
+    {
+        $raw = $arguments['steps'] ?? null;
+        if (!is_array($raw) || $raw === [] || count($raw) > 3) {
+            return ['ok' => false, 'text' => 'Pass one to three steps, each with an action (' . implode(', ', self::ACTIONS) . ') and a target.'];
+        }
+        $steps = [];
+        foreach (array_values($raw) as $i => $step) {
+            $action = is_array($step) ? (string) ($step['action'] ?? '') : '';
+            $target = is_array($step) ? trim((string) ($step['target'] ?? '')) : '';
+            $value = is_array($step) ? ($step['value'] ?? null) : null;
+            if (!in_array($action, self::ACTIONS, true) || $target === '') {
+                return ['ok' => false, 'text' => sprintf('Step %d needs an action (%s) and a target.', $i + 1, implode(', ', self::ACTIONS))];
+            }
+            if ($action === 'set_field' && !is_scalar($value)) {
+                return ['ok' => false, 'text' => sprintf('Step %d: set_field needs a value.', $i + 1)];
+            }
+            if ($action === 'click' && $i !== count($raw) - 1) {
+                return ['ok' => false, 'text' => sprintf('Step %d: a click must be the last step, because the page may reload.', $i + 1)];
+            }
+            $steps[] = ['action' => $action, 'target' => mb_substr($target, 0, 200), 'value' => is_scalar($value) ? (string) $value : null];
+        }
+        $summary = implode(', then ', array_map(static fn(array $s): string => sprintf('%s "%s"', str_replace('_', ' ', $s['action']), $s['target']), $steps));
+
+        return [
+            'ok' => true,
+            'text' => sprintf('The panel performs this when you finish your answer: %s. The page may reload; the next message shows its new state. Tell the administrator in one sentence what happens.', $summary),
+            'steps' => $steps,
+        ];
+    }
 
     /** @var array<string, array{title: string, action: string}>|null */
     private ?array $pages = null;
@@ -58,7 +143,7 @@ final class AdminPageTool
                     ],
                     'params' => [
                         'type' => 'object',
-                        'description' => 'Extra URL parameters, for example {"section": "general"} for the configuration page.',
+                        'description' => 'Extra URL parameters the page understands, for example {"section": "general"} for the configuration page, or {"store": "3"} for a page with a store view switcher (products, categories, configuration). A CMS page or block has no store parameter: each store view has its own record, so open that record.',
                         'additionalProperties' => ['type' => 'string'],
                     ],
                 ],
@@ -70,10 +155,81 @@ final class AdminPageTool
     }
 
     /**
+     * The form variant: the browser opens the edit form, or the new-record form, with
+     * the given values filled in. The administrator reviews the form and saves it.
+     */
+    public function fillTool(): Tool
+    {
+        return new Tool(
+            new ExecutionReference(self::class, 'fill'),
+            self::FILL_NAME,
+            'Open an admin edit form in the administrator\'s browser with values filled in, so the administrator reviews and saves it. Prefer it over an update tool for a long text such as page content, a description or an email template, and for a record the administrator wants to adjust by hand. Use the same menu paths as admin_open_page. Without record_id it opens the form for a new record. The fields are the API field names of the resource.',
+            [
+                'type' => 'object',
+                'properties' => [
+                    'page' => ['type' => 'string', 'description' => 'The menu path of the page, as in admin_open_page.', 'enum' => array_keys($this->pages())],
+                    'record_id' => ['type' => 'string', 'description' => 'Id of the record to edit. Omit it to open the form for a new record.'],
+                    'fields' => ['type' => 'object', 'description' => 'Field values to fill in, keyed by API field name, for example {"title": "..."}. A value replaces the field. To add to a long field without resending it, pass an object: {"content": {"prepend": "<p>...</p>"}} puts the text before the current value, {"append": "..."} after it. Use prepend or append whenever you did not read the whole current value.', 'additionalProperties' => true],
+                    'params' => ['type' => 'object', 'description' => 'Extra URL parameters the page understands, for example {"store": "3"} for a page with a store view switcher (products, categories, configuration). A CMS page or block has no store parameter: each store view has its own record, so open that record.', 'additionalProperties' => ['type' => 'string']],
+                ],
+                'required' => ['page', 'fields'],
+                'additionalProperties' => false,
+            ],
+            ['title' => self::title(self::FILL_NAME), 'read_only' => true, 'destructive' => false, 'local' => true],
+        );
+    }
+
+    /**
+     * @param array<string, mixed> $arguments
+     * @return array{ok: bool, text: string, url?: string, fields?: array<string, mixed>}
+     */
+    public function fill(array $arguments): array
+    {
+        $fields = $arguments['fields'] ?? null;
+        if (!is_array($fields) || $fields === []) {
+            return ['ok' => false, 'text' => 'Pass at least one field value in "fields".'];
+        }
+        $clean = [];
+        foreach ($fields as $name => $value) {
+            if (!is_string($name) || preg_match('/^[A-Za-z][A-Za-z0-9_]*$/', $name) !== 1) {
+                continue;
+            }
+            if (is_array($value) && array_key_exists('prepend', $value) === false && array_key_exists('append', $value) === false && !array_is_list($value)) {
+                continue;
+            }
+            if (is_array($value) && !array_is_list($value)) {
+                $value = array_intersect_key($value, ['prepend' => true, 'append' => true]);
+                $value = array_filter($value, is_scalar(...));
+                if ($value === []) {
+                    continue;
+                }
+            }
+            if (is_scalar($value) || is_array($value) || $value === null) {
+                $clean[$name] = $value;
+            }
+        }
+        if ($clean === []) {
+            return ['ok' => false, 'text' => 'No usable field: a field name is letters, digits and underscores.'];
+        }
+
+        $outcome = $this->open($arguments, true);
+        if (!$outcome['ok']) {
+            return $outcome;
+        }
+
+        return [
+            'ok' => true,
+            'text' => sprintf('The browser opens the form at %s with these fields filled in: %s. The administrator reviews the form and saves it. Do not call an update or create tool for the same change. Tell the administrator in one sentence what to check.', $outcome['url'], implode(', ', array_keys($clean))),
+            'url' => $outcome['url'],
+            'fields' => $clean,
+        ];
+    }
+
+    /**
      * @param array<string, mixed> $arguments
      * @return array{ok: bool, text: string, url?: string}
      */
-    public function open(array $arguments): array
+    public function open(array $arguments, bool $newRecordWithoutId = false): array
     {
         $pages = $this->pages();
         $path = (string) ($arguments['page'] ?? '');
@@ -98,6 +254,11 @@ final class AdminPageTool
             }
             [$route, $idParam] = $record;
             $params[$idParam] = $this->cleanValue((string) $recordId);
+        } elseif ($newRecordWithoutId) {
+            $route = $this->actionRoute($page['action'], 'new');
+            if ($route === null) {
+                return ['ok' => false, 'text' => sprintf('The page "%s" has no form for a new record.', $path)];
+            }
         }
 
         $url = \Mage::helper('adminhtml')->getUrl($route, $params);
@@ -182,19 +343,35 @@ final class AdminPageTool
      */
     private function recordRoute(string $menuAction): ?array
     {
-        $parts = explode('/', $menuAction);
-        $routeName = $parts[0];
-        $controller = $parts[1] ?? 'index';
-        $frontName = RouteCollectionBuilder::getFrontNameByRoute($routeName) ?? $routeName;
-
         foreach (['edit', 'view'] as $action) {
-            $route = RouteCollectionBuilder::resolveRoute($frontName, $controller, $action);
-            if ($route !== null) {
-                return [$routeName . '/' . $controller . '/' . $action, $this->idParameter($route['class'], $action . 'Action')];
+            $resolved = $this->resolveAction($menuAction, $action);
+            if ($resolved !== null) {
+                return [$resolved['route'], $this->idParameter($resolved['class'], $action . 'Action')];
             }
         }
 
         return null;
+    }
+
+    /** The route of one action of the controller behind a menu action, when the controller has it. */
+    private function actionRoute(string $menuAction, string $action): ?string
+    {
+        return $this->resolveAction($menuAction, $action)['route'] ?? null;
+    }
+
+    /** @return array{route: string, class: string}|null */
+    private function resolveAction(string $menuAction, string $action): ?array
+    {
+        $parts = explode('/', $menuAction);
+        $routeName = $parts[0];
+        $controller = $parts[1] ?? 'index';
+        $frontName = RouteCollectionBuilder::getFrontNameByRoute($routeName) ?? $routeName;
+        $route = RouteCollectionBuilder::resolveRoute($frontName, $controller, $action);
+        if ($route === null) {
+            return null;
+        }
+
+        return ['route' => $routeName . '/' . $controller . '/' . $action, 'class' => $route['class']];
     }
 
     /**

@@ -7,6 +7,7 @@
 
 declare(strict_types=1);
 
+use Maho\Ai\Api\Agent\McpToolbox;
 use Maho\ApiPlatform\Kernel;
 use Maho\ApiPlatform\Security\SameOriginGuard;
 use Symfony\AI\Platform\Model;
@@ -41,15 +42,24 @@ final class AiChatScript
     /** @var list<list<string>> tool names offered on each model call */
     public static array $offeredTools = [];
 
+    /** @var list<array<string, array<string, mixed>>> tool name => parameter schema, per model request */
+    public static array $offeredSchemas = [];
+
     public static function reset(ResultInterface ...$results): void
     {
         self::$queue = array_values($results);
         self::$offeredTools = [];
+        self::$offeredSchemas = [];
     }
 
     public static function answer(Model $model, array|string|object $input, array $options): ResultInterface
     {
         self::$offeredTools[] = array_map(static fn(Tool $tool): string => $tool->getName(), $options['tools'] ?? []);
+        $schemas = [];
+        foreach ($options['tools'] ?? [] as $tool) {
+            $schemas[$tool->getName()] = $tool->getParameters() ?? [];
+        }
+        self::$offeredSchemas[] = $schemas;
 
         return array_shift(self::$queue) ?? new TextResult('No scripted answer left.');
     }
@@ -258,7 +268,7 @@ it('runs a read tool at once, streams the answer and stores the conversation', f
 
         $result = aiChatRequest('/api/admin/ai/chat', [
             'message' => 'How many products are there?',
-            'context' => ['route' => 'dashboard/index'],
+            'context' => ['route' => 'catalog_product/index'],
         ]);
 
         expect($result['status'])->toBe(200);
@@ -274,18 +284,43 @@ it('runs a read tool at once, streams the answer and stores the conversation', f
         expect($done)->toHaveCount(1);
         expect($done[0]['state'])->toBe('complete');
 
-        // The model was offered the catalog tools and none of the excluded reports section.
-        expect(AiChatScript::$offeredTools[0])->toContain('catalog_products_list', 'content_widget_types_list');
+        // The catalog page loads the catalog section; other sections wait for enable_tools.
+        expect(AiChatScript::$offeredTools[0])->toContain('catalog_products_list', 'enable_tools', 'admin_open_page');
+        expect(AiChatScript::$offeredTools[0])->not->toContain('content_widget_types_list');
+        expect(count(AiChatScript::$offeredTools[0]))->toBeLessThanOrEqual(McpToolbox::MAX_TOOLS);
         expect(array_filter(AiChatScript::$offeredTools[0], static fn(string $n): bool => str_starts_with($n, 'reports_')))->toBe([]);
         foreach (AiChatScript::$offeredTools[0] as $name) {
             expect(strlen($name))->toBeLessThanOrEqual(64);
+        }
+        // Gemini refuses a schema keyword outside its subset, such as writeOnly or format.
+        $allowed = ['type', 'description', 'enum', 'properties', 'required', 'items', 'anyOf', 'oneOf', 'minimum', 'maximum', 'minLength', 'maxLength', 'minItems', 'maxItems', 'additionalProperties'];
+        $check = function (array $schema, string $path) use (&$check, $allowed): void {
+            foreach (array_keys($schema) as $key) {
+                expect(in_array((string) $key, $allowed, true))->toBeTrue("Unsupported schema keyword \"$key\" at $path");
+            }
+            foreach ($schema['properties'] ?? [] as $name => $child) {
+                $check($child, "$path.$name");
+            }
+            foreach (['items', 'additionalProperties'] as $one) {
+                if (is_array($schema[$one] ?? null)) {
+                    $check($schema[$one], "$path.$one");
+                }
+            }
+            foreach (['anyOf', 'oneOf'] as $many) {
+                foreach ($schema[$many] ?? [] as $child) {
+                    $check($child, "$path.$many");
+                }
+            }
+        };
+        foreach (AiChatScript::$offeredSchemas[0] ?? [] as $name => $schema) {
+            $check($schema, $name);
         }
 
         /** @var Maho_Ai_Model_Conversation $conversation */
         $conversation = Mage::getModel('ai/conversation')->load((int) $done[0]['conversation_id']);
         expect($conversation->getAdminUserId())->toBe((int) $admin->getId());
         expect($conversation->getTitle())->toBe('How many products are there?');
-        expect($conversation->getContextRoute())->toBe('dashboard/index');
+        expect($conversation->getContextRoute())->toBe('catalog_product/index');
         $roles = array_map(static fn($m) => $m->getRole(), array_values($conversation->messagesCollection()->getItems()));
         expect($roles)->toBe(['user', 'assistant', 'tool', 'assistant']);
         expect($conversation->getLockedUntil())->toBeNull();
@@ -328,21 +363,23 @@ it('does not offer tools the admin role cannot use and refuses a forced call', f
     try {
         aiChatLogin($admin);
         AiChatScript::reset(
+            new ToolCallResult([new ToolCall('call_0', 'enable_tools', ['sections' => ['catalog']])]),
             new ToolCallResult([new ToolCall('call_1', 'catalog_product_attributes_list', [])]),
             new TextResult('I cannot read the attributes.'),
         );
 
-        $result = aiChatRequest('/api/admin/ai/chat', ['message' => 'List attributes']);
+        $result = aiChatRequest('/api/admin/ai/chat', ['message' => 'List attributes', 'context' => ['route' => 'cms_page/index']]);
 
         expect($result['status'])->toBe(200);
-        $offered = AiChatScript::$offeredTools[0];
+        $offered = AiChatScript::$offeredTools[1];
         // Public storefront reads stay available; admin-gated catalog tools do not.
         expect($offered)->toContain('catalog_products_list', 'content_cms_blocks_list');
         $gated = array_values(array_filter($offered, static fn(string $n): bool => str_starts_with($n, 'catalog_product_attributes_') || str_ends_with($n, '_update') && str_starts_with($n, 'catalog_products')));
         expect($gated)->toBe([], 'Offered to a role without catalog access: ' . implode(', ', $gated));
         $toolResults = aiChatEvents($result['events'], 'tool_result');
-        expect($toolResults)->toHaveCount(1);
-        expect($toolResults[0]['ok'])->toBeFalse();
+        expect($toolResults)->toHaveCount(2);
+        expect($toolResults[0]['ok'])->toBeTrue();
+        expect($toolResults[1]['ok'])->toBeFalse();
         expect(aiChatEvents($result['events'], 'done')[0]['state'])->toBe('complete');
     } finally {
         aiChatDeleteConversations((int) $admin->getId());
@@ -586,6 +623,7 @@ it('runs a tool in the store view the store argument names', function (): void {
         aiChatLogin($admin);
         $code = (string) Mage::app()->getDefaultStoreView()->getCode();
         AiChatScript::reset(
+            new ToolCallResult([new ToolCall('call_s0', 'enable_tools', ['sections' => ['core']])]),
             new ToolCallResult([
                 new ToolCall('call_s1', 'core_store_config_get', ['store' => $code]),
                 new ToolCall('call_s2', 'core_store_config_get', ['store' => 'no_such_store_view']),
@@ -595,13 +633,191 @@ it('runs a tool in the store view the store argument names', function (): void {
 
         $result = aiChatRequest('/api/admin/ai/chat', ['message' => 'Show the store config']);
 
-        expect(AiChatScript::$offeredTools[0])->toContain('core_store_config_get');
-        $results = aiChatEvents($result['events'], 'tool_result');
+        expect(AiChatScript::$offeredTools[1])->toContain('core_store_config_get');
+        $results = array_slice(aiChatEvents($result['events'], 'tool_result'), 1);
         expect($results)->toHaveCount(2);
         expect($results[0]['ok'])->toBeTrue($result['raw']);
         expect($results[0]['preview'])->toContain('"' . $code . '"');
         expect($results[1]['ok'])->toBeFalse();
         expect($results[1]['preview'])->toContain('Unknown store view code', $code);
+    } finally {
+        aiChatDeleteConversations((int) $admin->getId());
+        aiChatDeleteAdmin($admin);
+    }
+});
+
+it('hands the form values to the browser through the fill tool', function (): void {
+    $admin = aiChatAdmin('ai_chat_filler', ['all']);
+    try {
+        aiChatLogin($admin);
+        AiChatScript::reset(
+            new ToolCallResult([
+                new ToolCall('call_f1', 'admin_fill_form', ['page' => 'cms/page', 'record_id' => '2', 'fields' => ['title' => 'Home', 'content' => ['prepend' => '<p>Hi</p>', 'junk' => 1]]]),
+                new ToolCall('call_f2', 'admin_fill_form', ['page' => 'cms/block', 'fields' => ['title' => 'New block']]),
+                new ToolCall('call_f3', 'admin_fill_form', ['page' => 'cms/block', 'fields' => []]),
+            ]),
+            new TextResult('Review the form.'),
+        );
+
+        $result = aiChatRequest('/api/admin/ai/chat', ['message' => 'Edit the home page content']);
+
+        expect(AiChatScript::$offeredTools[0])->toContain('admin_fill_form');
+        $toolCalls = aiChatEvents($result['events'], 'tool_call');
+        expect($toolCalls[0]['read_only'])->toBeTrue();
+        expect($toolCalls[0]['title'])->toBe('Fill admin form');
+        $results = aiChatEvents($result['events'], 'tool_result');
+        expect($results[0]['ok'])->toBeTrue($result['raw']);
+        expect($results[1]['ok'])->toBeTrue($result['raw']);
+        expect($results[2]['ok'])->toBeFalse();
+        $navigate = aiChatEvents($result['events'], 'navigate');
+        expect($navigate)->toHaveCount(2);
+        expect($navigate[0]['url'])->toContain('/cms_page/edit/page_id/2/');
+        expect($navigate[0]['fields'])->toBe(['title' => 'Home', 'content' => ['prepend' => '<p>Hi</p>']]);
+        expect($navigate[1]['url'])->toContain('/cms_block/new/');
+        expect(aiChatEvents($result['events'], 'done')[0]['state'])->toBe('complete');
+    } finally {
+        aiChatDeleteConversations((int) $admin->getId());
+        aiChatDeleteAdmin($admin);
+    }
+});
+
+it('loads tool sections on demand and keeps them for the conversation', function (): void {
+    $admin = aiChatAdmin('ai_chat_sections', ['all']);
+    try {
+        aiChatLogin($admin);
+        AiChatScript::reset(
+            new ToolCallResult([new ToolCall('call_e1', 'enable_tools', ['sections' => ['sales', 'nope']])]),
+            new ToolCallResult([new ToolCall('call_e2', 'enable_tools', ['sections' => ['sales']])]),
+            new ToolCallResult([new ToolCall('call_e3', 'sales_orders_list', ['itemsPerPage' => 1])]),
+            new TextResult('Here are the orders.'),
+        );
+
+        $result = aiChatRequest('/api/admin/ai/chat', ['message' => 'What came in today?', 'context' => ['route' => 'dashboard/index']]);
+
+        expect($result['status'])->toBe(200);
+        // The dashboard loads no section and the message names none: only the local tools are offered at first.
+        expect(AiChatScript::$offeredTools[0])->toBe(['enable_tools', 'admin_open_page', 'admin_fill_form', 'admin_page_action']);
+        $results = aiChatEvents($result['events'], 'tool_result');
+        expect($results[0]['ok'])->toBeFalse();
+        expect($results[0]['preview'])->toContain('nope');
+        expect($results[1]['ok'])->toBeTrue();
+        // The failed load did not change the set, so the second request still had the local tools only.
+        expect(AiChatScript::$offeredTools[1])->not->toContain('sales_orders_list');
+        expect(AiChatScript::$offeredTools[2])->toContain('sales_orders_list', 'sales_orders_get');
+        expect($results[2]['ok'])->toBeTrue($result['raw']);
+        $done = aiChatEvents($result['events'], 'done');
+        expect($done[0]['state'])->toBe('complete');
+        expect(implode('', array_column(aiChatEvents($result['events'], 'delta'), 'text')))->toBe('Here are the orders.');
+
+        // The next turn of the same conversation starts with the sales section loaded.
+        AiChatScript::reset(new TextResult('Still here.'));
+        aiChatRequest('/api/admin/ai/chat', ['conversation_id' => (int) $done[0]['conversation_id'], 'message' => 'Thanks', 'context' => ['route' => 'dashboard/index']]);
+        expect(AiChatScript::$offeredTools[0])->toContain('sales_orders_list');
+    } finally {
+        aiChatDeleteConversations((int) $admin->getId());
+        aiChatDeleteAdmin($admin);
+    }
+});
+
+it('drops the placeholders a model sends for unused list parameters', function (): void {
+    $admin = aiChatAdmin('ai_chat_placeholders', ['all']);
+    try {
+        aiChatLogin($admin);
+        AiChatScript::reset(
+            new ToolCallResult([new ToolCall('call_p1', 'catalog_products_list', ['search' => '', 'categoryId' => 0, 'priceMin' => 0, 'priceMax' => 0, 'sku' => '', 'status' => '', 'pageSize' => 2, 'page' => 1, 'store' => ''])]),
+            new TextResult('Found products.'),
+        );
+
+        $result = aiChatRequest('/api/admin/ai/chat', ['message' => 'Find products', 'context' => ['route' => 'catalog_product/index']]);
+
+        $preview = aiChatEvents($result['events'], 'tool_result')[0]['preview'];
+        expect($preview)->not->toContain('"totalItems":0');
+        expect($preview)->toContain('"sku"');
+    } finally {
+        aiChatDeleteConversations((int) $admin->getId());
+        aiChatDeleteAdmin($admin);
+    }
+});
+
+it('loads the sections the request names before the first model request', function (): void {
+    $admin = aiChatAdmin('ai_chat_keywords', ['all']);
+    try {
+        aiChatLogin($admin);
+        foreach ([
+            'Open the home page of the default store in the editor' => ['content_cms_pages_list', 'admin_fill_form'],
+            'Which orders came in today?' => ['sales_orders_list'],
+            'Find products that are low in stock' => ['catalog_products_list'],
+            'How many customers registered this week?' => ['customers_customers_list'],
+        ] as $message => $expected) {
+            AiChatScript::reset(new TextResult('Ok.'));
+            aiChatRequest('/api/admin/ai/chat', ['message' => $message, 'context' => ['route' => 'dashboard/index']]);
+            expect(AiChatScript::$offeredTools[0])->toContain(...$expected);
+            expect(count(AiChatScript::$offeredTools[0]))->toBeLessThanOrEqual(McpToolbox::MAX_TOOLS);
+        }
+    } finally {
+        aiChatDeleteConversations((int) $admin->getId());
+        aiChatDeleteAdmin($admin);
+    }
+});
+
+it('resolves a reused page identifier to the store view\'s own page', function (): void {
+    $admin = aiChatAdmin('ai_chat_storepage', ['all']);
+    $store = Mage::app()->getDefaultStoreView();
+    $shared = Mage::getModel('cms/page')->setData(['identifier' => 'ai-chat-store-home', 'title' => 'Shared home', 'content' => 'shared', 'is_active' => 1, 'stores' => [0]]);
+    $shared->save();
+    $own = Mage::getModel('cms/page')->setData(['identifier' => 'ai-chat-store-home', 'title' => 'Own home', 'content' => 'own', 'is_active' => 1, 'stores' => [(int) $store->getId()]]);
+    $own->save();
+    try {
+        aiChatLogin($admin);
+        AiChatScript::reset(
+            new ToolCallResult([
+                new ToolCall('call_h1', 'content_cms_pages_list', ['identifier' => 'ai-chat-store-home', 'store' => (string) $store->getCode()]),
+                new ToolCall('call_h2', 'content_cms_pages_list', ['identifier' => 'ai-chat-store-home']),
+            ]),
+            new TextResult('Found.'),
+        );
+
+        $result = aiChatRequest('/api/admin/ai/chat', ['message' => 'Find the home page', 'context' => ['route' => 'cms_page/index']]);
+
+        $results = aiChatEvents($result['events'], 'tool_result');
+        expect($results[0]['preview'])->toContain('"Own home"');
+        expect($results[0]['preview'])->not->toContain('"Shared home"');
+        // Without a store code the default store view applies, which owns the same page.
+        expect($results[1]['preview'])->toContain('"Own home"');
+    } finally {
+        $own->delete();
+        $shared->delete();
+        aiChatDeleteConversations((int) $admin->getId());
+        aiChatDeleteAdmin($admin);
+    }
+});
+
+it('hands a page action to the browser', function (): void {
+    $admin = aiChatAdmin('ai_chat_action', ['all']);
+    try {
+        aiChatLogin($admin);
+        AiChatScript::reset(
+            new ToolCallResult([
+                new ToolCall('call_a1', 'admin_page_action', ['steps' => [['action' => 'set_field', 'target' => 'Comment', 'value' => 'pippo'], ['action' => 'click', 'target' => 'Submit Comment']]]),
+                new ToolCall('call_a2', 'admin_page_action', ['steps' => [['action' => 'click', 'target' => 'Save'], ['action' => 'set_field', 'target' => 'Page Title', 'value' => 'x']]]),
+            ]),
+            new TextResult('Saving.'),
+        );
+
+        $result = aiChatRequest('/api/admin/ai/chat', ['message' => 'save it please', 'context' => ['route' => 'cms_page/edit']]);
+
+        expect(AiChatScript::$offeredTools[0])->toContain('admin_page_action');
+        $results = aiChatEvents($result['events'], 'tool_result');
+        expect($results[0]['ok'])->toBeTrue($result['raw']);
+        expect($results[1]['ok'])->toBeFalse();
+        $actions = aiChatEvents($result['events'], 'page_action');
+        expect($actions)->toHaveCount(1);
+        expect($actions[0]['steps'])->toBe([
+            ['action' => 'set_field', 'target' => 'Comment', 'value' => 'pippo'],
+            ['action' => 'click', 'target' => 'Submit Comment', 'value' => null],
+        ]);
+        expect($results[1]['preview'])->toContain('a click must be the last step');
+        expect(aiChatEvents($result['events'], 'done')[0]['state'])->toBe('complete');
     } finally {
         aiChatDeleteConversations((int) $admin->getId());
         aiChatDeleteAdmin($admin);
