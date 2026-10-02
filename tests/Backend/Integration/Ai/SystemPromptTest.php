@@ -78,6 +78,7 @@ it('stays within the size budget and keeps the decision table', function (): voi
     expect($prompt)->toContain('Opening a page is never a substitute for a change');
     expect($prompt)->toContain('The page scope is the default');
     expect($prompt)->toContain('When you are not sure, ask.');
+    expect($prompt)->toContain('A key stays as it is.');
     expect($prompt)->toContain('an attribute set name or a category is not a store');
     expect($prompt)->toContain('never in the language of the data you read');
 });
