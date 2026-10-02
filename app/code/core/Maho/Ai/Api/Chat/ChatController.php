@@ -14,6 +14,7 @@ namespace Maho\Ai\Api\Chat;
 
 use Mage_Admin_Model_User;
 use Maho\ApiPlatform\Security\SameOriginGuard;
+use Maho\ApiPlatform\Service\StoreContext;
 use Maho_Ai_Model_Chat_SseWriter;
 use Maho_Ai_Model_Conversation;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -104,6 +105,11 @@ final class ChatController
         if (!\Mage::getSingleton('core/session')->validateFormKey((string) ($input['form_key'] ?? ''))) {
             throw new AccessDeniedHttpException('Invalid form key.');
         }
+
+        // The storefront's store cookie would make this request run in that store view; an
+        // admin request runs in the admin scope, as every admin controller does.
+        \Mage::app()->setCurrentStore(\Mage_Core_Model_Store::ADMIN_CODE);
+        StoreContext::ensureStore();
 
         return $input;
     }

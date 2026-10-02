@@ -515,6 +515,61 @@ it('opens an admin page in the browser through the local page tool', function ()
     }
 });
 
+it('ignores the storefront store cookie: reads the default store view and builds admin urls without a store code', function (): void {
+    $admin = aiChatAdmin('ai_chat_store_cookie', ['all']);
+    $other = null;
+    foreach (Mage::app()->getStores() as $candidate) {
+        if ((int) $candidate->getId() !== (int) Mage::app()->getDefaultStoreView()->getId()) {
+            $other = $candidate;
+            break;
+        }
+    }
+    $createdStore = $other === null;
+    if ($createdStore) {
+        $group = Mage::app()->getDefaultStoreView()->getGroup();
+        $other = Mage::getModel('core/store')->setCode('ai_chat_other')->setName('Other')->setWebsiteId($group->getWebsiteId())->setGroupId($group->getId())->setIsActive(1);
+        $other->save();
+        Mage::app()->reinitStores();
+    }
+    $product = Mage::getModel('catalog/product')->getCollection()->addAttributeToSelect('name')->setPageSize(1)->getFirstItem();
+    $productId = (int) $product->getId();
+    $defaultName = (string) $product->getName();
+    Mage::getSingleton('catalog/product_action')->updateAttributes([$productId], ['name' => 'Nome nella vista negozio'], (int) $other->getId());
+    try {
+        aiChatLogin($admin);
+        AiChatScript::reset(
+            new ToolCallResult([new ToolCall('call_1', 'catalog_products_get', ['id' => (string) $productId, 'store' => ''])]),
+            new ToolCallResult([new ToolCall('call_2', 'admin_open_page', ['page' => 'catalog/products', 'record_id' => (string) $productId])]),
+            new TextResult('Opening the product.'),
+        );
+        // What the store cookie does at bootstrap when the administrator visited that storefront.
+        Mage::app()->setCurrentStore($other->getCode());
+
+        $result = aiChatRequest('/api/admin/ai/chat', ['message' => 'Improve the SEO of this product', 'context' => ['route' => 'catalog_product/edit', 'entity_type' => 'product', 'entity_id' => $productId]]);
+
+        expect($result['status'])->toBe(200);
+        $toolResults = aiChatEvents($result['events'], 'tool_result');
+        expect($toolResults[0]['ok'])->toBeTrue($result['raw']);
+        expect($toolResults[0]['preview'])->toContain($defaultName);
+        expect($toolResults[0]['preview'])->not->toContain('Nome nella vista negozio');
+        $navigate = aiChatEvents($result['events'], 'navigate');
+        expect($navigate)->toHaveCount(1);
+        expect($navigate[0]['url'])->not->toContain('/' . $other->getCode() . '/');
+        expect($navigate[0]['url'])->toContain('/catalog_product/edit/id/' . $productId . '/');
+    } finally {
+        Mage::app()->setCurrentStore(Mage_Core_Model_Store::ADMIN_CODE);
+        $attributeId = (int) Mage::getSingleton('eav/config')->getAttribute('catalog_product', 'name')->getId();
+        $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
+        $adapter->delete($adapter->getTableName('catalog_product_entity_varchar'), ['entity_id = ?' => $productId, 'store_id = ?' => (int) $other->getId(), 'attribute_id = ?' => $attributeId]);
+        if ($createdStore) {
+            $other->delete();
+            Mage::app()->reinitStores();
+        }
+        aiChatDeleteConversations((int) $admin->getId());
+        aiChatDeleteAdmin($admin);
+    }
+});
+
 it('offers only the admin pages the role can open', function (): void {
     $admin = aiChatAdmin('ai_chat_nav_limited', ['admin/system/ai/chat', 'admin/cms']);
     try {
