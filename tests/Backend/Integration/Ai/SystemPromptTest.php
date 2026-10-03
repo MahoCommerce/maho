@@ -65,6 +65,16 @@ it('describes what the administrator sees when the panel sends a screen digest',
     expect($prompt)->toContain('Insert Slideshow');
 });
 
+it('lists the editor layouts from the guide the panel sent', function (): void {
+    $admin = aiPromptAdmin();
+    $guide = "## Standard HTML the editor keeps\np\n\n## Directives\n{{var}}\n\n## Columns: 2 Columns\n<div></div>\n\n## Bento grid: Mosaic\n<div></div>";
+    $prompt = new Maho_Ai_Model_Chat_SystemPrompt()->build($admin, ['route' => 'cms_page/edit', 'editor_guide' => $guide]);
+
+    expect($prompt)->toContain('The content editor offers these layouts: Columns: 2 Columns, Bento grid: Mosaic.');
+    expect($prompt)->not->toContain('<div></div>');
+    expect(new Maho_Ai_Model_Chat_SystemPrompt()->build($admin, ['route' => 'cms_page/edit']))->not->toContain('The content editor offers');
+});
+
 it('stays within the size budget and keeps its sections', function (): void {
     $prompt = new Maho_Ai_Model_Chat_SystemPrompt()->build(aiPromptAdmin(), ['route' => 'cms_page/edit', 'entity_type' => 'CMS page', 'entity_id' => 60, 'entity_label' => 'Maho Store', 'store' => '', 'screen' => '']);
 

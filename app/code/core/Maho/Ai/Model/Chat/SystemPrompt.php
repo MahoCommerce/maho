@@ -32,6 +32,7 @@ class Maho_Ai_Model_Chat_SystemPrompt
             $this->pageContext($pageContext),
             $this->procedure(),
             $this->glossary(),
+            $this->editorLayouts((string) ($pageContext['editor_guide'] ?? '')),
             $this->example(),
             $this->answer(),
         ];
@@ -121,7 +122,7 @@ class Maho_Ai_Model_Chat_SystemPrompt
             '2. Choose the action by the kind of request:',
             '   - A question: read, then answer from the result.',
             '   - A short change to one record, such as a price, a status or a title: the update tool. It pauses until the administrator confirms it in the panel; say in one sentence what will change before you call it.',
-            '   - A long text, such as page content, a description or an email template: admin_fill_form. It opens the edit form with your values, and the administrator reviews and saves it. To add to a field, pass {"prepend": …} or {"append": …} for it, never the whole value you did not read in full. Content with a layout (columns, a grid, an accordion, tabs, a slideshow) or an image follows the HTML that admin_content_guide shows, so the editor keeps it editable.',
+            '   - A long text, such as page content, a description or an email template: admin_fill_form. It opens the edit form with your values, and the administrator reviews and saves it. To add to a field, pass {"prepend": …} or {"append": …} for it, never the whole value you did not read in full. Content with a layout or an image follows the HTML that admin_content_guide shows, so the editor keeps it editable.',
             '   - Content that must appear on many pages: a widget instance under CMS > Widgets. Offer to open that page.',
             '   - "Take me to", "open", "show me the page": admin_open_page. Opening a page is never a substitute for a change the administrator asked for.',
             '   - Many records at once: the update tools, one confirmation for the batch.',
@@ -144,6 +145,26 @@ class Maho_Ai_Model_Chat_SystemPrompt
             '- An order has invoices, shipments and credit memos as separate records. A status change on an order does not move money or stock; an invoice or a credit memo does.',
             '- Caches and indexes refresh on their own after a write; do not flush or reindex unless the administrator asks or a result says so.',
         ]);
+    }
+
+    /**
+     * The layout names from the guide the panel generated in the editor, so the model knows
+     * what the editor offers before it reads the HTML through the tool.
+     */
+    private function editorLayouts(string $guide): string
+    {
+        if (!preg_match_all('/^## (.+)$/m', $guide, $matches)) {
+            return '';
+        }
+        $names = array_values(array_filter(
+            array_map(trim(...), $matches[1]),
+            static fn(string $name): bool => !str_starts_with($name, 'Standard HTML') && !str_starts_with($name, 'Directives'),
+        ));
+        if ($names === []) {
+            return '';
+        }
+
+        return 'The content editor offers these layouts: ' . implode(', ', $names) . '. ' . \Maho\Ai\Api\Agent\ContentGuideTool::NAME . ' shows the HTML of each one and of images, widgets and variables.';
     }
 
     private function example(): string
