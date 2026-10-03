@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "51a5e3a0556b4ccacd195830a5be913e",
+    "content-hash": "82b2022f98a45907163715a1ff676582",
     "packages": [
         {
             "name": "altcha-org/altcha",
@@ -15464,16 +15464,16 @@
         },
         {
             "name": "symfony/mcp-bundle",
-            "version": "v0.13.0",
+            "version": "v0.14.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/mcp-bundle.git",
-                "reference": "a0d4443ff899803a4030ae24fbb1dfb961f0b6fa"
+                "reference": "f9f5be5e16a7b4749ca98d8099042902fe917a74"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/mcp-bundle/zipball/a0d4443ff899803a4030ae24fbb1dfb961f0b6fa",
-                "reference": "a0d4443ff899803a4030ae24fbb1dfb961f0b6fa",
+                "url": "https://api.github.com/repos/symfony/mcp-bundle/zipball/f9f5be5e16a7b4749ca98d8099042902fe917a74",
+                "reference": "f9f5be5e16a7b4749ca98d8099042902fe917a74",
                 "shasum": ""
             },
             "require": {
@@ -15527,7 +15527,7 @@
             ],
             "description": "Symfony integration bundle for Model Context Protocol (via official mcp/sdk)",
             "support": {
-                "source": "https://github.com/symfony/mcp-bundle/tree/v0.13.0"
+                "source": "https://github.com/symfony/mcp-bundle/tree/v0.14.1"
             },
             "funding": [
                 {
@@ -15547,7 +15547,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-08-30T00:16:19+00:00"
+            "time": "2026-09-26T01:53:23+00:00"
         },
         {
             "name": "symfony/options-resolver",
