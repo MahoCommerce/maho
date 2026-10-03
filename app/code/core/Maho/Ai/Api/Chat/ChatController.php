@@ -15,6 +15,7 @@ namespace Maho\Ai\Api\Chat;
 use Mage_Admin_Model_User;
 use Maho\ApiPlatform\Security\SameOriginGuard;
 use Maho\ApiPlatform\Service\StoreContext;
+use Maho_Ai_Model_Chat_ClientGone as ClientGone;
 use Maho_Ai_Model_Chat_SseWriter;
 use Maho_Ai_Model_Conversation;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -192,6 +193,8 @@ final class ChatController
             try {
                 $sse->open();
                 $turn($sse);
+            } catch (ClientGone) {
+                // The browser left before the turn produced anything to keep.
             } finally {
                 $conversation->releaseLock();
                 $this->requestStack->pop();

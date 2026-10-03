@@ -16,6 +16,7 @@ use Mage_Admin_Model_User;
 use Maho\Ai\Api\Agent\AgentFactory;
 use Maho\Ai\Api\Agent\McpToolCatalog;
 use Maho\Ai\Api\Agent\McpToolbox;
+use Maho_Ai_Model_Chat_ClientGone;
 use Maho_Ai_Model_Chat_ConfirmationRequired;
 use Maho_Ai_Model_Chat_MessageBagBuilder;
 use Maho_Ai_Model_Chat_SseWriter;
@@ -187,6 +188,11 @@ final class ChatService
             $conversation->save();
             $this->recordUsage($conversation, $in, $out);
             $sse->event('done', ['state' => 'complete', 'conversation_id' => (int) $conversation->getId()]);
+        } catch (Maho_Ai_Model_Chat_ClientGone) {
+            // The administrator stopped the turn. Keep the text that was already streamed.
+            if ($roundText !== '') {
+                $conversation->addMessage(['role' => Message::ROLE_ASSISTANT, 'content' => $roundText]);
+            }
         } catch (Maho_Ai_Model_Chat_ConfirmationRequired $e) {
             $this->persistRound($conversation, $roundText, $e->toolCalls, $e->results, $e->pending);
             $calls = [];

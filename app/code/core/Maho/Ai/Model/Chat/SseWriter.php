@@ -15,6 +15,9 @@ class Maho_Ai_Model_Chat_SseWriter
     /** Output buffers up to this level stay open. A test raises it to capture the stream. */
     public static int $keepBufferLevel = 0;
 
+    /** A test sets this to act as a browser that closed the stream. */
+    public static bool $simulateClientGone = false;
+
     private bool $open = false;
 
     /**
@@ -45,7 +48,9 @@ class Maho_Ai_Model_Chat_SseWriter
             session_write_close();
         }
         set_time_limit(0);
-        ignore_user_abort(false);
+        // PHP would end the script at the next output after the browser left, and skip the
+        // finally blocks that release the conversation lock. The writer checks and throws instead.
+        ignore_user_abort(true);
         while (ob_get_level() > self::$keepBufferLevel) {
             ob_end_flush();
         }
@@ -71,14 +76,20 @@ class Maho_Ai_Model_Chat_SseWriter
 
     public function isClientGone(): bool
     {
-        return connection_aborted() !== 0;
+        return self::$simulateClientGone || connection_aborted() !== 0;
     }
 
+    /**
+     * @throws Maho_Ai_Model_Chat_ClientGone when the browser closed the stream
+     */
     private function flush(): void
     {
         if (ob_get_level() > self::$keepBufferLevel) {
             ob_flush();
         }
         flush();
+        if ($this->isClientGone()) {
+            throw new Maho_Ai_Model_Chat_ClientGone('The browser closed the stream.');
+        }
     }
 }

@@ -330,6 +330,32 @@ it('runs a read tool at once, streams the answer and stores the conversation', f
     }
 });
 
+it('ends the turn and releases the lock when the browser closes the stream', function (): void {
+    $admin = aiChatAdmin('ai_chat_stopper', ['all']);
+    try {
+        aiChatLogin($admin);
+        AiChatScript::reset(new TextResult('A long answer the administrator stopped.'));
+        Maho_Ai_Model_Chat_SseWriter::$simulateClientGone = true;
+        try {
+            $stopped = aiChatRequest('/api/admin/ai/chat', ['message' => 'tell me everything']);
+        } finally {
+            Maho_Ai_Model_Chat_SseWriter::$simulateClientGone = false;
+        }
+        expect($stopped['status'])->toBe(200);
+        expect(aiChatEvents($stopped['events'], 'done'))->toBe([]);
+
+        $conversation = Mage::getModel('ai/conversation')->getCollection()->addFieldToFilter('admin_user_id', (int) $admin->getId())->getFirstItem();
+        expect($conversation->getId())->not->toBeNull();
+        AiChatScript::reset(new TextResult('Next answer.'));
+        $next = aiChatRequest('/api/admin/ai/chat', ['message' => 'and now?', 'conversation_id' => (int) $conversation->getId()]);
+        expect($next['status'])->toBe(200);
+        expect(aiChatEvents($next['events'], 'done')[0]['state'])->toBe('complete');
+    } finally {
+        aiChatDeleteConversations((int) $admin->getId());
+        aiChatDeleteAdmin($admin);
+    }
+});
+
 it('runs a tool call that the stream reported twice only once', function (): void {
     $admin = aiChatAdmin('ai_chat_dedupe', ['all']);
     try {
