@@ -648,20 +648,33 @@ body.ai-chat-open .ai-chat-toggle {
     color: var(--maho-ink-muted, #666);
 }
 
-/* Files attached to the next message, and the button that adds them. */
-.ai-chat-attach-bar {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    padding: 0 12px 8px;
-}
-
+/* Files attached to the next message. */
 .ai-chat-attachments {
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
-    min-width: 0;
-    padding-top: 3px;
+    padding: 0 12px 8px;
+}
+
+/* Shown over the panel while a file is dragged over it. */
+.ai-chat-drop {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 8px;
+    border: 2px dashed var(--maho-accent, #c7d422);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--maho-surface) 88%, transparent);
+    font-weight: 600;
+    pointer-events: none;
+}
+
+.ai-chat-drop[hidden],
+.ai-chat-attachments[hidden] {
+    display: none;
 }
 
 .ai-chat-attachment {

@@ -107,15 +107,13 @@ final class ChatController
         $admin = $this->admin();
         $file = $request->files->get('file');
         if (!$file instanceof \Symfony\Component\HttpFoundation\File\UploadedFile || !$file->isValid()) {
-            throw new BadRequestHttpException('No file was uploaded.');
+            return new JsonResponse(['error' => true, 'message' => 'No file was uploaded.'], 400);
         }
         try {
-            $stored = Maho_Ai_Model_Chat_Attachment::store((int) $admin->getId(), (string) $file->getClientOriginalName(), $file->getPathname());
+            return new JsonResponse(Maho_Ai_Model_Chat_Attachment::store((int) $admin->getId(), (string) $file->getClientOriginalName(), $file->getPathname()));
         } catch (\Mage_Core_Exception $e) {
-            throw new BadRequestHttpException($e->getMessage());
+            return new JsonResponse(['error' => true, 'message' => $e->getMessage()], 400);
         }
-
-        return new JsonResponse($stored);
     }
 
     /**

@@ -51,7 +51,16 @@ class MahoAiAssistant {
                 });
             }
         };
-        chat.textInput = { placeholder: { text: this.labels.placeholder } };
+        chat.textInput = { placeholder: { text: this.labels.placeholder }, styles: { container: { width: 'calc(100% - 24px)', maxWidth: 'none' }, text: { paddingLeft: '32px' } } };
+        chat.customButtons = [{
+            position: 'inside-start',
+            tooltip: { text: this.labels.attach },
+            styles: { button: { default: {
+                container: { default: { marginLeft: '6px', marginRight: '2px' } },
+                svg: { content: this.config.attachIcon, styles: { default: { width: '18px', height: '18px', color: 'var(--maho-ink-muted, #666)' } } },
+            } } },
+            onClick: () => this.fileInput.click(),
+        }];
         chat.introMessage = { html: this.renderIntro() };
         chat.messageStyles = {
             default: {
@@ -80,8 +89,8 @@ class MahoAiAssistant {
         this.attachments = [];
         this.attachmentList = document.getElementById('ai-chat-attachments');
         this.fileInput = document.getElementById('ai-chat-file');
-        document.getElementById('ai-chat-attach').addEventListener('click', () => this.fileInput.click());
         this.fileInput.addEventListener('change', () => this.attachFiles(this.fileInput.files));
+        this.bindDrop();
         this.deleteButton.addEventListener('click', () => this.deleteConversation());
         this.picker.addEventListener('change', () => {
             const id = parseInt(this.picker.value, 10);
@@ -243,20 +252,50 @@ class MahoAiAssistant {
             }
             const body = new FormData();
             body.append('file', file, file.name);
-            body.append('form_key', this.config.formKey);
             try {
-                const response = await fetch(this.config.uploadUrl, { method: 'POST', body, credentials: 'same-origin' });
-                const data = await response.json().catch(() => ({}));
-                if (!response.ok) {
-                    throw new Error(data.detail ?? data.message ?? response.statusText);
-                }
-                this.attachments.push(data);
+                this.attachments.push(await mahoFetch(this.config.uploadUrl, { method: 'POST', body, loaderArea: false }));
             } catch (error) {
                 this.flash(this.labels.uploadFailed.replace('%s', error.message));
             }
         }
         this.fileInput.value = '';
         this.renderAttachments();
+    }
+
+    /** A file dragged anywhere over the panel attaches on drop. The counter survives the enter/leave pairs of child nodes. */
+    bindDrop() {
+        const hint = document.getElementById('ai-chat-drop');
+        let depth = 0;
+        const hasFiles = (event) => [...(event.dataTransfer?.types ?? [])].includes('Files');
+        this.panel.addEventListener('dragenter', (event) => {
+            if (!hasFiles(event)) {
+                return;
+            }
+            event.preventDefault();
+            depth++;
+            hint.hidden = false;
+        });
+        this.panel.addEventListener('dragover', (event) => {
+            if (hasFiles(event)) {
+                event.preventDefault();
+                event.dataTransfer.dropEffect = 'copy';
+            }
+        });
+        this.panel.addEventListener('dragleave', (event) => {
+            if (hasFiles(event) && --depth <= 0) {
+                depth = 0;
+                hint.hidden = true;
+            }
+        });
+        this.panel.addEventListener('drop', (event) => {
+            if (!hasFiles(event)) {
+                return;
+            }
+            event.preventDefault();
+            depth = 0;
+            hint.hidden = true;
+            this.attachFiles(event.dataTransfer.files);
+        });
     }
 
     renderAttachments() {

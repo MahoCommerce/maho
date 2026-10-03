@@ -110,7 +110,7 @@ final class ImageTool
         $mediaPath = 'wysiwyg/' . self::FOLDER . '/' . $file;
 
         return ['ok' => true, 'text' => sprintf(
-            "Image saved as %s (%dx%d). URL: %s. Directive for page content: <img src=\"{{media url=\\\"%s\\\"}}\" alt=\"\">. It is in the media library under wysiwyg/%s.",
+            'Image saved as %s (%dx%d). URL: %s. Directive for page content: <img src="{{media url=\\"%s\\"}}" alt="">. It is in the media library under wysiwyg/%s.',
             $mediaPath,
             (int) ($info[0] ?? 0),
             (int) ($info[1] ?? 0),
