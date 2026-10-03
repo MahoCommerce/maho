@@ -13,6 +13,7 @@ declare(strict_types=1);
 namespace Mage\Index\Api;
 
 use ApiPlatform\Metadata\ApiProperty;
+use Maho\ApiPlatform\Metadata\EnumSource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\GraphQl\Query;
@@ -107,7 +108,7 @@ class IndexProcess extends CrudResource
     #[ApiProperty(writable: false, description: 'pending (ready), working (a reindex runs) or require_reindex (the index is out of date)')]
     public ?string $status = null;
 
-    #[ApiProperty(description: 'real_time (update on save) or manual (update only on reindex)')]
+    #[ApiProperty(description: 'real_time (update on save) or manual (update only on reindex)', extraProperties: [EnumSource::KEY => ['real_time', 'manual']])]
     public ?string $mode = null;
 
     #[ApiProperty(writable: false, description: 'Start of the last reindex, UTC')]

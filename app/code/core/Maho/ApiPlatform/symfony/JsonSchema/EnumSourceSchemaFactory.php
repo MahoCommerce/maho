@@ -56,12 +56,39 @@ final class EnumSourceSchemaFactory implements SchemaFactoryInterface, SchemaFac
                     continue;
                 }
                 $propertySchema = $propertySchema instanceof \ArrayObject ? $propertySchema->getArrayCopy() : (array) $propertySchema;
-                $propertySchema['enum'] = $values;
-                $properties[$property] = $propertySchema;
+                $properties[$property] = $this->withEnum($propertySchema, $values);
             }
             $definition['properties'] = $properties;
             $definitions[$name] = $definition;
         }
+
+        return $schema;
+    }
+
+    /**
+     * The enum goes where the value goes: on the items of an array property, on the
+     * property itself otherwise, cast to the declared type so an integer id stays an integer.
+     *
+     * @param array<string, mixed> $schema
+     * @param list<int|string> $values
+     * @return array<string, mixed>
+     */
+    private function withEnum(array $schema, array $values): array
+    {
+        $type = $schema['type'] ?? null;
+        $types = is_array($type) ? $type : [$type];
+        if (in_array('array', $types, true)) {
+            $items = $schema['items'] ?? [];
+            $items = $items instanceof \ArrayObject ? $items->getArrayCopy() : (array) $items;
+            $schema['items'] = $this->withEnum($items === [] ? ['type' => 'string'] : $items, $values);
+
+            return $schema;
+        }
+        $integer = in_array('integer', $types, true);
+        $schema['enum'] = array_values(array_map(
+            static fn(int|string $v): int|string => $integer && is_numeric($v) ? (int) $v : (is_int($v) ? (string) $v : $v),
+            $values,
+        ));
 
         return $schema;
     }

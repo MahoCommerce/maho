@@ -161,7 +161,9 @@ public function __invoke(My_Module_Model_SomeMessage $message): void {}
   group) names its source with `extraProperties: [EnumSource::KEY => 'page/source_layout']` on
   `#[ApiProperty]`. The schema factories turn the live list into an `enum` for OpenAPI and the
   MCP tools, so a client picks from a closed list. The source is a model alias with
-  `toOptionArray()` or a `Class::method` callable; see `Maho\ApiPlatform\Metadata\EnumSource`.
+  `toOptionArray()`, an `alias::method` pair, a `Class::method` callable or an inline list for a set
+  that code defines; see `Maho\ApiPlatform\Metadata\EnumSource` and `ValueLists`. Never use
+  `openapiContext: ['enum' => …]`: it reaches the OpenAPI document only.
 - An HTTP QUERY collection operation (`ApiPlatform\Metadata\Query`, RFC 10008) receives its body as
   `$context['filters']` through `Maho\ApiPlatform\State\QueryBodyFiltersProvider`, so a provider
   serves GET and QUERY with one code path. Import it as `HttpQuery` next to the GraphQL `Query`.

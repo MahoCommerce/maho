@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Mage\Catalog\Api;
 
 use ApiPlatform\Metadata\ApiProperty;
+use Maho\ApiPlatform\Metadata\EnumSource;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\GetCollection;
@@ -72,7 +73,7 @@ class BundleOption extends \Maho\ApiPlatform\Resource
     #[ApiProperty(description: 'Option title')]
     public string $title = '';
 
-    #[ApiProperty(description: 'Input type (select, radio, checkbox, multi)')]
+    #[ApiProperty(description: 'Input type (select, radio, checkbox, multi)', extraProperties: [EnumSource::KEY => ['select', 'radio', 'checkbox', 'multi']])]
     public string $type = 'select';
 
     #[ApiProperty(description: 'Is option required')]

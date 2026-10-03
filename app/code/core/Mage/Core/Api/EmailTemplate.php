@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Mage\Core\Api;
 
 use ApiPlatform\Metadata\ApiProperty;
+use Maho\ApiPlatform\Metadata\EnumSource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
@@ -121,7 +122,7 @@ class EmailTemplate extends CrudResource
     #[ApiProperty(description: 'CSS added to an html template')]
     public ?string $templateStyles = null;
 
-    #[ApiProperty(description: 'Body format: "text" or "html"', extraProperties: ['computed' => true])]
+    #[ApiProperty(description: 'Body format: "text" or "html"', extraProperties: [EnumSource::KEY => ['text', 'html'], 'computed' => true])]
     public ?string $templateType = null;
 
     #[ApiProperty(description: 'Sender name override. Null uses the store contact.')]

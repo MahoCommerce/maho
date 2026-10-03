@@ -11,6 +11,8 @@ declare(strict_types=1);
 namespace Mage\SalesRule\Api;
 
 use ApiPlatform\Metadata\ApiProperty;
+use Maho\ApiPlatform\Metadata\EnumSource;
+use Maho\ApiPlatform\Metadata\ValueLists;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
@@ -216,11 +218,11 @@ class Coupon extends CrudResource
     public ?string $createdAt = null;
 
     /** @var int[]|null */
-    #[ApiProperty(extraProperties: ['computed' => true])]
+    #[ApiProperty(extraProperties: [EnumSource::KEY => 'Maho\ApiPlatform\Metadata\ValueLists::websites', 'computed' => true])]
     public ?array $websiteIds = null;
 
     /** @var int[]|null */
-    #[ApiProperty(extraProperties: ['computed' => true])]
+    #[ApiProperty(extraProperties: [EnumSource::KEY => 'customer/customer_attribute_source_group', 'computed' => true])]
     public ?array $customerGroupIds = null;
 
     #[ApiProperty(extraProperties: ['computed' => true])]

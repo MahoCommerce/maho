@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Mage\Catalog\Api;
 
 use ApiPlatform\Metadata\ApiProperty;
+use Maho\ApiPlatform\Metadata\EnumSource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
@@ -128,7 +129,7 @@ class ProductAttribute extends CrudResource
     #[ApiProperty(description: 'Admin label, required on create')]
     public ?string $frontendLabel = null;
 
-    #[ApiProperty(description: 'Input type, set on create only: text, textarea, date, boolean, select, multiselect or price', openapiContext: ['enum' => ['text', 'textarea', 'date', 'boolean', 'select', 'multiselect', 'price']])]
+    #[ApiProperty(description: 'Input type, set on create only: text, textarea, date, boolean, select, multiselect or price', extraProperties: [EnumSource::KEY => ['text', 'textarea', 'date', 'boolean', 'select', 'multiselect', 'price']])]
     public ?string $frontendInput = null;
 
     #[ApiProperty(writable: false, description: 'Storage type, derived from frontendInput (varchar, int, text, decimal, datetime, static)')]
@@ -143,7 +144,7 @@ class ProductAttribute extends CrudResource
     #[ApiProperty(description: 'Whether values must be unique across products')]
     public bool $isUnique = false;
 
-    #[ApiProperty(description: 'Value scope: global, website or store', extraProperties: ['computed' => true], openapiContext: ['enum' => ['global', 'website', 'store']])]
+    #[ApiProperty(description: 'Value scope: global, website or store', extraProperties: ['computed' => true, EnumSource::KEY => ['global', 'website', 'store']])]
     public string $scope = 'global';
 
     #[ApiProperty(description: 'Raw scope flag (0 = store view, 1 = global, 2 = website). scope is the readable form of the same value')]

@@ -11,6 +11,8 @@ declare(strict_types=1);
 namespace Maho\Giftcard\Api;
 
 use ApiPlatform\Metadata\ApiProperty;
+use Maho\ApiPlatform\Metadata\EnumSource;
+use Maho\ApiPlatform\Metadata\ValueLists;
 use Maho\Config\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Post;
@@ -112,6 +114,7 @@ class GiftCard extends CrudResource
     public ?float $initialBalance = null;
 
     /** Writable only through the admin/service-gated Post and Put operations. */
+    #[ApiProperty(extraProperties: [EnumSource::KEY => ['active', 'used', 'expired', 'disabled']])]
     public ?string $status = null;
 
     public ?string $expiresAt = null;
@@ -148,6 +151,7 @@ class GiftCard extends CrudResource
      *
      * @var int[]|null
      */
+    #[ApiProperty(extraProperties: [EnumSource::KEY => 'Maho\ApiPlatform\Metadata\ValueLists::websites'])]
     public ?array $websiteIds = null;
 
     /**

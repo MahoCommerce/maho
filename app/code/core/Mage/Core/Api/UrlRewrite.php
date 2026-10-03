@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Mage\Core\Api;
 
 use ApiPlatform\Metadata\ApiProperty;
+use Maho\ApiPlatform\Metadata\EnumSource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
@@ -111,7 +112,7 @@ class UrlRewrite extends CrudResource
     #[ApiProperty(writable: false, description: 'True for a rewrite the catalog URL indexer generated. System rewrites are read-only.')]
     public ?bool $isSystem = null;
 
-    #[ApiProperty(description: 'Redirect type: "" for an internal rewrite, "R" for a 302 temporary redirect, "RP" for a 301 permanent redirect')]
+    #[ApiProperty(description: 'Redirect type: "" for an internal rewrite, "R" for a 302 temporary redirect, "RP" for a 301 permanent redirect', extraProperties: [EnumSource::KEY => ['', 'R', 'RP']])]
     public ?string $options = null;
 
     #[ApiProperty(description: 'Free-text note shown in the admin grid')]

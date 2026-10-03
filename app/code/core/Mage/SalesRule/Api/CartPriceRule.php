@@ -13,6 +13,8 @@ declare(strict_types=1);
 namespace Mage\SalesRule\Api;
 
 use ApiPlatform\Metadata\ApiProperty;
+use Maho\ApiPlatform\Metadata\EnumSource;
+use Maho\ApiPlatform\Metadata\ValueLists;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
@@ -101,12 +103,14 @@ class CartPriceRule extends \Maho\ApiPlatform\Resource
     public bool $isActive = false;
 
     /** @var int[] */
+    #[ApiProperty(extraProperties: [EnumSource::KEY => 'Maho\ApiPlatform\Metadata\ValueLists::websites'])]
     public array $websiteIds = [];
 
     /** @var int[] */
+    #[ApiProperty(extraProperties: [EnumSource::KEY => 'customer/customer_attribute_source_group'])]
     public array $customerGroupIds = [];
 
-    #[ApiProperty(description: 'none, specific (one code in couponCode) or auto (generated codes)', openapiContext: ['enum' => ['none', 'specific', 'auto']])]
+    #[ApiProperty(description: 'none, specific (one code in couponCode) or auto (generated codes)', extraProperties: [EnumSource::KEY => ['none', 'specific', 'auto']])]
     public string $couponType = self::COUPON_TYPE_NONE;
 
     #[ApiProperty(description: 'The code of a rule with couponType "specific"')]
@@ -130,7 +134,7 @@ class CartPriceRule extends \Maho\ApiPlatform\Resource
 
     public bool $isRss = false;
 
-    #[ApiProperty(description: 'by_percent, by_fixed, cart_fixed or buy_x_get_y', openapiContext: ['enum' => ['by_percent', 'by_fixed', 'cart_fixed', 'buy_x_get_y']])]
+    #[ApiProperty(description: 'by_percent, by_fixed, cart_fixed or buy_x_get_y', extraProperties: [EnumSource::KEY => ['by_percent', 'by_fixed', 'cart_fixed', 'buy_x_get_y']])]
     public string $simpleAction = \Mage_SalesRule_Model_Rule::BY_PERCENT_ACTION;
 
     #[ApiProperty(description: 'At most 100 for by_percent')]
@@ -144,7 +148,7 @@ class CartPriceRule extends \Maho\ApiPlatform\Resource
 
     public bool $applyToShipping = false;
 
-    #[ApiProperty(description: '0 (no), 1 (matching items) or 2 (whole shipment)')]
+    #[ApiProperty(description: '0 (no), 1 (matching items) or 2 (whole shipment)', extraProperties: [EnumSource::KEY => [0, 1, 2]])]
     public int $simpleFreeShipping = 0;
 
     /** @var list<array{storeId: int, label: string}> */

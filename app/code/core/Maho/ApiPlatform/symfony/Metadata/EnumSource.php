@@ -19,20 +19,28 @@ namespace Maho\ApiPlatform\Metadata;
  *
  *     #[ApiProperty(extraProperties: [EnumSource::KEY => 'page/source_layout'])]
  *
- * The source is a Maho model alias with toOptionArray() or getOptions(), a model alias
- * with a method as "core/locale::getOptionWeekdays", or a static callable as
- * "Class::method"; each returns a list of values or option arrays. The list is read when
- * the schema is built, so it never goes stale through the metadata cache.
+ * The source is one of:
+ * - a list of values, for a set that code defines: ['enabled', 'disabled']
+ * - a Maho model alias with toOptionArray(), getAllOptions() or getOptions()
+ * - a model alias with a method: 'sales/order_config::getStatuses'
+ * - a static callable: 'Maho\ApiPlatform\Metadata\ValueLists::websites'
+ * A method returns a list of values, option arrays (value and label, groups included) or
+ * a value => label map. The list is read when the schema is built, so it never goes stale
+ * through the metadata cache. The schema factory casts the values to the property type and
+ * puts them on the items of an array property.
  */
 final class EnumSource
 {
     public const KEY = 'enumSource';
 
     /**
-     * @return list<string>
+     * @return list<int|string>
      */
     public static function values(mixed $source): array
     {
+        if (is_array($source)) {
+            return array_values(array_unique(array_map(static fn(mixed $v): int|string => is_int($v) ? $v : (string) $v, $source), SORT_REGULAR));
+        }
         if (!is_string($source) || $source === '') {
             return [];
         }
@@ -45,18 +53,34 @@ final class EnumSource
         }
 
         $values = [];
-        foreach (is_iterable($options) ? $options : [] as $key => $option) {
-            $value = is_array($option) ? ($option['value'] ?? null) : (is_scalar($option) && !is_int($key) ? $key : $option);
-            if (is_array($value)) {
+        self::collect(is_iterable($options) ? $options : [], $values);
+
+        return $values;
+    }
+
+    /**
+     * @param list<int|string> $values
+     */
+    private static function collect(iterable $options, array &$values): void
+    {
+        foreach ($options as $key => $option) {
+            if (is_array($option)) {
+                $value = $option['value'] ?? null;
+                if (is_iterable($value)) {
+                    self::collect($value, $values);
+                    continue;
+                }
+            } else {
+                $value = is_int($key) ? $option : $key;
+            }
+            if (!is_scalar($value) || (string) $value === '') {
                 continue;
             }
-            $value = (string) $value;
-            if ($value !== '' && !in_array($value, $values, true)) {
+            $value = is_int($value) ? $value : (string) $value;
+            if (!in_array($value, $values, true)) {
                 $values[] = $value;
             }
         }
-
-        return $values;
     }
 
     private static function options(string $source): mixed
@@ -75,11 +99,13 @@ final class EnumSource
     private static function modelOptions(string $alias): iterable
     {
         $model = \Mage::getSingleton($alias);
-        if (method_exists($model, 'toOptionArray')) {
-            return $model->toOptionArray();
+        if (!is_object($model)) {
+            return [];
         }
-        if (method_exists($model, 'getOptions')) {
-            return $model->getOptions();
+        foreach (['toOptionArray', 'getAllOptions', 'getOptions'] as $method) {
+            if (method_exists($model, $method)) {
+                return $model->{$method}();
+            }
         }
 
         return [];

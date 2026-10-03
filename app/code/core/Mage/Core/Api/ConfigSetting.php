@@ -13,6 +13,7 @@ declare(strict_types=1);
 namespace Mage\Core\Api;
 
 use ApiPlatform\Metadata\ApiProperty;
+use Maho\ApiPlatform\Metadata\EnumSource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
@@ -106,7 +107,7 @@ class ConfigSetting extends \Maho\ApiPlatform\Resource
     #[ApiProperty(description: 'Value at the requested scope. Null when the field is sensitive or has no value')]
     public ?string $value = null;
 
-    #[ApiProperty(description: 'Scope of the value: default, websites or stores')]
+    #[ApiProperty(description: 'Scope of the value: default, websites or stores', extraProperties: [EnumSource::KEY => ['default', 'websites', 'stores']])]
     public string $scope = self::SCOPE_DEFAULT;
 
     #[ApiProperty(description: 'Website code for scope websites, store view code for scope stores, null for scope default')]

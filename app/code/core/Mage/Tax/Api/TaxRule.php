@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Mage\Tax\Api;
 
 use ApiPlatform\Metadata\ApiProperty;
+use Maho\ApiPlatform\Metadata\EnumSource;
 use Maho\Config\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
@@ -100,11 +101,11 @@ class TaxRule extends CrudResource
      *
      * @var int[]
      */
-    #[ApiProperty(extraProperties: ['modelField' => 'tax_customer_class'])]
+    #[ApiProperty(extraProperties: [EnumSource::KEY => 'tax/class_source_customer', 'modelField' => 'tax_customer_class'])]
     public array $customerTaxClassIds = [];
 
     /** @var int[] */
-    #[ApiProperty(extraProperties: ['modelField' => 'tax_product_class'])]
+    #[ApiProperty(extraProperties: [EnumSource::KEY => 'tax/class_source_product', 'modelField' => 'tax_product_class'])]
     public array $productTaxClassIds = [];
 
     /** @var int[] */

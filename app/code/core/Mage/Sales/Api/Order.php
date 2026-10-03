@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Mage\Sales\Api;
 
 use Maho\Config\ApiResource;
+use Maho\ApiPlatform\Metadata\EnumSource;
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
@@ -302,10 +303,10 @@ class Order extends CrudResource
     #[ApiProperty(writable: false, description: 'Customer note captured at checkout (orderNote at placement)')]
     public ?string $customerNote = null;
 
-    #[ApiProperty(writable: false, description: 'Order status (pending, processing, complete, canceled, etc.)')]
+    #[ApiProperty(writable: false, description: 'Order status (pending, processing, complete, canceled, etc.)', extraProperties: [EnumSource::KEY => 'sales/order_config::getStatuses'])]
     public ?string $status = null;
 
-    #[ApiProperty(writable: false, description: 'Order state (new, processing, complete, closed, canceled)')]
+    #[ApiProperty(writable: false, description: 'Order state (new, processing, complete, closed, canceled)', extraProperties: [EnumSource::KEY => 'sales/order_config::getStates'])]
     public ?string $state = null;
 
     /**

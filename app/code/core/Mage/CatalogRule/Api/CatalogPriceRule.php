@@ -140,7 +140,7 @@ class CatalogPriceRule extends \Maho\ApiPlatform\Resource
     #[ApiProperty(description: 'Rules with a lower sortOrder apply first')]
     public int $sortOrder = 0;
 
-    #[ApiProperty(description: 'by_percent (discount of a percentage of the price), by_fixed (discount of a fixed amount), to_percent (price becomes a percentage of the price) or to_fixed (price becomes a fixed amount)', openapiContext: ['enum' => self::SIMPLE_ACTIONS])]
+    #[ApiProperty(description: 'by_percent (discount of a percentage of the price), by_fixed (discount of a fixed amount), to_percent (price becomes a percentage of the price) or to_fixed (price becomes a fixed amount)', extraProperties: [EnumSource::KEY => self::SIMPLE_ACTIONS])]
     public string $simpleAction = 'by_percent';
 
     #[ApiProperty(description: 'Percentage or amount of the action, 0 or more; at most 100 for by_percent and to_percent')]
@@ -149,7 +149,7 @@ class CatalogPriceRule extends \Maho\ApiPlatform\Resource
     #[ApiProperty(description: 'Whether the rule also gives a discount on the sub products of a configurable or bundle product')]
     public bool $subIsEnable = false;
 
-    #[ApiProperty(description: 'Action for the sub products, same values as simpleAction, or null', openapiContext: ['enum' => self::SIMPLE_ACTIONS])]
+    #[ApiProperty(description: 'Action for the sub products, same values as simpleAction, or null', extraProperties: [EnumSource::KEY => self::SIMPLE_ACTIONS])]
     public ?string $subSimpleAction = null;
 
     #[ApiProperty(description: 'Percentage or amount of the action for the sub products')]

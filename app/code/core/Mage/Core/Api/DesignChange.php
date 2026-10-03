@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Mage\Core\Api;
 
 use ApiPlatform\Metadata\ApiProperty;
+use Maho\ApiPlatform\Metadata\EnumSource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
@@ -93,7 +94,7 @@ class DesignChange extends CrudResource
     #[ApiProperty(description: 'Store view id the change applies to')]
     public ?int $storeId = null;
 
-    #[ApiProperty(description: 'Theme to apply, as "package/theme" (for example "base/default")')]
+    #[ApiProperty(description: 'Theme to apply, as "package/theme" (for example "base/default")', extraProperties: [EnumSource::KEY => 'core/design_source_design'])]
     public ?string $design = null;
 
     #[ApiProperty(description: 'First day the theme applies, as Y-m-d. Null means no start bound.')]

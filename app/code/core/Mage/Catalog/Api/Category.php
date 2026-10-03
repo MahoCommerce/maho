@@ -11,6 +11,8 @@ declare(strict_types=1);
 namespace Mage\Catalog\Api;
 
 use Maho\Config\ApiResource;
+use Maho\ApiPlatform\Metadata\EnumSource;
+use Maho\ApiPlatform\Metadata\ValueLists;
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
@@ -184,7 +186,7 @@ class Category extends CrudResource
     public ?array $availableSortBy = null;
 
     #[Groups(['category:read'])]
-    #[ApiProperty(description: 'Default product listing sort-by code ("" clears, falls back to config)')]
+    #[ApiProperty(description: 'Default product listing sort-by code ("" clears, falls back to config)', extraProperties: [EnumSource::KEY => 'catalog/category_attribute_source_sortby'])]
     public ?string $defaultSortBy = null;
 
     #[Groups(['category:read'])]
@@ -214,6 +216,7 @@ class Category extends CrudResource
     public ?string $path = null;
 
     #[Groups(['category:read'])]
+    #[ApiProperty(extraProperties: [EnumSource::KEY => 'catalog/category_attribute_source_mode'])]
     public ?string $displayMode = null;
 
     #[Groups(['category:detail'])]
@@ -230,9 +233,11 @@ class Category extends CrudResource
     public ?string $metaDescription = null;
 
     #[Groups(['category:read'])]
+    #[ApiProperty(extraProperties: [EnumSource::KEY => 'page/source_layout'])]
     public ?string $pageLayout = null;
 
     #[Groups(['category:read'])]
+    #[ApiProperty(extraProperties: [EnumSource::KEY => ValueLists::META_ROBOTS])]
     public ?string $metaRobots = null;
 
     #[Groups(['category:read'])]

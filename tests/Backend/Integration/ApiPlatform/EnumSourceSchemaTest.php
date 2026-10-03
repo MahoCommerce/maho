@@ -96,3 +96,51 @@ it('shows the enum in the OpenAPI document', function (): void {
     }
     expect($found)->toBeTrue();
 });
+
+it('resolves every EnumSource declared on an API resource to a non-empty list, and casts the schema values to the property type', function (): void {
+    $factory = enumSourceContainer()->get(SchemaFactoryInterface::class);
+    $checked = 0;
+    foreach (glob(dirname(__DIR__, 4) . '/app/code/core/*/*/Api/*.php') as $file) {
+        $source = (string) file_get_contents($file);
+        if (!str_contains($source, 'EnumSource::KEY')) {
+            continue;
+        }
+        preg_match('/^namespace\s+([^;]+);/m', $source, $ns);
+        $class = ($ns[1] ?? '') . '\\' . basename($file, '.php');
+        if (!class_exists($class)) {
+            continue;
+        }
+        // A read-only resource has no input schema: its enums show on the output.
+        $schema = $factory->buildSchema($class, 'json', Schema::TYPE_INPUT);
+        $root = $schema->getDefinitions()[$schema->getRootDefinitionKey()] ?? null;
+        if ($root === null) {
+            $schema = $factory->buildSchema($class, 'json', Schema::TYPE_OUTPUT);
+            $root = $schema->getDefinitions()[$schema->getRootDefinitionKey()] ?? null;
+        }
+        expect($root)->not->toBeNull($class);
+        foreach (new ReflectionClass($class)->getProperties(ReflectionProperty::IS_PUBLIC) as $property) {
+            foreach ($property->getAttributes(ApiPlatform\Metadata\ApiProperty::class) as $attribute) {
+                $extra = $attribute->getArguments()['extraProperties'] ?? [];
+                if (!isset($extra[EnumSource::KEY])) {
+                    continue;
+                }
+                $name = $property->getName();
+                $values = EnumSource::values($extra[EnumSource::KEY]);
+                expect($values)->not->toBe([], "$class::$name resolves to no values");
+                $propertySchema = $root['properties'][$name] ?? null;
+                if ($propertySchema === null) {
+                    continue; // read-only, so absent from the input schema
+                }
+                $target = in_array('array', (array) ($propertySchema['type'] ?? []), true) ? $propertySchema['items'] : $propertySchema;
+                $enum = $target['enum'] ?? null;
+                expect($enum)->toBeArray("$class::$name has no enum in the input schema");
+                $integer = in_array('integer', (array) ($target['type'] ?? []), true);
+                foreach ($enum as $value) {
+                    expect($integer ? is_int($value) : is_string($value))->toBeTrue("$class::$name enum value " . var_export($value, true) . ' does not match the property type');
+                }
+                $checked++;
+            }
+        }
+    }
+    expect($checked)->toBeGreaterThan(40);
+});
