@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Mage\Cms\Api;
 
 use ApiPlatform\Metadata\ApiProperty;
+use Maho\ApiPlatform\Metadata\EnumSource;
 use Maho\Config\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
@@ -89,7 +90,7 @@ class CmsPage extends CrudResource
 
     public ?string $metaDescription = null;
 
-    #[ApiProperty(description: 'Page layout code as the theme declares it, usually empty, one_column, two_columns_left, two_columns_right or three_columns; an unknown code is refused with the list. Omitted on create, the page gets the default layout.', extraProperties: ['modelField' => 'root_template'])]
+    #[ApiProperty(description: 'Page layout code, one of the codes the theme declares. Omitted on create, the page gets the default layout.', extraProperties: ['modelField' => 'root_template', EnumSource::KEY => 'page/source_layout'])]
     public ?string $pageLayout = null;
 
     public ?int $sortOrder = null;
@@ -103,7 +104,7 @@ class CmsPage extends CrudResource
     #[ApiProperty(security: "has_backend_access('cms-pages')")]
     public ?string $customTheme = null;
 
-    #[ApiProperty(security: "has_backend_access('cms-pages')")]
+    #[ApiProperty(description: 'Layout code the custom design uses while it is active', security: "has_backend_access('cms-pages')", extraProperties: [EnumSource::KEY => 'page/source_layout'])]
     public ?string $customRootTemplate = null;
 
     #[ApiProperty(security: "has_backend_access('cms-pages')")]

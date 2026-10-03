@@ -292,6 +292,8 @@ it('runs a read tool at once, streams the answer and stores the conversation', f
         foreach (AiChatScript::$offeredTools[0] as $name) {
             expect(strlen($name))->toBeLessThanOrEqual(64);
         }
+        // A property with an EnumSource and the store argument reach the model as closed lists.
+        expect(AiChatScript::$offeredSchemas[0]['catalog_products_list']['properties']['store']['enum'])->toContain(Mage::app()->getDefaultStoreView()->getCode());
         // Gemini refuses a schema keyword outside its subset, such as writeOnly or format.
         $allowed = ['type', 'description', 'enum', 'properties', 'required', 'items', 'anyOf', 'oneOf', 'minimum', 'maximum', 'minLength', 'maxLength', 'minItems', 'maxItems', 'additionalProperties'];
         $check = function (array $schema, string $path) use (&$check, $allowed): void {
@@ -616,6 +618,8 @@ it('offers the content editor guide as a tool once the panel sent one, and keeps
 
         expect($result['status'])->toBe(200);
         expect(AiChatScript::$offeredTools[0])->toContain('admin_content_guide');
+        expect(AiChatScript::$offeredTools[0])->toContain('content_cms_pages_create');
+        expect(AiChatScript::$offeredSchemas[0]['content_cms_pages_create']['properties']['pageLayout']['enum'])->toContain('one_column');
         $toolCalls = aiChatEvents($result['events'], 'tool_call');
         expect($toolCalls[0]['read_only'])->toBeTrue();
         expect($toolCalls[0]['title'])->toBe('Content editor guide');

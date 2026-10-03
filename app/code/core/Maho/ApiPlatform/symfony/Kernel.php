@@ -466,6 +466,12 @@ class Kernel extends BaseKernel
             ->decorate('api_platform.state_provider.main', null, 400)
             ->arg('$decorated', new Reference(State\QueryBodyFiltersProvider::class . '.inner'));
 
+        // A property that names an EnumSource gets its live values as an enum, in the
+        // OpenAPI document and in every JSON schema. The MCP factory below gets the same.
+        $services->set(JsonSchema\EnumSourceSchemaFactory::class)
+            ->decorate('api_platform.json_schema.schema_factory')
+            ->arg('$decorated', new Reference(JsonSchema\EnumSourceSchemaFactory::class . '.inner'));
+
         if (!$mcpAvailable) {
             return;
         }
@@ -500,6 +506,12 @@ class Kernel extends BaseKernel
         $services->set(Mcp\ToolSchemaFactory::class)
             ->decorate('api_platform.mcp.json_schema.schema_factory')
             ->arg('$decorated', new Reference(Mcp\ToolSchemaFactory::class . '.inner'));
+
+        // Priority 10 puts this inside the tool schema factory, which copies the body
+        // properties, enums included, into the create and update tool arguments.
+        $services->set(JsonSchema\EnumSourceSchemaFactory::class . '.mcp', JsonSchema\EnumSourceSchemaFactory::class)
+            ->decorate('api_platform.mcp.json_schema.schema_factory', null, 10)
+            ->arg('$decorated', new Reference(JsonSchema\EnumSourceSchemaFactory::class . '.mcp.inner'));
 
         $services->set(Mcp\PermissionElementAccessChecker::class)
             ->decorate('api_platform.mcp.security.expression_access_checker')

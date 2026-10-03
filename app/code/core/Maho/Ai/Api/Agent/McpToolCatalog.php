@@ -359,7 +359,8 @@ final class McpToolCatalog
 
         $properties[self::STORE_ARGUMENT] ??= [
             'type' => 'string',
-            'description' => 'Store view code the call runs in, such as "default-it". Omit it unless the administrator named a store or a language, or the page scope is a store view: a write without it goes to the default scope, which applies to every store view without a value of its own.',
+            'enum' => array_values(array_map(static fn(\Mage_Core_Model_Store $store): string => (string) $store->getCode(), \Mage::app()->getStores())),
+            'description' => 'Store view code the call runs in. Omit it unless the administrator named a store or a language, or the page scope is a store view: a write without it goes to the default scope, which applies to every store view without a value of its own.',
         ];
 
         return [
