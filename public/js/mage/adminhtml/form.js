@@ -687,6 +687,7 @@ function onAddressCountryChanged(countryElement) {
 }
 
 function setPostcodeOptional(zipElement, country) {
+    setPostcodeFormat(zipElement, country);
     var spanElement = zipElement.parentElement?.querySelector('label > span.required');
     if (!spanElement || (typeof optionalZipCountries == 'undefined')) {
         return; // nothing to do (for example in system config)

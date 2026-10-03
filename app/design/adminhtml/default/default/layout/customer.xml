@@ -13,6 +13,7 @@ SPDX-License-Identifier: AFL-3.0
         </reference>
         <reference name="head">
             <block type="adminhtml/template" name="optional_zip_countries" as="optional_zip_countries" template="directory/js/optional_zip_countries.phtml" />
+            <block type="adminhtml/template" name="postcode_formats" as="postcode_formats" template="directory/js/postcode_formats.phtml" />
             <action method="addJs"><file>mage/adminhtml/product/composite/configure.js</file></action>
             <action method="addJs"><file>varien/product.js</file></action>
             <action method="addJs"><file>varien/product_options.js</file></action>

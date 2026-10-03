@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <!--
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
 SPDX-FileCopyrightText: 2022 The OpenMage Contributors <https://openmage.org>
 SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
 SPDX-License-Identifier: AFL-3.0
@@ -14,4 +15,16 @@ SPDX-License-Identifier: AFL-3.0
             <block type="directory/currency" name="currency" as="currency_switcher" template="directory/currency.phtml"/>
         </reference>
     </default>
+
+    <checkout_onepage_index>
+        <reference name="head">
+            <block type="core/template" name="postcode_formats" as="postcode_formats" template="directory/js/postcode_formats.phtml" />
+        </reference>
+    </checkout_onepage_index>
+
+    <customer_address_form>
+        <reference name="head">
+            <block type="core/template" name="postcode_formats" as="postcode_formats" template="directory/js/postcode_formats.phtml" />
+        </reference>
+    </customer_address_form>
 </layout>

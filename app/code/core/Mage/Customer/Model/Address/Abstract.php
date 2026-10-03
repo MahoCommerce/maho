@@ -440,6 +440,33 @@ class Mage_Customer_Model_Address_Abstract extends Mage_Core_Model_Abstract
                 $this->addError(Mage::helper('customer')->__('Please enter the state/province.'));
             }
         }
+
+        foreach ($this->getFormatErrors() as $error) {
+            $this->addError($error);
+        }
+    }
+
+    /**
+     * Check the postcode format of the country, and that the region belongs to the country.
+     *
+     * @return string[]
+     */
+    public function getFormatErrors(): array
+    {
+        $errors = [];
+        $countryId = (string) $this->getCountryId();
+
+        $postcodeError = Mage::helper('customer/address')->getPostcodeFormatError($countryId, $this->getPostcode());
+        if ($postcodeError !== null) {
+            $errors[] = $postcodeError;
+        }
+
+        $regionId = $this->getRegionId();
+        if ($regionId && $this->getRegionModel($regionId)->getCountryId() !== $countryId) {
+            $errors[] = Mage::helper('customer')->__('The selected state/province is not valid for the chosen country.');
+        }
+
+        return $errors;
     }
 
     /**

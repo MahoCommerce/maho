@@ -18,7 +18,7 @@ class Mage_Customer_Model_Attribute_Data_Postcode extends Mage_Eav_Model_Attribu
 {
     /**
      * Validate postal/zip code
-     * Return true and skip validation if country zip code is optional
+     * Skip the required check if the zip code of the country is optional
      *
      * @param array|string $value
      * @return bool|array
@@ -29,7 +29,17 @@ class Mage_Customer_Model_Attribute_Data_Postcode extends Mage_Eav_Model_Attribu
         $countryId      = $this->getExtractedData('country_id');
         $optionalZip    = Mage::helper('directory')->getCountriesWithOptionalZip();
         if (!in_array($countryId, $optionalZip)) {
-            return parent::validateValue($value);
+            $result = parent::validateValue($value);
+            if ($result !== true) {
+                return $result;
+            }
+        }
+
+        if (is_string($countryId) && is_string($value)) {
+            $error = Mage::helper('customer/address')->getPostcodeFormatError($countryId, $value);
+            if ($error !== null) {
+                return [$error];
+            }
         }
         return true;
     }

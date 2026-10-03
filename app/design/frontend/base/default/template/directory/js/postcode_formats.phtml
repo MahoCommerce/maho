@@ -1,0 +1,12 @@
+<?php
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package base_default
+ */
+
+/** @var Mage_Core_Block_Template $this */
+?>
+<script>
+    postcodeFormats = <?= $this->helper('directory')->getPostcodeFormatsJson() ?>;
+</script>

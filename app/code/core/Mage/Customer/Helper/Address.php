@@ -269,4 +269,21 @@ class Mage_Customer_Helper_Address extends Mage_Core_Helper_Abstract
     {
         return Mage::getStoreConfigFlag(self::XML_PATH_VAT_FRONTEND_VISIBILITY);
     }
+
+    /**
+     * Return the error message when $postcode does not match the postcode format of the country, or null.
+     */
+    public function getPostcodeFormatError(?string $countryId, ?string $postcode): ?string
+    {
+        $addressFormat = Mage::getSingleton('directory/addressFormat');
+        if ($addressFormat->isValidPostcode($countryId, $postcode)) {
+            return null;
+        }
+
+        return $this->__(
+            'Please enter a valid postcode for %s (example: %s).',
+            Mage::getModel('directory/country')->loadByCode((string) $countryId)->getName(),
+            $addressFormat->getPostcodeExample((string) $countryId),
+        );
+    }
 }
