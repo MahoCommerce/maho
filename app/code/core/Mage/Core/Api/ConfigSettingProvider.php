@@ -29,6 +29,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  *     label: string,
  *     groupLabel: string,
  *     sectionLabel: string,
+ *     comment: string,
  *     frontendType: ?string,
  *     backendModel: ?string,
  *     showInDefault: bool,
@@ -103,6 +104,7 @@ final class ConfigSettingProvider extends \Maho\ApiPlatform\Provider
             if ($search !== ''
                 && stripos($field['path'], $search) === false
                 && stripos($field['label'], $search) === false
+                && stripos($field['comment'], $search) === false
             ) {
                 continue;
             }
@@ -141,6 +143,7 @@ final class ConfigSettingProvider extends \Maho\ApiPlatform\Provider
         $dto->label = $field['label'];
         $dto->groupLabel = $field['groupLabel'];
         $dto->sectionLabel = $field['sectionLabel'];
+        $dto->comment = $field['comment'] !== '' ? $field['comment'] : null;
         $dto->frontendType = $field['frontendType'];
         $dto->isSensitive = $this->isSensitive($field);
         $dto->inherited = $scope['scope'] !== ConfigSetting::SCOPE_DEFAULT && !isset($ownPaths[$field['path']]);
@@ -368,6 +371,7 @@ final class ConfigSettingProvider extends \Maho\ApiPlatform\Provider
                 'label' => $this->label($fieldNode),
                 'groupLabel' => $groupLabel,
                 'sectionLabel' => $sectionLabel,
+                'comment' => isset($fieldNode->comment) ? trim(html_entity_decode(strip_tags((string) $fieldNode->comment))) : '',
                 'frontendType' => isset($fieldNode->frontend_type) ? (string) $fieldNode->frontend_type : 'text',
                 'backendModel' => isset($fieldNode->backend_model) ? (string) $fieldNode->backend_model : null,
                 'showInDefault' => (bool) (int) $fieldNode->show_in_default,

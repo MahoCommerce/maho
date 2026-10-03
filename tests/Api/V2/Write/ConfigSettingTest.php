@@ -98,6 +98,14 @@ describe('Config setting read (REST)', function (): void {
         expect(array_column(getItems($response), 'path'))->toContain(CONFIG_SETTING_TEST_PATH);
     });
 
+    it('finds a setting by a word of its help text and returns the help text', function (): void {
+        $response = apiGet('/api/rest/v2/config-settings?search=Counts+only+a+lookup+that+finds+nothing', serviceToken(['config-settings/read']));
+        expect($response['status'])->toBe(200);
+        $items = getItems($response);
+        expect($items)->not->toBe([]);
+        expect($items[0]['comment'])->toContain('Counts only a lookup that finds nothing');
+    });
+
     it('gets one setting by its path', function (): void {
         $response = apiGet('/api/rest/v2/config-settings/' . CONFIG_SETTING_TEST_PATH, adminToken());
         expect($response['status'])->toBe(200);

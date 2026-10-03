@@ -38,7 +38,7 @@ use Maho\Config\ApiResource;
             security: "is_granted('ROLE_ADMIN') or is_granted('config-settings/read')",
             description: 'List the system configuration settings (the fields of System > Configuration) with their value at one scope. '
                 . 'Query: scope (default, websites or stores; default is default), scopeCode (the website or store view code, required for websites and stores), '
-                . 'pathPrefix (for example general/ or catalog/frontend), search (partial match on the path or the label). '
+                . 'pathPrefix (for example general/ or catalog/frontend), search (partial match on the path, the label or the help text). '
                 . 'Each item has path (section/group/field), value, inherited (true when the scope has no own value and uses the parent scope), '
                 . 'isSensitive (true when the value is a secret; the value is then null). An admin token sees only the sections that its admin role allows.',
         ),
@@ -87,7 +87,7 @@ use Maho\Config\ApiResource;
                 'pathPrefix' => ['type' => 'String', 'description' => 'Only the settings whose path starts with this prefix, for example general/ or catalog/frontend'],
                 'scope' => ['type' => 'String', 'description' => 'Scope of the values: default, websites or stores (default is default)'],
                 'scopeCode' => ['type' => 'String', 'description' => 'Website code for scope websites, store view code for scope stores'],
-                'search' => ['type' => 'String', 'description' => 'Partial match on the path or the label of the setting'],
+                'search' => ['type' => 'String', 'description' => 'Partial match on the path, the label or the help text of the setting'],
             ],
         ),
     ],
@@ -127,6 +127,9 @@ class ConfigSetting extends \Maho\ApiPlatform\Resource
 
     #[ApiProperty(writable: false, extraProperties: ['computed' => true], description: 'Label of the section that holds the field')]
     public ?string $sectionLabel = null;
+
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true], description: 'Help text shown under the field in System > Configuration, or null; the search filter matches it')]
+    public ?string $comment = null;
 
     #[ApiProperty(writable: false, extraProperties: ['computed' => true], description: 'Input type of the field: text, select, multiselect, textarea, obscure and others')]
     public ?string $frontendType = null;
