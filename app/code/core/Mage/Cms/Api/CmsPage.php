@@ -89,7 +89,7 @@ class CmsPage extends CrudResource
 
     public ?string $metaDescription = null;
 
-    #[ApiProperty(extraProperties: ['modelField' => 'root_template'])]
+    #[ApiProperty(description: 'Page layout code as the theme declares it, usually empty, one_column, two_columns_left, two_columns_right or three_columns; an unknown code is refused with the list. Omitted on create, the page gets the default layout.', extraProperties: ['modelField' => 'root_template'])]
     public ?string $pageLayout = null;
 
     public ?int $sortOrder = null;

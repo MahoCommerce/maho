@@ -40,6 +40,9 @@ final class CmsPageProcessor extends CrudProcessor
             if ($data->metaRobots !== null) {
                 $model->setData('meta_robots', $this->normalizeMetaRobots($data->metaRobots));
             }
+            if ($data->pageLayout !== null) {
+                $model->setData('root_template', $this->normalizePageLayout($data->pageLayout));
+            }
             if ($data->layoutUpdateXml !== null) {
                 $model->setData('layout_update_xml', $this->validateLayoutUpdate($data->layoutUpdateXml, 'layoutUpdateXml'));
             }
@@ -62,6 +65,9 @@ final class CmsPageProcessor extends CrudProcessor
             }
             if ($model->getData('stores') === null) {
                 $model->setData('stores', [0]);
+            }
+            if ($model->getData('root_template') === null) {
+                $model->setData('root_template', \Mage::getSingleton('page/source_layout')->getDefaultValue());
             }
         }
 
@@ -107,6 +113,23 @@ final class CmsPageProcessor extends CrudProcessor
         }
 
         return $xml;
+    }
+
+    /**
+     * The layout codes come from the theme configuration, so an unknown code would render
+     * nothing; refuse it and name the codes the store knows.
+     */
+    private function normalizePageLayout(string $value): ?string
+    {
+        if ($value === '') {
+            return null;
+        }
+        $codes = array_map(strval(...), array_keys(\Mage::getSingleton('page/source_layout')->getOptions()));
+        if (!in_array($value, $codes, true)) {
+            throw new BadRequestHttpException('pageLayout must be one of: ' . implode(', ', $codes));
+        }
+
+        return $value;
     }
 
     private function normalizeMetaRobots(string $value): ?string
