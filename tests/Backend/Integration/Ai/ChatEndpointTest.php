@@ -365,6 +365,69 @@ it('keeps a note the model stores with the remember tool and lists it in the nex
     }
 });
 
+it('starts a background job after confirmation and runs it in a worker with its writes approved in advance', function (): void {
+    $admin = aiChatAdmin('ai_chat_background', ['all']);
+    $page = Mage::getModel('cms/page')->setData(['identifier' => 'ai-chat-background-page', 'title' => 'Old', 'content' => '<p>x</p>', 'is_active' => 1, 'stores' => [0], 'root_template' => 'one_column']);
+    $page->save();
+    $pageId = (int) $page->getId();
+    $queue = Mage::getSingleton('core/resource')->getConnection('core_write');
+    $queueTable = Mage::getSingleton('core/resource')->getTableName('queue/message');
+    $before = (int) $queue->fetchOne("SELECT COUNT(*) FROM {$queueTable}");
+    $jobId = null;
+    try {
+        aiChatLogin($admin);
+        AiChatScript::reset(
+            new ToolCallResult([new ToolCall('call_b', 'run_in_background', ['title' => 'Rename pages', 'instruction' => 'Rename the page ' . $pageId . ' to New.'])]),
+            new TextResult('Started.'),
+        );
+        $first = aiChatRequest('/api/admin/ai/chat', ['message' => 'Rename all the pages, in the background']);
+        expect($first['status'])->toBe(200);
+        expect(AiChatScript::$offeredTools[0])->toContain('run_in_background');
+        $confirm = aiChatEvents($first['events'], 'confirm');
+        expect($confirm)->toHaveCount(1);
+        expect($confirm[0]['calls'][0]['name'])->toBe('run_in_background');
+        $conversationId = (int) $confirm[0]['conversation_id'];
+
+        $approved = aiChatRequest('/api/admin/ai/chat/confirm', ['conversation_id' => $conversationId, 'decisions' => ['call_b' => true]]);
+        $result = aiChatEvents($approved['events'], 'tool_result')[0];
+        expect($result['ok'])->toBeTrue($approved['raw']);
+        $job = Mage::getResourceModel('ai/conversation_collection')->addFieldToFilter('admin_user_id', (int) $admin->getId())->addFieldToFilter('status', Maho_Ai_Model_Conversation::STATUS_RUNNING)->getFirstItem();
+        $jobId = (int) $job->getId();
+        expect($jobId)->toBeGreaterThan(0);
+        expect((string) $job->getTitle())->toBe('Rename pages');
+        expect((int) $queue->fetchOne("SELECT COUNT(*) FROM {$queueTable}"))->toBe($before + 1);
+
+        // The worker: the handler runs the job with the scripted model; the update needs no confirmation.
+        AiChatScript::reset(
+            new ToolCallResult([new ToolCall('call_w', 'content_cms_pages_update', ['id' => (string) $pageId, 'title' => 'New'])]),
+            new TextResult('Renamed one page.'),
+        );
+        new Maho_Ai_Model_Chat_BackgroundTurnHandler()(new Maho_Ai_Model_Chat_BackgroundTurn($jobId, (int) $admin->getId(), 'Rename the page ' . $pageId . ' to New.'));
+
+        expect(AiChatScript::$offeredTools[0])->toContain('content_cms_pages_update');
+        expect(AiChatScript::$offeredTools[0])->not->toContain('run_in_background', 'admin_open_page');
+        expect((string) Mage::getModel('cms/page')->load($pageId)->getTitle())->toBe('New');
+        $job = Mage::getModel('ai/conversation')->load($jobId);
+        expect($job->getStatus())->toBe(Maho_Ai_Model_Conversation::STATUS_ACTIVE);
+        $rows = [];
+        foreach ($job->messagesCollection() as $message) {
+            $rows[] = [$message->getRole(), $message->getToolStatus(), (bool) $message->getIsWrite(), (string) $message->getContent()];
+        }
+        expect($rows[0])->toBe(['user', null, false, 'Rename the page ' . $pageId . ' to New.']);
+        expect(array_filter($rows, static fn(array $r): bool => $r[0] === 'tool'))->toHaveCount(1);
+        $toolRow = array_values(array_filter($rows, static fn(array $r): bool => $r[0] === 'tool'))[0];
+        expect($toolRow[1])->toBe('done');
+        expect($toolRow[2])->toBeTrue();
+        expect(end($rows)[3])->toBe('Renamed one page.');
+    } finally {
+        $queue->delete($queueTable, ['body LIKE ?' => '%BackgroundTurn%']);
+        Mage::getModel('cms/page')->load($pageId)->delete();
+        aiChatLogin($admin);
+        aiChatDeleteConversations((int) $admin->getId());
+        aiChatDeleteAdmin($admin);
+    }
+});
+
 it('runs a read tool at once, streams the answer and stores the conversation', function (): void {
     $admin = aiChatAdmin('ai_chat_reader', ['all']);
     try {
@@ -929,7 +992,7 @@ it('loads tool sections on demand and keeps them for the conversation', function
 
         expect($result['status'])->toBe(200);
         // The dashboard loads no section and the message names none: only the local tools are offered at first.
-        expect(AiChatScript::$offeredTools[0])->toBe(['enable_tools', 'admin_open_page', 'admin_fill_form', 'admin_page_action', 'remember', 'forget']);
+        expect(AiChatScript::$offeredTools[0])->toBe(['enable_tools', 'remember', 'forget', 'admin_open_page', 'admin_fill_form', 'admin_page_action', 'run_in_background']);
         $results = aiChatEvents($result['events'], 'tool_result');
         expect($results[0]['ok'])->toBeFalse();
         expect($results[0]['preview'])->toContain('nope');

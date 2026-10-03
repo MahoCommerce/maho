@@ -63,7 +63,7 @@ class Maho_Ai_Adminhtml_Ai_ChatController extends Mage_Adminhtml_Controller_Acti
     {
         $collection = Mage::getResourceModel('ai/conversation_collection')
             ->addFieldToFilter('admin_user_id', $this->adminId())
-            ->addFieldToFilter('status', Maho_Ai_Model_Conversation::STATUS_ACTIVE)
+            ->addFieldToFilter('status', ['in' => [Maho_Ai_Model_Conversation::STATUS_ACTIVE, Maho_Ai_Model_Conversation::STATUS_RUNNING]])
             ->setOrder('updated_at', 'DESC')
             ->setPageSize(30);
 
@@ -75,6 +75,7 @@ class Maho_Ai_Adminhtml_Ai_ChatController extends Mage_Adminhtml_Controller_Acti
                 'title' => (string) ($conversation->getTitle() ?? ''),
                 'updated_at' => (string) $conversation->getUpdatedAt(),
                 'pending' => $conversation->getPendingWrites() !== [],
+                'running' => $conversation->getStatus() === Maho_Ai_Model_Conversation::STATUS_RUNNING,
             ];
         }
         $this->getResponse()->setBodyJson(['conversations' => $items]);
@@ -119,6 +120,7 @@ class Maho_Ai_Adminhtml_Ai_ChatController extends Mage_Adminhtml_Controller_Acti
             'conversation' => [
                 'id' => (int) $conversation->getId(),
                 'title' => (string) ($conversation->getTitle() ?? ''),
+                'running' => $conversation->getStatus() === Maho_Ai_Model_Conversation::STATUS_RUNNING,
             ],
             'messages' => $messages,
         ]);

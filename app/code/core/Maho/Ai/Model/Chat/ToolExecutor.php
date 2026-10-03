@@ -89,13 +89,17 @@ class Maho_Ai_Model_Chat_ToolExecutor implements ToolExecutorInterface
             }
             $seen[$id] = $id;
             $seen[self::payloadKey($toolCall)] = $id;
-            if (!$this->toolbox->isReadOnly($toolCall->getName())) {
+            $write = !$this->toolbox->isReadOnly($toolCall->getName());
+            if ($write && !$this->toolbox->isBackground()) {
                 $pending[] = $toolCall;
                 continue;
             }
 
             yield new Progress('tool_call', sprintf('Executing tool "%s".', $toolCall->getName()), $toolCall);
-            $result = $this->toolbox->execute($toolCall);
+            // The administrator approved the job, not a deletion: a destructive tool waits for the chat.
+            $result = $write && $this->toolbox->isDestructive($toolCall->getName())
+                ? new ToolResult($toolCall, McpToolbox::ERROR_PREFIX . 'A destructive action is not allowed in a background job. Ask the administrator to run it in the chat.')
+                : $this->toolbox->execute($toolCall);
             $results[$id] = $result;
             $ordered[] = $result;
             yield new Progress('tool_result', sprintf('Tool "%s" finished.', $toolCall->getName()), $result);

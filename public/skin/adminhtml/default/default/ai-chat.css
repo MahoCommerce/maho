@@ -640,3 +640,10 @@ body.ai-chat-open .ai-chat-toggle {
     font-size: 11px;
     cursor: pointer;
 }
+
+/* A background job that still runs in this conversation. */
+.ai-chat-running {
+    font-size: 12px;
+    font-style: italic;
+    color: var(--maho-ink-muted, #666);
+}

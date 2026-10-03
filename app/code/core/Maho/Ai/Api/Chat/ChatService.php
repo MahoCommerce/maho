@@ -17,6 +17,7 @@ use Maho\Ai\Api\Agent\AgentFactory;
 use Maho\Ai\Api\Agent\McpToolCatalog;
 use Maho\Ai\Api\Agent\McpToolbox;
 use Maho_Ai_Model_Chat_ClientGone;
+use Maho_Ai_Model_Chat_NullSseWriter;
 use Maho_Ai_Model_Chat_ConfirmationRequired;
 use Maho_Ai_Model_Chat_MessageBagBuilder;
 use Maho_Ai_Model_Chat_SseWriter;
@@ -122,6 +123,22 @@ final class ChatService
         }
 
         $this->run($conversation, $admin, $pageContext, $sse);
+    }
+
+    /**
+     * One turn without a browser, in a queue worker: the instruction the administrator
+     * confirmed runs with every non-destructive write approved in advance.
+     */
+    public function runBackground(Maho_Ai_Model_Conversation $conversation, Mage_Admin_Model_User $admin, string $instruction): void
+    {
+        $this->toolbox->setBackground(true);
+        $conversation->addMessage(['role' => Message::ROLE_USER, 'content' => $instruction]);
+        try {
+            $this->run($conversation, $admin, [], new Maho_Ai_Model_Chat_NullSseWriter());
+        } finally {
+            $this->toolbox->setBackground(false);
+            $conversation->setStatus(Maho_Ai_Model_Conversation::STATUS_ACTIVE)->save();
+        }
     }
 
     /**
@@ -508,7 +525,7 @@ final class ChatService
                     $resultText !== null && McpToolbox::isErrorText($resultText) => Message::TOOL_ERROR,
                     default => Message::TOOL_DONE,
                 },
-                'is_write' => $isPending ? 1 : 0,
+                'is_write' => $isPending || !$this->toolbox->isReadOnly($toolCall->getName()) ? 1 : 0,
                 'content' => $resultText,
             ]);
         }

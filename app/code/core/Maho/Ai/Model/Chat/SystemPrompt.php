@@ -19,7 +19,7 @@ declare(strict_types=1);
 class Maho_Ai_Model_Chat_SystemPrompt
 {
     /** Longer prompts cost on every model request; a test keeps this honest. */
-    public const MAX_CHARS = 9000;
+    public const MAX_CHARS = 10000;
 
     /**
      * @param array<string, mixed> $pageContext route, entity_type, entity_id, entity_label, store and screen of the admin page
@@ -84,7 +84,7 @@ class Maho_Ai_Model_Chat_SystemPrompt
     {
         $notes = Maho_Ai_Model_Memory::notesOf((int) $admin->getId());
         if ($notes === []) {
-            return 'What the administrator asked you to remember: nothing yet. When the administrator states a lasting preference or fact about their work, such as the language to answer in or the store view they manage, keep it with the remember tool, once.';
+            return 'What the administrator asked you to remember: nothing yet. Keep a lasting preference they state, such as the language to answer in, with the remember tool, once.';
         }
         $lines = ['What the administrator asked you to remember, to follow without repeating it back:'];
         foreach ($notes as $note) {
@@ -143,6 +143,7 @@ class Maho_Ai_Model_Chat_SystemPrompt
             '   - Content that must appear on many pages: a widget instance under CMS > Widgets. Offer to open that page.',
             '   - "Take me to", "open", "show me the page": admin_open_page. Opening a page is never a substitute for a change the administrator asked for.',
             '   - Many records at once: the update tools, one confirmation for the batch.',
+            '   - A long job, such as a text for every product of a category or a change over hundreds of records: run_in_background with a complete instruction. The administrator confirms it once and follows it in a new conversation; do not start the job here as well.',
             '   - One change, one tool. A create or update call that already holds the content finishes the change; never fill the form with the same content afterwards, and never send a value twice.',
             '   - "Save", "click …", "open the … tab", "set … to …", "add a comment" about the page the administrator has open: admin_page_action, with up to three steps and a click last, for example set the Comment field then click Submit Comment. Use only labels listed under what the administrator sees. The next message shows the result.',
             '3. Act. Tools come in sections and only the loaded sections are callable; when a tool you need is not loaded, call enable_tools with its section first. Pass only the parameters a call needs. Without a store argument a write goes to the default scope, which is the normal case. Pass the store view code only when the administrator names a store or a language, or the page scope is a store view; a store view code can look like an ordinary word (a product type, a room, an audience), so a word in the request, a product name, an attribute set or a category is a store view only when the administrator says store, store view, website or a language. A read without a store argument searches the main catalog; start there. Name the scope in the sentence before a write: "for every store view" or "for the Italian store view only". If a call fails, read the error and change the call; do not repeat it unchanged. A result marked as truncated is incomplete: ask for a smaller page, and never write a truncated field back.',

@@ -15,6 +15,7 @@ namespace Maho\Ai\Api\Chat;
 use Mage_Admin_Model_User;
 use Maho\ApiPlatform\Security\SameOriginGuard;
 use Maho\ApiPlatform\Service\StoreContext;
+use Maho_Ai_Model_Chat_BackgroundTurnHandler;
 use Maho_Ai_Model_Chat_ClientGone as ClientGone;
 use Maho_Ai_Model_Chat_SseWriter;
 use Maho_Ai_Model_Conversation;
@@ -82,6 +83,43 @@ final class ChatController
         return $this->stream($request, $conversation, function (Maho_Ai_Model_Chat_SseWriter $sse) use ($conversation, $admin, $decisions, $context): void {
             $this->service->resumeTurn($conversation, $admin, $decisions, $context, $sse);
         });
+    }
+
+    /**
+     * The route of a background run. Only the queue handler reaches it: it sets a request
+     * attribute that no HTTP client can set, so a browser gets a 404 here.
+     */
+    #[Route('/api/admin/ai/chat/background', name: 'api_admin_ai_chat_background', methods: ['POST'])]
+    public function background(Request $request): Response
+    {
+        if ($request->attributes->get(Maho_Ai_Model_Chat_BackgroundTurnHandler::ATTRIBUTE) !== true || !\Mage::helper('ai')->isChatEnabled() || !\Mage::helper('ai')->isChatAllowed()) {
+            throw new NotFoundHttpException('Not found.');
+        }
+        $admin = $this->admin();
+        try {
+            $input = (array) \Mage::helper('core')->jsonDecode($request->getContent() ?: '[]');
+        } catch (\JsonException) {
+            throw new BadRequestHttpException('The request body is not valid JSON.');
+        }
+        $conversation = $this->conversation($input, $admin, $this->context($input), create: false);
+        $instruction = trim((string) ($input['instruction'] ?? ''));
+        if ($instruction === '') {
+            throw new BadRequestHttpException('The instruction is empty.');
+        }
+        if (!$conversation->acquireLock()) {
+            throw new ConflictHttpException('The assistant is still answering in this conversation.');
+        }
+        \Mage::app()->setCurrentStore(\Mage_Core_Model_Store::ADMIN_CODE);
+        StoreContext::ensureStore();
+        $this->requestStack->push($request);
+        try {
+            $this->service->runBackground($conversation, $admin, $instruction);
+        } finally {
+            $this->requestStack->pop();
+            $conversation->releaseLock();
+        }
+
+        return new JsonResponse(['conversation_id' => (int) $conversation->getId(), 'status' => $conversation->getStatus()]);
     }
 
     #[Route('/api/admin/ai/chat/undo', name: 'api_admin_ai_chat_undo', methods: ['POST'])]

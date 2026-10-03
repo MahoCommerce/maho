@@ -14,6 +14,8 @@ class Maho_Ai_Model_Conversation extends Mage_Core_Model_Abstract
 {
     public const STATUS_ACTIVE = 'active';
     public const STATUS_ARCHIVED = 'archived';
+    /** A background run of the assistant works in it; the panel polls it until it is active again. */
+    public const STATUS_RUNNING = 'running';
 
     /** Seconds one chat turn may hold the conversation before another request may take it. */
     public const LOCK_SECONDS = 300;

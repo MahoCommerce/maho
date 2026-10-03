@@ -162,7 +162,7 @@ class MahoAiAssistant {
             for (const conversation of data.conversations ?? []) {
                 const option = document.createElement('option');
                 option.value = String(conversation.id);
-                option.textContent = (conversation.pending ? '⏳ ' : '') + (conversation.title || this.labels.untitled);
+                option.textContent = (conversation.running ? '⚙ ' : '') + (conversation.pending ? '⏳ ' : '') + (conversation.title || this.labels.untitled);
                 this.picker.appendChild(option);
             }
             this.picker.value = current ? String(current) : '';
@@ -217,12 +217,30 @@ class MahoAiAssistant {
                 history.push({ role: 'ai', html: this.renderConfirmCard(pending) });
                 this.pendingCard = { index: history.length - 1, calls: pending };
             }
+            if (data.conversation.running) {
+                history.push({ role: 'ai', html: `<div class="ai-chat-running">${this.escape(this.labels.running)}…</div>` });
+            }
             this.chat.history = history;
             setTimeout(() => this.updateIntro(history.length > 0), 100);
             setTimeout(() => this.chat.scrollToBottom(), 50);
+            this.watchBackground(data.conversation.running ? id : null);
         } catch (error) {
             console.error('[ai-chat]', error);
         }
+    }
+
+    /** A background job writes into its conversation from a worker; the panel re-reads it until the job ends. */
+    watchBackground(id) {
+        clearTimeout(this.backgroundTimer);
+        this.backgroundTimer = null;
+        if (!id) {
+            return;
+        }
+        this.backgroundTimer = setTimeout(() => {
+            if (this.conversationId === id && !this.abortController) {
+                this.loadConversation(id).then(() => this.loadConversations());
+            }
+        }, 5000);
     }
 
     async deleteConversation() {
@@ -1007,7 +1025,7 @@ class MahoAiAssistant {
 
     /** "content_cms_pages_update" reads as "Update cms pages": the verb first, without the section. */
     humanizeTool(name) {
-        const local = { admin_open_page: this.labels.openPage, admin_fill_form: this.labels.fillForm, admin_page_action: this.labels.pageAction, enable_tools: this.labels.loadTools, admin_content_guide: this.labels.contentGuide, remember: this.labels.remember, forget: this.labels.forget };
+        const local = { run_in_background: this.labels.runInBackground, admin_open_page: this.labels.openPage, admin_fill_form: this.labels.fillForm, admin_page_action: this.labels.pageAction, enable_tools: this.labels.loadTools, admin_content_guide: this.labels.contentGuide, remember: this.labels.remember, forget: this.labels.forget };
         if (local[name]) {
             return local[name];
         }
