@@ -13,6 +13,8 @@ declare(strict_types=1);
 namespace Mage\CatalogRule\Api;
 
 use ApiPlatform\Metadata\ApiProperty;
+use Maho\ApiPlatform\Metadata\EnumSource;
+use Maho\ApiPlatform\Metadata\ValueLists;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
@@ -23,6 +25,8 @@ use ApiPlatform\OpenApi\Model\Response as OpenApiResponse;
 use Maho\Config\ApiResource;
 
 #[ApiResource(
+    // The operations that API Platform adds by itself, for example the GraphQL queries, use this expression
+    security: "is_granted('ROLE_ADMIN') or is_granted('catalog-price-rules/read')",
     mahoLabel: 'Catalog Price Rules',
     mahoSection: 'Promotions',
     mahoOperations: ['read' => 'View', 'write' => 'Create, Update & Apply', 'delete' => 'Delete'],
@@ -120,9 +124,11 @@ class CatalogPriceRule extends \Maho\ApiPlatform\Resource
     public bool $isActive = false;
 
     /** @var int[] */
+    #[ApiProperty(extraProperties: [EnumSource::KEY => 'Maho\ApiPlatform\Metadata\ValueLists::websites'])]
     public array $websiteIds = [];
 
     /** @var int[] */
+    #[ApiProperty(extraProperties: [EnumSource::KEY => 'customer/customer_attribute_source_group'])]
     public array $customerGroupIds = [];
 
     #[ApiProperty(description: 'First day of the rule, YYYY-MM-DD')]
