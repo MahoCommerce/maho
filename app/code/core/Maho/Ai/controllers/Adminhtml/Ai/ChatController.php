@@ -75,7 +75,7 @@ class Maho_Ai_Adminhtml_Ai_ChatController extends Mage_Adminhtml_Controller_Acti
                 'title' => (string) ($conversation->getTitle() ?? ''),
                 'updated_at' => (string) $conversation->getUpdatedAt(),
                 'pending' => $conversation->getPendingWrites() !== [],
-                'running' => $conversation->getStatus() === Maho_Ai_Model_Conversation::STATUS_RUNNING,
+                'running' => $conversation->isRunning(),
             ];
         }
         $this->getResponse()->setBodyJson(['conversations' => $items]);
@@ -102,6 +102,9 @@ class Maho_Ai_Adminhtml_Ai_ChatController extends Mage_Adminhtml_Controller_Acti
                 'content' => (string) $message->getContent(),
                 'created_at' => $message->getCreatedAt(),
             ];
+            if ($message->getRole() === Maho_Ai_Model_Conversation_Message::ROLE_ASSISTANT && $message->getToolStatus() !== null) {
+                $row['notice'] = $message->getToolStatus();
+            }
             if ($message->getRole() === Maho_Ai_Model_Conversation_Message::ROLE_USER && $message->getAttachments() !== []) {
                 $row['attachments'] = $message->getAttachments();
             }
@@ -123,7 +126,7 @@ class Maho_Ai_Adminhtml_Ai_ChatController extends Mage_Adminhtml_Controller_Acti
             'conversation' => [
                 'id' => (int) $conversation->getId(),
                 'title' => (string) ($conversation->getTitle() ?? ''),
-                'running' => $conversation->getStatus() === Maho_Ai_Model_Conversation::STATUS_RUNNING,
+                'running' => $conversation->isRunning(),
             ],
             'messages' => $messages,
         ]);

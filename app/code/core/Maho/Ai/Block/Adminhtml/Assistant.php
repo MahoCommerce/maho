@@ -61,6 +61,7 @@ class Maho_Ai_Block_Adminhtml_Assistant extends Mage_Adminhtml_Block_Template
             'chatUrl' => $apiBase . '/api/admin/ai/chat',
             'confirmUrl' => $apiBase . '/api/admin/ai/chat/confirm',
             'undoUrl' => $apiBase . '/api/admin/ai/chat/undo',
+            'stopUrl' => $apiBase . '/api/admin/ai/chat/stop',
             'uploadUrl' => $apiBase . '/api/admin/ai/chat/upload',
             'uploadAccept' => '.' . implode(',.', array_keys(Maho_Ai_Model_Chat_Attachment::TEXT_EXTENSIONS + Maho_Ai_Model_Chat_Attachment::IMAGE_EXTENSIONS)),
             'uploadMaxFiles' => Maho_Ai_Model_Chat_Attachment::MAX_PER_MESSAGE,

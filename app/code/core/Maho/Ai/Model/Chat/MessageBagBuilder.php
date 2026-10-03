@@ -46,6 +46,10 @@ class Maho_Ai_Model_Chat_MessageBagBuilder
             }
 
             if ($role === Maho_Ai_Model_Conversation_Message::ROLE_ASSISTANT) {
+                if ($message->getToolStatus() !== null) {
+                    // A note about the turn (stopped, failed) is for the administrator only.
+                    continue;
+                }
                 $toolCalls = $message->getToolCalls();
                 if ($toolCalls === []) {
                     $bag->add(Message::ofAssistant($content));

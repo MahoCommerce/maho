@@ -263,10 +263,6 @@ final class ChatService
                 }
             } while ($restart);
 
-            if ($sse->isClientGone()) {
-                return;
-            }
-
             $text = $roundText;
             if ($text === '') {
                 // A provider without streaming answers in one piece: nothing was sent as a delta yet.
@@ -298,6 +294,7 @@ final class ChatService
             if ($roundText !== '') {
                 $conversation->addMessage(['role' => Message::ROLE_ASSISTANT, 'content' => $roundText]);
             }
+            $this->stopped($conversation);
         } catch (Maho_Ai_Model_Chat_ConfirmationRequired $e) {
             $this->persistRound($conversation, $roundText, $e->toolCalls, $e->results, $e->pending);
             $rows = [];
@@ -319,18 +316,35 @@ final class ChatService
             $sse->event('done', ['state' => 'awaiting_confirmation', 'conversation_id' => (int) $conversation->getId()]);
         } catch (PlatformException $e) {
             $error = \Mage::helper('ai')->translateProviderException($e, $this->agentFactory->platformCode($storeId));
-            $sse->event('error', ['message' => $this->readableProviderError($error->getMessage())]);
-            $sse->event('done', ['state' => 'error', 'conversation_id' => (int) $conversation->getId()]);
+            $this->fail($conversation, $sse, $this->readableProviderError($error->getMessage()));
         } catch (\Mage_Core_Exception $e) {
-            $sse->event('error', ['message' => $e->getMessage()]);
-            $sse->event('done', ['state' => 'error', 'conversation_id' => (int) $conversation->getId()]);
+            $this->fail($conversation, $sse, $e->getMessage());
         } catch (\Throwable $e) {
             \Mage::logException($e);
-            $sse->event('error', ['message' => \Mage::getIsDeveloperMode()
+            $this->fail($conversation, $sse, \Mage::getIsDeveloperMode()
                 ? $e->getMessage()
-                : \Mage::helper('ai')->__('The assistant hit an internal error. It was logged.')]);
-            $sse->event('done', ['state' => 'error', 'conversation_id' => (int) $conversation->getId()]);
+                : \Mage::helper('ai')->__('The assistant hit an internal error. It was logged.'));
         }
+    }
+
+    /** The administrator pressed Stop: the history shows it after a reload. */
+    public function stopped(Maho_Ai_Model_Conversation $conversation): void
+    {
+        $this->notice($conversation, \Mage::helper('ai')->__('Stopped.'), Message::TOOL_CANCELLED);
+    }
+
+    /** The turn ends with an error: the panel shows it now, and the history shows it after a reload. */
+    private function fail(Maho_Ai_Model_Conversation $conversation, Maho_Ai_Model_Chat_SseWriter $sse, string $message): void
+    {
+        $this->notice($conversation, $message, Message::TOOL_ERROR);
+        $sse->event('error', ['message' => $message]);
+        $sse->event('done', ['state' => 'error', 'conversation_id' => (int) $conversation->getId()]);
+    }
+
+    /** A note about the turn itself, shown in the history and never sent to the model. */
+    private function notice(Maho_Ai_Model_Conversation $conversation, string $text, string $status): void
+    {
+        $conversation->addMessage(['role' => Message::ROLE_ASSISTANT, 'content' => $text, 'tool_status' => $status]);
     }
 
     /** Run the agent once and forward its progress as SSE events. */
@@ -371,9 +385,6 @@ final class ChatService
                         }
                     }
                     break;
-            }
-            if ($sse->isClientGone()) {
-                $execution->cancel();
             }
         }
 

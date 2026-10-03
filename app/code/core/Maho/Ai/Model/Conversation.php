@@ -153,6 +153,17 @@ class Maho_Ai_Model_Conversation extends Mage_Core_Model_Abstract
     /**
      * Take the conversation for one chat turn. False when another turn still holds it.
      */
+    /** True while a turn runs: a background job, or a chat request that holds the lock. */
+    public function isRunning(): bool
+    {
+        if ($this->getStatus() === self::STATUS_RUNNING) {
+            return true;
+        }
+        $until = $this->getLockedUntil();
+
+        return $until !== null && $until > Mage::app()->getLocale()->formatDateForDb('now');
+    }
+
     public function acquireLock(int $seconds = self::LOCK_SECONDS): bool
     {
         return $this->lockResource()->acquireLock($this, $seconds);

@@ -153,6 +153,17 @@ final class ChatController
         return new JsonResponse(['removed' => $removed]);
     }
 
+    /** Stop asks the running turn of a conversation to end at its next event. */
+    #[Route('/api/admin/ai/chat/stop', name: 'api_admin_ai_chat_stop', methods: ['POST'])]
+    public function stop(Request $request): Response
+    {
+        $input = $this->guard($request);
+        $conversation = $this->conversation($input, $this->admin(), $this->context($input), create: false);
+        Maho_Ai_Model_Chat_SseWriter::requestStop((int) $conversation->getId());
+
+        return new JsonResponse(['stopped' => true]);
+    }
+
     #[Route('/api/admin/ai/chat/background', name: 'api_admin_ai_chat_background', methods: ['POST'])]
     public function background(Request $request): Response
     {
@@ -307,12 +318,14 @@ final class ChatController
             // The kernel popped the request when it returned this response, and the MCP
             // handler reads the current request to build each tool call.
             $this->requestStack->push($request);
-            $sse = new Maho_Ai_Model_Chat_SseWriter();
+            $sse = new Maho_Ai_Model_Chat_SseWriter((int) $conversation->getId());
             try {
                 $sse->open();
+                $sse->event('start', ['conversation_id' => (int) $conversation->getId()]);
                 $turn($sse);
             } catch (ClientGone) {
-                // The browser left before the turn produced anything to keep.
+                // Stopped before the turn started: the service did not run, so it leaves the note here.
+                $this->service->stopped($conversation);
             } finally {
                 $conversation->releaseLock();
                 $this->requestStack->pop();

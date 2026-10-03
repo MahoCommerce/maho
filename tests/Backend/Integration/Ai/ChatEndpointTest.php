@@ -52,8 +52,16 @@ final class AiChatScript
         self::$offeredSchemas = [];
     }
 
+    /** Thrown by the next model call, once. */
+    public static ?\Throwable $throw = null;
+
     public static function answer(Model $model, array|string|object $input, array $options): ResultInterface
     {
+        if (self::$throw !== null) {
+            $throw = self::$throw;
+            self::$throw = null;
+            throw $throw;
+        }
         self::$offeredTools[] = array_map(static fn(Tool $tool): string => $tool->getName(), $options['tools'] ?? []);
         $schemas = [];
         foreach ($options['tools'] ?? [] as $tool) {
@@ -601,27 +609,118 @@ it('runs a read tool at once, streams the answer and stores the conversation', f
     }
 });
 
-it('ends the turn and releases the lock when the browser closes the stream', function (): void {
+it('finishes the turn and keeps the answer when the browser closes the stream', function (): void {
     $admin = aiChatAdmin('ai_chat_stopper', ['all']);
     try {
         aiChatLogin($admin);
-        AiChatScript::reset(new TextResult('A long answer the administrator stopped.'));
+        AiChatScript::reset(new TextResult('An answer the administrator did not wait for.'));
         Maho_Ai_Model_Chat_SseWriter::$simulateClientGone = true;
         try {
-            $stopped = aiChatRequest('/api/admin/ai/chat', ['message' => 'tell me everything']);
+            $left = aiChatRequest('/api/admin/ai/chat', ['message' => 'tell me everything']);
         } finally {
             Maho_Ai_Model_Chat_SseWriter::$simulateClientGone = false;
         }
-        expect($stopped['status'])->toBe(200);
-        expect(aiChatEvents($stopped['events'], 'done'))->toBe([]);
+        expect($left['status'])->toBe(200);
+        // Nothing after the first flush reaches a browser that left, but the turn ran to its end.
+        expect(aiChatEvents($left['events'], 'done'))->toBe([]);
 
         $conversation = Mage::getModel('ai/conversation')->getCollection()->addFieldToFilter('admin_user_id', (int) $admin->getId())->getFirstItem();
         expect($conversation->getId())->not->toBeNull();
+        expect($conversation->isRunning())->toBeFalse();
+        $texts = array_map(static fn($m): string => (string) $m->getContent(), array_values(array_filter($conversation->messagesCollection()->getItems(), static fn($m): bool => $m->getRole() === 'assistant')));
+        expect($texts)->toBe(['An answer the administrator did not wait for.']);
+
         AiChatScript::reset(new TextResult('Next answer.'));
         $next = aiChatRequest('/api/admin/ai/chat', ['message' => 'and now?', 'conversation_id' => (int) $conversation->getId()]);
         expect($next['status'])->toBe(200);
         expect(aiChatEvents($next['events'], 'done')[0]['state'])->toBe('complete');
     } finally {
+        aiChatDeleteConversations((int) $admin->getId());
+        aiChatDeleteAdmin($admin);
+    }
+});
+
+it('ends the turn on Stop and leaves a note that the history shows', function (): void {
+    $admin = aiChatAdmin('ai_chat_stop_note', ['all']);
+    try {
+        aiChatLogin($admin);
+        AiChatScript::reset(new TextResult('First answer.'));
+        $first = aiChatRequest('/api/admin/ai/chat', ['message' => 'hello']);
+        $id = (int) aiChatEvents($first['events'], 'start')[0]['conversation_id'];
+        expect($id)->toBeGreaterThan(0);
+
+        $stopped = aiChatRequest('/api/admin/ai/chat/stop', ['conversation_id' => $id]);
+        expect($stopped['status'])->toBe(200);
+        AiChatScript::reset(new TextResult('Never shown.'));
+        $turn = aiChatRequest('/api/admin/ai/chat', ['message' => 'go on', 'conversation_id' => $id]);
+        expect($turn['status'])->toBe(200);
+        expect(aiChatEvents($turn['events'], 'done'))->toBe([]);
+
+        $conversation = Mage::getModel('ai/conversation')->load($id);
+        expect($conversation->isRunning())->toBeFalse();
+        $last = $conversation->messagesCollection()->getLastItem();
+        expect($last->getRole())->toBe('assistant');
+        expect($last->getToolStatus())->toBe(Maho_Ai_Model_Conversation_Message::TOOL_CANCELLED);
+        expect((string) $last->getContent())->toBe('Stopped.');
+        // The note is for the administrator: the model never sees it.
+        $bag = new Maho_Ai_Model_Chat_MessageBagBuilder()->build($conversation, 40);
+        $contents = array_map(static fn($m) => $m instanceof Symfony\AI\Platform\Message\AssistantMessage ? $m->getContent() : null, $bag->getMessages());
+        expect($contents)->not->toContain('Stopped.');
+    } finally {
+        aiChatDeleteConversations((int) $admin->getId());
+        aiChatDeleteAdmin($admin);
+    }
+});
+
+it('leaves the Stop note when Stop lands during a tool round', function (string $event): void {
+    $admin = aiChatAdmin('ai_chat_stop_round', ['all']);
+    try {
+        aiChatLogin($admin);
+        AiChatScript::reset(
+            new ToolCallResult([new ToolCall('call_s', 'catalog_products_list', ['itemsPerPage' => 1])]),
+            new TextResult('Never shown.'),
+        );
+        Mage::setIsDeveloperMode(true);
+        Maho_Ai_Model_Chat_SseWriter::$simulateStopOnEvent = $event;
+        try {
+            $turn = aiChatRequest('/api/admin/ai/chat', ['message' => 'list one']);
+        } finally {
+            Maho_Ai_Model_Chat_SseWriter::$simulateStopOnEvent = null;
+            Mage::setIsDeveloperMode(false);
+        }
+        expect($turn['status'])->toBe(200);
+        $conversation = Mage::getModel('ai/conversation')->getCollection()->addFieldToFilter('admin_user_id', (int) $admin->getId())->getFirstItem();
+        $last = $conversation->messagesCollection()->getLastItem();
+        expect((string) $last->getContent())->toBe('Stopped.');
+        expect($last->getToolStatus())->toBe(Maho_Ai_Model_Conversation_Message::TOOL_CANCELLED);
+    } finally {
+        aiChatDeleteConversations((int) $admin->getId());
+        aiChatDeleteAdmin($admin);
+    }
+})->with(['tool_call', 'tool_result', 'delta']);
+
+it('stores the error of a failed turn in the history and reports a locked conversation as running', function (): void {
+    $admin = aiChatAdmin('ai_chat_failer', ['all']);
+    try {
+        aiChatLogin($admin);
+        AiChatScript::$throw = new RuntimeException('The provider exploded.');
+        $turn = aiChatRequest('/api/admin/ai/chat', ['message' => 'hello']);
+        expect($turn['status'])->toBe(200);
+        expect(aiChatEvents($turn['events'], 'done')[0]['state'])->toBe('error');
+
+        $conversation = Mage::getModel('ai/conversation')->getCollection()->addFieldToFilter('admin_user_id', (int) $admin->getId())->getFirstItem();
+        $last = $conversation->messagesCollection()->getLastItem();
+        expect($last->getToolStatus())->toBe(Maho_Ai_Model_Conversation_Message::TOOL_ERROR);
+        expect((string) $last->getContent())->not->toBe('');
+        expect((string) $last->getContent())->toBe(aiChatEvents($turn['events'], 'error')[0]['message']);
+
+        expect($conversation->isRunning())->toBeFalse();
+        expect($conversation->acquireLock())->toBeTrue();
+        expect(Mage::getModel('ai/conversation')->load((int) $conversation->getId())->isRunning())->toBeTrue();
+        $conversation->releaseLock();
+        expect(Mage::getModel('ai/conversation')->load((int) $conversation->getId())->isRunning())->toBeFalse();
+    } finally {
+        AiChatScript::$throw = null;
         aiChatDeleteConversations((int) $admin->getId());
         aiChatDeleteAdmin($admin);
     }

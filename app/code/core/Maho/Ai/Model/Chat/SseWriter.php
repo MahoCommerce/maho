@@ -17,8 +17,35 @@ class Maho_Ai_Model_Chat_SseWriter
 
     /** A test sets this to act as a browser that closed the stream. */
     public static bool $simulateClientGone = false;
+    /** Test hook: Stop lands while this event is written. */
+    public static ?string $simulateStopOnEvent = null;
 
     private bool $open = false;
+    /** True once the browser left: the turn goes on and persists its result, and nothing is written. */
+    private bool $detached = false;
+
+    public function __construct(private readonly ?int $conversationId = null) {}
+
+    /** The administrator pressed Stop: the turn ends at its next event. */
+    public static function requestStop(int $conversationId): void
+    {
+        Mage::app()->saveCache('1', self::stopCacheId($conversationId), [Mage_Core_Model_Config::CACHE_TAG], 600);
+    }
+
+    private static function stopRequested(int $conversationId): bool
+    {
+        if (Mage::app()->loadCache(self::stopCacheId($conversationId)) === false) {
+            return false;
+        }
+        Mage::app()->removeCache(self::stopCacheId($conversationId));
+
+        return true;
+    }
+
+    private static function stopCacheId(int $conversationId): string
+    {
+        return 'ai_chat_stop_' . $conversationId;
+    }
 
     /**
      * @return array<string, string>
@@ -65,6 +92,11 @@ class Maho_Ai_Model_Chat_SseWriter
     public function event(string $name, array $data = []): void
     {
         $this->open();
+        if ($this->detached) {
+            $this->checkStop();
+
+            return;
+        }
         $json = Mage::helper('core')->jsonEncode($data);
         echo 'event: ' . $name . "\n";
         foreach (explode("\n", $json) as $line) {
@@ -72,6 +104,9 @@ class Maho_Ai_Model_Chat_SseWriter
         }
         echo "\n";
         $this->flush();
+        if (self::$simulateStopOnEvent === $name) {
+            throw new Maho_Ai_Model_Chat_ClientGone('The administrator stopped the turn.');
+        }
     }
 
     public function isClientGone(): bool
@@ -80,7 +115,10 @@ class Maho_Ai_Model_Chat_SseWriter
     }
 
     /**
-     * @throws Maho_Ai_Model_Chat_ClientGone when the browser closed the stream
+     * A browser that left (a refresh, a closed tab) detaches the writer: the turn goes on,
+     * so the answer is in the history when the panel comes back.
+     *
+     * @throws Maho_Ai_Model_Chat_ClientGone when the administrator pressed Stop
      */
     private function flush(): void
     {
@@ -89,7 +127,18 @@ class Maho_Ai_Model_Chat_SseWriter
         }
         flush();
         if ($this->isClientGone()) {
-            throw new Maho_Ai_Model_Chat_ClientGone('The browser closed the stream.');
+            $this->detached = true;
+        }
+        $this->checkStop();
+    }
+
+    /**
+     * @throws Maho_Ai_Model_Chat_ClientGone
+     */
+    private function checkStop(): void
+    {
+        if ($this->conversationId !== null && self::stopRequested($this->conversationId)) {
+            throw new Maho_Ai_Model_Chat_ClientGone('The administrator stopped the turn.');
         }
     }
 }

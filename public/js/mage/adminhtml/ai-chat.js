@@ -215,7 +215,11 @@ class MahoAiAssistant {
                 if (message.role === 'user') {
                     history.push({ role: 'user', text: message.content });
                 } else if (message.role === 'assistant') {
-                    if (message.content) {
+                    if (message.notice === 'error') {
+                        history.push({ role: 'ai', html: this.renderError(message.content) });
+                    } else if (message.notice) {
+                        history.push({ role: 'ai', text: '_' + message.content + '_' });
+                    } else if (message.content) {
                         history.push({ role: 'ai', text: message.content });
                     }
                 } else if (message.role === 'tool') {
@@ -389,7 +393,7 @@ class MahoAiAssistant {
         const text = body.messages?.at(-1)?.text ?? '';
         signals.onOpen();
         this.abortController = new AbortController();
-        signals.stopClicked.listener = () => this.abortController?.abort();
+        signals.stopClicked.listener = () => this.stop();
         this.updateIntro(true);
 
         await this.uploadsSettled();
@@ -413,6 +417,14 @@ class MahoAiAssistant {
         if (outcome.newConversation) {
             await this.loadConversations();
         }
+    }
+
+    /** Stop tells the server to end the turn, then closes the stream. A closed stream alone lets the turn finish. */
+    stop() {
+        if (this.conversationId) {
+            mahoFetch(this.config.stopUrl, { method: 'POST', body: JSON.stringify({ conversation_id: this.conversationId }), loaderArea: false }).catch(() => {});
+        }
+        this.abortController?.abort();
     }
 
     async confirm(decisions) {
@@ -573,6 +585,11 @@ class MahoAiAssistant {
                 break;
             case 'page_action':
                 state.pageAction = data.steps ?? null;
+                break;
+            case 'start':
+                if (data.conversation_id) {
+                    this.rememberConversation(data.conversation_id);
+                }
                 break;
             case 'done':
                 state.done = true;
