@@ -62,6 +62,7 @@ class Maho_Ai_Block_Adminhtml_Assistant extends Mage_Adminhtml_Block_Template
             'confirmUrl' => $apiBase . '/api/admin/ai/chat/confirm',
             'cssUrl' => $this->getSkinUrl('ai-chat.css'),
             'introIcon' => $this->getIconSvg('sparkles'),
+            'editorUrl' => $this->getJsUrl('mage/adminhtml/wysiwyg/tiptap/setup.js'),
             'adminName' => (string) Mage::getSingleton('admin/session')->getUser()?->getFirstname(),
             'examples' => [
                 $helper->__('Which orders came in today?'),
@@ -103,6 +104,7 @@ class Maho_Ai_Block_Adminhtml_Assistant extends Mage_Adminhtml_Block_Template
                 'fillForm' => $helper->__('Fill admin form'),
                 'loadTools' => $helper->__('Load tools'),
                 'pageAction' => $helper->__('Act on the page'),
+                'contentGuide' => $helper->__('Content editor guide'),
                 'actionDone' => $helper->__('Done: %s.'),
                 'actionNotFound' => $helper->__('I could not find "%s" on this page.'),
                 'formFilled' => $helper->__('I filled these fields in the form: %s. Review the form and save it.'),

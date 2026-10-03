@@ -57,12 +57,22 @@ final class McpToolbox implements ToolboxInterface
         private readonly McpToolCatalog $catalog,
         private readonly McpToolDispatcher $dispatcher,
         private readonly AdminPageTool $adminPageTool,
+        private readonly ContentGuideTool $contentGuideTool,
     ) {}
+
+    /** The editor guide the panel sent with this request, or an empty string without one. */
+    public function setContentGuide(string $guide): void
+    {
+        $this->contentGuideTool->setGuide($guide);
+    }
 
     #[\Override]
     public function getTools(): array
     {
         $tools = [$this->enableTool(), $this->adminPageTool->tool(), $this->adminPageTool->fillTool(), $this->adminPageTool->actionTool()];
+        if ($this->contentGuideTool->hasGuide()) {
+            $tools[] = $this->contentGuideTool->tool();
+        }
         // The most recently enabled section wins the budget: it is the one the model asked for last.
         foreach (array_reverse($this->enabledSections) as $section) {
             $sectionTools = $this->catalog->tools($this->excludedSections(), [$section]);
@@ -167,7 +177,7 @@ final class McpToolbox implements ToolboxInterface
     /** A tool that runs in this process, outside the MCP catalog. */
     public static function isLocal(string $name): bool
     {
-        return $name === self::ENABLE_NAME || in_array($name, AdminPageTool::NAMES, true);
+        return $name === self::ENABLE_NAME || $name === ContentGuideTool::NAME || in_array($name, AdminPageTool::NAMES, true);
     }
 
     #[\Override]
@@ -175,6 +185,8 @@ final class McpToolbox implements ToolboxInterface
     {
         if ($toolCall->getName() === self::ENABLE_NAME) {
             $outcome = $this->enable($toolCall->getArguments());
+        } elseif ($toolCall->getName() === ContentGuideTool::NAME) {
+            $outcome = $this->contentGuideTool->read();
         } elseif (in_array($toolCall->getName(), AdminPageTool::NAMES, true)) {
             $outcome = match ($toolCall->getName()) {
                 AdminPageTool::FILL_NAME => $this->adminPageTool->fill($toolCall->getArguments()),
@@ -250,6 +262,7 @@ final class McpToolbox implements ToolboxInterface
     {
         return match (true) {
             $name === self::ENABLE_NAME => 'Load tools',
+            $name === ContentGuideTool::NAME => ContentGuideTool::TITLE,
             in_array($name, AdminPageTool::NAMES, true) => AdminPageTool::title($name),
             default => $this->catalog->title($name),
         };

@@ -570,6 +570,36 @@ it('ignores the storefront store cookie: reads the default store view and builds
     }
 });
 
+it('offers the content editor guide as a tool only when the panel sent one', function (): void {
+    $admin = aiChatAdmin('ai_chat_guide', ['all']);
+    try {
+        aiChatLogin($admin);
+        AiChatScript::reset(new TextResult('Hello.'));
+        $without = aiChatRequest('/api/admin/ai/chat', ['message' => 'hello']);
+        expect($without['status'])->toBe(200);
+        expect(AiChatScript::$offeredTools[0])->not->toContain('admin_content_guide');
+
+        AiChatScript::reset(
+            new ToolCallResult([new ToolCall('call_1', 'admin_content_guide', [])]),
+            new TextResult('I use two columns.'),
+        );
+        $guide = "## Columns: 2 Columns\n<div data-type=\"maho-columns\" data-preset=\"2-equal\"></div>";
+        $result = aiChatRequest('/api/admin/ai/chat', ['message' => 'Add two columns to the home page', 'context' => ['editor_guide' => $guide]]);
+
+        expect($result['status'])->toBe(200);
+        expect(AiChatScript::$offeredTools[0])->toContain('admin_content_guide');
+        $toolCalls = aiChatEvents($result['events'], 'tool_call');
+        expect($toolCalls[0]['read_only'])->toBeTrue();
+        expect($toolCalls[0]['title'])->toBe('Content editor guide');
+        $toolResult = aiChatEvents($result['events'], 'tool_result')[0];
+        expect($toolResult['ok'])->toBeTrue($result['raw']);
+        expect($toolResult['preview'])->toContain('data-preset="2-equal"');
+    } finally {
+        aiChatDeleteConversations((int) $admin->getId());
+        aiChatDeleteAdmin($admin);
+    }
+});
+
 it('offers only the admin pages the role can open', function (): void {
     $admin = aiChatAdmin('ai_chat_nav_limited', ['admin/system/ai/chat', 'admin/cms']);
     try {

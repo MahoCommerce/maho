@@ -125,6 +125,10 @@ class tiptapWysiwygSetup {
     }
 
     convertToPlain(content) {
+        return tiptapWysiwygSetup.toPlainHtml(content);
+    }
+
+    static toPlainHtml(content) {
         // ProseMirror's schema requires the cursor to live inside a block node, so
         // editor.getHTML() emits a trailing empty <p></p> that's just "where the
         // cursor is parked" — not content. Strip a single trailing empty paragraph
@@ -151,6 +155,79 @@ class tiptapWysiwygSetup {
         });
 
         return content;
+    }
+
+    /**
+     * The HTML this editor writes for each of its layouts, as the plain textarea holds it.
+     * The assistant reads it before it writes page content, so a layout it produces stays
+     * editable here. A headless editor inserts every preset and serializes the result.
+     */
+    static contentGuide() {
+        const editor = new TiptapModules.Editor({
+            wysiwygSetup: { translate: (string) => string },
+            element: document.createElement('div'),
+            content: '',
+            extensions: [
+                TiptapModules.GlobalAttributes,
+                TiptapModules.StarterKit.configure({ heading: { levels: [1, 2, 3, 4, 5] } }),
+                TiptapModules.MahoImage.configure({ inline: true }),
+                TiptapModules.MahoWidgetBlock,
+                TiptapModules.MahoWidgetInline,
+                TiptapModules.MahoSpan,
+                TiptapModules.MahoSlideshow,
+                TiptapModules.Table,
+                TiptapModules.TableRow,
+                TiptapModules.TableCell,
+                TiptapModules.TableHeader,
+                TiptapModules.TextAlign.configure({ types: ['heading', 'paragraph', 'tableCell', 'tableHeader'] }),
+                TiptapModules.VerticalAlign,
+                TiptapModules.MahoColumns,
+                TiptapModules.MahoColumn,
+                TiptapModules.MahoBentoGrid,
+                TiptapModules.MahoBentoCell,
+                TiptapModules.MahoAccordion,
+                TiptapModules.MahoDetails.configure({ persist: false }),
+                TiptapModules.DetailsSummary,
+                TiptapModules.DetailsContent,
+                TiptapModules.MahoDiv,
+            ],
+        });
+        const snapshot = (title, run) => {
+            editor.commands.clearContent();
+            run();
+            return `## ${title}\n${tiptapWysiwygSetup.toPlainHtml(editor.getHTML()).trim()}`;
+        };
+        const sections = [
+            'The content editor of this admin is TipTap with Maho layouts. Page, block and template content is HTML; the layouts below are the exact HTML the editor writes, with the attributes it reads back. Use the same structure so the administrator can keep editing the layout in the editor. Any text block, image, widget or variable can go inside a cell or a section.',
+            '## Standard HTML the editor keeps\np, h1 to h5, ul, ol, li, blockquote, a href, strong, em, u, s, table/thead/tbody/tr/th/td, style="text-align: left|center|right" on headings, paragraphs and table cells, div with id and class, span with class.',
+            [
+                '## Directives, as the plain HTML holds them',
+                '<p><img src="{{media url="wysiwyg/photo.jpg"}}" alt="A photo"></p>',
+                '{{widget type="catalog/product_widget_new" products_count="4" template="catalog/product/widget/new/content/new_grid.phtml"}}',
+                '<p>Write to {{config path="trans_email/ident_general/email"}} or visit {{store url="contacts"}}.</p>',
+                '{{block id="footer_links"}}',
+            ].join('\n'),
+        ];
+        for (const [key, preset] of Object.entries(TiptapModules.COLUMN_PRESETS)) {
+            sections.push(snapshot(`Columns: ${preset.label}`, () => editor.commands.insertColumns(key)));
+        }
+        for (const [key, preset] of Object.entries(TiptapModules.BENTO_PRESETS)) {
+            sections.push(snapshot(`Bento grid: ${preset.label}`, () => editor.commands.insertBentoGrid(key)));
+        }
+        for (const [key, style] of Object.entries(TiptapModules.ACCORDION_STYLES)) {
+            sections.push(snapshot(style.label, () => editor.commands.insertAccordion(key)));
+        }
+        sections.push(snapshot('Slideshow', () => editor.commands.insertContent({
+            type: 'mahoSlideshow',
+            attrs: { slides: [
+                { src: '{{media url="wysiwyg/slide-1.jpg"}}', alt: 'First slide', href: '{{store url="sale"}}' },
+                { src: '{{media url="wysiwyg/slide-2.jpg"}}', alt: 'Second slide' },
+            ] },
+        })));
+        sections.push(snapshot('Table', () => editor.commands.insertTable({ rows: 2, cols: 2, withHeaderRow: true })));
+        editor.destroy();
+
+        return sections.join('\n\n');
     }
 
     syncPlainToWysiwyg() {

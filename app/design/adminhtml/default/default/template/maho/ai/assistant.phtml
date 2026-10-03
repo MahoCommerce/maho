@@ -30,5 +30,5 @@ $labels = $config['labels'];
 <script type="module">
     import '<?= $this->escapeUrl($this->getJsUrl('deep-chat.js')) ?>';
     await customElements.whenDefined('deep-chat');
-    new MahoAiAssistant(JSON.parse(document.getElementById('ai-chat-config').textContent));
+    window.mahoAiAssistant = new MahoAiAssistant(JSON.parse(document.getElementById('ai-chat-config').textContent));
 </script>

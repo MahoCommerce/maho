@@ -134,6 +134,7 @@ final class ChatService
 
         try {
             $this->toolbox->enableSections($this->initialSections($conversation, $pageContext, $this->lastUserMessage($conversation)));
+            $this->toolbox->setContentGuide((string) ($pageContext['editor_guide'] ?? ''));
             $prompt = new Maho_Ai_Model_Chat_SystemPrompt()->build($admin, $pageContext, $storeId);
             $executor = new Maho_Ai_Model_Chat_ToolExecutor($this->toolbox, $persistRound);
             $limit = max(2, (int) \Mage::getStoreConfig('ai/chat/history_messages', $storeId));

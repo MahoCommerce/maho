@@ -11,6 +11,7 @@
 class MahoAiAssistant {
     static STORAGE_OPEN = 'maho_ai_chat_open';
     static STORAGE_PREFILL = 'maho_ai_chat_prefill';
+    static STORAGE_EDITOR_GUIDE = 'maho_ai_chat_editor_guide';
     static STORAGE_CONVERSATION = 'maho_ai_chat_conversation';
 
     constructor(config) {
@@ -247,7 +248,7 @@ class MahoAiAssistant {
         const outcome = await this.streamTurn(this.config.chatUrl, {
             conversation_id: this.conversationId,
             message: text,
-            context: { ...this.config.context, screen: this.screenDigest() },
+            context: { ...this.config.context, screen: this.screenDigest(), editor_guide: await this.contentGuide() },
             form_key: this.config.formKey,
         });
 
@@ -272,7 +273,7 @@ class MahoAiAssistant {
         const outcome = await this.streamTurn(this.config.confirmUrl, {
             conversation_id: this.conversationId,
             decisions,
-            context: this.config.context,
+            context: { ...this.config.context, editor_guide: await this.contentGuide() },
             form_key: this.config.formKey,
         });
         if (outcome.error) {
@@ -474,6 +475,37 @@ class MahoAiAssistant {
     // --- screen digest ----------------------------------------------------------------
     // A text description of the page the administrator sees, sent with each message, so
     // the model can answer "where is the slideshow button" for this page, this tab.
+
+    /**
+     * The HTML the content editor writes for its layouts, generated once per tab by the
+     * editor script itself. The server offers it to the model as a tool, so the model
+     * writes content the editor can keep editing. An empty string when the script fails.
+     */
+    async contentGuide() {
+        try {
+            const cached = sessionStorage.getItem(MahoAiAssistant.STORAGE_EDITOR_GUIDE);
+            if (cached !== null) {
+                return cached;
+            }
+        } catch {
+            // storage unavailable: generate again
+        }
+        let guide = '';
+        try {
+            if (!window.tiptapWysiwygSetup && this.config.editorUrl) {
+                await import(this.config.editorUrl);
+            }
+            guide = window.tiptapWysiwygSetup?.contentGuide?.() ?? '';
+        } catch (error) {
+            console.warn('[ai-chat] editor guide unavailable', error);
+        }
+        try {
+            sessionStorage.setItem(MahoAiAssistant.STORAGE_EDITOR_GUIDE, guide);
+        } catch {
+            // storage unavailable
+        }
+        return guide;
+    }
 
     screenDigest() {
         const lines = [];
@@ -903,7 +935,7 @@ class MahoAiAssistant {
 
     /** "content_cms_pages_update" reads as "Update cms pages": the verb first, without the section. */
     humanizeTool(name) {
-        const local = { admin_open_page: this.labels.openPage, admin_fill_form: this.labels.fillForm, admin_page_action: this.labels.pageAction, enable_tools: this.labels.loadTools };
+        const local = { admin_open_page: this.labels.openPage, admin_fill_form: this.labels.fillForm, admin_page_action: this.labels.pageAction, enable_tools: this.labels.loadTools, admin_content_guide: this.labels.contentGuide };
         if (local[name]) {
             return local[name];
         }
