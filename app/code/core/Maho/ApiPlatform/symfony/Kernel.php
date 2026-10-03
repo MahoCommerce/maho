@@ -438,6 +438,12 @@ class Kernel extends BaseKernel
         // Translate IriConverter input errors (bare `id: 1` instead of an IRI)
         // into proper GraphQL null-results / 404s instead of HTTP 500. See the
         // class docblock for the full rationale.
+        // A string property with an EnumSource gets a GraphQL enum type; see the class docblock.
+        $services->set(GraphQl\EnumSourceTypeConverter::class)
+            ->decorate('api_platform.graphql.type_converter')
+            ->arg('$decorated', new Reference(GraphQl\EnumSourceTypeConverter::class . '.inner'))
+            ->arg('$typesContainer', new Reference('api_platform.graphql.types_container'));
+
         $services->set(GraphQl\IriToleranceProvider::class)
             ->decorate('api_platform.graphql.state_provider.read')
             ->arg('$inner', new Reference(GraphQl\IriToleranceProvider::class . '.inner'));

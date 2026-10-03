@@ -40,7 +40,7 @@ final class EnumSourceKernel extends Kernel
             #[\Override]
             public function process(ContainerBuilder $container): void
             {
-                foreach ([SchemaFactoryInterface::class, OpenApiFactoryInterface::class] as $id) {
+                foreach ([SchemaFactoryInterface::class, OpenApiFactoryInterface::class, 'api_platform.graphql.schema_builder'] as $id) {
                     if ($container->hasAlias($id)) {
                         $container->getAlias($id)->setPublic(true);
                     } elseif ($container->hasDefinition($id)) {
@@ -143,4 +143,32 @@ it('resolves every EnumSource declared on an API resource to a non-empty list, a
         }
     }
     expect($checked)->toBeGreaterThan(40);
+});
+
+it('gives a string property with an EnumSource a GraphQL enum type, and leaves an integer list alone', function (): void {
+    $schema = enumSourceContainer()->get('api_platform.graphql.schema_builder')->getSchema();
+    // The object fields are lazy and the enum types are made while they are built.
+    $schema->getTypeMap();
+
+    $status = $schema->getType('ProductStatusEnum');
+    expect($status)->toBeInstanceOf(GraphQL\Type\Definition\EnumType::class);
+    expect(array_map(static fn(GraphQL\Type\Definition\EnumValueDefinition $v): string => $v->name, $status->getValues()))->toBe(['enabled', 'disabled']);
+    expect($status->getValue('enabled')?->value)->toBe('enabled');
+
+    $robots = $schema->getType('ProductMetaRobotsEnum');
+    expect($robots)->toBeInstanceOf(GraphQL\Type\Definition\EnumType::class);
+    expect($robots->getValue('INDEX_FOLLOW')?->value)->toBe('INDEX,FOLLOW');
+
+    $layout = $schema->getType('CmsPagePageLayoutEnum');
+    expect($layout)->toBeInstanceOf(GraphQL\Type\Definition\EnumType::class);
+    expect(array_map(static fn(GraphQL\Type\Definition\EnumValueDefinition $v): string => $v->value, $layout->getValues()))->toContain('one_column');
+
+    $product = $schema->getType('Product');
+    expect($product)->toBeInstanceOf(GraphQL\Type\Definition\ObjectType::class);
+    expect($product->getField('status')->getType()->toString())->toBe('ProductStatusEnum!');
+    expect($product->getField('websiteIds')->getType()->toString())->not->toContain('Enum');
+    expect($schema->getType('ProductWebsiteIdsEnum'))->toBeNull();
+
+    expect(Maho\ApiPlatform\GraphQl\EnumSourceTypeConverter::memberName('24h'))->toBe('_24h');
+    expect(Maho\ApiPlatform\GraphQl\EnumSourceTypeConverter::memberName(''))->toBe('EMPTY');
 });
