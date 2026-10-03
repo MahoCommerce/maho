@@ -245,6 +245,12 @@ final class McpToolbox implements ToolboxInterface
      *
      * @return array{url?: string, fields?: array<string, mixed>, steps?: list<array{action: string, target: string, value: string|null}>}|null
      */
+    /** Admin page links in place of the API links of an answer; see AdminPageTool::linkRecords(). */
+    public function linkRecords(string $markdown): string
+    {
+        return $this->adminPageTool->linkRecords($markdown);
+    }
+
     public function takeNavigation(): ?array
     {
         $navigation = $this->navigation;

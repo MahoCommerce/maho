@@ -172,7 +172,7 @@ final class ChatService
                 }
             }
             $metadata = [];
-            $clean = \Mage::getSingleton('ai/safety_outputSanitizer')->sanitize($text, false, $metadata);
+            $clean = $this->toolbox->linkRecords(\Mage::getSingleton('ai/safety_outputSanitizer')->sanitize($text, false, $metadata));
             if ($clean !== $text) {
                 $sse->event('replace', ['text' => $clean]);
             }

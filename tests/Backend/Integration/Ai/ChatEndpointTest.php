@@ -257,6 +257,28 @@ it('refuses an admin whose role does not grant the assistant', function (): void
     }
 });
 
+it('turns the API links of an answer into admin page links', function (): void {
+    $admin = aiChatAdmin('ai_chat_linker', ['all']);
+    try {
+        aiChatLogin($admin);
+        AiChatScript::reset(new TextResult('See [Blue Shirt](/api/rest/v2/products/12), [the page](/api/rest/v2/cms-pages/2) and [a store](/api/rest/v2/stores/1).'));
+
+        $result = aiChatRequest('/api/admin/ai/chat', ['message' => 'Find the blue shirt']);
+
+        expect($result['status'])->toBe(200);
+        $replace = aiChatEvents($result['events'], 'replace');
+        expect($replace)->toHaveCount(1);
+        expect($replace[0]['text'])->toMatch('~\[Blue Shirt\]\(http://[^)]+/catalog_product/edit/id/12/[^)]*\)~');
+        expect($replace[0]['text'])->toMatch('~\[the page\]\(http://[^)]+/cms_page/edit/page_id/2/[^)]*\)~');
+        expect($replace[0]['text'])->toContain(' and a store.');
+        $stored = Mage::getModel('ai/conversation_message')->getCollection()->addFieldToFilter('role', 'assistant')->setOrder('message_id', 'DESC')->getFirstItem();
+        expect((string) $stored->getContent())->toContain('/catalog_product/edit/id/12/');
+    } finally {
+        aiChatDeleteConversations((int) $admin->getId());
+        aiChatDeleteAdmin($admin);
+    }
+});
+
 it('runs a read tool at once, streams the answer and stores the conversation', function (): void {
     $admin = aiChatAdmin('ai_chat_reader', ['all']);
     try {

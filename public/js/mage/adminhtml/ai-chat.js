@@ -41,6 +41,14 @@ class MahoAiAssistant {
                 link.href = this.config.cssUrl;
                 link.dataset.aiChat = '1';
                 chat.shadowRoot.appendChild(link);
+                // deep-chat opens every link in a new tab; an admin page of this store opens here.
+                chat.shadowRoot.addEventListener('click', (event) => {
+                    const anchor = event.composedPath().find((node) => node.tagName === 'A' && node.href);
+                    if (anchor && new URL(anchor.href).origin === window.location.origin) {
+                        event.preventDefault();
+                        window.location.assign(anchor.href);
+                    }
+                });
             }
         };
         chat.textInput = { placeholder: { text: this.labels.placeholder } };

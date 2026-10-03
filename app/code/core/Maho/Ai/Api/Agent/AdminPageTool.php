@@ -12,6 +12,9 @@ declare(strict_types=1);
 
 namespace Maho\Ai\Api\Agent;
 
+use ApiPlatform\Metadata\HttpOperation;
+use ApiPlatform\Metadata\Resource\Factory\ResourceMetadataCollectionFactoryInterface;
+use ApiPlatform\Metadata\Resource\Factory\ResourceNameCollectionFactoryInterface;
 use Maho\Routing\RouteCollectionBuilder;
 use Symfony\AI\Platform\Tool\ExecutionReference;
 use Symfony\AI\Platform\Tool\Tool;
@@ -27,6 +30,11 @@ use Symfony\AI\Platform\Tool\Tool;
  */
 final class AdminPageTool
 {
+    public function __construct(
+        private readonly ResourceNameCollectionFactoryInterface $resourceNameCollectionFactory,
+        private readonly ResourceMetadataCollectionFactoryInterface $resourceMetadataCollectionFactory,
+    ) {}
+
     public const NAME = 'admin_open_page';
     public const FILL_NAME = 'admin_fill_form';
     public const ACTION_NAME = 'admin_page_action';
@@ -114,7 +122,7 @@ final class AdminPageTool
         ];
     }
 
-    /** @var array<string, array{title: string, action: string}>|null */
+    /** @var array<string, array{title: string, action: string, acl: string}>|null */
     private ?array $pages = null;
 
     public function tool(): Tool
@@ -269,7 +277,7 @@ final class AdminPageTool
     /**
      * The admin menu entries the current administrator can open, keyed by menu path.
      *
-     * @return array<string, array{title: string, action: string}>
+     * @return array<string, array{title: string, action: string, acl: string}>
      */
     public function pages(): array
     {
@@ -301,7 +309,7 @@ final class AdminPageTool
             $childTitles = [...$titles, (string) \Mage::helper($module)->__((string) $child->title)];
             $action = trim((string) $child->action, '/');
             if ($action !== '') {
-                $this->pages[$path . $name] = ['title' => implode(' > ', $childTitles), 'action' => $action];
+                $this->pages[$path . $name] = ['title' => implode(' > ', $childTitles), 'action' => $action, 'acl' => substr($resource, strlen('admin/'))];
             }
             if ($child->children) {
                 $this->collect($child->children, $path . $name . '/', $childTitles);
@@ -409,6 +417,81 @@ final class AdminPageTool
         $lines = file($file);
 
         return $lines === false ? '' : implode('', array_slice($lines, $start - 1, $end - $start + 1));
+    }
+
+    /** API resource path segment => ACL resource of its admin page, from the API resource classes. */
+    private ?array $resourceAcl = null;
+
+    /**
+     * Turn the API links of an answer into admin page links, so a record name in the
+     * answer opens its edit page: [Blue Shirt](/api/rest/v2/products/12). An unknown
+     * resource keeps its text and loses the link.
+     */
+    public function linkRecords(string $markdown): string
+    {
+        return (string) preg_replace_callback(
+            '~\\[([^\\]\\n]*)\\]\\((?:https?://[^/\\s)]+)?/api/rest/v2/([a-z0-9-]+)/([A-Za-z0-9_.%-]+)/?\\)~',
+            function (array $m): string {
+                $url = $this->recordUrl($m[2], rawurldecode($m[3]));
+
+                return $url === null ? $m[1] : sprintf('[%s](%s)', $m[1], $url);
+            },
+            $markdown,
+        );
+    }
+
+    /**
+     * The admin page of one record, or null when the resource names no admin page or the
+     * administrator may not open it. An API resource class names its admin ACL resource in
+     * ADMIN_RESOURCE, and the admin menu names the ACL resource of each entry: the two meet here.
+     */
+    public function recordUrl(string $resource, string $id): ?string
+    {
+        $acl = $this->resourceAcl()[$resource] ?? null;
+        if ($acl === null) {
+            return null;
+        }
+        foreach ($this->pages() as $page) {
+            if ($page['acl'] !== $acl) {
+                continue;
+            }
+            $record = $this->recordRoute($page['action']);
+            if ($record === null) {
+                continue;
+            }
+            [$route, $idParam] = $record;
+
+            return \Mage::helper('adminhtml')->getUrl($route, [$idParam => $this->cleanValue($id)]);
+        }
+
+        return null;
+    }
+
+    /** @return array<string, string> */
+    private function resourceAcl(): array
+    {
+        if ($this->resourceAcl !== null) {
+            return $this->resourceAcl;
+        }
+        $this->resourceAcl = [];
+        foreach ($this->resourceNameCollectionFactory->create() as $class) {
+            if (!defined($class . '::ADMIN_RESOURCE')) {
+                continue;
+            }
+            $acl = constant($class . '::ADMIN_RESOURCE');
+            if (!is_string($acl) || $acl === '') {
+                continue;
+            }
+            foreach ($this->resourceMetadataCollectionFactory->create($class) as $resource) {
+                foreach ($resource->getOperations() ?? [] as $operation) {
+                    if ($operation instanceof HttpOperation && preg_match('~^/([a-z0-9-]+)/\\{[^}]+\\}$~', (string) $operation->getUriTemplate(), $m) === 1) {
+                        $this->resourceAcl[$m[1]] ??= $acl;
+                    }
+                }
+            }
+        }
+
+        return $this->resourceAcl;
     }
 
     private function cleanValue(string $value): string
