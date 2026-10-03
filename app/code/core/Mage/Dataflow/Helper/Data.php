@@ -14,4 +14,92 @@ class Mage_Dataflow_Helper_Data extends Mage_Core_Helper_Abstract
 {
     #[\Override]
     protected $_moduleName = 'Mage_Dataflow';
+
+    /**
+     * The mount and the folder on it for a profile path relative to the Maho root: var/export is
+     * the exports mount and var/import the imports mount. Null for any other path.
+     *
+     * @return array{0: \Maho\Storage\Mount, 1: string}|null
+     */
+    public function getStorageLocation(string $path): ?array
+    {
+        $absolute = \Symfony\Component\Filesystem\Path::makeAbsolute($path, Mage::getBaseDir());
+        $mounts = [
+            'exports' => Mage::getBaseDir('export'),
+            'imports' => Mage::getBaseDir('var') . DS . 'import',
+        ];
+        foreach ($mounts as $name => $directory) {
+            $inside = \Maho\Io::getPathWithinDir($directory, $absolute);
+            if ($inside !== null) {
+                $base = \Symfony\Component\Filesystem\Path::canonicalize($directory);
+                return [Mage::getStorage($name), trim(substr($inside, strlen($base)), '/')];
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Copy the file $path of $mount into the temporary file of the batch, which the parser reads
+     */
+    public function copyToBatchFile(\Maho\Storage\Mount $mount, string $path, string $displayName): void
+    {
+        $target = Mage::getSingleton('dataflow/batch')->getIoAdapter()->getFile(true);
+        try {
+            $mount->copyToLocalFile($path, $target);
+        } catch (\League\Flysystem\FilesystemException|\Maho\Storage\StorageException) {
+            Mage::throwException($this->__('Could not load file: "%s".', $displayName));
+        }
+    }
+
+    public function getUploadMount(): \Maho\Storage\Mount
+    {
+        return Mage::getStorage('imports');
+    }
+
+    /**
+     * Mount path of an uploaded profile file, at the root of the imports mount (var/import).
+     * Null when the name leaves the mount.
+     */
+    public function getUploadPath(string $filename): ?string
+    {
+        return \Maho\Io::getPathWithinMount($this->getUploadMount(), '', $filename);
+    }
+
+    /**
+     * Put a checked local upload on the imports mount. Delete the local file, also when this fails.
+     */
+    public function storeUpload(string $localPath, string $filename): void
+    {
+        try {
+            $path = $this->getUploadPath($filename);
+            if ($path === null) {
+                Mage::throwException($this->__('Invalid file path.'));
+            }
+            $this->getUploadMount()->copyFromLocalFile($localPath, $path);
+        } finally {
+            unlink($localPath);
+        }
+    }
+
+    /**
+     * Names of the files with the given extension at the root of the imports mount, sorted
+     *
+     * @return list<string>
+     */
+    public function getImportFiles(string $extension): array
+    {
+        $files = [];
+        try {
+            foreach ($this->getUploadMount()->listContents('', false) as $item) {
+                $name = basename($item->path());
+                if ($item->isFile() && strtolower(pathinfo($name, PATHINFO_EXTENSION)) === strtolower($extension)) {
+                    $files[] = $name;
+                }
+            }
+        } catch (\League\Flysystem\FilesystemException $e) {
+            Mage::logException($e);
+        }
+        sort($files);
+        return $files;
+    }
 }

@@ -4688,11 +4688,6 @@ parameters:
 			count: 1
 			path: app/code/core/Mage/Adminhtml/controllers/Customer/GroupController.php
 
-		-
-			rawMessage: 'Parameter #2 $timestamp of function date expects int|null, array|bool given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/CustomerController.php
 
 		-
 			rawMessage: 'Method Mage_Adminhtml_IndexController::_getDeniedIframe() has no return type specified.'
@@ -6229,12 +6224,6 @@ parameters:
 		-
 			rawMessage: 'Call to an undefined method Mage_Catalog_Model_Product_Configuration_Item_Option_Interface::setValue().'
 			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product/Option/Type/File.php
-
-		-
-			rawMessage: 'Method Mage_Catalog_Model_Product_Option_Type_File::_createWriteableDir() has no return type specified.'
-			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Product/Option/Type/File.php
 
@@ -8406,12 +8395,6 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Email/Template/Filter.php
 
 		-
-			rawMessage: 'Method Mage_Core_Model_File_Storage_File::removeLockedFile() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/File/Storage/File.php
-
-		-
 			rawMessage: 'Method Mage_Core_Model_File_Validator_Image::validate() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -8656,12 +8639,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Core/Model/Resource/Entity/Abstract.php
-
-		-
-			rawMessage: 'Method Mage_Core_Model_Resource_File_Storage_File::removeLockedFile() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/File/Storage/File.php
 
 		-
 			rawMessage: 'Method Mage_Core_Model_Resource_Flag::_construct() has no return type specified.'
@@ -10626,18 +10603,6 @@ parameters:
 			path: app/code/core/Mage/Downloadable/Block/Adminhtml/Catalog/Product/Edit/Tab/Downloadable.php
 
 		-
-			rawMessage: 'Cannot call method streamRead() on resource.'
-			identifier: method.nonObject
-			count: 1
-			path: app/code/core/Mage/Downloadable/Helper/Download.php
-
-		-
-			rawMessage: 'Cannot call method streamStat() on resource.'
-			identifier: method.nonObject
-			count: 1
-			path: app/code/core/Mage/Downloadable/Helper/Download.php
-
-		-
 			rawMessage: 'Method Mage_Downloadable_Helper_Download::getFilesize() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -10652,7 +10617,7 @@ parameters:
 		-
 			rawMessage: 'Parameter #2 $code of class Exception constructor expects int, string given.'
 			identifier: argument.type
-			count: 2
+			count: 1
 			path: app/code/core/Mage/Downloadable/Model/Link/Api/Uploader.php
 
 		-
@@ -11467,12 +11432,6 @@ parameters:
 
 		-
 			rawMessage: Property Mage_ImportExport_Model_Import_Uploader::$_allowedMimeTypes has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/ImportExport/Model/Import/Uploader.php
-
-		-
-			rawMessage: Property Mage_ImportExport_Model_Import_Uploader::$_destDir has no type specified.
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/ImportExport/Model/Import/Uploader.php

@@ -43,7 +43,7 @@ class Mage_Catalog_Model_Resource_Product_Attribute_Backend_Image extends Mage_E
                 $uploader->setAllowRenameFiles(true);
                 $uploader->setFilesDispersion(true);
                 $uploader->addValidateCallback(Mage_Core_Model_File_Validator_Image::NAME, $validator, 'validate');
-                $uploader->save(Mage::getBaseDir('media') . DS . 'catalog' . DS . 'product');
+                $uploader->saveToStorage(Mage::getStorage('media'), Mage::getSingleton('catalog/product_media_config')->getBaseMediaStoragePath());
 
                 $fileName = $uploader->getUploadedFileName();
                 if ($fileName) {
@@ -87,29 +87,13 @@ class Mage_Catalog_Model_Resource_Product_Attribute_Backend_Image extends Mage_E
     protected function _deleteFile(string $fileName): void
     {
         try {
-            $baseDir = Mage::getBaseDir('media') . '/catalog/product';
-            $filePath = $baseDir . '/' . $fileName;
-
-            // Delete original file
-            if (file_exists($filePath)) {
-                unlink($filePath);
+            $mount = Mage::getStorage('media');
+            $baseStoragePath = Mage::getSingleton('catalog/product_media_config')->getBaseMediaStoragePath();
+            $filePath = \Maho\Io::getPathWithinMount($mount, $baseStoragePath, $fileName);
+            if ($filePath !== null && $mount->fileExists($filePath)) {
+                $mount->delete($filePath);
             }
-
-            // Delete all cached versions - search for all cache files matching this dispersed path
-            $cacheDir = $baseDir . '/cache';
-            if (is_dir($cacheDir)) {
-                // Use glob to find all cached versions of this file
-                // Cache structure: /cache/*/image/*/{dispersed_path}
-                $pattern = $cacheDir . '/*/image/*/' . ltrim($fileName, '/') . Maho::getConfiguredImageExtension();
-                $cachedFiles = glob($pattern);
-                if ($cachedFiles) {
-                    foreach ($cachedFiles as $cachedFile) {
-                        if (file_exists($cachedFile)) {
-                            unlink($cachedFile);
-                        }
-                    }
-                }
-            }
+            Mage::getSingleton('catalog/product_image_size')->deleteCachedCopies($fileName);
         } catch (Exception $e) {
             // Silently fail - file deletion is not critical
             Mage::logException($e);

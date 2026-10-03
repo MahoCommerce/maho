@@ -24,6 +24,11 @@ class Maho_FeedManager_Model_Uploader
         $this->_config = $destination->getConfigArray();
     }
 
+    protected function _createHttpClient(int $timeout): \Symfony\Contracts\HttpClient\HttpClientInterface
+    {
+        return \Maho\Http\Client::create(['timeout' => $timeout]);
+    }
+
     /**
      * Check if SSH2 extension is available
      */
@@ -69,9 +74,25 @@ class Maho_FeedManager_Model_Uploader
             Maho_FeedManager_Model_Destination::TYPE_SFTP => $this->_uploadSftp($localPath, $remoteName),
             Maho_FeedManager_Model_Destination::TYPE_FTP => $this->_uploadFtp($localPath, $remoteName),
             Maho_FeedManager_Model_Destination::TYPE_GOOGLE_API => $this->_uploadGoogleApi($localPath),
-            Maho_FeedManager_Model_Destination::TYPE_FACEBOOK_API => $this->_uploadFacebookApi($localPath),
+            Maho_FeedManager_Model_Destination::TYPE_FACEBOOK_API => $this->_uploadFacebookApi($localPath, $remoteName),
             default => throw new InvalidArgumentException("Unsupported destination type: {$this->_destination->getType()}"),
         };
+    }
+
+    /**
+     * Upload the file of a feed from the media mount, under the file name of the feed
+     *
+     * A remote mount gives a local temp copy, which is deleted after the upload.
+     */
+    public function uploadFeed(Maho_FeedManager_Model_Feed $feed): bool
+    {
+        $path = $feed->getStoragePath();
+        $mount = Mage::helper('feedmanager')->getOutputMount();
+        if ($path === null || !$mount->fileExists($path)) {
+            throw new InvalidArgumentException("Feed file not found: {$feed->getOutputFilename()}");
+        }
+
+        return $mount->withLocalFile($path, fn(string $localPath): bool => $this->upload($localPath, $feed->getOutputFilename()));
     }
 
     /**
@@ -312,7 +333,7 @@ class Maho_FeedManager_Model_Uploader
      * Uses streaming multipart upload via Symfony Mime to avoid
      * loading the entire feed file into memory.
      */
-    protected function _uploadFacebookApi(string $localPath): bool
+    protected function _uploadFacebookApi(string $localPath, string $remoteName): bool
     {
         $catalogId = $this->_config['catalog_id'] ?? '';
         $accessToken = $this->_config['access_token'] ?? '';
@@ -327,13 +348,17 @@ class Maho_FeedManager_Model_Uploader
         // Build multipart form with streaming file part (no full file_get_contents)
         $formData = new \Symfony\Component\Mime\Part\Multipart\FormDataPart([
             'update_type' => 'CREATE_OR_UPDATE',
-            'file' => \Symfony\Component\Mime\Part\DataPart::fromPath($localPath),
+            'file' => \Symfony\Component\Mime\Part\DataPart::fromPath(
+                $localPath,
+                $remoteName,
+                \Symfony\Component\Mime\MimeTypes::getDefault()->getMimeTypes(pathinfo($remoteName, PATHINFO_EXTENSION))[0] ?? null,
+            ),
         ]);
 
         $headers = $formData->getPreparedHeaders()->toArray();
         $headers['Authorization'] = 'Bearer ' . $accessToken;
 
-        $client = \Maho\Http\Client::create(['timeout' => 300]);
+        $client = $this->_createHttpClient(300);
 
         $response = $client->request('POST', $url, [
             'headers' => $headers,
@@ -561,7 +586,7 @@ class Maho_FeedManager_Model_Uploader
 
         try {
             $url = "https://graph.facebook.com/v18.0/{$catalogId}";
-            $client = \Maho\Http\Client::create(['timeout' => 30]);
+            $client = $this->_createHttpClient(30);
             $response = $client->request('GET', $url, [
                 'headers' => [
                     'Authorization' => 'Bearer ' . $accessToken,

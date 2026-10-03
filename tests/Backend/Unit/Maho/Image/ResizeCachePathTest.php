@@ -39,6 +39,14 @@ describe('Maho::buildImageResizeCachePath', function () {
         expect($path)->toEndWith('/i/m/image_76.jpg' . Maho::getConfiguredImageExtension());
     });
 
+    it('keeps the cache path of earlier releases, so existing cache files stay valid', function () {
+        Mage::app()->setCurrentStore(1);
+
+        $path = Maho::buildImageResizeCachePath($this->params, 'catalog/product', '/i/m/image_76.jpg');
+
+        expect($path)->toBe('catalog/product/cache/1/image/800x/e3f29957c4a84f7bf5c1685080c2b7a2/i/m/image_76.jpg' . Maho::getConfiguredImageExtension());
+    });
+
     it('appends the configured extension to a source file that has no extension', function () {
         $path = Maho::buildImageResizeCachePath($this->params, $this->baseMediaPath, '/i/m/image_76');
 

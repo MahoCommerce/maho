@@ -205,8 +205,7 @@ class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Absolute URLs of the base image and the gallery images, the base image first. The original
-     * media URL is used rather than the resize helper, whose signed core/index/resize URL is
-     * neither stable nor crawlable.
+     * media URL gives search engines the full resolution, which a resized copy does not.
      *
      * @return array<int, string>
      */
