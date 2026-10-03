@@ -24,10 +24,10 @@ $labels = $config['labels'];
         <button type="button" id="ai-chat-close" class="ai-chat-icon-button" title="<?= $this->escapeHtml($labels['close']) ?>"><?= $this->getIconSvg('x') ?></button>
     </header>
     <deep-chat id="ai-chat"></deep-chat>
-    <div class="ai-chat-attachments" id="ai-chat-attachments" hidden></div>
     <div class="ai-chat-attach-bar">
         <button type="button" id="ai-chat-attach" class="ai-chat-icon-button" title="<?= $this->escapeHtml($labels['attach']) ?>"><?= $this->getIconSvg('paperclip') ?></button>
         <input type="file" id="ai-chat-file" multiple accept="<?= $this->escapeHtml($config['uploadAccept']) ?>" hidden>
+        <div class="ai-chat-attachments" id="ai-chat-attachments" hidden></div>
     </div>
 </aside>
 <script type="application/json" id="ai-chat-config"><?= Mage::helper('core')->jsonEncode($config) ?></script>
