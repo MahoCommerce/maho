@@ -261,7 +261,8 @@ class Kernel extends BaseKernel
                     'maho' => [
                         'version' => \Mage::getVersion(),
                         'description' => 'Maho Commerce store data and operations',
-                        'instructions' => $this->mcpInstructions(),
+                        // The store name is free text, and the container reads %name% as a parameter.
+                        'instructions' => str_replace('%', '%%', $this->mcpInstructions()),
                         'transports' => ['http' => true, 'stdio' => false],
                         'http' => [
                             // Under /api so the `^/api` firewall gives it bearer auth for free.

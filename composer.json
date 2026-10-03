@@ -78,7 +78,7 @@
         "mahocommerce/directory-data": "^1.0",
         "symfony/ai-agent": "^0.14",
         "symfony/ai-platform": "^0.14",
-        "symfony/mcp-bundle": "^0.13",
+        "symfony/mcp-bundle": "^0.14",
         "nyholm/psr7": "^1.8",
         "symfony/ai-generic-platform": "^0.14"
     },
