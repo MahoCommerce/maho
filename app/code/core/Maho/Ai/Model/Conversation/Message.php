@@ -168,6 +168,34 @@ class Maho_Ai_Model_Conversation_Message extends Mage_Core_Model_Abstract
         return $this->setData('undo_arguments', $value === null ? null : Mage::helper('core')->jsonEncode($value));
     }
 
+    /**
+     * The files the administrator attached to this message: id, name, mime and size.
+     *
+     * @return list<array{id: string, name: string, mime: string, size: int}>
+     */
+    public function getAttachments(): array
+    {
+        $json = $this->getData('attachments');
+        if ($json === null || $json === '') {
+            return [];
+        }
+        try {
+            $decoded = Mage::helper('core')->jsonDecode((string) $json);
+        } catch (\JsonException) {
+            return [];
+        }
+
+        return is_array($decoded) ? array_values($decoded) : [];
+    }
+
+    /**
+     * @param list<array{id: string, name: string, mime: string, size: int}>|null $value
+     */
+    public function setAttachments(?array $value): static
+    {
+        return $this->setData('attachments', $value === null || $value === [] ? null : Mage::helper('core')->jsonEncode($value));
+    }
+
     public function getToolStatus(): ?string
     {
         $value = $this->getData('tool_status');

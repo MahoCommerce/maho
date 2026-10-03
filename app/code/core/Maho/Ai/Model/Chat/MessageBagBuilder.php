@@ -11,6 +11,7 @@
 declare(strict_types=1);
 
 use Symfony\AI\Platform\Message\AssistantMessage;
+use Symfony\AI\Platform\Message\Content\Image;
 use Symfony\AI\Platform\Message\Content\Text;
 use Symfony\AI\Platform\Message\Message;
 use Symfony\AI\Platform\Message\MessageBag;
@@ -26,13 +27,13 @@ class Maho_Ai_Model_Chat_MessageBagBuilder
     {
         $messages = array_values($conversation->messagesCollection()->getItems());
 
-        return $this->fromMessages($this->window($messages, $limit));
+        return $this->fromMessages($this->window($messages, $limit), (int) $conversation->getAdminUserId());
     }
 
     /**
      * @param list<Maho_Ai_Model_Conversation_Message> $messages oldest first
      */
-    public function fromMessages(array $messages): MessageBag
+    public function fromMessages(array $messages, int $adminId = 0): MessageBag
     {
         $bag = new MessageBag();
         foreach ($messages as $message) {
@@ -40,7 +41,7 @@ class Maho_Ai_Model_Chat_MessageBagBuilder
             $content = (string) $message->getContent();
 
             if ($role === Maho_Ai_Model_Conversation_Message::ROLE_USER) {
-                $bag->add(Message::ofUser($content));
+                $bag->add(Message::ofUser($content, ...$this->images($message, $adminId)));
                 continue;
             }
 
@@ -96,6 +97,28 @@ class Maho_Ai_Model_Chat_MessageBagBuilder
     /**
      * @param array{id?: string, name?: string, arguments?: array<string, mixed>, signature?: ?string} $call
      */
+    /**
+     * The images attached to a user message, as content the model can see. A text file is
+     * not sent: the model reads it with the attachment tool when it needs it.
+     *
+     * @return list<Image>
+     */
+    private function images(Maho_Ai_Model_Conversation_Message $message, int $adminId): array
+    {
+        $images = [];
+        foreach ($message->getAttachments() as $file) {
+            if (!Maho_Ai_Model_Chat_Attachment::isImage($file['mime'])) {
+                continue;
+            }
+            $path = Maho_Ai_Model_Chat_Attachment::path($adminId, $file['id']);
+            if ($path !== null) {
+                $images[] = Image::fromFile($path);
+            }
+        }
+
+        return $images;
+    }
+
     private function toolCall(array $call): ToolCall
     {
         return new ToolCall(

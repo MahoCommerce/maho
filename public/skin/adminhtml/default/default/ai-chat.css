@@ -647,3 +647,37 @@ body.ai-chat-open .ai-chat-toggle {
     font-style: italic;
     color: var(--maho-ink-muted, #666);
 }
+
+/* Files attached to the next message, and the button that adds them. */
+.ai-chat-attach-bar {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0 8px 6px;
+}
+
+.ai-chat-attachments {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 4px 8px 0;
+}
+
+.ai-chat-attachment {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 6px;
+    border: 1px solid var(--maho-border, #ccc);
+    border-radius: 12px;
+    background: var(--maho-surface);
+    font-size: 12px;
+}
+
+.ai-chat-attachment-remove {
+    border: 0;
+    padding: 0 2px;
+    background: none;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+}

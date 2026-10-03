@@ -102,6 +102,9 @@ class Maho_Ai_Adminhtml_Ai_ChatController extends Mage_Adminhtml_Controller_Acti
                 'content' => (string) $message->getContent(),
                 'created_at' => $message->getCreatedAt(),
             ];
+            if ($message->getRole() === Maho_Ai_Model_Conversation_Message::ROLE_USER && $message->getAttachments() !== []) {
+                $row['attachments'] = $message->getAttachments();
+            }
             if ($message->getRole() === Maho_Ai_Model_Conversation_Message::ROLE_TOOL) {
                 $row['tool'] = [
                     'id' => $message->getToolCallId(),

@@ -54,12 +54,16 @@ final class ChatService
     /**
      * @param array<string, mixed> $pageContext
      */
+    /**
+     * @param list<array{id: string, name: string, mime: string, size: int}> $attachments
+     */
     public function startTurn(
         Maho_Ai_Model_Conversation $conversation,
         Mage_Admin_Model_User $admin,
         string $userMessage,
         array $pageContext,
         Maho_Ai_Model_Chat_SseWriter $sse,
+        array $attachments = [],
     ): void {
         $validation = \Mage::getSingleton('ai/safety_inputValidator')->validate($userMessage);
         if (!$validation['safe']) {
@@ -69,7 +73,17 @@ final class ChatService
         }
 
         $conversation->cancelPendingWrites();
-        $conversation->addMessage(['role' => Message::ROLE_USER, 'content' => $userMessage]);
+        if ($attachments !== []) {
+            $lines = [];
+            foreach ($attachments as $file) {
+                $lines[] = sprintf('- %s (%s, %s) id %s', $file['name'], $file['mime'], $this->humanSize($file['size']), $file['id']);
+            }
+            $userMessage = rtrim($userMessage) . "\n\nAttachments:\n" . implode("\n", $lines);
+        }
+        $message = $conversation->addMessage(['role' => Message::ROLE_USER, 'content' => $userMessage]);
+        if ($attachments !== []) {
+            $message->setAttachments($attachments)->save();
+        }
         if ((string) $conversation->getTitle() === '') {
             $conversation->setTitle(mb_substr(trim(preg_replace('/\s+/', ' ', $userMessage) ?? $userMessage), 0, 80));
             $conversation->save();
@@ -571,6 +585,11 @@ final class ChatService
         $prefix = preg_replace('/:\s*Unexpected response code \d+$/', '', trim($m[1])) ?? trim($m[1]);
 
         return $prefix . ': ' . trim($detail);
+    }
+
+    private function humanSize(int $bytes): string
+    {
+        return $bytes >= 1024 * 1024 ? sprintf('%.1f MB', $bytes / 1024 / 1024) : sprintf('%d KB', max(1, intdiv($bytes, 1024)));
     }
 
     private function preview(string $text): string

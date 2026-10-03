@@ -77,6 +77,11 @@ class MahoAiAssistant {
         this.toggle.addEventListener('click', () => this.setOpen(this.panel.hidden));
         document.getElementById('ai-chat-close').addEventListener('click', () => this.setOpen(false));
         document.getElementById('ai-chat-new').addEventListener('click', () => this.newConversation());
+        this.attachments = [];
+        this.attachmentList = document.getElementById('ai-chat-attachments');
+        this.fileInput = document.getElementById('ai-chat-file');
+        document.getElementById('ai-chat-attach').addEventListener('click', () => this.fileInput.click());
+        this.fileInput.addEventListener('change', () => this.attachFiles(this.fileInput.files));
         this.deleteButton.addEventListener('click', () => this.deleteConversation());
         this.picker.addEventListener('change', () => {
             const id = parseInt(this.picker.value, 10);
@@ -229,6 +234,57 @@ class MahoAiAssistant {
         }
     }
 
+    /** Upload each chosen file now, so the next message only names the ids. */
+    async attachFiles(files) {
+        for (const file of Array.from(files ?? [])) {
+            if (this.attachments.length >= this.config.uploadMaxFiles) {
+                this.flash(this.labels.tooManyFiles.replace('%s', String(this.config.uploadMaxFiles)));
+                break;
+            }
+            const body = new FormData();
+            body.append('file', file, file.name);
+            body.append('form_key', this.config.formKey);
+            try {
+                const response = await fetch(this.config.uploadUrl, { method: 'POST', body, credentials: 'same-origin' });
+                const data = await response.json().catch(() => ({}));
+                if (!response.ok) {
+                    throw new Error(data.detail ?? data.message ?? response.statusText);
+                }
+                this.attachments.push(data);
+            } catch (error) {
+                this.flash(this.labels.uploadFailed.replace('%s', error.message));
+            }
+        }
+        this.fileInput.value = '';
+        this.renderAttachments();
+    }
+
+    renderAttachments() {
+        this.attachmentList.replaceChildren();
+        this.attachmentList.hidden = this.attachments.length === 0;
+        for (const file of this.attachments) {
+            const chip = document.createElement('span');
+            chip.className = 'ai-chat-attachment';
+            chip.textContent = file.name;
+            const remove = document.createElement('button');
+            remove.type = 'button';
+            remove.className = 'ai-chat-attachment-remove';
+            remove.title = this.labels.removeAttachment;
+            remove.textContent = '×';
+            remove.addEventListener('click', () => {
+                this.attachments = this.attachments.filter((f) => f.id !== file.id);
+                this.renderAttachments();
+            });
+            chip.appendChild(remove);
+            this.attachmentList.appendChild(chip);
+        }
+    }
+
+    clearAttachments() {
+        this.attachments = [];
+        this.renderAttachments();
+    }
+
     /** A background job writes into its conversation from a worker; the panel re-reads it until the job ends. */
     watchBackground(id) {
         clearTimeout(this.backgroundTimer);
@@ -271,9 +327,12 @@ class MahoAiAssistant {
         signals.stopClicked.listener = () => this.abortController?.abort();
         this.updateIntro(true);
 
+        const attachments = this.attachments.map((file) => file.id);
+        this.clearAttachments();
         const outcome = await this.streamTurn(this.config.chatUrl, {
             conversation_id: this.conversationId,
             message: text,
+            attachments,
             context: { ...this.config.context, screen: this.screenDigest(), editor_guide: await this.contentGuide() },
             form_key: this.config.formKey,
         });
@@ -1025,7 +1084,7 @@ class MahoAiAssistant {
 
     /** "content_cms_pages_update" reads as "Update cms pages": the verb first, without the section. */
     humanizeTool(name) {
-        const local = { run_in_background: this.labels.runInBackground, admin_open_page: this.labels.openPage, admin_fill_form: this.labels.fillForm, admin_page_action: this.labels.pageAction, enable_tools: this.labels.loadTools, admin_content_guide: this.labels.contentGuide, remember: this.labels.remember, forget: this.labels.forget };
+        const local = { attachment_read: this.labels.attachmentRead, generate_image: this.labels.generateImage, run_in_background: this.labels.runInBackground, admin_open_page: this.labels.openPage, admin_fill_form: this.labels.fillForm, admin_page_action: this.labels.pageAction, enable_tools: this.labels.loadTools, admin_content_guide: this.labels.contentGuide, remember: this.labels.remember, forget: this.labels.forget };
         if (local[name]) {
             return local[name];
         }

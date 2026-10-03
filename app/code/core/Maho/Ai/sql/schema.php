@@ -134,6 +134,7 @@ return function (Schema $schema): void {
     $message->addColumn('tool_status', Types::STRING, ['length' => 16, 'notnull' => false]);
     $message->addColumn('is_write', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
     $message->addColumn('undo_arguments', Types::TEXT, ['length' => 16777215, 'notnull' => false]);
+    $message->addColumn('attachments', Types::TEXT, ['length' => 65535, 'notnull' => false]);
     $message->addColumn('input_tokens', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
     $message->addColumn('output_tokens', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
     $message->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);

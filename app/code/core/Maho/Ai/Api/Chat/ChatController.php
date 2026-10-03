@@ -15,6 +15,7 @@ namespace Maho\Ai\Api\Chat;
 use Mage_Admin_Model_User;
 use Maho\ApiPlatform\Security\SameOriginGuard;
 use Maho\ApiPlatform\Service\StoreContext;
+use Maho_Ai_Model_Chat_Attachment;
 use Maho_Ai_Model_Chat_BackgroundTurnHandler;
 use Maho_Ai_Model_Chat_ClientGone as ClientGone;
 use Maho_Ai_Model_Chat_SseWriter;
@@ -61,9 +62,10 @@ final class ChatController
 
         $context = $this->context($input);
         $conversation = $this->conversation($input, $admin, $context, create: true);
+        $attachments = $this->attachments($input, $admin);
 
-        return $this->stream($request, $conversation, function (Maho_Ai_Model_Chat_SseWriter $sse) use ($conversation, $admin, $message, $context): void {
-            $this->service->startTurn($conversation, $admin, $message, $context, $sse);
+        return $this->stream($request, $conversation, function (Maho_Ai_Model_Chat_SseWriter $sse) use ($conversation, $admin, $message, $context, $attachments): void {
+            $this->service->startTurn($conversation, $admin, $message, $context, $sse, $attachments);
         });
     }
 
@@ -83,6 +85,57 @@ final class ChatController
         return $this->stream($request, $conversation, function (Maho_Ai_Model_Chat_SseWriter $sse) use ($conversation, $admin, $decisions, $context): void {
             $this->service->resumeTurn($conversation, $admin, $decisions, $context, $sse);
         });
+    }
+
+    /**
+     * One file for the next message, sent as multipart with the form key. The reply gives the
+     * id the message refers to; the file waits under var/ai/attachments of this administrator.
+     */
+    #[Route('/api/admin/ai/chat/upload', name: 'api_admin_ai_chat_upload', methods: ['POST'])]
+    public function upload(Request $request): Response
+    {
+        if (!\Mage::helper('ai')->isChatEnabled()) {
+            throw new NotFoundHttpException('The admin assistant is disabled.');
+        }
+        SameOriginGuard::assert($request);
+        if (!\Mage::helper('ai')->isChatAllowed()) {
+            throw new AccessDeniedHttpException('Your admin role does not grant access to the assistant.');
+        }
+        if (!\Mage::getSingleton('core/session')->validateFormKey((string) $request->request->get('form_key', ''))) {
+            throw new AccessDeniedHttpException('Invalid form key.');
+        }
+        $admin = $this->admin();
+        $file = $request->files->get('file');
+        if (!$file instanceof \Symfony\Component\HttpFoundation\File\UploadedFile || !$file->isValid()) {
+            throw new BadRequestHttpException('No file was uploaded.');
+        }
+        try {
+            $stored = Maho_Ai_Model_Chat_Attachment::store((int) $admin->getId(), (string) $file->getClientOriginalName(), $file->getPathname());
+        } catch (\Mage_Core_Exception $e) {
+            throw new BadRequestHttpException($e->getMessage());
+        }
+
+        return new JsonResponse($stored);
+    }
+
+    /**
+     * The attachments a message names, each one checked against this administrator's files.
+     *
+     * @param array<string, mixed> $input
+     * @return list<array{id: string, name: string, mime: string, size: int}>
+     */
+    private function attachments(array $input, Mage_Admin_Model_User $admin): array
+    {
+        $attachments = [];
+        foreach (array_slice((array) ($input['attachments'] ?? []), 0, Maho_Ai_Model_Chat_Attachment::MAX_PER_MESSAGE) as $id) {
+            $file = is_string($id) ? Maho_Ai_Model_Chat_Attachment::describe((int) $admin->getId(), $id) : null;
+            if ($file === null) {
+                throw new BadRequestHttpException('An attachment is missing. Attach the file again.');
+            }
+            $attachments[] = $file;
+        }
+
+        return $attachments;
     }
 
     /**

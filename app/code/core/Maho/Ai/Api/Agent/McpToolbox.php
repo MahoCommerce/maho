@@ -60,6 +60,8 @@ final class McpToolbox implements ToolboxInterface
         private readonly ContentGuideTool $contentGuideTool,
         private readonly MemoryTool $memoryTool,
         private readonly BackgroundTaskTool $backgroundTaskTool,
+        private readonly AttachmentTool $attachmentTool,
+        private readonly ImageTool $imageTool,
     ) {}
 
     private bool $background = false;
@@ -90,7 +92,10 @@ final class McpToolbox implements ToolboxInterface
     #[\Override]
     public function getTools(): array
     {
-        $tools = [$this->enableTool(), $this->memoryTool->rememberTool(), $this->memoryTool->forgetTool()];
+        $tools = [$this->enableTool(), $this->memoryTool->rememberTool(), $this->memoryTool->forgetTool(), $this->attachmentTool->tool()];
+        if ($this->imageTool->isAvailable()) {
+            $tools[] = $this->imageTool->tool();
+        }
         if (!$this->background) {
             // A worker has no browser to open a page in, and no administrator to confirm another job.
             $tools = [...$tools, $this->adminPageTool->tool(), $this->adminPageTool->fillTool(), $this->adminPageTool->actionTool(), $this->backgroundTaskTool->tool()];
@@ -202,7 +207,7 @@ final class McpToolbox implements ToolboxInterface
     /** A tool that runs in this process, outside the MCP catalog. */
     public static function isLocal(string $name): bool
     {
-        return $name === self::ENABLE_NAME || $name === ContentGuideTool::NAME || $name === BackgroundTaskTool::NAME || in_array($name, AdminPageTool::NAMES, true) || in_array($name, MemoryTool::NAMES, true);
+        return in_array($name, [self::ENABLE_NAME, ContentGuideTool::NAME, BackgroundTaskTool::NAME, AttachmentTool::NAME, ImageTool::NAME], true) || in_array($name, AdminPageTool::NAMES, true) || in_array($name, MemoryTool::NAMES, true);
     }
 
     #[\Override]
@@ -214,6 +219,10 @@ final class McpToolbox implements ToolboxInterface
             $outcome = $this->contentGuideTool->read();
         } elseif ($toolCall->getName() === BackgroundTaskTool::NAME) {
             $outcome = $this->backgroundTaskTool->start($toolCall->getArguments());
+        } elseif ($toolCall->getName() === AttachmentTool::NAME) {
+            $outcome = $this->attachmentTool->read($toolCall->getArguments());
+        } elseif ($toolCall->getName() === ImageTool::NAME) {
+            $outcome = $this->imageTool->generate($toolCall->getArguments());
         } elseif (in_array($toolCall->getName(), MemoryTool::NAMES, true)) {
             $outcome = $toolCall->getName() === MemoryTool::FORGET
                 ? $this->memoryTool->forget($toolCall->getArguments())
@@ -371,7 +380,7 @@ final class McpToolbox implements ToolboxInterface
     /** A tool that never changes data, so it runs without the administrator's confirmation. */
     public function isReadOnly(string $name): bool
     {
-        return $name !== BackgroundTaskTool::NAME && (self::isLocal($name) || $this->catalog->isReadOnly($name));
+        return $name !== BackgroundTaskTool::NAME && $name !== ImageTool::NAME && (self::isLocal($name) || $this->catalog->isReadOnly($name));
     }
 
     public function isDestructive(string $name): bool
@@ -386,6 +395,8 @@ final class McpToolbox implements ToolboxInterface
             $name === ContentGuideTool::NAME => ContentGuideTool::TITLE,
             in_array($name, MemoryTool::NAMES, true) => MemoryTool::title($name),
             $name === BackgroundTaskTool::NAME => BackgroundTaskTool::TITLE,
+            $name === AttachmentTool::NAME => AttachmentTool::TITLE,
+            $name === ImageTool::NAME => ImageTool::TITLE,
             in_array($name, AdminPageTool::NAMES, true) => AdminPageTool::title($name),
             default => $this->catalog->title($name),
         };

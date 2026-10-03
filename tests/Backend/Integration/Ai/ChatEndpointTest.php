@@ -428,6 +428,84 @@ it('starts a background job after confirmation and runs it in a worker with its 
     }
 });
 
+/**
+ * @return array{status: int, json: array<string, mixed>}
+ */
+function aiChatUpload(string $name, string $content, string $mime): array
+{
+    $tmp = tempnam(sys_get_temp_dir(), 'aichat');
+    file_put_contents($tmp, $content);
+    $request = Request::create(
+        '/api/admin/ai/chat/upload',
+        'POST',
+        ['form_key' => Mage::getSingleton('core/session')->getFormKey()],
+        [],
+        ['file' => new Symfony\Component\HttpFoundation\File\UploadedFile($tmp, $name, $mime, null, true)],
+        ['HTTP_ORIGIN' => SameOriginGuard::allowedOrigins()[0] ?? 'http://localhost'],
+    );
+    $response = new Kernel('prod', false)->handle($request);
+    $json = json_decode((string) $response->getContent(), true);
+
+    return ['status' => $response->getStatusCode(), 'json' => is_array($json) ? $json : []];
+}
+
+it('attaches a CSV to a message, lets the model read it, and shows an attached image to the model', function (): void {
+    $admin = aiChatAdmin('ai_chat_attacher', ['all']);
+    try {
+        aiChatLogin($admin);
+        $csv = aiChatUpload('stock.csv', "sku,qty\nA-1,5\nA-2,0\n", 'text/csv');
+        expect($csv['status'])->toBe(200);
+        expect($csv['json']['name'])->toBe('stock.csv');
+        expect($csv['json']['mime'])->toBe('text/csv');
+        expect(aiChatUpload('run.exe', 'MZ', 'application/octet-stream')['status'])->toBe(400);
+        expect(aiChatUpload('fake.png', 'not an image', 'image/png')['status'])->toBe(400);
+        $png = aiChatUpload('dot.png', (string) base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', true), 'image/png');
+        expect($png['status'])->toBe(200);
+
+        AiChatScript::reset(
+            new ToolCallResult([new ToolCall('call_r', 'attachment_read', ['id' => $csv['json']['id']])]),
+            new TextResult('Two SKUs, one out of stock.'),
+        );
+        $result = aiChatRequest('/api/admin/ai/chat', ['message' => 'Which of these are out of stock?', 'attachments' => [$csv['json']['id'], $png['json']['id']]]);
+        expect($result['status'])->toBe(200);
+        expect(AiChatScript::$offeredTools[0])->toContain('attachment_read');
+        $read = aiChatEvents($result['events'], 'tool_result')[0];
+        expect($read['ok'])->toBeTrue($result['raw']);
+        expect($read['preview'])->toContain('stock.csv')->toContain('A-2,0');
+
+        $conversation = Mage::getModel('ai/conversation')->load((int) aiChatEvents($result['events'], 'done')[0]['conversation_id']);
+        $user = $conversation->messagesCollection()->getFirstItem();
+        expect((string) $user->getContent())->toContain('Attachments:')->toContain('stock.csv (text/csv')->toContain('dot.png (image/png');
+        expect(array_column($user->getAttachments(), 'name'))->toBe(['stock.csv', 'dot.png']);
+
+        $bag = new Maho_Ai_Model_Chat_MessageBagBuilder()->build($conversation, 40);
+        $userMessage = $bag->getMessages()[0];
+        expect($userMessage)->toBeInstanceOf(Symfony\AI\Platform\Message\UserMessage::class);
+        $images = array_filter($userMessage->getContent(), static fn($part): bool => $part instanceof Symfony\AI\Platform\Message\Content\Image);
+        expect($images)->toHaveCount(1);
+
+        // Another administrator cannot read this administrator's file.
+        $other = aiChatAdmin('ai_chat_attacher_other', ['all']);
+        try {
+            aiChatLogin($other);
+            AiChatScript::reset(new ToolCallResult([new ToolCall('call_x', 'attachment_read', ['id' => $csv['json']['id']])]), new TextResult('.'));
+            $stolen = aiChatRequest('/api/admin/ai/chat', ['message' => 'read it']);
+            expect(aiChatEvents($stolen['events'], 'tool_result')[0]['ok'])->toBeFalse();
+        } finally {
+            aiChatDeleteConversations((int) $other->getId());
+            aiChatDeleteAdmin($other);
+        }
+    } finally {
+        aiChatLogin($admin);
+        foreach (glob(Mage::getBaseDir('var') . '/ai/attachments/' . (int) $admin->getId() . '/*') ?: [] as $file) {
+            unlink($file);
+        }
+        @rmdir(Mage::getBaseDir('var') . '/ai/attachments/' . (int) $admin->getId());
+        aiChatDeleteConversations((int) $admin->getId());
+        aiChatDeleteAdmin($admin);
+    }
+});
+
 it('runs a read tool at once, streams the answer and stores the conversation', function (): void {
     $admin = aiChatAdmin('ai_chat_reader', ['all']);
     try {
@@ -992,7 +1070,7 @@ it('loads tool sections on demand and keeps them for the conversation', function
 
         expect($result['status'])->toBe(200);
         // The dashboard loads no section and the message names none: only the local tools are offered at first.
-        expect(AiChatScript::$offeredTools[0])->toBe(['enable_tools', 'remember', 'forget', 'admin_open_page', 'admin_fill_form', 'admin_page_action', 'run_in_background']);
+        expect(AiChatScript::$offeredTools[0])->toBe(['enable_tools', 'remember', 'forget', 'attachment_read', 'admin_open_page', 'admin_fill_form', 'admin_page_action', 'run_in_background']);
         $results = aiChatEvents($result['events'], 'tool_result');
         expect($results[0]['ok'])->toBeFalse();
         expect($results[0]['preview'])->toContain('nope');
