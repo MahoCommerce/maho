@@ -499,10 +499,12 @@ class MahoAiAssistant {
         } catch (error) {
             console.warn('[ai-chat] editor guide unavailable', error);
         }
-        try {
-            sessionStorage.setItem(MahoAiAssistant.STORAGE_EDITOR_GUIDE, guide);
-        } catch {
-            // storage unavailable
+        if (guide !== '') {
+            try {
+                sessionStorage.setItem(MahoAiAssistant.STORAGE_EDITOR_GUIDE, guide);
+            } catch {
+                // storage unavailable
+            }
         }
         return guide;
     }

@@ -62,7 +62,7 @@ class Maho_Ai_Block_Adminhtml_Assistant extends Mage_Adminhtml_Block_Template
             'confirmUrl' => $apiBase . '/api/admin/ai/chat/confirm',
             'cssUrl' => $this->getSkinUrl('ai-chat.css'),
             'introIcon' => $this->getIconSvg('sparkles'),
-            'editorUrl' => $this->getJsUrl('mage/adminhtml/wysiwyg/tiptap/setup.js'),
+            'editorUrl' => $this->getEditorUrl(),
             'adminName' => (string) Mage::getSingleton('admin/session')->getUser()?->getFirstname(),
             'examples' => [
                 $helper->__('Which orders came in today?'),
@@ -123,6 +123,16 @@ class Maho_Ai_Block_Adminhtml_Assistant extends Mage_Adminhtml_Block_Template
                 'untitled' => $helper->__('Untitled conversation'),
             ],
         ];
+    }
+
+    /** The editor script the panel imports on a page without an editor, versioned so a browser never imports a stale copy. */
+    private function getEditorUrl(): string
+    {
+        $file = 'mage/adminhtml/wysiwyg/tiptap/setup.js';
+        $path = Mage::getBaseDir('public') . DS . 'js' . DS . $file;
+        $version = is_file($path) ? (string) filemtime($path) : '0';
+
+        return $this->getJsUrl($file) . '?v=' . $version;
     }
 
     /**
