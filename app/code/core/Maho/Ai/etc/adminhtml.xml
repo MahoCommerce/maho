@@ -32,6 +32,11 @@ SPDX-License-Identifier: OSL-3.0
                             <sort_order>40</sort_order>
                             <action>adminhtml/ai_chat/index</action>
                         </chat>
+                        <actions translate="title" module="ai">
+                            <title>Assistant Actions</title>
+                            <sort_order>45</sort_order>
+                            <action>adminhtml/ai_chat/actions</action>
+                        </actions>
                     </children>
                 </ai>
             </children>
@@ -63,6 +68,10 @@ SPDX-License-Identifier: OSL-3.0
                                         <title>Assistant</title>
                                         <sort_order>40</sort_order>
                                     </chat>
+                                    <actions translate="title" module="ai">
+                                        <title>Assistant Actions</title>
+                                        <sort_order>45</sort_order>
+                                    </actions>
                                 </children>
                             </ai>
                             <config>

@@ -14,6 +14,17 @@ class Maho_Ai_Adminhtml_Ai_ChatController extends Mage_Adminhtml_Controller_Acti
 {
     public const ADMIN_RESOURCE = 'system/ai/chat';
 
+    /** The audit trail has its own ACL entry: it shows what every administrator did. */
+    #[\Override]
+    protected function _isAllowed(): bool
+    {
+        if (in_array($this->getRequest()->getActionName(), ['actions', 'exportActionsCsv'], true)) {
+            return Mage::getSingleton('admin/session')->isAllowed('system/ai/actions');
+        }
+
+        return parent::_isAllowed();
+    }
+
     #[Maho\Config\Route('/admin/ai_chat/index')]
     public function indexAction(): void
     {
@@ -23,6 +34,25 @@ class Maho_Ai_Adminhtml_Ai_ChatController extends Mage_Adminhtml_Controller_Acti
             ->_addBreadcrumb(Mage::helper('ai')->__('AI'), Mage::helper('ai')->__('AI'))
             ->_addBreadcrumb(Mage::helper('ai')->__('Assistant Conversations'), Mage::helper('ai')->__('Assistant Conversations'))
             ->renderLayout();
+    }
+
+    /** Every write the assistant made, for any administrator: the audit trail. */
+    #[Maho\Config\Route('/admin/ai_chat/actions')]
+    public function actionsAction(): void
+    {
+        $this->_title(Mage::helper('ai')->__('Assistant Actions'));
+        $this->loadLayout()
+            ->_setActiveMenu('system/ai/actions')
+            ->_addBreadcrumb(Mage::helper('ai')->__('AI'), Mage::helper('ai')->__('AI'))
+            ->_addBreadcrumb(Mage::helper('ai')->__('Assistant Actions'), Mage::helper('ai')->__('Assistant Actions'))
+            ->renderLayout();
+    }
+
+    #[Maho\Config\Route('/admin/ai_chat/exportActionsCsv')]
+    public function exportActionsCsvAction(): void
+    {
+        $grid = $this->getLayout()->createBlock('ai/adminhtml_action_grid');
+        $this->_prepareDownloadResponse('assistant_actions.csv', $grid->getCsvFile());
     }
 
     /**
