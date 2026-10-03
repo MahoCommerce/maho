@@ -19,6 +19,7 @@ final class Maho_Ai_Model_Chat_Attachment
 {
     public const MAX_BYTES = 5 * 1024 * 1024;
     public const MAX_PER_MESSAGE = 5;
+    public const KEEP_DAYS = 30;
     /** What the tool reads as text, with its MIME type as the panel sends it. */
     public const TEXT_EXTENSIONS = ['csv' => 'text/csv', 'txt' => 'text/plain', 'md' => 'text/markdown', 'json' => 'application/json', 'xml' => 'application/xml', 'html' => 'text/html', 'tsv' => 'text/tab-separated-values'];
     public const IMAGE_EXTENSIONS = ['png' => 'image/png', 'jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'gif' => 'image/gif', 'webp' => 'image/webp'];
@@ -37,8 +38,8 @@ final class Maho_Ai_Model_Chat_Attachment
             Mage::throwException(Mage::helper('ai')->__('The assistant accepts text, CSV, JSON, XML, Markdown and image files.'));
         }
         $size = (int) filesize($tmpPath);
-        if ($size <= 0 || $size > self::MAX_BYTES) {
-            Mage::throwException(Mage::helper('ai')->__('A file can be at most %s.', '5 MB'));
+        if ($size <= 0 || $size > self::maxBytes()) {
+            Mage::throwException(Mage::helper('ai')->__('A file can be at most %s.', self::humanSize(self::maxBytes())));
         }
         if (isset(self::IMAGE_EXTENSIONS[$extension]) && @getimagesize($tmpPath) === false) {
             Mage::throwException(Mage::helper('ai')->__('The file is not an image.'));
@@ -80,6 +81,102 @@ final class Maho_Ai_Model_Chat_Attachment
         $extension = strtolower(pathinfo($name, PATHINFO_EXTENSION));
 
         return ['id' => $id, 'name' => $name, 'mime' => self::TEXT_EXTENSIONS[$extension] ?? self::IMAGE_EXTENSIONS[$extension] ?? 'application/octet-stream', 'size' => (int) filesize($path)];
+    }
+
+    /** Removes the file. A file that a sent message refers to stays, unless $force is set (a conversation delete). */
+    public static function delete(int $adminId, string $id, bool $force = false): bool
+    {
+        $path = self::path($adminId, $id);
+        if ($path === null || (!$force && self::isReferenced($adminId, $id))) {
+            return false;
+        }
+
+        return @unlink($path);
+    }
+
+    /** True when a message of this administrator carries the attachment. */
+    public static function isReferenced(int $adminId, string $id): bool
+    {
+        $resource = Mage::getSingleton('core/resource');
+        $connection = $resource->getConnection('core_read');
+        $select = $connection->select()
+            ->from(['m' => $resource->getTableName('ai/conversation_message')], ['message_id'])
+            ->join(['c' => $resource->getTableName('ai/conversation')], 'c.conversation_id = m.conversation_id', [])
+            ->where('c.admin_user_id = ?', $adminId)
+            ->where('m.attachments LIKE ?', '%"id":"' . $id . '"%')
+            ->limit(1);
+
+        return $connection->fetchOne($select) !== false;
+    }
+
+    /** Removes every attachment of a conversation that is deleted. */
+    public static function deleteForConversation(Maho_Ai_Model_Conversation $conversation): void
+    {
+        $adminId = (int) $conversation->getAdminUserId();
+        foreach ($conversation->messagesCollection() as $message) {
+            foreach ($message->getAttachments() as $attachment) {
+                self::delete($adminId, (string) ($attachment['id'] ?? ''), force: true);
+            }
+        }
+    }
+
+    /** Removes files older than $days, and the per-administrator folder once it is empty. Returns the number of removed files. */
+    public static function purgeOlderThan(int $days): int
+    {
+        $root = Mage::getBaseDir('var') . DS . 'ai' . DS . 'attachments';
+        $cutoff = time() - $days * 86400;
+        $removed = 0;
+        foreach (glob($root . DS . '*', GLOB_ONLYDIR) ?: [] as $directory) {
+            foreach (glob($directory . DS . '*') ?: [] as $file) {
+                if (is_file($file) && filemtime($file) < $cutoff && @unlink($file)) {
+                    $removed++;
+                }
+            }
+            if ((glob($directory . DS . '*') ?: []) === []) {
+                @rmdir($directory);
+            }
+        }
+
+        return $removed;
+    }
+
+    /** The smaller of MAX_BYTES and what PHP accepts in one upload. */
+    public static function maxBytes(): int
+    {
+        $limit = self::MAX_BYTES;
+        foreach (['upload_max_filesize', 'post_max_size'] as $setting) {
+            $bytes = self::iniBytes((string) ini_get($setting));
+            if ($bytes > 0) {
+                $limit = min($limit, $bytes);
+            }
+        }
+
+        return $limit;
+    }
+
+    public static function humanSize(int $bytes): string
+    {
+        if ($bytes >= 1024 * 1024) {
+            return rtrim(rtrim(number_format($bytes / 1024 / 1024, 1, '.', ''), '0'), '.') . ' MB';
+        }
+
+        return max(1, (int) round($bytes / 1024)) . ' KB';
+    }
+
+    private static function iniBytes(string $value): int
+    {
+        $value = trim($value);
+        if ($value === '' || $value === '-1') {
+            return 0;
+        }
+        $number = (int) $value;
+
+        return match (strtolower(substr($value, -1))) {
+            'g' => $number * 1024 ** 3,
+            'm' => $number * 1024 ** 2,
+            'k' => $number * 1024,
+            default => $number,
+        };
     }
 
     public static function isImage(string $mime): bool

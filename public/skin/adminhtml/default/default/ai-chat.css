@@ -688,6 +688,25 @@ body.ai-chat-open .ai-chat-toggle {
     font-size: 12px;
 }
 
+.ai-chat-attachment.is-uploading {
+    color: var(--maho-ink-muted, #666);
+    border-style: dashed;
+}
+
+.ai-chat-attachment.is-uploading::before {
+    content: '';
+    width: 10px;
+    height: 10px;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: ai-chat-spin .8s linear infinite;
+}
+
+@keyframes ai-chat-spin {
+    to { transform: rotate(360deg); }
+}
+
 .ai-chat-attachment-remove {
     border: 0;
     padding: 0 2px;

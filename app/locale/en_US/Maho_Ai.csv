@@ -196,6 +196,8 @@
 "Run in the background","Run in the background"
 "Attach a file","Attach a file"
 "Drop the files here","Drop the files here"
+"Uploading","Uploading"
+"%s is too large. A file can be at most %s.","%s is too large. A file can be at most %s."
 "Read an attachment","Read an attachment"
 "Generate an image","Generate an image"
 "Remove","Remove"

@@ -26,6 +26,14 @@ class Maho_Ai_Model_Conversation extends Mage_Core_Model_Abstract
         $this->_init('ai/conversation');
     }
 
+    #[\Override]
+    protected function _beforeDelete(): static
+    {
+        Maho_Ai_Model_Chat_Attachment::deleteForConversation($this);
+
+        return parent::_beforeDelete();
+    }
+
     public function getAdminUserId(): ?int
     {
         $value = $this->getData('admin_user_id');

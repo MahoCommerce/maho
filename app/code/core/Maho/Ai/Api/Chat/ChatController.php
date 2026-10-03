@@ -106,8 +106,11 @@ final class ChatController
         }
         $admin = $this->admin();
         $file = $request->files->get('file');
-        if (!$file instanceof \Symfony\Component\HttpFoundation\File\UploadedFile || !$file->isValid()) {
+        if (!$file instanceof \Symfony\Component\HttpFoundation\File\UploadedFile) {
             return new JsonResponse(['error' => true, 'message' => 'No file was uploaded.'], 400);
+        }
+        if (!$file->isValid()) {
+            return new JsonResponse(['error' => true, 'message' => $file->getErrorMessage()], 400);
         }
         try {
             return new JsonResponse(Maho_Ai_Model_Chat_Attachment::store((int) $admin->getId(), (string) $file->getClientOriginalName(), $file->getPathname()));
@@ -140,6 +143,16 @@ final class ChatController
      * The route of a background run. Only the queue handler reaches it: it sets a request
      * attribute that no HTTP client can set, so a browser gets a 404 here.
      */
+    /** Removes a file that was attached but not sent. A file a message refers to stays. */
+    #[Route('/api/admin/ai/chat/upload/remove', name: 'api_admin_ai_chat_upload_remove', methods: ['POST'])]
+    public function removeUpload(Request $request): Response
+    {
+        $input = $this->guard($request);
+        $removed = Maho_Ai_Model_Chat_Attachment::delete((int) $this->admin()->getId(), (string) ($input['id'] ?? ''));
+
+        return new JsonResponse(['removed' => $removed]);
+    }
+
     #[Route('/api/admin/ai/chat/background', name: 'api_admin_ai_chat_background', methods: ['POST'])]
     public function background(Request $request): Response
     {

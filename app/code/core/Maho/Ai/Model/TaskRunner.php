@@ -126,6 +126,13 @@ class Maho_Ai_Model_TaskRunner
         ]);
     }
 
+    /** A chat attachment is kept for the conversation; the file goes after 30 days, the message keeps its name. */
+    #[Maho\Config\CronJob('ai_cleanup_old_attachments', schedule: '30 3 * * *')]
+    public function cleanupOldAttachments(): void
+    {
+        Maho_Ai_Model_Chat_Attachment::purgeOlderThan(Maho_Ai_Model_Chat_Attachment::KEEP_DAYS);
+    }
+
     /**
      * Process a single task by id, immediately, in the current process.
      *

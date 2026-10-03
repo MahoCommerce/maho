@@ -244,22 +244,50 @@ class MahoAiAssistant {
     }
 
     /** Upload each chosen file now, so the next message only names the ids. */
+    /** Each file gets its chip at once, marked as uploading until the server answers. The uploads run in parallel. */
     async attachFiles(files) {
+        const uploads = [];
         for (const file of Array.from(files ?? [])) {
             if (this.attachments.length >= this.config.uploadMaxFiles) {
-                this.flash(this.labels.tooManyFiles.replace('%s', String(this.config.uploadMaxFiles)));
+                this.notice(this.labels.tooManyFiles.replace('%s', String(this.config.uploadMaxFiles)));
                 break;
             }
+            if (file.size > this.config.uploadMaxBytes) {
+                this.notice(this.labels.fileTooLarge.replace('%s', file.name));
+                continue;
+            }
+            const entry = { id: null, name: file.name, uploading: true };
+            this.attachments.push(entry);
             const body = new FormData();
             body.append('file', file, file.name);
-            try {
-                this.attachments.push(await mahoFetch(this.config.uploadUrl, { method: 'POST', body, loaderArea: false }));
-            } catch (error) {
-                this.flash(this.labels.uploadFailed.replace('%s', error.message));
-            }
+            uploads.push(mahoFetch(this.config.uploadUrl, { method: 'POST', body, loaderArea: false }).then((stored) => {
+                Object.assign(entry, stored, { uploading: false });
+            }).catch((error) => {
+                this.attachments = this.attachments.filter((f) => f !== entry);
+                this.notice(this.labels.uploadFailed.replace('%s', error.message));
+            }).finally(() => this.renderAttachments()));
         }
         this.fileInput.value = '';
         this.renderAttachments();
+        this.pendingUploads = (this.pendingUploads ?? []).concat(uploads);
+        await Promise.allSettled(uploads);
+        this.pendingUploads = this.pendingUploads.filter((upload) => !uploads.includes(upload));
+    }
+
+    /** Resolves when no upload is in flight, so a message never leaves before its files have an id. */
+    async uploadsSettled() {
+        while ((this.pendingUploads ?? []).length > 0) {
+            await Promise.allSettled(this.pendingUploads);
+        }
+    }
+
+    /** Removes a chip. A file that is not sent yet goes from the server too. */
+    removeAttachment(file) {
+        this.attachments = this.attachments.filter((f) => f !== file);
+        this.renderAttachments();
+        if (file.id) {
+            mahoFetch(this.config.removeUploadUrl, { method: 'POST', body: JSON.stringify({ id: file.id }), loaderArea: false }).catch(() => {});
+        }
     }
 
     /** A file dragged anywhere over the panel attaches on drop. The counter survives the enter/leave pairs of child nodes. */
@@ -303,17 +331,15 @@ class MahoAiAssistant {
         this.attachmentList.hidden = this.attachments.length === 0;
         for (const file of this.attachments) {
             const chip = document.createElement('span');
-            chip.className = 'ai-chat-attachment';
+            chip.className = 'ai-chat-attachment' + (file.uploading ? ' is-uploading' : '');
+            chip.title = file.uploading ? this.labels.uploading : '';
             chip.textContent = file.name;
             const remove = document.createElement('button');
             remove.type = 'button';
             remove.className = 'ai-chat-attachment-remove';
             remove.title = this.labels.removeAttachment;
             remove.textContent = '×';
-            remove.addEventListener('click', () => {
-                this.attachments = this.attachments.filter((f) => f.id !== file.id);
-                this.renderAttachments();
-            });
+            remove.addEventListener('click', () => this.removeAttachment(file));
             chip.appendChild(remove);
             this.attachmentList.appendChild(chip);
         }
@@ -366,7 +392,8 @@ class MahoAiAssistant {
         signals.stopClicked.listener = () => this.abortController?.abort();
         this.updateIntro(true);
 
-        const attachments = this.attachments.map((file) => file.id);
+        await this.uploadsSettled();
+        const attachments = this.attachments.map((file) => file.id).filter(Boolean);
         this.clearAttachments();
         const outcome = await this.streamTurn(this.config.chatUrl, {
             conversation_id: this.conversationId,
@@ -775,6 +802,11 @@ class MahoAiAssistant {
             }
         }
         return null;
+    }
+
+    /** Shows a message that belongs to the panel, not to the model, as an error bubble. */
+    notice(message) {
+        this.chat.addMessage({ html: this.renderError(message), role: 'ai' });
     }
 
     flash(element) {

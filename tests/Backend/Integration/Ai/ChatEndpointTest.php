@@ -484,6 +484,20 @@ it('attaches a CSV to a message, lets the model read it, and shows an attached i
         $images = array_filter($userMessage->getContent(), static fn($part): bool => $part instanceof Symfony\AI\Platform\Message\Content\Image);
         expect($images)->toHaveCount(1);
 
+        // A sent file stays when the panel asks to remove it; a file that was never sent goes.
+        $spare = aiChatUpload('spare.txt', 'unused', 'text/plain');
+        expect(json_decode(aiChatRequest('/api/admin/ai/chat/upload/remove', ['id' => $csv['json']['id']])['raw'], true)['removed'] ?? null)->toBeFalse();
+        expect(json_decode(aiChatRequest('/api/admin/ai/chat/upload/remove', ['id' => $spare['json']['id']])['raw'], true)['removed'] ?? null)->toBeTrue();
+        expect(Maho_Ai_Model_Chat_Attachment::path((int) $admin->getId(), $csv['json']['id']))->not->toBeNull();
+        expect(Maho_Ai_Model_Chat_Attachment::path((int) $admin->getId(), $spare['json']['id']))->toBeNull();
+
+        // The cron keeps a recent file and removes an old one.
+        $old = aiChatUpload('old.txt', 'old', 'text/plain');
+        touch((string) Maho_Ai_Model_Chat_Attachment::path((int) $admin->getId(), $old['json']['id']), time() - 31 * 86400);
+        expect(Maho_Ai_Model_Chat_Attachment::purgeOlderThan(Maho_Ai_Model_Chat_Attachment::KEEP_DAYS))->toBeGreaterThanOrEqual(1);
+        expect(Maho_Ai_Model_Chat_Attachment::path((int) $admin->getId(), $old['json']['id']))->toBeNull();
+        expect(Maho_Ai_Model_Chat_Attachment::path((int) $admin->getId(), $csv['json']['id']))->not->toBeNull();
+
         // Another administrator cannot read this administrator's file.
         $other = aiChatAdmin('ai_chat_attacher_other', ['all']);
         try {
@@ -495,6 +509,12 @@ it('attaches a CSV to a message, lets the model read it, and shows an attached i
             aiChatDeleteConversations((int) $other->getId());
             aiChatDeleteAdmin($other);
         }
+
+        // Deleting the conversation removes its files.
+        aiChatLogin($admin);
+        aiChatDeleteConversations((int) $admin->getId());
+        expect(Maho_Ai_Model_Chat_Attachment::path((int) $admin->getId(), $csv['json']['id']))->toBeNull();
+        expect(Maho_Ai_Model_Chat_Attachment::path((int) $admin->getId(), $png['json']['id']))->toBeNull();
     } finally {
         aiChatLogin($admin);
         foreach (glob(Mage::getBaseDir('var') . '/ai/attachments/' . (int) $admin->getId() . '/*') ?: [] as $file) {
