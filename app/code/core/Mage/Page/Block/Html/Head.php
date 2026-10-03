@@ -282,6 +282,9 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
                         $url = $minifyHelper->minifyCss($url);
                     }
                 }
+                if ($url === $baseJsUrl . $name) {
+                    $url = $this->_versionedUrl($url, Mage::getBaseDir('public') . DS . 'js' . DS . $name);
+                }
 
                 $items[$params][] = $url;
             }
@@ -301,6 +304,9 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
                         $url = $minifyHelper->minifyJs($url);
                     }
                 }
+                if ($url === $designPackage->getSkinUrl($name, [])) {
+                    $url = $this->_versionedUrl($url, (string) $designPackage->getFilename($name, ['_type' => 'skin']));
+                }
 
                 $items[$params][] = $url;
             }
@@ -315,6 +321,19 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
             }
         }
         return $html;
+    }
+
+    /**
+     * Add the file modification time to the URL of a file served as it is, so a browser
+     * loads a changed file instead of a cached copy. A minified file carries its time in its name.
+     */
+    protected function _versionedUrl(string $url, string $path): string
+    {
+        if (str_contains($url, '?') || !is_file($path)) {
+            return $url;
+        }
+
+        return $url . '?v=' . filemtime($path);
     }
 
     /**

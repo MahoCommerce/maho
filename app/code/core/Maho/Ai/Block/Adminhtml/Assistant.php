@@ -60,9 +60,10 @@ class Maho_Ai_Block_Adminhtml_Assistant extends Mage_Adminhtml_Block_Template
         return [
             'chatUrl' => $apiBase . '/api/admin/ai/chat',
             'confirmUrl' => $apiBase . '/api/admin/ai/chat/confirm',
-            'cssUrl' => $this->getSkinUrl('ai-chat.css'),
+            'cssUrl' => $this->getVersionedSkinUrl('ai-chat.css'),
             'introIcon' => $this->getIconSvg('sparkles'),
-            'editorUrl' => $this->getEditorUrl(),
+            'editorUrl' => $this->getVersionedJsUrl('mage/adminhtml/wysiwyg/tiptap/setup.js'),
+            'needsEditorGuide' => $helper->editorGuide() === '',
             'adminName' => (string) Mage::getSingleton('admin/session')->getUser()?->getFirstname(),
             'examples' => [
                 $helper->__('Which orders came in today?'),
@@ -125,14 +126,21 @@ class Maho_Ai_Block_Adminhtml_Assistant extends Mage_Adminhtml_Block_Template
         ];
     }
 
-    /** The editor script the panel imports on a page without an editor, versioned so a browser never imports a stale copy. */
-    private function getEditorUrl(): string
+    /** A script URL with the file modification time, so a browser never keeps a stale copy. */
+    public function getVersionedJsUrl(string $file): string
     {
-        $file = 'mage/adminhtml/wysiwyg/tiptap/setup.js';
-        $path = Mage::getBaseDir('public') . DS . 'js' . DS . $file;
-        $version = is_file($path) ? (string) filemtime($path) : '0';
+        return $this->versioned($this->getJsUrl($file), Mage::getBaseDir('public') . DS . 'js' . DS . $file);
+    }
 
-        return $this->getJsUrl($file) . '?v=' . $version;
+    /** A skin file URL with the file modification time, so a browser never keeps a stale copy. */
+    public function getVersionedSkinUrl(string $file): string
+    {
+        return $this->versioned($this->getSkinUrl($file), (string) Mage::getDesign()->getFilename($file, ['_type' => 'skin']));
+    }
+
+    private function versioned(string $url, string $path): string
+    {
+        return is_file($path) ? $url . '?v=' . filemtime($path) : $url;
     }
 
     /**

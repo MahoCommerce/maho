@@ -60,10 +60,16 @@ final class McpToolbox implements ToolboxInterface
         private readonly ContentGuideTool $contentGuideTool,
     ) {}
 
-    /** The editor guide the panel sent with this request, or an empty string without one. */
-    public function setContentGuide(string $guide): void
+    /** Keep the editor guide the panel sent with this request, when it sent one. */
+    public function storeContentGuide(string $guide): void
     {
-        $this->contentGuideTool->setGuide($guide);
+        $this->contentGuideTool->store($guide);
+    }
+
+    /** The editor guide known to the server, or an empty string before the panel sent one. */
+    public function contentGuide(): string
+    {
+        return $this->contentGuideTool->guide();
     }
 
     #[\Override]

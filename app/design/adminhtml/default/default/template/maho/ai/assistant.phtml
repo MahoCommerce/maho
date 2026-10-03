@@ -10,7 +10,7 @@
 $config = $this->getConfig();
 $labels = $config['labels'];
 ?>
-<link rel="stylesheet" href="<?= $this->escapeUrl($this->getSkinUrl('ai-chat.css')) ?>">
+<link rel="stylesheet" href="<?= $this->escapeUrl($config['cssUrl']) ?>">
 <button type="button" id="ai-chat-toggle" class="ai-chat-toggle" title="<?= $this->escapeHtml($labels['open']) ?>" aria-controls="ai-chat-panel" aria-expanded="false">
     <?= $this->getIconSvg('sparkles') ?>
     <span><?= $this->escapeHtml($labels['title']) ?></span>
@@ -26,9 +26,9 @@ $labels = $config['labels'];
     <deep-chat id="ai-chat"></deep-chat>
 </aside>
 <script type="application/json" id="ai-chat-config"><?= Mage::helper('core')->jsonEncode($config) ?></script>
-<script src="<?= $this->escapeUrl($this->getJsUrl('mage/adminhtml/ai-chat.js')) ?>"></script>
+<script src="<?= $this->escapeUrl($this->getVersionedJsUrl('mage/adminhtml/ai-chat.js')) ?>"></script>
 <script type="module">
-    import '<?= $this->escapeUrl($this->getJsUrl('deep-chat.js')) ?>';
+    import '<?= $this->escapeUrl($this->getVersionedJsUrl('deep-chat.js')) ?>';
     await customElements.whenDefined('deep-chat');
     window.mahoAiAssistant = new MahoAiAssistant(JSON.parse(document.getElementById('ai-chat-config').textContent));
 </script>

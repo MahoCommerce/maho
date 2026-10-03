@@ -570,8 +570,10 @@ it('ignores the storefront store cookie: reads the default store view and builds
     }
 });
 
-it('offers the content editor guide as a tool only when the panel sent one', function (): void {
+it('offers the content editor guide as a tool once the panel sent one, and keeps it for later requests', function (): void {
     $admin = aiChatAdmin('ai_chat_guide', ['all']);
+    $cacheId = Mage::helper('ai')->editorGuideCacheId();
+    Mage::app()->removeCache($cacheId);
     try {
         aiChatLogin($admin);
         AiChatScript::reset(new TextResult('Hello.'));
@@ -594,7 +596,15 @@ it('offers the content editor guide as a tool only when the panel sent one', fun
         $toolResult = aiChatEvents($result['events'], 'tool_result')[0];
         expect($toolResult['ok'])->toBeTrue($result['raw']);
         expect($toolResult['preview'])->toContain('data-preset="2-equal"');
+        expect(Mage::helper('ai')->editorGuide())->toBe($guide);
+
+        // The next request carries no guide: the server keeps the one it got.
+        AiChatScript::reset(new TextResult('Hello again.'));
+        $later = aiChatRequest('/api/admin/ai/chat', ['message' => 'hello']);
+        expect($later['status'])->toBe(200);
+        expect(AiChatScript::$offeredTools[0])->toContain('admin_content_guide');
     } finally {
+        Mage::app()->removeCache($cacheId);
         aiChatDeleteConversations((int) $admin->getId());
         aiChatDeleteAdmin($admin);
     }

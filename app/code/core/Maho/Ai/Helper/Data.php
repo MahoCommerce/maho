@@ -416,6 +416,32 @@ class Maho_Ai_Helper_Data extends Mage_Core_Helper_Abstract
             && class_exists(\Symfony\AI\Agent\Agent::class);
     }
 
+    /**
+     * The editor guide the panel generated in the browser, kept in the cache per version of
+     * the editor script, so the browser sends it once and not with every message.
+     */
+    public function editorGuide(): string
+    {
+        $guide = Mage::app()->loadCache($this->editorGuideCacheId());
+
+        return is_string($guide) ? $guide : '';
+    }
+
+    public function saveEditorGuide(string $guide): void
+    {
+        $guide = trim($guide);
+        if ($guide !== '') {
+            Mage::app()->saveCache($guide, $this->editorGuideCacheId(), [Mage_Core_Model_Config::CACHE_TAG]);
+        }
+    }
+
+    public function editorGuideCacheId(): string
+    {
+        $path = Mage::getBaseDir('public') . DS . 'js' . DS . 'mage' . DS . 'adminhtml' . DS . 'wysiwyg' . DS . 'tiptap' . DS . 'setup.js';
+
+        return 'ai_editor_guide_' . (is_file($path) ? (string) filemtime($path) : '0');
+    }
+
     public function isChatAllowed(): bool
     {
         return Mage::getSingleton('admin/session')->isAllowed('system/ai/chat');

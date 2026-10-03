@@ -17,24 +17,34 @@ use Symfony\AI\Platform\Tool\Tool;
 
 /**
  * The guide is not a file in the repository: the editor script builds it in the browser from
- * its own layout presets, so it never goes stale, and the panel sends it with each request.
- * The tool exists only when the request carried one.
+ * its own layout presets, so it never goes stale. The panel sends it once per version of the
+ * script, the helper keeps it in the cache, and the tool exists only while a guide is known.
  */
 final class ContentGuideTool
 {
     public const NAME = 'admin_content_guide';
     public const TITLE = 'Content editor guide';
 
-    private string $guide = '';
+    private ?string $guide = null;
 
-    public function setGuide(string $guide): void
+    /** Keep a guide the request carried; an empty value changes nothing. */
+    public function store(string $guide): void
     {
-        $this->guide = trim($guide);
+        $guide = trim($guide);
+        if ($guide !== '') {
+            \Mage::helper('ai')->saveEditorGuide($guide);
+            $this->guide = $guide;
+        }
+    }
+
+    public function guide(): string
+    {
+        return $this->guide ??= \Mage::helper('ai')->editorGuide();
     }
 
     public function hasGuide(): bool
     {
-        return $this->guide !== '';
+        return $this->guide() !== '';
     }
 
     public function tool(): Tool
@@ -54,7 +64,7 @@ final class ContentGuideTool
     public function read(): array
     {
         return $this->hasGuide()
-            ? ['ok' => true, 'text' => $this->guide]
-            : ['ok' => false, 'text' => 'No editor guide was sent with this request.'];
+            ? ['ok' => true, 'text' => $this->guide()]
+            : ['ok' => false, 'text' => 'No editor guide is available yet.'];
     }
 }
