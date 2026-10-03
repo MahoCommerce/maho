@@ -95,6 +95,13 @@ return function (Schema $schema): void {
     $vector->addIndex(['entity_type', 'entity_id']);
     $vector->setComment('Maho AI - Entity Embedding Vectors');
 
+    $memory = $schema->createTable('ai_memory');
+    $memory->addColumn('memory_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
+    $memory->addColumn('admin_user_id', Types::INTEGER, ['unsigned' => true]);
+    $memory->addColumn('note', Types::STRING, ['length' => 255]);
+    $memory->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
+    $memory->addIndex(['admin_user_id']);
+
     $conversation = $schema->createTable('ai_conversation');
     $conversation->addColumn('conversation_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $conversation->addColumn('admin_user_id', Types::INTEGER, ['unsigned' => true]);

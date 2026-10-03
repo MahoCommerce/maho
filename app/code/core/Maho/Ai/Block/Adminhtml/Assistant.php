@@ -117,6 +117,8 @@ class Maho_Ai_Block_Adminhtml_Assistant extends Mage_Adminhtml_Block_Template
                 'loadTools' => $helper->__('Load tools'),
                 'pageAction' => $helper->__('Act on the page'),
                 'contentGuide' => $helper->__('Content editor guide'),
+                'remember' => $helper->__('Remember a note'),
+                'forget' => $helper->__('Forget a note'),
                 'actionDone' => $helper->__('Done: %s.'),
                 'actionNotFound' => $helper->__('I could not find "%s" on this page.'),
                 'formFilled' => $helper->__('I filled these fields in the form: %s. Review the form and save it.'),

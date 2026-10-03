@@ -29,6 +29,7 @@ class Maho_Ai_Model_Chat_SystemPrompt
         $sections = [
             $this->identity(),
             $this->store($admin, $storeId),
+            $this->memory($admin),
             $this->pageContext($pageContext),
             $this->procedure(),
             $this->glossary(),
@@ -76,6 +77,22 @@ class Maho_Ai_Model_Chat_SystemPrompt
         }
 
         return $lines === [] ? null : '- Store views, as "code = name (website)"; the store argument of a tool takes the code: ' . implode('; ', $lines) . '.';
+    }
+
+    /** The notes this administrator asked the assistant to keep, numbered for the forget tool. */
+    private function memory(Mage_Admin_Model_User $admin): string
+    {
+        $notes = Maho_Ai_Model_Memory::notesOf((int) $admin->getId());
+        if ($notes === []) {
+            return 'What the administrator asked you to remember: nothing yet. When the administrator states a lasting preference or fact about their work, such as the language to answer in or the store view they manage, keep it with the remember tool, once.';
+        }
+        $lines = ['What the administrator asked you to remember, to follow without repeating it back:'];
+        foreach ($notes as $note) {
+            $lines[] = sprintf('%d. %s', $note['id'], $note['note']);
+        }
+        $lines[] = 'Add a new lasting preference with the remember tool; drop one the administrator cancels with the forget tool.';
+
+        return implode("\n", $lines);
     }
 
     /**

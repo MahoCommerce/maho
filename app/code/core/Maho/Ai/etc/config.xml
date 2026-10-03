@@ -30,6 +30,9 @@
                     <conversation_message>
                         <table>ai_conversation_message</table>
                     </conversation_message>
+                    <memory>
+                        <table>ai_memory</table>
+                    </memory>
                 </entities>
             </ai_resource>
         </models>

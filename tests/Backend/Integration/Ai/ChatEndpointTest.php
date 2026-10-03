@@ -329,6 +329,42 @@ it('previews an update with the current values, and undoes it after the administ
     }
 });
 
+it('keeps a note the model stores with the remember tool and lists it in the next prompt', function (): void {
+    $admin = aiChatAdmin('ai_chat_rememberer', ['all']);
+    try {
+        aiChatLogin($admin);
+        AiChatScript::reset(
+            new ToolCallResult([new ToolCall('call_m', 'remember', ['note' => 'Answer in Italian.'])]),
+            new TextResult('Noted.'),
+        );
+        $first = aiChatRequest('/api/admin/ai/chat', ['message' => 'Always answer me in Italian']);
+        expect($first['status'])->toBe(200);
+        expect(AiChatScript::$offeredTools[0])->toContain('remember', 'forget');
+        $result = aiChatEvents($first['events'], 'tool_result')[0];
+        expect($result['ok'])->toBeTrue($first['raw']);
+        $notes = Maho_Ai_Model_Memory::notesOf((int) $admin->getId());
+        expect($notes)->toHaveCount(1);
+        expect($notes[0]['note'])->toBe('Answer in Italian.');
+
+        $prompt = new Maho_Ai_Model_Chat_SystemPrompt()->build($admin);
+        expect($prompt)->toContain($notes[0]['id'] . '. Answer in Italian.');
+
+        AiChatScript::reset(
+            new ToolCallResult([new ToolCall('call_f', 'forget', ['note_id' => $notes[0]['id']])]),
+            new TextResult('Forgotten.'),
+        );
+        $second = aiChatRequest('/api/admin/ai/chat', ['message' => 'Forget that', 'conversation_id' => (int) aiChatEvents($first['events'], 'done')[0]['conversation_id']]);
+        expect(aiChatEvents($second['events'], 'tool_result')[0]['ok'])->toBeTrue($second['raw']);
+        expect(Maho_Ai_Model_Memory::notesOf((int) $admin->getId()))->toBe([]);
+    } finally {
+        foreach (Mage::getResourceModel('ai/memory_collection')->addFieldToFilter('admin_user_id', (int) $admin->getId()) as $memory) {
+            $memory->delete();
+        }
+        aiChatDeleteConversations((int) $admin->getId());
+        aiChatDeleteAdmin($admin);
+    }
+});
+
 it('runs a read tool at once, streams the answer and stores the conversation', function (): void {
     $admin = aiChatAdmin('ai_chat_reader', ['all']);
     try {
@@ -893,7 +929,7 @@ it('loads tool sections on demand and keeps them for the conversation', function
 
         expect($result['status'])->toBe(200);
         // The dashboard loads no section and the message names none: only the local tools are offered at first.
-        expect(AiChatScript::$offeredTools[0])->toBe(['enable_tools', 'admin_open_page', 'admin_fill_form', 'admin_page_action']);
+        expect(AiChatScript::$offeredTools[0])->toBe(['enable_tools', 'admin_open_page', 'admin_fill_form', 'admin_page_action', 'remember', 'forget']);
         $results = aiChatEvents($result['events'], 'tool_result');
         expect($results[0]['ok'])->toBeFalse();
         expect($results[0]['preview'])->toContain('nope');

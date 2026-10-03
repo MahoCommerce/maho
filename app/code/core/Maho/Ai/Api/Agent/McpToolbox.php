@@ -58,6 +58,7 @@ final class McpToolbox implements ToolboxInterface
         private readonly McpToolDispatcher $dispatcher,
         private readonly AdminPageTool $adminPageTool,
         private readonly ContentGuideTool $contentGuideTool,
+        private readonly MemoryTool $memoryTool,
     ) {}
 
     /** Keep the editor guide the panel sent with this request, when it sent one. */
@@ -75,7 +76,7 @@ final class McpToolbox implements ToolboxInterface
     #[\Override]
     public function getTools(): array
     {
-        $tools = [$this->enableTool(), $this->adminPageTool->tool(), $this->adminPageTool->fillTool(), $this->adminPageTool->actionTool()];
+        $tools = [$this->enableTool(), $this->adminPageTool->tool(), $this->adminPageTool->fillTool(), $this->adminPageTool->actionTool(), $this->memoryTool->rememberTool(), $this->memoryTool->forgetTool()];
         if ($this->contentGuideTool->hasGuide()) {
             $tools[] = $this->contentGuideTool->tool();
         }
@@ -183,7 +184,7 @@ final class McpToolbox implements ToolboxInterface
     /** A tool that runs in this process, outside the MCP catalog. */
     public static function isLocal(string $name): bool
     {
-        return $name === self::ENABLE_NAME || $name === ContentGuideTool::NAME || in_array($name, AdminPageTool::NAMES, true);
+        return $name === self::ENABLE_NAME || $name === ContentGuideTool::NAME || in_array($name, AdminPageTool::NAMES, true) || in_array($name, MemoryTool::NAMES, true);
     }
 
     #[\Override]
@@ -193,6 +194,10 @@ final class McpToolbox implements ToolboxInterface
             $outcome = $this->enable($toolCall->getArguments());
         } elseif ($toolCall->getName() === ContentGuideTool::NAME) {
             $outcome = $this->contentGuideTool->read();
+        } elseif (in_array($toolCall->getName(), MemoryTool::NAMES, true)) {
+            $outcome = $toolCall->getName() === MemoryTool::FORGET
+                ? $this->memoryTool->forget($toolCall->getArguments())
+                : $this->memoryTool->remember($toolCall->getArguments());
         } elseif (in_array($toolCall->getName(), AdminPageTool::NAMES, true)) {
             $outcome = match ($toolCall->getName()) {
                 AdminPageTool::FILL_NAME => $this->adminPageTool->fill($toolCall->getArguments()),
@@ -359,6 +364,7 @@ final class McpToolbox implements ToolboxInterface
         return match (true) {
             $name === self::ENABLE_NAME => 'Load tools',
             $name === ContentGuideTool::NAME => ContentGuideTool::TITLE,
+            in_array($name, MemoryTool::NAMES, true) => MemoryTool::title($name),
             in_array($name, AdminPageTool::NAMES, true) => AdminPageTool::title($name),
             default => $this->catalog->title($name),
         };

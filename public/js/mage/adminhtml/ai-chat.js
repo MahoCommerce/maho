@@ -1007,7 +1007,7 @@ class MahoAiAssistant {
 
     /** "content_cms_pages_update" reads as "Update cms pages": the verb first, without the section. */
     humanizeTool(name) {
-        const local = { admin_open_page: this.labels.openPage, admin_fill_form: this.labels.fillForm, admin_page_action: this.labels.pageAction, enable_tools: this.labels.loadTools, admin_content_guide: this.labels.contentGuide };
+        const local = { admin_open_page: this.labels.openPage, admin_fill_form: this.labels.fillForm, admin_page_action: this.labels.pageAction, enable_tools: this.labels.loadTools, admin_content_guide: this.labels.contentGuide, remember: this.labels.remember, forget: this.labels.forget };
         if (local[name]) {
             return local[name];
         }
