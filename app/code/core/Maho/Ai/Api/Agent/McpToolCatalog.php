@@ -123,6 +123,42 @@ final class McpToolCatalog
         return $this->all()[$this->resolve($nameOrAlias)] ?? null;
     }
 
+    /**
+     * How a write tool touches a record: its kind, the name of the id argument and the read
+     * tool that returns the record, so a preview can show the change and an undo can restore it.
+     *
+     * @return array{kind: 'create'|'update'|'delete', id: ?string, read: ?string}|null null for a read or an unknown tool
+     */
+    public function writeShape(string $nameOrAlias): ?array
+    {
+        $tool = $this->get($nameOrAlias);
+        if ($tool === null) {
+            return null;
+        }
+        $kind = match (strtoupper($tool->getMethod())) {
+            'POST' => 'create',
+            'PUT', 'PATCH' => 'update',
+            'DELETE' => 'delete',
+            default => null,
+        };
+        if ($kind === null) {
+            return null;
+        }
+        $uri = (string) $tool->getUriTemplate();
+        $idVariable = preg_match('~\\{([^}]+)\\}$~', $uri, $m) === 1 ? $m[1] : null;
+        $read = null;
+        if ($idVariable !== null) {
+            foreach ($this->all() as $name => $candidate) {
+                if (strtoupper($candidate->getMethod()) === 'GET' && (string) $candidate->getUriTemplate() === $uri) {
+                    $read = $name;
+                    break;
+                }
+            }
+        }
+
+        return ['kind' => $kind, 'id' => $idVariable, 'read' => $read];
+    }
+
     public function resolve(string $nameOrAlias): string
     {
         return $this->aliases[$nameOrAlias] ?? $nameOrAlias;

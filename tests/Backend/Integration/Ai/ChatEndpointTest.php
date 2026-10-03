@@ -279,6 +279,56 @@ it('turns the API links of an answer into admin page links', function (): void {
     }
 });
 
+it('previews an update with the current values, and undoes it after the administrator confirmed it', function (): void {
+    $admin = aiChatAdmin('ai_chat_undoer', ['all']);
+    $page = Mage::getModel('cms/page')->setData(['identifier' => 'ai-chat-undo-page', 'title' => 'Before', 'content' => '<p>x</p>', 'is_active' => 1, 'stores' => [0], 'root_template' => 'one_column']);
+    $page->save();
+    $pageId = (int) $page->getId();
+    try {
+        aiChatLogin($admin);
+        AiChatScript::reset(
+            new ToolCallResult([new ToolCall('call_u', 'content_cms_pages_update', ['id' => (string) $pageId, 'title' => 'After', 'content' => '<p>x</p>'])]),
+            new TextResult('Renamed.'),
+        );
+        $first = aiChatRequest('/api/admin/ai/chat', ['message' => 'Rename the page', 'context' => ['route' => 'cms_page/index']]);
+        expect($first['status'])->toBe(200);
+        $confirm = aiChatEvents($first['events'], 'confirm');
+        expect($confirm)->toHaveCount(1);
+        $preview = $confirm[0]['calls'][0]['preview'];
+        expect($preview['kind'])->toBe('update');
+        expect($preview['record'])->toBe('Before');
+        expect($preview['scope'])->toBe('');
+        expect($preview['changes'])->toBe([['field' => 'title', 'from' => 'Before', 'to' => 'After']]);
+        expect($preview)->not->toHaveKey('undo');
+        $conversationId = (int) $confirm[0]['conversation_id'];
+
+        $approved = aiChatRequest('/api/admin/ai/chat/confirm', ['conversation_id' => $conversationId, 'decisions' => ['call_u' => true]]);
+        expect($approved['status'])->toBe(200);
+        $result = aiChatEvents($approved['events'], 'tool_result')[0];
+        expect($result['ok'])->toBeTrue($approved['raw']);
+        expect($result['undo'])->toBeInt();
+        expect((string) Mage::getModel('cms/page')->load($pageId)->getTitle())->toBe('After');
+
+        $undone = aiChatRequest('/api/admin/ai/chat/undo', ['conversation_id' => $conversationId, 'message_id' => $result['undo']]);
+        expect($undone['status'])->toBe(200);
+        $undoArguments = aiChatEvents($undone['events'], 'tool_call')[0]['arguments'];
+        expect(array_keys($undoArguments))->toBe(['id', 'title']);
+        expect((int) $undoArguments['id'])->toBe($pageId);
+        expect($undoArguments['title'])->toBe('Before');
+        expect(aiChatEvents($undone['events'], 'tool_result')[0]['ok'])->toBeTrue($undone['raw']);
+        expect(aiChatEvents($undone['events'], 'done')[0]['state'])->toBe('complete');
+        expect((string) Mage::getModel('cms/page')->load($pageId)->getTitle())->toBe('Before');
+
+        // An undo is a write of its own and cannot be undone again.
+        $again = aiChatRequest('/api/admin/ai/chat/undo', ['conversation_id' => $conversationId, 'message_id' => $result['undo']]);
+        expect(aiChatEvents($again['events'], 'done')[0]['state'])->toBe('error');
+    } finally {
+        Mage::getModel('cms/page')->load($pageId)->delete();
+        aiChatDeleteConversations((int) $admin->getId());
+        aiChatDeleteAdmin($admin);
+    }
+});
+
 it('runs a read tool at once, streams the answer and stores the conversation', function (): void {
     $admin = aiChatAdmin('ai_chat_reader', ['all']);
     try {

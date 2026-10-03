@@ -63,6 +63,7 @@ class MahoAiAssistant {
         chat.htmlClassUtilities = {
             'ai-chat-approve': { events: { click: (event) => this.onApprove(event) } },
             'ai-chat-deny': { events: { click: (event) => this.onDeny(event) } },
+            'ai-chat-undo': { events: { click: (event) => { event.preventDefault(); this.undo(parseInt(event.target.dataset.message, 10), event.target); } } },
             'ai-chat-example': { events: { click: (event) => this.chat.submitUserMessage({ text: event.currentTarget.dataset.text }) } },
         };
         chat.connect = {
@@ -208,7 +209,7 @@ class MahoAiAssistant {
                     if (tool.status === 'pending') {
                         pending.push({ id: tool.id, name: tool.name, title: tool.name, arguments: tool.arguments, destructive: false });
                     } else {
-                        history.push({ role: 'ai', html: this.renderStep({ id: tool.id, name: tool.name, title: tool.name, arguments: tool.arguments, read_only: !tool.is_write }, { status: tool.status }) });
+                        history.push({ role: 'ai', html: this.renderStep({ id: tool.id, name: tool.name, title: tool.name, arguments: tool.arguments, read_only: !tool.is_write }, { status: tool.status, undo: tool.undo ?? null }) });
                     }
                 }
             }
@@ -410,7 +411,7 @@ class MahoAiAssistant {
                 const step = state.steps.get(data.id);
                 if (step) {
                     const status = data.denied ? 'denied' : (data.ok ? 'done' : 'error');
-                    this.chat.updateMessage({ html: this.renderStep(step.call, { status, preview: data.preview }) }, step.index);
+                    this.chat.updateMessage({ html: this.renderStep(step.call, { status, preview: data.preview, undo: data.undo ?? null }) }, step.index);
                 } else if (data.denied) {
                     this.chat.addMessage({ html: this.renderStep({ id: data.id, name: '', title: '', arguments: {} }, { status: 'denied' }), role: 'ai' });
                 }
@@ -856,10 +857,12 @@ class MahoAiAssistant {
         const title = call.title && call.title !== call.name ? call.title : this.humanizeTool(call.name);
         const args = this.renderArguments(call.arguments);
         const preview = result.preview ? `<pre class="ai-chat-step-preview">${this.escape(this.prettyPreview(result.preview))}</pre>` : '';
+        const undo = result.undo ? `<button type="button" class="ai-chat-undo" data-message="${this.escape(String(result.undo))}">${this.escape(this.labels.undo)}</button>` : '';
         return `<details class="ai-chat-step ai-chat-step-${this.escape(status)}">`
             + `<summary><span class="ai-chat-step-status">${this.escape(labels[status] ?? status)}</span>`
             + `<span class="ai-chat-step-title">${this.escape(title)}</span>`
             + (call.destructive ? `<span class="ai-chat-badge">${this.escape(this.labels.destructive)}</span>` : '')
+            + undo
             + `</summary>`
             + args
             + preview
@@ -880,7 +883,7 @@ class MahoAiAssistant {
                 + `<strong>${this.escape(title)}</strong>`
                 + (call.destructive ? ` <span class="ai-chat-badge">${this.escape(this.labels.destructive)}</span>` : '')
                 + `</label>`
-                + this.renderArguments(call.arguments)
+                + (call.preview ? this.renderPreview(call.preview, call.arguments) : this.renderArguments(call.arguments))
                 + `</li>`;
         }).join('');
         const html = `<div class="ai-chat-confirm" data-ids="${this.escape(calls.map((c) => c.id).join(','))}">`
@@ -891,6 +894,73 @@ class MahoAiAssistant {
             + `<button type="button" class="ai-chat-deny">${this.escape(this.labels.deny)}</button>`
             + `</div></div>`;
         return html;
+    }
+
+    /**
+     * What a write does, before the administrator approves it: the record, the scope, and a
+     * before/after table for an update. A create lists its fields; a delete says so.
+     */
+    renderPreview(preview, args) {
+        const parts = [];
+        const meta = [];
+        if (preview.record) {
+            meta.push(`<span class="ai-chat-preview-record">${this.escape(this.labels.changeRecord)}: ${this.escape(preview.record)}</span>`);
+        }
+        if (preview.kind === 'update' || preview.kind === 'create') {
+            meta.push(`<span class="ai-chat-preview-scope">${this.escape(preview.scope ? this.labels.changeScopeStore.replace('%s', preview.scope) : this.labels.changeScopeDefault)}</span>`);
+        }
+        if (meta.length > 0) {
+            parts.push(`<p class="ai-chat-preview-meta">${meta.join(' · ')}</p>`);
+        }
+        if (preview.kind === 'delete') {
+            parts.push(`<p class="ai-chat-preview-delete">${this.escape(this.labels.changeDelete)}</p>`);
+            return parts.join('');
+        }
+        if (preview.kind === 'update' && preview.changes.length === 0) {
+            parts.push(`<p class="ai-chat-preview-none">${this.escape(this.labels.changeNone)}</p>`);
+            return parts.join('');
+        }
+        if (preview.kind !== 'update' || preview.changes.length === 0) {
+            parts.push(this.renderArguments(args));
+            return parts.join('');
+        }
+        const rows = preview.changes.map((change) => `<tr><th>${this.escape(this.humanizeKey(change.field))}</th>`
+            + `<td class="ai-chat-preview-from">${this.renderValue(change.from)}</td>`
+            + `<td class="ai-chat-preview-to">${this.renderValue(change.to)}</td></tr>`).join('');
+        parts.push(`<table class="ai-chat-preview-table"><thead><tr><th>${this.escape(this.labels.changeField)}</th>`
+            + `<th>${this.escape(this.labels.changeFrom)}</th><th>${this.escape(this.labels.changeTo)}</th></tr></thead><tbody>${rows}</tbody></table>`);
+        return parts.join('');
+    }
+
+    /** A value in the preview table: HTML as the page renders it, an object as JSON, nothing as "(empty)". */
+    renderValue(value) {
+        if (value === null || value === undefined || value === '') {
+            return `<em>${this.escape(this.labels.changeEmpty)}</em>`;
+        }
+        if (typeof value === 'string' && /<[a-z][^>]*>/i.test(value)) {
+            return `<div class="ai-chat-html-preview">${this.sanitizeHtml(value)}</div>`;
+        }
+        const text = typeof value === 'string' ? value : JSON.stringify(value, null, 2);
+        return text.length > 80 || text.includes('\n') ? `<pre>${this.escape(text)}</pre>` : this.escape(text);
+    }
+
+    async undo(messageId, button) {
+        if (!this.conversationId || this.abortController) {
+            return;
+        }
+        button?.remove();
+        this.abortController = new AbortController();
+        this.chat.disableSubmitButton(true);
+        const outcome = await this.streamTurn(this.config.undoUrl, {
+            conversation_id: this.conversationId,
+            message_id: messageId,
+            form_key: this.config.formKey,
+        });
+        if (outcome.error) {
+            this.chat.addMessage({ html: this.renderError(outcome.error), role: 'ai' });
+        }
+        this.chat.disableSubmitButton(false);
+        this.abortController = null;
     }
 
     onApprove(event) {

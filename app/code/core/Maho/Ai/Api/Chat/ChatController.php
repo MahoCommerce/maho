@@ -84,6 +84,22 @@ final class ChatController
         });
     }
 
+    #[Route('/api/admin/ai/chat/undo', name: 'api_admin_ai_chat_undo', methods: ['POST'])]
+    public function undo(Request $request): Response
+    {
+        $input = $this->guard($request);
+        $admin = $this->admin();
+        $conversation = $this->conversation($input, $admin, $this->context($input), create: false);
+        $messageId = (int) ($input['message_id'] ?? 0);
+        if ($messageId <= 0) {
+            throw new BadRequestHttpException('The message id is missing.');
+        }
+
+        return $this->stream($request, $conversation, function (Maho_Ai_Model_Chat_SseWriter $sse) use ($conversation, $messageId): void {
+            $this->service->undo($conversation, $messageId, $sse);
+        });
+    }
+
     /**
      * @return array<string, mixed> the decoded JSON body
      */

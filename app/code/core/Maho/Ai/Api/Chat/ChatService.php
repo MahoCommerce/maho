@@ -110,11 +110,85 @@ final class ChatService
             $ok = !McpToolbox::isErrorText($text);
             $message->setToolStatus($ok ? Message::TOOL_DONE : Message::TOOL_ERROR);
             $message->setContent($text);
+            if (!$ok) {
+                $message->setUndoArguments(null);
+            }
             $message->save();
-            $sse->event('tool_result', ['id' => $callId, 'ok' => $ok, 'preview' => $this->preview($text)]);
+            $result = ['id' => $callId, 'ok' => $ok, 'preview' => $this->preview($text)];
+            if ($ok && $message->getUndoArguments() !== null) {
+                $result['undo'] = (int) $message->getId();
+            }
+            $sse->event('tool_result', $result);
         }
 
         $this->run($conversation, $admin, $pageContext, $sse);
+    }
+
+    /**
+     * Put a record back as it was before a confirmed write. The undo is a write of its own:
+     * it gets its own tool row, so the history and the model see it, and it cannot be undone.
+     */
+    public function undo(
+        Maho_Ai_Model_Conversation $conversation,
+        int $messageId,
+        Maho_Ai_Model_Chat_SseWriter $sse,
+    ): void {
+        /** @var Message $original */
+        $original = \Mage::getModel('ai/conversation_message')->load($messageId);
+        $undo = $original->getUndoArguments();
+        if (!$original->getId() || (int) $original->getConversationId() !== (int) $conversation->getId() || $undo === null || $original->getToolStatus() !== Message::TOOL_DONE) {
+            $sse->event('error', ['message' => \Mage::helper('ai')->__('This change cannot be undone.')]);
+            $sse->event('done', ['state' => 'error', 'conversation_id' => (int) $conversation->getId()]);
+            return;
+        }
+
+        $name = (string) $original->getToolName();
+        $callId = 'undo-' . $messageId;
+        $call = $this->describeCall($callId, $name, $undo);
+        $call['undo_of'] = $messageId;
+        $sse->event('tool_call', $call);
+        $text = (string) $this->toolbox->execute(new ToolCall($callId, $name, $undo))->getResult();
+        $ok = !McpToolbox::isErrorText($text);
+
+        $conversation->addMessage([
+            'role' => Message::ROLE_ASSISTANT,
+            'content' => '',
+            'tool_calls' => \Mage::helper('core')->jsonEncode([['id' => $callId, 'name' => $name, 'arguments' => $undo, 'signature' => null]]),
+        ]);
+        $conversation->addMessage([
+            'role' => Message::ROLE_TOOL,
+            'tool_call_id' => $callId,
+            'tool_name' => $name,
+            'tool_arguments' => \Mage::helper('core')->jsonEncode($undo),
+            'tool_status' => $ok ? Message::TOOL_DONE : Message::TOOL_ERROR,
+            'is_write' => 1,
+            'content' => $text,
+        ]);
+        if ($ok) {
+            $original->setUndoArguments(null)->save();
+            $conversation->addMessage(['role' => Message::ROLE_ASSISTANT, 'content' => \Mage::helper('ai')->__('I restored the previous values.')]);
+        }
+        $conversation->save();
+        $sse->event('tool_result', ['id' => $callId, 'ok' => $ok, 'preview' => $this->preview($text)]);
+        if ($ok) {
+            $sse->event('delta', ['text' => \Mage::helper('ai')->__('I restored the previous values.')]);
+        }
+        $sse->event('done', ['state' => $ok ? 'complete' : 'error', 'conversation_id' => (int) $conversation->getId()]);
+    }
+
+    /**
+     * @param array<string, mixed> $arguments
+     * @return array{kind: string, scope: string, record: ?string, changes: list<array{field: string, from: mixed, to: mixed}>, undo: ?array<string, mixed>}
+     */
+    private function previewWrite(string $name, array $arguments): array
+    {
+        try {
+            return $this->toolbox->previewWrite($name, $arguments);
+        } catch (\Throwable $e) {
+            \Mage::logException($e);
+
+            return ['kind' => 'other', 'scope' => '', 'record' => null, 'changes' => [], 'undo' => null];
+        }
     }
 
     /**
@@ -195,9 +269,20 @@ final class ChatService
             }
         } catch (Maho_Ai_Model_Chat_ConfirmationRequired $e) {
             $this->persistRound($conversation, $roundText, $e->toolCalls, $e->results, $e->pending);
+            $rows = [];
+            foreach ($conversation->getPendingWrites() as $row) {
+                $rows[(string) $row->getToolCallId()] = $row;
+            }
             $calls = [];
             foreach ($e->pending as $toolCall) {
-                $calls[] = $this->describeCall($toolCall->getId(), $toolCall->getName(), $toolCall->getArguments());
+                $call = $this->describeCall($toolCall->getId(), $toolCall->getName(), $toolCall->getArguments());
+                $call['preview'] = $this->previewWrite($toolCall->getName(), $toolCall->getArguments());
+                $row = $rows[$toolCall->getId()] ?? null;
+                if ($row !== null && $call['preview']['undo'] !== null) {
+                    $row->setUndoArguments($call['preview']['undo'])->save();
+                }
+                unset($call['preview']['undo']);
+                $calls[] = $call;
             }
             $sse->event('confirm', ['conversation_id' => (int) $conversation->getId(), 'calls' => $calls]);
             $sse->event('done', ['state' => 'awaiting_confirmation', 'conversation_id' => (int) $conversation->getId()]);

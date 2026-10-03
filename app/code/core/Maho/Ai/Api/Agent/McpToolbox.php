@@ -219,6 +219,90 @@ final class McpToolbox implements ToolboxInterface
         return new ToolResult($toolCall, $this->truncate($text));
     }
 
+    /** Labels an administrator knows a record by, in the order a preview tries them. */
+    private const RECORD_LABELS = ['name', 'title', 'incrementId', 'sku', 'email', 'code', 'identifier', 'label', 'templateCode', 'username'];
+
+    /**
+     * What a write will do, for the confirmation card: the record it touches, the scope it
+     * writes in, the fields it changes with their current values, and the arguments that
+     * would undo it. A local tool and a tool without a record give an empty preview.
+     *
+     * @param array<string, mixed> $arguments
+     * @return array{kind: string, scope: string, record: ?string, changes: list<array{field: string, from: mixed, to: mixed}>, undo: ?array<string, mixed>}
+     */
+    public function previewWrite(string $name, array $arguments): array
+    {
+        $storeCode = $arguments[McpToolCatalog::STORE_ARGUMENT] ?? null;
+        $scope = is_string($storeCode) && trim($storeCode) !== '' ? trim($storeCode) : '';
+        $empty = ['kind' => 'other', 'scope' => $scope, 'record' => null, 'changes' => [], 'undo' => null];
+        if (self::isLocal($name)) {
+            return $empty;
+        }
+        $shape = $this->catalog->writeShape($name);
+        if ($shape === null) {
+            return $empty;
+        }
+        $arguments = $this->catalog->coerce($this->catalog->resolve($name), $arguments);
+        unset($arguments[McpToolCatalog::STORE_ARGUMENT]);
+        $preview = $empty;
+        $preview['kind'] = $shape['kind'];
+
+        $current = null;
+        $idVariable = $shape['id'];
+        $id = $idVariable !== null ? ($arguments[$idVariable] ?? null) : null;
+        if ($shape['read'] !== null && is_scalar($id)) {
+            $outcome = $this->inStore($storeCode, fn(): array => $this->dispatcher->call($shape['read'], [$idVariable => $id]));
+            if ($outcome['ok']) {
+                try {
+                    $decoded = \Mage::helper('core')->jsonDecode($outcome['text']);
+                    $current = is_array($decoded) ? $decoded : null;
+                } catch (\JsonException) {
+                    $current = null;
+                }
+            }
+        }
+        if ($current !== null) {
+            foreach (self::RECORD_LABELS as $label) {
+                if (isset($current[$label]) && is_scalar($current[$label]) && (string) $current[$label] !== '') {
+                    $preview['record'] = (string) $current[$label];
+                    break;
+                }
+            }
+        }
+
+        if ($shape['kind'] === 'create') {
+            foreach ($arguments as $field => $to) {
+                $preview['changes'][] = ['field' => (string) $field, 'from' => null, 'to' => $to];
+            }
+
+            return $preview;
+        }
+        if ($shape['kind'] !== 'update' || $current === null) {
+            return $preview;
+        }
+
+        $undo = [$idVariable => $id];
+        if ($scope !== '') {
+            $undo[McpToolCatalog::STORE_ARGUMENT] = $scope;
+        }
+        foreach ($arguments as $field => $to) {
+            if ($field === $idVariable) {
+                continue;
+            }
+            $from = $current[$field] ?? null;
+            if (json_encode($from) === json_encode($to)) {
+                continue;
+            }
+            $preview['changes'][] = ['field' => (string) $field, 'from' => $from, 'to' => $to];
+            $undo[$field] = $from;
+        }
+        if ($preview['changes'] !== []) {
+            $preview['undo'] = $undo;
+        }
+
+        return $preview;
+    }
+
     /**
      * @param \Closure(): array{ok: bool, text: string} $call
      * @return array{ok: bool, text: string}

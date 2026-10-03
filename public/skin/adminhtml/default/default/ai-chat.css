@@ -571,3 +571,72 @@ body.ai-chat-open .ai-chat-toggle {
     letter-spacing: .04em;
     text-transform: uppercase;
 }
+
+/* Preview of a write on the confirmation card: record, scope and a before/after table. */
+.ai-chat-preview-meta {
+    margin: 6px 0 4px;
+    font-size: 12px;
+    color: var(--maho-ink-muted, #666);
+}
+
+.ai-chat-preview-table {
+    width: 100%;
+    margin: 4px 0 0;
+    border-collapse: collapse;
+    font-size: 12px;
+    background: var(--maho-surface);
+    border-radius: 4px;
+}
+
+.ai-chat-preview-table th,
+.ai-chat-preview-table td {
+    padding: 4px 6px;
+    text-align: left;
+    vertical-align: top;
+    border-bottom: 1px solid var(--maho-border, #e5e5e5);
+    word-break: break-word;
+}
+
+.ai-chat-preview-table thead th {
+    font-weight: 600;
+}
+
+.ai-chat-preview-table tbody th {
+    font-weight: 500;
+    width: 28%;
+}
+
+.ai-chat-preview-from {
+    color: var(--maho-ink-muted, #666);
+    text-decoration: line-through;
+}
+
+.ai-chat-preview-to {
+    color: var(--maho-success);
+}
+
+.ai-chat-preview-table pre {
+    margin: 0;
+    white-space: pre-wrap;
+}
+
+.ai-chat-preview-delete {
+    margin: 4px 0;
+    color: var(--maho-error);
+}
+
+.ai-chat-preview-none {
+    margin: 4px 0;
+    color: var(--maho-ink-muted, #666);
+}
+
+/* Undo of a confirmed write, on its done card. */
+.ai-chat-undo {
+    margin-left: auto;
+    padding: 1px 8px;
+    border: 1px solid var(--maho-border, #ccc);
+    border-radius: 3px;
+    background: var(--maho-surface);
+    font-size: 11px;
+    cursor: pointer;
+}

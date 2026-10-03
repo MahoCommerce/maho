@@ -78,6 +78,7 @@ class Maho_Ai_Adminhtml_Ai_ChatController extends Mage_Adminhtml_Controller_Acti
                     'arguments' => $message->getToolArguments(),
                     'status' => $message->getToolStatus(),
                     'is_write' => (bool) $message->getIsWrite(),
+                    'undo' => $message->getToolStatus() === Maho_Ai_Model_Conversation_Message::TOOL_DONE && $message->getUndoArguments() !== null ? (int) $message->getId() : null,
                 ];
                 unset($row['content']);
             }

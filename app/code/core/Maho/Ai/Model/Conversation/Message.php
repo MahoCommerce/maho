@@ -140,6 +140,34 @@ class Maho_Ai_Model_Conversation_Message extends Mage_Core_Model_Abstract
         return $this->setData('tool_arguments', $value === null ? null : Mage::helper('core')->jsonEncode($value));
     }
 
+    /**
+     * The arguments that put the record back as it was before this write, kept while an undo is possible.
+     *
+     * @return array<string, mixed>|null
+     */
+    public function getUndoArguments(): ?array
+    {
+        $json = $this->getData('undo_arguments');
+        if ($json === null || $json === '') {
+            return null;
+        }
+        try {
+            $decoded = Mage::helper('core')->jsonDecode((string) $json);
+        } catch (\JsonException) {
+            return null;
+        }
+
+        return is_array($decoded) ? $decoded : null;
+    }
+
+    /**
+     * @param array<string, mixed>|null $value
+     */
+    public function setUndoArguments(?array $value): static
+    {
+        return $this->setData('undo_arguments', $value === null ? null : Mage::helper('core')->jsonEncode($value));
+    }
+
     public function getToolStatus(): ?string
     {
         $value = $this->getData('tool_status');
