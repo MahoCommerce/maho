@@ -1221,11 +1221,13 @@ class MahoAiAssistant {
     sanitizeHtml(html) {
         const doc = new DOMParser().parseFromString(html, 'text/html');
         doc.querySelectorAll('script, style, link, meta, iframe, object, embed, form, input, button, textarea, select').forEach((node) => node.remove());
+        // A URL attribute keeps only a relative URL or one of these schemes; every other scheme goes.
+        const safeUrl = (value) => !/^[a-z][a-z0-9+.-]*:/i.test(value) || /^(https?|mailto|tel):/i.test(value);
         doc.querySelectorAll('*').forEach((node) => {
             for (const attribute of Array.from(node.attributes)) {
                 const name = attribute.name.toLowerCase();
-                const value = attribute.value.trim().toLowerCase();
-                if (name.startsWith('on') || name === 'srcdoc' || ((name === 'href' || name === 'src' || name === 'xlink:href') && value.startsWith('javascript:'))) {
+                const value = attribute.value.trim();
+                if (name.startsWith('on') || name === 'srcdoc' || ((name === 'href' || name === 'src' || name === 'xlink:href' || name === 'action' || name === 'formaction') && !safeUrl(value))) {
                     node.removeAttribute(attribute.name);
                 }
             }
