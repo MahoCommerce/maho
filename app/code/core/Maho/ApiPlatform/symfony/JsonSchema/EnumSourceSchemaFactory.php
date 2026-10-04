@@ -27,10 +27,22 @@ use Maho\ApiPlatform\Metadata\EnumSource;
  */
 final class EnumSourceSchemaFactory implements SchemaFactoryInterface, SchemaFactoryAwareInterface
 {
+    /**
+     * The OpenAPI factory passes one Schema to every build, so each definition is visited once.
+     *
+     * @var \WeakMap<Schema, array<string, true>>
+     */
+    private \WeakMap $visited;
+
+    /** @var array<string, list<int|string>|null> */
+    private array $enums = [];
+
     public function __construct(
         private readonly SchemaFactoryInterface $decorated,
         private readonly PropertyMetadataFactoryInterface $propertyMetadataFactory,
-    ) {}
+    ) {
+        $this->visited = new \WeakMap();
+    }
 
     #[\Override]
     public function buildSchema(string $className, string $format = 'json', string $type = Schema::TYPE_OUTPUT, ?Operation $operation = null, ?Schema $schema = null, ?array $serializerContext = null, bool $forceCollection = false): Schema
@@ -38,7 +50,13 @@ final class EnumSourceSchemaFactory implements SchemaFactoryInterface, SchemaFac
         $schema = $this->decorated->buildSchema($className, $format, $type, $operation, $schema, $serializerContext, $forceCollection);
 
         $definitions = $schema->getDefinitions();
+        $visited = $this->visited[$schema] ?? [];
         foreach ($definitions as $name => $definition) {
+            $name = (string) $name;
+            if (isset($visited[$name])) {
+                continue;
+            }
+            $visited[$name] = true;
             if (!is_array($definition) && !$definition instanceof \ArrayObject) {
                 continue;
             }
@@ -46,7 +64,7 @@ final class EnumSourceSchemaFactory implements SchemaFactoryInterface, SchemaFac
             if ($properties === null) {
                 continue;
             }
-            $class = $this->definitionClass((string) $name, $className, $schema);
+            $class = $this->definitionClass($name, $className, $schema);
             if ($class === null) {
                 continue;
             }
@@ -61,6 +79,7 @@ final class EnumSourceSchemaFactory implements SchemaFactoryInterface, SchemaFac
             $definition['properties'] = $properties;
             $definitions[$name] = $definition;
         }
+        $this->visited[$schema] = $visited;
 
         return $schema;
     }
@@ -131,6 +150,20 @@ final class EnumSourceSchemaFactory implements SchemaFactoryInterface, SchemaFac
         if (!in_array($class, self::$knownClasses, true)) {
             self::$knownClasses[] = $class;
         }
+
+        $key = $class . '::' . $property;
+        if (!array_key_exists($key, $this->enums)) {
+            $this->enums[$key] = $this->resolveEnum($class, $property);
+        }
+
+        return $this->enums[$key];
+    }
+
+    /**
+     * @return list<int|string>|null
+     */
+    private function resolveEnum(string $class, string $property): ?array
+    {
         try {
             $metadata = $this->propertyMetadataFactory->create($class, $property);
         } catch (PropertyNotFoundException) {
