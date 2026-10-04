@@ -404,6 +404,19 @@ it('starts a background job after confirmation and runs it in a worker with its 
         expect($jobId)->toBeGreaterThan(0);
         expect((string) $job->getTitle())->toBe('Rename pages');
         expect((int) $queue->fetchOne("SELECT COUNT(*) FROM {$queueTable}"))->toBe($before + 1);
+        expect($job->isRunning())->toBeTrue();
+        expect((string) $job->messagesCollection()->getFirstItem()->getContent())->toBe('Rename the page ' . $pageId . ' to New.');
+
+        // A lost queue message: the job can never run, and the panel must not wait forever.
+        $lost = Mage::getModel('ai/conversation')->setData(['admin_user_id' => (int) $admin->getId(), 'store_id' => 0, 'status' => Maho_Ai_Model_Conversation::STATUS_RUNNING, 'title' => 'Lost job']);
+        $lost->save();
+        expect($lost->isRunning())->toBeFalse();
+        $lost->reconcileBackgroundJob();
+        $lost = Mage::getModel('ai/conversation')->load((int) $lost->getId());
+        expect($lost->getStatus())->toBe(Maho_Ai_Model_Conversation::STATUS_ACTIVE);
+        expect($lost->messagesCollection()->getLastItem()->getToolStatus())->toBe(Maho_Ai_Model_Conversation_Message::TOOL_ERROR);
+        $job->reconcileBackgroundJob();
+        expect(Mage::getModel('ai/conversation')->load($jobId)->getStatus())->toBe(Maho_Ai_Model_Conversation::STATUS_RUNNING);
 
         // The worker: the handler runs the job with the scripted model; the update needs no confirmation.
         AiChatScript::reset(

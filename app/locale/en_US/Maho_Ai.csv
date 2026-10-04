@@ -208,3 +208,4 @@
 "The file is not an image.","The file is not an image."
 "The attachment folder cannot be created.","The attachment folder cannot be created."
 "The file cannot be stored.","The file cannot be stored."
+"The background job was lost before it ran. Ask again.","The background job was lost before it ran. Ask again."

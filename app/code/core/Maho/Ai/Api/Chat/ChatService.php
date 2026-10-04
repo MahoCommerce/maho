@@ -146,7 +146,10 @@ final class ChatService
     public function runBackground(Maho_Ai_Model_Conversation $conversation, Mage_Admin_Model_User $admin, string $instruction): void
     {
         $this->toolbox->setBackground(true);
-        $conversation->addMessage(['role' => Message::ROLE_USER, 'content' => $instruction]);
+        if ($conversation->messagesCollection()->getSize() === 0) {
+            // A job queued before the instruction was stored at dispatch.
+            $conversation->addMessage(['role' => Message::ROLE_USER, 'content' => $instruction]);
+        }
         try {
             $this->run($conversation, $admin, [], new Maho_Ai_Model_Chat_NullSseWriter());
         } finally {

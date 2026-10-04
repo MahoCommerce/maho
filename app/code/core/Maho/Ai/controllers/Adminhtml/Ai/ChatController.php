@@ -70,6 +70,7 @@ class Maho_Ai_Adminhtml_Ai_ChatController extends Mage_Adminhtml_Controller_Acti
         $items = [];
         /** @var Maho_Ai_Model_Conversation $conversation */
         foreach ($collection as $conversation) {
+            $conversation->reconcileBackgroundJob();
             $items[] = [
                 'id' => (int) $conversation->getId(),
                 'title' => (string) ($conversation->getTitle() ?? ''),
@@ -93,6 +94,7 @@ class Maho_Ai_Adminhtml_Ai_ChatController extends Mage_Adminhtml_Controller_Acti
             return;
         }
 
+        $conversation->reconcileBackgroundJob();
         $messages = [];
         /** @var Maho_Ai_Model_Conversation_Message $message */
         foreach ($conversation->messagesCollection() as $message) {

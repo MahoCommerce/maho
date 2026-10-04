@@ -153,15 +153,51 @@ class Maho_Ai_Model_Conversation extends Mage_Core_Model_Abstract
     /**
      * Take the conversation for one chat turn. False when another turn still holds it.
      */
-    /** True while a turn runs: a background job, or a chat request that holds the lock. */
+    /** True while a turn runs: a background job the queue still holds, or a chat request that holds the lock. */
     public function isRunning(): bool
     {
         if ($this->getStatus() === self::STATUS_RUNNING) {
-            return true;
+            return $this->backgroundJobQueued();
         }
         $until = $this->getLockedUntil();
 
         return $until !== null && $until > Mage::app()->getLocale()->formatDateForDb('now');
+    }
+
+    /** The dedupe key of the queue message that runs this conversation as a background job. */
+    public static function backgroundQueueKey(int $conversationId): string
+    {
+        return 'ai_background_' . $conversationId;
+    }
+
+    /** A background job whose queue message is gone can never run: mark it, so the panel stops waiting. */
+    public function reconcileBackgroundJob(): void
+    {
+        if ($this->getStatus() !== self::STATUS_RUNNING || $this->backgroundJobQueued()) {
+            return;
+        }
+        $this->setStatus(self::STATUS_ACTIVE)->save();
+        $this->addMessage([
+            'role' => Maho_Ai_Model_Conversation_Message::ROLE_ASSISTANT,
+            'content' => Mage::helper('ai')->__('The background job was lost before it ran. Ask again.'),
+            'tool_status' => Maho_Ai_Model_Conversation_Message::TOOL_ERROR,
+        ]);
+    }
+
+    private function backgroundJobQueued(): bool
+    {
+        if (!Mage::helper('core')->isModuleEnabled('Maho_Queue')) {
+            return false;
+        }
+        $resource = Mage::getSingleton('core/resource');
+        $connection = $resource->getConnection('core_read');
+        $select = $connection->select()
+            ->from(\Maho\Queue\QueueManager::tableName(), ['message_id'])
+            ->where('dedupe_key = ?', self::backgroundQueueKey((int) $this->getId()))
+            ->where('status IN (?)', [\Maho\Queue\Transport\DbTransport::STATUS_PENDING, \Maho\Queue\Transport\DbTransport::STATUS_PROCESSING])
+            ->limit(1);
+
+        return $connection->fetchOne($select) !== false;
     }
 
     public function acquireLock(int $seconds = self::LOCK_SECONDS): bool

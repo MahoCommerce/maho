@@ -72,8 +72,13 @@ final class BackgroundTaskTool
         $conversation->setStatus(\Maho_Ai_Model_Conversation::STATUS_RUNNING);
         $conversation->setTitle($title !== '' ? $title : mb_substr($instruction, 0, 60));
         $conversation->save();
+        // The instruction is in the history from the start, so a lost queue message loses nothing.
+        $conversation->addMessage(['role' => \Maho_Ai_Model_Conversation_Message::ROLE_USER, 'content' => $instruction]);
 
-        \Maho\Queue\QueueManager::dispatch(new \Maho_Ai_Model_Chat_BackgroundTurn((int) $conversation->getId(), $adminId, $instruction));
+        \Maho\Queue\QueueManager::dispatch(
+            new \Maho_Ai_Model_Chat_BackgroundTurn((int) $conversation->getId(), $adminId, $instruction),
+            dedupeKey: \Maho_Ai_Model_Conversation::backgroundQueueKey((int) $conversation->getId()),
+        );
 
         return ['ok' => true, 'text' => sprintf('The job runs in the background as conversation %d, "%s". Tell the administrator to open it from the conversation list to follow it; do not run the job here as well.', (int) $conversation->getId(), (string) $conversation->getTitle())];
     }
