@@ -74,7 +74,7 @@ final class McpToolCatalog
                 continue;
             }
 
-            $tools[] = new Tool(
+            $tools[] = ToolDefinition::create(
                 new ExecutionReference(McpToolbox::class, 'execute'),
                 $this->alias($name),
                 $this->describe($mcp),

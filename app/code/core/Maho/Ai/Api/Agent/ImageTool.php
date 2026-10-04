@@ -34,7 +34,7 @@ final class ImageTool
 
     public function tool(): Tool
     {
-        return new Tool(
+        return ToolDefinition::create(
             new ExecutionReference(self::class, 'generate'),
             self::NAME,
             'Generate an image from a description and save it in the media library, for a page, a block, a banner or a product. Describe the subject, the style, the mood and the format in one paragraph. The result gives the media directive to put the image into content: <img src="{{media url=\"wysiwyg/ai/name.png\"}}" alt="...">.',

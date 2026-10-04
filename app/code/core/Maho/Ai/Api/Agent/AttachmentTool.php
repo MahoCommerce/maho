@@ -22,7 +22,7 @@ final class AttachmentTool
 
     public function tool(): Tool
     {
-        return new Tool(
+        return ToolDefinition::create(
             new ExecutionReference(self::class, 'read'),
             self::NAME,
             'Read a text, CSV, JSON, XML or Markdown file the administrator attached to a message, by the id the message lists. A long file comes in parts: pass offset to continue. Read a file before you use what it holds; never guess its content from its name.',

@@ -165,7 +165,7 @@ final class McpToolbox implements ToolboxInterface
             $lines[] = sprintf('%s (%s): %s', $section, $state, implode(', ', $names));
         }
 
-        return new Tool(
+        return ToolDefinition::create(
             new ExecutionReference(self::class, 'execute'),
             self::ENABLE_NAME,
             'Load the tools of one or more sections. The store tools are grouped in sections and only the loaded sections are callable. Call this first when the tool you need is not loaded, then continue. Sections and their tools: ' . implode('; ', $lines) . '.',

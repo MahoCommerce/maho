@@ -34,7 +34,7 @@ final class MemoryTool
 
     public function rememberTool(): Tool
     {
-        return new Tool(
+        return ToolDefinition::create(
             new ExecutionReference(self::class, 'remember'),
             self::REMEMBER,
             'Keep a short note about the administrator for every later conversation: a lasting preference or fact they stated, such as the language to answer in, the store view they work on, or a rule for their content. Store it once, in one sentence, and never store a secret, a password or a record value you could read again.',
@@ -50,7 +50,7 @@ final class MemoryTool
 
     public function forgetTool(): Tool
     {
-        return new Tool(
+        return ToolDefinition::create(
             new ExecutionReference(self::class, 'forget'),
             self::FORGET,
             'Drop one of the notes listed in the prompt under what the administrator asked you to remember, by its number, when the administrator asks you to forget it or states the opposite.',
