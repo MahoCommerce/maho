@@ -113,8 +113,8 @@ return [
         'title', 'updatedAt',
     ],
     'ConfigSetting' => [
-        'extensions', 'frontendType', 'groupLabel', 'inherited', 'isSensitive', 'label', 'path',
-        'scope', 'scopeCode', 'sectionLabel', 'value',
+        'comment', 'extensions', 'frontendType', 'groupLabel', 'inherited', 'isSensitive', 'label',
+        'path', 'scope', 'scopeCode', 'sectionLabel', 'value',
     ],
     'ConfigurableSetup' => [
         'childProductIds', 'extensions', 'id', 'superAttributes',

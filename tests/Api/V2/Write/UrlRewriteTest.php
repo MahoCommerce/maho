@@ -219,7 +219,7 @@ describe('System URL rewrites', function (): void {
         if ($systemId === null) {
             $this->markTestSkipped('No system URL rewrite in the test fixture');
         }
-        $token = serviceToken(['url-rewrites/write', 'url-rewrites/delete']);
+        $token = serviceToken(['url-rewrites/read', 'url-rewrites/write', 'url-rewrites/delete']);
 
         $read = apiGet("/api/rest/v2/url-rewrites/{$systemId}", $token);
         expect($read['status'])->toBe(200);
