@@ -41,7 +41,7 @@ final class Maho_Ai_Model_Chat_Attachment
         if ($size <= 0 || $size > self::maxBytes()) {
             Mage::throwException(Mage::helper('ai')->__('A file can be at most %s.', self::humanSize(self::maxBytes())));
         }
-        if (isset(self::IMAGE_EXTENSIONS[$extension]) && @getimagesize($tmpPath) === false) {
+        if (isset(self::IMAGE_EXTENSIONS[$extension]) && @\Maho\Io::getImageSize($tmpPath) === false) {
             Mage::throwException(Mage::helper('ai')->__('The file is not an image.'));
         }
         $id = bin2hex(random_bytes(8));

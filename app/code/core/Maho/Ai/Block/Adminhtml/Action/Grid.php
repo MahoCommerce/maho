@@ -64,14 +64,14 @@ class Maho_Ai_Block_Adminhtml_Action_Grid extends Mage_Adminhtml_Block_Widget_Gr
             'header' => $helper->__('Action'),
             'index' => 'tool_name',
             'filter_index' => 'main_table.tool_name',
-            'frame_callback' => [$this, 'decorateTool'],
+            'frame_callback' => $this->decorateTool(...),
             'width' => '200px',
         ]);
         $this->addColumn('tool_arguments', [
             'header' => $helper->__('Arguments'),
             'index' => 'tool_arguments',
             'filter_index' => 'main_table.tool_arguments',
-            'frame_callback' => [$this, 'decorateArguments'],
+            'frame_callback' => $this->decorateArguments(...),
         ]);
         $this->addColumn('tool_status', [
             'header' => $helper->__('Status'),
@@ -91,7 +91,7 @@ class Maho_Ai_Block_Adminhtml_Action_Grid extends Mage_Adminhtml_Block_Widget_Gr
             'index' => 'undo_arguments',
             'filter' => false,
             'sortable' => false,
-            'frame_callback' => [$this, 'decorateUndo'],
+            'frame_callback' => $this->decorateUndo(...),
             'width' => '90px',
         ]);
         $this->addColumn('conversation_title', [
