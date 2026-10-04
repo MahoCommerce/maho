@@ -72,8 +72,7 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
         $skeletonId = $this->defaultSetId();
         if (array_key_exists('skeletonId', $body) && $body['skeletonId'] !== null) {
             $skeletonId = $this->readInteger($body['skeletonId']) ?? 0;
-            $skeleton = \Mage::getModel('eav/entity_attribute_set')->load($skeletonId);
-            if (!$skeleton->getId() || (int) $skeleton->getEntityTypeId() !== $entityTypeId) {
+            if ($this->setEntityTypeId($skeletonId) !== $entityTypeId) {
                 $this->addError('skeletonId', 'skeletonId must be the ID of a product attribute set');
             }
         }
@@ -271,7 +270,8 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
                 $this->addError('groupId', 'groupId must be a positive integer');
                 return 0;
             }
-            $collection->addFieldToFilter('attribute_group_id', $groupId);
+            // An integer literal: PostgreSQL refuses a quoted value above the range of the SMALLINT column
+            $collection->getSelect()->where('main_table.attribute_group_id = ' . $groupId);
             if (!$collection->getSize()) {
                 $this->addError('groupId', "No group of this attribute set has the ID {$groupId}");
             }
@@ -392,6 +392,22 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
     private function addError(string $field, string $message): void
     {
         $this->errors[] = ['field' => $field, 'message' => $message];
+    }
+
+    /**
+     * Compare the ID as an integer literal: PostgreSQL refuses a quoted value above the range of the SMALLINT column.
+     */
+    private function setEntityTypeId(int $setId): ?int
+    {
+        $resource = \Mage::getSingleton('core/resource');
+        $adapter = $resource->getConnection('core_read');
+        $value = $adapter->fetchOne(
+            $adapter->select()
+                ->from($resource->getTableName('eav/attribute_set'), ['entity_type_id'])
+                ->where('attribute_set_id = ' . $setId),
+        );
+
+        return $value === false || $value === null ? null : (int) $value;
     }
 
     private static function duplicateName(string $message): ValidationException
