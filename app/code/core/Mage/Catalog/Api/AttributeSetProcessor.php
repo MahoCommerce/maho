@@ -151,7 +151,7 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
         $group = \Mage::getModel('eav/entity_attribute_group');
         $group->setAttributeSetId($id)->setAttributeGroupName($name)->setSortOrder($sortOrder);
         if ($group->itemExists()) {
-            throw new ValidationException("A group named '{$name}' already exists in this attribute set", 'name', 'Duplicate');
+            throw self::duplicateName("A group named '{$name}' already exists in this attribute set");
         }
 
         $oldData = $set->getData();
@@ -334,7 +334,7 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
         try {
             $set->validate();
         } catch (\Mage_Core_Exception $e) {
-            throw new ValidationException($e->getMessage(), 'name', 'Duplicate');
+            throw self::duplicateName($e->getMessage());
         }
     }
 
@@ -392,6 +392,11 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
     private function addError(string $field, string $message): void
     {
         $this->errors[] = ['field' => $field, 'message' => $message];
+    }
+
+    private static function duplicateName(string $message): ValidationException
+    {
+        return new ValidationException($message, 'name', 'Duplicate', ['errors' => [['field' => 'name', 'message' => $message]]]);
     }
 
     private function throwErrors(): void
