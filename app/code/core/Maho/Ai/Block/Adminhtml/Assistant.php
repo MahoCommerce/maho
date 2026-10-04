@@ -30,6 +30,8 @@ class Maho_Ai_Block_Adminhtml_Assistant extends Mage_Adminhtml_Block_Template
         'system_email_template' => ['email template', 'id', 'core/email_template', 'template_code'],
     ];
 
+    private const LOGO_PATH = 'M1075.34-395.845c5.796 0 10.492 4.654 10.492 10.392v109.133c0 64.867-53.088 117.45-118.571 117.45H854.981c-5.796 0-10.496-4.654-10.496-10.396v-115.717c0-61.225 50.113-110.863 111.929-110.863h118.925zm-111.229 40.954c-42.454 0-76.871 34.088-76.871 76.142s34.417 76.138 76.871 76.138 76.871-34.088 76.871-76.138-34.417-76.142-76.871-76.142z';
+
     #[\Override]
     protected function _toHtml(): string
     {
@@ -38,6 +40,12 @@ class Maho_Ai_Block_Adminhtml_Assistant extends Mage_Adminhtml_Block_Template
         }
 
         return parent::_toHtml();
+    }
+
+    /** The Maho symbol, in the current text color. */
+    public function getLogoSvg(): string
+    {
+        return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="844 -397 242 238" fill="currentColor" fill-rule="evenodd" aria-hidden="true"><path d="' . self::LOGO_PATH . '"/></svg>';
     }
 
     public function isAvailable(): bool
@@ -69,7 +77,9 @@ class Maho_Ai_Block_Adminhtml_Assistant extends Mage_Adminhtml_Block_Template
             'attachIcon' => $this->getIconSvg('paperclip'),
             'removeUploadUrl' => $apiBase . '/api/admin/ai/chat/upload/remove',
             'cssUrl' => $this->getVersionedSkinUrl('ai-chat.css'),
-            'introIcon' => $this->getIconSvg('sparkles'),
+            'logo' => $this->getLogoSvg(),
+            'sendIcon' => $this->getIconSvg('arrow-up'),
+            'stopIcon' => $this->getIconSvg('player-stop', 'filled'),
             'editorUrl' => $this->getVersionedJsUrl('mage/adminhtml/wysiwyg/tiptap/setup.js'),
             'needsEditorGuide' => $helper->editorGuide() === '',
             'adminName' => (string) Mage::getSingleton('admin/session')->getUser()?->getFirstname(),
@@ -119,6 +129,8 @@ class Maho_Ai_Block_Adminhtml_Assistant extends Mage_Adminhtml_Block_Template
                 'failed' => $helper->__('Failed'),
                 'running' => $helper->__('Running'),
                 'thinking' => $helper->__('Thinking'),
+                'send' => $helper->__('Send'),
+                'stop' => $helper->__('Stop'),
                 'openPage' => $helper->__('Open admin page'),
                 'fillForm' => $helper->__('Fill admin form'),
                 'loadTools' => $helper->__('Load tools'),

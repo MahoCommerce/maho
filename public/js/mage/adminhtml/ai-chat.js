@@ -51,23 +51,34 @@ class MahoAiAssistant {
                 });
             }
         };
-        chat.textInput = { placeholder: { text: this.labels.placeholder }, styles: { container: { width: 'calc(100% - 24px)', maxWidth: 'none' }, text: { paddingLeft: '32px' } } };
+        chat.textInput = { placeholder: { text: this.labels.placeholder, style: { color: 'var(--maho-control-placeholder)' } } };
         chat.customButtons = [{
             position: 'inside-start',
             tooltip: { text: this.labels.attach },
-            styles: { button: { default: {
-                container: { default: { marginLeft: '6px', marginRight: '2px' } },
-                svg: { content: this.config.attachIcon, styles: { default: { width: '18px', height: '18px', color: 'var(--maho-ink-muted, #666)' } } },
-            } } },
+            styles: { button: { default: { svg: { content: this.config.attachIcon } } } },
             onClick: () => this.fileInput.click(),
         }];
+        // The panel stylesheet gives the button its shape; each state only names its colors and icon.
+        const button = (icon, background, color) => ({
+            container: { default: { backgroundColor: background, color } },
+            svg: { content: icon },
+        });
+        chat.submitButtonStyles = {
+            position: 'inside-end',
+            tooltip: { text: this.labels.send },
+            submit: button(this.config.sendIcon, 'var(--maho-btn-bg)', 'var(--maho-btn-ink)'),
+            loading: button(this.config.sendIcon, 'var(--maho-surface-sunken)', 'var(--maho-ink-faint)'),
+            stop: button(this.config.stopIcon, 'var(--maho-btn-bg)', 'var(--maho-btn-ink)'),
+            disabled: button(this.config.sendIcon, 'var(--maho-surface-sunken)', 'var(--maho-ink-faint)'),
+        };
         chat.introMessage = { html: this.renderIntro() };
         chat.messageStyles = {
             default: {
-                ai: { bubble: { maxWidth: '94%', padding: '.6em .8em' } },
-                user: { bubble: { maxWidth: '85%' } },
+                ai: { bubble: { maxWidth: '100%', padding: '0', backgroundColor: 'transparent', color: 'inherit' } },
+                user: { bubble: { maxWidth: '85%', padding: '.55em .85em', backgroundColor: 'var(--ai-chat-user-bg)', color: 'var(--ai-chat-user-ink)' } },
             },
             html: { shared: { bubble: { backgroundColor: 'transparent', padding: '0', maxWidth: '100%', width: '100%' } } },
+            loading: { message: { html: this.renderWorking(this.labels.thinking), styles: { bubble: { backgroundColor: 'transparent', padding: '0' } } } },
         };
         chat.htmlClassUtilities = {
             'ai-chat-approve': { events: { click: (event) => this.onApprove(event) } },
@@ -159,6 +170,13 @@ class MahoAiAssistant {
         } catch (e) {
             // ignore
         }
+        // A new conversation is in the list only after its first turn: until then its question names it.
+        if (id && ![...this.picker.options].some((o) => o.value === String(id))) {
+            const option = document.createElement('option');
+            option.value = String(id);
+            option.textContent = this.pendingTitle || this.labels.untitled;
+            this.picker.appendChild(option);
+        }
         if (this.picker.value !== String(id ?? '')) {
             this.picker.value = id ? String(id) : '';
         }
@@ -238,7 +256,7 @@ class MahoAiAssistant {
                 this.pendingCard = { index: history.length - 1, calls: pending };
             }
             if (data.conversation.running) {
-                history.push({ role: 'ai', html: `<div class="ai-chat-running">${this.escape(this.labels.running)}…</div>` });
+                history.push({ role: 'ai', html: this.renderWorking(this.labels.running) });
             }
             this.chat.history = history;
             setTimeout(() => this.updateIntro(history.length > 0), 100);
@@ -393,6 +411,7 @@ class MahoAiAssistant {
      */
     async handleSubmit(body, signals) {
         const text = body.messages?.at(-1)?.text ?? '';
+        this.pendingTitle = text;
         signals.onOpen();
         this.abortController = new AbortController();
         signals.stopClicked.listener = () => this.stop();
@@ -629,7 +648,7 @@ class MahoAiAssistant {
         if (state.thinkingIndex !== null) {
             return;
         }
-        this.chat.addMessage({ html: `<div class="ai-chat-thinking">${this.escape(this.labels.thinking)}</div>`, role: 'ai' });
+        this.chat.addMessage({ html: this.renderWorking(this.labels.thinking), role: 'ai' });
         state.thinkingIndex = this.lastIndex();
         setTimeout(() => this.chat.scrollToBottom(), 50);
     }
@@ -1001,12 +1020,17 @@ class MahoAiAssistant {
             .map((text) => `<button type="button" class="ai-chat-example" data-text="${this.escape(text)}">${this.escape(text)}</button>`)
             .join('');
         return `<div class="ai-chat-intro">`
-            + `<div class="ai-chat-intro-icon">${this.config.introIcon ?? ''}</div>`
+            + `<div class="ai-chat-intro-icon">${this.config.logo ?? ''}</div>`
             + `<h3 class="ai-chat-intro-title">${greeting}</h3>`
             + `<p class="ai-chat-intro-text">${this.escape(this.labels.intro)}</p>`
             + (examples ? `<p class="ai-chat-intro-label">${this.escape(this.labels.introExamples)}</p><div class="ai-chat-intro-examples">${examples}</div>` : '')
             + `<p class="ai-chat-intro-hint">${this.escape(this.labels.introHint.replace('%s', this.shortcutLabel()))}</p>`
             + `</div>`;
+    }
+
+    /** Three pulsing dots and a label: the model is working on the turn. */
+    renderWorking(label) {
+        return `<div class="ai-chat-working" role="status"><span class="ai-chat-dots"><i></i><i></i><i></i></span>${this.escape(label)}</div>`;
     }
 
     // --- cards ---------------------------------------------------------------------
@@ -1025,11 +1049,13 @@ class MahoAiAssistant {
         const args = this.renderArguments(call.arguments);
         const preview = result.preview ? `<pre class="ai-chat-step-preview">${this.escape(this.prettyPreview(result.preview))}</pre>` : '';
         const undo = result.undo ? `<button type="button" class="ai-chat-undo" data-message="${this.escape(String(result.undo))}">${this.escape(this.labels.undo)}</button>` : '';
-        return `<details class="ai-chat-step ai-chat-step-${this.escape(status)}">`
-            + `<summary><span class="ai-chat-step-status">${this.escape(labels[status] ?? status)}</span>`
+        const label = this.escape(labels[status] ?? status);
+        return `<details class="ai-chat-step ai-chat-step-${this.escape(status)}${args || preview ? '' : ' ai-chat-step-plain'}">`
+            + `<summary><span class="ai-chat-step-status" role="img" title="${label}" aria-label="${label}"></span>`
             + `<span class="ai-chat-step-title">${this.escape(title)}</span>`
             + (call.destructive ? `<span class="ai-chat-badge">${this.escape(this.labels.destructive)}</span>` : '')
             + undo
+            + (args || preview ? '<span class="ai-chat-step-chevron" aria-hidden="true"></span>' : '')
             + `</summary>`
             + args
             + preview
