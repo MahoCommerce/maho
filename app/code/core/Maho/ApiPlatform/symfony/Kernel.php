@@ -19,6 +19,9 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 
@@ -30,10 +33,32 @@ class Kernel extends BaseKernel
 
     private bool $moduleAutoloaderRegistered = false;
 
+    private static int $activeRequests = 0;
+
     public function __construct(string $environment = 'prod', bool $debug = false)
     {
         $this->resolveEnvironmentVars();
         parent::__construct($environment, $debug);
+    }
+
+    /**
+     * Tell if a kernel in this process handles a request now. Its compiled container then
+     * still loads service files from var/cache/api_platform.
+     */
+    public static function isHandlingRequest(): bool
+    {
+        return self::$activeRequests > 0;
+    }
+
+    #[\Override]
+    public function handle(Request $request, int $type = HttpKernelInterface::MAIN_REQUEST, bool $catch = true): Response
+    {
+        self::$activeRequests++;
+        try {
+            return parent::handle($request, $type, $catch);
+        } finally {
+            self::$activeRequests--;
+        }
     }
 
     /**
