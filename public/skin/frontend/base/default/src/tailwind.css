@@ -23,6 +23,7 @@
 /* Frontend JavaScript that builds markup. The admin area never uses this theme. */
 @source "../../../../../../public/js/**/*.js";
 @source not "../../../../../../public/js/mage/adminhtml/**/*.js";
+@source not "../../../../../../public/js/deep-chat.js";
 @source "../../../../../../public/skin/frontend/*/*/js/**/*.js";
 
 /* CMS pages, static blocks and widgets live in the database and cannot be scanned
