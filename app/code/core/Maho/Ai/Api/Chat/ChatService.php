@@ -350,6 +350,15 @@ final class ChatService
     /** Run the agent once and forward its progress as SSE events. */
     private function stream(Agent $agent, MessageBag $bag, Maho_Ai_Model_Chat_SseWriter $sse, string &$roundText): Execution
     {
+        // With ai/general/log_requests on, one line per model request tells how the provider
+        // streamed it: a repeated answer or a repeated tool call then points at the provider.
+        $trace = \Mage::getStoreConfigFlag('ai/general/log_requests');
+        $round = ['deltas' => 0, 'chars' => 0, 'tools' => 0];
+        $logRound = static function (array $round) use ($agent): void {
+            if ($round['deltas'] + $round['tools'] > 0) {
+                \Mage::log(sprintf('chat model=%s deltas=%d chars=%d tool_calls=%d', $agent->getModel(), $round['deltas'], $round['chars'], $round['tools']), \Mage::LOG_INFO, 'ai.log');
+            }
+        };
         $execution = $agent->call($bag, ['stream' => true]);
         foreach ($execution as $update) {
             if (!$update instanceof Progress) {
@@ -359,15 +368,22 @@ final class ChatService
             switch ($update->getStage()) {
                 case 'model_request':
                     $roundText = '';
+                    if ($trace) {
+                        $logRound($round);
+                    }
+                    $round = ['deltas' => 0, 'chars' => 0, 'tools' => 0];
                     break;
                 case 'delta':
                     if ($payload instanceof TextDelta && $payload->getText() !== '') {
                         $roundText .= $payload->getText();
+                        $round['deltas']++;
+                        $round['chars'] += mb_strlen($payload->getText());
                         $sse->event('delta', ['text' => $payload->getText()]);
                     }
                     break;
                 case 'tool_call':
                     if ($payload instanceof ToolCall) {
+                        $round['tools']++;
                         $sse->event('tool_call', $this->describeCall($payload->getId(), $payload->getName(), $payload->getArguments()));
                     }
                     break;
@@ -386,6 +402,9 @@ final class ChatService
                     }
                     break;
             }
+        }
+        if ($trace) {
+            $logRound($round);
         }
 
         return $execution;

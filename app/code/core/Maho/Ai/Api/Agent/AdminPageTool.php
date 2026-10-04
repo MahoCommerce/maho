@@ -375,11 +375,16 @@ final class AdminPageTool
         $controller = $parts[1] ?? 'index';
         $frontName = RouteCollectionBuilder::getFrontNameByRoute($routeName) ?? $routeName;
         $route = RouteCollectionBuilder::resolveRoute($frontName, $controller, $action);
-        if ($route === null) {
-            return null;
+        $class = $route['class'] ?? null;
+        if ($class === null) {
+            // An action inherited from a base controller has no compiled route, but the dispatcher serves it.
+            $class = RouteCollectionBuilder::lookupCompiledControllerClass($frontName, $controller);
+            if ($class === null || !method_exists($class, $action . 'Action')) {
+                return null;
+            }
         }
 
-        return ['route' => $routeName . '/' . $controller . '/' . $action, 'class' => $route['class']];
+        return ['route' => $routeName . '/' . $controller . '/' . $action, 'class' => $class];
     }
 
     /**

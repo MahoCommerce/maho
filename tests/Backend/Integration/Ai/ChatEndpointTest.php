@@ -672,6 +672,26 @@ it('ends the turn on Stop and leaves a note that the history shows', function ()
     }
 });
 
+it('opens the record page of an action the controller inherits without a route attribute', function (): void {
+    $admin = aiChatAdmin('ai_chat_invoice_page', ['all']);
+    try {
+        aiChatLogin($admin);
+        AiChatScript::reset(
+            new ToolCallResult([new ToolCall('call_1', 'admin_open_page', ['page' => 'sales/invoice', 'record_id' => '274'])]),
+            new TextResult('Opening the invoice.'),
+        );
+        $result = aiChatRequest('/api/admin/ai/chat', ['message' => 'open the invoice']);
+        expect($result['status'])->toBe(200);
+        expect(aiChatEvents($result['events'], 'tool_result')[0]['ok'])->toBeTrue($result['raw']);
+        $navigate = aiChatEvents($result['events'], 'navigate');
+        expect($navigate)->toHaveCount(1);
+        expect($navigate[0]['url'])->toContain('/sales_invoice/view/invoice_id/274/');
+    } finally {
+        aiChatDeleteConversations((int) $admin->getId());
+        aiChatDeleteAdmin($admin);
+    }
+});
+
 it('leaves the Stop note when Stop lands during a tool round', function (string $event): void {
     $admin = aiChatAdmin('ai_chat_stop_round', ['all']);
     try {

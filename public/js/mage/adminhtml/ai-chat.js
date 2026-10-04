@@ -121,11 +121,13 @@ class MahoAiAssistant {
         } catch (e) {
             // storage can be unavailable; the panel starts closed
         }
+        // The greeting would show for a moment before the stored conversation replaces it.
+        this.panel.classList.toggle('is-restoring', conversationId > 0);
         this.loadConversations().then(() => {
             if (conversationId > 0 && [...this.picker.options].some((o) => parseInt(o.value, 10) === conversationId)) {
-                this.loadConversation(conversationId);
+                return this.loadConversation(conversationId);
             }
-        });
+        }).finally(() => this.panel.classList.remove('is-restoring'));
         if (open) {
             this.setOpen(true);
         }

@@ -57,6 +57,10 @@ body.ai-chat-open .ai-chat-toggle {
     font-family: var(--maho-font-sans);
 }
 
+.ai-chat-panel.is-restoring #ai-chat {
+    visibility: hidden;
+}
+
 .ai-chat-panel[hidden] {
     display: none;
 }
