@@ -43,6 +43,12 @@ final class EmailTemplateProcessor extends CrudProcessor
         if (!$isNew && $data->templateText !== null && trim($data->templateText) === '') {
             throw ValidationException::invalidValue('templateText', 'must not be empty');
         }
+        if ($isNew && ($data->templateSubject === null || trim($data->templateSubject) === '')) {
+            throw ValidationException::requiredField('templateSubject');
+        }
+        if (!$isNew && $data->templateSubject !== null && trim($data->templateSubject) === '') {
+            throw ValidationException::invalidValue('templateSubject', 'must not be empty');
+        }
 
         if ($data->templateType !== null
             && !in_array($data->templateType, [EmailTemplate::TYPE_TEXT, EmailTemplate::TYPE_HTML], true)

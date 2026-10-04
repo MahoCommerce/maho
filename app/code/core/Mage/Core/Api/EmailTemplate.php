@@ -62,7 +62,7 @@ use Maho\Config\ApiResource;
             uriTemplate: '/email-templates',
             processor: EmailTemplateProcessor::class,
             security: "is_granted('ROLE_ADMIN') or is_granted('email-templates/write')",
-            description: 'Create an email template. templateCode must be unique and templateText is required. templateType defaults to html.',
+            description: 'Create an email template. templateCode must be unique, and templateText and templateSubject are required. templateType defaults to html.',
         ),
         new Put(
             uriTemplate: '/email-templates/{id}',

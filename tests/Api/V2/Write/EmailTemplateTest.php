@@ -151,12 +151,13 @@ describe('Email template CRUD lifecycle', function (): void {
         expect(apiGet("/api/rest/v2/email-templates/{$id}", adminToken())['status'])->toBeNotFound();
     });
 
-    it('rejects a duplicate template code and missing text', function (): void {
+    it('rejects a duplicate template code, missing text and a missing subject', function (): void {
         $token = adminToken();
         $code = 'Pest dup ' . substr(uniqid(), -6);
 
         $create = apiPost('/api/rest/v2/email-templates', [
             'templateCode' => $code,
+            'templateSubject' => 'Pest subject',
             'templateText' => 'plain body',
             'templateType' => 'text',
         ], $token);
@@ -175,6 +176,13 @@ describe('Email template CRUD lifecycle', function (): void {
                 'templateCode' => $code . ' b',
             ], $token);
             expect($noText['status'])->toBe(400);
+
+            $noSubject = apiPost('/api/rest/v2/email-templates', [
+                'templateCode' => $code . ' d',
+                'templateText' => 'x',
+            ], $token);
+            expect($noSubject['status'])->toBe(400);
+            expect($noSubject['json']['details']['field'] ?? null)->toBe('templateSubject');
 
             $badType = apiPost('/api/rest/v2/email-templates', [
                 'templateCode' => $code . ' c',
