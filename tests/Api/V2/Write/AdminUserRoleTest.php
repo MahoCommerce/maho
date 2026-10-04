@@ -59,7 +59,7 @@ describe('Admin users', function (): void {
 
     it('lists and reads users with their role and never exposes credentials', function (): void {
         $username = 'pest_ausr_' . substr(uniqid(), -6);
-        $aclToken = adminTokenWithAcl(['system/acl/users', 'system/acl/roles'], $username);
+        $aclToken = adminTokenWithAcl(['admin/system/acl/users', 'admin/system/acl/roles'], $username);
 
         $list = apiGet(AUSR_PATH . '?search=' . $username, $aclToken);
         expect($list['status'])->toBe(200);
@@ -94,7 +94,7 @@ describe('Admin roles', function (): void {
 
     it('lists group roles with their resources and user count', function (): void {
         $username = 'pest_arol_' . substr(uniqid(), -6);
-        adminTokenWithAcl(['catalog/products', 'system/acl/roles'], $username);
+        adminTokenWithAcl(['admin/catalog/products', 'admin/system/acl/roles'], $username);
         $token = serviceToken(['admin-roles/read']);
 
         $list = apiGet(AROL_PATH . '?search=' . $username, $token);

@@ -67,7 +67,10 @@ final class AdminRoleProvider extends CrudProvider
             ->where('permission = ?', \Mage_Admin_Model_Rules::RULE_PERMISSION_ALLOWED)
             ->order('resource_id ASC');
         $allowed = array_map(strval(...), $adapter->fetchCol($select));
-        $dto->resources = in_array('all', $allowed, true) ? ['all'] : $allowed;
+        $dto->resources = in_array('all', $allowed, true) ? ['all'] : array_values(array_filter(array_map(
+            static fn(string $id): ?string => str_starts_with($id, 'admin/') ? substr($id, 6) : null,
+            $allowed,
+        )));
 
         $select = $adapter->select()
             ->from($resource->getTableName('admin/role'), ['count' => new \Maho\Db\Expr('COUNT(*)')])
