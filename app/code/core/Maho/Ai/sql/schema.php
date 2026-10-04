@@ -100,7 +100,11 @@ return function (Schema $schema): void {
     $memory->addColumn('admin_user_id', Types::INTEGER, ['unsigned' => true]);
     $memory->addColumn('note', Types::STRING, ['length' => 255]);
     $memory->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
+    $memory->addPrimaryKeyConstraint(
+        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('memory_id')->create(),
+    );
     $memory->addIndex(['admin_user_id']);
+    $memory->setComment('Maho AI Assistant Memory');
 
     $conversation = $schema->createTable('ai_conversation');
     $conversation->addColumn('conversation_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
