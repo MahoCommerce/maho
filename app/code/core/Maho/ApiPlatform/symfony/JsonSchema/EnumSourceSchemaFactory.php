@@ -28,14 +28,18 @@ use Maho\ApiPlatform\Metadata\EnumSource;
 final class EnumSourceSchemaFactory implements SchemaFactoryInterface, SchemaFactoryAwareInterface
 {
     /**
-     * The OpenAPI factory passes one Schema to every build, so each definition is visited once.
+     * The OpenAPI factory shares one definitions list between the schemas of all operations and
+     * only appends to it. Each build visits the definitions after the position where the last
+     * build stopped, and the pending ones whose class was not known yet.
      *
-     * @var \WeakMap<Schema, array<string, true>>
+     * @var \WeakMap<object, array{position: int, pending: array<string, true>}>
      */
     private \WeakMap $visited;
 
     /** @var array<string, list<int|string>|null> */
     private array $enums = [];
+
+    private int $depth = 0;
 
     public function __construct(
         private readonly SchemaFactoryInterface $decorated,
@@ -47,41 +51,97 @@ final class EnumSourceSchemaFactory implements SchemaFactoryInterface, SchemaFac
     #[\Override]
     public function buildSchema(string $className, string $format = 'json', string $type = Schema::TYPE_OUTPUT, ?Operation $operation = null, ?Schema $schema = null, ?array $serializerContext = null, bool $forceCollection = false): Schema
     {
-        $schema = $this->decorated->buildSchema($className, $format, $type, $operation, $schema, $serializerContext, $forceCollection);
+        if (!in_array($className, self::$knownClasses, true)) {
+            self::$knownClasses[] = $className;
+        }
+        $this->depth++;
+        try {
+            $schema = $this->decorated->buildSchema($className, $format, $type, $operation, $schema, $serializerContext, $forceCollection);
+        } finally {
+            $this->depth--;
+        }
+        // A nested build returns while the definitions of the outer build are still incomplete
+        if ($this->depth > 0) {
+            return $schema;
+        }
 
         $definitions = $schema->getDefinitions();
-        $visited = $this->visited[$schema] ?? [];
-        foreach ($definitions as $name => $definition) {
-            $name = (string) $name;
-            if (isset($visited[$name])) {
-                continue;
-            }
-            $visited[$name] = true;
+        $state = $this->visited[$definitions] ?? ['position' => 0, 'pending' => []];
+        $names = array_keys($state['pending']);
+        foreach ($this->namesFrom($definitions, $state['position']) as $name) {
+            $names[] = $name;
+        }
+        $state['position'] = count($definitions);
+        $state['pending'] = [];
+        foreach ($names as $name) {
+            $definition = $definitions[$name];
             if (!is_array($definition) && !$definition instanceof \ArrayObject) {
                 continue;
             }
-            $properties = $definition['properties'] ?? null;
-            if ($properties === null) {
+            // A JSON-LD definition keeps its properties in an allOf entry
+            $allOf = $definition['allOf'] ?? [];
+            if (!isset($definition['properties']) && $allOf === []) {
                 continue;
             }
             $class = $this->definitionClass($name, $className, $schema);
             if ($class === null) {
+                $state['pending'][$name] = true;
                 continue;
             }
-            foreach ($properties as $property => $propertySchema) {
-                $values = $this->enumFor($class, (string) $property);
-                if ($values === null) {
-                    continue;
-                }
-                $propertySchema = $propertySchema instanceof \ArrayObject ? $propertySchema->getArrayCopy() : (array) $propertySchema;
-                $properties[$property] = $this->withEnum($propertySchema, $values);
+            if (isset($definition['properties'])) {
+                $definition['properties'] = $this->withEnums($class, $definition['properties']);
             }
-            $definition['properties'] = $properties;
+            foreach ($allOf as $index => $part) {
+                if ((is_array($part) || $part instanceof \ArrayObject) && isset($part['properties'])) {
+                    $part['properties'] = $this->withEnums($class, $part['properties']);
+                    $allOf[$index] = $part;
+                }
+            }
+            if ($allOf !== []) {
+                $definition['allOf'] = $allOf;
+            }
             $definitions[$name] = $definition;
         }
-        $this->visited[$schema] = $visited;
+        $this->visited[$definitions] = $state;
 
         return $schema;
+    }
+
+    /**
+     * @param \ArrayObject<array-key, mixed> $definitions
+     * @return list<string>
+     */
+    private function namesFrom(\ArrayObject $definitions, int $start): array
+    {
+        if ($start >= count($definitions)) {
+            return [];
+        }
+        $iterator = $definitions->getIterator();
+        $iterator->seek($start);
+        $names = [];
+        for (; $iterator->valid(); $iterator->next()) {
+            $names[] = (string) $iterator->key();
+        }
+
+        return $names;
+    }
+
+    /**
+     * @param array<string, mixed>|\ArrayObject<string, mixed> $properties
+     * @return array<string, mixed>|\ArrayObject<string, mixed>
+     */
+    private function withEnums(string $class, array|\ArrayObject $properties): array|\ArrayObject
+    {
+        foreach ($properties as $property => $propertySchema) {
+            $values = $this->enumFor($class, (string) $property);
+            if ($values === null) {
+                continue;
+            }
+            $propertySchema = $propertySchema instanceof \ArrayObject ? $propertySchema->getArrayCopy() : (array) $propertySchema;
+            $properties[$property] = $this->withEnum($propertySchema, $values);
+        }
+
+        return $properties;
     }
 
     /**
