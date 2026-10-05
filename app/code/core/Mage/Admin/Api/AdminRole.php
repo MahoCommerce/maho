@@ -15,6 +15,8 @@ namespace Mage\Admin\Api;
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\GraphQl\Query;
+use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use Maho\ApiPlatform\CrudResource;
 use Maho\Config\ApiResource;
 
@@ -38,7 +40,21 @@ use Maho\Config\ApiResource;
             description: 'List admin roles. Filter: search (partial match on the role name)',
         ),
     ],
-    graphQlOperations: [],
+    graphQlOperations: [
+        new Query(
+            name: 'item_query',
+            description: 'Get an admin role by ID',
+            security: "is_granted('ROLE_ADMIN') or is_granted('admin-roles/read')",
+        ),
+        new QueryCollection(
+            name: 'collection_query',
+            description: 'Get admin roles',
+            security: "is_granted('ROLE_ADMIN') or is_granted('admin-roles/read')",
+            extraArgs: [
+                'search' => ['type' => 'String', 'description' => 'Partial match on the role name'],
+            ],
+        ),
+    ],
 )]
 class AdminRole extends CrudResource
 {

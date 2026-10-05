@@ -87,10 +87,9 @@ final class IndexProcessProcessor extends \Maho\ApiPlatform\Processor
     private function reindexAll(ApiUser $user): JsonResponse
     {
         // The queue holds each index once, with its dependencies first, so no index runs twice.
-        $processes = \Mage::getModel('index/runner')->buildQueue(array_map(
-            static fn(\Mage_Index_Model_Process $process): int => (int) $process->getId(),
-            $this->provider->processes(),
-        ));
+        // A new indexer gives processes without the flag of an earlier run in this worker.
+        \Mage::unregister('_singleton/index/indexer');
+        $processes = \Mage::getModel('index/runner')->buildQueue();
         foreach ($processes as $process) {
             $this->reindex($process, $user);
         }

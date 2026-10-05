@@ -15,6 +15,8 @@ namespace Mage\Admin\Api;
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\GraphQl\Query;
+use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use Maho\ApiPlatform\CrudResource;
 use Maho\Config\ApiResource;
 
@@ -38,7 +40,22 @@ use Maho\Config\ApiResource;
             description: 'List admin users. Filters: search (partial match on the username, first name, last name or email), isActive',
         ),
     ],
-    graphQlOperations: [],
+    graphQlOperations: [
+        new Query(
+            name: 'item_query',
+            description: 'Get an admin user by ID',
+            security: "is_granted('ROLE_ADMIN') or is_granted('admin-users/read')",
+        ),
+        new QueryCollection(
+            name: 'collection_query',
+            description: 'Get admin users',
+            security: "is_granted('ROLE_ADMIN') or is_granted('admin-users/read')",
+            extraArgs: [
+                'search' => ['type' => 'String', 'description' => 'Partial match on the username, first name, last name or email'],
+                'isActive' => ['type' => 'Boolean', 'description' => 'Only active (true) or inactive (false) users'],
+            ],
+        ),
+    ],
 )]
 class AdminUser extends CrudResource
 {

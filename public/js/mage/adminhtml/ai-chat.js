@@ -45,7 +45,7 @@ class MahoAiAssistant {
                 // deep-chat opens every link in a new tab; an admin page of this store opens here.
                 chat.shadowRoot.addEventListener('click', (event) => {
                     const anchor = event.composedPath().find((node) => node.tagName === 'A' && node.href);
-                    if (anchor?.protocol === 'javascript:') {
+                    if (anchor && ['javascript:', 'data:', 'vbscript:'].includes(anchor.protocol)) {
                         event.preventDefault();
                     } else if (anchor && new URL(anchor.href).origin === window.location.origin) {
                         event.preventDefault();
