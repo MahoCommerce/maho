@@ -64,6 +64,18 @@ class Mage_Directory_Model_Region extends Mage_Core_Model_Abstract
         return $this;
     }
 
+    /**
+     * Load the region of $countryId whose code is $value. If no code matches, load the region whose name is $value.
+     */
+    public function loadByCodeOrName(string $value, string $countryId): static
+    {
+        $this->loadByCode($value, $countryId);
+        if (!$this->getId()) {
+            $this->loadByName($value, $countryId);
+        }
+        return $this;
+    }
+
     public function validate(): array|true
     {
         $errors = [];

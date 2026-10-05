@@ -248,6 +248,7 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
      * Normalize address data types from frontend input
      * - street: string -> array
      * - regionId: string -> int|null
+     * - region code or name -> regionId, when regionId is empty
      */
     private function normalizeAddressData(Address $data): void
     {
@@ -259,6 +260,11 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
         // Normalize regionId to int or null
         if ($data->regionId !== null && !is_int($data->regionId)) {
             $data->regionId = $data->regionId !== '' ? (int) $data->regionId : null;
+        }
+
+        if (!$data->regionId && $data->region) {
+            $regionId = \Mage::getModel('directory/region')->loadByCodeOrName($data->region, $data->countryId)->getId();
+            $data->regionId = $regionId ? (int) $regionId : null;
         }
     }
 

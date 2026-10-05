@@ -894,10 +894,7 @@ class CartService
         $countryId = $input['countryId'] ?? '';
 
         if (!$regionId && $regionText && $countryId !== '') {
-            $region = \Mage::getModel('directory/region')->loadByCode($regionText, $countryId);
-            if (!$region->getId()) {
-                $region = \Mage::getModel('directory/region')->loadByName($regionText, $countryId);
-            }
+            $region = \Mage::getModel('directory/region')->loadByCodeOrName((string) $regionText, (string) $countryId);
             if ($region->getId()) {
                 $regionId = (int) $region->getId();
                 $regionText = $region->getName();
