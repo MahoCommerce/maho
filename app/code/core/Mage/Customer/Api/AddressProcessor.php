@@ -120,11 +120,10 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
      */
     private function createAddress(Address $data, \Mage_Customer_Model_Customer $customer): Address
     {
-        $this->validateAddress($data);
-
         $address = \Mage::getModel('customer/address');
         $address->setCustomerId($customer->getId());
         $this->populateAddressFromDto($address, $data);
+        $this->validateAddress($address);
 
         try {
             $address->save();
@@ -164,8 +163,8 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
             throw new NotFoundHttpException('Address not found');
         }
 
-        $this->validateAddress($data);
         $this->populateAddressFromDto($address, $data);
+        $this->validateAddress($address);
 
         try {
             $address->save();
@@ -263,40 +262,11 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
         }
     }
 
-    /**
-     * Validate address data
-     */
-    private function validateAddress(Address $data): void
+    private function validateAddress(\Mage_Customer_Model_Address $address): void
     {
-        // Normalize data types before validation
-        $this->normalizeAddressData($data);
-
-        $errors = [];
-
-        if (empty($data->firstname)) {
-            $errors[] = 'First name is required';
-        }
-        if (empty($data->lastname)) {
-            $errors[] = 'Last name is required';
-        }
-        if (empty($data->street) || (is_array($data->street) && empty(array_filter($data->street)))) {
-            $errors[] = 'Street address is required';
-        }
-        if (empty($data->city)) {
-            $errors[] = 'City is required';
-        }
-        if (empty($data->postcode) && !\Mage::helper('directory')->isZipCodeOptional((string) $data->countryId)) {
-            $errors[] = 'Postcode is required';
-        }
-        if (empty($data->countryId)) {
-            $errors[] = 'Country is required';
-        }
-        if (empty($data->telephone)) {
-            $errors[] = 'Telephone is required';
-        }
-
-        if (!empty($errors)) {
-            throw new BadRequestHttpException(implode(', ', $errors));
+        $errors = $address->validate();
+        if ($errors !== true) {
+            throw new BadRequestHttpException(implode(' ', $errors));
         }
     }
 
@@ -305,6 +275,7 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
      */
     private function populateAddressFromDto(\Mage_Customer_Model_Address $address, Address $data): void
     {
+        $this->normalizeAddressData($data);
         $address->setFirstname($data->firstname);
         $address->setLastname($data->lastname);
         $address->setCompany($data->company);

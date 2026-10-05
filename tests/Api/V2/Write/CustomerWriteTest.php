@@ -360,7 +360,7 @@ describe('Customer address postcode', function (): void {
         ], customerToken($customerId));
 
         expect($created['status'])->toBe(400);
-        expect($created['json']['message'])->toContain('Postcode is required');
+        expect($created['json']['message'])->toContain('Please enter the zip/postal code.');
     });
 
 });

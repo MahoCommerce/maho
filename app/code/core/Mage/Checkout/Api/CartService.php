@@ -866,21 +866,11 @@ class CartService
      * these fields non-null; the REST bodies carry no schema, so without this a
      * `{}` PUT blanks an already-valid address and only fails at order placement.
      */
-    public function assertCompleteAddressInput(array $input): void
+    public function assertCompleteAddressInput(array $addressData): void
     {
-        $required = ['firstName', 'lastName', 'street', 'city', 'postcode', 'countryId', 'telephone'];
-        if (\Mage::helper('directory')->isZipCodeOptional((string) ($input['countryId'] ?? ''))) {
-            $required = array_values(array_diff($required, ['postcode']));
-        }
-        $missing = [];
-        foreach ($required as $field) {
-            $value = $input[$field] ?? null;
-            if ($value === null || $value === '' || $value === []) {
-                $missing[] = $field;
-            }
-        }
-        if ($missing) {
-            throw new BadRequestHttpException('Missing required address fields: ' . implode(', ', $missing));
+        $errors = \Mage::getModel('sales/quote_address')->addData($addressData)->validate();
+        if ($errors !== true) {
+            throw new BadRequestHttpException(implode(' ', $errors));
         }
     }
 
