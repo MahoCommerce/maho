@@ -71,10 +71,11 @@ class RegionUpdater {
         this.regions = regions;
 
         this.disableAction = (typeof disableAction === 'undefined') ? 'hide' : disableAction;
-        this.zipOptions = (typeof zipOptions === 'undefined') ? false : zipOptions;
 
         if (this.regionSelectEl.options.length <= 1) {
             this.update();
+        } else {
+            setPostcodeFormat(this.zipEl, this.countryEl.value);
         }
 
         this.countryEl.addEventListener('change', this.update.bind(this));
@@ -219,6 +220,7 @@ class ZipUpdater {
     }
 
     update() {
+        setPostcodeFormat(this.zipElement, this.country);
         // Country ISO 2-letter codes must be pre-defined
         if (typeof optionalZipCountries === 'undefined') {
             return false;

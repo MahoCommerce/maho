@@ -17,6 +17,8 @@ class Mage_ImportExport_Model_Export_Entity_Category extends Mage_ImportExport_M
      * to avoid interference with same attribute name.
      */
     public const COL_STORE = '_store';
+    public const COL_ROOT = '_root';
+    public const COL_PATH = '_path';
     public const COL_CATEGORY_ID = 'category_id';
     public const COL_PARENT_ID = 'parent_id';
 
@@ -33,7 +35,7 @@ class Mage_ImportExport_Model_Export_Entity_Category extends Mage_ImportExport_M
      * @var array
      */
     #[\Override]
-    protected $_indexValueAttributes = [];
+    protected $_indexValueAttributes = ['display_mode'];
 
     /**
      * Attribute code to ID mapping for faster lookups.
@@ -48,6 +50,8 @@ class Mage_ImportExport_Model_Export_Entity_Category extends Mage_ImportExport_M
      * @var array
      */
     protected $_categoryAttributeData = [];
+
+    protected Mage_ImportExport_Model_Category_KeyMap $_keyMap;
 
     /**
      * Disabled attributes for export.
@@ -86,8 +90,22 @@ class Mage_ImportExport_Model_Export_Entity_Category extends Mage_ImportExport_M
              ->_initBooleanAttributes()
              ->_initAttrValues();
 
-        $this->_initCategoryParents()
+        $this->_initLandingPageIdentifiers()
+             ->_initCategoryParents()
              ->_initAttributeMapping();
+        $this->_keyMap = new Mage_ImportExport_Model_Category_KeyMap();
+    }
+
+    /**
+     * Write a landing page as the identifier of its CMS block, so the file works on another install.
+     */
+    protected function _initLandingPageIdentifiers(): self
+    {
+        $this->_attributeValues['landing_page'] = [];
+        foreach (Mage::getResourceModel('cms/block_collection') as $block) {
+            $this->_attributeValues['landing_page'][$block->getId()] = $block->getIdentifier();
+        }
+        return $this;
     }
 
     /**
@@ -179,7 +197,7 @@ class Mage_ImportExport_Model_Export_Entity_Category extends Mage_ImportExport_M
         $validAttrCodes = $this->_getExportAttrCodes();
 
         $writer->setHeaderCols(array_merge(
-            [self::COL_CATEGORY_ID, self::COL_PARENT_ID, self::COL_STORE],
+            [self::COL_CATEGORY_ID, self::COL_PARENT_ID, self::COL_STORE, self::COL_ROOT, self::COL_PATH],
             $validAttrCodes,
         ));
 
@@ -228,12 +246,15 @@ class Mage_ImportExport_Model_Export_Entity_Category extends Mage_ImportExport_M
             /** @var Mage_Catalog_Model_Category $category */
             $categoryId = (int) $category->getId();
             $parentId = $this->_categoryParents[$categoryId] ?? $category->getParentId();
+            [$rootName, $path] = $this->_keyMap->getKey($categoryId) ?? ['', ''];
 
             // Export default store data first
             $dataRow = [
                 self::COL_CATEGORY_ID => (string) $categoryId,
                 self::COL_PARENT_ID => (string) $parentId,
                 self::COL_STORE => '',
+                self::COL_ROOT => $rootName,
+                self::COL_PATH => $path,
             ];
 
             // Add attribute values for default store
@@ -262,6 +283,8 @@ class Mage_ImportExport_Model_Export_Entity_Category extends Mage_ImportExport_M
                     self::COL_CATEGORY_ID => (string) $categoryId,
                     self::COL_PARENT_ID => (string) $parentId,
                     self::COL_STORE => $storeCode,
+                    self::COL_ROOT => $rootName,
+                    self::COL_PATH => $path,
                 ];
 
                 $hasStoreSpecificData = false;

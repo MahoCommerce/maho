@@ -288,28 +288,14 @@ describe('DELETE Behavior', function () {
             ->and((int) $defaultCategory->getId())->toBe(2);
     });
 
-    it('requires either category_id or category_path for delete operations', function () {
-        // Try to delete without any identifier
-        $deleteData = [
-            ['_store'],
-            [''], // Empty row with no category_id or category_path
-        ];
+    it('requires either category_id or _root and _path for delete operations', function () {
+        expect(fn() => createAndImportBehaviorCsv([['_store'], ['']], Mage_ImportExport_Model_Import::BEHAVIOR_DELETE))
+            ->toThrow(Mage_Core_Exception::class, 'Can not find required columns');
 
-        createAndImportBehaviorCsv($deleteData, Mage_ImportExport_Model_Import::BEHAVIOR_DELETE);
+        createAndImportBehaviorCsv([['category_id', '_store'], ['', '']], Mage_ImportExport_Model_Import::BEHAVIOR_DELETE);
 
-        // Should have validation error
-        expect($GLOBALS['testImportModelBehavior']->getErrorsCount())->toBeGreaterThan(0);
-
-        // Check for specific error message
-        $errors = $GLOBALS['testImportModelBehavior']->getErrorMessages();
-        $hasIdentifierError = false;
-        foreach ($errors as $errorType => $rows) {
-            if (strpos($errorType, 'category_id or category_path must be provided') !== false) {
-                $hasIdentifierError = true;
-                break;
-            }
-        }
-        expect($hasIdentifierError)->toBeTrue();
+        expect($GLOBALS['testImportModelBehavior']->getErrorMessages())
+            ->toHaveKey('A row to delete needs category_id, or _root and _path');
     });
 });
 
@@ -455,10 +441,11 @@ describe('REPLACE Behavior', function () {
 
         createAndImportBehaviorCsv($replaceData, Mage_ImportExport_Model_Import::BEHAVIOR_REPLACE);
 
-        // Verify replacement
-        expect(findCategoryByUrlKeyBehavior('multi-replace-1'))->toBeNull()
-            ->and(findCategoryByUrlKeyBehavior('multi-replace-2'))->toBeNull()
+        // REPLACE works like APPEND: the categories and their store names stay
+        expect(findCategoryByUrlKeyBehavior('multi-replace-1'))->not->toBeNull()
+            ->and(findCategoryByUrlKeyBehavior('multi-replace-2'))->not->toBeNull()
             ->and(findCategoryByUrlKeyBehavior('multi-replace-new'))->not->toBeNull();
+        expect(Mage::getModel('catalog/category')->setStoreId(1)->load($cat1->getId())->getName())->toBe('German 1');
 
         // Verify multi-store data
         $newCategory = findCategoryByUrlKeyBehavior('multi-replace-new');

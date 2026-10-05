@@ -13,6 +13,7 @@ use Exception;
 use Mage;
 use Mage_Core_Model_Resource;
 use Maho\Db\Adapter\AdapterInterface;
+use Maho\DirectoryData\Paths;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
@@ -25,8 +26,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class SysDirectoryRegionsImport extends BaseMahoCommand
 {
-    private const DATA_BASE_URL = 'https://raw.githubusercontent.com/MahoCommerce/directory-data/main/regions/';
-
     private mixed $logger = null;
 
     private function initLogger(?OutputInterface $output = null, ?callable $loggerCallback = null): void
@@ -123,11 +122,7 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
         }
 
         try {
-            // Fetch region data from GitHub
-            if ($verbose) {
-                $this->log('Fetching region data from GitHub...');
-            }
-            $regionsData = $this->fetchRegionData($countryCode);
+            $regionsData = $this->loadRegionData($countryCode);
 
             if (empty($regionsData)) {
                 $this->log("No regions data found for $countryCode", 'comment');
@@ -311,34 +306,19 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
         ];
     }
 
-    private function fetchRegionData(string $countryCode): array
+    private function loadRegionData(string $countryCode): array
     {
-        try {
-            $url = self::DATA_BASE_URL . $countryCode . '.json';
-            $client = \Maho\Http\Client::create(['timeout' => 30]);
-            $response = $client->request('GET', $url);
-
-            // Check if file exists (404 means no regions for this country)
-            if ($response->getStatusCode() === 404) {
-                return [];
-            }
-
-            $data = $response->getContent();
-            $jsonData = Mage::helper('core')->jsonDecode($data);
-
-            if (!is_array($jsonData)) {
-                throw new Exception('Invalid JSON data received');
-            }
-
-            return $jsonData;
-        } catch (Exception $e) {
-            if (str_contains($e->getMessage(), '404')) {
-                // No regions file for this country - this is normal
-                return [];
-            }
-            $this->log("Failed to fetch region data: {$e->getMessage()}", 'error');
+        $file = Paths::regionsFile($countryCode);
+        if (!is_file($file)) {
             return [];
         }
+
+        $jsonData = Mage::helper('core')->jsonDecode((string) file_get_contents($file));
+        if (!is_array($jsonData)) {
+            throw new Exception("Invalid JSON data in $file");
+        }
+
+        return $jsonData;
     }
 
     private function getLocalizedNamesFromData(array $regionsData, string $mahoLocale, bool $verbose = false): array

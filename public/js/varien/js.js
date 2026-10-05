@@ -162,6 +162,25 @@ function hideLoader() {
     mahoLoaderTimeout = mahoLoaderElement = null;
 }
 
+/**
+ * Set the placeholder and the format check of a postcode input from the postcodeFormats map of postcode_formats.phtml.
+ */
+function setPostcodeFormat(zipElement, countryId) {
+    if (!zipElement || typeof postcodeFormats === 'undefined') {
+        return;
+    }
+    const format = postcodeFormats[countryId];
+    if (format) {
+        zipElement.placeholder = format.example ?? '';
+        zipElement.dataset.postcodePattern = format.pattern;
+        zipElement.classList.add('validate-postcode-format');
+    } else {
+        zipElement.removeAttribute('placeholder');
+        delete zipElement.dataset.postcodePattern;
+        zipElement.classList.remove('validate-postcode-format');
+    }
+}
+
 function popWin(url,win,para) {
     var win = window.open(url,win,para);
     win.focus();

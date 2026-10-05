@@ -124,7 +124,7 @@ class Mage_Customer_AddressController extends Mage_Core_Controller_Front_Action
 
                 $addressErrors = $address->validate();
                 if ($addressErrors !== true) {
-                    $errors = array_merge($errors, $addressErrors);
+                    $errors = array_values(array_unique(array_merge($errors, $addressErrors)));
                 }
 
                 if (count($errors) === 0) {

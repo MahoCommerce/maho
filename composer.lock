@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "bc8dbd73b7c804ede152eca00086d2b9",
+    "content-hash": "d0308e12556b4040baf05499eca856f9",
     "packages": [
         {
             "name": "altcha-org/altcha",
@@ -1864,6 +1864,82 @@
                 }
             ],
             "time": "2026-03-08T20:05:35+00:00"
+        },
+        {
+            "name": "mahocommerce/directory-data",
+            "version": "1.0.20260726",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/MahoCommerce/directory-data.git",
+                "reference": "3cbf7a1b92ddff884f38c6eee6410f1339dfa921"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/MahoCommerce/directory-data/zipball/3cbf7a1b92ddff884f38c6eee6410f1339dfa921",
+                "reference": "3cbf7a1b92ddff884f38c6eee6410f1339dfa921",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.3"
+            },
+            "require-dev": {
+                "ext-intl": "*",
+                "sokil/php-isocodes": "^4.4",
+                "sokil/php-isocodes-db-i18n": "^4.0",
+                "symfony/translation": "^7.4"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Maho\\DirectoryData\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabrizio Balliano",
+                    "homepage": "https://mahocommerce.com"
+                }
+            ],
+            "description": "Multilingual country and region JSON data plus per-country address format metadata (postcode regex, required fields, format templates) for international e-commerce",
+            "keywords": [
+                "address",
+                "address-validation",
+                "countries",
+                "ecommerce",
+                "i18n",
+                "iso",
+                "libaddressinput",
+                "localization",
+                "maho",
+                "mahocommerce",
+                "multilingual",
+                "postcode",
+                "regions",
+                "translation"
+            ],
+            "support": {
+                "issues": "https://github.com/MahoCommerce/directory-data/issues",
+                "source": "https://github.com/MahoCommerce/directory-data/tree/1.0.20260726"
+            },
+            "funding": [
+                {
+                    "url": "https://www.buymeacoffee.com/fballiano",
+                    "type": "buy_me_a_coffee"
+                },
+                {
+                    "url": "https://paypal.me/fabrizioballiano",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fballiano",
+                    "type": "github"
+                }
+            ],
+            "time": "2026-07-26T05:25:58+00:00"
         },
         {
             "name": "mahocommerce/icons",
@@ -15388,16 +15464,16 @@
         },
         {
             "name": "symfony/mcp-bundle",
-            "version": "v0.13.0",
+            "version": "v0.14.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/mcp-bundle.git",
-                "reference": "a0d4443ff899803a4030ae24fbb1dfb961f0b6fa"
+                "reference": "f9f5be5e16a7b4749ca98d8099042902fe917a74"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/mcp-bundle/zipball/a0d4443ff899803a4030ae24fbb1dfb961f0b6fa",
-                "reference": "a0d4443ff899803a4030ae24fbb1dfb961f0b6fa",
+                "url": "https://api.github.com/repos/symfony/mcp-bundle/zipball/f9f5be5e16a7b4749ca98d8099042902fe917a74",
+                "reference": "f9f5be5e16a7b4749ca98d8099042902fe917a74",
                 "shasum": ""
             },
             "require": {
@@ -15451,7 +15527,7 @@
             ],
             "description": "Symfony integration bundle for Model Context Protocol (via official mcp/sdk)",
             "support": {
-                "source": "https://github.com/symfony/mcp-bundle/tree/v0.13.0"
+                "source": "https://github.com/symfony/mcp-bundle/tree/v0.14.1"
             },
             "funding": [
                 {
@@ -15471,7 +15547,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-08-30T00:16:19+00:00"
+            "time": "2026-09-26T01:53:23+00:00"
         },
         {
             "name": "symfony/options-resolver",

@@ -331,6 +331,7 @@ SPDX-License-Identifier: AFL-3.0
             <action method="addJs"><file>varien/product.js</file></action>
             <action method="addJs"><file>varien/product_options.js</file></action>
             <block type="adminhtml/template" name="optional_zip_countries" as="optional_zip_countries" template="directory/js/optional_zip_countries.phtml" />
+            <block type="adminhtml/template" name="postcode_formats" as="postcode_formats" template="directory/js/postcode_formats.phtml" />
         </reference>
         <reference name="js">
             <block type="adminhtml/template" template="sales/order/create/js.phtml" name="create" />
@@ -895,6 +896,7 @@ SPDX-License-Identifier: AFL-3.0
     <adminhtml_sales_order_address>
         <reference name="head">
             <block type="adminhtml/template" name="optional_zip_countries" as="optional_zip_countries" template="directory/js/optional_zip_countries.phtml" />
+            <block type="adminhtml/template" name="postcode_formats" as="postcode_formats" template="directory/js/postcode_formats.phtml" />
         </reference>
         <reference name="content">
             <block type="adminhtml/sales_order_address" name="sales_order_address.form.container"></block>
