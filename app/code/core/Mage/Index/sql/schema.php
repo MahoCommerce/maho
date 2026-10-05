@@ -8,58 +8,85 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
+use Doctrine\DBAL\Schema\ForeignKeyConstraint;
+use Doctrine\DBAL\Schema\ForeignKeyConstraint\ReferentialAction;
+use Doctrine\DBAL\Schema\Index;
+use Doctrine\DBAL\Schema\Index\IndexType;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
-use Doctrine\DBAL\Schema\Schema;
+use Doctrine\DBAL\Schema\SchemaEditor;
+use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
+use Maho\Db\Schema;
 
-return function (Schema $schema): void {
-    $event = $schema->createTable('index_event');
-    $event->addColumn('event_id', Types::BIGINT, ['unsigned' => true, 'autoincrement' => true]);
-    $event->addColumn('type', Types::STRING, ['length' => 64]);
-    $event->addColumn('entity', Types::STRING, ['length' => 64]);
-    $event->addColumn('entity_pk', Types::BIGINT, ['notnull' => false]);
-    $event->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
-    $event->addColumn('old_data', Types::TEXT, ['length' => 2097152, 'notnull' => false]);
-    $event->addColumn('new_data', Types::TEXT, ['length' => 2097152, 'notnull' => false]);
-    $event->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('event_id')->create(),
+return function (SchemaEditor $schema): void {
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('index_event')
+            ->addColumn(Schema::column('event_id', Types::BIGINT, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('type', Types::STRING, length: 64))
+            ->addColumn(Schema::column('entity', Types::STRING, length: 64))
+            ->addColumn(Schema::column('entity_pk', Types::BIGINT, notNull: false))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('old_data', Types::TEXT, length: 2097152, notNull: false))
+            ->addColumn(Schema::column('new_data', Types::TEXT, length: 2097152, notNull: false))
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('event_id')->create())
+            ->addIndex(
+                Index::editor()
+                    ->setType(IndexType::UNIQUE)
+                    ->setUnquotedColumnNames('type', 'entity', 'entity_pk'),
+            )
+            ->setComment('Index Event')
+            ->create(),
     );
-    $event->addUniqueIndex(['type', 'entity', 'entity_pk']);
-    $event->setComment('Index Event');
 
-    $process = $schema->createTable('index_process');
-    $process->addColumn('process_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $process->addColumn('indexer_code', Types::STRING, ['length' => 32]);
-    $process->addColumn('status', Types::STRING, ['length' => 15, 'default' => 'pending']);
-    $process->addColumn('started_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
-    $process->addColumn('ended_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
-    $process->addColumn('mode', Types::STRING, ['length' => 9, 'default' => 'real_time']);
-    $process->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('process_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('index_process')
+            ->addColumn(Schema::column('process_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('indexer_code', Types::STRING, length: 32))
+            ->addColumn(Schema::column('status', Types::STRING, length: 15, default: 'pending'))
+            ->addColumn(Schema::column('started_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('ended_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('mode', Types::STRING, length: 9, default: 'real_time'))
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('process_id')->create())
+            ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('indexer_code'))
+            ->setComment('Index Process')
+            ->create(),
     );
-    $process->addUniqueIndex(['indexer_code']);
-    $process->setComment('Index Process');
 
-    $processEvent = $schema->createTable('index_process_event');
-    $processEvent->addColumn('process_id', Types::INTEGER, ['unsigned' => true]);
-    $processEvent->addColumn('event_id', Types::BIGINT, ['unsigned' => true]);
-    $processEvent->addColumn('status', Types::STRING, ['length' => 7, 'default' => 'new']);
-    $processEvent->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('process_id', 'event_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('index_process_event')
+            ->addColumn(Schema::column('process_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('event_id', Types::BIGINT, unsigned: true))
+            ->addColumn(Schema::column('status', Types::STRING, length: 7, default: 'new'))
+            ->addPrimaryKeyConstraint(
+                PrimaryKeyConstraint::editor()
+                    ->setUnquotedColumnNames('process_id', 'event_id')
+                    ->create(),
+            )
+            ->addIndex(Index::editor()->setUnquotedColumnNames('event_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('event_id')
+                    ->setUnquotedReferencedTableName('index_event')
+                    ->setUnquotedReferencedColumnNames('event_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('process_id')
+                    ->setUnquotedReferencedTableName('index_process')
+                    ->setUnquotedReferencedColumnNames('process_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Index Process Event')
+            ->create(),
     );
-    $processEvent->addIndex(['event_id']);
-    $processEvent->addForeignKeyConstraint(
-        'index_event',
-        ['event_id'],
-        ['event_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $processEvent->addForeignKeyConstraint(
-        'index_process',
-        ['process_id'],
-        ['process_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $processEvent->setComment('Index Process Event');
 };

@@ -1393,10 +1393,7 @@ abstract class AbstractPdoAdapter implements AdapterInterface
             // Use getIdentifier()->getValue() to get the raw name without quotes
             $columnNameStr = $column->getObjectName()->getIdentifier()->getValue();
             $isPrimary = in_array(strtolower($columnNameStr), $primaryColumns);
-            $typeName = $column->getType()::class;
-            // Extract short type name from class
-            $typeName = substr($typeName, strrpos($typeName, '\\') + 1);
-            $typeName = strtolower(preg_replace('/Type$/', '', $typeName));
+            $typeName = $column->getTypeName();
 
             $result[$columnNameStr] = [
                 'SCHEMA_NAME'      => $schemaName ?? '',

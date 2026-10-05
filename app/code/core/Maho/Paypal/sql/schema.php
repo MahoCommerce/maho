@@ -8,71 +8,81 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
+use Doctrine\DBAL\Schema\ForeignKeyConstraint;
+use Doctrine\DBAL\Schema\ForeignKeyConstraint\ReferentialAction;
+use Doctrine\DBAL\Schema\Index;
+use Doctrine\DBAL\Schema\Index\IndexType;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
-use Doctrine\DBAL\Schema\Schema;
+use Doctrine\DBAL\Schema\SchemaEditor;
+use Doctrine\DBAL\Schema\Table;
+use Doctrine\DBAL\Schema\TableEditor;
 use Doctrine\DBAL\Types\Types;
+use Maho\Db\Schema;
 
-return function (Schema $schema): void {
-    $webhook = $schema->createTable('paypal_webhook_event');
-    $webhook->addColumn('event_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $webhook->addColumn('paypal_event_id', Types::STRING, ['length' => 64]);
-    $webhook->addColumn('event_type', Types::STRING, ['length' => 128]);
-    $webhook->addColumn('resource_type', Types::STRING, ['length' => 64, 'notnull' => false]);
-    $webhook->addColumn('resource_id', Types::STRING, ['length' => 64, 'notnull' => false]);
-    $webhook->addColumn('summary', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $webhook->addColumn('status', Types::STRING, ['length' => 32, 'default' => 'received']);
-    $webhook->addColumn('payload', Types::TEXT, ['length' => 65535, 'notnull' => false]);
-    $webhook->addColumn('error_message', Types::TEXT, ['length' => 65535, 'notnull' => false]);
-    $webhook->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
-    $webhook->addColumn('processed_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
-    $webhook->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('event_id')->create(),
+return function (SchemaEditor $schema): void {
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('paypal_webhook_event')
+            ->addColumn(Schema::column('event_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('paypal_event_id', Types::STRING, length: 64))
+            ->addColumn(Schema::column('event_type', Types::STRING, length: 128))
+            ->addColumn(Schema::column('resource_type', Types::STRING, length: 64, notNull: false))
+            ->addColumn(Schema::column('resource_id', Types::STRING, length: 64, notNull: false))
+            ->addColumn(Schema::column('summary', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('status', Types::STRING, length: 32, default: 'received'))
+            ->addColumn(Schema::column('payload', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('error_message', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('processed_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('event_id')->create())
+            ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('paypal_event_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('event_type'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('status'))
+            ->setComment('PayPal Webhook Events')
+            ->create(),
     );
-    $webhook->addUniqueIndex(['paypal_event_id']);
-    $webhook->addIndex(['event_type']);
-    $webhook->addIndex(['status']);
-    $webhook->setComment('PayPal Webhook Events');
 
-    $vault = $schema->createTable('paypal_vault_token');
-    $vault->addColumn('token_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $vault->addColumn('customer_id', Types::INTEGER, ['unsigned' => true]);
-    $vault->addColumn('paypal_token_id', Types::TEXT, ['length' => 65535]);
-    $vault->addColumn('paypal_token_id_hash', Types::STRING, ['length' => 64, 'notnull' => false]);
-    $vault->addColumn('payment_source_type', Types::STRING, ['length' => 32]);
-    $vault->addColumn('card_last_four', Types::STRING, ['length' => 4, 'notnull' => false]);
-    $vault->addColumn('card_brand', Types::STRING, ['length' => 32, 'notnull' => false]);
-    $vault->addColumn('card_expiry', Types::STRING, ['length' => 7, 'notnull' => false]);
-    $vault->addColumn('payer_email', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $vault->addColumn('label', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $vault->addColumn('is_active', Types::SMALLINT, ['unsigned' => true, 'default' => 1]);
-    $vault->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
-    $vault->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
-    $vault->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('token_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('paypal_vault_token')
+            ->addColumn(Schema::column('token_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('customer_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('paypal_token_id', Types::TEXT, length: 65535))
+            ->addColumn(Schema::column('paypal_token_id_hash', Types::STRING, length: 64, notNull: false))
+            ->addColumn(Schema::column('payment_source_type', Types::STRING, length: 32))
+            ->addColumn(Schema::column('card_last_four', Types::STRING, length: 4, notNull: false))
+            ->addColumn(Schema::column('card_brand', Types::STRING, length: 32, notNull: false))
+            ->addColumn(Schema::column('card_expiry', Types::STRING, length: 7, notNull: false))
+            ->addColumn(Schema::column('payer_email', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('label', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('is_active', Types::SMALLINT, unsigned: true, default: 1))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('updated_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('token_id')->create())
+            ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('paypal_token_id_hash'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('customer_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('customer_id')
+                    ->setUnquotedReferencedTableName('customer_entity')
+                    ->setUnquotedReferencedColumnNames('entity_id')
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('PayPal Vault Tokens')
+            ->create(),
     );
-    $vault->addUniqueIndex(['paypal_token_id_hash']);
-    $vault->addIndex(['customer_id']);
-    $vault->addForeignKeyConstraint(
-        'customer_entity',
-        ['customer_id'],
-        ['entity_id'],
-        ['onDelete' => 'CASCADE'],
-    );
-    $vault->setComment('PayPal Vault Tokens');
 
     // Paypal grafts a paypal_order_id column + index onto Mage_Sales' quote/order payment tables, kept here so module removal stays one delete.
-    $quotePayment = $schema->getTable('sales_flat_quote_payment');
-    $quotePayment->addColumn('paypal_order_id', Types::STRING, [
-        'length' => 64, 'notnull' => false,
-        'comment' => 'PayPal Order ID',
-    ]);
-    $quotePayment->addIndex(['paypal_order_id']);
+    $schema->modifyTableByUnquotedName('sales_flat_quote_payment', static function (TableEditor $quotePayment): void {
+        $quotePayment->addColumn(Schema::column('paypal_order_id', Types::STRING, length: 64, notNull: false, comment: 'PayPal Order ID'));
+        $quotePayment->addIndex(Index::editor()->setUnquotedColumnNames('paypal_order_id'));
+    });
 
-    $orderPayment = $schema->getTable('sales_flat_order_payment');
-    $orderPayment->addColumn('paypal_order_id', Types::STRING, [
-        'length' => 64, 'notnull' => false,
-        'comment' => 'PayPal Order ID',
-    ]);
-    $orderPayment->addIndex(['paypal_order_id']);
+    $schema->modifyTableByUnquotedName('sales_flat_order_payment', static function (TableEditor $orderPayment): void {
+        $orderPayment->addColumn(Schema::column('paypal_order_id', Types::STRING, length: 64, notNull: false, comment: 'PayPal Order ID'));
+        $orderPayment->addIndex(Index::editor()->setUnquotedColumnNames('paypal_order_id'));
+    });
 };

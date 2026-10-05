@@ -7,8 +7,12 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Schema\Column;
+use Doctrine\DBAL\Schema\ForeignKeyConstraint;
+use Doctrine\DBAL\Schema\Index;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\Schema;
+use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
 use Maho\Db\Adapter\Pdo\Mysql;
 use Maho\Db\Schema\Applier;
@@ -24,27 +28,69 @@ const CHARSET_CHILD_TABLE = 'test_charset_child';
  */
 function charsetProbeSchema(string $charset): Schema
 {
-    $schema = new Schema();
+    $options = ['engine' => 'InnoDB', 'charset' => $charset, 'collation' => $charset . '_general_ci'];
 
-    $parent = $schema->createTable(CHARSET_PARENT_TABLE);
-    $parent->addColumn('code', Types::STRING, ['length' => 32]);
-    $parent->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('code')->create());
+    $parent = Table::editor()
+        ->setUnquotedName(CHARSET_PARENT_TABLE)
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName('code')
+                ->setTypeName(Types::STRING)
+                ->setLength(32)
+                ->create(),
+        )
+        ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('code')->create())
+        ->setOptions($options)
+        ->create();
 
-    $child = $schema->createTable(CHARSET_CHILD_TABLE);
-    $child->addColumn('entity_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $child->addColumn('parent_code', Types::STRING, ['length' => 32]);
-    $child->addColumn('note', Types::TEXT, ['length' => 65535, 'notnull' => false, 'comment' => 'Free text']);
-    $child->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create());
-    $child->addIndex(['parent_code'], 'IDX_TEST_CHARSET_CHILD_PARENT_CODE');
-    $child->addForeignKeyConstraint(CHARSET_PARENT_TABLE, ['parent_code'], ['code'], [], 'FK_TEST_CHARSET_CHILD_PARENT');
+    $child = Table::editor()
+        ->setUnquotedName(CHARSET_CHILD_TABLE)
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName('entity_id')
+                ->setTypeName(Types::INTEGER)
+                ->setUnsigned(true)
+                ->setAutoincrement(true)
+                ->create(),
+        )
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName('parent_code')
+                ->setTypeName(Types::STRING)
+                ->setLength(32)
+                ->create(),
+        )
+        ->addColumn(
+            Column::editor()
+                ->setUnquotedName('note')
+                ->setTypeName(Types::TEXT)
+                ->setLength(65535)
+                ->setNotNull(false)
+                ->setComment('Free text')
+                ->create(),
+        )
+        ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create())
+        ->addIndex(
+            Index::editor()
+                ->setUnquotedName('IDX_TEST_CHARSET_CHILD_PARENT_CODE')
+                ->setUnquotedColumnNames('parent_code')
+                ->create(),
+        )
+        ->addForeignKeyConstraint(
+            ForeignKeyConstraint::editor()
+                ->setUnquotedName('FK_TEST_CHARSET_CHILD_PARENT')
+                ->setUnquotedReferencingColumnNames('parent_code')
+                ->setUnquotedReferencedTableName(CHARSET_PARENT_TABLE)
+                ->setUnquotedReferencedColumnNames('code')
+                ->create(),
+        )
+        ->setOptions($options)
+        ->create();
 
-    foreach ([$parent, $child] as $table) {
-        $table->addOption('engine', 'InnoDB');
-        $table->addOption('charset', $charset);
-        $table->addOption('collation', $charset . '_general_ci');
-    }
-
-    return $schema;
+    return Schema::editor()
+        ->addTable($parent)
+        ->addTable($child)
+        ->create();
 }
 
 /** @return array<string, array{charset: ?string, type: string}> column name => charset and type */
@@ -146,7 +192,7 @@ it('converts an undeclared utf8mb3 table', function () {
     try {
         expect(Applier::legacyCharsetTables($this->adapter->getConnection()))->toHaveKey($table);
 
-        Applier::execute($this->adapter, Applier::plan($this->adapter->getConnection(), new Schema()));
+        Applier::execute($this->adapter, Applier::plan($this->adapter->getConnection(), Schema::editor()->create()));
 
         expect(Applier::legacyCharsetTables($this->adapter->getConnection()))->not->toHaveKey($table);
     } finally {

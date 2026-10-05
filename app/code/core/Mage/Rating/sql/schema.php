@@ -8,153 +8,211 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Schema\Column;
+use Doctrine\DBAL\Schema\ForeignKeyConstraint;
+use Doctrine\DBAL\Schema\ForeignKeyConstraint\ReferentialAction;
+use Doctrine\DBAL\Schema\Index;
+use Doctrine\DBAL\Schema\Index\IndexType;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
-use Doctrine\DBAL\Schema\Schema;
+use Doctrine\DBAL\Schema\SchemaEditor;
+use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
+use Maho\Db\Schema;
 
-return function (Schema $schema): void {
-    $entity = $schema->createTable('rating_entity');
-    $entity->addColumn('entity_id', Types::SMALLINT, ['unsigned' => true, 'autoincrement' => true]);
-    $entity->addColumn('entity_code', Types::STRING, ['length' => 64]);
-    $entity->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create(),
+return function (SchemaEditor $schema): void {
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('rating_entity')
+            ->addColumn(Schema::column('entity_id', Types::SMALLINT, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('entity_code', Types::STRING, length: 64))
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create())
+            ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('entity_code'))
+            ->setComment('Rating entities')
+            ->create(),
     );
-    $entity->addUniqueIndex(['entity_code']);
-    $entity->setComment('Rating entities');
 
-    $rating = $schema->createTable('rating');
-    $rating->addColumn('rating_id', Types::SMALLINT, ['unsigned' => true, 'autoincrement' => true]);
-    $rating->addColumn('entity_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $rating->addColumn('rating_code', Types::STRING, ['length' => 64]);
-    $rating->addColumn('position', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $rating->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rating_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('rating')
+            ->addColumn(Schema::column('rating_id', Types::SMALLINT, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('entity_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('rating_code', Types::STRING, length: 64))
+            ->addColumn(Schema::column('position', Types::SMALLINT, unsigned: true, default: 0))
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rating_id')->create())
+            ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('rating_code'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('entity_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('entity_id')
+                    ->setUnquotedReferencedTableName('rating_entity')
+                    ->setUnquotedReferencedColumnNames('entity_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Ratings')
+            ->create(),
     );
-    $rating->addUniqueIndex(['rating_code']);
-    $rating->addIndex(['entity_id']);
-    $rating->addForeignKeyConstraint(
-        'rating_entity',
-        ['entity_id'],
-        ['entity_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $rating->setComment('Ratings');
 
-    $option = $schema->createTable('rating_option');
-    $option->addColumn('option_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $option->addColumn('rating_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $option->addColumn('code', Types::STRING, ['length' => 32]);
-    $option->addColumn('value', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $option->addColumn('position', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $option->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('option_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('rating_option')
+            ->addColumn(Schema::column('option_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('rating_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('code', Types::STRING, length: 32))
+            ->addColumn(Schema::column('value', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('position', Types::SMALLINT, unsigned: true, default: 0))
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('option_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('rating_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('rating_id')
+                    ->setUnquotedReferencedTableName('rating')
+                    ->setUnquotedReferencedColumnNames('rating_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Rating options')
+            ->create(),
     );
-    $option->addIndex(['rating_id']);
-    $option->addForeignKeyConstraint(
-        'rating',
-        ['rating_id'],
-        ['rating_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $option->setComment('Rating options');
 
-    $vote = $schema->createTable('rating_option_vote');
-    $vote->addColumn('vote_id', Types::BIGINT, ['unsigned' => true, 'autoincrement' => true]);
-    $vote->addColumn('option_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $vote->addColumn('remote_ip', Types::STRING, ['length' => 50, 'notnull' => false]);
-    $vote->addColumn('remote_ip_long', Types::BINARY, ['length' => 16, 'notnull' => false]);
-    $vote->addColumn('customer_id', Types::INTEGER, ['unsigned' => true, 'notnull' => false, 'default' => 0]);
-    $vote->addColumn('entity_pk_value', Types::BIGINT, ['unsigned' => true, 'default' => 0]);
-    $vote->addColumn('rating_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $vote->addColumn('review_id', Types::BIGINT, ['unsigned' => true, 'notnull' => false]);
-    $vote->addColumn('percent', Types::SMALLINT, ['default' => 0]);
-    $vote->addColumn('value', Types::SMALLINT, ['default' => 0]);
-    $vote->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('vote_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('rating_option_vote')
+            ->addColumn(Schema::column('vote_id', Types::BIGINT, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('option_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('remote_ip', Types::STRING, length: 50, notNull: false))
+            ->addColumn(Schema::column('remote_ip_long', Types::BINARY, length: 16, notNull: false))
+            ->addColumn(Schema::column('customer_id', Types::INTEGER, unsigned: true, notNull: false, default: 0))
+            ->addColumn(Schema::column('entity_pk_value', Types::BIGINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('rating_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('review_id', Types::BIGINT, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('percent', Types::SMALLINT, default: 0))
+            ->addColumn(Schema::column('value', Types::SMALLINT, default: 0))
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('vote_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('option_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('option_id')
+                    ->setUnquotedReferencedTableName('rating_option')
+                    ->setUnquotedReferencedColumnNames('option_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('review_id')
+                    ->setUnquotedReferencedTableName('review')
+                    ->setUnquotedReferencedColumnNames('review_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Rating option values')
+            ->create(),
     );
-    $vote->addIndex(['option_id']);
-    $vote->addForeignKeyConstraint(
-        'rating_option',
-        ['option_id'],
-        ['option_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $vote->addForeignKeyConstraint(
-        'review',
-        ['review_id'],
-        ['review_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $vote->setComment('Rating option values');
 
-    $aggregated = $schema->createTable('rating_option_vote_aggregated');
-    $aggregated->addColumn('primary_id', Types::INTEGER, ['autoincrement' => true]);
-    $aggregated->addColumn('rating_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $aggregated->addColumn('entity_pk_value', Types::BIGINT, ['unsigned' => true, 'default' => 0]);
-    $aggregated->addColumn('vote_count', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $aggregated->addColumn('vote_value_sum', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $aggregated->addColumn('percent', Types::SMALLINT, ['default' => 0]);
-    $aggregated->addColumn('percent_approved', Types::SMALLINT, ['notnull' => false, 'default' => 0]);
-    $aggregated->addColumn('store_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $aggregated->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('primary_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('rating_option_vote_aggregated')
+            ->addColumn(Schema::column('primary_id', Types::INTEGER, autoincrement: true))
+            ->addColumn(Schema::column('rating_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('entity_pk_value', Types::BIGINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('vote_count', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('vote_value_sum', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('percent', Types::SMALLINT, default: 0))
+            ->addColumn(Schema::column('percent_approved', Types::SMALLINT, notNull: false, default: 0))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('primary_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('rating_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('rating_id')
+                    ->setUnquotedReferencedTableName('rating')
+                    ->setUnquotedReferencedColumnNames('rating_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('store_id')
+                    ->setUnquotedReferencedTableName('core_store')
+                    ->setUnquotedReferencedColumnNames('store_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Rating vote aggregated')
+            ->create(),
     );
-    $aggregated->addIndex(['rating_id']);
-    $aggregated->addIndex(['store_id']);
-    $aggregated->addForeignKeyConstraint(
-        'rating',
-        ['rating_id'],
-        ['rating_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $aggregated->addForeignKeyConstraint(
-        'core_store',
-        ['store_id'],
-        ['store_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $aggregated->setComment('Rating vote aggregated');
 
-    $ratingStore = $schema->createTable('rating_store');
-    $ratingStore->addColumn('rating_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $ratingStore->addColumn('store_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $ratingStore->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rating_id', 'store_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('rating_store')
+            ->addColumn(Schema::column('rating_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addPrimaryKeyConstraint(
+                PrimaryKeyConstraint::editor()
+                    ->setUnquotedColumnNames('rating_id', 'store_id')
+                    ->create(),
+            )
+            ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('store_id')
+                    ->setUnquotedReferencedTableName('core_store')
+                    ->setUnquotedReferencedColumnNames('store_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('rating_id')
+                    ->setUnquotedReferencedTableName('rating')
+                    ->setUnquotedReferencedColumnNames('rating_id')
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Rating Store')
+            ->create(),
     );
-    $ratingStore->addIndex(['store_id']);
-    $ratingStore->addForeignKeyConstraint(
-        'core_store',
-        ['store_id'],
-        ['store_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $ratingStore->addForeignKeyConstraint(
-        'rating',
-        ['rating_id'],
-        ['rating_id'],
-        ['onDelete' => 'CASCADE'],
-    );
-    $ratingStore->setComment('Rating Store');
 
-    $ratingTitle = $schema->createTable('rating_title');
-    $ratingTitle->addColumn('rating_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $ratingTitle->addColumn('store_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $ratingTitle->addColumn('value', Types::STRING, ['length' => 255]);
-    $ratingTitle->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rating_id', 'store_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('rating_title')
+            ->addColumn(Schema::column('rating_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('value', Types::STRING, length: 255))
+            ->addPrimaryKeyConstraint(
+                PrimaryKeyConstraint::editor()
+                    ->setUnquotedColumnNames('rating_id', 'store_id')
+                    ->create(),
+            )
+            ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('rating_id')
+                    ->setUnquotedReferencedTableName('rating')
+                    ->setUnquotedReferencedColumnNames('rating_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('store_id')
+                    ->setUnquotedReferencedTableName('core_store')
+                    ->setUnquotedReferencedColumnNames('store_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Rating Title')
+            ->create(),
     );
-    $ratingTitle->addIndex(['store_id']);
-    $ratingTitle->addForeignKeyConstraint(
-        'rating',
-        ['rating_id'],
-        ['rating_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $ratingTitle->addForeignKeyConstraint(
-        'core_store',
-        ['store_id'],
-        ['store_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $ratingTitle->setComment('Rating Title');
 };
