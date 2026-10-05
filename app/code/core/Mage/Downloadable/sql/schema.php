@@ -8,217 +8,286 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
+use Doctrine\DBAL\Schema\ForeignKeyConstraint;
+use Doctrine\DBAL\Schema\ForeignKeyConstraint\ReferentialAction;
+use Doctrine\DBAL\Schema\Index;
+use Doctrine\DBAL\Schema\Index\IndexType;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
-use Doctrine\DBAL\Schema\Schema;
+use Doctrine\DBAL\Schema\SchemaEditor;
+use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
+use Maho\Db\Schema;
 
-return function (Schema $schema): void {
-    $link = $schema->createTable('downloadable_link');
-    $link->addColumn('link_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $link->addColumn('product_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $link->addColumn('sort_order', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $link->addColumn('number_of_downloads', Types::INTEGER, ['notnull' => false]);
-    $link->addColumn('is_shareable', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $link->addColumn('link_url', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $link->addColumn('link_file', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $link->addColumn('link_type', Types::STRING, ['length' => 20, 'notnull' => false]);
-    $link->addColumn('sample_url', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $link->addColumn('sample_file', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $link->addColumn('sample_type', Types::STRING, ['length' => 20, 'notnull' => false]);
-    $link->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('link_id')->create(),
+return function (SchemaEditor $schema): void {
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('downloadable_link')
+            ->addColumn(Schema::column('link_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('product_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('sort_order', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('number_of_downloads', Types::INTEGER, notNull: false))
+            ->addColumn(Schema::column('is_shareable', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('link_url', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('link_file', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('link_type', Types::STRING, length: 20, notNull: false))
+            ->addColumn(Schema::column('sample_url', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('sample_file', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('sample_type', Types::STRING, length: 20, notNull: false))
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('link_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('product_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('product_id', 'sort_order'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('product_id')
+                    ->setUnquotedReferencedTableName('catalog_product_entity')
+                    ->setUnquotedReferencedColumnNames('entity_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Downloadable Link Table')
+            ->create(),
     );
-    $link->addIndex(['product_id']);
-    $link->addIndex(['product_id', 'sort_order']);
-    $link->addForeignKeyConstraint(
-        'catalog_product_entity',
-        ['product_id'],
-        ['entity_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $link->setComment('Downloadable Link Table');
 
-    $linkPrice = $schema->createTable('downloadable_link_price');
-    $linkPrice->addColumn('price_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $linkPrice->addColumn('link_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $linkPrice->addColumn('website_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $linkPrice->addColumn('price', Types::DECIMAL, ['precision' => 12, 'scale' => 4, 'default' => '0.0000']);
-    $linkPrice->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('price_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('downloadable_link_price')
+            ->addColumn(Schema::column('price_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('link_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('website_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('price', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('price_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('link_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('website_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('link_id')
+                    ->setUnquotedReferencedTableName('downloadable_link')
+                    ->setUnquotedReferencedColumnNames('link_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('website_id')
+                    ->setUnquotedReferencedTableName('core_website')
+                    ->setUnquotedReferencedColumnNames('website_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Downloadable Link Price Table')
+            ->create(),
     );
-    $linkPrice->addIndex(['link_id']);
-    $linkPrice->addIndex(['website_id']);
-    $linkPrice->addForeignKeyConstraint(
-        'downloadable_link',
-        ['link_id'],
-        ['link_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $linkPrice->addForeignKeyConstraint(
-        'core_website',
-        ['website_id'],
-        ['website_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $linkPrice->setComment('Downloadable Link Price Table');
 
-    $linkPurchased = $schema->createTable('downloadable_link_purchased');
-    $linkPurchased->addColumn('purchased_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $linkPurchased->addColumn('order_id', Types::INTEGER, ['unsigned' => true, 'notnull' => false, 'default' => 0]);
-    $linkPurchased->addColumn('order_increment_id', Types::STRING, ['length' => 50, 'notnull' => false]);
-    $linkPurchased->addColumn('order_item_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $linkPurchased->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
-    $linkPurchased->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
-    $linkPurchased->addColumn('customer_id', Types::INTEGER, ['unsigned' => true, 'notnull' => false, 'default' => 0]);
-    $linkPurchased->addColumn('product_name', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $linkPurchased->addColumn('product_sku', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $linkPurchased->addColumn('link_section_title', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $linkPurchased->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('purchased_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('downloadable_link_purchased')
+            ->addColumn(Schema::column('purchased_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('order_id', Types::INTEGER, unsigned: true, notNull: false, default: 0))
+            ->addColumn(Schema::column('order_increment_id', Types::STRING, length: 50, notNull: false))
+            ->addColumn(Schema::column('order_item_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('updated_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('customer_id', Types::INTEGER, unsigned: true, notNull: false, default: 0))
+            ->addColumn(Schema::column('product_name', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('product_sku', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('link_section_title', Types::STRING, length: 255, notNull: false))
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('purchased_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('order_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('order_item_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('customer_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('customer_id')
+                    ->setUnquotedReferencedTableName('customer_entity')
+                    ->setUnquotedReferencedColumnNames('entity_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::SET_NULL)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('order_id')
+                    ->setUnquotedReferencedTableName('sales_flat_order')
+                    ->setUnquotedReferencedColumnNames('entity_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::SET_NULL)
+                    ->create(),
+            )
+            ->setComment('Downloadable Link Purchased Table')
+            ->create(),
     );
-    $linkPurchased->addIndex(['order_id']);
-    $linkPurchased->addIndex(['order_item_id']);
-    $linkPurchased->addIndex(['customer_id']);
-    $linkPurchased->addForeignKeyConstraint(
-        'customer_entity',
-        ['customer_id'],
-        ['entity_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'],
-    );
-    $linkPurchased->addForeignKeyConstraint(
-        'sales_flat_order',
-        ['order_id'],
-        ['entity_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'],
-    );
-    $linkPurchased->setComment('Downloadable Link Purchased Table');
 
-    $linkPurchasedItem = $schema->createTable('downloadable_link_purchased_item');
-    $linkPurchasedItem->addColumn('item_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $linkPurchasedItem->addColumn('purchased_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $linkPurchasedItem->addColumn('order_item_id', Types::INTEGER, ['unsigned' => true, 'notnull' => false, 'default' => 0]);
-    $linkPurchasedItem->addColumn('product_id', Types::INTEGER, ['unsigned' => true, 'notnull' => false, 'default' => 0]);
-    $linkPurchasedItem->addColumn('link_hash', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $linkPurchasedItem->addColumn('number_of_downloads_bought', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $linkPurchasedItem->addColumn('number_of_downloads_used', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $linkPurchasedItem->addColumn('link_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $linkPurchasedItem->addColumn('link_title', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $linkPurchasedItem->addColumn('is_shareable', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $linkPurchasedItem->addColumn('link_url', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $linkPurchasedItem->addColumn('link_file', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $linkPurchasedItem->addColumn('link_type', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $linkPurchasedItem->addColumn('status', Types::STRING, ['length' => 50, 'notnull' => false]);
-    $linkPurchasedItem->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
-    $linkPurchasedItem->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
-    $linkPurchasedItem->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('item_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('downloadable_link_purchased_item')
+            ->addColumn(Schema::column('item_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('purchased_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('order_item_id', Types::INTEGER, unsigned: true, notNull: false, default: 0))
+            ->addColumn(Schema::column('product_id', Types::INTEGER, unsigned: true, notNull: false, default: 0))
+            ->addColumn(Schema::column('link_hash', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('number_of_downloads_bought', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('number_of_downloads_used', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('link_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('link_title', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('is_shareable', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('link_url', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('link_file', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('link_type', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('status', Types::STRING, length: 50, notNull: false))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('updated_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('item_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('link_hash'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('order_item_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('purchased_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('purchased_id')
+                    ->setUnquotedReferencedTableName('downloadable_link_purchased')
+                    ->setUnquotedReferencedColumnNames('purchased_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('order_item_id')
+                    ->setUnquotedReferencedTableName('sales_flat_order_item')
+                    ->setUnquotedReferencedColumnNames('item_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::SET_NULL)
+                    ->create(),
+            )
+            ->setComment('Downloadable Link Purchased Item Table')
+            ->create(),
     );
-    $linkPurchasedItem->addIndex(['link_hash']);
-    $linkPurchasedItem->addIndex(['order_item_id']);
-    $linkPurchasedItem->addIndex(['purchased_id']);
-    $linkPurchasedItem->addForeignKeyConstraint(
-        'downloadable_link_purchased',
-        ['purchased_id'],
-        ['purchased_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $linkPurchasedItem->addForeignKeyConstraint(
-        'sales_flat_order_item',
-        ['order_item_id'],
-        ['item_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'],
-    );
-    $linkPurchasedItem->setComment('Downloadable Link Purchased Item Table');
 
-    $linkTitle = $schema->createTable('downloadable_link_title');
-    $linkTitle->addColumn('title_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $linkTitle->addColumn('link_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $linkTitle->addColumn('store_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $linkTitle->addColumn('title', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $linkTitle->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('title_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('downloadable_link_title')
+            ->addColumn(Schema::column('title_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('link_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('title', Types::STRING, length: 255, notNull: false))
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('title_id')->create())
+            ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('link_id', 'store_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('link_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('link_id')
+                    ->setUnquotedReferencedTableName('downloadable_link')
+                    ->setUnquotedReferencedColumnNames('link_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('store_id')
+                    ->setUnquotedReferencedTableName('core_store')
+                    ->setUnquotedReferencedColumnNames('store_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Link Title Table')
+            ->create(),
     );
-    $linkTitle->addUniqueIndex(['link_id', 'store_id']);
-    $linkTitle->addIndex(['link_id']);
-    $linkTitle->addIndex(['store_id']);
-    $linkTitle->addForeignKeyConstraint(
-        'downloadable_link',
-        ['link_id'],
-        ['link_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $linkTitle->addForeignKeyConstraint(
-        'core_store',
-        ['store_id'],
-        ['store_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $linkTitle->setComment('Link Title Table');
 
-    $sample = $schema->createTable('downloadable_sample');
-    $sample->addColumn('sample_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $sample->addColumn('product_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $sample->addColumn('sample_url', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $sample->addColumn('sample_file', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $sample->addColumn('sample_type', Types::STRING, ['length' => 20, 'notnull' => false]);
-    $sample->addColumn('sort_order', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $sample->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('sample_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('downloadable_sample')
+            ->addColumn(Schema::column('sample_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('product_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('sample_url', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('sample_file', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('sample_type', Types::STRING, length: 20, notNull: false))
+            ->addColumn(Schema::column('sort_order', Types::INTEGER, unsigned: true, default: 0))
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('sample_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('product_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('product_id')
+                    ->setUnquotedReferencedTableName('catalog_product_entity')
+                    ->setUnquotedReferencedColumnNames('entity_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Downloadable Sample Table')
+            ->create(),
     );
-    $sample->addIndex(['product_id']);
-    $sample->addForeignKeyConstraint(
-        'catalog_product_entity',
-        ['product_id'],
-        ['entity_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $sample->setComment('Downloadable Sample Table');
 
-    $sampleTitle = $schema->createTable('downloadable_sample_title');
-    $sampleTitle->addColumn('title_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $sampleTitle->addColumn('sample_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $sampleTitle->addColumn('store_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $sampleTitle->addColumn('title', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $sampleTitle->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('title_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('downloadable_sample_title')
+            ->addColumn(Schema::column('title_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('sample_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('title', Types::STRING, length: 255, notNull: false))
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('title_id')->create())
+            ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('sample_id', 'store_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('sample_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('sample_id')
+                    ->setUnquotedReferencedTableName('downloadable_sample')
+                    ->setUnquotedReferencedColumnNames('sample_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('store_id')
+                    ->setUnquotedReferencedTableName('core_store')
+                    ->setUnquotedReferencedColumnNames('store_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Downloadable Sample Title Table')
+            ->create(),
     );
-    $sampleTitle->addUniqueIndex(['sample_id', 'store_id']);
-    $sampleTitle->addIndex(['sample_id']);
-    $sampleTitle->addIndex(['store_id']);
-    $sampleTitle->addForeignKeyConstraint(
-        'downloadable_sample',
-        ['sample_id'],
-        ['sample_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $sampleTitle->addForeignKeyConstraint(
-        'core_store',
-        ['store_id'],
-        ['store_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
-    $sampleTitle->setComment('Downloadable Sample Title Table');
 
-    $priceIdx = $schema->createTable('catalog_product_index_price_downlod_idx');
-    $priceIdx->addColumn('entity_id', Types::INTEGER, ['unsigned' => true]);
-    $priceIdx->addColumn('customer_group_id', Types::SMALLINT, ['unsigned' => true]);
-    $priceIdx->addColumn('website_id', Types::SMALLINT, ['unsigned' => true]);
-    $priceIdx->addColumn('min_price', Types::DECIMAL, ['precision' => 12, 'scale' => 4, 'default' => '0.0000']);
-    $priceIdx->addColumn('max_price', Types::DECIMAL, ['precision' => 12, 'scale' => 4, 'default' => '0.0000']);
-    $priceIdx->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id', 'customer_group_id', 'website_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('catalog_product_index_price_downlod_idx')
+            ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('customer_group_id', Types::SMALLINT, unsigned: true))
+            ->addColumn(Schema::column('website_id', Types::SMALLINT, unsigned: true))
+            ->addColumn(Schema::column('min_price', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('max_price', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addPrimaryKeyConstraint(
+                PrimaryKeyConstraint::editor()
+                    ->setUnquotedColumnNames('entity_id', 'customer_group_id', 'website_id')
+                    ->create(),
+            )
+            ->setComment('Indexer Table for price of downloadable products')
+            ->create(),
     );
-    $priceIdx->setComment('Indexer Table for price of downloadable products');
 
-    $priceTmp = $schema->createTable('catalog_product_index_price_downlod_tmp');
-    $priceTmp->addColumn('entity_id', Types::INTEGER, ['unsigned' => true]);
-    $priceTmp->addColumn('customer_group_id', Types::SMALLINT, ['unsigned' => true]);
-    $priceTmp->addColumn('website_id', Types::SMALLINT, ['unsigned' => true]);
-    $priceTmp->addColumn('min_price', Types::DECIMAL, ['precision' => 12, 'scale' => 4, 'default' => '0.0000']);
-    $priceTmp->addColumn('max_price', Types::DECIMAL, ['precision' => 12, 'scale' => 4, 'default' => '0.0000']);
-    $priceTmp->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id', 'customer_group_id', 'website_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('catalog_product_index_price_downlod_tmp')
+            ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('customer_group_id', Types::SMALLINT, unsigned: true))
+            ->addColumn(Schema::column('website_id', Types::SMALLINT, unsigned: true))
+            ->addColumn(Schema::column('min_price', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addColumn(Schema::column('max_price', Types::DECIMAL, precision: 12, scale: 4, default: '0.0000'))
+            ->addPrimaryKeyConstraint(
+                PrimaryKeyConstraint::editor()
+                    ->setUnquotedColumnNames('entity_id', 'customer_group_id', 'website_id')
+                    ->create(),
+            )
+            ->setComment('Temporary Indexer Table for price of downloadable products')
+            ->create(),
     );
-    $priceTmp->setComment('Temporary Indexer Table for price of downloadable products');
 };

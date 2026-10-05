@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "82b2022f98a45907163715a1ff676582",
+    "content-hash": "d0308e12556b4040baf05499eca856f9",
     "packages": [
         {
             "name": "altcha-org/altcha",
@@ -727,16 +727,16 @@
         },
         {
             "name": "doctrine/dbal",
-            "version": "4.4.5",
+            "version": "4.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/dbal.git",
-                "reference": "205fdf552ffafe33c1d12a41a2d6c7217666c32c"
+                "reference": "c435cd7ea33e17d2a89288caf994cf3d4549b879"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/dbal/zipball/205fdf552ffafe33c1d12a41a2d6c7217666c32c",
-                "reference": "205fdf552ffafe33c1d12a41a2d6c7217666c32c",
+                "url": "https://api.github.com/repos/doctrine/dbal/zipball/c435cd7ea33e17d2a89288caf994cf3d4549b879",
+                "reference": "c435cd7ea33e17d2a89288caf994cf3d4549b879",
                 "shasum": ""
             },
             "require": {
@@ -813,7 +813,7 @@
             ],
             "support": {
                 "issues": "https://github.com/doctrine/dbal/issues",
-                "source": "https://github.com/doctrine/dbal/tree/4.4.5"
+                "source": "https://github.com/doctrine/dbal/tree/4.5.0"
             },
             "funding": [
                 {
@@ -829,7 +829,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-09-03T13:05:34+00:00"
+            "time": "2026-09-24T16:11:26+00:00"
         },
         {
             "name": "doctrine/deprecations",
