@@ -330,6 +330,7 @@ final class McpToolbox implements ToolboxInterface
         if ($scope !== '') {
             $undo[McpToolCatalog::STORE_ARGUMENT] = $scope;
         }
+        $canUndo = true;
         foreach ($arguments as $field => $to) {
             if ($field === $idVariable) {
                 continue;
@@ -340,8 +341,10 @@ final class McpToolbox implements ToolboxInterface
             }
             $preview['changes'][] = ['field' => (string) $field, 'from' => $from, 'to' => $to];
             $undo[$field] = $from;
+            // The call drops an empty argument, so an undo cannot put an empty value back.
+            $canUndo = $canUndo && !in_array($from, [null, '', []], true);
         }
-        if ($preview['changes'] !== []) {
+        if ($preview['changes'] !== [] && $canUndo) {
             $preview['undo'] = $undo;
         }
 

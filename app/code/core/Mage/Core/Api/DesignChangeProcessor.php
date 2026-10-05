@@ -37,6 +37,12 @@ final class DesignChangeProcessor extends CrudProcessor
     }
 
     #[\Override]
+    protected function authorizeEntity(object $model, ApiUser $user): void
+    {
+        $this->validateEntityStoreAccess([(int) $model->getData('store_id')], $user, 'design change');
+    }
+
+    #[\Override]
     protected function validate(CrudResource $data, object $model, bool $isNew): void
     {
         /** @var DesignChange $data */
@@ -67,6 +73,7 @@ final class DesignChangeProcessor extends CrudProcessor
     #[\Override]
     protected function beforeSave(object $model, CrudResource $data, ApiUser $user): void
     {
+        $this->authorizeEntity($model, $user);
         foreach (['dateFrom' => 'date_from', 'dateTo' => 'date_to'] as $property => $column) {
             if (array_key_exists($property, $this->body) && $this->body[$property] === null) {
                 $model->setData($column, null);

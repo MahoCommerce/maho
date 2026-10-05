@@ -261,7 +261,7 @@ final class ChatService
         };
 
         try {
-            $this->toolbox->enableSections($this->initialSections($conversation, $pageContext, $this->lastUserMessage($conversation)));
+            $this->toolbox->enableSections($this->initialSections($conversation, $pageContext));
             $this->toolbox->storeContentGuide((string) ($pageContext['editor_guide'] ?? ''));
             $pageContext['editor_guide'] = $this->toolbox->contentGuide();
             $prompt = new Maho_Ai_Model_Chat_SystemPrompt()->build($admin, $pageContext, $storeId);
@@ -460,7 +460,7 @@ final class ChatService
      * @param array<string, mixed> $pageContext
      * @return list<string>
      */
-    private function initialSections(Maho_Ai_Model_Conversation $conversation, array $pageContext, string $userMessage): array
+    private function initialSections(Maho_Ai_Model_Conversation $conversation, array $pageContext): array
     {
         $sections = [];
         $route = (string) ($pageContext['route'] ?? $conversation->getContextRoute() ?? '');
@@ -471,7 +471,11 @@ final class ChatService
                 break;
             }
         }
+        $userMessage = '';
         foreach ($conversation->messagesCollection()->getItems() as $message) {
+            if ($message->getRole() === Message::ROLE_USER) {
+                $userMessage = (string) $message->getContent();
+            }
             if ($message->getRole() !== Message::ROLE_TOOL) {
                 continue;
             }
@@ -486,18 +490,6 @@ final class ChatService
         array_push($sections, ...$this->sectionsNamedIn($userMessage));
 
         return array_values(array_unique(array_reverse(array_values(array_unique(array_reverse($sections))))));
-    }
-
-    private function lastUserMessage(Maho_Ai_Model_Conversation $conversation): string
-    {
-        $text = '';
-        foreach ($conversation->messagesCollection()->getItems() as $message) {
-            if ($message->getRole() === Message::ROLE_USER) {
-                $text = (string) $message->getContent();
-            }
-        }
-
-        return $text;
     }
 
     /**

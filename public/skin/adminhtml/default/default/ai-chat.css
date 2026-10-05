@@ -611,66 +611,6 @@ body.ai-chat-open .ai-chat-toggle {
     word-break: break-word;
 }
 
-.ai-chat-arg-long summary {
-    cursor: pointer;
-    color: var(--maho-ink-soft);
-    list-style: none;
-}
-
-.ai-chat-arg-long summary::-webkit-details-marker {
-    display: none;
-}
-
-.ai-chat-arg-long summary::before {
-    content: '▸ ';
-    color: var(--maho-ink-muted);
-}
-
-.ai-chat-arg-long[open] summary::before {
-    content: '▾ ';
-}
-
-.ai-chat-arg-long pre {
-    margin: 4px 0 0;
-    padding: 6px 8px;
-    max-height: 240px;
-    overflow: auto;
-    border-radius: 6px;
-    background: var(--maho-surface-sunken);
-    color: var(--maho-ink);
-    font-family: var(--maho-font-mono, ui-monospace, monospace);
-    font-size: 11px;
-    line-height: 1.4;
-    white-space: pre-wrap;
-    word-break: break-word;
-}
-
-/* The preview box is a small page: its own text color, and no layout bleed into the panel. */
-.ai-chat-html-preview {
-    margin: 2px 0 4px;
-    padding: 8px;
-    max-height: 320px;
-    overflow: auto;
-    border: 1px solid var(--maho-border-soft);
-    border-radius: 6px;
-    background: #fff;
-    color: #222;
-    font-size: 12px;
-    line-height: 1.4;
-    contain: content;
-}
-
-.ai-chat-html-preview img {
-    max-width: 100%;
-    height: auto;
-}
-
-.ai-chat-html-preview a {
-    color: inherit;
-    text-decoration: underline;
-    pointer-events: none;
-}
-
 .ai-chat-step-preview {
     padding: 6px 8px;
     max-height: 180px;

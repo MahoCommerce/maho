@@ -188,7 +188,7 @@ class Maho_Ai_Adminhtml_Ai_ChatController extends Mage_Adminhtml_Controller_Acti
         foreach ($ids as $id) {
             /** @var Maho_Ai_Model_Conversation $conversation */
             $conversation = Mage::getModel('ai/conversation')->load($id);
-            if ($conversation->getId()) {
+            if ($conversation->getId() && $conversation->isOwnedBy($this->adminId())) {
                 $conversation->delete();
                 $deleted++;
             }

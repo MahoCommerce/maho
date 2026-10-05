@@ -218,7 +218,6 @@
 "Send a notification","Send a notification"
 "Show","Show"
 "Shows a chat panel on every admin page. The assistant calls the REST API tools the admin role grants. Every create, update or delete waits for the administrator's confirmation.","Shows a chat panel on every admin page. The assistant calls the REST API tools the admin role grants. Every create, update or delete waits for the administrator's confirmation."
-"Show the HTML source","Show the HTML source"
 "Started","Started"
 "Status","Status"
 "Stop","Stop"

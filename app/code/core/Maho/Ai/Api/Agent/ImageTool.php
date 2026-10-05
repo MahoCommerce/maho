@@ -29,7 +29,8 @@ final class ImageTool
 
     public function isAvailable(): bool
     {
-        return \Mage::helper('ai')->isEnabled() && \Mage::getStoreConfigFlag('ai/image/enabled');
+        return \Mage::helper('ai')->isEnabled() && \Mage::getStoreConfigFlag('ai/image/enabled')
+            && \Mage::getSingleton('admin/session')->isAllowed('cms/media_gallery');
     }
 
     public function tool(): Tool

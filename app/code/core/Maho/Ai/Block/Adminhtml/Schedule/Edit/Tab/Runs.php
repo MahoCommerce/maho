@@ -29,6 +29,8 @@ class Maho_Ai_Block_Adminhtml_Schedule_Edit_Tab_Runs extends Mage_Adminhtml_Bloc
         /** @var Maho_Ai_Model_Resource_Task_Collection $collection */
         $collection = Mage::getModel('ai/task')->getCollection();
         $collection->addFieldToFilter('schedule_id', $schedule instanceof Maho_Ai_Model_Task_Schedule ? (int) $schedule->getId() : 0);
+        // A run used the rights of its owner, so only that owner sees its answer.
+        $collection->addFieldToFilter('admin_user_id', (int) Mage::getSingleton('admin/session')->getUser()->getId());
         // A run that ended with writes to confirm is complete as a task, but it is not done for the owner.
         $pending = $collection->getConnection()->select()
             ->from(['m' => $collection->getTable('ai/conversation_message')], [new Maho\Db\Expr('COUNT(*)')])

@@ -75,6 +75,7 @@ class Maho_Ai_Block_Adminhtml_Schedule_Grid extends Mage_Adminhtml_Block_Widget_
         $this->addColumn('is_active', [
             'header' => $helper->__('Status'),
             'index' => 'is_active',
+            'filter_index' => 'main_table.is_active',
             'type' => 'options',
             'options' => [1 => $helper->__('Active'), 0 => $helper->__('Paused')],
             'width' => '90px',

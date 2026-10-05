@@ -68,7 +68,6 @@ final class EmailTemplateProcessor extends CrudProcessor
     {
         /** @var EmailTemplate $data */
         $now = \Mage::app()->getLocale()->formatDateForDb('now');
-        $model->setData('modified_at', $now);
 
         if (!$model->getId()) {
             $model->setData('added_at', $now);

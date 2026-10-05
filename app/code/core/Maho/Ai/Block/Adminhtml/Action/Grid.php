@@ -118,9 +118,12 @@ class Maho_Ai_Block_Adminhtml_Action_Grid extends Mage_Adminhtml_Block_Widget_Gr
     }
 
     /** The arguments as one line of "key: value" pairs, cut at the width of the cell. */
-    public function decorateArguments(string $value, Maho\DataObject $row): string
+    public function decorateArguments(string $value, Maho\DataObject $row, ?Mage_Adminhtml_Block_Widget_Grid_Column $column = null, bool $isExport = false): string
     {
         $value = (string) $row->getData('tool_arguments');
+        if ($isExport) {
+            return $value;
+        }
         try {
             $arguments = Mage::helper('core')->jsonDecode($value);
         } catch (\JsonException) {

@@ -253,7 +253,10 @@ final class ProductAttributeProcessor extends \Maho\ApiPlatform\Processor
         if (array_key_exists('defaultValue', $body)) {
             $value = $body['defaultValue'];
             if (in_array($attribute->getFrontendInput(), self::OPTION_INPUT_TYPES, true)) {
-                $this->addError('defaultValue', 'The default of a select or multiselect attribute is set with isDefault on an option');
+                // A client can send back the value that it read.
+                if (($value !== null && !is_scalar($value)) || (string) $value !== (string) $attribute->getData('default_value')) {
+                    $this->addError('defaultValue', 'The default of a select or multiselect attribute is set with isDefault on an option');
+                }
             } elseif ($value !== null && !is_scalar($value)) {
                 $this->addError('defaultValue', 'defaultValue must be a text, a number, a boolean or null');
             } else {

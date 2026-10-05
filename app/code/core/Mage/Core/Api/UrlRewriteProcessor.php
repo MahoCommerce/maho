@@ -20,6 +20,12 @@ final class UrlRewriteProcessor extends CrudProcessor
     private const SYSTEM_MESSAGE = 'This is a system URL rewrite. The catalog URL indexer generates and regenerates it, so it cannot be changed through the API. Create a custom rewrite instead.';
 
     #[\Override]
+    protected function authorizeEntity(object $model, ApiUser $user): void
+    {
+        $this->validateEntityStoreAccess([(int) $model->getData('store_id')], $user, 'URL rewrite');
+    }
+
+    #[\Override]
     protected function processDelete(int $id, ApiUser $user): null
     {
         $model = $this->loadOrFail($this->modelAlias, $id, 'UrlRewrite not found');
@@ -99,6 +105,7 @@ final class UrlRewriteProcessor extends CrudProcessor
     protected function beforeSave(object $model, CrudResource $data, ApiUser $user): void
     {
         /** @var UrlRewrite $data */
+        $this->authorizeEntity($model, $user);
         if (!$model->getId()) {
             $model->setData('is_system', 0);
         }

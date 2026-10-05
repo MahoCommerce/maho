@@ -160,7 +160,8 @@ class Maho_Ai_Model_Task_Schedule extends Mage_Core_Model_Abstract
         $ranges = [[0, 59], [0, 23], [1, 31], [1, 12], [0, 6]];
         foreach ($fields as $i => $field) {
             $matches = false;
-            for ($n = $ranges[$i][0]; $n <= $ranges[$i][1]; $n++) {
+            // A step that is not a whole number above zero never matches, and the cron model divides by it.
+            for ($n = $ranges[$i][0]; $n <= $ranges[$i][1] && !preg_match('#/(?!0*[1-9]\d*(?:,|$))#', $field); $n++) {
                 // Throws on a field it cannot read.
                 $matches = $cron->matchCronExpression($field, $n) || $matches;
             }

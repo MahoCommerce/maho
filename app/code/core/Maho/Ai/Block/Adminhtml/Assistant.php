@@ -148,7 +148,6 @@ class Maho_Ai_Block_Adminhtml_Assistant extends Mage_Adminhtml_Block_Template
                 'actionNotFound' => $helper->__('I could not find "%s" on this page.'),
                 'formFilled' => $helper->__('I filled these fields in the form: %s. Review the form and save it.'),
                 'formFieldsMissing' => $helper->__('I could not find these fields in the form: %s.'),
-                'showSource' => $helper->__('Show the HTML source'),
                 'verbList' => $helper->__('List'),
                 'verbGet' => $helper->__('Show'),
                 'verbCreate' => $helper->__('Create'),

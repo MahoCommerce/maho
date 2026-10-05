@@ -27,11 +27,11 @@ final class ContentGuideTool
 
     private ?string $guide = null;
 
-    /** Keep a guide the request carried; an empty value changes nothing. */
+    /** Keep the guide that a request carried, only when no guide is known for this script version. */
     public function store(string $guide): void
     {
         $guide = trim($guide);
-        if ($guide !== '') {
+        if ($guide !== '' && $this->guide() === '') {
             \Mage::helper('ai')->saveEditorGuide($guide);
             $this->guide = $guide;
         }

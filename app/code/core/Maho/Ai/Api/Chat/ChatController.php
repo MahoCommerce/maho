@@ -316,7 +316,8 @@ final class ChatController
      */
     private function stream(Request $request, Maho_Ai_Model_Conversation $conversation, \Closure $turn): StreamedResponse
     {
-        if (!$conversation->acquireLock()) {
+        // A queued background job holds no lock yet.
+        if ($conversation->isRunning() || !$conversation->acquireLock()) {
             throw new ConflictHttpException('The assistant is still answering in this conversation.');
         }
 

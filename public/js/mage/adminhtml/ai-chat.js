@@ -45,7 +45,9 @@ class MahoAiAssistant {
                 // deep-chat opens every link in a new tab; an admin page of this store opens here.
                 chat.shadowRoot.addEventListener('click', (event) => {
                     const anchor = event.composedPath().find((node) => node.tagName === 'A' && node.href);
-                    if (anchor && new URL(anchor.href).origin === window.location.origin) {
+                    if (anchor?.protocol === 'javascript:') {
+                        event.preventDefault();
+                    } else if (anchor && new URL(anchor.href).origin === window.location.origin) {
                         event.preventDefault();
                         window.location.assign(anchor.href);
                     }
@@ -1147,13 +1149,10 @@ class MahoAiAssistant {
         return parts.join('');
     }
 
-    /** A value in the preview table: HTML as the page renders it, an object as JSON, nothing as "(empty)". */
+    /** A value in the preview table: an object as JSON, nothing as "(empty)". */
     renderValue(value) {
         if (value === null || value === undefined || value === '') {
             return `<em>${this.escape(this.labels.changeEmpty)}</em>`;
-        }
-        if (typeof value === 'string' && /<[a-z][^>]*>/i.test(value)) {
-            return `<div class="ai-chat-html-preview">${this.sanitizeHtml(value)}</div>`;
         }
         const text = typeof value === 'string' ? value : JSON.stringify(value, null, 2);
         return text.length > 80 || text.includes('\n') ? `<pre>${this.escape(text)}</pre>` : this.escape(text);
@@ -1241,7 +1240,7 @@ class MahoAiAssistant {
 
     /**
      * One row per argument. A short value sits next to its label. A long value takes the
-     * full width below it. HTML is shown as the page would render it, with the source folded.
+     * full width below it.
      */
     renderArguments(args) {
         if (!args || typeof args !== 'object' || Object.keys(args).length === 0) {
@@ -1249,12 +1248,6 @@ class MahoAiAssistant {
         }
         const rows = Object.entries(args).map(([key, value]) => {
             const label = `<dt>${this.escape(this.humanizeKey(key))}</dt>`;
-            if (typeof value === 'string' && /<[a-z][^>]*>/i.test(value)) {
-                return `<div class="ai-chat-arg ai-chat-arg-block">${label}<dd>`
-                    + `<div class="ai-chat-html-preview">${this.sanitizeHtml(value)}</div>`
-                    + `<details class="ai-chat-arg-long"><summary>${this.escape(this.labels.showSource)}</summary><pre>${this.escape(value)}</pre></details>`
-                    + `</dd></div>`;
-            }
             const text = typeof value === 'string' ? value : JSON.stringify(value, null, 2);
             if (text.length > 80 || text.includes('\n')) {
                 // A sentence reads as text; only a structure keeps the code font.
@@ -1264,27 +1257,6 @@ class MahoAiAssistant {
             return `<div class="ai-chat-arg">${label}<dd>${this.escape(text)}</dd></div>`;
         });
         return `<dl class="ai-chat-args">${rows.join('')}</dl>`;
-    }
-
-    /** Markup for a preview inside the panel: no scripts, no styles, no handlers, no active links. */
-    sanitizeHtml(html) {
-        const doc = new DOMParser().parseFromString(html, 'text/html');
-        doc.querySelectorAll('script, style, link, meta, iframe, object, embed, form, input, button, textarea, select').forEach((node) => node.remove());
-        // A URL attribute keeps only a relative URL or one of these schemes; every other scheme goes.
-        const safeUrl = (value) => !/^[a-z][a-z0-9+.-]*:/i.test(value) || /^(https?|mailto|tel):/i.test(value);
-        doc.querySelectorAll('*').forEach((node) => {
-            for (const attribute of Array.from(node.attributes)) {
-                const name = attribute.name.toLowerCase();
-                const value = attribute.value.trim();
-                if (name.startsWith('on') || name === 'srcdoc' || ((name === 'href' || name === 'src' || name === 'xlink:href' || name === 'action' || name === 'formaction') && !safeUrl(value))) {
-                    node.removeAttribute(attribute.name);
-                }
-            }
-            if (node.tagName === 'A') {
-                node.removeAttribute('href');
-            }
-        });
-        return doc.body.innerHTML;
     }
 
     prettyPreview(text) {
