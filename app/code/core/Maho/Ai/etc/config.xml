@@ -18,6 +18,9 @@
                     <task>
                         <table>ai_task</table>
                     </task>
+                    <task_schedule>
+                        <table>ai_task_schedule</table>
+                    </task_schedule>
                     <usage>
                         <table>ai_usage</table>
                     </usage>

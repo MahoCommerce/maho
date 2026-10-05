@@ -49,6 +49,7 @@ return function (SchemaEditor $schema): void {
             ->addColumn(Schema::column('max_retries', Types::SMALLINT, unsigned: true, default: 3))
             ->addColumn(Schema::column('admin_user_id', Types::INTEGER, unsigned: true, notNull: false))
             ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('conversation_id', Types::INTEGER, unsigned: true, notNull: false))
             ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
             ->addColumn(Schema::column('started_at', Types::DATETIME_MUTABLE, notNull: false))
             ->addColumn(Schema::column('completed_at', Types::DATETIME_MUTABLE, notNull: false))
@@ -57,7 +58,33 @@ return function (SchemaEditor $schema): void {
             ->addIndex(Index::editor()->setUnquotedColumnNames('task_type'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('consumer', 'created_at'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('admin_user_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('conversation_id'))
             ->setComment('Maho AI Task Queue')
+            ->create(),
+    );
+
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('ai_task_schedule')
+            ->addColumn(Schema::column('schedule_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('admin_user_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('title', Types::STRING, length: 255))
+            ->addColumn(Schema::column('instruction', Types::TEXT, length: 65535))
+            // A cron expression in the time zone of the store
+            ->addColumn(Schema::column('cron_expr', Types::STRING, length: 64))
+            // Who sees the notifications: "self", "everyone" or an admin ACL resource
+            ->addColumn(Schema::column('notify', Types::STRING, length: 128, default: 'self'))
+            ->addColumn(Schema::column('is_active', Types::SMALLINT, unsigned: true, default: 1))
+            ->addColumn(Schema::column('next_run_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('last_run_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('last_task_id', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('updated_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('schedule_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('is_active', 'next_run_at'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('admin_user_id'))
+            ->setComment('Maho AI Scheduled Tasks')
             ->create(),
     );
 

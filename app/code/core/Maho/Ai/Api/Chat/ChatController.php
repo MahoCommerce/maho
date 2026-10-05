@@ -16,7 +16,7 @@ use Mage_Admin_Model_User;
 use Maho\ApiPlatform\Security\SameOriginGuard;
 use Maho\ApiPlatform\Service\StoreContext;
 use Maho_Ai_Model_Chat_Attachment;
-use Maho_Ai_Model_Chat_BackgroundTurnHandler;
+use Maho_Ai_Model_Chat_AgentRunner;
 use Maho_Ai_Model_Chat_ClientGone as ClientGone;
 use Maho_Ai_Model_Chat_SseWriter;
 use Maho_Ai_Model_Conversation;
@@ -167,7 +167,7 @@ final class ChatController
     #[Route('/api/admin/ai/chat/background', name: 'api_admin_ai_chat_background', methods: ['POST'])]
     public function background(Request $request): Response
     {
-        if ($request->attributes->get(Maho_Ai_Model_Chat_BackgroundTurnHandler::ATTRIBUTE) !== true || !\Mage::helper('ai')->isChatEnabled() || !\Mage::helper('ai')->isChatAllowed()) {
+        if ($request->attributes->get(Maho_Ai_Model_Chat_AgentRunner::ATTRIBUTE) !== true || !\Mage::helper('ai')->isChatEnabled() || !\Mage::helper('ai')->isChatAllowed()) {
             throw new NotFoundHttpException('Not found.');
         }
         $admin = $this->admin();
@@ -177,9 +177,14 @@ final class ChatController
             throw new BadRequestHttpException('The request body is not valid JSON.');
         }
         $conversation = $this->conversation($input, $admin, $this->context($input), create: false);
-        $instruction = trim((string) ($input['instruction'] ?? ''));
-        if ($instruction === '') {
-            throw new BadRequestHttpException('The instruction is empty.');
+        /** @var \Maho_Ai_Model_Task $task */
+        $task = \Mage::getModel('ai/task')->load((int) ($input['task_id'] ?? 0));
+        if (!$task->isAgent() || $task->getConversationId() !== (int) $conversation->getId() || (int) $task->getData('admin_user_id') !== (int) $admin->getId()) {
+            throw new BadRequestHttpException('The task does not belong to this conversation.');
+        }
+        $mode = \Maho_Ai_Model_Chat_RunMode::tryFrom((string) ($task->getContextArray()['mode'] ?? '')) ?? \Maho_Ai_Model_Chat_RunMode::Job;
+        if ($mode === \Maho_Ai_Model_Chat_RunMode::Chat) {
+            throw new BadRequestHttpException('A chat turn does not run in the background.');
         }
         if (!$conversation->acquireLock()) {
             throw new ConflictHttpException('The assistant is still answering in this conversation.');
@@ -188,13 +193,15 @@ final class ChatController
         StoreContext::ensureStore();
         $this->requestStack->push($request);
         try {
-            $this->service->runBackground($conversation, $admin, $instruction);
+            $scheduleId = (int) ($task->getContextArray()['schedule_id'] ?? 0);
+            $schedule = $scheduleId > 0 ? \Mage::getModel('ai/task_schedule')->load($scheduleId) : null;
+            $outcome = $this->service->runTask($conversation, $admin, $mode, $schedule?->getId() ? $schedule : null);
         } finally {
             $this->requestStack->pop();
             $conversation->releaseLock();
         }
 
-        return new JsonResponse(['conversation_id' => (int) $conversation->getId(), 'status' => $conversation->getStatus()]);
+        return new JsonResponse(['conversation_id' => (int) $conversation->getId()] + $outcome);
     }
 
     #[Route('/api/admin/ai/chat/undo', name: 'api_admin_ai_chat_undo', methods: ['POST'])]

@@ -309,6 +309,10 @@ return [
     'SalesTaxReport' => [
         'extensions', 'report',
     ],
+    'ScheduledTask' => [
+        'adminUserId', 'cronExpr', 'extensions', 'id', 'instruction', 'isActive', 'lastRunAt', 'nextRunAt', 'notify',
+        'title',
+    ],
     'SearchTermsReport' => [
         'extensions', 'report',
     ],

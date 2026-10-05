@@ -16,6 +16,12 @@ SPDX-License-Identifier: OSL-3.0
         </reference>
     </adminhtml_ai_chat_index>
 
+    <adminhtml_ai_schedule_index>
+        <reference name="content">
+            <block type="ai/adminhtml_schedule" name="ai.schedules"/>
+        </reference>
+    </adminhtml_ai_schedule_index>
+
     <adminhtml_ai_chat_actions>
         <reference name="content">
             <block type="ai/adminhtml_action" name="ai.actions"/>

@@ -17,6 +17,9 @@ class Maho_Ai_Model_Conversation extends Mage_Core_Model_Abstract
     /** A background run of the assistant works in it; the panel polls it until it is active again. */
     public const STATUS_RUNNING = 'running';
 
+    /** The consumer that the usage records and the tasks of the assistant carry. */
+    public const USAGE_CONSUMER = 'ai_chat';
+
     /** Seconds one chat turn may hold the conversation before another request may take it. */
     public const LOCK_SECONDS = 300;
 
@@ -150,31 +153,45 @@ class Maho_Ai_Model_Conversation extends Mage_Core_Model_Abstract
         return $this->getId() && $this->getAdminUserId() === $adminUserId;
     }
 
-    /**
-     * Take the conversation for one chat turn. False when another turn still holds it.
-     */
-    /** True while a turn runs: a background job the queue still holds, or a chat request that holds the lock. */
+    /** True while a turn runs: a background run that can still end, or a chat request that holds the lock. */
     public function isRunning(): bool
     {
         if ($this->getStatus() === self::STATUS_RUNNING) {
-            return $this->backgroundJobQueued();
+            $task = $this->latestTask();
+
+            return $task !== null && ($task->isPending() || ($task->isProcessing() && $task->isQueued()));
         }
         $until = $this->getLockedUntil();
 
         return $until !== null && $until > Mage::app()->getLocale()->formatDateForDb('now');
     }
 
-    /** The dedupe key of the queue message that runs this conversation as a background job. */
-    public static function backgroundQueueKey(int $conversationId): string
+    /** The newest agent task that runs in this conversation, or null for a chat. */
+    public function latestTask(): ?Maho_Ai_Model_Task
     {
-        return 'ai_background_' . $conversationId;
+        if (!$this->getId()) {
+            return null;
+        }
+        /** @var Maho_Ai_Model_Resource_Task_Collection $collection */
+        $collection = Mage::getModel('ai/task')->getCollection();
+        $collection->addFieldToFilter('conversation_id', (int) $this->getId())
+            ->addFieldToFilter('task_type', Maho_Ai_Model_Task::TYPE_AGENT)
+            ->setOrder('task_id', 'DESC')
+            ->setPageSize(1);
+        $task = $collection->getFirstItem();
+
+        return $task instanceof Maho_Ai_Model_Task && $task->getId() ? $task : null;
     }
 
-    /** A background job whose queue message is gone can never run: mark it, so the panel stops waiting. */
+    /** A background run that can never end: mark it, so the panel stops waiting. */
     public function reconcileBackgroundJob(): void
     {
-        if ($this->getStatus() !== self::STATUS_RUNNING || $this->backgroundJobQueued()) {
+        if ($this->getStatus() !== self::STATUS_RUNNING || $this->isRunning()) {
             return;
+        }
+        $task = $this->latestTask();
+        if ($task !== null && ($task->isPending() || $task->isProcessing())) {
+            $task->setData('max_retries', 0)->markFailed('The worker stopped before the run ended.')->save();
         }
         $this->setStatus(self::STATUS_ACTIVE)->save();
         $this->addMessage([
@@ -184,22 +201,7 @@ class Maho_Ai_Model_Conversation extends Mage_Core_Model_Abstract
         ]);
     }
 
-    private function backgroundJobQueued(): bool
-    {
-        if (!Mage::helper('core')->isModuleEnabled('Maho_Queue')) {
-            return false;
-        }
-        $resource = Mage::getSingleton('core/resource');
-        $connection = $resource->getConnection('core_read');
-        $select = $connection->select()
-            ->from(\Maho\Queue\QueueManager::tableName(), ['message_id'])
-            ->where('dedupe_key = ?', self::backgroundQueueKey((int) $this->getId()))
-            ->where('status IN (?)', [\Maho\Queue\Transport\DbTransport::STATUS_PENDING, \Maho\Queue\Transport\DbTransport::STATUS_PROCESSING])
-            ->limit(1);
-
-        return $connection->fetchOne($select) !== false;
-    }
-
+    /** Take the conversation for one chat turn. False when another turn still holds it. */
     public function acquireLock(int $seconds = self::LOCK_SECONDS): bool
     {
         return $this->lockResource()->acquireLock($this, $seconds);

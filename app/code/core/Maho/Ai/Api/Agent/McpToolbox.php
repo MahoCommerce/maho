@@ -60,21 +60,27 @@ final class McpToolbox implements ToolboxInterface
         private readonly ContentGuideTool $contentGuideTool,
         private readonly MemoryTool $memoryTool,
         private readonly BackgroundTaskTool $backgroundTaskTool,
+        private readonly NotifyTool $notifyTool,
         private readonly AttachmentTool $attachmentTool,
         private readonly ImageTool $imageTool,
     ) {}
 
-    private bool $background = false;
+    private \Maho_Ai_Model_Chat_RunMode $mode = \Maho_Ai_Model_Chat_RunMode::Chat;
 
-    /** A background run has its writes approved in advance, and offers no second background run. */
-    public function setBackground(bool $background): void
+    public function setMode(\Maho_Ai_Model_Chat_RunMode $mode): void
     {
-        $this->background = $background;
+        $this->mode = $mode;
     }
 
-    public function isBackground(): bool
+    public function mode(): \Maho_Ai_Model_Chat_RunMode
     {
-        return $this->background;
+        return $this->mode;
+    }
+
+    /** The background run that the notify tool reports on; null in the chat. */
+    public function setRun(?\Maho_Ai_Model_Conversation $conversation, ?\Maho_Ai_Model_Task_Schedule $schedule = null): void
+    {
+        $this->notifyTool->setRun($conversation, $schedule);
     }
 
     /** Keep the editor guide the panel sent with this request, when it sent one. */
@@ -96,9 +102,11 @@ final class McpToolbox implements ToolboxInterface
         if ($this->imageTool->isAvailable()) {
             $tools[] = $this->imageTool->tool();
         }
-        if (!$this->background) {
+        if ($this->mode->hasBrowser()) {
             // A worker has no browser to open a page in, and no administrator to confirm another job.
             $tools = [...$tools, $this->adminPageTool->tool(), $this->adminPageTool->fillTool(), $this->adminPageTool->actionTool(), $this->backgroundTaskTool->tool()];
+        } elseif ($this->notifyTool->isAvailable()) {
+            $tools[] = $this->notifyTool->tool();
         }
         if ($this->contentGuideTool->hasGuide()) {
             $tools[] = $this->contentGuideTool->tool();
@@ -207,7 +215,8 @@ final class McpToolbox implements ToolboxInterface
     /** A tool that runs in this process, outside the MCP catalog. */
     public static function isLocal(string $name): bool
     {
-        return in_array($name, [self::ENABLE_NAME, ContentGuideTool::NAME, BackgroundTaskTool::NAME, AttachmentTool::NAME, ImageTool::NAME], true) || in_array($name, AdminPageTool::NAMES, true) || in_array($name, MemoryTool::NAMES, true);
+        return in_array($name, [self::ENABLE_NAME, ContentGuideTool::NAME, BackgroundTaskTool::NAME, AttachmentTool::NAME, ImageTool::NAME, NotifyTool::NAME], true)
+            || in_array($name, AdminPageTool::NAMES, true) || in_array($name, MemoryTool::NAMES, true);
     }
 
     #[\Override]
@@ -219,6 +228,8 @@ final class McpToolbox implements ToolboxInterface
             $outcome = $this->contentGuideTool->read();
         } elseif ($toolCall->getName() === BackgroundTaskTool::NAME) {
             $outcome = $this->backgroundTaskTool->start($toolCall->getArguments());
+        } elseif ($toolCall->getName() === NotifyTool::NAME) {
+            $outcome = $this->notifyTool->notify($toolCall->getArguments());
         } elseif ($toolCall->getName() === AttachmentTool::NAME) {
             $outcome = $this->attachmentTool->read($toolCall->getArguments());
         } elseif ($toolCall->getName() === ImageTool::NAME) {
@@ -395,6 +406,7 @@ final class McpToolbox implements ToolboxInterface
             $name === ContentGuideTool::NAME => ContentGuideTool::TITLE,
             in_array($name, MemoryTool::NAMES, true) => MemoryTool::title($name),
             $name === BackgroundTaskTool::NAME => BackgroundTaskTool::TITLE,
+            $name === NotifyTool::NAME => 'Send a notification',
             $name === AttachmentTool::NAME => AttachmentTool::TITLE,
             $name === ImageTool::NAME => ImageTool::TITLE,
             in_array($name, AdminPageTool::NAMES, true) => AdminPageTool::title($name),

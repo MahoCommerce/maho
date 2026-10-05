@@ -588,7 +588,19 @@ body.ai-chat-open .ai-chat-toggle {
     white-space: pre-wrap;
 }
 
+.ai-chat-arg-text {
+    max-height: 240px;
+    overflow: auto;
+    line-height: 1.5;
+    white-space: pre-wrap;
+}
+
+/* deep-chat gives every pre a dark code box; an argument keeps the colors of its card. */
 .ai-chat-arg dd pre {
+    padding: 6px 8px;
+    border-radius: 6px;
+    background: var(--maho-surface-sunken);
+    color: var(--maho-ink);
     margin: 0;
     max-height: 240px;
     overflow: auto;

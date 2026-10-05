@@ -17,7 +17,7 @@ use Maho\Ai\Api\Agent\AgentFactory;
 use Maho\Ai\Api\Agent\McpToolCatalog;
 use Maho\Ai\Api\Agent\McpToolbox;
 use Maho_Ai_Model_Chat_ClientGone;
-use Maho_Ai_Model_Chat_NullSseWriter;
+use Maho_Ai_Model_Chat_RecordingSseWriter;
 use Maho_Ai_Model_Chat_ConfirmationRequired;
 use Maho_Ai_Model_Chat_MessageBagBuilder;
 use Maho_Ai_Model_Chat_SseWriter;
@@ -44,7 +44,7 @@ use Symfony\AI\Platform\TokenUsage\TokenUsageAggregation;
  */
 final class ChatService
 {
-    public const USAGE_CONSUMER = 'ai_chat';
+    public const USAGE_CONSUMER = Maho_Ai_Model_Conversation::USAGE_CONSUMER;
 
     public function __construct(
         private readonly AgentFactory $agentFactory,
@@ -73,6 +73,10 @@ final class ChatService
         }
 
         $conversation->cancelPendingWrites();
+        if ($conversation->getStatus() === Maho_Ai_Model_Conversation::STATUS_ARCHIVED) {
+            // The administrator answers an archived run: it is a conversation of the panel again.
+            $conversation->setStatus(Maho_Ai_Model_Conversation::STATUS_ACTIVE)->save();
+        }
         if ($attachments !== []) {
             $lines = [];
             foreach ($attachments as $file) {
@@ -140,22 +144,30 @@ final class ChatService
     }
 
     /**
-     * One turn without a browser, in a queue worker: the instruction the administrator
-     * confirmed runs with every non-destructive write approved in advance.
+     * One turn without a browser, in a queue worker. The instruction is already the last
+     * message of the conversation. A job runs with its non-destructive writes approved in
+     * advance; a scheduled run leaves every write waiting in the conversation.
+     *
+     * @return array{state: string, error: string}
      */
-    public function runBackground(Maho_Ai_Model_Conversation $conversation, Mage_Admin_Model_User $admin, string $instruction): void
-    {
-        $this->toolbox->setBackground(true);
-        if ($conversation->messagesCollection()->getSize() === 0) {
-            // A job queued before the instruction was stored at dispatch.
-            $conversation->addMessage(['role' => Message::ROLE_USER, 'content' => $instruction]);
-        }
+    public function runTask(
+        Maho_Ai_Model_Conversation $conversation,
+        Mage_Admin_Model_User $admin,
+        \Maho_Ai_Model_Chat_RunMode $mode,
+        ?\Maho_Ai_Model_Task_Schedule $schedule = null,
+    ): array {
+        $this->toolbox->setMode($mode);
+        $this->toolbox->setRun($conversation, $schedule);
+        $sse = new Maho_Ai_Model_Chat_RecordingSseWriter();
         try {
-            $this->run($conversation, $admin, [], new Maho_Ai_Model_Chat_NullSseWriter());
+            $this->run($conversation, $admin, ['run_mode' => $mode->value], $sse);
         } finally {
-            $this->toolbox->setBackground(false);
+            $this->toolbox->setMode(\Maho_Ai_Model_Chat_RunMode::Chat);
+            $this->toolbox->setRun(null);
             $conversation->setStatus(Maho_Ai_Model_Conversation::STATUS_ACTIVE)->save();
         }
+
+        return ['state' => $sse->state(), 'error' => $sse->error()];
     }
 
     /**

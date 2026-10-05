@@ -158,6 +158,7 @@ class Maho_Ai_Helper_Data extends Mage_Core_Helper_Abstract
                 : null,
         ]);
         $task->save();
+        $task->queue();
 
         return (int) $task->getId();
     }
@@ -266,6 +267,7 @@ class Maho_Ai_Helper_Data extends Mage_Core_Helper_Abstract
             'store_id'        => $data['store_id'] ?? 0,
         ]);
         $task->save();
+        $task->queue();
 
         return (int) $task->getId();
     }
@@ -372,6 +374,7 @@ class Maho_Ai_Helper_Data extends Mage_Core_Helper_Abstract
             'store_id'        => $data['store_id'] ?? 0,
         ]);
         $task->save();
+        $task->queue();
 
         return (int) $task->getId();
     }

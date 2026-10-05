@@ -404,6 +404,12 @@ it('starts a background job after confirmation and runs it in a worker with its 
         expect($jobId)->toBeGreaterThan(0);
         expect((string) $job->getTitle())->toBe('Rename pages');
         expect((int) $queue->fetchOne("SELECT COUNT(*) FROM {$queueTable}"))->toBe($before + 1);
+        $task = $job->latestTask();
+        expect($task)->not->toBeNull();
+        expect($task->getTaskType())->toBe(Maho_Ai_Model_Task::TYPE_AGENT);
+        expect($task->getContextArray()['mode'])->toBe('job');
+        expect((int) $task->getData('max_retries'))->toBe(0);
+        expect($task->isQueued())->toBeTrue();
         expect($job->isRunning())->toBeTrue();
         expect((string) $job->messagesCollection()->getFirstItem()->getContent())->toBe('Rename the page ' . $pageId . ' to New.');
 
@@ -423,7 +429,7 @@ it('starts a background job after confirmation and runs it in a worker with its 
             new ToolCallResult([new ToolCall('call_w', 'content_cms_pages_update', ['id' => (string) $pageId, 'title' => 'New'])]),
             new TextResult('Renamed one page.'),
         );
-        new Maho_Ai_Model_Chat_BackgroundTurnHandler()(new Maho_Ai_Model_Chat_BackgroundTurn($jobId, (int) $admin->getId(), 'Rename the page ' . $pageId . ' to New.'));
+        new Maho_Ai_Model_TaskRunner()->processTask((int) $task->getId());
 
         expect(AiChatScript::$offeredTools[0])->toContain('content_cms_pages_update');
         expect(AiChatScript::$offeredTools[0])->not->toContain('run_in_background', 'admin_open_page');
@@ -440,11 +446,122 @@ it('starts a background job after confirmation and runs it in a worker with its 
         expect($toolRow[1])->toBe('done');
         expect($toolRow[2])->toBeTrue();
         expect(end($rows)[3])->toBe('Renamed one page.');
+        $task = Mage::getModel('ai/task')->load((int) $task->getId());
+        expect($task->getData('status'))->toBe(Maho_Ai_Model_Task::STATUS_COMPLETE, (string) $task->getData('error_message'));
+        expect((string) $task->getData('response'))->toBe('Renamed one page.');
+
+        // A second runner finds the task taken and leaves it alone.
+        new Maho_Ai_Model_TaskRunner()->processTask((int) $task->getId());
+        expect(Mage::getModel('cms/page')->load($pageId)->getTitle())->toBe('New');
     } finally {
-        $queue->delete($queueTable, ['body LIKE ?' => '%BackgroundTurn%']);
+        $queue->delete($queueTable, ['dedupe_key LIKE ?' => 'ai_task_%']);
+        Mage::getSingleton('core/resource')->getConnection('core_write')->delete(
+            Mage::getSingleton('core/resource')->getTableName('ai/task'),
+            ['admin_user_id = ?' => (int) $admin->getId()],
+        );
         Mage::getModel('cms/page')->load($pageId)->delete();
         aiChatLogin($admin);
         aiChatDeleteConversations((int) $admin->getId());
+        aiChatDeleteAdmin($admin);
+    }
+});
+
+it('creates a scheduled task through its API tool, and a scheduled run proposes its write and notifies its audience', function (): void {
+    $admin = aiChatAdmin('ai_chat_schedule', ['all']);
+    $page = Mage::getModel('cms/page')->setData(['identifier' => 'ai-chat-schedule-page', 'title' => 'Old', 'content' => '<p>x</p>', 'is_active' => 1, 'stores' => [0], 'root_template' => 'one_column']);
+    $page->save();
+    $pageId = (int) $page->getId();
+    $resource = Mage::getSingleton('core/resource');
+    $connection = $resource->getConnection('core_write');
+    $inbox = $resource->getTableName('adminnotification/inbox');
+    try {
+        aiChatLogin($admin);
+        AiChatScript::reset(
+            new ToolCallResult([new ToolCall('call_s', 'system_scheduled_tasks_create', ['title' => 'Page check', 'instruction' => 'Check the title of page ' . $pageId . '.', 'cronExpr' => '0 8 * * *', 'notify' => 'admin/cms/page'])]),
+            new TextResult('Scheduled.'),
+        );
+        $first = aiChatRequest('/api/admin/ai/chat', ['message' => 'Check the page title every morning']);
+        $confirm = aiChatEvents($first['events'], 'confirm');
+        expect($confirm[0]['calls'][0]['name'] ?? null)->toBe('system_scheduled_tasks_create', $first['raw']);
+        $approved = aiChatRequest('/api/admin/ai/chat/confirm', ['conversation_id' => (int) $confirm[0]['conversation_id'], 'decisions' => ['call_s' => true]]);
+        expect(aiChatEvents($approved['events'], 'tool_result')[0]['ok'])->toBeTrue($approved['raw']);
+
+        /** @var Maho_Ai_Model_Task_Schedule $schedule */
+        $schedule = Mage::getModel('ai/task_schedule')->getCollection()->addFieldToFilter('admin_user_id', (int) $admin->getId())->getFirstItem();
+        expect($schedule->getCronExpr())->toBe('0 8 * * *');
+        expect($schedule->getNotify())->toBe('cms/page');
+        expect($schedule->getNextRunAt())->not->toBeNull();
+
+        // The minute comes: the dispatcher queues one run and moves the schedule to its next minute.
+        $schedule->setNextRunAt(Mage::app()->getLocale()->formatDateForDb('-1 minute'))->save();
+        new Maho_Ai_Model_Task_Scheduler()->runDueSchedules();
+        $schedule = Mage::getModel('ai/task_schedule')->load((int) $schedule->getId());
+        expect($schedule->getNextRunAt())->toBeGreaterThan(Mage::app()->getLocale()->formatDateForDb('now'));
+        $task = Mage::getModel('ai/task')->load((int) $schedule->getLastTaskId());
+        expect($task->getContextArray())->toBe(['mode' => 'schedule', 'schedule_id' => (int) $schedule->getId()]);
+        expect($task->isQueued())->toBeTrue();
+
+        // The run: the notification goes out at once, the write waits for the administrator.
+        AiChatScript::reset(
+            new ToolCallResult([
+                new ToolCall('call_n', 'notify', ['title' => 'The page title is old', 'text' => 'Page ' . $pageId . ' is still called Old.', 'severity' => 'major']),
+                new ToolCall('call_u', 'content_cms_pages_update', ['id' => (string) $pageId, 'title' => 'New']),
+            ]),
+        );
+        new Maho_Ai_Model_TaskRunner()->processTask((int) $task->getId());
+
+        expect(AiChatScript::$offeredTools[0])->toContain('notify');
+        expect(AiChatScript::$offeredTools[0])->not->toContain('admin_open_page', 'run_in_background');
+        expect((string) Mage::getModel('cms/page')->load($pageId)->getTitle())->toBe('Old');
+        $task = Mage::getModel('ai/task')->load((int) $task->getId());
+        expect($task->getData('status'))->toBe(Maho_Ai_Model_Task::STATUS_COMPLETE, (string) $task->getData('error_message'));
+        $run = Mage::getModel('ai/conversation')->load((int) $task->getConversationId());
+        expect($run->getPendingWrites())->toHaveCount(1);
+        expect($run->getStatus())->toBe(Maho_Ai_Model_Conversation::STATUS_ACTIVE);
+
+        $rows = $connection->fetchAll($connection->select()->from($inbox, ['title', 'admin_user_id', 'acl_resource', 'url'])->where('url LIKE ?', '%/ai_chat/open/id/' . (int) $run->getId() . '/%'));
+        $byTitle = array_column($rows, null, 'title');
+        expect($byTitle['The page title is old']['acl_resource'] ?? null)->toBe('cms/page');
+        expect($byTitle['The page title is old']['admin_user_id'])->toBeNull();
+        expect((int) ($byTitle['The assistant task "Page check" waits for your confirmation']['admin_user_id'] ?? 0))->toBe((int) $admin->getId());
+        // The worker runs in a frontend store: its code must not end up in the admin link.
+        expect($byTitle['The page title is old']['url'])->not->toContain('/' . Mage::app()->getDefaultStoreView()->getCode() . '/');
+
+        // A run whose write still waits blocks the next one: it would propose the same again.
+        $schedule->setNextRunAt(Mage::app()->getLocale()->formatDateForDb('-1 minute'))->save();
+        new Maho_Ai_Model_Task_Scheduler()->runDueSchedules();
+        expect((int) Mage::getModel('ai/task_schedule')->load((int) $schedule->getId())->getLastTaskId())->toBe((int) $task->getId());
+    } finally {
+        $connection->delete(\Maho\Queue\QueueManager::tableName(), ['dedupe_key LIKE ?' => 'ai_task_%']);
+        $connection->delete($resource->getTableName('ai/task'), ['admin_user_id = ?' => (int) $admin->getId()]);
+        $connection->delete($resource->getTableName('ai/task_schedule'), ['admin_user_id = ?' => (int) $admin->getId()]);
+        $connection->delete($inbox, ['url LIKE ?' => '%/ai_chat/open/id/%']);
+        Mage::getModel('cms/page')->load($pageId)->delete();
+        aiChatLogin($admin);
+        aiChatDeleteConversations((int) $admin->getId());
+        aiChatDeleteAdmin($admin);
+    }
+});
+
+it('refuses a schedule that runs more than once an hour, or notifies a resource the administrator lacks', function (): void {
+    $admin = aiChatAdmin('ai_chat_schedule_limits', ['admin/system/ai/chat', 'admin/cms/page']);
+    try {
+        aiChatLogin($admin);
+        $create = static fn(string $cron, string $notify): Closure => static fn(): Maho_Ai_Model_Task_Schedule => Mage::getModel('ai/task_schedule')
+            ->setTitle('Check')->setInstruction('Check the pages.')->setCronExpr($cron)->setNotify($notify)
+            ->validateFor($admin);
+        expect($create('*/5 * * * *', 'self'))->toThrow(Mage_Core_Exception::class, 'at most once an hour');
+        expect($create('0 8 * * *', 'sales/order'))->toThrow(Mage_Core_Exception::class, 'not an ACL resource');
+        $schedule = $create('0 8 * * *', 'admin/cms/page')();
+        expect($schedule->getAdminUserId())->toBe((int) $admin->getId());
+        expect($schedule->getNotify())->toBe('cms/page');
+        expect($schedule->notifyAclResource())->toBe('cms/page');
+        expect($schedule->notifyAdminUserId())->toBeNull();
+    } finally {
+        Mage::getSingleton('core/resource')->getConnection('core_write')->delete(
+            Mage::getSingleton('core/resource')->getTableName('ai/task_schedule'),
+            ['admin_user_id = ?' => (int) $admin->getId()],
+        );
         aiChatDeleteAdmin($admin);
     }
 });

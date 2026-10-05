@@ -90,7 +90,7 @@ class Maho_Ai_Model_Chat_ToolExecutor implements ToolExecutorInterface
             $seen[$id] = $id;
             $seen[self::payloadKey($toolCall)] = $id;
             $write = !$this->toolbox->isReadOnly($toolCall->getName());
-            if ($write && !$this->toolbox->isBackground()) {
+            if ($write && !$this->toolbox->mode()->approvesWrites()) {
                 $pending[] = $toolCall;
                 continue;
             }

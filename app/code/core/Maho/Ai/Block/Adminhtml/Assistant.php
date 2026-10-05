@@ -30,6 +30,9 @@ class Maho_Ai_Block_Adminhtml_Assistant extends Mage_Adminhtml_Block_Template
         'system_email_template' => ['email template', 'id', 'core/email_template', 'template_code'],
     ];
 
+    /** The admin session key of a conversation that a notification link asked the panel to open. */
+    public const SESSION_OPEN_CONVERSATION = 'ai_open_conversation';
+
     private const LOGO_PATH = 'M1075.34-395.845c5.796 0 10.492 4.654 10.492 10.392v109.133c0 64.867-53.088 117.45-118.571 117.45H854.981c-5.796 0-10.496-4.654-10.496-10.396v-115.717c0-61.225 50.113-110.863 111.929-110.863h118.925zm-111.229 40.954c-42.454 0-76.871 34.088-76.871 76.142s34.417 76.138 76.871 76.138 76.871-34.088 76.871-76.138-34.417-76.142-76.871-76.142z';
 
     #[\Override]
@@ -94,6 +97,7 @@ class Maho_Ai_Block_Adminhtml_Assistant extends Mage_Adminhtml_Block_Template
             'deleteUrl' => $this->getUrl('adminhtml/ai_chat/delete'),
             'formKey' => $this->getFormKey(),
             'context' => $this->getPageContext(),
+            'openConversation' => (int) Mage::getSingleton('adminhtml/session')->getData(self::SESSION_OPEN_CONVERSATION, true),
             'labels' => [
                 'title' => $helper->__('Maho Assistant'),
                 'placeholder' => $helper->__('Ask the assistant to find or change something...'),
@@ -138,6 +142,7 @@ class Maho_Ai_Block_Adminhtml_Assistant extends Mage_Adminhtml_Block_Template
                 'contentGuide' => $helper->__('Content editor guide'),
                 'remember' => $helper->__('Remember a note'),
                 'runInBackground' => $helper->__('Run in the background'),
+                'notify' => $helper->__('Send a notification'),
                 'attach' => $helper->__('Attach a file'),
                 'dropHint' => $helper->__('Drop the files here'),
                 'uploading' => $helper->__('Uploading'),

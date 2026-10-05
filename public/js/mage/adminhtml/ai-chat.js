@@ -132,10 +132,17 @@ class MahoAiAssistant {
         } catch (e) {
             // storage can be unavailable; the panel starts closed
         }
+        // A notification link names the conversation to open: it wins over the stored one.
+        const linked = this.config.openConversation > 0;
+        if (linked) {
+            conversationId = this.config.openConversation;
+            open = true;
+        }
         // The greeting would show for a moment before the stored conversation replaces it.
         this.panel.classList.toggle('is-restoring', conversationId > 0);
         this.loadConversations().then(() => {
-            if (conversationId > 0 && [...this.picker.options].some((o) => parseInt(o.value, 10) === conversationId)) {
+            // The picker lists recent open conversations only; a linked one can be an archived run.
+            if (conversationId > 0 && (linked || [...this.picker.options].some((o) => parseInt(o.value, 10) === conversationId))) {
                 return this.loadConversation(conversationId);
             }
         }).finally(() => this.panel.classList.remove('is-restoring'));
@@ -226,6 +233,7 @@ class MahoAiAssistant {
             const url = new URL(this.config.messagesUrl, window.location.href);
             url.searchParams.set('id', String(id));
             const data = await mahoFetch(url, { loaderArea: false });
+            this.pendingTitle = data.conversation.title;
             this.rememberConversation(data.conversation.id);
             this.pendingCard = null;
             this.chat.clearMessages(true);
@@ -1200,7 +1208,7 @@ class MahoAiAssistant {
 
     /** "content_cms_pages_update" reads as "Update cms pages": the verb first, without the section. */
     humanizeTool(name) {
-        const local = { attachment_read: this.labels.attachmentRead, generate_image: this.labels.generateImage, run_in_background: this.labels.runInBackground, admin_open_page: this.labels.openPage, admin_fill_form: this.labels.fillForm, admin_page_action: this.labels.pageAction, enable_tools: this.labels.loadTools, admin_content_guide: this.labels.contentGuide, remember: this.labels.remember, forget: this.labels.forget };
+        const local = { attachment_read: this.labels.attachmentRead, generate_image: this.labels.generateImage, run_in_background: this.labels.runInBackground, admin_open_page: this.labels.openPage, admin_fill_form: this.labels.fillForm, admin_page_action: this.labels.pageAction, enable_tools: this.labels.loadTools, admin_content_guide: this.labels.contentGuide, remember: this.labels.remember, forget: this.labels.forget, notify: this.labels.notify };
         if (local[name]) {
             return local[name];
         }
@@ -1236,7 +1244,9 @@ class MahoAiAssistant {
             }
             const text = typeof value === 'string' ? value : JSON.stringify(value, null, 2);
             if (text.length > 80 || text.includes('\n')) {
-                return `<div class="ai-chat-arg ai-chat-arg-block">${label}<dd><pre>${this.escape(text)}</pre></dd></div>`;
+                // A sentence reads as text; only a structure keeps the code font.
+                const body = typeof value === 'string' ? `<div class="ai-chat-arg-text">${this.escape(text)}</div>` : `<pre>${this.escape(text)}</pre>`;
+                return `<div class="ai-chat-arg ai-chat-arg-block">${label}<dd>${body}</dd></div>`;
             }
             return `<div class="ai-chat-arg">${label}<dd>${this.escape(text)}</dd></div>`;
         });

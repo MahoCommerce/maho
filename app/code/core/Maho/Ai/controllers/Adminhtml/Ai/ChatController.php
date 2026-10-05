@@ -14,6 +14,10 @@ class Maho_Ai_Adminhtml_Ai_ChatController extends Mage_Adminhtml_Controller_Acti
 {
     public const ADMIN_RESOURCE = 'system/ai/chat';
 
+    /** A notification link comes from cron, which has no session to sign it with: open only redirects. */
+    #[\Override]
+    protected $_publicActions = ['open'];
+
     /** The audit trail has its own ACL entry: it shows what every administrator did. */
     #[\Override]
     protected function _isAllowed(): bool
@@ -53,6 +57,20 @@ class Maho_Ai_Adminhtml_Ai_ChatController extends Mage_Adminhtml_Controller_Acti
     {
         $grid = $this->getLayout()->createBlock('ai/adminhtml_action_grid');
         $this->_prepareDownloadResponse('assistant_actions.csv', $grid->getCsvFile());
+    }
+
+    /** The link of an assistant notification: the dashboard, with the panel open on the conversation. */
+    #[Maho\Config\Route('/admin/ai_chat/open', methods: ['GET'])]
+    public function openAction(): void
+    {
+        $conversation = $this->ownConversation();
+        if ($conversation === null) {
+            Mage::getSingleton('adminhtml/session')->addError(Mage::helper('ai')->__('This conversation belongs to another administrator. The notification text holds the result.'));
+            $this->_redirect('adminhtml/dashboard/index');
+            return;
+        }
+        Mage::getSingleton('adminhtml/session')->setData(Maho_Ai_Block_Adminhtml_Assistant::SESSION_OPEN_CONVERSATION, (int) $conversation->getId());
+        $this->_redirect('adminhtml/dashboard/index');
     }
 
     /**
