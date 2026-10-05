@@ -326,3 +326,41 @@ describe('Customer address extended fields', function (): void {
     });
 
 });
+
+describe('Customer address postcode', function (): void {
+
+    it('saves an address without a postcode in a country where the postcode is optional', function (): void {
+        [$create] = createTestCustomer();
+        $customerId = (int) $create['json']['id'];
+
+        $created = apiPost('/api/rest/v2/customers/me/addresses', [
+            'firstname' => 'Pest',
+            'lastname' => 'Writer',
+            'street' => ['1 Grafton Street'],
+            'city' => 'Dublin',
+            'countryId' => 'IE',
+            'telephone' => '+353 1 2345678',
+        ], customerToken($customerId));
+
+        expect($created['status'])->toBeSuccessful();
+        expect($created['json']['postcode'] ?? null)->toBeEmpty();
+    });
+
+    it('still requires a postcode in other countries', function (): void {
+        [$create] = createTestCustomer();
+        $customerId = (int) $create['json']['id'];
+
+        $created = apiPost('/api/rest/v2/customers/me/addresses', [
+            'firstname' => 'Pest',
+            'lastname' => 'Writer',
+            'street' => ['Via Roma 2'],
+            'city' => 'Torino',
+            'countryId' => 'IT',
+            'telephone' => '+39 011 7654321',
+        ], customerToken($customerId));
+
+        expect($created['status'])->toBe(400);
+        expect($created['json']['message'])->toContain('Postcode is required');
+    });
+
+});

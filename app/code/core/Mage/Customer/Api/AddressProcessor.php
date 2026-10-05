@@ -285,7 +285,7 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
         if (empty($data->city)) {
             $errors[] = 'City is required';
         }
-        if (empty($data->postcode)) {
+        if (empty($data->postcode) && !\Mage::helper('directory')->isZipCodeOptional((string) $data->countryId)) {
             $errors[] = 'Postcode is required';
         }
         if (empty($data->countryId)) {

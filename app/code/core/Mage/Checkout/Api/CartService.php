@@ -868,8 +868,12 @@ class CartService
      */
     public function assertCompleteAddressInput(array $input): void
     {
+        $required = ['firstName', 'lastName', 'street', 'city', 'postcode', 'countryId', 'telephone'];
+        if (\Mage::helper('directory')->isZipCodeOptional((string) ($input['countryId'] ?? ''))) {
+            $required = array_values(array_diff($required, ['postcode']));
+        }
         $missing = [];
-        foreach (['firstName', 'lastName', 'street', 'city', 'postcode', 'countryId', 'telephone'] as $field) {
+        foreach ($required as $field) {
             $value = $input[$field] ?? null;
             if ($value === null || $value === '' || $value === []) {
                 $missing[] = $field;
