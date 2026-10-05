@@ -326,3 +326,54 @@ describe('Customer address extended fields', function (): void {
     });
 
 });
+
+describe('Customer address format checks', function (): void {
+
+    $usAddress = fn(array $override = []): array => array_merge([
+        'firstname' => 'Pest',
+        'lastname' => 'Writer',
+        'street' => ['1 Infinite Loop'],
+        'city' => 'Cupertino',
+        'postcode' => '95014',
+        'countryId' => 'US',
+        'telephone' => '4085550100',
+    ], $override);
+
+    it('rejects a postcode in the wrong format with the message of the address model', function () use ($usAddress): void {
+        [$create] = createTestCustomer();
+        $token = customerToken((int) $create['json']['id']);
+
+        $created = apiPost('/api/rest/v2/customers/me/addresses', $usAddress(['postcode' => '123456789']), $token);
+
+        expect($created['status'])->toBe(400);
+        expect($created['json']['message'])->toContain('Please enter a valid postcode for United States');
+    });
+
+    it('rejects a postcode in the wrong format on update', function () use ($usAddress): void {
+        [$create] = createTestCustomer();
+        $token = customerToken((int) $create['json']['id']);
+
+        $created = apiPost('/api/rest/v2/customers/me/addresses', $usAddress(), $token);
+        expect($created['status'])->toBeSuccessful();
+        $addressId = (int) $created['json']['id'];
+
+        $updated = apiPut("/api/rest/v2/customers/me/addresses/{$addressId}", $usAddress(['postcode' => '123456789']), $token);
+
+        expect($updated['status'])->toBe(400);
+        expect($updated['json']['message'])->toContain('Please enter a valid postcode for United States');
+    });
+
+    it('rejects a region of another country', function () use ($usAddress): void {
+        [$create] = createTestCustomer();
+        $token = customerToken((int) $create['json']['id']);
+        $regions = apiGet('/api/rest/v2/countries/CA')['json']['availableRegions'] ?? [];
+        $ontarioId = (int) (array_column($regions, 'id', 'code')['ON'] ?? 0);
+        expect($ontarioId)->toBeGreaterThan(0);
+
+        $created = apiPost('/api/rest/v2/customers/me/addresses', $usAddress(['regionId' => $ontarioId]), $token);
+
+        expect($created['status'])->toBe(400);
+        expect($created['json']['message'])->toContain('The selected state/province is not valid for the chosen country.');
+    });
+
+});

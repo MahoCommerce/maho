@@ -125,6 +125,7 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
         $address = \Mage::getModel('customer/address');
         $address->setCustomerId($customer->getId());
         $this->populateAddressFromDto($address, $data);
+        $this->assertAddressFormat($address);
 
         try {
             $address->save();
@@ -166,6 +167,7 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
 
         $this->validateAddress($data);
         $this->populateAddressFromDto($address, $data);
+        $this->assertAddressFormat($address);
 
         try {
             $address->save();
@@ -297,6 +299,18 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
 
         if (!empty($errors)) {
             throw new BadRequestHttpException(implode(', ', $errors));
+        }
+    }
+
+    /**
+     * Reject a postcode in the wrong format, or a region of another country.
+     * The address model does not run these checks on save.
+     */
+    private function assertAddressFormat(\Mage_Customer_Model_Address $address): void
+    {
+        $errors = $address->getFormatErrors();
+        if ($errors) {
+            throw new BadRequestHttpException(implode(' ', $errors));
         }
     }
 
