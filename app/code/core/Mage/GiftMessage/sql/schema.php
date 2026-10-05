@@ -8,23 +8,31 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
-use Doctrine\DBAL\Schema\Schema;
+use Doctrine\DBAL\Schema\SchemaEditor;
+use Doctrine\DBAL\Schema\Table;
+use Doctrine\DBAL\Schema\TableEditor;
 use Doctrine\DBAL\Types\Types;
+use Maho\Db\Schema;
 
-return function (Schema $schema): void {
-    $message = $schema->createTable('gift_message');
-    $message->addColumn('gift_message_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $message->addColumn('customer_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $message->addColumn('sender', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $message->addColumn('recipient', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $message->addColumn('message', Types::TEXT, ['length' => 65535, 'notnull' => false]);
-
-    $message->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('gift_message_id')->create(),
+return function (SchemaEditor $schema): void {
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('gift_message')
+            ->addColumn(Schema::column('gift_message_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('customer_id', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('sender', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('recipient', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('message', Types::TEXT, length: 65535, notNull: false))
+            ->addPrimaryKeyConstraint(
+                PrimaryKeyConstraint::editor()
+                    ->setUnquotedColumnNames('gift_message_id')
+                    ->create(),
+            )
+            ->setComment('Gift Message')
+            ->create(),
     );
-
-    $message->setComment('Gift Message');
 
     // Graft the gift_message_id reference onto the sales/quote tables owned by
     // Mage_Sales (depends_on guarantees those tables already exist in the shared
@@ -39,8 +47,12 @@ return function (Schema $schema): void {
         'sales_flat_order',
         'sales_flat_order_item',
     ] as $tableName) {
-        $schema->getTable($tableName)->addColumn('gift_message_id', Types::INTEGER, ['notnull' => false]);
+        $schema->modifyTableByUnquotedName($tableName, static function (TableEditor $table): void {
+            $table->addColumn(Schema::column('gift_message_id', Types::INTEGER, notNull: false));
+        });
     }
 
-    $schema->getTable('sales_flat_order_item')->addColumn('gift_message_available', Types::INTEGER, ['notnull' => false]);
+    $schema->modifyTableByUnquotedName('sales_flat_order_item', static function (TableEditor $table): void {
+        $table->addColumn(Schema::column('gift_message_available', Types::INTEGER, notNull: false));
+    });
 };

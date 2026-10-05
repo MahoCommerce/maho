@@ -283,6 +283,7 @@ describe('DDL Operations - Column Management', function () {
 
         expect($this->adapter->tableColumnExists($this->testTableName, 'old_name'))->toBeFalse();
         expect($this->adapter->tableColumnExists($this->testTableName, 'new_name'))->toBeTrue();
+        expect($this->adapter->describeTable($this->testTableName)['new_name']['NULLABLE'])->toBeFalse();
     });
 
     it('drops column from table', function () {
@@ -885,6 +886,66 @@ describe('DDL Operations - Foreign Key Management', function () {
             expect($indexesAfter[$keyName]['COLUMNS_LIST'])->toBe($index['COLUMNS_LIST']);
         }
         expect(count($this->adapter->getForeignKeys($this->testTableName)))->toBe(count($foreignKeysBefore) + 1);
+
+        $this->adapter->dropTable($this->testTableName);
+        $this->adapter->dropTable($parentTable);
+    });
+
+    it('drops one foreign key and keeps the other foreign keys, their names and the indexes', function () {
+        $parentTable = 'test_parent_' . uniqid();
+        $this->adapter->createTable($this->adapter->newTable($parentTable)
+            ->addColumn('id', Table::TYPE_INTEGER, null, ['identity' => true, 'nullable' => false, 'primary' => true]));
+
+        $droppedFk = $this->adapter->getForeignKeyName($this->testTableName, 'parent_id', $parentTable, 'id');
+        $keptFk = $this->adapter->getForeignKeyName($this->testTableName, 'other_id', $parentTable, 'id');
+        $this->adapter->createTable($this->adapter->newTable($this->testTableName)
+            ->addColumn('id', Table::TYPE_INTEGER, null, ['identity' => true, 'nullable' => false, 'primary' => true])
+            ->addColumn('parent_id', Table::TYPE_INTEGER, null, ['nullable' => true])
+            ->addColumn('other_id', Table::TYPE_INTEGER, null, ['nullable' => true])
+            ->addIndex($this->adapter->getIndexName($this->testTableName, ['parent_id']), ['parent_id'])
+            ->addIndex($this->adapter->getIndexName($this->testTableName, ['other_id']), ['other_id'])
+            ->addForeignKey($droppedFk, 'parent_id', $parentTable, 'id', Table::ACTION_CASCADE)
+            ->addForeignKey($keptFk, 'other_id', $parentTable, 'id', Table::ACTION_SET_NULL));
+        $this->adapter->insert($parentTable, ['id' => 1]);
+        $this->adapter->insert($this->testTableName, ['id' => 1, 'parent_id' => 1, 'other_id' => 1]);
+        $indexesBefore = array_keys($this->adapter->getIndexList($this->testTableName));
+
+        $this->adapter->dropForeignKey($this->testTableName, $droppedFk);
+
+        $foreignKeys = array_change_key_case($this->adapter->getForeignKeys($this->testTableName), CASE_UPPER);
+        expect(array_keys($foreignKeys))->toBe([strtoupper($keptFk)]);
+        expect($foreignKeys[strtoupper($keptFk)]['ON_DELETE'])->toBe(AdapterInterface::FK_ACTION_SET_NULL);
+        expect(array_keys($this->adapter->getIndexList($this->testTableName)))->toEqualCanonicalizing($indexesBefore);
+        expect((int) $this->adapter->fetchOne('SELECT COUNT(*) FROM ' . $this->adapter->quoteIdentifier($this->testTableName)))->toBe(1);
+
+        $this->adapter->dropTable($this->testTableName);
+        $this->adapter->dropTable($parentTable);
+    });
+
+    it('keeps the child rows when it rebuilds a table that other tables reference', function () {
+        // SQLite rebuilds the table, and a DROP TABLE with foreign keys on deletes the child rows.
+        $parentTable = 'test_parent_' . uniqid();
+        $this->adapter->createTable($this->adapter->newTable($parentTable)
+            ->addColumn('id', Table::TYPE_INTEGER, null, ['identity' => true, 'nullable' => false, 'primary' => true])
+            ->addColumn('label', Table::TYPE_TEXT, 64, ['nullable' => false, 'default' => 'x']));
+        $this->adapter->createTable($this->adapter->newTable($this->testTableName)
+            ->addColumn('id', Table::TYPE_INTEGER, null, ['identity' => true, 'nullable' => false, 'primary' => true])
+            ->addColumn('parent_id', Table::TYPE_INTEGER, null, ['nullable' => false])
+            ->addIndex($this->adapter->getIndexName($this->testTableName, ['parent_id']), ['parent_id'])
+            ->addForeignKey(
+                $this->adapter->getForeignKeyName($this->testTableName, 'parent_id', $parentTable, 'id'),
+                'parent_id',
+                $parentTable,
+                'id',
+                Table::ACTION_CASCADE,
+            ));
+        $this->adapter->insert($parentTable, ['id' => 1]);
+        $this->adapter->insert($this->testTableName, ['id' => 1, 'parent_id' => 1]);
+
+        $this->adapter->modifyColumn($parentTable, 'label', ['nullable' => true, 'default' => null]);
+
+        $childRows = (int) $this->adapter->fetchOne('SELECT COUNT(*) FROM ' . $this->adapter->quoteIdentifier($this->testTableName));
+        expect($childRows)->toBe(1);
 
         $this->adapter->dropTable($this->testTableName);
         $this->adapter->dropTable($parentTable);

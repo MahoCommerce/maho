@@ -34,3 +34,8 @@ parameters:
 
     ignoreErrors:
         - identifier: missingType.iterableValue
+        # DBAL 4.5 marks AbstractNamedObject internal, but getObjectName() is the public NamedObject API.
+        # Remove with doctrine/dbal#7520, or with DBAL 5.0, which drops the class (doctrine/dbal#7394).
+        -
+            identifier: method.internalClass
+            message: '#^Call to method getObjectName\(\) of internal class Doctrine\\DBAL\\Schema\\Abstract(Optionally)?NamedObject<#'

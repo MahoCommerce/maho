@@ -8,122 +8,237 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Schema\Column;
+use Doctrine\DBAL\Schema\ForeignKeyConstraint;
+use Doctrine\DBAL\Schema\ForeignKeyConstraint\ReferentialAction;
+use Doctrine\DBAL\Schema\Index;
+use Doctrine\DBAL\Schema\Index\IndexType;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
-use Doctrine\DBAL\Schema\Schema;
+use Doctrine\DBAL\Schema\SchemaEditor;
+use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
+use Maho\Db\Schema;
 
-return function (Schema $schema): void {
-    $class = $schema->createTable('tax_class');
-    $class->addColumn('class_id', Types::SMALLINT, ['autoincrement' => true]);
-    $class->addColumn('class_name', Types::STRING, ['length' => 255]);
-    $class->addColumn('class_type', Types::STRING, ['length' => 8, 'default' => 'CUSTOMER']);
-    $class->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('class_id')->create(),
+return function (SchemaEditor $schema): void {
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('tax_class')
+            ->addColumn(Schema::column('class_id', Types::SMALLINT, autoincrement: true))
+            ->addColumn(Schema::column('class_name', Types::STRING, length: 255))
+            ->addColumn(Schema::column('class_type', Types::STRING, length: 8, default: 'CUSTOMER'))
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('class_id')->create())
+            ->setComment('Tax Class')
+            ->create(),
     );
-    $class->setComment('Tax Class');
 
-    $rule = $schema->createTable('tax_calculation_rule');
-    $rule->addColumn('tax_calculation_rule_id', Types::INTEGER, ['autoincrement' => true]);
-    $rule->addColumn('code', Types::STRING, ['length' => 255]);
-    $rule->addColumn('priority', Types::INTEGER);
-    $rule->addColumn('position', Types::INTEGER);
-    $rule->addColumn('calculate_subtotal', Types::INTEGER, ['default' => 0]);
-    $rule->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('tax_calculation_rule_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('tax_calculation_rule')
+            ->addColumn(Schema::column('tax_calculation_rule_id', Types::INTEGER, autoincrement: true))
+            ->addColumn(Schema::column('code', Types::STRING, length: 255))
+            ->addColumn(Schema::column('priority', Types::INTEGER))
+            ->addColumn(Schema::column('position', Types::INTEGER))
+            ->addColumn(Schema::column('calculate_subtotal', Types::INTEGER, default: 0))
+            ->addPrimaryKeyConstraint(
+                PrimaryKeyConstraint::editor()
+                    ->setUnquotedColumnNames('tax_calculation_rule_id')
+                    ->create(),
+            )
+            ->addIndex(Index::editor()->setUnquotedColumnNames('priority', 'position', 'tax_calculation_rule_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('code'))
+            ->setComment('Tax Calculation Rule')
+            ->create(),
     );
-    $rule->addIndex(['priority', 'position', 'tax_calculation_rule_id']);
-    $rule->addIndex(['code']);
-    $rule->setComment('Tax Calculation Rule');
 
-    $rate = $schema->createTable('tax_calculation_rate');
-    $rate->addColumn('tax_calculation_rate_id', Types::INTEGER, ['autoincrement' => true]);
-    $rate->addColumn('tax_country_id', Types::STRING, ['length' => 2]);
-    $rate->addColumn('tax_region_id', Types::INTEGER);
-    $rate->addColumn('tax_postcode', Types::STRING, ['length' => 21, 'notnull' => false]);
-    $rate->addColumn('code', Types::STRING, ['length' => 255]);
-    $rate->addColumn('rate', Types::DECIMAL, ['precision' => 12, 'scale' => 4]);
-    $rate->addColumn('zip_is_range', Types::SMALLINT, ['notnull' => false]);
-    $rate->addColumn('zip_from', Types::INTEGER, ['unsigned' => true, 'notnull' => false]);
-    $rate->addColumn('zip_to', Types::INTEGER, ['unsigned' => true, 'notnull' => false]);
-    $rate->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('tax_calculation_rate_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('tax_calculation_rate')
+            ->addColumn(Schema::column('tax_calculation_rate_id', Types::INTEGER, autoincrement: true))
+            ->addColumn(Schema::column('tax_country_id', Types::STRING, length: 2))
+            ->addColumn(Schema::column('tax_region_id', Types::INTEGER))
+            ->addColumn(Schema::column('tax_postcode', Types::STRING, length: 21, notNull: false))
+            ->addColumn(Schema::column('code', Types::STRING, length: 255))
+            ->addColumn(Schema::column('rate', Types::DECIMAL, precision: 12, scale: 4))
+            ->addColumn(Schema::column('zip_is_range', Types::SMALLINT, notNull: false))
+            ->addColumn(Schema::column('zip_from', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('zip_to', Types::INTEGER, unsigned: true, notNull: false))
+            ->addPrimaryKeyConstraint(
+                PrimaryKeyConstraint::editor()
+                    ->setUnquotedColumnNames('tax_calculation_rate_id')
+                    ->create(),
+            )
+            ->addIndex(Index::editor()->setUnquotedColumnNames('tax_country_id', 'tax_region_id', 'tax_postcode'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('code'))
+            ->addIndex(
+                Index::editor()
+                    ->setUnquotedColumnNames('tax_calculation_rate_id', 'tax_country_id', 'tax_region_id', 'zip_is_range', 'tax_postcode'),
+            )
+            ->setComment('Tax Calculation Rate')
+            ->create(),
     );
-    $rate->addIndex(['tax_country_id', 'tax_region_id', 'tax_postcode']);
-    $rate->addIndex(['code']);
-    $rate->addIndex(
-        ['tax_calculation_rate_id', 'tax_country_id', 'tax_region_id', 'zip_is_range', 'tax_postcode'],
-    );
-    $rate->setComment('Tax Calculation Rate');
 
-    $calc = $schema->createTable('tax_calculation');
-    $calc->addColumn('tax_calculation_id', Types::INTEGER, ['autoincrement' => true]);
-    $calc->addColumn('tax_calculation_rate_id', Types::INTEGER);
-    $calc->addColumn('tax_calculation_rule_id', Types::INTEGER);
-    $calc->addColumn('customer_tax_class_id', Types::SMALLINT);
-    $calc->addColumn('product_tax_class_id', Types::SMALLINT);
-    $calc->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('tax_calculation_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('tax_calculation')
+            ->addColumn(Schema::column('tax_calculation_id', Types::INTEGER, autoincrement: true))
+            ->addColumn(Schema::column('tax_calculation_rate_id', Types::INTEGER))
+            ->addColumn(Schema::column('tax_calculation_rule_id', Types::INTEGER))
+            ->addColumn(Schema::column('customer_tax_class_id', Types::SMALLINT))
+            ->addColumn(Schema::column('product_tax_class_id', Types::SMALLINT))
+            ->addPrimaryKeyConstraint(
+                PrimaryKeyConstraint::editor()
+                    ->setUnquotedColumnNames('tax_calculation_id')
+                    ->create(),
+            )
+            ->addIndex(Index::editor()->setUnquotedColumnNames('tax_calculation_rule_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('tax_calculation_rate_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('customer_tax_class_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('product_tax_class_id'))
+            ->addIndex(
+                Index::editor()
+                    ->setUnquotedColumnNames('tax_calculation_rate_id', 'customer_tax_class_id', 'product_tax_class_id'),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('product_tax_class_id')
+                    ->setUnquotedReferencedTableName('tax_class')
+                    ->setUnquotedReferencedColumnNames('class_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('customer_tax_class_id')
+                    ->setUnquotedReferencedTableName('tax_class')
+                    ->setUnquotedReferencedColumnNames('class_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('tax_calculation_rate_id')
+                    ->setUnquotedReferencedTableName('tax_calculation_rate')
+                    ->setUnquotedReferencedColumnNames('tax_calculation_rate_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('tax_calculation_rule_id')
+                    ->setUnquotedReferencedTableName('tax_calculation_rule')
+                    ->setUnquotedReferencedColumnNames('tax_calculation_rule_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Tax Calculation')
+            ->create(),
     );
-    $calc->addIndex(['tax_calculation_rule_id']);
-    $calc->addIndex(['tax_calculation_rate_id']);
-    $calc->addIndex(['customer_tax_class_id']);
-    $calc->addIndex(['product_tax_class_id']);
-    $calc->addIndex(
-        ['tax_calculation_rate_id', 'customer_tax_class_id', 'product_tax_class_id'],
-    );
-    $calc->addForeignKeyConstraint('tax_class', ['product_tax_class_id'], ['class_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
-    $calc->addForeignKeyConstraint('tax_class', ['customer_tax_class_id'], ['class_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
-    $calc->addForeignKeyConstraint('tax_calculation_rate', ['tax_calculation_rate_id'], ['tax_calculation_rate_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
-    $calc->addForeignKeyConstraint('tax_calculation_rule', ['tax_calculation_rule_id'], ['tax_calculation_rule_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
-    $calc->setComment('Tax Calculation');
 
-    $rateTitle = $schema->createTable('tax_calculation_rate_title');
-    $rateTitle->addColumn('tax_calculation_rate_title_id', Types::INTEGER, ['autoincrement' => true]);
-    $rateTitle->addColumn('tax_calculation_rate_id', Types::INTEGER);
-    $rateTitle->addColumn('store_id', Types::SMALLINT, ['unsigned' => true]);
-    $rateTitle->addColumn('value', Types::STRING, ['length' => 255]);
-    $rateTitle->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('tax_calculation_rate_title_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('tax_calculation_rate_title')
+            ->addColumn(Schema::column('tax_calculation_rate_title_id', Types::INTEGER, autoincrement: true))
+            ->addColumn(Schema::column('tax_calculation_rate_id', Types::INTEGER))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true))
+            ->addColumn(Schema::column('value', Types::STRING, length: 255))
+            ->addPrimaryKeyConstraint(
+                PrimaryKeyConstraint::editor()
+                    ->setUnquotedColumnNames('tax_calculation_rate_title_id')
+                    ->create(),
+            )
+            ->addIndex(Index::editor()->setUnquotedColumnNames('tax_calculation_rate_id', 'store_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('tax_calculation_rate_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('store_id')
+                    ->setUnquotedReferencedTableName('core_store')
+                    ->setUnquotedReferencedColumnNames('store_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('tax_calculation_rate_id')
+                    ->setUnquotedReferencedTableName('tax_calculation_rate')
+                    ->setUnquotedReferencedColumnNames('tax_calculation_rate_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Tax Calculation Rate Title')
+            ->create(),
     );
-    $rateTitle->addIndex(['tax_calculation_rate_id', 'store_id']);
-    $rateTitle->addIndex(['tax_calculation_rate_id']);
-    $rateTitle->addIndex(['store_id']);
-    $rateTitle->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
-    $rateTitle->addForeignKeyConstraint('tax_calculation_rate', ['tax_calculation_rate_id'], ['tax_calculation_rate_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
-    $rateTitle->setComment('Tax Calculation Rate Title');
 
     // Two structurally identical aggregation tables.
     foreach (['tax_order_aggregated_created', 'tax_order_aggregated_updated'] as $tableName) {
-        $aggr = $schema->createTable($tableName);
-        $aggr->addColumn('id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-        $aggr->addColumn('period', Types::DATE_MUTABLE, ['notnull' => false]);
-        $aggr->addColumn('store_id', Types::SMALLINT, ['unsigned' => true, 'notnull' => false]);
-        $aggr->addColumn('code', Types::STRING, ['length' => 255]);
-        $aggr->addColumn('order_status', Types::STRING, ['length' => 50]);
-        $aggr->addColumn('percent', Types::SMALLFLOAT, ['notnull' => false]);
-        $aggr->addColumn('orders_count', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-        $aggr->addColumn('tax_base_amount_sum', Types::SMALLFLOAT, ['notnull' => false]);
-        $aggr->addPrimaryKeyConstraint(
-            PrimaryKeyConstraint::editor()->setUnquotedColumnNames('id')->create(),
+        $schema->addTable(
+            Table::editor()
+                ->setUnquotedName($tableName)
+                ->addColumn(Schema::column('id', Types::INTEGER, unsigned: true, autoincrement: true))
+                ->addColumn(Schema::column('period', Types::DATE_MUTABLE, notNull: false))
+                ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, notNull: false))
+                ->addColumn(Schema::column('code', Types::STRING, length: 255))
+                ->addColumn(Schema::column('order_status', Types::STRING, length: 50))
+                ->addColumn(Schema::column('percent', Types::SMALLFLOAT, notNull: false))
+                ->addColumn(Schema::column('orders_count', Types::INTEGER, unsigned: true, default: 0))
+                ->addColumn(Schema::column('tax_base_amount_sum', Types::SMALLFLOAT, notNull: false))
+                ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('id')->create())
+                ->addIndex(
+                    Index::editor()
+                        ->setType(IndexType::UNIQUE)
+                        ->setUnquotedColumnNames('period', 'store_id', 'code', 'percent', 'order_status'),
+                )
+                ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
+                ->addForeignKeyConstraint(
+                    ForeignKeyConstraint::editor()
+                        ->setUnquotedReferencingColumnNames('store_id')
+                        ->setUnquotedReferencedTableName('core_store')
+                        ->setUnquotedReferencedColumnNames('store_id')
+                        ->setOnUpdateAction(ReferentialAction::CASCADE)
+                        ->setOnDeleteAction(ReferentialAction::CASCADE)
+                        ->create(),
+                )
+                ->setComment('Tax Order Aggregation')
+                ->create(),
         );
-        $aggr->addUniqueIndex(['period', 'store_id', 'code', 'percent', 'order_status']);
-        $aggr->addIndex(['store_id']);
-        $aggr->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
-        $aggr->setComment('Tax Order Aggregation');
     }
 
-    $taxItem = $schema->createTable('sales_order_tax_item');
-    $taxItem->addColumn('tax_item_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $taxItem->addColumn('tax_id', Types::INTEGER, ['unsigned' => true]);
-    $taxItem->addColumn('item_id', Types::INTEGER, ['unsigned' => true]);
-    $taxItem->addColumn('tax_percent', Types::DECIMAL, ['precision' => 12, 'scale' => 4]);
-    $taxItem->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('tax_item_id')->create(),
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('sales_order_tax_item')
+            ->addColumn(Schema::column('tax_item_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('tax_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('item_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('tax_percent', Types::DECIMAL, precision: 12, scale: 4))
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('tax_item_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('tax_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('item_id'))
+            ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('tax_id', 'item_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('tax_id')
+                    ->setUnquotedReferencedTableName('sales_order_tax')
+                    ->setUnquotedReferencedColumnNames('tax_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('item_id')
+                    ->setUnquotedReferencedTableName('sales_flat_order_item')
+                    ->setUnquotedReferencedColumnNames('item_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Sales Order Tax Item')
+            ->create(),
     );
-    $taxItem->addIndex(['tax_id']);
-    $taxItem->addIndex(['item_id']);
-    $taxItem->addUniqueIndex(['tax_id', 'item_id']);
-    $taxItem->addForeignKeyConstraint('sales_order_tax', ['tax_id'], ['tax_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
-    $taxItem->addForeignKeyConstraint('sales_flat_order_item', ['item_id'], ['item_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
-    $taxItem->setComment('Sales Order Tax Item');
 };

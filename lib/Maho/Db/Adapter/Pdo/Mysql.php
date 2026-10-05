@@ -11,6 +11,9 @@ declare(strict_types=1);
 
 namespace Maho\Db\Adapter\Pdo;
 
+use Doctrine\DBAL\Schema\Exception\TableDoesNotExist;
+use Doctrine\DBAL\Schema\Name\OptionallyQualifiedName;
+use Doctrine\DBAL\Types\Type;
 use Maho\Db\Adapter\AbstractPdoAdapter;
 use Maho\Db\Helper;
 
@@ -1480,15 +1483,19 @@ class Mysql extends AbstractPdoAdapter
             // Get the full table name with schema if provided
             $fullTableName = $this->_getTableName($tableName, $schemaName);
 
-            // Use Doctrine DBAL SchemaManager for table introspection
+            // Only the columns and the primary key: a full introspection also reads
+            // every index, foreign key and unique constraint.
             $schemaManager = $this->_connection->createSchemaManager();
-            $table = $schemaManager->introspectTableByUnquotedName($fullTableName);
+            $columns = $schemaManager->introspectTableColumnsByUnquotedName($fullTableName);
+            if ($columns === []) {
+                throw TableDoesNotExist::new($fullTableName);
+            }
             $platform = $this->_connection->getDatabasePlatform();
 
             // Get primary key information
             $primaryKey = [];
             $primaryKeyPositions = [];
-            $pkConstraint = $table->getPrimaryKeyConstraint();
+            $pkConstraint = $schemaManager->introspectTablePrimaryKeyConstraint(OptionallyQualifiedName::unquoted($fullTableName));
             if ($pkConstraint) {
                 $pkColumns = $pkConstraint->getColumnNames();
                 foreach ($pkColumns as $index => $columnNameObj) {
@@ -1501,11 +1508,11 @@ class Mysql extends AbstractPdoAdapter
             $ddl = [];
             $position = 1;
 
-            foreach ($table->getColumns() as $column) {
+            foreach ($columns as $column) {
                 $columnName = $column->getObjectName()->getIdentifier()->getValue();
 
                 // Get the SQL declaration and parse it to extract MySQL type
-                $sqlDeclaration = $column->getType()->getSQLDeclaration($column->toArray(), $platform);
+                $sqlDeclaration = Type::getType($column->getTypeName())->getSQLDeclaration($column->toArray(true), $platform);
                 $typeInfo = $this->_parseMysqlType($sqlDeclaration);
 
                 // Determine if column is in primary key
