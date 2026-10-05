@@ -51,6 +51,17 @@ class Maho_Ai_Model_Task extends Mage_Core_Model_Abstract
         return $this->setData('conversation_id', $value);
     }
 
+    public function getScheduleId(): ?int
+    {
+        $value = $this->getData('schedule_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setScheduleId(?int $value): static
+    {
+        return $this->setData('schedule_id', $value);
+    }
+
     public function isAgent(): bool
     {
         return $this->getTaskType() === self::TYPE_AGENT;

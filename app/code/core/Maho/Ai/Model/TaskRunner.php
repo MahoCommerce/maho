@@ -351,8 +351,7 @@ class Maho_Ai_Model_TaskRunner
         $outcome = new Maho_Ai_Model_Chat_AgentRunner()->run($task);
         /** @var Maho_Ai_Model_Conversation $conversation */
         $conversation = Mage::getModel('ai/conversation')->load((int) $task->getConversationId());
-        $scheduleId = (int) ($task->getContextArray()['schedule_id'] ?? 0);
-        $schedule = $scheduleId > 0 ? Mage::getModel('ai/task_schedule')->load($scheduleId) : null;
+        $schedule = $task->getScheduleId() ? Mage::getModel('ai/task_schedule')->load($task->getScheduleId()) : null;
         $schedule = $schedule?->getId() ? $schedule : null;
         $title = (string) ($schedule?->getTitle() ?? $conversation->getTitle());
         $helper = Mage::helper('ai');
@@ -390,6 +389,10 @@ class Maho_Ai_Model_TaskRunner
         } elseif ($schedule === null) {
             Maho_Ai_Model_Chat_Notifier::send(Mage_AdminNotification_Model_Inbox::SEVERITY_NOTICE, $helper->__('The background job "%s" is done', $title), $summary, $conversation);
         } else {
+            // A run started by hand ends with its result for the owner, even when the model notified nobody.
+            if (!empty($task->getContextArray()['manual'])) {
+                Maho_Ai_Model_Chat_Notifier::send(Mage_AdminNotification_Model_Inbox::SEVERITY_NOTICE, $helper->__('The scheduled task "%s" is done', $title), $summary, $conversation, $schedule, creatorOnly: true);
+            }
             // A run with nothing to confirm stays out of the panel picker; the grid and its notifications still open it.
             $conversation->setStatus(Maho_Ai_Model_Conversation::STATUS_ARCHIVED)->save();
         }

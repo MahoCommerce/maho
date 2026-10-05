@@ -13,7 +13,7 @@ SPDX-License-Identifier: OSL-3.0
                     <action>adminhtml/ai/tasks</action>
                     <children>
                         <tasks translate="title" module="ai">
-                            <title>Task History</title>
+                            <title>Request Queue</title>
                             <sort_order>20</sort_order>
                             <action>adminhtml/ai/tasks</action>
                         </tasks>
@@ -29,17 +29,17 @@ SPDX-License-Identifier: OSL-3.0
                         </reindex>
                         <chat translate="title" module="ai">
                             <title>Assistant Conversations</title>
-                            <sort_order>40</sort_order>
+                            <sort_order>10</sort_order>
                             <action>adminhtml/ai_chat/index</action>
                         </chat>
                         <schedules translate="title" module="ai">
-                            <title>Scheduled Tasks</title>
-                            <sort_order>42</sort_order>
+                            <title>Assistant Scheduled Tasks</title>
+                            <sort_order>12</sort_order>
                             <action>adminhtml/ai_schedule/index</action>
                         </schedules>
                         <actions translate="title" module="ai">
-                            <title>Assistant Actions</title>
-                            <sort_order>45</sort_order>
+                            <title>Assistant Actions Log</title>
+                            <sort_order>14</sort_order>
                             <action>adminhtml/ai_chat/actions</action>
                         </actions>
                     </children>
@@ -58,7 +58,7 @@ SPDX-License-Identifier: OSL-3.0
                                 <sort_order>17</sort_order>
                                 <children>
                                     <tasks translate="title" module="ai">
-                                        <title>Task History</title>
+                                        <title>Request Queue</title>
                                         <sort_order>20</sort_order>
                                     </tasks>
                                     <usage translate="title" module="ai">
@@ -71,15 +71,15 @@ SPDX-License-Identifier: OSL-3.0
                                     </reindex>
                                     <chat translate="title" module="ai">
                                         <title>Assistant</title>
-                                        <sort_order>40</sort_order>
+                                        <sort_order>10</sort_order>
                                     </chat>
                                     <schedules translate="title" module="ai">
-                                        <title>Scheduled Tasks</title>
-                                        <sort_order>42</sort_order>
+                                        <title>Assistant Scheduled Tasks</title>
+                                        <sort_order>12</sort_order>
                                     </schedules>
                                     <actions translate="title" module="ai">
-                                        <title>Assistant Actions</title>
-                                        <sort_order>45</sort_order>
+                                        <title>Assistant Actions Log</title>
+                                        <sort_order>14</sort_order>
                                     </actions>
                                 </children>
                             </ai>

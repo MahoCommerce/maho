@@ -23,7 +23,7 @@ final class AgentFactory
         private readonly McpToolbox $toolbox,
     ) {}
 
-    public function create(string $systemPrompt, ToolExecutorInterface $executor, ?int $storeId = null): Agent
+    public function create(string $systemPrompt, ToolExecutorInterface $executor, ?int $storeId = null, ?int $maxToolCalls = null): Agent
     {
         $platformCode = (string) \Mage::getStoreConfig('ai/chat/platform', $storeId) ?: null;
         $provider = \Mage::getSingleton('ai/platform_factory')->create($platformCode, $storeId);
@@ -43,7 +43,7 @@ final class AgentFactory
             name: 'admin-assistant',
             toolbox: $this->toolbox,
             toolExecutor: $executor,
-            maxToolCalls: max(1, (int) \Mage::getStoreConfig('ai/chat/max_tool_calls', $storeId)),
+            maxToolCalls: $maxToolCalls ?? max(1, (int) \Mage::getStoreConfig('ai/chat/max_tool_calls', $storeId)),
         );
     }
 

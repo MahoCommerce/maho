@@ -193,8 +193,7 @@ final class ChatController
         StoreContext::ensureStore();
         $this->requestStack->push($request);
         try {
-            $scheduleId = (int) ($task->getContextArray()['schedule_id'] ?? 0);
-            $schedule = $scheduleId > 0 ? \Mage::getModel('ai/task_schedule')->load($scheduleId) : null;
+            $schedule = $task->getScheduleId() ? \Mage::getModel('ai/task_schedule')->load($task->getScheduleId()) : null;
             $outcome = $this->service->runTask($conversation, $admin, $mode, $schedule?->getId() ? $schedule : null);
         } finally {
             $this->requestStack->pop();

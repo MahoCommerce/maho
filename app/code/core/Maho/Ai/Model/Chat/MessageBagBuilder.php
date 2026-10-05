@@ -78,7 +78,9 @@ class Maho_Ai_Model_Chat_MessageBagBuilder
 
     /**
      * Cut the oldest messages, never inside a tool round: an assistant message that
-     * carries tool calls and its tool results travel together or not at all.
+     * carries tool calls and its tool results travel together or not at all. The current
+     * turn always stays whole, from the last message of the administrator: a turn with
+     * many tool rounds is longer than the limit, and the model needs the question.
      *
      * @param list<Maho_Ai_Model_Conversation_Message> $messages
      * @return list<Maho_Ai_Model_Conversation_Message>
@@ -93,6 +95,12 @@ class Maho_Ai_Model_Chat_MessageBagBuilder
         $start = $count - $limit;
         while ($start < $count && $messages[$start]->getRole() === Maho_Ai_Model_Conversation_Message::ROLE_TOOL) {
             $start++;
+        }
+        for ($turn = $count - 1; $turn >= 0; $turn--) {
+            if ($messages[$turn]->getRole() === Maho_Ai_Model_Conversation_Message::ROLE_USER) {
+                $start = min($start, $turn);
+                break;
+            }
         }
 
         return array_values(array_slice($messages, $start));

@@ -60,6 +60,7 @@ class Maho_Ai_Model_Chat_AgentRunner
             'store_id' => (int) $conversation->getStoreId(),
         ]);
         $task->setConversationId((int) $conversation->getId());
+        $task->setScheduleId(isset($context['schedule_id']) ? (int) $context['schedule_id'] : null);
         $task->save();
         $task->queue();
 

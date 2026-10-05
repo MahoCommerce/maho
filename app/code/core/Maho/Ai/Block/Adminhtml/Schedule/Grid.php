@@ -92,6 +92,16 @@ class Maho_Ai_Block_Adminhtml_Schedule_Grid extends Mage_Adminhtml_Block_Widget_
             'width' => '150px',
         ]);
 
+        $this->addColumn('action', [
+            'header' => $helper->__('Action'),
+            'index' => 'schedule_id',
+            'width' => '110px',
+            'filter' => false,
+            'sortable' => false,
+            'is_system' => true,
+            'frame_callback' => $this->renderActions(...),
+        ]);
+
         return parent::_prepareColumns();
     }
 
@@ -104,6 +114,28 @@ class Maho_Ai_Block_Adminhtml_Schedule_Grid extends Mage_Adminhtml_Block_Widget_
             Maho_Ai_Model_Task_Schedule::NOTIFY_EVERYONE => $this->escapeHtml($helper->__('Every administrator')),
             default => $this->escapeHtml($helper->__('Allowed: %s', (string) $row->getNotify())),
         };
+    }
+
+    /** The mass actions, for one row: Run Now, Pause or Resume, Edit and Delete. */
+    public function renderActions(mixed $value, Maho_Ai_Model_Task_Schedule $row): string
+    {
+        $helper = Mage::helper('ai');
+        $id = ['id' => $row->getId()];
+        $links = [
+            [$helper->__('Run Now'), $this->getUrl('*/*/run', $id), null],
+            $row->getIsActive()
+                ? [$helper->__('Pause'), $this->getUrl('*/*/status', $id + ['active' => 0]), null]
+                : [$helper->__('Resume'), $this->getUrl('*/*/status', $id + ['active' => 1]), null],
+            [$helper->__('Edit'), $this->getUrl('*/*/edit', $id), null],
+            [$helper->__('Delete'), $this->getUrl('*/*/delete', $id), $helper->__('Are you sure?')],
+        ];
+        $html = [];
+        foreach ($links as [$label, $url, $confirm]) {
+            $onclick = $confirm === null ? '' : sprintf(' onclick="return confirm(\'%s\')"', $this->escapeHtml($this->jsQuoteEscape($confirm)));
+            $html[] = sprintf('<a href="%s"%s>%s</a>', $this->escapeUrl($url), $onclick, $this->escapeHtml($label));
+        }
+
+        return implode('<br>', $html);
     }
 
     #[\Override]

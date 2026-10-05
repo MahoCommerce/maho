@@ -50,6 +50,7 @@ return function (SchemaEditor $schema): void {
             ->addColumn(Schema::column('admin_user_id', Types::INTEGER, unsigned: true, notNull: false))
             ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
             ->addColumn(Schema::column('conversation_id', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('schedule_id', Types::INTEGER, unsigned: true, notNull: false))
             ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
             ->addColumn(Schema::column('started_at', Types::DATETIME_MUTABLE, notNull: false))
             ->addColumn(Schema::column('completed_at', Types::DATETIME_MUTABLE, notNull: false))
@@ -59,6 +60,7 @@ return function (SchemaEditor $schema): void {
             ->addIndex(Index::editor()->setUnquotedColumnNames('consumer', 'created_at'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('admin_user_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('conversation_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('schedule_id', 'task_id'))
             ->setComment('Maho AI Task Queue')
             ->create(),
     );

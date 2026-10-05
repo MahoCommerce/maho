@@ -145,7 +145,7 @@ class Maho_Ai_Model_Chat_SystemPrompt
                 'How this turn runs: one run of a scheduled task, in a queue worker, with nobody watching and no admin page.',
                 '- A write does not run: it waits in this conversation for the administrator. Propose one only when the instruction asks for a change.',
                 '- Call notify only when the result needs attention, with a text that stands on its own. When everything is as expected, do not notify.',
-                '- End with a short report. The next run reads it: report what is new since the previous run, which the instruction quotes when there was one.',
+                '- End with a short report of what you found.',
             ]),
             default => '',
         };

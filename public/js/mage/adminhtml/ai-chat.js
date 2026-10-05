@@ -16,6 +16,7 @@ class MahoAiAssistant {
     constructor(config) {
         this.config = config;
         this.labels = config.labels;
+        this.toolLabels = config.toolLabels;
         this.panel = document.getElementById('ai-chat-panel');
         this.toggle = document.getElementById('ai-chat-toggle');
         this.chat = document.getElementById('ai-chat');
@@ -218,6 +219,8 @@ class MahoAiAssistant {
         }
         this.rememberConversation(null);
         this.pendingCard = null;
+        this.renderedHistory = null;
+        this.chat.classList.remove('has-history');
         this.chat.clearMessages(true);
         this.chat.focusInput();
         setTimeout(() => this.updateIntro(false), 100);
@@ -233,9 +236,18 @@ class MahoAiAssistant {
             const url = new URL(this.config.messagesUrl, window.location.href);
             url.searchParams.set('id', String(id));
             const data = await mahoFetch(url, { loaderArea: false });
+            // A poll of a running job finds the same history most of the time: nothing to redraw.
+            const signature = JSON.stringify([data.conversation, data.messages]);
+            if (signature === this.renderedHistory && this.conversationId === data.conversation.id) {
+                this.watchBackground(data.conversation.running ? id : null);
+                return;
+            }
+            this.renderedHistory = signature;
             this.pendingTitle = data.conversation.title;
             this.rememberConversation(data.conversation.id);
             this.pendingCard = null;
+            // Set before the redraw: the greeting stays one line while the history is put back.
+            this.chat.classList.toggle('has-history', data.messages.length > 0);
             this.chat.clearMessages(true);
             const pending = [];
             const history = [];
@@ -264,7 +276,7 @@ class MahoAiAssistant {
                 this.pendingCard = { index: history.length - 1, calls: pending };
             }
             if (data.conversation.running) {
-                history.push({ role: 'ai', html: this.renderWorking(this.labels.running) });
+                history.push({ role: 'ai', html: this.renderWorking(data.conversation.queued ? this.labels.queued : this.labels.running) });
             }
             this.chat.history = history;
             setTimeout(() => this.updateIntro(history.length > 0), 100);
@@ -424,6 +436,8 @@ class MahoAiAssistant {
         this.abortController = new AbortController();
         signals.stopClicked.listener = () => this.stop();
         this.updateIntro(true);
+        this.chat.classList.add('has-history');
+        this.renderedHistory = null;
 
         await this.uploadsSettled();
         const attachments = this.attachments.map((file) => file.id).filter(Boolean);
@@ -1208,9 +1222,8 @@ class MahoAiAssistant {
 
     /** "content_cms_pages_update" reads as "Update cms pages": the verb first, without the section. */
     humanizeTool(name) {
-        const local = { attachment_read: this.labels.attachmentRead, generate_image: this.labels.generateImage, run_in_background: this.labels.runInBackground, admin_open_page: this.labels.openPage, admin_fill_form: this.labels.fillForm, admin_page_action: this.labels.pageAction, enable_tools: this.labels.loadTools, admin_content_guide: this.labels.contentGuide, remember: this.labels.remember, forget: this.labels.forget, notify: this.labels.notify };
-        if (local[name]) {
-            return local[name];
+        if (this.toolLabels[name]) {
+            return this.toolLabels[name];
         }
         const parts = String(name ?? '').split('_').filter(Boolean);
         const verbs = { list: this.labels.verbList, get: this.labels.verbGet, create: this.labels.verbCreate, update: this.labels.verbUpdate, delete: this.labels.verbDelete };

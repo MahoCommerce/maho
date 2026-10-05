@@ -27,7 +27,7 @@ use Maho\Config\ApiResource;
     mahoSection: 'System',
     mahoOperations: ['read' => 'View', 'write' => 'Create & Update', 'delete' => 'Delete'],
     shortName: 'ScheduledTask',
-    description: 'An instruction that the admin assistant runs on a schedule, in a queue worker, with the permissions of its owner: the administrator who saved it last. A run never changes data by itself: a write waits in the run conversation for a confirmation. A run notifies its audience in the admin inbox only when it finds something worth attention, and it reads the answer of the previous run.',
+    description: 'An instruction that the admin assistant runs on a schedule, in a queue worker, with the permissions of its owner: the administrator who saved it last. A run never changes data by itself: a write waits in the run conversation for a confirmation. A run notifies its audience in the admin inbox only when it finds something worth attention.',
     provider: CrudProvider::class,
     processor: ScheduledTaskProcessor::class,
     operations: [

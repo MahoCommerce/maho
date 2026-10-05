@@ -58,7 +58,15 @@ class Maho_Ai_Adminhtml_Ai_ScheduleController extends Mage_Adminhtml_Controller_
             ->_addBreadcrumb($helper->__('AI'), $helper->__('AI'))
             ->_addBreadcrumb($helper->__('Scheduled Tasks'), $helper->__('Scheduled Tasks'))
             ->_addContent($this->getLayout()->createBlock('ai/adminhtml_schedule_edit'))
+            ->_addLeft($this->getLayout()->createBlock('ai/adminhtml_schedule_edit_tabs'))
             ->renderLayout();
+    }
+
+    #[Maho\Config\Route('/admin/ai_schedule/runs')]
+    public function runsAction(): void
+    {
+        Mage::register('ai_task_schedule', Mage::getModel('ai/task_schedule')->load((int) $this->getRequest()->getParam('id')));
+        $this->getResponse()->setBody($this->getLayout()->createBlock('ai/adminhtml_schedule_edit_tab_runs')->toHtml());
     }
 
     /** Whoever saves the task becomes its owner: the runs use the permissions of the owner. */
@@ -120,22 +128,53 @@ class Maho_Ai_Adminhtml_Ai_ScheduleController extends Mage_Adminhtml_Controller_
         $this->_redirect('*/*/index');
     }
 
-    /** A run uses the permissions of the administrator who created the task, so only that administrator starts one by hand. */
+    /** Pause or resume one task from its grid row. */
+    #[Maho\Config\Route('/admin/ai_schedule/status')]
+    public function statusAction(): void
+    {
+        $schedule = Mage::getModel('ai/task_schedule')->load((int) $this->getRequest()->getParam('id'));
+        if ($schedule->getId()) {
+            $schedule->setIsActive((bool) $this->getRequest()->getParam('active'))->save();
+            Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('ai')->__('%d scheduled task(s) were updated.', 1));
+        }
+        $this->_redirect('*/*/index');
+    }
+
+    /** Queue one run now. Its owner gets a notification with the result when it ends. */
+    #[Maho\Config\Route('/admin/ai_schedule/run')]
+    public function runAction(): void
+    {
+        $helper = Mage::helper('ai');
+        $session = Mage::getSingleton('adminhtml/session');
+        /** @var Maho_Ai_Model_Task_Schedule $schedule */
+        $schedule = Mage::getModel('ai/task_schedule')->load((int) $this->getRequest()->getParam('id'));
+        if (!$schedule->getId()) {
+            $session->addError($helper->__('This scheduled task no longer exists.'));
+        } elseif (!$this->isOwnedByCurrentAdmin($schedule)) {
+            $session->addError($helper->__('Only the owner of a scheduled task can run it: a run uses the permissions of the owner. Save the task to become its owner.'));
+        } elseif ($schedule->run(manual: true) === null) {
+            $session->addNotice($helper->__('The previous run of this task still runs or waits for a confirmation.'));
+        } else {
+            $session->addSuccess($helper->__('The scheduled task is in the queue. You get a notification when it is done.'));
+        }
+        $this->_redirectReferer($this->getUrl('*/*/index'));
+    }
+
+    /** A run uses the permissions of the owner, so only the owner starts one by hand. */
     #[Maho\Config\Route('/admin/ai_schedule/massRun', methods: ['POST'])]
     public function massRunAction(): void
     {
         $session = Mage::getSingleton('adminhtml/session');
-        $adminId = (int) Mage::getSingleton('admin/session')->getUser()->getId();
         $started = 0;
         $skipped = 0;
         foreach ($this->selectedSchedules() as $schedule) {
-            if ($schedule->getAdminUserId() !== $adminId || $schedule->run() === null) {
+            if (!$this->isOwnedByCurrentAdmin($schedule) || $schedule->run(manual: true) === null) {
                 $skipped++;
                 continue;
             }
             $started++;
         }
-        $session->addSuccess(Mage::helper('ai')->__('%d scheduled task(s) were started. Each run is a new conversation in the assistant.', $started));
+        $session->addSuccess(Mage::helper('ai')->__('%d scheduled task(s) are in the queue. You get a notification when each one is done.', $started));
         if ($skipped > 0) {
             $session->addNotice(Mage::helper('ai')->__('%d scheduled task(s) were skipped: they belong to another administrator, or their previous run still runs or waits for a confirmation.', $skipped));
         }
@@ -152,6 +191,11 @@ class Maho_Ai_Adminhtml_Ai_ScheduleController extends Mage_Adminhtml_Controller_
         }
         Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('ai')->__('%d scheduled task(s) were deleted.', $deleted));
         $this->_redirect('*/*/index');
+    }
+
+    private function isOwnedByCurrentAdmin(Maho_Ai_Model_Task_Schedule $schedule): bool
+    {
+        return $schedule->getAdminUserId() === (int) Mage::getSingleton('admin/session')->getUser()->getId();
     }
 
     /**

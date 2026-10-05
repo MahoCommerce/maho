@@ -101,3 +101,16 @@ it('never cuts the history window inside a tool round', function (): void {
     expect(array_map(static fn($m) => $m->getRole(), $window))->toBe(['assistant', 'user']);
     expect(new Maho_Ai_Model_Chat_MessageBagBuilder()->window($rows, 10))->toHaveCount(5);
 });
+
+it('keeps the whole current turn in the window, even when its tool rounds pass the limit', function (): void {
+    $rows = [aiMessage(['role' => 'user', 'content' => 'old question']), aiMessage(['role' => 'assistant', 'content' => 'old answer'])];
+    $rows[] = aiMessage(['role' => 'user', 'content' => 'List the pending reviews']);
+    for ($i = 1; $i <= 5; $i++) {
+        array_push($rows, ...aiToolRound('call_' . $i, 'catalog_reviews_list', 'done', '{}'));
+    }
+
+    $window = new Maho_Ai_Model_Chat_MessageBagBuilder()->window($rows, 4);
+
+    expect($window)->toHaveCount(11);
+    expect($window[0]->getContent())->toBe('List the pending reviews');
+});

@@ -967,8 +967,9 @@ body.ai-chat-open .ai-chat-toggle {
     width: 100%;
 }
 
-/* After the first message the greeting is one quiet line. */
-.ai-chat-intro.ai-chat-intro-compact {
+/* After the first message the greeting is one quiet line. The panel marks the chat element before it redraws a history, so a reload never shows the full greeting for a moment. */
+.ai-chat-intro.ai-chat-intro-compact,
+:host(.has-history) .ai-chat-intro {
     margin: 4px auto 0;
     padding: 0;
 }
@@ -977,11 +978,13 @@ body.ai-chat-open .ai-chat-toggle {
 .ai-chat-intro-compact .ai-chat-intro-text,
 .ai-chat-intro-compact .ai-chat-intro-label,
 .ai-chat-intro-compact .ai-chat-intro-examples,
-.ai-chat-intro-compact .ai-chat-intro-hint {
+.ai-chat-intro-compact .ai-chat-intro-hint,
+:host(.has-history) :is(.ai-chat-intro-icon, .ai-chat-intro-text, .ai-chat-intro-label, .ai-chat-intro-examples, .ai-chat-intro-hint) {
     display: none;
 }
 
-.ai-chat-intro-compact .ai-chat-intro-title {
+.ai-chat-intro-compact .ai-chat-intro-title,
+:host(.has-history) .ai-chat-intro-title {
     margin: 0;
     color: var(--maho-ink-faint);
     font-size: 11px;

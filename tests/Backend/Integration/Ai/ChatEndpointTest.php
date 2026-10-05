@@ -55,6 +55,9 @@ final class AiChatScript
     /** Thrown by the next model call, once. */
     public static ?\Throwable $throw = null;
 
+    /** The messages of the last model call. */
+    public static mixed $lastInput = null;
+
     public static function answer(Model $model, array|string|object $input, array $options): ResultInterface
     {
         if (self::$throw !== null) {
@@ -62,6 +65,7 @@ final class AiChatScript
             self::$throw = null;
             throw $throw;
         }
+        self::$lastInput = $input;
         self::$offeredTools[] = array_map(static fn(Tool $tool): string => $tool->getName(), $options['tools'] ?? []);
         $schemas = [];
         foreach ($options['tools'] ?? [] as $tool) {
@@ -498,7 +502,8 @@ it('creates a scheduled task through its API tool, and a scheduled run proposes 
         $schedule = Mage::getModel('ai/task_schedule')->load((int) $schedule->getId());
         expect($schedule->getNextRunAt())->toBeGreaterThan(Mage::app()->getLocale()->formatDateForDb('now'));
         $task = Mage::getModel('ai/task')->load((int) $schedule->getLastTaskId());
-        expect($task->getContextArray())->toBe(['mode' => 'schedule', 'schedule_id' => (int) $schedule->getId()]);
+        expect($task->getContextArray())->toBe(['mode' => 'schedule', 'schedule_id' => (int) $schedule->getId(), 'manual' => false]);
+        expect($task->getScheduleId())->toBe((int) $schedule->getId());
         expect($task->isQueued())->toBeTrue();
 
         // The run: the notification goes out at once, the write waits for the administrator.
@@ -531,6 +536,20 @@ it('creates a scheduled task through its API tool, and a scheduled run proposes 
         $schedule->setNextRunAt(Mage::app()->getLocale()->formatDateForDb('-1 minute'))->save();
         new Maho_Ai_Model_Task_Scheduler()->runDueSchedules();
         expect((int) Mage::getModel('ai/task_schedule')->load((int) $schedule->getId())->getLastTaskId())->toBe((int) $task->getId());
+
+        // Run Now queues a run like the schedule does, and its end tells the owner even when the model notified nobody.
+        $run->cancelPendingWrites();
+        $manual = Mage::getModel('ai/task_schedule')->load((int) $schedule->getId())->run(manual: true);
+        expect($manual)->not->toBeNull();
+        expect($manual->isQueued())->toBeTrue();
+        AiChatScript::reset(new TextResult('The page title is still Old.'));
+        new Maho_Ai_Model_TaskRunner()->processTask((int) $manual->getId());
+        $manualRun = Mage::getModel('ai/conversation')->load((int) Mage::getModel('ai/task')->load((int) $manual->getId())->getConversationId());
+        expect($manualRun->getStatus())->toBe(Maho_Ai_Model_Conversation::STATUS_ARCHIVED);
+        $done = $connection->fetchRow($connection->select()->from($inbox, ['title', 'description', 'admin_user_id'])->where('url LIKE ?', '%/ai_chat/open/id/' . (int) $manualRun->getId() . '/%'));
+        expect($done['title'] ?? null)->toBe('The scheduled task "Page check" is done');
+        expect($done['description'])->toBe('The page title is still Old.');
+        expect((int) $done['admin_user_id'])->toBe((int) $admin->getId());
     } finally {
         $connection->delete(\Maho\Queue\QueueManager::tableName(), ['dedupe_key LIKE ?' => 'ai_task_%']);
         $connection->delete($resource->getTableName('ai/task'), ['admin_user_id = ?' => (int) $admin->getId()]);
@@ -733,6 +752,45 @@ it('runs a read tool at once, streams the answer and stores the conversation', f
         $roles = array_map(static fn($m) => $m->getRole(), array_values($conversation->messagesCollection()->getItems()));
         expect($roles)->toBe(['user', 'assistant', 'tool', 'assistant']);
         expect($conversation->getLockedUntil())->toBeNull();
+    } finally {
+        aiChatDeleteConversations((int) $admin->getId());
+        aiChatDeleteAdmin($admin);
+    }
+});
+
+it('answers with the tool results it has when the turn reaches the tool round limit', function (): void {
+    $admin = aiChatAdmin('ai_chat_limit', ['all']);
+    try {
+        aiChatLogin($admin);
+        // The limit is 5 rounds: the sixth request for a tool ends the rounds.
+        $rounds = [];
+        for ($i = 1; $i <= 6; $i++) {
+            $rounds[] = new ToolCallResult([new ToolCall('call_' . $i, 'catalog_products_list', ['itemsPerPage' => 1, 'page' => $i])]);
+        }
+        AiChatScript::reset(...[...$rounds, new TextResult('I checked 5 pages of products. The rest is not checked.')]);
+
+        $result = aiChatRequest('/api/admin/ai/chat', [
+            'message' => 'Check every product.',
+            'context' => ['route' => 'catalog_product/index'],
+        ]);
+
+        expect(aiChatEvents($result['events'], 'tool_result'))->toHaveCount(5);
+        expect(aiChatEvents($result['events'], 'error'))->toBe([]);
+        expect(implode('', array_column(aiChatEvents($result['events'], 'delta'), 'text')))->toBe('I checked 5 pages of products. The rest is not checked.');
+        $done = aiChatEvents($result['events'], 'done');
+        expect($done[0]['state'])->toBe('complete');
+
+        // The last request carries the question, the five results and the instruction to answer.
+        $users = array_filter(AiChatScript::$lastInput->getMessages(), static fn($m): bool => $m instanceof \Symfony\AI\Platform\Message\UserMessage);
+        $texts = array_values(array_map(static fn($m): string => (string) $m->asText(), $users));
+        expect($texts)->toContain('Check every product.');
+        expect(end($texts))->toBe(\Maho\Ai\Api\Chat\ChatService::WRAP_UP_INSTRUCTION);
+        expect(array_filter(AiChatScript::$lastInput->getMessages(), static fn($m): bool => $m instanceof \Symfony\AI\Platform\Message\ToolCallMessage))->toHaveCount(5);
+
+        $conversation = Mage::getModel('ai/conversation')->load((int) $done[0]['conversation_id']);
+        $messages = array_values($conversation->messagesCollection()->getItems());
+        expect(end($messages)->getContent())->toBe('I checked 5 pages of products. The rest is not checked.');
+        expect(array_map(static fn($m): string => (string) $m->getContent(), $messages))->not->toContain(\Maho\Ai\Api\Chat\ChatService::WRAP_UP_INSTRUCTION);
     } finally {
         aiChatDeleteConversations((int) $admin->getId());
         aiChatDeleteAdmin($admin);

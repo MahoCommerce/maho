@@ -13,7 +13,7 @@ $status = (string) $task->getData('status');
 <div class="content-header">
     <table cellspacing="0">
         <tr>
-            <td><h3 class="icon-head head-edit-form"><?= $helper->__('AI Task #%s', $this->escapeHtml($task->getId())) ?></h3></td>
+            <td><h3 class="icon-head head-edit-form"><?= $helper->__('AI Request #%s', $this->escapeHtml($task->getId())) ?></h3></td>
             <td class="form-buttons">
                 <a href="<?= $this->escapeUrl($this->getBackUrl()) ?>" class="scalable back"><span><?= $helper->__('Back') ?></span></a>
             </td>
@@ -21,7 +21,7 @@ $status = (string) $task->getData('status');
     </table>
 </div>
 
-<h3><?= $helper->__('Task Details') ?></h3>
+<h3><?= $helper->__('Request Details') ?></h3>
 <table class="form-list" cellspacing="0">
     <tr>
         <td class="label"><?= $helper->__('Status') ?></td>

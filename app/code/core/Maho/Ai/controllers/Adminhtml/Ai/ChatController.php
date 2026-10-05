@@ -44,11 +44,11 @@ class Maho_Ai_Adminhtml_Ai_ChatController extends Mage_Adminhtml_Controller_Acti
     #[Maho\Config\Route('/admin/ai_chat/actions')]
     public function actionsAction(): void
     {
-        $this->_title(Mage::helper('ai')->__('Assistant Actions'));
+        $this->_title(Mage::helper('ai')->__('Assistant Actions Log'));
         $this->loadLayout()
             ->_setActiveMenu('system/ai/actions')
             ->_addBreadcrumb(Mage::helper('ai')->__('AI'), Mage::helper('ai')->__('AI'))
-            ->_addBreadcrumb(Mage::helper('ai')->__('Assistant Actions'), Mage::helper('ai')->__('Assistant Actions'))
+            ->_addBreadcrumb(Mage::helper('ai')->__('Assistant Actions Log'), Mage::helper('ai')->__('Assistant Actions Log'))
             ->renderLayout();
     }
 
@@ -147,6 +147,8 @@ class Maho_Ai_Adminhtml_Ai_ChatController extends Mage_Adminhtml_Controller_Acti
                 'id' => (int) $conversation->getId(),
                 'title' => (string) ($conversation->getTitle() ?? ''),
                 'running' => $conversation->isRunning(),
+                // A run that no worker took yet: without cron, no worker starts, and the panel says so.
+                'queued' => $conversation->isRunning() && (bool) $conversation->latestTask()?->isPending(),
             ],
             'messages' => $messages,
         ]);

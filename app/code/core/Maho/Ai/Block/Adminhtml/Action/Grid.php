@@ -111,21 +111,16 @@ class Maho_Ai_Block_Adminhtml_Action_Grid extends Mage_Adminhtml_Block_Widget_Gr
         return parent::_prepareColumns();
     }
 
-    /** "content_cms_pages_update" reads as "Update cms pages", the way the panel shows it. */
-    public function decorateTool(string $value): string
+    /** The cell value is already escaped HTML, so the callbacks read the raw value from the row. */
+    public function decorateTool(string $value, Maho\DataObject $row): string
     {
-        $parts = array_values(array_filter(explode('_', $value)));
-        $verb = $parts === [] ? '' : $parts[count($parts) - 1];
-        if (count($parts) > 2 && in_array($verb, ['create', 'update', 'delete'], true)) {
-            $value = ucfirst($verb) . ' ' . implode(' ', array_slice($parts, 1, -1));
-        }
-
-        return $this->escapeHtml($value);
+        return $this->escapeHtml(Mage::helper('ai')->toolLabel((string) $row->getData('tool_name')));
     }
 
     /** The arguments as one line of "key: value" pairs, cut at the width of the cell. */
-    public function decorateArguments(string $value): string
+    public function decorateArguments(string $value, Maho\DataObject $row): string
     {
+        $value = (string) $row->getData('tool_arguments');
         try {
             $arguments = Mage::helper('core')->jsonDecode($value);
         } catch (\JsonException) {

@@ -26,9 +26,6 @@ class Maho_Ai_Model_Task_Schedule extends Mage_Core_Model_Abstract
     /** Schedules per administrator: each run costs model calls. */
     public const MAX_PER_ADMIN = 20;
 
-    /** Characters of the previous answer that the next run reads. */
-    private const PREVIOUS_ANSWER_CHARS = 2000;
-
     /** Days ahead that the next run is searched in: a yearly schedule still finds its day. */
     private const SEARCH_DAYS = 400;
 
@@ -291,10 +288,10 @@ class Maho_Ai_Model_Task_Schedule extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Start one run, unless the previous run still runs or still waits for a confirmation:
+     * Queue one run, unless the previous run still runs or still waits for a confirmation:
      * a second run would only find or propose the same thing again.
      */
-    public function run(): ?Maho_Ai_Model_Task
+    public function run(bool $manual = false): ?Maho_Ai_Model_Task
     {
         $previous = $this->getLastTaskId() ? Mage::getModel('ai/task')->load($this->getLastTaskId()) : null;
         if ($previous?->getId()) {
@@ -307,13 +304,6 @@ class Maho_Ai_Model_Task_Schedule extends Mage_Core_Model_Abstract
             }
         }
 
-        $instruction = (string) $this->getInstruction();
-        $answer = trim((string) $previous?->getData('response'));
-        if ($answer !== '') {
-            $instruction .= "\n\nThe previous run of this task, on " . (string) $previous->getData('completed_at') . " UTC, answered:\n"
-                . mb_substr($answer, 0, self::PREVIOUS_ANSWER_CHARS);
-        }
-
         /** @var Maho_Ai_Model_Conversation $conversation */
         $conversation = Mage::getModel('ai/conversation');
         $conversation->setAdminUserId((int) $this->getAdminUserId());
@@ -322,9 +312,9 @@ class Maho_Ai_Model_Task_Schedule extends Mage_Core_Model_Abstract
         $task = Maho_Ai_Model_Chat_AgentRunner::queue(
             $conversation,
             (int) $this->getAdminUserId(),
-            $instruction,
+            (string) $this->getInstruction(),
             Maho_Ai_Model_Chat_RunMode::Schedule,
-            ['schedule_id' => (int) $this->getId()],
+            ['schedule_id' => (int) $this->getId(), 'manual' => $manual],
         );
 
         $this->setLastRunAt(Mage::app()->getLocale()->formatDateForDb('now'));

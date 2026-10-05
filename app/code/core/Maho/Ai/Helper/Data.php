@@ -445,6 +445,45 @@ class Maho_Ai_Helper_Data extends Mage_Core_Helper_Abstract
         return 'ai_editor_guide_' . (is_file($path) ? (string) filemtime($path) : '0');
     }
 
+    /**
+     * The labels of the tools that the assistant has besides the API tools, keyed by tool name.
+     *
+     * @return array<string, string>
+     */
+    public function localToolLabels(): array
+    {
+        return [
+            'admin_open_page' => $this->__('Open admin page'),
+            'admin_fill_form' => $this->__('Fill admin form'),
+            'admin_page_action' => $this->__('Act on the page'),
+            'admin_content_guide' => $this->__('Content editor guide'),
+            'enable_tools' => $this->__('Load tools'),
+            'remember' => $this->__('Remember a note'),
+            'forget' => $this->__('Forget a note'),
+            'run_in_background' => $this->__('Run in the background'),
+            'notify' => $this->__('Send a notification'),
+            'attachment_read' => $this->__('Read an attachment'),
+            'generate_image' => $this->__('Generate an image'),
+        ];
+    }
+
+    /** "content_cms_pages_update" reads as "Update cms pages": the verb first, without the section. */
+    public function toolLabel(string $name): string
+    {
+        $local = $this->localToolLabels();
+        if (isset($local[$name])) {
+            return $local[$name];
+        }
+        $parts = array_values(array_filter(explode('_', $name)));
+        $verbs = ['list' => $this->__('List'), 'get' => $this->__('Show'), 'create' => $this->__('Create'), 'update' => $this->__('Update'), 'delete' => $this->__('Delete')];
+        $verb = $verbs[$parts[count($parts) - 1] ?? ''] ?? null;
+        if (count($parts) > 2 && $verb !== null) {
+            return $verb . ' ' . implode(' ', array_slice($parts, 1, -1));
+        }
+
+        return implode(' ', $parts);
+    }
+
     public function isChatAllowed(): bool
     {
         return Mage::getSingleton('admin/session')->isAllowed('system/ai/chat');

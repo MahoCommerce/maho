@@ -16,7 +16,7 @@ class Maho_Ai_Block_Adminhtml_Action extends Mage_Adminhtml_Block_Widget_Grid_Co
     {
         $this->_blockGroup = 'ai';
         $this->_controller = 'adminhtml_action';
-        $this->_headerText = Mage::helper('ai')->__('Assistant Actions');
+        $this->_headerText = Mage::helper('ai')->__('Assistant Actions Log');
         parent::__construct();
         $this->_removeButton('add');
     }

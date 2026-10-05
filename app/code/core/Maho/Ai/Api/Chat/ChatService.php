@@ -27,7 +27,9 @@ use Maho_Ai_Model_Chat_ToolsetChanged;
 use Maho_Ai_Model_Conversation;
 use Maho_Ai_Model_Conversation_Message as Message;
 use Symfony\AI\Agent\Agent;
+use Symfony\AI\Agent\Exception\MaxIterationsExceededException;
 use Symfony\AI\Agent\Execution\Execution;
+use Symfony\AI\Platform\Message\Message as PlatformMessage;
 use Symfony\AI\Platform\Message\MessageBag;
 use Symfony\AI\Agent\Execution\Update\Progress;
 use Symfony\AI\Agent\Toolbox\ToolResult;
@@ -45,6 +47,11 @@ use Symfony\AI\Platform\TokenUsage\TokenUsageAggregation;
 final class ChatService
 {
     public const USAGE_CONSUMER = Maho_Ai_Model_Conversation::USAGE_CONSUMER;
+
+    /** Sent to the model, never stored: the run reached the tool round limit. */
+    public const WRAP_UP_INSTRUCTION = 'You reached the limit of tool rounds for this answer. Do not call a tool. '
+        . 'Answer now with the results of the tools that you already called. '
+        . 'Say what you could not check, and suggest how the administrator can make the request narrower.';
 
     public function __construct(
         private readonly AgentFactory $agentFactory,
@@ -263,11 +270,19 @@ final class ChatService
 
             // A round that loaded tool sections ends the run: the runner resolves the tool
             // list once, so the agent starts again with the new set and the stored history.
+            // A run that reaches the tool round limit gets one more round without tool calls,
+            // so it answers with the data it already has. The toolbox stays, since some
+            // providers refuse a history with tool calls when the request defines no tools.
             $restarts = 0;
+            $wrapUp = false;
+            $execution = null;
             do {
                 $restart = false;
-                $agent = $this->agentFactory->create($prompt, $executor, $storeId);
+                $agent = $this->agentFactory->create($prompt, $executor, $storeId, $wrapUp ? 0 : null);
                 $bag = new Maho_Ai_Model_Chat_MessageBagBuilder()->build($conversation, $limit);
+                if ($wrapUp) {
+                    $bag->add(PlatformMessage::ofUser(self::WRAP_UP_INSTRUCTION));
+                }
                 try {
                     $execution = $this->stream($agent, $bag, $sse, $roundText);
                 } catch (Maho_Ai_Model_Chat_ToolsetChanged) {
@@ -275,8 +290,18 @@ final class ChatService
                     if (!$restart) {
                         throw new \Mage_Core_Exception(\Mage::helper('ai')->__('The assistant loaded tools too many times in one turn.'));
                     }
+                } catch (MaxIterationsExceededException $e) {
+                    if ($wrapUp) {
+                        throw $e;
+                    }
+                    $wrapUp = $restart = true;
+                    if ($roundText !== '') {
+                        $roundText = '';
+                        $sse->event('replace', ['text' => '']);
+                    }
                 }
             } while ($restart);
+            assert($execution instanceof Execution);
 
             $text = $roundText;
             if ($text === '') {
@@ -329,6 +354,11 @@ final class ChatService
             }
             $sse->event('confirm', ['conversation_id' => (int) $conversation->getId(), 'calls' => $calls]);
             $sse->event('done', ['state' => 'awaiting_confirmation', 'conversation_id' => (int) $conversation->getId()]);
+        } catch (MaxIterationsExceededException) {
+            $this->fail($conversation, $sse, \Mage::helper('ai')->__(
+                'The assistant stopped after %d tool rounds without an answer. Make the request narrower, or raise "Max Tool Rounds per Answer" under System > Configuration > AI > Assistant.',
+                (int) \Mage::getStoreConfig('ai/chat/max_tool_calls', $storeId),
+            ));
         } catch (PlatformException $e) {
             $error = \Mage::helper('ai')->translateProviderException($e, $this->agentFactory->platformCode($storeId));
             $this->fail($conversation, $sse, $this->readableProviderError($error->getMessage()));
@@ -336,9 +366,7 @@ final class ChatService
             $this->fail($conversation, $sse, $e->getMessage());
         } catch (\Throwable $e) {
             \Mage::logException($e);
-            $this->fail($conversation, $sse, \Mage::getIsDeveloperMode()
-                ? $e->getMessage()
-                : \Mage::helper('ai')->__('The assistant hit an internal error. It was logged.'));
+            $this->fail($conversation, $sse, \Mage::helper('ai')->__('The assistant stopped because of an internal error: %s', mb_substr($e->getMessage(), 0, 500)));
         }
     }
 
