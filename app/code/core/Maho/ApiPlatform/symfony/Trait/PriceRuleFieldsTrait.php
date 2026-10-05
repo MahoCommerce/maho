@@ -1,25 +1,21 @@
 <?php
 
 /**
- * Check the website and customer group lists of a catalog price rule.
+ * Check the website and customer group lists that catalog and cart price rules share.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
- * @package Mage_CatalogRule
+ * @package Maho_ApiPlatform
  */
 
 declare(strict_types=1);
 
-namespace Mage\CatalogRule\Api;
+namespace Maho\ApiPlatform\Trait;
 
 use Maho\ApiPlatform\Exception\ValidationException;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
-/**
- * A copy of the same methods of Mage\SalesRule\Api\RuleFieldsTrait: the API kernel loads the
- * classes of one module Api directory at a time, so a trait of another module is not found.
- */
-trait RuleFieldsTrait
+trait PriceRuleFieldsTrait
 {
     /**
      * @return int[]

@@ -371,18 +371,18 @@ final class McpToolbox implements ToolboxInterface
         return ['ok' => false, 'text' => sprintf('Unknown store view code "%s". Store view codes: %s.', $storeCode, implode(', ', $codes))];
     }
 
-    /**
-     * What the last local tool asked the browser to do, once: open an admin page, with form
-     * values to fill in when the tool gave some, or act on the open page.
-     *
-     * @return array{url?: string, fields?: array<string, mixed>, steps?: list<array{action: string, target: string, value: string|null}>}|null
-     */
     /** Admin page links in place of the API links of an answer; see AdminPageTool::linkRecords(). */
     public function linkRecords(string $markdown): string
     {
         return $this->adminPageTool->linkRecords($markdown);
     }
 
+    /**
+     * What the last local tool asked the browser to do, once: open an admin page, with form
+     * values to fill in when the tool gave some, or act on the open page.
+     *
+     * @return array{url?: string, fields?: array<string, mixed>, steps?: list<array{action: string, target: string, value: string|null}>}|null
+     */
     public function takeNavigation(): ?array
     {
         $navigation = $this->navigation;
@@ -400,6 +400,14 @@ final class McpToolbox implements ToolboxInterface
     public function isDestructive(string $name): bool
     {
         return !self::isLocal($name) && $this->catalog->isDestructive($name);
+    }
+
+    /** A write that changes one record that the API can read back, so the panel can show and undo it. */
+    public function isRecordUpdate(string $name): bool
+    {
+        $shape = self::isLocal($name) ? null : $this->catalog->writeShape($name);
+
+        return $shape !== null && $shape['kind'] === 'update' && $shape['read'] !== null;
     }
 
     public function title(string $name): string

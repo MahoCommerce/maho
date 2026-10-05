@@ -39,13 +39,13 @@ final class McpToolCatalog
     /** @var array<string, McpTool>|null keyed by MCP tool name */
     private ?array $tools = null;
 
-    /** @var array<string, string> alias => MCP tool name */
     /** JSON Schema keywords every chat provider accepts in a tool parameter. */
     private const SCHEMA_KEYWORDS = ['type', 'description', 'enum', 'properties', 'required', 'items', 'anyOf', 'oneOf', 'minimum', 'maximum', 'minLength', 'maxLength', 'minItems', 'maxItems'];
 
     /** Argument every MCP tool takes: the store view code, since an in-process call has no request to carry ?store=. */
     public const STORE_ARGUMENT = 'store';
 
+    /** @var array<string, string> alias => MCP tool name */
     private array $aliases = [];
 
     public function __construct(
@@ -275,9 +275,6 @@ final class McpToolCatalog
     }
 
     /**
-     * @return array<string, mixed> a JSON Schema object with `type`, `properties`, `required` and `additionalProperties`
-     */
-    /**
      * Cast each argument to the type its schema declares: a model often sends "4" for an
      * integer or "true" for a boolean, and the serializer refuses the wrong scalar type.
      *
@@ -377,6 +374,9 @@ final class McpToolCatalog
         };
     }
 
+    /**
+     * @return array<string, mixed> a JSON Schema object with `type`, `properties`, `required` and `additionalProperties`
+     */
     private function parameters(McpTool $mcp): array
     {
         $inputClass = $mcp->getInput()['class'] ?? $mcp->getClass();

@@ -139,10 +139,6 @@ final class ChatController
         return $attachments;
     }
 
-    /**
-     * The route of a background run. Only the queue handler reaches it: it sets a request
-     * attribute that no HTTP client can set, so a browser gets a 404 here.
-     */
     /** Removes a file that was attached but not sent. A file a message refers to stays. */
     #[Route('/api/admin/ai/chat/upload/remove', name: 'api_admin_ai_chat_upload_remove', methods: ['POST'])]
     public function removeUpload(Request $request): Response
@@ -164,6 +160,10 @@ final class ChatController
         return new JsonResponse(['stopped' => true]);
     }
 
+    /**
+     * The route of a background run. Only the queue handler reaches it: it sets a request
+     * attribute that no HTTP client can set, so a browser gets a 404 here.
+     */
     #[Route('/api/admin/ai/chat/background', name: 'api_admin_ai_chat_background', methods: ['POST'])]
     public function background(Request $request): Response
     {

@@ -12,7 +12,6 @@ declare(strict_types=1);
 
 namespace Mage\Index\Api;
 
-use ApiPlatform\Metadata\HttpOperation;
 use ApiPlatform\Metadata\Operation;
 use Maho\ApiPlatform\Exception\ValidationException;
 use Maho\ApiPlatform\Security\ApiUser;
@@ -38,15 +37,17 @@ final class IndexProcessProcessor extends \Maho\ApiPlatform\Processor
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): IndexProcess|JsonResponse
     {
         $user = $this->requireUser();
-        $template = $operation instanceof HttpOperation ? (string) $operation->getUriTemplate() : '';
+        $name = $operation->getName();
+        // The cached indexer keeps the done flag of an earlier reindex in a long worker, so each request starts a new one.
+        \Mage::unregister('_singleton/index/indexer');
 
-        if (str_ends_with($template, '/reindex-all')) {
+        if ($name === 'index_process_reindex_all') {
             return $this->reindexAll($user);
         }
 
         $process = $this->provider->loadProcess((int) ($uriVariables['id'] ?? 0));
 
-        if (str_ends_with($template, '/reindex')) {
+        if ($name === 'index_process_reindex') {
             $this->reindex($process, $user);
             return IndexProcess::fromModel($this->provider->loadProcess((int) $process->getId()));
         }
@@ -87,8 +88,6 @@ final class IndexProcessProcessor extends \Maho\ApiPlatform\Processor
     private function reindexAll(ApiUser $user): JsonResponse
     {
         // The queue holds each index once, with its dependencies first, so no index runs twice.
-        // A new indexer gives processes without the flag of an earlier run in this worker.
-        \Mage::unregister('_singleton/index/indexer');
         $processes = \Mage::getModel('index/runner')->buildQueue();
         foreach ($processes as $process) {
             $this->reindex($process, $user);

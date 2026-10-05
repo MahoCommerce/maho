@@ -14,6 +14,7 @@ use ApiPlatform\Metadata\DeleteOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use Maho\ApiPlatform\Exception\ValidationException;
 use Maho\ApiPlatform\Security\ApiUser;
+use Maho\ApiPlatform\Trait\PriceRuleFieldsTrait;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -22,7 +23,7 @@ use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 final class CatalogPriceRuleProcessor extends \Maho\ApiPlatform\Processor
 {
     use ConditionMetadataTrait;
-    use RuleFieldsTrait;
+    use PriceRuleFieldsTrait;
 
     private const WRITABLE_FIELDS = [
         'name', 'description', 'isActive', 'websiteIds', 'customerGroupIds', 'fromDate', 'toDate', 'sortOrder',

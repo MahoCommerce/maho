@@ -285,7 +285,7 @@ final class AdminPageTool
             $this->pages = [];
             $menu = \Mage::getSingleton('admin/config')->getAdminhtmlConfig()->getNode('menu');
             if ($menu instanceof \Maho\Simplexml\Element) {
-                $this->collect($menu, '', []);
+                $this->collect(new \Mage_Adminhtml_Block_Page_Menu(), $menu, '', []);
             }
         }
 
@@ -293,15 +293,11 @@ final class AdminPageTool
     }
 
     /** @param list<string> $titles */
-    private function collect(\Maho\Simplexml\Element $parent, string $path, array $titles): void
+    private function collect(\Mage_Adminhtml_Block_Page_Menu $menu, \Maho\Simplexml\Element $parent, string $path, array $titles): void
     {
-        $session = \Mage::getSingleton('admin/session');
         foreach ($parent->children() as $name => $child) {
-            if ((string) $child->disabled === '1') {
-                continue;
-            }
-            $resource = 'admin/' . ($child->resource ? (string) $child->resource : $path . $name);
-            if (!$session->isAllowed($resource) || !$this->moduleOutputEnabled($child) || !$this->dependsMet($child)) {
+            $resource = $menu->getItemAclResource($child, $path . $name);
+            if (!$menu->isItemVisible($child, $resource)) {
                 continue;
             }
 
@@ -312,36 +308,9 @@ final class AdminPageTool
                 $this->pages[$path . $name] = ['title' => implode(' > ', $childTitles), 'action' => $action, 'acl' => substr($resource, strlen('admin/'))];
             }
             if ($child->children) {
-                $this->collect($child->children, $path . $name . '/', $childTitles);
+                $this->collect($menu, $child->children, $path . $name . '/', $childTitles);
             }
         }
-    }
-
-    private function moduleOutputEnabled(\Maho\Simplexml\Element $child): bool
-    {
-        $module = (string) ($child->attributes()['module'] ?? '');
-
-        return \Mage::helper($module === '' ? 'adminhtml' : $module)->isModuleOutputEnabled();
-    }
-
-    private function dependsMet(\Maho\Simplexml\Element $child): bool
-    {
-        if (!$child->depends) {
-            return true;
-        }
-        foreach ($child->depends->module ?? [] as $module) {
-            $node = \Mage::getConfig()->getNode('modules/' . $module);
-            if (!$node || !$node->is('active')) {
-                return false;
-            }
-        }
-        foreach ($child->depends->config ?? [] as $configPath) {
-            if (!\Mage::getStoreConfigFlag((string) $configPath)) {
-                return false;
-            }
-        }
-
-        return true;
     }
 
     /**

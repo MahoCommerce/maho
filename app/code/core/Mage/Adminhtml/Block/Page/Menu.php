@@ -112,16 +112,8 @@ class Mage_Adminhtml_Block_Page_Menu extends Mage_Adminhtml_Block_Template
         $parentArr = [];
         $sortOrder = 0;
         foreach ($parent->children() as $childName => $child) {
-            if ((string) $child->disabled === '1') {
-                continue;
-            }
-
-            $aclResource = 'admin/' . ($child->resource ? (string) $child->resource : $path . $childName);
-            if (!$this->_checkAcl($aclResource) || !$this->_isEnabledModuleOutput($child)) {
-                continue;
-            }
-
-            if ($child->depends && !$this->_checkDepends($child->depends)) {
+            $aclResource = $this->getItemAclResource($child, $path . $childName);
+            if (!$this->isItemVisible($child, $aclResource)) {
                 continue;
             }
 
@@ -165,6 +157,25 @@ class Mage_Adminhtml_Block_Page_Menu extends Mage_Adminhtml_Block_Template
         }
 
         return $parentArr;
+    }
+
+    /**
+     * The ACL resource of the menu entry $child at the menu path $path, with the admin/ prefix.
+     */
+    public function getItemAclResource(\Maho\Simplexml\Element $child, string $path): string
+    {
+        return 'admin/' . ($child->resource ? (string) $child->resource : $path);
+    }
+
+    /**
+     * Tell whether the current administrator sees the menu entry $child.
+     */
+    public function isItemVisible(\Maho\Simplexml\Element $child, string $aclResource): bool
+    {
+        return (string) $child->disabled !== '1'
+            && $this->_checkAcl($aclResource)
+            && $this->_isEnabledModuleOutput($child)
+            && (!$child->depends || $this->_checkDepends($child->depends));
     }
 
     /**

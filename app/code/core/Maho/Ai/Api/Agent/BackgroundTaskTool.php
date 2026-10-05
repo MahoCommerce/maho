@@ -18,8 +18,8 @@ use Symfony\AI\Platform\Tool\Tool;
 /**
  * A request over many records cannot run inside one chat turn. The tool is a write, so the
  * administrator confirms the instruction once; the worker then runs the turn with every
- * non-destructive write approved in advance, and the steps land in a new conversation the
- * administrator can open while it runs. A destructive tool still needs the chat.
+ * update of one record approved in advance, and the steps land in a new conversation the
+ * administrator can open while it runs. Every other write waits in that conversation.
  */
 final class BackgroundTaskTool
 {
@@ -31,7 +31,7 @@ final class BackgroundTaskTool
         return ToolDefinition::create(
             new ExecutionReference(self::class, 'start'),
             self::NAME,
-            'Run a long job in the background: a change over many records, a text for every product of a category, a check over a whole catalog. Give a complete instruction, with the records, the scope and the exact change, as if to a colleague who cannot ask back. The administrator confirms it once; every read and every non-destructive write in the job is then approved in advance, and a delete is refused. The job runs in a new conversation that the administrator can open to follow it.',
+            'Run a long job in the background: a change over many records, a text for every product of a category, a check over a whole catalog. Give a complete instruction, with the records, the scope and the exact change, as if to a colleague who cannot ask back. The administrator confirms it once; every read and every update of one record in the job is then approved in advance. Any other write, such as a create, a delete, a cancel or a refund, waits in the job conversation for the administrator. The job runs in a new conversation that the administrator can open to follow it.',
             [
                 'type' => 'object',
                 'properties' => [

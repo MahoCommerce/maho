@@ -300,9 +300,6 @@ class ApiExceptionListener implements EventSubscriberInterface
     }
 
     /**
-     * Only show debug info when both Symfony debug mode AND Maho developer mode are active
-     */
-    /**
      * Whether the caller presented credentials, so a refusal is a 403 and not a 401. A
      * bearer token counts, and so does the admin session cookie that the bridge verified
      * on an `/api/admin/` request.
@@ -321,6 +318,9 @@ class ApiExceptionListener implements EventSubscriberInterface
             && isset($_SERVER['MAHO_API_BRIDGE_TOKEN']);
     }
 
+    /**
+     * Only show debug info when both Symfony debug mode AND Maho developer mode are active
+     */
     private function showDebug(): bool
     {
         return $this->debug && \Mage::getIsDeveloperMode();

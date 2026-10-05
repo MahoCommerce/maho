@@ -15,7 +15,7 @@ enum Maho_Ai_Model_Chat_RunMode: string
     /** The administrator watches: every write waits for a confirmation in the panel. */
     case Chat = 'chat';
 
-    /** A job the administrator confirmed once: its non-destructive writes are approved in advance. */
+    /** A job the administrator confirmed once: its updates of one record are approved in advance. */
     case Job = 'job';
 
     /** A scheduled task: nobody watches, so every write waits in the conversation for the administrator. */

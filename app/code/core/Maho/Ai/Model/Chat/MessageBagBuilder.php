@@ -107,9 +107,6 @@ class Maho_Ai_Model_Chat_MessageBagBuilder
     }
 
     /**
-     * @param array{id?: string, name?: string, arguments?: array<string, mixed>, signature?: ?string} $call
-     */
-    /**
      * The images attached to a user message, as content the model can see. A text file is
      * not sent: the model reads it with the attachment tool when it needs it.
      *
@@ -131,6 +128,9 @@ class Maho_Ai_Model_Chat_MessageBagBuilder
         return $images;
     }
 
+    /**
+     * @param array{id?: string, name?: string, arguments?: array<string, mixed>, signature?: ?string} $call
+     */
     private function toolCall(array $call): ToolCall
     {
         return new ToolCall(

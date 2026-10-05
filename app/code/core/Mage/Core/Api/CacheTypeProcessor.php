@@ -12,7 +12,6 @@ declare(strict_types=1);
 
 namespace Mage\Core\Api;
 
-use ApiPlatform\Metadata\HttpOperation;
 use ApiPlatform\Metadata\Operation;
 use Maho\ApiPlatform\Exception\ValidationException;
 use Maho\ApiPlatform\Security\ApiUser;
@@ -33,16 +32,16 @@ final class CacheTypeProcessor extends \Maho\ApiPlatform\Processor
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): CacheType|JsonResponse
     {
         $user = $this->requireUser();
-        $template = $operation instanceof HttpOperation ? (string) $operation->getUriTemplate() : '';
+        $name = $operation->getName();
 
-        if (str_ends_with($template, '/flush-all')) {
+        if ($name === 'cache_type_flush_all') {
             return $this->flushAll($user);
         }
 
         $code = (string) ($uriVariables['code'] ?? '');
         $this->provider->cacheType($code);
 
-        if (str_ends_with($template, '/refresh')) {
+        if ($name === 'cache_type_refresh') {
             return $this->refresh($code, $user);
         }
 

@@ -28,11 +28,6 @@ class Maho_Ai_Model_Chat_ToolExecutor implements ToolExecutorInterface
     ) {}
 
     /**
-     * Read-only calls run in model order and report `tool_call` and `tool_result`
-     * progress. The round stops with {@see Maho_Ai_Model_Chat_ConfirmationRequired} when
-     * at least one call writes, so the chat service can persist the round and ask.
-     */
-    /**
      * @param list<ToolCall> $toolCalls
      * @return list<ToolCall> the calls with each id and each name-plus-arguments once, first occurrence kept
      */
@@ -68,6 +63,11 @@ class Maho_Ai_Model_Chat_ToolExecutor implements ToolExecutorInterface
         return 'payload:' . $toolCall->getName() . ':' . json_encode($toolCall->getArguments());
     }
 
+    /**
+     * Read-only calls, and the updates that a job approves in advance, run in model order and report `tool_call` and `tool_result`
+     * progress. The round stops with {@see Maho_Ai_Model_Chat_ConfirmationRequired} when
+     * another call writes, so the chat service can persist the round and ask.
+     */
     #[\Override]
     public function execute(array $toolCalls): \Generator
     {
@@ -89,20 +89,18 @@ class Maho_Ai_Model_Chat_ToolExecutor implements ToolExecutorInterface
             }
             $seen[$id] = $id;
             $seen[self::payloadKey($toolCall)] = $id;
-            $write = !$this->toolbox->isReadOnly($toolCall->getName());
-            if ($write && !$this->toolbox->mode()->approvesWrites()) {
+            $name = $toolCall->getName();
+            // A job approves in advance only the update of one record. Every other write waits for the administrator.
+            if (!$this->toolbox->isReadOnly($name) && !($this->toolbox->mode()->approvesWrites() && $this->toolbox->isRecordUpdate($name))) {
                 $pending[] = $toolCall;
                 continue;
             }
 
-            yield new Progress('tool_call', sprintf('Executing tool "%s".', $toolCall->getName()), $toolCall);
-            // The administrator approved the job, not a deletion: a destructive tool waits for the chat.
-            $result = $write && $this->toolbox->isDestructive($toolCall->getName())
-                ? new ToolResult($toolCall, McpToolbox::ERROR_PREFIX . 'A destructive action is not allowed in a background job. Ask the administrator to run it in the chat.')
-                : $this->toolbox->execute($toolCall);
+            yield new Progress('tool_call', sprintf('Executing tool "%s".', $name), $toolCall);
+            $result = $this->toolbox->execute($toolCall);
             $results[$id] = $result;
             $ordered[] = $result;
-            yield new Progress('tool_result', sprintf('Tool "%s" finished.', $toolCall->getName()), $result);
+            yield new Progress('tool_result', sprintf('Tool "%s" finished.', $name), $result);
         }
 
         if ($pending !== []) {

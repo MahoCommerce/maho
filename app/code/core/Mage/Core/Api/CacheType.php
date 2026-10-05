@@ -55,6 +55,7 @@ use Maho\Config\ApiResource;
         ),
         new Post(
             uriTemplate: '/cache-types/{code}/refresh',
+            name: 'cache_type_refresh',
             requirements: ['code' => '[a-z0-9_]+'],
             uriVariables: ['code' => new Link(fromClass: self::class, identifiers: ['code'])],
             status: 200,
@@ -65,6 +66,7 @@ use Maho\Config\ApiResource;
         ),
         new Post(
             uriTemplate: '/cache-types/flush-all',
+            name: 'cache_type_flush_all',
             status: 200,
             read: false,
             deserialize: false,

@@ -138,7 +138,7 @@ class Maho_Ai_Model_Chat_SystemPrompt
         return match ($mode) {
             'job' => implode("\n", [
                 'How this turn runs: a background job in a queue worker, with nobody watching and no admin page.',
-                '- The administrator approved the job: every read and every non-destructive write runs at once; a delete is refused.',
+                '- The administrator approved the job: every read and every update of one record runs at once. Any other write, such as a create, a delete, a cancel, a refund or a cache flush, waits in this conversation for the administrator.',
                 '- Do the whole job without questions, then end with a short report of what changed, with the record IDs. Call notify only for a problem the administrator must act on.',
             ]),
             'schedule' => implode("\n", [

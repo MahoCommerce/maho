@@ -55,6 +55,7 @@ use Maho\Config\ApiResource;
         ),
         new Post(
             uriTemplate: '/index-processes/{id}/reindex',
+            name: 'index_process_reindex',
             requirements: ['id' => '\d+'],
             status: 200,
             read: false,
@@ -65,6 +66,7 @@ use Maho\Config\ApiResource;
         ),
         new Post(
             uriTemplate: '/index-processes/reindex-all',
+            name: 'index_process_reindex_all',
             status: 200,
             read: false,
             deserialize: false,

@@ -60,8 +60,6 @@ final class ChatService
 
     /**
      * @param array<string, mixed> $pageContext
-     */
-    /**
      * @param list<array{id: string, name: string, mime: string, size: int}> $attachments
      */
     public function startTurn(
@@ -152,7 +150,7 @@ final class ChatService
 
     /**
      * One turn without a browser, in a queue worker. The instruction is already the last
-     * message of the conversation. A job runs with its non-destructive writes approved in
+     * message of the conversation. A job runs with its updates of one record approved in
      * advance; a scheduled run leaves every write waiting in the conversation.
      *
      * @return array{state: string, error: string}
