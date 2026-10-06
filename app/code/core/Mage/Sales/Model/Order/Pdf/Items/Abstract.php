@@ -216,6 +216,21 @@ abstract class Mage_Sales_Model_Order_Pdf_Items_Abstract extends Mage_Core_Block
     }
 
     /**
+     * Get item total including tax and excluding discount
+     *
+     * @return float
+     */
+    public function getItemTotalInclTax()
+    {
+        $item = $this->getItem();
+        if (!$item) {
+            return 0.0;
+        }
+
+        return $item->getRowTotal() + $item->getTaxAmount() + $item->getHiddenTaxAmount() - $item->getDiscountAmount();
+    }
+
+    /**
      * Format price
      *
      * @param float $price

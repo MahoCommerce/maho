@@ -18,6 +18,9 @@ class Mage_Eav_Model_Attribute_Data_Image extends Mage_Eav_Model_Attribute_Data_
         IMAGETYPE_AVIF => 'avif',
     ];
 
+    /** @var array<string, array<int|string, mixed>|false> */
+    private array $imageSizes = [];
+
     /**
      * Validate file by attribute validate rules
      * Return array of errors
@@ -31,7 +34,7 @@ class Mage_Eav_Model_Attribute_Data_Image extends Mage_Eav_Model_Attribute_Data_
         $label  = Mage::helper('eav')->__($this->getAttribute()->getStoreLabel());
         $rules  = $this->getAttribute()->getValidateRules();
 
-        $imageProp = @\Maho\Io::getImageSize($value['tmp_name']);
+        $imageProp = $this->readImageSize($value['tmp_name']);
 
         if (!is_uploaded_file($value['tmp_name']) || !$imageProp) {
             return [
@@ -77,7 +80,7 @@ class Mage_Eav_Model_Attribute_Data_Image extends Mage_Eav_Model_Attribute_Data_
     #[\Override]
     public function compactValue($value)
     {
-        if (is_array($value)) {
+        if (is_array($value) && !$this->getIsAjaxRequest()) {
             $value = $this->_setImageTypeExtension($value);
         }
 
@@ -92,10 +95,20 @@ class Mage_Eav_Model_Attribute_Data_Image extends Mage_Eav_Model_Attribute_Data_
         if (empty($value['tmp_name']) || !isset($value['name'])) {
             return $value;
         }
-        $imageProp = @\Maho\Io::getImageSize($value['tmp_name']);
+        $imageProp = $this->readImageSize($value['tmp_name']);
         if ($imageProp && isset(self::ALLOWED_IMAGE_TYPES[$imageProp[2]])) {
             $value['name'] = pathinfo($value['name'], PATHINFO_FILENAME) . '.' . self::ALLOWED_IMAGE_TYPES[$imageProp[2]];
         }
         return $value;
+    }
+
+    /**
+     * Read the image size of $tmpName once. Validation and the upload both need it.
+     *
+     * @return array<int|string, mixed>|false
+     */
+    private function readImageSize(string $tmpName): array|false
+    {
+        return $this->imageSizes[$tmpName] ??= \Maho\Io::getImageSize($tmpName);
     }
 }

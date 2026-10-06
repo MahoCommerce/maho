@@ -1449,14 +1449,16 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
                 if (!isset($data[$prefix . $field])) {
                     return false;
                 }
-                if ($field == 'country'
-                    && in_array(strtoupper($data[$prefix . $field]), $usca)
-                ) {
+                if ($field != 'country') {
+                    continue;
+                }
+                $countryId = strtoupper((string) $data[$prefix . $field]);
+                if (in_array($countryId, $usca)) {
                     if (!isset($data[$prefix . 'region'])) {
                         return false;
                     }
 
-                    $region = Mage::getModel('directory/region')->loadByName($data[$prefix . 'region'], $data[$prefix . $field]);
+                    $region = Mage::getModel('directory/region')->loadByCodeOrName((string) $data[$prefix . 'region'], $countryId);
                     if (!$region->getId()) {
                         return false;
                     }

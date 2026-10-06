@@ -60,7 +60,6 @@ class Mage_Catalog_Model_Resource_Setup extends Mage_Eav_Model_Entity_Setup
                 'table'                          => 'catalog/category',
                 'additional_attribute_table'     => 'catalog/eav_attribute',
                 'entity_attribute_collection'    => 'catalog/category_attribute_collection',
-                'default_group'                  => 'General Information',
                 'attributes'                     => [
                     'name'               => [
                         'type'                       => 'varchar',
