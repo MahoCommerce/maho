@@ -11,8 +11,8 @@ declare(strict_types=1);
 /**
  * API v2 customer address format checks (WRITE)
  *
- * The address model does not check the postcode format or the region on save,
- * so the address processor runs Address::getFormatErrors() first.
+ * The address processor runs Address::validate(), which checks the postcode
+ * format and the region before the save.
  *
  * @group write
  */
@@ -53,6 +53,7 @@ describe('Customer address format checks', function (): void {
         'lastname' => 'Writer',
         'street' => ['1 Infinite Loop'],
         'city' => 'Cupertino',
+        'region' => 'California',
         'postcode' => '95014',
         'countryId' => 'US',
         'telephone' => '4085550100',
