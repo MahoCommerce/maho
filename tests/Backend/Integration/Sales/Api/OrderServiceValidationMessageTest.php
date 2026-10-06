@@ -55,11 +55,11 @@ describe('OrderService validation messages', function (): void {
     };
 
     it('throws the Mage_Core_Exception of the quote validation unchanged', function () use ($createQuote): void {
-        $quote = $createQuote('123456789');
+        $quote = $createQuote('');
 
         try {
             expect(fn() => new OrderService()->placeAdminOrder($quote))
-                ->toThrow(Mage_Core_Exception::class, 'Please enter a valid postcode for United States');
+                ->toThrow(Mage_Core_Exception::class, 'Please enter the zip/postal code.');
 
             $reloaded = Mage::getModel('sales/quote')->load($quote->getId());
             expect((int) $reloaded->getIsActive())->toBe(1);
