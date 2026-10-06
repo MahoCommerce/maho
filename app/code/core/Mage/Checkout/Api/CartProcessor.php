@@ -398,10 +398,10 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     private function setShippingAddressOnCart(array $context, array $uriVariables): Cart
     {
         $args = $context['args']['input'] ?? [];
-        $this->cartService->assertCompleteAddressInput($args);
-
         $quote = $this->resolveAndVerify($context, $uriVariables);
-        $quote = $this->cartService->setShippingAddress($quote, $this->cartService->mapAddressInput($args));
+        $addressData = $this->cartService->mapAddressInput($args);
+        $this->cartService->assertCompleteAddressInput($addressData);
+        $quote = $this->cartService->setShippingAddress($quote, $addressData);
 
         return $this->cartMapper->mapQuoteToCart($quote);
     }
@@ -415,12 +415,12 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         // FILTER_VALIDATE_BOOLEAN also normalizes stringly-typed clients
         // ("true"/"false"/"1"/"0"), which strict_types would otherwise 500 on
         $sameAsShipping = filter_var($args['sameAsShipping'] ?? false, FILTER_VALIDATE_BOOLEAN);
-        if (!$sameAsShipping) {
-            $this->cartService->assertCompleteAddressInput($args);
-        }
 
         $quote = $this->resolveAndVerify($context, $uriVariables);
         $addressData = $sameAsShipping ? [] : $this->cartService->mapAddressInput($args);
+        if (!$sameAsShipping) {
+            $this->cartService->assertCompleteAddressInput($addressData);
+        }
         $quote = $this->cartService->setBillingAddress($quote, $addressData, $sameAsShipping);
 
         return $this->cartMapper->mapQuoteToCart($quote);
