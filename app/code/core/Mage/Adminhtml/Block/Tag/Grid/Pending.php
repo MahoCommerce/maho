@@ -47,8 +47,6 @@ class Mage_Adminhtml_Block_Tag_Grid_Pending extends Mage_Adminhtml_Block_Widget_
     #[\Override]
     protected function _prepareColumns()
     {
-        $baseUrl = $this->getUrl();
-
         $this->addColumn('name', [
             'header'        => Mage::helper('tag')->__('Tag'),
             'index'         => 'name',
@@ -67,13 +65,6 @@ class Mage_Adminhtml_Block_Tag_Grid_Pending extends Mage_Adminhtml_Block_Widget_
             'index'         => 'customers',
             'type'          => 'number',
         ]);
-
-        // Collection for stores filters
-        if (!$collection = Mage::registry('stores_select_collection')) {
-            $collection =  Mage::app()->getStore()->getResourceCollection()
-                ->load();
-            Mage::register('stores_select_collection', $collection);
-        }
 
         if (!Mage::app()->isSingleStoreMode()) {
             $this->addColumn('visible_in', [

@@ -112,7 +112,7 @@ class Excel extends AbstractParser
                     }
                     $xml .= '</ss:Row>';
                 }
-                foreach ($wsData as $i => $row) {
+                foreach ($wsData as $row) {
                     if (!is_array($row)) {
                         continue;
                     }

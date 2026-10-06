@@ -914,19 +914,13 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
      */
     public function getValidatorData(): array
     {
-        $parts = [
-            self::VALIDATOR_REMOTE_ADDR_KEY             => '',
-            self::VALIDATOR_HTTP_VIA_KEY                => '',
-            self::VALIDATOR_HTTP_X_FORVARDED_FOR_KEY    => '',
-            self::VALIDATOR_HTTP_USER_AGENT_KEY         => '',
-        ];
-
-        // Use Symfony Request for modern HTTP handling
         $request = Request::createFromGlobals();
-        $parts[self::VALIDATOR_REMOTE_ADDR_KEY] = $request->getClientIp() ?: '';
-        $parts[self::VALIDATOR_HTTP_VIA_KEY] = $request->headers->get('Via', '');
-        $parts[self::VALIDATOR_HTTP_X_FORVARDED_FOR_KEY] = $request->headers->get('X-Forwarded-For', '');
-        $parts[self::VALIDATOR_HTTP_USER_AGENT_KEY] = $request->headers->get('User-Agent', '');
+        $parts = [
+            self::VALIDATOR_REMOTE_ADDR_KEY          => $request->getClientIp() ?: '',
+            self::VALIDATOR_HTTP_VIA_KEY             => $request->headers->get('Via', ''),
+            self::VALIDATOR_HTTP_X_FORVARDED_FOR_KEY => $request->headers->get('X-Forwarded-For', ''),
+            self::VALIDATOR_HTTP_USER_AGENT_KEY      => $request->headers->get('User-Agent', ''),
+        ];
 
         // get time when password was last changed
         if (isset($this->_data['visitor_data']['customer_id'])) {

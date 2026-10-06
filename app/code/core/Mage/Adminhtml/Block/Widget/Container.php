@@ -147,7 +147,7 @@ class Mage_Adminhtml_Block_Widget_Container extends Mage_Adminhtml_Block_Templat
     #[\Override]
     protected function _prepareLayout()
     {
-        foreach ($this->_buttons as $level => $buttons) {
+        foreach ($this->_buttons as $buttons) {
             foreach ($buttons as $id => $data) {
                 $childId = $this->_prepareButtonBlockId($id);
                 $this->_addButtonChildBlock($childId);
@@ -256,8 +256,8 @@ class Mage_Adminhtml_Block_Widget_Container extends Mage_Adminhtml_Block_Templat
      */
     public function hasFooterButtons()
     {
-        foreach ($this->_buttons as $level => $buttons) {
-            foreach ($buttons as $id => $data) {
+        foreach ($this->_buttons as $buttons) {
+            foreach ($buttons as $data) {
                 if (isset($data['area']) && ($data['area'] == 'footer')) {
                     return true;
                 }

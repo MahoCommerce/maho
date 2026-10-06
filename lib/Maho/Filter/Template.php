@@ -120,8 +120,7 @@ class Template
         ];
         foreach ($directives as $pattern => $directive) {
             if (preg_match_all($pattern, $value, $constructions, PREG_SET_ORDER)) {
-                foreach ($constructions as $index => $construction) {
-                    $replacedValue = '';
+                foreach ($constructions as $construction) {
                     $callback = [$this, $directive];
                     try {
                         $replacedValue = call_user_func($callback, $construction);
@@ -134,8 +133,7 @@ class Template
         }
 
         if (preg_match_all(self::CONSTRUCTION_PATTERN, $value, $constructions, PREG_SET_ORDER)) {
-            foreach ($constructions as $index => $construction) {
-                $replacedValue = '';
+            foreach ($constructions as $construction) {
                 $callback = [$this, $construction[1] . 'Directive'];
                 if (!is_callable($callback)) {
                     continue;

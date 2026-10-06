@@ -336,11 +336,8 @@ class Maho_AdminActivityLog_Model_Observer
         $controllerAction = $observer->getEvent()->getControllerAction();
         $request = $controllerAction->getRequest();
 
-        // Get all parameters for debugging
-        $allParams = $request->getParams();
         $actionName = $request->getActionName();
         $controllerName = $request->getControllerName();
-        $moduleName = $request->getModuleName();
 
         // Check if this is a mass action request - improved detection
         $isMassAction = false;

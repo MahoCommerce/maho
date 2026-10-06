@@ -28,7 +28,7 @@ class Mage_Catalog_Model_Product_Option_Observer
                     if ($option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_FILE) {
                         /** @var Mage_Catalog_Model_Product_Option $option */
                         try {
-                            $group = $option->groupFactory($option->getType())
+                            $option->groupFactory($option->getType())
                                 ->setQuoteItemOption($itemOption)
                                 ->copyQuoteToOrder();
                         } catch (Exception) {

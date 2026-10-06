@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d0308e12556b4040baf05499eca856f9",
+    "content-hash": "70284a4b27a755b81a1919527d89db1c",
     "packages": [
         {
             "name": "altcha-org/altcha",
@@ -10461,21 +10461,21 @@
         },
         {
             "name": "mahocommerce/maho-phpstan-plugin",
-            "version": "v5.0.0",
+            "version": "v5.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/MahoCommerce/maho-phpstan-plugin.git",
-                "reference": "a5cc4100d456abef4296c0eee84b764a2494665b"
+                "reference": "7f3994dc27b4e8baf21baf8b49058a7363933940"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/MahoCommerce/maho-phpstan-plugin/zipball/a5cc4100d456abef4296c0eee84b764a2494665b",
-                "reference": "a5cc4100d456abef4296c0eee84b764a2494665b",
+                "url": "https://api.github.com/repos/MahoCommerce/maho-phpstan-plugin/zipball/7f3994dc27b4e8baf21baf8b49058a7363933940",
+                "reference": "7f3994dc27b4e8baf21baf8b49058a7363933940",
                 "shasum": ""
             },
             "require": {
                 "php": ">=8.5",
-                "phpstan/phpstan": "^2.2.6"
+                "phpstan/phpstan": "^2.3"
             },
             "require-dev": {
                 "friendsofphp/php-cs-fixer": "^3.95",
@@ -10502,7 +10502,7 @@
             ],
             "description": "Extension for PHPStan to allow static analysis of Maho projects.",
             "support": {
-                "source": "https://github.com/MahoCommerce/maho-phpstan-plugin/tree/v5.0.0"
+                "source": "https://github.com/MahoCommerce/maho-phpstan-plugin/tree/v5.1.0"
             },
             "funding": [
                 {
@@ -10518,7 +10518,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-09-21T15:17:04+00:00"
+            "time": "2026-10-06T09:40:09+00:00"
         },
         {
             "name": "mcp/sdk",
@@ -12560,11 +12560,11 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "2.2.15",
+            "version": "2.3.0",
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/b158556ffd26825cf615a1c1f72fb5157a2301b7",
-                "reference": "b158556ffd26825cf615a1c1f72fb5157a2301b7",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/b1f9890d9af53a25c58129e78f0aadd31f90d7f4",
+                "reference": "b1f9890d9af53a25c58129e78f0aadd31f90d7f4",
                 "shasum": ""
             },
             "require": {
@@ -12620,7 +12620,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-09-23T12:23:07+00:00"
+            "time": "2026-10-06T06:15:36+00:00"
         },
         {
             "name": "phpstan/phpstan-deprecation-rules",

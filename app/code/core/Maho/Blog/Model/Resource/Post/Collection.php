@@ -186,12 +186,10 @@ class Maho_Blog_Model_Resource_Post_Collection extends Mage_Eav_Model_Entity_Col
         }
 
         if (is_array($attribute)) {
-            $staticAttrs = [];
             $eavAttrs = [];
 
             foreach ($attribute as $attr) {
                 if ($this->isStaticAttribute($attr)) {
-                    $staticAttrs[] = $attr;
                     $this->_selectAttributes[] = $attr;
                 } else {
                     $eavAttrs[] = $attr;
@@ -217,12 +215,6 @@ class Maho_Blog_Model_Resource_Post_Collection extends Mage_Eav_Model_Entity_Col
     protected function _initSelect(): self
     {
         parent::_initSelect();
-
-        // Ensure static attributes are selected from main entity table
-        $staticColumns = [];
-        foreach ($this->_staticAttributes as $attr) {
-            $staticColumns[] = $attr;
-        }
 
         // Add store view information
         $connection = $this->getConnection();

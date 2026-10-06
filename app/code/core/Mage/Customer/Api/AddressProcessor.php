@@ -44,10 +44,10 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
 
         // Handle GraphQL mutations
         if ($operationName === 'create') {
-            return $this->handleGraphQlCreate($data, $context);
+            return $this->handleGraphQlCreate($context);
         }
         if ($operationName === 'update') {
-            return $this->handleGraphQlUpdate($data, $context);
+            return $this->handleGraphQlUpdate($context);
         }
         if ($operationName === 'delete') {
             $this->handleGraphQlDelete($context);
@@ -311,7 +311,7 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
     /**
      * Handle GraphQL createAddress mutation
      */
-    private function handleGraphQlCreate(mixed $data, array $context): Address
+    private function handleGraphQlCreate(array $context): Address
     {
         $customerId = $this->getAuthenticatedCustomerId();
         if (!$customerId) {
@@ -345,7 +345,7 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
     /**
      * Handle GraphQL updateAddress mutation
      */
-    private function handleGraphQlUpdate(mixed $data, array $context): Address
+    private function handleGraphQlUpdate(array $context): Address
     {
         $args = $context['args']['input'] ?? [];
         $addressId = (int) ($args['id'] ?? 0);

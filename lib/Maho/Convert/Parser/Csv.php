@@ -72,7 +72,6 @@ class Csv extends AbstractParser
         fputs($fp, $this->getData());
         fseek($fp, 0);
 
-        $data = [];
         $sessionId = \Mage::registry('current_dataflow_session_id');
         $import = \Mage::getModel('dataflow/import');
         $map = new Column();
@@ -108,8 +107,6 @@ class Csv extends AbstractParser
     #[\Override]
     public function unparse()
     {
-        $csv = '';
-
         $fDel = $this->getVar('delimiter', ',');
         $fEnc = $this->getVar('enclose', '"');
         $fEsc = $this->getVar('escape', '\\');
@@ -130,7 +127,7 @@ class Csv extends AbstractParser
             }
             $lines[] = implode($fDel, $line);
         }
-        foreach ($data as $i => $row) {
+        foreach ($data as $row) {
             $line = [];
             foreach ($fields as $f) {
                 /*

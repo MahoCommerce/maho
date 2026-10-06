@@ -46,7 +46,6 @@ class Mage_Customer_VatController extends Mage_Core_Controller_Front_Action
             'valid' => false,
             'format_valid' => false,
             'success' => false,
-            'message' => '',
             'cached' => false,
             'format_only' => false,
         ];

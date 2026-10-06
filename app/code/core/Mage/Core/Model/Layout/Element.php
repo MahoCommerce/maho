@@ -44,7 +44,6 @@ class Mage_Core_Model_Layout_Element extends \Maho\Simplexml\Element
                 $this->prepareActionArgument($args);
                 break;
         }
-        $children = $this->children();
         foreach ($this as $child) {
             $child->prepare($args);
         }
@@ -70,7 +69,6 @@ class Mage_Core_Model_Layout_Element extends \Maho\Simplexml\Element
     public function prepareBlock($args)
     {
         $type = (string) $this['type'];
-        $name = (string) $this['name'];
 
         $className = (string) $this['class'];
         if (!$className) {

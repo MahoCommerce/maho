@@ -10,6 +10,14 @@
 
 class Mage_Eav_Model_Attribute_Data_Image extends Mage_Eav_Model_Attribute_Data_File
 {
+    private const ALLOWED_IMAGE_TYPES = [
+        IMAGETYPE_GIF  => 'gif',
+        IMAGETYPE_JPEG => 'jpg',
+        IMAGETYPE_PNG  => 'png',
+        IMAGETYPE_WEBP => 'webp',
+        IMAGETYPE_AVIF => 'avif',
+    ];
+
     /**
      * Validate file by attribute validate rules
      * Return array of errors
@@ -31,24 +39,10 @@ class Mage_Eav_Model_Attribute_Data_Image extends Mage_Eav_Model_Attribute_Data_
             ];
         }
 
-        $allowImageTypes = [
-            1   => 'gif',
-            2   => 'jpg',
-            3   => 'png',
-            18  => 'webp',
-            19  => 'avif',
-        ];
-
-        if (!isset($allowImageTypes[$imageProp[2]])) {
+        if (!isset(self::ALLOWED_IMAGE_TYPES[$imageProp[2]])) {
             return [
                 Mage::helper('eav')->__('"%s" is not a valid image format', $label),
             ];
-        }
-
-        // modify image name
-        $extension  = pathinfo($value['name'], PATHINFO_EXTENSION);
-        if ($extension != $allowImageTypes[$imageProp[2]]) {
-            $value['name'] = pathinfo($value['name'], PATHINFO_FILENAME) . '.' . $allowImageTypes[$imageProp[2]];
         }
 
         $errors = [];
@@ -73,5 +67,35 @@ class Mage_Eav_Model_Attribute_Data_Image extends Mage_Eav_Model_Attribute_Data_
         }
 
         return $errors;
+    }
+
+    /**
+     * @param array|string $value
+     * @return $this
+     * @throws Mage_Core_Exception
+     */
+    #[\Override]
+    public function compactValue($value)
+    {
+        if (is_array($value)) {
+            $value = $this->_setImageTypeExtension($value);
+        }
+
+        return parent::compactValue($value);
+    }
+
+    /**
+     * Give the uploaded file the extension of its real image type.
+     */
+    protected function _setImageTypeExtension(array $value): array
+    {
+        if (empty($value['tmp_name']) || !isset($value['name'])) {
+            return $value;
+        }
+        $imageProp = @\Maho\Io::getImageSize($value['tmp_name']);
+        if ($imageProp && isset(self::ALLOWED_IMAGE_TYPES[$imageProp[2]])) {
+            $value['name'] = pathinfo($value['name'], PATHINFO_FILENAME) . '.' . self::ALLOWED_IMAGE_TYPES[$imageProp[2]];
+        }
+        return $value;
     }
 }

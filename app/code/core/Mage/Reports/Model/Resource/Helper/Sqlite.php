@@ -94,7 +94,6 @@ class Mage_Reports_Model_Resource_Helper_Sqlite extends Mage_Core_Model_Resource
         $rankCols[] = "total_qty AS $column";
         $rankCols[] = "ROW_NUMBER() OVER (PARTITION BY store_id, $periodColOuter ORDER BY total_qty DESC) AS rating_pos";
 
-        $finalCols = $rankCols;
         // Remove unnecessary columns for final insert
         $insertCols = array_keys($columns);
         $insertCols[] = $column;

@@ -112,13 +112,12 @@ class Mage_Downloadable_Model_Resource_Link extends Mage_Core_Model_Resource_Db_
     public function deleteItems($items)
     {
         $writeAdapter   = $this->_getWriteAdapter();
-        $where = [];
         if ($items instanceof Mage_Downloadable_Model_Link) {
             $where = ['link_id = ?'    => $items->getId()];
         } elseif (is_array($items)) {
             $where = ['link_id in (?)' => $items];
         } else {
-            $where = ['sample_id = ?'  => $items];
+            $where = ['link_id = ?'  => $items];
         }
         $writeAdapter->delete(
             $this->getMainTable(),

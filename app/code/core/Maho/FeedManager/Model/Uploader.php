@@ -290,7 +290,6 @@ class Maho_FeedManager_Model_Uploader
     protected function _uploadGoogleApi(string $localPath): bool
     {
         $merchantId = $this->_config['merchant_id'] ?? '';
-        $targetCountry = $this->_config['target_country'] ?? 'AU';
         $serviceAccountJson = $this->_config['service_account_json'] ?? '';
 
         if (empty($merchantId) || empty($serviceAccountJson)) {

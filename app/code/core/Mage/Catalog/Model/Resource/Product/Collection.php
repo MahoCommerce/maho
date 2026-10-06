@@ -835,7 +835,6 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
                 $anchorStmt->limit(); //reset limits
                 $anchorStmt->where('count_table.category_id IN (?)', $isAnchor);
                 $productCounts += $this->getConnection()->fetchPairs($anchorStmt);
-                $anchorStmt = null;
             }
             if ($isNotAnchor) {
                 $notAnchorStmt = clone $select;
@@ -843,9 +842,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
                 $notAnchorStmt->where('count_table.category_id IN (?)', $isNotAnchor);
                 $notAnchorStmt->where('count_table.is_parent = 1');
                 $productCounts += $this->getConnection()->fetchPairs($notAnchorStmt);
-                $notAnchorStmt = null;
             }
-            $select = null;
             $this->unsProductCountSelect();
         }
 
@@ -1709,11 +1706,11 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
             if ($item->hasStockItem()) {
                 $item->unsStockItem();
             }
-            $item = $this->_items[$i] = null;
+            $this->_items[$i] = null;
         }
 
-        foreach ($this->_itemsById as $i => $item) {
-            $item = $this->_itemsById[$i] = null;
+        foreach (array_keys($this->_itemsById) as $i) {
+            $this->_itemsById[$i] = null;
         }
 
         $this->_items = [];

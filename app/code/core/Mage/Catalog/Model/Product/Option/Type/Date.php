@@ -47,13 +47,10 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
         }
 
         $timeValid = true;
-        if ($this->_timeExists()) {
-            // For datetime options, time is included in the datetime field
-            if ($option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE_TIME) {
-                $timeValid = true; // Already validated above
-            }
+        // For datetime options, time is included in the datetime field, which is already validated above
+        if ($this->_timeExists() && $option->getType() != Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE_TIME) {
             // For time-only options, check for native time input format
-            elseif ($option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_TIME && isset($value['time'])) {
+            if ($option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_TIME && isset($value['time'])) {
                 // Validate time format HH:mm
                 $timeParts = explode(':', $value['time']);
                 if (count($timeParts) === 2) {
@@ -167,7 +164,6 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
     public function getFormattedOptionValue($optionValue)
     {
         if ($this->_formattedOptionValue === null) {
-            $option = $this->getOption();
             if ($this->getOption()->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE) {
                 $format = Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM);
                 $result = new DateTime($optionValue)->format($format);

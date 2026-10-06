@@ -31,7 +31,7 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
     #[Maho\Config\Route('/giftcard/cart/checkBalance', methods: ['POST'])]
     public function checkBalanceAction(): void
     {
-        $result = ['success' => false, 'message' => ''];
+        $result = ['success' => false];
 
         // Rate limiting
         if ($this->_isRateLimited()) {
@@ -237,7 +237,7 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
     #[Maho\Config\Route('/giftcard/cart/ajaxApply', methods: ['POST'])]
     public function ajaxApplyAction(): void
     {
-        $result = ['success' => false, 'message' => '', 'html' => ''];
+        $result = ['success' => false, 'html' => ''];
 
         if (!$this->getRequest()->isPost()) {
             $result['message'] = $this->__('Invalid request.');
@@ -340,7 +340,7 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
     #[Maho\Config\Route('/giftcard/cart/ajaxRemove', methods: ['POST'])]
     public function ajaxRemoveAction(): void
     {
-        $result = ['success' => false, 'message' => ''];
+        $result = ['success' => false];
 
         if (!$this->getRequest()->isPost()) {
             $result['message'] = $this->__('Invalid request.');

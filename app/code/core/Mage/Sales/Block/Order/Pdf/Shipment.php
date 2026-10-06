@@ -116,8 +116,11 @@ class Mage_Sales_Block_Order_Pdf_Shipment extends Mage_Sales_Block_Order_Pdf_Abs
 
     protected function _getItemRenderer(string $type): ?Mage_Sales_Model_Order_Pdf_Items_Abstract
     {
-        $rendererModel = Mage::getStoreConfig('sales_pdf/shipment/' . $type) ?: 'sales/order_pdf_items_shipment_default';
-        $this->_renderers[$type] ??= new Mage_Sales_Model_Order_Pdf_Items_Shipment_Default();
+        if (!array_key_exists($type, $this->_renderers)) {
+            $model = (string) Mage::getConfig()->getNode("global/pdf/shipment/{$type}");
+            $renderer = $model === '' ? null : Mage::getModel($model);
+            $this->_renderers[$type] = $renderer instanceof Mage_Sales_Model_Order_Pdf_Items_Abstract ? $renderer : null;
+        }
         return $this->_renderers[$type];
     }
 

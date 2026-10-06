@@ -47,12 +47,6 @@ class Mage_Adminhtml_Block_Report_Sales_Grid_Column_Renderer_Date extends Mage_A
     {
         $column = $this->getColumn();
         if ($data = $row->getData($column->getIndex())) {
-            $dateFormat = match ($column->getPeriodType()) {
-                'month' => 'yyyy-MM',
-                'year' => 'yyyy',
-                default => 'yyyy-MM-dd',
-            };
-
             try {
                 $dateObj = ($column->getGmtoffset())
                     ? Mage::app()->getLocale()->utcToStore(null, $data)

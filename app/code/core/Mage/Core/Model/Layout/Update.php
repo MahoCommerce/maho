@@ -287,7 +287,7 @@ class Mage_Core_Model_Layout_Update
      */
     public function merge($handle)
     {
-        $packageUpdatesStatus = $this->fetchPackageLayoutUpdates($handle);
+        $this->fetchPackageLayoutUpdates($handle);
         if (Mage::isInstalled()) {
             $this->fetchDbLayoutUpdates($handle);
         }
@@ -418,7 +418,6 @@ class Mage_Core_Model_Layout_Update
         $storeId ??= Mage::app()->getStore()->getId();
         /** @var Mage_Core_Model_Design_Package $design */
         $design = Mage::getSingleton('core/design_package');
-        $layoutXml = null;
         $elementClass = $this->getElementClass();
         $updatesRoot = Mage::app()->getConfig()->getNode($area . '/layout/updates');
         Mage::dispatchEvent('core_layout_update_updates_get_after', ['updates' => $updatesRoot]);
@@ -459,7 +458,6 @@ class Mage_Core_Model_Layout_Update
             }
             $layoutStr .= $fileXml->innerXml();
         }
-        $layoutXml = simplexml_load_string('<layouts>' . $layoutStr . '</layouts>', $elementClass);
-        return $layoutXml;
+        return simplexml_load_string('<layouts>' . $layoutStr . '</layouts>', $elementClass);
     }
 }

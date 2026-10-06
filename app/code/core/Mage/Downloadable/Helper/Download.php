@@ -157,7 +157,7 @@ class Mage_Downloadable_Helper_Download extends Mage_Core_Helper_Abstract
      */
     public function getContentType()
     {
-        $handle = $this->_getHandle();
+        $this->_getHandle();
         if ($this->_linkType == self::LINK_TYPE_FILE) {
             $extension = pathinfo($this->_resourceFile, PATHINFO_EXTENSION);
 
@@ -186,7 +186,7 @@ class Mage_Downloadable_Helper_Download extends Mage_Core_Helper_Abstract
      */
     public function getFilename()
     {
-        $handle = $this->_getHandle();
+        $this->_getHandle();
         if ($this->_linkType == self::LINK_TYPE_FILE) {
             return pathinfo($this->_resourceFile, PATHINFO_BASENAME);
         }

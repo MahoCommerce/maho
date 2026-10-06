@@ -446,7 +446,7 @@ class Sqlite extends AbstractPdoAdapter
             $pos = strpos($sql, '?', $offset);
             if ($pos !== false) {
                 $positions[] = $pos;
-                $offset = ++$pos;
+                $offset = $pos + 1;
             } else {
                 break;
             }
@@ -2059,7 +2059,6 @@ class Sqlite extends AbstractPdoAdapter
     protected function _getColumnDefinition(array $options, ?string $ddlType = null): string
     {
         $options = array_change_key_case($options, CASE_UPPER);
-        $cType = null;
         $cNullable = true;
         $cDefault = false;
         $cIdentity = false;
@@ -3083,7 +3082,7 @@ class Sqlite extends AbstractPdoAdapter
 
                 $droppedKeys = [];
                 foreach ($foreignKeys as $keyTable => $columns) {
-                    foreach ($columns as $columnName => $keyOptions) {
+                    foreach ($columns as $keyOptions) {
                         if ($table == $keyOptions['REF_TABLE_NAME'] && $column == $keyOptions['REF_COLUMN_NAME']) {
                             $this->dropForeignKey($keyTable, $keyOptions['FK_NAME']);
                             $droppedKeys[] = $keyOptions;

@@ -1044,7 +1044,6 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
         }
 
         $selects = [];
-        $select = '';
         foreach ($tableAttributes as $table => $attributes) {
             $select = $this->_getLoadAttributesSelect($table, $attributes);
             $selects[$attributeTypes[$table]][] = $this->_addLoadAttributesSelectValues(
@@ -1088,7 +1087,6 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
         if (empty($attributeIds)) {
             $attributeIds = $this->_selectAttributes;
         }
-        $helper = Mage::getResourceHelper('eav');
         $entityIdField = $this->getEntity()->getEntityIdField();
         return $this->getConnection()->select()
             ->from($table, [$entityIdField, 'attribute_id'])
@@ -1224,8 +1222,6 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
         $attrTable = $this->_getAttributeTableAlias($attributeCode);
         if (isset($this->_joinAttributes[$attributeCode])) {
             $attribute      = $this->_joinAttributes[$attributeCode]['attribute'];
-            $entity         = $attribute->getEntity();
-            $entityIdField  = $entity->getEntityIdField();
             $fkName         = $this->_joinAttributes[$attributeCode]['bind'];
             $fkAttribute    = $this->_joinAttributes[$attributeCode]['bindAttribute'];
             $fkTable        = $this->_getAttributeTableAlias($fkName);
@@ -1331,11 +1327,9 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
         }
         // process linked attribute
         if (isset($this->_joinAttributes[$attribute])) {
-            $entity      = $this->getAttribute($attribute)->getEntity();
-            $entityTable = $entity->getEntityTable();
+            $entity = $this->getAttribute($attribute)->getEntity();
         } else {
-            $entity      = $this->getEntity();
-            $entityTable = 'e';
+            $entity = $this->getEntity();
         }
 
         if ($entity->isAttributeStatic($attribute)) {

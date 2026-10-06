@@ -127,8 +127,6 @@ class Mage_Core_Controller_Request_Http
         if ($uri instanceof SymfonyRequest) {
             $this->symfonyRequest = $uri;
         } elseif ($uri !== null) {
-            // Parse URI and create request
-            $parsedUrl = parse_url($uri);
             $this->symfonyRequest = SymfonyRequest::create($uri);
         } else {
             $this->symfonyRequest = SymfonyRequest::createFromGlobals();

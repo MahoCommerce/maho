@@ -540,7 +540,6 @@ class Mage_CatalogIndex_Model_Indexer extends Mage_Core_Model_Abstract
     public function buildEntityPriceFilter($attributes, $values, &$filteredAttributes, $productCollection)
     {
         $filter = [];
-        $store = Mage::app()->getStore()->getId();
         $website = Mage::app()->getStore()->getWebsiteId();
 
         $currentStoreCurrency = Mage::app()->getStore()->getCurrentCurrencyCode();
@@ -569,7 +568,6 @@ class Mage_CatalogIndex_Model_Indexer extends Mage_Core_Model_Abstract
                                 }
                             }
                             if (is_array($values[$code])) {
-                                $rateConversion = 1;
                                 $filter[$code]->distinct(true);
 
                                 if (isset($values[$code]['from']) && isset($values[$code]['to'])) {

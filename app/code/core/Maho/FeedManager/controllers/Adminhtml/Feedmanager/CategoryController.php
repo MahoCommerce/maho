@@ -214,7 +214,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_CategoryController extends Mage_Adm
                 $results = $adapter->searchTaxonomy($category->getName(), 1);
                 if (!empty($results)) {
                     $match = $results[0];
-                    $mapping = Mage::getModel('feedmanager/categoryMapping')
+                    Mage::getModel('feedmanager/categoryMapping')
                         ->setPlatform($platform)
                         ->setCategoryId((int) $category->getId())
                         ->setPlatformCategoryId($match['id'] ?? '')
