@@ -13,16 +13,6 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends \Maho\DataObject
     use Mage_Core_Model_Pdf_Trait;
 
     /**
-     * Item renderers with render type key
-     *
-     * model    => the model name
-     * renderer => the renderer model
-     *
-     * @var array
-     */
-    protected $_renderers = [];
-
-    /**
      * Default total model
      *
      * @var string
@@ -181,44 +171,6 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends \Maho\DataObject
     {
         // Default implementation - subclasses should override
         return 'Mage_Core_Block_Template';
-    }
-
-    /**
-     * Initialize renderer
-     */
-    protected function _initRenderer(string $type): void
-    {
-        $renderers = Mage::getConfig()->getNode('global/pdf/item_renderers/' . $type);
-        if ($renderers) {
-            foreach ($renderers->children() as $name => $renderer) {
-                $this->_renderers[$name] = [
-                    'model' => (string) $renderer,
-                    'renderer' => null,
-                ];
-            }
-        }
-    }
-
-    /**
-     * Get item renderer
-     */
-    public function getItemRenderer(string $type): ?Mage_Core_Block_Abstract
-    {
-        if (!isset($this->_renderers[$type])) {
-            $type = 'default';
-        }
-
-        if (!isset($this->_renderers[$type])) {
-            return null;
-        }
-
-        if (!$this->_renderers[$type]['renderer']) {
-            $this->_renderers[$type]['renderer'] = $this->_getLayout()->createBlock(
-                $this->_renderers[$type]['model'],
-            );
-        }
-
-        return $this->_renderers[$type]['renderer'];
     }
 
     /**
