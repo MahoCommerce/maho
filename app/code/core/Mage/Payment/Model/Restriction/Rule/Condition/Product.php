@@ -49,7 +49,6 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Product extends Mage_Rule_Mo
     #[\Override]
     public function validate(\Maho\DataObject $object)
     {
-        $product = false;
         if ($object->getProduct() instanceof Mage_Catalog_Model_Product) {
             $product = $object->getProduct();
         } else {

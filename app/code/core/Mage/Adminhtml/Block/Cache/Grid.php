@@ -94,7 +94,6 @@ class Mage_Adminhtml_Block_Cache_Grid extends Mage_Adminhtml_Block_Widget_Grid
      */
     public function decorateStatus($value, $row, $column, $isExport)
     {
-        $class = '';
         if (isset($this->_invalidatedTypes[$row->getId()])) {
             $cell = '<span class="grid-severity-minor"><span>' . $this->__('Invalidated') . '</span></span>';
         } else {
@@ -128,8 +127,6 @@ class Mage_Adminhtml_Block_Cache_Grid extends Mage_Adminhtml_Block_Widget_Grid
     {
         $this->setMassactionIdField('id');
         $this->getMassactionBlock()->setFormFieldName('types');
-
-        $modeOptions = Mage::getModel('index/process')->getModesOptions();
 
         $this->getMassactionBlock()->addItem(MassAction::ENABLE, [
             'label'    => Mage::helper('index')->__('Enable'),

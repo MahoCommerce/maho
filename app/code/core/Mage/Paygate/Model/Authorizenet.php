@@ -1150,7 +1150,6 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
                     $this->_clearAssignedData($quotePayment);
                     $this->setPartialAuthorizationLastActionState(self::PARTIAL_AUTH_LAST_SUCCESS);
                     $quotePayment->setAdditionalInformation($orderPayment->getAdditionalInformation());
-                    $exceptionMessage = null;
                     break;
                 case self::RESPONSE_CODE_DECLINED:
                 case self::RESPONSE_CODE_ERROR:

@@ -31,8 +31,6 @@ class Mage_Adminhtml_Block_System_Design_Grid extends Mage_Adminhtml_Block_Widge
     #[\Override]
     protected function _prepareCollection()
     {
-        $storeId = (int) $this->getRequest()->getParam('store', 0);
-
         $collection = Mage::getResourceModel('core/design_collection');
 
         $this->setCollection($collection);

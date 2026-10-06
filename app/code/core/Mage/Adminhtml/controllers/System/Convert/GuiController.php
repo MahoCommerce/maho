@@ -100,14 +100,12 @@ class Mage_Adminhtml_System_Convert_GuiController extends Mage_Adminhtml_System_
     public function uploadAction(): void
     {
         $this->_initProfile();
-        $profile = Mage::registry('current_convert_profile');
     }
 
     #[Maho\Config\Route('/admin/system_convert_gui/uploadPost')]
     public function uploadPostAction(): void
     {
         $this->_initProfile();
-        $profile = Mage::registry('current_convert_profile');
     }
 
     #[Maho\Config\Route('/admin/system_convert_gui/download')]
@@ -118,6 +116,5 @@ class Mage_Adminhtml_System_Convert_GuiController extends Mage_Adminhtml_System_
             return;
         }
         $this->_initProfile();
-        $profile = Mage::registry('current_convert_profile');
     }
 }

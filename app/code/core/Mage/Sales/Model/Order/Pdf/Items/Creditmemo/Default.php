@@ -21,19 +21,4 @@ class Mage_Sales_Model_Order_Pdf_Items_Creditmemo_Default extends Mage_Sales_Mod
         $item = $this->getItem();
         return $item ? $item->getSku() : '';
     }
-
-    /**
-     * Get item total including tax and excluding discount
-     *
-     * @return float
-     */
-    public function getItemTotalInclTax()
-    {
-        $item = $this->getItem();
-        if (!$item) {
-            return 0.0;
-        }
-
-        return $item->getRowTotal() + $item->getTaxAmount() + $item->getHiddenTaxAmount() - $item->getDiscountAmount();
-    }
 }

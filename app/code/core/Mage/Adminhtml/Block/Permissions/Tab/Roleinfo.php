@@ -44,8 +44,6 @@ class Mage_Adminhtml_Block_Permissions_Tab_Roleinfo extends Mage_Adminhtml_Block
 
     protected function _initForm()
     {
-        $roleId = $this->getRequest()->getParam('rid');
-
         $form = new \Maho\Data\Form();
 
         $fieldset = $form->addFieldset('base_fieldset', ['legend' => Mage::helper('adminhtml')->__('Role Information')]);

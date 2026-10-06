@@ -283,8 +283,6 @@ class Mage_Adminhtml_Block_Catalog_Category_Abstract extends Mage_Adminhtml_Bloc
     {
         $collection = $this->getData('category_collection');
         if (is_null($collection)) {
-            $store = $this->getStore();
-
             /** @var Mage_Catalog_Model_Resource_Category_Collection $collection */
             $collection = Mage::getModel('catalog/category')->getCollection();
 

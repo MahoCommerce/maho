@@ -271,10 +271,6 @@ class Maho_Ai_Adminhtml_AiController extends Mage_Adminhtml_Controller_Action
         ];
 
         $flush = function () use (&$batch, &$count, $conn, $taskTable): void {
-            // PHPStan can't track that $batch gets appended to outside the
-            // closure (the loop below grows it before each flush call), so
-            // it sees the initial [] and concludes this if is always false.
-            // @phpstan-ignore if.alwaysFalse
             if ($batch) {
                 $conn->insertMultiple($taskTable, $batch);
                 $count += count($batch);

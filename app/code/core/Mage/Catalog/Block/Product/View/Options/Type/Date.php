@@ -214,7 +214,6 @@ class Mage_Catalog_Block_Product_View_Options_Type_Date extends Mage_Catalog_Blo
                 $dateTime = new DateTime($datetimeValue);
                 $isoValue = $dateTime->format(Mage_Core_Model_Locale::HTML5_DATETIME_FORMAT);
             } catch (Exception) {
-                $isoValue = '';
             }
         } elseif ($dateValue || $timeValue) {
             // Handle separate date and time values
@@ -245,7 +244,6 @@ class Mage_Catalog_Block_Product_View_Options_Type_Date extends Mage_Catalog_Blo
 
                 $isoValue = $dateTime->format(Mage_Core_Model_Locale::HTML5_DATETIME_FORMAT);
             } catch (Exception) {
-                $isoValue = '';
             }
         }
 

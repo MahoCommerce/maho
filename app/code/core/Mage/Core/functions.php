@@ -214,7 +214,7 @@ function mageDelTree($path)
  * @param string $escape
  * @return array
  */
-function mageParseCsv($string, $delimiter = ',', $enclosure = '"', $escape = '\\')
+function mageParseCsv($string, $delimiter = ',', $enclosure = '"', $escape = '\\') // @phpstan-ignore function.unusedParameter (public global function that keeps the str_getcsv() signature)
 {
     $elements = explode($delimiter, $string);
     for ($i = 0; $i < count($elements); $i++) {

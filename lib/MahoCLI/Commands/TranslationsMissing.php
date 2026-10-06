@@ -32,7 +32,6 @@ class TranslationsMissing extends BaseMahoCommand
         $usedFileMap = $this->getUsedStrings();
 
         $definedFlat = array_unique(array_merge(...array_values($definedFileMap)));
-        $usedFlat = array_unique(array_merge(...array_values($usedFileMap)));
 
         foreach ($usedFileMap as $file => $used) {
             $missing = array_diff($used, $definedFlat);

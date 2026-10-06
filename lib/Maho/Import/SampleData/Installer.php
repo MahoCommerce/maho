@@ -105,7 +105,7 @@ final class Installer
             $this->reindexAll();
         }
 
-        $this->step(++$done, $steps, 'Cache');
+        $this->step($done + 1, $steps, 'Cache');
         Mage::app()->getCache()->flush();
         $this->reporter->finish();
         return $result;

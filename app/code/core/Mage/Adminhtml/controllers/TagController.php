@@ -290,7 +290,6 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
     public function massStatusAction(): void
     {
         $tagIds = $this->getRequest()->getParam('tag');
-        $storeId = (int) $this->getRequest()->getParam('store', 0);
         if (!is_array($tagIds)) {
             // No products selected
             Mage::getSingleton('adminhtml/session')->addError($this->__('Please select tag(s).'));

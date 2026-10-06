@@ -113,7 +113,7 @@ class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
                 $allTypes[$code] = 0;
                 $updatedTypes++;
             }
-            $tags = Mage::app()->getCache()->cleanType($code);
+            Mage::app()->getCache()->cleanType($code);
         }
         if ($updatedTypes > 0) {
             Mage::app()->saveUseCache($allTypes);
@@ -132,7 +132,7 @@ class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
         $updatedTypes = 0;
         if (!empty($types)) {
             foreach ($types as $type) {
-                $tags = Mage::app()->getCache()->cleanType($type);
+                Mage::app()->getCache()->cleanType($type);
                 Mage::dispatchEvent('adminhtml_cache_refresh_type', ['type' => $type]);
                 $updatedTypes++;
             }

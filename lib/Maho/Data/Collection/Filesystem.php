@@ -472,7 +472,7 @@ class Filesystem extends Collection
      */
     protected function _invokeFilter($callback, $callbackParams)
     {
-        [$field, $value, $row] = $callbackParams;
+        [$field, , $row] = $callbackParams;
         if (!array_key_exists((string) $field, $row)) {
             return false;
         }

@@ -230,7 +230,6 @@ class Mage_Weee_Model_Tax extends Mage_Core_Model_Abstract
                         } else {
                             $appliedRates = Mage::getModel('tax/calculation')->getAppliedRates($rateRequest);
                             if (count($appliedRates) > 1) {
-                                $taxAmount = 0;
                                 foreach ($appliedRates as $appliedRate) {
                                     $taxRate = $appliedRate['percent'];
                                     $taxAmount += Mage::app()->getStore()->roundPrice($value * $taxRate / 100);

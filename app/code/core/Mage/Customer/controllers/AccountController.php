@@ -1181,7 +1181,6 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
                 $errors = array_merge($customerErrors, $errors);
             } else {
                 $customerForm->compactData($customerData);
-                $errors = [];
 
                 // Skip password validation in no-password mode
                 $magicLinkMode = Mage::helper('customer')->getMagicLinkRegistrationMode();

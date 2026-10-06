@@ -364,7 +364,6 @@ class Mage_Core_Model_Url extends \Maho\DataObject
             $route = $this->getRequest()->getRequestedRouteName();
         }
         $this->setRouteName($route);
-        $routePath = $route . '/';
 
         if (!empty($a)) {
             $controller = array_shift($a);
@@ -372,7 +371,6 @@ class Mage_Core_Model_Url extends \Maho\DataObject
                 $controller = $this->getRequest()->getRequestedControllerName();
             }
             $this->setControllerName($controller);
-            $routePath .= $controller . '/';
         }
 
         if (!empty($a)) {
@@ -381,7 +379,6 @@ class Mage_Core_Model_Url extends \Maho\DataObject
                 $action = $this->getRequest()->getRequestedActionName();
             }
             $this->setActionName($action);
-            $routePath .= $action . '/';
         }
 
         if (!empty($a)) {
@@ -391,7 +388,6 @@ class Mage_Core_Model_Url extends \Maho\DataObject
                 if (!empty($a)) {
                     $value = array_shift($a);
                     $this->setRouteParam($key, $value);
-                    $routePath .= $key . '/' . $value . '/';
                 }
             }
         }

@@ -76,18 +76,15 @@ class Mage_Dataflow_Model_Convert_Parser_Xml_Excel extends Mage_Dataflow_Model_C
 
         $worksheet = $this->getVar('single_sheet', '');
 
-        $xmlString = $xmlRowString = '';
-        $countRows = 0;
-        $isWorksheet = $isRow = false;
+        $xmlString = '';
+        $isWorksheet = false;
         while (($xmlOriginalString = $batchIoAdapter->read()) !== false) {
             $xmlString .= $xmlOriginalString;
             if (!$isWorksheet) {
                 $strposS = strpos($xmlString, '<Worksheet');
-                $substrL = 10;
                 //fix for OpenOffice
                 if ($strposS === false) {
                     $strposS = strpos($xmlString, '<ss:Worksheet');
-                    $substrL = 13;
                 }
                 if ($strposS === false) {
                     $xmlString = substr($xmlString, -13);
@@ -228,7 +225,7 @@ class Mage_Dataflow_Model_Convert_Parser_Xml_Excel extends Mage_Dataflow_Model_C
             $i++;
         }
 
-        $batchImportModel = $this->getBatchImportModel()
+        $this->getBatchImportModel()
             ->setId(null)
             ->setBatchId($this->getBatchModel()->getId())
             ->setBatchData($itemData)

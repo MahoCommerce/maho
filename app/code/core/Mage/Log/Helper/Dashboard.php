@@ -438,7 +438,7 @@ class Mage_Log_Helper_Dashboard extends Mage_Core_Helper_Abstract
                 $totalDuration += (int) $session['duration'];
             }
 
-            foreach ($pageCounts as $visitorId => $pages) {
+            foreach ($pageCounts as $pages) {
                 $totalPages += $pages;
                 if ($pages == 1) {
                     $bounces++;

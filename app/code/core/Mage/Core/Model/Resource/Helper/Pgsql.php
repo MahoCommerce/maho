@@ -185,27 +185,6 @@ class Mage_Core_Model_Resource_Helper_Pgsql extends Mage_Core_Model_Resource_Hel
     }
 
     /**
-     * @param string $query
-     * @param int $limitCount
-     * @param int $limitOffset
-     * @param array $columnList
-     * @return string
-     */
-    protected function _assembleLimit($query, $limitCount, $limitOffset, $columnList = [])
-    {
-        if ($limitCount !== null) {
-            $limitCount = (int) $limitCount;
-            $limitOffset = (int) $limitOffset;
-
-            if ($limitOffset + $limitCount != $limitOffset + 1) {
-                $query = sprintf('%s LIMIT %d OFFSET %d', $query, $limitCount, $limitOffset);
-            }
-        }
-
-        return $query;
-    }
-
-    /**
      * Prepare select column list
      *
      * @param string $groupByCondition

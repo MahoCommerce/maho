@@ -144,8 +144,6 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
         $hasDefaultValue = ((string) $defaultValue != '');
 
         if ($this->getBackendType() == 'decimal' && $hasDefaultValue) {
-            $locale = Mage::app()->getLocale()->getLocaleCode();
-
             // Use NumberFormatter to validate and normalize the number
             $parsedValue = Mage::app()->getLocale()->normalizeNumber($defaultValue);
 
@@ -153,12 +151,7 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
                 throw Mage::exception('Mage_Eav', Mage::helper('eav')->__('Invalid default decimal value'));
             }
 
-            try {
-                // Set the normalized value (NumberFormatter::parse returns a float)
-                $this->setDefaultValue((int) $parsedValue);
-            } catch (Exception) {
-                throw Mage::exception('Mage_Eav', Mage::helper('eav')->__('Invalid default decimal value'));
-            }
+            $this->setDefaultValue((string) $parsedValue);
         }
 
         if ($this->getBackendType() == 'datetime') {

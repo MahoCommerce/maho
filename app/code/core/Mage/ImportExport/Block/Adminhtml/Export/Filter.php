@@ -155,13 +155,13 @@ class Mage_ImportExport_Block_Adminhtml_Export_Filter extends Mage_Adminhtml_Blo
         if ($attribute->getFilterOptions()) {
             $options = [];
 
-            foreach ($attribute->getFilterOptions() as $value => $label) {
-                $options[] = ['value' => $value, 'label' => $label];
+            foreach ($attribute->getFilterOptions() as $optionValue => $label) {
+                $options[] = ['value' => $optionValue, 'label' => $label];
             }
         } else {
             $options = $attribute->getSource()->getAllOptions(false);
         }
-        if (($size = count($options))) {
+        if (count($options)) {
             // add empty value option
             $firstOption = reset($options);
 

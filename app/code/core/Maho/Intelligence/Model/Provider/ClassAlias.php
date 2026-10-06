@@ -232,7 +232,7 @@ class Maho_Intelligence_Model_Provider_ClassAlias
             return [];
         }
 
-        foreach ($modelsNode->children() as $group => $groupConfig) {
+        foreach ($modelsNode->children() as $groupConfig) {
             if (!isset($groupConfig->resourceModel)) {
                 continue;
             }

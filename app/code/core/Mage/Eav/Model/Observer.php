@@ -31,7 +31,6 @@ class Mage_Eav_Model_Observer
     {
         $resource = Mage::getSingleton('core/resource');
         $connection = $resource->getConnection('core_write');
-        $entityAttributeTable = $resource->getTableName('eav_entity_attribute');
         $attributeSetTable = $resource->getTableName('eav_attribute_set');
         $entityTypes = Mage::getModel('eav/entity_type')->getCollection();
         foreach ($entityTypes as $entityType) {

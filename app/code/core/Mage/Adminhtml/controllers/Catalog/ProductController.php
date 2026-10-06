@@ -708,7 +708,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
     #[Maho\Config\Route('/admin/catalog_product/categoriesJson')]
     public function categoriesJsonAction(): void
     {
-        $product = $this->_initProduct();
+        $this->_initProduct();
 
         $this->getResponse()->setBodyJson(
             $this->getLayout()->createBlock('adminhtml/catalog_product_edit_tab_categories')

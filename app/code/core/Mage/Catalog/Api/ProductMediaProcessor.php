@@ -76,8 +76,6 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
         $position = $body['position'] ?? null;
         $disabled = $body['disabled'] ?? null;
 
-        $tmpPath = null;
-
         if ($base64 !== null) {
             // Decode base64 to temp file
             $decoded = base64_decode($base64, true);

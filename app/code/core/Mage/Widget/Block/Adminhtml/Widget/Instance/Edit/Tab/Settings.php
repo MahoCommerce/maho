@@ -74,7 +74,6 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Settings extends Mage
     #[\Override]
     protected function _prepareForm()
     {
-        $widgetInstance = $this->getWidgetInstance();
         $form = new \Maho\Data\Form([
             'id' => 'edit_form',
             'action' => $this->getData('action'),

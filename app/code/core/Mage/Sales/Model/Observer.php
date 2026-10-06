@@ -379,12 +379,10 @@ class Mage_Sales_Model_Observer
     protected function _getVatRequiredSalesAddress($salesModel, $store = null)
     {
         $configAddressType = Mage::helper('customer/address')->getTaxCalculationAddressType($store);
-        $requiredAddress = null;
-        $requiredAddress = match ($configAddressType) {
+        return match ($configAddressType) {
             Mage_Customer_Model_Address_Abstract::TYPE_SHIPPING => $salesModel->getShippingAddress(),
             default => $salesModel->getBillingAddress(),
         };
-        return $requiredAddress;
     }
 
     /**
@@ -396,12 +394,10 @@ class Mage_Sales_Model_Observer
     protected function _getVatRequiredCustomerAddress(Mage_Customer_Model_Customer $customer, $store = null)
     {
         $configAddressType = Mage::helper('customer/address')->getTaxCalculationAddressType($store);
-        $requiredAddress = null;
-        $requiredAddress = match ($configAddressType) {
+        return match ($configAddressType) {
             Mage_Customer_Model_Address_Abstract::TYPE_SHIPPING => $customer->getDefaultShipping(),
             default => $customer->getDefaultBilling(),
         };
-        return $requiredAddress;
     }
 
     /**
@@ -454,7 +450,6 @@ class Mage_Sales_Model_Observer
         $merchantCountryCode = $coreHelper->getMerchantCountryCode();
         $merchantVatNumber = $coreHelper->getMerchantVatNumber();
 
-        $gatewayResponse = null;
         if ($addressHelper->getValidateOnEachTransaction($storeId)
             || $customerCountryCode != $quoteAddress->getValidatedCountryCode()
             || $customerVatNumber != $quoteAddress->getValidatedVatNumber()

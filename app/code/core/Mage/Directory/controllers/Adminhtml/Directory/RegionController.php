@@ -322,7 +322,7 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
                 if (!str_contains($localeId, '|')) {
                     continue;
                 }
-                [$regionId, $locale] = explode('|', $localeId);
+                [, $locale] = explode('|', $localeId);
                 $result = $model->deleteTranslation($locale);
                 if ($result === true) {
                     $deletedCount++;
