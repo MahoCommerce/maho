@@ -137,7 +137,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
                 'city' => ['type' => 'String!'],
                 'region' => ['type' => 'String'],
                 'regionId' => ['type' => 'Int'],
-                'postcode' => ['type' => 'String!'],
+                'postcode' => ['type' => 'String'],
                 'countryId' => ['type' => 'String!'],
                 'telephone' => ['type' => 'String!'],
                 'company' => ['type' => 'String'],
