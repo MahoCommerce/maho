@@ -187,7 +187,7 @@ it('starts the worker when the log directory does not exist yet', function () {
     $options->setData('var_dir', $freshVarDir)->setData('log_dir', $freshVarDir . '/log');
 
     try {
-        new ReflectionMethod(Maho_Queue_Model_Cron::class, 'spawnWorker')
+        (new ReflectionMethod(Maho_Queue_Model_Cron::class, 'spawnWorker'))
             ->invoke(Mage::getModel('queue/cron'), $pool, 0);
 
         $deadline = microtime(true) + 30;

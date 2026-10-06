@@ -58,7 +58,7 @@ describe('OrderService validation messages', function (): void {
         $quote = $createQuote('');
 
         try {
-            expect(fn() => new OrderService()->placeAdminOrder($quote))
+            expect(fn() => (new OrderService())->placeAdminOrder($quote))
                 ->toThrow(Mage_Core_Exception::class, 'Please enter the zip/postal code.');
 
             $reloaded = Mage::getModel('sales/quote')->load($quote->getId());
@@ -73,7 +73,7 @@ describe('OrderService validation messages', function (): void {
         $quote->setData('giftcard_codes', Mage::helper('core')->jsonEncode(['PEST-MISSING-CARD' => 10.0]));
 
         try {
-            expect(fn() => new OrderService()->placeAdminOrder($quote))
+            expect(fn() => (new OrderService())->placeAdminOrder($quote))
                 ->toThrow(BadRequestHttpException::class, 'Gift card "PEST-MISSING-CARD" is no longer valid');
         } finally {
             $quote->delete();
