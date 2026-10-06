@@ -281,6 +281,18 @@ abstract class Mage_Core_Helper_Abstract
     }
 
     /**
+     * Encode $data as a complete JavaScript literal. The result includes its own quotes.
+     * The result is HTML-safe. Use it in an HTML attribute or in a script block without escapeHtml().
+     */
+    public function jsEscape(mixed $data): string
+    {
+        return json_encode(
+            $data,
+            JSON_THROW_ON_ERROR | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP,
+        );
+    }
+
+    /**
      * Escape quotes in java script
      *
      * @param string|string[] $data

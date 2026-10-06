@@ -1288,6 +1288,12 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
         return $this->helper('core')->quoteEscape($data, $addSlashes);
     }
 
+    /** @see Mage_Core_Helper_Abstract::jsEscape() */
+    public function jsEscape(mixed $data): string
+    {
+        return $this->helper('core')->jsEscape($data);
+    }
+
     /**
      * Escape quotes in java scripts
      *
