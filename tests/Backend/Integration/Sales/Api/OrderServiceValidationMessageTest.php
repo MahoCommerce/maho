@@ -8,26 +8,23 @@
 declare(strict_types=1);
 
 use Mage\Sales\Api\OrderService;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 uses(Tests\MahoBackendTestCase::class);
 
 /**
- * placeAdminOrder() wrapped every exception in a RuntimeException, which the
- * API returns as a 500 "An internal error occurred". A validation failure of
- * the quote, for example a postcode in the wrong format, must reach the caller
- * as a Mage_Core_Exception, which ApiExceptionListener returns as a 422.
+ * placeAdminOrder() throws the exception of a failed check unchanged, so the API returns its status and message.
  */
 describe('OrderService validation messages', function (): void {
 
-    it('throws the Mage_Core_Exception of the quote validation unchanged', function (): void {
+    $createQuote = function (string $postcode): Mage_Sales_Model_Quote {
         $product = Mage::getResourceModel('catalog/product_collection')
             ->addAttributeToFilter('type_id', 'simple')
             ->addAttributeToFilter('status', 1)
-            ->addAttributeToSelect(['price', 'name'])
             ->setPageSize(1)
             ->getFirstItem();
         if (!$product->getId()) {
-            $this->markTestSkipped('No simple product available for testing');
+            test()->markTestSkipped('No simple product available for testing');
         }
 
         $quote = Mage::getModel('sales/quote');
@@ -37,22 +34,28 @@ describe('OrderService validation messages', function (): void {
         $addressData = [
             'country_id' => 'US',
             'region_id' => 12,
-            'postcode' => '123456789',
-            'firstname' => 'Invalid',
-            'lastname' => 'Postcode',
+            'postcode' => $postcode,
+            'firstname' => 'Pest',
+            'lastname' => 'Validation',
             'street' => '123 Test St',
             'city' => 'Beverly Hills',
             'telephone' => '555-1234',
-            'email' => 'invalid-postcode@example.com',
+            'email' => 'order-validation@example.com',
         ];
         $quote->getBillingAddress()->addData($addressData);
         $quote->getShippingAddress()->addData($addressData)
             ->setCollectShippingRates(true)
             ->setShippingMethod('flatrate_flatrate');
-        $quote->setCustomerIsGuest(true)->setCustomerEmail('invalid-postcode@example.com');
+        $quote->setCustomerIsGuest(true)->setCustomerEmail('order-validation@example.com');
         $quote->getPayment()->setMethod('cashondelivery');
         $quote->setIsActive(true);
         $quote->collectTotals()->save();
+
+        return $quote;
+    };
+
+    it('throws the Mage_Core_Exception of the quote validation unchanged', function () use ($createQuote): void {
+        $quote = $createQuote('123456789');
 
         try {
             expect(fn() => new OrderService()->placeAdminOrder($quote))
@@ -60,6 +63,18 @@ describe('OrderService validation messages', function (): void {
 
             $reloaded = Mage::getModel('sales/quote')->load($quote->getId());
             expect((int) $reloaded->getIsActive())->toBe(1);
+        } finally {
+            $quote->delete();
+        }
+    });
+
+    it('throws the BadRequestHttpException of the gift card check unchanged', function () use ($createQuote): void {
+        $quote = $createQuote('90210');
+        $quote->setData('giftcard_codes', Mage::helper('core')->jsonEncode(['PEST-MISSING-CARD' => 10.0]));
+
+        try {
+            expect(fn() => new OrderService()->placeAdminOrder($quote))
+                ->toThrow(BadRequestHttpException::class, 'Gift card "PEST-MISSING-CARD" is no longer valid');
         } finally {
             $quote->delete();
         }

@@ -185,16 +185,6 @@ class OrderService
                 'accessToken' => $accessToken,
                 'changeAmount' => $changeAmount,
             ];
-        } catch (\Mage_Core_Exception $e) {
-            // A validation failure of the model, for example an invalid address.
-            // ApiExceptionListener returns it as a 422 with this message.
-            throw $e;
-        } catch (\Exception $e) {
-            \Mage::logException($e);
-            // Preserve the original message so domain validation failures
-            // (e.g. "Cart is no longer active", "Insufficient cash tendered")
-            // surface to the caller instead of a generic placeholder.
-            throw new \RuntimeException($e->getMessage() ?: 'Failed to place order', 0, $e);
         } finally {
             $write->releaseLock($lockName);
         }
