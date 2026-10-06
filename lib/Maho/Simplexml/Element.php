@@ -60,7 +60,7 @@ class Element extends SimpleXMLElement
     public function hasChildren()
     {
         // children() of a node with only attributes is truthy, so count the child elements
-        return $this->children()->count() > 0;
+        return ($this->children()?->count() ?? 0) > 0;
     }
 
     /**
