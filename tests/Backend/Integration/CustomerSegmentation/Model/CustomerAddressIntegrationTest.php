@@ -831,9 +831,9 @@ function createCustomerAddressTestSegment(string $name, array $conditions): Maho
     $segment = Mage::getModel('customersegmentation/segment');
     $segment->setName($name);
     $segment->setDescription('Customer address test segment for ' . $name);
-    $segment->setIsActive(1);
-    $segment->setWebsiteIds('1');
-    $segment->setCustomerGroupIds('0,1,2,3');
+    $segment->setIsActive();
+    $segment->setWebsiteIds([1]);
+    $segment->setCustomerGroupIds([0, 1, 2, 3]);
     $segment->setConditionsSerialized(Mage::helper('core')->jsonEncode($conditions));
     $segment->setRefreshMode('manual');
     $segment->setRefreshStatus('pending');

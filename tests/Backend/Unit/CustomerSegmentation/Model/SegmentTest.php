@@ -36,8 +36,8 @@ describe('Customer Segment Model', function () {
 
         // Test valid segment
         $this->segment->setName('Valid Segment');
-        $this->segment->setWebsiteIds('1'); // Required by validation
-        $this->segment->setIsActive(1);
+        $this->segment->setWebsiteIds([1]); // Required by validation
+        $this->segment->setIsActive();
         expect($this->segment->validate())->toBe(true);
     });
 
@@ -45,5 +45,41 @@ describe('Customer Segment Model', function () {
         $this->segment->setConditionsSerialized('');
         $conditions = $this->segment->getConditions();
         expect($conditions)->toBeInstanceOf(Maho_CustomerSegmentation_Model_Segment_Condition_Combine::class);
+    });
+
+    test('reads the website and customer group IDs from the column text and from the array of a load', function () {
+        $this->segment->setData('website_ids', '1,2')->setData('customer_group_ids', '0,3');
+        expect($this->segment->getWebsiteIds())->toBe([1, 2])
+            ->and($this->segment->getCustomerGroupIds())->toBe([0, 3]);
+
+        // _afterLoad() turns both columns into arrays of texts
+        $this->segment->setData('website_ids', ['1', '2'])->setData('customer_group_ids', ['3']);
+        expect($this->segment->getWebsiteIds())->toBe([1, 2])
+            ->and($this->segment->getCustomerGroupIds())->toBe([3]);
+
+        $this->segment->setData('website_ids')->setData('customer_group_ids', '');
+        expect($this->segment->getWebsiteIds())->toBe([])
+            ->and($this->segment->getCustomerGroupIds())->toBe([]);
+    });
+
+    test('limits the customers of a loaded segment to its customer groups', function () {
+        $group = Mage::getModel('customer/group')
+            ->setCode('Pest empty ' . substr(uniqid(), -6))
+            ->setTaxClassId(3);
+        $group->save();
+        $segment = Mage::getModel('customersegmentation/segment')
+            ->setName('Pest group scope ' . uniqid())
+            ->setWebsiteIds([1])
+            ->setCustomerGroupIds([(int) $group->getId()])
+            ->setIsActive(1);
+        $segment->save();
+
+        try {
+            $loaded = Mage::getModel('customersegmentation/segment')->load($segment->getId());
+            expect($loaded->getMatchingCustomerIds())->toBe([]);
+        } finally {
+            $segment->delete();
+            $group->delete();
+        }
     });
 });

@@ -154,6 +154,17 @@ return [
     'CustomerGroup' => [
         'code', 'extensions', 'id', 'taxClassId', 'taxClassName',
     ],
+    'CustomerSegment' => [
+        'allowOverlappingSequences', 'autoEmailActive', 'conditions', 'customerGroupIds', 'description',
+        'extensions', 'id', 'isActive', 'lastRefreshAt', 'matchedCustomersCount', 'name', 'priority',
+        'refreshMode', 'refreshStatus', 'websiteIds',
+    ],
+    'CustomerSegmentConditionType' => [
+        'attributes', 'code', 'combine', 'extensions', 'kind', 'label', 'type',
+    ],
+    'CustomerSegmentCustomer' => [
+        'addedAt', 'email', 'extensions', 'firstname', 'groupId', 'id', 'lastname', 'websiteId',
+    ],
     'CustomersByOrdersCountReport' => [
         'extensions', 'report',
     ],

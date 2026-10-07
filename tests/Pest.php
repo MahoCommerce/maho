@@ -70,6 +70,11 @@ function apiPut(string $path, array $data, ?string $token = null, array $extraHe
     return ApiV2Helper::put($path, $data, $token, $extraHeaders);
 }
 
+function apiPatch(string $path, array $data, ?string $token = null, array $extraHeaders = []): array
+{
+    return ApiV2Helper::patch($path, $data, $token, $extraHeaders);
+}
+
 function apiQuery(string $path, array $data, ?string $token = null, array $extraHeaders = []): array
 {
     return ApiV2Helper::query($path, $data, $token, $extraHeaders);

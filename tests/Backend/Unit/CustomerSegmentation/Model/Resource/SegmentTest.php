@@ -18,8 +18,8 @@ describe('Customer Segment Resource Model', function () {
         // Create a test segment
         $segment = Mage::getModel('customersegmentation/segment');
         $segment->setName('Customer Match Test');
-        $segment->setIsActive(1);
-        $segment->setWebsiteIds('1');
+        $segment->setIsActive();
+        $segment->setWebsiteIds([1]);
         $this->resource->save($segment);
 
         // Test the core segmentation functionality
@@ -55,8 +55,8 @@ describe('Customer Segment Resource Model', function () {
         // Create a test segment
         $segment = Mage::getModel('customersegmentation/segment');
         $segment->setName('Relationship Test');
-        $segment->setIsActive(1);
-        $segment->setWebsiteIds('1');
+        $segment->setIsActive();
+        $segment->setWebsiteIds([1]);
         $this->resource->save($segment);
 
         $segmentId = $segment->getId();
@@ -79,14 +79,14 @@ describe('Customer Segment Resource Model', function () {
         // Create segments with different website assignments
         $segment1 = Mage::getModel('customersegmentation/segment');
         $segment1->setName('Website 1 Segment');
-        $segment1->setIsActive(1);
-        $segment1->setWebsiteIds('1');
+        $segment1->setIsActive();
+        $segment1->setWebsiteIds([1]);
         $this->resource->save($segment1);
 
         $segment2 = Mage::getModel('customersegmentation/segment');
         $segment2->setName('Website 2 Segment');
-        $segment2->setIsActive(1);
-        $segment2->setWebsiteIds('2');
+        $segment2->setIsActive();
+        $segment2->setWebsiteIds([2]);
         $this->resource->save($segment2);
 
         // Test website-specific segment retrieval

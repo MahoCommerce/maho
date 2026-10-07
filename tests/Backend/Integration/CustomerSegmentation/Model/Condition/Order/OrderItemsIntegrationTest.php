@@ -480,7 +480,7 @@ function createOrderItemsTestSegment(string $name, array $conditions): Maho_Cust
 
     $segment = Mage::getModel('customersegmentation/segment');
     $segment->setName($name);
-    $segment->setIsActive(1);
+    $segment->setIsActive();
     $segment->setWebsiteIds([1]);
     $segment->setConditionsSerialized(Mage::helper('core')->jsonEncode($conditions));
     $segment->save();

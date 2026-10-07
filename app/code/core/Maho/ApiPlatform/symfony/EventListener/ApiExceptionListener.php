@@ -12,6 +12,7 @@ namespace Maho\ApiPlatform\EventListener;
 
 use ApiPlatform\Metadata\Exception\AccessDeniedException as MetadataAccessDeniedException;
 use ApiPlatform\Metadata\HttpOperation;
+use ApiPlatform\Validator\Exception\ConstraintViolationListAwareExceptionInterface;
 use Maho\ApiPlatform\Exception\ApiException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -22,7 +23,10 @@ use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Exception\InsufficientAuthenticationException;
+use Symfony\Component\Serializer\Exception\ExtraAttributesException;
 use Symfony\Component\Serializer\Exception\NotEncodableValueException;
+use Symfony\Component\Serializer\Exception\NotNormalizableValueException;
+use Symfony\Component\Serializer\Exception\PartialDenormalizationException;
 use Symfony\Component\Serializer\Exception\UnexpectedValueException as SerializerUnexpectedValueException;
 
 /**
@@ -205,6 +209,12 @@ class ApiExceptionListener implements EventSubscriberInterface
                         : ($exception->getMessage() ?: $this->getDefaultMessageForStatusCode($statusCode))),
                 'code' => $statusCode,
             ];
+            if ($exception instanceof ConstraintViolationListAwareExceptionInterface) {
+                $data['details'] = ['errors' => []];
+                foreach ($exception->getConstraintViolationList() as $violation) {
+                    $data['details']['errors'][] = ['field' => $violation->getPropertyPath(), 'message' => (string) $violation->getMessage()];
+                }
+            }
 
             if ($this->showDebug()) {
                 $data['debug'] = [
@@ -226,15 +236,22 @@ class ApiExceptionListener implements EventSubscriberInterface
         // type of the "email" attribute must be ..."), safe to pass through.
         // Processor::parseRequestBody() already maps its own JSON errors to 400;
         // this mirrors that for the DTO path, which otherwise surfaced as 500.
-        if ($exception instanceof SerializerUnexpectedValueException) {
+        // ExtraAttributesException = a field that the DTO does not accept, when the operation sets allow_extra_attributes to false.
+        if ($exception instanceof SerializerUnexpectedValueException || $exception instanceof ExtraAttributesException) {
             $statusCode = 400;
+            $errors = self::serializerErrors($exception);
             $data = [
                 'error' => 'bad_request',
-                'message' => $exception instanceof NotEncodableValueException
-                    ? 'Invalid JSON in request body'
-                    : ($exception->getMessage() ?: 'Invalid request body'),
+                'message' => match (true) {
+                    $exception instanceof NotEncodableValueException => 'Invalid JSON in request body',
+                    $errors !== [] => implode("\n", array_column($errors, 'message')),
+                    default => $exception->getMessage() ?: 'Invalid request body',
+                },
                 'code' => $statusCode,
             ];
+            if ($errors !== []) {
+                $data['details'] = ['errors' => $errors];
+            }
 
             if ($this->showDebug()) {
                 $data['debug'] = [
@@ -244,6 +261,10 @@ class ApiExceptionListener implements EventSubscriberInterface
             }
 
             return new JsonResponse($data, $statusCode);
+        }
+
+        if ($exception instanceof \Mage_Core_Exception_NoSuchEntity) {
+            return new JsonResponse(['error' => 'not_found', 'message' => $exception->getMessage(), 'code' => 404], 404);
         }
 
         // Mage_Core_Exception is the canonical user-facing validation/business
@@ -265,6 +286,12 @@ class ApiExceptionListener implements EventSubscriberInterface
                 'message' => $exception->getMessage(),
                 'code' => $statusCode,
             ];
+            if ($exception instanceof \Mage_Core_Exception_Input) {
+                $data['details'] = ['errors' => array_map(
+                    fn(array $error): array => ['field' => self::apiFieldName($error['field']), 'message' => $error['message']],
+                    $exception->getErrors(),
+                )];
+            }
 
             if ($this->showDebug()) {
                 $data['debug'] = [
@@ -316,6 +343,44 @@ class ApiExceptionListener implements EventSubscriberInterface
         return str_contains($request->getPathInfo(), '/api/admin/')
             && ($_SERVER['MAHO_IS_ADMIN'] ?? '') === '1'
             && isset($_SERVER['MAHO_API_BRIDGE_TOKEN']);
+    }
+
+    /**
+     * Return one error for each field that the serializer refused: a value of a wrong type, or a field that the DTO does not accept.
+     *
+     * @return list<array{field: string, message: string}>
+     */
+    private static function serializerErrors(\Throwable $exception): array
+    {
+        $typeErrors = match (true) {
+            $exception instanceof PartialDenormalizationException => $exception->getNotNormalizableValueErrors(),
+            $exception instanceof NotNormalizableValueException => [$exception],
+            default => [],
+        };
+        $extra = match (true) {
+            $exception instanceof PartialDenormalizationException => $exception->getExtraAttributesError(),
+            $exception instanceof ExtraAttributesException => $exception,
+            default => null,
+        };
+
+        $errors = [];
+        foreach ($typeErrors as $error) {
+            if ($error->getPath() !== null) {
+                $errors[] = ['field' => $error->getPath(), 'message' => $error->getMessage()];
+            }
+        }
+        foreach ($extra?->getExtraAttributes() ?? [] as $field) {
+            $errors[] = ['field' => (string) $field, 'message' => sprintf('The field "%s" is unknown or read-only.', $field)];
+        }
+        return $errors;
+    }
+
+    /**
+     * Return the API name of a model field: an API property is the camel case form of its column, website_ids is websiteIds.
+     */
+    private static function apiFieldName(string $field): string
+    {
+        return lcfirst(str_replace('_', '', ucwords($field, '_')));
     }
 
     /**

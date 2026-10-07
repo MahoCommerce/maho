@@ -22,13 +22,13 @@ class Maho_CustomerSegmentation_Model_Resource_Segment extends Mage_Core_Model_R
             ->from(['e' => $this->getTable('customer/entity')], ['entity_id']);
 
         // Apply website filter
-        $websiteIds = $websiteId ? [$websiteId] : $segment->getWebsiteIdsArray();
+        $websiteIds = $websiteId ? [$websiteId] : $segment->getWebsiteIds();
         if (!empty($websiteIds)) {
             $select->where('e.website_id IN (?)', $websiteIds);
         }
 
         // Apply customer group filter
-        $groupIds = $segment->getCustomerGroupIdsArray();
+        $groupIds = $segment->getCustomerGroupIds();
         if (!empty($groupIds)) {
             $select->where('e.group_id IN (?)', $groupIds);
         }

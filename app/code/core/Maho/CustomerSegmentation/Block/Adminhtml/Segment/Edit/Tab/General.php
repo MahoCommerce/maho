@@ -75,7 +75,7 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tab_General extends
             // Seed the key setValues() would otherwise clear, keeping the segment's own scope
             $savedWebsiteIds = $model?->getData('website_ids');
             $savedWebsiteIds = is_array($savedWebsiteIds) ? implode(',', $savedWebsiteIds) : (string) $savedWebsiteIds;
-            $model?->setWebsiteIds($savedWebsiteIds !== '' ? $savedWebsiteIds : $websiteId);
+            $model?->setData('website_ids', $savedWebsiteIds !== '' ? $savedWebsiteIds : $websiteId);
         }
 
         $customerGroups = Mage::getResourceModel('customer/group_collection')->toOptionArray();

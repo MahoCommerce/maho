@@ -172,6 +172,18 @@ public function __invoke(My_Module_Model_SomeMessage $message): void {}
   `toOptionArray()`, an `alias::method` pair, a `Class::method` callable or an inline list for a set
   that code defines; see `Maho\ApiPlatform\Metadata\EnumSource` and `ValueLists`. Never use
   `openapiContext: ['enum' => …]`: it reaches the OpenAPI document only.
+- Writes follow HTTP. PATCH (`application/merge-patch+json`) changes the fields in the body. PUT
+  replaces the record, so a field that the body leaves out gets its default value. Declare `Patch`
+  before `Put`: the MCP update tool comes from the first one. Set
+  `denormalizationContext: ['allow_extra_attributes' => false, 'collect_denormalization_errors' => true]`
+  so an unknown field is a 400 and every type error comes back at once. Many older resources still
+  use PUT as a partial update; they move one at a time.
+- A resource whose writes go through a service maps to its model with the Symfony ObjectMapper: a
+  class `#[Map(target: Model::class)]` and a `#[Map]` on each DTO property (a model keeps its data
+  in `_data`, so implicit mapping finds nothing and writes nothing). A read-only property takes
+  `#[Map(if: new TargetClass(self::class))]`. The provider returns models (a `Post` sets `read: true`
+  and gets the new model from the service), and the processor receives the model and calls the
+  service. `Maho\CustomerSegmentation\Api\CustomerSegment` is the worked example
 - An HTTP QUERY collection operation (`ApiPlatform\Metadata\Query`, RFC 10008) receives its body as
   `$context['filters']` through `Maho\ApiPlatform\State\QueryBodyFiltersProvider`, so a provider
   serves GET and QUERY with one code path. Import it as `HttpQuery` next to the GraphQL `Query`.
@@ -243,6 +255,16 @@ class My_Module_Checkout_CartController extends Mage_Checkout_CartController { /
   connection, so such a worker can be misreported after 5 minutes). Worker startup
   failures land in `var/log/queue-worker.log`; production installs should prefer supervisord or
   systemd over the cron watchdog
+- **Services** (#1348): a flow that two or more transports start (an admin controller, the API, a CLI
+  command) keeps its rules in one service class under `<Module>/Service/`, declared under
+  `<global><services>` and resolved with `Mage::getService('group/name')`, never `new`. No interface
+  and no base class: a `<rewrite>` extends the service, so the class is the contract. Name the methods
+  `getById()`, `save()`, `delete()`, plus one verb for each other action (`refresh()`). A service
+  takes and returns models, never a request or a session: the transport writes its input into the
+  model through the typed setters, and the service checks and saves it. It throws
+  `Mage_Core_Exception_NoSuchEntity` (API 404) and `Mage_Core_Exception_Input` with one error for
+  each field (API 422 with `details.errors`). `Maho_CustomerSegmentation_Service_Segment` is the
+  first one
 - **Errors**: `Mage::throwException()` for user-facing errors (`Mage_Core_Exception`),
   `Mage::log()` / `Mage::logException()` for logging
 

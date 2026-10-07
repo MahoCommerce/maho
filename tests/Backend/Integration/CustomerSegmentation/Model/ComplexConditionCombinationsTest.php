@@ -430,7 +430,7 @@ describe('Complex Condition Combinations', function () {
         // Import conditions to new segment
         $newSegment = Mage::getModel('customersegmentation/segment');
         $newSegment->setName('Import Test Segment');
-        $newSegment->setIsActive(1);
+        $newSegment->setIsActive();
 
         $newConditionsModel = $newSegment->getConditions();
         $newConditionsModel->loadArray($exportedArray);
@@ -535,9 +535,9 @@ describe('Complex Condition Combinations', function () {
         $segment = Mage::getModel('customersegmentation/segment');
         $segment->setName($name);
         $segment->setDescription('Complex test segment for ' . $name);
-        $segment->setIsActive(1);
-        $segment->setWebsiteIds('1');
-        $segment->setCustomerGroupIds('0,1,2,3');
+        $segment->setIsActive();
+        $segment->setWebsiteIds([1]);
+        $segment->setCustomerGroupIds([0, 1, 2, 3]);
         $segment->setConditionsSerialized(Mage::helper('core')->jsonEncode($conditions));
         $segment->setRefreshMode('manual');
         $segment->setRefreshStatus('pending');
