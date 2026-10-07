@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-class Maho_SocialLogin_Model_Service
+class Maho_SocialLogin_Service_Identity
 {
     public const SUPPORTED_PROVIDERS = ['google', 'apple', 'facebook'];
 

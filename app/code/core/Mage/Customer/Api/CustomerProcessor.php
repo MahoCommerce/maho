@@ -16,7 +16,6 @@ use ApiPlatform\Metadata\Put;
 use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Bundle\SecurityBundle\Security;
-use Mage\Sales\Api\AccountTokenService;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
@@ -36,12 +35,12 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
      */
     private const MAX_SMALLINT = 32767;
 
-    private readonly CustomerService $customerService;
+    private readonly \Mage_Customer_Service_Customer $customerService;
 
     public function __construct(Security $security)
     {
         parent::__construct($security);
-        $this->customerService = new CustomerService();
+        $this->customerService = \Mage::getService('customer/customer');
     }
 
     /**
@@ -752,7 +751,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         }
 
         try {
-            $tokenData = AccountTokenService::verify($accountToken, 3600);
+            $tokenData = \Mage::helper('sales/accountToken')->verify($accountToken, 3600);
         } catch (\Mage_Core_Exception $e) {
             throw new BadRequestHttpException($e->getMessage());
         }

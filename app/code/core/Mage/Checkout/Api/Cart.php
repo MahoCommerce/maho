@@ -74,7 +74,7 @@ use Mage\Customer\Api\Address;
         // Authenticated-cart checkout sub-resources. These mirror the guest-cart
         // endpoints onto the numeric /carts/{id} path so a logged-in customer can
         // run the full checkout flow over REST (not only GraphQL). CartProvider /
-        // CartProcessor resolve the cart generically via resolveCartFromRequest()
+        // CartProcessor resolve the cart generically via CartRequest::resolve()
         // and verifyCartAccess() enforces per-customer ownership.
         new Post(
             uriTemplate: '/carts/{id}/coupon',
@@ -150,7 +150,7 @@ use Mage\Customer\Api\Address;
         ),
         // Gift messages — cart-level and per-item, for both authenticated and
         // guest carts. PUT sets/updates (body: {sender, recipient, message});
-        // DELETE clears. CartProcessor reuses CartService::setGiftMessage().
+        // DELETE clears. CartProcessor reuses \Mage_Checkout_Service_Cart::setGiftMessage().
         new Put(
             uriTemplate: '/carts/{id}/gift-message',
             name: 'set_my_cart_gift_message',

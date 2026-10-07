@@ -10,7 +10,6 @@ declare(strict_types=1);
 
 namespace Maho\ApiPlatform\Service;
 
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Contracts\Service\ResetInterface;
 
 /**
@@ -66,7 +65,7 @@ final class StoreContext implements ResetInterface
         }
 
         if (!isset($store->getServeableCurrencyRates()[$code])) {
-            throw new BadRequestHttpException("Currency not available for this cart's store: {$code}");
+            throw new \Mage_Core_Exception_InvalidRequest("Currency not available for this cart's store: {$code}");
         }
 
         $store->setRequestedCurrencyCode($code);

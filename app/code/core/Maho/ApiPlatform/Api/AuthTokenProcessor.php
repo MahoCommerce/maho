@@ -11,7 +11,6 @@ declare(strict_types=1);
 namespace Maho\ApiPlatform\Api;
 
 use ApiPlatform\Metadata\Operation;
-use Mage\Checkout\Api\CartService;
 use Maho\ApiPlatform\Service\JwtService;
 use Maho\ApiPlatform\Service\StoreContext;
 use Maho\ApiPlatform\Service\TokenBlacklist;
@@ -22,13 +21,15 @@ use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
 {
+    private readonly \Mage_Checkout_Service_Cart $cartService;
+
     public function __construct(
         Security $security,
         private JwtService $jwtService,
         private TokenBlacklist $tokenBlacklist,
-        private CartService $cartService,
     ) {
         parent::__construct($security);
+        $this->cartService = \Mage::getService('checkout/cart');
     }
 
     #[\Override]
@@ -101,9 +102,9 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
             $cartId = null;
             $customerCart = null;
 
-            if (CartService::isValidMaskedId($guestCartMaskedId)) {
+            if (\Mage_Checkout_Service_Cart::isValidMaskedId($guestCartMaskedId)) {
                 try {
-                    // Delegate to CartService::mergeCarts, which enforces the full
+                    // Delegate to \Mage_Checkout_Service_Cart::mergeCarts, which enforces the full
                     // guest-cart ownership guard (rejecting a masked ID resolving
                     // to another customer's cart), re-collects totals correctly
                     // (setTotalsCollectedFlag(false) before collectTotals), and

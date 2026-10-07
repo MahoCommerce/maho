@@ -93,7 +93,7 @@ class Maho_Revocation_IndexController extends Mage_Core_Controller_Front_Action
         }
 
         try {
-            $revocationRequest = Mage::getModel('revocation/service')->submit($input);
+            $revocationRequest = Mage::getService('revocation/request')->submit($input);
         } catch (Mage_Core_Exception $e) {
             $session->addError($e->getMessage());
             $session->setRevocationFormData($request->getPost());

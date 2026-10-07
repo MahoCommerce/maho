@@ -196,7 +196,7 @@ final class ShipmentProcessor extends \Maho\ApiPlatform\Processor
         // Serialize with the order's other state transitions so two concurrent
         // requests can't both pass canShip() and both register a shipment,
         // decrementing inventory twice. Shared per-order lock name, see
-        // OrderService::withOrderLock().
+        // \Mage_Sales_Service_Order::withOrderLock().
         $write = \Mage::getSingleton('core/resource')->getConnection('core_write');
         $lockName = 'maho_order_mutate:' . (int) $order->getId();
         if (!$write->getLock($lockName, 5)) {

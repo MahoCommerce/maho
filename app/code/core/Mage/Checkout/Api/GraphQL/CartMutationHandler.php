@@ -12,7 +12,6 @@ namespace Mage\Checkout\Api\GraphQL;
 
 use Mage\Checkout\Api\Cart;
 use Mage\Checkout\Api\CartMapper;
-use Mage\Checkout\Api\CartService;
 use Maho\ApiPlatform\Exception\NotFoundException;
 use Maho\ApiPlatform\Exception\ValidationException;
 use Maho\ApiPlatform\Security\AdminAcl;
@@ -30,7 +29,12 @@ class CartMutationHandler
 {
     use AdminQuoteTrait;
 
-    public function __construct(private CartService $cartService, private CartMapper $cartMapper) {}
+    private readonly \Mage_Checkout_Service_Cart $cartService;
+
+    public function __construct(private CartMapper $cartMapper)
+    {
+        $this->cartService = \Mage::getService('checkout/cart');
+    }
 
     /**
      * Handle getCart query
@@ -169,7 +173,7 @@ class CartMutationHandler
             // website-scope and currency checks aren't bypassed.
             try {
                 $this->cartService->applyGiftcard($quote, $couponCode);
-            } catch (\RuntimeException $e) {
+            } catch (\Mage_Core_Exception $e) {
                 throw ValidationException::invalidValue('couponCode', $e->getMessage());
             }
             return ['applyCoupon' => $this->mapCart($quote)];
@@ -294,11 +298,11 @@ class CartMutationHandler
         }
 
         // Reuse the REST path so website-scope, quote-currency balance, validity
-        // and duplicate checks stay in one place (CartService::applyGiftcard also
+        // and duplicate checks stay in one place (\Mage_Checkout_Service_Cart::applyGiftcard also
         // collects totals and saves). Avoids the drift this handler had before.
         try {
             $this->cartService->applyGiftcard($quote, (string) $code, $amount);
-        } catch (\RuntimeException $e) {
+        } catch (\Mage_Core_Exception $e) {
             throw ValidationException::invalidValue('code', $e->getMessage());
         }
 
@@ -333,7 +337,7 @@ class CartMutationHandler
         // card discount on an already-collected quote.
         try {
             $this->cartService->removeGiftcard($quote, (string) $code);
-        } catch (\RuntimeException $e) {
+        } catch (\Mage_Core_Exception $e) {
             throw ValidationException::invalidValue('code', $e->getMessage());
         }
 
@@ -353,7 +357,7 @@ class CartMutationHandler
 
         $quote = $this->loadAdminQuote($cartId);
 
-        return CartService::inQuoteStoreScope($quote, function () use ($quote): array {
+        return \Mage_Checkout_Service_Cart::inQuoteStoreScope($quote, function () use ($quote): array {
             $shippingAddress = $quote->getShippingAddress();
             if (!$shippingAddress->getCountryId()) {
                 $defaults = \Maho\ApiPlatform\Service\StoreDefaults::getPosAddress($quote->getStoreId() ? (int) $quote->getStoreId() : null);

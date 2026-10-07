@@ -8,7 +8,6 @@
 declare(strict_types=1);
 
 use Mage\Checkout\Api\CartMapper;
-use Mage\Checkout\Api\CartService;
 
 uses(Tests\MahoBackendTestCase::class);
 
@@ -93,7 +92,7 @@ describe('Cart API quote-currency consistency (issue #1238)', function (): void 
         // A large enough cart that the full balance applies.
         $quote = createPricedQuote($this->product, 10);
 
-        $service = new CartService();
+        $service = \Mage::getService('checkout/cart');
         $service->applyGiftcard($quote, $giftcard->getCode());
 
         // The stored snapshot is base currency: the total collector owns the format.

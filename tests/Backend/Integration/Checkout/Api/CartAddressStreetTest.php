@@ -7,13 +7,11 @@
 
 declare(strict_types=1);
 
-use Mage\Checkout\Api\CartService;
-use Mage\Sales\Api\OrderService;
 
 uses(Tests\MahoBackendTestCase::class);
 
 /**
- * Every REST and GraphQL cart address write lands in CartService, which applies
+ * Every REST and GraphQL cart address write lands in the cart service, which applies
  * the payload with addData(). addData() bypasses the setStreet() magic setter,
  * so the street array reached the flat column as the literal string 'Array'
  * (issue #1327). The response looked correct, because it reads the in-memory
@@ -66,7 +64,7 @@ describe('cart API street lines', function (): void {
         $quote->save();
 
         try {
-            $service = new CartService();
+            $service = \Mage::getService('checkout/cart');
             $service->setShippingAddress($quote, $service->mapAddressInput(cartApiAddressInput()));
 
             expect(cartApiQuoteStreet((int) $quote->getId(), 'shipping'))->toBe("1 Test Street\nApt 7");
@@ -84,7 +82,7 @@ describe('cart API street lines', function (): void {
         $quote->save();
 
         try {
-            $service = new CartService();
+            $service = \Mage::getService('checkout/cart');
             $service->setBillingAddress($quote, $service->mapAddressInput(cartApiAddressInput()));
 
             expect(cartApiQuoteStreet((int) $quote->getId(), 'billing'))->toBe("1 Test Street\nApt 7");
@@ -102,7 +100,7 @@ describe('cart API street lines', function (): void {
         $quote->save();
 
         try {
-            $service = new CartService();
+            $service = \Mage::getService('checkout/cart');
             $service->setShippingAddress($quote, $service->mapAddressInput(cartApiAddressInput()));
             $service->setBillingAddress($quote, [], true);
 
@@ -121,7 +119,7 @@ describe('cart API street lines', function (): void {
         try {
             $quote = createPlaceableQuote($product, 1);
 
-            $service = new CartService();
+            $service = \Mage::getService('checkout/cart');
             $service->setShippingAddress($quote, $service->mapAddressInput(cartApiAddressInput()));
             $service->setBillingAddress($quote, [], true);
 
@@ -132,7 +130,7 @@ describe('cart API street lines', function (): void {
                 test()->markTestSkipped('Flat rate shipping not available in this environment');
             }
 
-            $order = (new OrderService())->placeAdminOrder($placed)['order'];
+            $order = \Mage::getService('sales/order')->placeAdminOrder($placed)['order'];
 
             foreach ([$order->getShippingAddress(), $order->getBillingAddress()] as $address) {
                 expect(cartApiOrderStreet((int) $address->getId()))->toBe("1 Test Street\nApt 7");

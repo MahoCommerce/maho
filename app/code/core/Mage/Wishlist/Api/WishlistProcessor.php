@@ -13,7 +13,6 @@ namespace Mage\Wishlist\Api;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Delete;
 use Maho\ApiPlatform\Service\StoreContext;
-use Mage\Checkout\Api\CartService;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -23,7 +22,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 final class WishlistProcessor extends \Maho\ApiPlatform\Processor
 {
-    public function __construct(Security $security, private CartService $cartService)
+    public function __construct(Security $security, private \Mage_Checkout_Service_Cart $cartService)
     {
         parent::__construct($security);
     }
@@ -215,7 +214,7 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
         return null;
     }
 
-    // TODO: Refactor cart loading to use CartService instead of inline quote loading logic
+    // TODO: Refactor cart loading to use the cart service instead of inline quote loading logic
     /**
      * Move wishlist item to cart
      */
@@ -246,7 +245,7 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
         /** @var \Mage_Sales_Model_Quote|null $quote */
         $quote = null;
         if ($cartId) {
-            // Use CartService to load the cart properly (handles numeric or masked IDs)
+            // Use the cart service to load the cart properly (handles numeric or masked IDs)
             $accessedByMaskedId = !is_numeric($cartId);
             if ($accessedByMaskedId) {
                 $quote = $this->cartService->getCart(null, $cartId);
@@ -283,7 +282,7 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
             }
         }
 
-        // Add to cart using CartService
+        // Add to cart using the cart service
         try {
             $this->cartService->addItem($quote, $product->getSku(), (float) $qty);
         } catch (\Exception) {

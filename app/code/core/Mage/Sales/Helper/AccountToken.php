@@ -8,19 +8,20 @@
 
 declare(strict_types=1);
 
-namespace Mage\Sales\Api;
-
 /**
  * HMAC-signed account token for guest order → customer account creation.
  *
  * Token format: base64(json{orderId,email,timestamp,action}).hmac_sha256(base64_payload, crypt_key)
  */
-final class AccountTokenService
+class Mage_Sales_Helper_AccountToken extends Mage_Core_Helper_Abstract
 {
+    #[\Override]
+    protected $_moduleName = 'Mage_Sales';
+
     /**
      * Generate an HMAC-signed account token
      */
-    public static function generate(int $orderId, #[\SensitiveParameter]
+    public function generate(int $orderId, #[\SensitiveParameter]
         string $email, string $action = 'create_account'): string
     {
         // JSON-encode the payload so no field value (e.g. an email containing a
@@ -32,7 +33,7 @@ final class AccountTokenService
             'action' => $action,
         ]);
         $payloadBase64 = base64_encode($payload);
-        $signature = hash_hmac('sha256', $payloadBase64, self::getCryptKey());
+        $signature = hash_hmac('sha256', $payloadBase64, $this->getCryptKey());
 
         return $payloadBase64 . '.' . $signature;
     }
@@ -44,7 +45,7 @@ final class AccountTokenService
      *
      * @throws \Mage_Core_Exception on invalid or expired tokens
      */
-    public static function verify(#[\SensitiveParameter]
+    public function verify(#[\SensitiveParameter]
         string $token, int $maxAgeSeconds = 86400): array
     {
         $parts = explode('.', $token, 2);
@@ -53,7 +54,7 @@ final class AccountTokenService
         }
 
         [$payloadBase64, $signature] = $parts;
-        $expectedSignature = hash_hmac('sha256', $payloadBase64, self::getCryptKey());
+        $expectedSignature = hash_hmac('sha256', $payloadBase64, $this->getCryptKey());
 
         if (!hash_equals($expectedSignature, $signature)) {
             throw new \Mage_Core_Exception('Invalid or expired account token.');
@@ -99,7 +100,7 @@ final class AccountTokenService
      * leak. HKDF scopes the signing material to this token's purpose without
      * requiring a separate config value.
      */
-    private static function getCryptKey(): string
+    private function getCryptKey(): string
     {
         $cryptKey = (string) \Mage::app()->getConfig()->getNode('global/crypt/key');
 

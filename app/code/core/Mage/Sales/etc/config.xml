@@ -1125,6 +1125,11 @@ SPDX-License-Identifier: AFL-3.0
                 <class>Mage_Sales_Block</class>
             </sales>
         </blocks>
+        <services>
+            <sales>
+                <class>Mage_Sales_Service</class>
+            </sales>
+        </services>
         <sales>
             <quote>
                 <totals>

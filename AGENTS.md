@@ -254,10 +254,15 @@ class My_Module_Checkout_CartController extends Mage_Checkout_CartController { /
   and no base class: a `<rewrite>` extends the service, so the class is the contract. Name the methods
   `getById()`, `save()`, `delete()`, plus one verb for each other action (`refresh()`). A service
   takes and returns models, never a request or a session: the transport writes its input into the
-  model through the typed setters, and the service checks and saves it. It throws
-  `Mage_Core_Exception_NoSuchEntity` (API 404) and `Mage_Core_Exception_Input` with one error for
-  each field (API 422 with `details.errors`). `Maho_CustomerSegmentation_Service_Segment` is the
-  first one
+  model through the typed setters, and the service checks and saves it. It never throws an HTTP
+  exception. For a client fault it throws `Mage_Core_Exception_NoSuchEntity` (404),
+  `Mage_Core_Exception_InvalidRequest` (400, with an optional error code such as `invalid_coupon`),
+  `Mage_Core_Exception_Input` with one error for each field (422 with `details.errors`) or a plain
+  `Mage_Core_Exception` (422). A `\RuntimeException` is a server fault, so a transport never turns it
+  into a validation error. `ApiExceptionListener` maps these for REST and `MageExceptionNormalizer`
+  for GraphQL. Code that reads the request (a path, a body, the API Platform context) stays in the
+  transport, as `Mage\Checkout\Api\CartRequest` does. `tests/Backend/Unit/Maho/ServiceLayoutTest.php`
+  enforces the layout
 - **Errors**: `Mage::throwException()` for user-facing errors (`Mage_Core_Exception`),
   `Mage::log()` / `Mage::logException()` for logging
 

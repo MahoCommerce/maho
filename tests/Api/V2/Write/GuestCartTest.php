@@ -366,7 +366,7 @@ describe('Cart Totals Consistency', function (): void {
             expect((float) $item['rowTotal'])->toBeLessThanOrEqual($expectedRowTotal + 0.01);
 
             // Note: quote-level subtotal/grandTotal may be 0 due to known collectTotals()
-            // issue in API context (see CartService::collectAndVerifyTotals WORKAROUND)
+            // issue in API context (see \Mage_Checkout_Service_Cart::collectAndVerifyTotals WORKAROUND)
         }
     });
 

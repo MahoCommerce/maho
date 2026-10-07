@@ -7,7 +7,6 @@
 
 declare(strict_types=1);
 
-use Mage\Sales\Api\OrderService;
 
 uses(Tests\MahoBackendTestCase::class);
 
@@ -39,7 +38,7 @@ describe('guest order customer name', function (): void {
                 test()->markTestSkipped('Flat rate shipping not available in this environment');
             }
 
-            $order = (new OrderService())->placeAdminOrder($placed, 'jane@example.com')['order'];
+            $order = \Mage::getService('sales/order')->placeAdminOrder($placed, 'jane@example.com')['order'];
 
             expect($order->getCustomerFirstname())->toBe('Jane');
             expect($order->getCustomerLastname())->toBe('Smith');

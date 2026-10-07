@@ -23,12 +23,12 @@ use Symfony\Bundle\SecurityBundle\Security;
  */
 final class CustomerProvider extends \Maho\ApiPlatform\Provider
 {
-    private CustomerService $customerService;
+    private \Mage_Customer_Service_Customer $customerService;
 
     public function __construct(Security $security)
     {
         parent::__construct($security);
-        $this->customerService = new CustomerService();
+        $this->customerService = \Mage::getService('customer/customer');
     }
 
     /**
@@ -115,7 +115,7 @@ final class CustomerProvider extends \Maho\ApiPlatform\Provider
      */
     private function getCollection(array $context): TraversablePaginator
     {
-        ['page' => $page, 'pageSize' => $pageSize] = $this->extractPagination($context, 15, CustomerService::MAX_PAGE_SIZE);
+        ['page' => $page, 'pageSize' => $pageSize] = $this->extractPagination($context, 15, \Mage_Customer_Service_Customer::MAX_PAGE_SIZE);
         $filters = $context['args'] ?? $context['filters'] ?? [];
 
         $result = $this->customerService->searchCustomers(

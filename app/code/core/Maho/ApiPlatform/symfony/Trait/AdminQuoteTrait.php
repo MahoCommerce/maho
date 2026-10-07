@@ -21,7 +21,7 @@ use Maho\ApiPlatform\Service\StoreContext;
  * missing, so handlers don't each repeat the load-and-check.
  *
  * Re-applies the request's display currency to the quote's own store, the same
- * step CartService::getCart() performs, so a shipping estimate or a placed
+ * step \Mage_Checkout_Service_Cart::getCart() performs, so a shipping estimate or a placed
  * order does not ignore a header the cart reads honored.
  */
 trait AdminQuoteTrait

@@ -8,17 +8,13 @@
 
 declare(strict_types=1);
 
-namespace Mage\Sales\Api;
-
 use Maho\ApiPlatform\Trait\DateRangeFilterTrait;
 use Maho\ApiPlatform\Trait\FilterValueTrait;
-use Mage\Checkout\Api\CartService;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
- * Order Service - Business logic for checkout and order operations.
+ * Places orders from carts, finds orders, and cancels, holds, invoices, ships and refunds them.
  */
-class OrderService
+class Mage_Sales_Service_Order
 {
     use DateRangeFilterTrait;
     use FilterValueTrait;
@@ -118,7 +114,7 @@ class OrderService
             // immediately before consuming them, a card spent elsewhere since
             // apply time must not discount this order. Collect totals once more
             // so submitAll() converts the freshly revalidated amounts.
-            new CartService()->revalidateGiftcards($quote);
+            \Mage::getService('checkout/cart')->revalidateGiftcards($quote);
             // Restated together: submitAll() copies the currency off the quote,
             // and the totals were just converted at the live one.
             $quote->collectTotals()->refreshCurrencyStamp();
@@ -490,7 +486,7 @@ class OrderService
             // invoice/ship/cancel may have transitioned the order while we waited.
             $order->load((int) $order->getId());
             if (!$order->canCancel()) {
-                throw new BadRequestHttpException('Order cannot be cancelled');
+                throw new \Mage_Core_Exception_InvalidRequest('Order cannot be cancelled');
             }
 
             try {
@@ -520,7 +516,7 @@ class OrderService
         return $this->withOrderLock((int) $order->getId(), function () use ($order, $reason) {
             $order->load((int) $order->getId());
             if (!$order->canHold()) {
-                throw new BadRequestHttpException('Order cannot be held');
+                throw new \Mage_Core_Exception_InvalidRequest('Order cannot be held');
             }
 
             try {
@@ -546,7 +542,7 @@ class OrderService
         return $this->withOrderLock((int) $order->getId(), function () use ($order, $reason) {
             $order->load((int) $order->getId());
             if (!$order->canUnhold()) {
-                throw new BadRequestHttpException('Order is not on hold');
+                throw new \Mage_Core_Exception_InvalidRequest('Order is not on hold');
             }
 
             try {
@@ -623,10 +619,10 @@ class OrderService
     }
 
     /**
-     * Get order shipments as DTOs. A customer or guest reader gets only the shipment comments
-     * that are visible on the storefront.
+     * Get the shipments of an order, with their comments preloaded. A customer or guest reader gets
+     * only the shipment comments that are visible on the storefront.
      *
-     * @return Shipment[]
+     * @return list<\Mage_Sales_Model_Order_Shipment>
      */
     public function getOrderShipments(\Mage_Sales_Model_Order $order, bool $visibleCommentsOnly = false): array
     {
@@ -655,7 +651,7 @@ class OrderService
             }
         }
 
-        return array_map(Shipment::fromModel(...), $models);
+        return $models;
     }
 
     /**

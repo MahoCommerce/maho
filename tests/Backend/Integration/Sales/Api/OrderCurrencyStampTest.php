@@ -66,7 +66,7 @@ describe('Order currency stamp', function (): void {
         $reloaded = Mage::getModel('sales/quote')->loadByIdWithoutStore((int) $quote->getId());
         expect($reloaded->getQuoteCurrencyCode())->toBe('EUR');
 
-        $order = (new Mage\Sales\Api\OrderService())->placeAdminOrder($reloaded)['order'];
+        $order = Mage::getService('sales/order')->placeAdminOrder($reloaded)['order'];
 
         expect($order->getId())->toBeGreaterThan(0);
 
