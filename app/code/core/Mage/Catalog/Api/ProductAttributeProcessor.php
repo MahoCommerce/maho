@@ -15,7 +15,6 @@ namespace Mage\Catalog\Api;
 use ApiPlatform\Metadata\DeleteOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use Maho\ApiPlatform\Exception\ValidationException;
-use Maho\ApiPlatform\Security\ApiUser;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
@@ -78,16 +77,16 @@ final class ProductAttributeProcessor extends \Maho\ApiPlatform\Processor
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): ?ProductAttribute
     {
-        $user = $this->requireUser();
+        $this->requireUser();
         $id = (int) ($uriVariables['id'] ?? 0);
         $optionId = (int) ($uriVariables['optionId'] ?? 0);
         $name = (string) $operation->getName();
 
         if ($operation instanceof DeleteOperationInterface) {
             if ($name === 'product_attribute_option_delete') {
-                $this->deleteOption($id, $optionId, $user);
+                $this->deleteOption($id, $optionId);
             } else {
-                $this->delete($id, $user);
+                $this->delete($id);
             }
             return null;
         }
@@ -95,16 +94,16 @@ final class ProductAttributeProcessor extends \Maho\ApiPlatform\Processor
         $body = $this->parseRequestBody($context['request'] ?? null);
 
         return match ($name) {
-            'product_attribute_option_create' => $this->createOption($id, $body, $user),
-            'product_attribute_option_update' => $this->updateOption($id, $optionId, $body, $user),
-            default => $id > 0 ? $this->update($id, $body, $user) : $this->create($body, $user),
+            'product_attribute_option_create' => $this->createOption($id, $body),
+            'product_attribute_option_update' => $this->updateOption($id, $optionId, $body),
+            default => $id > 0 ? $this->update($id, $body) : $this->create($body),
         };
     }
 
     /**
      * @param array<string, mixed> $body
      */
-    private function create(array $body, ApiUser $user): ProductAttribute
+    private function create(array $body): ProductAttribute
     {
         $this->errors = [];
         $this->rejectUnknownFields($body);
@@ -153,7 +152,7 @@ final class ProductAttributeProcessor extends \Maho\ApiPlatform\Processor
 
         $this->safeSave($attribute, 'create product attribute');
         \Mage::app()->cleanCache([\Mage_Core_Model_Translate::CACHE_TAG]);
-        $this->logApiActivity('product_attribute', 'create', null, $attribute, $user);
+        $this->logApiActivity('product_attribute', 'create', null, $attribute);
 
         return $this->provider->attributeDto($this->loadAttribute((int) $attribute->getId()));
     }
@@ -161,7 +160,7 @@ final class ProductAttributeProcessor extends \Maho\ApiPlatform\Processor
     /**
      * @param array<string, mixed> $body
      */
-    private function update(int $id, array $body, ApiUser $user): ProductAttribute
+    private function update(int $id, array $body): ProductAttribute
     {
         $attribute = $this->loadAttribute($id);
         $oldData = $attribute->getData();
@@ -189,12 +188,12 @@ final class ProductAttributeProcessor extends \Maho\ApiPlatform\Processor
 
         $this->safeSave($attribute, 'update product attribute');
         \Mage::app()->cleanCache([\Mage_Core_Model_Translate::CACHE_TAG]);
-        $this->logApiActivity('product_attribute', 'update', $oldData, $attribute, $user);
+        $this->logApiActivity('product_attribute', 'update', $oldData, $attribute);
 
         return $this->provider->attributeDto($this->loadAttribute($id));
     }
 
-    private function delete(int $id, ApiUser $user): void
+    private function delete(int $id): void
     {
         $attribute = $this->loadAttribute($id);
         if (!$attribute->getIsUserDefined()) {
@@ -202,7 +201,7 @@ final class ProductAttributeProcessor extends \Maho\ApiPlatform\Processor
         }
         $oldData = $attribute->getData();
         $this->safeDelete($attribute, 'delete product attribute');
-        $this->logApiActivity('product_attribute', 'delete', $oldData, null, $user);
+        $this->logApiActivity('product_attribute', 'delete', $oldData, null);
     }
 
     /**
@@ -341,7 +340,7 @@ final class ProductAttributeProcessor extends \Maho\ApiPlatform\Processor
     /**
      * @param array<string, mixed> $body
      */
-    private function createOption(int $id, array $body, ApiUser $user): ProductAttribute
+    private function createOption(int $id, array $body): ProductAttribute
     {
         $attribute = $this->loadOptionAttribute($id);
         $options = $this->loadOptions($id);
@@ -362,7 +361,7 @@ final class ProductAttributeProcessor extends \Maho\ApiPlatform\Processor
 
         $oldData = $attribute->getData();
         $this->saveOptions($attribute, $options, $defaults, []);
-        $this->logApiActivity('product_attribute', 'update', $oldData, $attribute, $user);
+        $this->logApiActivity('product_attribute', 'update', $oldData, $attribute);
 
         return $this->provider->attributeDto($this->loadAttribute($id));
     }
@@ -370,7 +369,7 @@ final class ProductAttributeProcessor extends \Maho\ApiPlatform\Processor
     /**
      * @param array<string, mixed> $body
      */
-    private function updateOption(int $id, int $optionId, array $body, ApiUser $user): ProductAttribute
+    private function updateOption(int $id, int $optionId, array $body): ProductAttribute
     {
         $attribute = $this->loadOptionAttribute($id);
         $options = $this->loadOptions($id);
@@ -386,12 +385,12 @@ final class ProductAttributeProcessor extends \Maho\ApiPlatform\Processor
 
         $oldData = $attribute->getData();
         $this->saveOptions($attribute, $options, $defaults, []);
-        $this->logApiActivity('product_attribute', 'update', $oldData, $attribute, $user);
+        $this->logApiActivity('product_attribute', 'update', $oldData, $attribute);
 
         return $this->provider->attributeDto($this->loadAttribute($id));
     }
 
-    private function deleteOption(int $id, int $optionId, ApiUser $user): void
+    private function deleteOption(int $id, int $optionId): void
     {
         $attribute = $this->loadOptionAttribute($id);
         $options = $this->loadOptions($id);
@@ -402,7 +401,7 @@ final class ProductAttributeProcessor extends \Maho\ApiPlatform\Processor
 
         $oldData = $attribute->getData();
         $this->saveOptions($attribute, $options, $defaults, [$optionId]);
-        $this->logApiActivity('product_attribute', 'update', $oldData, $attribute, $user);
+        $this->logApiActivity('product_attribute', 'update', $oldData, $attribute);
     }
 
     /**

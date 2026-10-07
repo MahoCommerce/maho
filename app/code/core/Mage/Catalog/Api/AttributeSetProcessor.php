@@ -15,7 +15,6 @@ namespace Mage\Catalog\Api;
 use ApiPlatform\Metadata\DeleteOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use Maho\ApiPlatform\Exception\ValidationException;
-use Maho\ApiPlatform\Security\ApiUser;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
@@ -37,15 +36,15 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): ?AttributeSet
     {
-        $user = $this->requireUser();
+        $this->requireUser();
         $id = (int) ($uriVariables['id'] ?? 0);
         $name = (string) $operation->getName();
 
         if ($operation instanceof DeleteOperationInterface) {
             if ($name === 'attribute_set_attribute_unassign') {
-                $this->unassignAttribute($id, (int) ($uriVariables['attributeId'] ?? 0), $user);
+                $this->unassignAttribute($id, (int) ($uriVariables['attributeId'] ?? 0));
             } else {
-                $this->delete($id, $user);
+                $this->delete($id);
             }
             return null;
         }
@@ -53,16 +52,16 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
         $body = $this->parseRequestBody($context['request'] ?? null);
 
         return match ($name) {
-            'attribute_set_group_create' => $this->createGroup($id, $body, $user),
-            'attribute_set_attribute_assign' => $this->assignAttribute($id, $body, $user),
-            default => $id > 0 ? $this->rename($id, $body, $user) : $this->create($body, $user),
+            'attribute_set_group_create' => $this->createGroup($id, $body),
+            'attribute_set_attribute_assign' => $this->assignAttribute($id, $body),
+            default => $id > 0 ? $this->rename($id, $body) : $this->create($body),
         };
     }
 
     /**
      * @param array<string, mixed> $body
      */
-    private function create(array $body, ApiUser $user): AttributeSet
+    private function create(array $body): AttributeSet
     {
         $this->errors = [];
         $this->rejectUnknownFields($body, ['name', 'skeletonId']);
@@ -94,7 +93,7 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
             throw new UnprocessableEntityHttpException('Failed to copy the skeleton attribute set');
         }
         $this->clearEavCache();
-        $this->logApiActivity('attribute_set', 'create', null, $set, $user);
+        $this->logApiActivity('attribute_set', 'create', null, $set);
 
         return $this->provider->setDto($this->loadSet((int) $set->getId()));
     }
@@ -102,7 +101,7 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
     /**
      * @param array<string, mixed> $body
      */
-    private function rename(int $id, array $body, ApiUser $user): AttributeSet
+    private function rename(int $id, array $body): AttributeSet
     {
         $set = $this->loadSet($id);
         $oldData = $set->getData();
@@ -116,12 +115,12 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
         $this->validateName($set);
         $this->safeSave($set, 'rename attribute set');
         $this->clearEavCache();
-        $this->logApiActivity('attribute_set', 'update', $oldData, $set, $user);
+        $this->logApiActivity('attribute_set', 'update', $oldData, $set);
 
         return $this->provider->setDto($this->loadSet($id));
     }
 
-    private function delete(int $id, ApiUser $user): void
+    private function delete(int $id): void
     {
         $set = $this->loadSet($id);
         if ($id === $this->defaultSetId()) {
@@ -130,13 +129,13 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
         $oldData = $set->getData();
         $this->safeDelete($set, 'delete attribute set');
         $this->clearEavCache();
-        $this->logApiActivity('attribute_set', 'delete', $oldData, null, $user);
+        $this->logApiActivity('attribute_set', 'delete', $oldData, null);
     }
 
     /**
      * @param array<string, mixed> $body
      */
-    private function createGroup(int $id, array $body, ApiUser $user): AttributeSet
+    private function createGroup(int $id, array $body): AttributeSet
     {
         $set = $this->loadSet($id);
 
@@ -156,7 +155,7 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
         $oldData = $set->getData();
         $this->safeSave($group, 'create attribute group');
         $this->clearEavCache();
-        $this->logApiActivity('attribute_set', 'update', $oldData, $set, $user);
+        $this->logApiActivity('attribute_set', 'update', $oldData, $set);
 
         return $this->provider->setDto($this->loadSet($id));
     }
@@ -164,7 +163,7 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
     /**
      * @param array<string, mixed> $body
      */
-    private function assignAttribute(int $id, array $body, ApiUser $user): AttributeSet
+    private function assignAttribute(int $id, array $body): AttributeSet
     {
         $set = $this->loadSet($id);
 
@@ -184,12 +183,12 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
             throw new UnprocessableEntityHttpException('Failed to assign the attribute to the set');
         }
         $this->clearEavCache();
-        $this->logApiActivity('attribute_set', 'update', $oldData, $set, $user);
+        $this->logApiActivity('attribute_set', 'update', $oldData, $set);
 
         return $this->provider->setDto($this->loadSet($id));
     }
 
-    private function unassignAttribute(int $id, int $attributeId, ApiUser $user): void
+    private function unassignAttribute(int $id, int $attributeId): void
     {
         $set = $this->loadSet($id);
 
@@ -221,7 +220,7 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
             throw new UnprocessableEntityHttpException('Failed to remove the attribute from the set');
         }
         $this->clearEavCache();
-        $this->logApiActivity('attribute_set', 'update', $oldData, $set, $user);
+        $this->logApiActivity('attribute_set', 'update', $oldData, $set);
     }
 
     /**

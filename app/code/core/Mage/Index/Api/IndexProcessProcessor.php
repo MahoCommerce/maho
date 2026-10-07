@@ -14,7 +14,6 @@ namespace Mage\Index\Api;
 
 use ApiPlatform\Metadata\Operation;
 use Maho\ApiPlatform\Exception\ValidationException;
-use Maho\ApiPlatform\Security\ApiUser;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
@@ -36,19 +35,19 @@ final class IndexProcessProcessor extends \Maho\ApiPlatform\Processor
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): IndexProcess|JsonResponse
     {
-        $user = $this->requireUser();
+        $this->requireUser();
         $name = $operation->getName();
         // The cached indexer keeps the done flag of an earlier reindex in a long worker, so each request starts a new one.
         \Mage::unregister('_singleton/index/indexer');
 
         if ($name === 'index_process_reindex_all') {
-            return $this->reindexAll($user);
+            return $this->reindexAll();
         }
 
         $process = $this->provider->loadProcess((int) ($uriVariables['id'] ?? 0));
 
         if ($name === 'index_process_reindex') {
-            $this->reindex($process, $user);
+            $this->reindex($process);
             return IndexProcess::fromModel($this->provider->loadProcess((int) $process->getId()));
         }
 
@@ -64,12 +63,12 @@ final class IndexProcessProcessor extends \Maho\ApiPlatform\Processor
         $oldData = $process->getData();
         $process->setMode($mode);
         $this->safeSave($process, 'update index process');
-        $this->logApiActivity('index_process', 'update', $oldData, $process, $user);
+        $this->logApiActivity('index_process', 'update', $oldData, $process);
 
         return IndexProcess::fromModel($this->provider->loadProcess((int) $process->getId()));
     }
 
-    private function reindex(\Mage_Index_Model_Process $process, ApiUser $user): void
+    private function reindex(\Mage_Index_Model_Process $process): void
     {
         if ($process->isLocked()) {
             throw new ConflictHttpException(sprintf('Index "%s" is working now. Try again later.', $process->getIndexer()->getName()));
@@ -82,15 +81,15 @@ final class IndexProcessProcessor extends \Maho\ApiPlatform\Processor
         } catch (\Mage_Core_Exception $e) {
             throw new ConflictHttpException($e->getMessage(), $e);
         }
-        $this->logApiActivity('index_process', 'reindex', $oldData, $process, $user);
+        $this->logApiActivity('index_process', 'reindex', $oldData, $process);
     }
 
-    private function reindexAll(ApiUser $user): JsonResponse
+    private function reindexAll(): JsonResponse
     {
         // The queue holds each index once, with its dependencies first, so no index runs twice.
         $processes = \Mage::getModel('index/runner')->buildQueue();
         foreach ($processes as $process) {
-            $this->reindex($process, $user);
+            $this->reindex($process);
         }
 
         $result = array_map(

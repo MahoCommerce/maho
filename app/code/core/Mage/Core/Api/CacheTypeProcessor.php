@@ -14,7 +14,6 @@ namespace Mage\Core\Api;
 
 use ApiPlatform\Metadata\Operation;
 use Maho\ApiPlatform\Exception\ValidationException;
-use Maho\ApiPlatform\Security\ApiUser;
 use Maho\DataObject;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -31,18 +30,18 @@ final class CacheTypeProcessor extends \Maho\ApiPlatform\Processor
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): CacheType|JsonResponse
     {
-        $user = $this->requireUser();
+        $this->requireUser();
         $name = $operation->getName();
 
         if ($name === 'cache_type_flush_all') {
-            return $this->flushAll($user);
+            return $this->flushAll();
         }
 
         $code = (string) ($uriVariables['code'] ?? '');
         $this->provider->cacheType($code);
 
         if ($name === 'cache_type_refresh') {
-            return $this->refresh($code, $user);
+            return $this->refresh($code);
         }
 
         $body = $this->parseRequestBody($context['request'] ?? null);
@@ -53,10 +52,10 @@ final class CacheTypeProcessor extends \Maho\ApiPlatform\Processor
             throw new ValidationException('enabled must be a boolean', 'enabled', 'Type');
         }
 
-        return $this->setEnabled($code, $body['enabled'], $user);
+        return $this->setEnabled($code, $body['enabled']);
     }
 
-    private function setEnabled(string $code, bool $enabled, ApiUser $user): CacheType
+    private function setEnabled(string $code, bool $enabled): CacheType
     {
         $app = \Mage::app();
         $allTypes = $app->useCache();
@@ -76,7 +75,6 @@ final class CacheTypeProcessor extends \Maho\ApiPlatform\Processor
             'update',
             ['code' => $code, 'enabled' => $wasEnabled],
             new DataObject(['code' => $code, 'enabled' => $enabled]),
-            $user,
         );
 
         return $this->provider->toCacheTypeDto(
@@ -85,23 +83,23 @@ final class CacheTypeProcessor extends \Maho\ApiPlatform\Processor
         );
     }
 
-    private function refresh(string $code, ApiUser $user): CacheType
+    private function refresh(string $code): CacheType
     {
         \Mage::app()->getCache()->cleanType($code);
         \Mage::dispatchEvent('adminhtml_cache_refresh_type', ['type' => $code]);
 
-        $this->logApiActivity('cache_type', 'refresh', ['code' => $code], new DataObject(['code' => $code]), $user);
+        $this->logApiActivity('cache_type', 'refresh', ['code' => $code], new DataObject(['code' => $code]));
 
         return $this->provider->cacheType($code);
     }
 
-    private function flushAll(ApiUser $user): JsonResponse
+    private function flushAll(): JsonResponse
     {
         \Mage::app()->getCache()->flush();
         \Mage::dispatchEvent('adminhtml_cache_flush_all');
 
         $count = count($this->provider->types());
-        $this->logApiActivity('cache_type', 'flush_all', null, new DataObject(['flushed' => $count]), $user);
+        $this->logApiActivity('cache_type', 'flush_all', null, new DataObject(['flushed' => $count]));
 
         return $this->respondRaw(['success' => true, 'flushed' => $count]);
     }

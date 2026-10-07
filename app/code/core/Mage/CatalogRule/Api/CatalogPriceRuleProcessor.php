@@ -75,14 +75,14 @@ final class CatalogPriceRuleProcessor extends \Maho\ApiPlatform\Processor
             $body = $this->parseRequestBody($context['request'] ?? null);
             return isset($uriVariables['id'])
                 ? $this->update((int) $uriVariables['id'], $body, $user, $locale)
-                : $this->create($body, $user, $locale);
+                : $this->create($body, $locale);
         });
     }
 
     /**
      * @param array<string, mixed> $body
      */
-    private function create(array $body, ApiUser $user, string $locale): CatalogPriceRule
+    private function create(array $body, string $locale): CatalogPriceRule
     {
         /** @var \Mage_CatalogRule_Model_Rule $rule */
         $rule = \Mage::getModel('catalogrule/rule');
@@ -107,7 +107,7 @@ final class CatalogPriceRuleProcessor extends \Maho\ApiPlatform\Processor
 
         $this->safeSave($rule, 'create catalog price rule');
         $this->markRulesDirty();
-        $this->logApiActivity('catalog_price_rule', 'create', null, $rule, $user);
+        $this->logApiActivity('catalog_price_rule', 'create', null, $rule);
 
         return $this->provider->toRuleDto($this->provider->loadRule((int) $rule->getId()), true);
     }
@@ -127,7 +127,7 @@ final class CatalogPriceRuleProcessor extends \Maho\ApiPlatform\Processor
 
         $this->safeSave($rule, 'update catalog price rule');
         $this->markRulesDirty();
-        $this->logApiActivity('catalog_price_rule', 'update', $oldData, $rule, $user);
+        $this->logApiActivity('catalog_price_rule', 'update', $oldData, $rule);
 
         return $this->provider->toRuleDto($this->provider->loadRule($id), true);
     }
@@ -138,7 +138,7 @@ final class CatalogPriceRuleProcessor extends \Maho\ApiPlatform\Processor
         $oldData = $rule->getData();
         $this->safeDelete($rule, 'delete catalog price rule');
         $this->markRulesDirty();
-        $this->logApiActivity('catalog_price_rule', 'delete', $oldData, null, $user);
+        $this->logApiActivity('catalog_price_rule', 'delete', $oldData, null);
     }
 
     /**
@@ -159,7 +159,7 @@ final class CatalogPriceRuleProcessor extends \Maho\ApiPlatform\Processor
             $detail = $e instanceof \Mage_Core_Exception ? ': ' . $e->getMessage() : '';
             throw new UnprocessableEntityHttpException('Unable to apply the catalog price rules' . $detail);
         }
-        $this->logApiActivity('catalog_price_rule', 'apply', null, null, $user);
+        $this->logApiActivity('catalog_price_rule', 'apply', null, null);
 
         return $this->respondRaw(['success' => true]);
     }

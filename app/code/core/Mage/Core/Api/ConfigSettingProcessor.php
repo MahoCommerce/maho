@@ -63,7 +63,7 @@ final class ConfigSettingProcessor extends \Maho\ApiPlatform\Processor
         $oldValue = $this->provider->toSettingDto($field, $scope, $this->provider->ownPaths($scope))->value;
 
         if ($operation instanceof DeleteOperationInterface) {
-            $this->restoreInheritance($field, $scope, $oldValue, $user);
+            $this->restoreInheritance($field, $scope, $oldValue);
             return null;
         }
 
@@ -71,7 +71,7 @@ final class ConfigSettingProcessor extends \Maho\ApiPlatform\Processor
             throw ValidationException::requiredField('value');
         }
         $value = $this->normalizeValue($body['value']);
-        $this->write($field, $scope, $value, $oldValue, $user);
+        $this->write($field, $scope, $value, $oldValue);
 
         return $this->provider->toSettingDto($field, $scope, $this->provider->ownPaths($scope), withOptions: true);
     }
@@ -80,7 +80,7 @@ final class ConfigSettingProcessor extends \Maho\ApiPlatform\Processor
      * @param FieldInfo $field
      * @param ScopeInfo $scope
      */
-    private function write(array $field, array $scope, ?string $value, ?string $oldValue, ApiUser $user): void
+    private function write(array $field, array $scope, ?string $value, ?string $oldValue): void
     {
         try {
             \Mage::getModel('adminhtml/config_data')
@@ -94,14 +94,14 @@ final class ConfigSettingProcessor extends \Maho\ApiPlatform\Processor
         }
 
         $this->afterChange($field, $scope);
-        $this->logChange('update', $field, $scope, $oldValue, $value, $user);
+        $this->logChange('update', $field, $scope, $oldValue, $value);
     }
 
     /**
      * @param FieldInfo $field
      * @param ScopeInfo $scope
      */
-    private function restoreInheritance(array $field, array $scope, ?string $oldValue, ApiUser $user): void
+    private function restoreInheritance(array $field, array $scope, ?string $oldValue): void
     {
         if ($scope['scope'] === ConfigSetting::SCOPE_DEFAULT) {
             throw new ValidationException('The default scope has no parent scope to inherit from', 'scope', 'Invalid');
@@ -110,7 +110,7 @@ final class ConfigSettingProcessor extends \Maho\ApiPlatform\Processor
         \Mage::getConfig()->deleteConfig($field['path'], $scope['scope'], $scope['scopeId']);
 
         $this->afterChange($field, $scope);
-        $this->logChange('delete', $field, $scope, $oldValue, null, $user);
+        $this->logChange('delete', $field, $scope, $oldValue, null);
     }
 
     /**
@@ -143,7 +143,7 @@ final class ConfigSettingProcessor extends \Maho\ApiPlatform\Processor
      * @param FieldInfo $field
      * @param ScopeInfo $scope
      */
-    private function logChange(string $action, array $field, array $scope, ?string $oldValue, ?string $newValue, ApiUser $user): void
+    private function logChange(string $action, array $field, array $scope, ?string $oldValue, ?string $newValue): void
     {
         $sensitive = $this->provider->isSensitive($field);
         $entry = [
@@ -154,7 +154,7 @@ final class ConfigSettingProcessor extends \Maho\ApiPlatform\Processor
         $oldData = $entry + ['value' => $sensitive ? '******' : $oldValue];
         $newData = $action === 'delete' ? null : new DataObject($entry + ['value' => $sensitive ? '******' : $newValue]);
 
-        $this->logApiActivity('config_setting', $action, $oldData, $newData, $user);
+        $this->logApiActivity('config_setting', $action, $oldData, $newData);
     }
 
     /**
