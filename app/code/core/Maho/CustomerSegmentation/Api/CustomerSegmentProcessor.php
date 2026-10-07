@@ -34,7 +34,7 @@ final class CustomerSegmentProcessor extends \Maho\ApiPlatform\Processor
             $this->assertSegmentAcl(CustomerSegment::ACL_REFRESH);
             $this->assertWebsitesWritable($data, $context, $user);
             $this->segmentService()->refresh($data);
-            $this->logApiActivity('customer_segment', 'refresh', null, $data, $user);
+            $this->logApiActivity('customer_segment', 'refresh', null, $data);
             return $data;
         }
 
@@ -42,7 +42,7 @@ final class CustomerSegmentProcessor extends \Maho\ApiPlatform\Processor
             $this->assertSegmentAcl(CustomerSegment::ACL_DELETE);
             $this->assertWebsitesWritable($data, $context, $user);
             $this->segmentService()->delete($data);
-            $this->logApiActivity('customer_segment', 'delete', $oldData, null, $user);
+            $this->logApiActivity('customer_segment', 'delete', $oldData, null);
             return null;
         }
 
@@ -50,7 +50,7 @@ final class CustomerSegmentProcessor extends \Maho\ApiPlatform\Processor
         $this->assertWebsitesWritable($data, $context, $user);
         $isNew = !$data->getId();
         $this->segmentService()->save($data);
-        $this->logApiActivity('customer_segment', $isNew ? 'create' : 'update', $isNew ? null : $oldData, $data, $user);
+        $this->logApiActivity('customer_segment', $isNew ? 'create' : 'update', $isNew ? null : $oldData, $data);
 
         return $data;
     }

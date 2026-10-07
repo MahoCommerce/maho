@@ -70,7 +70,7 @@ final class BlogCategoryProcessor extends CrudProcessor
         $oldData = $model->getData();
         $resource->deleteDescendants((int) $model->getId());
         $this->safeDelete($model, "delete {$this->entityLabel}");
-        $this->logApiActivity($this->entityType, 'delete', $oldData, null, $user);
+        $this->logApiActivity($this->entityType, 'delete', $oldData, null);
         return null;
     }
 }
