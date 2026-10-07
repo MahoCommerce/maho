@@ -201,7 +201,8 @@ it('redirects a new customer to the account edit page when a required profile fi
     // the customer could not fill in on the edit page anyway
     $attribute = Mage::getModel('customer/attribute')->loadByCode($entityType, 'middlename');
     $wasRequired = (int) $attribute->getIsRequired();
-    $attribute->setIsRequired(1)->save();
+    $wasVisible = (int) $attribute->getIsVisible();
+    $attribute->setIsRequired(1)->setIsVisible(1)->save();
 
     try {
         $email = 'social-profile-' . uniqid() . '@example.com';
@@ -218,7 +219,7 @@ it('redirects a new customer to the account edit page when a required profile fi
             ->and($json['redirect'])->toContain('customer/account/edit');
         $this->createdCustomerIds[] = (int) Mage::getSingleton('customer/session')->getCustomerId();
     } finally {
-        $attribute->setIsRequired($wasRequired)->save();
+        $attribute->setIsRequired($wasRequired)->setIsVisible($wasVisible)->save();
     }
 });
 

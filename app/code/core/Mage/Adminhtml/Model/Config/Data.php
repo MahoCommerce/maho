@@ -201,10 +201,13 @@ class Mage_Adminhtml_Model_Config_Data extends \Maho\DataObject
      */
     public function saveValue(string $path, string $value, string $scope = self::SCOPE_DEFAULT, int $scopeId = 0): void
     {
+        $sections = Mage::getSingleton('adminhtml/config')->getSections();
         $parts = explode('/', $path, 3);
-        $fieldConfig = count($parts) === 3
-            ? Mage::getSingleton('adminhtml/config')->getSections()->descend("{$parts[0]}/groups/{$parts[1]}/fields/{$parts[2]}")
-            : false;
+        $fieldConfig = count($parts) === 3 ? $sections->descend("{$parts[0]}/groups/{$parts[1]}/fields/{$parts[2]}") : false;
+        $fieldConfig = $fieldConfig ?: current(array_filter(
+            $sections->xpath('*/groups/*/fields/*[config_path]') ?: [],
+            static fn($node) => (string) $node->config_path === $path,
+        ));
         $backendClass = $fieldConfig ? Mage::helper('adminhtml/config')->getBackendModelByFieldConfig($fieldConfig) : null;
         $dataObject = $backendClass ? Mage::getModel($backendClass) : false;
         if (!$dataObject instanceof Mage_Core_Model_Config_Data
@@ -214,11 +217,15 @@ class Mage_Adminhtml_Model_Config_Data extends \Maho\DataObject
             return;
         }
 
-        [$section, $group, $field] = $parts;
+        $field = $fieldConfig->getName();
+        $groupConfig = $fieldConfig->getParent()->getParent();
+        $group = $groupConfig->getName();
+        $section = $groupConfig->getParent()->getParent()->getName();
         // Some backend models read the other fields of the group, which the admin form always sends
         $fields = [];
         foreach ($fieldConfig->getParent()->children() as $name => $node) {
-            $fieldValue = $name === $field ? $value : (string) Mage::getConfig()->getNode("{$section}/{$group}/{$name}", $scope, $scopeId);
+            $nodePath = (string) $node->config_path ?: "{$section}/{$group}/{$name}";
+            $fieldValue = $name === $field ? $value : (string) Mage::getConfig()->getNode($nodePath, $scope, $scopeId);
             $fields[$name] = in_array((string) $node->frontend_type, ['multiselect', 'time'], true) ? explode(',', $fieldValue) : $fieldValue;
         }
         $store = $scope === self::SCOPE_STORES ? Mage::app()->getStore($scopeId) : null;

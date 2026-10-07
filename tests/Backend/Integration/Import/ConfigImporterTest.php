@@ -175,13 +175,7 @@ it('saves the value of a field whose backend model reads only an upload', functi
 
     try {
         (new Config())->import($path);
-        $read = Mage::getSingleton('core/resource')->getConnection('core_read');
-        $value = $read->fetchOne(
-            $read->select()
-                ->from(Mage::getSingleton('core/resource')->getTableName('core_config_data'), 'value')
-                ->where('path = ?', 'sales/identity/logo')->where('scope = ?', 'default')->where('scope_id = ?', 0),
-        );
-        expect($value)->toBe('default/imp-logo.png');
+        expect(Mage::getModel('core/config')->getConfig('sales/identity/logo'))->toBe('default/imp-logo.png');
     } finally {
         unlink($path);
         Mage::getModel('core/config')->deleteConfig('sales/identity/logo', 'default', 0);
