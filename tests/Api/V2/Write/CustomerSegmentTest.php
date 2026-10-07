@@ -169,10 +169,11 @@ describe('Customer segment fields', function (): void {
             ->and($json['refreshStatus'])->toBe('pending')
             ->and($json['conditions']['type'])->toBe(CSEG_ROOT);
 
-        $patch = apiPatch(CSEG_PATH . "/{$id}", ['isActive' => true, 'customerGroupIds' => []], $token);
+        $patch = apiPatch(CSEG_PATH . "/{$id}", ['isActive' => true, 'customerGroupIds' => [], 'description' => null], $token);
         expect($patch['status'])->toBe(200)
             ->and($patch['json']['isActive'])->toBeTrue()
             ->and($patch['json']['customerGroupIds'])->toBe([])
+            ->and($patch['json']['description'] ?? null)->toBeNull()
             ->and($patch['json']['name'])->toBe('Pest full segment')
             ->and($patch['json']['priority'])->toBe(4);
 
@@ -218,6 +219,28 @@ describe('Customer segment fields', function (): void {
             ->and($put['json']['priority'])->toBe(0)
             ->and($put['json']['customerGroupIds'])->toBe([])
             ->and($put['json']['conditions']['conditions'])->toBe([]);
+    });
+
+    it('gives the same fields to a POST and to a PUT with the same body', function (): void {
+        $token = adminToken();
+        $body = ['name' => 'Pest default segment', 'websiteIds' => [1]];
+        $id = (int) csegCreate([
+            'description' => 'Replaced',
+            'isActive' => false,
+            'customerGroupIds' => [1],
+            'refreshMode' => 'manual',
+            'priority' => 4,
+            'allowOverlappingSequences' => true,
+            'conditions' => csegLifetimeSalesTree('500'),
+        ], $token)['json']['id'];
+
+        $post = csegCreate($body, $token);
+        $put = apiPut(CSEG_PATH . "/{$id}", $body, $token);
+
+        $fields = static fn(array $json): array => array_diff_key($json, array_flip(['@context', '@id', '@type', 'id', 'matchedCustomersCount', 'refreshStatus', 'lastRefreshAt']));
+        expect($post['status'])->toBe(201)
+            ->and($put['status'])->toBe(200)
+            ->and($fields($put['json']))->toEqual($fields($post['json']));
     });
 
     it('refuses a PATCH body that is not a JSON merge patch', function (): void {
