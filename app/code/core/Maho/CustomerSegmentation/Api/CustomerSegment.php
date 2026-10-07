@@ -19,6 +19,7 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
+use ApiPlatform\OpenApi\Model\Operation as OpenApiOperation;
 use Maho\ApiPlatform\Metadata\EnumSource;
 use Maho\Config\ApiResource;
 use Symfony\Component\ObjectMapper\Attribute\Map;
@@ -81,6 +82,7 @@ use Symfony\Component\ObjectMapper\Condition\TargetClass;
             requirements: ['id' => '\d+'],
             status: 200,
             deserialize: false,
+            openapi: new OpenApiOperation(summary: 'Refreshes the CustomerSegment resource.'),
             security: "is_granted('ROLE_ADMIN') or is_granted('customer-segments/write')",
             description: 'Find the customers of a segment again from its conditions, as the Refresh button of the admin does, and return the segment with the new matchedCustomersCount. '
                 . 'An inactive segment gets no customers. It takes no body. List the customers with the segment customers tool',
@@ -119,61 +121,74 @@ class CustomerSegment extends \Maho\ApiPlatform\Resource
         ],
     ];
 
-    #[ApiProperty(identifier: true, writable: false)]
+    private const TREE_EXAMPLE = [
+        'type' => self::ROOT_CONDITIONS,
+        'aggregator' => 'all',
+        'value' => true,
+        'conditions' => [[
+            'type' => 'customersegmentation/segment_condition_customer_clv',
+            'attribute' => 'lifetime_sales',
+            'operator' => '>=',
+            'value' => '1000',
+        ]],
+    ];
+
+    #[ApiProperty(identifier: true, writable: false, example: 4)]
     #[Map(if: new TargetClass(self::class))]
     public ?int $id = null;
 
-    #[ApiProperty(description: 'Name, at most 255 characters')]
+    #[ApiProperty(description: 'Name, at most 255 characters', example: 'Top spenders')]
     #[Map]
     public ?string $name = null;
 
+    #[ApiProperty(example: 'Customers who spent more than 1000 in total')]
     #[Map]
     public ?string $description = null;
 
-    #[ApiProperty(description: 'Only an active segment has customers, and only an active segment applies in price rules and email sequences')]
+    #[ApiProperty(description: 'Only an active segment has customers, and only an active segment applies in price rules and email sequences', example: true)]
     #[Map]
     public bool $isActive = true;
 
     /** @var list<int> */
-    #[ApiProperty(description: 'The websites whose customers the segment can hold', extraProperties: [EnumSource::KEY => 'Maho\ApiPlatform\Metadata\ValueLists::websites'])]
+    #[ApiProperty(description: 'The websites whose customers the segment can hold', example: [1], extraProperties: [EnumSource::KEY => 'Maho\ApiPlatform\Metadata\ValueLists::websites'])]
     #[Map]
     public array $websiteIds = [];
 
     /** @var list<int> */
-    #[ApiProperty(description: 'Only customers of these groups. Empty: every customer group', extraProperties: [EnumSource::KEY => 'customer/customer_attribute_source_group'])]
+    #[ApiProperty(description: 'Only customers of these groups. Empty: every customer group', example: [1, 2], extraProperties: [EnumSource::KEY => 'customer/customer_attribute_source_group'])]
     #[Map]
     public array $customerGroupIds = [];
 
-    #[ApiProperty(description: 'auto: a daily job finds the customers again. manual: only a refresh does', extraProperties: [EnumSource::KEY => \Maho_CustomerSegmentation_Service_Segment::REFRESH_MODES])]
+    #[ApiProperty(description: 'auto: a daily job finds the customers again. manual: only a refresh does', example: 'auto', extraProperties: [EnumSource::KEY => \Maho_CustomerSegmentation_Service_Segment::REFRESH_MODES])]
     #[Map]
     public string $refreshMode = \Maho_CustomerSegmentation_Model_Segment::MODE_AUTO;
 
-    #[ApiProperty(description: 'Segments with a higher priority come first, 0 or more')]
+    #[ApiProperty(description: 'Segments with a higher priority come first, 0 or more', example: 10)]
     #[Map]
     public int $priority = 0;
 
-    #[ApiProperty(description: 'Whether the email sequences of the segment run when a customer enters or leaves it. The segment needs at least one email sequence, which the admin manages')]
+    #[ApiProperty(description: 'Whether the email sequences of the segment run when a customer enters or leaves it. The segment needs at least one email sequence, which the admin manages', example: false)]
     #[Map]
     public bool $autoEmailActive = false;
 
-    #[ApiProperty(description: 'Whether a customer can be in more than one email sequence of the segment at the same time')]
+    #[ApiProperty(description: 'Whether a customer can be in more than one email sequence of the segment at the same time', example: false)]
     #[Map]
     public bool $allowOverlappingSequences = false;
 
-    #[ApiProperty(writable: false, description: 'Count of the customers that the last refresh found')]
+    #[ApiProperty(writable: false, description: 'Count of the customers that the last refresh found', example: 42)]
     #[Map(if: new TargetClass(self::class))]
     public ?int $matchedCustomersCount = null;
 
-    #[ApiProperty(writable: false, description: 'State of the last refresh: pending (never refreshed), processing, completed or error', extraProperties: [EnumSource::KEY => ['pending', 'processing', 'completed', 'error']])]
+    #[ApiProperty(writable: false, description: 'State of the last refresh: pending (never refreshed), processing, completed or error', example: 'completed', extraProperties: [EnumSource::KEY => ['pending', 'processing', 'completed', 'error']])]
     #[Map(if: new TargetClass(self::class))]
     public ?string $refreshStatus = null;
 
-    #[ApiProperty(writable: false, description: 'Time of the last refresh, in UTC')]
+    #[ApiProperty(writable: false, description: 'Time of the last refresh, in UTC', example: '2026-10-07 05:00:12')]
     #[Map(if: new TargetClass(self::class))]
     public ?string $lastRefreshAt = null;
 
     /** @var array<string, mixed>|null */
-    #[ApiProperty(description: 'Conditions tree: the customers that belong to the segment', openapiContext: self::TREE_SCHEMA)]
+    #[ApiProperty(description: 'Conditions tree: the customers that belong to the segment', openapiContext: self::TREE_SCHEMA, example: self::TREE_EXAMPLE)]
     #[Map(transform: CustomerSegmentConditionsTransform::class)]
     public ?array $conditions = null;
 }

@@ -391,3 +391,20 @@ describe('Customer segment admin page and API parity', function (): void {
             ->and($errors)->toBe([$api['json']['message']]);
     });
 });
+
+describe('Customer segment OpenAPI document', function (): void {
+
+    it('shows the description of each operation and an example for each field', function (): void {
+        $docs = apiGet('/api/docs.json')['json'];
+        $paths = $docs['paths'];
+
+        expect($paths['/api/rest/v2/customer-segments']['post']['description'])->toStartWith('Create a customer segment.')
+            ->and($paths['/api/rest/v2/customer-segments/{id}']['patch']['description'])->toStartWith('Change some fields of a customer segment')
+            ->and($paths['/api/rest/v2/customer-segments/{id}/refresh']['post']['summary'])->toBe('Refreshes the CustomerSegment resource.')
+            ->and($paths['/api/rest/v2/customer-segments/{segmentId}/customers']['get']['description'])->toStartWith('List the customers of a segment');
+
+        $properties = $docs['components']['schemas']['CustomerSegment']['properties'];
+        expect(array_keys(array_filter($properties, fn(array $property): bool => !array_key_exists('example', $property))))->toBe([])
+            ->and($properties['conditions']['example']['conditions'][0]['attribute'])->toBe('lifetime_sales');
+    });
+});
