@@ -101,28 +101,25 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
             // the edit form, so unprefixed names would be overwritten by the filter and pager
             // inputs of the grids loaded into the Customers and E-mails on Enter/Exit tabs.
             $data = $post['segment'] ?? [];
-            $segment = Mage::getModel('customersegmentation/segment');
-            $segmentId = $this->getRequest()->getParam('id');
+            $segmentId = (int) $this->getRequest()->getParam('id');
 
-            if ($segmentId) {
-                $segment->load($segmentId);
-                if (!$segment->getId()) {
-                    Mage::getSingleton('adminhtml/session')->addError(
-                        Mage::helper('customersegmentation')->__('This segment no longer exists.'),
-                    );
-                    $this->_redirect('*/*/');
-                    return;
-                }
+            try {
+                $segment = $segmentId
+                    ? $this->segmentService()->getById($segmentId)
+                    : $this->segmentService()->newSegment();
+            } catch (Mage_Core_Exception_NoSuchEntity $e) {
+                Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
+                $this->_redirect('*/*/');
+                return;
             }
 
             try {
-                // Process conditions
                 if (isset($post['rule']['conditions'])) {
                     $data['conditions'] = $post['rule']['conditions'];
+                    $segment->loadPost(['conditions' => $data['conditions']]);
                 }
-
-                $segment->loadPost($data);
-                $segment->save();
+                $this->applyFormFields($segment, $data);
+                $this->segmentService()->save($segment);
 
                 Mage::getSingleton('adminhtml/session')->addSuccess(
                     Mage::helper('customersegmentation')->__('The segment has been saved.'),
@@ -136,6 +133,13 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
                 $this->_redirect('*/*/');
                 return;
 
+            } catch (Mage_Core_Exception_Input $e) {
+                foreach ($e->getErrors() as $error) {
+                    Mage::getSingleton('adminhtml/session')->addError($error['message']);
+                }
+                Mage::getSingleton('adminhtml/session')->setFormData($data);
+                $this->_redirect('*/*/edit', ['id' => $segmentId]);
+                return;
             } catch (Exception $e) {
                 Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
                 Mage::getSingleton('adminhtml/session')->setFormData($data);
@@ -154,7 +158,7 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
             try {
                 $segment = Mage::getModel('customersegmentation/segment');
                 $segment->load($segmentId);
-                $segment->delete();
+                $this->segmentService()->delete($segment);
                 Mage::getSingleton('adminhtml/session')->addSuccess(
                     Mage::helper('customersegmentation')->__('The segment has been deleted.'),
                 );
@@ -179,7 +183,7 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
                     ->addFieldToFilter('segment_id', ['in' => $segmentIds]);
 
                 foreach ($collection as $segment) {
-                    $segment->delete();
+                    $this->segmentService()->delete($segment);
                 }
                 Mage::getSingleton('adminhtml/session')->addSuccess(
                     Mage::helper('customersegmentation')->__(
@@ -203,7 +207,7 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
                 $segment = Mage::getModel('customersegmentation/segment');
                 $segment->load($segmentId);
                 if ($segment->getId()) {
-                    $segment->refreshCustomers();
+                    $this->segmentService()->refresh($segment);
                     Mage::getSingleton('adminhtml/session')->addSuccess(
                         Mage::helper('customersegmentation')->__('The segment has been refreshed.'),
                     );
@@ -229,10 +233,10 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
             );
         } else {
             try {
-                $status = (int) $this->getRequest()->getParam('status');
+                $isActive = (bool) $this->getRequest()->getParam('status');
                 foreach ($segmentIds as $segmentId) {
-                    $segment = Mage::getModel('customersegmentation/segment')->load($segmentId);
-                    $segment->setIsActive($status)->save();
+                    $segment = $this->segmentService()->getById((int) $segmentId);
+                    $this->segmentService()->save($segment->setIsActive($isActive));
                 }
                 Mage::getSingleton('adminhtml/session')->addSuccess(
                     Mage::helper('customersegmentation')->__(
@@ -588,6 +592,49 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
         }
 
         $this->_redirect('*/*/edit', ['id' => $segmentId, 'tab' => 'email_sequences']);
+    }
+
+    private function segmentService(): Maho_CustomerSegmentation_Service_Segment
+    {
+        /** @var Maho_CustomerSegmentation_Service_Segment */
+        return Mage::getService('customersegmentation/segment');
+    }
+
+    /**
+     * Put the posted fields of the segment form into $segment through its typed setters.
+     * A multiselect without a selection posts nothing, so a form without customer groups means every group.
+     *
+     * @param array<string, mixed> $data
+     */
+    private function applyFormFields(Maho_CustomerSegmentation_Model_Segment $segment, array $data): void
+    {
+        $ids = static fn(mixed $value): array => array_values(array_map(
+            intval(...),
+            array_filter((array) $value, is_numeric(...)),
+        ));
+
+        if (isset($data['name'])) {
+            $segment->setName((string) $data['name']);
+            $segment->setCustomerGroupIds($ids($data['customer_group_ids'] ?? []));
+        }
+        if (array_key_exists('description', $data)) {
+            $segment->setDescription($data['description'] === null ? null : (string) $data['description']);
+        }
+        if (isset($data['is_active'])) {
+            $segment->setIsActive((bool) $data['is_active']);
+        }
+        if (isset($data['website_ids'])) {
+            $segment->setWebsiteIds($ids($data['website_ids']));
+        }
+        if (isset($data['refresh_mode'])) {
+            $segment->setRefreshMode((string) $data['refresh_mode']);
+        }
+        if (isset($data['auto_email_active'])) {
+            $segment->setAutoEmailActive((bool) $data['auto_email_active']);
+        }
+        if (isset($data['allow_overlapping_sequences'])) {
+            $segment->setAllowOverlappingSequences((bool) $data['allow_overlapping_sequences']);
+        }
     }
 
     #[\Override]

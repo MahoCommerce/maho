@@ -1196,9 +1196,9 @@ function createWishlistTestSegment(string $name, array $conditions): Maho_Custom
     $segment = Mage::getModel('customersegmentation/segment');
     $segment->setName($name);
     $segment->setDescription('Product wishlist test segment for ' . $name);
-    $segment->setIsActive(1);
-    $segment->setWebsiteIds('1');
-    $segment->setCustomerGroupIds('0,1,2,3');
+    $segment->setIsActive();
+    $segment->setWebsiteIds([1]);
+    $segment->setCustomerGroupIds([0, 1, 2, 3]);
     $segment->setConditionsSerialized(Mage::helper('core')->jsonEncode($conditions));
     $segment->setRefreshMode('manual');
     $segment->setRefreshStatus('pending');

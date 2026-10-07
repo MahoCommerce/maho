@@ -1,0 +1,393 @@
+<?php
+
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Tests
+ */
+
+declare(strict_types=1);
+
+use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
+
+/**
+ * API v2 customer segments: fields, conditions, refresh, customers, condition types, access,
+ * and the same outcome as the admin page, since both call the segment service.
+ *
+ * @group write
+ */
+
+const CSEG_PATH = '/api/rest/v2/customer-segments';
+
+const CSEG_ROOT = 'customersegmentation/segment_condition_combine';
+
+afterAll(function (): void {
+    foreach (csegIds() as $segmentId) {
+        $segment = Mage::getModel('customersegmentation/segment')->load($segmentId);
+        if ($segment->getId()) {
+            $segment->delete();
+        }
+    }
+    cleanupTestData();
+});
+
+function &csegIds(): array
+{
+    static $ids = [];
+    return $ids;
+}
+
+function csegCreate(
+    array $fields = [],
+    #[\SensitiveParameter]
+    ?string $token = null,
+): array {
+    $response = apiPost(CSEG_PATH, $fields + [
+        'name' => 'Pest segment ' . substr(uniqid(), -6),
+        'websiteIds' => [1],
+    ], $token ?? adminToken());
+    if (isset($response['json']['id'])) {
+        csegIds()[] = (int) $response['json']['id'];
+    }
+    return $response;
+}
+
+function csegMembers(array $response): array
+{
+    return $response['json']['member'] ?? $response['json']['hydra:member'] ?? (array_is_list($response['json']) ? $response['json'] : []);
+}
+
+function csegLifetimeSalesTree(string $amount): array
+{
+    return [
+        'type' => CSEG_ROOT,
+        'aggregator' => 'all',
+        'value' => true,
+        'conditions' => [[
+            'type' => 'customersegmentation/segment_condition_customer_clv',
+            'attribute' => 'lifetime_sales',
+            'operator' => '>=',
+            'value' => $amount,
+        ]],
+    ];
+}
+
+/**
+ * Run the save action of the segment admin page with $segmentPost under the "segment" key, as the form posts it.
+ */
+function csegAdminSave(array $segmentPost, ?int $id = null): void
+{
+    $request = new Mage_Core_Controller_Request_Http(
+        SymfonyRequest::create('/admin/customersegmentation_index/save', 'POST', ['segment' => $segmentPost]),
+    );
+    $request->setRouteName('adminhtml')
+        ->setControllerName('customersegmentation_index')
+        ->setActionName('save')
+        ->setDispatched(true);
+    if ($id !== null) {
+        $request->setParam('id', $id);
+    }
+    Mage::app()->setRequest($request);
+    new Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController($request, new Mage_Core_Controller_Response_Http())
+        ->saveAction();
+}
+
+describe('Customer segment access', function (): void {
+
+    it('denies every operation without authentication', function (): void {
+        expect(apiGet(CSEG_PATH)['status'])->toBe(401);
+        expect(apiPost(CSEG_PATH, ['name' => 'x'])['status'])->toBe(401);
+        expect(apiGet(CSEG_PATH . '/condition-types')['status'])->toBe(401);
+    });
+
+    it('denies a token without the permission', function (): void {
+        $readToken = serviceToken(['customer-segments/read']);
+        expect(apiGet(CSEG_PATH, $readToken)['status'])->toBe(200);
+        expect(apiGet(CSEG_PATH . '/condition-types', $readToken)['status'])->toBe(200);
+        expect(apiPost(CSEG_PATH, ['name' => 'x', 'websiteIds' => [1]], $readToken)['status'])->toBeForbidden();
+        expect(apiGet(CSEG_PATH, serviceToken(['customers/read']))['status'])->toBeForbidden();
+    });
+
+    it('checks the ACL resource of each action for an admin, as the admin pages do', function (): void {
+        $id = (int) csegCreate()['json']['id'];
+        $token = adminTokenWithAcl(
+            ['admin/customer', 'admin/customer/customersegmentation', 'admin/customer/customersegmentation/manage'],
+            'pest_cseg_acl_read',
+        );
+
+        expect(apiGet(CSEG_PATH . "/{$id}", $token)['status'])->toBe(200);
+        expect(apiGet(CSEG_PATH . "/{$id}/customers", $token)['status'])->toBe(200);
+        expect(apiPatch(CSEG_PATH . "/{$id}", ['priority' => 1], $token)['status'])->toBeForbidden();
+        expect(apiPost(CSEG_PATH . "/{$id}/refresh", [], $token)['status'])->toBeForbidden();
+        expect(apiDelete(CSEG_PATH . "/{$id}", $token)['status'])->toBeForbidden();
+        expect(apiGet(CSEG_PATH, adminTokenWithAcl(['admin/customer/manage'], 'pest_cseg_acl_deny'))['status'])->toBeForbidden();
+    });
+
+    it('hides the segments of other websites from a store-restricted token', function (): void {
+        $id = (int) csegCreate()['json']['id'];
+        $token = serviceToken(['customer-segments/read', 'customer-segments/write'], [999999]);
+
+        expect(csegMembers(apiGet(CSEG_PATH, $token)))->toBe([]);
+        expect(apiGet(CSEG_PATH . "/{$id}", $token)['status'])->toBe(404);
+        expect(apiPost(CSEG_PATH, ['name' => 'x', 'websiteIds' => [1]], $token)['status'])->toBeForbidden();
+    });
+});
+
+describe('Customer segment fields', function (): void {
+
+    it('creates, reads, updates and deletes a segment', function (): void {
+        $token = adminToken();
+        $create = csegCreate([
+            'name' => 'Pest full segment',
+            'description' => 'All fields',
+            'isActive' => false,
+            'customerGroupIds' => [1],
+            'refreshMode' => 'manual',
+            'priority' => 4,
+        ], $token);
+
+        expect($create['status'])->toBe(201);
+        $id = (int) $create['json']['id'];
+        $json = apiGet(CSEG_PATH . "/{$id}", $token)['json'];
+        expect($json['name'])->toBe('Pest full segment')
+            ->and($json['description'])->toBe('All fields')
+            ->and($json['isActive'])->toBeFalse()
+            ->and($json['websiteIds'])->toBe([1])
+            ->and($json['customerGroupIds'])->toBe([1])
+            ->and($json['refreshMode'])->toBe('manual')
+            ->and($json['priority'])->toBe(4)
+            ->and($json['refreshStatus'])->toBe('pending')
+            ->and($json['conditions']['type'])->toBe(CSEG_ROOT);
+
+        $patch = apiPatch(CSEG_PATH . "/{$id}", ['isActive' => true, 'customerGroupIds' => []], $token);
+        expect($patch['status'])->toBe(200)
+            ->and($patch['json']['isActive'])->toBeTrue()
+            ->and($patch['json']['customerGroupIds'])->toBe([])
+            ->and($patch['json']['name'])->toBe('Pest full segment')
+            ->and($patch['json']['priority'])->toBe(4);
+
+        expect(apiDelete(CSEG_PATH . "/{$id}", $token)['status'])->toBe(204);
+        expect(apiGet(CSEG_PATH . "/{$id}", $token)['status'])->toBe(404);
+    });
+
+    it('writes each change to the admin activity log', function (): void {
+        if (!Mage::helper('adminactivitylog')->isEnabled()) {
+            $this->markTestSkipped('The admin activity log is off');
+        }
+        $token = adminToken();
+        $id = (int) csegCreate([], $token)['json']['id'];
+        apiPatch(CSEG_PATH . "/{$id}", ['priority' => 2], $token);
+
+        $resource = Mage::getSingleton('core/resource');
+        $read = $resource->getConnection('core_read');
+        $actions = $read->fetchCol(
+            $read->select()
+                ->from($resource->getTableName('adminactivitylog/activity'), ['action_type'])
+                ->where('entity_type = ?', 'customer_segment')
+                ->where('entity_id = ?', $id)
+                ->order('activity_id ASC'),
+        );
+
+        expect($actions)->toBe(['create', 'update']);
+    });
+
+    it('replaces every field with PUT and gives a field that the body leaves out its default value', function (): void {
+        $token = adminToken();
+        $id = (int) csegCreate([
+            'description' => 'Gone after a replace',
+            'priority' => 4,
+            'customerGroupIds' => [1],
+            'conditions' => csegLifetimeSalesTree('500'),
+        ], $token)['json']['id'];
+
+        $put = apiPut(CSEG_PATH . "/{$id}", ['name' => 'Pest replaced segment', 'websiteIds' => [1]], $token);
+
+        expect($put['status'])->toBe(200)
+            ->and($put['json']['name'])->toBe('Pest replaced segment')
+            ->and($put['json']['description'] ?? null)->toBeNull()
+            ->and($put['json']['priority'])->toBe(0)
+            ->and($put['json']['customerGroupIds'])->toBe([])
+            ->and($put['json']['conditions']['conditions'])->toBe([]);
+    });
+
+    it('refuses a PATCH body that is not a JSON merge patch', function (): void {
+        $id = (int) csegCreate()['json']['id'];
+
+        expect(apiPatch(CSEG_PATH . "/{$id}", ['priority' => 1], adminToken(), ['Content-Type' => 'application/json'])['status'])->toBe(415);
+    });
+
+    it('lists the segments with their trees', function (): void {
+        $id = (int) csegCreate(['conditions' => csegLifetimeSalesTree('1')])['json']['id'];
+        $list = csegMembers(apiGet(CSEG_PATH . '?itemsPerPage=100', adminToken()));
+        $row = array_values(array_filter($list, fn(array $item): bool => $item['id'] === $id))[0] ?? null;
+
+        expect($row)->not->toBeNull()
+            ->and($row['conditions']['conditions'][0]['attribute'])->toBe('lifetime_sales');
+    });
+
+    it('refuses an unknown or read-only field with a 400 that names each field', function (): void {
+        $id = (int) csegCreate()['json']['id'];
+        $response = apiPatch(CSEG_PATH . "/{$id}", ['unknown' => true, 'matchedCustomersCount' => 5], adminToken());
+
+        expect($response['status'])->toBe(400)
+            ->and(array_column($response['json']['details']['errors'], 'field'))->toBe(['unknown', 'matchedCustomersCount']);
+    });
+
+    it('lists every value of a wrong type with a 422 that names each field', function (): void {
+        $response = csegCreate(['name' => 5, 'priority' => 'x', 'websiteIds' => '1']);
+
+        expect($response['status'])->toBe(422)
+            ->and(array_column($response['json']['details']['errors'], 'field'))
+            ->toEqualCanonicalizing(['name', 'priority', 'websiteIds']);
+    });
+
+    it('answers a broken business rule of the service with a 422 that names every problem', function (): void {
+        $response = csegCreate(['name' => '', 'websiteIds' => [999], 'refreshMode' => 'often']);
+
+        expect($response['status'])->toBe(422)
+            ->and($response['json']['message'])->toContain('999', 'auto, manual')
+            ->and(array_column($response['json']['details']['errors'], 'field'))->toBe(['name', 'websiteIds', 'refreshMode']);
+    });
+});
+
+describe('Customer segment conditions', function (): void {
+
+    it('stores a tree and returns it with labels', function (): void {
+        $create = csegCreate(['conditions' => csegLifetimeSalesTree('500')]);
+
+        expect($create['status'])->toBe(201);
+        $leaf = $create['json']['conditions']['conditions'][0];
+        expect($leaf['attribute'])->toBe('lifetime_sales')
+            ->and($leaf['operator'])->toBe('>=')
+            ->and($leaf['value'])->toBe('500')
+            ->and($leaf['label'])->toBeString();
+    });
+
+    it('refuses an attribute that the condition type does not have', function (): void {
+        $tree = csegLifetimeSalesTree('500');
+        $tree['conditions'][0]['attribute'] = 'nope';
+        $response = csegCreate(['conditions' => $tree]);
+
+        expect($response['status'])->toBe(422)
+            ->and($response['json']['details']['errors'][0]['field'])->toBe('conditions.conditions[0].attribute');
+    });
+
+    it('lists the condition types in short form and gives one type in full', function (): void {
+        $token = adminToken();
+        $types = csegMembers(apiGet(CSEG_PATH . '/condition-types', $token));
+        $clv = array_values(array_filter($types, fn(array $type): bool => $type['code'] === 'customer_clv'))[0] ?? null;
+
+        expect($clv)->not->toBeNull()
+            ->and($clv['type'])->toBe('customersegmentation/segment_condition_customer_clv')
+            ->and(array_column($clv['attributes'], 'code'))->toContain('lifetime_sales')
+            ->and($clv['attributes'][0])->not->toHaveKey('operators');
+
+        $full = apiGet(CSEG_PATH . '/condition-types/customer_clv', $token);
+        expect($full['status'])->toBe(200)
+            ->and($full['json']['attributes'][0])->toHaveKey('operators');
+        expect(apiGet(CSEG_PATH . '/condition-types/nope', $token)['status'])->toBe(404);
+    });
+});
+
+describe('Customer segment refresh', function (): void {
+
+    it('finds the customers of the segment and lists them', function (): void {
+        $token = adminToken();
+        $id = (int) csegCreate(['conditions' => csegLifetimeSalesTree('0')], $token)['json']['id'];
+
+        $refresh = apiPost(CSEG_PATH . "/{$id}/refresh", [], $token);
+        expect($refresh['status'])->toBe(200)
+            ->and($refresh['json']['refreshStatus'])->toBe('completed')
+            ->and($refresh['json']['lastRefreshAt'])->toBeString();
+
+        $customers = apiGet(CSEG_PATH . "/{$id}/customers?itemsPerPage=100", $token);
+        expect($customers['status'])->toBe(200)
+            ->and(count(csegMembers($customers)))->toBe(min(100, $refresh['json']['matchedCustomersCount']));
+        foreach (csegMembers($customers) as $customer) {
+            expect($customer['websiteId'])->toBe(1)
+                ->and($customer['email'])->toBeString();
+        }
+    });
+
+    it('gives an inactive segment no customers', function (): void {
+        $token = adminToken();
+        $id = (int) csegCreate(['isActive' => false, 'conditions' => csegLifetimeSalesTree('0')], $token)['json']['id'];
+
+        expect(apiPost(CSEG_PATH . "/{$id}/refresh", [], $token)['json']['matchedCustomersCount'])->toBe(0);
+    });
+});
+
+describe('Customer segment MCP tools', function (): void {
+
+    it('puts every segment tool in the customers section', function (): void {
+        $token = adminToken();
+        $tools = array_keys(mcpTools($token, mcpSession($token)));
+
+        expect($tools)->toContain(
+            'customers_customer_segments_list',
+            'customers_customer_segments_get',
+            'customers_customer_segments_create',
+            'customers_customer_segments_refresh_create',
+            'customers_customer_segments_customers_list',
+            'customers_customer_segments_condition_types_list',
+            'customers_customer_segments_condition_types_get',
+        );
+    });
+});
+
+describe('Customer segment admin page and API parity', function (): void {
+
+    beforeEach(function (): void {
+        Mage::unregister(Mage_Core_Model_Session_Abstract::REGISTRY_KEY);
+        $session = new Session(new MockArraySessionStorage());
+        $session->start();
+        Mage::register(Mage_Core_Model_Session_Abstract::REGISTRY_KEY, $session);
+    });
+
+    it('saves the same segment from the admin form and from the API', function (): void {
+        $name = 'Pest parity ' . substr(uniqid(), -6);
+        csegAdminSave([
+            'name' => $name . ' admin',
+            'is_active' => '1',
+            'refresh_mode' => 'manual',
+            'website_ids' => ['1'],
+            'customer_group_ids' => ['', '1'],
+        ]);
+        $admin = Mage::getModel('customersegmentation/segment')->load($name . ' admin', 'name');
+        expect($admin->getId())->not->toBeNull();
+        csegIds()[] = (int) $admin->getId();
+
+        $api = csegCreate([
+            'name' => $name . ' api',
+            'isActive' => true,
+            'refreshMode' => 'manual',
+            'websiteIds' => [1],
+            'customerGroupIds' => [1],
+        ]);
+        $apiSegment = Mage::getModel('customersegmentation/segment')->load($api['json']['id']);
+
+        foreach ([$admin, $apiSegment] as $segment) {
+            expect($segment->getIsActive())->toBeTrue()
+                ->and($segment->getRefreshMode())->toBe('manual')
+                ->and($segment->getWebsiteIds())->toBe([1])
+                ->and($segment->getCustomerGroupIds())->toBe([1]);
+        }
+    });
+
+    it('refuses an unknown website with the same message on the admin page and in the API', function (): void {
+        $name = 'Pest parity refused ' . substr(uniqid(), -6);
+        csegAdminSave(['name' => $name, 'website_ids' => ['999']]);
+
+        $errors = array_map(
+            fn(Mage_Core_Model_Message_Abstract $message): string => $message->getText(),
+            Mage::getSingleton('adminhtml/session')->getMessages(true)->getErrors(),
+        );
+        $api = csegCreate(['name' => $name, 'websiteIds' => [999]]);
+
+        expect(Mage::getModel('customersegmentation/segment')->load($name, 'name')->getId())->toBeNull()
+            ->and($api['status'])->toBe(422)
+            ->and($errors)->toBe([$api['json']['message']]);
+    });
+});

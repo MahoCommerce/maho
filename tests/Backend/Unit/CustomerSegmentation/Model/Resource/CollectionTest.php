@@ -21,8 +21,7 @@ describe('Customer Segment Collection', function () {
         $this->collection->load();
 
         foreach ($this->collection as $segment) {
-            $websiteIds = explode(',', $segment->getWebsiteIds());
-            expect($websiteIds)->toContain('1');
+            expect($segment->getWebsiteIds())->toContain(1);
         }
     });
 

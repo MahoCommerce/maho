@@ -280,7 +280,7 @@ describe('Segment Matching Integration', function () {
         ]);
 
         // Set specific website restriction
-        $segment->setWebsiteIds('1');
+        $segment->setWebsiteIds([1]);
         $segment->save();
 
         $matchedCustomers = $segment->getMatchingCustomerIds();
@@ -305,8 +305,8 @@ describe('Segment Matching Integration', function () {
             'value' => '@multiwebsite.com',
         ]);
 
-        $segment->setWebsiteIds('1');
-        $segment->setCustomerGroupIds('0,1,2,3'); // All groups
+        $segment->setWebsiteIds([1]);
+        $segment->setCustomerGroupIds([0, 1, 2, 3]); // All groups
         $segment->save();
 
         $matchedCustomers = $segment->getMatchingCustomerIds();
@@ -345,8 +345,8 @@ describe('Segment Matching Integration', function () {
             'value' => '@grouptest.com',
         ]);
 
-        $segment->setWebsiteIds('1'); // All websites
-        $segment->setCustomerGroupIds('1'); // Only group 1
+        $segment->setWebsiteIds([1]); // All websites
+        $segment->setCustomerGroupIds([1]); // Only group 1
         $segment->save();
 
         $matchedCustomers = $segment->getMatchingCustomerIds();
@@ -385,8 +385,8 @@ describe('Segment Matching Integration', function () {
             'value' => '@grouptest.com',
         ]);
 
-        $segment->setWebsiteIds('1');
-        $segment->setCustomerGroupIds('1,2'); // Only groups 1 and 2
+        $segment->setWebsiteIds([1]);
+        $segment->setCustomerGroupIds([1, 2]); // Only groups 1 and 2
         $segment->save();
 
         $matchedCustomers = $segment->getMatchingCustomerIds();
@@ -424,8 +424,8 @@ describe('Segment Matching Integration', function () {
             'value' => '@combined.com',
         ]);
 
-        $segment->setWebsiteIds('1');
-        $segment->setCustomerGroupIds('2');
+        $segment->setWebsiteIds([1]);
+        $segment->setCustomerGroupIds([2]);
         $segment->save();
 
         $matchedCustomers = $segment->getMatchingCustomerIds();
@@ -466,8 +466,8 @@ describe('Segment Matching Integration', function () {
             'value' => '@grouptest.com',
         ]);
 
-        $segment->setWebsiteIds('1');
-        $segment->setCustomerGroupIds('0,1'); // Groups 0 and 1
+        $segment->setWebsiteIds([1]);
+        $segment->setCustomerGroupIds([0, 1]); // Groups 0 and 1
         $segment->save();
 
         $matchedCustomers = $segment->getMatchingCustomerIds();
@@ -863,9 +863,9 @@ describe('Segment Matching Integration', function () {
         $segment = Mage::getModel('customersegmentation/segment');
         $segment->setName($name);
         $segment->setDescription('Test segment for ' . $name);
-        $segment->setIsActive(1);
-        $segment->setWebsiteIds('1'); // Base website
-        $segment->setCustomerGroupIds('0,1,2,3'); // All customer groups
+        $segment->setIsActive();
+        $segment->setWebsiteIds([1]); // Base website
+        $segment->setCustomerGroupIds([0, 1, 2, 3]); // All customer groups
         $segment->setConditionsSerialized(Mage::helper('core')->jsonEncode($conditions));
         $segment->setRefreshMode('manual');
         $segment->setRefreshStatus('pending');

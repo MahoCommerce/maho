@@ -290,7 +290,7 @@ describe('Enhanced Time-based Customer Conditions', function () {
                     'value' => '0',
                 ]);
 
-                $segment->setWebsiteIds('1');
+                $segment->setWebsiteIds([1]);
                 $segment->save();
 
                 $matchedCustomers = $segment->getMatchingCustomerIds();

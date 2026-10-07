@@ -84,34 +84,23 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
         return Mage::getModel('rule/action_collection');
     }
 
-    public function getWebsiteIdsArray(): array
+    /**
+     * Read a list of IDs from the comma-separated text of the column or from the array that a load gives.
+     *
+     * @return list<int>
+     */
+    private static function idList(mixed $value): array
     {
-        $websiteIds = $this->getWebsiteIds();
-        if (is_string($websiteIds) && !empty($websiteIds)) {
-            return explode(',', $websiteIds);
+        if (is_string($value)) {
+            $value = explode(',', $value);
         }
-        return [];
-    }
-
-    public function setWebsiteIdsArray(array $websiteIds): self
-    {
-        $this->setWebsiteIds(implode(',', $websiteIds));
-        return $this;
-    }
-
-    public function getCustomerGroupIdsArray(): array
-    {
-        $groupIds = $this->getCustomerGroupIds();
-        if (is_string($groupIds) && !empty($groupIds)) {
-            return explode(',', $groupIds);
+        $ids = [];
+        foreach ((array) $value as $id) {
+            if (is_numeric($id)) {
+                $ids[] = (int) $id;
+            }
         }
-        return [];
-    }
-
-    public function setCustomerGroupIdsArray(array $groupIds): self
-    {
-        $this->setCustomerGroupIds(implode(',', $groupIds));
-        return $this;
+        return array_values(array_unique($ids));
     }
 
     /**
@@ -284,10 +273,10 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
 
             // Set default values for email automation
             if (!$this->hasData('auto_email_active')) {
-                $this->setAutoEmailActive(0);
+                $this->setAutoEmailActive(false);
             }
             if (!$this->hasData('allow_overlapping_sequences')) {
-                $this->setAllowOverlappingSequences(0);
+                $this->setAllowOverlappingSequences(false);
             }
         }
 
@@ -344,7 +333,7 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
      */
     public function hasEmailAutomation(): bool
     {
-        if (!(bool) $this->getAutoEmailActive()) {
+        if (!$this->getAutoEmailActive()) {
             return false;
         }
 
@@ -548,13 +537,13 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
         return $this->setData('description', $value);
     }
 
-    public function getIsActive(): ?int
+    public function getIsActive(): ?bool
     {
         $value = $this->getData('is_active');
-        return $value === null ? null : (int) $value;
+        return $value === null ? null : (bool) $value;
     }
 
-    public function setIsActive(?int $value): static
+    public function setIsActive(?bool $value = true): static
     {
         return $this->setData('is_active', $value);
     }
@@ -571,20 +560,38 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
     }
 
     /**
-     * The column stores a comma-separated list, but Mage_Rule_Model_Abstract::_beforeSave()
-     * and the admin multiselects both hand these two fields an array, so neither may cast.
+     * The websites of the segment. The column stores a comma-separated list, and a load turns it into an array.
+     *
+     * @return list<int>
      */
-    public function setWebsiteIds(string|array|null $value): static
+    #[\Override]
+    public function getWebsiteIds(): array
+    {
+        return self::idList($this->getData('website_ids'));
+    }
+
+    /**
+     * @param list<int> $value
+     */
+    public function setWebsiteIds(array $value): static
     {
         return $this->setData('website_ids', $value);
     }
 
-    public function getCustomerGroupIds(): string|array|null
+    /**
+     * The customer groups of the segment. An empty list means every customer group.
+     *
+     * @return list<int>
+     */
+    public function getCustomerGroupIds(): array
     {
-        return $this->getData('customer_group_ids');
+        return self::idList($this->getData('customer_group_ids'));
     }
 
-    public function setCustomerGroupIds(string|array|null $value): static
+    /**
+     * @param list<int> $value
+     */
+    public function setCustomerGroupIds(array $value): static
     {
         return $this->setData('customer_group_ids', $value);
     }
@@ -644,24 +651,24 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
         return $this->setData('priority', $value);
     }
 
-    public function getAutoEmailActive(): ?int
+    public function getAutoEmailActive(): ?bool
     {
         $value = $this->getData('auto_email_active');
-        return $value === null ? null : (int) $value;
+        return $value === null ? null : (bool) $value;
     }
 
-    public function setAutoEmailActive(?int $value): static
+    public function setAutoEmailActive(?bool $value = true): static
     {
         return $this->setData('auto_email_active', $value);
     }
 
-    public function getAllowOverlappingSequences(): ?int
+    public function getAllowOverlappingSequences(): ?bool
     {
         $value = $this->getData('allow_overlapping_sequences');
-        return $value === null ? null : (int) $value;
+        return $value === null ? null : (bool) $value;
     }
 
-    public function setAllowOverlappingSequences(?int $value): static
+    public function setAllowOverlappingSequences(?bool $value = true): static
     {
         return $this->setData('allow_overlapping_sequences', $value);
     }

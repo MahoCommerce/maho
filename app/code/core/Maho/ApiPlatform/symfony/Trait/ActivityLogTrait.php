@@ -27,7 +27,7 @@ trait ActivityLogTrait
             $activity = \Mage::getModel('adminactivitylog/activity');
             $activity->logActivity([
                 'entity_type' => $entityType,
-                'action' => $action,
+                'action_type' => $action,
                 'entity_id' => $model ? (int) $model->getId() : ($oldData['entity_id'] ?? $oldData['page_id'] ?? $oldData['block_id'] ?? 0),
                 'old_data' => $oldData,
                 'new_data' => $model?->getData(),
