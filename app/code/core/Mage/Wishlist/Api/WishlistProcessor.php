@@ -22,9 +22,12 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 final class WishlistProcessor extends \Maho\ApiPlatform\Processor
 {
-    public function __construct(Security $security, private \Mage_Checkout_Service_Cart $cartService)
+    private readonly \Mage_Checkout_Service_Cart $cartService;
+
+    public function __construct(Security $security)
     {
         parent::__construct($security);
+        $this->cartService = \Mage::getService('checkout/cart');
     }
 
     /**
