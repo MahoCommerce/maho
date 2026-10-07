@@ -179,7 +179,7 @@ describe('Media Upload (REST)', function (): void {
             ->and($delete['raw'])->not->toContain('nginx');
     });
 
-    it('writes the upload to the admin activity log', function (): void {
+    it('writes the upload of an admin to the admin activity log', function (): void {
         if (!Mage::helper('adminactivitylog')->isEnabled()) {
             $this->markTestSkipped('The admin activity log is off');
         }
@@ -194,7 +194,7 @@ describe('Media Upload (REST)', function (): void {
             '/api/rest/v2/media',
             ['folder' => 'test', 'filename' => 'pest-activity-log'],
             ['file' => $tmpFile],
-            serviceToken(['media/write']),
+            adminToken(),
         );
         unlink($tmpFile);
         expect($upload['status'])->toBeIn([200, 201]);

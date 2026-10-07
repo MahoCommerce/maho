@@ -126,12 +126,20 @@ describe('Customer segment access', function (): void {
     });
 
     it('hides the segments of other websites from a store-restricted token', function (): void {
-        $id = (int) csegCreate()['json']['id'];
-        $token = serviceToken(['customer-segments/read', 'customer-segments/write'], [999999]);
+        $foreignWebsiteId = (int) createPriceWebsite('pest_cseg')->getId();
+        try {
+            $foreign = (int) csegCreate(['websiteIds' => [$foreignWebsiteId]])['json']['id'];
+            $own = (int) csegCreate()['json']['id'];
+            $token = serviceToken(['customer-segments/read', 'customer-segments/write'], [1]);
 
-        expect(csegMembers(apiGet(CSEG_PATH, $token)))->toBe([]);
-        expect(apiGet(CSEG_PATH . "/{$id}", $token)['status'])->toBe(404);
-        expect(apiPost(CSEG_PATH, ['name' => 'x', 'websiteIds' => [1]], $token)['status'])->toBeForbidden();
+            $listed = array_column(csegMembers(apiGet(CSEG_PATH, $token)), 'id');
+            expect($listed)->toContain($own)->not->toContain($foreign)
+                ->and(apiGet(CSEG_PATH . "/{$own}", $token)['status'])->toBe(200)
+                ->and(apiGet(CSEG_PATH . "/{$foreign}", $token)['status'])->toBe(404)
+                ->and(apiPost(CSEG_PATH, ['name' => 'x', 'websiteIds' => [$foreignWebsiteId]], $token)['status'])->toBeForbidden();
+        } finally {
+            deletePriceWebsite('pest_cseg');
+        }
     });
 });
 
