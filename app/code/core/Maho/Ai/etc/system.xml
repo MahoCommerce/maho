@@ -503,6 +503,17 @@
                             <show_in_store>0</show_in_store>
                             <depends><enabled>1</enabled></depends>
                         </excluded_sections>
+                        <custom_instructions translate="label comment">
+                            <label>Custom Instructions</label>
+                            <frontend_type>textarea</frontend_type>
+                            <validate>validate-length maximum-length-2000</validate>
+                            <comment>Added to the instructions of the assistant for every administrator, for example the tone of store texts or rules of this business. Up to 2000 characters. Each character adds cost to every model request.</comment>
+                            <sort_order>80</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </custom_instructions>
                     </fields>
                 </chat>
 

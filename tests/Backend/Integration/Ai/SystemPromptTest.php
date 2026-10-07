@@ -81,3 +81,36 @@ it('stays within the size budget and keeps its sections', function (): void {
     expect(strlen($prompt))->toBeLessThanOrEqual(Maho_Ai_Model_Chat_SystemPrompt::MAX_CHARS);
     expect($prompt)->toContain('How a task runs:', 'Maho in short:', 'Example of a good turn', 'How to answer:');
 });
+
+it('adds the custom instructions of the store owner before the answer rules, cut to their limit', function (): void {
+    $store = Mage::app()->getStore();
+    $previous = $store->getConfig(Maho_Ai_Model_Chat_SystemPrompt::XML_PATH_CUSTOM_INSTRUCTIONS);
+    $store->setConfig(Maho_Ai_Model_Chat_SystemPrompt::XML_PATH_CUSTOM_INSTRUCTIONS, "  Always write product texts in a formal tone.\n" . str_repeat('x', Maho_Ai_Model_Chat_SystemPrompt::MAX_CUSTOM_CHARS));
+    try {
+        $prompt = new Maho_Ai_Model_Chat_SystemPrompt()->build(aiPromptAdmin());
+    } finally {
+        $store->setConfig(Maho_Ai_Model_Chat_SystemPrompt::XML_PATH_CUSTOM_INSTRUCTIONS, $previous);
+    }
+
+    expect($prompt)->toContain("Instructions from the store owner, to follow in every conversation:\nAlways write product texts in a formal tone.");
+    expect(strpos($prompt, 'Instructions from the store owner'))->toBeLessThan(strpos($prompt, 'How to answer:'));
+    expect($prompt)->toContain(str_repeat('x', 1900));
+    expect($prompt)->not->toContain(str_repeat('x', Maho_Ai_Model_Chat_SystemPrompt::MAX_CUSTOM_CHARS));
+});
+
+it('leaves the custom instructions out when the store owner wrote none', function (): void {
+    $store = Mage::app()->getStore();
+    $previous = $store->getConfig(Maho_Ai_Model_Chat_SystemPrompt::XML_PATH_CUSTOM_INSTRUCTIONS);
+    $store->setConfig(Maho_Ai_Model_Chat_SystemPrompt::XML_PATH_CUSTOM_INSTRUCTIONS, "  \n ");
+    try {
+        $prompt = new Maho_Ai_Model_Chat_SystemPrompt()->build(aiPromptAdmin());
+    } finally {
+        $store->setConfig(Maho_Ai_Model_Chat_SystemPrompt::XML_PATH_CUSTOM_INSTRUCTIONS, $previous);
+    }
+
+    expect($prompt)->not->toContain('Instructions from the store owner');
+});
+
+it('builds the prompt through the model factory, so a module can override it', function (): void {
+    expect(Mage::getModel('ai/chat_systemPrompt'))->toBeInstanceOf(Maho_Ai_Model_Chat_SystemPrompt::class);
+});

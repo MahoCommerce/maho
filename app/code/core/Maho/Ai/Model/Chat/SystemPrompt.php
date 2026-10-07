@@ -21,6 +21,11 @@ class Maho_Ai_Model_Chat_SystemPrompt
     /** Longer prompts cost on every model request; a test keeps this honest. */
     public const MAX_CHARS = 10000;
 
+    /** The custom instructions of the store owner come on top of MAX_CHARS. */
+    public const MAX_CUSTOM_CHARS = 2000;
+
+    public const XML_PATH_CUSTOM_INSTRUCTIONS = 'ai/chat/custom_instructions';
+
     /**
      * @param array<string, mixed> $pageContext route, entity_type, entity_id, entity_label, store and screen of the admin page
      */
@@ -37,6 +42,8 @@ class Maho_Ai_Model_Chat_SystemPrompt
             $this->editorLayouts((string) ($pageContext['editor_guide'] ?? '')),
             // The example fills a form, which a run without a browser cannot do.
             ($pageContext['run_mode'] ?? '') === '' ? $this->example() : '',
+            // Before the answer rules, so a custom text cannot cancel them by accident.
+            $this->customInstructions($storeId),
             $this->answer(),
         ];
 
@@ -220,6 +227,17 @@ class Maho_Ai_Model_Chat_SystemPrompt
             '- admin_fill_form with page "cms/page", record_id "60", fields {"content": {"prepend": "<h2>Novità</h2>{{widget type=\"catalog/product_widget_new\" products_count=\"4\" …}}"}}.',
             '- Answer: what was added, where, and that the form waits for the administrator\'s save.',
         ]);
+    }
+
+    /** What the store owner wrote in the configuration, for every administrator. */
+    private function customInstructions(?int $storeId): string
+    {
+        $text = trim(mb_substr((string) Mage::getStoreConfig(self::XML_PATH_CUSTOM_INSTRUCTIONS, $storeId), 0, self::MAX_CUSTOM_CHARS));
+        if ($text === '') {
+            return '';
+        }
+
+        return "Instructions from the store owner, to follow in every conversation:\n" . $text;
     }
 
     private function answer(): string
