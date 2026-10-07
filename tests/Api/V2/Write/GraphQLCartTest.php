@@ -305,6 +305,6 @@ describe('GraphQL Cart - Service errors', function (): void {
         GRAPHQL, [], customerToken());
 
         expect($response['json']['errors'][0]['message'])->toBe("Product with SKU 'PEST-NO-SUCH-SKU' not found")
-            ->and($response['json']['errors'][0]['extensions']['status'])->toBe(400);
+            ->and($response['json']['errors'][0]['extensions']['status'])->toBe(422);
     });
 });

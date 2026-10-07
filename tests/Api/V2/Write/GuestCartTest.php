@@ -55,10 +55,10 @@ describe('POST /api/rest/v2/guest-carts (Create Cart)', function (): void {
         expect($response['status'])->toBe(201);
     });
 
-    it('rejects a non-existent store id with 400', function (): void {
+    it('rejects a non-existent store id with 422', function (): void {
         $response = apiPost('/api/rest/v2/guest-carts', ['storeId' => 999999]);
 
-        expect($response['status'])->toBe(400);
+        expect($response['status'])->toBe(422);
     });
 
 });
@@ -151,7 +151,7 @@ describe('POST /api/rest/v2/guest-carts/{id}/items (Add Item)', function (): voi
             'qty' => 1,
         ]);
 
-        expect($response['status'])->toBe(400);
+        expect($response['status'])->toBe(422);
         expect($response['json'])->toHaveKey('error');
     });
 
@@ -163,7 +163,7 @@ describe('POST /api/rest/v2/guest-carts/{id}/items (Add Item)', function (): voi
             'qty' => 1,
         ]);
 
-        expect($response['status'])->toBe(400);
+        expect($response['status'])->toBe(422);
         expect($response['json']['message'])->toContain('SKU');
     });
 
@@ -322,8 +322,8 @@ describe('PUT /api/rest/v2/guest-carts/{id}/coupon (Apply Coupon)', function ():
             'code' => 'INVALID-COUPON-CODE-12345',
         ]);
 
-        expect($response['status'])->toBe(400);
-        expect($response['json']['error'])->toBe('invalid_coupon');
+        expect($response['status'])->toBe(422);
+        expect($response['json']['message'])->toContain('is not valid');
     });
 
     it('returns 400 when coupon code is missing', function (): void {
@@ -402,4 +402,16 @@ describe('Cart Item Response Structure', function (): void {
         expect($item['rowTotal'])->toBeNumeric();
     });
 
+});
+
+describe('Guest cart order placement errors', function (): void {
+
+    it('refuses an order from an empty cart with a 422', function (): void {
+        $cartId = createGuestCart()['json']['maskedId'];
+
+        $response = apiPost("/api/rest/v2/guest-carts/{$cartId}/place-order", []);
+
+        expect($response['status'])->toBe(422)
+            ->and($response['json']['message'])->toBe('Cart is empty');
+    });
 });
