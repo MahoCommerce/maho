@@ -44,7 +44,7 @@ use Symfony\AI\Platform\TokenUsage\TokenUsageAggregation;
  * `tool_result`, `confirm` (write calls that wait for the administrator), `replace`
  * (the sanitized final text when it differs from the streamed one), `error`, `done`.
  */
-final class ChatService
+final class TurnRunner
 {
     public const USAGE_CONSUMER = Maho_Ai_Model_Conversation::USAGE_CONSUMER;
 

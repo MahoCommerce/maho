@@ -66,7 +66,7 @@ class Maho_Ai_Model_Chat_ToolExecutor implements ToolExecutorInterface
     /**
      * Read-only calls, and the updates that a job approves in advance, run in model order and report `tool_call` and `tool_result`
      * progress. The round stops with {@see Maho_Ai_Model_Chat_ConfirmationRequired} when
-     * another call writes, so the chat service can persist the round and ask.
+     * another call writes, so the turn runner can persist the round and ask.
      */
     #[\Override]
     public function execute(array $toolCalls): \Generator
