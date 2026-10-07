@@ -195,6 +195,49 @@ class Mage_Adminhtml_Model_Config_Data extends \Maho\DataObject
     }
 
     /**
+     * Save one value through the backend model of its field, as save() does for the admin form.
+     * A field without a backend model, or with a file backend model, gets a plain write.
+     * A file backend model keeps a value only when the value comes from an upload.
+     */
+    public function saveValue(string $path, string $value, string $scope = self::SCOPE_DEFAULT, int $scopeId = 0): void
+    {
+        $parts = explode('/', $path, 3);
+        $fieldConfig = count($parts) === 3
+            ? Mage::getSingleton('adminhtml/config')->getSections()->descend("{$parts[0]}/groups/{$parts[1]}/fields/{$parts[2]}")
+            : false;
+        $backendClass = $fieldConfig ? Mage::helper('adminhtml/config')->getBackendModelByFieldConfig($fieldConfig) : null;
+        $dataObject = $backendClass ? Mage::getModel($backendClass) : false;
+        if (!$dataObject instanceof Mage_Core_Model_Config_Data
+            || $dataObject instanceof Mage_Adminhtml_Model_System_Config_Backend_File
+        ) {
+            Mage::getConfig()->saveConfig($path, $value, $scope, $scopeId);
+            return;
+        }
+
+        [, $group, $field] = $parts;
+        $store = $scope === self::SCOPE_STORES ? Mage::app()->getStore($scopeId) : null;
+        $website = match ($scope) {
+            self::SCOPE_WEBSITES => Mage::app()->getWebsite($scopeId),
+            self::SCOPE_STORES => $store->getWebsite(),
+            default => null,
+        };
+
+        $dataObject
+            ->setField($field)
+            ->setGroups([$group => ['fields' => [$field => ['value' => $value]]]])
+            ->setGroupId($group)
+            ->setStoreCode($store?->getCode())
+            ->setWebsiteCode($website?->getCode())
+            ->setScope($scope)
+            ->setScopeId($scopeId)
+            ->setFieldConfig($fieldConfig)
+            ->setFieldsetData([$field => $value])
+            ->setPath($path)
+            ->setValue($value)
+            ->save();
+    }
+
+    /**
      * Load config data for section
      *
      * @return array

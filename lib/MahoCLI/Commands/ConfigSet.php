@@ -64,11 +64,8 @@ class ConfigSet extends BaseMahoCommand
                 $value = Mage::helper('core')->encrypt($value);
             }
 
-            // Get the configuration model
-            $config = Mage::getModel('core/config');
-
-            // Save the configuration value
-            $config->saveConfig($path, $value, $scope, $scopeId);
+            // Save the value through the backend model of its field, as the admin form does
+            Mage::getModel('adminhtml/config_data')->saveValue($path, $value, $scope, $scopeId);
 
             // Clear configuration cache
             Mage::app()->getCache()->clean(['config']);

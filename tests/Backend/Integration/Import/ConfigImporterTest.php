@@ -10,6 +10,10 @@ declare(strict_types=1);
 
 use Maho\Import\Importer\Config;
 use Maho\Import\RowException;
+use MahoCLI\Commands\ConfigSet;
+use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Tester\CommandTester;
 
 uses(Tests\MahoBackendTestCase::class);
 
@@ -103,6 +107,86 @@ it('resolves a store url macro against the web rows of the same file', function 
             ->where('path = ?', 'catalog/frontend/imp_store_url')->where('scope = ?', 'default')->where('scope_id = ?', 0),
     );
     expect($value)->toStartWith('https://imp-cfg.example/shop/');
+});
+
+/**
+ * @return array<string, int> is_visible of the middlename attribute, by entity type code
+ */
+function middlenameVisibility(): array
+{
+    $resource = Mage::getSingleton('core/resource');
+    $read = $resource->getConnection('core_read');
+    return array_map('intval', $read->fetchPairs(
+        $read->select()
+            ->from(['cea' => $resource->getTableName('customer/eav_attribute')], [])
+            ->join(['ea' => $resource->getTableName('eav/attribute')], 'ea.attribute_id = cea.attribute_id', [])
+            ->join(['et' => $resource->getTableName('eav/entity_type')], 'et.entity_type_id = ea.entity_type_id', ['entity_type_code'])
+            ->columns(['is_visible' => 'cea.is_visible'])
+            ->where('ea.attribute_code = ?', 'middlename'),
+    ));
+}
+
+/**
+ * @param array<string, int> $visibility
+ */
+function setMiddlenameVisibility(array $visibility): void
+{
+    $eav = Mage::getSingleton('eav/config');
+    foreach ($visibility as $entityType => $isVisible) {
+        Mage::getSingleton('core/resource')->getConnection('core_write')->update(
+            Mage::getSingleton('core/resource')->getTableName('customer/eav_attribute'),
+            ['is_visible' => $isVisible],
+            ['attribute_id = ?' => (int) $eav->getAttribute($entityType, 'middlename')->getId()],
+        );
+    }
+    $eav->clear();
+}
+
+it('saves a value through the backend model of its field', function (Closure $save): void {
+    $config = Mage::getModel('core/config');
+    $oldValue = Mage::getStoreConfig('customer/address/middlename_show', 0);
+    $oldVisibility = middlenameVisibility();
+    setMiddlenameVisibility(['customer' => 1, 'customer_address' => 1]);
+
+    try {
+        $save('customer/address/middlename_show', '0');
+        expect(middlenameVisibility())->toBe(['customer' => 0, 'customer_address' => 0]);
+    } finally {
+        $config->saveConfig('customer/address/middlename_show', $oldValue, 'default', 0);
+        setMiddlenameVisibility($oldVisibility);
+        Mage::app()->getCache()->cleanType('config');
+    }
+})->with([
+    'import:config' => [function (string $configPath, string $value): void {
+        $path = configCsv([['path', 'value'], [$configPath, $value]]);
+        (new Config())->import($path);
+        unlink($path);
+    }],
+    'config:set' => [function (string $configPath, string $value): void {
+        $command = new ConfigSet('config:set');
+        (new Application())->addCommand($command);
+        $result = (new CommandTester($command))->execute(['path' => $configPath, 'value' => $value, '--scope' => 'default', '--scope-id' => 0]);
+        expect($result)->toBe(Command::SUCCESS);
+    }],
+]);
+
+it('saves the value of a field whose backend model reads only an upload', function (): void {
+    $path = configCsv([['path', 'value'], ['sales/identity/logo', 'default/imp-logo.png']]);
+
+    try {
+        (new Config())->import($path);
+        $read = Mage::getSingleton('core/resource')->getConnection('core_read');
+        $value = $read->fetchOne(
+            $read->select()
+                ->from(Mage::getSingleton('core/resource')->getTableName('core_config_data'), 'value')
+                ->where('path = ?', 'sales/identity/logo')->where('scope = ?', 'default')->where('scope_id = ?', 0),
+        );
+        expect($value)->toBe('default/imp-logo.png');
+    } finally {
+        unlink($path);
+        Mage::getModel('core/config')->deleteConfig('sales/identity/logo', 'default', 0);
+        Mage::app()->getCache()->cleanType('config');
+    }
 });
 
 it('rejects unknown scopes, codes and macros before writing', function (): void {

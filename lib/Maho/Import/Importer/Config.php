@@ -62,12 +62,12 @@ class Config extends AbstractImporter
     protected function write(CsvFile $file, array $rows, array $options, Reporter $reporter): Result
     {
         $result = new Result();
-        $config = Mage::getModel('core/config');
+        $configData = Mage::getModel('adminhtml/config_data');
         $web = array_filter($rows, static fn(array $row): bool => str_starts_with($row['path'], 'web/'));
         $rest = array_diff_key($rows, $web);
         foreach ([$web, $rest] as $batch) {
             foreach ($batch as $row) {
-                $config->saveConfig($row['path'], $this->resolver->expand($row['value']), $row['scope'], $row['scope_id']);
+                $configData->saveValue($row['path'], $this->resolver->expand($row['value']), $row['scope'], $row['scope_id']);
                 $result->updated++;
             }
             if ($batch === $web && $web !== []) {
