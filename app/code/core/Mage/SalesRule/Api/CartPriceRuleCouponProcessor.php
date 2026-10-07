@@ -12,7 +12,6 @@ namespace Mage\SalesRule\Api;
 
 use ApiPlatform\Metadata\Operation;
 use Maho\ApiPlatform\Exception\ValidationException;
-use Maho\ApiPlatform\Security\ApiUser;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
@@ -45,16 +44,16 @@ final class CartPriceRuleCouponProcessor extends \Maho\ApiPlatform\Processor
         $this->assertAllWebsitesAllowed((array) $rule->getWebsiteIds(), $user, 'cart price rule');
 
         return match ($operation->getName()) {
-            'cart_price_rule_coupons_generate' => $this->generate($rule, $this->parseRequestBody($context['request'] ?? null), $user),
-            'cart_price_rule_coupons_mass_delete' => $this->massDelete($rule, $this->parseRequestBody($context['request'] ?? null), $user),
-            default => $this->deleteOne($rule, (int) ($uriVariables['couponId'] ?? 0), $user),
+            'cart_price_rule_coupons_generate' => $this->generate($rule, $this->parseRequestBody($context['request'] ?? null)),
+            'cart_price_rule_coupons_mass_delete' => $this->massDelete($rule, $this->parseRequestBody($context['request'] ?? null)),
+            default => $this->deleteOne($rule, (int) ($uriVariables['couponId'] ?? 0)),
         };
     }
 
     /**
      * @param array<string, mixed> $body
      */
-    private function generate(\Mage_SalesRule_Model_Rule $rule, array $body, ApiUser $user): JsonResponse
+    private function generate(\Mage_SalesRule_Model_Rule $rule, array $body): JsonResponse
     {
         if (CartPriceRuleProvider::couponTypeOf($rule) !== CartPriceRule::COUPON_TYPE_AUTO) {
             throw new ConflictHttpException('Only a rule with couponType "auto" can generate coupons');
@@ -98,7 +97,7 @@ final class CartPriceRuleCouponProcessor extends \Maho\ApiPlatform\Processor
         foreach ($collection as $coupon) {
             $coupons[] = CartPriceRuleCoupon::fromCoupon($coupon)->toArray();
         }
-        $this->logApiActivity('cart_price_rule', 'generate_coupons', null, $rule, $user);
+        $this->logApiActivity('cart_price_rule', 'generate_coupons', null, $rule);
 
         return $this->respondRaw(['generatedCount' => $count, 'coupons' => $coupons], JsonResponse::HTTP_CREATED);
     }
@@ -163,7 +162,7 @@ final class CartPriceRuleCouponProcessor extends \Maho\ApiPlatform\Processor
         ];
     }
 
-    private function deleteOne(\Mage_SalesRule_Model_Rule $rule, int $couponId, ApiUser $user): null
+    private function deleteOne(\Mage_SalesRule_Model_Rule $rule, int $couponId): null
     {
         /** @var \Mage_SalesRule_Model_Coupon $coupon */
         $coupon = \Mage::getModel('salesrule/coupon')->load($couponId);
@@ -176,14 +175,14 @@ final class CartPriceRuleCouponProcessor extends \Maho\ApiPlatform\Processor
 
         $oldData = $coupon->getData();
         $this->safeDelete($coupon, 'delete coupon');
-        $this->logApiActivity('coupon', 'delete', $oldData, null, $user);
+        $this->logApiActivity('coupon', 'delete', $oldData, null);
         return null;
     }
 
     /**
      * @param array<string, mixed> $body
      */
-    private function massDelete(\Mage_SalesRule_Model_Rule $rule, array $body, ApiUser $user): JsonResponse
+    private function massDelete(\Mage_SalesRule_Model_Rule $rule, array $body): JsonResponse
     {
         $ids = $body['ids'] ?? null;
         if (!is_array($ids) || !array_is_list($ids) || $ids === [] || count($ids) > self::MAX_DELETE_IDS) {
@@ -205,7 +204,7 @@ final class CartPriceRuleCouponProcessor extends \Maho\ApiPlatform\Processor
             'coupon_id IN (?)' => array_values(array_unique($couponIds)),
             '(is_primary IS NULL OR is_primary = 0)',
         ]);
-        $this->logApiActivity('cart_price_rule', 'delete_coupons', null, $rule, $user);
+        $this->logApiActivity('cart_price_rule', 'delete_coupons', null, $rule);
 
         return $this->respondRaw(['deletedCount' => (int) $deleted]);
     }

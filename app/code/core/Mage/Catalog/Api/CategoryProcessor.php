@@ -105,7 +105,7 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
 
         $this->safeSave($category, 'create category');
 
-        $this->logApiActivity('catalog/category', 'create', null, $category, $user);
+        $this->logApiActivity('catalog/category', 'create', null, $category);
 
         return $this->refreshDto($category);
     }
@@ -156,7 +156,7 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
         $this->safeSave($category, 'update category');
 
         StoreScopeWrite::restoreInheritedValues($category, $oldData, $inherited);
-        $this->logApiActivity('catalog/category', 'update', $oldData, $category, $user);
+        $this->logApiActivity('catalog/category', 'update', $oldData, $category);
 
         return $this->refreshDto($category);
     }
@@ -181,7 +181,7 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
 
         $this->secureAreaDelete($category, 'delete category');
 
-        $this->logApiActivity('catalog/category', 'delete', $oldData, null, $user);
+        $this->logApiActivity('catalog/category', 'delete', $oldData, null);
 
         return null;
     }

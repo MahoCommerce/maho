@@ -169,7 +169,7 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
 
         $this->updateStockData($product, $data);
         $this->invalidateCache((int) $product->getId());
-        $this->logApiActivity('catalog/product', 'create', null, $product, $user);
+        $this->logApiActivity('catalog/product', 'create', null, $product);
 
         return $this->refreshDto($product);
     }
@@ -244,7 +244,7 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         $this->updateStockData($product, $data);
         StoreScopeWrite::restoreInheritedValues($product, $oldData, $inherited);
         $this->invalidateCache((int) $product->getId());
-        $this->logApiActivity('catalog/product', 'update', $oldData, $product, $user);
+        $this->logApiActivity('catalog/product', 'update', $oldData, $product);
 
         return $this->refreshDto($product);
     }
@@ -374,7 +374,7 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         }
 
         $this->invalidateCache($id);
-        $this->logApiActivity('catalog/product', 'update', $oldData, $product, $user);
+        $this->logApiActivity('catalog/product', 'update', $oldData, $product);
 
         return $this->refreshDto($product);
     }
@@ -395,7 +395,7 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         $this->secureAreaDelete($product, 'delete product');
 
         $this->invalidateCache($id);
-        $this->logApiActivity('catalog/product', 'delete', $oldData, null, $user);
+        $this->logApiActivity('catalog/product', 'delete', $oldData, null);
 
         return null;
     }
