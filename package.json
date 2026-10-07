@@ -10,9 +10,9 @@
     },
     "devDependencies": {
         "@tailwindcss/cli": "^4.3.3",
-        "altcha": "^3.2.3",
+        "altcha": "^3.2.4",
         "chart.js": "^4.5.1",
-        "daisyui": "^5.7.44",
+        "daisyui": "^5.7.47",
         "deep-chat": "^2.5.1",
         "playwright": "^1.63.0",
         "sortablejs": "^1.15.7",
