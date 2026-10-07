@@ -182,7 +182,7 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\CrudProcessor
             $this->safeSave($model, "update {$this->entityLabel}");
         }
 
-        $this->logApiActivity($this->entityType, 'update', $oldData, $model, $user);
+        $this->logApiActivity($this->entityType, 'update', $oldData, $model);
 
         // Not buildResponse(): the afterSave() hook there sends the recipient
         // email, which a status/balance update must never trigger early.

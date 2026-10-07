@@ -59,7 +59,7 @@ final class CategoryImageProcessor extends Processor
             $category->setData('image');
             $this->saveCategory($category, $oldData, 'delete the image of the category');
             $backend->deleteUnusedFile($oldImage);
-            $this->logApiActivity('catalog/category', 'update', $oldData, $category, $user);
+            $this->logApiActivity('catalog/category', 'update', $oldData, $category);
             return null;
         }
 
@@ -69,7 +69,7 @@ final class CategoryImageProcessor extends Processor
             static fn(\Mage_Core_Model_File_Uploader $uploader): ?string => $backend->saveImage($category, $uploader),
         );
         $this->saveCategory($category, $oldData, 'update category');
-        $this->logApiActivity('catalog/category', 'update', $oldData, $category, $user);
+        $this->logApiActivity('catalog/category', 'update', $oldData, $category);
 
         /** @var \Mage_Catalog_Model_Category $fresh */
         $fresh = \Mage::getModel('catalog/category');
