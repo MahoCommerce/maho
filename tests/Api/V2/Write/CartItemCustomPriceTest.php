@@ -135,7 +135,7 @@ describe('customPrice on add-to-cart', function (): void {
             'customPrice' => -5,
         ], $token);
 
-        expect($response['status'])->toBe(400);
+        expect($response['status'])->toBe(422);
     });
 
     it('rejects a non-numeric customPrice', function (): void {
@@ -176,7 +176,7 @@ describe('customPrice on add-to-cart', function (): void {
             'customPrice' => 2.00,
         ], $token);
 
-        expect($repriced['status'])->toBe(400);
+        expect($repriced['status'])->toBe(409);
     });
 
     it('lets a privileged token change the custom price via item update', function (): void {

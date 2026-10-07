@@ -83,11 +83,11 @@ describe('guest cart step-wise checkout setters', function (): void {
         expect($copied['json']['billingAddress']['postcode'])->toBe('90210');
     });
 
-    it('rejects an incomplete address payload with a 400', function (): void {
+    it('rejects an incomplete address payload with a 422', function (): void {
         [$maskedId] = makeGuestSetterCart();
 
-        expect(apiPut("/api/rest/v2/guest-carts/{$maskedId}/shipping-address", [])['status'])->toBe(400);
-        expect(apiPut("/api/rest/v2/guest-carts/{$maskedId}/billing-address", ['city' => 'Los Angeles'])['status'])->toBe(400);
+        expect(apiPut("/api/rest/v2/guest-carts/{$maskedId}/shipping-address", [])['status'])->toBe(422);
+        expect(apiPut("/api/rest/v2/guest-carts/{$maskedId}/billing-address", ['city' => 'Los Angeles'])['status'])->toBe(422);
     });
 
     it('accepts an address without a postcode in a country where the postcode is optional', function (): void {
@@ -99,7 +99,7 @@ describe('guest cart step-wise checkout setters', function (): void {
         expect(apiPut("/api/rest/v2/guest-carts/{$maskedId}/billing-address", $address)['status'])->toBe(200);
 
         $address['countryId'] = 'US';
-        expect(apiPut("/api/rest/v2/guest-carts/{$maskedId}/shipping-address", $address)['status'])->toBe(400);
+        expect(apiPut("/api/rest/v2/guest-carts/{$maskedId}/shipping-address", $address)['status'])->toBe(422);
     });
 
     it('rejects sameAsShipping when the cart has no shipping address', function (): void {
@@ -107,7 +107,7 @@ describe('guest cart step-wise checkout setters', function (): void {
 
         $response = apiPut("/api/rest/v2/guest-carts/{$maskedId}/billing-address", ['sameAsShipping' => true]);
 
-        expect($response['status'])->toBe(400);
+        expect($response['status'])->toBe(409);
     });
 
     it('selects a shipping method', function (): void {
@@ -170,7 +170,7 @@ describe('guest cart step-wise checkout setters', function (): void {
         expect($response['json']['selectedPaymentMethod']['code'])->toBe('cashondelivery');
     });
 
-    it('rejects an unavailable shipping method with a 400', function (): void {
+    it('rejects an unavailable shipping method with a 422', function (): void {
         [$maskedId] = makeGuestSetterCart();
 
         apiPut("/api/rest/v2/guest-carts/{$maskedId}/shipping-address", checkoutSetterAddress());
@@ -180,7 +180,7 @@ describe('guest cart step-wise checkout setters', function (): void {
             'methodCode' => 'notamethod',
         ]);
 
-        expect($response['status'])->toBe(400);
+        expect($response['status'])->toBe(422);
     });
 
     it('rejects a shipping method without codes with a 400', function (): void {
