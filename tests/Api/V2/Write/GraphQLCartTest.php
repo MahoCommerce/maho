@@ -152,7 +152,7 @@ describe('GraphQL Cart - Add To Cart Mutation', function (): void {
         /**
          * Regression: prices field should exist and be accessible (was named 'totals' before).
          * Note: subtotal/grandTotal may be 0 due to known collectTotals() issue in API context
-         * (see CartService::collectAndVerifyTotals WORKAROUND comment).
+         * (see \Mage_Checkout_Service_Cart::collectAndVerifyTotals WORKAROUND comment).
          */
         expect($cart)->toHaveKey('prices');
         $prices = $cart['prices'];

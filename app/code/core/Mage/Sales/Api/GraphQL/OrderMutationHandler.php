@@ -14,7 +14,6 @@ use Mage\Sales\Api\CreditMemo;
 use Mage\Sales\Api\Order;
 use Mage\Sales\Api\OrderCurrency;
 use Mage\Sales\Api\OrderProvider;
-use Mage\Sales\Api\OrderService;
 use Maho\ApiPlatform\Exception\NotFoundException;
 use Maho\ApiPlatform\Exception\ValidationException;
 use Maho\ApiPlatform\Security\AdminAcl;
@@ -30,7 +29,12 @@ class OrderMutationHandler
 {
     use AdminQuoteTrait;
 
-    public function __construct(private OrderService $orderService, private OrderProvider $orderProvider) {}
+    private readonly \Mage_Sales_Service_Order $orderService;
+
+    public function __construct(private OrderProvider $orderProvider)
+    {
+        $this->orderService = \Mage::getService('sales/order');
+    }
 
     /**
      * Handle placeOrder mutation
@@ -236,7 +240,7 @@ class OrderMutationHandler
         }
 
         try {
-            // Refunds run through OrderService so this path and the REST/GraphQL
+            // Refunds run through the order service so this path and the REST/GraphQL
             // CreditMemo resource apply the same money rules and the same lock.
             $creditmemo = $this->orderService->createCreditMemoForOrder(
                 $order,

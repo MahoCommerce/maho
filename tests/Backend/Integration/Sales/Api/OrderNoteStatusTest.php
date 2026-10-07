@@ -7,7 +7,6 @@
 
 declare(strict_types=1);
 
-use Mage\Sales\Api\OrderService;
 
 uses(Tests\MahoBackendTestCase::class);
 
@@ -40,7 +39,7 @@ function orderNoteStatusOrder(): Mage_Sales_Model_Order
 it('rejects a note status that is not assigned to the order state', function (): void {
     $order = orderNoteStatusOrder();
 
-    expect(fn() => (new OrderService())->addOrderNote($order, 'Refund synced', false, false, 'processing'))
+    expect(fn() => \Mage::getService('sales/order')->addOrderNote($order, 'Refund synced', false, false, 'processing'))
         ->toThrow(Mage_Core_Exception::class);
 
     $reloaded = Mage::getModel('sales/order')->load($order->getId());
@@ -51,7 +50,7 @@ it('rejects a note status that is not assigned to the order state', function ():
 it('adds the note when no status is given', function (): void {
     $order = orderNoteStatusOrder();
 
-    (new OrderService())->addOrderNote($order, 'Refund synced');
+    \Mage::getService('sales/order')->addOrderNote($order, 'Refund synced');
 
     $reloaded = Mage::getModel('sales/order')->load($order->getId());
     expect($reloaded->getStatus())->toBe('closed');

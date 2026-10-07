@@ -14,7 +14,7 @@ declare(strict_types=1);
  * Input keys: customer_name, email, order_reference, reason, ip, user_agent, locale,
  * store_id, received_at_microtime (float), customer_id (?int), session_order_id (?int).
  */
-class Maho_Revocation_Model_Service
+class Maho_Revocation_Service_Request
 {
     /**
      * @throws Mage_Core_Exception on validation failure (before any row is written)

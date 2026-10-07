@@ -25,13 +25,13 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 final class CartProcessor extends \Maho\ApiPlatform\Processor
 {
     private CartMapper $cartMapper;
-    private CartService $cartService;
+    private \Mage_Checkout_Service_Cart $cartService;
 
     public function __construct(Security $security)
     {
         parent::__construct($security);
         $this->cartMapper = new CartMapper();
-        $this->cartService = new CartService();
+        $this->cartService = \Mage::getService('checkout/cart');
     }
 
     /**
@@ -107,7 +107,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     private function resolveAndVerify(array $context, array $uriVariables): \Mage_Sales_Model_Quote
     {
         ['quote' => $quote, 'accessedByMaskedId' => $byMasked]
-            = $this->cartService->resolveCartFromRequest($uriVariables, $context);
+            = CartRequest::resolve($uriVariables, $context);
 
         if (!$quote) {
             throw new NotFoundHttpException('Cart not found');
@@ -212,7 +212,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
             $buyOptions['options'] = $args['options'];
         }
         // File-type custom options: the base64 uploads must be forwarded to
-        // CartService::addItem, which injects them into the buy request. Without
+        // \Mage_Checkout_Service_Cart::addItem, which injects them into the buy request. Without
         // this they're dropped and a provided file reads as a missing required
         // option (add-to-cart 400s).
         if (!empty($args['options_files'])) {
@@ -283,7 +283,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     private function resolveCartForItemAdd(array $context, array $uriVariables, bool &$recreated): \Mage_Sales_Model_Quote
     {
         ['quote' => $quote, 'accessedByMaskedId' => $byMasked, 'maskedId' => $maskedId]
-            = $this->cartService->resolveCartFromRequest($uriVariables, $context);
+            = CartRequest::resolve($uriVariables, $context);
 
         if ($quote) {
             $this->cartService->verifyCartAccess(
@@ -458,7 +458,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         if ($focused) {
             $shippingAddress = $quote->getShippingAddress();
             $methods = $shippingAddress->getId()
-                ? CartService::inQuoteStoreScope($quote, fn(): array => $this->cartMapper->getAvailableShippingMethods($shippingAddress))
+                ? \Mage_Checkout_Service_Cart::inQuoteStoreScope($quote, fn(): array => $this->cartMapper->getAvailableShippingMethods($shippingAddress))
                 : [];
             return $this->respondRaw($methods);
         }

@@ -21,12 +21,12 @@ use Symfony\Bundle\SecurityBundle\Security;
  */
 final class OrderProvider extends \Maho\ApiPlatform\Provider
 {
-    private OrderService $orderService;
+    private \Mage_Sales_Service_Order $orderService;
 
     public function __construct(Security $security)
     {
         parent::__construct($security);
-        $this->orderService = new OrderService();
+        $this->orderService = \Mage::getService('sales/order');
     }
 
     /**
@@ -87,7 +87,7 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
                     ->loadByEmail($orderEmail);
 
                 if (!$existingCustomer->getId()) {
-                    $dto->accountToken = AccountTokenService::generate((int) $order->getId(), $orderEmail);
+                    $dto->accountToken = \Mage::helper('sales/accountToken')->generate((int) $order->getId(), $orderEmail);
                 }
             }
 
@@ -136,7 +136,7 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
                     ->loadByEmail($orderEmail);
 
                 if (!$existingCustomer->getId()) {
-                    $dto->accountToken = AccountTokenService::generate((int) $order->getId(), $orderEmail);
+                    $dto->accountToken = \Mage::helper('sales/accountToken')->generate((int) $order->getId(), $orderEmail);
                 }
             }
 
@@ -357,7 +357,7 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
         $dto->shippingDescription = $order->getShippingDescription();
 
         // Map payment method. List paths batch-load payments in
-        // OrderService::paginateAndPreload(); fall back to the lazy per-order
+        // \Mage_Sales_Service_Order::paginateAndPreload(); fall back to the lazy per-order
         // load only for single-order views.
         $payment = $order->getData('_preloaded_payment') ?? $order->getPayment();
         if ($payment) {
@@ -385,7 +385,7 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
             $dto->statusHistory = $this->orderService->getOrderNotes($order, $visibleOnly);
 
             // Map shipments with tracking
-            $dto->shipments = $this->orderService->getOrderShipments($order, $visibleOnly);
+            $dto->shipments = array_map(Shipment::fromModel(...), $this->orderService->getOrderShipments($order, $visibleOnly));
 
             if (!$visibleOnly) {
                 // The statuses the admin comment form offers, which addOrderComment accepts

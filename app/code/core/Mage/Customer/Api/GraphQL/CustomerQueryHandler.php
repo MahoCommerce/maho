@@ -13,7 +13,6 @@ namespace Mage\Customer\Api\GraphQL;
 use Mage\Customer\Api\Address;
 use Mage\Customer\Api\Customer;
 use Mage\Customer\Api\CustomerProvider;
-use Mage\Customer\Api\CustomerService;
 use Maho\ApiPlatform\Exception\NotFoundException;
 use Maho\ApiPlatform\Exception\ValidationException;
 use Maho\ApiPlatform\Security\AdminAcl;
@@ -27,7 +26,12 @@ use Maho\ApiPlatform\Security\AdminAcl;
  */
 class CustomerQueryHandler
 {
-    public function __construct(private CustomerService $customerService, private CustomerProvider $customerProvider) {}
+    private readonly \Mage_Customer_Service_Customer $customerService;
+
+    public function __construct(private CustomerProvider $customerProvider)
+    {
+        $this->customerService = \Mage::getService('customer/customer');
+    }
 
     /**
      * Handle searchCustomers query

@@ -26,13 +26,13 @@ class CartMapper
      */
     public function mapQuoteToCart(\Mage_Sales_Model_Quote $quote, bool $collectTotals = true): Cart
     {
-        return CartService::inQuoteStoreScope($quote, fn(): Cart => $this->buildCartDto($quote, $collectTotals));
+        return \Mage_Checkout_Service_Cart::inQuoteStoreScope($quote, fn(): Cart => $this->buildCartDto($quote, $collectTotals));
     }
 
     private function buildCartDto(\Mage_Sales_Model_Quote $quote, bool $collectTotals): Cart
     {
         if ($collectTotals && !$quote->getTotalsCollectedFlag()) {
-            CartService::collectAndVerifyTotals($quote);
+            \Mage_Checkout_Service_Cart::collectAndVerifyTotals($quote);
         }
 
         $cart = new Cart();
@@ -456,7 +456,7 @@ class CartMapper
             // list never advertises a method the setter or place-order would reject
             $checks = \Mage_Payment_Model_Method_Abstract::checksForCurrentScope();
             foreach ($availableMethods as $method) {
-                if (CartService::isMethodUsableOverApi($method)
+                if (\Mage_Checkout_Service_Cart::isMethodUsableOverApi($method)
                     && $method->isApplicableToQuote($quote, $checks)
                 ) {
                     $methods[] = [

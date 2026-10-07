@@ -23,12 +23,12 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
 {
     use \Maho\ApiPlatform\Trait\OrderItemsTrait;
 
-    private OrderService $orderService;
+    private \Mage_Sales_Service_Order $orderService;
 
     public function __construct(Security $security)
     {
         parent::__construct($security);
-        $this->orderService = new OrderService();
+        $this->orderService = \Mage::getService('sales/order');
     }
 
     #[\Override]
@@ -87,7 +87,7 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
 
         $this->assertStoreAllowed($order->getStoreId(), $this->requireUser(), 'order');
 
-        // Report an unrefundable order before the item input. OrderService
+        // Report an unrefundable order before the item input. The order service
         // checks this again under the lock, where the answer is authoritative.
         if (!$order->canCreditmemo()) {
             throw new BadRequestHttpException('Order cannot be refunded (already fully refunded or not in a refundable state)');

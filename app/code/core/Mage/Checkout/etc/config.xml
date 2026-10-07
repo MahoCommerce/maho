@@ -102,6 +102,11 @@ SPDX-License-Identifier: AFL-3.0
                 <class>Mage_Checkout_Block</class>
             </checkout>
         </blocks>
+        <services>
+            <checkout>
+                <class>Mage_Checkout_Service</class>
+            </checkout>
+        </services>
         <models>
             <checkout>
                 <class>Mage_Checkout_Model</class>

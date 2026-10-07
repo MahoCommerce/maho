@@ -87,7 +87,7 @@ describe('GET /api/rest/v2/orders', function (): void {
             $this->markTestSkipped('No order_id configured in fixtures');
         }
         $incrementId = (string) \Mage::getModel('sales/order')->load($orderId)->getIncrementId();
-        $words = array_fill(0, \Mage\Sales\Api\OrderService::MAX_SEARCH_WORDS, substr($incrementId, -4));
+        $words = array_fill(0, \Mage_Sales_Service_Order::MAX_SEARCH_WORDS, substr($incrementId, -4));
         $words[] = 'zzqx-no-order';
 
         $response = apiGet('/api/rest/v2/orders?itemsPerPage=100&search=' . urlencode(implode(' ', $words)), adminToken());

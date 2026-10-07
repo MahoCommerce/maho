@@ -39,3 +39,9 @@ parameters:
         -
             identifier: method.internalClass
             message: '#^Call to method getObjectName\(\) of internal class Doctrine\\DBAL\\Schema\\Abstract(Optionally)?NamedObject<#'
+
+services:
+    -
+        class: Tests\PHPStan\ServiceTypeExtension
+        tags:
+            - phpstan.broker.dynamicStaticMethodReturnTypeExtension

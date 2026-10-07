@@ -11,7 +11,6 @@ declare(strict_types=1);
 namespace Mage\Sales\Api;
 
 use ApiPlatform\Metadata\Operation;
-use Mage\Checkout\Api\CartService;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -21,16 +20,16 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 final class OrderProcessor extends \Maho\ApiPlatform\Processor
 {
-    private CartService $cartService;
+    private \Mage_Checkout_Service_Cart $cartService;
     private OrderProvider $orderProvider;
-    private OrderService $orderService;
+    private \Mage_Sales_Service_Order $orderService;
 
     public function __construct(Security $security)
     {
         parent::__construct($security);
-        $this->cartService = new CartService();
+        $this->cartService = \Mage::getService('checkout/cart');
         $this->orderProvider = new OrderProvider($security);
-        $this->orderService = new OrderService();
+        $this->orderService = \Mage::getService('sales/order');
     }
 
     /**
@@ -98,7 +97,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
      * Also applies shipping/billing address, customer email, and payment data
      * from the request body, frontend callers send the full checkout state in
      * one shot rather than pre-mutating the cart. paymentData reaches assignData() flat, with
-     * a copy under CartService::PAYMENT_ADDITIONAL_DATA_KEY so no key is lost at save time.
+     * a copy under \Mage_Checkout_Service_Cart::PAYMENT_ADDITIONAL_DATA_KEY so no key is lost at save time.
      */
     private function placeOrder(array $context): Order
     {
@@ -123,7 +122,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         // body id can never place the order of a cart the URI does not name.
         $request = $context['request'] ?? null;
         $maskedId = $request instanceof \Symfony\Component\HttpFoundation\Request
-            ? CartService::maskedIdFromPath($request->getPathInfo())
+            ? \Mage\Checkout\Api\CartRequest::maskedIdFromPath($request->getPathInfo())
             : null;
         if (!$maskedId && is_string($args['maskedId'] ?? null)) {
             $maskedId = $args['maskedId'];
@@ -181,7 +180,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         }
         // Collect once: this prices the applied addresses and shipping method,
         // and gives the payment gate below fresh totals
-        CartService::collectAndVerifyTotals($quote);
+        \Mage_Checkout_Service_Cart::collectAndVerifyTotals($quote);
 
         // Reject a method the client made up: after rates are collected the
         // chosen code must resolve to a real rate, otherwise a caller could
@@ -213,7 +212,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
 
             // Recollect so payment-dependent totals (e.g. payment fees) land on
             // the order; the consumed rates flag keeps the validated rates.
-            CartService::collectAndVerifyTotals($quote);
+            \Mage_Checkout_Service_Cart::collectAndVerifyTotals($quote);
         }
 
         $placeOrder = function () use ($quote, $paymentMethod, $shippingMethod, $guestEmail, $orderNote, $cashTendered, $employeeId): array {
@@ -243,7 +242,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         // even when the caller's X-Store-Code names a different one.
         $result = $isAdminOrder
             ? $placeOrder()
-            : CartService::inQuoteStoreScope($quote, $placeOrder);
+            : \Mage_Checkout_Service_Cart::inQuoteStoreScope($quote, $placeOrder);
 
         $order = $result['order'];
         $accessToken = $result['accessToken'];

@@ -87,7 +87,7 @@ describe('Revocation suppressed-email handling', function () {
             ->setSuppressedReason(Maho_Revocation_Model_Request::SUPPRESSED_REASON_RATE_LIMIT)
             ->save();
 
-        $sent = Mage::getModel('revocation/service')->resendReceipt($request);
+        $sent = Mage::getService('revocation/request')->resendReceipt($request);
         expect($sent)->toBeTrue();
 
         $reloaded = Mage::getModel('revocation/request')->load($request->getId());

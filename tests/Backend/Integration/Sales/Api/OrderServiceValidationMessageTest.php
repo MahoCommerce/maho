@@ -7,15 +7,13 @@
 
 declare(strict_types=1);
 
-use Mage\Sales\Api\OrderService;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 uses(Tests\MahoBackendTestCase::class);
 
 /**
  * placeAdminOrder() throws the exception of a failed check unchanged, so the API returns its status and message.
  */
-describe('OrderService validation messages', function (): void {
+describe('The order service validation messages', function (): void {
 
     $createQuote = function (string $postcode): Mage_Sales_Model_Quote {
         $product = Mage::getResourceModel('catalog/product_collection')
@@ -58,7 +56,7 @@ describe('OrderService validation messages', function (): void {
         $quote = $createQuote('123456789');
 
         try {
-            expect(fn() => new OrderService()->placeAdminOrder($quote))
+            expect(fn() => \Mage::getService('sales/order')->placeAdminOrder($quote))
                 ->toThrow(Mage_Core_Exception::class, 'Please enter a valid postcode for United States');
 
             $reloaded = Mage::getModel('sales/quote')->load($quote->getId());
@@ -68,13 +66,13 @@ describe('OrderService validation messages', function (): void {
         }
     });
 
-    it('throws the BadRequestHttpException of the gift card check unchanged', function () use ($createQuote): void {
+    it('throws the Mage_Core_Exception_InvalidRequest of the gift card check unchanged', function () use ($createQuote): void {
         $quote = $createQuote('90210');
         $quote->setData('giftcard_codes', Mage::helper('core')->jsonEncode(['PEST-MISSING-CARD' => 10.0]));
 
         try {
-            expect(fn() => new OrderService()->placeAdminOrder($quote))
-                ->toThrow(BadRequestHttpException::class, 'Gift card "PEST-MISSING-CARD" is no longer valid');
+            expect(fn() => \Mage::getService('sales/order')->placeAdminOrder($quote))
+                ->toThrow(Mage_Core_Exception_InvalidRequest::class, 'Gift card "PEST-MISSING-CARD" is no longer valid');
         } finally {
             $quote->delete();
         }

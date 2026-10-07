@@ -88,7 +88,7 @@ describe('Wishlist move-to-cart ownership (IDOR)', function (): void {
         ], customerToken());
 
         // 404, not 403: cart ids are enumerable, so a foreign cart is reported
-        // exactly like a missing one (CartService::verifyCartAccess).
+        // exactly like a missing one (\Mage_Checkout_Service_Cart::verifyCartAccess).
         expect($move['status'])->toBeNotFound();
 
         // The victim's cart must remain empty.
