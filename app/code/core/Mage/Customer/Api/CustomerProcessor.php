@@ -444,11 +444,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             'email' => $email,
         ], fn($v) => $v !== null) + $profile;
 
-        try {
-            $customer = $this->customerService->updateCustomer($customer, $data);
-        } catch (\Exception $e) {
-            throw new BadRequestHttpException($e->getMessage());
-        }
+        $customer = $this->customerService->updateCustomer($customer, $data);
 
         return Customer::fromModel($customer);
     }
@@ -649,11 +645,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             throw new AccessDeniedHttpException('Customer not found');
         }
 
-        try {
-            $this->customerService->changePassword($customer, $currentPassword, $newPassword);
-        } catch (\Exception $e) {
-            throw new BadRequestHttpException($e->getMessage());
-        }
+        $this->customerService->changePassword($customer, $currentPassword, $newPassword);
 
         return Customer::fromModel($customer);
     }
@@ -720,11 +712,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             throw new BadRequestHttpException("New password must be at least {$minPasswordLength} characters");
         }
 
-        try {
-            $this->customerService->resetPassword($email, $resetToken, $newPassword);
-        } catch (\Exception $e) {
-            throw new BadRequestHttpException($e->getMessage());
-        }
+        $this->customerService->resetPassword($email, $resetToken, $newPassword);
 
         $dto = new Customer();
         $dto->email = $email;

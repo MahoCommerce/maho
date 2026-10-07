@@ -64,7 +64,7 @@ describe('Admin quote load currency', function (): void {
         StoreContext::setStore(0);
 
         expect(fn() => $this->loader->load((int) $this->quote->getId()))
-            ->toThrow(Mage_Core_Exception_InvalidRequest::class);
+            ->toThrow(Mage_Core_Exception::class);
     });
 
 });

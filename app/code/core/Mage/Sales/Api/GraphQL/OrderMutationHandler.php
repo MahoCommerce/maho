@@ -248,10 +248,10 @@ class OrderMutationHandler
                 $comment,
                 offlineRefund: false,
             );
+        } catch (\Mage_Core_Exception_Conflict $e) {
+            throw ValidationException::invalidValue('orderId', $e->getMessage(), $e);
         } catch (\Mage_Core_Exception $e) {
             throw ValidationException::invalidValue('return', $e->getMessage(), $e);
-        } catch (\RuntimeException $e) {
-            throw ValidationException::invalidValue('orderId', 'a refund is already in progress for this order', $e);
         } catch (\Exception $e) {
             \Mage::logException($e);
             throw ValidationException::invalidValue('return', 'failed to process the return', $e);

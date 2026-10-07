@@ -255,11 +255,15 @@ class My_Module_Checkout_CartController extends Mage_Checkout_CartController { /
   `getById()`, `save()`, `delete()`, plus one verb for each other action (`refresh()`). A service
   takes and returns models, never a request or a session: the transport writes its input into the
   model through the typed setters, and the service checks and saves it. It never throws an HTTP
-  exception. For a client fault it throws `Mage_Core_Exception_NoSuchEntity` (404),
-  `Mage_Core_Exception_InvalidRequest` (400, with an optional error code such as `invalid_coupon`),
-  `Mage_Core_Exception_Input` with one error for each field (422 with `details.errors`) or a plain
-  `Mage_Core_Exception` (422). A `\RuntimeException` is a server fault, so a transport never turns it
-  into a validation error. `ApiExceptionListener` maps these for REST and `MageExceptionNormalizer`
+  exception. Pick the exception by what went wrong (RFC 9110):
+  `Mage_Core_Exception_NoSuchEntity` (404) when the record that the URL names does not exist,
+  `Mage_Core_Exception_Conflict` (409) when the current state of the record does not allow the action
+  (an order that is already canceled, an email that another customer uses, a lock that another request
+  holds), `Mage_Core_Exception_Input` (422 with `details.errors`) for errors of named fields, and a
+  plain `Mage_Core_Exception` (422) for any other content that the service cannot accept, such as an
+  unknown SKU in the body. 400 is for a malformed request only, which the transport detects. A
+  `\RuntimeException` is a server fault (500), so a transport never turns it into a client error, and
+  a transport never catches a `Mage_Core_Exception` only to throw it again with another status. `ApiExceptionListener` maps these for REST and `MageExceptionNormalizer`
   for GraphQL. Code that reads the request (a path, a body, the API Platform context) stays in the
   transport, as `Mage\Checkout\Api\CartRequest` does. `tests/Backend/Unit/Maho/ServiceLayoutTest.php`
   enforces the layout

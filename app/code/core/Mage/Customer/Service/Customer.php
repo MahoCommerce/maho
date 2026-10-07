@@ -258,7 +258,7 @@ class Mage_Customer_Service_Customer
     ): \Mage_Customer_Model_Customer {
         // Check if email already exists
         if ($this->getCustomerByEmail($email)) {
-            throw new \Mage_Core_Exception_InvalidRequest('A customer with this email already exists.');
+            throw new \Mage_Core_Exception_Conflict('A customer with this email already exists.');
         }
 
         $customer = \Mage::getModel('customer/customer');
@@ -279,7 +279,7 @@ class Mage_Customer_Service_Customer
             // constraint. Re-check and surface the same clean error rather than a
             // raw DB exception (500).
             if ($this->getCustomerByEmail($email)) {
-                throw new \Mage_Core_Exception_InvalidRequest('A customer with this email already exists.');
+                throw new \Mage_Core_Exception_Conflict('A customer with this email already exists.');
             }
             throw $e;
         }
@@ -306,7 +306,7 @@ class Mage_Customer_Service_Customer
             // Check if email is already used by another customer
             $existing = $this->getCustomerByEmail($data['email']);
             if ($existing && $existing->getId() !== $customer->getId()) {
-                throw new \Mage_Core_Exception_InvalidRequest('This email is already in use.');
+                throw new \Mage_Core_Exception_Conflict('This email is already in use.');
             }
             $customer->setEmail($data['email']);
         }
@@ -338,7 +338,7 @@ class Mage_Customer_Service_Customer
     ): bool {
         // Validate current password
         if (!$customer->validatePassword($currentPassword)) {
-            throw new \Mage_Core_Exception_InvalidRequest('Current password is incorrect.');
+            throw new \Mage_Core_Exception('Current password is incorrect.');
         }
 
         $customer->setPassword($newPassword);
@@ -380,19 +380,19 @@ class Mage_Customer_Service_Customer
         $customer = $this->getCustomerByEmail($email);
 
         if (!$customer) {
-            throw new \Mage_Core_Exception_InvalidRequest('Invalid email or token.');
+            throw new \Mage_Core_Exception('Invalid email or token.');
         }
 
         // Validate reset token (use hash_equals to prevent timing attacks)
         $storedToken = $customer->getRpToken();
         if (!$storedToken || !hash_equals($storedToken, $token)) {
-            throw new \Mage_Core_Exception_InvalidRequest('Invalid or expired reset token.');
+            throw new \Mage_Core_Exception('Invalid or expired reset token.');
         }
 
         if ($customer->isResetPasswordLinkTokenExpired()) {
             // Use the same message as an invalid token so the response does not
             // confirm to a caller that a supplied token was correct-but-expired.
-            throw new \Mage_Core_Exception_InvalidRequest('Invalid or expired reset token.');
+            throw new \Mage_Core_Exception('Invalid or expired reset token.');
         }
 
         $customer->setPassword($newPassword);

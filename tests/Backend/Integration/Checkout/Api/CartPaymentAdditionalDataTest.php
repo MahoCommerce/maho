@@ -112,9 +112,9 @@ describe('set-payment-method additionalData', function (): void {
 
             // The message distinguishes the importData() checks from the
             // earlier assertPaymentMethodAvailable() gate, which would also
-            // throw Mage_Core_Exception_InvalidRequest if checkmo were simply inactive.
+            // throw Mage_Core_Exception if checkmo were simply inactive.
             expect(fn() => \Mage::getService('checkout/cart')->setPaymentMethod($loaded, 'checkmo'))
-                ->toThrow(Mage_Core_Exception_InvalidRequest::class, 'Payment method is not available: ');
+                ->toThrow(Mage_Core_Exception::class, 'Payment method is not available: ');
         } finally {
             $quote->delete();
         }

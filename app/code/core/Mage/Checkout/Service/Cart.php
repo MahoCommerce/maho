@@ -50,7 +50,7 @@ class Mage_Checkout_Service_Cart
                 $store = null;
             }
             if (!$store || !$store->getId() || !$store->getIsActive()) {
-                throw new \Mage_Core_Exception_InvalidRequest("Invalid store: {$storeId}");
+                throw new \Mage_Core_Exception("Invalid store: {$storeId}");
             }
             $quote->setStoreId((int) $store->getId());
         } else {
@@ -190,20 +190,20 @@ class Mage_Checkout_Service_Cart
     {
         // Validate quantity
         if ($qty <= 0) {
-            throw new \Mage_Core_Exception_InvalidRequest('Quantity must be greater than zero');
+            throw new \Mage_Core_Exception('Quantity must be greater than zero');
         }
         if ($qty > self::MAX_ITEM_QTY) {
-            throw new \Mage_Core_Exception_InvalidRequest('Quantity cannot exceed 10,000');
+            throw new \Mage_Core_Exception('Quantity cannot exceed 10,000');
         }
         if ($customPrice !== null && $customPrice < 0) {
-            throw new \Mage_Core_Exception_InvalidRequest('Custom price cannot be negative');
+            throw new \Mage_Core_Exception('Custom price cannot be negative');
         }
 
         // First find product ID by SKU
         $productId = \Mage::getResourceModel('catalog/product')->getIdBySku($sku);
 
         if (!$productId) {
-            throw new \Mage_Core_Exception_InvalidRequest("Product with SKU '{$sku}' not found");
+            throw new \Mage_Core_Exception("Product with SKU '{$sku}' not found");
         }
 
         $this->logDebug("Adding product {$sku} (ID: {$productId}) to quote {$quote->getId()}, quote store_id: {$quote->getStoreId()}");
@@ -214,13 +214,13 @@ class Mage_Checkout_Service_Cart
             ->load($productId);
 
         if (!$product->getId()) {
-            throw new \Mage_Core_Exception_InvalidRequest("Product with SKU '{$sku}' not found");
+            throw new \Mage_Core_Exception("Product with SKU '{$sku}' not found");
         }
 
         // Status gate, addProduct does not check this itself, so without an
         // explicit guard a disabled SKU is addable through the public API.
         if ((int) $product->getStatus() !== \Mage_Catalog_Model_Product_Status::STATUS_ENABLED) {
-            throw new \Mage_Core_Exception_InvalidRequest("Product '{$sku}' is not available");
+            throw new \Mage_Core_Exception("Product '{$sku}' is not available");
         }
 
         // Visibility gate: refuse 'not_visible_individually' simples that
@@ -231,7 +231,7 @@ class Mage_Checkout_Service_Cart
         if ($visibility === \Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE
             && $product->getTypeId() !== \Mage_Catalog_Model_Product_Type::TYPE_SIMPLE
         ) {
-            throw new \Mage_Core_Exception_InvalidRequest("Product '{$sku}' is not available");
+            throw new \Mage_Core_Exception("Product '{$sku}' is not available");
         }
 
         // Check if this simple product is a child of a configurable
@@ -300,7 +300,7 @@ class Mage_Checkout_Service_Cart
                     // product actually added to the cart is the configurable parent.
                     // A disabled parent with an enabled child must not be addable.
                     if ((int) $configurableProduct->getStatus() !== \Mage_Catalog_Model_Product_Status::STATUS_ENABLED) {
-                        throw new \Mage_Core_Exception_InvalidRequest("Product '{$sku}' is not available");
+                        throw new \Mage_Core_Exception("Product '{$sku}' is not available");
                     }
 
                     // Get the super_attribute values for this simple product
@@ -327,7 +327,7 @@ class Mage_Checkout_Service_Cart
         if ($product->getTypeId() === \Mage_Catalog_Model_Product_Type::TYPE_SIMPLE
             && (int) $product->getVisibility() === \Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE
         ) {
-            throw new \Mage_Core_Exception_InvalidRequest("Product '{$sku}' is not available");
+            throw new \Mage_Core_Exception("Product '{$sku}' is not available");
         }
 
         $this->logDebug("Product loaded: ID={$product->getId()}, StoreId={$product->getStoreId()}, Price={$product->getPrice()}, FinalPrice={$product->getFinalPrice()}");
@@ -365,10 +365,10 @@ class Mage_Checkout_Service_Cart
                 // Verify this option ID belongs to a file-type option on this product
                 $productOption = $product->getOptionById((string) $optionId);
                 if (!$productOption || $productOption->getType() !== \Mage_Catalog_Model_Product_Option::OPTION_TYPE_FILE) {
-                    throw new \Mage_Core_Exception_InvalidRequest("Option ID {$optionId} is not a valid file-type option for this product");
+                    throw new \Mage_Core_Exception("Option ID {$optionId} is not a valid file-type option for this product");
                 }
                 if (!is_array($fileData) || empty($fileData['base64_encoded_data']) || empty($fileData['name'])) {
-                    throw new \Mage_Core_Exception_InvalidRequest("File option {$optionId} requires 'name' and 'base64_encoded_data'");
+                    throw new \Mage_Core_Exception("File option {$optionId} requires 'name' and 'base64_encoded_data'");
                 }
                 $optionsFiles[$optionId] = $fileData;
             }
@@ -382,7 +382,7 @@ class Mage_Checkout_Service_Cart
             // addProduct returns a string error message on failure
             if (is_string($result)) {
                 $this->logDebug("Failed to add product: {$result}");
-                throw new \Mage_Core_Exception_InvalidRequest("Failed to add product: {$result}");
+                throw new \Mage_Core_Exception("Failed to add product: {$result}");
             }
 
             if ($customPrice !== null) {
@@ -391,7 +391,7 @@ class Mage_Checkout_Service_Cart
                 // (compared at the column's DECIMAL(12,4) scale, so a re-add of the same value passes)
                 $existingOverride = $result->getOriginalCustomPrice();
                 if ($result->getId() && ($existingOverride === null || round((float) $existingOverride, 4) !== round($customPrice, 4))) {
-                    throw new \Mage_Core_Exception_InvalidRequest('customPrice would reprice units already in the cart; update the existing item instead');
+                    throw new \Mage_Core_Exception_Conflict('customPrice would reprice units already in the cart; update the existing item instead');
                 }
                 $result->setCustomPrice($customPrice);
                 $result->setOriginalCustomPrice($customPrice);
@@ -414,7 +414,7 @@ class Mage_Checkout_Service_Cart
     public function updateItem(\Mage_Sales_Model_Quote $quote, int $itemId, ?float $qty, ?float $customPrice = null): \Mage_Sales_Model_Quote
     {
         if ($customPrice !== null && $customPrice < 0) {
-            throw new \Mage_Core_Exception_InvalidRequest('Custom price cannot be negative');
+            throw new \Mage_Core_Exception('Custom price cannot be negative');
         }
 
         $item = $quote->getItemById($itemId);
@@ -427,10 +427,10 @@ class Mage_Checkout_Service_Cart
 
         // Validate quantity
         if ($qty <= 0) {
-            throw new \Mage_Core_Exception_InvalidRequest('Quantity must be greater than zero');
+            throw new \Mage_Core_Exception('Quantity must be greater than zero');
         }
         if ($qty > self::MAX_ITEM_QTY) {
-            throw new \Mage_Core_Exception_InvalidRequest('Quantity cannot exceed 10,000');
+            throw new \Mage_Core_Exception('Quantity cannot exceed 10,000');
         }
 
         return self::inQuoteStoreScope($quote, function () use ($quote, $item, $qty, $customPrice): \Mage_Sales_Model_Quote {
@@ -480,7 +480,7 @@ class Mage_Checkout_Service_Cart
         /** @var \Mage_SalesRule_Model_Coupon $coupon */
         $coupon = \Mage::getModel('salesrule/coupon')->load($couponCode, 'code');
         if (!$coupon->getId()) {
-            throw new \Mage_Core_Exception_InvalidRequest("Coupon code '{$couponCode}' is not valid", 'invalid_coupon');
+            throw new \Mage_Core_Exception("Coupon code '{$couponCode}' is not valid");
         }
 
         $quote->setCouponCode($couponCode);
@@ -492,7 +492,7 @@ class Mage_Checkout_Service_Cart
             // (inactive/expired/exhausted/wrong website), so confirm the rule id
             // landed on a quote address before persisting anything
             if ($quote->getCouponCode() !== $couponCode || !$this->isCouponRuleApplied($quote, (int) $coupon->getRuleId())) {
-                throw new \Mage_Core_Exception_InvalidRequest("Coupon code '{$couponCode}' could not be applied", 'invalid_coupon');
+                throw new \Mage_Core_Exception("Coupon code '{$couponCode}' could not be applied");
             }
 
             $quote->save();
@@ -537,18 +537,18 @@ class Mage_Checkout_Service_Cart
     /**
      * Apply gift card to cart
      *
-     * @throws \Mage_Core_Exception_InvalidRequest
+     * @throws \Mage_Core_Exception
      */
     public function applyGiftcard(\Mage_Sales_Model_Quote $quote, string $giftcardCode, ?float $amount = null): \Mage_Sales_Model_Quote
     {
         if (!$giftcardCode) {
-            throw new \Mage_Core_Exception_InvalidRequest('Gift card code is required');
+            throw new \Mage_Core_Exception('Gift card code is required');
         }
 
         // Check if cart has gift card products
         foreach ($quote->getAllItems() as $item) {
             if ($item->getProductType() === 'giftcard') {
-                throw new \Mage_Core_Exception_InvalidRequest('Gift cards cannot be used to purchase gift card products');
+                throw new \Mage_Core_Exception('Gift cards cannot be used to purchase gift card products');
             }
         }
 
@@ -556,26 +556,26 @@ class Mage_Checkout_Service_Cart
         $giftcard = \Mage::getModel('giftcard/giftcard')->loadByCode($giftcardCode);
 
         if (!$giftcard->getId()) {
-            throw new \Mage_Core_Exception_InvalidRequest('Gift card "' . $giftcardCode . '" is not valid');
+            throw new \Mage_Core_Exception('Gift card "' . $giftcardCode . '" is not valid');
         }
 
         if (!$giftcard->isValid()) {
             $status = $giftcard->getStatus();
             if ($status === 'pending') {
-                throw new \Mage_Core_Exception_InvalidRequest('Gift card "' . $giftcardCode . '" is pending activation');
+                throw new \Mage_Core_Exception('Gift card "' . $giftcardCode . '" is pending activation');
             }
             if ($status === 'expired') {
-                throw new \Mage_Core_Exception_InvalidRequest('Gift card "' . $giftcardCode . '" has expired');
+                throw new \Mage_Core_Exception('Gift card "' . $giftcardCode . '" has expired');
             }
             if ($status === 'used') {
-                throw new \Mage_Core_Exception_InvalidRequest('Gift card "' . $giftcardCode . '" has been fully used');
+                throw new \Mage_Core_Exception('Gift card "' . $giftcardCode . '" has been fully used');
             }
-            throw new \Mage_Core_Exception_InvalidRequest('Gift card "' . $giftcardCode . '" is not active');
+            throw new \Mage_Core_Exception('Gift card "' . $giftcardCode . '" is not active');
         }
 
         // Gift cards are scoped to the website that issued them
         if (!$giftcard->isValidForWebsite((int) $quote->getStore()->getWebsiteId())) {
-            throw new \Mage_Core_Exception_InvalidRequest('Gift card "' . $giftcardCode . '" is not valid for this store');
+            throw new \Mage_Core_Exception('Gift card "' . $giftcardCode . '" is not valid for this store');
         }
 
         // Get currently applied codes
@@ -584,7 +584,7 @@ class Mage_Checkout_Service_Cart
 
         // Check if already applied
         if (isset($appliedCodes[$giftcardCode])) {
-            throw new \Mage_Core_Exception_InvalidRequest('Gift card "' . $giftcardCode . '" is already applied');
+            throw new \Mage_Core_Exception_Conflict('Gift card "' . $giftcardCode . '" is already applied');
         }
 
         // giftcard_codes is a base-currency map: convert the requested amount back to base
@@ -611,7 +611,7 @@ class Mage_Checkout_Service_Cart
      * order at its original (now stale) balance and the store would eat the
      * difference.
      *
-     * @throws \Mage_Core_Exception_InvalidRequest when an applied card is no longer redeemable
+     * @throws \Mage_Core_Exception when an applied card is no longer redeemable
      */
     public function revalidateGiftcards(\Mage_Sales_Model_Quote $quote): \Mage_Sales_Model_Quote
     {
@@ -629,12 +629,12 @@ class Mage_Checkout_Service_Cart
         foreach ($applied as $code => $snapshotBalance) {
             $card = \Mage::getModel('giftcard/giftcard')->loadByCode((string) $code);
             if (!$card->getId() || !$card->isValidForWebsite($websiteId)) {
-                throw new \Mage_Core_Exception_InvalidRequest('Gift card "' . $code . '" is no longer valid');
+                throw new \Mage_Core_Exception('Gift card "' . $code . '" is no longer valid');
             }
 
             $live = (float) $card->getBalance($baseCurrency);
             if ($live <= 0) {
-                throw new \Mage_Core_Exception_InvalidRequest('Gift card "' . $code . '" has no remaining balance');
+                throw new \Mage_Core_Exception('Gift card "' . $code . '" has no remaining balance');
             }
 
             // Cap the applied amount at the live balance
@@ -655,12 +655,12 @@ class Mage_Checkout_Service_Cart
     /**
      * Remove gift card from cart
      *
-     * @throws \Mage_Core_Exception_InvalidRequest
+     * @throws \Mage_Core_Exception
      */
     public function removeGiftcard(\Mage_Sales_Model_Quote $quote, string $giftcardCode): \Mage_Sales_Model_Quote
     {
         if (!$giftcardCode) {
-            throw new \Mage_Core_Exception_InvalidRequest('Gift card code is required');
+            throw new \Mage_Core_Exception('Gift card code is required');
         }
 
         // Get currently applied codes
@@ -669,7 +669,7 @@ class Mage_Checkout_Service_Cart
 
         // Check if gift card is applied
         if (!isset($appliedCodes[$giftcardCode])) {
-            throw new \Mage_Core_Exception_InvalidRequest('Gift card "' . $giftcardCode . '" is not applied to this cart');
+            throw new \Mage_Core_Exception_NoSuchEntity('Gift card "' . $giftcardCode . '" is not applied to this cart');
         }
 
         // Remove the code
@@ -698,7 +698,7 @@ class Mage_Checkout_Service_Cart
      * gift_message_id is pointed at it. Requires the GiftMessage module and the
      * relevant store-config toggle to be enabled.
      *
-     * @throws \Mage_Core_Exception_InvalidRequest when gift messages are disabled for the target
+     * @throws \Mage_Core_Exception when gift messages are disabled for the target
      */
     public function setGiftMessage(
         \Mage_Sales_Model_Quote $quote,
@@ -708,14 +708,14 @@ class Mage_Checkout_Service_Cart
         string $message,
     ): \Mage_Sales_Model_Quote {
         if (!\Mage::helper('core')->isModuleEnabled('Mage_GiftMessage')) {
-            throw new \Mage_Core_Exception_InvalidRequest('Gift messages are not available');
+            throw new \Mage_Core_Exception('Gift messages are not available');
         }
 
         $entity = $this->resolveGiftMessageEntity($quote, $itemId);
         $helper = \Mage::helper('giftmessage/message');
         $type = $itemId === null ? 'quote' : 'item';
         if (!$helper->isMessagesAvailable($type, $entity, $quote->getStoreId())) {
-            throw new \Mage_Core_Exception_InvalidRequest('Gift messages are not available for this ' . ($itemId === null ? 'cart' : 'item'));
+            throw new \Mage_Core_Exception('Gift messages are not available for this ' . ($itemId === null ? 'cart' : 'item'));
         }
 
         if (trim($message) === '') {
@@ -780,7 +780,7 @@ class Mage_Checkout_Service_Cart
     {
         $errors = \Mage::getModel('sales/quote_address')->addData($addressData)->validate();
         if ($errors !== true) {
-            throw new \Mage_Core_Exception_InvalidRequest(implode(' ', $errors));
+            throw new \Mage_Core_Exception(implode(' ', $errors));
         }
     }
 
@@ -871,7 +871,7 @@ class Mage_Checkout_Service_Cart
         if ($sameAsShipping) {
             $shippingAddress = $quote->getShippingAddress();
             if (!$shippingAddress->getCountryId()) {
-                throw new \Mage_Core_Exception_InvalidRequest('Cart has no shipping address to copy');
+                throw new \Mage_Core_Exception_Conflict('Cart has no shipping address to copy');
             }
             $addressData = StoreDefaults::extractAddressFields($shippingAddress);
         }
@@ -901,7 +901,7 @@ class Mage_Checkout_Service_Cart
                 $address->collectShippingRates();
                 $rate = $address->getShippingRateByCode($shippingMethod);
                 if (!$rate || $rate->getErrorMessage()) {
-                    throw new \Mage_Core_Exception_InvalidRequest('Shipping method is not available for this address');
+                    throw new \Mage_Core_Exception('Shipping method is not available for this address');
                 }
             }
 
@@ -945,7 +945,7 @@ class Mage_Checkout_Service_Cart
         try {
             $quote->getPayment()->importData($paymentData);
         } catch (\Mage_Core_Exception $e) {
-            throw new \Mage_Core_Exception_InvalidRequest('Payment method is not available: ' . $e->getMessage());
+            throw new \Mage_Core_Exception('Payment method is not available: ' . $e->getMessage());
         }
         self::backupPaymentAdditionalData($quote->getPayment(), $paymentData);
     }
@@ -1010,12 +1010,12 @@ class Mage_Checkout_Service_Cart
         $model = \Mage::helper('payment')->getPaymentMethods($quote->getStoreId())[$methodCode]['model'] ?? null;
         $method = $model ? \Mage::getModel($model) : null;
         if (!$method instanceof \Mage_Payment_Model_Method_Abstract || !self::isMethodUsableOverApi($method)) {
-            throw new \Mage_Core_Exception_InvalidRequest('Payment method is not available for this cart');
+            throw new \Mage_Core_Exception('Payment method is not available for this cart');
         }
 
         $method->setStore($quote->getStoreId());
         if (!$method->isAvailable($quote)) {
-            throw new \Mage_Core_Exception_InvalidRequest('Payment method is not available for this cart');
+            throw new \Mage_Core_Exception('Payment method is not available for this cart');
         }
     }
 
