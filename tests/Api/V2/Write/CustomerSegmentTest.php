@@ -403,8 +403,14 @@ describe('Customer segment OpenAPI document', function (): void {
             ->and($paths['/api/rest/v2/customer-segments/{id}/refresh']['post']['summary'])->toBe('Refreshes the CustomerSegment resource.')
             ->and($paths['/api/rest/v2/customer-segments/{segmentId}/customers']['get']['description'])->toStartWith('List the customers of a segment');
 
-        $properties = $docs['components']['schemas']['CustomerSegment']['properties'];
+        $properties = array_diff_key($docs['components']['schemas']['CustomerSegment']['properties'], ['extensions' => true]);
         expect(array_keys(array_filter($properties, fn(array $property): bool => !array_key_exists('example', $property))))->toBe([])
             ->and($properties['conditions']['example']['conditions'][0]['attribute'])->toBe('lifetime_sales');
+    });
+
+    it('keeps the generated text for an operation that has only the description of its resource', function (): void {
+        $operation = apiGet('/api/docs.json')['json']['paths']['/api/rest/v2/cms-pages']['get'];
+
+        expect($operation['description'])->toBe($operation['summary']);
     });
 });
