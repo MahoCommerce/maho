@@ -14,6 +14,7 @@ use Maho\ApiPlatform\CrudProcessor;
 use Maho\ApiPlatform\CrudResource;
 use Maho\ApiPlatform\Security\ApiUser;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 final class TaxRateProcessor extends CrudProcessor
 {
@@ -26,18 +27,18 @@ final class TaxRateProcessor extends CrudProcessor
         // value arrives as null and leaves the existing one untouched.
         if ($isNew) {
             if (trim((string) $data->code) === '') {
-                throw new BadRequestHttpException('Tax rate code is required.');
+                throw new UnprocessableEntityHttpException('Tax rate code is required.');
             }
             if (trim((string) $data->taxCountryId) === '') {
-                throw new BadRequestHttpException('Tax country is required.');
+                throw new UnprocessableEntityHttpException('Tax country is required.');
             }
             if ($data->rate === null) {
-                throw new BadRequestHttpException('Rate is required.');
+                throw new UnprocessableEntityHttpException('Rate is required.');
             }
         }
 
         if ($data->rate !== null && $data->rate < 0) {
-            throw new BadRequestHttpException('Rate must be a number greater than or equal to zero.');
+            throw new UnprocessableEntityHttpException('Rate must be a number greater than or equal to zero.');
         }
     }
 
@@ -79,7 +80,7 @@ final class TaxRateProcessor extends CrudProcessor
             }
             $storeId = (int) $entry['storeId'];
             if (!isset($stores[$storeId])) {
-                throw new BadRequestHttpException("Unknown store ID: {$storeId}");
+                throw new UnprocessableEntityHttpException("Unknown store ID: {$storeId}");
             }
             $normalized[$storeId] = (string) $entry['title'];
         }

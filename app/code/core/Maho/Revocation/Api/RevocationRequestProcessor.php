@@ -99,11 +99,7 @@ final class RevocationRequestProcessor extends Processor
             'session_order_id' => (int) $order->getId(),
         ]);
 
-        try {
-            $model = \Mage::getService('revocation/request')->submit($input);
-        } catch (\Mage_Core_Exception $e) {
-            throw new UnprocessableEntityHttpException($e->getMessage());
-        }
+        $model = \Mage::getService('revocation/request')->submit($input);
 
         return RevocationRequest::fromModel($model);
     }
@@ -121,7 +117,7 @@ final class RevocationRequestProcessor extends Processor
         } elseif ($orderReference !== null && trim($orderReference) !== '') {
             $order->loadByIncrementId(trim($orderReference));
         } else {
-            throw new BadRequestHttpException('An order reference is required');
+            throw new UnprocessableEntityHttpException('An order reference is required');
         }
 
         if (!$order->getId() || (int) $order->getCustomerId() !== $customerId) {
@@ -141,11 +137,7 @@ final class RevocationRequestProcessor extends Processor
         $dto = $data instanceof RevocationRequest ? $data : null;
 
         if ($dto?->processedStatus !== null && $dto->processedStatus !== '') {
-            try {
-                \Mage::getService('revocation/request')->applyProcessedStatus($model, $dto->processedStatus);
-            } catch (\Mage_Core_Exception $e) {
-                throw new UnprocessableEntityHttpException($e->getMessage());
-            }
+            \Mage::getService('revocation/request')->applyProcessedStatus($model, $dto->processedStatus);
         }
 
         if ($dto?->adminNote !== null) {

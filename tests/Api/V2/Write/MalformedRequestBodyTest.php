@@ -68,8 +68,8 @@ describe('Malformed JSON request bodies', function (): void {
     it('still returns the domain validation error for valid JSON with an invalid value', function (): void {
         $response = apiPost('/api/rest/v2/newsletter/subscribe', ['email' => 'not-an-email']);
 
-        expect($response['status'])->toBe(400);
-        expect($response['json']['error'])->toBe('bad_request');
+        expect($response['status'])->toBe(422);
+        expect($response['json']['error'])->toBe('unprocessable_entity');
         expect($response['json']['message'])->toBe('Invalid email address');
     });
 });

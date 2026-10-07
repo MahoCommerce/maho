@@ -13,6 +13,7 @@ namespace Maho\ApiPlatform\Trait;
 use Maho\ApiPlatform\Security\ApiUser;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
  * Store access helpers shared by content processors (CMS pages, blocks, blog posts).
@@ -68,7 +69,7 @@ trait StoreAccessTrait
                 /** @var \Mage_Core_Model_Store $store */
                 $store = \Mage::app()->getStore($storeCode);
             } catch (\Mage_Core_Model_Store_Exception) {
-                throw new BadRequestHttpException("Unknown store: {$storeCode}");
+                throw new UnprocessableEntityHttpException("Unknown store: {$storeCode}");
             }
             $storeId = (int) $store->getId();
 

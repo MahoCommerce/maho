@@ -338,14 +338,14 @@ describe('CMS Page layout and meta fields (REST)', function (): void {
                 . '<block type="core/template" template="../../../../app/etc/local.xml"/>'
                 . '</reference>',
         ], $token);
-        expect($injection['status'])->toBeIn([400, 422]);
+        expect($injection['status'])->toBe(422);
 
         $malformed = apiPost('/api/rest/v2/cms-pages', [
             'identifier' => 'test-pest-layout-malformed',
             'title' => 'Layout Malformed',
             'customLayoutUpdateXml' => '<reference name="content"><block type="core/template">',
         ], $token);
-        expect($malformed['status'])->toBeIn([400, 422]);
+        expect($malformed['status'])->toBe(422);
     });
 
 });

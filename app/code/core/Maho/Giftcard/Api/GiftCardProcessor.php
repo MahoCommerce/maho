@@ -17,6 +17,7 @@ use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 final class GiftCardProcessor extends \Maho\ApiPlatform\CrudProcessor
 {
@@ -110,7 +111,7 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\CrudProcessor
     private function resolveWebsiteIds(?array $websiteIds): array
     {
         if ($websiteIds === []) {
-            throw new BadRequestHttpException('A gift card must be associated with at least one website');
+            throw new UnprocessableEntityHttpException('A gift card must be associated with at least one website');
         }
         if ($websiteIds === null) {
             return [(int) StoreContext::getStore()->getWebsiteId()];
@@ -126,19 +127,19 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\CrudProcessor
     {
         // id 0 loads the admin website, which no storefront can redeem on
         if ($websiteId <= 0) {
-            throw new BadRequestHttpException("Unknown website id {$websiteId}");
+            throw new UnprocessableEntityHttpException("Unknown website id {$websiteId}");
         }
         try {
             \Mage::app()->getWebsite($websiteId);
         } catch (\Throwable) {
-            throw new BadRequestHttpException("Unknown website id {$websiteId}");
+            throw new UnprocessableEntityHttpException("Unknown website id {$websiteId}");
         }
     }
 
     private function assertValidStatus(?string $status): void
     {
         if ($status !== null && !in_array($status, self::STATUSES, true)) {
-            throw new BadRequestHttpException('Invalid gift card status; allowed: ' . implode(', ', self::STATUSES));
+            throw new UnprocessableEntityHttpException('Invalid gift card status; allowed: ' . implode(', ', self::STATUSES));
         }
     }
 
@@ -165,7 +166,7 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\CrudProcessor
         if ($data->websiteIds !== null
             && \Maho_Giftcard_Model_Giftcard::canonicalizeWebsiteIds($data->websiteIds) !== $model->getWebsiteIds()
         ) {
-            throw new BadRequestHttpException('websiteIds cannot be changed through update');
+            throw new UnprocessableEntityHttpException('websiteIds cannot be changed through update');
         }
 
         if ($data->balance !== null) {
@@ -194,10 +195,10 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\CrudProcessor
     private function assertBalanceBounds(float $balance): void
     {
         if ($balance < 0) {
-            throw new BadRequestHttpException('Gift card balance cannot be negative');
+            throw new UnprocessableEntityHttpException('Gift card balance cannot be negative');
         }
         if ($balance > self::MAX_BALANCE) {
-            throw new BadRequestHttpException('Gift card balance cannot exceed ' . self::MAX_BALANCE);
+            throw new UnprocessableEntityHttpException('Gift card balance cannot exceed ' . self::MAX_BALANCE);
         }
     }
 
@@ -208,10 +209,10 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\CrudProcessor
     private function assertValidGiftcard(float $balance, ?string $code, ?int $excludeId): void
     {
         if ($balance <= 0) {
-            throw new BadRequestHttpException('Gift card balance must be greater than zero');
+            throw new UnprocessableEntityHttpException('Gift card balance must be greater than zero');
         }
         if ($balance > self::MAX_BALANCE) {
-            throw new BadRequestHttpException('Gift card balance cannot exceed ' . self::MAX_BALANCE);
+            throw new UnprocessableEntityHttpException('Gift card balance cannot exceed ' . self::MAX_BALANCE);
         }
         if ($code !== null && $code !== '') {
             $existing = \Mage::getModel('giftcard/giftcard')->loadByCode($code);
@@ -281,7 +282,7 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\CrudProcessor
         $newBalance = (float) ($args['newBalance'] ?? 0);
 
         if ($code === '') {
-            throw new BadRequestHttpException('Gift card code is required');
+            throw new UnprocessableEntityHttpException('Gift card code is required');
         }
 
         $giftcard = \Mage::getModel('giftcard/giftcard')->loadByCode($code);

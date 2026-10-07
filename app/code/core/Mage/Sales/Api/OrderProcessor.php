@@ -14,6 +14,7 @@ use ApiPlatform\Metadata\Operation;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
  * Order State Processor - Handles order mutations for API Platform.
@@ -192,7 +193,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
             // A carrier failure produces a rate whose code is the carrier's
             // error entry; it must not be orderable (it would price at 0)
             if (!$rate || $rate->getErrorMessage()) {
-                throw new BadRequestHttpException('Shipping method is not available for this address');
+                throw new UnprocessableEntityHttpException('Shipping method is not available for this address');
             }
         }
 
@@ -306,7 +307,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         $args = $context['args']['input'] ?? [];
         $comment = trim((string) ($args['comment'] ?? $args['note'] ?? ''));
         if ($comment === '') {
-            throw new BadRequestHttpException('Comment text is required');
+            throw new UnprocessableEntityHttpException('Comment text is required');
         }
         $notifyCustomer = (bool) ($args['notifyCustomer'] ?? false);
         $visibleOnFront = (bool) ($args['visibleOnFront'] ?? false);
@@ -323,7 +324,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         if ($status !== null) {
             $allowed = $order->getConfig()->getStateStatuses($order->getState(), false);
             if (!in_array($status, $allowed, true)) {
-                throw new BadRequestHttpException(sprintf(
+                throw new UnprocessableEntityHttpException(sprintf(
                     'Status "%s" is not assigned to the order\'s current state "%s"; allowed: %s',
                     $status,
                     (string) $order->getState(),

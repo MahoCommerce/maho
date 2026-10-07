@@ -131,7 +131,7 @@ describe('Order comments', function (): void {
             'status' => 'nonexistent_status_' . uniqid(),
         ], adminToken());
 
-        expect($response['status'])->toBe(400);
+        expect($response['status'])->toBe(422);
         expect(Mage::getModel('sales/order')->load($orderId)->getStatus())->toBe($before);
     });
 

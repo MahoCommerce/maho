@@ -64,7 +64,7 @@ describe('Customer address format checks', function (): void {
 
         $created = apiPost('/api/rest/v2/customers/me/addresses', $usAddress(['postcode' => '123456789']), $token);
 
-        expect($created['status'])->toBe(400);
+        expect($created['status'])->toBe(422);
         expect($created['json']['message'])->toContain('Please enter a valid postcode for United States');
     });
 
@@ -77,7 +77,7 @@ describe('Customer address format checks', function (): void {
 
         $updated = apiPut("/api/rest/v2/customers/me/addresses/{$addressId}", $usAddress(['postcode' => '123456789']), $token);
 
-        expect($updated['status'])->toBe(400);
+        expect($updated['status'])->toBe(422);
         expect($updated['json']['message'])->toContain('Please enter a valid postcode for United States');
     });
 
@@ -89,7 +89,7 @@ describe('Customer address format checks', function (): void {
 
         $created = apiPost('/api/rest/v2/customers/me/addresses', $usAddress(['regionId' => $ontarioId]), $token);
 
-        expect($created['status'])->toBe(400);
+        expect($created['status'])->toBe(422);
         expect($created['json']['message'])->toContain('The selected state/province is not valid for the chosen country.');
     });
 

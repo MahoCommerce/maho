@@ -80,7 +80,7 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
             // Decode base64 to temp file
             $decoded = base64_decode($base64, true);
             if ($decoded === false) {
-                throw new BadRequestHttpException('Invalid base64 image data');
+                throw new UnprocessableEntityHttpException('Invalid base64 image data');
             }
             $ext = $this->sanitizeImageExtension(pathinfo($filename, PATHINFO_EXTENSION));
             $tmpPath = $this->writeTempImage($decoded, $ext);
@@ -88,17 +88,17 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
             try {
                 $target = new OutboundUrl()->validate($imageUrl);
             } catch (OutboundUrlException $e) {
-                throw new BadRequestHttpException('Invalid imageUrl: ' . $e->getMessage());
+                throw new UnprocessableEntityHttpException('Invalid imageUrl: ' . $e->getMessage());
             }
             $context = stream_context_create($target->streamContextOptions(10));
             $imageData = @file_get_contents($target->pinnedUrl(), false, $context);
             if ($imageData === false) {
-                throw new BadRequestHttpException('Failed to download image from URL');
+                throw new UnprocessableEntityHttpException('Failed to download image from URL');
             }
             $ext = $this->sanitizeImageExtension(pathinfo(parse_url($imageUrl, PHP_URL_PATH) ?: '', PATHINFO_EXTENSION));
             $tmpPath = $this->writeTempImage($imageData, $ext);
         } else {
-            throw new BadRequestHttpException('Either base64, imageData, or imageUrl is required');
+            throw new UnprocessableEntityHttpException('Either base64, imageData, or imageUrl is required');
         }
 
         // The gallery backend only checks the extension; verify the bytes are
@@ -141,9 +141,6 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
             }
 
             $product->save();
-        } catch (\Throwable $e) {
-            \Mage::logException($e);
-            throw new UnprocessableEntityHttpException('Failed to upload image: ' . $e->getMessage());
         } finally {
             if (file_exists($tmpPath)) {
                 @unlink($tmpPath);
@@ -201,7 +198,7 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
 
         $valueId = (int) ($body['valueId'] ?? $body['value_id'] ?? $body['id'] ?? 0);
         if ($valueId <= 0) {
-            throw new BadRequestHttpException('valueId is required');
+            throw new UnprocessableEntityHttpException('valueId is required');
         }
 
         // Find the image file path by value_id
@@ -251,13 +248,8 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
             }
         }
 
-        try {
-            $product->unsetData('stock_data');
-            $product->save();
-        } catch (\Throwable $e) {
-            \Mage::logException($e);
-            throw new UnprocessableEntityHttpException('Failed to update image: ' . $e->getMessage());
-        }
+        $product->unsetData('stock_data');
+        $product->save();
 
         return $this->provider->getMediaGallery($this->loadProduct($productId));
     }
@@ -267,7 +259,7 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
         $product = $this->loadProductForWrite($productId, $this->requireUser());
 
         if ($valueId <= 0) {
-            throw new BadRequestHttpException('valueId is required');
+            throw new UnprocessableEntityHttpException('valueId is required');
         }
 
         $gallery = $product->getData('media_gallery');
@@ -290,13 +282,8 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
         $gallery['images'] = $images;
         $product->setData('media_gallery', $gallery);
 
-        try {
-            $product->unsetData('stock_data');
-            $product->save();
-        } catch (\Throwable $e) {
-            \Mage::logException($e);
-            throw new UnprocessableEntityHttpException('Failed to delete image: ' . $e->getMessage());
-        }
+        $product->unsetData('stock_data');
+        $product->save();
 
         return null;
     }
@@ -349,7 +336,7 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
         $allowed = [IMAGETYPE_JPEG, IMAGETYPE_PNG, IMAGETYPE_GIF, IMAGETYPE_WEBP, IMAGETYPE_AVIF];
         if ($info === false || !in_array($info[2], $allowed, true)) {
             @unlink($path);
-            throw new BadRequestHttpException('Uploaded data is not a valid JPEG, PNG, GIF, WEBP or AVIF image');
+            throw new UnprocessableEntityHttpException('Uploaded data is not a valid JPEG, PNG, GIF, WEBP or AVIF image');
         }
     }
 }

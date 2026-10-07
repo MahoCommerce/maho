@@ -286,11 +286,7 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
         }
 
         // Add to cart using the cart service
-        try {
-            $this->cartService->addItem($quote, $product->getSku(), (float) $qty);
-        } catch (\Exception) {
-            throw new BadRequestHttpException('Failed to add item to cart');
-        }
+        $this->cartService->addItem($quote, $product->getSku(), (float) $qty);
 
         // Build response before deleting (we need the item data)
         $wishlistItem = WishlistItem::fromModel($item);

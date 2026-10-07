@@ -18,6 +18,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
  * Cart State Processor - Handles cart mutations for API Platform.
@@ -325,7 +326,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $customPrice = $this->extractCustomPrice($args);
 
         if (!$itemId) {
-            throw new BadRequestHttpException('Item ID is required');
+            throw new UnprocessableEntityHttpException('Item ID is required');
         }
 
         $quote = $this->resolveAndVerify($context, $uriVariables);
@@ -343,7 +344,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $itemId = $args['itemId'] ?? $uriVariables['itemId'] ?? null;
 
         if (!$itemId) {
-            throw new BadRequestHttpException('Item ID is required');
+            throw new UnprocessableEntityHttpException('Item ID is required');
         }
 
         $quote = $this->resolveAndVerify($context, $uriVariables);
@@ -364,7 +365,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $couponCode = $args['couponCode'] ?? $args['code'] ?? '';
 
         if (!$couponCode) {
-            throw new BadRequestHttpException('Coupon code is required');
+            throw new UnprocessableEntityHttpException('Coupon code is required');
         }
 
         // Throttle anonymous/customer callers by IP: applying a coupon to a cart
@@ -476,7 +477,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $methodCode = $args['methodCode'] ?? '';
 
         if (!is_scalar($carrierCode) || !is_scalar($methodCode) || !$carrierCode || !$methodCode) {
-            throw new BadRequestHttpException('Carrier code and method code are required');
+            throw new UnprocessableEntityHttpException('Carrier code and method code are required');
         }
         $carrierCode = (string) $carrierCode;
         $methodCode = (string) $methodCode;
@@ -497,7 +498,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $additionalData = $args['additionalData'] ?? null;
 
         if (!is_scalar($methodCode) || !$methodCode) {
-            throw new BadRequestHttpException('Payment method code is required');
+            throw new UnprocessableEntityHttpException('Payment method code is required');
         }
         if ($additionalData !== null && !is_array($additionalData)) {
             throw new BadRequestHttpException('additionalData must be an object');
@@ -523,7 +524,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         // Admin/POS users can assign any customer to any cart
         if ($this->isPrivilegedCartActor()) {
             if (!$requestedCustomerId) {
-                throw new BadRequestHttpException('Customer ID is required');
+                throw new UnprocessableEntityHttpException('Customer ID is required');
             }
             $quote = $this->cartService->getCart(
                 $cartId ? (int) $cartId : null,
@@ -546,7 +547,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
 
         // Customer self-assignment (merge guest cart)
         if (!$maskedId) {
-            throw new BadRequestHttpException('Masked cart ID is required');
+            throw new UnprocessableEntityHttpException('Masked cart ID is required');
         }
 
         $customerId = $this->requireCustomerId();

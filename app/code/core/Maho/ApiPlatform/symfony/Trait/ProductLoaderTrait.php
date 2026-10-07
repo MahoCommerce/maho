@@ -18,6 +18,7 @@ use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
  * Loads a catalog product by ID within the current store context.
@@ -50,7 +51,7 @@ trait ProductLoaderTrait
         }
 
         if ($requiredType !== null && $product->getTypeId() !== $requiredType) {
-            throw new BadRequestHttpException("Product is not a {$requiredType} product");
+            throw new NotFoundHttpException("Product is not a {$requiredType} product");
         }
 
         return $product;
@@ -80,7 +81,7 @@ trait ProductLoaderTrait
         }
 
         if ($requiredType !== null && $product->getTypeId() !== $requiredType) {
-            throw new BadRequestHttpException("Product is not a {$requiredType} product");
+            throw new NotFoundHttpException("Product is not a {$requiredType} product");
         }
 
         return $product;
@@ -117,7 +118,7 @@ trait ProductLoaderTrait
         }
 
         if ($requiredType !== null && $product->getTypeId() !== $requiredType) {
-            throw new BadRequestHttpException("Product is not a {$requiredType} product");
+            throw new NotFoundHttpException("Product is not a {$requiredType} product");
         }
 
         return $product;

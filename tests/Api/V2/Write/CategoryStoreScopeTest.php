@@ -234,7 +234,7 @@ describe('Category write scope (REST)', function (): void {
         $update = apiPut("/api/rest/v2/categories/{$categoryId}", [
             'useDefault' => ['name'],
         ], $token);
-        expect($update['status'])->toBe(400);
+        expect($update['status'])->toBe(422);
     });
 
 });

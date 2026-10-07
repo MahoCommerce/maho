@@ -16,6 +16,7 @@ use ApiPlatform\Metadata\Operation;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 final class InvoiceProcessor extends \Maho\ApiPlatform\Processor
 {
@@ -46,13 +47,13 @@ final class InvoiceProcessor extends \Maho\ApiPlatform\Processor
     {
         $orderId = (int) ($uriVariables['orderId'] ?? 0);
         if (!$orderId) {
-            throw new BadRequestHttpException('Order ID is required');
+            throw new UnprocessableEntityHttpException('Order ID is required');
         }
 
         $args = $context['args']['input'] ?? [];
         $captureCase = $args['capture'] ?? null;
         if ($captureCase !== null && !in_array($captureCase, self::CAPTURE_CASES, true)) {
-            throw new BadRequestHttpException('Invalid capture mode; expected one of: ' . implode(', ', self::CAPTURE_CASES));
+            throw new UnprocessableEntityHttpException('Invalid capture mode; expected one of: ' . implode(', ', self::CAPTURE_CASES));
         }
 
         $items = $args['items'] ?? null;
@@ -104,7 +105,7 @@ final class InvoiceProcessor extends \Maho\ApiPlatform\Processor
         bool $notifyCustomer,
     ): Invoice {
         if (!$order->canInvoice()) {
-            throw new BadRequestHttpException('Order cannot be invoiced (already fully invoiced or not in an invoiceable state)');
+            throw new ConflictHttpException('Order cannot be invoiced (already fully invoiced or not in an invoiceable state)');
         }
 
         $qtyMap = [];
@@ -119,10 +120,10 @@ final class InvoiceProcessor extends \Maho\ApiPlatform\Processor
                 // order, so neither check applies to them.
                 if (!$orderItem->isDummy()) {
                     if (!$orderItem->getIsQtyDecimal() && fmod($qty, 1.0) !== 0.0) {
-                        throw new BadRequestHttpException("Order item {$orderItemId} does not accept a fractional qty");
+                        throw new UnprocessableEntityHttpException("Order item {$orderItemId} does not accept a fractional qty");
                     }
                     if ($qty > (float) $orderItem->getQtyToInvoice()) {
-                        throw new BadRequestHttpException("Qty to invoice for order item {$orderItemId} exceeds the qty available to invoice");
+                        throw new UnprocessableEntityHttpException("Qty to invoice for order item {$orderItemId} exceeds the qty available to invoice");
                     }
                 }
 
@@ -130,18 +131,14 @@ final class InvoiceProcessor extends \Maho\ApiPlatform\Processor
             }
         }
 
-        try {
-            $invoice = \Mage::getModel('sales/service_order', $order)->prepareInvoice($qtyMap);
-        } catch (\Mage_Core_Exception $e) {
-            throw new BadRequestHttpException($e->getMessage());
-        }
+        $invoice = \Mage::getModel('sales/service_order', $order)->prepareInvoice($qtyMap);
 
         if (!$invoice->getTotalQty()) {
-            throw new BadRequestHttpException('Cannot create invoice: no items to invoice');
+            throw new UnprocessableEntityHttpException('Cannot create invoice: no items to invoice');
         }
 
         if ($captureCase === \Mage_Sales_Model_Order_Invoice::CAPTURE_ONLINE && !$invoice->canCapture()) {
-            throw new BadRequestHttpException('The order\'s payment method does not support online capture');
+            throw new UnprocessableEntityHttpException('The order\'s payment method does not support online capture');
         }
         if ($captureCase !== null) {
             $invoice->setRequestedCaptureCase($captureCase);
@@ -151,11 +148,7 @@ final class InvoiceProcessor extends \Maho\ApiPlatform\Processor
             $invoice->addComment($comment, $notifyCustomer);
         }
 
-        try {
-            $invoice->register();
-        } catch (\Mage_Core_Exception $e) {
-            throw new BadRequestHttpException($e->getMessage());
-        }
+        $invoice->register();
 
         $invoice->getOrder()->setIsInProcess();
 
@@ -178,7 +171,7 @@ final class InvoiceProcessor extends \Maho\ApiPlatform\Processor
     {
         $invoiceId = (int) ($uriVariables['id'] ?? 0);
         if (!$invoiceId) {
-            throw new BadRequestHttpException('Invoice ID is required');
+            throw new UnprocessableEntityHttpException('Invoice ID is required');
         }
 
         $invoice = \Mage::getModel('sales/order_invoice')->load($invoiceId);
@@ -211,14 +204,10 @@ final class InvoiceProcessor extends \Maho\ApiPlatform\Processor
                     'void' => 'voided',
                     'cancel' => 'canceled',
                 };
-                throw new BadRequestHttpException("The invoice cannot be {$past} in its current state");
+                throw new ConflictHttpException("The invoice cannot be {$past} in its current state");
             }
 
-            try {
-                $invoice->{$action}();
-            } catch (\Mage_Core_Exception $e) {
-                throw new BadRequestHttpException($e->getMessage());
-            }
+            $invoice->{$action}();
 
             $invoice->getOrder()->setIsInProcess();
 

@@ -86,7 +86,7 @@ describe('POST /api/rest/v2/orders/{orderId}/shipments', function (): void {
             'notifyCustomer' => false,
         ], adminToken());
 
-        expect($second['status'])->toBe(400);
+        expect($second['status'])->toBe(409);
     });
 
     it('ships only the requested qty for a partial shipment', function (): void {

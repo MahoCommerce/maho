@@ -20,6 +20,7 @@ use Maho\ApiPlatform\Trait\ActivityLogTrait;
 use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
@@ -72,7 +73,7 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
         /** @var Mage_Catalog_Model_Category $parentCategory */
         $parentCategory = Mage::getModel('catalog/category')->load($parentId);
         if (!$parentCategory->getId()) {
-            throw new BadRequestHttpException('Parent category not found');
+            throw new UnprocessableEntityHttpException('Parent category not found');
         }
 
         // A store-restricted token may only create under a category in one of
@@ -173,7 +174,7 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
 
         // Prevent deletion of root categories
         if ((int) $category->getLevel() <= 1) {
-            throw new BadRequestHttpException('Cannot delete root categories');
+            throw new ConflictHttpException('Cannot delete root categories');
         }
 
         $oldData = $category->getData();
@@ -252,7 +253,7 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
         }
         if (!empty($data->productPositions)) {
             if (!$category->getId()) {
-                throw new BadRequestHttpException(
+                throw new UnprocessableEntityHttpException(
                     'productPositions applies to products already assigned to the category: create it first, '
                     . 'assign products, then set their positions.',
                 );
@@ -339,7 +340,7 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
 
         if (!$isValid) {
             $messages = implode(' ', $validator->getMessages());
-            throw new BadRequestHttpException(trim('customLayoutUpdate is not a valid layout update. ' . $messages));
+            throw new UnprocessableEntityHttpException(trim('customLayoutUpdate is not a valid layout update. ' . $messages));
         }
 
         return $xml;
@@ -355,7 +356,7 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
         foreach ($codes as $code) {
             if (!is_string($code) || !in_array($code, $valid, true)) {
                 $label = is_scalar($code) ? (string) $code : gettype($code);
-                throw new BadRequestHttpException(
+                throw new UnprocessableEntityHttpException(
                     'Invalid sort-by code "' . $label . '". Valid: ' . implode(', ', $valid),
                 );
             }
@@ -369,11 +370,11 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
             return null;
         }
         if ($blockId > self::MAX_SMALLINT) {
-            throw new BadRequestHttpException("CMS block {$blockId} not found");
+            throw new UnprocessableEntityHttpException("CMS block {$blockId} not found");
         }
         $block = Mage::getModel('cms/block')->load($blockId);
         if (!$block->getId()) {
-            throw new BadRequestHttpException("CMS block {$blockId} not found");
+            throw new UnprocessableEntityHttpException("CMS block {$blockId} not found");
         }
         return $blockId;
     }
@@ -390,13 +391,13 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
         if (str_contains($image, '/') || str_contains($image, '\\') || str_contains($image, '..')
             || preg_match('#^[a-z][a-z0-9+.-]*:#i', $image)
         ) {
-            throw new BadRequestHttpException(
+            throw new UnprocessableEntityHttpException(
                 'image must be a bare filename (stored under media/catalog/category), with no path, no ".." and no scheme',
             );
         }
         $extension = strtolower(pathinfo($image, PATHINFO_EXTENSION));
         if (!in_array($extension, \Maho\Io\File::ALLOWED_IMAGES_EXTENSIONS, true)) {
-            throw new BadRequestHttpException('image must have a valid image file extension');
+            throw new UnprocessableEntityHttpException('image must have a valid image file extension');
         }
         return $image;
     }
@@ -409,7 +410,7 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
         try {
             return Mage::app()->getLocale()->formatDateForDb($value, withTime: false);
         } catch (\Throwable) {
-            throw new BadRequestHttpException("{$field} must be a valid date (Y-m-d)");
+            throw new UnprocessableEntityHttpException("{$field} must be a valid date (Y-m-d)");
         }
     }
 
@@ -441,7 +442,7 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
             $code = (string) $code;
 
             if (in_array($code, self::PROTECTED_ATTRIBUTE_CODES, true)) {
-                throw new BadRequestHttpException(
+                throw new UnprocessableEntityHttpException(
                     "Attribute '{$code}' cannot be set via customAttributes; use the dedicated field.",
                 );
             }
@@ -487,18 +488,14 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
         /** @var Mage_Catalog_Model_Category $newParent */
         $newParent = Mage::getModel('catalog/category')->load($newParentId);
         if (!$newParent->getId()) {
-            throw new BadRequestHttpException('New parent category not found');
+            throw new UnprocessableEntityHttpException('New parent category not found');
         }
 
         // The destination must also be within the caller's store tree, otherwise
         // a store-restricted token could move a category into another store's root.
         self::authorizeCategoryStore($newParent, $user);
 
-        try {
-            $category->move($newParentId, 0);
-        } catch (\Exception $e) {
-            throw new UnprocessableEntityHttpException('Failed to move category: ' . $e->getMessage());
-        }
+        $category->move($newParentId, 0);
     }
 
     /**
@@ -555,17 +552,17 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
         }
 
         if ($storeId === Mage_Core_Model_App::ADMIN_STORE_ID) {
-            throw new BadRequestHttpException('useDefault requires a store context (?store=): global values have no default to revert to.');
+            throw new UnprocessableEntityHttpException('useDefault requires a store context (?store=): global values have no default to revert to.');
         }
 
         foreach ($data->useDefault as $code) {
             $code = (string) $code;
             $attribute = Mage::getSingleton('eav/config')->getAttribute(Mage_Catalog_Model_Category::ENTITY, $code);
             if (!$attribute instanceof \Mage_Catalog_Model_Resource_Eav_Attribute || !$attribute->getId() || $attribute->getBackend()->isStatic()) {
-                throw new BadRequestHttpException("Unknown attribute in useDefault: {$code}");
+                throw new UnprocessableEntityHttpException("Unknown attribute in useDefault: {$code}");
             }
             if ($attribute->isScopeGlobal()) {
-                throw new BadRequestHttpException("Attribute '{$code}' is global scope and has no store override to revert.");
+                throw new UnprocessableEntityHttpException("Attribute '{$code}' is global scope and has no store override to revert.");
             }
             $category->setData($code, false);
         }

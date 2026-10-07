@@ -71,7 +71,7 @@ describe('POST /api/rest/v2/customers/me/revocation-requests', function (): void
             'reason' => 'No order given',
         ], customerToken());
 
-        expect($response['status'])->toBeIn([400, 404]);
+        expect($response['status'])->toBe(422);
     });
 
 });

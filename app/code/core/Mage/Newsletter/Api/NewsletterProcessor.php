@@ -15,6 +15,8 @@ use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
  * Newsletter Processor, handles subscribe/unsubscribe operations.
@@ -53,7 +55,7 @@ final class NewsletterProcessor extends \Maho\ApiPlatform\Processor
         if ($customerId !== null) {
             $customer = \Mage::getModel('customer/customer')->load($customerId);
             if (!$customer->getId()) {
-                throw new BadRequestHttpException('Customer not found');
+                throw new NotFoundHttpException('Customer not found');
             }
 
             // An authenticated customer may only subscribe their own address.
@@ -69,12 +71,12 @@ final class NewsletterProcessor extends \Maho\ApiPlatform\Processor
         }
 
         if (empty($email)) {
-            throw new BadRequestHttpException('Email address is required');
+            throw new UnprocessableEntityHttpException('Email address is required');
         }
 
         $coreHelper = \Mage::helper('core');
         if (!$coreHelper->isValidEmail($email)) {
-            throw new BadRequestHttpException('Invalid email address');
+            throw new UnprocessableEntityHttpException('Invalid email address');
         }
 
         // Multi-store targeting: subscribe() stamps the subscriber with the ambient
@@ -83,7 +85,7 @@ final class NewsletterProcessor extends \Maho\ApiPlatform\Processor
             ?? (isset($context['args']['input']['storeId']) ? (int) $context['args']['input']['storeId'] : null);
         if ($storeId !== null) {
             if (!isset(\Mage::app()->getStores()[$storeId])) {
-                throw new BadRequestHttpException("Unknown store ID: {$storeId}");
+                throw new UnprocessableEntityHttpException("Unknown store ID: {$storeId}");
             }
             // A body-level storeId must respect the token's store allowlist; the
             // request-level listeners only check ?store= / X-Store-Code.
@@ -105,64 +107,57 @@ final class NewsletterProcessor extends \Maho\ApiPlatform\Processor
         if ($customerId === null) {
             $allowGuest = \Mage::getStoreConfigFlag(\Mage_Newsletter_Model_Subscriber::XML_PATH_ALLOW_GUEST_SUBSCRIBE_FLAG);
             if (!$allowGuest) {
-                throw new BadRequestHttpException('Guest subscription is not allowed. Please login first.');
+                throw new AccessDeniedHttpException('Guest subscription is not allowed. Please login first.');
             }
         }
 
         $data->email = $email;
 
-        try {
-            /** @var \Mage_Newsletter_Model_Subscriber $subscriber */
-            $subscriber = \Mage::getModel('newsletter/subscriber');
+        /** @var \Mage_Newsletter_Model_Subscriber $subscriber */
+        $subscriber = \Mage::getModel('newsletter/subscriber');
 
-            $subscriber->loadByEmail($email);
-            $alreadySubscribed = $subscriber->getId()
-                && $subscriber->getSubscriberStatus() == \Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED;
+        $subscriber->loadByEmail($email);
+        $alreadySubscribed = $subscriber->getId()
+            && $subscriber->getSubscriberStatus() == \Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED;
 
-            $confirmRequired = \Mage::getStoreConfigFlag(\Mage_Newsletter_Model_Subscriber::XML_PATH_CONFIRMATION_FLAG);
+        $confirmRequired = \Mage::getStoreConfigFlag(\Mage_Newsletter_Model_Subscriber::XML_PATH_CONFIRMATION_FLAG);
 
-            // Guests get a uniform response regardless of prior state. Echoing
-            // "already subscribed" (or the subscriber's customer_id) would let an
-            // unauthenticated caller probe whether an address is a registered
-            // customer.
-            if ($customerId === null) {
-                if (!$alreadySubscribed) {
-                    $subscriber->subscribe($email);
-                }
-                $dto = new NewsletterSubscription();
-                $dto->email = $email;
-                $dto->message = $confirmRequired
-                    ? 'A confirmation email has been sent. Please check your inbox.'
-                    : 'You have been successfully subscribed to the newsletter.';
-                return $dto;
+        // Guests get a uniform response regardless of prior state. Echoing
+        // "already subscribed" (or the subscriber's customer_id) would let an
+        // unauthenticated caller probe whether an address is a registered
+        // customer.
+        if ($customerId === null) {
+            if (!$alreadySubscribed) {
+                $subscriber->subscribe($email);
             }
-
-            if ($alreadySubscribed) {
-                $dto = NewsletterSubscription::fromModel($subscriber);
-                $dto->message = 'You are already subscribed to the newsletter.';
-                return $dto;
-            }
-
-            $subscriber->subscribe($email);
-
-            $subscriber->loadByEmail($email);
-            $dto = NewsletterSubscription::fromModel($subscriber);
-
-            $dto->confirmationRequired = $confirmRequired && !$dto->isSubscribed;
-
-            if ($dto->confirmationRequired) {
-                $dto->message = 'A confirmation email has been sent. Please check your inbox.';
-            } else {
-                $dto->message = 'You have been successfully subscribed to the newsletter.';
-            }
-
+            $dto = new NewsletterSubscription();
+            $dto->email = $email;
+            $dto->message = $confirmRequired
+                ? 'A confirmation email has been sent. Please check your inbox.'
+                : 'You have been successfully subscribed to the newsletter.';
             return $dto;
-        } catch (\Mage_Core_Exception $e) {
-            throw new BadRequestHttpException($e->getMessage());
-        } catch (\Exception $e) {
-            \Mage::log('Newsletter subscription error: ' . $e->getMessage(), \Mage::LOG_ERROR);
-            throw new BadRequestHttpException('An error occurred while processing your subscription.');
         }
+
+        if ($alreadySubscribed) {
+            $dto = NewsletterSubscription::fromModel($subscriber);
+            $dto->message = 'You are already subscribed to the newsletter.';
+            return $dto;
+        }
+
+        $subscriber->subscribe($email);
+
+        $subscriber->loadByEmail($email);
+        $dto = NewsletterSubscription::fromModel($subscriber);
+
+        $dto->confirmationRequired = $confirmRequired && !$dto->isSubscribed;
+
+        if ($dto->confirmationRequired) {
+            $dto->message = 'A confirmation email has been sent. Please check your inbox.';
+        } else {
+            $dto->message = 'You have been successfully subscribed to the newsletter.';
+        }
+
+        return $dto;
     }
 
     private function unsubscribe(): NewsletterSubscription
@@ -179,38 +174,31 @@ final class NewsletterProcessor extends \Maho\ApiPlatform\Processor
 
         $customer = \Mage::getModel('customer/customer')->load($customerId);
         if (!$customer->getId()) {
-            throw new BadRequestHttpException('Customer not found');
+            throw new NotFoundHttpException('Customer not found');
         }
 
         $email = $customer->getEmail();
 
-        try {
-            /** @var \Mage_Newsletter_Model_Subscriber $subscriber */
-            $subscriber = \Mage::getModel('newsletter/subscriber');
-            $subscriber->loadByEmail($email);
+        /** @var \Mage_Newsletter_Model_Subscriber $subscriber */
+        $subscriber = \Mage::getModel('newsletter/subscriber');
+        $subscriber->loadByEmail($email);
 
-            if (!$subscriber->getId()) {
-                $dto = new NewsletterSubscription();
-                $dto->email = $email;
-                $dto->customerId = $customerId;
-                $dto->status = 'unsubscribed';
-                $dto->isSubscribed = false;
-                $dto->message = 'This email address is not subscribed to the newsletter.';
-                return $dto;
-            }
-
-            $subscriber->setCheckCode($subscriber->getCode());
-            $subscriber->unsubscribe();
-
-            $dto = NewsletterSubscription::fromModel($subscriber);
-            $dto->message = 'You have been successfully unsubscribed from the newsletter.';
-
+        if (!$subscriber->getId()) {
+            $dto = new NewsletterSubscription();
+            $dto->email = $email;
+            $dto->customerId = $customerId;
+            $dto->status = 'unsubscribed';
+            $dto->isSubscribed = false;
+            $dto->message = 'This email address is not subscribed to the newsletter.';
             return $dto;
-        } catch (\Mage_Core_Exception $e) {
-            throw new BadRequestHttpException($e->getMessage());
-        } catch (\Exception $e) {
-            \Mage::log('Newsletter unsubscribe error: ' . $e->getMessage(), \Mage::LOG_ERROR);
-            throw new BadRequestHttpException('An error occurred while processing your request.');
         }
+
+        $subscriber->setCheckCode($subscriber->getCode());
+        $subscriber->unsubscribe();
+
+        $dto = NewsletterSubscription::fromModel($subscriber);
+        $dto->message = 'You have been successfully unsubscribed from the newsletter.';
+
+        return $dto;
     }
 }

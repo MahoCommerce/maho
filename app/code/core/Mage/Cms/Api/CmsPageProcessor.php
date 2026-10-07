@@ -14,6 +14,7 @@ use Maho\ApiPlatform\CrudProcessor;
 use Maho\ApiPlatform\CrudResource;
 use Maho\ApiPlatform\Security\ApiUser;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 final class CmsPageProcessor extends CrudProcessor
 {
@@ -55,7 +56,7 @@ final class CmsPageProcessor extends CrudProcessor
             // A page needs a URL identifier; reject a create that omits it with a
             // 4xx rather than persisting a page with an empty identifier.
             if (trim((string) $model->getData('identifier')) === '') {
-                throw new BadRequestHttpException('Identifier is required.');
+                throw new UnprocessableEntityHttpException('Identifier is required.');
             }
             if ($model->getData('is_active') === null) {
                 $model->setData('is_active', 1);
@@ -78,7 +79,7 @@ final class CmsPageProcessor extends CrudProcessor
         try {
             return \Mage::app()->getLocale()->formatDateForDb($value, withTime: false);
         } catch (\Exception) {
-            throw new BadRequestHttpException("Invalid date for {$field}; use Y-m-d format.");
+            throw new UnprocessableEntityHttpException("Invalid date for {$field}; use Y-m-d format.");
         }
     }
 
@@ -103,7 +104,7 @@ final class CmsPageProcessor extends CrudProcessor
 
         if (!$isValid) {
             $messages = implode(' ', $validator->getMessages());
-            throw new BadRequestHttpException(trim("{$field} is not a valid layout update. " . $messages));
+            throw new UnprocessableEntityHttpException(trim("{$field} is not a valid layout update. " . $messages));
         }
 
         return $xml;
@@ -117,7 +118,7 @@ final class CmsPageProcessor extends CrudProcessor
 
         $normalized = strtoupper(str_replace(' ', '', $value));
         if (!in_array($normalized, self::VALID_META_ROBOTS, true)) {
-            throw new BadRequestHttpException('metaRobots must be one of: ' . implode(', ', self::VALID_META_ROBOTS));
+            throw new UnprocessableEntityHttpException('metaRobots must be one of: ' . implode(', ', self::VALID_META_ROBOTS));
         }
 
         return $normalized;

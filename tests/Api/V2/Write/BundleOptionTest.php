@@ -103,7 +103,7 @@ describe('Bundle Options, CRUD Lifecycle', function (): void {
         trackCreated('product', $simpleId);
 
         $response = apiGet("/api/rest/v2/products/{$simpleId}/bundle-options");
-        expect($response['status'])->toBeIn([400, 422]);
+        expect($response['status'])->toBe(404);
     });
 
 });

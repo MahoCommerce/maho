@@ -16,6 +16,7 @@ use Maho\ApiPlatform\Trait\ProductLoaderTrait;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
  */
@@ -87,12 +88,12 @@ final class ProductTierPriceProcessor extends \Maho\ApiPlatform\Processor
 
             $price = (float) ($tp['price'] ?? 0);
             if ($price < 0) {
-                throw new BadRequestHttpException('Price must not be negative');
+                throw new UnprocessableEntityHttpException('Price must not be negative');
             }
 
             $qty = (float) ($tp['qty'] ?? 1);
             if ($qty <= 0) {
-                throw new BadRequestHttpException('Quantity must be greater than 0');
+                throw new UnprocessableEntityHttpException('Quantity must be greater than 0');
             }
 
             $websiteId = (int) ($tp['websiteId'] ?? $tp['website_id'] ?? 0);

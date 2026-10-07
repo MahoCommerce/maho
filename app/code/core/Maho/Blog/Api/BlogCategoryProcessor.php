@@ -16,6 +16,7 @@ use Maho\ApiPlatform\CrudProcessor;
 use Maho\ApiPlatform\CrudResource;
 use Maho\ApiPlatform\Security\ApiUser;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 final class BlogCategoryProcessor extends CrudProcessor
 {
@@ -27,22 +28,22 @@ final class BlogCategoryProcessor extends CrudProcessor
         }
 
         if ($data->name !== null && trim($data->name) === '') {
-            throw new BadRequestHttpException('Blog category name cannot be empty');
+            throw new UnprocessableEntityHttpException('Blog category name cannot be empty');
         }
         if ($isNew && $data->name === null) {
-            throw new BadRequestHttpException('Blog category name is required');
+            throw new UnprocessableEntityHttpException('Blog category name is required');
         }
 
         if ($data->parentId !== null && $data->parentId !== \Maho_Blog_Model_Category::ROOT_PARENT_ID) {
             $parent = \Mage::getModel('blog/category')->load($data->parentId);
             if (!$parent->getId()) {
-                throw new BadRequestHttpException("Unknown parent blog category id {$data->parentId}");
+                throw new UnprocessableEntityHttpException("Unknown parent blog category id {$data->parentId}");
             }
             if ($model->getId() && (
                 (int) $data->parentId === (int) $model->getId()
                 || in_array((int) $model->getId(), $parent->getPathIds(), true)
             )) {
-                throw new BadRequestHttpException('A blog category cannot be moved under itself or its descendants');
+                throw new UnprocessableEntityHttpException('A blog category cannot be moved under itself or its descendants');
             }
         }
     }

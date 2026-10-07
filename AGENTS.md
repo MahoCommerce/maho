@@ -171,6 +171,14 @@ public function __invoke(My_Module_Model_SomeMessage $message): void {}
   `denormalizationContext: ['allow_extra_attributes' => false, 'collect_denormalization_errors' => true]`
   so an unknown field is a 400 and every type error comes back at once. Many older resources still
   use PUT as a partial update; they move one at a time.
+- Pick the status code by what went wrong (RFC 9110). 400 (`BadRequestHttpException`): the request
+  cannot be read, such as invalid JSON, a value of the wrong type or shape, or a bad query string or
+  header. 404: the record in the URL does not exist. 409 (`ConflictHttpException`): the state of the
+  record does not allow the action. 422 (`UnprocessableEntityHttpException`, `ValidationException`):
+  any other problem in the body, such as a missing field, a value out of range or an unknown ID. The
+  OAuth token endpoints keep the 400 of RFC 6749. Never catch an exception only to throw it again with
+  another status: `ApiExceptionListener` maps `Mage_Core_Exception` and its subclasses, and an
+  unexpected exception must stay a 500
 - A resource whose writes go through a service maps to its model with the Symfony ObjectMapper: a
   class `#[Map(target: Model::class)]` and a `#[Map]` on each DTO property (a model keeps its data
   in `_data`, so implicit mapping finds nothing and writes nothing). A read-only property takes

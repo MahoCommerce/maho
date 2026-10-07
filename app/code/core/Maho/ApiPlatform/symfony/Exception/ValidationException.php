@@ -11,9 +11,9 @@ declare(strict_types=1);
 namespace Maho\ApiPlatform\Exception;
 
 /**
- * Validation Exception - 400 Bad Request.
+ * Validation Exception - 422 Unprocessable Content.
  *
- * Use when request data fails validation (missing fields, invalid format, etc.)
+ * Use when request data fails validation (missing fields, invalid values, etc.)
  */
 class ValidationException extends ApiException
 {
@@ -37,7 +37,7 @@ class ValidationException extends ApiException
         parent::__construct(
             message: $message,
             errorCode: 'validation_error',
-            httpStatusCode: 400,
+            httpStatusCode: 422,
             details: $details,
             previous: $previous,
         );

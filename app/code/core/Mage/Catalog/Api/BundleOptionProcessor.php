@@ -19,6 +19,7 @@ use Maho\ApiPlatform\Trait\ProductLoaderTrait;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
  */
@@ -78,12 +79,12 @@ final class BundleOptionProcessor extends \Maho\ApiPlatform\Processor
         $selections = $body['selections'] ?? [];
 
         if ($title === '') {
-            throw new BadRequestHttpException('title is required');
+            throw new UnprocessableEntityHttpException('title is required');
         }
 
         $validTypes = ['select', 'radio', 'checkbox', 'multi'];
         if (!in_array($type, $validTypes, true)) {
-            throw new BadRequestHttpException("Invalid type: {$type}. Valid: " . implode(', ', $validTypes));
+            throw new UnprocessableEntityHttpException("Invalid type: {$type}. Valid: " . implode(', ', $validTypes));
         }
 
         /** @var \Mage_Bundle_Model_Option $option */
@@ -120,11 +121,11 @@ final class BundleOptionProcessor extends \Maho\ApiPlatform\Processor
 
                 $qty = (float) ($sel['qty'] ?? 1);
                 if ($qty <= 0) {
-                    throw new BadRequestHttpException('Quantity must be greater than 0');
+                    throw new UnprocessableEntityHttpException('Quantity must be greater than 0');
                 }
                 $price = (float) ($sel['price'] ?? 0);
                 if ($price < 0) {
-                    throw new BadRequestHttpException('Price must not be negative');
+                    throw new UnprocessableEntityHttpException('Price must not be negative');
                 }
 
                 /** @var \Mage_Bundle_Model_Selection $selection */
@@ -166,7 +167,7 @@ final class BundleOptionProcessor extends \Maho\ApiPlatform\Processor
 
         $optionId = (int) ($body['optionId'] ?? $body['option_id'] ?? $body['id'] ?? 0) ?: $pathOptionId;
         if ($optionId <= 0) {
-            throw new BadRequestHttpException('optionId is required');
+            throw new UnprocessableEntityHttpException('optionId is required');
         }
 
         /** @var \Mage_Bundle_Model_Option $option */
@@ -182,7 +183,7 @@ final class BundleOptionProcessor extends \Maho\ApiPlatform\Processor
         if (isset($body['type'])) {
             $validTypes = ['select', 'radio', 'checkbox', 'multi'];
             if (!in_array($body['type'], $validTypes, true)) {
-                throw new BadRequestHttpException("Invalid type: {$body['type']}. Valid: " . implode(', ', $validTypes));
+                throw new UnprocessableEntityHttpException("Invalid type: {$body['type']}. Valid: " . implode(', ', $validTypes));
             }
             $option->setType($body['type']);
         }
@@ -203,7 +204,7 @@ final class BundleOptionProcessor extends \Maho\ApiPlatform\Processor
         $this->loadProduct($productId, Mage_Catalog_Model_Product_Type::TYPE_BUNDLE);
 
         if ($optionId <= 0) {
-            throw new BadRequestHttpException('optionId is required');
+            throw new UnprocessableEntityHttpException('optionId is required');
         }
 
         /** @var \Mage_Bundle_Model_Option $option */

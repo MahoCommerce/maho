@@ -96,7 +96,7 @@ final class ConfigurableSetupProcessor extends \Maho\ApiPlatform\Processor
                     $attribute = Mage::getSingleton('eav/config')
                         ->getAttribute('catalog_product', $code);
                     if (!$attribute || !$attribute->getId()) {
-                        throw new BadRequestHttpException("Attribute not found: {$code}");
+                        throw new UnprocessableEntityHttpException("Attribute not found: {$code}");
                     }
                     $superAttributeData[] = [
                         'attribute_id' => $attribute->getId(),
@@ -106,11 +106,7 @@ final class ConfigurableSetupProcessor extends \Maho\ApiPlatform\Processor
                 $product->setConfigurableAttributesData($superAttributeData);
                 $product->setCanSaveConfigurableAttributes(true);
 
-                try {
-                    $product->save();
-                } catch (\Throwable $e) {
-                    throw new UnprocessableEntityHttpException('Failed to set super attributes: ' . $e->getMessage());
-                }
+                $product->save();
             }
         }
 
@@ -135,7 +131,7 @@ final class ConfigurableSetupProcessor extends \Maho\ApiPlatform\Processor
 
         $childId = (int) ($body['childProductId'] ?? $body['child_product_id'] ?? $body['childId'] ?? 0);
         if ($childId <= 0) {
-            throw new BadRequestHttpException('childProductId is required and must be positive');
+            throw new UnprocessableEntityHttpException('childProductId is required and must be positive');
         }
 
         $this->authorizeAssociatedProductWebsites($childId);
@@ -155,7 +151,7 @@ final class ConfigurableSetupProcessor extends \Maho\ApiPlatform\Processor
         // no-op, so the product saves unchanged and the caller gets a misleading
         // 200 "removed". Mirrors the validation in handleAddChild().
         if ($childId <= 0) {
-            throw new BadRequestHttpException('childProductId is required and must be positive');
+            throw new UnprocessableEntityHttpException('childProductId is required and must be positive');
         }
 
         $product = $this->loadProductForWrite($productId, $this->requireUser(), Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE);

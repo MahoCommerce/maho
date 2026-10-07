@@ -134,7 +134,7 @@ describe('Category Extended Fields (REST)', function (): void {
             'name' => 'Pest Bad SortBy Category',
             'availableSortBy' => ['not_a_real_sort_code'],
         ], $token);
-        expect($response['status'])->toBeIn([400, 422]);
+        expect($response['status'])->toBe(422);
     });
 
     it('round-trips landingPageId referencing a CMS block', function (): void {
@@ -183,7 +183,7 @@ describe('Category Extended Fields (REST)', function (): void {
             'name' => 'Pest Bad Landing Category',
             'landingPageId' => 99999999,
         ], $token);
-        expect($response['status'])->toBeIn([400, 422]);
+        expect($response['status'])->toBe(422);
     });
 
     it('round-trips custom design fields and clears them with empty strings', function (): void {
@@ -229,7 +229,7 @@ describe('Category Extended Fields (REST)', function (): void {
             'name' => "Pest CustomAttr Denied {$suffix}",
             'customAttributesWrite' => ['path' => '1/2/3'],
         ], $token);
-        expect($denied['status'])->toBeIn([400, 422]);
+        expect($denied['status'])->toBe(422);
 
         $create = apiPost('/api/rest/v2/categories', [
             'name' => "Pest CustomAttr Category {$suffix}",
@@ -261,7 +261,7 @@ describe('Category layout update validation (REST)', function (): void {
                 . '</reference>',
         ], $token);
 
-        expect($response['status'])->toBeIn([400, 422]);
+        expect($response['status'])->toBe(422);
     });
 
     it('rejects a layout update that is not well-formed XML', function (): void {
@@ -272,7 +272,7 @@ describe('Category layout update validation (REST)', function (): void {
             'customLayoutUpdate' => '<reference name="content"><block type="core/template">',
         ], $token);
 
-        expect($response['status'])->toBeIn([400, 422]);
+        expect($response['status'])->toBe(422);
     });
 
     it('accepts a valid layout update and keeps it out of anonymous reads', function (): void {
@@ -313,19 +313,19 @@ describe('Category layout update validation (REST)', function (): void {
                     . '</reference>',
             ],
         ], $token);
-        expect($layout['status'])->toBeIn([400, 422]);
+        expect($layout['status'])->toBe(422);
 
         $image = apiPost('/api/rest/v2/categories', [
             'name' => 'Pest Bag Image Category',
             'customAttributesWrite' => ['image' => '../../../app/etc/local.xml'],
         ], $token);
-        expect($image['status'])->toBeIn([400, 422]);
+        expect($image['status'])->toBe(422);
 
         $sortBy = apiPost('/api/rest/v2/categories', [
             'name' => 'Pest Bag SortBy Category',
             'customAttributesWrite' => ['available_sort_by' => 'not_a_real_sort_code'],
         ], $token);
-        expect($sortBy['status'])->toBeIn([400, 422]);
+        expect($sortBy['status'])->toBe(422);
     });
 
     it('rejects productPositions on create instead of dropping it', function (): void {
@@ -336,7 +336,7 @@ describe('Category layout update validation (REST)', function (): void {
             'productPositions' => ['1' => 5],
         ], $token);
 
-        expect($response['status'])->toBeIn([400, 422]);
+        expect($response['status'])->toBe(422);
     });
 
 });

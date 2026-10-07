@@ -60,7 +60,7 @@ final class MediaProcessor implements ProcessorInterface
         $request = $this->requestStack->getCurrentRequest();
 
         if (!isset($_FILES['file']) || $_FILES['file']['error'] !== UPLOAD_ERR_OK) {
-            throw new BadRequestHttpException('No valid file uploaded');
+            throw new UnprocessableEntityHttpException('No valid file uploaded');
         }
 
         // Storage::uploadFile() expects $_FILES['image']
@@ -108,7 +108,7 @@ final class MediaProcessor implements ProcessorInterface
         if ($resolved === false
             || ($resolved !== rtrim($realStorageRoot, DS) && !str_starts_with($resolved . DS, $rootBoundary))
         ) {
-            throw new BadRequestHttpException('Invalid folder path');
+            throw new UnprocessableEntityHttpException('Invalid folder path');
         }
 
         $io = new \Maho\Io\File();
@@ -116,7 +116,7 @@ final class MediaProcessor implements ProcessorInterface
 
         $realTargetDir = realpath($targetDir);
         if (!$realTargetDir || !str_starts_with(rtrim($realTargetDir, DS) . DS, $rootBoundary)) {
-            throw new BadRequestHttpException('Invalid folder path');
+            throw new UnprocessableEntityHttpException('Invalid folder path');
         }
 
         $result = $storage->uploadFile($realTargetDir, 'image');

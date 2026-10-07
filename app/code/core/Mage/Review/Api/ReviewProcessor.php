@@ -16,6 +16,7 @@ use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
  * Review Processor, handles review submission with custom logic.
@@ -79,10 +80,10 @@ final class ReviewProcessor extends \Maho\ApiPlatform\Processor
     private function moderateReview(int $reviewId, Review $data): Review
     {
         if ($data->status === null && ($data->stores === null || $data->stores === [])) {
-            throw new BadRequestHttpException('Provide a status and/or stores to moderate');
+            throw new UnprocessableEntityHttpException('Provide a status and/or stores to moderate');
         }
         if ($data->status !== null && !isset(self::STATUS_MAP[$data->status])) {
-            throw new BadRequestHttpException('status must be one of: ' . implode(', ', array_keys(self::STATUS_MAP)));
+            throw new UnprocessableEntityHttpException('status must be one of: ' . implode(', ', array_keys(self::STATUS_MAP)));
         }
 
         /** @var \Mage_Review_Model_Review $review */
@@ -136,7 +137,7 @@ final class ReviewProcessor extends \Maho\ApiPlatform\Processor
         try {
             return $this->resolveStoreIds(array_map(strval(...), $stores), $user);
         } catch (\Mage_Core_Model_Store_Exception) {
-            throw new BadRequestHttpException('stores contains an unknown store');
+            throw new UnprocessableEntityHttpException('stores contains an unknown store');
         }
     }
 
@@ -166,25 +167,25 @@ final class ReviewProcessor extends \Maho\ApiPlatform\Processor
         $nickname = trim($nickname);
 
         if (empty($title)) {
-            throw new BadRequestHttpException('Review title is required');
+            throw new UnprocessableEntityHttpException('Review title is required');
         }
         if (strlen($title) > 255) {
-            throw new BadRequestHttpException('Review title cannot exceed 255 characters');
+            throw new UnprocessableEntityHttpException('Review title cannot exceed 255 characters');
         }
         if (empty($detail)) {
-            throw new BadRequestHttpException('Review detail is required');
+            throw new UnprocessableEntityHttpException('Review detail is required');
         }
         if (strlen($detail) > 65535) {
-            throw new BadRequestHttpException('Review detail is too long');
+            throw new UnprocessableEntityHttpException('Review detail is too long');
         }
         if (empty($nickname)) {
-            throw new BadRequestHttpException('Nickname is required');
+            throw new UnprocessableEntityHttpException('Nickname is required');
         }
         if (strlen($nickname) > 255) {
-            throw new BadRequestHttpException('Nickname cannot exceed 255 characters');
+            throw new UnprocessableEntityHttpException('Nickname cannot exceed 255 characters');
         }
         if ($rating < 1 || $rating > 5) {
-            throw new BadRequestHttpException('Rating must be between 1 and 5');
+            throw new UnprocessableEntityHttpException('Rating must be between 1 and 5');
         }
 
         $storeId = StoreContext::getStoreId();
@@ -203,7 +204,7 @@ final class ReviewProcessor extends \Maho\ApiPlatform\Processor
 
         $validate = $review->validate();
         if ($validate !== true && is_array($validate)) {
-            throw new BadRequestHttpException(implode(', ', $validate));
+            throw new UnprocessableEntityHttpException(implode(', ', $validate));
         }
 
         $review->save();

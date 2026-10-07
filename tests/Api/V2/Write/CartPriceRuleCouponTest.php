@@ -98,7 +98,7 @@ describe('Cart price rule coupon generation', function (): void {
         $ruleId = cprcpRule();
         $response = cprcpGenerate($ruleId, $body);
 
-        expect($response['status'])->toBe(400)
+        expect($response['status'])->toBe(422)
             ->and($response['json']['details']['field'])->toBe($field);
     })->with([
         'no quantity' => [[], 'qty'],
@@ -179,9 +179,9 @@ describe('Cart price rule coupon lists and deletes', function (): void {
             ->and(array_column(cprcpMembers(apiGet(CPRCP_PATH . "/{$ruleId}/coupons", adminToken())), 'id'))->toBe([$coupons[2]['id']])
             ->and(cprcpMembers(apiGet(CPRCP_PATH . "/{$otherRule}/coupons", adminToken())))->toHaveCount(1);
 
-        expect(apiPost(CPRCP_PATH . "/{$ruleId}/coupons/mass-delete", ['ids' => []], adminToken())['status'])->toBe(400)
-            ->and(apiPost(CPRCP_PATH . "/{$ruleId}/coupons/mass-delete", ['ids' => range(1, 1001)], adminToken())['status'])->toBe(400)
-            ->and(apiPost(CPRCP_PATH . "/{$ruleId}/coupons/mass-delete", ['ids' => ['x']], adminToken())['status'])->toBe(400);
+        expect(apiPost(CPRCP_PATH . "/{$ruleId}/coupons/mass-delete", ['ids' => []], adminToken())['status'])->toBe(422)
+            ->and(apiPost(CPRCP_PATH . "/{$ruleId}/coupons/mass-delete", ['ids' => range(1, 1001)], adminToken())['status'])->toBe(422)
+            ->and(apiPost(CPRCP_PATH . "/{$ruleId}/coupons/mass-delete", ['ids' => ['x']], adminToken())['status'])->toBe(422);
     });
 
 });

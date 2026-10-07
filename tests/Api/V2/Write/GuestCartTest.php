@@ -326,13 +326,13 @@ describe('PUT /api/rest/v2/guest-carts/{id}/coupon (Apply Coupon)', function ():
         expect($response['json']['message'])->toContain('is not valid');
     });
 
-    it('returns 400 when coupon code is missing', function (): void {
+    it('returns 422 when coupon code is missing', function (): void {
         $createResponse = createGuestCart();
         $cartId = $createResponse['json']['maskedId'];
 
         $response = apiPut("/api/rest/v2/guest-carts/{$cartId}/coupon", []);
 
-        expect($response['status'])->toBe(400);
+        expect($response['status'])->toBe(422);
     });
 
 });
