@@ -117,7 +117,7 @@ final class CartPriceRuleProcessor extends \Maho\ApiPlatform\Processor
         $this->throwErrors();
 
         $this->safeSave($rule, 'create cart price rule');
-        $this->logApiActivity('cart_price_rule', 'create', null, $rule, $user);
+        $this->logApiActivity('cart_price_rule', 'create', null, $rule);
 
         return $this->provider->toRuleDto($this->provider->loadRule((int) $rule->getId()), true);
     }
@@ -136,7 +136,7 @@ final class CartPriceRuleProcessor extends \Maho\ApiPlatform\Processor
         $this->throwErrors();
 
         $this->safeSave($rule, 'update cart price rule');
-        $this->logApiActivity('cart_price_rule', 'update', $oldData, $rule, $user);
+        $this->logApiActivity('cart_price_rule', 'update', $oldData, $rule);
 
         return $this->provider->toRuleDto($this->provider->loadRule($id), true);
     }
@@ -146,7 +146,7 @@ final class CartPriceRuleProcessor extends \Maho\ApiPlatform\Processor
         $rule = $this->loadWritableRule($id, $user);
         $oldData = $rule->getData();
         $this->safeDelete($rule, 'delete cart price rule');
-        $this->logApiActivity('cart_price_rule', 'delete', $oldData, null, $user);
+        $this->logApiActivity('cart_price_rule', 'delete', $oldData, null);
     }
 
     /**
