@@ -302,7 +302,7 @@ final class McpToolResourceMetadataCollectionFactory implements ResourceMetadata
 
         return new $class(
             name: $name,
-            title: sprintf('%s %s', ucfirst($suffix), $operation->getShortName() ?? 'record'),
+            title: sprintf('%s %s', ucfirst($suffix), preg_replace('/(?<=[a-z0-9])(?=[A-Z])/', ' ', $operation->getShortName() ?? 'record')),
             description: $this->description($operation, $resource),
             annotations: $this->annotations($operation),
             method: $operation->getMethod(),

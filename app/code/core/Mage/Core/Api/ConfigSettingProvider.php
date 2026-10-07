@@ -32,6 +32,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  *     comment: string,
  *     frontendType: ?string,
  *     backendModel: ?string,
+ *     sourceModel: ?string,
  *     showInDefault: bool,
  *     showInWebsite: bool,
  *     showInStore: bool,
@@ -42,6 +43,7 @@ final class ConfigSettingProvider extends \Maho\ApiPlatform\Provider
 {
     private const SENSITIVE_NAME_PATTERN = '/key|secret|password|token|salt/i';
     private const SENSITIVE_FRONTEND_TYPES = ['obscure', 'password'];
+    private const MAX_OPTIONS = 50;
 
     /** @var array<string, FieldInfo>|null */
     private ?array $fields = null;
@@ -68,7 +70,7 @@ final class ConfigSettingProvider extends \Maho\ApiPlatform\Provider
         }
         $this->assertSectionAllowed($field, $user);
 
-        return $this->toSettingDto($field, $scope, $this->ownPaths($scope));
+        return $this->toSettingDto($field, $scope, $this->ownPaths($scope), withOptions: true);
     }
 
     /**
@@ -134,7 +136,7 @@ final class ConfigSettingProvider extends \Maho\ApiPlatform\Provider
      * @param ScopeInfo $scope
      * @param array<string, true> $ownPaths Paths that have a row at this scope
      */
-    public function toSettingDto(array $field, array $scope, array $ownPaths): ConfigSetting
+    public function toSettingDto(array $field, array $scope, array $ownPaths, bool $withOptions = false): ConfigSetting
     {
         $dto = new ConfigSetting();
         $dto->path = $field['path'];
@@ -148,6 +150,7 @@ final class ConfigSettingProvider extends \Maho\ApiPlatform\Provider
         $dto->isSensitive = $this->isSensitive($field);
         $dto->inherited = $scope['scope'] !== ConfigSetting::SCOPE_DEFAULT && !isset($ownPaths[$field['path']]);
         $dto->value = $dto->isSensitive ? null : $this->valueAtScope($field['path'], $scope);
+        $dto->options = $withOptions ? $this->options($field) : null;
 
         return $dto;
     }
@@ -374,10 +377,83 @@ final class ConfigSettingProvider extends \Maho\ApiPlatform\Provider
                 'comment' => isset($fieldNode->comment) ? trim(html_entity_decode(strip_tags((string) $fieldNode->comment))) : '',
                 'frontendType' => isset($fieldNode->frontend_type) ? (string) $fieldNode->frontend_type : 'text',
                 'backendModel' => isset($fieldNode->backend_model) ? (string) $fieldNode->backend_model : null,
+                'sourceModel' => isset($fieldNode->source_model) ? (string) $fieldNode->source_model : null,
                 'showInDefault' => (bool) (int) $fieldNode->show_in_default,
                 'showInWebsite' => (bool) (int) $fieldNode->show_in_website,
                 'showInStore' => (bool) (int) $fieldNode->show_in_store,
             ];
+        }
+    }
+
+    /**
+     * The values of a select, multiselect or boolean field with their labels, as System >
+     * Configuration shows them. Null when the field has no source model or more than MAX_OPTIONS values.
+     *
+     * @param FieldInfo $field
+     * @return list<array{value: string, label: string}>|null
+     */
+    public function options(array $field): ?array
+    {
+        if ($field['frontendType'] === 'boolean') {
+            return [
+                ['value' => '1', 'label' => \Mage::helper('core')->__('Yes')],
+                ['value' => '0', 'label' => \Mage::helper('core')->__('No')],
+            ];
+        }
+        if ($field['sourceModel'] === null || !in_array($field['frontendType'], ['select', 'multiselect'], true)) {
+            return null;
+        }
+        $factoryName = $field['sourceModel'];
+        $method = null;
+        if (preg_match('/^([^:]+?)::([^:]+?)$/', $factoryName, $matches)) {
+            [, $factoryName, $method] = $matches;
+        }
+        $multiselect = $field['frontendType'] === 'multiselect';
+        try {
+            $source = \Mage::getSingleton($factoryName);
+            if (!is_object($source)) {
+                return null;
+            }
+            if ($source instanceof \Maho\DataObject) {
+                $source->setPath($field['path']);
+            }
+            if ($method === null) {
+                $raw = method_exists($source, 'toOptionArray') ? $source->toOptionArray($multiselect) : [];
+            } else {
+                $raw = $source->$method() ?? [];
+                if (!$multiselect) {
+                    $raw = array_map(static fn($value, $label): array => ['value' => $value, 'label' => $label], array_keys($raw), $raw);
+                }
+            }
+        } catch (\Throwable) {
+            return null;
+        }
+
+        $options = [];
+        $this->flattenOptions(is_array($raw) ? $raw : [], $options);
+
+        return $options === [] || count($options) > self::MAX_OPTIONS ? null : $options;
+    }
+
+    /**
+     * Add the options in $raw to $options. An option group holds its options in its value.
+     *
+     * @param array<mixed> $raw
+     * @param list<array{value: string, label: string}> $options
+     */
+    private function flattenOptions(array $raw, array &$options): void
+    {
+        foreach ($raw as $option) {
+            if (!is_array($option) || !array_key_exists('value', $option)) {
+                continue;
+            }
+            if (is_array($option['value'])) {
+                $this->flattenOptions($option['value'], $options);
+                continue;
+            }
+            if (is_scalar($option['value'])) {
+                $options[] = ['value' => (string) $option['value'], 'label' => (string) ($option['label'] ?? $option['value'])];
+            }
         }
     }
 

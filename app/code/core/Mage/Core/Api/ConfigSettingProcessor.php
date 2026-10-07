@@ -73,7 +73,7 @@ final class ConfigSettingProcessor extends \Maho\ApiPlatform\Processor
         $value = $this->normalizeValue($body['value']);
         $this->write($field, $scope, $value, $oldValue, $user);
 
-        return $this->provider->toSettingDto($field, $scope, $this->provider->ownPaths($scope));
+        return $this->provider->toSettingDto($field, $scope, $this->provider->ownPaths($scope), withOptions: true);
     }
 
     /**

@@ -19,7 +19,7 @@ declare(strict_types=1);
 class Maho_Ai_Model_Chat_SystemPrompt
 {
     /** Longer prompts cost on every model request; a test keeps this honest. */
-    public const MAX_CHARS = 10000;
+    public const MAX_CHARS = 10500;
 
     /** The custom instructions of the store owner come on top of MAX_CHARS. */
     public const MAX_CUSTOM_CHARS = 2000;
@@ -245,6 +245,8 @@ class Maho_Ai_Model_Chat_SystemPrompt
         return implode("\n", [
             'How to answer:',
             '- Write in the language of the administrator\'s message, never in the language of the data you read.',
+            '- Write plain language for a store owner, not for a developer: short sentences with one fact each, the active voice, common words, and the same word for the same thing. No jargon, no idioms, no filler.',
+            '- Name a thing as the admin shows it: the menu, the tab, the field label. Never show a configuration path, a field code, a tool name or JSON unless the administrator asks for it.',
             '- Markdown without HTML. A table for a list of records, with headers of one or two words: "Time", not "Time (store timezone)". Short: the result, then the next step if there is one.',
             '- Never put an em dash (—) or an en dash (–) between words, in answers or store texts: use a comma, a colon or parentheses.',
             '- Link every record you name to its API @id, as the tool result gives it: [Blue Shirt](/api/rest/v2/products/12). The panel turns the link into the record\'s page in the admin.',

@@ -306,12 +306,7 @@ final class McpToolbox implements ToolboxInterface
             }
         }
         if ($current !== null) {
-            foreach (self::RECORD_LABELS as $label) {
-                if (isset($current[$label]) && is_scalar($current[$label]) && (string) $current[$label] !== '') {
-                    $preview['record'] = (string) $current[$label];
-                    break;
-                }
-            }
+            $preview['record'] = self::recordLabel($current);
         }
 
         if ($shape['kind'] === 'create') {
@@ -346,8 +341,70 @@ final class McpToolbox implements ToolboxInterface
         if ($preview['changes'] !== [] && $canUndo) {
             $preview['undo'] = $undo;
         }
+        $preview['changes'] = self::withOptionLabels($preview['changes'], $current);
 
         return $preview;
+    }
+
+    /**
+     * The name an administrator knows a record by. A configuration setting gives its section,
+     * group and field labels, because many fields share a label such as "Enable".
+     *
+     * @param array<string, mixed> $current
+     */
+    private static function recordLabel(array $current): ?string
+    {
+        if (isset($current['groupLabel'], $current['label']) && is_string($current['groupLabel']) && is_string($current['label'])) {
+            $sectionLabel = is_string($current['sectionLabel'] ?? null) ? $current['sectionLabel'] : '';
+
+            return implode(' > ', array_filter([$sectionLabel, $current['groupLabel'], $current['label']], static fn(string $part): bool => $part !== ''));
+        }
+        foreach (self::RECORD_LABELS as $label) {
+            if (isset($current[$label]) && is_scalar($current[$label]) && (string) $current[$label] !== '') {
+                return (string) $current[$label];
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Put the option label in place of the stored value of a configuration setting, so the card
+     * shows "Yes" and not "1". A multiselect value is a comma-separated list.
+     *
+     * @param list<array{field: string, from: mixed, to: mixed}> $changes
+     * @param array<string, mixed>|null $current
+     * @return list<array{field: string, from: mixed, to: mixed}>
+     */
+    private static function withOptionLabels(array $changes, ?array $current): array
+    {
+        if (!is_array($current['options'] ?? null)) {
+            return $changes;
+        }
+        $labels = [];
+        foreach ($current['options'] as $option) {
+            if (is_array($option) && isset($option['value'], $option['label'])) {
+                $labels[(string) $option['value']] = (string) $option['label'];
+            }
+        }
+        $label = static function (mixed $value) use ($labels): mixed {
+            if (is_bool($value)) {
+                $value = $value ? '1' : '0';
+            }
+            if (!is_scalar($value) || (string) $value === '') {
+                return $value;
+            }
+            if (isset($labels[(string) $value])) {
+                return $labels[(string) $value];
+            }
+            $parts = array_map(static fn(string $part): string => $labels[$part] ?? $part, explode(',', (string) $value));
+
+            return implode(', ', $parts);
+        };
+
+        return array_map(static fn(array $change): array => $change['field'] === 'value'
+            ? ['field' => $change['field'], 'from' => $label($change['from']), 'to' => $label($change['to'])]
+            : $change, $changes);
     }
 
     /**

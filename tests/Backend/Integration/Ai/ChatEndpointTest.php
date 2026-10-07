@@ -341,6 +341,27 @@ it('previews an update with the current values, and undoes it after the administ
     }
 });
 
+it('previews a configuration setting by its section, group and field labels, and its value by the option label', function (): void {
+    $admin = aiChatAdmin('ai_chat_setting_previewer', ['all']);
+    try {
+        aiChatLogin($admin);
+        AiChatScript::reset(
+            new ToolCallResult([new ToolCall('call_s', 'system_config_settings_update', ['path' => 'sales/minimum_order/active', 'value' => '1'])]),
+        );
+        $result = aiChatRequest('/api/admin/ai/chat', ['message' => 'Turn on the minimum order amount', 'context' => ['route' => 'system_config/edit']]);
+        expect($result['status'])->toBe(200);
+        $call = aiChatEvents($result['events'], 'confirm')[0]['calls'][0];
+        expect($call['title'])->toBe('Update Config Setting');
+        expect($call['preview']['record'])->toBe('Sales > Minimum Order Amount > Enable');
+        expect($call['preview']['changes'])->toHaveCount(1);
+        expect($call['preview']['changes'][0]['field'])->toBe('value');
+        expect($call['preview']['changes'][0]['to'])->toBe('Yes');
+    } finally {
+        aiChatDeleteConversations((int) $admin->getId());
+        aiChatDeleteAdmin($admin);
+    }
+});
+
 it('keeps a note the model stores with the remember tool and lists it in the next prompt', function (): void {
     $admin = aiChatAdmin('ai_chat_rememberer', ['all']);
     try {

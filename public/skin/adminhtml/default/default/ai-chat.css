@@ -289,8 +289,8 @@ body.ai-chat-open .ai-chat-toggle {
     word-break: break-word;
 }
 
-/* A table wider than the panel scrolls on its own, and a header never breaks into several lines. */
-:host .message-bubble table {
+/* A table in an answer scrolls on its own when it is wider than the panel, and a header never breaks into several lines. */
+:host .message-bubble:not(.html-message) table {
     display: block;
     max-width: 100%;
     overflow-x: auto;
@@ -299,14 +299,14 @@ body.ai-chat-open .ai-chat-toggle {
     font-size: 12px;
 }
 
-:host .message-bubble th,
-:host .message-bubble td {
+:host .message-bubble:not(.html-message) th,
+:host .message-bubble:not(.html-message) td {
     padding: 6px 8px;
     border-bottom: 1px solid var(--maho-border-soft);
     vertical-align: top;
 }
 
-:host .message-bubble th {
+:host .message-bubble:not(.html-message) th {
     color: var(--maho-ink-muted);
     font-size: 11px;
     font-weight: 600;
@@ -315,13 +315,13 @@ body.ai-chat-open .ai-chat-toggle {
     white-space: nowrap;
 }
 
-:host .message-bubble th:first-child,
-:host .message-bubble td:first-child {
+:host .message-bubble:not(.html-message) th:first-child,
+:host .message-bubble:not(.html-message) td:first-child {
     padding-inline-start: 0;
 }
 
-:host .message-bubble th:last-child,
-:host .message-bubble td:last-child {
+:host .message-bubble:not(.html-message) th:last-child,
+:host .message-bubble:not(.html-message) td:last-child {
     padding-inline-end: 0;
 }
 

@@ -133,4 +133,10 @@ class ConfigSetting extends \Maho\ApiPlatform\Resource
 
     #[ApiProperty(writable: false, extraProperties: ['computed' => true], description: 'Input type of the field: text, select, multiselect, textarea, obscure and others')]
     public ?string $frontendType = null;
+
+    /**
+     * @var list<array{value: string, label: string}>|null
+     */
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true], description: 'The values that a select, multiselect or boolean field takes, each with its label. Only on one setting, never in a list. Null for other fields and for a field with more than 50 values')]
+    public ?array $options = null;
 }

@@ -114,7 +114,7 @@ return [
     ],
     'ConfigSetting' => [
         'comment', 'extensions', 'frontendType', 'groupLabel', 'inherited', 'isSensitive', 'label',
-        'path', 'scope', 'scopeCode', 'sectionLabel', 'value',
+        'options', 'path', 'scope', 'scopeCode', 'sectionLabel', 'value',
     ],
     'ConfigurableSetup' => [
         'childProductIds', 'extensions', 'id', 'superAttributes',
