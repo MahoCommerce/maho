@@ -29,16 +29,23 @@ describe('Customer Segment Model', function () {
         expect($conditionsModel)->toBeInstanceOf(Maho_CustomerSegmentation_Model_Segment_Condition_Combine::class);
     });
 
-    test('validates segment data correctly - business logic validation', function () {
-        // Test invalid segment (no name) - should throw exception
-        $this->segment->setDescription('Test');
-        expect(fn() => $this->segment->validate())->toThrow(Mage_Core_Exception::class);
+    test('gets the column defaults of the table when a direct save leaves them out', function () {
+        $segment = Mage::getModel('customersegmentation/segment')
+            ->setName('Pest table defaults ' . uniqid())
+            ->setWebsiteIds([1]);
+        $segment->save();
 
-        // Test valid segment
-        $this->segment->setName('Valid Segment');
-        $this->segment->setWebsiteIds([1]); // Required by validation
-        $this->segment->setIsActive();
-        expect($this->segment->validate())->toBe(true);
+        try {
+            $loaded = Mage::getModel('customersegmentation/segment')->load($segment->getId());
+            expect($loaded->getIsActive())->toBeTrue()
+                ->and($loaded->getRefreshMode())->toBe(Maho_CustomerSegmentation_Model_Segment::MODE_AUTO)
+                ->and($loaded->getRefreshStatus())->toBe(Maho_CustomerSegmentation_Model_Segment::STATUS_PENDING)
+                ->and($loaded->getPriority())->toBe(0)
+                ->and($loaded->getAutoEmailActive())->toBeFalse()
+                ->and($loaded->getAllowOverlappingSequences())->toBeFalse();
+        } finally {
+            $segment->delete();
+        }
     });
 
     test('can handle empty conditions gracefully - segmentation specific functionality', function () {

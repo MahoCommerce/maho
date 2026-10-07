@@ -46,12 +46,7 @@ final class CustomerSegmentProvider extends \Maho\ApiPlatform\Provider
      */
     public function loadReadableSegment(int $id, ApiUser $user): \Maho_CustomerSegmentation_Model_Segment
     {
-        $segment = $this->segmentService()->getById($id);
-        $allowedWebsiteIds = $this->allowedWebsiteIds($user);
-        if ($allowedWebsiteIds !== null && array_intersect($segment->getWebsiteIds(), $allowedWebsiteIds) === []) {
-            throw new \Mage_Core_Exception_NoSuchEntity(\Mage::helper('customersegmentation')->__('This segment no longer exists.'));
-        }
-        return $segment;
+        return $this->segmentService()->getById($id, $this->allowedWebsiteIds($user));
     }
 
     /**

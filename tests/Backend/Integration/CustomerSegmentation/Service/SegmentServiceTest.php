@@ -64,4 +64,36 @@ describe('Customer segment service', function () {
         expect(fn() => pestSegmentService()->getById((int) $segment->getId()))
             ->toThrow(Mage_Core_Exception_NoSuchEntity::class);
     });
+
+    it('treats a segment outside the given websites as missing', function () {
+        $segment = pestSegmentService()->save(
+            pestSegmentService()->newSegment()->setName('Pest scope ' . uniqid())->setWebsiteIds([1]),
+        );
+
+        try {
+            expect(pestSegmentService()->getById((int) $segment->getId(), [1])->getId())->toBe($segment->getId())
+                ->and(fn() => pestSegmentService()->getById((int) $segment->getId(), [999]))
+                ->toThrow(Mage_Core_Exception_NoSuchEntity::class)
+                ->and(fn() => pestSegmentService()->getById((int) $segment->getId(), []))
+                ->toThrow(Mage_Core_Exception_NoSuchEntity::class);
+        } finally {
+            pestSegmentService()->delete($segment);
+        }
+    });
+
+    it('refuses the email automation of a segment without an email sequence', function () {
+        $segment = pestSegmentService()->save(
+            pestSegmentService()->newSegment()->setName('Pest automation ' . uniqid())->setWebsiteIds([1]),
+        );
+
+        try {
+            pestSegmentService()->save($segment->setAutoEmailActive());
+            $this->fail('The service turned on the email automation of a segment without a sequence');
+        } catch (Mage_Core_Exception_Input $e) {
+            expect(array_column($e->getErrors(), 'field'))->toBe(['auto_email_active'])
+                ->and(pestSegmentService()->getById((int) $segment->getId())->getAutoEmailActive())->toBeFalse();
+        } finally {
+            pestSegmentService()->delete($segment);
+        }
+    });
 });
