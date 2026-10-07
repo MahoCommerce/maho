@@ -74,9 +74,9 @@ function segmentAudienceSegment(array $customerIds, string $websiteIds = '1'): M
     /** @var Maho_CustomerSegmentation_Model_Segment $segment */
     $segment = Mage::getModel('customersegmentation/segment');
     $segment->setName(SEGMENT_AUDIENCE_PREFIX . ' ' . uniqid())
-        ->setIsActive(1)
-        ->setWebsiteIds($websiteIds)
-        ->setCustomerGroupIds('0,1,2,3')
+        ->setIsActive()
+        ->setWebsiteIds(array_map(intval(...), explode(',', $websiteIds)))
+        ->setCustomerGroupIds([0, 1, 2, 3])
         ->setRefreshMode(Maho_CustomerSegmentation_Model_Segment::MODE_MANUAL)
         ->save();
 
