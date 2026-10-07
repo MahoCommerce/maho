@@ -409,6 +409,10 @@ class Kernel extends BaseKernel
             ->decorate('api_platform.metadata.resource.metadata_collection_factory', null, 140)
             ->arg('$decorated', new Reference(Metadata\SelfResolvingWriteResourceMetadataCollectionFactory::class . '.inner'));
 
+        $services->set(Metadata\OperationDescriptionResourceMetadataCollectionFactory::class)
+            ->decorate('api_platform.metadata.resource.metadata_collection_factory', null, 145)
+            ->arg('$decorated', new Reference(Metadata\OperationDescriptionResourceMetadataCollectionFactory::class . '.inner'));
+
         // Publishes has_backend_access('<resource>') to every security expression,
         // including the per-property ones the serializer evaluates. Tagged by
         // hand: FrameworkBundle autoconfigures ExpressionFunctionProviderInterface

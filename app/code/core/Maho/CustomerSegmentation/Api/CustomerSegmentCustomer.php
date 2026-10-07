@@ -42,24 +42,24 @@ class CustomerSegmentCustomer extends \Maho\ApiPlatform\Resource
 {
     public const ADMIN_RESOURCE = CustomerSegment::ADMIN_RESOURCE;
 
-    #[ApiProperty(identifier: true, writable: false, description: 'Customer ID')]
+    #[ApiProperty(identifier: true, writable: false, description: 'Customer ID', example: 136)]
     public int $id = 0;
 
-    #[ApiProperty(writable: false)]
+    #[ApiProperty(writable: false, example: 'jane.doe@example.com')]
     public ?string $email = null;
 
-    #[ApiProperty(writable: false)]
+    #[ApiProperty(writable: false, example: 'Jane')]
     public ?string $firstname = null;
 
-    #[ApiProperty(writable: false)]
+    #[ApiProperty(writable: false, example: 'Doe')]
     public ?string $lastname = null;
 
-    #[ApiProperty(writable: false)]
+    #[ApiProperty(writable: false, description: 'Customer group ID', example: 1)]
     public ?int $groupId = null;
 
-    #[ApiProperty(writable: false, description: 'The website of the membership')]
+    #[ApiProperty(writable: false, description: 'The website of the membership', example: 1)]
     public ?int $websiteId = null;
 
-    #[ApiProperty(writable: false, description: 'Time when a refresh added the customer to the segment, in UTC')]
+    #[ApiProperty(writable: false, description: 'Time when a refresh added the customer to the segment, in UTC', example: '2026-10-07 05:00:12')]
     public ?string $addedAt = null;
 }

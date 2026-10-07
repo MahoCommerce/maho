@@ -51,16 +51,16 @@ class CustomerSegmentConditionType extends \Maho\ApiPlatform\Resource
     /** The type of a tree node is this prefix and the code. */
     public const TYPE_PREFIX = 'customersegmentation/segment_condition_';
 
-    #[ApiProperty(identifier: true, writable: false, description: 'Short code of the type, for example customer_clv')]
+    #[ApiProperty(identifier: true, writable: false, description: 'Short code of the type, for example customer_clv', example: 'customer_clv')]
     public string $code = '';
 
-    #[ApiProperty(writable: false, description: 'The type of a tree node, for example customersegmentation/segment_condition_customer_clv')]
+    #[ApiProperty(writable: false, description: 'The type of a tree node, for example customersegmentation/segment_condition_customer_clv', example: 'customersegmentation/segment_condition_customer_clv')]
     public string $type = '';
 
-    #[ApiProperty(writable: false, description: 'combine (a node with child conditions) or leaf')]
+    #[ApiProperty(writable: false, description: 'combine (a node with child conditions) or leaf', example: 'leaf')]
     public string $kind = '';
 
-    #[ApiProperty(writable: false, description: 'The group of the type in the condition list of the admin, such as Order History')]
+    #[ApiProperty(writable: false, description: 'The group of the type in the condition list of the admin, such as Order History', example: 'Customer Lifetime Value')]
     public ?string $label = null;
 
     /** @var list<array<string, mixed>> */
