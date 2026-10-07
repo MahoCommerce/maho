@@ -546,6 +546,7 @@ final class ChatService
         'widget' => 'content',
         'sales' => 'sales',
         'customer' => 'customers',
+        'customersegmentation' => 'customers',
         'promo' => 'promotions',
         'tax' => 'tax',
         'newsletter' => 'other',

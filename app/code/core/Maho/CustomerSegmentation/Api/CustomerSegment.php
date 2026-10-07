@@ -19,6 +19,7 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
+use Maho\ApiPlatform\Metadata\EnumSource;
 use Maho\Config\ApiResource;
 use Symfony\Component\ObjectMapper\Attribute\Map;
 use Symfony\Component\ObjectMapper\Condition\TargetClass;
@@ -134,16 +135,16 @@ class CustomerSegment extends \Maho\ApiPlatform\Resource
     public bool $isActive = true;
 
     /** @var list<int> */
-    #[ApiProperty(description: 'The websites whose customers the segment can hold')]
+    #[ApiProperty(description: 'The websites whose customers the segment can hold', extraProperties: [EnumSource::KEY => 'Maho\ApiPlatform\Metadata\ValueLists::websites'])]
     #[Map]
     public array $websiteIds = [];
 
     /** @var list<int> */
-    #[ApiProperty(description: 'Only customers of these groups. Empty: every customer group')]
+    #[ApiProperty(description: 'Only customers of these groups. Empty: every customer group', extraProperties: [EnumSource::KEY => 'customer/customer_attribute_source_group'])]
     #[Map]
     public array $customerGroupIds = [];
 
-    #[ApiProperty(description: 'auto: a daily job finds the customers again. manual: only a refresh does')]
+    #[ApiProperty(description: 'auto: a daily job finds the customers again. manual: only a refresh does', extraProperties: [EnumSource::KEY => \Maho_CustomerSegmentation_Service_Segment::REFRESH_MODES])]
     #[Map]
     public string $refreshMode = \Maho_CustomerSegmentation_Model_Segment::MODE_AUTO;
 
@@ -163,7 +164,7 @@ class CustomerSegment extends \Maho\ApiPlatform\Resource
     #[Map(if: new TargetClass(self::class))]
     public ?int $matchedCustomersCount = null;
 
-    #[ApiProperty(writable: false, description: 'State of the last refresh: pending (never refreshed), processing, completed or error')]
+    #[ApiProperty(writable: false, description: 'State of the last refresh: pending (never refreshed), processing, completed or error', extraProperties: [EnumSource::KEY => ['pending', 'processing', 'completed', 'error']])]
     #[Map(if: new TargetClass(self::class))]
     public ?string $refreshStatus = null;
 
