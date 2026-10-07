@@ -22,7 +22,7 @@ use Symfony\AI\Platform\Result\ToolCall;
 /**
  * The MCP tools are grouped in sections and loaded on demand: a model request with every
  * tool is too large for most providers, and OpenAI-compatible endpoints stop at 128 tools.
- * The agent starts with the local tools and the sections the turn runner enabled from the
+ * The agent starts with the local tools and the sections the assistant enabled from the
  * page and the conversation; enable_tools loads more, and the agent runs again with them.
  */
 final class McpToolbox implements ToolboxInterface

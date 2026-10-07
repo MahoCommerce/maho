@@ -42,7 +42,7 @@ use Symfony\Component\Routing\Attribute\Route;
 final class ChatController
 {
     public function __construct(
-        private readonly TurnRunner $turnRunner,
+        private readonly Assistant $assistant,
         private readonly RequestStack $requestStack,
     ) {}
 
@@ -65,7 +65,7 @@ final class ChatController
         $attachments = $this->attachments($input, $admin);
 
         return $this->stream($request, $conversation, function (Maho_Ai_Model_Chat_SseWriter $sse) use ($conversation, $admin, $message, $context, $attachments): void {
-            $this->turnRunner->startTurn($conversation, $admin, $message, $context, $sse, $attachments);
+            $this->assistant->startTurn($conversation, $admin, $message, $context, $sse, $attachments);
         });
     }
 
@@ -83,7 +83,7 @@ final class ChatController
         }
 
         return $this->stream($request, $conversation, function (Maho_Ai_Model_Chat_SseWriter $sse) use ($conversation, $admin, $decisions, $context): void {
-            $this->turnRunner->resumeTurn($conversation, $admin, $decisions, $context, $sse);
+            $this->assistant->resumeTurn($conversation, $admin, $decisions, $context, $sse);
         });
     }
 
@@ -194,7 +194,7 @@ final class ChatController
         $this->requestStack->push($request);
         try {
             $schedule = $task->getScheduleId() ? \Mage::getModel('ai/task_schedule')->load($task->getScheduleId()) : null;
-            $outcome = $this->turnRunner->runTask($conversation, $admin, $mode, $schedule?->getId() ? $schedule : null);
+            $outcome = $this->assistant->runTask($conversation, $admin, $mode, $schedule?->getId() ? $schedule : null);
         } finally {
             $this->requestStack->pop();
             $conversation->releaseLock();
@@ -215,7 +215,7 @@ final class ChatController
         }
 
         return $this->stream($request, $conversation, function (Maho_Ai_Model_Chat_SseWriter $sse) use ($conversation, $messageId): void {
-            $this->turnRunner->undo($conversation, $messageId, $sse);
+            $this->assistant->undo($conversation, $messageId, $sse);
         });
     }
 
@@ -331,8 +331,8 @@ final class ChatController
                 $sse->event('start', ['conversation_id' => (int) $conversation->getId()]);
                 $turn($sse);
             } catch (ClientGone) {
-                // Stopped before the turn started: the turn runner did not run, so the note goes here.
-                $this->turnRunner->stopped($conversation);
+                // Stopped before the turn started: the assistant did not run, so the note goes here.
+                $this->assistant->stopped($conversation);
             } finally {
                 $conversation->releaseLock();
                 $this->requestStack->pop();

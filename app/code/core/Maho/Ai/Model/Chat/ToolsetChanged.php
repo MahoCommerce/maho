@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Raised after a round that loaded tool sections, so the turn runner restarts the agent with them.
+ * Raised after a round that loaded tool sections, so the assistant restarts the agent with them.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0

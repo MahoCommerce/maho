@@ -805,13 +805,13 @@ it('answers with the tool results it has when the turn reaches the tool round li
         $users = array_filter(AiChatScript::$lastInput->getMessages(), static fn($m): bool => $m instanceof \Symfony\AI\Platform\Message\UserMessage);
         $texts = array_values(array_map(static fn($m): string => (string) $m->asText(), $users));
         expect($texts)->toContain('Check every product.');
-        expect(end($texts))->toBe(\Maho\Ai\Api\Chat\TurnRunner::WRAP_UP_INSTRUCTION);
+        expect(end($texts))->toBe(\Maho\Ai\Api\Chat\Assistant::WRAP_UP_INSTRUCTION);
         expect(array_filter(AiChatScript::$lastInput->getMessages(), static fn($m): bool => $m instanceof \Symfony\AI\Platform\Message\ToolCallMessage))->toHaveCount(5);
 
         $conversation = Mage::getModel('ai/conversation')->load((int) $done[0]['conversation_id']);
         $messages = array_values($conversation->messagesCollection()->getItems());
         expect(end($messages)->getContent())->toBe('I checked 5 pages of products. The rest is not checked.');
-        expect(array_map(static fn($m): string => (string) $m->getContent(), $messages))->not->toContain(\Maho\Ai\Api\Chat\TurnRunner::WRAP_UP_INSTRUCTION);
+        expect(array_map(static fn($m): string => (string) $m->getContent(), $messages))->not->toContain(\Maho\Ai\Api\Chat\Assistant::WRAP_UP_INSTRUCTION);
     } finally {
         aiChatDeleteConversations((int) $admin->getId());
         aiChatDeleteAdmin($admin);
