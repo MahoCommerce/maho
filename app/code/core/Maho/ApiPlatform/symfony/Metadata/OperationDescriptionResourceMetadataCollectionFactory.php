@@ -42,7 +42,9 @@ final class OperationDescriptionResourceMetadataCollectionFactory implements Res
             foreach ($operations as $name => $operation) {
                 $description = $operation->getDescription();
                 $openapi = $operation->getOpenapi();
-                if ($description === null || $description === '' || $openapi === false || $openapi instanceof Webhook) {
+                // An operation without a description of its own inherits the resource description, which says less than the generated text
+                if ($description === null || $description === '' || $description === $resource->getDescription()
+                    || $openapi === false || $openapi instanceof Webhook) {
                     continue;
                 }
                 $openapi = $openapi instanceof OpenApiOperation ? $openapi : new OpenApiOperation();
