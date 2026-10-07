@@ -35,7 +35,7 @@ final class MageExceptionNormalizer implements NormalizerInterface
         $error['message'] = $exception->getMessage();
         $error['extensions']['status'] = match (true) {
             $exception instanceof \Mage_Core_Exception_NoSuchEntity => 404,
-            $exception instanceof \Mage_Core_Exception_InvalidRequest => 400,
+            $exception instanceof \Mage_Core_Exception_Conflict => 409,
             default => 422,
         };
 

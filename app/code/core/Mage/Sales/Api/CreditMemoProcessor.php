@@ -140,13 +140,7 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
             $data['shipping_amount'] = 0.0;
         }
 
-        try {
-            $creditmemo = $this->orderService->createCreditMemoForOrder($order, $data, $comment, $offlineRefund, $backToStockItems);
-        } catch (\Mage_Core_Exception $e) {
-            throw new BadRequestHttpException($e->getMessage());
-        } catch (\RuntimeException) {
-            throw new ConflictHttpException('A refund is already in progress for this order');
-        }
+        $creditmemo = $this->orderService->createCreditMemoForOrder($order, $data, $comment, $offlineRefund, $backToStockItems);
 
         if (!$creditmemo) {
             throw new BadRequestHttpException('Order cannot be refunded (already fully refunded or not in a refundable state)');

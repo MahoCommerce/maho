@@ -65,7 +65,7 @@ final class StoreContext implements ResetInterface
         }
 
         if (!isset($store->getServeableCurrencyRates()[$code])) {
-            throw new \Mage_Core_Exception_InvalidRequest("Currency not available for this cart's store: {$code}");
+            throw new \Mage_Core_Exception("Currency not available for this cart's store: {$code}");
         }
 
         $store->setRequestedCurrencyCode($code);

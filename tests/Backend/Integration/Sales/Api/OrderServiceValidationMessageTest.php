@@ -66,13 +66,13 @@ describe('The order service validation messages', function (): void {
         }
     });
 
-    it('throws the Mage_Core_Exception_InvalidRequest of the gift card check unchanged', function () use ($createQuote): void {
+    it('throws the Mage_Core_Exception of the gift card check unchanged', function () use ($createQuote): void {
         $quote = $createQuote('90210');
         $quote->setData('giftcard_codes', Mage::helper('core')->jsonEncode(['PEST-MISSING-CARD' => 10.0]));
 
         try {
             expect(fn() => \Mage::getService('sales/order')->placeAdminOrder($quote))
-                ->toThrow(Mage_Core_Exception_InvalidRequest::class, 'Gift card "PEST-MISSING-CARD" is no longer valid');
+                ->toThrow(Mage_Core_Exception::class, 'Gift card "PEST-MISSING-CARD" is no longer valid');
         } finally {
             $quote->delete();
         }

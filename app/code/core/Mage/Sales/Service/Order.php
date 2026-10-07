@@ -38,31 +38,31 @@ class Mage_Sales_Service_Order
     ): array {
         // Validate quote
         if (!$quote->getId() || !$quote->getIsActive()) {
-            throw new \RuntimeException('Cart is not active or does not exist');
+            throw new \Mage_Core_Exception('Cart is not active or does not exist');
         }
 
         // Validate quote has items
         if ($quote->getItemsCount() == 0) {
-            throw new \RuntimeException('Cart is empty');
+            throw new \Mage_Core_Exception('Cart is empty');
         }
 
         // Validate addresses
         if (!$quote->isVirtual()) {
             $shippingAddress = $quote->getShippingAddress();
             if (!$shippingAddress->getShippingMethod()) {
-                throw new \RuntimeException('Shipping method is not set');
+                throw new \Mage_Core_Exception('Shipping method is not set');
             }
         }
 
         $billingAddress = $quote->getBillingAddress();
         if (!$billingAddress->getFirstname()) {
-            throw new \RuntimeException('Billing address is not set');
+            throw new \Mage_Core_Exception('Billing address is not set');
         }
 
         // Validate payment method
         $payment = $quote->getPayment();
         if (!$payment->getMethod()) {
-            throw new \RuntimeException('Payment method is not set');
+            throw new \Mage_Core_Exception('Payment method is not set');
         }
 
         // Set guest email if provided
@@ -95,7 +95,7 @@ class Mage_Sales_Service_Order
         $write = $resource->getConnection('core_write');
         $lockName = 'maho_quote_place_order:' . (int) $quote->getId();
         if (!$write->getLock($lockName, 5)) {
-            throw new \RuntimeException('Order placement is already in progress for this cart');
+            throw new \Mage_Core_Exception_Conflict('Order placement is already in progress for this cart');
         }
 
         try {
@@ -107,7 +107,7 @@ class Mage_Sales_Service_Order
                     ->where('entity_id = ?', (int) $quote->getId()),
             );
             if ($stillActive !== 1) {
-                throw new \RuntimeException('Cart is no longer active');
+                throw new \Mage_Core_Exception_Conflict('Cart is no longer active');
             }
 
             // Re-validate gift-card balances against the live DB under the lock,
@@ -127,7 +127,7 @@ class Mage_Sales_Service_Order
                 && $payment->getMethod() === 'cashondelivery'
                 && $cashTendered < (float) $quote->getGrandTotal()
             ) {
-                throw new \RuntimeException('Insufficient cash tendered');
+                throw new \Mage_Core_Exception('Insufficient cash tendered');
             }
 
             // Convert quote to order
@@ -486,7 +486,7 @@ class Mage_Sales_Service_Order
             // invoice/ship/cancel may have transitioned the order while we waited.
             $order->load((int) $order->getId());
             if (!$order->canCancel()) {
-                throw new \Mage_Core_Exception_InvalidRequest('Order cannot be cancelled');
+                throw new \Mage_Core_Exception_Conflict('Order cannot be cancelled');
             }
 
             try {
@@ -516,7 +516,7 @@ class Mage_Sales_Service_Order
         return $this->withOrderLock((int) $order->getId(), function () use ($order, $reason) {
             $order->load((int) $order->getId());
             if (!$order->canHold()) {
-                throw new \Mage_Core_Exception_InvalidRequest('Order cannot be held');
+                throw new \Mage_Core_Exception_Conflict('Order cannot be held');
             }
 
             try {
@@ -542,7 +542,7 @@ class Mage_Sales_Service_Order
         return $this->withOrderLock((int) $order->getId(), function () use ($order, $reason) {
             $order->load((int) $order->getId());
             if (!$order->canUnhold()) {
-                throw new \Mage_Core_Exception_InvalidRequest('Order is not on hold');
+                throw new \Mage_Core_Exception_Conflict('Order is not on hold');
             }
 
             try {
@@ -802,7 +802,7 @@ class Mage_Sales_Service_Order
         $write = \Mage::getSingleton('core/resource')->getConnection('core_write');
         $lockName = 'maho_order_mutate:' . $orderId;
         if (!$write->getLock($lockName, 5)) {
-            throw new \RuntimeException('Another operation is already in progress for this order');
+            throw new \Mage_Core_Exception_Conflict('Another operation is already in progress for this order');
         }
 
         try {

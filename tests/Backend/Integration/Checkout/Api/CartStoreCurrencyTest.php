@@ -58,7 +58,7 @@ describe('Cart store currency', function (): void {
         StoreContext::setStore(0);
 
         expect(fn() => \Mage::getService('checkout/cart')->getCart((int) $this->quote->getId()))
-            ->toThrow(Mage_Core_Exception_InvalidRequest::class);
+            ->toThrow(Mage_Core_Exception::class);
     });
 
     test('the cart store is undone between requests', function (): void {

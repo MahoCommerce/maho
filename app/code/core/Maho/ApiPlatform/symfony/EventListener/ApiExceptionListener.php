@@ -268,8 +268,8 @@ class ApiExceptionListener implements EventSubscriberInterface
             return new JsonResponse(['error' => 'not_found', 'message' => $exception->getMessage(), 'code' => 404], 404);
         }
 
-        if ($exception instanceof \Mage_Core_Exception_InvalidRequest) {
-            return new JsonResponse(['error' => $exception->getErrorCode() ?? 'bad_request', 'message' => $exception->getMessage(), 'code' => 400], 400);
+        if ($exception instanceof \Mage_Core_Exception_Conflict) {
+            return new JsonResponse(['error' => 'conflict', 'message' => $exception->getMessage(), 'code' => 409], 409);
         }
 
         // Mage_Core_Exception is the canonical user-facing validation/business
