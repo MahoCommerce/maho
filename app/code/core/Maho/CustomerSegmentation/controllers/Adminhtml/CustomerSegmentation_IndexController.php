@@ -51,18 +51,15 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
     #[Maho\Config\Route('/admin/customersegmentation_index/edit')]
     public function editAction(): void
     {
-        $segmentId = $this->getRequest()->getParam('id');
-        $segment = Mage::getModel('customersegmentation/segment');
-
-        if ($segmentId) {
-            $segment->load($segmentId);
-            if (!$segment->getId()) {
-                Mage::getSingleton('adminhtml/session')->addError(
-                    Mage::helper('customersegmentation')->__('This segment no longer exists.'),
-                );
-                $this->_redirect('*/*/');
-                return;
-            }
+        $segmentId = (int) $this->getRequest()->getParam('id');
+        try {
+            $segment = $segmentId
+                ? $this->segmentService()->getById($segmentId)
+                : $this->segmentService()->newSegment();
+        } catch (Mage_Core_Exception_NoSuchEntity $e) {
+            Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
+            $this->_redirect('*/*/');
+            return;
         }
 
         $this->_title($this->__('Customers'))
@@ -156,9 +153,7 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
         $segmentId = $this->getRequest()->getParam('id');
         if ($segmentId) {
             try {
-                $segment = Mage::getModel('customersegmentation/segment');
-                $segment->load($segmentId);
-                $this->segmentService()->delete($segment);
+                $this->segmentService()->delete($this->segmentService()->getById((int) $segmentId));
                 Mage::getSingleton('adminhtml/session')->addSuccess(
                     Mage::helper('customersegmentation')->__('The segment has been deleted.'),
                 );
@@ -204,18 +199,10 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
         $segmentId = $this->getRequest()->getParam('id');
         if ($segmentId) {
             try {
-                $segment = Mage::getModel('customersegmentation/segment');
-                $segment->load($segmentId);
-                if ($segment->getId()) {
-                    $this->segmentService()->refresh($segment);
-                    Mage::getSingleton('adminhtml/session')->addSuccess(
-                        Mage::helper('customersegmentation')->__('The segment has been refreshed.'),
-                    );
-                } else {
-                    Mage::getSingleton('adminhtml/session')->addError(
-                        Mage::helper('customersegmentation')->__('Unable to find a segment to refresh.'),
-                    );
-                }
+                $this->segmentService()->refresh($this->segmentService()->getById((int) $segmentId));
+                Mage::getSingleton('adminhtml/session')->addSuccess(
+                    Mage::helper('customersegmentation')->__('The segment has been refreshed.'),
+                );
             } catch (Exception $e) {
                 Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
             }
@@ -302,49 +289,13 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
     #[Maho\Config\Route('/admin/customersegmentation_index/customersTab')]
     public function customersTabAction(): void
     {
-        $segmentId = $this->getRequest()->getParam('id');
-        if (!$segmentId) {
-            $this->getResponse()->setBody('');
-            return;
-        }
-
-        $segment = Mage::getModel('customersegmentation/segment')->load($segmentId);
-        if (!$segment->getId()) {
-            $this->getResponse()->setBody('');
-            return;
-        }
-
-        Mage::register('current_customer_segment', $segment);
-
-        $this->getResponse()->setBody(
-            $this->getLayout()
-                ->createBlock('customersegmentation/adminhtml_segment_edit_tab_customers')
-                ->toHtml(),
-        );
+        $this->renderSegmentTab('customersegmentation/adminhtml_segment_edit_tab_customers');
     }
 
     #[Maho\Config\Route('/admin/customersegmentation_index/customersGrid')]
     public function customersGridAction(): void
     {
-        $segmentId = $this->getRequest()->getParam('id');
-        if (!$segmentId) {
-            $this->getResponse()->setBody('');
-            return;
-        }
-
-        $segment = Mage::getModel('customersegmentation/segment')->load($segmentId);
-        if (!$segment->getId()) {
-            $this->getResponse()->setBody('');
-            return;
-        }
-
-        Mage::register('current_customer_segment', $segment);
-
-        $this->getResponse()->setBody(
-            $this->getLayout()
-                ->createBlock('customersegmentation/adminhtml_segment_edit_tab_customers')
-                ->toHtml(),
-        );
+        $this->renderSegmentTab('customersegmentation/adminhtml_segment_edit_tab_customers');
     }
 
     /**
@@ -362,25 +313,7 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
     #[Maho\Config\Route('/admin/customersegmentation_index/sequencesGridEnter')]
     public function sequencesGridEnterAction(): void
     {
-        $segmentId = $this->getRequest()->getParam('id');
-        if (!$segmentId) {
-            $this->getResponse()->setBody('');
-            return;
-        }
-
-        $segment = Mage::getModel('customersegmentation/segment')->load($segmentId);
-        if (!$segment->getId()) {
-            $this->getResponse()->setBody('');
-            return;
-        }
-
-        Mage::register('current_customer_segment', $segment);
-
-        $this->getResponse()->setBody(
-            $this->getLayout()
-                ->createBlock('customersegmentation/adminhtml_segment_edit_tab_emailSequencesEnter')
-                ->toHtml(),
-        );
+        $this->renderSegmentTab('customersegmentation/adminhtml_segment_edit_tab_emailSequencesEnter');
     }
 
     /**
@@ -389,25 +322,7 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
     #[Maho\Config\Route('/admin/customersegmentation_index/sequencesGridExit')]
     public function sequencesGridExitAction(): void
     {
-        $segmentId = $this->getRequest()->getParam('id');
-        if (!$segmentId) {
-            $this->getResponse()->setBody('');
-            return;
-        }
-
-        $segment = Mage::getModel('customersegmentation/segment')->load($segmentId);
-        if (!$segment->getId()) {
-            $this->getResponse()->setBody('');
-            return;
-        }
-
-        Mage::register('current_customer_segment', $segment);
-
-        $this->getResponse()->setBody(
-            $this->getLayout()
-                ->createBlock('customersegmentation/adminhtml_segment_edit_tab_emailSequencesExit')
-                ->toHtml(),
-        );
+        $this->renderSegmentTab('customersegmentation/adminhtml_segment_edit_tab_emailSequencesExit');
     }
 
     /**
@@ -430,7 +345,6 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
         $triggerEvent = $this->getRequest()->getParam('trigger_event');
 
         $sequence = Mage::getModel('customersegmentation/emailSequence');
-        $segment = Mage::getModel('customersegmentation/segment');
 
         if ($sequenceId) {
             $sequence->load($sequenceId);
@@ -445,15 +359,14 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
             $triggerEvent = $sequence->getTriggerEvent();
         }
 
-        if ($segmentId) {
-            $segment->load($segmentId);
-            if (!$segment->getId()) {
-                Mage::getSingleton('adminhtml/session')->addError(
-                    Mage::helper('customersegmentation')->__('Invalid segment.'),
-                );
-                $this->_redirect('*/*/');
-                return;
-            }
+        try {
+            $segment = $segmentId
+                ? $this->segmentService()->getById((int) $segmentId)
+                : Mage::getModel('customersegmentation/segment');
+        } catch (Mage_Core_Exception_NoSuchEntity $e) {
+            Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
+            $this->_redirect('*/*/');
+            return;
         }
 
         // Set default values for new sequence
@@ -598,6 +511,22 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
     {
         /** @var Maho_CustomerSegmentation_Service_Segment */
         return Mage::getService('customersegmentation/segment');
+    }
+
+    /**
+     * Render the tab block $blockType for the segment in the id parameter. A missing segment renders nothing.
+     */
+    private function renderSegmentTab(string $blockType): void
+    {
+        try {
+            $segment = $this->segmentService()->getById((int) $this->getRequest()->getParam('id'));
+        } catch (Mage_Core_Exception_NoSuchEntity) {
+            $this->getResponse()->setBody('');
+            return;
+        }
+
+        Mage::register('current_customer_segment', $segment);
+        $this->getResponse()->setBody($this->getLayout()->createBlock($blockType)->toHtml());
     }
 
     /**
