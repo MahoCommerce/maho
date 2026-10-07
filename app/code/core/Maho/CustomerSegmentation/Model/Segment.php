@@ -188,31 +188,6 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
         return $collection;
     }
 
-    /**
-     * Validate segment data
-     *
-     * @throws Mage_Core_Exception
-     */
-    #[\Override]
-    public function validate(?\Maho\DataObject $object = null): bool
-    {
-        $errors = [];
-
-        if (!$this->getName()) {
-            $errors[] = Mage::helper('customersegmentation')->__('Segment name is required.');
-        }
-
-        if (!$this->getWebsiteIds()) {
-            $errors[] = Mage::helper('customersegmentation')->__('Please select at least one website.');
-        }
-
-        if (!empty($errors)) {
-            Mage::throwException(implode("\n", $errors));
-        }
-
-        return true;
-    }
-
     #[\Override]
     protected function _afterLoad(): self
     {
@@ -240,38 +215,6 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
     protected function _beforeSave(): self
     {
         parent::_beforeSave();
-
-        // Validate data
-        $this->validate();
-
-        // Set default values
-        if ($this->isObjectNew()) {
-            if (!$this->hasRefreshMode()) {
-                $this->setRefreshMode(self::MODE_AUTO);
-            }
-            if (!$this->hasRefreshStatus()) {
-                $this->setRefreshStatus(self::STATUS_PENDING);
-            }
-            if (!$this->hasPriority()) {
-                $this->setPriority(0);
-            }
-
-            // Set default values for email automation
-            if (!$this->hasData('auto_email_active')) {
-                $this->setAutoEmailActive(false);
-            }
-            if (!$this->hasData('allow_overlapping_sequences')) {
-                $this->setAllowOverlappingSequences(false);
-            }
-        }
-
-        // Validate email automation if enabled
-        if ($this->getAutoEmailActive()) {
-            $errors = $this->validateEmailAutomation();
-            if (!empty($errors)) {
-                Mage::throwException(implode("\n", $errors));
-            }
-        }
 
         $now = Mage::app()->getLocale()->formatDateForDb('now');
         if ($this->isObjectNew() && !$this->getCreatedAt()) {
@@ -457,47 +400,6 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
             Mage::log('Failed to get email automation stats: ' . $e->getMessage(), Mage::LOG_WARNING);
             return [];
         }
-    }
-
-    /**
-     * Validate email automation settings
-     */
-    public function validateEmailAutomation(): array
-    {
-        $errors = [];
-
-        if (!$this->getAutoEmailActive()) {
-            return $errors; // No validation needed if automation is disabled
-        }
-
-        // Only check sequences if segment already exists (has ID)
-        if ($this->getId()) {
-            try {
-                // Check if segment has any sequences
-                $sequences = $this->getEmailSequences();
-                if ($sequences->getSize() === 0) {
-                    $errors[] = Mage::helper('customersegmentation')->__('At least one email sequence is required when automation is enabled.');
-                } else {
-                    // Validate each sequence
-                    foreach ($sequences as $sequence) {
-                        try {
-                            $sequence->validate();
-                        } catch (Exception $e) {
-                            $errors[] = Mage::helper('customersegmentation')->__(
-                                'Sequence step %d: %s',
-                                $sequence->getStepNumber(),
-                                $e->getMessage(),
-                            );
-                        }
-                    }
-                }
-            } catch (Exception $e) {
-                // Skip sequence validation if there are database connection issues
-                Mage::log('Failed to validate email sequences: ' . $e->getMessage(), Mage::LOG_WARNING);
-            }
-        }
-
-        return $errors;
     }
 
     public function getName(): ?string

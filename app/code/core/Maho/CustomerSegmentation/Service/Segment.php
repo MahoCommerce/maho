@@ -34,16 +34,21 @@ class Maho_CustomerSegmentation_Service_Segment
     }
 
     /**
+     * Load the segment $id. With $websiteIds, a segment that has none of these websites does not exist for the caller.
+     *
+     * @param list<int>|null $websiteIds
      * @throws Mage_Core_Exception_NoSuchEntity
      */
-    public function getById(int $id): Maho_CustomerSegmentation_Model_Segment
+    public function getById(int $id, ?array $websiteIds = null): Maho_CustomerSegmentation_Model_Segment
     {
         /** @var Maho_CustomerSegmentation_Model_Segment $segment */
         $segment = Mage::getModel('customersegmentation/segment');
         if ($id > 0) {
             $segment->load($id);
         }
-        if (!$segment->getId()) {
+        if (!$segment->getId()
+            || ($websiteIds !== null && array_intersect($segment->getWebsiteIds(), $websiteIds) === [])
+        ) {
             throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('customersegmentation')->__('This segment no longer exists.'));
         }
         return $segment;
@@ -86,6 +91,21 @@ class Maho_CustomerSegmentation_Service_Segment
 
         if ((int) $segment->getPriority() < 0) {
             $errors->addError('priority', $helper->__('The priority must be 0 or more.'));
+        }
+
+        // A new segment has no sequences yet: the admin adds them after the first save
+        if ($segment->getAutoEmailActive() && $segment->getId()) {
+            $sequences = $segment->getEmailSequences();
+            if ($sequences->getSize() === 0) {
+                $errors->addError('auto_email_active', $helper->__('At least one email sequence is required when automation is enabled.'));
+            }
+            foreach ($sequences as $sequence) {
+                try {
+                    $sequence->validate();
+                } catch (Mage_Core_Exception $e) {
+                    $errors->addError('auto_email_active', $helper->__('Sequence step %d: %s', $sequence->getStepNumber(), $e->getMessage()));
+                }
+            }
         }
 
         $errors->throwIfErrors();
