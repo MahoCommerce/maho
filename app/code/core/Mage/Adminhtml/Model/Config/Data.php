@@ -214,7 +214,13 @@ class Mage_Adminhtml_Model_Config_Data extends \Maho\DataObject
             return;
         }
 
-        [, $group, $field] = $parts;
+        [$section, $group, $field] = $parts;
+        // Some backend models read the other fields of the group, which the admin form always sends
+        $fields = [];
+        foreach ($fieldConfig->getParent()->children() as $name => $node) {
+            $fieldValue = $name === $field ? $value : (string) Mage::getConfig()->getNode("{$section}/{$group}/{$name}", $scope, $scopeId);
+            $fields[$name] = in_array((string) $node->frontend_type, ['multiselect', 'time'], true) ? explode(',', $fieldValue) : $fieldValue;
+        }
         $store = $scope === self::SCOPE_STORES ? Mage::app()->getStore($scopeId) : null;
         $website = match ($scope) {
             self::SCOPE_WEBSITES => Mage::app()->getWebsite($scopeId),
@@ -224,16 +230,16 @@ class Mage_Adminhtml_Model_Config_Data extends \Maho\DataObject
 
         $dataObject
             ->setField($field)
-            ->setGroups([$group => ['fields' => [$field => ['value' => $value]]]])
+            ->setGroups([$group => ['fields' => array_map(static fn($fieldValue) => ['value' => $fieldValue], $fields)]])
             ->setGroupId($group)
             ->setStoreCode($store?->getCode())
             ->setWebsiteCode($website?->getCode())
             ->setScope($scope)
             ->setScopeId($scopeId)
             ->setFieldConfig($fieldConfig)
-            ->setFieldsetData([$field => $value])
+            ->setFieldsetData($fields)
             ->setPath($path)
-            ->setValue($value)
+            ->setValue($fields[$field])
             ->save();
     }
 
