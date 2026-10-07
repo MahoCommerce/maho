@@ -71,7 +71,7 @@ describe('Customer Segment Model', function () {
             ->setName('Pest group scope ' . uniqid())
             ->setWebsiteIds([1])
             ->setCustomerGroupIds([(int) $group->getId()])
-            ->setIsActive(1);
+            ->setIsActive();
         $segment->save();
 
         try {

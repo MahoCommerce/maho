@@ -241,21 +241,6 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
     {
         parent::_beforeSave();
 
-        // Convert array fields to comma-separated strings
-        if ($this->hasData('website_ids')) {
-            $websiteIds = $this->getData('website_ids');
-            if (is_array($websiteIds)) {
-                $this->setData('website_ids', implode(',', $websiteIds));
-            }
-        }
-
-        if ($this->hasData('customer_group_ids')) {
-            $groupIds = $this->getData('customer_group_ids');
-            if (is_array($groupIds)) {
-                $this->setData('customer_group_ids', implode(',', $groupIds));
-            }
-        }
-
         // Validate data
         $this->validate();
 
