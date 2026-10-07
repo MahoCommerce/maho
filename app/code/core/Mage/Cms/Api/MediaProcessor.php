@@ -197,7 +197,7 @@ final class MediaProcessor implements ProcessorInterface
             $activity = Mage::getModel('adminactivitylog/activity');
             $activity->logActivity([
                 'entity_type' => 'cms/media',
-                'action' => $action,
+                'action_type' => $action,
                 'entity_id' => 0,
                 'old_data' => $action === 'delete' ? ['path' => $path] : null,
                 'new_data' => $action === 'upload' ? ['path' => $path] : null,
