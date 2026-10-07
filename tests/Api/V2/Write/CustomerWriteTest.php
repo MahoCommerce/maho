@@ -126,7 +126,7 @@ describe('POST /api/rest/v2/customers (extended fields)', function (): void {
         // '1990' would be read as a unix timestamp, 'tomorrow' as a relative date
         foreach (['1990', '0', 'tomorrow', '15/04/1990', '1990-13-45'] as $dob) {
             [$response] = createTestCustomer(['dob' => $dob]);
-            expect($response['status'])->toBe(400, "dob '{$dob}' should be rejected");
+            expect($response['status'])->toBe(422, "dob '{$dob}' should be rejected");
         }
     });
 
