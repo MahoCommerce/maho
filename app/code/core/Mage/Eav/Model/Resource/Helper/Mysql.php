@@ -99,7 +99,7 @@ class Mage_Eav_Model_Resource_Helper_Mysql extends Mage_Core_Model_Resource_Help
     public function getLoadAttributesSelectGroups($selects)
     {
         $mainGroup  = [];
-        foreach ($selects as $eavType => $selectGroup) {
+        foreach ($selects as $selectGroup) {
             $mainGroup = array_merge($mainGroup, $selectGroup);
         }
         return $mainGroup;

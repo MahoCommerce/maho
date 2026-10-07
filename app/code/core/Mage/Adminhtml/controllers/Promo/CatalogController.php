@@ -100,7 +100,7 @@ class Mage_Adminhtml_Promo_CatalogController extends Mage_Adminhtml_Controller_A
     #[Maho\Config\Route('/admin/promo_catalog/save')]
     public function saveAction(): void
     {
-        if ($this->getRequest()->getPost()) {
+        if ($data = $this->getRequest()->getPost()) {
             try {
                 $model = Mage::getModel('catalogrule/rule');
                 Mage::dispatchEvent(

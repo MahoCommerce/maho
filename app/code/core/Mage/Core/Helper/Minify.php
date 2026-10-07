@@ -147,7 +147,7 @@ class Mage_Core_Helper_Minify extends Mage_Core_Helper_Abstract
 
         // Minify and cache with file locking to prevent race conditions
         try {
-            $this->ensureCacheDirectory($type);
+            $this->ensureCacheDirectory();
 
             $lockName = 'minify_' . md5($absolutePath);
             $lock = Mage::getSingleton('core/lock');
@@ -245,7 +245,7 @@ class Mage_Core_Helper_Minify extends Mage_Core_Helper_Abstract
     /**
      * Ensure cache directory exists
      */
-    private function ensureCacheDirectory(string $type): void
+    private function ensureCacheDirectory(): void
     {
         $dir = Mage::getBaseDir() . '/' . self::CACHE_DIR;
 

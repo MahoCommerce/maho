@@ -200,7 +200,6 @@ class Mage_Payment_Model_Recurring_Profile extends Mage_Core_Model_Abstract
         $startDate = $buyRequest->getData(self::BUY_REQUEST_START_DATETIME);
         if ($startDate) {
             $this->_ensureLocaleAndStore();
-            $localeCode = $this->_locale->getLocaleCode();
             if (!Mage_Core_Model_Locale::isValidDate($startDate)) {
                 Mage::throwException(Mage::helper('payment')->__('Recurring profile start date has invalid format.'));
             }

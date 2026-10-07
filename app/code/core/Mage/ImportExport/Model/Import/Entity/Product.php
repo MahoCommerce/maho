@@ -482,7 +482,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
             $this->_saveStockItem();
             $this->_saveLinks();
             $this->_saveCustomOptions();
-            foreach ($this->_productTypeModels as $productType => $productTypeModel) {
+            foreach ($this->_productTypeModels as $productTypeModel) {
                 $productTypeModel->saveData();
             }
         }
@@ -1119,7 +1119,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
         $adapter = $this->_connection;
 
         // pre-load 'position' attributes ID for each link type once
-        foreach ($this->_linkNameToId as $linkName => $linkId) {
+        foreach ($this->_linkNameToId as $linkId) {
             $select = $adapter->select()
                 ->from(
                     $resource->getTable('catalog/product_link_attribute'),

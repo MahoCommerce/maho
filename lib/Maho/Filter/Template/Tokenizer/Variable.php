@@ -131,7 +131,6 @@ class Variable extends AbstractTokenizer
     public function getMethodArgs()
     {
         $value = [];
-        $numberStr = '';
 
         while ($this->next() && $this->char() != ')') {
             if ($this->isWhiteSpace() || $this->char() == ',') {

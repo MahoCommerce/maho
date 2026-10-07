@@ -56,8 +56,6 @@ class Mage_Eav_Model_Attribute_Data_File extends Mage_Eav_Model_Attribute_Data_A
                         $value[$fileKey] = $scopeData[$attrCode];
                     }
                 }
-            } else {
-                $value = [];
             }
         } else {
             if (isset($_FILES[$attrCode])) {

@@ -187,8 +187,6 @@ class Mage_ImportExport_Model_Import_Adapter_Array extends Mage_ImportExport_Mod
     public function validateSource(): self
     {
         // Validate all rows have consistent structure
-        $expectedColumnCount = count($this->_colNames);
-
         foreach ($this->_data as $index => $row) {
             if (!is_array($row)) {
                 Mage::throwException(

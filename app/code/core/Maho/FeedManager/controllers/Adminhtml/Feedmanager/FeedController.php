@@ -863,7 +863,6 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
         }
 
         $generated = 0;
-        $errors = 0;
 
         foreach ($feedIds as $feedId) {
             try {
@@ -885,13 +884,11 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
                 if ($log->getStatus() === 'completed') {
                     $generated++;
                 } else {
-                    $errors++;
                     $this->_getSession()->addError(
                         $this->__("Feed '%s' generation failed: %s", $feed->getName(), $log->getErrorMessage()),
                     );
                 }
             } catch (Exception $e) {
-                $errors++;
                 $this->_getSession()->addError(
                     $this->__('Failed to generate feed %s: %s', $feedId, $e->getMessage()),
                 );

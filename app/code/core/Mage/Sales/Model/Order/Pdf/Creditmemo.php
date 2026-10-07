@@ -49,8 +49,6 @@ class Mage_Sales_Model_Order_Pdf_Creditmemo extends Mage_Sales_Model_Order_Pdf_A
     #[\Override]
     public function getPdf(array|\Maho\Data\Collection $creditmemos = []): string
     {
-        $this->_initRenderer('creditmemo');
-
         // Handle collections
         if ($creditmemos instanceof \Maho\Data\Collection) {
             $creditmemos = $creditmemos->getItems();

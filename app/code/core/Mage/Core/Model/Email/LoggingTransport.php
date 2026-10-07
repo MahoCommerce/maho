@@ -55,7 +55,6 @@ class Mage_Core_Model_Email_LoggingTransport implements TransportInterface
             'email_bcc'    => null,
             'template'     => null,
             'content_type' => 'text',
-            'email_body'   => '',
             'status'       => 'sent',
             'error_message' => null,
         ];
@@ -80,7 +79,6 @@ class Mage_Core_Model_Email_LoggingTransport implements TransportInterface
             $data['content_type'] = 'html';
             $data['email_body'] = $message->getHtmlBody();
         } else {
-            $data['content_type'] = 'text';
             $data['email_body'] = (string) $message->getTextBody();
         }
 

@@ -42,7 +42,7 @@ class Checkbox extends AbstractElement
     #[\Override]
     public function getElementHtml()
     {
-        if ($checked = $this->getChecked()) {
+        if ($this->getChecked()) {
             $this->setData('checked', true);
         } else {
             $this->unsetData('checked');

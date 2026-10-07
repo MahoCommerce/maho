@@ -85,7 +85,6 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
     public function editAction(): void
     {
         $storeId = (int) $this->getRequest()->getParam('store');
-        $categoryId = (int) $this->getRequest()->getParam('id');
 
         $category = $this->_initCategory(true);
 
@@ -184,7 +183,6 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
     public function categoriesJsonAction(): void
     {
         $recursionLevel = $this->getRequest()->getParam('expand_all') ? 0 : null;
-        $categoryId = (int) $this->getRequest()->getPost('id');
 
         $category = $this->_initCategory();
         if (!$category || !$category->getId()) {
@@ -205,9 +203,10 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
     #[Maho\Config\Route('/admin/catalog_category/save')]
     public function saveAction(): void
     {
+        $data = $this->getRequest()->getPost();
         try {
             $storeId = (int) $this->getRequest()->getParam('store');
-            if (!$data = $this->getRequest()->getPost()) {
+            if (!$data) {
                 Mage::throwException(Mage::helper('catalog')->__('Unable to complete this request.'));
             }
             if (!$category = $this->_initCategory()) {
@@ -455,7 +454,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
             $this->getRequest()->setParam('id', $rootId);
         }
 
-        $category = $this->_initCategory(true);
+        $this->_initCategory(true);
 
         /** @var Mage_Adminhtml_Block_Catalog_Category_Tree $block */
         $block = $this->getLayout()->createBlock('adminhtml/catalog_category_tree');

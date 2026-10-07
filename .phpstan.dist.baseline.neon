@@ -5212,12 +5212,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Block/Navigation.php
 
 		-
-			rawMessage: 'Cannot call method count() on string.'
-			identifier: method.nonObject
-			count: 1
-			path: app/code/core/Mage/Catalog/Block/Navigation.php
-
-		-
 			rawMessage: Property Mage_Catalog_Block_Product::$_finalPrice has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -6072,19 +6066,7 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Product/Compare/Item.php
 
 		-
-			rawMessage: 'Parameter #1 $height of method Mage_Catalog_Model_Product_Image::setHeight() expects int, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product/Image.php
-
-		-
 			rawMessage: 'Parameter #1 $size of method Mage_Catalog_Model_Product_Image::setWatermarkSize() expects array, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product/Image.php
-
-		-
-			rawMessage: 'Parameter #1 $width of method Mage_Catalog_Model_Product_Image::setWidth() expects int, string given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Product/Image.php
@@ -9409,18 +9391,6 @@ parameters:
 			path: app/code/core/Mage/Customer/controllers/AccountController.php
 
 		-
-			rawMessage: Result of && is always false.
-			identifier: booleanAnd.alwaysFalse
-			count: 1
-			path: app/code/core/Mage/Customer/data/customer_setup/data-upgrade-1.4.0.0.7-1.4.0.0.8.php
-
-		-
-			rawMessage: 'Strict comparison using === between false and false will always evaluate to true.'
-			identifier: identical.alwaysTrue
-			count: 1
-			path: app/code/core/Mage/Customer/data/customer_setup/data-upgrade-1.4.0.0.7-1.4.0.0.8.php
-
-		-
 			rawMessage: 'Method Mage_Dataflow_Model_Batch::beforeFinish() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -12491,12 +12461,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Rss/Block/Catalog/Review.php
-
-		-
-			rawMessage: 'Method Mage_Rss_Block_Catalog_Special::addSpecialXmlCallback() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Rss/Block/Catalog/Special.php
 
 		-
 			rawMessage: 'Method Mage_Rss_Block_Catalog_Tag::addTaggedItemXml() has no return type specified.'

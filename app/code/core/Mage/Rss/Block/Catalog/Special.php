@@ -88,8 +88,13 @@ class Mage_Rss_Block_Catalog_Special extends Mage_Rss_Block_Catalog_Abstract
         */
         Mage::getSingleton('core/resource_iterator')->walk(
             $specials->getSelect(),
-            [$this->addSpecialXmlCallback(...)],
-            ['rssObj' => $rssObj, 'results' => &$results],
+            [function (array $args) use (&$results): void {
+                $row = $this->addSpecialXmlCallback($args);
+                if ($row !== null) {
+                    $results[] = $row;
+                }
+            }],
+            ['rssObj' => $rssObj],
         );
 
         if (count($results)) {
@@ -146,11 +151,9 @@ class Mage_Rss_Block_Catalog_Special extends Mage_Rss_Block_Catalog_Abstract
     }
 
     /**
-     * Preparing data and adding to rss object
-     *
-     * @param array $args
+     * Return the row of a special price product for the feed, or null if an observer excludes the product.
      */
-    public function addSpecialXmlCallback($args)
+    public function addSpecialXmlCallback(array $args): ?array
     {
         self::$_currentDate ??= new DateTime();
 
@@ -159,7 +162,7 @@ class Mage_Rss_Block_Catalog_Special extends Mage_Rss_Block_Catalog_Abstract
         $args['product'] = $product;
         Mage::dispatchEvent('rss_catalog_special_xml_callback', $args);
         if (!$product->getAllowedInRss()) {
-            return;
+            return null;
         }
 
         // add row to result and determine whether special price is active (less or equal to the final price)
@@ -175,7 +178,7 @@ class Mage_Rss_Block_Catalog_Special extends Mage_Rss_Block_Catalog_Abstract
             }
         }
 
-        $args['results'][] = $row;
+        return $row;
     }
 
     /**

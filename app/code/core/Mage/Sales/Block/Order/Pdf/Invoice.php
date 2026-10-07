@@ -8,6 +8,8 @@
 
 class Mage_Sales_Block_Order_Pdf_Invoice extends Mage_Sales_Block_Order_Pdf_Abstract
 {
+    protected const ITEM_RENDERER_SECTION = 'invoice';
+
     protected ?Mage_Sales_Model_Order_Invoice $_invoice = null;
 
     public function __construct()
@@ -122,15 +124,6 @@ class Mage_Sales_Block_Order_Pdf_Invoice extends Mage_Sales_Block_Order_Pdf_Abst
 
         return $renderer->toHtml();
     }
-
-    protected function _getItemRenderer(string $type): ?Mage_Sales_Model_Order_Pdf_Items_Abstract
-    {
-        $rendererModel = Mage::getStoreConfig('sales_pdf/invoice/' . $type) ?: 'sales/order_pdf_items_invoice_default';
-        $this->_renderers[$type] ??= new Mage_Sales_Model_Order_Pdf_Items_Invoice_Default();
-        return $this->_renderers[$type];
-    }
-
-    protected array $_renderers = [];
 
     public function getTotals(): array
     {

@@ -30,7 +30,6 @@ class Maho_Giftcard_Block_Adminhtml_Sales_Order_Creditmemo_Totals_Giftcard exten
         }
 
         // For credit memo new/create page, get gift card amount from order
-        $order = null;
         if ($source instanceof Mage_Sales_Model_Order_Creditmemo) {
             $order = $source->getOrder();
             $giftcardAmount = $source->getGiftcardAmount();

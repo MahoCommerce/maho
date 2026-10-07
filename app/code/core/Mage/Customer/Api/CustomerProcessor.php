@@ -103,14 +103,14 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
 
         // Handle REST POST /customers (create customer / registration)
         if ($operation instanceof Post && !in_array($operationName, ['change_password', 'forgot_password_rest', 'reset_password_rest', 'create_from_order'])) {
-            return $this->createCustomer($data, $context);
+            return $this->createCustomer($data);
         }
 
         // Handle GraphQL mutations
         return match ($operationName) {
             'quickCreate' => $this->createCustomerQuick($context),
             'login' => $this->customerLogin($context),
-            'logout' => $this->customerLogout($context),
+            'logout' => $this->customerLogout(),
             'update' => $this->updateCustomerGraphQl($context),
             'changePassword' => $this->changePasswordGraphQl($context),
             'forgotPassword' => $this->forgotPassword($context),
@@ -150,7 +150,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
     /**
      * Create a new customer (registration)
      */
-    private function createCustomer(Customer $data, array $context): Customer
+    private function createCustomer(Customer $data): Customer
     {
         StoreContext::ensureStore();
 
@@ -386,7 +386,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
     /**
      * Customer logout (GraphQL mutation)
      */
-    private function customerLogout(array $context): Customer
+    private function customerLogout(): Customer
     {
         // For stateless API, logout is handled client-side by clearing tokens
         // Return empty customer to indicate logged out state

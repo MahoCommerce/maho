@@ -29,37 +29,6 @@ class Mage_Reports_Model_Resource_Entity_Summary_Collection_Abstract extends \Ma
      */
     public function setSelectPeriod($periodType, $customStart = null, $customEnd = null)
     {
-        switch ($periodType) {
-            case '24h':
-                $customStart = time() - 86400;
-                $customEnd   = time();
-                break;
-
-            case '7d':
-                $customStart = time() - 604800;
-                $customEnd   = time();
-                break;
-
-            case '30d':
-                $customStart = time() - 2592000;
-                $customEnd   = time();
-                break;
-
-            case '1y':
-                $customStart = time() - 31536000;
-                $customEnd   = time();
-                break;
-
-            default:
-                if (is_string($customStart)) {
-                    $customStart = strtotime($customStart);
-                }
-                if (is_string($customEnd)) {
-                    $customEnd = strtotime($customEnd);
-                }
-                break;
-        }
-
         return $this;
     }
 

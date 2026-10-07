@@ -155,8 +155,6 @@ class Mage_Adminhtml_Block_Tax_Rule_Grid extends Mage_Adminhtml_Block_Widget_Gri
             ],
         );
 
-        $actionsUrl = $this->getUrl('*/*/');
-
         return parent::_prepareColumns();
     }
 

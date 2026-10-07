@@ -102,7 +102,6 @@ class Mage_Sales_DownloadController extends Mage_Core_Controller_Front_Action
         $customerSession = Mage::getSingleton('customer/session');
         $checkoutQuoteId = Mage::getSingleton('checkout/session')->getQuoteId();
 
-        $hasSessionAccess = false;
         if ($quote->getCustomerId()) {
             $hasSessionAccess = $customerSession->isLoggedIn()
                 && $quote->getCustomerId() == $customerSession->getCustomerId();

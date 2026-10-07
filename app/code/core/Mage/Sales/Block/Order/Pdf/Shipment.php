@@ -8,6 +8,8 @@
 
 class Mage_Sales_Block_Order_Pdf_Shipment extends Mage_Sales_Block_Order_Pdf_Abstract
 {
+    protected const ITEM_RENDERER_SECTION = 'shipment';
+
     protected ?Mage_Sales_Model_Order_Shipment $_shipment = null;
 
     public function __construct()
@@ -113,15 +115,6 @@ class Mage_Sales_Block_Order_Pdf_Shipment extends Mage_Sales_Block_Order_Pdf_Abs
 
         return $renderer->toHtml();
     }
-
-    protected function _getItemRenderer(string $type): ?Mage_Sales_Model_Order_Pdf_Items_Abstract
-    {
-        $rendererModel = Mage::getStoreConfig('sales_pdf/shipment/' . $type) ?: 'sales/order_pdf_items_shipment_default';
-        $this->_renderers[$type] ??= new Mage_Sales_Model_Order_Pdf_Items_Shipment_Default();
-        return $this->_renderers[$type];
-    }
-
-    protected array $_renderers = [];
 
     public function getTracking(): array
     {

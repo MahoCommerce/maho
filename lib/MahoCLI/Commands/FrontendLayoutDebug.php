@@ -125,8 +125,6 @@ class FrontendLayoutDebug extends BaseMahoCommand
         $front = Mage::app()->getFrontController();
         $front->init();
 
-        $response = Mage::app()->getResponse();
-
         // Run pre-dispatch checks (store resolution, URL rewrites, etc.) then route matching
         ob_start();
 

@@ -212,7 +212,6 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
             'prev_parent_id' => $this->getParentId(),
             'parent_id'     => $parentId,
         ];
-        $moveComplete = false;
 
         $this->_getResource()->beginTransaction();
         try {

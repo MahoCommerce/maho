@@ -131,7 +131,6 @@ class Mage_Catalog_Model_Product_Option_Type_Select extends Mage_Catalog_Model_P
                                 $this->_getWrongConfigurationMessage(),
                             );
                 }
-                $result = '';
             }
         }
         return $result;

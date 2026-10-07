@@ -122,7 +122,7 @@ class Maho_Intelligence_Model_Lsp_Server
     private function handleRequest(?string $method, array $params): array
     {
         return match ($method) {
-            'initialize' => [true, $this->handleInitialize($params)],
+            'initialize' => [true, $this->handleInitialize()],
             'shutdown' => [true, $this->handleShutdown()],
             'textDocument/completion' => [true, $this->completionHandler->handle($params)],
             'textDocument/definition' => [true, $this->definitionHandler->handle($params)],
@@ -131,7 +131,7 @@ class Maho_Intelligence_Model_Lsp_Server
         };
     }
 
-    private function handleInitialize(array $params): array
+    private function handleInitialize(): array
     {
         return [
             'capabilities' => [

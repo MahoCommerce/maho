@@ -368,7 +368,6 @@ class Maho_FeedManager_Model_Validator
     {
         // Check for common issues
         $lines = explode("\n", $content);
-        $lineNumber = 0;
 
         foreach ($lines as $i => $line) {
             $lineNumber = $i + 1;

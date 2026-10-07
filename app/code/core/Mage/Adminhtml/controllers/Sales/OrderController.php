@@ -211,10 +211,10 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     #[Maho\Config\Route('/admin/sales_order/reviewPayment')]
     public function reviewPaymentAction(): void
     {
+        if (!$order = $this->_initOrder()) {
+            return;
+        }
         try {
-            if (!$order = $this->_initOrder()) {
-                return;
-            }
             $action = $this->getRequest()->getParam('action', '');
             switch ($action) {
                 case 'accept':
@@ -437,16 +437,6 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
      */
     #[Maho\Config\Route('/admin/sales_order/massStatus')]
     public function massStatusAction(): void {}
-
-    /**
-     * Print documents for selected orders
-     */
-    #[Maho\Config\Route('/admin/sales_order/massPrint')]
-    public function massPrintAction(): void
-    {
-        $orderIds = $this->getRequest()->getPost('order_ids');
-        $document = $this->getRequest()->getPost('document');
-    }
 
     /**
      * Print invoices for selected orders

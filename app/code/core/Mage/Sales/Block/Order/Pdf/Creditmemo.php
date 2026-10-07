@@ -8,6 +8,8 @@
 
 class Mage_Sales_Block_Order_Pdf_Creditmemo extends Mage_Sales_Block_Order_Pdf_Abstract
 {
+    protected const ITEM_RENDERER_SECTION = 'creditmemo';
+
     protected ?Mage_Sales_Model_Order_Creditmemo $_creditmemo = null;
 
     public function __construct()
@@ -130,15 +132,6 @@ class Mage_Sales_Block_Order_Pdf_Creditmemo extends Mage_Sales_Block_Order_Pdf_A
 
         return $renderer->toHtml();
     }
-
-    protected function _getItemRenderer(string $type): ?Mage_Sales_Model_Order_Pdf_Items_Abstract
-    {
-        $rendererModel = Mage::getStoreConfig('sales_pdf/creditmemo/' . $type) ?: 'sales/order_pdf_items_creditmemo_default';
-        $this->_renderers[$type] ??= new Mage_Sales_Model_Order_Pdf_Items_Creditmemo_Default();
-        return $this->_renderers[$type];
-    }
-
-    protected array $_renderers = [];
 
     public function getTotals(): array
     {

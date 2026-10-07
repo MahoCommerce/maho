@@ -49,8 +49,6 @@ class Mage_Sales_Model_Order_Pdf_Shipment extends Mage_Sales_Model_Order_Pdf_Abs
     #[\Override]
     public function getPdf(array|\Maho\Data\Collection $shipments = []): string
     {
-        $this->_initRenderer('shipment');
-
         // Handle collections
         if ($shipments instanceof \Maho\Data\Collection) {
             $shipments = $shipments->getItems();

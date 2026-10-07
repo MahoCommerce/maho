@@ -212,9 +212,10 @@ class Ftp extends \Maho\Io
             $result = ftp_fget($this->_conn, $stream, $filename, $this->_config['file_mode']);
 
             if (is_null($dest)) {
-                fseek($stream, 0);
-                $result = '';
-                for ($result = ''; $s = fread($stream, 4096); $result .= $s);
+                if ($result) {
+                    fseek($stream, 0);
+                    for ($result = ''; $s = fread($stream, 4096); $result .= $s);
+                }
                 fclose($stream);
             }
         }

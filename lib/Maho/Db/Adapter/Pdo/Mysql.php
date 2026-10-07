@@ -551,7 +551,7 @@ class Mysql extends AbstractPdoAdapter
             $pos = strpos($sql, '?', $offset);
             if ($pos !== false) {
                 $positions[] = $pos;
-                $offset      = ++$pos;
+                $offset      = $pos + 1;
             } else {
                 break;
             }
@@ -891,7 +891,7 @@ class Mysql extends AbstractPdoAdapter
             $definition,
         );
 
-        $result = $this->raw_query($sql);
+        $this->raw_query($sql);
 
         if ($flushData) {
             $this->showTableStatus($tableName, $schemaName);
@@ -1120,7 +1120,7 @@ class Mysql extends AbstractPdoAdapter
                 }
                 $droppedKeys = [];
                 foreach ($foreignKeys as $keyTable => $columns) {
-                    foreach ($columns as $columnName => $keyOptions) {
+                    foreach ($columns as $keyOptions) {
                         if ($table == $keyOptions['REF_TABLE_NAME'] && $column == $keyOptions['REF_COLUMN_NAME']) {
                             $this->dropForeignKey($keyTable, $keyOptions['FK_NAME']);
                             $droppedKeys[] = $keyOptions;
@@ -1441,7 +1441,7 @@ class Mysql extends AbstractPdoAdapter
     {
         $matches = [];
         if (preg_match('/^((?:var)?binary)\((\d+)\)/', $tableColumnInfo['DATA_TYPE'], $matches)) {
-            [$fieldFullDescription, $fieldType, $fieldLength] = $matches;
+            [, $fieldType, $fieldLength] = $matches;
             $tableColumnInfo['DATA_TYPE'] = $fieldType;
             $tableColumnInfo['LENGTH'] = $fieldLength;
         }
@@ -1580,11 +1580,8 @@ class Mysql extends AbstractPdoAdapter
             'length' => null,
             'precision' => null,
             'scale' => null,
-            'unsigned' => false,
+            'unsigned' => stripos($sqlDeclaration, 'UNSIGNED') !== false,
         ];
-
-        // Check for UNSIGNED flag
-        $result['unsigned'] = stripos($sqlDeclaration, 'UNSIGNED') !== false;
 
         // Extract base type and parameters
         // Pattern matches: TYPE or TYPE(params) or TYPE(params) UNSIGNED etc.
@@ -2017,7 +2014,6 @@ class Mysql extends AbstractPdoAdapter
         // extract and quote col names from the array keys
         $cols = [];
         $vals = [];
-        $i = 0;
         foreach ($bind as $col => $val) {
             $cols[] = $this->quoteIdentifier($col, true);
             if ($val instanceof \Maho\Db\Expr) {
@@ -2406,7 +2402,6 @@ class Mysql extends AbstractPdoAdapter
     {
         // convert keys to uppercase
         $options    = array_change_key_case($options, CASE_UPPER);
-        $cType      = null;
         $cUnsigned  = false;
         $cNullable  = true;
         $cDefault   = false;

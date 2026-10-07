@@ -377,9 +377,21 @@ class Mage_Catalog_Model_Convert_Parser_Product extends Mage_Eav_Model_Convert_P
             $position = Mage::helper('catalog')->__('Line %d, SKU: %s', ($i + 1), $product->getSku());
             $this->setPosition($position);
 
+            $isAdminStore = $this->getStore()->getCode() == Mage_Core_Model_Store::ADMIN_CODE;
+            if ($isAdminStore) {
+                $websiteCodes = [];
+                foreach ($product->getWebsiteIds() as $websiteId) {
+                    $websiteCode = Mage::app()->getWebsite($websiteId)->getCode();
+                    $websiteCodes[$websiteCode] = $websiteCode;
+                }
+                $websites = implode(',', $websiteCodes);
+            } else {
+                $websites = $this->getStore()->getWebsite()->getCode();
+            }
+
             $row = [
                 'store'         => $this->getStore()->getCode(),
-                'websites'      => '',
+                'websites'      => $websites,
                 'attribute_set' => $this->getAttributeSetName(
                     $product->getEntityTypeId(),
                     $product->getAttributeSetId(),
@@ -388,18 +400,8 @@ class Mage_Catalog_Model_Convert_Parser_Product extends Mage_Eav_Model_Convert_P
                 'category_ids' => implode(',', $product->getCategoryIds()),
             ];
 
-            if ($this->getStore()->getCode() == Mage_Core_Model_Store::ADMIN_CODE) {
-                $websiteCodes = [];
-                foreach ($product->getWebsiteIds() as $websiteId) {
-                    $websiteCode = Mage::app()->getWebsite($websiteId)->getCode();
-                    $websiteCodes[$websiteCode] = $websiteCode;
-                }
-                $row['websites'] = implode(',', $websiteCodes);
-            } else {
-                $row['websites'] = $this->getStore()->getWebsite()->getCode();
-                if ($this->getVar('url_field')) {
-                    $row['url'] = $product->getProductUrl();
-                }
+            if (!$isAdminStore && $this->getVar('url_field')) {
+                $row['url'] = $product->getProductUrl();
             }
 
             foreach ($product->getData() as $field => $value) {

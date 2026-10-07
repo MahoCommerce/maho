@@ -615,7 +615,6 @@ class Mage_ImportExport_Model_Export_Entity_Product extends Mage_ImportExport_Mo
                             $rowCategories[$itemId] = $item->getCategoryIds();
                         }
                     }
-                    $item = null;
                 }
                 $collection->clear();
             }
@@ -706,9 +705,6 @@ class Mage_ImportExport_Model_Export_Entity_Product extends Mage_ImportExport_Mo
                         $row['_custom_option_sku']            = $option['sku'];
                         $row['_custom_option_max_characters'] = $option['max_characters'];
                         $row['_custom_option_sort_order']     = $option['sort_order'];
-
-                        // remember default title for later comparisons
-                        $defaultTitles[$option['option_id']] = $option['title'];
                     } elseif ($option['title'] != $customOptions[0]['_custom_option_title']) {
                         $row['_custom_option_title'] = $option['title'];
                     }
@@ -722,8 +718,6 @@ class Mage_ImportExport_Model_Export_Entity_Product extends Mage_ImportExport_Mo
                             $row['_custom_option_row_price'] = $firstValue['price'] . $priceType;
                             $row['_custom_option_row_sku']   = $firstValue['sku'];
                             $row['_custom_option_row_sort']  = $firstValue['sort_order'];
-
-                            $defaultValueTitles[$firstValue['option_type_id']] = $firstValue['title'];
                         } elseif ($firstValue['title'] != $customOptions[0]['_custom_option_row_title']) {
                             $row['_custom_option_row_title'] = $firstValue['title'];
                         }
@@ -757,15 +751,13 @@ class Mage_ImportExport_Model_Export_Entity_Product extends Mage_ImportExport_Mo
                         }
                         $customOptionsDataPre[$option['product_id']][$option['option_id']][] = $row;
                     }
-                    $option = null;
                 }
-                $options = null;
             }
             unset($storeId);
             foreach ($customOptionsDataPre as $productId => &$optionsData) {
                 $customOptionsData[$productId] = [];
 
-                foreach ($optionsData as $optionId => &$optionRows) {
+                foreach ($optionsData as &$optionRows) {
                     $customOptionsData[$productId] = array_merge($customOptionsData[$productId], $optionRows);
                 }
                 unset($optionRows, $optionsData);

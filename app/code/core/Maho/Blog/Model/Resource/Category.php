@@ -107,8 +107,7 @@ class Maho_Blog_Model_Resource_Category extends Mage_Eav_Model_Entity_Abstract
         // Calculate level and path from parent
         $parentId = (int) $object->getData('parent_id');
         if (!$parentId) {
-            $parentId = Maho_Blog_Model_Category::ROOT_PARENT_ID;
-            $object->setData('parent_id', $parentId);
+            $object->setData('parent_id', Maho_Blog_Model_Category::ROOT_PARENT_ID);
         }
 
         if ($parentId === Maho_Blog_Model_Category::ROOT_PARENT_ID) {

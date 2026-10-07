@@ -227,8 +227,6 @@ class Mage_Catalog_Block_Navigation extends Mage_Core_Block_Template
         $html = [];
 
         $children = $category->getChildren();
-        $childrenCount = $children->count();
-        $hasChildren = ($children && $childrenCount);
 
         // select active children
         $activeChildren = [];

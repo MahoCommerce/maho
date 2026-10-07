@@ -174,7 +174,6 @@ class Mage_Sales_Model_Resource_Order_Collection extends Mage_Sales_Model_Resour
         if (is_array($attributes) && !empty($attributes)) {
             $this->_addAddressFields();
 
-            $toFilterData = [];
             foreach ($attributes as $attribute) {
                 $this->addFieldToSearchFilter($this->_attributeToField($attribute['attribute']), $attribute);
             }

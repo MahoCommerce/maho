@@ -106,7 +106,7 @@ class Mage_Adminhtml_Promo_QuoteController extends Mage_Adminhtml_Controller_Act
     #[Maho\Config\Route('/admin/promo_quote/save')]
     public function saveAction(): void
     {
-        if ($this->getRequest()->getPost()) {
+        if ($data = $this->getRequest()->getPost()) {
             try {
                 /** @var Mage_SalesRule_Model_Rule $model */
                 $model = Mage::getModel('salesrule/rule');

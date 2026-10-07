@@ -57,14 +57,14 @@ class Mage_Core_Helper_EnvironmentConfigLoader extends Mage_Core_Helper_Abstract
 
             switch ($scope) {
                 case static::CONFIG_KEY_DEFAULT:
-                    [$unused1, $unused2, $section, $group, $field] = $configKeyParts;
+                    [, , $section, $group, $field] = $configKeyParts;
                     $path = $this->buildPath($section, $group, $field);
                     $xmlConfig->setNode($this->buildNodePath($scope, $path), $value);
                     break;
 
                 case static::CONFIG_KEY_WEBSITES:
                 case static::CONFIG_KEY_STORES:
-                    [$unused1, $unused2, $code, $section, $group, $field] = $configKeyParts;
+                    [, , $code, $section, $group, $field] = $configKeyParts;
                     $path = $this->buildPath($section, $group, $field);
                     $nodePath = sprintf('%s/%s/%s', strtolower($scope), strtolower($code), $path);
                     $xmlConfig->setNode($nodePath, $value);
@@ -92,7 +92,7 @@ class Mage_Core_Helper_EnvironmentConfigLoader extends Mage_Core_Helper_Abstract
     protected function getConfigKey(string $configKey): array
     {
         $configKeyParts = array_filter(explode(static::ENV_KEY_SEPARATOR, $configKey));
-        [$unused, $scope] = $configKeyParts;
+        [, $scope] = $configKeyParts;
         return [$configKeyParts, $scope];
     }
 

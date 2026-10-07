@@ -340,7 +340,7 @@ class Mage_Adminhtml_Block_System_Email_Template_Edit extends Mage_Adminhtml_Blo
      */
     protected function _getSystemConfigPathsParts($paths)
     {
-        $result = $urlParams = $prefixParts = [];
+        $result = $prefixParts = [];
         $scopeLabel = Mage::helper('adminhtml')->__('GLOBAL');
         if ($paths) {
             // create prefix path parts
@@ -353,7 +353,7 @@ class Mage_Adminhtml_Block_System_Email_Template_Edit extends Mage_Adminhtml_Blo
             ];
 
             $pathParts = $prefixParts;
-            foreach ($paths as $id => $pathData) {
+            foreach ($paths as $pathData) {
                 [$sectionName, $groupName, $fieldName] = explode('/', $pathData['path']);
                 $urlParams = ['section' => $sectionName];
                 if (isset($pathData['scope']) && isset($pathData['scope_id'])) {

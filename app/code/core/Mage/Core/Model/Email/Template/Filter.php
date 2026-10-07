@@ -183,7 +183,7 @@ class Mage_Core_Model_Email_Template_Filter extends \Maho\Filter\Template
         $layout->generateBlocks();
 
         /** @var Mage_Core_Block_Abstract $block */
-        foreach ($layout->getAllBlocks() as $blockName => $block) {
+        foreach ($layout->getAllBlocks() as $block) {
             foreach ($params as $k => $v) {
                 if (in_array($k, $skipParams)) {
                     continue;

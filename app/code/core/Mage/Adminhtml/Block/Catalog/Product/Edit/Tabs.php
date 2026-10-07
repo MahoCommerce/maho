@@ -113,11 +113,6 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tabs extends Mage_Adminhtml_Bloc
                 ]);
             }
 
-            $storeId = 0;
-            if ($this->getRequest()->getParam('store')) {
-                $storeId = Mage::app()->getStore($this->getRequest()->getParam('store'))->getId();
-            }
-
             $alertPriceAllow = Mage::getStoreConfig('catalog/productalert/allow_price');
             $alertStockAllow = Mage::getStoreConfig('catalog/productalert/allow_stock');
 

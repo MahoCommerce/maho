@@ -60,7 +60,6 @@ class Mage_Adminhtml_Promo_WidgetController extends Mage_Adminhtml_Controller_Ac
     public function categoriesJsonAction(): void
     {
         try {
-            $categoryId = (int) $this->getRequest()->getPost('id');
             $category = $this->_initCategory();
 
             if (!$category || !$category->getId()) {

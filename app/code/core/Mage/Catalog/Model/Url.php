@@ -422,10 +422,9 @@ class Mage_Catalog_Model_Url
     protected function _refreshCategoryProductRewrites(\Maho\DataObject $category)
     {
         $originalRewrites = $this->_rewrites;
-        $process = true;
         $lastEntityId = 0;
         $firstIteration = true;
-        while ($process) {
+        while (true) {
             $products = $this->getResource()->getProductsByCategory($category, $lastEntityId);
             if (!$products) {
                 if ($firstIteration) {
@@ -435,7 +434,6 @@ class Mage_Catalog_Model_Url
                         $category->getStoreId(),
                     );
                 }
-                $process = false;
                 break;
             }
 
@@ -567,12 +565,10 @@ class Mage_Catalog_Model_Url
         $this->_categories[$storeRootCategoryId] = $this->getResource()->getCategory($storeRootCategoryId, $storeId);
 
         $lastEntityId = 0;
-        $process = true;
 
-        while ($process) {
+        while (true) {
             $products = $this->getResource()->getProductsByStore($storeId, $lastEntityId);
             if (!$products) {
-                $process = false;
                 break;
             }
 
