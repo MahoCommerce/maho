@@ -311,12 +311,9 @@ class Orders extends AbstractImporter
     private function regionId(CsvFile $file, int $line, string $countryId, string $region): ?int
     {
         if ($region !== '') {
-            $model = Mage::getModel('directory/region')->loadByCode($region, $countryId);
-            if (!$model->getId()) {
-                $model = Mage::getModel('directory/region')->loadByName($region, $countryId);
-            }
-            if ($model->getId()) {
-                return (int) $model->getId();
+            $regionId = Mage::getModel('directory/region')->loadByCodeOrName($region, $countryId)->getId();
+            if ($regionId) {
+                return (int) $regionId;
             }
         }
         if (Mage::helper('directory')->isRegionRequired($countryId)) {

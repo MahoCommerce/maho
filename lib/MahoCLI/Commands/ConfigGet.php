@@ -57,7 +57,7 @@ class ConfigGet extends BaseMahoCommand
             $results = $connection->fetchAll($select);
 
             // Also get default value from XML configuration
-            $defaultValue = $this->getDefaultValue($path);
+            $defaultValue = $this->getDefaultValue();
 
             // If no results and no default value
             if (empty($results) && $defaultValue === null) {
@@ -141,7 +141,7 @@ class ConfigGet extends BaseMahoCommand
         return (string) $value;
     }
 
-    private function getDefaultValue(string $path): mixed
+    private function getDefaultValue(): mixed
     {
         // Don't show XML defaults since Mage::getConfig()->getNode() returns
         // already-processed values with placeholders replaced, making it

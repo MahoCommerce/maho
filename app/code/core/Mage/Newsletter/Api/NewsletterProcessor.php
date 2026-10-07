@@ -39,7 +39,7 @@ final class NewsletterProcessor extends \Maho\ApiPlatform\Processor
         }
 
         if ($operationName === 'unsubscribe' || $operationName === 'unsubscribe_rest') {
-            return $this->unsubscribe($data);
+            return $this->unsubscribe();
         }
 
         throw new BadRequestHttpException('Invalid newsletter operation');
@@ -165,7 +165,7 @@ final class NewsletterProcessor extends \Maho\ApiPlatform\Processor
         }
     }
 
-    private function unsubscribe(NewsletterSubscription $data): NewsletterSubscription
+    private function unsubscribe(): NewsletterSubscription
     {
         $customerId = $this->getAuthenticatedCustomerId();
 

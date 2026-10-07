@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -44,7 +45,6 @@ class Mage_Core_Model_Layout_Element extends \Maho\Simplexml\Element
                 $this->prepareActionArgument($args);
                 break;
         }
-        $children = $this->children();
         foreach ($this as $child) {
             $child->prepare($args);
         }
@@ -70,7 +70,6 @@ class Mage_Core_Model_Layout_Element extends \Maho\Simplexml\Element
     public function prepareBlock($args)
     {
         $type = (string) $this['type'];
-        $name = (string) $this['name'];
 
         $className = (string) $this['class'];
         if (!$className) {

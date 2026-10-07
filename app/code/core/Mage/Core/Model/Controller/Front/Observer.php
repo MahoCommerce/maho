@@ -280,7 +280,7 @@ class Mage_Core_Model_Controller_Front_Observer
     // Config rewrite
     // -------------------------------------------------------------------------
 
-    private function rewriteConfig(Mage_Core_Controller_Request_Http $request, Mage_Core_Controller_Response_Http $response): void
+    private function rewriteConfig(Mage_Core_Controller_Request_Http $request, Mage_Core_Controller_Response_Http $response): void // @phpstan-ignore method.unusedParameter (every step in onDispatchBefore() takes the request and the response)
     {
         if (!Mage::isInstalled() || Mage::app()->getStore()->isAdmin()) {
             return;

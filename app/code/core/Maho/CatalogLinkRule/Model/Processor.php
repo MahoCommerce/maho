@@ -38,8 +38,6 @@ class Maho_CatalogLinkRule_Model_Processor
     #[Maho\Config\CronJob('cataloglinkrule_apply_all', configPath: 'catalog/linkrule/schedule')]
     public function processRules(): void
     {
-        $resource = Mage::getSingleton('core/resource');
-
         // Get all active rules, ordered by priority
         $rules = Mage::getResourceModel('cataloglinkrule/rule_collection')
             ->addFieldToFilter('is_active', 1)

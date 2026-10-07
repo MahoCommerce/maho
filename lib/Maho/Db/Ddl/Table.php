@@ -356,7 +356,6 @@ class Table
             if (isset($options['primary_position'])) {
                 $primaryPosition = (int) $options['primary_position'];
             } else {
-                $primaryPosition = 0;
                 foreach ($this->_columns as $v) {
                     if ($v['PRIMARY']) {
                         $primaryPosition++;

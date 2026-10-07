@@ -151,7 +151,7 @@ class Mage_Dataflow_Model_Profile extends Mage_Core_Model_Abstract
             || isset($_FILES['file_3']['tmp_name'])
         ) {
             for ($index = 0; $index < 3; $index++) {
-                if ($file = $_FILES['file_' . ($index + 1)]['tmp_name']) {
+                if ($_FILES['file_' . ($index + 1)]['tmp_name']) {
                     $uploader = Mage::getModel('core/file_uploader', 'file_' . ($index + 1));
                     $uploader->setAllowedExtensions(['csv','xml']);
                     $path = Mage::app()->getConfig()->getTempVarDir() . '/import/';
@@ -174,7 +174,7 @@ class Mage_Dataflow_Model_Profile extends Mage_Core_Model_Abstract
                                 $fileData[] = $this->getNode($cell, 'Data')->item(0)->nodeValue;
                             }
                         } catch (Exception) {
-                            foreach ($newUploadedFilenames as $k => $v) {
+                            foreach ($newUploadedFilenames as $v) {
                                 unlink($path . $v);
                             }
                             unlink($path . $uploadFile);

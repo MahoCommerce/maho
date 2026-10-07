@@ -467,8 +467,9 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
     public function removeAccents($string, $german = false)
     {
         static $replacements;
+        $setKey = (int) $german;
 
-        if (empty($replacements[$german])) {
+        if (empty($replacements[$setKey])) {
             $subst = [
                 // single ISO-8859-1 letters
                 192 => 'A', 193 => 'A', 194 => 'A', 195 => 'A', 196 => 'A', 197 => 'A', 199 => 'C',
@@ -500,9 +501,9 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
                 ] + $subst;
             }
 
-            $replacements[$german] = [];
+            $replacements[$setKey] = [];
             foreach ($subst as $k => $v) {
-                $replacements[$german][$k < 256 ? chr($k) : '&#' . $k . ';'] = $v;
+                $replacements[$setKey][$k < 256 ? chr($k) : '&#' . $k . ';'] = $v;
             }
         }
 
@@ -513,7 +514,7 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
         }
 
         // Replace
-        $string = strtr($string, $replacements[$german]);
+        $string = strtr($string, $replacements[$setKey]);
 
         return $string;
     }
@@ -1377,7 +1378,6 @@ XML;
             return $cachedIcon;
         }
 
-        $installPath = null;
         $packageName = 'mahocommerce/icons';
         try {
             $installPath = \Composer\InstalledVersions::getInstallPath($packageName);

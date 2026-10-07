@@ -176,7 +176,6 @@ class Mage_Catalog_Model_Resource_Product extends Mage_Catalog_Model_Resource_Ab
     protected function _saveWebsiteIds($product)
     {
         $websiteIds = $product->getWebsiteIds();
-        $oldWebsiteIds = [];
 
         $product->setIsChangedWebsites(false);
 
@@ -543,7 +542,6 @@ class Mage_Catalog_Model_Resource_Product extends Mage_Catalog_Model_Resource_Ab
      */
     public function duplicate($oldId, $newId)
     {
-        $adapter = $this->_getWriteAdapter();
         $eavTables = ['datetime', 'decimal', 'int', 'text', 'varchar'];
 
         $adapter = $this->_getWriteAdapter();

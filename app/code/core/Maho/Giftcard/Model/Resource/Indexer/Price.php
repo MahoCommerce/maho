@@ -122,11 +122,6 @@ class Maho_Giftcard_Model_Resource_Indexer_Price extends Mage_Catalog_Model_Reso
         }
         $select->columns(['tax_class_id' => $taxClassId]);
 
-        // Get gift card specific attributes
-        $giftcardAmounts = $this->_addAttributeToSelect($select, 'giftcard_amounts', 'e.entity_id', 'cs.store_id');
-        $giftcardMinAmount = $this->_addAttributeToSelect($select, 'giftcard_min_amount', 'e.entity_id', 'cs.store_id');
-        $giftcardMaxAmount = $this->_addAttributeToSelect($select, 'giftcard_max_amount', 'e.entity_id', 'cs.store_id');
-
         // For gift cards, we need to calculate the price dynamically
         // Since we can't do complex string parsing in SQL, we'll use a placeholder
         // and update it via PHP after the initial insert
@@ -209,11 +204,6 @@ class Maho_Giftcard_Model_Resource_Indexer_Price extends Mage_Catalog_Model_Reso
         if (empty($productIds)) {
             return;
         }
-
-        // Load gift card attributes for these products
-        $amountsAttr = Mage::getSingleton('eav/config')->getAttribute('catalog_product', 'giftcard_amounts');
-        $minAmountAttr = Mage::getSingleton('eav/config')->getAttribute('catalog_product', 'giftcard_min_amount');
-        $maxAmountAttr = Mage::getSingleton('eav/config')->getAttribute('catalog_product', 'giftcard_max_amount');
 
         // Get attribute values for all products
         $productPrices = [];

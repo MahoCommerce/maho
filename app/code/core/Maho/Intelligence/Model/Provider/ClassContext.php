@@ -47,23 +47,19 @@ class Maho_Intelligence_Model_Provider_ClassContext
 
     private function getClassHierarchy(string $className): array
     {
-        $hierarchy = [
-            'parents' => [],
-            'interfaces' => [],
-        ];
-
         $parents = [];
         $current = $className;
         while ($parent = get_parent_class($current)) {
             $parents[] = $parent;
             $current = $parent;
         }
-        $hierarchy['parents'] = $parents;
 
         $allInterfaces = class_implements($className) ?: [];
-        $hierarchy['interfaces'] = array_values($allInterfaces);
 
-        return $hierarchy;
+        return [
+            'parents' => $parents,
+            'interfaces' => array_values($allInterfaces),
+        ];
     }
 
     private function detectModule(string $className): ?string

@@ -93,7 +93,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
     protected function _saveShipment($shipment)
     {
         $shipment->getOrder()->setIsInProcess();
-        $transactionSave = Mage::getModel('core/resource_transaction')
+        Mage::getModel('core/resource_transaction')
             ->addObject($shipment)
             ->addObject($shipment->getOrder())
             ->save();
@@ -347,7 +347,6 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
     public function removeTrackAction(): void
     {
         $trackId    = $this->getRequest()->getParam('track_id');
-        $shipmentId = $this->getRequest()->getParam('shipment_id');
         $track = Mage::getModel('sales/order_shipment_track')->load($trackId);
         if ($track->getId()) {
             try {
@@ -387,7 +386,6 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
     public function viewTrackAction(): void
     {
         $trackId    = $this->getRequest()->getParam('track_id');
-        $shipmentId = $this->getRequest()->getParam('shipment_id');
         $track = Mage::getModel('sales/order_shipment_track')->load($trackId);
         if ($track->getId()) {
             try {
@@ -534,7 +532,6 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
     #[Maho\Config\Route('/admin/sales_order_shipment/createLabel')]
     public function createLabelAction(): void
     {
-        $response = new \Maho\DataObject();
         try {
             $shipment = $this->_initShipment();
             if (!$this->_createShippingLabel($shipment)) {

@@ -166,7 +166,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Account extends Mage_Adminhtml_Bloc
                     if (!$confirmationKey) {
                         $confirmationKey = $customer->getRandomConfirmationKey();
                     }
-                    $element = $fieldset->addField('confirmation', 'select', [
+                    $fieldset->addField('confirmation', 'select', [
                         'name'  => 'confirmation',
                         'label' => Mage::helper('customer')->__($confirmationAttribute->getFrontendLabel()),
                     ])->setEntityAttribute($confirmationAttribute)

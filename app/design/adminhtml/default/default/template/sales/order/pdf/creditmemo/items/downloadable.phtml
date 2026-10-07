@@ -41,7 +41,7 @@ $order = $this->getOrder();
 </td>
 
 <td class="col-sku text-right">
-    <?= $this->escapeHtml($this->getSku()) ?>
+    <?= $this->escapeHtml($this->getItemSku()) ?>
 </td>
 
 <td class="col-price text-right">
@@ -50,8 +50,12 @@ $order = $this->getOrder();
         <?php if (isset($priceData['label'])): ?>
         <div class="price-label"><?= $this->escapeHtml($priceData['label']) ?></div>
         <?php endif ?>
-        <div class="price-value"><?= $priceData['price'] ?></div>
+        <div class="price-value"><?= $priceData['subtotal'] ?></div>
     <?php endforeach ?>
+</td>
+
+<td class="col-discount text-right">
+    <?= $this->formatPrice(-$item->getDiscountAmount()) ?>
 </td>
 
 <td class="col-qty text-right">
@@ -63,10 +67,5 @@ $order = $this->getOrder();
 </td>
 
 <td class="col-subtotal text-right">
-    <?php foreach ($prices as $priceData): ?>
-        <?php if (isset($priceData['label'])): ?>
-        <div class="subtotal-label"><?= $this->escapeHtml($priceData['label']) ?></div>
-        <?php endif ?>
-        <div class="subtotal-value"><?= $priceData['subtotal'] ?></div>
-    <?php endforeach ?>
+    <?= $this->formatPrice($this->getItemTotalInclTax()) ?>
 </td>

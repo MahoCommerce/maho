@@ -147,11 +147,9 @@ final class CustomerProvider extends \Maho\ApiPlatform\Provider
         }
 
         // Pre-load default billing addresses for all customers in a single query
-        $customerIds = [];
         $defaultBillingIds = [];
         foreach ($result['customers'] as $mahoCustomer) {
             $customerId = (int) $mahoCustomer->getId();
-            $customerIds[] = $customerId;
             $billingId = $mahoCustomer->getDefaultBilling();
             if ($billingId) {
                 $defaultBillingIds[$customerId] = (int) $billingId;

@@ -50,7 +50,6 @@ class Maho_Paypal_Model_Webhook_Handler_VaultTokenCreated extends Maho_Paypal_Mo
         }
 
         $paymentSource = $resource['payment_source'] ?? [];
-        $sourceType = '';
         $cardLastFour = null;
         $cardBrand = null;
         $cardExpiry = null;

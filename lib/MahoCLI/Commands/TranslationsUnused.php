@@ -36,7 +36,6 @@ class TranslationsUnused extends BaseMahoCommand
         $definedFileMap = $this->getDefinedStrings($lang);
         $usedFileMap = $this->getUsedStrings();
 
-        $definedFlat = array_unique(array_merge(...array_values($definedFileMap)));
         $usedFlat = array_unique(array_merge(...array_values($usedFileMap)));
 
         $totalRemoved = 0;

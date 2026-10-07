@@ -627,11 +627,9 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
 
         // Collect product IDs for batch operations
         $productIds = [];
-        $products = [];
         foreach ($result['products'] as $product) {
             if ($product instanceof \Mage_Catalog_Model_Product) {
                 $productIds[] = (int) $product->getId();
-                $products[] = $product;
             }
         }
 

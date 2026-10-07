@@ -59,15 +59,8 @@ class Element extends SimpleXMLElement
     #[\Override]
     public function hasChildren()
     {
-        if (!$this->children()) {
-            return false;
-        }
-
-        // simplexml bug: @attributes is in children() but invisible in foreach
-        foreach ($this->children() as $k => $child) {
-            return true;
-        }
-        return false;
+        // children() of a node with only attributes is truthy, so count the child elements
+        return ($this->children()?->count() ?? 0) > 0;
     }
 
     /**
@@ -380,7 +373,7 @@ class Element extends SimpleXMLElement
         }
 
         // finally add our source node children to resulting new target node
-        foreach ($sourceChildren as $childKey => $childNode) {
+        foreach ($sourceChildren as $childNode) {
             $targetChild->extendChild($childNode, $overwrite);
         }
 

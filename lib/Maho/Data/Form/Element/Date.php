@@ -97,12 +97,6 @@ class Date extends AbstractElement
                 $format = $this->getInputFormat();
             }
         }
-        // last check, if locale was set
-        if (null === $locale) {
-            if (!$locale = $this->getLocale()) {
-                $locale = null;
-            }
-        }
         try {
             // Try to parse using the specified format first
             if ($format && $format !== \Mage_Core_Model_Locale::DATETIME_FORMAT) {

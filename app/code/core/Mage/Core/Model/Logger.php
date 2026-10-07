@@ -267,7 +267,6 @@ class Mage_Core_Model_Logger
 
         foreach ($params as $param) {
             $paramName = $param->getName();
-            $paramType = $param->getType();
 
             // Handle common parameter patterns
             try {

@@ -286,7 +286,7 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
     #[Maho\Config\Observer('customer_logout', area: 'frontend', type: 'singleton')]
     public function bindCustomerLogout($observer)
     {
-        if ($this->getCustomerId() && $customer = $observer->getEvent()->getCustomer()) {
+        if ($this->getCustomerId() && $observer->getEvent()->getCustomer()) {
             $this->setDoCustomerLogout();
         }
         return $this;

@@ -473,7 +473,6 @@ class Mage_Checkout_Model_Cart extends \Maho\DataObject implements Mage_Checkout
      */
     public function getProductIds()
     {
-        $quoteId = Mage::getSingleton('checkout/session')->getQuoteId();
         if ($this->_productIds === null) {
             $this->_productIds = [];
             if ($this->getSummaryQty() > 0) {
@@ -499,7 +498,7 @@ class Mage_Checkout_Model_Cart extends \Maho\DataObject implements Mage_Checkout
         //and get new quote id. This is done for cases when quote was created
         //not by customer (from backend for example).
         if (!$quoteId && Mage::getSingleton('customer/session')->isLoggedIn()) {
-            $quote = Mage::getSingleton('checkout/session')->getQuote();
+            Mage::getSingleton('checkout/session')->getQuote();
             $quoteId = Mage::getSingleton('checkout/session')->getQuoteId();
         }
 

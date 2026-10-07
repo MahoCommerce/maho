@@ -111,11 +111,6 @@ class Mage_Weee_Model_Total_Quote_Weee extends Mage_Tax_Model_Sales_Total_Quote_
         $applied = [];
         $productTaxes = [];
 
-        $totalValue = 0;
-        $baseTotalValue = 0;
-        $totalRowValue = 0;
-        $baseTotalRowValue = 0;
-
         $totalExclTaxValue = 0;
         $baseTotalExclTaxValue = 0;
         $totalExclTaxRowValue = 0;
@@ -143,12 +138,6 @@ class Mage_Weee_Model_Total_Quote_Weee extends Mage_Tax_Model_Sales_Total_Quote_
             $baseRowValueExclTax = $baseValueExclTax * $item->getTotalQty();
 
             $title = $attribute->getName();
-
-            //Calculate the Wee value
-            $totalValue += $value;
-            $baseTotalValue += $baseValue;
-            $totalRowValue += $rowValue;
-            $baseTotalRowValue += $baseRowValue;
 
             //Calculate the Wee without tax
             $totalExclTaxValue += $valueExclTax;

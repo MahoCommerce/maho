@@ -18,7 +18,6 @@ class Maho_Giftcard_Block_Adminhtml_Sales_Order_Invoice_Totals extends Mage_Admi
     {
         parent::_initTotals();
 
-        $invoice = $this->getSource();
         $order = $this->getOrder();
 
         // For now, use the order's gift card amount

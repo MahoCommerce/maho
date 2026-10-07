@@ -491,7 +491,7 @@ class Maho_Ai_Model_Platform_Symfony implements
     {
         try {
             $metadata = $deferred->getResult()->getMetadata();
-            foreach ($metadata as $key => $value) {
+            foreach ($metadata as $value) {
                 if ($value instanceof TokenUsage) {
                     return $value;
                 }

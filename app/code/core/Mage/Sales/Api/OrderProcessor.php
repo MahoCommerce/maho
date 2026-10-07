@@ -50,7 +50,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         $this->normalizeGraphQlInput($context);
 
         return match ($operationName) {
-            'place', 'place_order', 'place_guest_order', 'place_customer_order' => $this->placeOrder($context, $uriVariables),
+            'place', 'place_order', 'place_guest_order', 'place_customer_order' => $this->placeOrder($context),
             'cancel', 'order_cancel' => $this->cancelOrder($context, $uriVariables),
             'hold', 'order_hold' => $this->holdOrder($context, $uriVariables),
             'unhold', 'order_unhold' => $this->unholdOrder($context, $uriVariables),
@@ -100,7 +100,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
      * one shot rather than pre-mutating the cart. paymentData reaches assignData() flat, with
      * a copy under CartService::PAYMENT_ADDITIONAL_DATA_KEY so no key is lost at save time.
      */
-    private function placeOrder(array $context, array $uriVariables = []): Order
+    private function placeOrder(array $context): Order
     {
         $args = $context['args']['input'] ?? $context['request_data'] ?? [];
         $cartId = $args['cartId'] ?? null;

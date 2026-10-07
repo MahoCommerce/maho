@@ -413,8 +413,6 @@ class Maho_Giftcard_Model_Observer
         // Don't start a new transaction - use the order's transaction so rollback works
         $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
 
-        $orderBaseCurrency = $order->getBaseCurrencyCode();
-
         // Calculate proportional amounts if codes have full balances but order has capped amount
         $totalFromCodes = array_sum($codes);
         $actualAmounts = [];

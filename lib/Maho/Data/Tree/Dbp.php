@@ -281,8 +281,6 @@ class Dbp extends Tree
      */
     public function move($node, $newParent, $prevNode = null): void
     {
-        $position = 1;
-
         $oldPath = $node->getData($this->_pathField);
         $newPath = $newParent->getData($this->_pathField);
 

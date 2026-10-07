@@ -208,7 +208,6 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
     {
         $options = [];
         $locales = ResourceBundle::getLocales('');
-        $currentLocale = $this->getLocaleCode();
 
         // Get allowed locales
         $allowed = $this->getAllowLocales();
@@ -242,9 +241,6 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
             if (!isset($parsed['language']) || !isset($parsed['region'])) {
                 continue;
             }
-
-            $language = $parsed['language'];
-            $country = $parsed['region'];
 
             // Get language and country names in English
             $languageNameEn = Locale::getDisplayLanguage($code, 'en');
@@ -450,13 +446,11 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
      */
     public function getAllowCurrencies(): array
     {
-        $data = [];
         if (Mage::isInstalled()) {
             $data = Mage::app()->getStore()->getConfig(self::XML_PATH_ALLOW_CURRENCIES_INSTALLED);
             return explode(',', $data);
         }
-        $data = Mage::getSingleton('core/locale_config')->getAllowedCurrencies();
-        return $data;
+        return Mage::getSingleton('core/locale_config')->getAllowedCurrencies();
     }
 
     /**
@@ -1329,12 +1323,6 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
 
             case 'dateformat':
             case 'date':
-                $formatter = new IntlDateFormatter(
-                    $locale,
-                    IntlDateFormatter::SHORT,
-                    IntlDateFormatter::NONE,
-                );
-
                 return [
                     'full' => new IntlDateFormatter($locale, IntlDateFormatter::FULL, IntlDateFormatter::NONE)->getPattern(),
                     'long' => new IntlDateFormatter($locale, IntlDateFormatter::LONG, IntlDateFormatter::NONE)->getPattern(),

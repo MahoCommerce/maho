@@ -324,47 +324,35 @@ class CartMapper
         $totalsAddress = $quote->isVirtual() ? $quote->getBillingAddress() : $quote->getShippingAddress();
         $shippingAddress = $quote->getShippingAddress();
 
-        $prices = [
+        return [
             'subtotal' => (float) $quote->getSubtotal(),
             'subtotalInclTax' => (float) array_reduce($quote->getAllVisibleItems(), fn(float $sum, $item) => $sum + (float) $item->getRowTotalInclTax(), 0.0),
             'subtotalWithDiscount' => (float) $quote->getSubtotalWithDiscount(),
-            'discountAmount' => null,
-            'shippingAmount' => null,
-            'shippingAmountInclTax' => null,
-            'taxAmount' => 0.0,
-            'shippingTaxAmount' => null,
+            'discountAmount' => $totalsAddress->getDiscountAmount()
+                ? (float) abs($totalsAddress->getDiscountAmount())
+                : null,
+            'shippingAmount' => $shippingAddress->getShippingAmount()
+                ? (float) $shippingAddress->getShippingAmount()
+                : null,
+            'shippingAmountInclTax' => $shippingAddress->getShippingInclTax()
+                ? (float) $shippingAddress->getShippingInclTax()
+                : null,
+            'taxAmount' => (float) $totalsAddress->getTaxAmount(),
+            'shippingTaxAmount' => $shippingAddress->getShippingTaxAmount()
+                ? (float) $shippingAddress->getShippingTaxAmount()
+                : null,
             'grandTotal' => (float) $quote->getGrandTotal(),
             'baseGrandTotal' => (float) $quote->getBaseGrandTotal(),
             'baseSubtotal' => (float) $quote->getBaseSubtotal(),
-            'baseTaxAmount' => 0.0,
-            'baseShippingAmount' => null,
-            'baseDiscountAmount' => null,
+            'baseTaxAmount' => (float) $totalsAddress->getBaseTaxAmount(),
+            'baseShippingAmount' => $shippingAddress->getBaseShippingAmount()
+                ? (float) $shippingAddress->getBaseShippingAmount()
+                : null,
+            'baseDiscountAmount' => $totalsAddress->getBaseDiscountAmount()
+                ? (float) abs($totalsAddress->getBaseDiscountAmount())
+                : null,
             'giftcardAmount' => null,
         ];
-
-        $prices['discountAmount'] = $totalsAddress->getDiscountAmount()
-            ? (float) abs($totalsAddress->getDiscountAmount())
-            : null;
-        $prices['baseDiscountAmount'] = $totalsAddress->getBaseDiscountAmount()
-            ? (float) abs($totalsAddress->getBaseDiscountAmount())
-            : null;
-        $prices['taxAmount'] = (float) $totalsAddress->getTaxAmount();
-        $prices['baseTaxAmount'] = (float) $totalsAddress->getBaseTaxAmount();
-
-        $prices['shippingAmount'] = $shippingAddress->getShippingAmount()
-            ? (float) $shippingAddress->getShippingAmount()
-            : null;
-        $prices['shippingAmountInclTax'] = $shippingAddress->getShippingInclTax()
-            ? (float) $shippingAddress->getShippingInclTax()
-            : null;
-        $prices['shippingTaxAmount'] = $shippingAddress->getShippingTaxAmount()
-            ? (float) $shippingAddress->getShippingTaxAmount()
-            : null;
-        $prices['baseShippingAmount'] = $shippingAddress->getBaseShippingAmount()
-            ? (float) $shippingAddress->getBaseShippingAmount()
-            : null;
-
-        return $prices;
     }
 
     /**

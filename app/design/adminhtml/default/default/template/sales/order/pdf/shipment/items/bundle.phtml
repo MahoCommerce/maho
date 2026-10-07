@@ -10,6 +10,10 @@ $item = $this->getItem();
 $order = $this->getOrder();
 ?>
 
+<td class="col-qty">
+    <?= $this->getItemQty() * 1 ?>
+</td>
+
 <td class="col-products">
     <div class="item-name"><?= $this->escapeHtml($this->getItemName()) ?></div>
 
@@ -56,9 +60,5 @@ $order = $this->getOrder();
 </td>
 
 <td class="col-sku text-right">
-    <?= $this->escapeHtml($this->getSku()) ?>
-</td>
-
-<td class="col-qty text-right">
-    <?= $this->getItemQty() * 1 ?>
+    <?= $this->escapeHtml($this->getItemSku()) ?>
 </td>

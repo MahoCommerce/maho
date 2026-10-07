@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -28,7 +29,7 @@ class Mage_Catalog_Model_Product_Option_Observer
                     if ($option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_FILE) {
                         /** @var Mage_Catalog_Model_Product_Option $option */
                         try {
-                            $group = $option->groupFactory($option->getType())
+                            $option->groupFactory($option->getType())
                                 ->setQuoteItemOption($itemOption)
                                 ->copyQuoteToOrder();
                         } catch (Exception) {

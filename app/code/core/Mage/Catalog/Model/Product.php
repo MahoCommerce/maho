@@ -2072,7 +2072,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
          * unload product options
          */
         if (!empty($this->_options)) {
-            foreach ($this->_options as $key => $option) {
+            foreach ($this->_options as $option) {
                 $option->setProduct();
                 $option->clearInstance();
             }

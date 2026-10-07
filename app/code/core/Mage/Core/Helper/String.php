@@ -102,7 +102,6 @@ class Mage_Core_Helper_String extends Mage_Core_Helper_Abstract
         foreach ($str as $part) {
             if ($this->strlen($part) >= $length) {
                 $lastDelimetr = $this->strpos($this->strrev($part), $needle);
-                $tmpNewStr = '';
                 $tmpNewStr = $this->substr($this->strrev($part), 0, $lastDelimetr)
                     . $insert . $this->substr($this->strrev($part), $lastDelimetr);
                 $newStr .= $this->strrev($tmpNewStr);
@@ -506,8 +505,7 @@ class Mage_Core_Helper_String extends Mage_Core_Helper_Abstract
      */
     public function uniOrd($c)
     {
-        $ord = 0;
-        $h   = ord($c[0]);
+        $h = ord($c[0]);
 
         if ($h <= 0x7F) {
             $ord = $h;
@@ -520,6 +518,8 @@ class Mage_Core_Helper_String extends Mage_Core_Helper_Abstract
         } elseif ($h <= 0xF4) {
             $ord = (($h & 0x0F) << 18 | (ord($c[1]) & 0x3F) << 12
                 | (ord($c[2]) & 0x3F) << 6 | (ord($c[3]) & 0x3F));
+        } else {
+            $ord = 0;
         }
 
         return $ord;

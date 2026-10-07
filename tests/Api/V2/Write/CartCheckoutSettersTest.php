@@ -90,6 +90,18 @@ describe('guest cart step-wise checkout setters', function (): void {
         expect(apiPut("/api/rest/v2/guest-carts/{$maskedId}/billing-address", ['city' => 'Los Angeles'])['status'])->toBe(400);
     });
 
+    it('accepts an address without a postcode in a country where the postcode is optional', function (): void {
+        [$maskedId] = makeGuestSetterCart();
+        $address = array_merge(checkoutSetterAddress(), ['city' => 'Dublin', 'countryId' => 'IE']);
+        unset($address['region'], $address['postcode']);
+
+        expect(apiPut("/api/rest/v2/guest-carts/{$maskedId}/shipping-address", $address)['status'])->toBe(200);
+        expect(apiPut("/api/rest/v2/guest-carts/{$maskedId}/billing-address", $address)['status'])->toBe(200);
+
+        $address['countryId'] = 'US';
+        expect(apiPut("/api/rest/v2/guest-carts/{$maskedId}/shipping-address", $address)['status'])->toBe(400);
+    });
+
     it('rejects sameAsShipping when the cart has no shipping address', function (): void {
         [$maskedId] = makeGuestSetterCart();
 

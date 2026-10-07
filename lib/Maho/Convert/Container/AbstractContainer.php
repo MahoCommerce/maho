@@ -115,7 +115,7 @@ abstract class AbstractContainer implements ContainerInterface
     public function getGridFields($grid)
     {
         $fields = [];
-        foreach ($grid as $i => $row) {
+        foreach ($grid as $row) {
             foreach ($row as $fieldName => $data) {
                 if (!in_array($fieldName, $fields)) {
                     $fields[] = $fieldName;

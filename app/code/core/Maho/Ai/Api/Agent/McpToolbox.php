@@ -302,7 +302,6 @@ final class McpToolbox implements ToolboxInterface
                     $decoded = \Mage::helper('core')->jsonDecode($outcome['text']);
                     $current = is_array($decoded) ? $decoded : null;
                 } catch (\JsonException) {
-                    $current = null;
                 }
             }
         }

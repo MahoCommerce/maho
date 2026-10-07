@@ -17,8 +17,6 @@ class Mage_Sales_Block_Adminhtml_Report_Filter_Form_Order extends Mage_Sales_Blo
     protected function _prepareForm()
     {
         parent::_prepareForm();
-        $form = $this->getForm();
-        $htmlIdPrefix = $form->getHtmlIdPrefix();
         /** @var \Maho\Data\Form\Element\Fieldset $fieldset */
         $fieldset = $this->getForm()->getElement('base_fieldset');
 

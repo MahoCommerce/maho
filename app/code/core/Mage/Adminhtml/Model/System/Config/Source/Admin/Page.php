@@ -130,8 +130,6 @@ class Mage_Adminhtml_Model_System_Config_Source_Admin_Page
             $helperName     = (string) $childAttributes['module'];
         }
 
-        $titleNodeName = 'title';
-
         return Mage::helper($helperName)->__((string) $child->$titleNodeName);
     }
 }

@@ -712,7 +712,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
                 }
                 break;
             case 'compared':
-                $item = Mage::getModel('catalog/product_compare_item')
+                Mage::getModel('catalog/product_compare_item')
                     ->load($itemId)
                     ->delete();
                 break;
