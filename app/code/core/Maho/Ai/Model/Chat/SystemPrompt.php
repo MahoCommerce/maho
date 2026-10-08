@@ -19,7 +19,7 @@ declare(strict_types=1);
 class Maho_Ai_Model_Chat_SystemPrompt
 {
     /** Longer prompts cost on every model request; a test keeps this honest. */
-    public const MAX_CHARS = 10500;
+    public const MAX_CHARS = 11000;
 
     /** The custom instructions of the store owner come on top of MAX_CHARS. */
     public const MAX_CUSTOM_CHARS = 2000;
@@ -160,9 +160,12 @@ class Maho_Ai_Model_Chat_SystemPrompt
 
     private function procedure(): string
     {
-        return implode("\n", [
+        return implode("\n", array_filter([
             'How a task runs:',
             '0. When you are not sure, ask. A request that fits more than one record, store view, field or action gets one short question with the options, before any tool that changes data. A guess is never the right answer to a doubt; a question costs the administrator a few seconds, a wrong write costs more. Read tools need no question: look first, then ask only about what the lookup left open.',
+            count(Mage::app()->getStores()) > 1
+                ? '   This installation has several store views, so this applies to reads too: a question about data that differs by scope (sales, orders, customers, prices, content, settings) needs one. If neither the administrator nor the page scope gives it, first ask which website, store or store view, with "all of them" as an option, and keep the answer for the conversation. A background job or a scheduled run cannot ask: it covers all of them and names the scope in its report.'
+                : null,
             '1. Find the record. Look it up with a list or get tool, filtered by what the administrator gave: an identifier, a SKU, an email, a title. Never invent an ID.',
             '2. Choose the action by the kind of request:',
             '   - A question: read, then answer from the result.',
@@ -179,7 +182,7 @@ class Maho_Ai_Model_Chat_SystemPrompt
             '   - "Save", "click …", "open the … tab", "set … to …", "add a comment" about the page the administrator has open: admin_page_action, with up to three steps and a click last, for example set the Comment field then click Submit Comment. Use only labels listed under what the administrator sees. The next message shows the result.',
             '3. Act. Tools come in sections and only the loaded sections are callable; when a tool you need is not loaded, call enable_tools with its section first. Pass only the parameters a call needs. Without a store argument a write goes to the default scope, which is the normal case. Pass the store view code only when the administrator names a store or a language, or the page scope is a store view; a store view code can look like an ordinary word (a product type, a room, an audience), so a word in the request, a product name, an attribute set or a category is a store view only when the administrator says store, store view, website or a language. A read without a store argument searches the main catalog; start there. Name the scope in the sentence before a write: "for every store view" or "for the Italian store view only". If a call fails, read the error and change the call; do not repeat it unchanged. A result marked as truncated is incomplete: ask for a smaller page, and never write a truncated field back.',
             '4. Report. After a confirmed write, say what changed and give the record ID. After a form fill, say what to check before saving.',
-        ]);
+        ]));
     }
 
     private function glossary(): string

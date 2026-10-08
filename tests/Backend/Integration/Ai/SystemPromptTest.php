@@ -82,6 +82,17 @@ it('stays within the size budget and keeps its sections', function (): void {
     expect($prompt)->toContain('How a task runs:', 'Maho in short:', 'Example of a good turn', 'How to answer:');
 });
 
+it('asks for the scope of a question only on an installation with several store views', function (): void {
+    $prompt = new Maho_Ai_Model_Chat_SystemPrompt()->build(aiPromptAdmin());
+    $rule = 'first ask which website, store or store view';
+
+    if (count(Mage::app()->getStores()) > 1) {
+        expect($prompt)->toContain($rule);
+    } else {
+        expect($prompt)->not->toContain($rule);
+    }
+});
+
 it('adds the custom instructions of the store owner before the answer rules, cut to their limit', function (): void {
     $store = Mage::app()->getStore();
     $previous = $store->getConfig(Maho_Ai_Model_Chat_SystemPrompt::XML_PATH_CUSTOM_INSTRUCTIONS);
