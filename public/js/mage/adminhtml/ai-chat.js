@@ -723,7 +723,7 @@ class MahoAiAssistant {
         const heading = document.querySelector('.content-header h3, .content-header h1, h1');
         lines.push('Page: ' + clip(text(heading) || document.title, 120));
 
-        const messages = [...document.querySelectorAll('#messages li, .message-popup .message')].filter(visible).map((m) => clip(text(m), 200));
+        const messages = [...document.querySelectorAll('#messages li, .message-popup .message-body')].filter(visible).map((m) => clip(text(m), 200));
         if (messages.length > 0) {
             lines.push('Messages: ' + messages.slice(0, 4).join(' | '));
         }

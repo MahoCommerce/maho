@@ -35,21 +35,27 @@
     });
 </script>
 <div id="message-popup-window-mask" style="display:none;"></div>
-<div id="message-popup-window" class="message-popup">
+<div id="message-popup-window" class="message-popup severity-<?= $this->getSeverityText() ?>" role="dialog" aria-modal="true" aria-labelledby="message-popup-title">
     <div class="message-popup-head">
-        <h2><?= $this->getHeaderText() ?></h2>
-        <a href="#" onclick="closeMessagePopup(); return false;" title="<?= $this->getCloseText() ?>"><span><?= $this->getCloseText() ?></span></a>
+        <h2 id="message-popup-title"><?= $this->getHeaderText() ?></h2>
+        <button type="button" class="message-popup-close" onclick="closeMessagePopup()" title="<?= $this->getCloseText() ?>" aria-label="<?= $this->getCloseText() ?>">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
+        </button>
     </div>
     <div class="message-popup-content">
-        <div class="message">
-            <span class="message-icon message-<?= $this->getSeverityText() ?>">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" /></svg>
-                <br>
-                <?= $this->getSeverityText() ?>
-            </span>
+        <span class="message-icon" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" /></svg>
+        </span>
+        <div class="message-body">
+            <span class="message-severity"><?= $this->getSeverityLabel() ?></span>
             <p class="message-text"><?= $this->getNoticeMessageText() ?></p>
         </div>
-        <p class="read-more"><a href="<?= $this->escapeUrl($this->getNoticeMessageUrl()) ?>" onclick="this.target='_blank';"><?= $this->getReadDetailsText() ?></a></p>
     </div>
+    <?php $url = (string) $this->getNoticeMessageUrl() ?>
+    <?php if ($url !== ''): ?>
+    <div class="message-popup-actions">
+        <a class="message-popup-read" href="<?= $this->escapeUrl($url) ?>"<?php if (Mage::helper('adminnotification')->isExternalUrl($url)): ?> target="_blank" rel="noopener"<?php endif ?>><?= $this->getReadDetailsText() ?></a>
+    </div>
+    <?php endif ?>
 </div>
 <?php endif ?>

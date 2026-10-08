@@ -106,6 +106,14 @@ class Mage_Adminhtml_Block_Notification_Window extends Mage_Adminhtml_Block_Noti
     }
 
     /**
+     * Return the translated name of the severity, such as MAJOR.
+     */
+    public function getSeverityLabel(): string
+    {
+        return (string) $this->getData($this->getSeverityText() . '_text');
+    }
+
+    /**
      * Check if current block allowed in ACL
      *
      * @return bool
