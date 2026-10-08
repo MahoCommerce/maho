@@ -22,13 +22,13 @@ class Maho_CustomerSegmentation_Model_Resource_Segment extends Mage_Core_Model_R
             ->from(['e' => $this->getTable('customer/entity')], ['entity_id']);
 
         // Apply website filter
-        $websiteIds = $websiteId ? [$websiteId] : $segment->getWebsiteIdsArray();
+        $websiteIds = $websiteId ? [$websiteId] : $segment->getWebsiteIds();
         if (!empty($websiteIds)) {
             $select->where('e.website_id IN (?)', $websiteIds);
         }
 
         // Apply customer group filter
-        $groupIds = $segment->getCustomerGroupIdsArray();
+        $groupIds = $segment->getCustomerGroupIds();
         if (!empty($groupIds)) {
             $select->where('e.group_id IN (?)', $groupIds);
         }
@@ -204,6 +204,13 @@ class Maho_CustomerSegmentation_Model_Resource_Segment extends Mage_Core_Model_R
     #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $object): self
     {
+        // The columns hold comma-separated IDs, and the typed setters of the model take lists
+        foreach (['website_ids', 'customer_group_ids'] as $field) {
+            if (is_array($object->getData($field))) {
+                $object->setData($field, implode(',', $object->getData($field)));
+            }
+        }
+
         // Encode conditions as JSON
         if ($object->getConditions()) {
             try {

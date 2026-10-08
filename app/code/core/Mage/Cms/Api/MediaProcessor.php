@@ -16,7 +16,6 @@ use ApiPlatform\State\ProcessorInterface;
 use Mage;
 use Mage_Core_Model_File_Uploader;
 use Mage_Core_Model_Store;
-use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Trait\AuthenticationTrait;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -46,16 +45,16 @@ final class MediaProcessor implements ProcessorInterface
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): ?Media
     {
-        $user = $this->requireUser();
+        $this->requireUser();
 
         if ($operation instanceof DeleteOperationInterface) {
-            return $this->handleDelete($uriVariables['path'], $user);
+            return $this->handleDelete($uriVariables['path']);
         }
 
-        return $this->handleUpload($user);
+        return $this->handleUpload();
     }
 
-    private function handleUpload(ApiUser $user): Media
+    private function handleUpload(): Media
     {
         $request = $this->requestStack->getCurrentRequest();
 
@@ -156,7 +155,7 @@ final class MediaProcessor implements ProcessorInterface
         $relativePath = str_replace(DS, '/', str_replace($mediaDir . DS, '', $targetPath));
         $imageSize = \Maho\Io::getImageSize($targetPath);
 
-        $this->logActivity('upload', $relativePath, $user);
+        $this->logActivity('upload', $relativePath);
 
         $media = new Media();
         $media->url = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA) . $relativePath;
@@ -170,7 +169,7 @@ final class MediaProcessor implements ProcessorInterface
         return $media;
     }
 
-    private function handleDelete(string $path, ApiUser $user): null
+    private function handleDelete(string $path): null
     {
         $helper = Mage::helper('cms/wysiwyg_images');
         $storageRoot = realpath($helper->getStorageRoot());
@@ -185,24 +184,22 @@ final class MediaProcessor implements ProcessorInterface
 
         $helper->getStorage()->deleteFile($fullPath);
 
-        $this->logActivity('delete', $path, $user);
+        $this->logActivity('delete', $path);
 
         return null;
     }
 
-    private function logActivity(string $action, string $path, ApiUser $user): void
+    private function logActivity(string $action, string $path): void
     {
         try {
             /** @var \Maho_AdminActivityLog_Model_Activity $activity */
             $activity = Mage::getModel('adminactivitylog/activity');
             $activity->logActivity([
                 'entity_type' => 'cms/media',
-                'action' => $action,
+                'action_type' => $action,
                 'entity_id' => 0,
                 'old_data' => $action === 'delete' ? ['path' => $path] : null,
                 'new_data' => $action === 'upload' ? ['path' => $path] : null,
-                'api_user_id' => $user->getApiUserId(),
-                'username' => 'API: ' . $user->getUserIdentifier(),
             ]);
         } catch (\Exception $e) {
             Mage::logException($e);

@@ -42,13 +42,13 @@ final class BlogPostImageProcessor extends Processor
             // The same value as the "Delete Image" checkbox of the admin form
             $post->setImage(['delete' => 1]);
             $this->safeSave($post, 'delete the image of the BlogPost');
-            $this->logApiActivity('blog_post', 'update', $oldData, $post, $user);
+            $this->logApiActivity('blog_post', 'update', $oldData, $post);
             return null;
         }
 
         $this->uploadImage($post, $this->parseRequestBody($context['request'] ?? null));
         $this->safeSave($post, 'update BlogPost');
-        $this->logApiActivity('blog_post', 'update', $oldData, $post, $user);
+        $this->logApiActivity('blog_post', 'update', $oldData, $post);
 
         return BlogPost::fromModel(\Mage::getModel('blog/post')->load($post->getId()));
     }

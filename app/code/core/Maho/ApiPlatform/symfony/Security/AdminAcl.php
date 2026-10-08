@@ -20,6 +20,7 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
  * to gate work behind the admin's Maho ACL:
  *
  *     AdminAcl::checkResource(\Mage\Sales\Api\Order::class);
+ *     AdminAcl::checkPath(CustomerSegment::ACL_DELETE);
  *
  * The check reads the resource class's ADMIN_RESOURCE constant and calls
  * Mage::getSingleton('admin/session')->isAllowed() against it. The check is
@@ -41,8 +42,7 @@ final class AdminAcl
      */
     public static function checkResource(string $resourceClass): void
     {
-        $session = \Mage::getSingleton('admin/session');
-        if (!$session->getUser()) {
+        if (!\Mage::getSingleton('admin/session')->getUser()) {
             // Not an admin context, let other gates handle this request.
             return;
         }
@@ -57,7 +57,17 @@ final class AdminAcl
             );
         }
 
-        if (!$session->isAllowed($aclPath)) {
+        self::checkPath($aclPath);
+    }
+
+    /**
+     * Throw 403 if the current request is an admin token whose ACL does not permit $aclPath.
+     * Use it for an action that has its own ACL path, such as customer/customersegmentation/delete.
+     */
+    public static function checkPath(string $aclPath): void
+    {
+        $session = \Mage::getSingleton('admin/session');
+        if ($session->getUser() && !$session->isAllowed($aclPath)) {
             throw new AccessDeniedHttpException(
                 sprintf('Your admin role does not grant access to "%s".', $aclPath),
             );

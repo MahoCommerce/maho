@@ -51,6 +51,12 @@ final class McpToolResourceMetadataCollectionFactory implements ResourceMetadata
     /** Per-operation opt-out, set as `extraProperties: ['maho_mcp' => false]`. */
     public const OPERATION_OPT_OUT = 'maho_mcp';
 
+    /**
+     * The section of a plain API Platform resource that the grant of another resource protects,
+     * set as `extraProperties: ['maho_mcp_section' => 'Customers']`, so its tools load with the tools of that resource.
+     */
+    public const RESOURCE_SECTION = 'maho_mcp_section';
+
     /** `Put` and `Patch` share `update`; the de-duplication below keeps the first. */
     private const VERB_SUFFIX = [
         'GET' => 'get',
@@ -148,8 +154,10 @@ final class McpToolResourceMetadataCollectionFactory implements ResourceMetadata
      */
     private function toolNamePrefix(string $resourceClass, ApiResource $resource): string
     {
-        $section = $resource instanceof MahoApiResource ? $resource->mahoSection : null;
-        if ($section === null) {
+        $section = $resource instanceof MahoApiResource
+            ? $resource->mahoSection
+            : ($resource->getExtraProperties()[self::RESOURCE_SECTION] ?? null);
+        if (!is_string($section) || $section === '') {
             $parts = explode('\\', $resourceClass);
             array_pop($parts);
             $section = match (true) {

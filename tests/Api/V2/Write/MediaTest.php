@@ -179,4 +179,33 @@ describe('Media Upload (REST)', function (): void {
             ->and($delete['raw'])->not->toContain('nginx');
     });
 
+    it('writes the upload of an admin to the admin activity log', function (): void {
+        if (!Mage::helper('adminactivitylog')->isEnabled()) {
+            $this->markTestSkipped('The admin activity log is off');
+        }
+        $resource = Mage::getSingleton('core/resource');
+        $read = $resource->getConnection('core_read');
+        $table = $resource->getTableName('adminactivitylog/activity');
+        $lastId = (int) $read->fetchOne($read->select()->from($table, [new Maho\Db\Expr('MAX(activity_id)')]));
+
+        $tmpFile = tempnam(sys_get_temp_dir(), 'pest_media_') . '.png';
+        imagepng(imagecreatetruecolor(1, 1), $tmpFile);
+        $upload = apiPostMultipart(
+            '/api/rest/v2/media',
+            ['folder' => 'test', 'filename' => 'pest-activity-log'],
+            ['file' => $tmpFile],
+            adminToken(),
+        );
+        unlink($tmpFile);
+        expect($upload['status'])->toBeIn([200, 201]);
+
+        $actions = $read->fetchCol(
+            $read->select()
+                ->from($table, ['action_type'])
+                ->where('entity_type = ?', 'cms/media')
+                ->where('activity_id > ?', $lastId),
+        );
+        expect($actions)->toBe(['upload']);
+    });
+
 });

@@ -70,6 +70,11 @@ function apiPut(string $path, array $data, ?string $token = null, array $extraHe
     return ApiV2Helper::put($path, $data, $token, $extraHeaders);
 }
 
+function apiPatch(string $path, array $data, ?string $token = null, array $extraHeaders = []): array
+{
+    return ApiV2Helper::patch($path, $data, $token, $extraHeaders);
+}
+
 function apiQuery(string $path, array $data, ?string $token = null, array $extraHeaders = []): array
 {
     return ApiV2Helper::query($path, $data, $token, $extraHeaders);
@@ -662,14 +667,21 @@ function deletePriceWebsite(string $code): void
         return;
     }
 
-    foreach ($website->getStores() as $store) {
-        $store->delete();
+    // A store, a group and a website refuse a delete outside the admin store
+    $currentStoreCode = Mage::app()->getStore()->getCode();
+    Mage::app()->setCurrentStore(Mage_Core_Model_Store::ADMIN_CODE);
+    try {
+        foreach ($website->getStores() as $store) {
+            $store->delete();
+        }
+        foreach ($website->getGroups() as $group) {
+            $group->delete();
+        }
+        $website->delete();
+    } finally {
+        Mage::app()->reinitStores();
+        Mage::app()->setCurrentStore($currentStoreCode === $code ? Mage_Core_Model_Store::ADMIN_CODE : $currentStoreCode);
     }
-    foreach ($website->getGroups() as $group) {
-        $group->delete();
-    }
-    $website->delete();
-    Mage::app()->reinitStores();
 }
 
 /** Remove every stored rate into the given currencies and forget the memoised ones. */

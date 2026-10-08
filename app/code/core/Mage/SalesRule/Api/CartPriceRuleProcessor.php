@@ -55,8 +55,7 @@ final class CartPriceRuleProcessor extends \Maho\ApiPlatform\Processor
         'discountStep' => 'setDiscountStep',
     ];
 
-    /** @var list<array{field: string, message: string}> */
-    private array $errors = [];
+    private \Mage_Core_Exception_Input $errors;
 
     public function __construct(
         Security $security,
@@ -106,7 +105,7 @@ final class CartPriceRuleProcessor extends \Maho\ApiPlatform\Processor
             ->setUsesPerCoupon(0)
             ->setUsesPerCustomer(0);
 
-        $this->errors = [];
+        $this->errors = new \Mage_Core_Exception_Input();
         foreach (['name', 'websiteIds', 'customerGroupIds'] as $field) {
             if (!array_key_exists($field, $body)) {
                 $this->addError($field, "{$field} is required");
@@ -114,10 +113,10 @@ final class CartPriceRuleProcessor extends \Maho\ApiPlatform\Processor
         }
         $this->applyFields($rule, $body, $user, true);
         $this->applyTrees($rule, $body, $locale, true);
-        $this->throwErrors();
+        $this->errors->throwIfErrors();
 
         $this->safeSave($rule, 'create cart price rule');
-        $this->logApiActivity('cart_price_rule', 'create', null, $rule, $user);
+        $this->logApiActivity('cart_price_rule', 'create', null, $rule);
 
         return $this->provider->toRuleDto($this->provider->loadRule((int) $rule->getId()), true);
     }
@@ -130,13 +129,13 @@ final class CartPriceRuleProcessor extends \Maho\ApiPlatform\Processor
         $rule = $this->loadWritableRule($id, $user);
         $oldData = $rule->getData();
 
-        $this->errors = [];
+        $this->errors = new \Mage_Core_Exception_Input();
         $this->applyFields($rule, $body, $user, false);
         $this->applyTrees($rule, $body, $locale, false);
-        $this->throwErrors();
+        $this->errors->throwIfErrors();
 
         $this->safeSave($rule, 'update cart price rule');
-        $this->logApiActivity('cart_price_rule', 'update', $oldData, $rule, $user);
+        $this->logApiActivity('cart_price_rule', 'update', $oldData, $rule);
 
         return $this->provider->toRuleDto($this->provider->loadRule($id), true);
     }
@@ -146,7 +145,7 @@ final class CartPriceRuleProcessor extends \Maho\ApiPlatform\Processor
         $rule = $this->loadWritableRule($id, $user);
         $oldData = $rule->getData();
         $this->safeDelete($rule, 'delete cart price rule');
-        $this->logApiActivity('cart_price_rule', 'delete', $oldData, null, $user);
+        $this->logApiActivity('cart_price_rule', 'delete', $oldData, null);
     }
 
     /**
@@ -412,7 +411,7 @@ final class CartPriceRuleProcessor extends \Maho\ApiPlatform\Processor
             }
         }
 
-        if ($this->errors === []) {
+        if ($this->errors->getErrors() === []) {
             foreach ($cleanTrees as $key => $cleanTree) {
                 $writer->replaceTree($rule, $key, $cleanTree);
             }
@@ -443,15 +442,6 @@ final class CartPriceRuleProcessor extends \Maho\ApiPlatform\Processor
 
     private function addError(string $field, string $message): void
     {
-        $this->errors[] = ['field' => $field, 'message' => $message];
-    }
-
-    private function throwErrors(): void
-    {
-        if ($this->errors === []) {
-            return;
-        }
-        $first = $this->errors[0];
-        throw new ValidationException($first['message'], $first['field'], 'Invalid', ['errors' => $this->errors]);
+        $this->errors->addError($field, $message);
     }
 }

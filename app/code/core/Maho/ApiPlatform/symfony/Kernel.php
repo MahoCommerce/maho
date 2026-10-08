@@ -16,6 +16,7 @@ use Maho\ApiPlatform\EventListener\CurrencyContextListener;
 use Maho\ApiPlatform\EventListener\StoreContextListener;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\DependencyInjection\Reference;
@@ -408,6 +409,10 @@ class Kernel extends BaseKernel
             ->decorate('api_platform.metadata.resource.metadata_collection_factory', null, 140)
             ->arg('$decorated', new Reference(Metadata\SelfResolvingWriteResourceMetadataCollectionFactory::class . '.inner'));
 
+        $services->set(Metadata\OperationDescriptionResourceMetadataCollectionFactory::class)
+            ->decorate('api_platform.metadata.resource.metadata_collection_factory', null, 145)
+            ->arg('$decorated', new Reference(Metadata\OperationDescriptionResourceMetadataCollectionFactory::class . '.inner'));
+
         // Publishes has_backend_access('<resource>') to every security expression,
         // including the per-property ones the serializer evaluates. Tagged by
         // hand: FrameworkBundle autoconfigures ExpressionFunctionProviderInterface
@@ -495,7 +500,8 @@ class Kernel extends BaseKernel
         $services->set(State\McpWriteProcessor::class)
             ->autoconfigure(false)
             ->decorate('api_platform.mcp.state_processor.write')
-            ->arg('$decorated', new Reference(State\McpWriteProcessor::class . '.inner'));
+            ->arg('$decorated', new Reference(State\McpWriteProcessor::class . '.inner'))
+            ->arg('$objectMapper', new Reference('api_platform.object_mapper', ContainerInterface::NULL_ON_INVALID_REFERENCE));
 
         $services->set(Mcp\ToolSchemaFactory::class)
             ->decorate('api_platform.mcp.json_schema.schema_factory')

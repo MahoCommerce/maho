@@ -1327,6 +1327,15 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     }
 
     /**
+     * Return the class name of $serviceAlias, for example Maho_CustomerSegmentation_Service_Segment
+     * for "customersegmentation/segment". A module declares its group under global/services.
+     */
+    public function getServiceClassName(string $serviceAlias): string
+    {
+        return $this->getGroupedClassName('service', $serviceAlias);
+    }
+
+    /**
      * Retrieve helper instance
      */
     public function getHelperInstance(string $helperAlias): Mage_Core_Helper_Abstract|false

@@ -422,6 +422,18 @@ class ApiV2Helper
     }
 
     /**
+     * HTTP PATCH request with a JSON merge patch body (RFC 7396): only the fields in the body change.
+     *
+     * @param array<string, mixed> $data
+     * @param array<string, string> $extraHeaders
+     * @return array{status: int, json: array, raw: string, headers: array}
+     */
+    public static function patch(string $path, array $data, ?string $token = null, array $extraHeaders = []): array
+    {
+        return self::request('PATCH', $path, $data, $token, $extraHeaders + ['Content-Type' => 'application/merge-patch+json']);
+    }
+
+    /**
      * HTTP QUERY request (RFC 10008): a safe read whose filters travel in a JSON body.
      *
      * @param array<string, mixed> $data
