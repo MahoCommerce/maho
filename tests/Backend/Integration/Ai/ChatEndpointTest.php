@@ -273,7 +273,7 @@ it('turns the API links of an answer into admin page links', function (): void {
     $admin = aiChatAdmin('ai_chat_linker', ['all']);
     try {
         aiChatLogin($admin);
-        AiChatScript::reset(new TextResult('See [Blue Shirt](/api/rest/v2/products/12), [the page](/api/rest/v2/cms-pages/2) and [a store](/api/rest/v2/stores/1).'));
+        AiChatScript::reset(new TextResult('See [Blue Shirt](/api/rest/v2/products/12), [the page](/api/rest/v2/cms-pages/2), [Giulia](/api/rest/v2/customers/52), [her address](/api/rest/v2/addresses/52), [a coupon](/api/rest/v2/coupons/3) and [a store](/api/rest/v2/stores/1).'));
 
         $result = aiChatRequest('/api/admin/ai/chat', ['message' => 'Find the blue shirt']);
 
@@ -282,7 +282,8 @@ it('turns the API links of an answer into admin page links', function (): void {
         expect($replace)->toHaveCount(1);
         expect($replace[0]['text'])->toMatch('~\[Blue Shirt\]\(http://[^)]+/catalog_product/edit/id/12/[^)]*\)~');
         expect($replace[0]['text'])->toMatch('~\[the page\]\(http://[^)]+/cms_page/edit/page_id/2/[^)]*\)~');
-        expect($replace[0]['text'])->toContain(' and a store.');
+        expect($replace[0]['text'])->toMatch('~\[Giulia\]\(http://[^)]+/customer/edit/id/52/[^)]*\)~');
+        expect($replace[0]['text'])->toContain(', her address, a coupon and a store.');
         $stored = Mage::getModel('ai/conversation_message')->getCollection()->addFieldToFilter('role', 'assistant')->setOrder('message_id', 'DESC')->getFirstItem();
         expect((string) $stored->getContent())->toContain('/catalog_product/edit/id/12/');
     } finally {

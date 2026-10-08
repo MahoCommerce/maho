@@ -97,6 +97,9 @@ class ConfigSetting extends \Maho\ApiPlatform\Resource
     /** Admin ACL gate. Mirrors backend Mage_Adminhtml_System_ConfigController. */
     public const ADMIN_RESOURCE = \Mage_Adminhtml_System_ConfigController::ADMIN_RESOURCE;
 
+    /** A setting has no record page: the configuration page opens one section, not one path. */
+    public const ADMIN_RECORD_PAGE = false;
+
     public const SCOPE_DEFAULT = 'default';
     public const SCOPE_WEBSITES = 'websites';
     public const SCOPE_STORES = 'stores';

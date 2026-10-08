@@ -54,6 +54,9 @@ class WidgetType extends \Maho\ApiPlatform\Resource
     /** Admin ACL gate: the same as the widget instances the backend manages. */
     public const ADMIN_RESOURCE = \Mage_Widget_Adminhtml_Widget_InstanceController::ADMIN_RESOURCE;
 
+    /** A widget type has no admin page: the page of its ACL resource edits widget instances. */
+    public const ADMIN_RECORD_PAGE = false;
+
     #[ApiProperty(identifier: true, description: 'Widget code, for example "new_products"')]
     public string $id = '';
 

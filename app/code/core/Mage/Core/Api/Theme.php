@@ -55,6 +55,9 @@ class Theme extends \Maho\ApiPlatform\Resource
     /** Admin ACL gate. Themes are managed from the design schedule in the backend. */
     public const ADMIN_RESOURCE = \Mage_Adminhtml_System_DesignController::ADMIN_RESOURCE;
 
+    /** A theme has no admin page: the page of its ACL resource edits design changes. */
+    public const ADMIN_RECORD_PAGE = false;
+
     #[ApiProperty(identifier: true, description: 'Theme id as "package/theme"')]
     public string $id = '';
 

@@ -156,6 +156,9 @@ class Coupon extends CrudResource
     /** Admin ACL gate. Mirrors backend Mage_Adminhtml_Promo_QuoteController. */
     public const ADMIN_RESOURCE = \Mage_Adminhtml_Promo_QuoteController::ADMIN_RESOURCE;
 
+    /** A coupon has no admin page of its own: it is a tab of the cart price rule page. */
+    public const ADMIN_RECORD_PAGE = false;
+
     private const DISCOUNT_TYPE_MAP = [
         'by_percent' => 'percent',
         'by_fixed' => 'fixed',

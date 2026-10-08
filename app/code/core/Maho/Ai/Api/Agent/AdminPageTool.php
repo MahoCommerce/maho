@@ -421,6 +421,7 @@ final class AdminPageTool
      * The admin page of one record, or null when the resource names no admin page or the
      * administrator may not open it. An API resource class names its admin ACL resource in
      * ADMIN_RESOURCE, and the admin menu names the ACL resource of each entry: the two meet here.
+     * A resource whose records have no page of their own sets ADMIN_RECORD_PAGE to false.
      */
     public function recordUrl(string $resource, string $id): ?string
     {
@@ -456,7 +457,8 @@ final class AdminPageTool
                 continue;
             }
             $acl = constant($class . '::ADMIN_RESOURCE');
-            if (!is_string($acl) || $acl === '') {
+            // Several resources can share the ACL resource of one page, but the page edits only one of them.
+            if (!is_string($acl) || $acl === '' || (defined($class . '::ADMIN_RECORD_PAGE') && constant($class . '::ADMIN_RECORD_PAGE') === false)) {
                 continue;
             }
             foreach ($this->resourceMetadataCollectionFactory->create($class) as $resource) {

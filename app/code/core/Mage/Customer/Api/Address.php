@@ -183,6 +183,9 @@ class Address extends CrudResource
     /** Admin ACL gate. Customer addresses are gated by the same node as customer mgmt. */
     public const ADMIN_RESOURCE = \Mage_Adminhtml_CustomerController::ADMIN_RESOURCE;
 
+    /** An address has no admin page of its own: it is a tab of the customer page. */
+    public const ADMIN_RECORD_PAGE = false;
+
     #[ApiProperty(identifier: true)]
     public ?int $id = null;
 
