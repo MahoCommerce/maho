@@ -135,7 +135,7 @@ describe('Attribute set lifecycle', function (): void {
     });
 
     it('refuses to delete the default attribute set', function (): void {
-        expect(apiDelete(ASET_PATH . '/' . asetDefaultId(), adminToken())['status'])->toBe(422);
+        expect(apiDelete(ASET_PATH . '/' . asetDefaultId(), adminToken())['status'])->toBe(409);
         expect(apiGet(ASET_PATH . '/' . asetDefaultId(), adminToken())['status'])->toBe(200);
     });
 });
@@ -186,7 +186,7 @@ describe('Attribute set groups and attributes', function (): void {
         $create = asetCreate();
         $nameId = (int) Mage::getSingleton('eav/config')->getAttribute(Mage_Catalog_Model_Product::ENTITY, 'name')->getId();
         $response = apiDelete(ASET_PATH . "/{$create['json']['id']}/attributes/{$nameId}", adminToken());
-        expect($response['status'])->toBe(422);
+        expect($response['status'])->toBe(409);
         expect(apiGet(ASET_PATH . "/{$create['json']['id']}", adminToken())['json']['attributeCodes'])->toContain('name');
     });
 });

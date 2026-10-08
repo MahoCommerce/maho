@@ -16,8 +16,8 @@ use ApiPlatform\Metadata\DeleteOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use Maho\ApiPlatform\Exception\ValidationException;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 use Symfony\Component\Serializer\Exception\ExtraAttributesException;
 
 final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
@@ -90,8 +90,7 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
         } catch (\Throwable $e) {
             // The copy of the skeleton failed, so do not leave an empty set behind
             $set->delete();
-            \Mage::logException($e instanceof \Exception ? $e : new \Exception($e->getMessage(), 0, $e));
-            throw new UnprocessableEntityHttpException('Failed to copy the skeleton attribute set');
+            throw $e;
         }
         $this->clearEavCache();
         $this->logApiActivity('attribute_set', 'create', null, $set);
@@ -125,7 +124,7 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
     {
         $set = $this->loadSet($id);
         if ($id === $this->defaultSetId()) {
-            throw new UnprocessableEntityHttpException('The default attribute set of products cannot be deleted');
+            throw new ConflictHttpException('The default attribute set of products cannot be deleted');
         }
         $oldData = $set->getData();
         $this->safeDelete($set, 'delete attribute set');
@@ -177,12 +176,7 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
 
         $oldData = $set->getData();
         $attribute->setAttributeSetId($id)->setAttributeGroupId($groupId)->setSortOrder($sortOrder);
-        try {
-            $attribute->getResource()->saveInSetIncluding($attribute);
-        } catch (\Throwable $e) {
-            \Mage::logException($e instanceof \Exception ? $e : new \Exception($e->getMessage(), 0, $e));
-            throw new UnprocessableEntityHttpException('Failed to assign the attribute to the set');
-        }
+        $attribute->getResource()->saveInSetIncluding($attribute);
         $this->clearEavCache();
         $this->logApiActivity('attribute_set', 'update', $oldData, $set);
 
@@ -207,19 +201,14 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
         /** @var \Mage_Catalog_Model_Resource_Eav_Attribute $attribute */
         $attribute = \Mage::getModel('catalog/resource_eav_attribute')->load($attributeId);
         if (!$attribute->getIsUserDefined()) {
-            throw new UnprocessableEntityHttpException('A system attribute cannot be removed from an attribute set');
+            throw new ConflictHttpException('A system attribute cannot be removed from an attribute set');
         }
         if ($attribute->getResource()->isUsedBySuperProducts($attribute, $id)) {
-            throw new UnprocessableEntityHttpException('Configurable products of this attribute set use the attribute, so it cannot be removed');
+            throw new ConflictHttpException('Configurable products of this attribute set use the attribute, so it cannot be removed');
         }
 
         $oldData = $set->getData();
-        try {
-            \Mage::getModel('eav/entity_attribute')->setEntityAttributeId($entityAttributeId)->deleteEntity();
-        } catch (\Throwable $e) {
-            \Mage::logException($e instanceof \Exception ? $e : new \Exception($e->getMessage(), 0, $e));
-            throw new UnprocessableEntityHttpException('Failed to remove the attribute from the set');
-        }
+        \Mage::getModel('eav/entity_attribute')->setEntityAttributeId($entityAttributeId)->deleteEntity();
         $this->clearEavCache();
         $this->logApiActivity('attribute_set', 'update', $oldData, $set);
     }

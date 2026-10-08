@@ -18,7 +18,6 @@ use Maho\ApiPlatform\Trait\PriceRuleFieldsTrait;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 use Symfony\Component\Serializer\Exception\ExtraAttributesException;
 
 final class CatalogPriceRuleProcessor extends \Maho\ApiPlatform\Processor
@@ -152,14 +151,8 @@ final class CatalogPriceRuleProcessor extends \Maho\ApiPlatform\Processor
         }
 
         set_time_limit(0);
-        try {
-            \Mage::getModel('catalogrule/rule')->applyAll();
-            \Mage::getModel('catalogrule/flag')->loadSelf()->setState(0)->save();
-        } catch (\Throwable $e) {
-            \Mage::logException($e instanceof \Exception ? $e : new \Exception($e->getMessage(), 0, $e));
-            $detail = $e instanceof \Mage_Core_Exception ? ': ' . $e->getMessage() : '';
-            throw new UnprocessableEntityHttpException('Unable to apply the catalog price rules' . $detail);
-        }
+        \Mage::getModel('catalogrule/rule')->applyAll();
+        \Mage::getModel('catalogrule/flag')->loadSelf()->setState(0)->save();
         $this->logApiActivity('catalog_price_rule', 'apply', null, null);
 
         return $this->respondRaw(['success' => true]);

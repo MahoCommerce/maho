@@ -15,6 +15,7 @@ namespace Mage\Catalog\Api;
 use ApiPlatform\Metadata\DeleteOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 use Symfony\Component\Serializer\Exception\ExtraAttributesException;
@@ -197,7 +198,7 @@ final class ProductAttributeProcessor extends \Maho\ApiPlatform\Processor
     {
         $attribute = $this->loadAttribute($id);
         if (!$attribute->getIsUserDefined()) {
-            throw new UnprocessableEntityHttpException('A system attribute cannot be deleted');
+            throw new ConflictHttpException('A system attribute cannot be deleted');
         }
         $oldData = $attribute->getData();
         $this->safeDelete($attribute, 'delete product attribute');

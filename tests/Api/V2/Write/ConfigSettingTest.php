@@ -220,7 +220,7 @@ describe('Config setting write and inheritance (REST)', function (): void {
 
     it('refuses to delete at the default scope', function (): void {
         $response = apiDelete('/api/rest/v2/config-settings/' . CONFIG_SETTING_TEST_PATH, serviceToken(['config-settings/delete']));
-        expect($response['status'])->toBe(409);
+        expect($response['status'])->toBe(422);
     });
 
 });

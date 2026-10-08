@@ -635,8 +635,8 @@ it('attaches a CSV to a message, lets the model read it, and shows an attached i
         expect($csv['status'])->toBe(200);
         expect($csv['json']['name'])->toBe('stock.csv');
         expect($csv['json']['mime'])->toBe('text/csv');
-        expect(aiChatUpload('run.exe', 'MZ', 'application/octet-stream')['status'])->toBe(400);
-        expect(aiChatUpload('fake.png', 'not an image', 'image/png')['status'])->toBe(400);
+        expect(aiChatUpload('run.exe', 'MZ', 'application/octet-stream')['status'])->toBe(422);
+        expect(aiChatUpload('fake.png', 'not an image', 'image/png')['status'])->toBe(422);
         $png = aiChatUpload('dot.png', (string) base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', true), 'image/png');
         expect($png['status'])->toBe(200);
 

@@ -196,7 +196,7 @@ describe('Product attribute lifecycle', function (): void {
 
     it('refuses to delete a system attribute', function (): void {
         $response = apiDelete(PATTR_PATH . '/' . pattrSystemAttributeId(), adminToken());
-        expect($response['status'])->toBe(422);
+        expect($response['status'])->toBe(409);
         expect(Mage::getSingleton('eav/config')->getAttribute(Mage_Catalog_Model_Product::ENTITY, 'name')->getId())->not->toBeNull();
     });
 

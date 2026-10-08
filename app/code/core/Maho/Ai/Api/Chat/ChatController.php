@@ -15,8 +15,8 @@ namespace Maho\Ai\Api\Chat;
 use Mage_Admin_Model_User;
 use Maho\ApiPlatform\Security\SameOriginGuard;
 use Maho\ApiPlatform\Service\StoreContext;
-use Maho_Ai_Model_Chat_Attachment;
 use Maho_Ai_Model_Chat_AgentRunner;
+use Maho_Ai_Model_Chat_Attachment;
 use Maho_Ai_Model_Chat_ClientGone as ClientGone;
 use Maho_Ai_Model_Chat_SseWriter;
 use Maho_Ai_Model_Conversation;
@@ -30,6 +30,7 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 
 /**
@@ -54,10 +55,10 @@ final class ChatController
 
         $message = trim((string) ($input['message'] ?? ''));
         if ($message === '') {
-            throw new BadRequestHttpException('The message is empty.');
+            throw new UnprocessableEntityHttpException('The message is empty.');
         }
         if (mb_strlen($message) > 20000) {
-            throw new BadRequestHttpException('The message is too long.');
+            throw new UnprocessableEntityHttpException('The message is too long.');
         }
 
         $context = $this->context($input);
@@ -107,7 +108,7 @@ final class ChatController
         $admin = $this->admin();
         $file = $request->files->get('file');
         if (!$file instanceof \Symfony\Component\HttpFoundation\File\UploadedFile) {
-            return new JsonResponse(['error' => true, 'message' => 'No file was uploaded.'], 400);
+            return new JsonResponse(['error' => true, 'message' => 'No file was uploaded.'], 422);
         }
         if (!$file->isValid()) {
             return new JsonResponse(['error' => true, 'message' => $file->getErrorMessage()], 400);
@@ -115,7 +116,7 @@ final class ChatController
         try {
             return new JsonResponse(Maho_Ai_Model_Chat_Attachment::store((int) $admin->getId(), (string) $file->getClientOriginalName(), $file->getPathname()));
         } catch (\Mage_Core_Exception $e) {
-            return new JsonResponse(['error' => true, 'message' => $e->getMessage()], 400);
+            return new JsonResponse(['error' => true, 'message' => $e->getMessage()], 422);
         }
     }
 
@@ -131,7 +132,7 @@ final class ChatController
         foreach (array_slice((array) ($input['attachments'] ?? []), 0, Maho_Ai_Model_Chat_Attachment::MAX_PER_MESSAGE) as $id) {
             $file = is_string($id) ? Maho_Ai_Model_Chat_Attachment::describe((int) $admin->getId(), $id) : null;
             if ($file === null) {
-                throw new BadRequestHttpException('An attachment is missing. Attach the file again.');
+                throw new UnprocessableEntityHttpException('An attachment is missing. Attach the file again.');
             }
             $attachments[] = $file;
         }
@@ -180,7 +181,7 @@ final class ChatController
         /** @var \Maho_Ai_Model_Task $task */
         $task = \Mage::getModel('ai/task')->load((int) ($input['task_id'] ?? 0));
         if (!$task->isAgent() || $task->getConversationId() !== (int) $conversation->getId() || (int) $task->getData('admin_user_id') !== (int) $admin->getId()) {
-            throw new BadRequestHttpException('The task does not belong to this conversation.');
+            throw new UnprocessableEntityHttpException('The task does not belong to this conversation.');
         }
         $mode = \Maho_Ai_Model_Chat_RunMode::tryFrom((string) ($task->getContextArray()['mode'] ?? '')) ?? \Maho_Ai_Model_Chat_RunMode::Job;
         if ($mode === \Maho_Ai_Model_Chat_RunMode::Chat) {
@@ -211,7 +212,7 @@ final class ChatController
         $conversation = $this->conversation($input, $admin, $this->context($input), create: false);
         $messageId = (int) ($input['message_id'] ?? 0);
         if ($messageId <= 0) {
-            throw new BadRequestHttpException('The message id is missing.');
+            throw new UnprocessableEntityHttpException('The message id is missing.');
         }
 
         return $this->stream($request, $conversation, function (Maho_Ai_Model_Chat_SseWriter $sse) use ($conversation, $messageId): void {

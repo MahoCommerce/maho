@@ -228,18 +228,6 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Items extends Maho
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    private function isAmountAttribute(string $attribute): bool
-    {
-        if (isset(self::BASE_AMOUNT_COLUMNS[$attribute])) {
-            return true;
-        }
-        if (!str_starts_with($attribute, 'product_')) {
-            return false;
-        }
-        $productAttribute = Mage::getSingleton('eav/config')->getAttribute(Mage_Catalog_Model_Product::ENTITY, substr($attribute, 8));
-        return $productAttribute && $productAttribute->getFrontendInput() === 'price';
-    }
-
     protected function getOrderItemTable(): string
     {
         return Mage::getSingleton('core/resource')->getTableName('sales/order_item');
@@ -261,7 +249,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Items extends Maho
         $attributeLabel = is_array($attributeOptions) && isset($attributeOptions[$attribute]) ? $attributeOptions[$attribute] : $attribute;
 
         $operatorName = $this->getOperatorName();
-        $valueName = $this->isAmountAttribute((string) $attribute) ? $this->getAmountValueName() : $this->getValueName();
+        $valueName = isset(self::BASE_AMOUNT_COLUMNS[(string) $attribute]) ? $this->getAmountValueName() : $this->getValueName();
 
         return Mage::helper('customersegmentation')->__('Order Items') . ': ' . $attributeLabel . ' ' . $operatorName . ' ' . $valueName;
     }

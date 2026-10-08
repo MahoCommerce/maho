@@ -20,7 +20,6 @@ use Maho\DataObject;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
@@ -107,7 +106,7 @@ final class ConfigSettingProcessor extends \Maho\ApiPlatform\Processor
     private function restoreInheritance(array $field, array $scope, ?string $oldValue): void
     {
         if ($scope['scope'] === ConfigSetting::SCOPE_DEFAULT) {
-            throw new ConflictHttpException('The default scope has no parent scope to inherit from');
+            throw new ValidationException('The default scope has no parent scope to inherit from', 'scope', 'Invalid');
         }
 
         \Mage::getConfig()->deleteConfig($field['path'], $scope['scope'], $scope['scopeId']);
