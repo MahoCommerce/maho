@@ -84,13 +84,13 @@ describe('cart service store scope (issue #1337)', function (): void {
         }
     });
 
-    it('keeps the admin scope across getCart()', function (): void {
+    it('keeps the admin scope across getById()', function (): void {
         $product = loadSimplePricedProduct();
         $quote = createPricedQuote($product);
 
         $previousStoreId = cartApiEnterAdminScope();
         try {
-            $loaded = \Mage::getService('checkout/cart')->getCart((int) $quote->getId());
+            $loaded = \Mage::getService('checkout/cart')->getById((int) $quote->getId());
 
             expect($loaded)->not->toBeNull()
                 ->and((int) Mage::app()->getStore()->getId())->toBe(0);
@@ -106,7 +106,7 @@ describe('cart service store scope (issue #1337)', function (): void {
 
         $previousStoreId = cartApiEnterAdminScope();
         try {
-            \Mage_Checkout_Service_Cart::inQuoteStoreScope($quote, function (): void {
+            \Mage::getService('checkout/cart')->inQuoteStoreScope($quote, function (): void {
                 expect((int) Mage::app()->getStore()->getId())->toBe(1)
                     ->and(StoreContext::getStoreId())->toBe(1);
             });
@@ -162,7 +162,7 @@ describe('cart service store scope (issue #1337)', function (): void {
         // The customer's existing store-1 cart. The merge must land here: a
         // lookup scoped to the caller's store (admin, 0) would miss it and
         // create a fresh cart instead.
-        $existing = $service->getCustomerCart((int) $customer->getId());
+        $existing = $service->getForCustomer((int) $customer->getId(), 1);
 
         $guestCart = createPricedQuote($product);
         $guestCart->setData('masked_quote_id', bin2hex(random_bytes(16)));
@@ -171,7 +171,7 @@ describe('cart service store scope (issue #1337)', function (): void {
 
         $previousStoreId = cartApiEnterAdminScope();
         try {
-            $merged = $service->mergeCarts((string) $guestCart->getData('masked_quote_id'), (int) $customer->getId());
+            $merged = $service->merge((string) $guestCart->getData('masked_quote_id'), (int) $customer->getId());
 
             expect((int) $merged->getId())->toBe((int) $existing->getId())
                 ->and((int) $merged->getStoreId())->toBe(1)

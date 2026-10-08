@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 
 /**
- * API v2 customer segments: fields, conditions, refresh, customers, condition types, access,
+ * API v2 customer segments: fields, conditions, refresh, customers, condition metadata, access,
  * and the same outcome as the admin page, since both call the segment service.
  *
  * @group write
@@ -99,13 +99,13 @@ describe('Customer segment access', function (): void {
     it('denies every operation without authentication', function (): void {
         expect(apiGet(CSEG_PATH)['status'])->toBe(401);
         expect(apiPost(CSEG_PATH, ['name' => 'x'])['status'])->toBe(401);
-        expect(apiGet(CSEG_PATH . '/condition-types')['status'])->toBe(401);
+        expect(apiGet(CSEG_PATH . '/condition-metadata')['status'])->toBe(401);
     });
 
     it('denies a token without the permission', function (): void {
         $readToken = serviceToken(['customer-segments/read']);
         expect(apiGet(CSEG_PATH, $readToken)['status'])->toBe(200);
-        expect(apiGet(CSEG_PATH . '/condition-types', $readToken)['status'])->toBe(200);
+        expect(apiGet(CSEG_PATH . '/condition-metadata', $readToken)['status'])->toBe(200);
         expect(apiPost(CSEG_PATH, ['name' => 'x', 'websiteIds' => [1]], $readToken)['status'])->toBeForbidden();
         expect(apiGet(CSEG_PATH, serviceToken(['customers/read']))['status'])->toBeForbidden();
     });
@@ -141,6 +141,19 @@ describe('Customer segment access', function (): void {
             deletePriceWebsite('pest_cseg');
         }
     });
+
+    it('refuses a store-restricted token that changes a segment with a website outside its scope', function (): void {
+        $foreignWebsiteId = (int) createPriceWebsite('pest_cseg_shared')->getId();
+        try {
+            $id = (int) csegCreate(['websiteIds' => [1, $foreignWebsiteId]])['json']['id'];
+            $token = serviceToken(['customer-segments/read', 'customer-segments/write'], [1]);
+
+            expect(apiPatch(CSEG_PATH . "/{$id}", ['websiteIds' => [1]], $token)['status'])->toBeForbidden()
+                ->and(Mage::getModel('customersegmentation/segment')->load($id)->getWebsiteIds())->toBe([1, $foreignWebsiteId]);
+        } finally {
+            deletePriceWebsite('pest_cseg_shared');
+        }
+    });
 });
 
 describe('Customer segment fields', function (): void {
@@ -158,6 +171,8 @@ describe('Customer segment fields', function (): void {
 
         expect($create['status'])->toBe(201);
         $id = (int) $create['json']['id'];
+        expect($create['json']['refreshStatus'])->toBe('pending')
+            ->and($create['json']['matchedCustomersCount'])->toBe(0);
         $json = apiGet(CSEG_PATH . "/{$id}", $token)['json'];
         expect($json['name'])->toBe('Pest full segment')
             ->and($json['description'])->toBe('All fields')
@@ -296,6 +311,38 @@ describe('Customer segment conditions', function (): void {
             ->and($leaf['label'])->toBeString();
     });
 
+    it('keeps the stored tree when a PATCH leaves out conditions, and empties it when a PATCH sends null', function (): void {
+        $token = adminToken();
+        $id = (int) csegCreate(['conditions' => csegLifetimeSalesTree('500')], $token)['json']['id'];
+
+        $kept = apiPatch(CSEG_PATH . "/{$id}", ['priority' => 2], $token);
+        expect($kept['status'])->toBe(200)
+            ->and($kept['json']['conditions']['conditions'][0]['attribute'])->toBe('lifetime_sales');
+
+        $cleared = apiPatch(CSEG_PATH . "/{$id}", ['conditions' => null], $token);
+        expect($cleared['status'])->toBe(200)
+            ->and($cleared['json']['conditions']['conditions'])->toBe([]);
+    });
+
+    it('refreshes and deletes a segment whose stored tree is deeper than the API accepts', function (): void {
+        $tree = ['type' => CSEG_ROOT, 'aggregator' => 'all', 'value' => true, 'conditions' => []];
+        for ($level = 0; $level < Mage_Rule_Model_Condition_TreeValidator::MAX_DEPTH; $level++) {
+            $tree = ['type' => CSEG_ROOT, 'aggregator' => 'all', 'value' => true, 'conditions' => [$tree]];
+        }
+        $segment = Mage::getModel('customersegmentation/segment')
+            ->setName('Pest deep tree ' . substr(uniqid(), -6))
+            ->setWebsiteIds([1])
+            ->setIsActive();
+        $segment->getConditions()->loadArray($tree);
+        $segment->save();
+        $id = (int) $segment->getId();
+        csegIds()[] = $id;
+
+        $token = adminToken();
+        expect(apiPost(CSEG_PATH . "/{$id}/refresh", [], $token)['status'])->toBe(200)
+            ->and(apiDelete(CSEG_PATH . "/{$id}", $token)['status'])->toBe(204);
+    });
+
     it('refuses an attribute that the condition type does not have', function (): void {
         $tree = csegLifetimeSalesTree('500');
         $tree['conditions'][0]['attribute'] = 'nope';
@@ -305,20 +352,36 @@ describe('Customer segment conditions', function (): void {
             ->and($response['json']['details']['errors'][0]['field'])->toBe('conditions.conditions[0].attribute');
     });
 
-    it('lists the condition types in short form and gives one type in full', function (): void {
+    it('describes the conditions tree and pages the value options of an attribute', function (): void {
         $token = adminToken();
-        $types = csegMembers(apiGet(CSEG_PATH . '/condition-types', $token));
-        $clv = array_values(array_filter($types, fn(array $type): bool => $type['code'] === 'customer_clv'))[0] ?? null;
+        $metadata = apiGet(CSEG_PATH . '/condition-metadata', $token);
+        $types = $metadata['json']['types'] ?? [];
 
-        expect($clv)->not->toBeNull()
-            ->and($clv['type'])->toBe('customersegmentation/segment_condition_customer_clv')
-            ->and(array_column($clv['attributes'], 'code'))->toContain('lifetime_sales')
-            ->and($clv['attributes'][0])->not->toHaveKey('operators');
+        expect($metadata['status'])->toBe(200)
+            ->and($metadata['json']['roots'])->toBe(['conditions' => CSEG_ROOT])
+            ->and(array_column($types['customersegmentation/segment_condition_customer_clv']['attributes'], 'code'))->toContain('lifetime_sales')
+            ->and(array_column($metadata['json']['scope']['websites'], 'id'))->toContain(1);
 
-        $full = apiGet(CSEG_PATH . '/condition-types/customer_clv', $token);
-        expect($full['status'])->toBe(200)
-            ->and($full['json']['attributes'][0])->toHaveKey('operators');
-        expect(apiGet(CSEG_PATH . '/condition-types/nope', $token)['status'])->toBe(404);
+        $unchanged = apiGet(CSEG_PATH . '/condition-metadata?knownVersion=' . $metadata['json']['version'], $token);
+        expect($unchanged['json']['unchanged'])->toBeTrue()
+            ->and($unchanged['json'])->not->toHaveKey('types');
+
+        $withOptions = null;
+        foreach ($types as $type => $description) {
+            foreach ($description['attributes'] ?? [] as $attribute) {
+                if (($attribute['options'] ?? null) !== null) {
+                    $withOptions = [$type, $attribute['code']];
+                    break 2;
+                }
+            }
+        }
+        expect($withOptions)->not->toBeNull();
+
+        $options = apiGet(CSEG_PATH . '/condition-value-options?type=' . urlencode($withOptions[0]) . '&attribute=' . urlencode($withOptions[1]), $token);
+        expect($options['status'])->toBe(200)
+            ->and($options['json']['items'])->toBeArray()
+            ->and($options['json']['totalItems'])->toBeGreaterThanOrEqual(count($options['json']['items']));
+        expect(apiGet(CSEG_PATH . '/condition-value-options?type=nope&attribute=x', $token)['status'])->toBe(400);
     });
 });
 
@@ -362,9 +425,23 @@ describe('Customer segment MCP tools', function (): void {
             'customers_customer_segments_create',
             'customers_customer_segments_refresh_create',
             'customers_customer_segments_customers_list',
-            'customers_customer_segments_condition_types_list',
-            'customers_customer_segments_condition_types_get',
+            'customers_customer_segments_condition_metadata_get',
+            'customers_customer_segments_condition_value_options_get',
         );
+    });
+
+    it('creates a segment with the MCP create tool', function (): void {
+        $token = adminToken();
+        $name = 'Pest MCP ' . substr(uniqid(), -6);
+        $created = mcpTool('customers_customer_segments_create', ['name' => $name, 'websiteIds' => [1]], $token, mcpSession($token));
+        $payload = json_decode($created['json']['result']['content'][0]['text'] ?? '{}', true);
+        if (isset($payload['id'])) {
+            csegIds()[] = (int) $payload['id'];
+        }
+
+        expect($payload['name'] ?? null)->toBe($name)
+            ->and($payload['id'] ?? null)->toBeInt()
+            ->and($payload['refreshStatus'] ?? null)->toBe('pending');
     });
 });
 
@@ -420,6 +497,27 @@ describe('Customer segment admin page and API parity', function (): void {
         expect(Mage::getModel('customersegmentation/segment')->load($name, 'name')->getId())->toBeNull()
             ->and($api['status'])->toBe(422)
             ->and($errors)->toBe([$api['json']['message']]);
+    });
+
+    it('clears the customer groups when the admin form posts none', function (): void {
+        $id = (int) csegCreate(['customerGroupIds' => [1]])['json']['id'];
+        csegAdminSave(['name' => 'Pest clear groups ' . substr(uniqid(), -6), 'website_ids' => ['1']], $id);
+
+        expect(Mage::getModel('customersegmentation/segment')->load($id)->getCustomerGroupIds())->toBe([]);
+    });
+
+    it('reads the website IDs that the form posts as one text in single store mode', function (): void {
+        $websiteId = (int) createPriceWebsite('pest_cseg_admin')->getId();
+        try {
+            $name = 'Pest single store ' . substr(uniqid(), -6);
+            csegAdminSave(['name' => $name, 'website_ids' => "1,{$websiteId}"]);
+            $segment = Mage::getModel('customersegmentation/segment')->load($name, 'name');
+            csegIds()[] = (int) $segment->getId();
+
+            expect($segment->getWebsiteIds())->toBe([1, $websiteId]);
+        } finally {
+            deletePriceWebsite('pest_cseg_admin');
+        }
     });
 });
 

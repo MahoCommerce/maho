@@ -130,7 +130,7 @@ describe('cart API street lines', function (): void {
                 test()->markTestSkipped('Flat rate shipping not available in this environment');
             }
 
-            $order = \Mage::getService('sales/order')->placeAdminOrder($placed)['order'];
+            $order = \Mage::getService('sales/order')->place($placed)['order'];
 
             foreach ([$order->getShippingAddress(), $order->getBillingAddress()] as $address) {
                 expect(cartApiOrderStreet((int) $address->getId()))->toBe("1 Test Street\nApt 7");

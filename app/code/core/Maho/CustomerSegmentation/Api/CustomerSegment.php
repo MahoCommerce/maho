@@ -52,7 +52,7 @@ use Symfony\Component\ObjectMapper\Condition\TargetClass;
             // The provider gives the new segment with its default values, and the body fills it
             read: true,
             security: "is_granted('ROLE_ADMIN') or is_granted('customer-segments/write')",
-            description: 'Create a customer segment. Required: name and websiteIds. Build the conditions tree from the condition types tools. '
+            description: 'Create a customer segment. Required: name and websiteIds. Build the conditions tree from the condition metadata. '
                 . 'Saving a segment does not find its customers: call POST /customer-segments/{id}/refresh afterwards',
         ),
         // Before Put: the MCP update tool comes from the first update operation, and an assistant changes one field at a time
@@ -107,7 +107,7 @@ class CustomerSegment extends \Maho\ApiPlatform\Resource
         'description' => 'Condition tree. A node has the keys type, attribute, operator, value, aggregator and conditions (a list of child nodes), and the read-only key label. '
             . 'The root has the type customersegmentation/segment_condition_combine, the aggregator all or any, and the value true (the conditions are true) or false (they are false). '
             . 'A leaf has a type and an attribute, for example the type customersegmentation/segment_condition_customer_clv with the attribute lifetime_sales, number_of_orders or average_order_value, '
-            . 'or the type customersegmentation/segment_condition_customer_timebased with days_since_last_order. The condition types tools list every type with its attributes, operators and values. '
+            . 'or the type customersegmentation/segment_condition_customer_timebased with days_since_last_order. The condition metadata lists every type with its attributes, operators and values. '
             . 'Operators are ==, !=, >=, <=, >, <, {} (contains), !{} (does not contain), () (is one of) and !() (is not one of).',
         'properties' => [
             'type' => ['type' => 'string'],

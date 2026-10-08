@@ -71,7 +71,7 @@ describe('Cash tendered in the order service', function (): void {
         $threw = false;
         try {
             // Tender $10 less than owed.
-            $service->placeAdminOrder($quote, null, null, $grandTotal - 10.0);
+            $service->place($quote, null, null, $grandTotal - 10.0);
         } catch (\Throwable $e) {
             $threw = true;
             expect($e->getMessage())->toContain('Insufficient cash');
@@ -99,7 +99,7 @@ describe('Cash tendered in the order service', function (): void {
         $service = Mage::getService('sales/order');
 
         try {
-            $result = $service->placeAdminOrder($quote, null, null, $tendered);
+            $result = $service->place($quote, null, null, $tendered);
         } catch (\Throwable $e) {
             $this->markTestSkipped('Cash-on-delivery checkout could not complete in this store: ' . $e->getMessage());
         }

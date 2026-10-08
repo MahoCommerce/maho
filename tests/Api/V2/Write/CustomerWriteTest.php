@@ -257,6 +257,49 @@ describe('PUT /api/rest/v2/customers/me (self-service gating)', function (): voi
 
 });
 
+describe('Customer service errors', function (): void {
+
+    it('returns 409 when a customer changes their email to the email of another customer', function (): void {
+        [$first] = createTestCustomer();
+        [, $secondEmail] = createTestCustomer();
+        $firstId = (int) $first['json']['id'];
+
+        $response = apiPut('/api/rest/v2/customers/me', ['email' => $secondEmail], customerToken($firstId));
+
+        expect($response['status'])->toBe(409);
+        expect($response['json']['message'])->toBe('This email is already in use.');
+    });
+
+    it('returns 422 for a wrong current password', function (): void {
+        [$create] = createTestCustomer();
+        $id = (int) $create['json']['id'];
+
+        // One call only: the endpoint has a rate limit for each IP
+        $response = apiPost('/api/rest/v2/customers/me/password', [
+            'currentPassword' => 'WrongPass1234!',
+            'newPassword' => 'PestNew12345!',
+        ], customerToken($id));
+
+        expect($response['status'])->toBe(422);
+        expect($response['json']['message'])->toBe('Current password is incorrect.');
+    });
+
+    it('returns 422 for a wrong reset token', function (): void {
+        [, $email] = createTestCustomer();
+
+        // One call only: the endpoint has a rate limit for each IP
+        $response = apiPost('/api/rest/v2/customers/reset-password', [
+            'email' => $email,
+            'resetToken' => 'pest-wrong-token',
+            'newPassword' => 'PestNew12345!',
+        ]);
+
+        expect($response['status'])->toBe(422);
+        expect($response['json']['message'])->toBe('Invalid or expired reset token.');
+    });
+
+});
+
 describe('Customer address extended fields', function (): void {
 
     it('round-trips vatId and name parts on an admin-created address', function (): void {

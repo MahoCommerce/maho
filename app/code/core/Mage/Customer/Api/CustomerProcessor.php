@@ -434,18 +434,25 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             throw new AccessDeniedHttpException('Authentication required');
         }
 
-        $customer = $this->customerService->getCustomerById($customerId);
+        $customer = $this->customerService->getById($customerId);
         if (!$customer) {
             throw new AccessDeniedHttpException('Customer not found');
         }
 
-        $data = array_filter([
-            'firstName' => $firstName,
-            'lastName' => $lastName,
-            'email' => $email,
-        ], fn($v) => $v !== null) + $profile;
+        if ($firstName !== null) {
+            $customer->setFirstname($firstName);
+        }
+        if ($lastName !== null) {
+            $customer->setLastname($lastName);
+        }
+        if ($email !== null) {
+            $customer->setEmail($email);
+        }
+        foreach ($profile as $field => $value) {
+            $customer->setData($field, $value);
+        }
 
-        $customer = $this->customerService->updateCustomer($customer, $data);
+        $customer = $this->customerService->save($customer);
 
         return Customer::fromModel($customer);
     }
@@ -456,7 +463,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
      */
     private function updateCustomerAdmin(int $customerId, Customer $data): Customer
     {
-        $customer = $this->customerService->getCustomerById($customerId);
+        $customer = $this->customerService->getById($customerId);
         if (!$customer) {
             throw new NotFoundHttpException('Customer not found');
         }
@@ -637,7 +644,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         $this->checkRateLimitByIp('change_password', 'change_password', 3600);
         $this->checkRateLimit('change_password:customer:' . $customerId, 'change_password', 3600);
 
-        $customer = $this->customerService->getCustomerById($customerId);
+        $customer = $this->customerService->getById($customerId);
         if (!$customer) {
             throw new AccessDeniedHttpException('Customer not found');
         }

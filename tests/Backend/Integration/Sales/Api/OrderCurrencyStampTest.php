@@ -62,11 +62,11 @@ describe('Order currency stamp', function (): void {
         setStoreDisplayCurrency('USD', 'USD,EUR');
 
         // The GraphQL cartId-only path: loadAdminQuote() then straight into
-        // placeAdminOrder(), with no save to refresh the stored columns.
+        // place(), with no save to refresh the stored columns.
         $reloaded = Mage::getModel('sales/quote')->loadByIdWithoutStore((int) $quote->getId());
         expect($reloaded->getQuoteCurrencyCode())->toBe('EUR');
 
-        $order = Mage::getService('sales/order')->placeAdminOrder($reloaded)['order'];
+        $order = Mage::getService('sales/order')->place($reloaded)['order'];
 
         expect($order->getId())->toBeGreaterThan(0);
 

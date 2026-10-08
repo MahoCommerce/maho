@@ -72,7 +72,7 @@ afterEach(function () {
 it('returns every status note to a backend reader', function (): void {
     $this->order = orderCommentVisibilityOrder();
 
-    $notes = array_column(\Mage::getService('sales/order')->getOrderNotes($this->order), 'note');
+    $notes = array_column(\Mage::getService('sales/order')->getNotes($this->order), 'note');
     sort($notes);
 
     expect($notes)->toBe(['hidden note', 'visible note']);
@@ -81,7 +81,7 @@ it('returns every status note to a backend reader', function (): void {
 it('returns only storefront-visible status notes to a customer reader', function (): void {
     $this->order = orderCommentVisibilityOrder();
 
-    $notes = array_column(\Mage::getService('sales/order')->getOrderNotes($this->order, true), 'note');
+    $notes = array_column(\Mage::getService('sales/order')->getNotes($this->order, true), 'note');
 
     expect($notes)->toBe(['visible note']);
 });
@@ -92,11 +92,11 @@ it('returns only storefront-visible shipment comments to a customer reader', fun
 
     $service = \Mage::getService('sales/order');
 
-    $all = array_column(\Mage\Sales\Api\Shipment::fromModel($service->getOrderShipments($this->order)[0])->comments, 'comment');
+    $all = array_column(\Mage\Sales\Api\Shipment::fromModel($service->getShipments($this->order)[0])->comments, 'comment');
     sort($all);
     expect($all)->toBe(['hidden shipment note', 'visible shipment note']);
 
-    $visible = array_column(\Mage\Sales\Api\Shipment::fromModel($service->getOrderShipments($this->order, true)[0])->comments, 'comment');
+    $visible = array_column(\Mage\Sales\Api\Shipment::fromModel($service->getShipments($this->order, true)[0])->comments, 'comment');
     expect($visible)->toBe(['visible shipment note']);
 });
 
@@ -106,10 +106,10 @@ it('does not carry a filtered comment set into a later backend read', function (
 
     $service = \Mage::getService('sales/order');
 
-    $visible = array_column(\Mage\Sales\Api\Shipment::fromModel($service->getOrderShipments($this->order, true)[0])->comments, 'comment');
+    $visible = array_column(\Mage\Sales\Api\Shipment::fromModel($service->getShipments($this->order, true)[0])->comments, 'comment');
     expect($visible)->toBe(['visible shipment note']);
 
-    $all = array_column(\Mage\Sales\Api\Shipment::fromModel($service->getOrderShipments($this->order)[0])->comments, 'comment');
+    $all = array_column(\Mage\Sales\Api\Shipment::fromModel($service->getShipments($this->order)[0])->comments, 'comment');
     sort($all);
     expect($all)->toBe(['hidden shipment note', 'visible shipment note']);
 });

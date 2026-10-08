@@ -66,7 +66,7 @@ afterEach(function () {
 it('leaves an order where it stands when the rate table moves', function () {
     $rate = useEurDisplayCurrency();
     $order = Mage::getService('sales/order')
-        ->placeAdminOrder(createPlaceableQuote($this->product))['order'];
+        ->place(createPlaceableQuote($this->product))['order'];
 
     expect($order->getOrderCurrencyCode())->toBe('EUR');
     expect((float) $order->getBaseToOrderRate())->toEqualWithDelta($rate, 0.0001);
@@ -89,7 +89,7 @@ it('leaves an order where it stands when the rate table moves', function () {
 it('invoices an order at the rates the order was placed with', function () {
     $rate = useEurDisplayCurrency();
     $order = Mage::getService('sales/order')
-        ->placeAdminOrder(createPlaceableQuote($this->product))['order'];
+        ->place(createPlaceableQuote($this->product))['order'];
 
     Mage::getModel('directory/currency')->saveRates(['USD' => ['EUR' => round($rate / 2, 4)]]);
     resetCurrencyState();

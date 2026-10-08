@@ -15,6 +15,7 @@ namespace Maho\CustomerSegmentation\Api;
 use ApiPlatform\Metadata\DeleteOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use Maho\ApiPlatform\Exception\ApiException;
+use Maho\ApiPlatform\Security\AdminAcl;
 use Maho\ApiPlatform\Security\ApiUser;
 
 final class CustomerSegmentProcessor extends \Maho\ApiPlatform\Processor
@@ -31,7 +32,7 @@ final class CustomerSegmentProcessor extends \Maho\ApiPlatform\Processor
         $oldData = $data->getOrigData();
 
         if ($operation->getName() === 'refresh_customer_segment') {
-            $this->assertSegmentAcl(CustomerSegment::ACL_REFRESH);
+            AdminAcl::checkPath(CustomerSegment::ACL_REFRESH);
             $this->assertWebsitesWritable($data, $context, $user);
             $this->segmentService()->refresh($data);
             $this->logApiActivity('customer_segment', 'refresh', null, $data);
@@ -39,14 +40,14 @@ final class CustomerSegmentProcessor extends \Maho\ApiPlatform\Processor
         }
 
         if ($operation instanceof DeleteOperationInterface) {
-            $this->assertSegmentAcl(CustomerSegment::ACL_DELETE);
+            AdminAcl::checkPath(CustomerSegment::ACL_DELETE);
             $this->assertWebsitesWritable($data, $context, $user);
             $this->segmentService()->delete($data);
             $this->logApiActivity('customer_segment', 'delete', $oldData, null);
             return null;
         }
 
-        $this->assertSegmentAcl(CustomerSegment::ACL_SAVE);
+        AdminAcl::checkPath(CustomerSegment::ACL_SAVE);
         $this->assertWebsitesWritable($data, $context, $user);
         $isNew = !$data->getId();
         $this->segmentService()->save($data);

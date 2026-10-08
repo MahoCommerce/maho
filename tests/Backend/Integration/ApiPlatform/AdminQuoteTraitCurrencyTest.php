@@ -14,9 +14,9 @@ uses(Tests\MahoBackendTestCase::class);
 
 /**
  * placeOrder and the shipping estimate load a cart through AdminQuoteTrait,
- * not \Mage_Checkout_Service_Cart::getCart(), so the trait has to perform the same
- * adapt-or-refuse step, or those paths ignore the X-Currency-Code header the
- * cart reads honored and stamp the order in a currency the caller never saw.
+ * so the trait has to perform the same adapt-or-refuse step as the cart reads,
+ * or those paths ignore the X-Currency-Code header the cart reads honored and
+ * stamp the order in a currency the caller never saw.
  */
 
 describe('Admin quote load currency', function (): void {

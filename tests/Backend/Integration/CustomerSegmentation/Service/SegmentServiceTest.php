@@ -65,6 +65,26 @@ describe('Customer segment service', function () {
             ->toThrow(Mage_Core_Exception_NoSuchEntity::class);
     });
 
+    it('keeps a stored customer group that was deleted later, and still refuses a new unknown one', function () {
+        $group = Mage::getModel('customer/group')->setCode('pest_cseg_' . uniqid())->setTaxClassId(3)->save();
+        $groupId = (int) $group->getId();
+        $segment = pestSegmentService()->save(
+            pestSegmentService()->newSegment()
+                ->setName('Pest deleted group ' . uniqid())
+                ->setWebsiteIds([1])
+                ->setCustomerGroupIds([1, $groupId]),
+        );
+        $group->delete();
+
+        try {
+            expect(pestSegmentService()->save(pestSegmentService()->getById((int) $segment->getId())->setPriority(2))->getPriority())->toBe(2)
+                ->and(fn() => pestSegmentService()->save(pestSegmentService()->getById((int) $segment->getId())->setCustomerGroupIds([1, $groupId, 99999])))
+                ->toThrow(Mage_Core_Exception_Input::class);
+        } finally {
+            pestSegmentService()->delete($segment);
+        }
+    });
+
     it('treats a segment outside the given websites as missing', function () {
         $segment = pestSegmentService()->save(
             pestSegmentService()->newSegment()->setName('Pest scope ' . uniqid())->setWebsiteIds([1]),

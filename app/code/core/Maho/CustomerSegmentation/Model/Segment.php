@@ -85,11 +85,11 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
     }
 
     /**
-     * Read a list of IDs from the comma-separated text of the column or from the array that a load gives.
+     * Read a list of IDs from comma-separated text or from an array. Ignore values that are not numbers, and remove duplicates.
      *
      * @return list<int>
      */
-    private static function idList(mixed $value): array
+    public static function idList(mixed $value): array
     {
         if (is_string($value)) {
             $value = explode(',', $value);

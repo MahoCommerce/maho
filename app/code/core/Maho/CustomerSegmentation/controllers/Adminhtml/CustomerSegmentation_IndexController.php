@@ -537,14 +537,9 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
      */
     private function applyFormFields(Maho_CustomerSegmentation_Model_Segment $segment, array $data): void
     {
-        $ids = static fn(mixed $value): array => array_values(array_map(
-            intval(...),
-            array_filter((array) $value, is_numeric(...)),
-        ));
-
         if (isset($data['name'])) {
             $segment->setName((string) $data['name']);
-            $segment->setCustomerGroupIds($ids($data['customer_group_ids'] ?? []));
+            $segment->setCustomerGroupIds($segment::idList($data['customer_group_ids'] ?? []));
         }
         if (array_key_exists('description', $data)) {
             $segment->setDescription($data['description'] === null ? null : (string) $data['description']);
@@ -553,7 +548,7 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
             $segment->setIsActive((bool) $data['is_active']);
         }
         if (isset($data['website_ids'])) {
-            $segment->setWebsiteIds($ids($data['website_ids']));
+            $segment->setWebsiteIds($segment::idList($data['website_ids']));
         }
         if (isset($data['refresh_mode'])) {
             $segment->setRefreshMode((string) $data['refresh_mode']);

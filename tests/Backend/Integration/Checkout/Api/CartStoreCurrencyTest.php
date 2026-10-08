@@ -7,6 +7,7 @@
 
 declare(strict_types=1);
 
+use Mage\Checkout\Api\CartRequest;
 use Maho\ApiPlatform\Service\StoreContext;
 
 uses(Tests\MahoBackendTestCase::class);
@@ -46,7 +47,7 @@ describe('Cart store currency', function (): void {
         // resolved a store the cart does not belong to.
         StoreContext::setStore(0);
 
-        $cart = \Mage::getService('checkout/cart')->getCart((int) $this->quote->getId());
+        $cart = CartRequest::load((int) $this->quote->getId());
 
         expect($cart)->not->toBeNull();
         expect($cart->getStore()->getCurrentCurrencyCode())->toBe('EUR');
@@ -57,7 +58,7 @@ describe('Cart store currency', function (): void {
         StoreContext::setRequestedCurrencyCode('EUR');
         StoreContext::setStore(0);
 
-        expect(fn() => \Mage::getService('checkout/cart')->getCart((int) $this->quote->getId()))
+        expect(fn() => CartRequest::load((int) $this->quote->getId()))
             ->toThrow(Mage_Core_Exception::class);
     });
 
@@ -65,7 +66,7 @@ describe('Cart store currency', function (): void {
         StoreContext::setRequestedCurrencyCode('EUR');
         StoreContext::setStore(0);
 
-        $cart = \Mage::getService('checkout/cart')->getCart((int) $this->quote->getId());
+        $cart = CartRequest::load((int) $this->quote->getId());
         expect($cart->getStore()->getCurrentCurrencyCode())->toBe('EUR');
 
         // What a worker runtime does between requests: the currency landed on
@@ -80,7 +81,7 @@ describe('Cart store currency', function (): void {
         StoreContext::setStore(1);
         $this->store->setRequestedCurrencyCode('EUR');
 
-        $cart = \Mage::getService('checkout/cart')->getCart((int) $this->quote->getId());
+        $cart = CartRequest::load((int) $this->quote->getId());
 
         expect($cart->getStore()->getCurrentCurrencyCode())->toBe('EUR');
     });

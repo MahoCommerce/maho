@@ -73,7 +73,7 @@ class OrderMutationHandler
             throw ValidationException::invalidValue('shippingMethod', 'is not available for this address');
         }
 
-        $result = $this->orderService->placeAdminOrder(
+        $result = $this->orderService->place(
             $quote,
             $variables['guestEmail'] ?? null,
             $variables['orderNote'] ?? null,
@@ -109,7 +109,7 @@ class OrderMutationHandler
             throw ValidationException::requiredField('incrementId');
         }
 
-        $order = $this->orderService->getOrder(incrementId: $incrementId);
+        $order = $this->orderService->getByIncrementId($incrementId);
         if (!$order) {
             throw NotFoundException::order();
         }
@@ -130,7 +130,7 @@ class OrderMutationHandler
             throw ValidationException::requiredField('customerId');
         }
 
-        $result = $this->orderService->getCustomerOrders((int) $customerId, 1, $limit);
+        $result = $this->orderService->getListForCustomer((int) $customerId, 1, $limit);
 
         $orders = [];
         foreach ($result['orders'] as $order) {
@@ -149,7 +149,7 @@ class OrderMutationHandler
         $storeId = $variables['storeId'] ?? null;
         $limit = max(1, min((int) ($variables['limit'] ?? 10), 100));
 
-        $orders = $this->orderService->getRecentOrders($limit, $storeId ? (int) $storeId : null);
+        $orders = $this->orderService->getRecent($limit, $storeId ? (int) $storeId : null);
 
         $result = [];
         foreach ($orders as $order) {
@@ -173,7 +173,7 @@ class OrderMutationHandler
             return ['searchOrders' => []];
         }
 
-        $orders = $this->orderService->searchOrders($search, $storeId ? (int) $storeId : null, $limit);
+        $orders = $this->orderService->search($search, $storeId ? (int) $storeId : null, $limit);
 
         $result = [];
         foreach ($orders as $order) {
@@ -241,7 +241,7 @@ class OrderMutationHandler
 
         // Refunds run through the order service so this path and the REST/GraphQL
         // CreditMemo resource apply the same money rules and the same lock.
-        $creditmemo = $this->orderService->createCreditMemoForOrder(
+        $creditmemo = $this->orderService->refund(
             $order,
             $creditmemoData,
             $comment,
@@ -272,8 +272,12 @@ class OrderMutationHandler
         $shipment = null;
 
         try {
-            $invoice = $this->orderService->createInvoiceForOrder($order);
-            $shipment = $this->orderService->createShipmentForOrder($order);
+            if ($order->canInvoice()) {
+                $invoice = $this->orderService->invoice($order, captureCase: \Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE);
+            }
+            if ($order->canShip()) {
+                $shipment = $this->orderService->ship($order);
+            }
             $order->load($order->getId());
         } catch (\Exception $e) {
             \Mage::logException($e);
