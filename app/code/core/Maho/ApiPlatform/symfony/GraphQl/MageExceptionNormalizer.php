@@ -31,6 +31,7 @@ final class MageExceptionNormalizer implements NormalizerInterface
     public function normalize(mixed $data, ?string $format = null, array $context = []): array
     {
         /** @var Error $data */
+        /** @var \Mage_Core_Exception $exception supportsNormalization() accepts no other error */
         $exception = $data->getPrevious();
         $error = FormattedError::createFromException($data);
         $error['message'] = $exception->getMessage();
