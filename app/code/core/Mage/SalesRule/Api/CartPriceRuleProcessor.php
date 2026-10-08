@@ -16,6 +16,8 @@ use Maho\ApiPlatform\Exception\ValidationException;
 use Maho\ApiPlatform\Security\ApiUser;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
+use Symfony\Component\Serializer\Exception\ExtraAttributesException;
 
 final class CartPriceRuleProcessor extends \Maho\ApiPlatform\Processor
 {
@@ -165,10 +167,9 @@ final class CartPriceRuleProcessor extends \Maho\ApiPlatform\Processor
      */
     private function applyFields(\Mage_SalesRule_Model_Rule $rule, array $body, ApiUser $user, bool $isNew): void
     {
-        foreach (array_keys($body) as $key) {
-            if (!in_array($key, self::WRITABLE_FIELDS, true) && !in_array($key, self::READ_ONLY_FIELDS, true)) {
-                $this->addError((string) $key, 'Unknown field');
-            }
+        $unknown = array_diff(array_keys($body), self::WRITABLE_FIELDS, self::READ_ONLY_FIELDS);
+        if ($unknown !== []) {
+            throw new ExtraAttributesException(array_values($unknown));
         }
 
         if (array_key_exists('name', $body)) {
@@ -323,8 +324,7 @@ final class CartPriceRuleProcessor extends \Maho\ApiPlatform\Processor
             }
             $primaryCouponId = $isNew ? null : (int) $rule->getPrimaryCoupon()->getId();
             if ($this->isCouponCodeTaken($code, $primaryCouponId ?: null)) {
-                $this->addError('couponCode', "Coupon code '{$code}' already exists");
-                return;
+                throw new ConflictHttpException("Coupon code '{$code}' already exists");
             }
         }
         $rule->setCouponType(\Mage_SalesRule_Model_Rule::COUPON_TYPE_SPECIFIC)

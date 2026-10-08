@@ -109,8 +109,14 @@ describe('Cart price rule coupon generation', function (): void {
         'prefix with a space' => [['qty' => 1, 'prefix' => 'A B'], 'prefix'],
         'long suffix' => [['qty' => 1, 'suffix' => str_repeat('S', 33)], 'suffix'],
         'dash after the end' => [['qty' => 1, 'length' => 4, 'dash' => 5], 'dash'],
-        'unknown field' => [['qty' => 1, 'count' => 2], 'count'],
     ]);
+
+    it('refuses an unknown setting with a 400', function (): void {
+        $response = cprcpGenerate(cprcpRule(), ['qty' => 1, 'count' => 2]);
+
+        expect($response['status'])->toBe(400)
+            ->and($response['json']['details']['errors'][0]['field'])->toBe('count');
+    });
 
 });
 

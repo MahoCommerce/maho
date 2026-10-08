@@ -28,6 +28,7 @@ class ValidationException extends ApiException
 
         if ($field !== null) {
             $details['field'] = $field;
+            $details['errors'] ??= [['field' => $field, 'message' => $message]];
         }
 
         if ($constraint !== null) {
@@ -36,7 +37,7 @@ class ValidationException extends ApiException
 
         parent::__construct(
             message: $message,
-            errorCode: 'validation_error',
+            errorCode: 'unprocessable_entity',
             httpStatusCode: 422,
             details: $details,
             previous: $previous,

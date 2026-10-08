@@ -11,7 +11,6 @@ declare(strict_types=1);
 namespace Maho\ApiPlatform\Trait;
 
 use Mage;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**

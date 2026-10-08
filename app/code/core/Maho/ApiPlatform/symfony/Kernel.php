@@ -431,6 +431,11 @@ class Kernel extends BaseKernel
             ->autoconfigure(false)
             ->tag('serializer.normalizer', ['priority' => -780]);
 
+        // Between the normalizers above and the ErrorNormalizer of API Platform (-790), which takes every error
+        $services->set(GraphQl\InternalErrorNormalizer::class)
+            ->autoconfigure(false)
+            ->tag('serializer.normalizer', ['priority' => -785]);
+
         $services->set(GraphQl\CustomQueryResolver::class)
             ->arg('$providerLocator', tagged_locator('maho.api.state_provider'))
             ->tag('api_platform.graphql.query_resolver');

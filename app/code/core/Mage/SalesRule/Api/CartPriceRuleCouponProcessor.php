@@ -16,6 +16,7 @@ use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Serializer\Exception\ExtraAttributesException;
 
 final class CartPriceRuleCouponProcessor extends \Maho\ApiPlatform\Processor
 {
@@ -79,9 +80,6 @@ final class CartPriceRuleCouponProcessor extends \Maho\ApiPlatform\Processor
         try {
             $generator->generatePool();
             $adapter->commit();
-        } catch (\Mage_Core_Exception $e) {
-            $adapter->rollBack();
-            throw new ConflictHttpException($e->getMessage(), $e);
         } catch (\Throwable $e) {
             $adapter->rollBack();
             throw $e;
@@ -111,13 +109,12 @@ final class CartPriceRuleCouponProcessor extends \Maho\ApiPlatform\Processor
         /** @var \Mage_SalesRule_Helper_Coupon $helper */
         $helper = \Mage::helper('salesrule/coupon');
         $formats = array_keys($helper->getFormatsList());
-        $errors = [];
-
-        foreach (array_keys($body) as $key) {
-            if (!in_array($key, self::GENERATE_FIELDS, true)) {
-                $errors[] = ['field' => (string) $key, 'message' => 'Unknown field'];
-            }
+        $unknown = array_diff(array_keys($body), self::GENERATE_FIELDS);
+        if ($unknown !== []) {
+            throw new ExtraAttributesException(array_values($unknown));
         }
+
+        $errors = [];
 
         $qty = $this->readInteger($body['qty'] ?? null);
         if ($qty === null || $qty < 1 || $qty > self::MAX_GENERATE_QTY) {

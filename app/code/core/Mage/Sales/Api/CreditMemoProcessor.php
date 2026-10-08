@@ -143,10 +143,6 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
 
         $creditmemo = $this->orderService->createCreditMemoForOrder($order, $data, $comment, $offlineRefund, $backToStockItems);
 
-        if (!$creditmemo) {
-            throw new ConflictHttpException('Order cannot be refunded (already fully refunded or not in a refundable state)');
-        }
-
         return CreditMemo::fromModel($creditmemo);
     }
 }

@@ -17,7 +17,6 @@ use Maho\ApiPlatform\Trait\ProductLoaderTrait;
 use Maho\Security\OutboundUrl;
 use Maho\Security\OutboundUrlException;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 

@@ -721,9 +721,8 @@ class Mage_Sales_Service_Order
      *
      * @param array<string, mixed> $data Credit memo data for prepareCreditmemo().
      * @param array<int, bool> $backToStockItemIds Order item ids to return to stock.
-     * @return \Mage_Sales_Model_Order_Creditmemo|null Null if the order cannot be refunded.
+     * @throws \Mage_Core_Exception_Conflict When the state of the order does not allow a refund, or another request holds the order lock.
      * @throws \Mage_Core_Exception When the refund breaks a money rule.
-     * @throws \RuntimeException When another request already holds the order lock.
      * @throws \Exception When the refund itself fails, for example at the payment gateway.
      */
     public function createCreditMemoForOrder(
@@ -732,13 +731,13 @@ class Mage_Sales_Service_Order
         ?string $comment = null,
         bool $offlineRefund = true,
         array $backToStockItemIds = [],
-    ): ?\Mage_Sales_Model_Order_Creditmemo {
+    ): \Mage_Sales_Model_Order_Creditmemo {
         return $this->withOrderLock((int) $order->getId(), function () use ($order, $data, $comment, $offlineRefund, $backToStockItemIds) {
             // Re-read under the lock so canCreditmemo() sees the live
             // total_refunded, not a value another request changed while we waited.
             $order->load((int) $order->getId());
             if (!$order->canCreditmemo()) {
-                return null;
+                throw new \Mage_Core_Exception_Conflict('Order cannot be refunded (already fully refunded or not in a refundable state)');
             }
 
             /** @var \Mage_Sales_Model_Service_Order $service */

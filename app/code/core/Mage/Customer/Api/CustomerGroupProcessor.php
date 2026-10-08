@@ -12,7 +12,6 @@ namespace Mage\Customer\Api;
 
 use Maho\ApiPlatform\CrudProcessor;
 use Maho\ApiPlatform\CrudResource;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 final class CustomerGroupProcessor extends CrudProcessor

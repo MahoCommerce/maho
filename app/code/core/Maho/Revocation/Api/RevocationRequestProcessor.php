@@ -13,7 +13,6 @@ namespace Maho\Revocation\Api;
 use ApiPlatform\Metadata\Operation;
 use Maho\ApiPlatform\Processor;
 use Maho\ApiPlatform\Service\StoreContext;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;

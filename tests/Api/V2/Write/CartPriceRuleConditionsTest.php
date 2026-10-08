@@ -227,7 +227,7 @@ describe('Cart price rule trees', function (): void {
         $response = cprcCreate(['actions' => cprcRoot([cprcSubtotal()], 'salesrule/rule_condition_product_combine')]);
 
         expect($response['status'])->toBe(422)
-            ->and($response['json']['error'])->toBe('validation_error')
+            ->and($response['json']['error'])->toBe('unprocessable_entity')
             ->and(cprcErrorFields($response))->toBe(['actions.conditions[0].type']);
     });
 
