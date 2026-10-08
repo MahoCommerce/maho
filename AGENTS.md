@@ -263,10 +263,11 @@ class My_Module_Checkout_CartController extends Mage_Checkout_CartController { /
   plain `Mage_Core_Exception` (422) for any other content that the service cannot accept, such as an
   unknown SKU in the body. 400 is for a malformed request only, which the transport detects. A
   `\RuntimeException` is a server fault (500), so a transport never turns it into a client error, and
-  a transport never catches a `Mage_Core_Exception` only to throw it again with another status. `ApiExceptionListener` maps these for REST and `MageExceptionNormalizer`
-  for GraphQL. Code that reads the request (a path, a body, the API Platform context) stays in the
-  transport, as `Mage\Checkout\Api\CartRequest` does. `tests/Backend/Unit/Maho/ServiceLayoutTest.php`
-  enforces the layout
+  a transport never catches a `Mage_Core_Exception` only to throw it again with another status.
+  `ApiExceptionListener` maps these for REST and `MageExceptionNormalizer` for GraphQL. Code that
+  reads the request (a path, a body, the API Platform context) stays in the transport, as
+  `Mage\Checkout\Api\CartRequest` does. `tests/Backend/Unit/Maho/ServiceLayoutTest.php` enforces the
+  layout
 - **Errors**: `Mage::throwException()` for user-facing errors (`Mage_Core_Exception`),
   `Mage::log()` / `Mage::logException()` for logging
 

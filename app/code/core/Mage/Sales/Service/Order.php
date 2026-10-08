@@ -723,7 +723,7 @@ class Mage_Sales_Service_Order
      * @param array<int, bool> $backToStockItemIds Order item ids to return to stock.
      * @return \Mage_Sales_Model_Order_Creditmemo|null Null if the order cannot be refunded.
      * @throws \Mage_Core_Exception When the refund breaks a money rule.
-     * @throws \RuntimeException When another request already holds the order lock.
+     * @throws \Mage_Core_Exception_Conflict When another request already holds the order lock.
      * @throws \Exception When the refund itself fails, for example at the payment gateway.
      */
     public function createCreditMemoForOrder(
