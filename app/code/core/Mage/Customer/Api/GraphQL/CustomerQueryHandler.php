@@ -46,7 +46,7 @@ class CustomerQueryHandler
         $pageSize = $variables['pageSize'] ?? 20;
 
         // Scoped to the caller's website allowlist like the REST collection
-        $result = $this->customerService->searchCustomers(
+        $result = $this->customerService->search(
             $search,
             $email,
             $telephone,
@@ -73,7 +73,7 @@ class CustomerQueryHandler
         if (!$id) {
             throw ValidationException::requiredField('customerId');
         }
-        $customer = $this->customerService->getCustomerById((int) $id);
+        $customer = $this->customerService->getById((int) $id);
         if ($customer) {
             $this->customerProvider->assertCustomerWebsiteAllowed($customer);
         }
@@ -225,7 +225,7 @@ class CustomerQueryHandler
     private function ensureEmailUnique(#[\SensitiveParameter]
         string $email): void
     {
-        $existing = $this->customerService->getCustomerByEmail($email);
+        $existing = $this->customerService->getByEmail($email);
         if ($existing) {
             throw ValidationException::invalidValue('email', 'a customer with this email already exists');
         }
