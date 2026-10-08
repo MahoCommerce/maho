@@ -11,7 +11,7 @@ declare(strict_types=1);
 namespace Maho\ApiPlatform\Trait;
 
 use Mage;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
  * Shared stock-write helpers for direct (model-bypassing) inventory updates.
@@ -99,12 +99,12 @@ trait StockWriterTrait
             \Mage_CatalogInventory_Model_Stock::BACKORDERS_YES_NOTIFY,
         ];
         if (isset($columns['backorders']) && !in_array((int) $columns['backorders'], $allowedBackorders, true)) {
-            throw new BadRequestHttpException('backorders must be one of: ' . implode(', ', $allowedBackorders));
+            throw new UnprocessableEntityHttpException('backorders must be one of: ' . implode(', ', $allowedBackorders));
         }
 
         foreach (self::NON_NEGATIVE_STOCK_COLUMNS as $column) {
             if (isset($columns[$column]) && $columns[$column] < 0) {
-                throw new BadRequestHttpException("{$column} cannot be negative");
+                throw new UnprocessableEntityHttpException("{$column} cannot be negative");
             }
         }
     }
@@ -129,7 +129,7 @@ trait StockWriterTrait
     protected function validateStockQty(float $qty): void
     {
         if ($qty < 0) {
-            throw new BadRequestHttpException('Quantity cannot be negative');
+            throw new UnprocessableEntityHttpException('Quantity cannot be negative');
         }
     }
 

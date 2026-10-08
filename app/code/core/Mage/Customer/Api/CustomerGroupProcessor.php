@@ -12,7 +12,7 @@ namespace Mage\Customer\Api;
 
 use Maho\ApiPlatform\CrudProcessor;
 use Maho\ApiPlatform\CrudResource;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 final class CustomerGroupProcessor extends CrudProcessor
 {
@@ -24,11 +24,11 @@ final class CustomerGroupProcessor extends CrudProcessor
 
         // Code is required on create; on update an omitted code leaves the existing value untouched.
         if ($isNew && $code === '') {
-            throw new BadRequestHttpException('Customer group code is required.');
+            throw new UnprocessableEntityHttpException('Customer group code is required.');
         }
 
         if (mb_strlen($code) > \Mage_Customer_Model_Group::GROUP_CODE_MAX_LENGTH) {
-            throw new BadRequestHttpException(
+            throw new UnprocessableEntityHttpException(
                 sprintf(
                     'Customer group code must not exceed %d characters.',
                     \Mage_Customer_Model_Group::GROUP_CODE_MAX_LENGTH,

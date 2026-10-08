@@ -150,11 +150,14 @@ describe('Cart price rule fields', function (): void {
             'usesPerCoupon' => -1,
             'fromDate' => '31/12/2030',
             'simpleAction' => 'to_percent',
-            'unknownField' => 1,
             'customerGroupIds' => [999999],
         ]);
         expect($wrong['status'])->toBe(422)
-            ->and(cprwFields($wrong))->toEqualCanonicalizing(['unknownField', 'isActive', 'usesPerCoupon', 'customerGroupIds', 'fromDate', 'simpleAction']);
+            ->and(cprwFields($wrong))->toEqualCanonicalizing(['isActive', 'usesPerCoupon', 'customerGroupIds', 'fromDate', 'simpleAction']);
+
+        $unknown = cprwCreate(['unknownField' => 1, 'isActive' => 'yes']);
+        expect($unknown['status'])->toBe(400)
+            ->and(cprwFields($unknown))->toBe(['unknownField']);
     });
 
     it('rejects a percent discount above 100 and a start date after the end date', function (): void {
@@ -183,8 +186,7 @@ describe('Cart price rule fields', function (): void {
         expect($rule['json']['primaryCouponId'])->toBeInt();
 
         $duplicate = cprwCreate(['couponType' => 'specific', 'couponCode' => strtolower($code)]);
-        expect($duplicate['status'])->toBe(422)
-            ->and(cprwFields($duplicate))->toBe(['couponCode']);
+        expect($duplicate['status'])->toBe(409);
 
         expect(cprwFields(cprwCreate(['couponType' => 'specific'])))->toBe(['couponCode'])
             ->and(cprwFields(cprwCreate(['couponType' => 'specific', 'couponCode' => 'bad code!'])))->toBe(['couponCode'])

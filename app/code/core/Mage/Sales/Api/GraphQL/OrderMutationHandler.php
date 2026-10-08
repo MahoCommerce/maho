@@ -239,27 +239,14 @@ class OrderMutationHandler
             }
         }
 
-        try {
-            // Refunds run through the order service so this path and the REST/GraphQL
-            // CreditMemo resource apply the same money rules and the same lock.
-            $creditmemo = $this->orderService->refund(
-                $order,
-                $creditmemoData,
-                $comment,
-                offlineRefund: false,
-            );
-        } catch (\Mage_Core_Exception_Conflict $e) {
-            throw ValidationException::invalidValue('orderId', $e->getMessage(), $e);
-        } catch (\Mage_Core_Exception $e) {
-            throw ValidationException::invalidValue('return', $e->getMessage(), $e);
-        } catch (\Exception $e) {
-            \Mage::logException($e);
-            throw ValidationException::invalidValue('return', 'failed to process the return', $e);
-        }
-
-        if (!$creditmemo) {
-            throw ValidationException::invalidValue('orderId', 'cannot create credit memo for this order');
-        }
+        // Refunds run through the order service so this path and the REST/GraphQL
+        // CreditMemo resource apply the same money rules and the same lock.
+        $creditmemo = $this->orderService->refund(
+            $order,
+            $creditmemoData,
+            $comment,
+            offlineRefund: false,
+        );
 
         return ['processReturn' => [
             'success' => true,

@@ -202,7 +202,7 @@ describe('Product write scope (REST)', function (): void {
         $update = apiPut("/api/rest/v2/products/{$productId}", [
             'useDefault' => ['name'],
         ], $token);
-        expect($update['status'])->toBe(400);
+        expect($update['status'])->toBe(422);
     });
 
     it('supports store overrides and useDefault in fast-update mode', function (): void {

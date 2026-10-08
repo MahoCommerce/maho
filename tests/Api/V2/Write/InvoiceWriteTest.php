@@ -47,7 +47,7 @@ describe('POST /api/rest/v2/orders/{orderId}/invoices', function (): void {
             'capture' => 'bogus',
         ], adminToken());
 
-        expect($response['status'])->toBe(400);
+        expect($response['status'])->toBe(422);
     });
 
     it('creates a full offline-captured invoice and lists it on the order', function (): void {
@@ -145,18 +145,18 @@ describe('POST /api/rest/v2/orders/{orderId}/invoices', function (): void {
         $response = apiPost("/api/rest/v2/orders/{$orderId}/invoices", [
             'items' => [['orderItemId' => 0, 'qty' => 1]],
         ], adminToken());
-        expect($response['status'])->toBe(400);
+        expect($response['status'])->toBe(422);
 
         $response = apiPost("/api/rest/v2/orders/{$orderId}/invoices", [
             'items' => [['orderItemId' => 123, 'qty' => 0]],
         ], adminToken());
-        expect($response['status'])->toBe(400);
+        expect($response['status'])->toBe(422);
 
         // An item id that doesn't belong to the order must not be silently dropped
         $response = apiPost("/api/rest/v2/orders/{$orderId}/invoices", [
             'items' => [['orderItemId' => 999999999, 'qty' => 1]],
         ], adminToken());
-        expect($response['status'])->toBe(400);
+        expect($response['status'])->toBe(422);
     });
 
     it('rejects a qty larger than the qty available to invoice', function (): void {

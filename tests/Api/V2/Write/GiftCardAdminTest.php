@@ -80,13 +80,13 @@ describe('GET /api/rest/v2/giftcards/{id} (admin read)', function (): void {
             'initialBalance' => 10.0,
             'balance' => 99999.0,
         ], adminToken());
-        expect($overLimit['status'])->toBe(400);
+        expect($overLimit['status'])->toBe(422);
 
         $negative = apiPost('/api/rest/v2/giftcards', [
             'initialBalance' => 10.0,
             'balance' => -5.0,
         ], adminToken());
-        expect($negative['status'])->toBe(400);
+        expect($negative['status'])->toBe(422);
     });
 
     it('rejects an unknown websiteId on create', function (): void {
@@ -95,7 +95,7 @@ describe('GET /api/rest/v2/giftcards/{id} (admin read)', function (): void {
             'websiteIds' => [99999],
         ], adminToken());
 
-        expect($response['status'])->toBe(400);
+        expect($response['status'])->toBe(422);
     });
 
     it('rejects website id 0 on create instead of scoping to the admin website', function (): void {
@@ -104,7 +104,7 @@ describe('GET /api/rest/v2/giftcards/{id} (admin read)', function (): void {
             'websiteIds' => [0],
         ], adminToken());
 
-        expect($response['status'])->toBe(400);
+        expect($response['status'])->toBe(422);
     });
 
     it('honors the legacy scalar websiteId on create instead of silently ignoring it', function (): void {
@@ -125,7 +125,7 @@ describe('GET /api/rest/v2/giftcards/{id} (admin read)', function (): void {
             'websiteId' => 99999,
         ], adminToken());
 
-        expect($response['status'])->toBe(400);
+        expect($response['status'])->toBe(422);
     });
 
     it('deduplicates repeated websiteIds on create instead of failing on the junction key', function (): void {
@@ -183,7 +183,7 @@ describe('PUT /api/rest/v2/giftcards/{id} (admin write)', function (): void {
         trackAdminGiftCard($create['json']['code']);
 
         $response = apiPut("/api/rest/v2/giftcards/{$id}", ['websiteIds' => [99999]], adminToken());
-        expect($response['status'])->toBe(400);
+        expect($response['status'])->toBe(422);
     });
 
     it('rejects an invalid status value', function (): void {
@@ -192,7 +192,7 @@ describe('PUT /api/rest/v2/giftcards/{id} (admin write)', function (): void {
         trackAdminGiftCard($create['json']['code']);
 
         $response = apiPut("/api/rest/v2/giftcards/{$id}", ['status' => 'frozen'], adminToken());
-        expect($response['status'])->toBe(400);
+        expect($response['status'])->toBe(422);
     });
 
     it('adjusts balance and records an adjusted history entry', function (): void {
@@ -226,8 +226,8 @@ describe('PUT /api/rest/v2/giftcards/{id} (admin write)', function (): void {
         $id = (int) $create['json']['id'];
         trackAdminGiftCard($create['json']['code']);
 
-        expect(apiPut("/api/rest/v2/giftcards/{$id}", ['balance' => -1.0], adminToken())['status'])->toBe(400);
-        expect(apiPut("/api/rest/v2/giftcards/{$id}", ['balance' => 10001.0], adminToken())['status'])->toBe(400);
+        expect(apiPut("/api/rest/v2/giftcards/{$id}", ['balance' => -1.0], adminToken())['status'])->toBe(422);
+        expect(apiPut("/api/rest/v2/giftcards/{$id}", ['balance' => 10001.0], adminToken())['status'])->toBe(422);
     });
 
 });

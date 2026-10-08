@@ -183,12 +183,12 @@ describe('guest cart step-wise checkout setters', function (): void {
         expect($response['status'])->toBe(422);
     });
 
-    it('rejects a shipping method without codes with a 400', function (): void {
+    it('rejects a shipping method without codes with a 422', function (): void {
         [$maskedId] = makeGuestSetterCart();
 
         $response = apiPut("/api/rest/v2/guest-carts/{$maskedId}/shipping-method", []);
 
-        expect($response['status'])->toBe(400);
+        expect($response['status'])->toBe(422);
     });
 
     it('completes the full step-wise checkout and places the order', function (): void {

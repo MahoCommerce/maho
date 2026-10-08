@@ -13,7 +13,6 @@ namespace Maho\Revocation\Api;
 use ApiPlatform\Metadata\Operation;
 use Maho\ApiPlatform\Processor;
 use Maho\ApiPlatform\Service\StoreContext;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
@@ -117,7 +116,7 @@ final class RevocationRequestProcessor extends Processor
         } elseif ($orderReference !== null && trim($orderReference) !== '') {
             $order->loadByIncrementId(trim($orderReference));
         } else {
-            throw new BadRequestHttpException('An order reference is required');
+            throw new UnprocessableEntityHttpException('An order reference is required');
         }
 
         if (!$order->getId() || (int) $order->getCustomerId() !== $customerId) {

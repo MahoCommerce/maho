@@ -12,7 +12,7 @@ namespace Mage\Tax\Api;
 
 use Maho\ApiPlatform\CrudProcessor;
 use Maho\ApiPlatform\CrudResource;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 final class TaxClassProcessor extends CrudProcessor
 {
@@ -23,7 +23,7 @@ final class TaxClassProcessor extends CrudProcessor
 
         // Name is required on create; on update an omitted name leaves the existing value untouched.
         if ($isNew && trim($data->className) === '') {
-            throw new BadRequestHttpException('Tax class name is required.');
+            throw new UnprocessableEntityHttpException('Tax class name is required.');
         }
 
         $allowed = [
@@ -31,7 +31,7 @@ final class TaxClassProcessor extends CrudProcessor
             \Mage_Tax_Model_Class::TAX_CLASS_TYPE_CUSTOMER,
         ];
         if (!in_array($data->classType, $allowed, true)) {
-            throw new BadRequestHttpException('Tax class type must be PRODUCT or CUSTOMER.');
+            throw new UnprocessableEntityHttpException('Tax class type must be PRODUCT or CUSTOMER.');
         }
     }
 }

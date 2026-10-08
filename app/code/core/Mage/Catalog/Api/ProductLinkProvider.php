@@ -13,7 +13,7 @@ namespace Mage\Catalog\Api;
 use ApiPlatform\Metadata\Operation;
 use Mage_Catalog_Model_Product;
 use Maho\ApiPlatform\Trait\ProductLoaderTrait;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 final class ProductLinkProvider extends \Maho\ApiPlatform\Provider
 {
@@ -32,7 +32,7 @@ final class ProductLinkProvider extends \Maho\ApiPlatform\Provider
         $linkType = self::extractLinkType($context);
 
         if (!isset(self::LINK_COLLECTION_MAP[$linkType])) {
-            throw new BadRequestHttpException("Invalid link type: {$linkType}. Valid types: related, cross-sell, up-sell");
+            throw new NotFoundHttpException("Invalid link type: {$linkType}. Valid types: related, cross-sell, up-sell");
         }
 
         $product = $this->loadProductForRead($productId);

@@ -11,8 +11,8 @@ declare(strict_types=1);
 namespace Mage\Sales\Api;
 
 use ApiPlatform\Metadata\Operation;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
  * Shipment State Processor - Handles shipment creation for API Platform.
@@ -48,7 +48,7 @@ final class ShipmentProcessor extends \Maho\ApiPlatform\Processor
         $args = $context['args']['input'] ?? [];
         $shipmentId = (int) ($uriVariables['id'] ?? $args['shipmentId'] ?? 0);
         if (!$shipmentId) {
-            throw new BadRequestHttpException('Shipment ID is required');
+            throw new UnprocessableEntityHttpException('Shipment ID is required');
         }
 
         $shipment = \Mage::getModel('sales/order_shipment')->load($shipmentId);
@@ -69,7 +69,7 @@ final class ShipmentProcessor extends \Maho\ApiPlatform\Processor
         $args = $context['args']['input'] ?? [];
         $trackNumber = trim((string) ($args['trackNumber'] ?? ''));
         if ($trackNumber === '') {
-            throw new BadRequestHttpException('Track number is required');
+            throw new UnprocessableEntityHttpException('Track number is required');
         }
         $carrierCode = $args['carrierCode'] ?? 'custom';
         $title = $args['title'] ?? $carrierCode;
@@ -94,7 +94,7 @@ final class ShipmentProcessor extends \Maho\ApiPlatform\Processor
         $args = $context['args']['input'] ?? [];
         $comment = trim((string) ($args['comment'] ?? ''));
         if ($comment === '') {
-            throw new BadRequestHttpException('Comment text is required');
+            throw new UnprocessableEntityHttpException('Comment text is required');
         }
         $notifyCustomer = (bool) ($args['notifyCustomer'] ?? false);
         $visibleOnFront = (bool) ($args['visibleOnFront'] ?? false);
@@ -127,7 +127,7 @@ final class ShipmentProcessor extends \Maho\ApiPlatform\Processor
             }
         }
         if (!$trackId) {
-            throw new BadRequestHttpException('Track ID is required');
+            throw new UnprocessableEntityHttpException('Track ID is required');
         }
 
         $shipment = $this->resolveShipment($uriVariables, $context);
@@ -145,9 +145,6 @@ final class ShipmentProcessor extends \Maho\ApiPlatform\Processor
     private function createShipmentFromRest(array $uriVariables, array $context): Shipment
     {
         $orderId = (int) ($uriVariables['orderId'] ?? 0);
-        if (!$orderId) {
-            throw new BadRequestHttpException('Order ID is required');
-        }
 
         $body = $context['request']?->toArray() ?? [];
 
@@ -166,7 +163,7 @@ final class ShipmentProcessor extends \Maho\ApiPlatform\Processor
         $orderId = (int) ($args['orderId'] ?? 0);
 
         if (!$orderId) {
-            throw new BadRequestHttpException('Order ID is required');
+            throw new UnprocessableEntityHttpException('Order ID is required');
         }
 
         return $this->doCreateShipment(
@@ -203,7 +200,7 @@ final class ShipmentProcessor extends \Maho\ApiPlatform\Processor
             $carrierCode = $trackData['carrierCode'] ?? 'custom';
             $trackNumber = $trackData['trackNumber'] ?? '';
             if (empty($trackNumber)) {
-                throw new BadRequestHttpException('Track number is required for each tracking entry');
+                throw new UnprocessableEntityHttpException('Track number is required for each tracking entry');
             }
 
             $trackModels[] = \Mage::getModel('sales/order_shipment_track')

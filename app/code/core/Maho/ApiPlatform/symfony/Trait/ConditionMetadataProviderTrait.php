@@ -13,9 +13,9 @@ declare(strict_types=1);
 
 namespace Maho\ApiPlatform\Trait;
 
-use Maho\ApiPlatform\Exception\ValidationException;
 use Maho\ApiPlatform\Security\ApiUser;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 trait ConditionMetadataProviderTrait
 {
@@ -59,13 +59,13 @@ trait ConditionMetadataProviderTrait
         $type = $this->stringFilter($filters, 'type');
         $attribute = $this->stringFilter($filters, 'attribute');
         if ($type === null || $attribute === null) {
-            throw new ValidationException('type and attribute are required', $type === null ? 'type' : 'attribute', 'NotBlank');
+            throw new BadRequestHttpException('type and attribute are required');
         }
 
         $locale = $this->adminLocale();
         $description = $this->findAttribute($this->conditionMetadata($locale), $type, $attribute);
         if ($description === null) {
-            throw new ValidationException('The condition metadata has no such type and attribute', 'type', 'Choice');
+            throw new BadRequestHttpException('The condition metadata has no such type and attribute');
         }
 
         ['page' => $page, 'pageSize' => $pageSize] = $this->extractPagination(['filters' => $filters], $this->defaultPageSize, $this->maxPageSize);
@@ -74,7 +74,7 @@ trait ConditionMetadataProviderTrait
         $parentId = $this->intFilter($filters, 'parentId');
         $chooser = $description['chooser'] ?? null;
         if ($chooser === null && ($description['options'] ?? null) === null) {
-            throw new ValidationException('This attribute has no value options', 'attribute', 'Choice');
+            throw new BadRequestHttpException('This attribute has no value options');
         }
 
         [$items, $total] = \Mage_Rule_Model_Condition_Metadata::runInLocale($locale, fn(): array => match ($chooser) {
@@ -117,7 +117,7 @@ trait ConditionMetadataProviderTrait
         }
         $list = array_values(array_unique(array_filter(array_map(trim(...), explode(',', $values)), fn(string $value) => $value !== '')));
         if (count($list) > self::MAX_VALUES) {
-            throw new ValidationException(sprintf('values can have no more than %d values', self::MAX_VALUES), 'values', 'Count');
+            throw new BadRequestHttpException(sprintf('values can have no more than %d values', self::MAX_VALUES));
         }
         return $list;
     }

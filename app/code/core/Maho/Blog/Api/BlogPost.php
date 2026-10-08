@@ -25,6 +25,7 @@ use ApiPlatform\OpenApi\Model\Response as OpenApiResponse;
 use Maho\ApiPlatform\CrudProcessor;
 use Maho\ApiPlatform\CrudResource;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 #[ApiResource(
     mahoSection: 'Content',
@@ -227,7 +228,7 @@ class BlogPost extends CrudResource
             || preg_match('#^[a-z][a-z0-9+.-]*:#i', $normalized)
             || in_array('..', explode('/', $normalized), true)
         ) {
-            throw new BadRequestHttpException(
+            throw new UnprocessableEntityHttpException(
                 'image must be a path relative to media/blog, with no leading "/", no ".." segment and no scheme',
             );
         }
@@ -272,7 +273,7 @@ class BlogPost extends CrudResource
             ->getAllIds());
         $missing = array_diff($ids, $existing);
         if ($missing !== []) {
-            throw new BadRequestHttpException('Unknown blog category id(s): ' . implode(', ', $missing));
+            throw new UnprocessableEntityHttpException('Unknown blog category id(s): ' . implode(', ', $missing));
         }
     }
 

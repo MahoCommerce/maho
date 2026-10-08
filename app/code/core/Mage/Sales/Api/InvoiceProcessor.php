@@ -15,6 +15,7 @@ namespace Mage\Sales\Api;
 use ApiPlatform\Metadata\Operation;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 final class InvoiceProcessor extends \Maho\ApiPlatform\Processor
 {
@@ -44,14 +45,10 @@ final class InvoiceProcessor extends \Maho\ApiPlatform\Processor
     private function createInvoice(array $uriVariables, array $context): Invoice
     {
         $orderId = (int) ($uriVariables['orderId'] ?? 0);
-        if (!$orderId) {
-            throw new BadRequestHttpException('Order ID is required');
-        }
-
         $args = $context['args']['input'] ?? [];
         $captureCase = $args['capture'] ?? null;
         if ($captureCase !== null && !in_array($captureCase, self::CAPTURE_CASES, true)) {
-            throw new BadRequestHttpException('Invalid capture mode; expected one of: ' . implode(', ', self::CAPTURE_CASES));
+            throw new UnprocessableEntityHttpException('Invalid capture mode; expected one of: ' . implode(', ', self::CAPTURE_CASES));
         }
 
         $items = $args['items'] ?? null;
@@ -93,10 +90,6 @@ final class InvoiceProcessor extends \Maho\ApiPlatform\Processor
     private function executeLifecycleAction(string $action, array $uriVariables): Invoice
     {
         $invoiceId = (int) ($uriVariables['id'] ?? 0);
-        if (!$invoiceId) {
-            throw new BadRequestHttpException('Invoice ID is required');
-        }
-
         $invoice = \Mage::getModel('sales/order_invoice')->load($invoiceId);
         if (!$invoice->getId()) {
             throw new NotFoundHttpException('Invoice not found');

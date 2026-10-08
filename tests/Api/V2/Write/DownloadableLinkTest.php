@@ -102,7 +102,7 @@ describe('Downloadable Links, CRUD Lifecycle', function (): void {
         trackCreated('product', $simpleId);
 
         $response = apiGet("/api/rest/v2/products/{$simpleId}/downloadable-links");
-        expect($response['status'])->toBeIn([400, 422]);
+        expect($response['status'])->toBe(404);
     });
 
 });

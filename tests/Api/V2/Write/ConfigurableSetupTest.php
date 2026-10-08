@@ -60,7 +60,7 @@ describe('Configurable Setup, Read', function (): void {
         trackCreated('product', $simpleId);
 
         $response = apiGet("/api/rest/v2/products/{$simpleId}/configurable");
-        expect($response['status'])->toBeIn([400, 422]);
+        expect($response['status'])->toBe(404);
     });
 
 });

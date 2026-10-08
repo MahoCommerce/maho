@@ -115,7 +115,7 @@ describe('Review moderation', function (): void {
     it('rejects a moderation Put with neither status nor stores', function (): void {
         $response = apiPut('/api/rest/v2/reviews/' . pestModerationReviewId(), [], adminToken());
 
-        expect($response['status'])->toBe(400);
+        expect($response['status'])->toBe(422);
     });
 
     it('lets an admin token move the review to not_approved', function (): void {
