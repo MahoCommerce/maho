@@ -152,7 +152,7 @@ describe('GraphQL Cart - Add To Cart Mutation', function (): void {
         /**
          * Regression: prices field should exist and be accessible (was named 'totals' before).
          * Note: subtotal/grandTotal may be 0 due to known collectTotals() issue in API context
-         * (see CartService::collectAndVerifyTotals WORKAROUND comment).
+         * (see \Mage_Checkout_Service_Cart::collectAndVerifyTotals WORKAROUND comment).
          */
         expect($cart)->toHaveKey('prices');
         $prices = $cart['prices'];
@@ -289,4 +289,22 @@ describe('GraphQL Cart - Apply Coupon', function (): void {
         expect($response['json'])->toHaveKey('errors');
     });
 
+});
+
+describe('GraphQL Cart - Service errors', function (): void {
+
+    it('shows the message and the status of a cart service error', function (): void {
+        $maskedId = createGqlCart()['json']['data']['createCart']['cart']['maskedId'];
+
+        $response = gqlQuery(<<<GRAPHQL
+        mutation {
+            addToCart(input: {maskedId: "{$maskedId}", sku: "PEST-NO-SUCH-SKU", qty: 1}) {
+                cart { _id }
+            }
+        }
+        GRAPHQL, [], customerToken());
+
+        expect($response['json']['errors'][0]['message'])->toBe("Product with SKU 'PEST-NO-SUCH-SKU' not found")
+            ->and($response['json']['errors'][0]['extensions']['status'])->toBe(422);
+    });
 });

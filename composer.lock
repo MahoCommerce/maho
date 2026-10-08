@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5dc7a92f8189fbe3206118ac850f99a5",
+    "content-hash": "645f4f25f6f65677c92c9232c503c3a8",
     "packages": [
         {
             "name": "altcha-org/altcha",
@@ -12059,16 +12059,16 @@
         },
         {
             "name": "mahocommerce/maho-phpstan-plugin",
-            "version": "v5.1.0",
+            "version": "v5.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/MahoCommerce/maho-phpstan-plugin.git",
-                "reference": "7f3994dc27b4e8baf21baf8b49058a7363933940"
+                "reference": "0e55d8534692fd4178c6a560064b5ed891ae13be"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/MahoCommerce/maho-phpstan-plugin/zipball/7f3994dc27b4e8baf21baf8b49058a7363933940",
-                "reference": "7f3994dc27b4e8baf21baf8b49058a7363933940",
+                "url": "https://api.github.com/repos/MahoCommerce/maho-phpstan-plugin/zipball/0e55d8534692fd4178c6a560064b5ed891ae13be",
+                "reference": "0e55d8534692fd4178c6a560064b5ed891ae13be",
                 "shasum": ""
             },
             "require": {
@@ -12100,7 +12100,7 @@
             ],
             "description": "Extension for PHPStan to allow static analysis of Maho projects.",
             "support": {
-                "source": "https://github.com/MahoCommerce/maho-phpstan-plugin/tree/v5.1.0"
+                "source": "https://github.com/MahoCommerce/maho-phpstan-plugin/tree/v5.2.0"
             },
             "funding": [
                 {
@@ -12116,7 +12116,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-10-06T09:40:09+00:00"
+            "time": "2026-10-07T20:47:57+00:00"
         },
         {
             "name": "myclabs/deep-copy",

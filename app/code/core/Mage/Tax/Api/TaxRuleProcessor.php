@@ -13,7 +13,7 @@ namespace Mage\Tax\Api;
 use Maho\ApiPlatform\CrudProcessor;
 use Maho\ApiPlatform\CrudResource;
 use Maho\ApiPlatform\Security\ApiUser;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 final class TaxRuleProcessor extends CrudProcessor
 {
@@ -24,7 +24,7 @@ final class TaxRuleProcessor extends CrudProcessor
 
         // Code is required on create; on update an omitted code leaves the existing value untouched.
         if ($isNew && trim($data->code) === '') {
-            throw new BadRequestHttpException('Tax rule code is required.');
+            throw new UnprocessableEntityHttpException('Tax rule code is required.');
         }
 
         // A rule needs at least one customer tax class, product tax class and rate.
@@ -32,13 +32,13 @@ final class TaxRuleProcessor extends CrudProcessor
         // (see beforeSave), so it's only mandatory on create.
         if ($isNew) {
             if ($data->customerTaxClassIds === []) {
-                throw new BadRequestHttpException('At least one customer tax class is required.');
+                throw new UnprocessableEntityHttpException('At least one customer tax class is required.');
             }
             if ($data->productTaxClassIds === []) {
-                throw new BadRequestHttpException('At least one product tax class is required.');
+                throw new UnprocessableEntityHttpException('At least one product tax class is required.');
             }
             if ($data->taxRateIds === []) {
-                throw new BadRequestHttpException('At least one tax rate is required.');
+                throw new UnprocessableEntityHttpException('At least one tax rate is required.');
             }
         }
     }

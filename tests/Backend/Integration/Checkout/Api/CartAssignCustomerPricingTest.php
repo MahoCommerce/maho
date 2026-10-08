@@ -8,7 +8,6 @@
 declare(strict_types=1);
 
 use Mage\Checkout\Api\CartMapper;
-use Mage\Checkout\Api\CartService;
 use Mage\Checkout\Api\GraphQL\CartMutationHandler;
 
 uses(Tests\MahoBackendTestCase::class);
@@ -62,7 +61,7 @@ describe('customer assignment pricing', function (): void {
         try {
             expect((float) $quote->getSubtotal())->toBe(40.0);
 
-            $handler = new CartMutationHandler(new CartService(), new CartMapper());
+            $handler = new CartMutationHandler(new CartMapper());
             $result = $handler->handleAssignCustomer([
                 'cartId' => (int) $quote->getId(),
                 'customerId' => (int) $customer->getId(),

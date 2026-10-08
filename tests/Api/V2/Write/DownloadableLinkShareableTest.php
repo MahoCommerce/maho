@@ -101,7 +101,7 @@ describe('Downloadable Links, Shareable & Samples', function (): void {
             'linkUrl' => 'https://example.com/file.zip',
             'isShareable' => 5,
         ], $token);
-        expect($add['status'])->toBeIn([400, 422]);
+        expect($add['status'])->toBe(422);
     });
 
 });

@@ -26,19 +26,19 @@ class CartMapper
      */
     public function mapQuoteToCart(\Mage_Sales_Model_Quote $quote, bool $collectTotals = true): Cart
     {
-        return CartService::inQuoteStoreScope($quote, fn(): Cart => $this->buildCartDto($quote, $collectTotals));
+        return \Mage::getService('checkout/cart')->inQuoteStoreScope($quote, fn(): Cart => $this->buildCartDto($quote, $collectTotals));
     }
 
     private function buildCartDto(\Mage_Sales_Model_Quote $quote, bool $collectTotals): Cart
     {
         if ($collectTotals && !$quote->getTotalsCollectedFlag()) {
-            CartService::collectAndVerifyTotals($quote);
+            \Mage::getService('checkout/cart')->collectAndVerifyTotals($quote);
         }
 
         $cart = new Cart();
         $cart->id = (int) $quote->getId();
         // The masked id is the guest bearer credential; once a customer owns the
-        // cart it grants nothing (see verifyCartAccess), so don't echo it.
+        // cart it grants nothing (see verifyAccess), so don't echo it.
         $cart->maskedId = $quote->getCustomerId() ? null : $quote->getData('masked_quote_id');
         $cart->customerId = $quote->getCustomerId() ? (int) $quote->getCustomerId() : null;
         $cart->customerEmail = $quote->getCustomerEmail();
@@ -456,7 +456,7 @@ class CartMapper
             // list never advertises a method the setter or place-order would reject
             $checks = \Mage_Payment_Model_Method_Abstract::checksForCurrentScope();
             foreach ($availableMethods as $method) {
-                if (CartService::isMethodUsableOverApi($method)
+                if (\Mage::getService('checkout/cart')->isMethodUsableOverApi($method)
                     && $method->isApplicableToQuote($quote, $checks)
                 ) {
                     $methods[] = [

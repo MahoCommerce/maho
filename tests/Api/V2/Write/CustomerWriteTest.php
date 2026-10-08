@@ -107,39 +107,39 @@ describe('POST /api/rest/v2/customers (extended fields)', function (): void {
     it('rejects a non-existent groupId', function (): void {
         [$response] = createTestCustomer(['groupId' => 999999]);
 
-        expect($response['status'])->toBe(400);
+        expect($response['status'])->toBe(422);
     });
 
     it('rejects a non-existent websiteId', function (): void {
         [$response] = createTestCustomer(['websiteId' => 999999]);
 
-        expect($response['status'])->toBe(400);
+        expect($response['status'])->toBe(422);
     });
 
     it('rejects an invalid dob', function (): void {
         [$response] = createTestCustomer(['dob' => 'not-a-date']);
 
-        expect($response['status'])->toBe(400);
+        expect($response['status'])->toBe(422);
     });
 
     it('rejects a dob that is not a Y-m-d calendar date', function (): void {
         // '1990' would be read as a unix timestamp, 'tomorrow' as a relative date
         foreach (['1990', '0', 'tomorrow', '15/04/1990', '1990-13-45'] as $dob) {
             [$response] = createTestCustomer(['dob' => $dob]);
-            expect($response['status'])->toBe(400, "dob '{$dob}' should be rejected");
+            expect($response['status'])->toBe(422, "dob '{$dob}' should be rejected");
         }
     });
 
     it('rejects a dob in the future', function (): void {
         [$response] = createTestCustomer(['dob' => date('Y-m-d', strtotime('+1 day'))]);
 
-        expect($response['status'])->toBe(400);
+        expect($response['status'])->toBe(422);
     });
 
     it('rejects a gender that is not an option of the gender attribute', function (): void {
         [$response] = createTestCustomer(['gender' => 999]);
 
-        expect($response['status'])->toBe(400);
+        expect($response['status'])->toBe(422);
     });
 
 });
@@ -176,7 +176,7 @@ describe('PUT /api/rest/v2/customers/{id}', function (): void {
             'websiteId' => $currentWebsiteId + 1,
         ], adminToken());
 
-        expect($update['status'])->toBe(400);
+        expect($update['status'])->toBe(422);
     });
 
     it('denies the admin update endpoint to a service token without customers/write', function (): void {
@@ -253,6 +253,49 @@ describe('PUT /api/rest/v2/customers/me (self-service gating)', function (): voi
         expect($update['json']['suffix'])->toBe('Sr.');
         expect($update['json']['gender'])->toBe(2);
         expect($update['json']['dob'])->toBe('1985-12-01');
+    });
+
+});
+
+describe('Customer service errors', function (): void {
+
+    it('returns 409 when a customer changes their email to the email of another customer', function (): void {
+        [$first] = createTestCustomer();
+        [, $secondEmail] = createTestCustomer();
+        $firstId = (int) $first['json']['id'];
+
+        $response = apiPut('/api/rest/v2/customers/me', ['email' => $secondEmail], customerToken($firstId));
+
+        expect($response['status'])->toBe(409);
+        expect($response['json']['message'])->toBe('This email is already in use.');
+    });
+
+    it('returns 422 for a wrong current password', function (): void {
+        [$create] = createTestCustomer();
+        $id = (int) $create['json']['id'];
+
+        // One call only: the endpoint has a rate limit for each IP
+        $response = apiPost('/api/rest/v2/customers/me/password', [
+            'currentPassword' => 'WrongPass1234!',
+            'newPassword' => 'PestNew12345!',
+        ], customerToken($id));
+
+        expect($response['status'])->toBe(422);
+        expect($response['json']['message'])->toBe('Current password is incorrect.');
+    });
+
+    it('returns 422 for a wrong reset token', function (): void {
+        [, $email] = createTestCustomer();
+
+        // One call only: the endpoint has a rate limit for each IP
+        $response = apiPost('/api/rest/v2/customers/reset-password', [
+            'email' => $email,
+            'resetToken' => 'pest-wrong-token',
+            'newPassword' => 'PestNew12345!',
+        ]);
+
+        expect($response['status'])->toBe(422);
+        expect($response['json']['message'])->toBe('Invalid or expired reset token.');
     });
 
 });
@@ -359,7 +402,7 @@ describe('Customer address postcode', function (): void {
             'telephone' => '+39 011 7654321',
         ], customerToken($customerId));
 
-        expect($created['status'])->toBe(400);
+        expect($created['status'])->toBe(422);
         expect($created['json']['message'])->toContain('Please enter the zip/postal code.');
     });
 

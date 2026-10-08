@@ -12,56 +12,30 @@ declare(strict_types=1);
 
 namespace Mage\SalesRule\Api;
 
-use Maho\ApiPlatform\Security\ApiUser;
-use Maho\ApiPlatform\Trait\AdminLocaleTrait;
-use Maho\ApiPlatform\Trait\CacheTrait;
-
 trait ConditionMetadataTrait
 {
-    use AdminLocaleTrait;
-    use CacheTrait;
-
-    /**
-     * Customer segments come from the database without a cache tag, so the document expires after this time.
-     */
-    private int $conditionMetadataLifetime = 900;
+    use \Maho\ApiPlatform\Trait\ConditionMetadataTrait;
 
     private ?\Mage_SalesRule_Model_Rule_Condition_Metadata $conditionMetadataModel = null;
 
+    #[\Override]
     protected function conditionMetadataModel(): \Mage_SalesRule_Model_Rule_Condition_Metadata
     {
         return $this->conditionMetadataModel ??= \Mage::getModel('salesrule/rule_condition_metadata');
     }
 
-    /**
-     * Return the metadata document of $locale without the scope part: version, locale, roots, types and rule.
-     *
-     * @return array<string, mixed>
-     */
-    protected function conditionMetadata(string $locale): array
+    #[\Override]
+    protected function conditionMetadataCacheKey(): string
     {
-        return $this->remember(
-            'API_CART_PRICE_RULE_CONDITION_METADATA_' . $locale,
-            [\Mage_Core_Model_Config::CACHE_TAG, \Mage_Eav_Model_Entity_Attribute::CACHE_TAG],
-            $this->conditionMetadataLifetime,
-            fn(): array => $this->buildConditionMetadata($locale),
-            fn(array $document): array => $document,
-            fn(array $document): array => $document,
-        );
+        return 'API_CART_PRICE_RULE_CONDITION_METADATA';
     }
 
     /**
      * @return array<string, mixed>
      */
-    private function buildConditionMetadata(string $locale): array
+    protected function extraConditionMetadata(): array
     {
-        $document = \Mage_Rule_Model_Condition_Metadata::runInLocale($locale, function (): array {
-            $document = $this->conditionMetadataModel()->build();
-            $document['rule'] = $this->ruleOptions();
-            return $document;
-        });
-
-        return ['version' => hash('sha256', (string) json_encode($document)), 'locale' => $locale] + $document;
+        return ['rule' => $this->ruleOptions()];
     }
 
     /**
@@ -109,44 +83,5 @@ trait ConditionMetadataTrait
                 'dash' => (int) $couponHelper->getDefaultDashInterval(),
             ],
         ];
-    }
-
-    /**
-     * Return the websites and stores that the token can use, and all customer groups.
-     *
-     * @return array<string, list<array<string, mixed>>>
-     */
-    protected function ruleScope(ApiUser $user): array
-    {
-        $allowedWebsiteIds = $this->allowedWebsiteIds($user);
-        $allowedStoreIds = $user->getAllowedStoreIds();
-
-        $websites = [];
-        foreach (\Mage::app()->getWebsites() as $website) {
-            $id = (int) $website->getId();
-            if ($allowedWebsiteIds === null || in_array($id, $allowedWebsiteIds, true)) {
-                $websites[] = ['id' => $id, 'code' => (string) $website->getCode(), 'name' => (string) $website->getName()];
-            }
-        }
-
-        $stores = [];
-        foreach (\Mage::app()->getStores() as $store) {
-            $id = (int) $store->getId();
-            if ($allowedStoreIds === null || in_array($id, $allowedStoreIds, true)) {
-                $stores[] = [
-                    'id' => $id,
-                    'code' => (string) $store->getCode(),
-                    'name' => (string) $store->getName(),
-                    'websiteId' => (int) $store->getWebsiteId(),
-                ];
-            }
-        }
-
-        $groups = [];
-        foreach (\Mage::getResourceModel('customer/group_collection') as $group) {
-            $groups[] = ['id' => (int) $group->getId(), 'code' => (string) $group->getCode()];
-        }
-
-        return ['websites' => $websites, 'stores' => $stores, 'customerGroups' => $groups];
     }
 }

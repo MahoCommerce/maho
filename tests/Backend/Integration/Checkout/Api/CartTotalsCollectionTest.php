@@ -8,14 +8,13 @@
 declare(strict_types=1);
 
 use Mage\Checkout\Api\CartMapper;
-use Mage\Checkout\Api\CartService;
 use Mage\Checkout\Api\GraphQL\CartMutationHandler;
 
 uses(Tests\MahoBackendTestCase::class);
 
 /**
  * Every cart mutation request used to collect totals at least twice: once when
- * getCart() loaded the quote and again after the mutation. Only the
+ * the service loaded the quote and again after the mutation. Only the
  * post-mutation collection produces the persisted totals, so the load-time
  * collection is pure waste. These tests pin the collection count per request.
  */
@@ -43,7 +42,7 @@ describe('cart mutation totals collection count', function (): void {
         $quote->setStoreId(1);
         $quote->save();
 
-        $handler = new CartMutationHandler(new CartService(), new CartMapper());
+        $handler = new CartMutationHandler(new CartMapper());
         try {
             $collections = cartCountTotalsCollections(fn() => $handler->handleAddToCart([
                 'cartId' => (int) $quote->getId(),
@@ -62,7 +61,7 @@ describe('cart mutation totals collection count', function (): void {
         $quote = createPricedQuote($product);
         $itemId = (int) $quote->getAllVisibleItems()[0]->getId();
 
-        $handler = new CartMutationHandler(new CartService(), new CartMapper());
+        $handler = new CartMutationHandler(new CartMapper());
         try {
             $collections = cartCountTotalsCollections(fn() => $handler->handleUpdateQty([
                 'cartId' => (int) $quote->getId(),
@@ -83,7 +82,7 @@ describe('cart mutation totals collection count', function (): void {
         try {
             $loaded = Mage::getModel('sales/quote')->setStoreId(1)->load($quote->getId());
             $collections = cartCountTotalsCollections(
-                fn() => (new CartService())->setPaymentMethod($loaded, 'checkmo'),
+                fn() => \Mage::getService('checkout/cart')->setPaymentMethod($loaded, 'checkmo'),
             );
 
             expect($collections)->toBe(1)
@@ -97,7 +96,7 @@ describe('cart mutation totals collection count', function (): void {
         $product = loadSimplePricedProduct();
         $quote = createPricedQuote($product);
 
-        $handler = new CartMutationHandler(new CartService(), new CartMapper());
+        $handler = new CartMutationHandler(new CartMapper());
         try {
             $collections = cartCountTotalsCollections(fn() => $handler->handleGetCart([
                 'cartId' => (int) $quote->getId(),

@@ -14,8 +14,8 @@ use ApiPlatform\Metadata\Operation;
 use Maho\ApiPlatform\Trait\ProductLoaderTrait;
 use Maho\ApiPlatform\Trait\StockWriterTrait;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
  * Stock Update Processor - Fast direct SQL stock updates.
@@ -80,14 +80,14 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
     private function doSingleUpdate(string $sku, ?float $qty, ?bool $isInStock, ?bool $manageStock, array $extended = []): StockUpdate
     {
         if (empty($sku)) {
-            throw new BadRequestHttpException('SKU is required');
+            throw new UnprocessableEntityHttpException('SKU is required');
         }
 
         // A missing qty must leave the stored quantity untouched (partial update
         // of availability/manage flags). Coercing it to 0 would silently wipe a
         // product's stock when the caller only flips isInStock/manageStock.
         if ($qty === null && $isInStock === null && $manageStock === null && $extended === []) {
-            throw new BadRequestHttpException('At least one stock field must be provided');
+            throw new UnprocessableEntityHttpException('At least one stock field must be provided');
         }
 
         if ($qty !== null) {
@@ -169,11 +169,11 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
     private function doBulkUpdate(array $items): StockUpdate
     {
         if (empty($items)) {
-            throw new BadRequestHttpException('Items array is required and cannot be empty');
+            throw new UnprocessableEntityHttpException('Items array is required and cannot be empty');
         }
 
         if (count($items) > 100) {
-            throw new BadRequestHttpException('Maximum 100 items per bulk update');
+            throw new UnprocessableEntityHttpException('Maximum 100 items per bulk update');
         }
 
         // Validate all SKUs first
@@ -185,7 +185,7 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
         foreach ($items as $index => $item) {
             $sku = $item['sku'] ?? '';
             if (empty($sku)) {
-                throw new BadRequestHttpException("Item at index {$index}: SKU is required");
+                throw new UnprocessableEntityHttpException("Item at index {$index}: SKU is required");
             }
             if (isset($item['qty'])) {
                 $this->validateStockQty((float) $item['qty']);
@@ -196,7 +196,7 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
 
             $productId = $productResource->getIdBySku($sku);
             if (!$productId) {
-                throw new BadRequestHttpException("Item at index {$index}: Product not found for SKU: {$sku}");
+                throw new UnprocessableEntityHttpException("Item at index {$index}: Product not found for SKU: {$sku}");
             }
             $skuToProductId[$sku] = $productId;
         }
@@ -235,9 +235,9 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
             }
 
             $write->commit();
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $write->rollBack();
-            throw new BadRequestHttpException('Bulk stock update failed: ' . $e->getMessage());
+            throw $e;
         }
 
         // Invalidate cache for all updated products

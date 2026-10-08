@@ -8,7 +8,6 @@
 declare(strict_types=1);
 
 use Mage\Checkout\Api\CartMapper;
-use Mage\Checkout\Api\CartService;
 use Mage\Checkout\Api\GraphQL\CartMutationHandler;
 use Maho\ApiPlatform\Service\StoreContext;
 
@@ -74,7 +73,7 @@ describe('cart service store scope (issue #1337)', function (): void {
 
         $previousStoreId = cartApiEnterAdminScope();
         try {
-            (new CartService())->addItem($quote, $product->getSku(), 2);
+            \Mage::getService('checkout/cart')->addItem($quote, $product->getSku(), 2);
 
             expect((int) Mage::app()->getStore()->getId())->toBe(0)
                 ->and(Mage::app()->getStore()->isAdmin())->toBeTrue()
@@ -85,13 +84,13 @@ describe('cart service store scope (issue #1337)', function (): void {
         }
     });
 
-    it('keeps the admin scope across getCart()', function (): void {
+    it('keeps the admin scope across getById()', function (): void {
         $product = loadSimplePricedProduct();
         $quote = createPricedQuote($product);
 
         $previousStoreId = cartApiEnterAdminScope();
         try {
-            $loaded = (new CartService())->getCart((int) $quote->getId());
+            $loaded = \Mage::getService('checkout/cart')->getById((int) $quote->getId());
 
             expect($loaded)->not->toBeNull()
                 ->and((int) Mage::app()->getStore()->getId())->toBe(0);
@@ -107,7 +106,7 @@ describe('cart service store scope (issue #1337)', function (): void {
 
         $previousStoreId = cartApiEnterAdminScope();
         try {
-            CartService::inQuoteStoreScope($quote, function (): void {
+            \Mage::getService('checkout/cart')->inQuoteStoreScope($quote, function (): void {
                 expect((int) Mage::app()->getStore()->getId())->toBe(1)
                     ->and(StoreContext::getStoreId())->toBe(1);
             });
@@ -144,7 +143,7 @@ describe('cart service store scope (issue #1337)', function (): void {
         try {
             // checkQty() passes any qty when the ambient store is admin, so this
             // rejection only happens when addItem() really switched to the quote store
-            expect(fn() => (new CartService())->addItem($quote, $product->getSku(), 10))
+            expect(fn() => \Mage::getService('checkout/cart')->addItem($quote, $product->getSku(), 10))
                 ->toThrow(Mage_Core_Exception::class, 'The requested quantity');
 
             expect((int) Mage::app()->getStore()->getId())->toBe(0);
@@ -157,13 +156,13 @@ describe('cart service store scope (issue #1337)', function (): void {
 
     it('merges an admin-scoped guest cart into the customer cart of the guest store', function (): void {
         $product = loadSimplePricedProduct();
-        $service = new CartService();
+        $service = \Mage::getService('checkout/cart');
 
         $customer = cartScopeCreateCustomer();
         // The customer's existing store-1 cart. The merge must land here: a
         // lookup scoped to the caller's store (admin, 0) would miss it and
         // create a fresh cart instead.
-        $existing = $service->getCustomerCart((int) $customer->getId());
+        $existing = $service->getForCustomer((int) $customer->getId(), 1);
 
         $guestCart = createPricedQuote($product);
         $guestCart->setData('masked_quote_id', bin2hex(random_bytes(16)));
@@ -172,7 +171,7 @@ describe('cart service store scope (issue #1337)', function (): void {
 
         $previousStoreId = cartApiEnterAdminScope();
         try {
-            $merged = $service->mergeCarts((string) $guestCart->getData('masked_quote_id'), (int) $customer->getId());
+            $merged = $service->merge((string) $guestCart->getData('masked_quote_id'), (int) $customer->getId());
 
             expect((int) $merged->getId())->toBe((int) $existing->getId())
                 ->and((int) $merged->getStoreId())->toBe(1)
@@ -191,7 +190,7 @@ describe('cart service store scope (issue #1337)', function (): void {
 
         $previousStoreId = cartApiEnterAdminScope();
         try {
-            $handler = new CartMutationHandler(new CartService(), new CartMapper());
+            $handler = new CartMutationHandler(new CartMapper());
             $result = $handler->handleShippingMethods(['cartId' => (int) $quote->getId()]);
 
             // A real carrier must have produced a rate; the handler always

@@ -16,12 +16,12 @@ use ApiPlatform\Metadata\Put;
 use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Bundle\SecurityBundle\Security;
-use Mage\Sales\Api\AccountTokenService;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
  * Customer State Processor - Handles customer mutations for API Platform.
@@ -36,12 +36,12 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
      */
     private const MAX_SMALLINT = 32767;
 
-    private readonly CustomerService $customerService;
+    private readonly \Mage_Customer_Service_Customer $customerService;
 
     public function __construct(Security $security)
     {
         parent::__construct($security);
-        $this->customerService = new CustomerService();
+        $this->customerService = \Mage::getService('customer/customer');
     }
 
     /**
@@ -169,12 +169,12 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         // lives on, defaulting the store to that website's default store.
         if ($data->websiteId !== null) {
             if ($data->websiteId < 0 || $data->websiteId > self::MAX_SMALLINT) {
-                throw new BadRequestHttpException("Website {$data->websiteId} does not exist");
+                throw new UnprocessableEntityHttpException("Website {$data->websiteId} does not exist");
             }
             try {
                 $website = \Mage::app()->getWebsite($data->websiteId);
             } catch (\Throwable) {
-                throw new BadRequestHttpException("Website {$data->websiteId} does not exist");
+                throw new UnprocessableEntityHttpException("Website {$data->websiteId} does not exist");
             }
             $websiteId = (int) $website->getId();
             $defaultStore = $website->getDefaultStore();
@@ -190,18 +190,18 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
 
         // Validate required fields using Maho validation helpers
         if (!$coreHelper->isValidNotBlank($data->email)) {
-            throw new BadRequestHttpException('Email is required');
+            throw new UnprocessableEntityHttpException('Email is required');
         }
         if (!$coreHelper->isValidEmail($data->email)) {
-            throw new BadRequestHttpException('Invalid email address');
+            throw new UnprocessableEntityHttpException('Invalid email address');
         }
         if (!$coreHelper->isValidNotBlank($data->password ?? '')) {
-            throw new BadRequestHttpException('Password is required');
+            throw new UnprocessableEntityHttpException('Password is required');
         }
 
         $minPasswordLength = \Mage::getModel('customer/customer')->getMinPasswordLength();
         if (!$coreHelper->isValidLength($data->password, $minPasswordLength)) {
-            throw new BadRequestHttpException("Password must be at least {$minPasswordLength} characters");
+            throw new UnprocessableEntityHttpException("Password must be at least {$minPasswordLength} characters");
         }
 
         $this->ensureEmailUnique($data->email, $websiteId);
@@ -286,11 +286,11 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         $telephone = $args['telephone'] ?? null;
 
         if (empty($email)) {
-            throw new BadRequestHttpException('Email is required');
+            throw new UnprocessableEntityHttpException('Email is required');
         }
 
         if (!\Mage::helper('core')->isValidEmail($email)) {
-            throw new BadRequestHttpException('A valid email address is required');
+            throw new UnprocessableEntityHttpException('A valid email address is required');
         }
 
         $this->ensureEmailUnique($email, $websiteId);
@@ -352,7 +352,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         $password = $args['password'] ?? '';
 
         if (empty($email) || empty($password)) {
-            throw new BadRequestHttpException('Email and password are required');
+            throw new UnprocessableEntityHttpException('Email and password are required');
         }
 
         // Per-IP cap first (matches the REST /auth/token endpoint), so an
@@ -377,7 +377,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             if ($e->getCode() === \Mage_Customer_Model_Customer::EXCEPTION_EMAIL_NOT_CONFIRMED) {
                 throw new HttpException(403, 'This account is not confirmed. Please check your email for the confirmation link.');
             }
-            throw new BadRequestHttpException('Invalid email or password');
+            throw new UnauthorizedHttpException('Bearer', 'Invalid email or password', null, 0, ['X-Api-Error-Code' => 'invalid_credentials']);
         }
 
         return Customer::fromModel($customer);
@@ -434,22 +434,25 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             throw new AccessDeniedHttpException('Authentication required');
         }
 
-        $customer = $this->customerService->getCustomerById($customerId);
+        $customer = $this->customerService->getById($customerId);
         if (!$customer) {
             throw new AccessDeniedHttpException('Customer not found');
         }
 
-        $data = array_filter([
-            'firstName' => $firstName,
-            'lastName' => $lastName,
-            'email' => $email,
-        ], fn($v) => $v !== null) + $profile;
-
-        try {
-            $customer = $this->customerService->updateCustomer($customer, $data);
-        } catch (\Exception $e) {
-            throw new BadRequestHttpException($e->getMessage());
+        if ($firstName !== null) {
+            $customer->setFirstname($firstName);
         }
+        if ($lastName !== null) {
+            $customer->setLastname($lastName);
+        }
+        if ($email !== null) {
+            $customer->setEmail($email);
+        }
+        foreach ($profile as $field => $value) {
+            $customer->setData($field, $value);
+        }
+
+        $customer = $this->customerService->save($customer);
 
         return Customer::fromModel($customer);
     }
@@ -460,7 +463,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
      */
     private function updateCustomerAdmin(int $customerId, Customer $data): Customer
     {
-        $customer = $this->customerService->getCustomerById($customerId);
+        $customer = $this->customerService->getById($customerId);
         if (!$customer) {
             throw new NotFoundHttpException('Customer not found');
         }
@@ -468,12 +471,12 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         $this->assertWebsiteAllowed($customer->getWebsiteId(), $this->requireUser(), 'customer');
 
         if ($data->websiteId !== null && $data->websiteId !== (int) $customer->getWebsiteId()) {
-            throw new BadRequestHttpException('websiteId can only be set when creating a customer');
+            throw new UnprocessableEntityHttpException('websiteId can only be set when creating a customer');
         }
 
         if ($data->email !== '' && $data->email !== $customer->getEmail()) {
             if (!\Mage::helper('core')->isValidEmail($data->email)) {
-                throw new BadRequestHttpException('Invalid email address');
+                throw new UnprocessableEntityHttpException('Invalid email address');
             }
             $this->ensureEmailUnique($data->email, (int) $customer->getWebsiteId());
             $customer->setEmail($data->email);
@@ -494,11 +497,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         }
         $this->applyAdminOnlyFields($customer, $data);
 
-        try {
-            $customer->save();
-        } catch (\Mage_Core_Exception $e) {
-            throw new BadRequestHttpException($e->getMessage());
-        }
+        $customer->save();
 
         return Customer::fromModel($customer);
     }
@@ -564,7 +563,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
     private function validateGroupExists(int $groupId): void
     {
         if ($groupId < 0 || $groupId > self::MAX_SMALLINT || !\Mage::getModel('customer/group')->load($groupId)->getId()) {
-            throw new BadRequestHttpException("Customer group {$groupId} does not exist");
+            throw new UnprocessableEntityHttpException("Customer group {$groupId} does not exist");
         }
     }
 
@@ -581,7 +580,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         ));
 
         if (!in_array($genderId, $optionIds, true)) {
-            throw new BadRequestHttpException(
+            throw new UnprocessableEntityHttpException(
                 "Invalid gender {$genderId}; allowed: " . implode(', ', $optionIds) . ' (0 clears)',
             );
         }
@@ -605,10 +604,10 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         $date = \DateTimeImmutable::createFromFormat('!Y-m-d', $value, new \DateTimeZone('UTC'));
         $errors = \DateTimeImmutable::getLastErrors();
         if ($date === false || ($errors && ($errors['warning_count'] || $errors['error_count']))) {
-            throw new BadRequestHttpException('Invalid date for dob; use Y-m-d format.');
+            throw new UnprocessableEntityHttpException('Invalid date for dob; use Y-m-d format.');
         }
         if ($date > new \DateTimeImmutable('now', new \DateTimeZone('UTC'))) {
-            throw new BadRequestHttpException('Date of birth cannot be in the future.');
+            throw new UnprocessableEntityHttpException('Date of birth cannot be in the future.');
         }
 
         return $date->format(\Mage_Core_Model_Locale::DATETIME_FORMAT);
@@ -628,15 +627,15 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         $coreHelper = \Mage::helper('core');
 
         if (!$coreHelper->isValidNotBlank($currentPassword)) {
-            throw new BadRequestHttpException('Current password is required');
+            throw new UnprocessableEntityHttpException('Current password is required');
         }
         if (!$coreHelper->isValidNotBlank($newPassword)) {
-            throw new BadRequestHttpException('New password is required');
+            throw new UnprocessableEntityHttpException('New password is required');
         }
 
         $minPasswordLength = \Mage::getModel('customer/customer')->getMinPasswordLength();
         if (!$coreHelper->isValidLength($newPassword, $minPasswordLength)) {
-            throw new BadRequestHttpException("New password must be at least {$minPasswordLength} characters");
+            throw new UnprocessableEntityHttpException("New password must be at least {$minPasswordLength} characters");
         }
 
         // Per-IP cap first (matches the login flow), then a tighter per-customer
@@ -645,16 +644,12 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         $this->checkRateLimitByIp('change_password', 'change_password', 3600);
         $this->checkRateLimit('change_password:customer:' . $customerId, 'change_password', 3600);
 
-        $customer = $this->customerService->getCustomerById($customerId);
+        $customer = $this->customerService->getById($customerId);
         if (!$customer) {
             throw new AccessDeniedHttpException('Customer not found');
         }
 
-        try {
-            $this->customerService->changePassword($customer, $currentPassword, $newPassword);
-        } catch (\Exception $e) {
-            throw new BadRequestHttpException($e->getMessage());
-        }
+        $this->customerService->changePassword($customer, $currentPassword, $newPassword);
 
         return Customer::fromModel($customer);
     }
@@ -669,7 +664,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         $email = $args['email'] ?? '';
 
         if (empty($email)) {
-            throw new BadRequestHttpException('Email is required');
+            throw new UnprocessableEntityHttpException('Email is required');
         }
 
         // Per-IP cap first so an attacker can't bypass the per-email bucket by
@@ -711,21 +706,17 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         $newPassword = $args['newPassword'] ?? '';
 
         if (empty($email) || empty($resetToken) || empty($newPassword)) {
-            throw new BadRequestHttpException('Email, reset token, and new password are required');
+            throw new UnprocessableEntityHttpException('Email, reset token, and new password are required');
         }
 
         $this->checkRateLimitByIp('reset_password', 'reset_password', 3600);
 
         $minPasswordLength = \Mage::getModel('customer/customer')->getMinPasswordLength();
         if (!\Mage::helper('core')->isValidLength($newPassword, $minPasswordLength)) {
-            throw new BadRequestHttpException("New password must be at least {$minPasswordLength} characters");
+            throw new UnprocessableEntityHttpException("New password must be at least {$minPasswordLength} characters");
         }
 
-        try {
-            $this->customerService->resetPassword($email, $resetToken, $newPassword);
-        } catch (\Exception $e) {
-            throw new BadRequestHttpException($e->getMessage());
-        }
+        $this->customerService->resetPassword($email, $resetToken, $newPassword);
 
         $dto = new Customer();
         $dto->email = $email;
@@ -743,22 +734,18 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         $password = $args['password'] ?? '';
 
         if (!$accountToken || !$password) {
-            throw new BadRequestHttpException('Account token and password are required.');
+            throw new UnprocessableEntityHttpException('Account token and password are required.');
         }
 
         $minPasswordLength = \Mage::getModel('customer/customer')->getMinPasswordLength();
         if (!\Mage::helper('core')->isValidLength($password, $minPasswordLength)) {
-            throw new BadRequestHttpException("Password must be at least {$minPasswordLength} characters");
+            throw new UnprocessableEntityHttpException("Password must be at least {$minPasswordLength} characters");
         }
 
-        try {
-            $tokenData = AccountTokenService::verify($accountToken, 3600);
-        } catch (\Mage_Core_Exception $e) {
-            throw new BadRequestHttpException($e->getMessage());
-        }
+        $tokenData = \Mage::helper('sales/accountToken')->verify($accountToken, 3600);
 
         if ($tokenData['action'] !== 'create_account') {
-            throw new BadRequestHttpException('Invalid token action.');
+            throw new UnprocessableEntityHttpException('Invalid token action.');
         }
 
         $orderId = $tokenData['orderId'];

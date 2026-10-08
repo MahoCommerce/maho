@@ -142,7 +142,7 @@ describe('POST /api/rest/v2/orders/{orderId}/credit-memos', function (): void {
             'offlineRefund' => true,
         ], adminToken());
 
-        expect($response['status'])->toBe(400);
+        expect($response['status'])->toBe(422);
     });
 
     it('refunds every item when items is omitted', function (): void {
@@ -173,7 +173,7 @@ describe('POST /api/rest/v2/orders/{orderId}/credit-memos', function (): void {
             'offlineRefund' => true,
         ], adminToken());
 
-        expect($response['status'])->toBe(400);
+        expect($response['status'])->toBe(422);
     });
 
 });

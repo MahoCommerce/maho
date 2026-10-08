@@ -126,7 +126,7 @@ describe('Product Group Prices, CRUD Lifecycle', function (): void {
         $response = apiPut("/api/rest/v2/products/{$productId}/group-prices", [
             ['customerGroupId' => 'all', 'price' => -10],
         ], $token);
-        expect($response['status'])->toBeIn([400, 422]);
+        expect($response['status'])->toBe(422);
     });
 
 });

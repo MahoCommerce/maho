@@ -10,7 +10,7 @@ declare(strict_types=1);
 uses(Tests\MahoBackendTestCase::class);
 
 /**
- * Integration coverage for OrderService POS cash handling:
+ * Integration coverage for the POS cash handling of the order service:
  *
  *  1. Insufficient cash is rejected BEFORE the order is created — the quote must
  *     stay active so a corrected retry works (regression: the check used to run
@@ -18,7 +18,7 @@ uses(Tests\MahoBackendTestCase::class);
  *  2. cash_tendered / change_amount are persisted on the ORDER payment, not the
  *     quote payment that is discarded once the quote is deactivated.
  */
-describe('OrderService cash tendered', function (): void {
+describe('Cash tendered in the order service', function (): void {
 
     beforeEach(function (): void {
         $product = Mage::getResourceModel('catalog/product_collection')
@@ -66,12 +66,12 @@ describe('OrderService cash tendered', function (): void {
         $grandTotal = (float) $quote->getGrandTotal();
         expect($grandTotal)->toBeGreaterThan(0.0);
 
-        $service = new Mage\Sales\Api\OrderService();
+        $service = Mage::getService('sales/order');
 
         $threw = false;
         try {
             // Tender $10 less than owed.
-            $service->placeAdminOrder($quote, null, null, $grandTotal - 10.0);
+            $service->place($quote, null, null, $grandTotal - 10.0);
         } catch (\Throwable $e) {
             $threw = true;
             expect($e->getMessage())->toContain('Insufficient cash');
@@ -96,10 +96,10 @@ describe('OrderService cash tendered', function (): void {
 
         $tendered = $grandTotal + 20.0;
 
-        $service = new Mage\Sales\Api\OrderService();
+        $service = Mage::getService('sales/order');
 
         try {
-            $result = $service->placeAdminOrder($quote, null, null, $tendered);
+            $result = $service->place($quote, null, null, $tendered);
         } catch (\Throwable $e) {
             $this->markTestSkipped('Cash-on-delivery checkout could not complete in this store: ' . $e->getMessage());
         }

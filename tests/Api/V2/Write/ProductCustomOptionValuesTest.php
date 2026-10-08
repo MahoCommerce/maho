@@ -90,7 +90,7 @@ describe('Product Custom Options, Select Values', function (): void {
             'type' => 'drop_down',
             'values' => [],
         ], $token);
-        expect($response['status'])->toBeIn([400, 422]);
+        expect($response['status'])->toBe(422);
     });
 
 });

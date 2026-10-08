@@ -20,18 +20,18 @@ use Symfony\Component\HttpFoundation\Response;
  *
  * Overrides provide() because Cart has non-standard routing:
  * guest carts (masked ID), customer carts, and numeric ID carts
- * all require unified resolution via CartService.
+ * all require unified resolution via CartRequest and the cart service.
  */
 final class CartProvider extends \Maho\ApiPlatform\Provider
 {
     private CartMapper $cartMapper;
-    private CartService $cartService;
+    private \Mage_Checkout_Service_Cart $cartService;
 
     public function __construct(Security $security)
     {
         parent::__construct($security);
         $this->cartMapper = new CartMapper();
-        $this->cartService = new CartService();
+        $this->cartService = \Mage::getService('checkout/cart');
     }
 
     /**
@@ -51,13 +51,13 @@ final class CartProvider extends \Maho\ApiPlatform\Provider
                 return null;
             }
             $this->assertCustomerAccess((int) $customerId);
-            $quote = $this->cartService->getCustomerCart((int) $customerId);
+            $quote = $this->cartService->getForCustomer((int) $customerId, StoreContext::getStoreId());
             return $this->cartMapper->mapQuoteToCart($quote);
         }
 
         // All other operations: resolve cart via unified method
         ['quote' => $quote, 'accessedByMaskedId' => $byMasked]
-            = $this->cartService->resolveCartFromRequest($uriVariables, $context);
+            = CartRequest::resolve($uriVariables, $context);
 
         if (!$quote) {
             return null;
@@ -66,7 +66,7 @@ final class CartProvider extends \Maho\ApiPlatform\Provider
         // hasBackendAccess: admin, or a service token holding a carts grant. A bare
         // api_user token without the grant must NOT bypass cart ownership
         // (mirrors the write side's isPrivilegedCartActor()).
-        $this->cartService->verifyCartAccess(
+        $this->cartService->verifyAccess(
             $quote,
             $byMasked,
             $this->getAuthenticatedCustomerId(),
@@ -80,17 +80,17 @@ final class CartProvider extends \Maho\ApiPlatform\Provider
         // They bypass the mapper's read-boundary collection, so collect here.
         if ($operationName === 'get_guest_totals') {
             if (!$quote->getTotalsCollectedFlag()) {
-                CartService::collectAndVerifyTotals($quote);
+                $this->cartService->collectAndVerifyTotals($quote);
             }
             return $this->respondRaw($this->cartMapper->mapPricesToArray($quote));
         }
 
         if ($operationName === 'get_guest_payments') {
             if (!$quote->getTotalsCollectedFlag()) {
-                CartService::collectAndVerifyTotals($quote);
+                $this->cartService->collectAndVerifyTotals($quote);
             }
             // payment_method_is_active observers must see the cart's own store, not the caller's
-            return $this->respondRaw(CartService::inQuoteStoreScope(
+            return $this->respondRaw($this->cartService->inQuoteStoreScope(
                 $quote,
                 fn(): array => $this->cartMapper->getAvailablePaymentMethods($quote),
             ));

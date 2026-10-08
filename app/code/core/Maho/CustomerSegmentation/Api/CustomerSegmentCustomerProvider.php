@@ -12,6 +12,7 @@ namespace Maho\CustomerSegmentation\Api;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\Pagination\TraversablePaginator;
+use Maho\ApiPlatform\Security\AdminAcl;
 use Symfony\Bundle\SecurityBundle\Security;
 
 final class CustomerSegmentCustomerProvider extends \Maho\ApiPlatform\Provider
@@ -31,7 +32,7 @@ final class CustomerSegmentCustomerProvider extends \Maho\ApiPlatform\Provider
     #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): TraversablePaginator
     {
-        $this->assertSegmentAcl(CustomerSegment::ACL_MANAGE);
+        AdminAcl::checkPath(CustomerSegment::ACL_MANAGE);
         $user = $this->requireUser();
         $segment = $this->segmentProvider->loadReadableSegment((int) ($uriVariables['segmentId'] ?? 0), $user);
 

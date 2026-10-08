@@ -247,12 +247,12 @@ describe('Blog Category CRUD Lifecycle (REST)', function (): void {
             'name' => 'Orphan Category',
             'parentId' => 99999999,
         ], $token);
-        expect($badParent['status'])->toBe(400);
+        expect($badParent['status'])->toBe(422);
 
         $noName = apiPost('/api/rest/v2/blog-categories', [
             'urlKey' => 'test-pest-no-name',
         ], $token);
-        expect($noName['status'])->toBe(400);
+        expect($noName['status'])->toBe(422);
     });
 
 });

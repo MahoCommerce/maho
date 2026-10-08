@@ -88,7 +88,7 @@ return function (SchemaEditor $schema): void {
             ->create(),
     );
 
-    // Per-order one-time token for guest order lookup (getGuestOrder / /guestOrder).
+    // Per-order one-time token for guest order lookup (getForGuest() / /guestOrder).
     $schema->modifyTableByUnquotedName('sales_flat_order', static function (TableEditor $order): void {
         $order->addColumn(Schema::column('guest_access_token', Types::STRING, length: 64, notNull: false, comment: 'Guest order access token (hex, issued at order placement)'));
         $order->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('guest_access_token'));

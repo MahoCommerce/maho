@@ -8,7 +8,6 @@
 declare(strict_types=1);
 
 use Mage\Checkout\Api\CartMapper;
-use Mage\Checkout\Api\CartService;
 use Mage\Checkout\Api\GraphQL\CartMutationHandler;
 
 uses(Tests\MahoBackendTestCase::class);
@@ -34,7 +33,7 @@ describe('GraphQL shipping estimate currency', function (): void {
 
         setStoreDisplayCurrency('USD', 'USD,EUR');
 
-        $handler = new CartMutationHandler(new CartService(), new CartMapper());
+        $handler = new CartMutationHandler(new CartMapper());
         $result = $handler->handleShippingMethods(['cartId' => (int) $quote->getId()]);
         $methods = $result['availableShippingMethods'];
         expect($methods)->not->toBeEmpty();

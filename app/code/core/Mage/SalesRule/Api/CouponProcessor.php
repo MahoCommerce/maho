@@ -12,9 +12,9 @@ namespace Mage\SalesRule\Api;
 
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Operation;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
  * Coupon State Processor - Handles coupon CRUD and validation.
@@ -60,7 +60,7 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
         $args = $context['args']['input'] ?? [];
         $id = (int) ($args['id'] ?? 0);
         if (!$id) {
-            throw new BadRequestHttpException('Coupon ID is required');
+            throw new UnprocessableEntityHttpException('Coupon ID is required');
         }
         return $this->doUpdate($id, $args);
     }
@@ -96,16 +96,16 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
 
         $discountType = $data['discountType'] ?? '';
         if (!in_array($discountType, self::VALID_DISCOUNT_TYPES, true)) {
-            throw new BadRequestHttpException('Invalid discount type. Must be one of: ' . implode(', ', self::VALID_DISCOUNT_TYPES));
+            throw new UnprocessableEntityHttpException('Invalid discount type. Must be one of: ' . implode(', ', self::VALID_DISCOUNT_TYPES));
         }
 
         $discountAmount = (float) ($data['discountAmount'] ?? 0);
         if ($discountAmount <= 0) {
-            throw new BadRequestHttpException('Discount amount must be greater than 0');
+            throw new UnprocessableEntityHttpException('Discount amount must be greater than 0');
         }
 
         if ($this->isCouponCodeTaken($code)) {
-            throw new BadRequestHttpException("Coupon code '{$code}' already exists");
+            throw new ConflictHttpException("Coupon code '{$code}' already exists");
         }
 
         /** @var \Mage_SalesRule_Model_Rule $rule */
@@ -194,7 +194,7 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
 
         if (isset($data['discountType'])) {
             if (!in_array($data['discountType'], self::VALID_DISCOUNT_TYPES, true)) {
-                throw new BadRequestHttpException('Invalid discount type');
+                throw new UnprocessableEntityHttpException('Invalid discount type');
             }
             $rule->setSimpleAction(self::DISCOUNT_TYPE_MAP[$data['discountType']]);
         }
@@ -202,7 +202,7 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
         if (isset($data['discountAmount'])) {
             $amount = (float) $data['discountAmount'];
             if ($amount <= 0) {
-                throw new BadRequestHttpException('Discount amount must be greater than 0');
+                throw new UnprocessableEntityHttpException('Discount amount must be greater than 0');
             }
             $rule->setDiscountAmount($amount);
         }
@@ -272,7 +272,7 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
         if (isset($data['code'])) {
             $this->validateCouponCode($data['code']);
             if ($this->isCouponCodeTaken($data['code'], $id)) {
-                throw new BadRequestHttpException("Coupon code '{$data['code']}' already exists");
+                throw new ConflictHttpException("Coupon code '{$data['code']}' already exists");
             }
             $coupon->setCode($data['code']);
             $coupon->save();
@@ -294,7 +294,7 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
     private function doDelete(int $id): null
     {
         if (!$id) {
-            throw new BadRequestHttpException('Coupon ID is required');
+            throw new UnprocessableEntityHttpException('Coupon ID is required');
         }
 
         /** @var \Mage_SalesRule_Model_Coupon $coupon */
@@ -345,7 +345,7 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
     private function doValidate(string $code, ?int $cartId): Coupon
     {
         if (empty($code)) {
-            throw new BadRequestHttpException('Coupon code is required');
+            throw new UnprocessableEntityHttpException('Coupon code is required');
         }
 
         // Public endpoint, throttle by IP to stop bulk enumeration of
@@ -480,15 +480,15 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
 
         if ($cartCustomerId !== null) {
             if ($authenticatedCustomerId === null || $cartCustomerId !== $authenticatedCustomerId) {
-                throw new BadRequestHttpException('Cart not accessible');
+                throw new UnprocessableEntityHttpException('Cart not accessible');
             }
             return;
         }
 
         // Guest carts can't be previewed via the numeric ID endpoint,
-        // mirrors CartService::verifyCartAccess(). The masked-id flow
+        // mirrors \Mage_Checkout_Service_Cart::verifyAccess(). The masked-id flow
         // is exercised through the CartProcessor coupon endpoints instead.
-        throw new BadRequestHttpException('Cart not accessible');
+        throw new UnprocessableEntityHttpException('Cart not accessible');
     }
 
     /**
@@ -503,7 +503,7 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
         try {
             $date = \Mage::app()->getLocale()->formatDateForDb((string) $value);
         } catch (\Exception) {
-            throw new BadRequestHttpException('Invalid date for expirationDate; use Y-m-d or Y-m-d H:i:s format.');
+            throw new UnprocessableEntityHttpException('Invalid date for expirationDate; use Y-m-d or Y-m-d H:i:s format.');
         }
 
         return $date;

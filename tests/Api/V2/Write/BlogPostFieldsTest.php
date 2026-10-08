@@ -165,7 +165,7 @@ describe('Blog Post writable categoryIds', function (): void {
             'categoryIds' => [99999999],
         ], serviceToken(['blog-posts/write']));
 
-        expect($response['status'])->toBe(400);
+        expect($response['status'])->toBe(422);
     });
 
     it('rejects malformed categoryIds entries', function (): void {

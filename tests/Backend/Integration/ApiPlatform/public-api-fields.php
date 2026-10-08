@@ -159,8 +159,11 @@ return [
         'extensions', 'id', 'isActive', 'lastRefreshAt', 'matchedCustomersCount', 'name', 'priority',
         'refreshMode', 'refreshStatus', 'websiteIds',
     ],
-    'CustomerSegmentConditionType' => [
-        'attributes', 'code', 'combine', 'extensions', 'kind', 'label', 'type',
+    'CustomerSegmentConditionMetadata' => [
+        'extensions', 'locale', 'roots', 'scope', 'types', 'unchanged', 'version',
+    ],
+    'CustomerSegmentConditionValueOption' => [
+        'attribute', 'extensions', 'items', 'itemsPerPage', 'page', 'totalItems', 'type',
     ],
     'CustomerSegmentCustomer' => [
         'addedAt', 'email', 'extensions', 'firstname', 'groupId', 'id', 'lastname', 'websiteId',

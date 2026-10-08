@@ -26,12 +26,12 @@ final class CustomerProvider extends \Maho\ApiPlatform\Provider
 {
     use DateRangeFilterTrait;
 
-    private CustomerService $customerService;
+    private \Mage_Customer_Service_Customer $customerService;
 
     public function __construct(Security $security)
     {
         parent::__construct($security);
-        $this->customerService = new CustomerService();
+        $this->customerService = \Mage::getService('customer/customer');
     }
 
     /**
@@ -70,7 +70,7 @@ final class CustomerProvider extends \Maho\ApiPlatform\Provider
             $this->assertCustomerAccess($requestedId);
         }
 
-        $mahoCustomer = $this->customerService->getCustomerById($requestedId);
+        $mahoCustomer = $this->customerService->getById($requestedId);
         if (!$mahoCustomer) {
             return null;
         }
@@ -115,7 +115,7 @@ final class CustomerProvider extends \Maho\ApiPlatform\Provider
      */
     private function getItem(int $id): ?Customer
     {
-        $mahoCustomer = $this->customerService->getCustomerById($id);
+        $mahoCustomer = $this->customerService->getById($id);
         return $mahoCustomer ? $this->mapToDto($mahoCustomer) : null;
     }
 
@@ -126,10 +126,10 @@ final class CustomerProvider extends \Maho\ApiPlatform\Provider
      */
     private function getCollection(array $context): TraversablePaginator
     {
-        ['page' => $page, 'pageSize' => $pageSize] = $this->extractPagination($context, 15, CustomerService::MAX_PAGE_SIZE);
+        ['page' => $page, 'pageSize' => $pageSize] = $this->extractPagination($context, 15, \Mage_Customer_Service_Customer::MAX_PAGE_SIZE);
         $filters = $context['args'] ?? $context['filters'] ?? [];
 
-        $result = $this->customerService->searchCustomers(
+        $result = $this->customerService->search(
             search: $this->stringFilter($filters, 'search') ?? '',
             email: $this->stringFilter($filters, 'email'),
             telephone: $this->stringFilter($filters, 'telephone'),

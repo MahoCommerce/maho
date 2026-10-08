@@ -16,6 +16,8 @@ use Maho\ApiPlatform\Exception\ValidationException;
 use Maho\ApiPlatform\Security\ApiUser;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
+use Symfony\Component\Serializer\Exception\ExtraAttributesException;
 
 final class CartPriceRuleProcessor extends \Maho\ApiPlatform\Processor
 {
@@ -55,8 +57,7 @@ final class CartPriceRuleProcessor extends \Maho\ApiPlatform\Processor
         'discountStep' => 'setDiscountStep',
     ];
 
-    /** @var list<array{field: string, message: string}> */
-    private array $errors = [];
+    private \Mage_Core_Exception_Input $errors;
 
     public function __construct(
         Security $security,
@@ -106,7 +107,7 @@ final class CartPriceRuleProcessor extends \Maho\ApiPlatform\Processor
             ->setUsesPerCoupon(0)
             ->setUsesPerCustomer(0);
 
-        $this->errors = [];
+        $this->errors = new \Mage_Core_Exception_Input();
         foreach (['name', 'websiteIds', 'customerGroupIds'] as $field) {
             if (!array_key_exists($field, $body)) {
                 $this->addError($field, "{$field} is required");
@@ -114,7 +115,7 @@ final class CartPriceRuleProcessor extends \Maho\ApiPlatform\Processor
         }
         $this->applyFields($rule, $body, $user, true);
         $this->applyTrees($rule, $body, $locale, true);
-        $this->throwErrors();
+        $this->errors->throwIfErrors();
 
         $this->safeSave($rule, 'create cart price rule');
         $this->logApiActivity('cart_price_rule', 'create', null, $rule);
@@ -130,10 +131,10 @@ final class CartPriceRuleProcessor extends \Maho\ApiPlatform\Processor
         $rule = $this->loadWritableRule($id, $user);
         $oldData = $rule->getData();
 
-        $this->errors = [];
+        $this->errors = new \Mage_Core_Exception_Input();
         $this->applyFields($rule, $body, $user, false);
         $this->applyTrees($rule, $body, $locale, false);
-        $this->throwErrors();
+        $this->errors->throwIfErrors();
 
         $this->safeSave($rule, 'update cart price rule');
         $this->logApiActivity('cart_price_rule', 'update', $oldData, $rule);
@@ -165,10 +166,9 @@ final class CartPriceRuleProcessor extends \Maho\ApiPlatform\Processor
      */
     private function applyFields(\Mage_SalesRule_Model_Rule $rule, array $body, ApiUser $user, bool $isNew): void
     {
-        foreach (array_keys($body) as $key) {
-            if (!in_array($key, self::WRITABLE_FIELDS, true) && !in_array($key, self::READ_ONLY_FIELDS, true)) {
-                $this->addError((string) $key, 'Unknown field');
-            }
+        $unknown = array_diff(array_keys($body), self::WRITABLE_FIELDS, self::READ_ONLY_FIELDS);
+        if ($unknown !== []) {
+            throw new ExtraAttributesException(array_values($unknown));
         }
 
         if (array_key_exists('name', $body)) {
@@ -323,8 +323,7 @@ final class CartPriceRuleProcessor extends \Maho\ApiPlatform\Processor
             }
             $primaryCouponId = $isNew ? null : (int) $rule->getPrimaryCoupon()->getId();
             if ($this->isCouponCodeTaken($code, $primaryCouponId ?: null)) {
-                $this->addError('couponCode', "Coupon code '{$code}' already exists");
-                return;
+                throw new ConflictHttpException("Coupon code '{$code}' already exists");
             }
         }
         $rule->setCouponType(\Mage_SalesRule_Model_Rule::COUPON_TYPE_SPECIFIC)
@@ -412,7 +411,7 @@ final class CartPriceRuleProcessor extends \Maho\ApiPlatform\Processor
             }
         }
 
-        if ($this->errors === []) {
+        if ($this->errors->getErrors() === []) {
             foreach ($cleanTrees as $key => $cleanTree) {
                 $writer->replaceTree($rule, $key, $cleanTree);
             }
@@ -443,15 +442,6 @@ final class CartPriceRuleProcessor extends \Maho\ApiPlatform\Processor
 
     private function addError(string $field, string $message): void
     {
-        $this->errors[] = ['field' => $field, 'message' => $message];
-    }
-
-    private function throwErrors(): void
-    {
-        if ($this->errors === []) {
-            return;
-        }
-        $first = $this->errors[0];
-        throw new ValidationException($first['message'], $first['field'], 'Invalid', ['errors' => $this->errors]);
+        $this->errors->addError($field, $message);
     }
 }

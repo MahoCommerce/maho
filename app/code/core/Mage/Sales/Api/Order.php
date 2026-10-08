@@ -18,7 +18,6 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\Post;
 use Mage\Checkout\Api\Cart;
-use Mage\Checkout\Api\CartService;
 use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use ApiPlatform\Metadata\GraphQl\Mutation;
@@ -78,7 +77,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
             uriVariables: [
                 'maskedQuoteId' => new Link(fromClass: Cart::class, identifiers: []),
             ],
-            requirements: ['maskedQuoteId' => CartService::MASKED_ID_PATTERN],
+            requirements: ['maskedQuoteId' => \Mage_Checkout_Service_Cart::MASKED_ID_PATTERN],
             security: 'true',
             description: 'Place order from guest cart. Body carries the full checkout state in one shot: shippingAddress, billingAddress, guestEmail, paymentMethod, paymentData, shippingMethod (carrier_method), orderNote',
         ),
