@@ -10,8 +10,8 @@ declare(strict_types=1);
 
 namespace Mage\Sales\Api;
 
+use Mage\Checkout\Api\CartRequest;
 use ApiPlatform\Metadata\Operation;
-use Mage\Checkout\Api\CartService;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -21,16 +21,16 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 final class OrderProcessor extends \Maho\ApiPlatform\Processor
 {
-    private CartService $cartService;
+    private \Mage_Checkout_Service_Cart $cartService;
     private OrderProvider $orderProvider;
-    private OrderService $orderService;
+    private \Mage_Sales_Service_Order $orderService;
 
     public function __construct(Security $security)
     {
         parent::__construct($security);
-        $this->cartService = new CartService();
+        $this->cartService = \Mage::getService('checkout/cart');
         $this->orderProvider = new OrderProvider($security);
-        $this->orderService = new OrderService();
+        $this->orderService = \Mage::getService('sales/order');
     }
 
     /**
@@ -50,7 +50,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         $this->normalizeGraphQlInput($context);
 
         return match ($operationName) {
-            'place', 'place_order', 'place_guest_order', 'place_customer_order' => $this->placeOrder($context),
+            'place', 'place_order', 'place_guest_order', 'place_customer_order' => $this->placeOrder($uriVariables, $context),
             'cancel', 'order_cancel' => $this->cancelOrder($context, $uriVariables),
             'hold', 'order_hold' => $this->holdOrder($context, $uriVariables),
             'unhold', 'order_unhold' => $this->unholdOrder($context, $uriVariables),
@@ -71,10 +71,11 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         $orderId = $uriVariables['id'] ?? $args['orderId'] ?? null;
         $incrementId = $args['incrementId'] ?? null;
 
-        $order = $this->orderService->getOrder(
-            $orderId !== null ? (int) $orderId : null,
-            $incrementId,
-        );
+        $order = match (true) {
+            (int) $orderId > 0 => $this->orderService->getById((int) $orderId),
+            is_string($incrementId) && $incrementId !== '' => $this->orderService->getByIncrementId($incrementId),
+            default => null,
+        };
         if (!$order) {
             throw new NotFoundHttpException('Order not found');
         }
@@ -93,41 +94,16 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
     }
 
     /**
-     * Place order from cart. Accepts the cart identifier from the request body
-     * (cartId / maskedId) OR from the URI (e.g. /guest-carts/{id}/place-order).
+     * Place order from cart. CartRequest::resolve() finds the cart that the URI
+     * (e.g. /guest-carts/{id}/place-order) or the request body (cartId / maskedId) names.
      * Also applies shipping/billing address, customer email, and payment data
      * from the request body, frontend callers send the full checkout state in
      * one shot rather than pre-mutating the cart. paymentData reaches assignData() flat, with
-     * a copy under CartService::PAYMENT_ADDITIONAL_DATA_KEY so no key is lost at save time.
+     * a copy under \Mage_Checkout_Service_Cart::PAYMENT_ADDITIONAL_DATA_KEY so no key is lost at save time.
      */
-    private function placeOrder(array $context): Order
+    private function placeOrder(array $uriVariables, array $context): Order
     {
         $args = $context['args']['input'] ?? $context['request_data'] ?? [];
-        $cartId = $args['cartId'] ?? null;
-        // Recover the numeric cart id from the authenticated /carts/{id}/place-order
-        // path when it wasn't supplied in the body. Ownership is enforced below by
-        // verifyCartOwnership() (accessedByMaskedId=false → customer-ownership check).
-        if (!$cartId) {
-            $request = $context['request'] ?? null;
-            if ($request instanceof \Symfony\Component\HttpFoundation\Request
-                && preg_match('#/carts/(\d+)/place-order#', $request->getPathInfo(), $cm)) {
-                $cartId = $cm[1];
-            }
-        }
-        // Accept the masked id from the URI, else from the request body. We pull
-        // from the Request path rather than $uriVariables because API Platform
-        // casts URI placeholders to the resource identifier's PHP type, Order.id
-        // is int, so a 32-char hex masked id gets silently truncated to its
-        // leading digit run via PHP (int) coercion. Parsing the path ourselves
-        // preserves the string verbatim. The path wins over the body so that a
-        // body id can never place the order of a cart the URI does not name.
-        $request = $context['request'] ?? null;
-        $maskedId = $request instanceof \Symfony\Component\HttpFoundation\Request
-            ? CartService::maskedIdFromPath($request->getPathInfo())
-            : null;
-        if (!$maskedId && is_string($args['maskedId'] ?? null)) {
-            $maskedId = $args['maskedId'];
-        }
         $guestEmail = $args['guestEmail'] ?? $args['email'] ?? null;
         $orderNote = $args['orderNote'] ?? null;
         // POS-only fields: only trust them from admin/api callers so a guest
@@ -141,17 +117,14 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         // order, while a service token naming a real store is a storefront flow.
         $isAdminOrder = \Mage::app()->getStore()->isAdmin();
 
-        $quote = $this->cartService->getCart(
-            $cartId ? (int) $cartId : null,
-            $maskedId,
-        );
+        ['quote' => $quote, 'accessedByMaskedId' => $accessedByMaskedId] = CartRequest::resolve($uriVariables, $context);
 
         if (!$quote) {
             throw new NotFoundHttpException('Cart not found');
         }
 
         // Verify cart ownership
-        $this->verifyCartOwnership($quote, $maskedId !== null);
+        $this->verifyCartOwnership($quote, $accessedByMaskedId);
 
         // Frontend callers send the full checkout state in the body. Apply any
         // provided addresses in-memory; the single collection below prices them
@@ -170,7 +143,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
 
         // Set shipping method directly on the in-memory address. The frontend
         // sends a composite carrier_method string in the body, and we preserve
-        // the in-memory quote state through to placeAdminOrder rather than
+        // the in-memory quote state through to place() rather than
         // save + reload through cartService->setShippingMethod.
         $validateShippingMethod = false;
         if ($shippingMethod && !$quote->isVirtual()) {
@@ -181,7 +154,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         }
         // Collect once: this prices the applied addresses and shipping method,
         // and gives the payment gate below fresh totals
-        CartService::collectAndVerifyTotals($quote);
+        $this->cartService->collectAndVerifyTotals($quote);
 
         // Reject a method the client made up: after rates are collected the
         // chosen code must resolve to a real rate, otherwise a caller could
@@ -213,7 +186,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
 
             // Recollect so payment-dependent totals (e.g. payment fees) land on
             // the order; the consumed rates flag keeps the validated rates.
-            CartService::collectAndVerifyTotals($quote);
+            $this->cartService->collectAndVerifyTotals($quote);
         }
 
         $placeOrder = function () use ($quote, $paymentMethod, $shippingMethod, $guestEmail, $orderNote, $cashTendered, $employeeId): array {
@@ -227,7 +200,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
                 'shipping_method' => $shippingMethod,
             ]);
 
-            return $this->orderService->placeAdminOrder(
+            return $this->orderService->place(
                 $quote,
                 $guestEmail,
                 $orderNote,
@@ -243,7 +216,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         // even when the caller's X-Store-Code names a different one.
         $result = $isAdminOrder
             ? $placeOrder()
-            : CartService::inQuoteStoreScope($quote, $placeOrder);
+            : $this->cartService->inQuoteStoreScope($quote, $placeOrder);
 
         $order = $result['order'];
         $accessToken = $result['accessToken'];
@@ -265,7 +238,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         $reason = $args['reason'] ?? null;
 
         $order = $this->resolveManagedOrder($context, $uriVariables);
-        $order = $this->orderService->cancelOrder($order, $reason);
+        $order = $this->orderService->cancel($order, $reason);
 
         return $this->orderProvider->mapToDto($order);
     }
@@ -278,7 +251,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         $reason = $context['args']['input']['reason'] ?? null;
 
         $order = $this->resolveManagedOrder($context, $uriVariables);
-        $order = $this->orderService->holdOrder($order, $reason);
+        $order = $this->orderService->hold($order, $reason);
 
         return $this->orderProvider->mapToDto($order);
     }
@@ -291,7 +264,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         $reason = $context['args']['input']['reason'] ?? null;
 
         $order = $this->resolveManagedOrder($context, $uriVariables);
-        $order = $this->orderService->unholdOrder($order, $reason);
+        $order = $this->orderService->unhold($order, $reason);
 
         return $this->orderProvider->mapToDto($order);
     }
@@ -332,7 +305,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
                 ));
             }
         }
-        $order = $this->orderService->addOrderNote($order, $comment, $notifyCustomer, $visibleOnFront, $status);
+        $order = $this->orderService->addNote($order, $comment, $notifyCustomer, $visibleOnFront, $status);
 
         return $this->orderProvider->mapToDto($order);
     }
@@ -342,7 +315,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
      */
     private function verifyCartOwnership(\Mage_Sales_Model_Quote $quote, bool $accessedByMaskedId): void
     {
-        $this->cartService->verifyCartAccess(
+        $this->cartService->verifyAccess(
             $quote,
             $accessedByMaskedId,
             $this->getAuthenticatedCustomerId(),

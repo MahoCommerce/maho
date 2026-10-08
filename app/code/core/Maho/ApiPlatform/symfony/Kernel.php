@@ -426,6 +426,11 @@ class Kernel extends BaseKernel
         $services->set(Security\CustomerOwnership::class)
             ->tag('security.expression_language_provider');
 
+        // -780 is the priority of the GraphQL exception normalizers of API Platform
+        $services->set(GraphQl\MageExceptionNormalizer::class)
+            ->autoconfigure(false)
+            ->tag('serializer.normalizer', ['priority' => -780]);
+
         $services->set(GraphQl\CustomQueryResolver::class)
             ->arg('$providerLocator', tagged_locator('maho.api.state_provider'))
             ->tag('api_platform.graphql.query_resolver');

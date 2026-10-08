@@ -187,7 +187,7 @@ describe('GET /api/rest/v2/customers search', function (): void {
 
     it('uses only the first words of a long search', function (): void {
         $customer = adminListCustomer();
-        $words = array_fill(0, \Mage\Customer\Api\CustomerService::MAX_SEARCH_WORDS, "Zanfirst{$customer['token']}");
+        $words = array_fill(0, \Mage_Customer_Service_Customer::MAX_SEARCH_WORDS, "Zanfirst{$customer['token']}");
         $words[] = 'zzqx-no-match';
 
         $response = apiGet('/api/rest/v2/customers?search=' . urlencode(implode(' ', $words)), adminToken());

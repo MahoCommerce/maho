@@ -16,7 +16,6 @@ use ApiPlatform\Metadata\Put;
 use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Bundle\SecurityBundle\Security;
-use Mage\Sales\Api\AccountTokenService;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
@@ -36,12 +35,12 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
      */
     private const MAX_SMALLINT = 32767;
 
-    private readonly CustomerService $customerService;
+    private readonly \Mage_Customer_Service_Customer $customerService;
 
     public function __construct(Security $security)
     {
         parent::__construct($security);
-        $this->customerService = new CustomerService();
+        $this->customerService = \Mage::getService('customer/customer');
     }
 
     /**
@@ -434,22 +433,25 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             throw new AccessDeniedHttpException('Authentication required');
         }
 
-        $customer = $this->customerService->getCustomerById($customerId);
+        $customer = $this->customerService->getById($customerId);
         if (!$customer) {
             throw new AccessDeniedHttpException('Customer not found');
         }
 
-        $data = array_filter([
-            'firstName' => $firstName,
-            'lastName' => $lastName,
-            'email' => $email,
-        ], fn($v) => $v !== null) + $profile;
-
-        try {
-            $customer = $this->customerService->updateCustomer($customer, $data);
-        } catch (\Exception $e) {
-            throw new BadRequestHttpException($e->getMessage());
+        if ($firstName !== null) {
+            $customer->setFirstname($firstName);
         }
+        if ($lastName !== null) {
+            $customer->setLastname($lastName);
+        }
+        if ($email !== null) {
+            $customer->setEmail($email);
+        }
+        foreach ($profile as $field => $value) {
+            $customer->setData($field, $value);
+        }
+
+        $customer = $this->customerService->save($customer);
 
         return Customer::fromModel($customer);
     }
@@ -460,7 +462,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
      */
     private function updateCustomerAdmin(int $customerId, Customer $data): Customer
     {
-        $customer = $this->customerService->getCustomerById($customerId);
+        $customer = $this->customerService->getById($customerId);
         if (!$customer) {
             throw new NotFoundHttpException('Customer not found');
         }
@@ -645,16 +647,12 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         $this->checkRateLimitByIp('change_password', 'change_password', 3600);
         $this->checkRateLimit('change_password:customer:' . $customerId, 'change_password', 3600);
 
-        $customer = $this->customerService->getCustomerById($customerId);
+        $customer = $this->customerService->getById($customerId);
         if (!$customer) {
             throw new AccessDeniedHttpException('Customer not found');
         }
 
-        try {
-            $this->customerService->changePassword($customer, $currentPassword, $newPassword);
-        } catch (\Exception $e) {
-            throw new BadRequestHttpException($e->getMessage());
-        }
+        $this->customerService->changePassword($customer, $currentPassword, $newPassword);
 
         return Customer::fromModel($customer);
     }
@@ -721,11 +719,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             throw new BadRequestHttpException("New password must be at least {$minPasswordLength} characters");
         }
 
-        try {
-            $this->customerService->resetPassword($email, $resetToken, $newPassword);
-        } catch (\Exception $e) {
-            throw new BadRequestHttpException($e->getMessage());
-        }
+        $this->customerService->resetPassword($email, $resetToken, $newPassword);
 
         $dto = new Customer();
         $dto->email = $email;
@@ -752,7 +746,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         }
 
         try {
-            $tokenData = AccountTokenService::verify($accountToken, 3600);
+            $tokenData = \Mage::helper('sales/accountToken')->verify($accountToken, 3600);
         } catch (\Mage_Core_Exception $e) {
             throw new BadRequestHttpException($e->getMessage());
         }

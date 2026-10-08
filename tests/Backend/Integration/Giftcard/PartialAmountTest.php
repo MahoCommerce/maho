@@ -77,17 +77,9 @@ describe('Gift card partial amount + deduction consistency', function (): void {
             $this->markTestSkipped('Sample product too cheap to exercise partial-amount capping');
         }
 
-        // Persist exactly what the cart API stores for a $10 request: the cart
-        // API's CartService::applyGiftcard($quote, $code, 10.0) writes
-        // min($requested, $balance) into giftcard_codes, then collects totals.
-        // (Instantiating CartService directly needs the API kernel's module
-        // autoloader; the stored state below is byte-for-byte what it produces,
-        // and the behaviour under test lives in the shared totals collector.)
-        $quote->setGiftcardCodes(json_encode([
-            $giftcard->getCode() => min($requestedAmount, $cardBalance),
-        ]));
-        $quote->setTotalsCollectedFlag(false);
-        $quote->collectTotals()->save();
+        // The cart API applies a $10 request through this call: it stores min($requested, $balance)
+        // in giftcard_codes, then collects totals.
+        Mage::getService('checkout/cart')->applyGiftcard($quote, $giftcard->getCode(), $requestedAmount);
 
         // (1) The partial request is ignored: the applied amount is the full
         // balance capped at the payable total, NOT the requested $10.

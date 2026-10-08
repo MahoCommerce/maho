@@ -486,7 +486,7 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
         }
 
         // Guest carts can't be previewed via the numeric ID endpoint,
-        // mirrors CartService::verifyCartAccess(). The masked-id flow
+        // mirrors \Mage_Checkout_Service_Cart::verifyAccess(). The masked-id flow
         // is exercised through the CartProcessor coupon endpoints instead.
         throw new BadRequestHttpException('Cart not accessible');
     }

@@ -95,7 +95,7 @@ class Maho_Revocation_Model_Request extends Mage_Core_Model_Abstract
      * 1 only when the request was submitted by a logged-in customer through the
      * "Revoke this contract" link on their own order page (the my-account entry
      * point), with order ownership re-checked server-side in
-     * Maho_Revocation_Model_Service::_resolveOrder(). Public-form submissions are
+     * Maho_Revocation_Service_Request::_resolveOrder(). Public-form submissions are
      * always 0, even when order reference + name + email all match — an unverified
      * self-assertion must never elevate itself, because a verified+linked request
      * is what lets an admin apply order-level changes.

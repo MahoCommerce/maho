@@ -133,7 +133,7 @@ describe('POST /api/rest/v2/orders/{orderId}/invoices', function (): void {
 
         // Fully invoiced: a third invoice must be rejected
         $again = apiPost("/api/rest/v2/orders/{$orderId}/invoices", [], adminToken());
-        expect($again['status'])->toBe(400);
+        expect($again['status'])->toBe(409);
     });
 
     it('rejects items with invalid orderItemId or qty', function (): void {
@@ -172,7 +172,7 @@ describe('POST /api/rest/v2/orders/{orderId}/invoices', function (): void {
             'items' => [['orderItemId' => $orderItemId, 'qty' => 99]],
         ], adminToken());
 
-        expect($response['status'])->toBe(400);
+        expect($response['status'])->toBe(422);
         expect(Mage::getModel('sales/order')->load($orderId)->canInvoice())->toBeTrue();
     });
 
@@ -189,7 +189,7 @@ describe('POST /api/rest/v2/orders/{orderId}/invoices', function (): void {
             'items' => [['orderItemId' => $orderItemId, 'qty' => 0.5]],
         ], adminToken());
 
-        expect($response['status'])->toBe(400);
+        expect($response['status'])->toBe(422);
 
         // No zero-qty invoice may have been registered behind the rejection
         $list = apiGet("/api/rest/v2/orders/{$orderId}/invoices", adminToken());
@@ -243,7 +243,7 @@ describe('POST /api/rest/v2/invoices/{id}/capture|void|cancel', function (): voi
             ->toBe(Mage_Sales_Model_Order_Invoice::STATE_CANCELED);
 
         // Canceling twice is rejected
-        expect(apiPost("/api/rest/v2/invoices/{$invoiceId}/cancel", [], adminToken())['status'])->toBe(400);
+        expect(apiPost("/api/rest/v2/invoices/{$invoiceId}/cancel", [], adminToken())['status'])->toBe(409);
     });
 
     it('rejects capture and cancel on an already-paid offline invoice', function (): void {
@@ -260,9 +260,9 @@ describe('POST /api/rest/v2/invoices/{id}/capture|void|cancel', function (): voi
         expect($created['json']['stateName'])->toBe('paid');
 
         // Paid: not capturable, not cancelable; void requires a gateway transaction
-        expect(apiPost("/api/rest/v2/invoices/{$invoiceId}/capture", [], adminToken())['status'])->toBe(400);
-        expect(apiPost("/api/rest/v2/invoices/{$invoiceId}/cancel", [], adminToken())['status'])->toBe(400);
-        expect(apiPost("/api/rest/v2/invoices/{$invoiceId}/void", [], adminToken())['status'])->toBe(400);
+        expect(apiPost("/api/rest/v2/invoices/{$invoiceId}/capture", [], adminToken())['status'])->toBe(409);
+        expect(apiPost("/api/rest/v2/invoices/{$invoiceId}/cancel", [], adminToken())['status'])->toBe(409);
+        expect(apiPost("/api/rest/v2/invoices/{$invoiceId}/void", [], adminToken())['status'])->toBe(409);
     });
 
 });

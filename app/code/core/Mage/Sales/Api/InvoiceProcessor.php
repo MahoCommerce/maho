@@ -14,7 +14,6 @@ namespace Mage\Sales\Api;
 
 use ApiPlatform\Metadata\Operation;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 final class InvoiceProcessor extends \Maho\ApiPlatform\Processor
@@ -77,96 +76,13 @@ final class InvoiceProcessor extends \Maho\ApiPlatform\Processor
 
         $this->assertStoreAllowed($order->getStoreId(), $this->requireUser(), 'order');
 
-        // Serialize with the order's other state transitions so two concurrent
-        // requests can't both pass canInvoice() and both register an invoice,
-        // double-invoicing the order. Shared per-order lock name, see
-        // OrderService::withOrderLock().
-        $write = \Mage::getSingleton('core/resource')->getConnection('core_write');
-        $lockName = 'maho_order_mutate:' . (int) $order->getId();
-        if (!$write->getLock($lockName, 5)) {
-            throw new ConflictHttpException('Another operation is already in progress for this order');
+        $qtys = [];
+        foreach ($items ?? [] as $itemData) {
+            $entry = $this->parseOrderItemEntry($itemData, $order);
+            $qtys[(int) $entry['item']->getId()] = $entry['qty'];
         }
 
-        try {
-            // Re-read under the lock so canInvoice() reflects the live state.
-            $order->load($orderId);
-            return $this->buildAndRegisterInvoice($order, $items, $captureCase, $comment, (bool) $notifyCustomer);
-        } finally {
-            $write->releaseLock($lockName);
-        }
-    }
-
-    private function buildAndRegisterInvoice(
-        \Mage_Sales_Model_Order $order,
-        ?array $items,
-        ?string $captureCase,
-        ?string $comment,
-        bool $notifyCustomer,
-    ): Invoice {
-        if (!$order->canInvoice()) {
-            throw new BadRequestHttpException('Order cannot be invoiced (already fully invoiced or not in an invoiceable state)');
-        }
-
-        $qtyMap = [];
-        if ($items !== null && count($items) > 0) {
-            foreach ($items as $itemData) {
-                $entry = $this->parseOrderItemEntry($itemData, $order);
-                $orderItem = $entry['item'];
-                $qty = $entry['qty'];
-                $orderItemId = (int) $orderItem->getId();
-
-                // Dummy (bundle/configurable parent) items take their qty from the
-                // order, so neither check applies to them.
-                if (!$orderItem->isDummy()) {
-                    if (!$orderItem->getIsQtyDecimal() && fmod($qty, 1.0) !== 0.0) {
-                        throw new BadRequestHttpException("Order item {$orderItemId} does not accept a fractional qty");
-                    }
-                    if ($qty > (float) $orderItem->getQtyToInvoice()) {
-                        throw new BadRequestHttpException("Qty to invoice for order item {$orderItemId} exceeds the qty available to invoice");
-                    }
-                }
-
-                $qtyMap[$orderItemId] = $qty;
-            }
-        }
-
-        try {
-            $invoice = \Mage::getModel('sales/service_order', $order)->prepareInvoice($qtyMap);
-        } catch (\Mage_Core_Exception $e) {
-            throw new BadRequestHttpException($e->getMessage());
-        }
-
-        if (!$invoice->getTotalQty()) {
-            throw new BadRequestHttpException('Cannot create invoice: no items to invoice');
-        }
-
-        if ($captureCase === \Mage_Sales_Model_Order_Invoice::CAPTURE_ONLINE && !$invoice->canCapture()) {
-            throw new BadRequestHttpException('The order\'s payment method does not support online capture');
-        }
-        if ($captureCase !== null) {
-            $invoice->setRequestedCaptureCase($captureCase);
-        }
-
-        if ($comment) {
-            $invoice->addComment($comment, $notifyCustomer);
-        }
-
-        try {
-            $invoice->register();
-        } catch (\Mage_Core_Exception $e) {
-            throw new BadRequestHttpException($e->getMessage());
-        }
-
-        $invoice->getOrder()->setIsInProcess();
-
-        \Mage::getModel('core/resource_transaction')
-            ->addObject($invoice)
-            ->addObject($invoice->getOrder())
-            ->save();
-
-        if ($notifyCustomer) {
-            $invoice->sendEmail(true, $comment ?? '');
-        }
+        $invoice = \Mage::getService('sales/order')->invoice($order, $qtys, $captureCase, $comment, (bool) $notifyCustomer);
 
         return Invoice::fromModel($invoice);
     }
@@ -188,47 +104,12 @@ final class InvoiceProcessor extends \Maho\ApiPlatform\Processor
 
         $this->assertStoreAllowed($invoice->getStoreId(), $this->requireUser(), 'invoice');
 
-        // Same per-order critical section as invoice/shipment/refund creation:
-        // capture/void/cancel mutate order totals and must not interleave.
-        $write = \Mage::getSingleton('core/resource')->getConnection('core_write');
-        $lockName = 'maho_order_mutate:' . (int) $invoice->getOrderId();
-        if (!$write->getLock($lockName, 5)) {
-            throw new ConflictHttpException('Another operation is already in progress for this order');
-        }
-
-        try {
-            // Re-read under the lock so the can*() checks reflect the live state.
-            $invoice->load($invoiceId);
-
-            $allowed = match ($action) {
-                'capture' => $invoice->canCapture(),
-                'void' => $invoice->canVoid(),
-                'cancel' => $invoice->canCancel(),
-            };
-            if (!$allowed) {
-                $past = match ($action) {
-                    'capture' => 'captured',
-                    'void' => 'voided',
-                    'cancel' => 'canceled',
-                };
-                throw new BadRequestHttpException("The invoice cannot be {$past} in its current state");
-            }
-
-            try {
-                $invoice->{$action}();
-            } catch (\Mage_Core_Exception $e) {
-                throw new BadRequestHttpException($e->getMessage());
-            }
-
-            $invoice->getOrder()->setIsInProcess();
-
-            \Mage::getModel('core/resource_transaction')
-                ->addObject($invoice)
-                ->addObject($invoice->getOrder())
-                ->save();
-        } finally {
-            $write->releaseLock($lockName);
-        }
+        $service = \Mage::getService('sales/order');
+        $invoice = match ($action) {
+            'capture' => $service->captureInvoice($invoice),
+            'void' => $service->voidInvoice($invoice),
+            'cancel' => $service->cancelInvoice($invoice),
+        };
 
         return Invoice::fromModel($invoice);
     }

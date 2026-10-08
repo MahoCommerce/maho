@@ -8,42 +8,19 @@
 
 declare(strict_types=1);
 
-namespace Mage\Customer\Api;
-
 use Maho\ApiPlatform\Trait\FilterValueTrait;
 
 /**
- * Customer Service - Business logic for customer operations.
+ * Finds, searches and saves customers, and changes and resets their passwords.
  */
-class CustomerService
+class Mage_Customer_Service_Customer
 {
     use FilterValueTrait;
 
     /**
-     * Authenticate customer with email and password
-     *
-     * Delegates to Mage_Customer_Model_Customer::authenticate() which handles
-     * loadByEmail, validatePassword, confirmation check, and fires the
-     * customer_customer_authenticated event.
-     *
-     * @throws \Mage_Core_Exception on invalid credentials or unconfirmed account
-     */
-    public function authenticate(#[\SensitiveParameter]
-        string $email, #[\SensitiveParameter]
-        string $password): \Mage_Customer_Model_Customer
-    {
-        $customer = \Mage::getModel('customer/customer')
-            ->setWebsiteId(\Mage::app()->getStore()->getWebsiteId());
-
-        $customer->authenticate($email, $password);
-
-        return $customer;
-    }
-
-    /**
      * Get customer by ID
      */
-    public function getCustomerById(int $id): ?\Mage_Customer_Model_Customer
+    public function getById(int $id): ?\Mage_Customer_Model_Customer
     {
         $customer = \Mage::getModel('customer/customer')->load($id);
 
@@ -57,7 +34,7 @@ class CustomerService
      *                 so two calls with the same email can legitimately differ
      *                 (used to detect a concurrent registration race).
      */
-    public function getCustomerByEmail(#[\SensitiveParameter]
+    public function getByEmail(#[\SensitiveParameter]
         string $email): ?\Mage_Customer_Model_Customer
     {
         $customer = \Mage::getModel('customer/customer')
@@ -80,7 +57,7 @@ class CustomerService
      * @param int[]|null $websiteIds Restrict matches to these websites; null means unrestricted
      * @return array{customers: list<\Mage_Customer_Model_Customer>, total: int}
      */
-    public function searchCustomers(
+    public function search(
         string $search = '',
         #[\SensitiveParameter]
         ?string $email = null,
@@ -195,132 +172,15 @@ class CustomerService
     }
 
     /**
-     * Create customer with minimal information (for POS quick checkout)
+     * Save a customer. Another customer of the same website must not use its email.
      */
-    public function createCustomerQuick(
-        string $firstName,
-        string $lastName,
-        #[\SensitiveParameter]
-        ?string $email = null,
-        ?string $telephone = null,
-        ?int $groupId = null,
-    ): \Mage_Customer_Model_Customer {
-        $customer = \Mage::getModel('customer/customer');
-
-        // If no email provided, generate a temporary one
-        if (empty($email)) {
-            $email = 'guest_' . bin2hex(random_bytes(8)) . '@pos.local';
-        }
-
-        $customer->setWebsiteId(\Mage::app()->getStore()->getWebsiteId())
-            ->setStore(\Mage::app()->getStore())
-            ->setFirstname($firstName)
-            ->setLastname($lastName)
-            ->setEmail($email);
-
-        if ($groupId !== null) {
-            $customer->setGroupId($groupId);
-        }
-
-        // Save customer
-        $customer->save();
-
-        // Add default address if telephone provided
-        if ($telephone) {
-            $address = \Mage::getModel('customer/address');
-            $address->setCustomerId($customer->getId())
-                ->setFirstname($firstName)
-                ->setLastname($lastName)
-                ->setTelephone($telephone)
-                ->setCountryId(\Maho\ApiPlatform\Service\StoreDefaults::getCountryId()) // Default to Australia
-                ->setIsDefaultBilling()
-                ->setIsDefaultShipping();
-
-            try {
-                $address->save();
-            } catch (\Exception $e) {
-                \Mage::logException($e);
-            }
-        }
-
-        return $customer;
-    }
-
-    /**
-     * Register new customer with full information
-     */
-    public function registerCustomer(
-        string $firstName,
-        string $lastName,
-        #[\SensitiveParameter]
-        string $email,
-        #[\SensitiveParameter]
-        string $password,
-        bool $isSubscribed = false,
-    ): \Mage_Customer_Model_Customer {
-        // Check if email already exists
-        if ($this->getCustomerByEmail($email)) {
-            throw new \Exception('A customer with this email already exists.');
-        }
-
-        $customer = \Mage::getModel('customer/customer');
-
-        $customer->setWebsiteId(\Mage::app()->getStore()->getWebsiteId())
-            ->setStore(\Mage::app()->getStore())
-            ->setFirstname($firstName)
-            ->setLastname($lastName)
-            ->setEmail($email)
-            ->setPassword($password)
-            ->setIsSubscribed($isSubscribed);
-
-        try {
-            $customer->save();
-        } catch (\Throwable $e) {
-            // The pre-check above is a TOCTOU: a concurrent registration with the
-            // same email can slip in between it and save(), tripping the unique
-            // constraint. Re-check and surface the same clean error rather than a
-            // raw DB exception (500).
-            if ($this->getCustomerByEmail($email)) {
-                throw new \Exception('A customer with this email already exists.');
-            }
-            throw $e;
-        }
-
-        return $customer;
-    }
-
-    /**
-     * Update customer information
-     */
-    public function updateCustomer(
-        \Mage_Customer_Model_Customer $customer,
-        array $data,
-    ): \Mage_Customer_Model_Customer {
-        if (isset($data['firstName'])) {
-            $customer->setFirstname($data['firstName']);
-        }
-
-        if (isset($data['lastName'])) {
-            $customer->setLastname($data['lastName']);
-        }
-
-        if (isset($data['email'])) {
-            // Check if email is already used by another customer
-            $existing = $this->getCustomerByEmail($data['email']);
+    public function save(\Mage_Customer_Model_Customer $customer): \Mage_Customer_Model_Customer
+    {
+        $email = $customer->getEmail();
+        if ($email !== null && $customer->dataHasChangedFor('email')) {
+            $existing = $this->getByEmail($email);
             if ($existing && $existing->getId() !== $customer->getId()) {
-                throw new \Exception('This email is already in use.');
-            }
-            $customer->setEmail($data['email']);
-        }
-
-        if (isset($data['isSubscribed'])) {
-            $customer->setIsSubscribed((bool) $data['isSubscribed']);
-        }
-
-        // Optional profile attributes; a present-but-null value clears the attribute
-        foreach (['prefix', 'middlename', 'suffix', 'gender', 'dob'] as $field) {
-            if (array_key_exists($field, $data)) {
-                $customer->setData($field, $data[$field]);
+                throw new \Mage_Core_Exception_Conflict('This email is already in use.');
             }
         }
 
@@ -340,35 +200,13 @@ class CustomerService
     ): bool {
         // Validate current password
         if (!$customer->validatePassword($currentPassword)) {
-            throw new \Exception('Current password is incorrect.');
+            throw new \Mage_Core_Exception('Current password is incorrect.');
         }
 
         $customer->setPassword($newPassword);
         $customer->save();
 
         return true;
-    }
-
-    /**
-     * Request password reset token
-     */
-    public function requestPasswordReset(#[\SensitiveParameter]
-        string $email): bool
-    {
-        $customer = $this->getCustomerByEmail($email);
-
-        if (!$customer) {
-            // Don't reveal if email exists or not (security)
-            return true;
-        }
-
-        try {
-            $customer->sendPasswordResetConfirmationEmail();
-            return true;
-        } catch (\Exception $e) {
-            \Mage::logException($e);
-            throw new \Exception('Unable to send password reset email.');
-        }
     }
 
     /**
@@ -379,22 +217,22 @@ class CustomerService
         string $token, #[\SensitiveParameter]
         string $newPassword): bool
     {
-        $customer = $this->getCustomerByEmail($email);
+        $customer = $this->getByEmail($email);
 
         if (!$customer) {
-            throw new \Exception('Invalid email or token.');
+            throw new \Mage_Core_Exception('Invalid or expired reset token.');
         }
 
         // Validate reset token (use hash_equals to prevent timing attacks)
         $storedToken = $customer->getRpToken();
         if (!$storedToken || !hash_equals($storedToken, $token)) {
-            throw new \Exception('Invalid or expired reset token.');
+            throw new \Mage_Core_Exception('Invalid or expired reset token.');
         }
 
         if ($customer->isResetPasswordLinkTokenExpired()) {
             // Use the same message as an invalid token so the response does not
             // confirm to a caller that a supplied token was correct-but-expired.
-            throw new \Exception('Invalid or expired reset token.');
+            throw new \Mage_Core_Exception('Invalid or expired reset token.');
         }
 
         $customer->setPassword($newPassword);

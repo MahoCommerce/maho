@@ -81,7 +81,7 @@ class Maho_Revocation_Adminhtml_Sales_RevocationController extends Mage_Adminhtm
             $note = trim((string) $this->getRequest()->getParam('admin_note'));
             $model->setAdminNote($note !== '' ? $note : null);
 
-            $service = Mage::getModel('revocation/service');
+            $service = Mage::getService('revocation/request');
             $processedStatus = (string) $this->getRequest()->getParam('processed_status');
             if ($processedStatus !== '' && $service->isValidProcessedStatus($processedStatus)) {
                 $service->applyProcessedStatus($model, $processedStatus);
@@ -197,7 +197,7 @@ class Maho_Revocation_Adminhtml_Sales_RevocationController extends Mage_Adminhtm
         }
 
         try {
-            if (Mage::getModel('revocation/service')->resendReceipt($model)) {
+            if (Mage::getService('revocation/request')->resendReceipt($model)) {
                 Mage::getSingleton('adminhtml/session')->addSuccess($this->__('The receipt email has been resent to %s.', $model->getEmail()));
             } else {
                 Mage::getSingleton('adminhtml/session')->addError($this->__('The receipt email could not be sent. Please check the email configuration.'));

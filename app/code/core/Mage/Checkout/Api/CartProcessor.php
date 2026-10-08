@@ -25,13 +25,13 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 final class CartProcessor extends \Maho\ApiPlatform\Processor
 {
     private CartMapper $cartMapper;
-    private CartService $cartService;
+    private \Mage_Checkout_Service_Cart $cartService;
 
     public function __construct(Security $security)
     {
         parent::__construct($security);
         $this->cartMapper = new CartMapper();
-        $this->cartService = new CartService();
+        $this->cartService = \Mage::getService('checkout/cart');
     }
 
     /**
@@ -107,13 +107,13 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     private function resolveAndVerify(array $context, array $uriVariables): \Mage_Sales_Model_Quote
     {
         ['quote' => $quote, 'accessedByMaskedId' => $byMasked]
-            = $this->cartService->resolveCartFromRequest($uriVariables, $context);
+            = CartRequest::resolve($uriVariables, $context);
 
         if (!$quote) {
             throw new NotFoundHttpException('Cart not found');
         }
 
-        $this->cartService->verifyCartAccess(
+        $this->cartService->verifyAccess(
             $quote,
             $byMasked,
             $this->getAuthenticatedCustomerId(),
@@ -151,9 +151,9 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $customerId = $context['customer_id'] ?? null;
         $storeId = $this->resolveRequestedStoreId($context);
 
-        $result = $this->cartService->createEmptyCart($customerId, $storeId);
+        $quote = $this->cartService->create($customerId, CartRequest::storeId($storeId));
 
-        return $this->cartMapper->mapQuoteToCart($result['quote'], false);
+        return $this->cartMapper->mapQuoteToCart($quote, false);
     }
 
     /**
@@ -170,9 +170,9 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $customerId = $this->getAuthenticatedCustomerId();
         $storeId = $this->resolveRequestedStoreId($context);
 
-        $result = $this->cartService->createEmptyCart($customerId, $storeId);
+        $quote = $this->cartService->create($customerId, CartRequest::storeId($storeId));
 
-        return $this->cartMapper->mapQuoteToCart($result['quote'], false);
+        return $this->cartMapper->mapQuoteToCart($quote, false);
     }
 
     /**
@@ -212,7 +212,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
             $buyOptions['options'] = $args['options'];
         }
         // File-type custom options: the base64 uploads must be forwarded to
-        // CartService::addItem, which injects them into the buy request. Without
+        // \Mage_Checkout_Service_Cart::addItem, which injects them into the buy request. Without
         // this they're dropped and a provided file reads as a missing required
         // option (add-to-cart 400s).
         if (!empty($args['options_files'])) {
@@ -283,10 +283,10 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     private function resolveCartForItemAdd(array $context, array $uriVariables, bool &$recreated): \Mage_Sales_Model_Quote
     {
         ['quote' => $quote, 'accessedByMaskedId' => $byMasked, 'maskedId' => $maskedId]
-            = $this->cartService->resolveCartFromRequest($uriVariables, $context);
+            = CartRequest::resolve($uriVariables, $context);
 
         if ($quote) {
-            $this->cartService->verifyCartAccess(
+            $this->cartService->verifyAccess(
                 $quote,
                 $byMasked,
                 $this->getAuthenticatedCustomerId(),
@@ -300,7 +300,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         // the lookup used, never a second, possibly different, id of its own.
         if ($maskedId !== null && $this->isGuestCartRequest($context)) {
             $recreated = true;
-            return $this->cartService->createEmptyCart()['quote'];
+            return $this->cartService->create(null, CartRequest::storeId());
         }
 
         throw new NotFoundHttpException('Cart not found');
@@ -458,7 +458,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         if ($focused) {
             $shippingAddress = $quote->getShippingAddress();
             $methods = $shippingAddress->getId()
-                ? CartService::inQuoteStoreScope($quote, fn(): array => $this->cartMapper->getAvailableShippingMethods($shippingAddress))
+                ? $this->cartService->inQuoteStoreScope($quote, fn(): array => $this->cartMapper->getAvailableShippingMethods($shippingAddress))
                 : [];
             return $this->respondRaw($methods);
         }
@@ -525,10 +525,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
             if (!$requestedCustomerId) {
                 throw new BadRequestHttpException('Customer ID is required');
             }
-            $quote = $this->cartService->getCart(
-                $cartId ? (int) $cartId : null,
-                $maskedId,
-            );
+            $quote = CartRequest::load($cartId ? (int) $cartId : null, $maskedId);
             if (!$quote) {
                 throw new NotFoundHttpException('Cart not found');
             }
@@ -554,7 +551,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
             throw new AccessDeniedHttpException('Cannot assign a different customer to this cart');
         }
 
-        $quote = $this->cartService->mergeCarts($maskedId, $customerId);
+        $quote = $this->cartService->merge($maskedId, $customerId);
 
         return $this->cartMapper->mapQuoteToCart($quote);
     }

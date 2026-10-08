@@ -264,26 +264,28 @@ class ApiExceptionListener implements EventSubscriberInterface
             return new JsonResponse($data, $statusCode);
         }
 
-        if ($exception instanceof \Mage_Core_Exception_NoSuchEntity) {
-            return new JsonResponse(['error' => 'not_found', 'message' => $exception->getMessage(), 'code' => 404], 404);
-        }
-
         // Mage_Core_Exception is the canonical user-facing validation/business
         // rule signal in Maho models (Mage::throwException()). Treat it as a
-        // 422 Unprocessable Entity with the model's message instead of a 500.
+        // client error with the model's message instead of a 500.
         // The trust assumption is that callers of Mage::throwException() pass
-        // safe, translated messages, log every occurrence to api.log so
+        // safe, translated messages, log every 422 to api.log so
         // anomalous leaks (DB error fragments, internal IDs, file paths) can
         // be detected post-hoc by reviewing the channel.
         if ($exception instanceof \Mage_Core_Exception) {
-            $statusCode = 422;
-            \Mage::log(
-                'API 422 Mage_Core_Exception: ' . $exception->getMessage(),
-                \Mage::LOG_INFO,
-                'api.log',
-            );
+            $statusCode = self::mageExceptionStatus($exception);
+            if ($statusCode === 422) {
+                \Mage::log(
+                    'API 422 Mage_Core_Exception: ' . $exception->getMessage(),
+                    \Mage::LOG_INFO,
+                    'api.log',
+                );
+            }
             $data = [
-                'error' => 'unprocessable_entity',
+                'error' => match ($statusCode) {
+                    404 => 'not_found',
+                    409 => 'conflict',
+                    default => 'unprocessable_entity',
+                },
                 'message' => $exception->getMessage(),
                 'code' => $statusCode,
             ];
@@ -325,6 +327,18 @@ class ApiExceptionListener implements EventSubscriberInterface
         \Mage::logException($exception);
 
         return new JsonResponse($data, $statusCode);
+    }
+
+    /**
+     * Return the HTTP status of a Mage_Core_Exception. GraphQL uses the same status.
+     */
+    public static function mageExceptionStatus(\Mage_Core_Exception $exception): int
+    {
+        return match (true) {
+            $exception instanceof \Mage_Core_Exception_NoSuchEntity => 404,
+            $exception instanceof \Mage_Core_Exception_Conflict => 409,
+            default => 422,
+        };
     }
 
     /**

@@ -22,7 +22,7 @@ use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
  * Adapts API requests to the existing revocation domain logic.
  *
  * The customer submit path resolves and re-checks order ownership, then hands
- * off to Maho_Revocation_Model_Service::submit() with the authenticated-session
+ * off to Maho_Revocation_Service_Request::submit() with the authenticated-session
  * input keys so the recorded declaration is verified (verified = 1). The admin
  * patch path mirrors the backend save action (status + internal note).
  */
@@ -99,11 +99,7 @@ final class RevocationRequestProcessor extends Processor
             'session_order_id' => (int) $order->getId(),
         ]);
 
-        try {
-            $model = \Mage::getModel('revocation/service')->submit($input);
-        } catch (\Mage_Core_Exception $e) {
-            throw new UnprocessableEntityHttpException($e->getMessage());
-        }
+        $model = \Mage::getService('revocation/request')->submit($input);
 
         return RevocationRequest::fromModel($model);
     }
@@ -141,11 +137,7 @@ final class RevocationRequestProcessor extends Processor
         $dto = $data instanceof RevocationRequest ? $data : null;
 
         if ($dto?->processedStatus !== null && $dto->processedStatus !== '') {
-            try {
-                \Mage::getModel('revocation/service')->applyProcessedStatus($model, $dto->processedStatus);
-            } catch (\Mage_Core_Exception $e) {
-                throw new UnprocessableEntityHttpException($e->getMessage());
-            }
+            \Mage::getService('revocation/request')->applyProcessedStatus($model, $dto->processedStatus);
         }
 
         if ($dto?->adminNote !== null) {

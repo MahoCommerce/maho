@@ -16,7 +16,7 @@ class Maho_SocialLogin_Adminhtml_Sociallogin_CustomerController extends Mage_Adm
     public function unlinkAction(): void
     {
         $customerId = (int) $this->getRequest()->getPost('id');
-        $unlinked = Mage::getModel('sociallogin/service')->unlink(
+        $unlinked = Mage::getService('sociallogin/identity')->unlink(
             $customerId,
             (int) $this->getRequest()->getPost('identity_id'),
         );

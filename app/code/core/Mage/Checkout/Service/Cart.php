@@ -8,17 +8,12 @@
 
 declare(strict_types=1);
 
-namespace Mage\Checkout\Api;
-
-use Maho\ApiPlatform\Service\StoreContext;
 use Maho\ApiPlatform\Service\StoreDefaults;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
- * Cart Service - Business logic for cart operations.
+ * Creates and finds carts, changes their items, codes, addresses, shipping and payment, and merges them.
  */
-class CartService
+class Mage_Checkout_Service_Cart
 {
     private const MAX_ITEM_QTY = 10000;
 
@@ -28,55 +23,29 @@ class CartService
     /** additional_information key that holds the client payment data the API accepted. */
     public const PAYMENT_ADDITIONAL_DATA_KEY = 'api_additional_data';
 
-    public static function isValidMaskedId(mixed $maskedId): bool
+    public function isValidMaskedId(mixed $maskedId): bool
     {
         return is_string($maskedId) && preg_match('/^' . self::MASKED_ID_PATTERN . '$/i', $maskedId) === 1;
     }
 
     /**
-     * The masked cart id a /guest-carts/{id}/… path names, or null when the path
-     * has no such segment. The whole segment must match: on a partial match one
-     * malformed id would resolve to a cart the caller never wrote.
+     * Create an empty active cart in $storeId, for a customer or, when $customerId is null, for a guest.
+     * The masked id of the cart is in its masked_quote_id field.
      */
-    public static function maskedIdFromPath(string $path): ?string
+    public function create(?int $customerId, int $storeId): \Mage_Sales_Model_Quote
     {
-        if (!preg_match('#/guest-carts/([^/?]+)#', $path, $m)) {
-            return null;
+        // The store drives pricing and the website of gift cards and coupons, so it must be an active store view.
+        try {
+            $store = \Mage::app()->getStore($storeId);
+        } catch (\Throwable) {
+            $store = null;
         }
-        return self::isValidMaskedId($m[1]) ? $m[1] : null;
-    }
+        if (!$store || !$store->getId() || !$store->getIsActive()) {
+            throw new \Mage_Core_Exception("Invalid store: {$storeId}");
+        }
 
-    /**
-     * Create empty cart
-     *
-     * @param int|null $customerId Customer ID (null for guest)
-     * @param int|null $storeId Store ID
-     * @return array [quote, maskedId]
-     */
-    public function createEmptyCart(?int $customerId = null, ?int $storeId = null): array
-    {
         $quote = \Mage::getModel('sales/quote');
-
-        if ($storeId) {
-            // A client must not bind a cart to an arbitrary, disabled, or
-            // non-existent store: the store drives pricing and gift-card/coupon
-            // website scoping for the whole cart lifecycle.
-            try {
-                $store = \Mage::app()->getStore($storeId);
-            } catch (\Throwable) {
-                $store = null;
-            }
-            if (!$store || !$store->getId() || !$store->getIsActive()) {
-                throw new \Symfony\Component\HttpKernel\Exception\BadRequestHttpException("Invalid store: {$storeId}");
-            }
-            $quote->setStoreId((int) $store->getId());
-        } else {
-            // Bind to the active API store context (?store= / X-Store-Code),
-            // falling back to the default store view; a cart must never live
-            // on the admin store (0).
-            $contextStoreId = StoreContext::getStoreId();
-            $quote->setStoreId($contextStoreId ?: StoreContext::getDefaultStoreId());
-        }
+        $quote->setStoreId((int) $store->getId());
 
         if ($customerId) {
             $quote->setCustomerId($customerId);
@@ -86,34 +55,19 @@ class CartService
         }
 
         $quote->setIsActive();
-
-        // Generate and set masked ID (used by storefront to reference the cart)
-        $maskedId = $this->generateSecureMaskedId();
-        $quote->setData('masked_quote_id', $maskedId);
-
+        $quote->setData('masked_quote_id', $this->generateSecureMaskedId());
         $quote->save();
 
-        return ['quote' => $quote, 'maskedId' => $maskedId];
+        return $quote;
     }
 
     /**
-     * Get cart by ID or masked ID. Never collects totals: mutations recollect
+     * Get a cart by its id, in the scope of its own store. Never collects totals: mutations recollect
      * in their service methods, reads collect at the mapping boundary (CartMapper).
-     *
-     * @param int|null $cartId Cart ID
-     * @param string|null $maskedId Masked ID
      */
-    public function getCart(?int $cartId = null, ?string $maskedId = null): ?\Mage_Sales_Model_Quote
+    public function getById(int $cartId): ?\Mage_Sales_Model_Quote
     {
-        if ($maskedId) {
-            $cartId = $this->getCartIdFromMaskedId($maskedId);
-        }
-
-        if (!$cartId) {
-            return null;
-        }
-
-        // Load quote - use loadByIdWithoutStore to avoid store filtering issues in admin context
+        // loadByIdWithoutStore() also finds a cart of another store than the current one, for example from the admin
         /** @var \Mage_Sales_Model_Quote $quote */
         $quote = \Mage::getModel('sales/quote')->loadByIdWithoutStore($cartId);
 
@@ -121,28 +75,34 @@ class CartService
             return null;
         }
 
-        // Ensure quote is loaded with its store context (important when called from admin)
         if ($quote->getStoreId()) {
             $quote->setStore(\Mage::app()->getStore($quote->getStoreId()));
-            StoreContext::applyRequestedCurrencyToQuote($quote);
         }
 
         return $quote;
     }
 
     /**
-     * Get customer's active cart
-     *
-     * @param int $customerId Customer ID
+     * Get an active cart by its masked id.
      */
-    public function getCustomerCart(int $customerId): \Mage_Sales_Model_Quote
+    public function getByMaskedId(string $maskedId): ?\Mage_Sales_Model_Quote
     {
-        // Scope the lookup to the current API store. loadByCustomer() otherwise
+        $cartId = $this->getCartIdFromMaskedId($maskedId);
+
+        return $cartId ? $this->getById($cartId) : null;
+    }
+
+    /**
+     * Get the active cart of a customer in $storeId, and create it when the customer has none.
+     */
+    public function getForCustomer(int $customerId, int $storeId): \Mage_Sales_Model_Quote
+    {
+        // Scope the lookup to the store. loadByCustomer() otherwise
         // returns the most-recently-updated active quote across all stores, which
         // in a multi-store setup surfaces another store's cart (wrong prices,
         // currency and availability). Mirrors AuthTokenProcessor's grant path.
         $loadQuote = fn(): \Mage_Sales_Model_Quote => \Mage::getModel('sales/quote')
-            ->setSharedStoreIds([\Mage::app()->getStore()->getId()])
+            ->setSharedStoreIds([$storeId])
             ->loadByCustomer($customerId);
 
         $quote = $loadQuote();
@@ -152,73 +112,10 @@ class CartService
             // dropped on the next load. That's a rare, low-impact outcome (an
             // empty cart), so we don't serialize creation: the cost of a lock on
             // every cart bootstrap isn't worth guarding against it.
-            $quote = $this->createEmptyCart($customerId)['quote'];
+            $quote = $this->create($customerId, $storeId);
         }
 
         return $quote;
-    }
-
-    /**
-     * Resolve a cart from API request context.
-     * Handles both /carts/{id} (numeric) and /guest-carts/{maskedId} (hex) patterns.
-     *
-     * @return array{quote: \Mage_Sales_Model_Quote|null, accessedByMaskedId: bool, maskedId: string|null}
-     */
-    public function resolveCartFromRequest(
-        array $uriVariables,
-        array $context,
-    ): array {
-        $request = $context['request'] ?? null;
-        $args = $context['args']['input'] ?? $context['args'] ?? [];
-
-        // Bridge REST request body for Provider context (Processor does this later, but Provider runs first)
-        if (empty($args) && $request instanceof \Symfony\Component\HttpFoundation\Request) {
-            try {
-                $body = \Mage::helper('core')->jsonDecode($request->getContent() ?: '[]');
-            } catch (\JsonException) {
-                throw new \Symfony\Component\HttpKernel\Exception\BadRequestHttpException('Invalid JSON in request body');
-            }
-            if (is_array($body)) {
-                $args = $body;
-            }
-        }
-
-        // On a guest-carts route the path segment is the identifier, so it wins
-        // over a body maskedId: the caller and the lookup must never disagree
-        // about which cart a request names. A body maskedId applies only where
-        // there is no such segment (GraphQL, /carts). The path is read from the
-        // raw string because API Platform casts URI placeholders to Cart.id (int),
-        // which truncates a hex masked id.
-        $maskedId = null;
-        $isGuestCartRoute = false;
-        if ($request instanceof \Symfony\Component\HttpFoundation\Request) {
-            $isGuestCartRoute = str_contains($request->getPathInfo(), '/guest-carts/');
-            $maskedId = self::maskedIdFromPath($request->getPathInfo());
-        }
-        if (!$maskedId && !$isGuestCartRoute && is_string($args['maskedId'] ?? null)) {
-            $maskedId = $args['maskedId'];
-        }
-
-        // Last: cartId from GraphQL args or uriVariables. On the guest-carts
-        // route the {id} is a masked id, never a numeric quote id. If it wasn't a
-        // valid masked id above, the cart simply doesn't exist. Falling back to
-        // numeric loading there, from the body or from the URI, would resolve an
-        // unrelated quote and leak its existence (404 vs 401) to an enumerating
-        // caller.
-        $cartId = null;
-        if (!$isGuestCartRoute) {
-            $cartId = isset($args['cartId']) ? (int) $args['cartId'] : null;
-            if (!$cartId && !$maskedId && isset($uriVariables['id'])) {
-                $cartId = (int) $uriVariables['id'];
-            }
-        }
-
-        if (!$maskedId && !$cartId) {
-            return ['quote' => null, 'accessedByMaskedId' => false, 'maskedId' => null];
-        }
-
-        $quote = $this->getCart($cartId, $maskedId);
-        return ['quote' => $quote, 'accessedByMaskedId' => $maskedId !== null, 'maskedId' => $maskedId];
     }
 
     /**
@@ -226,9 +123,9 @@ class CartService
      * cart ids are enumerable ints, so a status that differs from the
      * missing-cart response would leak which ids exist.
      *
-     * @throws NotFoundHttpException
+     * @throws \Mage_Core_Exception_NoSuchEntity
      */
-    public function verifyCartAccess(
+    public function verifyAccess(
         \Mage_Sales_Model_Quote $quote,
         bool $accessedByMaskedId,
         ?int $authenticatedCustomerId,
@@ -244,7 +141,7 @@ class CartService
         // Customer-owned cart: verify ownership
         if ($cartCustomerId !== null) {
             if ($authenticatedCustomerId === null || $cartCustomerId !== $authenticatedCustomerId) {
-                throw new NotFoundHttpException('Cart not found');
+                throw new \Mage_Core_Exception_NoSuchEntity('Cart not found');
             }
             return;
         }
@@ -253,7 +150,7 @@ class CartService
         // path is enumerable, so even authenticated customers must not see
         // someone else's pre-login cart through it.
         if (!$accessedByMaskedId) {
-            throw new NotFoundHttpException('Cart not found');
+            throw new \Mage_Core_Exception_NoSuchEntity('Cart not found');
         }
     }
 
@@ -270,20 +167,20 @@ class CartService
     {
         // Validate quantity
         if ($qty <= 0) {
-            throw new BadRequestHttpException('Quantity must be greater than zero');
+            throw new \Mage_Core_Exception('Quantity must be greater than zero');
         }
         if ($qty > self::MAX_ITEM_QTY) {
-            throw new BadRequestHttpException('Quantity cannot exceed 10,000');
+            throw new \Mage_Core_Exception('Quantity cannot exceed 10,000');
         }
         if ($customPrice !== null && $customPrice < 0) {
-            throw new BadRequestHttpException('Custom price cannot be negative');
+            throw new \Mage_Core_Exception('Custom price cannot be negative');
         }
 
         // First find product ID by SKU
         $productId = \Mage::getResourceModel('catalog/product')->getIdBySku($sku);
 
         if (!$productId) {
-            throw new BadRequestHttpException("Product with SKU '{$sku}' not found");
+            throw new \Mage_Core_Exception("Product with SKU '{$sku}' not found");
         }
 
         $this->logDebug("Adding product {$sku} (ID: {$productId}) to quote {$quote->getId()}, quote store_id: {$quote->getStoreId()}");
@@ -294,13 +191,13 @@ class CartService
             ->load($productId);
 
         if (!$product->getId()) {
-            throw new BadRequestHttpException("Product with SKU '{$sku}' not found");
+            throw new \Mage_Core_Exception("Product with SKU '{$sku}' not found");
         }
 
         // Status gate, addProduct does not check this itself, so without an
         // explicit guard a disabled SKU is addable through the public API.
         if ((int) $product->getStatus() !== \Mage_Catalog_Model_Product_Status::STATUS_ENABLED) {
-            throw new BadRequestHttpException("Product '{$sku}' is not available");
+            throw new \Mage_Core_Exception("Product '{$sku}' is not available");
         }
 
         // Visibility gate: refuse 'not_visible_individually' simples that
@@ -311,7 +208,7 @@ class CartService
         if ($visibility === \Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE
             && $product->getTypeId() !== \Mage_Catalog_Model_Product_Type::TYPE_SIMPLE
         ) {
-            throw new BadRequestHttpException("Product '{$sku}' is not available");
+            throw new \Mage_Core_Exception("Product '{$sku}' is not available");
         }
 
         // Check if this simple product is a child of a configurable
@@ -380,7 +277,7 @@ class CartService
                     // product actually added to the cart is the configurable parent.
                     // A disabled parent with an enabled child must not be addable.
                     if ((int) $configurableProduct->getStatus() !== \Mage_Catalog_Model_Product_Status::STATUS_ENABLED) {
-                        throw new BadRequestHttpException("Product '{$sku}' is not available");
+                        throw new \Mage_Core_Exception("Product '{$sku}' is not available");
                     }
 
                     // Get the super_attribute values for this simple product
@@ -407,7 +304,7 @@ class CartService
         if ($product->getTypeId() === \Mage_Catalog_Model_Product_Type::TYPE_SIMPLE
             && (int) $product->getVisibility() === \Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE
         ) {
-            throw new BadRequestHttpException("Product '{$sku}' is not available");
+            throw new \Mage_Core_Exception("Product '{$sku}' is not available");
         }
 
         $this->logDebug("Product loaded: ID={$product->getId()}, StoreId={$product->getStoreId()}, Price={$product->getPrice()}, FinalPrice={$product->getFinalPrice()}");
@@ -445,10 +342,10 @@ class CartService
                 // Verify this option ID belongs to a file-type option on this product
                 $productOption = $product->getOptionById((string) $optionId);
                 if (!$productOption || $productOption->getType() !== \Mage_Catalog_Model_Product_Option::OPTION_TYPE_FILE) {
-                    throw new BadRequestHttpException("Option ID {$optionId} is not a valid file-type option for this product");
+                    throw new \Mage_Core_Exception("Option ID {$optionId} is not a valid file-type option for this product");
                 }
                 if (!is_array($fileData) || empty($fileData['base64_encoded_data']) || empty($fileData['name'])) {
-                    throw new BadRequestHttpException("File option {$optionId} requires 'name' and 'base64_encoded_data'");
+                    throw new \Mage_Core_Exception("File option {$optionId} requires 'name' and 'base64_encoded_data'");
                 }
                 $optionsFiles[$optionId] = $fileData;
             }
@@ -456,13 +353,13 @@ class CartService
                 $buyRequest->setData('options_files', $optionsFiles);
             }
         }
-        return self::inQuoteStoreScope($quote, function () use ($quote, $product, $buyRequest, $customPrice): \Mage_Sales_Model_Quote {
+        return $this->inQuoteStoreScope($quote, function () use ($quote, $product, $buyRequest, $customPrice): \Mage_Sales_Model_Quote {
             $result = $quote->addProduct($product, $buyRequest);
 
             // addProduct returns a string error message on failure
             if (is_string($result)) {
                 $this->logDebug("Failed to add product: {$result}");
-                throw new BadRequestHttpException("Failed to add product: {$result}");
+                throw new \Mage_Core_Exception("Failed to add product: {$result}");
             }
 
             if ($customPrice !== null) {
@@ -471,7 +368,7 @@ class CartService
                 // (compared at the column's DECIMAL(12,4) scale, so a re-add of the same value passes)
                 $existingOverride = $result->getOriginalCustomPrice();
                 if ($result->getId() && ($existingOverride === null || round((float) $existingOverride, 4) !== round($customPrice, 4))) {
-                    throw new BadRequestHttpException('customPrice would reprice units already in the cart; update the existing item instead');
+                    throw new \Mage_Core_Exception_Conflict('customPrice would reprice units already in the cart; update the existing item instead');
                 }
                 $result->setCustomPrice($customPrice);
                 $result->setOriginalCustomPrice($customPrice);
@@ -494,26 +391,26 @@ class CartService
     public function updateItem(\Mage_Sales_Model_Quote $quote, int $itemId, ?float $qty, ?float $customPrice = null): \Mage_Sales_Model_Quote
     {
         if ($customPrice !== null && $customPrice < 0) {
-            throw new BadRequestHttpException('Custom price cannot be negative');
+            throw new \Mage_Core_Exception('Custom price cannot be negative');
         }
 
         $item = $quote->getItemById($itemId);
 
         if (!$item) {
-            throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException("Cart item with ID '{$itemId}' not found");
+            throw new \Mage_Core_Exception_NoSuchEntity("Cart item with ID '{$itemId}' not found");
         }
 
         $qty ??= (float) $item->getQty();
 
         // Validate quantity
         if ($qty <= 0) {
-            throw new BadRequestHttpException('Quantity must be greater than zero');
+            throw new \Mage_Core_Exception('Quantity must be greater than zero');
         }
         if ($qty > self::MAX_ITEM_QTY) {
-            throw new BadRequestHttpException('Quantity cannot exceed 10,000');
+            throw new \Mage_Core_Exception('Quantity cannot exceed 10,000');
         }
 
-        return self::inQuoteStoreScope($quote, function () use ($quote, $item, $qty, $customPrice): \Mage_Sales_Model_Quote {
+        return $this->inQuoteStoreScope($quote, function () use ($quote, $item, $qty, $customPrice): \Mage_Sales_Model_Quote {
             $item->setQty($qty);
             if ($customPrice !== null) {
                 $item->setCustomPrice($customPrice);
@@ -537,10 +434,10 @@ class CartService
         // removeItem() is a silent no-op for an unknown ID, so guard explicitly
         // to return a 404 instead of a false-positive 200 (mirrors updateItem()).
         if (!$quote->getItemById($itemId)) {
-            throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException("Cart item with ID '{$itemId}' not found");
+            throw new \Mage_Core_Exception_NoSuchEntity("Cart item with ID '{$itemId}' not found");
         }
 
-        return self::inQuoteStoreScope($quote, function () use ($quote, $itemId): \Mage_Sales_Model_Quote {
+        return $this->inQuoteStoreScope($quote, function () use ($quote, $itemId): \Mage_Sales_Model_Quote {
             $quote->removeItem($itemId);
             $this->collectAndSave($quote);
 
@@ -560,29 +457,19 @@ class CartService
         /** @var \Mage_SalesRule_Model_Coupon $coupon */
         $coupon = \Mage::getModel('salesrule/coupon')->load($couponCode, 'code');
         if (!$coupon->getId()) {
-            throw new BadRequestHttpException(
-                "Coupon code '{$couponCode}' is not valid",
-                null,
-                0,
-                ['X-Api-Error-Code' => 'invalid_coupon'],
-            );
+            throw new \Mage_Core_Exception("Coupon code '{$couponCode}' is not valid");
         }
 
         $quote->setCouponCode($couponCode);
 
-        return self::inQuoteStoreScope($quote, function () use ($quote, $couponCode, $coupon): \Mage_Sales_Model_Quote {
+        return $this->inQuoteStoreScope($quote, function () use ($quote, $couponCode, $coupon): \Mage_Sales_Model_Quote {
             self::collectTotalsInCurrentScope($quote);
 
             // setCouponCode() keeps the string even when the rule does not fire
             // (inactive/expired/exhausted/wrong website), so confirm the rule id
             // landed on a quote address before persisting anything
             if ($quote->getCouponCode() !== $couponCode || !$this->isCouponRuleApplied($quote, (int) $coupon->getRuleId())) {
-                throw new BadRequestHttpException(
-                    "Coupon code '{$couponCode}' could not be applied",
-                    null,
-                    0,
-                    ['X-Api-Error-Code' => 'invalid_coupon'],
-                );
+                throw new \Mage_Core_Exception("Coupon code '{$couponCode}' could not be applied");
             }
 
             $quote->save();
@@ -627,18 +514,18 @@ class CartService
     /**
      * Apply gift card to cart
      *
-     * @throws \RuntimeException
+     * @throws \Mage_Core_Exception
      */
     public function applyGiftcard(\Mage_Sales_Model_Quote $quote, string $giftcardCode, ?float $amount = null): \Mage_Sales_Model_Quote
     {
         if (!$giftcardCode) {
-            throw new BadRequestHttpException('Gift card code is required');
+            throw new \Mage_Core_Exception('Gift card code is required');
         }
 
         // Check if cart has gift card products
         foreach ($quote->getAllItems() as $item) {
             if ($item->getProductType() === 'giftcard') {
-                throw new BadRequestHttpException('Gift cards cannot be used to purchase gift card products');
+                throw new \Mage_Core_Exception('Gift cards cannot be used to purchase gift card products');
             }
         }
 
@@ -646,26 +533,26 @@ class CartService
         $giftcard = \Mage::getModel('giftcard/giftcard')->loadByCode($giftcardCode);
 
         if (!$giftcard->getId()) {
-            throw new BadRequestHttpException('Gift card "' . $giftcardCode . '" is not valid');
+            throw new \Mage_Core_Exception('Gift card "' . $giftcardCode . '" is not valid');
         }
 
         if (!$giftcard->isValid()) {
             $status = $giftcard->getStatus();
             if ($status === 'pending') {
-                throw new BadRequestHttpException('Gift card "' . $giftcardCode . '" is pending activation');
+                throw new \Mage_Core_Exception('Gift card "' . $giftcardCode . '" is pending activation');
             }
             if ($status === 'expired') {
-                throw new BadRequestHttpException('Gift card "' . $giftcardCode . '" has expired');
+                throw new \Mage_Core_Exception('Gift card "' . $giftcardCode . '" has expired');
             }
             if ($status === 'used') {
-                throw new BadRequestHttpException('Gift card "' . $giftcardCode . '" has been fully used');
+                throw new \Mage_Core_Exception('Gift card "' . $giftcardCode . '" has been fully used');
             }
-            throw new BadRequestHttpException('Gift card "' . $giftcardCode . '" is not active');
+            throw new \Mage_Core_Exception('Gift card "' . $giftcardCode . '" is not active');
         }
 
         // Gift cards are scoped to the website that issued them
         if (!$giftcard->isValidForWebsite((int) $quote->getStore()->getWebsiteId())) {
-            throw new BadRequestHttpException('Gift card "' . $giftcardCode . '" is not valid for this store');
+            throw new \Mage_Core_Exception('Gift card "' . $giftcardCode . '" is not valid for this store');
         }
 
         // Get currently applied codes
@@ -674,7 +561,7 @@ class CartService
 
         // Check if already applied
         if (isset($appliedCodes[$giftcardCode])) {
-            throw new BadRequestHttpException('Gift card "' . $giftcardCode . '" is already applied');
+            throw new \Mage_Core_Exception_Conflict('Gift card "' . $giftcardCode . '" is already applied');
         }
 
         // giftcard_codes is a base-currency map: convert the requested amount back to base
@@ -701,7 +588,7 @@ class CartService
      * order at its original (now stale) balance and the store would eat the
      * difference.
      *
-     * @throws \RuntimeException when an applied card is no longer redeemable
+     * @throws \Mage_Core_Exception when an applied card is no longer redeemable
      */
     public function revalidateGiftcards(\Mage_Sales_Model_Quote $quote): \Mage_Sales_Model_Quote
     {
@@ -719,12 +606,12 @@ class CartService
         foreach ($applied as $code => $snapshotBalance) {
             $card = \Mage::getModel('giftcard/giftcard')->loadByCode((string) $code);
             if (!$card->getId() || !$card->isValidForWebsite($websiteId)) {
-                throw new BadRequestHttpException('Gift card "' . $code . '" is no longer valid');
+                throw new \Mage_Core_Exception('Gift card "' . $code . '" is no longer valid');
             }
 
             $live = (float) $card->getBalance($baseCurrency);
             if ($live <= 0) {
-                throw new BadRequestHttpException('Gift card "' . $code . '" has no remaining balance');
+                throw new \Mage_Core_Exception('Gift card "' . $code . '" has no remaining balance');
             }
 
             // Cap the applied amount at the live balance
@@ -745,12 +632,12 @@ class CartService
     /**
      * Remove gift card from cart
      *
-     * @throws \RuntimeException
+     * @throws \Mage_Core_Exception
      */
     public function removeGiftcard(\Mage_Sales_Model_Quote $quote, string $giftcardCode): \Mage_Sales_Model_Quote
     {
         if (!$giftcardCode) {
-            throw new BadRequestHttpException('Gift card code is required');
+            throw new \Mage_Core_Exception('Gift card code is required');
         }
 
         // Get currently applied codes
@@ -759,7 +646,7 @@ class CartService
 
         // Check if gift card is applied
         if (!isset($appliedCodes[$giftcardCode])) {
-            throw new BadRequestHttpException('Gift card "' . $giftcardCode . '" is not applied to this cart');
+            throw new \Mage_Core_Exception_NoSuchEntity('Gift card "' . $giftcardCode . '" is not applied to this cart');
         }
 
         // Remove the code
@@ -788,7 +675,7 @@ class CartService
      * gift_message_id is pointed at it. Requires the GiftMessage module and the
      * relevant store-config toggle to be enabled.
      *
-     * @throws \RuntimeException when gift messages are disabled for the target
+     * @throws \Mage_Core_Exception when gift messages are disabled for the target
      */
     public function setGiftMessage(
         \Mage_Sales_Model_Quote $quote,
@@ -798,14 +685,14 @@ class CartService
         string $message,
     ): \Mage_Sales_Model_Quote {
         if (!\Mage::helper('core')->isModuleEnabled('Mage_GiftMessage')) {
-            throw new BadRequestHttpException('Gift messages are not available');
+            throw new \Mage_Core_Exception('Gift messages are not available');
         }
 
         $entity = $this->resolveGiftMessageEntity($quote, $itemId);
         $helper = \Mage::helper('giftmessage/message');
         $type = $itemId === null ? 'quote' : 'item';
         if (!$helper->isMessagesAvailable($type, $entity, $quote->getStoreId())) {
-            throw new BadRequestHttpException('Gift messages are not available for this ' . ($itemId === null ? 'cart' : 'item'));
+            throw new \Mage_Core_Exception('Gift messages are not available for this ' . ($itemId === null ? 'cart' : 'item'));
         }
 
         if (trim($message) === '') {
@@ -856,7 +743,7 @@ class CartService
         }
         $item = $quote->getItemById($itemId);
         if (!$item || !$item->getId()) {
-            throw new NotFoundHttpException('Cart item not found');
+            throw new \Mage_Core_Exception_NoSuchEntity('Cart item not found');
         }
         return $item;
     }
@@ -870,7 +757,7 @@ class CartService
     {
         $errors = \Mage::getModel('sales/quote_address')->addData($addressData)->validate();
         if ($errors !== true) {
-            throw new BadRequestHttpException(implode(' ', $errors));
+            throw new \Mage_Core_Exception(implode(' ', $errors));
         }
     }
 
@@ -961,7 +848,7 @@ class CartService
         if ($sameAsShipping) {
             $shippingAddress = $quote->getShippingAddress();
             if (!$shippingAddress->getCountryId()) {
-                throw new BadRequestHttpException('Cart has no shipping address to copy');
+                throw new \Mage_Core_Exception_Conflict('Cart has no shipping address to copy');
             }
             $addressData = StoreDefaults::extractAddressFields($shippingAddress);
         }
@@ -983,7 +870,7 @@ class CartService
     {
         $shippingMethod = $carrierCode . '_' . $methodCode;
 
-        return self::inQuoteStoreScope($quote, function () use ($quote, $shippingMethod, $skipValidation): \Mage_Sales_Model_Quote {
+        return $this->inQuoteStoreScope($quote, function () use ($quote, $shippingMethod, $skipValidation): \Mage_Sales_Model_Quote {
             $address = $quote->getShippingAddress();
 
             // Same gate as OrderProcessor: a carrier error entry would price the shipment at 0
@@ -991,7 +878,7 @@ class CartService
                 $address->collectShippingRates();
                 $rate = $address->getShippingRateByCode($shippingMethod);
                 if (!$rate || $rate->getErrorMessage()) {
-                    throw new BadRequestHttpException('Shipping method is not available for this address');
+                    throw new \Mage_Core_Exception('Shipping method is not available for this address');
                 }
             }
 
@@ -1014,7 +901,7 @@ class CartService
         // Resolve the checks in the caller's scope, before entering the quote's store scope
         $checks = \Mage_Payment_Model_Method_Abstract::checksForCurrentScope();
 
-        return self::inQuoteStoreScope($quote, function () use ($quote, $methodCode, $additionalData, $checks): \Mage_Sales_Model_Quote {
+        return $this->inQuoteStoreScope($quote, function () use ($quote, $methodCode, $additionalData, $checks): \Mage_Sales_Model_Quote {
             $this->assertPaymentMethodAvailable($quote, $methodCode);
 
             // Suppress importData()'s recollect; collectAndSave() below runs the real pass
@@ -1030,17 +917,17 @@ class CartService
     /** Import sanitized client payment data onto the quote payment and keep the backup copy. */
     public function importPaymentData(\Mage_Sales_Model_Quote $quote, string $methodCode, ?array $additionalData, int $checks): void
     {
-        $paymentData = self::buildPaymentImportData($methodCode, $additionalData, $checks);
+        $paymentData = $this->buildPaymentImportData($methodCode, $additionalData, $checks);
         // Only a Mage_Core_Exception is the client's fault; anything else must surface as a 500
         try {
             $quote->getPayment()->importData($paymentData);
         } catch (\Mage_Core_Exception $e) {
-            throw new BadRequestHttpException('Payment method is not available: ' . $e->getMessage());
+            throw new \Mage_Core_Exception('Payment method is not available: ' . $e->getMessage());
         }
-        self::backupPaymentAdditionalData($quote->getPayment(), $paymentData);
+        $this->backupPaymentAdditionalData($quote->getPayment(), $paymentData);
     }
 
-    public static function buildPaymentImportData(string $methodCode, ?array $additionalData, int $checks): array
+    public function buildPaymentImportData(string $methodCode, ?array $additionalData, int $checks): array
     {
         // assignData() puts these flat keys straight onto the quote payment. The paypal_*
         // ids assert "already paid", and the storefront accepts one only after its replay
@@ -1074,7 +961,7 @@ class CartService
      * unless the method owns a column for it. Nesting keeps it away from assignData() and from
      * any top-level additional_information lookup.
      */
-    public static function backupPaymentAdditionalData(\Mage_Sales_Model_Quote_Payment $payment, array $paymentImportData): void
+    public function backupPaymentAdditionalData(\Mage_Sales_Model_Quote_Payment $payment, array $paymentImportData): void
     {
         $backup = array_diff_key($paymentImportData, array_flip(['method', 'checks']));
         if ($backup) {
@@ -1086,7 +973,7 @@ class CartService
     }
 
     /** buildPaymentImportData() strips every cc_* key, so a card method always fails validate(). */
-    public static function isMethodUsableOverApi(\Mage_Payment_Model_Method_Abstract $method): bool
+    public function isMethodUsableOverApi(\Mage_Payment_Model_Method_Abstract $method): bool
     {
         return !$method instanceof \Mage_Payment_Model_Method_Cc;
     }
@@ -1099,13 +986,13 @@ class CartService
     {
         $model = \Mage::helper('payment')->getPaymentMethods($quote->getStoreId())[$methodCode]['model'] ?? null;
         $method = $model ? \Mage::getModel($model) : null;
-        if (!$method instanceof \Mage_Payment_Model_Method_Abstract || !self::isMethodUsableOverApi($method)) {
-            throw new BadRequestHttpException('Payment method is not available for this cart');
+        if (!$method instanceof \Mage_Payment_Model_Method_Abstract || !$this->isMethodUsableOverApi($method)) {
+            throw new \Mage_Core_Exception('Payment method is not available for this cart');
         }
 
         $method->setStore($quote->getStoreId());
         if (!$method->isAvailable($quote)) {
-            throw new BadRequestHttpException('Payment method is not available for this cart');
+            throw new \Mage_Core_Exception('Payment method is not available for this cart');
         }
     }
 
@@ -1180,11 +1067,11 @@ class CartService
      * @param int $customerId Customer ID
      * @return \Mage_Sales_Model_Quote Customer cart with merged items
      */
-    public function mergeCarts(string $guestMaskedId, int $customerId): \Mage_Sales_Model_Quote
+    public function merge(string $guestMaskedId, int $customerId): \Mage_Sales_Model_Quote
     {
         $guestCartId = $this->getCartIdFromMaskedId($guestMaskedId);
         if (!$guestCartId) {
-            throw new NotFoundHttpException('Guest cart not found');
+            throw new \Mage_Core_Exception_NoSuchEntity('Guest cart not found');
         }
         // Use loadByIdWithoutStore, admin context may sit on a different store
         // than the guest cart, and store-scoped load() would return an empty
@@ -1192,7 +1079,7 @@ class CartService
         $guestCart = \Mage::getModel('sales/quote')->loadByIdWithoutStore($guestCartId);
 
         if (!$guestCart->getId()) {
-            throw new NotFoundHttpException('Guest cart not found');
+            throw new \Mage_Core_Exception_NoSuchEntity('Guest cart not found');
         }
 
         // Reject any masked ID that resolves to a cart owned by a different
@@ -1201,16 +1088,16 @@ class CartService
         // previous guard let slip through and allowed to be absorbed.
         $sourceCustomerId = $guestCart->getCustomerId();
         if ($sourceCustomerId && (int) $sourceCustomerId !== $customerId) {
-            throw new NotFoundHttpException('Guest cart not found');
+            throw new \Mage_Core_Exception_NoSuchEntity('Guest cart not found');
         }
 
-        // getCustomerCart() scopes its lookup to the ambient store. An admin-scoped
+        // The merge uses the customer cart of the current store. An admin-scoped
         // caller must not land the merge in an admin-store cart (repricing the
         // items), so it merges in the guest cart's store. A storefront caller keeps
         // its own scope: its later customer-cart lookups are ambient-scoped, and a
         // merge pinned to another store view would leave the merged cart invisible.
         $merge = function () use ($guestCart, $customerId): \Mage_Sales_Model_Quote {
-            $customerCart = $this->getCustomerCart($customerId);
+            $customerCart = $this->getForCustomer($customerId, (int) \Mage::app()->getStore()->getId());
             $customerCart->merge($guestCart);
 
             // Import customer default addresses onto the cart so shipping quotes work
@@ -1238,7 +1125,7 @@ class CartService
             return $customerCart;
         };
         $customerCart = \Mage::app()->getStore()->isAdmin()
-            ? self::inQuoteStoreScope($guestCart, $merge)
+            ? $this->inQuoteStoreScope($guestCart, $merge)
             : $merge();
 
         // Deactivate guest cart
@@ -1270,7 +1157,7 @@ class CartService
     private function getCartIdFromMaskedId(string $maskedId): ?int
     {
         // Only accept secure 32-char hex format
-        if (!self::isValidMaskedId($maskedId)) {
+        if (!$this->isValidMaskedId($maskedId)) {
             return null;
         }
 
@@ -1336,9 +1223,9 @@ class CartService
      * Recollect totals in the quote's store scope, after priming the quote
      * addresses and clearing their cached item lists.
      */
-    public static function collectAndVerifyTotals(\Mage_Sales_Model_Quote $quote): void
+    public function collectAndVerifyTotals(\Mage_Sales_Model_Quote $quote): void
     {
-        self::inQuoteStoreScope($quote, fn() => self::collectTotalsInCurrentScope($quote));
+        $this->inQuoteStoreScope($quote, fn() => self::collectTotalsInCurrentScope($quote));
     }
 
     /**
@@ -1378,7 +1265,7 @@ class CartService
      */
     public function collectAndSave(\Mage_Sales_Model_Quote $quote): void
     {
-        self::inQuoteStoreScope($quote, function () use ($quote): void {
+        $this->inQuoteStoreScope($quote, function () use ($quote): void {
             self::collectTotalsInCurrentScope($quote);
             $quote->save();
         });
@@ -1388,13 +1275,13 @@ class CartService
      * Run $callback in the quote's store scope, then restore the caller's:
      * a leaked switch sent admin MOTO orders as storefront 3DS sales (issue #1337).
      */
-    public static function inQuoteStoreScope(\Mage_Sales_Model_Quote $quote, \Closure $callback): mixed
+    public function inQuoteStoreScope(\Mage_Sales_Model_Quote $quote, \Closure $callback): mixed
     {
         if (!$quote->getStoreId()) {
             return $callback();
         }
 
-        return StoreContext::withStore((int) $quote->getStoreId(), $callback);
+        return \Mage::app()->withStore((int) $quote->getStoreId(), $callback);
     }
 
     /**
