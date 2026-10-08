@@ -18,6 +18,7 @@ use Maho\Ai\Api\Agent\McpToolCatalog;
 use Maho\Ai\Api\Agent\McpToolbox;
 use Maho_Ai_Model_Chat_ClientGone;
 use Maho_Ai_Model_Chat_RecordingSseWriter;
+use Maho_Ai_Model_Chat_RepeatedDraft;
 use Maho_Ai_Model_Chat_ConfirmationRequired;
 use Maho_Ai_Model_Chat_MessageBagBuilder;
 use Maho_Ai_Model_Chat_SseWriter;
@@ -313,8 +314,10 @@ final class Assistant
                 }
             }
             $metadata = [];
+            $streamed = $text;
+            $text = Maho_Ai_Model_Chat_RepeatedDraft::remove($text);
             $clean = $this->toolbox->linkRecords(\Mage::getSingleton('ai/safety_outputSanitizer')->sanitize($text, false, $metadata));
-            if ($clean !== $text) {
+            if ($clean !== $streamed) {
                 $sse->event('replace', ['text' => $clean]);
             }
             [$in, $out] = $this->tokenUsage($execution->getMetadata()->all());
