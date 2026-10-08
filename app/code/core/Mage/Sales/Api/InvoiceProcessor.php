@@ -46,10 +46,6 @@ final class InvoiceProcessor extends \Maho\ApiPlatform\Processor
     private function createInvoice(array $uriVariables, array $context): Invoice
     {
         $orderId = (int) ($uriVariables['orderId'] ?? 0);
-        if (!$orderId) {
-            throw new UnprocessableEntityHttpException('Order ID is required');
-        }
-
         $args = $context['args']['input'] ?? [];
         $captureCase = $args['capture'] ?? null;
         if ($captureCase !== null && !in_array($captureCase, self::CAPTURE_CASES, true)) {
@@ -170,10 +166,6 @@ final class InvoiceProcessor extends \Maho\ApiPlatform\Processor
     private function executeLifecycleAction(string $action, array $uriVariables): Invoice
     {
         $invoiceId = (int) ($uriVariables['id'] ?? 0);
-        if (!$invoiceId) {
-            throw new UnprocessableEntityHttpException('Invoice ID is required');
-        }
-
         $invoice = \Mage::getModel('sales/order_invoice')->load($invoiceId);
         if (!$invoice->getId()) {
             throw new NotFoundHttpException('Invoice not found');

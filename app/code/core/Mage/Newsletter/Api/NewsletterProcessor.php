@@ -107,7 +107,7 @@ final class NewsletterProcessor extends \Maho\ApiPlatform\Processor
         if ($customerId === null) {
             $allowGuest = \Mage::getStoreConfigFlag(\Mage_Newsletter_Model_Subscriber::XML_PATH_ALLOW_GUEST_SUBSCRIBE_FLAG);
             if (!$allowGuest) {
-                throw new AccessDeniedHttpException('Guest subscription is not allowed. Please login first.');
+                throw new AccessDeniedHttpException('Guest subscription is not allowed. Please login first.', null, 0, ['X-Api-Error-Code' => 'forbidden']);
             }
         }
 

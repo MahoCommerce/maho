@@ -65,6 +65,9 @@ final class ImageUpload
         }
 
         $fileName = basename(str_replace('\\', '/', $fileName));
+        if (strlen($fileName) > 200) {
+            throw new UnprocessableEntityHttpException(\Mage::helper('core')->__('File name is too long. Maximum length is %s.', 200));
+        }
         $extension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
         if (!in_array($extension, $allowedExtensions, true)) {
             throw new UnprocessableEntityHttpException('The filename extension must be one of: ' . implode(', ', $allowedExtensions));

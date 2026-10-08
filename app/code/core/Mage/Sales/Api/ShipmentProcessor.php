@@ -147,9 +147,6 @@ final class ShipmentProcessor extends \Maho\ApiPlatform\Processor
     private function createShipmentFromRest(array $uriVariables, array $context): Shipment
     {
         $orderId = (int) ($uriVariables['orderId'] ?? 0);
-        if (!$orderId) {
-            throw new UnprocessableEntityHttpException('Order ID is required');
-        }
 
         $body = $context['request']?->toArray() ?? [];
 
