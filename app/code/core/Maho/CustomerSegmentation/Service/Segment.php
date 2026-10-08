@@ -28,6 +28,8 @@ class Maho_CustomerSegmentation_Service_Segment
             ->setWebsiteIds([])
             ->setCustomerGroupIds([])
             ->setRefreshMode(Maho_CustomerSegmentation_Model_Segment::MODE_AUTO)
+            ->setRefreshStatus(Maho_CustomerSegmentation_Model_Segment::STATUS_PENDING)
+            ->setMatchedCustomersCount(0)
             ->setPriority(0)
             ->setAutoEmailActive(false)
             ->setAllowOverlappingSequences(false);
@@ -75,12 +77,15 @@ class Maho_CustomerSegmentation_Service_Segment
             $errors->addError('website_ids', $helper->__('Please select at least one website.'));
         }
         $knownWebsiteIds = array_map(intval(...), array_keys(Mage::app()->getWebsites()));
-        foreach (array_diff($websiteIds, $knownWebsiteIds) as $id) {
+        // A website or a group that was deleted after the last save stays valid in the stored list
+        $storedWebsiteIds = $segment::idList($segment->getOrigData('website_ids'));
+        foreach (array_diff($websiteIds, $knownWebsiteIds, $storedWebsiteIds) as $id) {
             $errors->addError('website_ids', $helper->__('Unknown website ID: %s.', $id));
         }
 
         $knownGroupIds = array_map(intval(...), Mage::getResourceModel('customer/group_collection')->getAllIds());
-        foreach (array_diff($segment->getCustomerGroupIds(), $knownGroupIds) as $id) {
+        $storedGroupIds = $segment::idList($segment->getOrigData('customer_group_ids'));
+        foreach (array_diff($segment->getCustomerGroupIds(), $knownGroupIds, $storedGroupIds) as $id) {
             $errors->addError('customer_group_ids', $helper->__('Unknown customer group ID: %s.', $id));
         }
 

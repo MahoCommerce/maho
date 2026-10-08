@@ -89,7 +89,7 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
      *
      * @return list<int>
      */
-    private static function idList(mixed $value): array
+    public static function idList(mixed $value): array
     {
         if (is_string($value)) {
             $value = explode(',', $value);

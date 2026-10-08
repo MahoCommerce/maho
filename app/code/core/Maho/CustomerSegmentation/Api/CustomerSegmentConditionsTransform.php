@@ -15,18 +15,29 @@ namespace Maho\CustomerSegmentation\Api;
 use Maho\ApiPlatform\Trait\AuthenticationTrait;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\ObjectMapper\TransformCallableInterface;
+use Symfony\Contracts\Service\ResetInterface;
 
 /**
  * @implements TransformCallableInterface<object, object>
  */
-final class CustomerSegmentConditionsTransform implements TransformCallableInterface
+final class CustomerSegmentConditionsTransform implements TransformCallableInterface, ResetInterface
 {
     use AuthenticationTrait;
     use ConditionMetadataTrait;
 
+    private ?string $locale = null;
+    private ?array $document = null;
+
     public function __construct(Security $security)
     {
         $this->security = $security;
+    }
+
+    #[\Override]
+    public function reset(): void
+    {
+        $this->locale = null;
+        $this->document = null;
     }
 
     /**
@@ -38,8 +49,8 @@ final class CustomerSegmentConditionsTransform implements TransformCallableInter
     #[\Override]
     public function __invoke(mixed $value, object $source, ?object $target): mixed
     {
-        $locale = $this->adminLocale();
-        $document = $this->conditionMetadata($locale);
+        $locale = $this->locale ??= $this->adminLocale();
+        $document = $this->document ??= $this->conditionMetadata($locale);
         $writer = new \Mage_Rule_Model_Condition_TreeWriter($document);
 
         if ($source instanceof \Maho_CustomerSegmentation_Model_Segment) {
@@ -51,9 +62,15 @@ final class CustomerSegmentConditionsTransform implements TransformCallableInter
         }
 
         return \Mage_Rule_Model_Condition_Metadata::runInLocale($locale, function () use ($value, $target, $document, $writer): mixed {
+            $stored = $target->getId() ? $writer->readTree($target, 'conditions') : null;
+            // A delete or a refresh sends the stored tree back, and the admin form can store a tree that the validator refuses
+            if ($stored !== null && $value === $stored) {
+                return $target->getConditions();
+            }
+
             $validator = new \Mage_Rule_Model_Condition_TreeValidator($this->conditionMetadataModel(), $document);
             $tree = $value ?? ['type' => CustomerSegment::ROOT_CONDITIONS, 'aggregator' => 'all', 'value' => true, 'conditions' => []];
-            $result = $validator->validate('conditions', $tree, $target->getId() ? $writer->readTree($target, 'conditions') : null);
+            $result = $validator->validate('conditions', $tree, $stored);
 
             $errors = new \Mage_Core_Exception_Input();
             foreach ($result['errors'] as $error) {
