@@ -14,10 +14,10 @@ namespace Mage\Catalog\Api;
 
 use ApiPlatform\Metadata\DeleteOperationInterface;
 use ApiPlatform\Metadata\Operation;
-use Maho\ApiPlatform\Exception\ValidationException;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
+use Symfony\Component\Serializer\Exception\ExtraAttributesException;
 
 final class ProductAttributeProcessor extends \Maho\ApiPlatform\Processor
 {
@@ -64,14 +64,14 @@ final class ProductAttributeProcessor extends \Maho\ApiPlatform\Processor
      */
     private const SYSTEM_LOCKED_FIELDS = ['isUnique'];
 
-    /** @var list<array{field: string, message: string}> */
-    private array $errors = [];
+    private \Mage_Core_Exception_Input $errors;
 
     public function __construct(
         Security $security,
         private readonly ProductAttributeProvider $provider,
     ) {
         parent::__construct($security);
+        $this->errors = new \Mage_Core_Exception_Input();
     }
 
     #[\Override]
@@ -105,7 +105,7 @@ final class ProductAttributeProcessor extends \Maho\ApiPlatform\Processor
      */
     private function create(array $body): ProductAttribute
     {
-        $this->errors = [];
+        $this->errors = new \Mage_Core_Exception_Input();
         $this->rejectUnknownFields($body);
 
         /** @var \Mage_Catalog_Model_Resource_Eav_Attribute $attribute */
@@ -148,7 +148,7 @@ final class ProductAttributeProcessor extends \Maho\ApiPlatform\Processor
         ]);
 
         $this->applyFields($attribute, $body, true);
-        $this->throwErrors();
+        $this->errors->throwIfErrors();
 
         $this->safeSave($attribute, 'create product attribute');
         \Mage::app()->cleanCache([\Mage_Core_Model_Translate::CACHE_TAG]);
@@ -165,7 +165,7 @@ final class ProductAttributeProcessor extends \Maho\ApiPlatform\Processor
         $attribute = $this->loadAttribute($id);
         $oldData = $attribute->getData();
 
-        $this->errors = [];
+        $this->errors = new \Mage_Core_Exception_Input();
         $this->rejectUnknownFields($body);
 
         if (array_key_exists('attributeCode', $body) && $body['attributeCode'] !== $attribute->getAttributeCode()) {
@@ -184,7 +184,7 @@ final class ProductAttributeProcessor extends \Maho\ApiPlatform\Processor
         }
 
         $this->applyFields($attribute, $body, false);
-        $this->throwErrors();
+        $this->errors->throwIfErrors();
 
         $this->safeSave($attribute, 'update product attribute');
         \Mage::app()->cleanCache([\Mage_Core_Model_Translate::CACHE_TAG]);
@@ -346,7 +346,7 @@ final class ProductAttributeProcessor extends \Maho\ApiPlatform\Processor
         $options = $this->loadOptions($id);
         $defaults = $this->defaultOptionIds($attribute);
 
-        $this->errors = [];
+        $this->errors = new \Mage_Core_Exception_Input();
         $this->rejectUnknownOptionFields($body);
         if (!array_key_exists('label', $body)) {
             $this->addError('label', 'label is required');
@@ -357,7 +357,7 @@ final class ProductAttributeProcessor extends \Maho\ApiPlatform\Processor
             $maxOrder = max($maxOrder, $option['order']);
         }
         [$options['option_new'], $defaults] = $this->applyOptionFields(['order' => $maxOrder + 1, 'labels' => []], $defaults, 'option_new', $body, $attribute);
-        $this->throwErrors();
+        $this->errors->throwIfErrors();
 
         $oldData = $attribute->getData();
         $this->saveOptions($attribute, $options, $defaults, []);
@@ -378,10 +378,10 @@ final class ProductAttributeProcessor extends \Maho\ApiPlatform\Processor
         }
         $defaults = $this->defaultOptionIds($attribute);
 
-        $this->errors = [];
+        $this->errors = new \Mage_Core_Exception_Input();
         $this->rejectUnknownOptionFields($body);
         [$options[$optionId], $defaults] = $this->applyOptionFields($options[$optionId], $defaults, $optionId, $body, $attribute);
-        $this->throwErrors();
+        $this->errors->throwIfErrors();
 
         $oldData = $attribute->getData();
         $this->saveOptions($attribute, $options, $defaults, []);
@@ -583,13 +583,9 @@ final class ProductAttributeProcessor extends \Maho\ApiPlatform\Processor
      */
     private function rejectUnknownFields(array $body): void
     {
-        foreach (array_keys($body) as $key) {
-            if (!in_array($key, self::WRITABLE_FIELDS, true)
-                && !array_key_exists($key, self::BOOLEAN_FIELDS)
-                && !in_array($key, self::READ_ONLY_FIELDS, true)
-            ) {
-                $this->addError((string) $key, 'Unknown field');
-            }
+        $unknown = array_diff(array_keys($body), self::WRITABLE_FIELDS, array_keys(self::BOOLEAN_FIELDS), self::READ_ONLY_FIELDS);
+        if ($unknown !== []) {
+            throw new ExtraAttributesException(array_map(strval(...), array_values($unknown)));
         }
     }
 
@@ -598,10 +594,9 @@ final class ProductAttributeProcessor extends \Maho\ApiPlatform\Processor
      */
     private function rejectUnknownOptionFields(array $body): void
     {
-        foreach (array_keys($body) as $key) {
-            if (!in_array($key, ['label', 'sortOrder', 'isDefault', 'storeLabels'], true)) {
-                $this->addError((string) $key, 'Unknown field');
-            }
+        $unknown = array_diff(array_keys($body), ['label', 'sortOrder', 'isDefault', 'storeLabels']);
+        if ($unknown !== []) {
+            throw new ExtraAttributesException(array_map(strval(...), array_values($unknown)));
         }
     }
 
@@ -616,15 +611,7 @@ final class ProductAttributeProcessor extends \Maho\ApiPlatform\Processor
 
     private function addError(string $field, string $message): void
     {
-        $this->errors[] = ['field' => $field, 'message' => $message];
+        $this->errors->addError($field, $message);
     }
 
-    private function throwErrors(): void
-    {
-        if ($this->errors === []) {
-            return;
-        }
-        $first = $this->errors[0];
-        throw new ValidationException($first['message'], $first['field'], 'Invalid', ['errors' => $this->errors]);
-    }
 }

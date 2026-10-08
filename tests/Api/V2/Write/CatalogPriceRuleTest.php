@@ -145,8 +145,8 @@ describe('Catalog price rule fields', function (): void {
             ->and($create['json']['simpleAction'])->toBe('by_percent');
 
         $missing = apiPost(CATR_PATH, ['description' => 'x'], adminToken());
-        expect($missing['status'])->toBe(400)
-            ->and($missing['json']['error'])->toBe('validation_error')
+        expect($missing['status'])->toBe(422)
+            ->and($missing['json']['error'])->toBe('unprocessable_entity')
             ->and(catrFields($missing))->toBe(['name', 'websiteIds', 'customerGroupIds']);
 
         $wrong = catrCreate([
@@ -156,13 +156,16 @@ describe('Catalog price rule fields', function (): void {
             'simpleAction' => 'cart_fixed',
             'discountAmount' => -5,
             'customerGroupIds' => [999999],
-            'unknownField' => 1,
         ]);
-        expect($wrong['status'])->toBe(400)
-            ->and(catrFields($wrong))->toEqualCanonicalizing(['unknownField', 'isActive', 'sortOrder', 'customerGroupIds', 'fromDate', 'simpleAction', 'discountAmount']);
+        expect($wrong['status'])->toBe(422)
+            ->and(catrFields($wrong))->toEqualCanonicalizing(['isActive', 'sortOrder', 'customerGroupIds', 'fromDate', 'simpleAction', 'discountAmount']);
+
+        $unknown = catrCreate(['unknownField' => 1, 'isActive' => 'yes']);
+        expect($unknown['status'])->toBe(400)
+            ->and(catrFields($unknown))->toBe(['unknownField']);
 
         $percent = catrCreate(['simpleAction' => 'by_percent', 'discountAmount' => 101]);
-        expect($percent['status'])->toBe(400)
+        expect($percent['status'])->toBe(422)
             ->and(catrFields($percent))->toBe(['discountAmount']);
     });
 
@@ -198,11 +201,11 @@ describe('Catalog price rule fields', function (): void {
             'value' => true,
             'conditions' => [['type' => 'catalogrule/rule_condition_product', 'attribute' => 'no_such_attribute', 'operator' => '==', 'value' => '1']],
         ]], $token);
-        expect($unknownAttribute['status'])->toBe(400)
+        expect($unknownAttribute['status'])->toBe(422)
             ->and(catrFields($unknownAttribute))->toBe(['conditions.conditions[0].attribute']);
 
         $wrong = apiPut(CATR_PATH . "/{$id}", ['conditions' => ['type' => 'salesrule/rule_condition_combine']], $token);
-        expect($wrong['status'])->toBe(400)
+        expect($wrong['status'])->toBe(422)
             ->and(catrFields($wrong)[0] ?? '')->toStartWith('conditions');
 
         $reset = apiPut(CATR_PATH . "/{$id}", ['conditions' => null], $token);

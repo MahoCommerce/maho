@@ -19,6 +19,7 @@ use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
+use Symfony\Component\Serializer\Exception\ExtraAttributesException;
 
 final class CatalogPriceRuleProcessor extends \Maho\ApiPlatform\Processor
 {
@@ -44,14 +45,14 @@ final class CatalogPriceRuleProcessor extends \Maho\ApiPlatform\Processor
 
     private const PERCENT_ACTIONS = ['by_percent', 'to_percent'];
 
-    /** @var list<array{field: string, message: string}> */
-    private array $errors = [];
+    private \Mage_Core_Exception_Input $errors;
 
     public function __construct(
         Security $security,
         private readonly CatalogPriceRuleProvider $provider,
     ) {
         parent::__construct($security);
+        $this->errors = new \Mage_Core_Exception_Input();
     }
 
     #[\Override]
@@ -95,7 +96,7 @@ final class CatalogPriceRuleProcessor extends \Maho\ApiPlatform\Processor
         $rule->setData('sub_simple_action');
         $rule->setData('sub_discount_amount', 0);
 
-        $this->errors = [];
+        $this->errors = new \Mage_Core_Exception_Input();
         foreach (['name', 'websiteIds', 'customerGroupIds'] as $field) {
             if (!array_key_exists($field, $body)) {
                 $this->addError($field, "{$field} is required");
@@ -103,7 +104,7 @@ final class CatalogPriceRuleProcessor extends \Maho\ApiPlatform\Processor
         }
         $this->applyFields($rule, $body);
         $this->applyTree($rule, $body, $locale, true);
-        $this->throwErrors();
+        $this->errors->throwIfErrors();
 
         $this->safeSave($rule, 'create catalog price rule');
         $this->markRulesDirty();
@@ -120,10 +121,10 @@ final class CatalogPriceRuleProcessor extends \Maho\ApiPlatform\Processor
         $rule = $this->loadWritableRule($id, $user);
         $oldData = $rule->getData();
 
-        $this->errors = [];
+        $this->errors = new \Mage_Core_Exception_Input();
         $this->applyFields($rule, $body);
         $this->applyTree($rule, $body, $locale, false);
-        $this->throwErrors();
+        $this->errors->throwIfErrors();
 
         $this->safeSave($rule, 'update catalog price rule');
         $this->markRulesDirty();
@@ -180,10 +181,9 @@ final class CatalogPriceRuleProcessor extends \Maho\ApiPlatform\Processor
      */
     private function applyFields(\Mage_CatalogRule_Model_Rule $rule, array $body): void
     {
-        foreach (array_keys($body) as $key) {
-            if (!in_array($key, self::WRITABLE_FIELDS, true) && !in_array($key, self::READ_ONLY_FIELDS, true)) {
-                $this->addError((string) $key, 'Unknown field');
-            }
+        $unknown = array_diff(array_keys($body), self::WRITABLE_FIELDS, self::READ_ONLY_FIELDS);
+        if ($unknown !== []) {
+            throw new ExtraAttributesException(array_map(strval(...), array_values($unknown)));
         }
 
         if (array_key_exists('name', $body)) {
@@ -309,7 +309,7 @@ final class CatalogPriceRuleProcessor extends \Maho\ApiPlatform\Processor
             $this->addError($error['field'], $error['message']);
         }
 
-        if ($this->errors === [] && $result['tree'] !== null) {
+        if ($this->errors->getErrors() === [] && $result['tree'] !== null) {
             $writer->replaceTree($rule, 'conditions', $result['tree']);
         }
     }
@@ -345,15 +345,7 @@ final class CatalogPriceRuleProcessor extends \Maho\ApiPlatform\Processor
 
     private function addError(string $field, string $message): void
     {
-        $this->errors[] = ['field' => $field, 'message' => $message];
+        $this->errors->addError($field, $message);
     }
 
-    private function throwErrors(): void
-    {
-        if ($this->errors === []) {
-            return;
-        }
-        $first = $this->errors[0];
-        throw new ValidationException($first['message'], $first['field'], 'Invalid', ['errors' => $this->errors]);
-    }
 }

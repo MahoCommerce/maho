@@ -112,7 +112,7 @@ describe('Attribute set lifecycle', function (): void {
             ->and($create['json']['groups'][0])->toHaveKeys(['id', 'name', 'sortOrder', 'attributes']);
 
         $duplicate = apiPost(ASET_PATH, ['name' => $create['json']['attributeSetName']], $token);
-        expect($duplicate['status'])->toBe(400)
+        expect($duplicate['status'])->toBe(422)
             ->and(asetFields($duplicate))->toBe(['name']);
 
         $rename = apiPut(ASET_PATH . "/{$id}", ['name' => 'Pest renamed ' . substr(uniqid(), -6)], $token);
@@ -126,11 +126,11 @@ describe('Attribute set lifecycle', function (): void {
 
     it('rejects a missing name and an unknown skeleton', function (): void {
         $missing = apiPost(ASET_PATH, [], adminToken());
-        expect($missing['status'])->toBe(400)
+        expect($missing['status'])->toBe(422)
             ->and(asetFields($missing))->toBe(['name']);
 
         $unknown = asetCreate(['skeletonId' => 999999999]);
-        expect($unknown['status'])->toBe(400)
+        expect($unknown['status'])->toBe(422)
             ->and(asetFields($unknown))->toBe(['skeletonId']);
     });
 
@@ -156,7 +156,7 @@ describe('Attribute set groups and attributes', function (): void {
         $groupId = (int) $groups['Pest group']['id'];
 
         $again = apiPost(ASET_PATH . "/{$setId}/groups", ['name' => 'Pest group'], $token);
-        expect($again['status'])->toBe(400)
+        expect($again['status'])->toBe(422)
             ->and(asetFields($again))->toBe(['name']);
 
         $assign = apiPost(ASET_PATH . "/{$setId}/attributes", ['attributeCode' => $attribute['attributeCode'], 'groupName' => 'Pest group'], $token);
@@ -174,7 +174,7 @@ describe('Attribute set groups and attributes', function (): void {
             ->and(array_column($byName[$create['json']['groups'][0]['name']]['attributes'], 'code'))->toContain($attribute['attributeCode']);
 
         $wrong = apiPost(ASET_PATH . "/{$setId}/attributes", ['attributeCode' => 'no_such_attribute', 'groupId' => 999999999], $token);
-        expect($wrong['status'])->toBe(400)
+        expect($wrong['status'])->toBe(422)
             ->and(asetFields($wrong))->toBe(['attributeCode', 'groupId']);
 
         expect(apiDelete(ASET_PATH . "/{$setId}/attributes/{$attribute['id']}", $token)['status'])->toBe(204);

@@ -144,7 +144,7 @@ describe('Product attribute lifecycle', function (): void {
 
         // The code and the input type are fixed after creation
         $fixed = apiPut(PATTR_PATH . "/{$id}", ['attributeCode' => 'other_code', 'frontendInput' => 'select'], $token);
-        expect($fixed['status'])->toBe(400)
+        expect($fixed['status'])->toBe(422)
             ->and(pattrFields($fixed))->toBe(['attributeCode', 'frontendInput']);
 
         $denied = apiDelete(PATTR_PATH . "/{$id}", serviceToken(['product-attributes/write']));
@@ -165,8 +165,8 @@ describe('Product attribute lifecycle', function (): void {
 
     it('lists every wrong field in one answer', function (): void {
         $missing = apiPost(PATTR_PATH, [], adminToken());
-        expect($missing['status'])->toBe(400)
-            ->and($missing['json']['error'])->toBe('validation_error')
+        expect($missing['status'])->toBe(422)
+            ->and($missing['json']['error'])->toBe('unprocessable_entity')
             ->and(pattrFields($missing))->toBe(['attributeCode', 'frontendLabel']);
 
         $wrong = pattrCreate([
@@ -177,12 +177,15 @@ describe('Product attribute lifecycle', function (): void {
             'scope' => 'planet',
             'applyTo' => ['car'],
             'frontendClass' => 'validate-nothing',
-            'unknownField' => 1,
         ]);
-        expect($wrong['status'])->toBe(400)
+        expect($wrong['status'])->toBe(422)
             ->and(pattrFields($wrong))->toEqualCanonicalizing([
-                'unknownField', 'attributeCode', 'frontendInput', 'isSearchable', 'isFilterable', 'scope', 'applyTo', 'frontendClass',
+                'attributeCode', 'frontendInput', 'isSearchable', 'isFilterable', 'scope', 'applyTo', 'frontendClass',
             ]);
+
+        $unknown = pattrCreate(['unknownField' => 1, 'isSearchable' => 'yes']);
+        expect($unknown['status'])->toBe(400)
+            ->and(pattrFields($unknown))->toBe(['unknownField']);
     });
 
     it('refuses a reserved code, a used code and a code of more than 30 characters', function (): void {
@@ -205,7 +208,7 @@ describe('Product attribute lifecycle', function (): void {
         expect($update['status'])->toBe(200);
 
         $locked = apiPut(PATTR_PATH . "/{$id}", ['isUnique' => !$current['isUnique']], adminToken());
-        expect($locked['status'])->toBe(400)
+        expect($locked['status'])->toBe(422)
             ->and(pattrFields($locked))->toBe(['isUnique']);
     });
 });
@@ -249,9 +252,13 @@ describe('Product attribute options', function (): void {
         $labels = $read->fetchPairs('SELECT store_id, value FROM eav_attribute_option_value WHERE option_id = ?', [$redId]);
         expect($labels)->toBe([0 => 'Dark red']);
 
-        $wrong = apiPut(PATTR_PATH . "/{$id}/options/{$redId}", ['label' => '', 'storeLabels' => ['no_such_store' => 'x'], 'other' => 1], $token);
-        expect($wrong['status'])->toBe(400)
-            ->and(pattrFields($wrong))->toEqualCanonicalizing(['other', 'label', 'storeLabels.no_such_store']);
+        $wrong = apiPut(PATTR_PATH . "/{$id}/options/{$redId}", ['label' => '', 'storeLabels' => ['no_such_store' => 'x']], $token);
+        expect($wrong['status'])->toBe(422)
+            ->and(pattrFields($wrong))->toEqualCanonicalizing(['label', 'storeLabels.no_such_store']);
+
+        $unknown = apiPut(PATTR_PATH . "/{$id}/options/{$redId}", ['label' => 'x', 'other' => 1], $token);
+        expect($unknown['status'])->toBe(400)
+            ->and(pattrFields($unknown))->toBe(['other']);
 
         expect(apiPut(PATTR_PATH . "/{$id}/options/999999999", ['label' => 'x'], $token)['status'])->toBe(404);
 

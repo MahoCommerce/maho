@@ -18,19 +18,20 @@ use Maho\ApiPlatform\Exception\ValidationException;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
+use Symfony\Component\Serializer\Exception\ExtraAttributesException;
 
 final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
 {
     private const IGNORED_FIELDS = ['extensions', '@context', '@id', '@type'];
 
-    /** @var list<array{field: string, message: string}> */
-    private array $errors = [];
+    private \Mage_Core_Exception_Input $errors;
 
     public function __construct(
         Security $security,
         private readonly AttributeSetProvider $provider,
     ) {
         parent::__construct($security);
+        $this->errors = new \Mage_Core_Exception_Input();
     }
 
     #[\Override]
@@ -63,7 +64,7 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
      */
     private function create(array $body): AttributeSet
     {
-        $this->errors = [];
+        $this->errors = new \Mage_Core_Exception_Input();
         $this->rejectUnknownFields($body, ['name', 'skeletonId']);
         $name = $this->readName($body, true);
 
@@ -75,7 +76,7 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
                 $this->addError('skeletonId', 'skeletonId must be the ID of a product attribute set');
             }
         }
-        $this->throwErrors();
+        $this->errors->throwIfErrors();
 
         /** @var \Mage_Eav_Model_Entity_Attribute_Set $set */
         $set = \Mage::getModel('eav/entity_attribute_set');
@@ -106,10 +107,10 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
         $set = $this->loadSet($id);
         $oldData = $set->getData();
 
-        $this->errors = [];
+        $this->errors = new \Mage_Core_Exception_Input();
         $this->rejectUnknownFields($body, ['name', 'skeletonId']);
         $name = $this->readName($body, true);
-        $this->throwErrors();
+        $this->errors->throwIfErrors();
 
         $set->setAttributeSetName($name);
         $this->validateName($set);
@@ -139,11 +140,11 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
     {
         $set = $this->loadSet($id);
 
-        $this->errors = [];
+        $this->errors = new \Mage_Core_Exception_Input();
         $this->rejectUnknownFields($body, ['name', 'sortOrder']);
         $name = $this->readName($body, true);
         $sortOrder = $this->readSortOrder($body);
-        $this->throwErrors();
+        $this->errors->throwIfErrors();
 
         /** @var \Mage_Eav_Model_Entity_Attribute_Group $group */
         $group = \Mage::getModel('eav/entity_attribute_group');
@@ -167,12 +168,12 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
     {
         $set = $this->loadSet($id);
 
-        $this->errors = [];
+        $this->errors = new \Mage_Core_Exception_Input();
         $this->rejectUnknownFields($body, ['attributeId', 'attributeCode', 'groupId', 'groupName', 'sortOrder']);
         $attribute = $this->readAttribute($body);
         $groupId = $this->readGroupId($id, $body);
         $sortOrder = $this->readSortOrder($body);
-        $this->throwErrors();
+        $this->errors->throwIfErrors();
 
         $oldData = $set->getData();
         $attribute->setAttributeSetId($id)->setAttributeGroupId($groupId)->setSortOrder($sortOrder);
@@ -372,10 +373,9 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
      */
     private function rejectUnknownFields(array $body, array $allowed): void
     {
-        foreach (array_keys($body) as $key) {
-            if (!in_array($key, $allowed, true) && !in_array($key, self::IGNORED_FIELDS, true)) {
-                $this->addError((string) $key, 'Unknown field');
-            }
+        $unknown = array_diff(array_keys($body), $allowed, self::IGNORED_FIELDS);
+        if ($unknown !== []) {
+            throw new ExtraAttributesException(array_map(strval(...), array_values($unknown)));
         }
     }
 
@@ -390,7 +390,7 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
 
     private function addError(string $field, string $message): void
     {
-        $this->errors[] = ['field' => $field, 'message' => $message];
+        $this->errors->addError($field, $message);
     }
 
     /**
@@ -414,12 +414,4 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
         return new ValidationException($message, 'name', 'Duplicate', ['errors' => [['field' => 'name', 'message' => $message]]]);
     }
 
-    private function throwErrors(): void
-    {
-        if ($this->errors === []) {
-            return;
-        }
-        $first = $this->errors[0];
-        throw new ValidationException($first['message'], $first['field'], 'Invalid', ['errors' => $this->errors]);
-    }
 }
