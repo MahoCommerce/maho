@@ -169,19 +169,19 @@ describe('Email template CRUD lifecycle', function (): void {
                 'templateCode' => $code,
                 'templateText' => 'another body',
             ], $token);
-            expect($duplicate['status'])->toBe(400);
+            expect($duplicate['status'])->toBe(409);
             expect($duplicate['json']['message'] ?? '')->toContain('already exists');
 
             $noText = apiPost('/api/rest/v2/email-templates', [
                 'templateCode' => $code . ' b',
             ], $token);
-            expect($noText['status'])->toBe(400);
+            expect($noText['status'])->toBe(422);
 
             $noSubject = apiPost('/api/rest/v2/email-templates', [
                 'templateCode' => $code . ' d',
                 'templateText' => 'x',
             ], $token);
-            expect($noSubject['status'])->toBe(400);
+            expect($noSubject['status'])->toBe(422);
             expect($noSubject['json']['details']['field'] ?? null)->toBe('templateSubject');
 
             $badType = apiPost('/api/rest/v2/email-templates', [
@@ -189,7 +189,7 @@ describe('Email template CRUD lifecycle', function (): void {
                 'templateText' => 'x',
                 'templateType' => 'markdown',
             ], $token);
-            expect($badType['status'])->toBe(400);
+            expect($badType['status'])->toBe(422);
         } finally {
             deleteEmailTemplate($id);
         }
@@ -198,7 +198,7 @@ describe('Email template CRUD lifecycle', function (): void {
     it('filters the list by templateType', function (): void {
         $response = apiGet('/api/rest/v2/email-templates?templateType=pdf', adminToken());
 
-        expect($response['status'])->toBe(400);
+        expect($response['status'])->toBe(422);
     });
 
 });

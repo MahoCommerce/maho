@@ -111,7 +111,7 @@ describe('Cache type write (REST)', function (): void {
 
     it('requires a boolean enabled flag', function (): void {
         $missing = apiPut('/api/rest/v2/cache-types/block_html', [], serviceToken(['cache-types/write']));
-        expect($missing['status'])->toBe(400);
+        expect($missing['status'])->toBe(422);
 
         $wrongType = apiPut('/api/rest/v2/cache-types/block_html', ['enabled' => 'yes'], serviceToken(['cache-types/write']));
         expect($wrongType['status'])->toBe(400);

@@ -174,14 +174,14 @@ describe('Design change CRUD lifecycle', function (): void {
             'storeId' => 1,
             'design' => 'base/no_such_theme',
         ], $token);
-        expect($badDesign['status'])->toBe(400);
+        expect($badDesign['status'])->toBe(422);
         expect($badDesign['json']['message'] ?? '')->toContain('design');
 
         $badStore = apiPost('/api/rest/v2/design-changes', [
             'storeId' => 999999,
             'design' => 'base/default',
         ], $token);
-        expect($badStore['status'])->toBe(400);
+        expect($badStore['status'])->toBe(422);
 
         $reversed = apiPost('/api/rest/v2/design-changes', [
             'storeId' => 1,
@@ -189,14 +189,14 @@ describe('Design change CRUD lifecycle', function (): void {
             'dateFrom' => '2091-02-01',
             'dateTo' => '2091-01-01',
         ], $token);
-        expect($reversed['status'])->toBe(400);
+        expect($reversed['status'])->toBe(422);
 
         $badFormat = apiPost('/api/rest/v2/design-changes', [
             'storeId' => 1,
             'design' => 'base/default',
             'dateFrom' => '01/02/2091',
         ], $token);
-        expect($badFormat['status'])->toBe(400);
+        expect($badFormat['status'])->toBe(422);
     });
 
 });

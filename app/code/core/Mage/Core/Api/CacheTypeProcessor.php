@@ -17,6 +17,7 @@ use Maho\ApiPlatform\Exception\ValidationException;
 use Maho\DataObject;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 final class CacheTypeProcessor extends \Maho\ApiPlatform\Processor
 {
@@ -49,7 +50,7 @@ final class CacheTypeProcessor extends \Maho\ApiPlatform\Processor
             throw ValidationException::requiredField('enabled');
         }
         if (!is_bool($body['enabled'])) {
-            throw new ValidationException('enabled must be a boolean', 'enabled', 'Type');
+            throw new BadRequestHttpException('enabled must be a boolean');
         }
 
         return $this->setEnabled($code, $body['enabled']);

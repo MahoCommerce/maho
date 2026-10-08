@@ -118,7 +118,7 @@ describe('URL rewrite CRUD lifecycle', function (): void {
                 'idPath' => "pest/{$suffix}-dup",
                 'targetPath' => 'cms/index/index',
             ], $writeToken);
-            expect($duplicate['status'])->toBe(400);
+            expect($duplicate['status'])->toBe(409);
             expect($duplicate['json']['message'] ?? '')->toContain('already exists');
 
             $update = apiPut("/api/rest/v2/url-rewrites/{$id}", [
@@ -177,13 +177,13 @@ describe('URL rewrite CRUD lifecycle', function (): void {
             'idPath' => 'pest/nostore',
             'targetPath' => 'cms/index/index',
         ], $token);
-        expect($noStore['status'])->toBe(400);
+        expect($noStore['status'])->toBe(422);
 
         $noTarget = apiPost('/api/rest/v2/url-rewrites', [
             'storeId' => 1,
             'requestPath' => 'pest-notarget.html',
         ], $token);
-        expect($noTarget['status'])->toBe(400);
+        expect($noTarget['status'])->toBe(422);
 
         $badOptions = apiPost('/api/rest/v2/url-rewrites', [
             'storeId' => 1,
@@ -192,7 +192,7 @@ describe('URL rewrite CRUD lifecycle', function (): void {
             'targetPath' => 'cms/index/index',
             'options' => 'X',
         ], $token);
-        expect($badOptions['status'])->toBe(400);
+        expect($badOptions['status'])->toBe(422);
 
         $badPath = apiPost('/api/rest/v2/url-rewrites', [
             'storeId' => 1,
@@ -200,14 +200,14 @@ describe('URL rewrite CRUD lifecycle', function (): void {
             'idPath' => 'pest/badpath',
             'targetPath' => 'cms/index/index',
         ], $token);
-        expect($badPath['status'])->toBe(400);
+        expect($badPath['status'])->toBe(422);
 
         $badProduct = apiPost('/api/rest/v2/url-rewrites', [
             'storeId' => 1,
             'requestPath' => 'pest-badproduct.html',
             'productId' => 999999999,
         ], $token);
-        expect($badProduct['status'])->toBe(400);
+        expect($badProduct['status'])->toBe(422);
     });
 
 });
@@ -226,11 +226,11 @@ describe('System URL rewrites', function (): void {
         expect($read['json']['isSystem'])->toBeTrue();
 
         $update = apiPut("/api/rest/v2/url-rewrites/{$systemId}", ['description' => 'nope'], $token);
-        expect($update['status'])->toBe(400);
+        expect($update['status'])->toBe(409);
         expect($update['json']['message'] ?? '')->toContain('system URL rewrite');
 
         $delete = apiDelete("/api/rest/v2/url-rewrites/{$systemId}", $token);
-        expect($delete['status'])->toBe(400);
+        expect($delete['status'])->toBe(409);
 
         expect(apiGet("/api/rest/v2/url-rewrites/{$systemId}", $token)['status'])->toBe(200);
     });

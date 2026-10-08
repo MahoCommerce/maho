@@ -19,6 +19,9 @@ use Maho\ApiPlatform\Security\ApiUser;
 use Maho\DataObject;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * @phpstan-import-type FieldInfo from ConfigSettingProvider
@@ -43,7 +46,7 @@ final class ConfigSettingProcessor extends \Maho\ApiPlatform\Processor
         $path = (string) ($uriVariables['path'] ?? $params['path'] ?? '');
         $field = $this->provider->field($path);
         if ($field === null) {
-            throw new ValidationException("'$path' is not a system configuration field", 'path', 'Invalid');
+            throw new NotFoundHttpException("'$path' is not a system configuration field");
         }
 
         $scope = $this->provider->resolveScope(
@@ -104,7 +107,7 @@ final class ConfigSettingProcessor extends \Maho\ApiPlatform\Processor
     private function restoreInheritance(array $field, array $scope, ?string $oldValue): void
     {
         if ($scope['scope'] === ConfigSetting::SCOPE_DEFAULT) {
-            throw new ValidationException('The default scope has no parent scope to inherit from', 'scope', 'Invalid');
+            throw new ConflictHttpException('The default scope has no parent scope to inherit from');
         }
 
         \Mage::getConfig()->deleteConfig($field['path'], $scope['scope'], $scope['scopeId']);
@@ -183,7 +186,7 @@ final class ConfigSettingProcessor extends \Maho\ApiPlatform\Processor
         if (is_array($value)) {
             foreach ($value as $item) {
                 if (!is_scalar($item)) {
-                    throw new ValidationException('value must be a string, a number, a boolean or a list of them', 'value', 'Type');
+                    throw new BadRequestHttpException('value must be a string, a number, a boolean or a list of them');
                 }
             }
             return implode(',', array_map(strval(...), $value));
@@ -192,6 +195,6 @@ final class ConfigSettingProcessor extends \Maho\ApiPlatform\Processor
             return (string) $value;
         }
 
-        throw new ValidationException('value must be a string, a number, a boolean or a list of them', 'value', 'Type');
+        throw new BadRequestHttpException('value must be a string, a number, a boolean or a list of them');
     }
 }

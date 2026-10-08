@@ -120,7 +120,7 @@ describe('Config setting read (REST)', function (): void {
 
     it('rejects an unknown scope code', function (): void {
         $response = apiGet('/api/rest/v2/config-settings/' . CONFIG_SETTING_TEST_PATH . '?scope=stores&scopeCode=no_such_store', adminToken());
-        expect($response['status'])->toBe(400);
+        expect($response['status'])->toBe(422);
     });
 
     it('masks the value of a sensitive field', function (): void {
@@ -163,14 +163,14 @@ describe('Config setting write and inheritance (REST)', function (): void {
         $response = apiPut('/api/rest/v2/config-settings/' . CONFIG_SETTING_TEST_PATH, [
             'scope' => 'default',
         ], serviceToken(['config-settings/write']));
-        expect($response['status'])->toBe(400);
+        expect($response['status'])->toBe(422);
     });
 
     it('rejects a write to a path that is not a system.xml field', function (): void {
         $response = apiPut('/api/rest/v2/config-settings/general/no_such_group/no_such_field', [
             'value' => 'x',
         ], serviceToken(['config-settings/write']));
-        expect($response['status'])->toBe(400);
+        expect($response['status'])->toBe(404);
     });
 
     it('requires a scope code for the websites scope', function (): void {
@@ -178,7 +178,7 @@ describe('Config setting write and inheritance (REST)', function (): void {
             'value' => 'x',
             'scope' => 'websites',
         ], serviceToken(['config-settings/write']));
-        expect($response['status'])->toBe(400);
+        expect($response['status'])->toBe(422);
     });
 
     it('overrides a value at a store view and restores inheritance with delete', function (): void {
@@ -220,7 +220,7 @@ describe('Config setting write and inheritance (REST)', function (): void {
 
     it('refuses to delete at the default scope', function (): void {
         $response = apiDelete('/api/rest/v2/config-settings/' . CONFIG_SETTING_TEST_PATH, serviceToken(['config-settings/delete']));
-        expect($response['status'])->toBe(400);
+        expect($response['status'])->toBe(409);
     });
 
 });

@@ -124,7 +124,7 @@ describe('Index process write (REST)', function (): void {
     it('rejects an unknown mode', function (): void {
         $process = indexProcessByCode('cataloginventory_stock');
         $response = apiPut("/api/rest/v2/index-processes/{$process['id']}", ['mode' => 'sometimes'], serviceToken(['index-processes/write']));
-        expect($response['status'])->toBe(400);
+        expect($response['status'])->toBe(422);
     });
 
     it('reindexes one process and returns it as pending', function (): void {

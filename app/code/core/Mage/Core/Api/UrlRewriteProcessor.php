@@ -14,6 +14,7 @@ use Maho\ApiPlatform\CrudProcessor;
 use Maho\ApiPlatform\CrudResource;
 use Maho\ApiPlatform\Exception\ValidationException;
 use Maho\ApiPlatform\Security\ApiUser;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 
 final class UrlRewriteProcessor extends CrudProcessor
 {
@@ -30,7 +31,7 @@ final class UrlRewriteProcessor extends CrudProcessor
     {
         $model = $this->loadOrFail($this->modelAlias, $id, 'UrlRewrite not found');
         if ($model->getData('is_system')) {
-            throw new ValidationException(self::SYSTEM_MESSAGE, 'isSystem', 'ReadOnly');
+            throw new ConflictHttpException(self::SYSTEM_MESSAGE);
         }
 
         return parent::processDelete($id, $user);
@@ -41,7 +42,7 @@ final class UrlRewriteProcessor extends CrudProcessor
     {
         /** @var UrlRewrite $data */
         if (!$isNew && $model->getData('is_system')) {
-            throw new ValidationException(self::SYSTEM_MESSAGE, 'isSystem', 'ReadOnly');
+            throw new ConflictHttpException(self::SYSTEM_MESSAGE);
         }
 
         if ($isNew && $data->storeId === null) {
@@ -89,11 +90,7 @@ final class UrlRewriteProcessor extends CrudProcessor
         if ($requestPath !== null && $storeId !== null
             && $this->requestPathInUse(strtolower((string) $requestPath), (int) $storeId, $isNew ? null : (int) $model->getId())
         ) {
-            throw new ValidationException(
-                "A URL rewrite for request path '{$requestPath}' already exists in store view {$storeId}",
-                'requestPath',
-                'Unique',
-            );
+            throw new ConflictHttpException("A URL rewrite for request path '{$requestPath}' already exists in store view {$storeId}");
         }
     }
 

@@ -31,7 +31,7 @@ describe('Amount conditions of a customer segment', function () {
                 ->setBaseCurrencyCode($this->baseCurrency)
                 ->setGrandTotal($grandTotal)
                 ->setBaseGrandTotal($baseGrandTotal)
-                ->setState(Mage_Sales_Model_Order::STATE_COMPLETE)
+                ->setData('state', Mage_Sales_Model_Order::STATE_COMPLETE)
                 ->setStatus(Mage_Sales_Model_Order::STATE_COMPLETE)
                 ->save();
         }

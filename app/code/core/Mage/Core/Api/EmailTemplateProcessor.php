@@ -14,6 +14,7 @@ use Maho\ApiPlatform\CrudProcessor;
 use Maho\ApiPlatform\CrudResource;
 use Maho\ApiPlatform\Exception\ValidationException;
 use Maho\ApiPlatform\Security\ApiUser;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 
 final class EmailTemplateProcessor extends CrudProcessor
 {
@@ -30,11 +31,7 @@ final class EmailTemplateProcessor extends CrudProcessor
             throw ValidationException::invalidValue('templateCode', 'must not be empty');
         }
         if ($code !== null && $this->codeInUse($code, $isNew ? null : (int) $model->getId())) {
-            throw new ValidationException(
-                "An email template with code '{$code}' already exists",
-                'templateCode',
-                'Unique',
-            );
+            throw new ConflictHttpException("An email template with code '{$code}' already exists");
         }
 
         if ($isNew && ($data->templateText === null || trim($data->templateText) === '')) {
