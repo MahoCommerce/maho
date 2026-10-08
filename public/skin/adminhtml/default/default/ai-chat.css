@@ -56,6 +56,14 @@
     height: 18px;
 }
 
+/* The admin form.css styles every button:hover and button:active, so each button of the assistant restates its colors there. */
+.ai-chat-toggle:hover,
+.ai-chat-toggle:active {
+    border-color: light-dark(transparent, rgba(255, 255, 255, .12));
+    background: var(--maho-night);
+    color: #fff;
+}
+
 .ai-chat-toggle:hover {
     transform: translateY(-1px);
     box-shadow: 0 12px 28px rgba(0, 0, 0, .26), 0 2px 6px rgba(0, 0, 0, .12);
@@ -181,7 +189,8 @@ body.ai-chat-open .ai-chat-toggle {
     stroke-width: 1.75;
 }
 
-.ai-chat-icon-button:hover {
+.ai-chat-icon-button:hover,
+.ai-chat-icon-button:active {
     background: var(--maho-surface-sunken);
     color: var(--maho-ink);
 }
@@ -710,7 +719,9 @@ body.ai-chat-open .ai-chat-toggle {
     color: var(--maho-btn-ink);
 }
 
-.ai-chat-approve:hover {
+.ai-chat-approve:hover,
+.ai-chat-approve:active {
+    border-color: transparent;
     background: var(--maho-btn-bg-hover);
     color: var(--maho-btn-ink-hover);
 }
@@ -721,7 +732,9 @@ body.ai-chat-open .ai-chat-toggle {
     color: var(--maho-btn2-ink);
 }
 
-.ai-chat-deny:hover {
+.ai-chat-deny:hover,
+.ai-chat-deny:active {
+    border-color: var(--maho-btn2-border);
     background: var(--maho-btn2-bg-hover);
 }
 
@@ -888,7 +901,8 @@ body.ai-chat-open .ai-chat-toggle {
     transition: border-color var(--maho-duration-fast) var(--maho-ease), background-color var(--maho-duration-fast) var(--maho-ease);
 }
 
-.ai-chat-example:hover {
+.ai-chat-example:hover,
+.ai-chat-example:active {
     border-color: var(--maho-chartreuse-deep);
     background: var(--maho-row-hover);
 }
@@ -1012,7 +1026,9 @@ body.ai-chat-open .ai-chat-toggle {
     cursor: pointer;
 }
 
-.ai-chat-undo:hover {
+.ai-chat-undo:hover,
+.ai-chat-undo:active {
+    border-color: var(--maho-btn2-border);
     background: var(--maho-btn2-bg-hover);
 }
 
@@ -1087,7 +1103,8 @@ body.ai-chat-open .ai-chat-toggle {
     cursor: pointer;
 }
 
-.ai-chat-attachment-remove:hover {
+.ai-chat-attachment-remove:hover,
+.ai-chat-attachment-remove:active {
     background: var(--maho-border-soft);
     color: var(--maho-ink);
 }
