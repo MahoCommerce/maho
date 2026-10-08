@@ -682,7 +682,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         // Always return success to prevent email enumeration
         if ($customer->getId()) {
             try {
-                $customer->sendPasswordResetConfirmationEmail();
+                $customer->sendPasswordResetLinkEmail();
             } catch (\Exception $e) {
                 \Mage::logException($e);
             }
