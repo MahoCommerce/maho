@@ -202,6 +202,7 @@
 "Resume","Resume"
 "Retries","Retries"
 "Return a placeholder image URL when image generation is disabled or fails.","Return a placeholder image URL when image generation is disabled or fails."
+"row %s","row %s"
 "Run in the background","Run in the background"
 "Running","Running"
 "Run Now","Run Now"

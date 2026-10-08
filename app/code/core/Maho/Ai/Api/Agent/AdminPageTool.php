@@ -39,7 +39,7 @@ final class AdminPageTool
     public const FILL_NAME = 'admin_fill_form';
     public const ACTION_NAME = 'admin_page_action';
     public const NAMES = [self::NAME, self::FILL_NAME, self::ACTION_NAME];
-    public const ACTIONS = ['click', 'open_tab', 'set_field'];
+    public const ACTIONS = ['click', 'open_tab', 'set_field', 'open_row'];
 
     public static function title(string $name): string
     {
@@ -51,7 +51,7 @@ final class AdminPageTool
     }
 
     /**
-     * The page action tool: one click, tab switch or field change on the page the
+     * The page action tool: one click, tab switch, field change or grid row on the page the
      * administrator has open, performed by the panel after the answer. The panel resolves
      * the target against the visible elements only, the ones the screen digest listed.
      */
@@ -60,7 +60,7 @@ final class AdminPageTool
         return ToolDefinition::create(
             new ExecutionReference(self::class, 'act'),
             self::ACTION_NAME,
-            'Act on the admin page the administrator has open, after you answer: open a tab by its name, set a form field by its label or name, click a button by its label (for example "Save Page" when the administrator says "save"). Use the buttons, tabs and fields listed under what the administrator sees; never guess a label. Up to three steps in order, and a click must be the last step because the page may reload. The next message shows you the result.',
+            'Act on the admin page the administrator has open, after you answer: open a tab by its name, set a form field by its label or name, click a button by its label (for example "Save Page" when the administrator says "save"), or open a grid row by its number in the row list (target "3" for "the third one"). Use the buttons, tabs, fields and rows listed under what the administrator sees; never guess a label. Up to three steps in order, and a click or an open_row must be the last step because the page may reload. The next message shows you the result.',
             [
                 'type' => 'object',
                 'properties' => [
@@ -73,7 +73,7 @@ final class AdminPageTool
                             'type' => 'object',
                             'properties' => [
                                 'action' => ['type' => 'string', 'description' => 'What to do.', 'enum' => self::ACTIONS],
-                                'target' => ['type' => 'string', 'description' => 'The button label, the tab name, or the field label or name, as shown on the page.'],
+                                'target' => ['type' => 'string', 'description' => 'The button label, the tab name, or the field label or name, as shown on the page. For open_row, the row number.'],
                                 'value' => ['type' => 'string', 'description' => 'The value to set, for set_field only.'],
                             ],
                             'required' => ['action', 'target'],
@@ -108,8 +108,11 @@ final class AdminPageTool
             if ($action === 'set_field' && !is_scalar($value)) {
                 return ['ok' => false, 'text' => sprintf('Step %d: set_field needs a value.', $i + 1)];
             }
-            if ($action === 'click' && $i !== count($raw) - 1) {
-                return ['ok' => false, 'text' => sprintf('Step %d: a click must be the last step, because the page may reload.', $i + 1)];
+            if ($action === 'open_row' && !preg_match('/^[1-9]\d*$/', $target)) {
+                return ['ok' => false, 'text' => sprintf('Step %d: open_row needs the row number as its target, for example "3".', $i + 1)];
+            }
+            if (in_array($action, ['click', 'open_row'], true) && $i !== count($raw) - 1) {
+                return ['ok' => false, 'text' => sprintf('Step %d: a click or an open_row must be the last step, because the page may reload.', $i + 1)];
             }
             $steps[] = ['action' => $action, 'target' => mb_substr($target, 0, 200), 'value' => is_scalar($value) ? (string) $value : null];
         }

@@ -1538,8 +1538,35 @@ it('hands a page action to the browser', function (): void {
             ['action' => 'set_field', 'target' => 'Comment', 'value' => 'pippo'],
             ['action' => 'click', 'target' => 'Submit Comment', 'value' => null],
         ]);
-        expect($results[1]['preview'])->toContain('a click must be the last step');
+        expect($results[1]['preview'])->toContain('a click or an open_row must be the last step');
         expect(aiChatEvents($result['events'], 'done')[0]['state'])->toBe('complete');
+    } finally {
+        aiChatDeleteConversations((int) $admin->getId());
+        aiChatDeleteAdmin($admin);
+    }
+});
+
+it('hands the opening of a grid row to the browser by its number', function (): void {
+    $admin = aiChatAdmin('ai_chat_row', ['all']);
+    try {
+        aiChatLogin($admin);
+        AiChatScript::reset(
+            new ToolCallResult([
+                new ToolCall('call_r1', 'admin_page_action', ['steps' => [['action' => 'open_row', 'target' => 'third']]]),
+                new ToolCall('call_r2', 'admin_page_action', ['steps' => [['action' => 'open_row', 'target' => '3']]]),
+            ]),
+            new TextResult('Opening the third customer.'),
+        );
+
+        $result = aiChatRequest('/api/admin/ai/chat', ['message' => 'open the third one', 'context' => ['route' => 'customer/index']]);
+
+        $results = aiChatEvents($result['events'], 'tool_result');
+        expect($results[0]['ok'])->toBeFalse($result['raw']);
+        expect($results[0]['preview'])->toContain('open_row needs the row number');
+        expect($results[1]['ok'])->toBeTrue();
+        expect(aiChatEvents($result['events'], 'page_action')[0]['steps'])->toBe([
+            ['action' => 'open_row', 'target' => '3', 'value' => null],
+        ]);
     } finally {
         aiChatDeleteConversations((int) $admin->getId());
         aiChatDeleteAdmin($admin);

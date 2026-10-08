@@ -803,7 +803,7 @@ class MahoAiAssistant {
         let clicked = null;
         for (const step of steps) {
             const outcome = this.performPageAction(step);
-            (outcome.ok ? done : missing).push(step.target);
+            (outcome.ok ? done : missing).push(step.action === 'open_row' ? this.labels.gridRow.replace('%s', step.target) : step.target);
             if (outcome.click) {
                 clicked = outcome.click;
                 break;
@@ -837,6 +837,14 @@ class MahoAiAssistant {
             const buttons = [...document.querySelectorAll('button, a.button, input[type="submit"], .tiptap-toolbar button[title]')].filter(visible);
             const button = matches(buttons, (b) => b.textContent || b.title || b.value);
             return button ? { ok: true, click: button } : { ok: false };
+        }
+        if (action.action === 'open_row') {
+            // The rows the screen digest numbered. A plain cell gets the click, so the grid opens the row
+            // as for a person: a cell with a link, a field or a checkbox does something else.
+            const rows = [...document.querySelectorAll('.grid table tbody tr')].filter(visible);
+            const row = rows[Number(target) - 1];
+            const cell = row ? [...row.cells].find((td) => visible(td) && !td.querySelector('input, select, textarea, a, button')) : null;
+            return cell ? { ok: true, click: cell } : { ok: false };
         }
         if (action.action === 'open_tab') {
             const tabs = [...document.querySelectorAll('a.tab-item-link')].filter(visible);

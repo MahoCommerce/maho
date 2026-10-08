@@ -146,6 +146,7 @@ class Maho_Ai_Block_Adminhtml_Assistant extends Mage_Adminhtml_Block_Template
                 'tooManyFiles' => $helper->__('At most %s files per message.'),
                 'actionDone' => $helper->__('Done: %s.'),
                 'actionNotFound' => $helper->__('I could not find "%s" on this page.'),
+                'gridRow' => $helper->__('row %s'),
                 'formFilled' => $helper->__('I filled these fields in the form: %s. Review the form and save it.'),
                 'formFieldsMissing' => $helper->__('I could not find these fields in the form: %s.'),
                 'verbList' => $helper->__('List'),
