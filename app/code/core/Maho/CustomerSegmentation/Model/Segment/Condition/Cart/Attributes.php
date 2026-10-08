@@ -108,13 +108,13 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Cart_Attributes extends 
         $operator = $this->getMappedSqlOperator();
         $value = $this->getValue();
         return match ($attribute) {
-            'items_count', 'items_qty', 'base_subtotal', 'base_grand_total', 'created_at', 'updated_at', 'is_active', 'store_id', 'coupon_code' => $this->buildCartFieldCondition($adapter, $attribute, $operator, $value),
-            'applied_rule_ids' => $this->buildAppliedRulesCondition($adapter, $operator, $value),
+            'items_count', 'items_qty', 'base_subtotal', 'base_grand_total', 'created_at', 'updated_at', 'is_active', 'store_id', 'coupon_code' => $this->buildCartFieldCondition($adapter, $attribute, $operator, $value, $websiteId),
+            'applied_rule_ids' => $this->buildAppliedRulesCondition($adapter, $operator, $value, $websiteId),
             default => false,
         };
     }
 
-    protected function buildCartFieldCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $field, string $operator, mixed $value): string
+    protected function buildCartFieldCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $field, string $operator, mixed $value, ?int $websiteId = null): string
     {
         $subselect = $adapter->select()
             ->from(['q' => $this->getQuoteTable()], ['customer_id'])
@@ -127,16 +127,20 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Cart_Attributes extends 
 
         $subselect->where($this->buildSqlCondition($adapter, "q.{$field}", $operator, $value));
 
+        $this->filterCurrencyStores($subselect, 'q', $websiteId);
+
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function buildAppliedRulesCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $operator, mixed $value): string
+    protected function buildAppliedRulesCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $operator, mixed $value, ?int $websiteId = null): string
     {
         $subselect = $adapter->select()
             ->from(['q' => $this->getQuoteTable()], ['customer_id'])
             ->where('q.customer_id IS NOT NULL')
             ->where('q.is_active = ?', 1)
             ->where($this->buildSqlCondition($adapter, 'q.applied_rule_ids', $operator, $value));
+
+        $this->filterCurrencyStores($subselect, 'q', $websiteId);
 
         return 'e.entity_id IN (' . $subselect . ')';
     }

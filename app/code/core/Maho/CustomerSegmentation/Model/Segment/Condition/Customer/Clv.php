@@ -72,8 +72,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Clv extends Mah
             case 'lifetime_sales':
                 $joinConditions = 'c.entity_id = o.customer_id AND o.state NOT IN (\'canceled\', \'closed\')';
                 if ($website) {
-                    $websiteStores = Mage::app()->getWebsite($website)->getStoreIds();
-                    $joinConditions .= ' AND o.store_id IN (' . implode(',', $websiteStores) . ')';
+                    $joinConditions .= $adapter->quoteInto(' AND o.store_id IN (?)', $this->getCurrencyStoreIds($website));
                 }
                 $select = $adapter->select()
                     ->from(['c' => $resource->getTableName('customer/entity')], ['customer_id' => 'c.entity_id'])
@@ -84,8 +83,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Clv extends Mah
             case 'number_of_orders':
                 $joinConditions = 'c.entity_id = o.customer_id AND o.state NOT IN (\'canceled\', \'closed\')';
                 if ($website) {
-                    $websiteStores = Mage::app()->getWebsite($website)->getStoreIds();
-                    $joinConditions .= ' AND o.store_id IN (' . implode(',', $websiteStores) . ')';
+                    $joinConditions .= $adapter->quoteInto(' AND o.store_id IN (?)', $this->getCurrencyStoreIds($website));
                 }
                 $select = $adapter->select()
                     ->from(['c' => $resource->getTableName('customer/entity')], ['customer_id' => 'c.entity_id'])
@@ -96,8 +94,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Clv extends Mah
             case 'average_order_value':
                 $joinConditions = 'c.entity_id = o.customer_id AND o.state NOT IN (\'canceled\', \'closed\')';
                 if ($website) {
-                    $websiteStores = Mage::app()->getWebsite($website)->getStoreIds();
-                    $joinConditions .= ' AND o.store_id IN (' . implode(',', $websiteStores) . ')';
+                    $joinConditions .= $adapter->quoteInto(' AND o.store_id IN (?)', $this->getCurrencyStoreIds($website));
                 }
                 $select = $adapter->select()
                     ->from(['c' => $resource->getTableName('customer/entity')], ['customer_id' => 'c.entity_id'])
@@ -119,9 +116,9 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Clv extends Mah
                     ->group('o.customer_id');
 
                 if ($website) {
-                    $websiteStores = Mage::app()->getWebsite($website)->getStoreIds();
-                    $salesSelect->where('o.store_id IN (?)', $websiteStores);
-                    $refundsSelect->where('o.store_id IN (?)', $websiteStores);
+                    $storeIds = $this->getCurrencyStoreIds($website);
+                    $salesSelect->where('o.store_id IN (?)', $storeIds);
+                    $refundsSelect->where('o.store_id IN (?)', $storeIds);
                 }
 
                 $select = $adapter->select()
@@ -141,17 +138,12 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Clv extends Mah
                     ->where('o.customer_id IS NOT NULL')
                     ->group('o.customer_id');
                 if ($website) {
-                    $select->where('o.store_id IN (?)', Mage::app()->getWebsite($website)->getStoreIds());
+                    $select->where('o.store_id IN (?)', $this->getCurrencyStoreIds($website));
                 }
                 break;
 
             default:
                 return $requireValid ? 'FALSE' : 'TRUE';
-        }
-
-        // For LEFT JOIN queries, filter by customer website
-        if ($website && in_array($attribute, ['lifetime_sales', 'average_order_value'])) {
-            $select->where('c.website_id = ?', $website);
         }
 
         // Standard condition building

@@ -48,15 +48,18 @@ final class ConfigSettingProcessor extends \Maho\ApiPlatform\Processor
             throw new NotFoundHttpException("'$path' is not a system configuration field");
         }
 
+        $scopeInBody = array_key_exists('scope', $body) || array_key_exists('scopeCode', $body);
         $scope = $this->provider->resolveScope(
             isset($params['scope']) ? (string) $params['scope'] : ConfigSetting::SCOPE_DEFAULT,
             isset($params['scopeCode']) ? (string) $params['scopeCode'] : null,
+            $scopeInBody,
         );
         if (!$this->provider->isShownAtScope($field, $scope['scope'])) {
-            throw new ValidationException(
+            throw ConfigSettingProvider::scopeError(
                 sprintf("Field '%s' cannot be set at scope '%s'", $path, $scope['scope']),
                 'scope',
                 'Invalid',
+                $scopeInBody,
             );
         }
         $this->provider->assertSectionAllowed($field, $user);
@@ -106,7 +109,7 @@ final class ConfigSettingProcessor extends \Maho\ApiPlatform\Processor
     private function restoreInheritance(array $field, array $scope, ?string $oldValue): void
     {
         if ($scope['scope'] === ConfigSetting::SCOPE_DEFAULT) {
-            throw new ValidationException('The default scope has no parent scope to inherit from', 'scope', 'Invalid');
+            throw new BadRequestHttpException('The default scope has no parent scope to inherit from. Name a scope and scopeCode in the query string.');
         }
 
         \Mage::getConfig()->deleteConfig($field['path'], $scope['scope'], $scope['scopeId']);

@@ -18,6 +18,7 @@ use ApiPlatform\State\Pagination\TraversablePaginator;
 use Maho\ApiPlatform\Exception\ValidationException;
 use Maho\ApiPlatform\Security\ApiUser;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
@@ -199,16 +200,19 @@ final class ConfigSettingProvider extends \Maho\ApiPlatform\Provider
     }
 
     /**
+     * Return the scope that scope and scopeCode name.
+     * A wrong value is a 422 when it comes from the body and a 400 when it comes from the query string.
+     *
      * @return ScopeInfo
      */
-    public function resolveScope(string $scope, ?string $scopeCode): array
+    public function resolveScope(string $scope, ?string $scopeCode, bool $inBody = false): array
     {
         if ($scope === ConfigSetting::SCOPE_DEFAULT) {
             return ['scope' => $scope, 'scopeId' => 0, 'scopeCode' => null];
         }
 
         if ($scopeCode === null || $scopeCode === '') {
-            throw new ValidationException("scopeCode is required for scope '$scope'", 'scopeCode', 'NotBlank');
+            throw self::scopeError("scopeCode is required for scope '$scope'", 'scopeCode', 'NotBlank', $inBody);
         }
 
         if ($scope === ConfigSetting::SCOPE_WEBSITES) {
@@ -218,7 +222,7 @@ final class ConfigSettingProvider extends \Maho\ApiPlatform\Provider
                 $website = null;
             }
             if (!$website || !$website->getId()) {
-                throw new ValidationException("Website '$scopeCode' not found", 'scopeCode', 'Invalid');
+                throw self::scopeError("Website '$scopeCode' not found", 'scopeCode', 'Invalid', $inBody);
             }
             return ['scope' => $scope, 'scopeId' => (int) $website->getId(), 'scopeCode' => $website->getCode()];
         }
@@ -230,12 +234,17 @@ final class ConfigSettingProvider extends \Maho\ApiPlatform\Provider
                 $store = null;
             }
             if (!$store || !$store->getId()) {
-                throw new ValidationException("Store view '$scopeCode' not found", 'scopeCode', 'Invalid');
+                throw self::scopeError("Store view '$scopeCode' not found", 'scopeCode', 'Invalid', $inBody);
             }
             return ['scope' => $scope, 'scopeId' => (int) $store->getId(), 'scopeCode' => $store->getCode()];
         }
 
-        throw new ValidationException('scope must be default, websites or stores', 'scope', 'Choice');
+        throw self::scopeError('scope must be default, websites or stores', 'scope', 'Choice', $inBody);
+    }
+
+    public static function scopeError(string $message, string $field, string $constraint, bool $inBody): \Exception
+    {
+        return $inBody ? new ValidationException($message, $field, $constraint) : new BadRequestHttpException($message);
     }
 
     /**

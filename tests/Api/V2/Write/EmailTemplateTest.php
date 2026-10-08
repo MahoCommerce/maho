@@ -198,7 +198,7 @@ describe('Email template CRUD lifecycle', function (): void {
     it('filters the list by templateType', function (): void {
         $response = apiGet('/api/rest/v2/email-templates?templateType=pdf', adminToken());
 
-        expect($response['status'])->toBe(422);
+        expect($response['status'])->toBe(400);
     });
 
 });

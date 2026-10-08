@@ -13,6 +13,7 @@ namespace Mage\Core\Api;
 use ApiPlatform\State\Pagination\TraversablePaginator;
 use Maho\ApiPlatform\CrudProvider;
 use Maho\ApiPlatform\Exception\ValidationException;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 final class EmailTemplateProvider extends CrudProvider
@@ -49,7 +50,7 @@ final class EmailTemplateProvider extends CrudProvider
         $type = $this->stringFilter($filters, 'templateType');
         if ($type !== null) {
             if (!in_array($type, [EmailTemplate::TYPE_TEXT, EmailTemplate::TYPE_HTML], true)) {
-                throw ValidationException::invalidValue('templateType', 'must be "text" or "html"');
+                throw new BadRequestHttpException('templateType must be "text" or "html"');
             }
             $collection->addFieldToFilter('template_type', EmailTemplate::typeToInt($type));
         }

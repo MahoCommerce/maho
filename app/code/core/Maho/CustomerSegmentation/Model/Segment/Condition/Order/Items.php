@@ -164,25 +164,25 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Items extends Maho
 
             // Check if this is a special order item field vs. actual product attribute
             return match ($attributeCode) {
-                'name' => $this->buildOrderItemFieldCondition($adapter, 'name', $operator, $value),
-                'sku' => $this->buildOrderItemFieldCondition($adapter, 'sku', $operator, $value),
-                'type' => $this->buildOrderItemFieldCondition($adapter, 'product_type', $operator, $value),
-                default => $this->buildProductAttributeCondition($adapter, $attributeCode, $operator, $value),
+                'name' => $this->buildOrderItemFieldCondition($adapter, 'name', $operator, $value, $websiteId),
+                'sku' => $this->buildOrderItemFieldCondition($adapter, 'sku', $operator, $value, $websiteId),
+                'type' => $this->buildOrderItemFieldCondition($adapter, 'product_type', $operator, $value, $websiteId),
+                default => $this->buildProductAttributeCondition($adapter, $attributeCode, $operator, $value, $websiteId),
             };
         }
 
         // Handle other order item specific attributes
         return match ($attribute) {
-            'product_name' => $this->buildOrderItemFieldCondition($adapter, 'name', $operator, $value),
-            'product_sku' => $this->buildOrderItemFieldCondition($adapter, 'sku', $operator, $value),
-            'product_type' => $this->buildOrderItemFieldCondition($adapter, 'product_type', $operator, $value),
-            'qty_ordered' => $this->buildOrderItemFieldCondition($adapter, $attribute, $operator, $value),
-            'row_total', 'row_total_incl_tax', 'discount_amount' => $this->buildOrderItemFieldCondition($adapter, self::BASE_AMOUNT_COLUMNS[$attribute], $operator, $value),
+            'product_name' => $this->buildOrderItemFieldCondition($adapter, 'name', $operator, $value, $websiteId),
+            'product_sku' => $this->buildOrderItemFieldCondition($adapter, 'sku', $operator, $value, $websiteId),
+            'product_type' => $this->buildOrderItemFieldCondition($adapter, 'product_type', $operator, $value, $websiteId),
+            'qty_ordered' => $this->buildOrderItemFieldCondition($adapter, $attribute, $operator, $value, $websiteId),
+            'row_total', 'row_total_incl_tax', 'discount_amount' => $this->buildOrderItemFieldCondition($adapter, self::BASE_AMOUNT_COLUMNS[$attribute], $operator, $value, $websiteId),
             default => false,
         };
     }
 
-    protected function buildProductAttributeCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $attributeCode, string $operator, mixed $value): string
+    protected function buildProductAttributeCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $attributeCode, string $operator, mixed $value, ?int $websiteId = null): string
     {
         $productResource = Mage::getResourceSingleton('catalog/product');
         $attribute = Mage::getSingleton('eav/config')->getAttribute(Mage_Catalog_Model_Product::ENTITY, $attributeCode);
@@ -213,10 +213,12 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Items extends Maho
             $subselect->where($condition);
         }
 
+        $this->filterCurrencyStores($subselect, 'o', $websiteId);
+
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function buildOrderItemFieldCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $field, string $operator, mixed $value): string
+    protected function buildOrderItemFieldCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $field, string $operator, mixed $value, ?int $websiteId = null): string
     {
         $subselect = $adapter->select()
             ->from(['oi' => $this->getOrderItemTable()], [])
@@ -224,6 +226,8 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Items extends Maho
             ->where('o.customer_id IS NOT NULL')
             ->where('o.state NOT IN (?)', ['canceled'])
             ->where($this->buildSqlCondition($adapter, "oi.{$field}", $operator, $value));
+
+        $this->filterCurrencyStores($subselect, 'o', $websiteId);
 
         return 'e.entity_id IN (' . $subselect . ')';
     }

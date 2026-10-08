@@ -120,7 +120,7 @@ describe('Config setting read (REST)', function (): void {
 
     it('rejects an unknown scope code', function (): void {
         $response = apiGet('/api/rest/v2/config-settings/' . CONFIG_SETTING_TEST_PATH . '?scope=stores&scopeCode=no_such_store', adminToken());
-        expect($response['status'])->toBe(422);
+        expect($response['status'])->toBe(400);
     });
 
     it('masks the value of a sensitive field', function (): void {
@@ -220,7 +220,7 @@ describe('Config setting write and inheritance (REST)', function (): void {
 
     it('refuses to delete at the default scope', function (): void {
         $response = apiDelete('/api/rest/v2/config-settings/' . CONFIG_SETTING_TEST_PATH, serviceToken(['config-settings/delete']));
-        expect($response['status'])->toBe(422);
+        expect($response['status'])->toBe(400);
     });
 
 });
