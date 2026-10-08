@@ -51,7 +51,7 @@ final class CartProvider extends \Maho\ApiPlatform\Provider
                 return null;
             }
             $this->assertCustomerAccess((int) $customerId);
-            $quote = $this->cartService->getCustomerCart((int) $customerId);
+            $quote = $this->cartService->getForCustomer((int) $customerId, StoreContext::getStoreId());
             return $this->cartMapper->mapQuoteToCart($quote);
         }
 
@@ -66,7 +66,7 @@ final class CartProvider extends \Maho\ApiPlatform\Provider
         // hasBackendAccess: admin, or a service token holding a carts grant. A bare
         // api_user token without the grant must NOT bypass cart ownership
         // (mirrors the write side's isPrivilegedCartActor()).
-        $this->cartService->verifyCartAccess(
+        $this->cartService->verifyAccess(
             $quote,
             $byMasked,
             $this->getAuthenticatedCustomerId(),
@@ -80,17 +80,17 @@ final class CartProvider extends \Maho\ApiPlatform\Provider
         // They bypass the mapper's read-boundary collection, so collect here.
         if ($operationName === 'get_guest_totals') {
             if (!$quote->getTotalsCollectedFlag()) {
-                \Mage_Checkout_Service_Cart::collectAndVerifyTotals($quote);
+                $this->cartService->collectAndVerifyTotals($quote);
             }
             return $this->respondRaw($this->cartMapper->mapPricesToArray($quote));
         }
 
         if ($operationName === 'get_guest_payments') {
             if (!$quote->getTotalsCollectedFlag()) {
-                \Mage_Checkout_Service_Cart::collectAndVerifyTotals($quote);
+                $this->cartService->collectAndVerifyTotals($quote);
             }
             // payment_method_is_active observers must see the cart's own store, not the caller's
-            return $this->respondRaw(\Mage_Checkout_Service_Cart::inQuoteStoreScope(
+            return $this->respondRaw($this->cartService->inQuoteStoreScope(
                 $quote,
                 fn(): array => $this->cartMapper->getAvailablePaymentMethods($quote),
             ));

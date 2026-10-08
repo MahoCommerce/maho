@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace Mage\Checkout\Api\GraphQL;
 
+use Mage\Checkout\Api\CartRequest;
 use Mage\Checkout\Api\Cart;
 use Mage\Checkout\Api\CartMapper;
 use Maho\ApiPlatform\Exception\NotFoundException;
@@ -44,7 +45,7 @@ class CartMutationHandler
         AdminAcl::checkResource(Cart::class);
         $cartId = $variables['cartId'] ?? $variables['id'] ?? null;
         $maskedId = $variables['maskedId'] ?? null;
-        $quote = $this->cartService->getCart($cartId ? (int) $cartId : null, $maskedId);
+        $quote = CartRequest::load($cartId ? (int) $cartId : null, $maskedId);
         return ['cart' => $quote ? $this->mapCart($quote) : null];
     }
 
@@ -56,11 +57,9 @@ class CartMutationHandler
         AdminAcl::checkResource(Cart::class);
         $customerId = $variables['customerId'] ?? $context['customer_id'] ?? null;
         $storeId = $variables['storeId'] ?? $context['store_id'] ?? 1;
-        $result = $this->cartService->createEmptyCart($customerId, $storeId);
-        $mapped = $this->mapCart($result['quote']);
-        if (!empty($result['maskedId'])) {
-            $mapped['maskedId'] = $result['maskedId'];
-        }
+        $quote = $this->cartService->create($customerId ? (int) $customerId : null, (int) $storeId);
+        $mapped = $this->mapCart($quote);
+        $mapped['maskedId'] = $quote->getData('masked_quote_id');
         return ['createCart' => $mapped];
     }
 
@@ -88,7 +87,7 @@ class CartMutationHandler
         if (!$sku) {
             throw ValidationException::requiredField('sku');
         }
-        $quote = $this->cartService->getCart((int) $cartId);
+        $quote = CartRequest::load((int) $cartId);
         if (!$quote) {
             throw NotFoundException::cart($cartId);
         }
@@ -115,7 +114,7 @@ class CartMutationHandler
         if ($qty === null) {
             throw ValidationException::requiredField('qty');
         }
-        $quote = $this->cartService->getCart((int) $cartId);
+        $quote = CartRequest::load((int) $cartId);
         if (!$quote) {
             throw NotFoundException::cart($cartId);
         }
@@ -137,7 +136,7 @@ class CartMutationHandler
         if (!$itemId) {
             throw ValidationException::requiredField('itemId');
         }
-        $quote = $this->cartService->getCart((int) $cartId);
+        $quote = CartRequest::load((int) $cartId);
         if (!$quote) {
             throw NotFoundException::cart($cartId);
         }
@@ -160,7 +159,7 @@ class CartMutationHandler
         if (!$couponCode) {
             throw ValidationException::requiredField('couponCode');
         }
-        $quote = $this->cartService->getCart((int) $cartId);
+        $quote = CartRequest::load((int) $cartId);
         if (!$quote) {
             throw NotFoundException::cart($cartId);
         }
@@ -200,7 +199,7 @@ class CartMutationHandler
         if (!$cartId) {
             throw ValidationException::requiredField('cartId');
         }
-        $quote = $this->cartService->getCart((int) $cartId);
+        $quote = CartRequest::load((int) $cartId);
         if (!$quote) {
             throw NotFoundException::cart($cartId);
         }
@@ -222,7 +221,7 @@ class CartMutationHandler
         if (!$customerId) {
             throw ValidationException::requiredField('customerId');
         }
-        $quote = $this->cartService->getCart((int) $cartId);
+        $quote = CartRequest::load((int) $cartId);
         if (!$quote) {
             throw NotFoundException::cart($cartId);
         }
@@ -292,7 +291,7 @@ class CartMutationHandler
             throw ValidationException::requiredField('code');
         }
 
-        $quote = $this->cartService->getCart((int) $cartId);
+        $quote = CartRequest::load((int) $cartId);
         if (!$quote) {
             throw NotFoundException::cart($cartId);
         }
@@ -325,7 +324,7 @@ class CartMutationHandler
             throw ValidationException::requiredField('code');
         }
 
-        $quote = $this->cartService->getCart((int) $cartId);
+        $quote = CartRequest::load((int) $cartId);
         if (!$quote) {
             throw NotFoundException::cart($cartId);
         }
@@ -357,7 +356,7 @@ class CartMutationHandler
 
         $quote = $this->loadAdminQuote($cartId);
 
-        return \Mage_Checkout_Service_Cart::inQuoteStoreScope($quote, function () use ($quote): array {
+        return $this->cartService->inQuoteStoreScope($quote, function () use ($quote): array {
             $shippingAddress = $quote->getShippingAddress();
             if (!$shippingAddress->getCountryId()) {
                 $defaults = \Maho\ApiPlatform\Service\StoreDefaults::getPosAddress($quote->getStoreId() ? (int) $quote->getStoreId() : null);

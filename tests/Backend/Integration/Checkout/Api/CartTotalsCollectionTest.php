@@ -14,7 +14,7 @@ uses(Tests\MahoBackendTestCase::class);
 
 /**
  * Every cart mutation request used to collect totals at least twice: once when
- * getCart() loaded the quote and again after the mutation. Only the
+ * the service loaded the quote and again after the mutation. Only the
  * post-mutation collection produces the persisted totals, so the load-time
  * collection is pure waste. These tests pin the collection count per request.
  */

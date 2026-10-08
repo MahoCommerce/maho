@@ -102,11 +102,11 @@ class SocialAuthProcessor extends \Maho\ApiPlatform\Processor
         $guestCartMaskedId = $data->cartId;
         $cartId = null;
         $customerCart = null;
-        if (\Mage_Checkout_Service_Cart::isValidMaskedId($guestCartMaskedId)) {
+        if ($this->cartService->isValidMaskedId($guestCartMaskedId)) {
             try {
-                // \Mage_Checkout_Service_Cart::mergeCarts enforces the guest-cart ownership guard,
+                // \Mage_Checkout_Service_Cart::merge enforces the guest-cart ownership guard,
                 // re-collects totals, and deactivates the guest cart atomically.
-                $customerCart = $this->cartService->mergeCarts($guestCartMaskedId, (int) $customer->getId());
+                $customerCart = $this->cartService->merge($guestCartMaskedId, (int) $customer->getId());
                 $cartId = (int) $customerCart->getId();
             } catch (\Exception $e) {
                 \Mage::log('Cart merge failed: ' . $e->getMessage(), \Mage::LOG_WARNING);

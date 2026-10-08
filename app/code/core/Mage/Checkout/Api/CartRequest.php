@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Finds the cart that an API request names, from its path, its body or its GraphQL arguments.
+ * Finds the cart that an API request names, from its path, its body or its GraphQL arguments, and the store of a new cart.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -12,6 +12,7 @@ declare(strict_types=1);
 
 namespace Mage\Checkout\Api;
 
+use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 final class CartRequest
@@ -26,7 +27,7 @@ final class CartRequest
         if (!preg_match('#/guest-carts/([^/?]+)#', $path, $m)) {
             return null;
         }
-        return \Mage_Checkout_Service_Cart::isValidMaskedId($m[1]) ? $m[1] : null;
+        return \Mage::getService('checkout/cart')->isValidMaskedId($m[1]) ? $m[1] : null;
     }
 
     /**
@@ -88,7 +89,36 @@ final class CartRequest
             return ['quote' => null, 'accessedByMaskedId' => false, 'maskedId' => null];
         }
 
-        $quote = \Mage::getService('checkout/cart')->getCart($cartId, $maskedId);
+        $quote = self::load($cartId, $maskedId);
         return ['quote' => $quote, 'accessedByMaskedId' => $maskedId !== null, 'maskedId' => $maskedId];
+    }
+
+    /**
+     * Load a cart by its masked id or, when there is none, by its id. Give it the display currency
+     * that the request asks for with X-Currency-Code.
+     */
+    public static function load(?int $cartId, ?string $maskedId = null): ?\Mage_Sales_Model_Quote
+    {
+        $service = \Mage::getService('checkout/cart');
+        if ($maskedId) {
+            $quote = $service->getByMaskedId($maskedId);
+        } else {
+            $quote = $cartId ? $service->getById($cartId) : null;
+        }
+
+        if ($quote) {
+            StoreContext::applyRequestedCurrencyToQuote($quote);
+        }
+
+        return $quote;
+    }
+
+    /**
+     * The store of a new cart: $requestedStoreId when the request names one, else the store of the API
+     * request. A cart never belongs to the admin store (0).
+     */
+    public static function storeId(?int $requestedStoreId = null): int
+    {
+        return $requestedStoreId ?: (StoreContext::getStoreId() ?: StoreContext::getDefaultStoreId());
     }
 }

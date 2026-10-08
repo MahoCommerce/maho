@@ -102,14 +102,14 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
             $cartId = null;
             $customerCart = null;
 
-            if (\Mage_Checkout_Service_Cart::isValidMaskedId($guestCartMaskedId)) {
+            if ($this->cartService->isValidMaskedId($guestCartMaskedId)) {
                 try {
-                    // Delegate to \Mage_Checkout_Service_Cart::mergeCarts, which enforces the full
+                    // Delegate to \Mage_Checkout_Service_Cart::merge, which enforces the full
                     // guest-cart ownership guard (rejecting a masked ID resolving
                     // to another customer's cart), re-collects totals correctly
                     // (setTotalsCollectedFlag(false) before collectTotals), and
                     // deactivates the guest cart atomically.
-                    $customerCart = $this->cartService->mergeCarts($guestCartMaskedId, (int) $customer->getId());
+                    $customerCart = $this->cartService->merge($guestCartMaskedId, (int) $customer->getId());
                     $cartId = (int) $customerCart->getId();
                 } catch (\Exception $e) {
                     \Mage::log('Cart merge failed: ' . $e->getMessage(), \Mage::LOG_WARNING);

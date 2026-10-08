@@ -109,7 +109,7 @@ function customerScopeItemReads(): array
 
             // Cart is exempt as a whole: its item reads resolve guest carts by
             // masked id and are ownership-gated inside
-            // \Mage_Checkout_Service_Cart::verifyCartAccess() (shared with the write
+            // \Mage_Checkout_Service_Cart::verifyAccess() (shared with the write
             // processors), which already answers 404 for foreign rows.
             if ($shortName === 'Cart') {
                 continue;
