@@ -29,7 +29,7 @@ class Mage_Sales_Service_Order
      * @param int|null $employeeId Employee ID (for POS)
      * @return array [order, changeAmount]
      */
-    public function placeAdminOrder(
+    public function place(
         \Mage_Sales_Model_Quote $quote,
         ?string $guestEmail = null,
         ?string $orderNote = null,
@@ -187,28 +187,23 @@ class Mage_Sales_Service_Order
     }
 
     /**
-     * Get order by ID or increment ID (authenticated customers only)
-     *
-     * @param int|null $orderId Order ID
-     * @param string|null $incrementId Increment ID
+     * Get an order by its id.
      */
-    public function getOrder(?int $orderId = null, ?string $incrementId = null): ?\Mage_Sales_Model_Order
+    public function getById(int $orderId): ?\Mage_Sales_Model_Order
     {
-        $order = \Mage::getModel('sales/order');
+        $order = \Mage::getModel('sales/order')->load($orderId);
 
-        if ($orderId) {
-            $order->load($orderId);
-        } elseif ($incrementId) {
-            $order->loadByIncrementId($incrementId);
-        } else {
-            return null;
-        }
+        return $order->getId() ? $order : null;
+    }
 
-        if (!$order->getId()) {
-            return null;
-        }
+    /**
+     * Get an order by its increment id.
+     */
+    public function getByIncrementId(string $incrementId): ?\Mage_Sales_Model_Order
+    {
+        $order = \Mage::getModel('sales/order')->loadByIncrementId($incrementId);
 
-        return $order;
+        return $order->getId() ? $order : null;
     }
 
     /**
@@ -217,7 +212,7 @@ class Mage_Sales_Service_Order
      * @param string $incrementId Order increment ID
      * @param string $accessToken Guest access token
      */
-    public function getGuestOrder(string $incrementId, string $accessToken): ?\Mage_Sales_Model_Order
+    public function getForGuest(string $incrementId, string $accessToken): ?\Mage_Sales_Model_Order
     {
         $order = \Mage::getModel('sales/order')->loadByIncrementId($incrementId);
 
@@ -243,7 +238,7 @@ class Mage_Sales_Service_Order
      * @param int[]|null $allowedStoreIds Token store allowlist; null means unrestricted
      * @return array{orders: array, total: int}
      */
-    public function getAllOrders(
+    public function getList(
         int $page = 1,
         int $pageSize = 20,
         #[\SensitiveParameter]
@@ -301,7 +296,7 @@ class Mage_Sales_Service_Order
      * @param string|null $since Filter by updated_at >= value (ISO datetime)
      * @return array{orders: array, total: int}
      */
-    public function getCustomerOrders(
+    public function getListForCustomer(
         int $customerId,
         int $page = 1,
         int $pageSize = 20,
@@ -318,7 +313,7 @@ class Mage_Sales_Service_Order
      *
      * @return \Mage_Sales_Model_Order[]
      */
-    public function getRecentOrders(int $limit, ?int $storeId = null): array
+    public function getRecent(int $limit, ?int $storeId = null): array
     {
         $collection = $this->buildOrderCollection();
         if ($storeId !== null) {
@@ -334,7 +329,7 @@ class Mage_Sales_Service_Order
      *
      * @return \Mage_Sales_Model_Order[]
      */
-    public function searchOrders(string $query, ?int $storeId, int $limit): array
+    public function search(string $query, ?int $storeId, int $limit): array
     {
         $collection = $this->buildOrderCollection();
         if ($storeId !== null) {
@@ -479,7 +474,7 @@ class Mage_Sales_Service_Order
      * @param \Mage_Sales_Model_Order $order Order
      * @param string|null $reason Cancellation reason
      */
-    public function cancelOrder(\Mage_Sales_Model_Order $order, ?string $reason = null): \Mage_Sales_Model_Order
+    public function cancel(\Mage_Sales_Model_Order $order, ?string $reason = null): \Mage_Sales_Model_Order
     {
         return $this->withOrderLock((int) $order->getId(), function () use ($order, $reason) {
             // Re-read under the lock so canCancel() sees live state: a concurrent
@@ -511,7 +506,7 @@ class Mage_Sales_Service_Order
      * Put an order on hold. Serialized with the other state transitions through
      * the cross-request order lock so a hold can't race an invoice/ship/cancel.
      */
-    public function holdOrder(\Mage_Sales_Model_Order $order, ?string $reason = null): \Mage_Sales_Model_Order
+    public function hold(\Mage_Sales_Model_Order $order, ?string $reason = null): \Mage_Sales_Model_Order
     {
         return $this->withOrderLock((int) $order->getId(), function () use ($order, $reason) {
             $order->load((int) $order->getId());
@@ -537,7 +532,7 @@ class Mage_Sales_Service_Order
     /**
      * Release an order from hold.
      */
-    public function unholdOrder(\Mage_Sales_Model_Order $order, ?string $reason = null): \Mage_Sales_Model_Order
+    public function unhold(\Mage_Sales_Model_Order $order, ?string $reason = null): \Mage_Sales_Model_Order
     {
         return $this->withOrderLock((int) $order->getId(), function () use ($order, $reason) {
             $order->load((int) $order->getId());
@@ -569,7 +564,7 @@ class Mage_Sales_Service_Order
      * @param bool $visibleOnFront Visible on frontend
      * @param string|null $status New order status; the order refuses one not assigned to its current state
      */
-    public function addOrderNote(
+    public function addNote(
         \Mage_Sales_Model_Order $order,
         string $note,
         bool $notifyCustomer = false,
@@ -592,7 +587,7 @@ class Mage_Sales_Service_Order
      * @param \Mage_Sales_Model_Order $order Order
      * @return array Order notes
      */
-    public function getOrderNotes(\Mage_Sales_Model_Order $order, bool $visibleOnly = false): array
+    public function getNotes(\Mage_Sales_Model_Order $order, bool $visibleOnly = false): array
     {
         $notes = [];
 
@@ -624,7 +619,7 @@ class Mage_Sales_Service_Order
      *
      * @return list<\Mage_Sales_Model_Order_Shipment>
      */
-    public function getOrderShipments(\Mage_Sales_Model_Order $order, bool $visibleCommentsOnly = false): array
+    public function getShipments(\Mage_Sales_Model_Order $order, bool $visibleCommentsOnly = false): array
     {
         $models = [];
         foreach ($order->getShipmentsCollection() as $shipment) {
@@ -655,61 +650,199 @@ class Mage_Sales_Service_Order
     }
 
     /**
-     * Create invoice for an order
+     * Invoice an order and email the invoice to the customer when $notifyCustomer is true.
      *
-     * @param \Mage_Sales_Model_Order $order Order to invoice
-     * @param bool $capture Whether to capture payment (CAPTURE_OFFLINE) or not (NOT_CAPTURE)
-     * @return \Mage_Sales_Model_Order_Invoice|null Null if order cannot be invoiced
+     * @param array<int, float> $qtys Order item id => qty to invoice. An empty map invoices every item.
+     * @param string|null $captureCase One of the Mage_Sales_Model_Order_Invoice::CAPTURE_* and NOT_CAPTURE constants.
+     * @throws \Mage_Core_Exception_Conflict When the order cannot be invoiced, or another request holds the order lock.
+     * @throws \Mage_Core_Exception When a qty is not valid, or the invoice has no items.
      */
-    public function createInvoiceForOrder(\Mage_Sales_Model_Order $order, bool $capture = true): ?\Mage_Sales_Model_Order_Invoice
-    {
-        return $this->withOrderLock((int) $order->getId(), function () use ($order, $capture) {
+    public function invoice(
+        \Mage_Sales_Model_Order $order,
+        array $qtys = [],
+        ?string $captureCase = null,
+        ?string $comment = null,
+        bool $notifyCustomer = false,
+    ): \Mage_Sales_Model_Order_Invoice {
+        $invoice = $this->withOrderLock((int) $order->getId(), function () use ($order, $qtys, $captureCase, $comment, $notifyCustomer) {
             // Re-read under the lock so canInvoice() reflects any invoice another
             // request created while we waited, otherwise both would register one.
             $order->load((int) $order->getId());
             if (!$order->canInvoice()) {
-                return null;
+                throw new \Mage_Core_Exception_Conflict('Order cannot be invoiced (already fully invoiced or not in an invoiceable state)');
             }
 
-            $invoice = $order->prepareInvoice();
-            $invoice->setRequestedCaptureCase(
-                $capture ? \Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE : \Mage_Sales_Model_Order_Invoice::NOT_CAPTURE,
-            );
-            $invoice->register();
+            foreach ($qtys as $orderItemId => $qty) {
+                $orderItem = $order->getItemById($orderItemId);
+                // Dummy (bundle/configurable parent) items take their qty from the
+                // order, so neither check applies to them.
+                if (!$orderItem || $orderItem->isDummy()) {
+                    continue;
+                }
+                if (!$orderItem->getIsQtyDecimal() && fmod($qty, 1.0) !== 0.0) {
+                    throw new \Mage_Core_Exception("Order item {$orderItemId} does not accept a fractional qty");
+                }
+                if ($qty > (float) $orderItem->getQtyToInvoice()) {
+                    throw new \Mage_Core_Exception("Qty to invoice for order item {$orderItemId} exceeds the qty available to invoice");
+                }
+            }
 
-            $transactionSave = \Mage::getModel('core/resource_transaction');
-            $transactionSave->addObject($invoice)->addObject($order)->save();
+            $invoice = \Mage::getModel('sales/service_order', $order)->prepareInvoice($qtys);
+            if (!$invoice->getTotalQty()) {
+                throw new \Mage_Core_Exception('Cannot create invoice: no items to invoice');
+            }
+
+            if ($captureCase === \Mage_Sales_Model_Order_Invoice::CAPTURE_ONLINE && !$invoice->canCapture()) {
+                throw new \Mage_Core_Exception('The order\'s payment method does not support online capture');
+            }
+            if ($captureCase !== null) {
+                $invoice->setRequestedCaptureCase($captureCase);
+            }
+
+            if ($comment) {
+                $invoice->addComment($comment, $notifyCustomer);
+            }
+
+            $invoice->register();
+            $invoice->getOrder()->setIsInProcess();
+
+            \Mage::getModel('core/resource_transaction')
+                ->addObject($invoice)
+                ->addObject($invoice->getOrder())
+                ->save();
+
+            return $invoice;
+        });
+
+        if ($notifyCustomer) {
+            $invoice->sendEmail(true, $comment ?? '');
+        }
+
+        return $invoice;
+    }
+
+    /**
+     * Capture an invoice.
+     *
+     * @throws \Mage_Core_Exception_Conflict When the invoice cannot be captured, or another request holds the order lock.
+     */
+    public function captureInvoice(\Mage_Sales_Model_Order_Invoice $invoice): \Mage_Sales_Model_Order_Invoice
+    {
+        return $this->changeInvoice($invoice, 'capture');
+    }
+
+    /**
+     * Void an invoice.
+     *
+     * @throws \Mage_Core_Exception_Conflict When the invoice cannot be voided, or another request holds the order lock.
+     */
+    public function voidInvoice(\Mage_Sales_Model_Order_Invoice $invoice): \Mage_Sales_Model_Order_Invoice
+    {
+        return $this->changeInvoice($invoice, 'void');
+    }
+
+    /**
+     * Cancel an invoice.
+     *
+     * @throws \Mage_Core_Exception_Conflict When the invoice cannot be canceled, or another request holds the order lock.
+     */
+    public function cancelInvoice(\Mage_Sales_Model_Order_Invoice $invoice): \Mage_Sales_Model_Order_Invoice
+    {
+        return $this->changeInvoice($invoice, 'cancel');
+    }
+
+    /**
+     * @param 'capture'|'void'|'cancel' $action
+     */
+    private function changeInvoice(\Mage_Sales_Model_Order_Invoice $invoice, string $action): \Mage_Sales_Model_Order_Invoice
+    {
+        // Capture, void and cancel change the order totals, so they take the order lock too.
+        return $this->withOrderLock((int) $invoice->getOrderId(), function () use ($invoice, $action) {
+            // Re-read under the lock so the can*() checks reflect the live state.
+            $invoice->load((int) $invoice->getId());
+
+            $allowed = match ($action) {
+                'capture' => $invoice->canCapture(),
+                'void' => $invoice->canVoid(),
+                'cancel' => $invoice->canCancel(),
+            };
+            if (!$allowed) {
+                $past = match ($action) {
+                    'capture' => 'captured',
+                    'void' => 'voided',
+                    'cancel' => 'canceled',
+                };
+                throw new \Mage_Core_Exception_Conflict("The invoice cannot be {$past} in its current state");
+            }
+
+            $invoice->{$action}();
+            $invoice->getOrder()->setIsInProcess();
+
+            \Mage::getModel('core/resource_transaction')
+                ->addObject($invoice)
+                ->addObject($invoice->getOrder())
+                ->save();
 
             return $invoice;
         });
     }
 
     /**
-     * Create shipment for an order
+     * Ship an order and email the shipment to the customer when $notifyCustomer is true.
      *
-     * @param \Mage_Sales_Model_Order $order Order to ship
-     * @return \Mage_Sales_Model_Order_Shipment|null Null if order cannot be shipped
+     * @param array<int, float> $qtys Order item id => qty to ship. An empty map ships every item.
+     * @param list<\Mage_Sales_Model_Order_Shipment_Track> $tracks Tracking numbers to add to the shipment.
+     * @throws \Mage_Core_Exception_Conflict When the order cannot be shipped, or another request holds the order lock.
+     * @throws \Mage_Core_Exception When the shipment has no items.
      */
-    public function createShipmentForOrder(\Mage_Sales_Model_Order $order): ?\Mage_Sales_Model_Order_Shipment
-    {
-        return $this->withOrderLock((int) $order->getId(), function () use ($order) {
+    public function ship(
+        \Mage_Sales_Model_Order $order,
+        array $qtys = [],
+        array $tracks = [],
+        ?string $comment = null,
+        bool $notifyCustomer = false,
+    ): \Mage_Sales_Model_Order_Shipment {
+        $shipment = $this->withOrderLock((int) $order->getId(), function () use ($order, $qtys, $tracks, $comment, $notifyCustomer) {
             // Re-read under the lock so canShip() reflects any shipment another
             // request created while we waited, otherwise both would register one
             // and decrement inventory twice.
             $order->load((int) $order->getId());
             if (!$order->canShip()) {
-                return null;
+                throw new \Mage_Core_Exception_Conflict('Order cannot be shipped (already fully shipped or not in a shippable state)');
             }
 
-            $shipment = $order->prepareShipment();
-            $shipment->register();
-            $order->setIsInProcess();
+            $shipment = \Mage::getModel('sales/service_order', $order)->prepareShipment($qtys ?: null);
+            if (!$shipment || !$shipment->getTotalQty()) {
+                throw new \Mage_Core_Exception('Cannot create shipment: no items to ship');
+            }
 
-            $transactionSave = \Mage::getModel('core/resource_transaction');
-            $transactionSave->addObject($shipment)->addObject($order)->save();
+            foreach ($tracks as $track) {
+                $shipment->addTrack($track);
+            }
+
+            if ($comment) {
+                $shipment->addComment($comment, $notifyCustomer);
+            }
+
+            $shipment->register();
+
+            // Without a change on the order itself its save() short-circuits, so the
+            // qty_shipped that register() put on the items never persists.
+            $shipment->getOrder()->setIsInProcess();
+
+            \Mage::getModel('core/resource_transaction')
+                ->addObject($shipment)
+                ->addObject($shipment->getOrder())
+                ->save();
 
             return $shipment;
         });
+
+        if ($notifyCustomer) {
+            $shipment->sendEmail(true, $comment ?? '');
+        }
+
+        return $shipment;
     }
 
     /**
@@ -726,7 +859,7 @@ class Mage_Sales_Service_Order
      * @throws \Mage_Core_Exception_Conflict When another request already holds the order lock.
      * @throws \Exception When the refund itself fails, for example at the payment gateway.
      */
-    public function createCreditMemoForOrder(
+    public function refund(
         \Mage_Sales_Model_Order $order,
         array $data,
         ?string $comment = null,

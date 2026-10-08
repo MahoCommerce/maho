@@ -71,10 +71,11 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         $orderId = $uriVariables['id'] ?? $args['orderId'] ?? null;
         $incrementId = $args['incrementId'] ?? null;
 
-        $order = $this->orderService->getOrder(
-            $orderId !== null ? (int) $orderId : null,
-            $incrementId,
-        );
+        $order = match (true) {
+            (int) $orderId > 0 => $this->orderService->getById((int) $orderId),
+            is_string($incrementId) && $incrementId !== '' => $this->orderService->getByIncrementId($incrementId),
+            default => null,
+        };
         if (!$order) {
             throw new NotFoundHttpException('Order not found');
         }
@@ -142,7 +143,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
 
         // Set shipping method directly on the in-memory address. The frontend
         // sends a composite carrier_method string in the body, and we preserve
-        // the in-memory quote state through to placeAdminOrder rather than
+        // the in-memory quote state through to place() rather than
         // save + reload through cartService->setShippingMethod.
         $validateShippingMethod = false;
         if ($shippingMethod && !$quote->isVirtual()) {
@@ -199,7 +200,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
                 'shipping_method' => $shippingMethod,
             ]);
 
-            return $this->orderService->placeAdminOrder(
+            return $this->orderService->place(
                 $quote,
                 $guestEmail,
                 $orderNote,
@@ -237,7 +238,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         $reason = $args['reason'] ?? null;
 
         $order = $this->resolveManagedOrder($context, $uriVariables);
-        $order = $this->orderService->cancelOrder($order, $reason);
+        $order = $this->orderService->cancel($order, $reason);
 
         return $this->orderProvider->mapToDto($order);
     }
@@ -250,7 +251,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         $reason = $context['args']['input']['reason'] ?? null;
 
         $order = $this->resolveManagedOrder($context, $uriVariables);
-        $order = $this->orderService->holdOrder($order, $reason);
+        $order = $this->orderService->hold($order, $reason);
 
         return $this->orderProvider->mapToDto($order);
     }
@@ -263,7 +264,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         $reason = $context['args']['input']['reason'] ?? null;
 
         $order = $this->resolveManagedOrder($context, $uriVariables);
-        $order = $this->orderService->unholdOrder($order, $reason);
+        $order = $this->orderService->unhold($order, $reason);
 
         return $this->orderProvider->mapToDto($order);
     }
@@ -304,7 +305,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
                 ));
             }
         }
-        $order = $this->orderService->addOrderNote($order, $comment, $notifyCustomer, $visibleOnFront, $status);
+        $order = $this->orderService->addNote($order, $comment, $notifyCustomer, $visibleOnFront, $status);
 
         return $this->orderProvider->mapToDto($order);
     }

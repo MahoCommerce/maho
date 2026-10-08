@@ -11,7 +11,7 @@ declare(strict_types=1);
 uses(Tests\MahoBackendTestCase::class);
 
 /**
- * placeAdminOrder() throws the exception of a failed check unchanged, so the API returns its status and message.
+ * place() throws the exception of a failed check unchanged, so the API returns its status and message.
  */
 describe('The order service validation messages', function (): void {
 
@@ -56,7 +56,7 @@ describe('The order service validation messages', function (): void {
         $quote = $createQuote('123456789');
 
         try {
-            expect(fn() => \Mage::getService('sales/order')->placeAdminOrder($quote))
+            expect(fn() => \Mage::getService('sales/order')->place($quote))
                 ->toThrow(Mage_Core_Exception::class, 'Please enter a valid postcode for United States');
 
             $reloaded = Mage::getModel('sales/quote')->load($quote->getId());
@@ -71,7 +71,7 @@ describe('The order service validation messages', function (): void {
         $quote->setData('giftcard_codes', Mage::helper('core')->jsonEncode(['PEST-MISSING-CARD' => 10.0]));
 
         try {
-            expect(fn() => \Mage::getService('sales/order')->placeAdminOrder($quote))
+            expect(fn() => \Mage::getService('sales/order')->place($quote))
                 ->toThrow(Mage_Core_Exception::class, 'Gift card "PEST-MISSING-CARD" is no longer valid');
         } finally {
             $quote->delete();
