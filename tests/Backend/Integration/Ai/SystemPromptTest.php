@@ -82,9 +82,9 @@ it('stays within the size budget and keeps its sections', function (): void {
     expect($prompt)->toContain('How a task runs:', 'Maho in short:', 'Example of a good turn', 'How to answer:');
 });
 
-it('asks for the scope of a question only on an installation with several store views', function (): void {
+it('answers for every website, or asks for the scope, only on an installation with several store views', function (): void {
     $prompt = new Maho_Ai_Model_Chat_SystemPrompt()->build(aiPromptAdmin());
-    $rule = 'first ask which website, store or store view';
+    $rule = 'a table with one row for each website';
 
     if (count(Mage::app()->getStores()) > 1) {
         expect($prompt)->toContain($rule);

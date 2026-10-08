@@ -276,7 +276,7 @@ final class ChatController
             'entity_id' => is_scalar($id) && (string) $id !== '' ? (ctype_digit((string) $id) ? (int) $id : mb_substr((string) $id, 0, 64)) : null,
             'entity_label' => mb_substr(trim((string) ($raw['entity_label'] ?? '')), 0, 200),
             'store' => mb_substr(trim((string) ($raw['store'] ?? '')), 0, 32),
-            'screen' => mb_substr(trim((string) preg_replace('/[^\P{C}\n]+/u', ' ', (string) ($raw['screen'] ?? ''))), 0, 4000),
+            'screen' => mb_substr(trim((string) preg_replace('/[^\P{C}\n]+/u', ' ', (string) ($raw['screen'] ?? ''))), 0, 6000),
             'editor_guide' => mb_substr(trim((string) preg_replace('/[^\P{C}\n]+/u', ' ', (string) ($raw['editor_guide'] ?? ''))), 0, 40000),
         ];
     }

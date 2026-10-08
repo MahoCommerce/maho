@@ -774,16 +774,22 @@ class MahoAiAssistant {
 
         const grid = document.querySelector('.grid table');
         if (grid && visible(grid)) {
-            const columns = [...grid.querySelectorAll('thead th')].map(text).filter(Boolean);
-            const rows = grid.querySelectorAll('tbody tr').length;
-            lines.push(`Grid: ${rows} rows on this page, columns: ${columns.join(', ')}`);
+            const columns = [...grid.querySelectorAll('thead tr.headings th')].map(text);
+            const rows = [...grid.querySelectorAll('tbody tr')].filter(visible);
+            lines.push(`Grid: ${rows.length} rows on this page, columns: ${columns.filter(Boolean).join(', ')}`);
             const total = text(document.querySelector('.grid-widget .pager, .pager'));
             if (total) {
                 lines.push('Grid paging: ' + clip(total, 120));
             }
+            // A row link ends with /id/<record ID>/, so "open the third one" can name its record.
+            rows.slice(0, 15).forEach((row, index) => {
+                const id = (row.getAttribute('title') ?? '').match(/\/id\/(\d+)/)?.[1];
+                const cells = [...row.cells].map(text).filter(Boolean);
+                lines.push(clip(`Row ${index + 1}${id ? ` (record ID ${id})` : ''}: ${cells.join(' | ')}`, 200));
+            });
         }
 
-        return clip(lines.join('\n'), 4000);
+        return clip(lines.join('\n'), 6000);
     }
 
     // --- page actions -----------------------------------------------------------------
