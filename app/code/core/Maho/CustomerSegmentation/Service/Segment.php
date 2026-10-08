@@ -77,7 +77,7 @@ class Maho_CustomerSegmentation_Service_Segment
             $errors->addError('website_ids', $helper->__('Please select at least one website.'));
         }
         $knownWebsiteIds = array_map(intval(...), array_keys(Mage::app()->getWebsites()));
-        // A website or a group that was deleted after the last save stays valid in the stored list
+        // Accept a stored ID, because an admin can delete its website or group after the segment is saved
         $storedWebsiteIds = $segment::idList($segment->getOrigData('website_ids'));
         foreach (array_diff($websiteIds, $knownWebsiteIds, $storedWebsiteIds) as $id) {
             $errors->addError('website_ids', $helper->__('Unknown website ID: %s.', $id));

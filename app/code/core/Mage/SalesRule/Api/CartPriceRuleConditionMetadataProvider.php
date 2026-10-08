@@ -11,29 +11,17 @@ declare(strict_types=1);
 namespace Mage\SalesRule\Api;
 
 use ApiPlatform\Metadata\Operation;
+use Maho\ApiPlatform\Trait\ConditionMetadataProviderTrait;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 final class CartPriceRuleConditionMetadataProvider extends \Maho\ApiPlatform\Provider
 {
+    use ConditionMetadataProviderTrait;
     use ConditionMetadataTrait;
 
     #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): JsonResponse
     {
-        $user = $this->requireUser();
-        $document = $this->conditionMetadata($this->adminLocale());
-
-        $filters = ($context['filters'] ?? []) + ($context['request']?->query->all() ?? []);
-        $knownVersion = $this->stringFilter($filters, 'knownVersion');
-        if ($knownVersion !== null && hash_equals($document['version'], $knownVersion)) {
-            return $this->respondRaw([
-                'version' => $document['version'],
-                'unchanged' => true,
-                'scope' => $this->ruleScope($user),
-            ]);
-        }
-
-        $document['scope'] = $this->ruleScope($user);
-        return $this->respondRaw($document);
+        return $this->conditionMetadataResponse($context);
     }
 }

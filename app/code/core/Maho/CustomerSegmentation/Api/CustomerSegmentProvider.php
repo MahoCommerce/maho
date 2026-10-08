@@ -16,6 +16,7 @@ use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\State\Pagination\TraversablePaginator;
+use Maho\ApiPlatform\Security\AdminAcl;
 use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Service\StoreContext;
 
@@ -30,7 +31,7 @@ final class CustomerSegmentProvider extends \Maho\ApiPlatform\Provider
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): TraversablePaginator|\Maho_CustomerSegmentation_Model_Segment
     {
         StoreContext::ensureStore();
-        $this->assertSegmentAcl(CustomerSegment::ACL_MANAGE);
+        AdminAcl::checkPath(CustomerSegment::ACL_MANAGE);
 
         if ($operation instanceof CollectionOperationInterface) {
             return $this->segments($context);

@@ -359,9 +359,13 @@ class ApiExceptionListener implements EventSubscriberInterface
 
     /**
      * Return the API name of a model field: an API property is the camel case form of its column, website_ids is websiteIds.
+     * Return a path such as conditions.conditions[0].is_value_parsed as it is, because it names the keys that the client sent.
      */
     private static function apiFieldName(string $field): string
     {
+        if (!preg_match('/^[a-z][a-z0-9_]*$/', $field)) {
+            return $field;
+        }
         return lcfirst(str_replace('_', '', ucwords($field, '_')));
     }
 

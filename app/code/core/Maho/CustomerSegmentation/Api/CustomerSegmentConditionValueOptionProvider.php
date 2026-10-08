@@ -3,18 +3,19 @@
 /**
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
- * @package Mage_SalesRule
+ * @package Maho_CustomerSegmentation
  */
 
 declare(strict_types=1);
 
-namespace Mage\SalesRule\Api;
+namespace Maho\CustomerSegmentation\Api;
 
 use ApiPlatform\Metadata\Operation;
+use Maho\ApiPlatform\Security\AdminAcl;
 use Maho\ApiPlatform\Trait\ConditionMetadataProviderTrait;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
-final class CartPriceRuleConditionValueOptionProvider extends \Maho\ApiPlatform\Provider
+final class CustomerSegmentConditionValueOptionProvider extends \Maho\ApiPlatform\Provider
 {
     use ConditionMetadataProviderTrait;
     use ConditionMetadataTrait;
@@ -22,6 +23,7 @@ final class CartPriceRuleConditionValueOptionProvider extends \Maho\ApiPlatform\
     #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): JsonResponse
     {
+        AdminAcl::checkPath(CustomerSegment::ACL_MANAGE);
         return $this->conditionValueOptionsResponse($context);
     }
 }

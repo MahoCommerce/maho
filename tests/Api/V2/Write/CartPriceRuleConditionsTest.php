@@ -226,8 +226,8 @@ describe('Cart price rule trees', function (): void {
     it('rejects a cart condition in the actions tree', function (): void {
         $response = cprcCreate(['actions' => cprcRoot([cprcSubtotal()], 'salesrule/rule_condition_product_combine')]);
 
-        expect($response['status'])->toBe(400)
-            ->and($response['json']['error'])->toBe('validation_error')
+        expect($response['status'])->toBe(422)
+            ->and($response['json']['error'])->toBe('unprocessable_entity')
             ->and(cprcErrorFields($response))->toBe(['actions.conditions[0].type']);
     });
 
@@ -239,11 +239,11 @@ describe('Cart price rule trees', function (): void {
         $inside = cprcCreate(['name' => $name, 'conditions' => $nested]);
         $inActions = cprcCreate(['name' => $name, 'actions' => cprcRoot([['type' => $type]], 'salesrule/rule_condition_product_combine')]);
 
-        expect($atRoot['status'])->toBe(400)
+        expect($atRoot['status'])->toBe(422)
             ->and(cprcErrorFields($atRoot))->toBe(['conditions.type'])
-            ->and($inside['status'])->toBe(400)
+            ->and($inside['status'])->toBe(422)
             ->and(cprcErrorFields($inside))->toBe(['conditions.conditions[1].conditions[0].type'])
-            ->and($inActions['status'])->toBe(400)
+            ->and($inActions['status'])->toBe(422)
             ->and(cprcErrorFields($inActions))->toBe(['actions.conditions[0].type']);
 
         $saved = Mage::getResourceModel('salesrule/rule_collection')->addFieldToFilter('name', $name);
@@ -265,7 +265,7 @@ describe('Cart price rule trees', function (): void {
             cprcSubtotal('abc'),
         ])]);
 
-        expect($response['status'])->toBe(400)
+        expect($response['status'])->toBe(422)
             ->and(cprcErrorFields($response))->toBe([
                 'conditions.conditions[0].attribute',
                 'conditions.conditions[1].operator',
@@ -282,11 +282,11 @@ describe('Cart price rule trees', function (): void {
             $deep = cprcRoot([$deep]);
         }
         $depth = cprcCreate(['conditions' => $deep]);
-        expect($depth['status'])->toBe(400)
+        expect($depth['status'])->toBe(422)
             ->and($depth['json']['message'])->toContain('levels');
 
         $large = cprcCreate(['conditions' => cprcRoot(array_fill(0, 250, cprcSubtotal()))]);
-        expect($large['status'])->toBe(400)
+        expect($large['status'])->toBe(422)
             ->and(cprcErrorFields($large))->toBe(['conditions.conditions[249]']);
     });
 
@@ -327,7 +327,7 @@ describe('Cart price rule trees', function (): void {
             ->and(cprcWithoutLabels($kept['json']['conditions'])['conditions'])->toBe([$legacy, cprcSubtotal('5')]);
 
         $changed = apiPut(CPRC_PATH . "/{$id}", ['conditions' => cprcRoot([['operator' => '!='] + $legacy])], adminToken());
-        expect($changed['status'])->toBe(400)
+        expect($changed['status'])->toBe(422)
             ->and(cprcErrorFields($changed))->toBe(['conditions.conditions[0].value']);
     });
 
