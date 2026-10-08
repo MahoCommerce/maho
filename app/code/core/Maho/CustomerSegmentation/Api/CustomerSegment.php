@@ -109,6 +109,7 @@ class CustomerSegment extends \Maho\ApiPlatform\Resource
             . 'The root has the type customersegmentation/segment_condition_combine, the aggregator all or any, and the value true (the conditions are true) or false (they are false). '
             . 'A leaf has a type and an attribute, for example the type customersegmentation/segment_condition_customer_clv with the attribute lifetime_sales, number_of_orders or average_order_value, '
             . 'or the type customersegmentation/segment_condition_customer_timebased with days_since_last_order. The condition metadata lists every type with its attributes, operators and values. '
+            . 'An amount, such as lifetime_sales, is in the base currency of each website, and the label of the leaf shows the currency code. '
             . 'Operators are ==, !=, >=, <=, >, <, {} (contains), !{} (does not contain), () (is one of) and !() (is not one of).',
         'properties' => [
             'type' => ['type' => 'string'],

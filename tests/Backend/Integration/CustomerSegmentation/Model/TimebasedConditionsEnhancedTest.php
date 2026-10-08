@@ -215,6 +215,7 @@ describe('Enhanced Time-based Customer Conditions', function () {
             $order->setCustomerId($todayCustomer->getId());
             $order->setCustomerEmail($todayCustomer->getEmail());
             $order->setGrandTotal(100.00);
+            $order->setBaseGrandTotal(100.00);
             $order->setState(Mage_Sales_Model_Order::STATE_NEW);
             $order->setStatus('pending');
             $order->setStoreId(1);
@@ -521,6 +522,7 @@ describe('Enhanced Time-based Customer Conditions', function () {
                 $order->setCustomerId($customer->getId());
                 $order->setCustomerEmail($customer->getEmail());
                 $order->setGrandTotal($orderData['total']);
+                $order->setBaseGrandTotal($orderData['total']);
                 $order->setData('state', orderStateForStatus($orderData['status']));
                 $order->setStatus($orderData['status']);
                 $order->setStoreId(1);

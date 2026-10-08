@@ -77,7 +77,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Clv extends Mah
                 }
                 $select = $adapter->select()
                     ->from(['c' => $resource->getTableName('customer/entity')], ['customer_id' => 'c.entity_id'])
-                    ->joinLeft(['o' => $salesTable], $joinConditions, ['total' => 'COALESCE(SUM(o.grand_total), 0)'])
+                    ->joinLeft(['o' => $salesTable], $joinConditions, ['total' => 'COALESCE(SUM(o.base_grand_total), 0)'])
                     ->group('c.entity_id');
                 break;
 
@@ -101,22 +101,28 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Clv extends Mah
                 }
                 $select = $adapter->select()
                     ->from(['c' => $resource->getTableName('customer/entity')], ['customer_id' => 'c.entity_id'])
-                    ->joinLeft(['o' => $salesTable], $joinConditions, ['total' => 'COALESCE(AVG(o.grand_total), 0)'])
+                    ->joinLeft(['o' => $salesTable], $joinConditions, ['total' => 'COALESCE(AVG(o.base_grand_total), 0)'])
                     ->group('c.entity_id');
                 break;
 
             case 'lifetime_profit':
                 $salesSelect = $adapter->select()
-                    ->from(['o' => $salesTable], ['customer_id', 'amount' => 'SUM(o.grand_total)'])
+                    ->from(['o' => $salesTable], ['customer_id', 'amount' => 'SUM(o.base_grand_total)'])
                     ->where('o.customer_id IS NOT NULL')
                     ->where('o.state NOT IN (?)', ['canceled', 'closed'])
                     ->group('o.customer_id');
 
                 $refundsSelect = $adapter->select()
-                    ->from(['c' => $creditmemoTable], ['customer_id' => 'o.customer_id', 'amount' => 'SUM(c.grand_total)'])
+                    ->from(['c' => $creditmemoTable], ['customer_id' => 'o.customer_id', 'amount' => 'SUM(c.base_grand_total)'])
                     ->join(['o' => $salesTable], 'c.order_id = o.entity_id', [])
                     ->where('o.customer_id IS NOT NULL')
                     ->group('o.customer_id');
+
+                if ($website) {
+                    $websiteStores = Mage::app()->getWebsite($website)->getStoreIds();
+                    $salesSelect->where('o.store_id IN (?)', $websiteStores);
+                    $refundsSelect->where('o.store_id IN (?)', $websiteStores);
+                }
 
                 $select = $adapter->select()
                     ->from(['sales' => new Maho\Db\Expr("({$salesSelect})")], ['customer_id'])
@@ -130,26 +136,21 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Clv extends Mah
 
             case 'lifetime_refunds':
                 $select = $adapter->select()
-                    ->from(['c' => $creditmemoTable], ['customer_id' => 'o.customer_id', 'total' => 'SUM(c.grand_total)'])
+                    ->from(['c' => $creditmemoTable], ['customer_id' => 'o.customer_id', 'total' => 'SUM(c.base_grand_total)'])
                     ->join(['o' => $salesTable], 'c.order_id = o.entity_id', [])
                     ->where('o.customer_id IS NOT NULL')
                     ->group('o.customer_id');
+                if ($website) {
+                    $select->where('o.store_id IN (?)', Mage::app()->getWebsite($website)->getStoreIds());
+                }
                 break;
 
             default:
                 return $requireValid ? 'FALSE' : 'TRUE';
         }
 
-        if ($website && !in_array($attribute, ['lifetime_sales', 'lifetime_orders', 'number_of_orders', 'average_order_value'])) {
-            // Store filter is already handled in JOIN conditions for the main attributes
-            $websiteStores = Mage::app()->getWebsite($website)->getStoreIds();
-            if (isset($salesTable)) {
-                $select->where('o.store_id IN (?)', $websiteStores);
-            }
-        }
-
         // For LEFT JOIN queries, filter by customer website
-        if ($website && in_array($attribute, ['lifetime_sales', 'lifetime_orders', 'average_order_value'])) {
+        if ($website && in_array($attribute, ['lifetime_sales', 'average_order_value'])) {
             $select->where('c.website_id = ?', $website);
         }
 
@@ -180,7 +181,9 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Clv extends Mah
         $attributeLabel = is_array($attributeOptions) && isset($attributeOptions[$attribute]) ? $attributeOptions[$attribute] : $attribute;
 
         $operatorName = $this->getOperatorName();
-        $valueName = $this->getValueName();
+        $valueName = in_array($attribute, ['lifetime_sales', 'average_order_value', 'lifetime_profit', 'lifetime_refunds'], true)
+            ? $this->getAmountValueName()
+            : $this->getValueName();
         return Mage::helper('customersegmentation')->__('Order') . ':' . ' ' . $attributeLabel . ' ' . $operatorName . ' ' . $valueName;
     }
 

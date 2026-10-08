@@ -157,7 +157,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Cart_Attributes extends 
         $attributeLabel = is_array($attributeOptions) && isset($attributeOptions[$attribute]) ? $attributeOptions[$attribute] : $attribute;
 
         $operatorName = $this->getOperatorName();
-        $valueName = $this->getValueName();
+        $valueName = in_array($attribute, ['base_subtotal', 'base_grand_total'], true) ? $this->getAmountValueName() : $this->getValueName();
         return Mage::helper('customersegmentation')->__('Cart') . ':' . ' ' . $attributeLabel . ' ' . $operatorName . ' ' . $valueName;
     }
 }

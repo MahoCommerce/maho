@@ -588,6 +588,7 @@ describe('CLV Condition Tests - Profit and Refunds Focus', function () {
                 $order->setCustomerId($customer->getId());
                 $order->setCustomerEmail($customer->getEmail());
                 $order->setGrandTotal($orderData['total']);
+                $order->setBaseGrandTotal($orderData['total']);
                 $order->setStoreId(1);
                 $order->setCreatedAt(date('Y-m-d H:i:s', strtotime('-' . rand(1, 90) . ' days')));
 
