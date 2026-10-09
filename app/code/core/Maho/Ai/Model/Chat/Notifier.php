@@ -38,22 +38,10 @@ class Maho_Ai_Model_Chat_Notifier
             $severity,
             mb_substr(trim($title), 0, 255),
             trim($text),
-            self::conversationUrl((int) $conversation->getId()),
+            Mage::helper('ai')->adminUrl('adminhtml/ai_chat/open', ['id' => (int) $conversation->getId(), '_nosecret' => true]),
             true,
             $toCreator ? $conversation->getAdminUserId() : $schedule->notifyAdminUserId(),
             $toCreator ? null : $schedule->notifyAclResource(),
         );
-    }
-
-    /** A queue worker runs in a frontend store, whose code would end up in the admin URL. */
-    private static function conversationUrl(int $conversationId): string
-    {
-        $code = Mage::app()->getStore()->getCode();
-        Mage::app()->setCurrentStore(Mage_Core_Model_Store::ADMIN_CODE);
-        try {
-            return Mage::helper('adminhtml')->getUrl('adminhtml/ai_chat/open', ['id' => $conversationId, '_nosecret' => true]);
-        } finally {
-            Mage::app()->setCurrentStore($code);
-        }
     }
 }

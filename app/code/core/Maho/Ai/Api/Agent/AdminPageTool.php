@@ -272,7 +272,7 @@ final class AdminPageTool
             }
         }
 
-        $url = \Mage::helper('adminhtml')->getUrl($route, $params);
+        $url = \Mage::helper('ai')->adminUrl($route, $params);
 
         return ['ok' => true, 'text' => sprintf('The browser opens %s when you finish your answer. Tell the administrator in one sentence.', $url), 'url' => $url];
     }
@@ -439,7 +439,7 @@ final class AdminPageTool
             }
             [$route, $idParam] = $record;
 
-            return \Mage::helper('adminhtml')->getUrl($route, [$idParam => $this->cleanValue($id)]);
+            return \Mage::helper('ai')->adminUrl($route, [$idParam => $this->cleanValue($id)]);
         }
 
         return null;
