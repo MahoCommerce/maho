@@ -259,10 +259,26 @@ class Maho_Ai_Model_Platform_Symfony implements
                 $apiKey,
                 httpClient: \Maho\Http\Client::create(['headers' => self::anthropicWorkspaceHeaders($storeId)]),
                 modelCatalog: $catalog,
+                eventDispatcher: self::anthropicEventDispatcher(),
             ),
             platformCode: Maho_Ai_Model_Platform::ANTHROPIC,
             defaultChatModel: $chatModel,
         );
+    }
+
+    /**
+     * Give each request to Anthropic max_tokens 32000 when the request has no max_tokens. The Anthropic API
+     * requires the field, and the bridge sends 1000. 32000 is the output maximum of the Claude model with the
+     * smallest one (Opus 4 and 4.1).
+     */
+    public static function anthropicEventDispatcher(): \Symfony\Component\EventDispatcher\EventDispatcher
+    {
+        $dispatcher = new \Symfony\Component\EventDispatcher\EventDispatcher();
+        $dispatcher->addListener(
+            \Symfony\AI\Platform\Event\InvocationEvent::class,
+            static fn(\Symfony\AI\Platform\Event\InvocationEvent $event) => $event->setOptions($event->getOptions() + ['max_tokens' => 32000]),
+        );
+        return $dispatcher;
     }
 
     /**
