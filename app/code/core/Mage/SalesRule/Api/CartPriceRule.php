@@ -48,8 +48,8 @@ use Maho\Config\ApiResource;
             uriTemplate: '/cart-price-rules',
             deserialize: false,
             security: "is_granted('ROLE_ADMIN') or is_granted('cart-price-rules/create')",
-            description: 'Create a cart price rule. Required: name, websiteIds, customerGroupIds, and couponCode for couponType "specific". The trees use the types of GET /cart-price-rules/condition-metadata',
-            extraProperties: ['maho_mcp' => false],
+            description: 'Create a cart price rule. Required: name, websiteIds, customerGroupIds, and couponCode for couponType "specific". The trees use the types of GET /cart-price-rules/condition-metadata. '
+                . 'For the customers of a customer segment, put every customer group in customerGroupIds and add the Customer Segment condition of the metadata to the conditions tree',
         ),
         new Put(
             uriTemplate: '/cart-price-rules/{id}',
@@ -57,14 +57,12 @@ use Maho\Config\ApiResource;
             deserialize: false,
             security: "is_granted('ROLE_ADMIN') or is_granted('cart-price-rules/write')",
             description: 'Update a cart price rule. Only the fields in the body change. A conditions or actions tree in the body replaces the stored tree, and null resets it to an empty tree',
-            extraProperties: ['maho_mcp' => false],
         ),
         new Delete(
             uriTemplate: '/cart-price-rules/{id}',
             requirements: ['id' => '\d+'],
             security: "is_granted('ROLE_ADMIN') or is_granted('cart-price-rules/delete')",
             description: 'Delete a cart price rule and all its coupons',
-            extraProperties: ['maho_mcp' => false],
         ),
     ],
     graphQlOperations: [],
@@ -107,7 +105,7 @@ class CartPriceRule extends \Maho\ApiPlatform\Resource
     public array $websiteIds = [];
 
     /** @var int[] */
-    #[ApiProperty(extraProperties: [EnumSource::KEY => 'customer/customer_attribute_source_group'])]
+    #[ApiProperty(description: 'The rule applies only to customers of these groups. A rule for a customer segment lists every group and selects the segment with a condition', extraProperties: [EnumSource::KEY => 'customer/customer_attribute_source_group'])]
     public array $customerGroupIds = [];
 
     #[ApiProperty(description: 'none, specific (one code in couponCode) or auto (generated codes)', extraProperties: [EnumSource::KEY => ['none', 'specific', 'auto']])]

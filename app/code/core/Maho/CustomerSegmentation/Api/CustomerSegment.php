@@ -40,7 +40,7 @@ use Symfony\Component\ObjectMapper\Condition\TargetClass;
         new GetCollection(
             uriTemplate: '/customer-segments',
             security: "is_granted('ROLE_ADMIN') or is_granted('customer-segments/read')",
-            description: 'List the customer segments by priority and name. A group of customers by behavior, such as "VIP", "loyal" or "inactive" customers, is a segment, not a customer group: look here first',
+            description: 'List the customer segments by priority and name. A group of customers by behavior, such as "VIP", "loyal" or "inactive" customers, is a segment, not a customer group: look here first. A cart price rule reaches the customers of a segment through a Customer Segment condition in its conditions tree',
         ),
         new Get(
             uriTemplate: '/customer-segments/{id}',
