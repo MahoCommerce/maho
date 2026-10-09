@@ -51,12 +51,13 @@ jobs:
             echo "No changes in locales"
             exit 0
           fi
-      - name: Create Pull Request
+      - name: Create and merge Pull Request
         run: |
           cd maho-l10n
           git add .
           git commit -m "Update locales from main repo - ${{ steps.date.outputs.DATE }}" || exit 0
           git push -f origin tmp-${{ steps.date.outputs.DATE }}
           gh pr create --title "Update locales from main repo - ${{ steps.date.outputs.DATE }}" --body "This PR updates the locales from the main repository." --repo MahoCommerce/maho-l10n || true
+          gh pr merge tmp-${{ steps.date.outputs.DATE }} --squash --delete-branch --repo MahoCommerce/maho-l10n
         env:
           GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
