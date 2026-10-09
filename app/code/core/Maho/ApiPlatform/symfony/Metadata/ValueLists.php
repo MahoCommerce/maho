@@ -37,6 +37,12 @@ final class ValueLists
         return array_values(array_map(intval(...), $ids));
     }
 
+    /** @return array<int, array{value: int|string, label: string}> every customer group, NOT LOGGED IN included: a rule can apply to guests */
+    public static function ruleCustomerGroups(): array
+    {
+        return \Mage::getResourceModel('customer/group_collection')->toOptionArray();
+    }
+
     /** @return array<int, mixed> option arrays with value and label; the empty option is skipped by EnumSource */
     public static function customerGenders(): array
     {

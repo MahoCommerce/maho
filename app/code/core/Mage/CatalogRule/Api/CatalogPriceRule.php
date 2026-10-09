@@ -128,7 +128,7 @@ class CatalogPriceRule extends \Maho\ApiPlatform\Resource
     public array $websiteIds = [];
 
     /** @var int[] */
-    #[ApiProperty(extraProperties: [EnumSource::KEY => 'customer/customer_attribute_source_group'])]
+    #[ApiProperty(extraProperties: [EnumSource::KEY => 'Maho\ApiPlatform\Metadata\ValueLists::ruleCustomerGroups'])]
     public array $customerGroupIds = [];
 
     #[ApiProperty(description: 'First day of the rule, YYYY-MM-DD')]

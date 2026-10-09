@@ -225,7 +225,7 @@ class Coupon extends CrudResource
     public ?array $websiteIds = null;
 
     /** @var int[]|null */
-    #[ApiProperty(extraProperties: [EnumSource::KEY => 'customer/customer_attribute_source_group', 'computed' => true])]
+    #[ApiProperty(extraProperties: [EnumSource::KEY => 'Maho\ApiPlatform\Metadata\ValueLists::ruleCustomerGroups', 'computed' => true])]
     public ?array $customerGroupIds = null;
 
     #[ApiProperty(extraProperties: ['computed' => true])]

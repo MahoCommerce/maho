@@ -73,6 +73,20 @@ it('resolves a model alias and a static callable to value lists', function (): v
     expect(EnumSource::values('no/such_source'))->toBe([]);
 });
 
+it('lets a price rule or a coupon apply to guests, and keeps a customer out of the NOT LOGGED IN group', function (): void {
+    $groups = static function (string $class, string $property): array {
+        $attribute = new ReflectionProperty($class, $property)->getAttributes(ApiPlatform\Metadata\ApiProperty::class)[0];
+
+        return EnumSource::values($attribute->getArguments()['extraProperties'][EnumSource::KEY]);
+    };
+    $guests = Mage_Customer_Model_Group::NOT_LOGGED_IN_ID;
+
+    foreach ([Mage\SalesRule\Api\CartPriceRule::class, Mage\SalesRule\Api\Coupon::class, Mage\CatalogRule\Api\CatalogPriceRule::class] as $class) {
+        expect($groups($class, 'customerGroupIds'))->toContain($guests, 1);
+    }
+    expect($groups(Mage\Customer\Api\Customer::class, 'groupId'))->not->toContain($guests)->toContain(1);
+});
+
 it('puts the live layout codes in the JSON schema of the CMS page', function (): void {
     $schema = enumSourceContainer()->get(SchemaFactoryInterface::class)->buildSchema(CmsPage::class, 'json', Schema::TYPE_INPUT);
     $root = $schema->getDefinitions()[$schema->getRootDefinitionKey()];

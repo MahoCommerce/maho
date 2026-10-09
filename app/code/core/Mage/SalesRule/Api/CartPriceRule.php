@@ -105,7 +105,7 @@ class CartPriceRule extends \Maho\ApiPlatform\Resource
     public array $websiteIds = [];
 
     /** @var int[] */
-    #[ApiProperty(description: 'The rule applies only to customers of these groups. A rule for a customer segment lists every group and selects the segment with a condition', extraProperties: [EnumSource::KEY => 'customer/customer_attribute_source_group'])]
+    #[ApiProperty(description: 'The rule applies only to customers of these groups. A rule for a customer segment lists every group and selects the segment with a condition', extraProperties: [EnumSource::KEY => 'Maho\ApiPlatform\Metadata\ValueLists::ruleCustomerGroups'])]
     public array $customerGroupIds = [];
 
     #[ApiProperty(description: 'none, specific (one code in couponCode) or auto (generated codes)', extraProperties: [EnumSource::KEY => ['none', 'specific', 'auto']])]
