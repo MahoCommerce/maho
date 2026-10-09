@@ -782,13 +782,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
             $customerId = $customer->getId();
             if ($customerId) {
                 try {
-                    /** @var Mage_Customer_Helper_Data $helper */
-                    $helper = Mage::helper('customer');
-                    $newResetPasswordLinkToken = $helper->generateResetPasswordLinkToken();
-                    $newResetPasswordLinkCustomerId = $helper->generateResetPasswordLinkCustomerId($customerId);
-                    $customer->changeResetPasswordLinkCustomerId($newResetPasswordLinkCustomerId);
-                    $customer->changeResetPasswordLinkToken($newResetPasswordLinkToken);
-                    $customer->sendPasswordResetConfirmationEmail();
+                    $customer->sendPasswordResetLinkEmail();
                 } catch (Exception $exception) {
                     $this->_getSession()->addError($exception->getMessage());
                     $this->_redirect('*/*/forgotpassword');
@@ -896,14 +890,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
         }
 
         try {
-            // Empty current reset password token i.e. invalidate it
-            $customer->setRpToken(null);
-            $customer->setRpTokenCreatedAt(null);
-            $customer->cleanPasswordsValidationData();
-            $customer->setPasswordCreatedAt(time());
-            $customer->setRpCustomerId(null);
-            $customer->setConfirmation(null); // Set email is confirmed.
-            $customer->save();
+            $customer->completePasswordReset()->save();
 
             $this->_getSession()->unsetData(self::TOKEN_SESSION_NAME);
             $this->_getSession()->unsetData(self::CUSTOMER_ID_SESSION_NAME);
