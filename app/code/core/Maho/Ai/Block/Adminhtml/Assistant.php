@@ -67,6 +67,7 @@ class Maho_Ai_Block_Adminhtml_Assistant extends Mage_Adminhtml_Block_Template
     {
         $helper = Mage::helper('ai');
         $apiBase = rtrim(Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB), '/');
+        $context = $this->getPageContext();
 
         return [
             'chatUrl' => $apiBase . '/api/admin/ai/chat',
@@ -86,17 +87,12 @@ class Maho_Ai_Block_Adminhtml_Assistant extends Mage_Adminhtml_Block_Template
             'editorUrl' => $this->getVersionedJsUrl('mage/adminhtml/wysiwyg/tiptap/setup.js'),
             'needsEditorGuide' => $helper->editorGuide() === '',
             'adminName' => (string) Mage::getSingleton('admin/session')->getUser()?->getFirstname(),
-            'examples' => [
-                $helper->__('Which orders came in today?'),
-                $helper->__('Find products that are low in stock'),
-                $helper->__('Open the home page of the default store in the editor'),
-                $helper->__('How many customers registered this week?'),
-            ],
+            'examples' => $this->getExamples($context),
             'listUrl' => $this->getUrl('adminhtml/ai_chat/list'),
             'messagesUrl' => $this->getUrl('adminhtml/ai_chat/messages'),
             'deleteUrl' => $this->getUrl('adminhtml/ai_chat/delete'),
             'formKey' => $this->getFormKey(),
-            'context' => $this->getPageContext(),
+            'context' => $context,
             'openConversation' => (int) Mage::getSingleton('adminhtml/session')->getData(self::SESSION_OPEN_CONVERSATION, true),
             'toolLabels' => $helper->localToolLabels(),
             'labels' => [
@@ -163,6 +159,35 @@ class Maho_Ai_Block_Adminhtml_Assistant extends Mage_Adminhtml_Block_Template
                 'untitled' => $helper->__('Untitled conversation'),
             ],
         ];
+    }
+
+    /**
+     * The example requests of the intro: the proofread of the page, the ones for the record that the
+     * page shows, then the ones that work on every page. Each one shows a different capability.
+     *
+     * @param array{route: string, entity_type: string, entity_id: int|string|null, entity_label: string, store: string} $context
+     * @return list<string>
+     */
+    public function getExamples(array $context): array
+    {
+        $helper = Mage::helper('ai');
+        $record = $context['entity_id'] === null ? [] : match (strtok($context['route'], '/')) {
+            'catalog_product' => [$helper->__('Write a meta title and a meta description for this product')],
+            'sales_order' => [$helper->__('Summarize this order'), $helper->__('Add a comment to this order: the parcel left today')],
+            'customer' => [$helper->__('Summarize the orders of this customer')],
+            'promo_quote', 'promo_catalog' => [$helper->__('Explain this rule in plain words')],
+            'system_config' => [$helper->__('Explain the settings on this page')],
+            default => [],
+        };
+
+        return array_slice([
+            $helper->__('Proofread this page'),
+            ...$record,
+            $helper->__('Which orders are waiting to be shipped?'),
+            $helper->__('Every Monday at 8, send me a summary of the orders of last week'),
+            $helper->__('Create the coupon XMAS10: 10% off orders over 100, on every website, for all customers, until Sunday'),
+            $helper->__('How do I let customers check out without an account?'),
+        ], 0, 4);
     }
 
     /** A script URL with the file modification time, so a browser never keeps a stale copy. */
