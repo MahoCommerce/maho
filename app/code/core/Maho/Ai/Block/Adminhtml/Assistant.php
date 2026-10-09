@@ -184,7 +184,7 @@ class Maho_Ai_Block_Adminhtml_Assistant extends Mage_Adminhtml_Block_Template
             $helper->__('Proofread this page'),
             ...$record,
             $helper->__('Which orders are waiting to be shipped?'),
-            $helper->__('Every Monday at 8, send me a summary of the orders of last week'),
+            $helper->__('Every Monday at 8, give me a summary of the orders of last week'),
             $helper->__('Create the coupon XMAS10: 10% off orders over 100, on every website, for all customers, until Sunday'),
             $helper->__('How do I let customers check out without an account?'),
         ], 0, 4);
