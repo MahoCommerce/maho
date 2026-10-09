@@ -77,7 +77,7 @@ class Maho_ApiPlatform_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Orientation text a model reads before it calls any tool. The MCP server sends it as
-     * the server instructions, and the admin assistant puts it in its system prompt.
+     * the server instructions.
      */
     public function mcpInstructions(): string
     {

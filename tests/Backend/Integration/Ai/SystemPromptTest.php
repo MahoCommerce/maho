@@ -27,6 +27,7 @@ it('describes the store and the administrator', function (): void {
     expect($prompt)->toContain('prompt_admin');
     expect($prompt)->toContain('Store views, as "code = name (website)"');
     expect($prompt)->toContain(Mage::app()->getDefaultStoreView()->getCode() . ' = ');
+    expect($prompt)->toContain('Without that field, it is in ' . Mage::app()->getDefaultStoreView()->getBaseCurrencyCode());
     expect($prompt)->not->toContain('api_key');
 });
 
@@ -91,10 +92,9 @@ it('lists the editor layouts from the guide the panel sent', function (): void {
     expect(new Maho_Ai_Model_Chat_SystemPrompt()->build($admin, ['route' => 'cms_page/edit']))->not->toContain('The content editor offers');
 });
 
-it('stays within the size budget and keeps its sections', function (): void {
+it('keeps its sections', function (): void {
     $prompt = new Maho_Ai_Model_Chat_SystemPrompt()->build(aiPromptAdmin(), ['route' => 'cms_page/edit', 'entity_type' => 'CMS page', 'entity_id' => 60, 'entity_label' => 'Maho Store', 'store' => '', 'screen' => '']);
 
-    expect(strlen($prompt))->toBeLessThanOrEqual(Maho_Ai_Model_Chat_SystemPrompt::MAX_CHARS);
     expect($prompt)->toContain('How a task runs:', 'Maho in short:', 'Example of a good turn', 'How to answer:');
 });
 

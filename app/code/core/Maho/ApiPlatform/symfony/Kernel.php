@@ -589,8 +589,8 @@ class Kernel extends BaseKernel
     }
 
     /**
-     * Orientation text the model reads before touching any tool. The admin chat
-     * assistant shares it, see {@see \Maho_ApiPlatform_Helper_Data::mcpInstructions()}.
+     * Orientation text the model reads before touching any tool, see
+     * {@see \Maho_ApiPlatform_Helper_Data::mcpInstructions()}.
      */
     private function mcpInstructions(): string
     {
