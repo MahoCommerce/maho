@@ -468,6 +468,33 @@ final class McpToolbox implements ToolboxInterface
         return $navigation;
     }
 
+    /**
+     * The admin page of the record that a successful write tool changed or created, or null for a record
+     * without a page. The record of /orders/{id} or /orders/{id}/cancel has its id in the arguments, and
+     * the record of a create such as /cart-price-rules has it in the result. The panel offers that page,
+     * and loads it again when the administrator has it open, so the page never shows old data.
+     *
+     * @param array<string, mixed> $arguments
+     */
+    public function changedRecordUrl(string $name, array $arguments, string $result): ?string
+    {
+        $shape = self::isLocal($name) ? null : $this->catalog->writeShape($name);
+        if ($shape === null || $shape['kind'] === 'delete') {
+            return null;
+        }
+        $uri = (string) $this->catalog->get($name)?->getUriTemplate();
+        if (preg_match('~/([a-z0-9-]+)/\{([^}]+)\}(?:/[a-z0-9-]+)*$~', $uri, $m) === 1) {
+            [, $resource, $id] = [null, $m[1], $arguments[$m[2]] ?? null];
+        } elseif ($shape['kind'] === 'create' && preg_match('~/([a-z0-9-]+)$~', $uri, $m) === 1) {
+            $data = json_decode($result, true);
+            [$resource, $id] = [$m[1], is_array($data) ? ($data['id'] ?? null) : null];
+        } else {
+            return null;
+        }
+
+        return is_scalar($id) && (string) $id !== '' ? $this->adminPageTool->recordUrl($resource, (string) $id) : null;
+    }
+
     /** A tool that never changes data, so it runs without the administrator's confirmation. */
     public function isReadOnly(string $name): bool
     {

@@ -321,6 +321,9 @@ it('previews an update with the current values, and undoes it after the administ
         expect($result['ok'])->toBeTrue($approved['raw']);
         expect($result['undo'])->toBeInt();
         expect((string) Mage::getModel('cms/page')->load($pageId)->getTitle())->toBe('After');
+        // The panel offers the page of the record, or reloads it when the administrator has it open. The URL has no store code.
+        expect($result['record_url'])->toContain('/cms_page/edit/page_id/' . $pageId . '/');
+        expect($result['record_url'])->not->toContain('/' . Mage::app()->getDefaultStoreView()->getCode() . '/');
 
         $undone = aiChatRequest('/api/admin/ai/chat/undo', ['conversation_id' => $conversationId, 'message_id' => $result['undo']]);
         expect($undone['status'])->toBe(200);
@@ -331,6 +334,7 @@ it('previews an update with the current values, and undoes it after the administ
         expect(aiChatEvents($undone['events'], 'tool_result')[0]['ok'])->toBeTrue($undone['raw']);
         expect(aiChatEvents($undone['events'], 'done')[0]['state'])->toBe('complete');
         expect((string) Mage::getModel('cms/page')->load($pageId)->getTitle())->toBe('Before');
+        expect(aiChatEvents($undone['events'], 'tool_result')[0]['record_url'] ?? null)->toBe($result['record_url']);
 
         // An undo is a write of its own and cannot be undone again.
         $again = aiChatRequest('/api/admin/ai/chat/undo', ['conversation_id' => $conversationId, 'message_id' => $result['undo']]);
@@ -1094,6 +1098,7 @@ it('pauses a write for confirmation, then runs or denies it as the admin decides
         expect($results)->toHaveCount(1);
         expect($results[0]['id'])->toBe('call_w2');
         expect($results[0]['ok'])->toBeFalse();
+        expect($results[0])->not->toHaveKey('record_url');
         expect(aiChatEvents($approved['events'], 'done')[0]['state'])->toBe('complete');
 
         // A new message cancels whatever is still pending.
@@ -1204,6 +1209,7 @@ it('ignores the storefront store cookie: reads the default store view and builds
         $navigate = aiChatEvents($result['events'], 'navigate');
         expect($navigate)->toHaveCount(1);
         expect($navigate[0]['url'])->not->toContain('/' . $other->getCode() . '/');
+        expect($navigate[0]['url'])->not->toContain('/' . Mage::app()->getDefaultStoreView()->getCode() . '/');
         expect($navigate[0]['url'])->toContain('/catalog_product/edit/id/' . $productId . '/');
     } finally {
         Mage::app()->setCurrentStore(Mage_Core_Model_Store::ADMIN_CODE);

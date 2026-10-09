@@ -90,6 +90,8 @@ class MahoAiAssistant {
             'ai-chat-deny': { events: { click: (event) => this.onDeny(event) } },
             'ai-chat-undo': { events: { click: (event) => { event.preventDefault(); this.undo(parseInt(event.target.dataset.message, 10), event.target); } } },
             'ai-chat-example': { events: { click: (event) => this.chat.submitUserMessage({ text: event.currentTarget.dataset.text }) } },
+            'ai-chat-leave': { events: { click: () => this.pendingLeave?.() } },
+            'ai-chat-open-record': { events: { click: (event) => { event.preventDefault(); this.navigate(event.currentTarget.dataset.url, null); } } },
         };
         chat.connect = {
             stream: true,
@@ -499,7 +501,7 @@ class MahoAiAssistant {
      * Native fetch on purpose: mahoFetch reads the whole body, and this one is a stream.
      */
     async streamTurn(url, payload) {
-        const state = { textIndex: null, text: '', steps: new Map(), error: null, done: false, navigateTo: null, pageAction: null, textEdits: [], thinkingIndex: null, newConversation: !this.conversationId };
+        const state = { textIndex: null, text: '', steps: new Map(), error: null, done: false, navigateTo: null, pageAction: null, textEdits: [], changedRecords: [], thinkingIndex: null, newConversation: !this.conversationId };
         let response;
         try {
             response = await fetch(url, {
@@ -613,9 +615,12 @@ class MahoAiAssistant {
                 const step = state.steps.get(data.id);
                 if (step) {
                     const status = data.denied ? 'denied' : (data.ok ? 'done' : 'error');
-                    this.chat.updateMessage({ html: this.renderStep(step.call, { status, preview: data.preview, undo: data.undo ?? null }) }, step.index);
+                    this.chat.updateMessage({ html: this.renderStep(step.call, { status, preview: data.preview, undo: data.undo ?? null, recordUrl: data.record_url ?? null }) }, step.index);
                 } else if (data.denied) {
                     this.chat.addMessage({ html: this.renderStep({ id: data.id, name: '', title: '', arguments: {} }, { status: 'denied' }), role: 'ai' });
+                }
+                if (data.record_url) {
+                    state.changedRecords.push(data.record_url);
                 }
                 this.showThinking(state);
                 break;
@@ -652,13 +657,13 @@ class MahoAiAssistant {
                 }
                 if (state.navigateTo && data.state === 'complete') {
                     const { url, fields } = state.navigateTo;
-                    if (fields) {
-                        this.rememberPrefill(url, fields);
-                    }
-                    setTimeout(() => window.location.assign(url), 800);
+                    setTimeout(() => this.navigate(url, fields), 800);
                 } else if (state.pageAction && data.state === 'complete') {
                     const steps = state.pageAction;
                     setTimeout(() => this.performPageActions(steps), 800);
+                } else if (data.state === 'complete' && state.changedRecords.some((url) => this.samePage(url, window.location.href))) {
+                    // A confirmed write changed the record on the screen: show its new data.
+                    setTimeout(() => this.leavePage(this.labels.reloadUnsaved, this.labels.reload, () => window.location.reload()), 800);
                 }
                 break;
         }
@@ -1002,6 +1007,43 @@ class MahoAiAssistant {
     // A fill tool hands the panel a page URL and field values. The values wait in session
     // storage across the navigation, and the panel fills the form once the page is loaded.
 
+    /**
+     * Open the page that a tool asked for, without losing the changes that the open form did not save:
+     * the same form gets the values in place, and another page waits for the administrator.
+     */
+    navigate(url, fields) {
+        if (fields && this.samePage(url, window.location.href)) {
+            this.fillForm(fields, 0, false);
+            return;
+        }
+        this.leavePage(this.labels.unsavedChanges, this.labels.openAnyway, () => this.openPage(url, fields));
+    }
+
+    /** Run leave at once, or, when the form has unsaved changes, show a note that names them, with a button that runs it. */
+    leavePage(message, buttonLabel, leave) {
+        const unsaved = this.unsavedFields();
+        if (unsaved.length === 0) {
+            leave();
+            return;
+        }
+        this.pendingLeave = leave;
+        const note = this.escape(message.replace('%s', unsaved.join(', ')));
+        this.chat.addMessage({ html: `<div class="ai-chat-note">${note} <button type="button" class="ai-chat-leave">${this.escape(buttonLabel)}</button></div>`, role: 'ai' });
+    }
+
+    openPage(url, fields) {
+        if (fields) {
+            this.rememberPrefill(url, fields);
+        }
+        window.location.assign(url);
+    }
+
+    /** The labels of the fields of this page that changed and are not saved. */
+    unsavedFields() {
+        const fields = [...this.changedFields].map((id) => document.getElementById(id)).filter(Boolean);
+        return [...new Set(fields.map((field) => this.fieldLabel(field)))];
+    }
+
     rememberPrefill(url, fields) {
         try {
             sessionStorage.setItem(MahoAiAssistant.STORAGE_PREFILL, JSON.stringify({ url, fields }));
@@ -1041,7 +1083,8 @@ class MahoAiAssistant {
         return strip(a) !== '' && strip(a) === strip(b);
     }
 
-    fillForm(fields, attempt) {
+    /** A page that just loaded can still build its editors, so a textarea waits for them unless waitForEditors is false. */
+    fillForm(fields, attempt, waitForEditors = true) {
         const filled = [];
         const missing = [];
         const retry = [];
@@ -1051,7 +1094,7 @@ class MahoAiAssistant {
                 missing.push(name);
                 continue;
             }
-            if (element.tagName === 'TEXTAREA' && element.id && window.tiptapEditors === undefined && attempt < 10) {
+            if (waitForEditors && element.tagName === 'TEXTAREA' && element.id && window.tiptapEditors === undefined && attempt < 10) {
                 retry.push(name);
                 continue;
             }
@@ -1119,7 +1162,7 @@ class MahoAiAssistant {
     setFieldValue(element, value) {
         // {prepend} or {append} adds to the current value, so a long field is never resent.
         if (value && typeof value === 'object' && !Array.isArray(value) && ('prepend' in value || 'append' in value)) {
-            const current = element.value ?? '';
+            const current = this.fieldValue(element) ?? '';
             value = String(value.prepend ?? '') + current + String(value.append ?? '');
         }
         const asList = Array.isArray(value) ? value.map(String) : String(value ?? '').split(',').map((v) => v.trim());
@@ -1198,11 +1241,16 @@ class MahoAiAssistant {
         const args = this.renderArguments(call.arguments);
         const preview = result.preview ? `<pre class="ai-chat-step-preview">${this.escape(this.prettyPreview(result.preview))}</pre>` : '';
         const undo = result.undo ? `<button type="button" class="ai-chat-undo" data-message="${this.escape(String(result.undo))}">${this.escape(this.labels.undo)}</button>` : '';
+        // The record on the screen reloads by itself; another record gets a button to its page.
+        const open = result.recordUrl && !this.samePage(result.recordUrl, window.location.href)
+            ? `<button type="button" class="ai-chat-open-record" data-url="${this.escape(result.recordUrl)}">${this.escape(this.labels.openRecord)}</button>`
+            : '';
         const label = this.escape(labels[status] ?? status);
         return `<details class="ai-chat-step ai-chat-step-${this.escape(status)}${args || preview ? '' : ' ai-chat-step-plain'}">`
             + `<summary><span class="ai-chat-step-status" role="img" title="${label}" aria-label="${label}"></span>`
             + `<span class="ai-chat-step-title">${this.escape(title)}</span>`
             + (call.destructive ? `<span class="ai-chat-badge">${this.escape(this.labels.destructive)}</span>` : '')
+            + open
             + undo
             + (args || preview ? '<span class="ai-chat-step-chevron" aria-hidden="true"></span>' : '')
             + `</summary>`

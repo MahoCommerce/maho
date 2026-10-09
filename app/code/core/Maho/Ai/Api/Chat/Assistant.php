@@ -143,6 +143,10 @@ final class Assistant
             if ($ok && $message->getUndoArguments() !== null) {
                 $result['undo'] = (int) $message->getId();
             }
+            $url = $ok ? $this->toolbox->changedRecordUrl((string) $message->getToolName(), $message->getToolArguments(), $text) : null;
+            if ($url !== null) {
+                $result['record_url'] = $url;
+            }
             $sse->event('tool_result', $result);
         }
 
@@ -221,7 +225,12 @@ final class Assistant
             $conversation->addMessage(['role' => Message::ROLE_ASSISTANT, 'content' => \Mage::helper('ai')->__('I restored the previous values.')]);
         }
         $conversation->save();
-        $sse->event('tool_result', ['id' => $callId, 'ok' => $ok, 'preview' => $this->preview($text)]);
+        $result = ['id' => $callId, 'ok' => $ok, 'preview' => $this->preview($text)];
+        $url = $ok ? $this->toolbox->changedRecordUrl($name, $undo, $text) : null;
+        if ($url !== null) {
+            $result['record_url'] = $url;
+        }
+        $sse->event('tool_result', $result);
         if ($ok) {
             $sse->event('delta', ['text' => \Mage::helper('ai')->__('I restored the previous values.')]);
         }
