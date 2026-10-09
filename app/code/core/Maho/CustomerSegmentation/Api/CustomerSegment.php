@@ -105,7 +105,7 @@ class CustomerSegment extends \Maho\ApiPlatform\Resource
 
     private const TREE_SCHEMA = [
         'type' => 'object',
-        'description' => 'Condition tree. A node has the keys type, attribute, operator, value, aggregator and conditions (a list of child nodes), and the read-only key label. '
+        'description' => 'Condition tree. A node has the keys type, attribute, operator, value, aggregator and conditions (the list of child nodes, never "children"), and the read-only key label. '
             . 'The root has the type customersegmentation/segment_condition_combine, the aggregator all or any, and the value true (the conditions are true) or false (they are false). '
             . 'A leaf has a type and an attribute, for example the type customersegmentation/segment_condition_customer_clv with the attribute lifetime_sales, number_of_orders or average_order_value, '
             . 'or the type customersegmentation/segment_condition_customer_timebased with days_since_last_order. The condition metadata lists every type with its attributes, operators and values. '

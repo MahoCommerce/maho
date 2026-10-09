@@ -77,7 +77,7 @@ class CartPriceRule extends \Maho\ApiPlatform\Resource
 
     private const TREE_SCHEMA = [
         'type' => 'object',
-        'description' => 'Condition tree. A node has the keys type, attribute, operator, value, aggregator and conditions (a list of child nodes), and the read-only key label. GET /cart-price-rules/condition-metadata describes the allowed types, attributes, operators and values.',
+        'description' => 'Condition tree. A node has the keys type, attribute, operator, value, aggregator and conditions (the list of child nodes, never "children"), and the read-only key label. GET /cart-price-rules/condition-metadata describes the allowed types, attributes, operators and values.',
         'properties' => [
             'type' => ['type' => 'string'],
             'aggregator' => ['type' => 'string', 'enum' => ['all', 'any']],

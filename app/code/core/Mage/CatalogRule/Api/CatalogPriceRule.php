@@ -98,7 +98,7 @@ class CatalogPriceRule extends \Maho\ApiPlatform\Resource
 
     private const TREE_SCHEMA = [
         'type' => 'object',
-        'description' => 'Condition tree. A node has the keys type, attribute, operator, value, aggregator and conditions (a list of child nodes), and the read-only key label. '
+        'description' => 'Condition tree. A node has the keys type, attribute, operator, value, aggregator and conditions (the list of child nodes, never "children"), and the read-only key label. '
             . 'The root has the type catalogrule/rule_condition_combine. A leaf has the type catalogrule/rule_condition_product and the attribute code of a product attribute with isUsedForPriceRules true; '
             . 'operators are ==, !=, >=, <=, >, <, {} (contains), !{} (does not contain), () (is one of) and !() (is not one of).',
         'properties' => [
