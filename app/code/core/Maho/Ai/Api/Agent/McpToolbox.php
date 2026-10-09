@@ -45,7 +45,7 @@ final class McpToolbox implements ToolboxInterface
 
     private ?int $resultMaxChars = null;
 
-    /** @var array{url?: string, fields?: array<string, mixed>, steps?: list<array{action: string, target: string, value: string|null}>}|null */
+    /** @var array{url?: string, fields?: array<string, mixed>, steps?: list<array{action: string, target: string, value: string|null}>, edits?: list<array{id: string, find: string, replace: string}>}|null */
     private ?array $navigation = null;
 
     /** @var list<string> enabled sections, most recent last */
@@ -58,6 +58,7 @@ final class McpToolbox implements ToolboxInterface
         private readonly McpToolDispatcher $dispatcher,
         private readonly AdminPageTool $adminPageTool,
         private readonly ContentGuideTool $contentGuideTool,
+        private readonly FormTool $formTool,
         private readonly MemoryTool $memoryTool,
         private readonly BackgroundTaskTool $backgroundTaskTool,
         private readonly NotifyTool $notifyTool,
@@ -89,6 +90,16 @@ final class McpToolbox implements ToolboxInterface
         $this->contentGuideTool->store($guide);
     }
 
+    /**
+     * Keep the text fields of the open form that the panel sent with this request.
+     *
+     * @param list<array{id: string, name: string, label: string, value: string, changed: bool}> $fields
+     */
+    public function storeForm(array $fields): void
+    {
+        $this->formTool->store($fields);
+    }
+
     /** The editor guide known to the server, or an empty string before the panel sent one. */
     public function contentGuide(): string
     {
@@ -105,6 +116,9 @@ final class McpToolbox implements ToolboxInterface
         if ($this->mode->hasBrowser()) {
             // A worker has no browser to open a page in, and no administrator to confirm another job.
             $tools = [...$tools, $this->adminPageTool->tool(), $this->adminPageTool->fillTool(), $this->adminPageTool->actionTool(), $this->backgroundTaskTool->tool()];
+            if ($this->formTool->hasForm()) {
+                $tools = [...$tools, $this->formTool->readTool(), $this->formTool->editTool()];
+            }
         } elseif ($this->notifyTool->isAvailable()) {
             $tools[] = $this->notifyTool->tool();
         }
@@ -216,7 +230,7 @@ final class McpToolbox implements ToolboxInterface
     public static function isLocal(string $name): bool
     {
         return in_array($name, [self::ENABLE_NAME, ContentGuideTool::NAME, BackgroundTaskTool::NAME, AttachmentTool::NAME, ImageTool::NAME, NotifyTool::NAME], true)
-            || in_array($name, AdminPageTool::NAMES, true) || in_array($name, MemoryTool::NAMES, true);
+            || in_array($name, AdminPageTool::NAMES, true) || in_array($name, MemoryTool::NAMES, true) || in_array($name, FormTool::NAMES, true);
     }
 
     #[\Override]
@@ -234,6 +248,13 @@ final class McpToolbox implements ToolboxInterface
             $outcome = $this->attachmentTool->read($toolCall->getArguments());
         } elseif ($toolCall->getName() === ImageTool::NAME) {
             $outcome = $this->imageTool->generate($toolCall->getArguments());
+        } elseif ($toolCall->getName() === FormTool::READ_NAME) {
+            $outcome = $this->formTool->read($toolCall->getArguments());
+        } elseif ($toolCall->getName() === FormTool::EDIT_NAME) {
+            $outcome = $this->formTool->edit($toolCall->getArguments());
+            if (isset($outcome['edits'])) {
+                $this->navigation = ['edits' => $outcome['edits']];
+            }
         } elseif (in_array($toolCall->getName(), MemoryTool::NAMES, true)) {
             $outcome = $toolCall->getName() === MemoryTool::FORGET
                 ? $this->memoryTool->forget($toolCall->getArguments())
@@ -435,9 +456,9 @@ final class McpToolbox implements ToolboxInterface
 
     /**
      * What the last local tool asked the browser to do, once: open an admin page, with form
-     * values to fill in when the tool gave some, or act on the open page.
+     * values to fill in when the tool gave some, act on the open page, or correct its text.
      *
-     * @return array{url?: string, fields?: array<string, mixed>, steps?: list<array{action: string, target: string, value: string|null}>}|null
+     * @return array{url?: string, fields?: array<string, mixed>, steps?: list<array{action: string, target: string, value: string|null}>, edits?: list<array{id: string, find: string, replace: string}>}|null
      */
     public function takeNavigation(): ?array
     {
@@ -477,6 +498,7 @@ final class McpToolbox implements ToolboxInterface
             $name === AttachmentTool::NAME => AttachmentTool::TITLE,
             $name === ImageTool::NAME => ImageTool::TITLE,
             in_array($name, AdminPageTool::NAMES, true) => AdminPageTool::title($name),
+            in_array($name, FormTool::NAMES, true) => FormTool::title($name),
             default => $this->catalog->title($name),
         };
     }

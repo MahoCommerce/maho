@@ -149,6 +149,7 @@ class Maho_Ai_Block_Adminhtml_Assistant extends Mage_Adminhtml_Block_Template
                 'gridRow' => $helper->__('row %s'),
                 'formFilled' => $helper->__('I filled these fields in the form: %s. Review the form and save it.'),
                 'formFieldsMissing' => $helper->__('I could not find these fields in the form: %s.'),
+                'textEditMissing' => $helper->__('The text changed, so I did not make these corrections: %s.'),
                 'verbList' => $helper->__('List'),
                 'verbGet' => $helper->__('Show'),
                 'verbCreate' => $helper->__('Create'),

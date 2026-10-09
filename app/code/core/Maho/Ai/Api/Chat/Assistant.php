@@ -262,6 +262,7 @@ final class Assistant
         try {
             $this->toolbox->enableSections($this->initialSections($conversation, $pageContext));
             $this->toolbox->storeContentGuide((string) ($pageContext['editor_guide'] ?? ''));
+            $this->toolbox->storeForm($pageContext['form'] ?? []);
             $pageContext['editor_guide'] = $this->toolbox->contentGuide();
             /** @var Maho_Ai_Model_Chat_SystemPrompt $promptBuilder */
             $promptBuilder = \Mage::getModel('ai/chat_systemPrompt');
@@ -443,7 +444,11 @@ final class Assistant
                         ]);
                         $navigation = $this->toolbox->takeNavigation();
                         if ($navigation !== null) {
-                            $sse->event(isset($navigation['steps']) ? 'page_action' : 'navigate', $navigation);
+                            $sse->event(match (true) {
+                                isset($navigation['edits']) => 'text_edits',
+                                isset($navigation['steps']) => 'page_action',
+                                default => 'navigate',
+                            }, $navigation);
                         }
                     }
                     break;

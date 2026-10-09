@@ -456,6 +456,8 @@ class Maho_Ai_Helper_Data extends Mage_Core_Helper_Abstract
             'admin_open_page' => $this->__('Open admin page'),
             'admin_fill_form' => $this->__('Fill admin form'),
             'admin_page_action' => $this->__('Act on the page'),
+            'admin_read_form' => $this->__('Read the form'),
+            'admin_edit_text' => $this->__('Correct text in the form'),
             'admin_content_guide' => $this->__('Content editor guide'),
             'enable_tools' => $this->__('Load tools'),
             'remember' => $this->__('Remember a note'),

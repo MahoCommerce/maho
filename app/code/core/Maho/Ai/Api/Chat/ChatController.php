@@ -263,7 +263,7 @@ final class ChatController
 
     /**
      * @param array<string, mixed> $input
-     * @return array{route: string, entity_type: string, entity_id: int|string|null, entity_label: string, store: string, screen: string, editor_guide: string}
+     * @return array{route: string, entity_type: string, entity_id: int|string|null, entity_label: string, store: string, screen: string, editor_guide: string, form: list<array{id: string, name: string, label: string, value: string, changed: bool}>}
      */
     private function context(array $input): array
     {
@@ -278,12 +278,50 @@ final class ChatController
             'store' => mb_substr(trim((string) ($raw['store'] ?? '')), 0, 32),
             'screen' => mb_substr(trim((string) preg_replace('/[^\P{C}\n]+/u', ' ', (string) ($raw['screen'] ?? ''))), 0, 6000),
             'editor_guide' => mb_substr(trim((string) preg_replace('/[^\P{C}\n]+/u', ' ', (string) ($raw['editor_guide'] ?? ''))), 0, 40000),
+            'form' => $this->formFields($raw['form'] ?? null),
         ];
     }
 
     /**
+     * The text fields of the open form, as the panel sent them: at most 80 fields of 60,000 characters each, and 200,000 in total.
+     *
+     * @return list<array{id: string, name: string, label: string, value: string, changed: bool}>
+     */
+    private function formFields(mixed $raw): array
+    {
+        if (!is_array($raw)) {
+            return [];
+        }
+        $line = static fn(mixed $text, int $max): string => mb_substr(trim((string) preg_replace('/\p{C}+/u', ' ', is_scalar($text) ? (string) $text : '')), 0, $max);
+        $fields = [];
+        $budget = 200000;
+        foreach (array_slice(array_values($raw), 0, 80) as $field) {
+            if (!is_array($field) || !is_string($field['value'] ?? null)) {
+                continue;
+            }
+            // A value over the limit is left out, never cut: an edit of a cut value can break the field.
+            $id = $line($field['id'] ?? '', 128);
+            $value = (string) preg_replace('/[^\P{C}\n\t]+/u', ' ', $field['value']);
+            if ($id === '' || mb_strlen($value) > min(60000, $budget)) {
+                continue;
+            }
+            $budget -= mb_strlen($value);
+            $name = $line($field['name'] ?? '', 128);
+            $fields[] = [
+                'id' => $id,
+                'name' => $name !== '' ? $name : $id,
+                'label' => $line($field['label'] ?? '', 80) ?: ($name !== '' ? $name : $id),
+                'value' => $value,
+                'changed' => ($field['changed'] ?? false) === true,
+            ];
+        }
+
+        return $fields;
+    }
+
+    /**
      * @param array<string, mixed> $input
-     * @param array{route: string, entity_type: string, entity_id: int|string|null, entity_label: string, store: string, screen: string, editor_guide: string} $context
+     * @param array{route: string, entity_type: string, entity_id: int|string|null, entity_label: string, store: string, screen: string, editor_guide: string, form: list<array{id: string, name: string, label: string, value: string, changed: bool}>} $context
      */
     private function conversation(array $input, Mage_Admin_Model_User $admin, array $context, bool $create): Maho_Ai_Model_Conversation
     {

@@ -25,7 +25,9 @@ class MahoAiAssistant {
         this.conversationId = null;
         this.abortController = null;
         this.pendingCard = null;
+        this.changedFields = new Set();
         this.setupChat();
+        this.trackChanges();
         this.bindEvents();
         this.restoreState();
         this.applyPrefill();
@@ -448,7 +450,7 @@ class MahoAiAssistant {
             conversation_id: this.conversationId,
             message: text,
             attachments,
-            context: { ...this.config.context, screen: this.screenDigest(), editor_guide: await this.contentGuide() },
+            context: { ...this.config.context, screen: this.screenDigest(), editor_guide: await this.contentGuide(), form: this.formDraft() },
             form_key: this.config.formKey,
         });
 
@@ -481,7 +483,7 @@ class MahoAiAssistant {
         const outcome = await this.streamTurn(this.config.confirmUrl, {
             conversation_id: this.conversationId,
             decisions,
-            context: { ...this.config.context, editor_guide: await this.contentGuide() },
+            context: { ...this.config.context, editor_guide: await this.contentGuide(), form: this.formDraft() },
             form_key: this.config.formKey,
         });
         if (outcome.error) {
@@ -497,7 +499,7 @@ class MahoAiAssistant {
      * Native fetch on purpose: mahoFetch reads the whole body, and this one is a stream.
      */
     async streamTurn(url, payload) {
-        const state = { textIndex: null, text: '', steps: new Map(), error: null, done: false, navigateTo: null, pageAction: null, thinkingIndex: null, newConversation: !this.conversationId };
+        const state = { textIndex: null, text: '', steps: new Map(), error: null, done: false, navigateTo: null, pageAction: null, textEdits: [], thinkingIndex: null, newConversation: !this.conversationId };
         let response;
         try {
             response = await fetch(url, {
@@ -631,6 +633,9 @@ class MahoAiAssistant {
             case 'page_action':
                 state.pageAction = data.steps ?? null;
                 break;
+            case 'text_edits':
+                state.textEdits.push(...(data.edits ?? []));
+                break;
             case 'start':
                 if (data.conversation_id) {
                     this.rememberConversation(data.conversation_id);
@@ -640,6 +645,10 @@ class MahoAiAssistant {
                 state.done = true;
                 if (data.conversation_id) {
                     this.rememberConversation(data.conversation_id);
+                }
+                if (state.textEdits.length > 0 && data.state === 'complete') {
+                    const edits = state.textEdits;
+                    setTimeout(() => this.applyTextEdits(edits), 800);
                 }
                 if (state.navigateTo && data.state === 'complete') {
                     const { url, fields } = state.navigateTo;
@@ -741,7 +750,7 @@ class MahoAiAssistant {
             if (fields.length >= 40 || !visible(element) || ['hidden', 'password', 'submit', 'button', 'file'].includes(element.type) || element.closest('.grid, #ai-chat-panel')) {
                 continue;
             }
-            const label = text(element.id ? document.querySelector(`label[for="${CSS.escape(element.id)}"]`) : null) || text(element.closest('tr')?.querySelector('td.label, th')) || element.name || element.id;
+            const label = this.fieldLabel(element);
             let value;
             if (element.tagName === 'SELECT') {
                 value = [...element.selectedOptions].map((o) => text(o)).join(', ');
@@ -758,6 +767,10 @@ class MahoAiAssistant {
         }
         if (fields.length > 0) {
             lines.push('Fields: ' + fields.join('; '));
+        }
+        const changed = [...this.changedFields].map((id) => document.getElementById(id)).filter(Boolean).map((element) => this.fieldLabel(element));
+        if (changed.length > 0) {
+            lines.push('Unsaved changes: ' + [...new Set(changed)].join(', '));
         }
 
         const toolbar = [...scope.querySelectorAll('.tiptap-toolbar button[title], .tiptap-toolbar select[title]')].filter(visible).map((b) => b.title);
@@ -790,6 +803,101 @@ class MahoAiAssistant {
         }
 
         return clip(lines.join('\n'), 6000);
+    }
+
+    fieldLabel(element) {
+        const text = (node) => (node?.textContent ?? '').replace(/\s+/g, ' ').trim().replace(/\s*\*$/, '');
+        return text(element.id ? document.querySelector(`label[for="${CSS.escape(element.id)}"]`) : null) || text(element.closest('tr')?.querySelector('td.label, th')) || element.name || element.id;
+    }
+
+    // --- form text --------------------------------------------------------------------
+    // The text fields of the open form go with each message. The server keeps them out of
+    // the prompt, and gives them to the model only when it calls the read tool.
+
+    /** Record the fields that change after the page loaded. A fill by the panel counts too: it is not saved either. */
+    trackChanges() {
+        const mark = (event) => {
+            if (!event.isTrusted) {
+                return;
+            }
+            const element = event.target;
+            const field = ['INPUT', 'TEXTAREA', 'SELECT'].includes(element.tagName)
+                ? element
+                : [...(window.tiptapEditors?.values() ?? [])].find((editor) => editor.wrapper?.contains(element))?.textarea;
+            if (field?.id && !field.closest('#ai-chat-panel')) {
+                this.changedFields.add(field.id);
+            }
+        };
+        document.addEventListener('input', mark, true);
+        document.addEventListener('change', mark, true);
+        // A toolbar button or a key that the editor handles changes the text without an input event.
+        const watch = (setup) => setup?.editor?.on('update', ({ editor }) => {
+            if (editor.isFocused && setup.textarea?.id) {
+                this.changedFields.add(setup.textarea.id);
+            }
+        });
+        window.tiptapEditors?.forEach(watch);
+        window.varienGlobalEvents?.attachEventHandler('wysiwygEditorInitialized', (editor) => watch(editor?.options?.wysiwygSetup));
+    }
+
+    /** The value of a field as the form saves it: the HTML of the rich text editor when it is on. */
+    fieldValue(element) {
+        const editor = element.tagName === 'TEXTAREA' ? window.tiptapEditors?.get(element.id) : null;
+        return editor?.editor && editor.isTiptapActive() ? editor.convertToPlain(editor.editor.getHTML()) : element.value;
+    }
+
+    /**
+     * The text fields of the forms on the page, in every tab, with their current values.
+     * The limits match the server: 80 fields of 60,000 characters each, 200,000 in total.
+     */
+    formDraft() {
+        const fields = [];
+        let budget = 200000;
+        for (const element of document.querySelectorAll('form input, form textarea')) {
+            const text = element.tagName === 'TEXTAREA' || ['text', 'email', 'url', 'search', 'tel'].includes(element.type);
+            if (fields.length >= 80 || !text || !element.id || element.disabled || element.readOnly || element.closest('.grid, #ai-chat-panel')) {
+                continue;
+            }
+            const value = this.fieldValue(element);
+            const changed = this.changedFields.has(element.id);
+            if ((value === '' && !changed) || value.length > Math.min(60000, budget)) {
+                continue;
+            }
+            budget -= value.length;
+            // "product[description]" is the field "description", as the API names it.
+            const name = element.name.match(/\[([^\]]+)\]$/)?.[1] ?? element.name;
+            fields.push({ id: element.id, name: name || element.id, label: this.fieldLabel(element), value, changed });
+        }
+        return fields;
+    }
+
+    /** The corrections of the edit tool, checked again against the live values: the administrator may have typed since. */
+    applyTextEdits(edits) {
+        const values = new Map();
+        const missing = [];
+        for (const edit of edits) {
+            const element = document.getElementById(edit.id);
+            const current = element ? (values.get(element) ?? this.fieldValue(element)) : '';
+            const at = current.indexOf(edit.find);
+            if (!element || at === -1 || current.indexOf(edit.find, at + 1) !== -1) {
+                missing.push(edit.find);
+                continue;
+            }
+            values.set(element, current.slice(0, at) + edit.replace + current.slice(at + edit.find.length));
+        }
+        for (const [element, value] of values) {
+            this.setFieldValue(element, value);
+        }
+        // The answer already names the corrections. Only a correction that the live form refused needs a note.
+        if (missing.length > 0) {
+            const note = this.labels.textEditMissing.replace('%s', missing.map((find) => `"${find}"`).join(', '));
+            this.chat.addMessage({ html: `<div class="ai-chat-note">${this.escape(note)}</div>`, role: 'ai' });
+        }
+        const first = values.keys().next().value;
+        if (first) {
+            this.showTabOf(first);
+            setTimeout(() => (window.tiptapEditors?.get(first.id)?.wrapper ?? first).scrollIntoView({ block: 'center', behavior: 'smooth' }), 150);
+        }
     }
 
     // --- page actions -----------------------------------------------------------------
@@ -1039,6 +1147,9 @@ class MahoAiAssistant {
         element.dispatchEvent(new Event('input', { bubbles: true }));
         element.dispatchEvent(new Event('change', { bubbles: true }));
         element.classList.add('ai-chat-prefilled');
+        if (element.id) {
+            this.changedFields.add(element.id);
+        }
     }
 
     lastIndex() {

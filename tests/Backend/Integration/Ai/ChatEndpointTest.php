@@ -1547,6 +1547,70 @@ it('hands a page action to the browser', function (): void {
     }
 });
 
+it('reads the text of the open form and hands the text corrections to the browser', function (): void {
+    $admin = aiChatAdmin('ai_chat_form', ['all']);
+    $form = [
+        ['id' => 'page_title', 'name' => 'title', 'label' => 'Page Title', 'value' => 'Promo di Natale', 'changed' => false],
+        ['id' => 'page_content', 'name' => 'content', 'label' => 'Content', 'value' => '<p>Regalizzz belli.</p><p>Nel carrello e al pagamento.</p>', 'changed' => true],
+    ];
+    try {
+        aiChatLogin($admin);
+        AiChatScript::reset(new TextResult('Hello.'));
+        aiChatRequest('/api/admin/ai/chat', ['message' => 'hello', 'context' => ['route' => 'cms_page/edit']]);
+        expect(AiChatScript::$offeredTools[0])->not->toContain('admin_read_form');
+        expect(AiChatScript::$offeredTools[0])->not->toContain('admin_edit_text');
+
+        AiChatScript::reset(
+            new ToolCallResult([
+                new ToolCall('call_f1', 'admin_read_form', ['fields' => ['Content']]),
+                new ToolCall('call_f2', 'admin_edit_text', ['edits' => [
+                    ['field' => 'content', 'find' => 'Regalizzz', 'replace' => 'Regali'],
+                    ['field' => 'content', 'find' => 'p>', 'replace' => 'div>'],
+                ]]),
+            ]),
+            new ToolCallResult([
+                new ToolCall('call_f3', 'admin_edit_text', ['edits' => [
+                    ['field' => 'Content', 'find' => 'Regalizzz', 'replace' => 'Regali'],
+                    ['field' => 'content', 'find' => 'e al pagamento', 'replace' => 'e al momento del pagamento'],
+                ]]),
+                new ToolCall('call_f4', 'admin_edit_text', ['edits' => [['field' => 'content', 'find' => 'Regalizzz', 'replace' => 'Regalo']]]),
+                new ToolCall('call_f5', 'admin_edit_text', ['edits' => [['field' => 'Meta Keywords', 'find' => 'a', 'replace' => 'b']]]),
+            ]),
+            new TextResult('I corrected two places. Check them and save the page.'),
+        );
+
+        $result = aiChatRequest('/api/admin/ai/chat', ['message' => 'proofread the page', 'context' => ['route' => 'cms_page/edit', 'form' => $form]]);
+
+        expect($result['status'])->toBe(200);
+        expect(AiChatScript::$offeredTools[0])->toContain('admin_read_form', 'admin_edit_text');
+        $results = aiChatEvents($result['events'], 'tool_result');
+        expect($results[0]['ok'])->toBeTrue($result['raw']);
+        expect($results[0]['preview'])->toContain('Regalizzz belli', 'not saved');
+        expect($results[0]['preview'])->not->toContain('Promo di Natale');
+        // One edit that matches more than once refuses the whole call, so nothing reaches the browser.
+        expect($results[1]['ok'])->toBeFalse();
+        expect($results[1]['preview'])->toContain('4 times');
+        expect($results[2]['ok'])->toBeTrue($result['raw']);
+        // The server keeps the corrected text: a later call does not find the old word.
+        expect($results[3]['ok'])->toBeFalse();
+        expect($results[3]['preview'])->toContain('not in the field');
+        expect($results[4]['ok'])->toBeFalse();
+        expect($results[4]['preview'])->toContain('Page Title', 'Content');
+
+        $edits = aiChatEvents($result['events'], 'text_edits');
+        expect($edits)->toHaveCount(1);
+        expect($edits[0]['edits'])->toBe([
+            ['id' => 'page_content', 'find' => 'Regalizzz', 'replace' => 'Regali'],
+            ['id' => 'page_content', 'find' => 'e al pagamento', 'replace' => 'e al momento del pagamento'],
+        ]);
+        expect(aiChatEvents($result['events'], 'tool_call')[1]['read_only'])->toBeTrue();
+        expect(aiChatEvents($result['events'], 'done')[0]['state'])->toBe('complete');
+    } finally {
+        aiChatDeleteConversations((int) $admin->getId());
+        aiChatDeleteAdmin($admin);
+    }
+});
+
 it('hands the opening of a grid row to the browser by its number', function (): void {
     $admin = aiChatAdmin('ai_chat_row', ['all']);
     try {

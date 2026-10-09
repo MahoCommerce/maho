@@ -65,6 +65,16 @@ it('describes what the administrator sees when the panel sends a screen digest',
     expect($prompt)->toContain('Insert Slideshow');
 });
 
+it('points to the form tools when the panel sent the text fields of the open form', function (): void {
+    $admin = aiPromptAdmin();
+    $form = [['id' => 'page_content', 'name' => 'content', 'label' => 'Content', 'value' => '<p>Secret draft</p>', 'changed' => true]];
+    $prompt = new Maho_Ai_Model_Chat_SystemPrompt()->build($admin, ['route' => 'cms_page/edit', 'form' => $form]);
+
+    expect($prompt)->toContain('admin_read_form', 'admin_edit_text');
+    expect($prompt)->not->toContain('Secret draft');
+    expect(new Maho_Ai_Model_Chat_SystemPrompt()->build($admin, ['route' => 'cms_page/edit']))->not->toContain('admin_read_form');
+});
+
 it('lists the editor layouts from the guide the panel sent', function (): void {
     $admin = aiPromptAdmin();
     $guide = "## Standard HTML the editor keeps\np\n\n## Directives\n{{var}}\n\n## Columns: 2 Columns\n<div></div>\n\n## Bento grid: Mosaic\n<div></div>";
