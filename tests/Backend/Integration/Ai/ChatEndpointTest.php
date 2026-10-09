@@ -572,6 +572,29 @@ it('creates a scheduled task through its API tool, and a scheduled run proposes 
         expect($done['title'] ?? null)->toBe('The scheduled task "Page check" is done');
         expect($done['description'])->toBe('The page title is still Old.');
         expect((int) $done['admin_user_id'])->toBe((int) $admin->getId());
+
+        // A timed run puts its answer in the inbox of the audience, also when the model notified nobody.
+        $timed = Mage::getModel('ai/task_schedule')->load((int) $schedule->getId())->run();
+        AiChatScript::reset(new TextResult('Page ' . $pageId . ' is still called Old.'));
+        new Maho_Ai_Model_TaskRunner()->processTask((int) $timed->getId());
+        $timedRun = (int) Mage::getModel('ai/task')->load((int) $timed->getId())->getConversationId();
+        $report = $connection->fetchAll($connection->select()->from($inbox, ['title', 'description', 'admin_user_id', 'acl_resource'])->where('url LIKE ?', '%/ai_chat/open/id/' . $timedRun . '/%'));
+        expect($report)->toHaveCount(1);
+        expect($report[0]['title'])->toBe('Page check');
+        expect($report[0]['description'])->toBe('Page ' . $pageId . ' is still called Old.');
+        expect($report[0]['acl_resource'])->toBe('cms/page');
+        expect($report[0]['admin_user_id'])->toBeNull();
+
+        // A run that notified the audience itself sends nothing more.
+        $flagged = Mage::getModel('ai/task_schedule')->load((int) $schedule->getId())->run();
+        AiChatScript::reset(
+            new ToolCallResult([new ToolCall('call_m', 'notify', ['title' => 'The page title is still old', 'text' => 'Page ' . $pageId . ' is still called Old.', 'severity' => 'minor'])]),
+            new TextResult('I notified the editors.'),
+        );
+        new Maho_Ai_Model_TaskRunner()->processTask((int) $flagged->getId());
+        $flaggedRun = (int) Mage::getModel('ai/task')->load((int) $flagged->getId())->getConversationId();
+        $titles = $connection->fetchCol($connection->select()->from($inbox, ['title'])->where('url LIKE ?', '%/ai_chat/open/id/' . $flaggedRun . '/%'));
+        expect($titles)->toBe(['The page title is still old']);
     } finally {
         $connection->delete(\Maho\Queue\QueueManager::tableName(), ['dedupe_key LIKE ?' => 'ai_task_%']);
         $connection->delete($resource->getTableName('ai/task'), ['admin_user_id = ?' => (int) $admin->getId()]);

@@ -48,7 +48,7 @@ final class NotifyTool
         return ToolDefinition::create(
             new ExecutionReference(self::class, 'notify'),
             self::NAME,
-            'Put a message in the admin notification inbox, for a result that needs the attention of the administrators. The message links to this conversation. Send one only when there is something to act on or to know; when everything is as expected, send none. The text must stand on its own: the facts, the records and the numbers.',
+            'Put a message in the admin notification inbox, for a result that needs the attention of the administrators. The message links to this conversation. In a scheduled run, the final answer goes to the inbox anyway: call this only for a problem that needs a higher severity, and the final answer is then not sent. The text must stand on its own: the facts, the records and the numbers.',
             [
                 'type' => 'object',
                 'properties' => [

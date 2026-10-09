@@ -154,8 +154,8 @@ class Maho_Ai_Model_Chat_SystemPrompt
             'schedule' => implode("\n", [
                 'How this turn runs: one run of a scheduled task, in a queue worker, with nobody watching and no admin page.',
                 '- A write does not run: it waits in this conversation for the administrator. Propose one only when the instruction asks for a change.',
-                '- A summary, a report or a list that the instruction asks for is the result itself: send it with notify on every run, also when nothing changed. A check, such as "tell me when", calls notify only when the result needs attention. The text of a notification stands on its own.',
-                '- End with a short report of what you found.',
+                '- Your final answer goes to the admin inbox of the audience after the run, so write it as that message: what you found, with the records and the numbers. When there is nothing to report, say so in one sentence.',
+                '- Call notify only for a problem that needs a higher severity than a notice. The final answer is then not sent, so the text of the notification must stand on its own.',
             ]),
             default => '',
         };
@@ -180,7 +180,7 @@ class Maho_Ai_Model_Chat_SystemPrompt
             '   - "Take me to", "open", "show me the page": admin_open_page. Opening a page is never a substitute for a change the administrator asked for.',
             '   - Many records at once: the update tools, one confirmation for the batch.',
             '   - A long job, such as a text for every product of a category or a change over hundreds of records: run_in_background with a complete instruction. The administrator confirms it once and follows it in a new conversation; do not start the job here as well.',
-            '   - "Every morning", "each Monday": a scheduled task, with the scheduled tasks tools. Its runs propose writes, they never make them.',
+            '   - "Every morning", "each Monday": a scheduled task, with the scheduled tasks tools. Its runs propose writes, they never make them. Each run puts its answer in the admin inbox of the audience, never in an email: say so.',
             '   - One change, one tool. A create or update call that already holds the content finishes the change; never fill the form with the same content afterwards, and never send a value twice.',
             '   - "Save", "click …", "open the … tab", "set … to …", "add a comment" about the page the administrator has open: admin_page_action, with up to three steps and a click last, for example set the Comment field then click Submit Comment. Use only labels listed under what the administrator sees. The next message shows the result.',
             '3. Act. Tools come in sections and only the loaded sections are callable; when a tool you need is not loaded, call enable_tools with its section first. Pass only the parameters a call needs. Without a store argument a write goes to the default scope, which is the normal case. Pass the store view code only when the administrator names a store or a language, or the page scope is a store view; a store view code can look like an ordinary word (a product type, a room, an audience), so a word in the request, a product name, an attribute set or a category is a store view only when the administrator says store, store view, website or a language. A read without a store argument searches the main catalog; start there. Name the scope in the sentence before a write: "for every store view" or "for the Italian store view only". If a call fails, read the error and change the call; do not repeat it unchanged. A result marked as truncated is incomplete: ask for a smaller page, and never write a truncated field back.',

@@ -343,8 +343,8 @@ class Maho_Ai_Model_TaskRunner
 
     /**
      * The creator hears about a run that failed or waits for a confirmation, since only the
-     * creator can act on it, and about the end of a background job. A scheduled run that
-     * ends as expected sends only what the model chose to notify.
+     * creator can act on it, and about the end of a background job. A scheduled run that ends
+     * as expected puts its answer in the inbox of the audience, unless the model notified it.
      */
     private function executeAgentTask(Maho_Ai_Model_Task $task): void
     {
@@ -392,10 +392,28 @@ class Maho_Ai_Model_TaskRunner
             // A run started by hand ends with its result for the owner, even when the model notified nobody.
             if (!empty($task->getContextArray()['manual'])) {
                 Maho_Ai_Model_Chat_Notifier::send(Mage_AdminNotification_Model_Inbox::SEVERITY_NOTICE, $helper->__('The scheduled task "%s" is done', $title), $summary, $conversation, $schedule, creatorOnly: true);
+            } elseif (!$this->calledNotify($conversation)) {
+                $text = $summary !== '' ? $summary : $helper->__('The run ended without an answer. Open the conversation for its steps.');
+                Maho_Ai_Model_Chat_Notifier::send(Mage_AdminNotification_Model_Inbox::SEVERITY_NOTICE, $title, $text, $conversation, $schedule);
             }
             // A run with nothing to confirm stays out of the panel picker; the grid and its notifications still open it.
             $conversation->setStatus(Maho_Ai_Model_Conversation::STATUS_ARCHIVED)->save();
         }
+    }
+
+    /** A run that sent a notification of its own already told the audience what it found. */
+    private function calledNotify(Maho_Ai_Model_Conversation $conversation): bool
+    {
+        $calls = $conversation->messagesCollection()
+            ->addFieldToFilter('role', Maho_Ai_Model_Conversation_Message::ROLE_TOOL)
+            ->addFieldToFilter('tool_name', \Maho\Ai\Api\Agent\NotifyTool::NAME);
+        foreach ($calls as $call) {
+            if (!\Maho\Ai\Api\Agent\McpToolbox::isErrorText((string) $call->getContent())) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

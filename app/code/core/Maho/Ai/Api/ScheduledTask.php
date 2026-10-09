@@ -27,7 +27,7 @@ use Maho\Config\ApiResource;
     mahoSection: 'System',
     mahoOperations: ['read' => 'View', 'write' => 'Create & Update', 'delete' => 'Delete'],
     shortName: 'ScheduledTask',
-    description: 'An instruction that the admin assistant runs on a schedule, in a queue worker, with the permissions of its owner: the administrator who saved it last. A run never changes data by itself: a write waits in the run conversation for a confirmation. A run notifies its audience in the admin inbox only when it finds something worth attention.',
+    description: 'An instruction that the admin assistant runs on a schedule, in a queue worker, with the permissions of its owner: the administrator who saved it last. A run never changes data by itself: a write waits in the run conversation for a confirmation. Every run puts its result in the admin inbox of its audience.',
     provider: CrudProvider::class,
     processor: ScheduledTaskProcessor::class,
     operations: [
@@ -90,7 +90,7 @@ class ScheduledTask extends CrudResource
     #[ApiProperty(description: 'A short name for the task')]
     public ?string $title = null;
 
-    #[ApiProperty(description: 'The complete instruction of one run, as if to a colleague who cannot ask back: what to check, the limits, and when to notify. A summary or a report notifies on every run; a check notifies only when it finds something')]
+    #[ApiProperty(description: 'The complete instruction of one run, as if to a colleague who cannot ask back: what to check, the limits, and what to report. The final answer of each run goes to the admin inbox of the audience')]
     public ?string $instruction = null;
 
     #[ApiProperty(description: 'When it runs: five cron fields, minute hour day-of-month month day-of-week, in the store time zone, with one fixed minute. Every day at 8:00 is "0 8 * * *", every Monday at 9:30 is "30 9 * * 1"')]

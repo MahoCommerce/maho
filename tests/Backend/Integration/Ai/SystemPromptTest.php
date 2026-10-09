@@ -75,10 +75,10 @@ it('points to the form tools when the panel sent the text fields of the open for
     expect(new Maho_Ai_Model_Chat_SystemPrompt()->build($admin, ['route' => 'cms_page/edit']))->not->toContain('admin_read_form');
 });
 
-it('tells a scheduled run to send a summary on every run, and a check only when it finds something', function (): void {
+it('tells a scheduled run that its final answer goes to the admin inbox', function (): void {
     $prompt = new Maho_Ai_Model_Chat_SystemPrompt()->build(aiPromptAdmin(), ['run_mode' => 'schedule']);
 
-    expect($prompt)->toContain('send it with notify on every run', 'calls notify only when the result needs attention');
+    expect($prompt)->toContain('Your final answer goes to the admin inbox of the audience', 'Call notify only for a problem');
 });
 
 it('lists the editor layouts from the guide the panel sent', function (): void {

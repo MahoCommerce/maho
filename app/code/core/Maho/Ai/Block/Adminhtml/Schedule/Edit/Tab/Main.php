@@ -33,7 +33,7 @@ class Maho_Ai_Block_Adminhtml_Schedule_Edit_Tab_Main extends Mage_Adminhtml_Bloc
             'name' => 'instruction',
             'label' => $helper->__('Instruction'),
             'required' => true,
-            'note' => $helper->__('What the assistant does in each run, as if to a colleague who cannot ask back: what to check, the limits, and when to notify. A run never changes data by itself: a change waits in the run conversation for your confirmation.'),
+            'note' => $helper->__('What the assistant does in each run, as if to a colleague who cannot ask back: what to check, the limits, and what to report. The answer of each run goes to the admin inbox. A run never changes data by itself: a change waits in the run conversation for your confirmation.'),
         ]);
         $fieldset->addField('cron_expr', 'text', [
             'name' => 'cron_expr',
@@ -45,7 +45,7 @@ class Maho_Ai_Block_Adminhtml_Schedule_Edit_Tab_Main extends Mage_Adminhtml_Bloc
             'name' => 'notify',
             'label' => $helper->__('Notify'),
             'values' => Maho_Ai_Model_Task_Schedule::audienceOptions($admin),
-            'note' => $helper->__('Who sees the notifications of the runs in the admin inbox. A failure or a change that waits for a confirmation always goes to the owner.'),
+            'note' => $helper->__('Who sees the answer of each run in the admin inbox. A failure or a change that waits for a confirmation always goes to the owner.'),
         ]);
         $fieldset->addField('is_active', 'select', [
             'name' => 'is_active',
