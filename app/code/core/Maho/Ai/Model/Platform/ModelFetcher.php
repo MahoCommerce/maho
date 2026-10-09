@@ -9,9 +9,19 @@
 declare(strict_types=1);
 
 use Maho\Http\Client as HttpClient;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Symfony\Contracts\HttpClient\ResponseInterface;
 
 class Maho_Ai_Model_Platform_ModelFetcher
 {
+    private ?HttpClientInterface $httpClient = null;
+
+    public function setHttpClient(HttpClientInterface $httpClient): static
+    {
+        $this->httpClient = $httpClient;
+        return $this;
+    }
+
     /**
      * Fetch available models for the given provider.
      * Returns array of ['value' => model_id, 'label' => display_name].
@@ -74,6 +84,48 @@ class Maho_Ai_Model_Platform_ModelFetcher
         return (string) Mage::getStoreConfig($path);
     }
 
+    private function getHttpClient(): HttpClientInterface
+    {
+        return $this->httpClient ??= HttpClient::create();
+    }
+
+    /**
+     * Return the JSON body of $response. If the status is 400 or more, throw the error message of the provider.
+     *
+     * The message never contains the request URL, because the Google URL contains the API key.
+     *
+     * @throws Mage_Core_Exception
+     */
+    private function decode(ResponseInterface $response, string $provider): array
+    {
+        $status = $response->getStatusCode();
+        if ($status < 400) {
+            return $response->toArray();
+        }
+
+        $content = $response->getContent(false);
+        Mage::log(
+            sprintf(
+                'model fetch failed: provider=%s status=%d request_id=%s body=%s',
+                $provider,
+                $status,
+                $response->getHeaders(false)['request-id'][0] ?? '-',
+                mb_strimwidth($content, 0, 2000, '...'),
+            ),
+            Mage::LOG_DEBUG,
+            'ai.log',
+        );
+
+        $body = json_decode($content, true);
+        $error = is_array($body) ? ($body['error'] ?? $body) : null;
+        $message = is_array($error) ? ($error['message'] ?? $error['detail'] ?? null) : $error;
+        if (!is_string($message) || trim($message) === '') {
+            throw new Mage_Core_Exception("{$provider} returned HTTP {$status}.");
+        }
+
+        throw new Mage_Core_Exception("{$provider} returned HTTP {$status}: " . mb_strimwidth(trim($message), 0, 300, '...'));
+    }
+
     /** For fields stored with backend_model=adminhtml/system_config_backend_encrypted. */
     private function getEncryptedConfig(string $path): string
     {
@@ -90,13 +142,12 @@ class Maho_Ai_Model_Platform_ModelFetcher
             throw new Mage_Core_Exception('OpenAI API key is not configured.');
         }
 
-        $client = HttpClient::create();
-        $response = $client->request('GET', 'https://api.openai.com/v1/models', [
+        $response = $this->getHttpClient()->request('GET', 'https://api.openai.com/v1/models', [
             'headers' => ['Authorization' => "Bearer {$apiKey}"],
             'timeout' => 10,
         ]);
 
-        $data = $response->toArray();
+        $data = $this->decode($response, 'OpenAI');
         $models = [];
         foreach ($data['data'] ?? [] as $model) {
             $id = $model['id'];
@@ -125,16 +176,16 @@ class Maho_Ai_Model_Platform_ModelFetcher
             throw new Mage_Core_Exception('Anthropic API key is not configured.');
         }
 
-        $client = HttpClient::create();
-        $response = $client->request('GET', 'https://api.anthropic.com/v1/models', [
+        $response = $this->getHttpClient()->request('GET', 'https://api.anthropic.com/v1/models', [
             'headers' => [
                 'x-api-key'         => $apiKey,
                 'anthropic-version' => '2023-06-01',
+                ...Maho_Ai_Model_Platform_Symfony::anthropicWorkspaceHeaders(null),
             ],
             'timeout' => 10,
         ]);
 
-        $data = $response->toArray();
+        $data = $this->decode($response, 'Anthropic');
         $models = [];
         foreach ($data['data'] ?? [] as $model) {
             $id = $model['id'];
@@ -158,14 +209,13 @@ class Maho_Ai_Model_Platform_ModelFetcher
             throw new Mage_Core_Exception('Google AI API key is not configured.');
         }
 
-        $client = HttpClient::create();
-        $response = $client->request(
+        $response = $this->getHttpClient()->request(
             'GET',
             "https://generativelanguage.googleapis.com/v1beta/models?key={$apiKey}",
             ['timeout' => 10],
         );
 
-        $data = $response->toArray();
+        $data = $this->decode($response, 'Google');
         $models = [];
         foreach ($data['models'] ?? [] as $model) {
             $methods = $model['supportedGenerationMethods'] ?? [];
@@ -191,13 +241,12 @@ class Maho_Ai_Model_Platform_ModelFetcher
             throw new Mage_Core_Exception('Mistral API key is not configured.');
         }
 
-        $client = HttpClient::create();
-        $response = $client->request('GET', 'https://api.mistral.ai/v1/models', [
+        $response = $this->getHttpClient()->request('GET', 'https://api.mistral.ai/v1/models', [
             'headers' => ['Authorization' => "Bearer {$apiKey}"],
             'timeout' => 10,
         ]);
 
-        $data = $response->toArray();
+        $data = $this->decode($response, 'Mistral');
         $models = [];
         foreach ($data['data'] ?? [] as $model) {
             $id = $model['id'];
@@ -217,12 +266,11 @@ class Maho_Ai_Model_Platform_ModelFetcher
      */
     private function fetchOpenRouter(): array
     {
-        $client = HttpClient::create();
-        $response = $client->request('GET', 'https://openrouter.ai/api/v1/models', [
+        $response = $this->getHttpClient()->request('GET', 'https://openrouter.ai/api/v1/models', [
             'timeout' => 15,
         ]);
 
-        $data = $response->toArray();
+        $data = $this->decode($response, 'OpenRouter');
         $models = [];
         foreach ($data['data'] ?? [] as $model) {
             $id = $model['id'];
@@ -242,10 +290,9 @@ class Maho_Ai_Model_Platform_ModelFetcher
         $baseUrl = $this->getConfig('ai/general/ollama_base_url') ?: 'http://localhost:11434';
         $baseUrl = rtrim($baseUrl, '/');
 
-        $client = HttpClient::create();
-        $response = $client->request('GET', "{$baseUrl}/api/tags", ['timeout' => 5]);
+        $response = $this->getHttpClient()->request('GET', "{$baseUrl}/api/tags", ['timeout' => 5]);
 
-        $data = $response->toArray();
+        $data = $this->decode($response, 'Ollama');
         $models = [];
         foreach ($data['models'] ?? [] as $model) {
             $id = $model['name'];

@@ -255,10 +255,27 @@ class Maho_Ai_Model_Platform_Symfony implements
         $catalog = new \Symfony\AI\Platform\Bridge\Anthropic\ModelCatalog($additional);
 
         return new self(
-            platform: \Symfony\AI\Platform\Bridge\Anthropic\Factory::createPlatform($apiKey, modelCatalog: $catalog),
+            platform: \Symfony\AI\Platform\Bridge\Anthropic\Factory::createPlatform(
+                $apiKey,
+                httpClient: \Maho\Http\Client::create(['headers' => self::anthropicWorkspaceHeaders($storeId)]),
+                modelCatalog: $catalog,
+            ),
             platformCode: Maho_Ai_Model_Platform::ANTHROPIC,
             defaultChatModel: $chatModel,
         );
+    }
+
+    /**
+     * Return the anthropic-workspace-id header when a workspace ID is set.
+     *
+     * Anthropic refuses a request with an API key that is not scoped to a workspace, if the request has no such header.
+     *
+     * @return array<string, string>
+     */
+    public static function anthropicWorkspaceHeaders(?int $storeId): array
+    {
+        $workspaceId = trim((string) Mage::getStoreConfig('ai/general/anthropic_workspace_id', $storeId));
+        return $workspaceId === '' ? [] : ['anthropic-workspace-id' => $workspaceId];
     }
 
     public static function createForGoogle(?int $storeId): self

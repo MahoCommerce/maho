@@ -77,6 +77,16 @@
                             <show_in_store>0</show_in_store>
                             <depends><default_platform>anthropic</default_platform></depends>
                         </anthropic_api_key>
+                        <anthropic_workspace_id translate="label comment">
+                            <label>Workspace ID</label>
+                            <comment>Required only for an API key that is not scoped to a workspace. Example: wrkspc_01...</comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>205</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends><default_platform>anthropic</default_platform></depends>
+                        </anthropic_workspace_id>
                         <anthropic_model translate="label">
                             <label>Model</label>
                             <frontend_type>select</frontend_type>
