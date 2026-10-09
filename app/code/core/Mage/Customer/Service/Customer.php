@@ -243,9 +243,15 @@ class Mage_Customer_Service_Customer
             throw new \Mage_Core_Exception('Invalid or expired reset token.');
         }
 
+        // The API takes the new password once, so it is its own confirmation
         $customer->setPassword($newPassword);
-        $customer->clearMagicLinkToken();
-        $customer->save();
+        $customer->setPasswordConfirmation($newPassword);
+        $errors = $customer->validateResetPassword();
+        if (is_array($errors)) {
+            throw new \Mage_Core_Exception(implode(' ', $errors));
+        }
+
+        $customer->completePasswordReset()->save();
 
         return true;
     }

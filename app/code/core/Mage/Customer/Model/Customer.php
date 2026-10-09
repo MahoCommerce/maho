@@ -821,6 +821,22 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
     }
 
     /**
+     * Generate a new password reset link and send it in the reset password confirmation email
+     *
+     * @throws Mage_Core_Exception
+     * @throws Mage_Core_Model_Store_Exception
+     */
+    public function sendPasswordResetLinkEmail(): self
+    {
+        /** @var Mage_Customer_Helper_Data $helper */
+        $helper = Mage::helper('customer');
+        $this->changeResetPasswordLinkCustomerId($helper->generateResetPasswordLinkCustomerId($this->getId()));
+        $this->changeResetPasswordLinkToken($helper->generateResetPasswordLinkToken());
+
+        return $this->sendPasswordResetConfirmationEmail();
+    }
+
+    /**
      * Send email with link to set password
      *
      * @bool $isNew Send welcome email?
@@ -1703,6 +1719,21 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
     {
         $this->setData('password');
         $this->setData('password_confirmation');
+        return $this;
+    }
+
+    /**
+     * Invalidate the password reset link once the new password is set, and mark the email
+     * address as confirmed, since the customer received the link there. The caller saves.
+     */
+    public function completePasswordReset(): self
+    {
+        $this->setRpToken(null);
+        $this->setRpTokenCreatedAt(null);
+        $this->setRpCustomerId(null);
+        $this->cleanPasswordsValidationData();
+        $this->setPasswordCreatedAt(time());
+        $this->setConfirmation(null);
         return $this;
     }
 

@@ -682,7 +682,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         // Always return success to prevent email enumeration
         if ($customer->getId()) {
             try {
-                $customer->sendPasswordResetConfirmationEmail();
+                $customer->sendPasswordResetLinkEmail();
             } catch (\Exception $e) {
                 \Mage::logException($e);
             }
@@ -710,11 +710,6 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         }
 
         $this->checkRateLimitByIp('reset_password', 'reset_password', 3600);
-
-        $minPasswordLength = \Mage::getModel('customer/customer')->getMinPasswordLength();
-        if (!\Mage::helper('core')->isValidLength($newPassword, $minPasswordLength)) {
-            throw new UnprocessableEntityHttpException("New password must be at least {$minPasswordLength} characters");
-        }
 
         $this->customerService->resetPassword($email, $resetToken, $newPassword);
 
