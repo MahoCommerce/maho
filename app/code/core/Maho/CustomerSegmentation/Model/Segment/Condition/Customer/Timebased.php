@@ -79,6 +79,10 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Timebased exten
         return $this->getSubfilterSql('e.entity_id', true, $websiteId);
     }
 
+    /**
+     * A time condition counts the orders of every store. The resource passes a website only to keep
+     * the amounts of a currency group together, and a date has no currency.
+     */
     public function getSubfilterSql(string $fieldName, bool $requireValid, ?int $website): string
     {
         $attribute = $this->getAttribute();
@@ -109,10 +113,6 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Timebased exten
                     ->where('o.state NOT IN (?)', ['canceled'])
                     ->group('o.customer_id')
                     ->having($this->buildSqlCondition($adapter, (string) $dateDiff, $operator, $value));
-
-                if ($website) {
-                    $select->where('o.store_id IN (?)', Mage::app()->getWebsite($website)->getStoreIds());
-                }
                 break;
 
             case 'days_inactive':
@@ -142,10 +142,6 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Timebased exten
                     ])
                     ->group('c.entity_id')
                     ->having($this->buildSqlCondition($adapter, (string) $dateDiff, $operator, $value));
-
-                if ($website) {
-                    $select->where('o.store_id IN (?) OR o.store_id IS NULL', Mage::app()->getWebsite($website)->getStoreIds());
-                }
                 break;
 
             case 'days_since_first_order':
@@ -157,10 +153,6 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Timebased exten
                     ->where('o.state NOT IN (?)', ['canceled'])
                     ->group('o.customer_id')
                     ->having($this->buildSqlCondition($adapter, (string) $dateDiff, $operator, $value));
-
-                if ($website) {
-                    $select->where('o.store_id IN (?)', Mage::app()->getWebsite($website)->getStoreIds());
-                }
                 break;
 
             case 'order_frequency_days':
@@ -177,10 +169,6 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Timebased exten
                     ->group('o.customer_id')
                     ->having('COUNT(*) > 1')  // Need at least 2 orders to calculate frequency
                     ->having($this->buildSqlCondition($adapter, "({$dateDiff}) / GREATEST(COUNT(*) - 1, 1)", $operator, $value));
-
-                if ($website) {
-                    $select->where('o.store_id IN (?)', Mage::app()->getWebsite($website)->getStoreIds());
-                }
                 break;
 
             case 'days_without_purchase':
@@ -193,10 +181,6 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Timebased exten
                     ->where('o.customer_id IS NOT NULL')
                     ->where('o.state NOT IN (?)', ['canceled'])
                     ->group('o.customer_id');
-
-                if ($website) {
-                    $lastOrderSelect->where('o.store_id IN (?)', Mage::app()->getWebsite($website)->getStoreIds());
-                }
 
                 $dateDiff = $adapter->getDateDiffSql("'{$now}'", 'lo.last_order');
                 $select = $adapter->select()
