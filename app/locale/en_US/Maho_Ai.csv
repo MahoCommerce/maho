@@ -259,6 +259,7 @@
 "The message was rejected: %s","The message was rejected: %s"
 "The previous run of this task still runs or waits for a confirmation.","The previous run of this task still runs or waits for a confirmation."
 "There is no action waiting for confirmation.","There is no action waiting for confirmation."
+"The run ended without an answer. Open the conversation for its steps.","The run ended without an answer. Open the conversation for its steps."
 "The runs use the permissions of the owner. You become the owner when you save.","The runs use the permissions of the owner. You become the owner when you save."
 "The scheduled task ""%s"" is done","The scheduled task ""%s"" is done"
 "The scheduled task is in the queue. You get a notification when it is done.","The scheduled task is in the queue. You get a notification when it is done."
@@ -302,4 +303,3 @@
 "Write a meta title and a meta description for this product","Write a meta title and a meta description for this product"
 "You. The runs use your permissions.","You. The runs use your permissions."
 "— save the API key to load available models —","— save the API key to load available models —"
-"The run ended without an answer. Open the conversation for its steps.","The run ended without an answer. Open the conversation for its steps."
