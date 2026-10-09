@@ -90,7 +90,7 @@ class ScheduledTask extends CrudResource
     #[ApiProperty(description: 'A short name for the task')]
     public ?string $title = null;
 
-    #[ApiProperty(description: 'The complete instruction of one run, as if to a colleague who cannot ask back: what to check, the limits, and when to notify')]
+    #[ApiProperty(description: 'The complete instruction of one run, as if to a colleague who cannot ask back: what to check, the limits, and when to notify. A summary or a report notifies on every run; a check notifies only when it finds something')]
     public ?string $instruction = null;
 
     #[ApiProperty(description: 'When it runs: five cron fields, minute hour day-of-month month day-of-week, in the store time zone, with one fixed minute. Every day at 8:00 is "0 8 * * *", every Monday at 9:30 is "30 9 * * 1"')]

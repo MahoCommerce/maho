@@ -154,7 +154,7 @@ class Maho_Ai_Model_Chat_SystemPrompt
             'schedule' => implode("\n", [
                 'How this turn runs: one run of a scheduled task, in a queue worker, with nobody watching and no admin page.',
                 '- A write does not run: it waits in this conversation for the administrator. Propose one only when the instruction asks for a change.',
-                '- Call notify only when the result needs attention, with a text that stands on its own. When everything is as expected, do not notify.',
+                '- A summary, a report or a list that the instruction asks for is the result itself: send it with notify on every run, also when nothing changed. A check, such as "tell me when", calls notify only when the result needs attention. The text of a notification stands on its own.',
                 '- End with a short report of what you found.',
             ]),
             default => '',
