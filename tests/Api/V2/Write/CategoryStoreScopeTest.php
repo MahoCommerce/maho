@@ -139,6 +139,14 @@ beforeAll(function (): void {
     $GLOBALS['_cat_restrict_store_id'] = (int) Mage::getModel('core/store')
         ->load(CAT_RESTRICT_STORE_CODE, 'code')->getId();
 
+    // A category under the root of the restricted store only, for the scope=all tests.
+    $child = Mage::getModel('catalog/category')->getCollection()
+        ->addAttributeToFilter('name', 'API Scope All Child')->getFirstItem();
+    if (!$child->getId()) {
+        Mage::getModel('catalog/category')->setStoreId(0)->setName('API Scope All Child')->setIsActive(1)
+            ->setPath('1/' . catRestrictRootId())->save();
+    }
+
     Mage::app()->cleanCache();
 });
 
@@ -456,16 +464,6 @@ describe('Store-restricted category writes (REST)', function (): void {
 });
 
 describe('Category list of every root tree (?scope=all)', function (): void {
-
-    beforeAll(function (): void {
-        ApiV2Helper::ensureMahoBootstrapped();
-        $category = Mage::getModel('catalog/category')->getCollection()
-            ->addAttributeToFilter('name', 'API Scope All Child')->getFirstItem();
-        if (!$category->getId()) {
-            Mage::getModel('catalog/category')->setStoreId(0)->setName('API Scope All Child')->setIsActive(1)
-                ->setPath('1/' . catRestrictRootId())->save();
-        }
-    });
 
     $count = fn(array $response): ?int => $response['json']['totalItems'] ?? null;
 
