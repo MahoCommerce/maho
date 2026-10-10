@@ -519,6 +519,11 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
         return $this->setData('description', $value);
     }
 
+    public function setDiscountAmount(?float $value): static
+    {
+        return $this->setData('discount_amount', $value);
+    }
+
     public function setDiscountQty(?float $value): static
     {
         return $this->setData('discount_qty', $value);
