@@ -10,6 +10,8 @@ declare(strict_types=1);
 
 use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
+use Doctrine\DBAL\Schema\ForeignKeyConstraint;
+use Doctrine\DBAL\Schema\ForeignKeyConstraint\ReferentialAction;
 use Doctrine\DBAL\Schema\Index;
 use Doctrine\DBAL\Schema\Index\IndexType;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
@@ -47,6 +49,8 @@ return function (SchemaEditor $schema): void {
             ->addColumn(Schema::column('max_retries', Types::SMALLINT, unsigned: true, default: 3))
             ->addColumn(Schema::column('admin_user_id', Types::INTEGER, unsigned: true, notNull: false))
             ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('conversation_id', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('schedule_id', Types::INTEGER, unsigned: true, notNull: false))
             ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
             ->addColumn(Schema::column('started_at', Types::DATETIME_MUTABLE, notNull: false))
             ->addColumn(Schema::column('completed_at', Types::DATETIME_MUTABLE, notNull: false))
@@ -55,7 +59,34 @@ return function (SchemaEditor $schema): void {
             ->addIndex(Index::editor()->setUnquotedColumnNames('task_type'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('consumer', 'created_at'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('admin_user_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('conversation_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('schedule_id', 'task_id'))
             ->setComment('Maho AI Task Queue')
+            ->create(),
+    );
+
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('ai_task_schedule')
+            ->addColumn(Schema::column('schedule_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('admin_user_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('title', Types::STRING, length: 255))
+            ->addColumn(Schema::column('instruction', Types::TEXT, length: 65535))
+            // A cron expression in the time zone of the store
+            ->addColumn(Schema::column('cron_expr', Types::STRING, length: 64))
+            // Who sees the notifications: "self", "everyone" or an admin ACL resource
+            ->addColumn(Schema::column('notify', Types::STRING, length: 128, default: 'self'))
+            ->addColumn(Schema::column('is_active', Types::SMALLINT, unsigned: true, default: 1))
+            ->addColumn(Schema::column('next_run_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('last_run_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('last_task_id', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('updated_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('schedule_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('is_active', 'next_run_at'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('admin_user_id'))
+            ->setComment('Maho AI Scheduled Tasks')
             ->create(),
     );
 
@@ -106,6 +137,74 @@ return function (SchemaEditor $schema): void {
             )
             ->addIndex(Index::editor()->setUnquotedColumnNames('entity_type', 'entity_id'))
             ->setComment('Maho AI - Entity Embedding Vectors')
+            ->create(),
+    );
+
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('ai_memory')
+            ->addColumn(Schema::column('memory_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('admin_user_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('note', Types::STRING, length: 255))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('memory_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('admin_user_id'))
+            ->setComment('Maho AI Assistant Memory')
+            ->create(),
+    );
+
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('ai_conversation')
+            ->addColumn(Schema::column('conversation_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('admin_user_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('title', Types::STRING, length: 255, notNull: false))
+            ->addColumn(Schema::column('platform', Types::STRING, length: 32, notNull: false))
+            ->addColumn(Schema::column('model', Types::STRING, length: 128, notNull: false))
+            ->addColumn(Schema::column('status', Types::STRING, length: 16, default: 'active'))
+            ->addColumn(Schema::column('context_route', Types::STRING, length: 128, notNull: false))
+            ->addColumn(Schema::column('context_entity_type', Types::STRING, length: 32, notNull: false))
+            ->addColumn(Schema::column('context_entity_id', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('locked_until', Types::DATETIME_MUTABLE, notNull: false))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addColumn(Schema::column('updated_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('conversation_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('admin_user_id', 'updated_at'))
+            ->setComment('Maho AI Assistant Conversations')
+            ->create(),
+    );
+
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('ai_conversation_message')
+            ->addColumn(Schema::column('message_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('conversation_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('role', Types::STRING, length: 16))
+            ->addColumn(Schema::column('content', Types::TEXT, length: 16777215, notNull: false))
+            ->addColumn(Schema::column('tool_calls', Types::TEXT, length: 16777215, notNull: false))
+            ->addColumn(Schema::column('tool_call_id', Types::STRING, length: 64, notNull: false))
+            ->addColumn(Schema::column('tool_name', Types::STRING, length: 128, notNull: false))
+            ->addColumn(Schema::column('tool_arguments', Types::TEXT, length: 16777215, notNull: false))
+            ->addColumn(Schema::column('tool_status', Types::STRING, length: 16, notNull: false))
+            ->addColumn(Schema::column('is_write', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('undo_arguments', Types::TEXT, length: 16777215, notNull: false))
+            ->addColumn(Schema::column('attachments', Types::TEXT, length: 65535, notNull: false))
+            ->addColumn(Schema::column('input_tokens', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('output_tokens', Types::INTEGER, unsigned: true, default: 0))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('message_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('conversation_id', 'message_id'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('tool_status'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('conversation_id')
+                    ->setUnquotedReferencedTableName('ai_conversation')
+                    ->setUnquotedReferencedColumnNames('conversation_id')
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Maho AI Assistant Conversation Messages')
             ->create(),
     );
 };

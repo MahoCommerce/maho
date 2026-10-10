@@ -11,6 +11,8 @@ declare(strict_types=1);
 namespace Mage\Customer\Api;
 
 use Maho\Config\ApiResource;
+use Maho\ApiPlatform\Metadata\EnumSource;
+use Maho\ApiPlatform\Metadata\ValueLists;
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
@@ -43,7 +45,7 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
         ),
         new GetCollection(
             uriTemplate: '/customers',
-            description: 'Get customer collection, newest first. Filters: search (every word must match part of the email, first name, last name, or an address telephone), email (exact), telephone (prefix), groupId, websiteId',
+            description: 'Get customer collection, newest first. Filters: search (every word must match part of the email, first name, last name, or an address telephone), email (exact), telephone (prefix), groupId, websiteId, createdFrom and createdTo (registration date, UTC)',
             security: "is_granted('ROLE_ADMIN') or is_granted('customers/read')",
         ),
         new Post(
@@ -102,6 +104,8 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
                 'telephone' => ['type' => 'String', 'description' => 'Address telephone that starts with this value'],
                 'groupId' => ['type' => 'Int', 'description' => 'Filter by customer group ID'],
                 'websiteId' => ['type' => 'Int', 'description' => 'Filter by website ID'],
+                'createdFrom' => ['type' => 'String', 'description' => 'Registered at or after this UTC date or datetime; a bare date means from 00:00:00'],
+                'createdTo' => ['type' => 'String', 'description' => 'Registered at or before this UTC date or datetime; a bare date includes the whole day'],
                 'pageSize' => ['type' => 'Int', 'description' => 'Number of results per page'],
                 'page' => ['type' => 'Int', 'description' => 'Page number'],
             ],
@@ -202,7 +206,7 @@ class Customer extends CrudResource
 
     public ?string $suffix = null;
 
-    #[ApiProperty(description: 'Gender option id; 0 clears')]
+    #[ApiProperty(description: 'Gender option id; 0 clears', extraProperties: [EnumSource::KEY => 'Maho\ApiPlatform\Metadata\ValueLists::customerGenders'])]
     public ?int $gender = null;
 
     #[ApiProperty(description: 'Date of birth as Y-m-d; empty string clears')]
@@ -217,16 +221,16 @@ class Customer extends CrudResource
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public bool $isSubscribed = false;
 
-    #[ApiProperty(description: 'Customer group id; admin or service token only', securityPostDenormalize: "is_granted('ROLE_ADMIN') or is_granted('customers/create') or is_granted('customers/write')")]
+    #[ApiProperty(description: 'Customer group id; admin or service token only', securityPostDenormalize: "is_granted('ROLE_ADMIN') or is_granted('customers/create') or is_granted('customers/write')", extraProperties: [EnumSource::KEY => 'customer/customer_attribute_source_group'])]
     public ?int $groupId = null;
 
     #[ApiProperty(description: 'Account enabled flag; admin or service token only', securityPostDenormalize: "is_granted('ROLE_ADMIN') or is_granted('customers/create') or is_granted('customers/write')")]
     public ?bool $isActive = null;
 
-    #[ApiProperty(description: 'Website id; admin or service token, settable on create only', securityPostDenormalize: "is_granted('ROLE_ADMIN') or is_granted('customers/create') or is_granted('customers/write')")]
+    #[ApiProperty(description: 'Website id; admin or service token, settable on create only', securityPostDenormalize: "is_granted('ROLE_ADMIN') or is_granted('customers/create') or is_granted('customers/write')", extraProperties: [EnumSource::KEY => 'Maho\ApiPlatform\Metadata\ValueLists::websites'])]
     public ?int $websiteId = null;
 
-    #[ApiProperty(writable: false)]
+    #[ApiProperty(writable: false, extraProperties: [EnumSource::KEY => 'Maho\ApiPlatform\Metadata\ValueLists::storeViews'])]
     public ?int $storeId = null;
 
     #[ApiProperty(writable: false)]

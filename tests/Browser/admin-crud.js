@@ -108,6 +108,7 @@
     tax_rule: f => ['tax_customer_class[]', 'tax_product_class[]', 'tax_rate[]'].map(n => lastOption(f, n)),
     permissions_block: (f, tag) => [set(f, 'block_name', 'crud/' + tag)],
     catalog_product_review: f => [set(f, 'product_id', String(C.productId))],
+    ai_schedule: f => [set(f, 'cron_expr', '0 8 * * *')],
   };
   // A grid that does not show the tag: the value to search for instead.
   C.search = {directory_country: 'QZ'};

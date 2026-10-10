@@ -16,16 +16,40 @@ class Maho_CustomerSegmentation_Model_Resource_Segment extends Mage_Core_Model_R
         $this->_init('customersegmentation/segment', 'segment_id');
     }
 
+    /**
+     * Return the customers that match the segment.
+     * The websites of the segment form one group for each base currency. The customers of a group match against the
+     * orders and carts of the stores of that currency, so that the amounts of one match add up in one currency.
+     */
     public function getMatchingCustomerIds(Maho_CustomerSegmentation_Model_Segment $segment, ?int $websiteId = null): array
     {
-        $select = $this->_getReadAdapter()->select()
-            ->from(['e' => $this->getTable('customer/entity')], ['entity_id']);
-
-        // Apply website filter
-        $websiteIds = $websiteId ? [$websiteId] : $segment->getWebsiteIds();
-        if (!empty($websiteIds)) {
-            $select->where('e.website_id IN (?)', $websiteIds);
+        if ($websiteId) {
+            return $this->getGroupMatchingCustomerIds($segment, [$websiteId]);
         }
+
+        $websites = Mage::app()->getWebsites();
+        $groups = [];
+        foreach ($segment->getWebsiteIds() ?: array_keys($websites) as $id) {
+            if (isset($websites[$id])) {
+                $groups[(string) $websites[$id]->getBaseCurrencyCode()][] = (int) $id;
+            }
+        }
+
+        $customerIds = [];
+        foreach ($groups as $groupWebsiteIds) {
+            array_push($customerIds, ...$this->getGroupMatchingCustomerIds($segment, $groupWebsiteIds));
+        }
+        return array_values(array_unique($customerIds));
+    }
+
+    /**
+     * @param non-empty-list<int> $websiteIds websites that use one base currency
+     */
+    protected function getGroupMatchingCustomerIds(Maho_CustomerSegmentation_Model_Segment $segment, array $websiteIds): array
+    {
+        $select = $this->_getReadAdapter()->select()
+            ->from(['e' => $this->getTable('customer/entity')], ['entity_id'])
+            ->where('e.website_id IN (?)', $websiteIds);
 
         // Apply customer group filter
         $groupIds = $segment->getCustomerGroupIds();
@@ -36,7 +60,7 @@ class Maho_CustomerSegmentation_Model_Resource_Segment extends Mage_Core_Model_R
         // Apply segment conditions
         $conditions = $segment->getConditions();
         if ($conditions instanceof Maho_CustomerSegmentation_Model_Segment_Condition_Combine) {
-            $conditionsSql = $conditions->getConditionsSql($this->_getReadAdapter(), $websiteId);
+            $conditionsSql = $conditions->getConditionsSql($this->_getReadAdapter(), $websiteIds[0]);
             if ($conditionsSql) {
                 $select->where($conditionsSql);
             }

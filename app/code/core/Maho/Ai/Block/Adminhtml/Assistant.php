@@ -1,0 +1,273 @@
+<?php
+
+/**
+ * Renders the assistant panel on every admin page when the feature is on and the role allows it.
+ *
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_Ai
+ */
+
+declare(strict_types=1);
+
+class Maho_Ai_Block_Adminhtml_Assistant extends Mage_Adminhtml_Block_Template
+{
+    /** Admin controller name => [entity type, id parameter, model alias, label attribute]. */
+    private const ENTITIES = [
+        'catalog_product' => ['product', 'id', 'catalog/product', 'name'],
+        'catalog_category' => ['category', 'id', 'catalog/category', 'name'],
+        'customer' => ['customer', 'id', 'customer/customer', 'name'],
+        'sales_order' => ['order', 'order_id', 'sales/order', 'increment_id'],
+        'sales_order_invoice' => ['invoice', 'invoice_id', 'sales/order_invoice', 'increment_id'],
+        'sales_order_shipment' => ['shipment', 'shipment_id', 'sales/order_shipment', 'increment_id'],
+        'sales_order_creditmemo' => ['credit memo', 'creditmemo_id', 'sales/order_creditmemo', 'increment_id'],
+        'cms_page' => ['CMS page', 'page_id', 'cms/page', 'title'],
+        'cms_block' => ['CMS block', 'block_id', 'cms/block', 'title'],
+        'promo_quote' => ['cart price rule', 'id', 'salesrule/rule', 'name'],
+        'promo_catalog' => ['catalog price rule', 'id', 'catalogrule/rule', 'name'],
+        'customer_group' => ['customer group', 'id', 'customer/group', 'customer_group_code'],
+        'newsletter_template' => ['newsletter template', 'id', 'newsletter/template', 'template_code'],
+        'system_email_template' => ['email template', 'id', 'core/email_template', 'template_code'],
+    ];
+
+    /** The admin session key of a conversation that a notification link asked the panel to open. */
+    public const SESSION_OPEN_CONVERSATION = 'ai_open_conversation';
+
+    private const LOGO_PATH = 'M1075.34-395.845c5.796 0 10.492 4.654 10.492 10.392v109.133c0 64.867-53.088 117.45-118.571 117.45H854.981c-5.796 0-10.496-4.654-10.496-10.396v-115.717c0-61.225 50.113-110.863 111.929-110.863h118.925zm-111.229 40.954c-42.454 0-76.871 34.088-76.871 76.142s34.417 76.138 76.871 76.138 76.871-34.088 76.871-76.138-34.417-76.142-76.871-76.142z';
+
+    #[\Override]
+    protected function _toHtml(): string
+    {
+        if (!$this->isAvailable()) {
+            return '';
+        }
+
+        return parent::_toHtml();
+    }
+
+    /** The Maho symbol, in the current text color. */
+    public function getLogoSvg(): string
+    {
+        return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="844 -397 242 238" fill="currentColor" fill-rule="evenodd" aria-hidden="true"><path d="' . self::LOGO_PATH . '"/></svg>';
+    }
+
+    public function isAvailable(): bool
+    {
+        $helper = Mage::helper('ai');
+
+        return $helper->isChatEnabled() && $helper->isChatAllowed();
+    }
+
+    /**
+     * Everything the panel script needs, as one JSON document.
+     *
+     * @return array<string, mixed>
+     */
+    public function getConfig(): array
+    {
+        $helper = Mage::helper('ai');
+        $apiBase = rtrim(Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB), '/');
+        $context = $this->getPageContext();
+
+        return [
+            'chatUrl' => $apiBase . '/api/admin/ai/chat',
+            'confirmUrl' => $apiBase . '/api/admin/ai/chat/confirm',
+            'undoUrl' => $apiBase . '/api/admin/ai/chat/undo',
+            'stopUrl' => $apiBase . '/api/admin/ai/chat/stop',
+            'uploadUrl' => $apiBase . '/api/admin/ai/chat/upload',
+            'uploadAccept' => '.' . implode(',.', array_keys(Maho_Ai_Model_Chat_Attachment::TEXT_EXTENSIONS + Maho_Ai_Model_Chat_Attachment::IMAGE_EXTENSIONS)),
+            'uploadMaxFiles' => Maho_Ai_Model_Chat_Attachment::MAX_PER_MESSAGE,
+            'uploadMaxBytes' => Maho_Ai_Model_Chat_Attachment::maxBytes(),
+            'attachIcon' => $this->getIconSvg('paperclip'),
+            'removeUploadUrl' => $apiBase . '/api/admin/ai/chat/upload/remove',
+            'cssUrl' => $this->getVersionedSkinUrl('ai-chat.css'),
+            'logo' => $this->getLogoSvg(),
+            'sendIcon' => $this->getIconSvg('arrow-up'),
+            'stopIcon' => $this->getIconSvg('player-stop', 'filled'),
+            'editorUrl' => $this->getVersionedJsUrl('mage/adminhtml/wysiwyg/tiptap/setup.js'),
+            'needsEditorGuide' => $helper->editorGuide() === '',
+            'adminName' => (string) Mage::getSingleton('admin/session')->getUser()?->getFirstname(),
+            'examples' => $this->getExamples($context),
+            'listUrl' => $this->getUrl('adminhtml/ai_chat/list'),
+            'messagesUrl' => $this->getUrl('adminhtml/ai_chat/messages'),
+            'deleteUrl' => $this->getUrl('adminhtml/ai_chat/delete'),
+            'formKey' => $this->getFormKey(),
+            'context' => $context,
+            'openConversation' => (int) Mage::getSingleton('adminhtml/session')->getData(self::SESSION_OPEN_CONVERSATION, true),
+            'toolLabels' => $helper->localToolLabels(),
+            'labels' => [
+                'title' => $helper->__('Maho Assistant'),
+                'placeholder' => $helper->__('Ask the assistant to find or change something...'),
+                'introGreeting' => $helper->__('Hi %s, what can I do for you?'),
+                'introGreetingAnonymous' => $helper->__('What can I do for you?'),
+                'intro' => $helper->__('I can look up and change products, orders, customers, content and settings for you. Every change waits for your confirmation.'),
+                'introExamples' => $helper->__('Try one of these:'),
+                'introHint' => $helper->__('%s opens and closes this panel.'),
+                'newChat' => $helper->__('New chat'),
+                'conversations' => $helper->__('Conversations'),
+                'close' => $helper->__('Close'),
+                'open' => $helper->__('Open the assistant'),
+                'delete' => $helper->__('Delete this conversation'),
+                'deleteConfirm' => $helper->__('Delete this conversation?'),
+                'approve' => $helper->__('Approve'),
+                'approveSelected' => $helper->__('Approve selected'),
+                'deny' => $helper->__('Deny'),
+                'confirmTitle' => $helper->__('The assistant wants to make these changes:'),
+                'undo' => $helper->__('Undo'),
+                'changeRecord' => $helper->__('Record'),
+                'changeScopeDefault' => $helper->__('Scope: every store view without a value of its own'),
+                'changeScopeStore' => $helper->__('Scope: store view %s'),
+                'changeField' => $helper->__('Field'),
+                'changeFrom' => $helper->__('Now'),
+                'changeTo' => $helper->__('After'),
+                'changeNone' => $helper->__('No field changes: the values are already as requested.'),
+                'changeDelete' => $helper->__('This record will be deleted.'),
+                'changeEmpty' => $helper->__('(empty)'),
+                'approved' => $helper->__('Approved'),
+                'denied' => $helper->__('Denied'),
+                'cancelled' => $helper->__('Cancelled'),
+                'pending' => $helper->__('Waiting for confirmation'),
+                'failed' => $helper->__('Failed'),
+                'running' => $helper->__('Running'),
+                'queued' => $helper->__('Waiting for a queue worker. Without cron, no worker starts.'),
+                'thinking' => $helper->__('Thinking'),
+                'send' => $helper->__('Send'),
+                'stop' => $helper->__('Stop'),
+                'attach' => $helper->__('Attach a file'),
+                'dropHint' => $helper->__('Drop the files here'),
+                'uploading' => $helper->__('Uploading'),
+                'fileTooLarge' => $helper->__('%s is too large. A file can be at most %s.', '%s', Maho_Ai_Model_Chat_Attachment::humanSize(Maho_Ai_Model_Chat_Attachment::maxBytes())),
+                'removeAttachment' => $helper->__('Remove'),
+                'uploadFailed' => $helper->__('The file could not be attached: %s'),
+                'tooManyFiles' => $helper->__('At most %s files per message.'),
+                'actionDone' => $helper->__('Done: %s.'),
+                'actionNotFound' => $helper->__('I could not find "%s" on this page.'),
+                'gridRow' => $helper->__('row %s'),
+                'formFilled' => $helper->__('I filled these fields in the form: %s. Review the form and save it.'),
+                'formFieldsMissing' => $helper->__('I could not find these fields in the form: %s.'),
+                'unsavedChanges' => $helper->__('This page has changes that are not saved (%s). Save them first, or open the page and lose them.'),
+                'openAnyway' => $helper->__('Open the page'),
+                'reloadUnsaved' => $helper->__('I changed this record, but this page has changes that are not saved (%s). Reload the page to see the new values, and lose those changes.'),
+                'reload' => $helper->__('Reload the page'),
+                'openRecord' => $helper->__('Open'),
+                'textEditMissing' => $helper->__('The text changed, so I did not make these corrections: %s.'),
+                'verbList' => $helper->__('List'),
+                'verbGet' => $helper->__('Show'),
+                'verbCreate' => $helper->__('Create'),
+                'verbUpdate' => $helper->__('Update'),
+                'verbDelete' => $helper->__('Delete'),
+                'done' => $helper->__('Done'),
+                'destructive' => $helper->__('Deletes data'),
+                'error' => $helper->__('The assistant could not answer. Try again.'),
+                'stopped' => $helper->__('Stopped.'),
+                'noConversations' => $helper->__('No conversations yet.'),
+                'untitled' => $helper->__('Untitled conversation'),
+            ],
+        ];
+    }
+
+    /**
+     * The example requests of the intro: the proofread of the page, the ones for the record that the
+     * page shows, then the ones that work on every page. Each one shows a different capability.
+     *
+     * @param array{route: string, entity_type: string, entity_id: int|string|null, entity_label: string, store: string} $context
+     * @return list<string>
+     */
+    public function getExamples(array $context): array
+    {
+        $helper = Mage::helper('ai');
+        $record = $context['entity_id'] === null ? [] : match (strtok($context['route'], '/')) {
+            'catalog_product' => [$helper->__('Write a meta title and a meta description for this product')],
+            'sales_order' => [$helper->__('Summarize this order'), $helper->__('Add a comment to this order: the parcel left today')],
+            'customer' => [$helper->__('Summarize the orders of this customer')],
+            'promo_quote', 'promo_catalog' => [$helper->__('Explain this rule in plain words')],
+            'system_config' => [$helper->__('Explain the settings on this page')],
+            default => [],
+        };
+
+        return array_slice([
+            $helper->__('Proofread this page'),
+            ...$record,
+            $helper->__('Which orders are waiting to be shipped?'),
+            $helper->__('Every Monday at 8, give me a summary of the orders of last week'),
+            $helper->__('Create the coupon XMAS10: 10% off orders over 100, on every website, for all customers, until Sunday'),
+            $helper->__('How do I let customers check out without an account?'),
+        ], 0, 4);
+    }
+
+    /** A script URL with the file modification time, so a browser never keeps a stale copy. */
+    public function getVersionedJsUrl(string $file): string
+    {
+        return $this->versioned($this->getJsUrl($file), Mage::getBaseDir('public') . DS . 'js' . DS . $file);
+    }
+
+    /** A skin file URL with the file modification time, so a browser never keeps a stale copy. */
+    public function getVersionedSkinUrl(string $file): string
+    {
+        return $this->versioned($this->getSkinUrl($file), (string) Mage::getDesign()->getFilename($file, ['_type' => 'skin']));
+    }
+
+    private function versioned(string $url, string $path): string
+    {
+        return is_file($path) ? $url . '?v=' . filemtime($path) : $url;
+    }
+
+    /**
+     * @return array{route: string, entity_type: string, entity_id: int|string|null, entity_label: string, store: string}
+     */
+    public function getPageContext(): array
+    {
+        $request = $this->getRequest();
+        $controller = (string) $request->getControllerName();
+        $context = [
+            'route' => sprintf('%s/%s', $controller, (string) $request->getActionName()),
+            'entity_type' => '',
+            'entity_id' => null,
+            'entity_label' => '',
+            'store' => '',
+        ];
+
+        $storeId = (int) $request->getParam('store');
+        if ($storeId > 0) {
+            try {
+                $context['store'] = (string) Mage::app()->getStore($storeId)->getCode();
+            } catch (Mage_Core_Model_Store_Exception) {
+                // the page scope stays empty
+            }
+        }
+
+        if ($controller === 'system_config') {
+            $section = (string) $request->getParam('section');
+            if ($section !== '') {
+                $context['entity_type'] = 'configuration section';
+                $context['entity_id'] = $section;
+            }
+            return $context;
+        }
+
+        $entity = self::ENTITIES[$controller] ?? null;
+        if ($entity === null) {
+            return $context;
+        }
+        [$type, $param, $alias, $labelAttribute] = $entity;
+        $id = (int) $request->getParam($param);
+        if ($id <= 0) {
+            return $context;
+        }
+
+        $context['entity_type'] = $type;
+        $context['entity_id'] = $id;
+        try {
+            $model = Mage::getModel($alias)->load($id);
+            if ($model->getId()) {
+                $context['entity_label'] = $labelAttribute === 'name' && $model instanceof Mage_Customer_Model_Customer
+                    ? (string) $model->getName()
+                    : (string) $model->getData($labelAttribute);
+            }
+        } catch (\Throwable $e) {
+            Mage::logException($e);
+        }
+
+        return $context;
+    }
+}

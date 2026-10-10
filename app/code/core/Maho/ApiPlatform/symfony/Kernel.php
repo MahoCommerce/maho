@@ -20,6 +20,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 
@@ -31,10 +34,32 @@ class Kernel extends BaseKernel
 
     private bool $moduleAutoloaderRegistered = false;
 
+    private static int $activeRequests = 0;
+
     public function __construct(string $environment = 'prod', bool $debug = false)
     {
         $this->resolveEnvironmentVars();
         parent::__construct($environment, $debug);
+    }
+
+    /**
+     * Tell if a kernel in this process handles a request now. Its compiled container then
+     * still loads service files from var/cache/api_platform.
+     */
+    public static function isHandlingRequest(): bool
+    {
+        return self::$activeRequests > 0;
+    }
+
+    #[\Override]
+    public function handle(Request $request, int $type = HttpKernelInterface::MAIN_REQUEST, bool $catch = true): Response
+    {
+        self::$activeRequests++;
+        try {
+            return parent::handle($request, $type, $catch);
+        } finally {
+            self::$activeRequests--;
+        }
     }
 
     /**
@@ -337,8 +362,8 @@ class Kernel extends BaseKernel
                     'pattern' => '^/api/docs',
                     'security' => false,
                 ],
-                'api_admin_graphql' => [
-                    'pattern' => '^/api/admin/graphql',
+                'api_admin' => [
+                    'pattern' => '^/api/admin/',
                     'stateless' => true,
                     'provider' => 'maho_admin',
                     'custom_authenticators' => [
@@ -365,7 +390,7 @@ class Kernel extends BaseKernel
             'access_control' => [
                 ['path' => '^/api/docs', 'roles' => 'PUBLIC_ACCESS'],
                 ['path' => '^/api/graphql', 'roles' => 'PUBLIC_ACCESS'],
-                ['path' => '^/api/admin/graphql', 'roles' => 'IS_AUTHENTICATED_FULLY'],
+                ['path' => '^/api/admin/', 'roles' => 'IS_AUTHENTICATED_FULLY'],
                 ['path' => '^/api', 'roles' => 'PUBLIC_ACCESS'],
             ],
         ]);
@@ -450,6 +475,12 @@ class Kernel extends BaseKernel
             ->decorate('api_platform.iri_converter')
             ->arg('$inner', new Reference(Serializer\TolerantIriConverter::class . '.inner'));
 
+        // A string property with an EnumSource gets a GraphQL enum type; see the class docblock.
+        $services->set(GraphQl\EnumSourceTypeConverter::class)
+            ->decorate('api_platform.graphql.type_converter')
+            ->arg('$decorated', new Reference(GraphQl\EnumSourceTypeConverter::class . '.inner'))
+            ->arg('$typesContainer', new Reference('api_platform.graphql.types_container'));
+
         // Translate IriConverter input errors (bare `id: 1` instead of an IRI)
         // into proper GraphQL null-results / 404s instead of HTTP 500. See the
         // class docblock for the full rationale.
@@ -480,6 +511,12 @@ class Kernel extends BaseKernel
             ->autoconfigure(false)
             ->decorate('api_platform.state_provider.main', null, 400)
             ->arg('$decorated', new Reference(State\QueryBodyFiltersProvider::class . '.inner'));
+
+        // A property that names an EnumSource gets its live values as an enum, in the
+        // OpenAPI document and in every JSON schema. The MCP factory below gets the same.
+        $services->set(JsonSchema\EnumSourceSchemaFactory::class)
+            ->decorate('api_platform.json_schema.schema_factory')
+            ->arg('$decorated', new Reference(JsonSchema\EnumSourceSchemaFactory::class . '.inner'));
 
         if (!$mcpAvailable) {
             return;
@@ -517,6 +554,12 @@ class Kernel extends BaseKernel
             ->decorate('api_platform.mcp.json_schema.schema_factory')
             ->arg('$decorated', new Reference(Mcp\ToolSchemaFactory::class . '.inner'));
 
+        // Priority 10 puts this inside the tool schema factory, which copies the body
+        // properties, enums included, into the create and update tool arguments.
+        $services->set(JsonSchema\EnumSourceSchemaFactory::class . '.mcp', JsonSchema\EnumSourceSchemaFactory::class)
+            ->decorate('api_platform.mcp.json_schema.schema_factory', null, 10)
+            ->arg('$decorated', new Reference(JsonSchema\EnumSourceSchemaFactory::class . '.mcp.inner'));
+
         $services->set(Mcp\PermissionElementAccessChecker::class)
             ->decorate('api_platform.mcp.security.expression_access_checker')
             ->arg('$decorated', new Reference(Mcp\PermissionElementAccessChecker::class . '.inner'))
@@ -546,24 +589,12 @@ class Kernel extends BaseKernel
     }
 
     /**
-     * Orientation text the model reads before touching any tool. Does more work than
-     * any individual tool description, so it stays short and concrete.
+     * Orientation text the model reads before touching any tool, see
+     * {@see \Maho_ApiPlatform_Helper_Data::mcpInstructions()}.
      */
     private function mcpInstructions(): string
     {
-        $store = \Mage::app()->getDefaultStoreView();
-        $name = (string) \Mage::getStoreConfig('general/store_information/name') ?: (string) $store?->getFrontendName();
-        $currency = (string) $store?->getBaseCurrencyCode();
-
-        return implode("\n", array_filter([
-            'Maho Commerce store data and operations: catalog, inventory, pricing, orders and customers.',
-            $name === '' ? null : sprintf('Store: %s.', $name),
-            $currency === '' ? null : sprintf('Read the "currency" field of any response that carries one: cart and order amounts are in the currency named there, which is not always %1$s. Where no currency is given, amounts are in %1$s, the base currency of the default website; other websites may differ.', $currency),
-            'IDs are Maho entity IDs, not SKUs or increment IDs; look an entity up by its identifying field before writing to it.',
-            'Multi-store installs select a store view by its store code, never by name.',
-            'List tools are paginated and return one page at a time; ask for the next page rather than assuming the first is complete.',
-            'Tools mirror the REST API one-to-one, so a call is refused exactly when the same REST request would be.',
-        ]));
+        return \Mage::helper('apiplatform')->mcpInstructions();
     }
 
     /**
@@ -600,6 +631,11 @@ class Kernel extends BaseKernel
             $routes->import('.', 'mcp');
         }
         $routes->import($this->getProjectDir() . '/Controller/', 'attribute');
+        // A module controller under Api/ declares its routes with #[Route] like the
+        // project ones; the admin firewall covers it when its path starts with /api/admin/.
+        foreach (ModuleApiDiscovery::discover()['namespaces'] as $baseDir) {
+            $routes->import($baseDir, 'attribute');
+        }
     }
 
     /**

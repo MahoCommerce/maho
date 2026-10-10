@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Mage\Tax\Api;
 
 use ApiPlatform\Metadata\ApiProperty;
+use Maho\ApiPlatform\Metadata\EnumSource;
 use Maho\Config\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
@@ -93,6 +94,6 @@ class TaxClass extends CrudResource
     #[ApiProperty(extraProperties: ['modelField' => 'class_name'])]
     public string $className = '';
 
-    #[ApiProperty(extraProperties: ['modelField' => 'class_type'])]
+    #[ApiProperty(extraProperties: [EnumSource::KEY => ['PRODUCT', 'CUSTOMER'], 'modelField' => 'class_type'])]
     public string $classType = 'PRODUCT';
 }

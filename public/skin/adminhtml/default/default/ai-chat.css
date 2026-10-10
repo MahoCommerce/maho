@@ -1,0 +1,1120 @@
+/*
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ */
+
+/* This file loads twice: in the page, and inside the deep-chat shadow root. Rules that start with :host match only inside the shadow root. */
+
+:root {
+    --ai-chat-width: 440px;
+    --ai-chat-user-bg: light-dark(#1c1c1c, #2e2e2e);
+    --ai-chat-user-ink: light-dark(#fff, #ececec);
+    --ai-chat-avatar-size: 22px;
+    --ai-chat-gutter: 36px;
+    --ai-chat-icon-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12l5 5l10 -10'/%3E%3C/svg%3E");
+    --ai-chat-icon-x: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 6l-12 12M6 6l12 12'/%3E%3C/svg%3E");
+    --ai-chat-icon-minus: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12h12'/%3E%3C/svg%3E");
+    --ai-chat-icon-clock: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='8'/%3E%3Cpath d='M12 8v4l2.5 2.5'/%3E%3C/svg%3E");
+    --ai-chat-icon-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 6l6 6l-6 6'/%3E%3C/svg%3E");
+}
+
+/* The Maho symbol. */
+.ai-chat-mark {
+    display: inline-flex;
+    flex: none;
+    width: 26px;
+    height: 26px;
+    color: var(--maho-chartreuse);
+}
+
+.ai-chat-mark svg {
+    width: 100%;
+    height: 100%;
+}
+
+.ai-chat-toggle {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 900;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 10px 16px 10px 12px;
+    border: 1px solid light-dark(transparent, rgba(255, 255, 255, .12));
+    border-radius: var(--maho-radius-pill);
+    background: var(--maho-night);
+    color: #fff;
+    font: 600 13px/1 var(--maho-font-sans);
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .22), 0 2px 6px rgba(0, 0, 0, .12);
+    transition: transform var(--maho-duration-fast) var(--maho-ease), box-shadow var(--maho-duration-fast) var(--maho-ease);
+}
+
+.ai-chat-toggle .ai-chat-mark {
+    width: 18px;
+    height: 18px;
+}
+
+/* The admin form.css styles every button:hover and button:active, so each button of the assistant restates its colors there. */
+.ai-chat-toggle:hover,
+.ai-chat-toggle:active {
+    border-color: light-dark(transparent, rgba(255, 255, 255, .12));
+    background: var(--maho-night);
+    color: #fff;
+}
+
+.ai-chat-toggle:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, .26), 0 2px 6px rgba(0, 0, 0, .12);
+}
+
+.ai-chat-toggle:focus-visible {
+    outline: 2px solid var(--maho-focus-ring);
+    outline-offset: 2px;
+}
+
+body.ai-chat-open .ai-chat-toggle {
+    display: none;
+}
+
+/* On a wide screen the open panel docks: the page shrinks instead of being covered. */
+@media (min-width: 1200px) {
+    body.ai-chat-open {
+        padding-right: var(--ai-chat-width);
+    }
+}
+
+.ai-chat-panel {
+    overscroll-behavior: contain;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 901;
+    display: flex;
+    flex-direction: column;
+    width: min(var(--ai-chat-width), 100vw);
+    background: var(--maho-surface);
+    border-left: 1px solid var(--maho-border-soft);
+    box-shadow: -12px 0 32px light-dark(rgba(0, 0, 0, .06), rgba(0, 0, 0, .4));
+    color: var(--maho-ink);
+    font-family: var(--maho-font-sans);
+}
+
+.ai-chat-panel.is-restoring #ai-chat {
+    visibility: hidden;
+}
+
+.ai-chat-panel[hidden] {
+    display: none;
+}
+
+.ai-chat-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 10px 12px 14px;
+    border-bottom: 1px solid var(--maho-border-soft);
+    background: var(--maho-surface);
+}
+
+.ai-chat-heading {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.ai-chat-title {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+/* The conversation picker reads as a subtitle: the current conversation, with a chevron. */
+.ai-chat-conversations {
+    appearance: none;
+    field-sizing: content;
+    align-self: flex-start;
+    max-width: 100%;
+    min-width: 0;
+    height: 20px;
+    min-height: 0;
+    margin: 0 0 0 -4px;
+    padding: 0 18px 0 4px;
+    border: 0;
+    border-radius: var(--maho-radius-sm);
+    background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238a8a8a' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6l6 -6'/%3E%3C/svg%3E") no-repeat right 3px center / 12px;
+    color: var(--maho-ink-muted);
+    font: 12px/1.4 var(--maho-font-sans);
+    text-overflow: ellipsis;
+    cursor: pointer;
+}
+
+.ai-chat-conversations:hover {
+    background-color: var(--maho-surface-sunken);
+    color: var(--maho-ink);
+}
+
+.ai-chat-conversations:focus-visible {
+    outline: 2px solid var(--maho-focus-ring);
+}
+
+.ai-chat-icon-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--maho-ink-muted);
+    cursor: pointer;
+    transition: background-color var(--maho-duration-fast) var(--maho-ease), color var(--maho-duration-fast) var(--maho-ease);
+}
+
+.ai-chat-icon-button[hidden] {
+    display: none;
+}
+
+.ai-chat-icon-button svg {
+    width: 18px;
+    height: 18px;
+    stroke-width: 1.75;
+}
+
+.ai-chat-icon-button:hover,
+.ai-chat-icon-button:active {
+    background: var(--maho-surface-sunken);
+    color: var(--maho-ink);
+}
+
+.ai-chat-icon-button:focus-visible {
+    outline: 2px solid var(--maho-focus-ring);
+    outline-offset: -2px;
+}
+
+/* deep-chat sizes its inner container with height: 100%, so the host needs a percentage height, not a flex basis. Its :host rule sets all: initial, so the color scheme of the page comes back here. */
+#ai-chat {
+    color-scheme: inherit;
+    display: block;
+    flex: 1 1 auto;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+    border: 0;
+    border-radius: 0;
+    background: var(--maho-surface);
+    color: var(--maho-ink);
+    font-family: var(--maho-font-sans);
+    font-size: 13px;
+}
+
+/* Inside the deep-chat shadow root: the message list must not hand its scroll to the page. */
+:host #messages {
+    overscroll-behavior: contain;
+    padding-bottom: 12px;
+}
+
+:host .inner-message-container {
+    width: calc(100% - 32px);
+}
+
+:host .message-bubble {
+    line-height: 1.55;
+}
+
+:host .user-message-text {
+    border-radius: 16px 16px 4px 16px;
+}
+
+/* Every assistant message keeps a gutter on the left. The first one after a question shows the avatar in it. */
+:host .deep-chat-outer-container-role-ai .inner-message-container {
+    position: relative;
+    box-sizing: border-box;
+    padding-inline-start: var(--ai-chat-gutter);
+}
+
+:host .deep-chat-outer-container-role-user + .deep-chat-outer-container-role-ai .inner-message-container::before {
+    content: '';
+    position: absolute;
+    top: 11px;
+    left: 0;
+    width: var(--ai-chat-avatar-size);
+    height: var(--ai-chat-avatar-size);
+    background: url('images/favicon.svg') no-repeat center / contain;
+}
+
+/* The avatar centers on the first row of the message beside it, and each kind of message has its own first row. */
+:host .deep-chat-outer-container-role-user + .outer-message-container:has(.ai-chat-working) .inner-message-container::before {
+    top: 12px;
+}
+
+:host .deep-chat-outer-container-role-user + .outer-message-container:has(.ai-chat-step) .inner-message-container::before {
+    top: 18px;
+}
+
+:host .deep-chat-outer-container-role-user + .outer-message-container:has(.ai-chat-error, .ai-chat-note) .inner-message-container::before {
+    top: 20px;
+}
+
+:host .deep-chat-outer-container-role-user + .outer-message-container:has(.ai-chat-confirm) .inner-message-container::before {
+    top: 24px;
+}
+
+:host .deep-chat-outer-container-role-ai .ai-message-text {
+    padding-top: 2px !important;
+}
+
+:host .outer-message-container:has(.ai-chat-intro) .inner-message-container {
+    padding-inline-start: 0;
+}
+
+:host .outer-message-container:has(.ai-chat-turn-end) {
+    display: none;
+}
+
+/* Steps follow each other closely, as one list. */
+:host .outer-message-container:has(.ai-chat-step) .message-bubble {
+    margin-top: 4px;
+}
+
+:host .deep-chat-outer-container-role-user + .outer-message-container:has(.ai-chat-step) .message-bubble {
+    margin-top: 12px;
+}
+
+/* Inside the deep-chat shadow root: a code block in an answer wraps instead of widening the bubble. */
+:host .message-bubble pre {
+    max-width: 100%;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* A table in an answer scrolls on its own when it is wider than the panel, and a header never breaks into several lines. */
+:host .message-bubble:not(.html-message) table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+:host .message-bubble:not(.html-message) th,
+:host .message-bubble:not(.html-message) td {
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--maho-border-soft);
+    vertical-align: top;
+}
+
+:host .message-bubble:not(.html-message) th {
+    color: var(--maho-ink-muted);
+    font-size: 11px;
+    font-weight: 600;
+    text-align: start;
+    vertical-align: bottom;
+    white-space: nowrap;
+}
+
+:host .message-bubble:not(.html-message) th:first-child,
+:host .message-bubble:not(.html-message) td:first-child {
+    padding-inline-start: 0;
+}
+
+:host .message-bubble:not(.html-message) th:last-child,
+:host .message-bubble:not(.html-message) td:last-child {
+    padding-inline-end: 0;
+}
+
+:host .ai-message-text a {
+    color: var(--maho-link);
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
+    text-underline-offset: 2px;
+}
+
+:host .ai-message-text a:hover {
+    text-decoration-color: currentColor;
+}
+
+/* The input row. deep-chat places the inside buttons for an input of 80% width; this input fills the panel. */
+:host #input {
+    box-sizing: border-box;
+    padding: 4px 14px 14px;
+}
+
+:host #text-input-container {
+    box-sizing: border-box;
+    width: 100%;
+    max-height: 220px;
+    margin: 0;
+    border: 1px solid var(--maho-control-border);
+    border-radius: 14px;
+    background: var(--maho-control-bg);
+    box-shadow: 0 1px 2px light-dark(rgba(0, 0, 0, .04), rgba(0, 0, 0, .3)), 0 6px 20px light-dark(rgba(0, 0, 0, .06), rgba(0, 0, 0, .3));
+    transition: border-color var(--maho-duration-fast) var(--maho-ease), box-shadow var(--maho-duration-fast) var(--maho-ease);
+}
+
+:host #text-input-container:focus-within {
+    border-color: var(--maho-focus-ring);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--maho-chartreuse) 30%, transparent);
+}
+
+:host .text-input-container-start-adjustment,
+:host .text-input-container-start-small-adjustment,
+:host .text-input-container-end-adjustment,
+:host .text-input-container-end-small-adjustment {
+    margin-inline: 0;
+}
+
+:host #text-input {
+    min-height: 20px;
+    padding: 12px 52px 12px 46px;
+    color: var(--maho-control-ink);
+    font-size: 13px;
+    line-height: 20px;
+}
+
+/* The buttons sit in a wrapper as high as the input box: a 30px button 8px from its edges stays centered on one line. */
+:host .input-button.inside-start,
+:host .input-button.inside-end {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: 30px;
+    height: 30px;
+    margin: 0;
+    padding: 0;
+    border-radius: 9px;
+    inset-block-end: 8px;
+    transition: background-color var(--maho-duration-fast) var(--maho-ease), color var(--maho-duration-fast) var(--maho-ease);
+}
+
+:host .input-button.inside-start {
+    inset-inline-start: 8px;
+    color: var(--maho-ink-muted);
+}
+
+:host .input-button.inside-end {
+    inset-inline-end: 8px;
+}
+
+:host .input-button.inside-start:hover {
+    background: var(--maho-surface-sunken);
+    color: var(--maho-ink);
+}
+
+:host .input-button svg {
+    width: 18px;
+    height: 18px;
+    filter: none;
+}
+
+:host .input-button.inside-end svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 2.5;
+}
+
+/* Step cards: one per tool call. */
+.ai-chat-step {
+    border: 1px solid var(--maho-border-soft);
+    border-radius: 10px;
+    background: var(--maho-surface);
+    color: var(--maho-ink-soft);
+    font-size: 12px;
+}
+
+.ai-chat-step[open] {
+    background: var(--maho-surface-sunken);
+}
+
+.ai-chat-step summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 22px;
+    padding: 5px 8px;
+    border-radius: 10px;
+    cursor: pointer;
+    list-style: none;
+}
+
+.ai-chat-step summary:hover {
+    background: var(--maho-surface-sunken);
+}
+
+.ai-chat-step-plain summary {
+    cursor: default;
+}
+
+.ai-chat-step-plain summary:hover {
+    background: none;
+}
+
+.ai-chat-step summary::-webkit-details-marker {
+    display: none;
+}
+
+.ai-chat-step-status {
+    position: relative;
+    flex: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--maho-surface-sunken);
+    color: var(--maho-ink-muted);
+}
+
+.ai-chat-step-status::before {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    background: currentColor;
+    mask: var(--ai-chat-icon-check) center / contain no-repeat;
+}
+
+.ai-chat-step-title {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    color: var(--maho-ink);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ai-chat-step-chevron {
+    flex: none;
+    width: 14px;
+    height: 14px;
+    background: var(--maho-ink-faint);
+    mask: var(--ai-chat-icon-chevron) center / contain no-repeat;
+    transition: transform var(--maho-duration-fast) var(--maho-ease);
+}
+
+.ai-chat-step[open] .ai-chat-step-chevron {
+    transform: rotate(90deg);
+}
+
+.ai-chat-step-done .ai-chat-step-status {
+    background: var(--maho-success-bg);
+    color: var(--maho-success);
+}
+
+.ai-chat-step-error {
+    border-color: var(--maho-error-border);
+}
+
+.ai-chat-step-error .ai-chat-step-status {
+    background: var(--maho-error-bg);
+    color: var(--maho-error);
+}
+
+.ai-chat-step-error .ai-chat-step-status::before,
+.ai-chat-step-denied .ai-chat-step-status::before {
+    mask-image: var(--ai-chat-icon-x);
+}
+
+.ai-chat-step-cancelled .ai-chat-step-status::before {
+    mask-image: var(--ai-chat-icon-minus);
+}
+
+.ai-chat-step-denied .ai-chat-step-title,
+.ai-chat-step-cancelled .ai-chat-step-title {
+    color: var(--maho-ink-muted);
+    text-decoration: line-through;
+    text-decoration-color: var(--maho-ink-faint);
+}
+
+.ai-chat-step-pending .ai-chat-step-status {
+    background: var(--maho-warning-bg);
+    color: var(--maho-warning);
+}
+
+.ai-chat-step-pending .ai-chat-step-status::before {
+    inset: 3px;
+    mask-image: var(--ai-chat-icon-clock);
+}
+
+.ai-chat-step-running .ai-chat-step-status {
+    background: none;
+    border: 2px solid var(--maho-border-soft);
+    border-top-color: var(--maho-chartreuse-deep);
+    box-sizing: border-box;
+    animation: ai-chat-spin .8s linear infinite;
+}
+
+.ai-chat-step-running .ai-chat-step-status::before {
+    content: none;
+}
+
+.ai-chat-step > :not(summary) {
+    margin: 0 8px 8px;
+}
+
+/* Arguments: one label and value per row. */
+.ai-chat-args {
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: var(--maho-surface);
+    color: var(--maho-ink);
+    font-size: 12px;
+}
+
+.ai-chat-arg {
+    display: grid;
+    grid-template-columns: minmax(70px, 30%) 1fr;
+    gap: 2px 10px;
+    padding: 4px 0;
+}
+
+.ai-chat-arg-block {
+    grid-template-columns: 1fr;
+}
+
+.ai-chat-arg + .ai-chat-arg {
+    border-top: 1px solid var(--maho-hairline);
+}
+
+.ai-chat-arg dt {
+    color: var(--maho-ink-muted);
+    overflow-wrap: anywhere;
+}
+
+.ai-chat-arg dd {
+    margin: 0;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+}
+
+.ai-chat-arg-text {
+    max-height: 240px;
+    overflow: auto;
+    line-height: 1.5;
+    white-space: pre-wrap;
+}
+
+/* deep-chat gives every pre a dark code box; an argument keeps the colors of its card. */
+.ai-chat-arg dd pre {
+    padding: 6px 8px;
+    border-radius: 6px;
+    background: var(--maho-surface-sunken);
+    color: var(--maho-ink);
+    margin: 0;
+    max-height: 240px;
+    overflow: auto;
+    font-family: var(--maho-font-mono, ui-monospace, monospace);
+    font-size: 11px;
+    line-height: 1.4;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.ai-chat-step-preview {
+    padding: 6px 8px;
+    max-height: 180px;
+    overflow: auto;
+    border-radius: 8px;
+    background: var(--maho-surface);
+    color: var(--maho-ink);
+    font-family: var(--maho-font-mono, ui-monospace, monospace);
+    font-size: 11px;
+    line-height: 1.4;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.ai-chat-badge {
+    flex: none;
+    padding: 1px 7px;
+    border-radius: var(--maho-radius-pill);
+    background: var(--maho-error-bg);
+    border: 1px solid var(--maho-error-border);
+    color: var(--maho-error-strong);
+    font-size: 10px;
+    font-weight: 600;
+}
+
+/* Confirmation card: the write tools that wait for the administrator. */
+.ai-chat-confirm {
+    margin: 6px 0;
+    overflow: hidden;
+    border: 1px solid var(--maho-warning-border);
+    border-radius: 12px;
+    background: var(--maho-surface-raised);
+    box-shadow: 0 4px 16px light-dark(rgba(0, 0, 0, .06), rgba(0, 0, 0, .3));
+    color: var(--maho-ink);
+    font-size: 12px;
+}
+
+.ai-chat-confirm-title {
+    margin: 0;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--maho-warning-border);
+    background: var(--maho-warning-bg);
+    font-weight: 600;
+}
+
+.ai-chat-confirm-list,
+.ai-chat-confirm-settled ul {
+    margin: 0;
+    padding: 12px 14px;
+    list-style: none;
+}
+
+.ai-chat-confirm-row + .ai-chat-confirm-row {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--maho-border-soft);
+}
+
+.ai-chat-confirm-row label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.ai-chat-confirm-row input[type="checkbox"] {
+    margin: 0;
+    accent-color: var(--maho-accent);
+}
+
+.ai-chat-confirm-row .ai-chat-args {
+    margin-top: 8px;
+    background: var(--maho-surface-sunken);
+}
+
+.ai-chat-confirm-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 10px 14px;
+    border-top: 1px solid var(--maho-border-soft);
+    background: var(--maho-surface);
+}
+
+.ai-chat-approve,
+.ai-chat-deny {
+    padding: 7px 16px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    font: 600 12px/1.2 var(--maho-font-sans);
+    cursor: pointer;
+    transition: background-color var(--maho-duration-fast) var(--maho-ease), color var(--maho-duration-fast) var(--maho-ease);
+}
+
+.ai-chat-approve {
+    background: var(--maho-btn-bg);
+    color: var(--maho-btn-ink);
+}
+
+.ai-chat-approve:hover,
+.ai-chat-approve:active {
+    border-color: transparent;
+    background: var(--maho-btn-bg-hover);
+    color: var(--maho-btn-ink-hover);
+}
+
+.ai-chat-deny {
+    border-color: var(--maho-btn2-border);
+    background: var(--maho-btn2-bg);
+    color: var(--maho-btn2-ink);
+}
+
+.ai-chat-deny:hover,
+.ai-chat-deny:active {
+    border-color: var(--maho-btn2-border);
+    background: var(--maho-btn2-bg-hover);
+}
+
+.ai-chat-confirm-settled {
+    border-color: var(--maho-border-soft);
+    background: var(--maho-surface);
+    box-shadow: none;
+    color: var(--maho-ink-muted);
+}
+
+.ai-chat-confirm-settled ul {
+    padding: 8px 12px;
+}
+
+.ai-chat-error {
+    margin: 4px 0;
+    padding: 9px 12px;
+    border: 1px solid var(--maho-error-border);
+    border-radius: 10px;
+    background: var(--maho-error-bg);
+    color: var(--maho-error-strong);
+    font-size: 12px;
+}
+
+.ai-chat-note {
+    margin: 4px 0;
+    padding: 9px 12px;
+    border: 1px solid var(--maho-info-border);
+    border-radius: 10px;
+    background: var(--maho-info-bg);
+    color: var(--maho-ink);
+    font-size: 12px;
+}
+
+.ai-chat-turn-end {
+    display: none;
+}
+
+/* The model is working: three dots that pulse in turn, then a label. */
+.ai-chat-working {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 26px;
+    color: var(--maho-ink-muted);
+    font-size: 12px;
+}
+
+.ai-chat-dots {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.ai-chat-dots i {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--maho-ink-faint);
+    animation: ai-chat-pulse 1.2s ease-in-out infinite;
+}
+
+.ai-chat-dots i:nth-child(2) {
+    animation-delay: .15s;
+}
+
+.ai-chat-dots i:nth-child(3) {
+    animation-delay: .3s;
+}
+
+@keyframes ai-chat-pulse {
+    0%, 60%, 100% { opacity: .35; transform: translateY(0); }
+    30% { opacity: 1; transform: translateY(-2px); }
+}
+
+@keyframes ai-chat-spin {
+    to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ai-chat-dots i,
+    .ai-chat-step-running .ai-chat-step-status,
+    .ai-chat-attachment.is-uploading::before {
+        animation-duration: 3s;
+    }
+}
+
+@media (max-width: 720px) {
+    .ai-chat-panel {
+        width: 100vw;
+    }
+}
+
+/* A form control the assistant filled in: the administrator sees what to review. The outline sits inside the box, so no parent clips it. */
+.ai-chat-prefilled {
+    outline: 2px solid var(--maho-chartreuse);
+    outline-offset: -2px;
+    border-radius: inherit;
+}
+
+/* Greeting card, shown as the intro message inside the deep-chat shadow root. */
+.ai-chat-intro {
+    margin: 24px auto 8px;
+    padding: 4px 8px 0;
+    max-width: 360px;
+    color: var(--maho-ink);
+    text-align: center;
+}
+
+.ai-chat-intro-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 14px;
+    color: var(--maho-chartreuse);
+}
+
+.ai-chat-intro-icon svg {
+    width: 100%;
+    height: 100%;
+}
+
+.ai-chat-intro-title {
+    margin: 0 0 6px;
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.ai-chat-intro-text {
+    margin: 0 0 20px;
+    color: var(--maho-ink-muted);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.ai-chat-intro-label {
+    margin: 0 0 8px;
+    color: var(--maho-ink-faint);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+.ai-chat-intro-examples {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.ai-chat-example {
+    padding: 9px 12px;
+    border: 1px solid var(--maho-border-soft);
+    border-radius: 10px;
+    background: var(--maho-surface);
+    color: var(--maho-ink);
+    font: inherit;
+    font-size: 12.5px;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color var(--maho-duration-fast) var(--maho-ease), background-color var(--maho-duration-fast) var(--maho-ease);
+}
+
+.ai-chat-example:hover,
+.ai-chat-example:active {
+    border-color: var(--maho-chartreuse-deep);
+    background: var(--maho-row-hover);
+}
+
+.ai-chat-intro-hint {
+    margin: 16px 0 0;
+    color: var(--maho-ink-faint);
+    font-size: 11px;
+}
+
+/* The intro bubble is a card of its own, not a grey message bubble. */
+.message-bubble:has(> .ai-chat-intro) {
+    background: transparent;
+    padding: 0;
+    max-width: 100%;
+    width: 100%;
+}
+
+/* After the first message the greeting is one quiet line. The panel marks the chat element before it redraws a history, so a reload never shows the full greeting for a moment. */
+.ai-chat-intro.ai-chat-intro-compact,
+:host(.has-history) .ai-chat-intro {
+    margin: 4px auto 0;
+    padding: 0;
+}
+
+.ai-chat-intro-compact .ai-chat-intro-icon,
+.ai-chat-intro-compact .ai-chat-intro-text,
+.ai-chat-intro-compact .ai-chat-intro-label,
+.ai-chat-intro-compact .ai-chat-intro-examples,
+.ai-chat-intro-compact .ai-chat-intro-hint,
+:host(.has-history) :is(.ai-chat-intro-icon, .ai-chat-intro-text, .ai-chat-intro-label, .ai-chat-intro-examples, .ai-chat-intro-hint) {
+    display: none;
+}
+
+.ai-chat-intro-compact .ai-chat-intro-title,
+:host(.has-history) .ai-chat-intro-title {
+    margin: 0;
+    color: var(--maho-ink-faint);
+    font-size: 11px;
+    font-weight: 500;
+}
+
+/* Preview of a write on the confirmation card: record, scope and a before/after table. */
+.ai-chat-preview-meta {
+    margin: 6px 0 4px;
+    color: var(--maho-ink-muted);
+    font-size: 12px;
+}
+
+.ai-chat-preview-table {
+    width: 100%;
+    margin: 6px 0 0;
+    overflow: hidden;
+    border: 1px solid var(--maho-border-soft);
+    border-radius: 8px;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: var(--maho-surface);
+    font-size: 12px;
+}
+
+.ai-chat-preview-table th,
+.ai-chat-preview-table td {
+    padding: 5px 8px;
+    border-bottom: 1px solid var(--maho-border-soft);
+    text-align: left;
+    vertical-align: top;
+    word-break: break-word;
+}
+
+.ai-chat-preview-table tr:last-child th,
+.ai-chat-preview-table tr:last-child td {
+    border-bottom: 0;
+}
+
+.ai-chat-preview-table thead th {
+    background: var(--maho-surface-sunken);
+    color: var(--maho-ink-muted);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.ai-chat-preview-table tbody th {
+    width: 28%;
+    font-weight: 500;
+}
+
+.ai-chat-preview-from {
+    color: var(--maho-ink-muted);
+    text-decoration: line-through;
+}
+
+.ai-chat-preview-to {
+    color: var(--maho-success);
+}
+
+.ai-chat-preview-table pre {
+    margin: 0;
+    white-space: pre-wrap;
+}
+
+.ai-chat-preview-delete {
+    margin: 4px 0;
+    color: var(--maho-error);
+}
+
+.ai-chat-preview-none {
+    margin: 4px 0;
+    color: var(--maho-ink-muted);
+}
+
+/* Open and Undo on the card of a done write, and the button of a note. */
+.ai-chat-undo,
+.ai-chat-open-record,
+.ai-chat-leave {
+    margin-left: auto;
+    padding: 2px 10px;
+    border: 1px solid var(--maho-btn2-border);
+    border-radius: var(--maho-radius-pill);
+    background: var(--maho-btn2-bg);
+    color: var(--maho-btn2-ink);
+    font: 500 11px/1.4 var(--maho-font-sans);
+    cursor: pointer;
+}
+
+.ai-chat-undo:hover,
+.ai-chat-undo:active,
+.ai-chat-open-record:hover,
+.ai-chat-open-record:active,
+.ai-chat-leave:hover,
+.ai-chat-leave:active {
+    border-color: var(--maho-btn2-border);
+    background: var(--maho-btn2-bg-hover);
+}
+
+.ai-chat-open-record + .ai-chat-undo {
+    margin-left: 6px;
+}
+
+/* Files attached to the next message. */
+.ai-chat-attachments {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 0 14px 12px;
+}
+
+/* Shown over the panel while a file is dragged over it. */
+.ai-chat-drop {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 8px;
+    border: 2px dashed var(--maho-chartreuse-deep);
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--maho-surface) 88%, transparent);
+    font-weight: 600;
+    pointer-events: none;
+}
+
+.ai-chat-drop[hidden],
+.ai-chat-attachments[hidden] {
+    display: none;
+}
+
+.ai-chat-attachment {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 4px 3px 10px;
+    border: 1px solid var(--maho-border-soft);
+    border-radius: var(--maho-radius-pill);
+    background: var(--maho-surface-sunken);
+    font-size: 12px;
+}
+
+.ai-chat-attachment.is-uploading {
+    color: var(--maho-ink-muted);
+    border-style: dashed;
+}
+
+.ai-chat-attachment.is-uploading::before {
+    content: '';
+    width: 10px;
+    height: 10px;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: ai-chat-spin .8s linear infinite;
+}
+
+.ai-chat-attachment-remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    color: var(--maho-ink-muted);
+    font-size: 14px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.ai-chat-attachment-remove:hover,
+.ai-chat-attachment-remove:active {
+    background: var(--maho-border-soft);
+    color: var(--maho-ink);
+}

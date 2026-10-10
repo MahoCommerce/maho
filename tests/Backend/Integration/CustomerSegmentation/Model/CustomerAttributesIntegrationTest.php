@@ -1008,6 +1008,7 @@ describe('Customer Attributes Integration Tests', function () {
                 $order->setCustomerId($customer->getId());
                 $order->setCustomerEmail($customer->getEmail());
                 $order->setGrandTotal($orderData['total']);
+                $order->setBaseGrandTotal($orderData['total']);
 
                 $order->setData('state', orderStateForStatus($orderData['status']));
                 $order->setStatus($orderData['status']);

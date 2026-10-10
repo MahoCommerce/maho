@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Mage\Customer\Api;
 
 use ApiPlatform\Metadata\ApiProperty;
+use Maho\ApiPlatform\Metadata\EnumSource;
 use Maho\Config\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
@@ -91,6 +92,7 @@ class CustomerGroup extends CrudResource
     #[ApiProperty(extraProperties: ['modelField' => 'customer_group_code'])]
     public string $code = '';
 
+    #[ApiProperty(extraProperties: [EnumSource::KEY => 'tax/class_source_customer'])]
     public ?int $taxClassId = null;
 
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]

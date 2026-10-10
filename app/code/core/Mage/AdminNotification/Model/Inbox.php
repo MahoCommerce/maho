@@ -94,9 +94,11 @@ class Mage_AdminNotification_Model_Inbox extends Mage_Core_Model_Abstract
      * @param string|array $description
      * @param string $url
      * @param bool $isInternal
+     * @param ?int $adminUserId Only this administrator sees the message
+     * @param ?string $aclResource Only the administrators allowed this ACL resource see the message
      * @return $this
      */
-    public function add($severity, $title, $description, $url = '', $isInternal = true)
+    public function add($severity, $title, $description, $url = '', $isInternal = true, ?int $adminUserId = null, ?string $aclResource = null)
     {
         if (!$this->getSeverities($severity)) {
             Mage::throwException(Mage::helper('adminnotification')->__('Wrong message type'));
@@ -112,8 +114,32 @@ class Mage_AdminNotification_Model_Inbox extends Mage_Core_Model_Abstract
             'description' => $description,
             'url'         => $url,
             'internal'    => $isInternal,
+            'admin_user_id' => $adminUserId,
+            'acl_resource'  => $aclResource === null ? null : self::normalizeAclResource($aclResource),
         ]]);
         return $this;
+    }
+
+    /** An ACL resource as the admin session checks it: without the "admin/" prefix. */
+    public static function normalizeAclResource(string $resource): string
+    {
+        $resource = trim($resource, " /\t\n");
+        return str_starts_with($resource, 'admin/') ? substr($resource, 6) : $resource;
+    }
+
+    /** Whether the current administrator may see this message. */
+    public function isVisibleToCurrentAdmin(): bool
+    {
+        if (!$this->getId()) {
+            return false;
+        }
+        $session = Mage::getSingleton('admin/session');
+        $adminUserId = $this->getData('admin_user_id');
+        if ($adminUserId !== null && (int) $adminUserId !== (int) $session->getUser()?->getId()) {
+            return false;
+        }
+        $resource = $this->getData('acl_resource');
+        return $resource === null || $session->isAllowed((string) $resource);
     }
 
     /**

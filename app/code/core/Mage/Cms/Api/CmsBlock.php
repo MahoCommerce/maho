@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Mage\Cms\Api;
 
 use ApiPlatform\Metadata\ApiProperty;
+use Maho\ApiPlatform\Metadata\EnumSource;
 use Maho\Config\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
@@ -63,6 +64,7 @@ use Maho\ApiPlatform\CrudResource;
                 'updatedSince' => ['type' => 'String', 'description' => 'Updated at or after this UTC date or datetime'],
                 'identifier' => ['type' => 'String', 'description' => 'Exact identifier lookup (returns 0 or 1 block)'],
                 'search' => ['type' => 'String', 'description' => 'Partial match on the block title or identifier'],
+                'scope' => ['type' => 'String', 'description' => 'Give "all" to list the records of every store view, the disabled and unpublished ones too, as the admin grid does. It needs backend access. Without it, the list holds only the published records of the current store view'],
             ],
         ),
     ],
@@ -81,12 +83,13 @@ class CmsBlock extends CrudResource
     public string $title = '';
     public ?string $content = null;
 
-    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
+    #[ApiProperty(writable: false, extraProperties: [EnumSource::KEY => ['enabled', 'disabled'], 'computed' => true])]
     public string $status = 'enabled';
 
     public ?bool $isActive = null;
 
     /** @var int[]|null */
+    #[ApiProperty(description: 'Store view ids the block belongs to. 0 means every store view. Several blocks can share an identifier, one per store view, and the store view\'s own block wins over the one for every store view.')]
     public ?array $stores = null;
 
     #[ApiProperty(writable: false, extraProperties: ['modelField' => 'creation_time'])]

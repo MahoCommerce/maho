@@ -17,6 +17,7 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\Post;
 use Maho\ApiPlatform\CrudResource;
+use Maho\ApiPlatform\Metadata\ListFilter;
 
 #[ApiResource(
     mahoOperations: ['read' => 'View', 'create' => 'Create', 'write' => 'Manage'],
@@ -29,7 +30,14 @@ use Maho\ApiPlatform\CrudResource;
         new GetCollection(
             uriTemplate: '/invoices',
             name: 'invoice_list',
-            description: 'List the invoices of all orders, newest first. Filters: search (every word must match part of the invoice number, the order number, or the billing name), orderId, state (open, paid, canceled), createdFrom, createdTo',
+            description: 'List the invoices of all orders, newest first',
+            parameters: [
+                'search' => new ListFilter('Every word must match part of the invoice number, the order number or the billing name. An invoice and an order can have the same number'),
+                'orderId' => new ListFilter('Only the invoices of this order ID', 'integer'),
+                'state' => new ListFilter('Only the invoices in this state', enum: ['open', 'paid', 'canceled']),
+                'createdFrom' => new ListFilter('Created at or after this UTC date or datetime; a bare date means from 00:00:00'),
+                'createdTo' => new ListFilter('Created at or before this UTC date or datetime; a bare date includes the whole day'),
+            ],
             security: "is_granted('ROLE_ADMIN') or is_granted('invoices/read')",
         ),
         new Get(

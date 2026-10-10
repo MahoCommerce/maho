@@ -1,0 +1,40 @@
+<?php
+
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package default_default
+ */
+
+/** @var Maho_Ai_Block_Adminhtml_Assistant $this */
+$config = $this->getConfig();
+$labels = $config['labels'];
+?>
+<link rel="stylesheet" href="<?= $this->escapeUrl($config['cssUrl']) ?>">
+<button type="button" id="ai-chat-toggle" class="ai-chat-toggle" title="<?= $this->escapeHtml($labels['open']) ?>" aria-controls="ai-chat-panel" aria-expanded="false">
+    <span class="ai-chat-mark"><?= $this->getLogoSvg() ?></span>
+    <span><?= $this->escapeHtml($labels['title']) ?></span>
+</button>
+<aside id="ai-chat-panel" class="ai-chat-panel" hidden aria-label="<?= $this->escapeHtml($labels['title']) ?>">
+    <header class="ai-chat-header">
+        <span class="ai-chat-mark"><?= $this->getLogoSvg() ?></span>
+        <div class="ai-chat-heading">
+            <strong class="ai-chat-title"><?= $this->escapeHtml($labels['title']) ?></strong>
+            <select id="ai-chat-conversations" class="ai-chat-conversations" aria-label="<?= $this->escapeHtml($labels['conversations']) ?>"></select>
+        </div>
+        <button type="button" id="ai-chat-new" class="ai-chat-icon-button" title="<?= $this->escapeHtml($labels['newChat']) ?>"><?= $this->getIconSvg('plus') ?></button>
+        <button type="button" id="ai-chat-delete" class="ai-chat-icon-button" title="<?= $this->escapeHtml($labels['delete']) ?>" hidden><?= $this->getIconSvg('trash') ?></button>
+        <button type="button" id="ai-chat-close" class="ai-chat-icon-button" title="<?= $this->escapeHtml($labels['close']) ?>"><?= $this->getIconSvg('x') ?></button>
+    </header>
+    <deep-chat id="ai-chat"></deep-chat>
+    <div class="ai-chat-attachments" id="ai-chat-attachments" hidden></div>
+    <div class="ai-chat-drop" id="ai-chat-drop" hidden><?= $this->escapeHtml($labels['dropHint']) ?></div>
+    <input type="file" id="ai-chat-file" multiple accept="<?= $this->escapeHtml($config['uploadAccept']) ?>" hidden>
+</aside>
+<script type="application/json" id="ai-chat-config"><?= Mage::helper('core')->jsonEncode($config) ?></script>
+<script src="<?= $this->escapeUrl($this->getVersionedJsUrl('mage/adminhtml/ai-chat.js')) ?>"></script>
+<script type="module">
+    import '<?= $this->escapeUrl($this->getVersionedJsUrl('deep-chat.js')) ?>';
+    await customElements.whenDefined('deep-chat');
+    window.mahoAiAssistant = new MahoAiAssistant(JSON.parse(document.getElementById('ai-chat-config').textContent));
+</script>

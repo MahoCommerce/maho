@@ -29,6 +29,9 @@ return function (SchemaEditor $schema): void {
             ->addColumn(Schema::column('url', Types::STRING, length: 255, notNull: false))
             ->addColumn(Schema::column('is_read', Types::SMALLINT, unsigned: true, default: 0))
             ->addColumn(Schema::column('is_remove', Types::SMALLINT, unsigned: true, default: 0))
+            // The audience: one administrator, the administrators allowed an ACL resource, or everyone when both are empty
+            ->addColumn(Schema::column('admin_user_id', Types::INTEGER, unsigned: true, notNull: false))
+            ->addColumn(Schema::column('acl_resource', Types::STRING, length: 255, notNull: false))
             ->addPrimaryKeyConstraint(
                 PrimaryKeyConstraint::editor()
                     ->setUnquotedColumnNames('notification_id')
@@ -37,6 +40,7 @@ return function (SchemaEditor $schema): void {
             ->addIndex(Index::editor()->setUnquotedColumnNames('severity'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('is_read'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('is_remove'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('admin_user_id'))
             ->setComment('Adminnotification Inbox')
             ->create(),
     );

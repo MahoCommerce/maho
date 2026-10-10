@@ -13,12 +13,15 @@ declare(strict_types=1);
 namespace Mage\SalesRule\Api;
 
 use ApiPlatform\Metadata\ApiProperty;
+use Maho\ApiPlatform\Metadata\EnumSource;
+use Maho\ApiPlatform\Metadata\ValueLists;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use Maho\Config\ApiResource;
+use Maho\ApiPlatform\Metadata\ListFilter;
 
 #[ApiResource(
     // The operations that API Platform adds by itself, for example the GraphQL queries, use this expression
@@ -34,7 +37,19 @@ use Maho\Config\ApiResource;
         new GetCollection(
             uriTemplate: '/cart-price-rules',
             security: "is_granted('ROLE_ADMIN') or is_granted('cart-price-rules/read')",
-            description: 'List cart price rules without their trees. Filters: search (every word must match part of the name, the description or the coupon code), isActive, couponType (none, specific, auto), websiteId, customerGroupId, activeOn (YYYY-MM-DD), code (the exact coupon code), usesAttribute (a product attribute code in the trees), sort (id, name, sortOrder, fromDate, toDate), order (asc, desc)',
+            description: 'List cart price rules without their trees',
+            parameters: [
+                'search' => new ListFilter('Every word must match part of the name, the description or the coupon code'),
+                'isActive' => new ListFilter('Only the active rules, or only the inactive rules', 'boolean'),
+                'couponType' => new ListFilter('Only the rules with this coupon type', enum: ['none', 'specific', 'auto']),
+                'websiteId' => new ListFilter('Only the rules of this website', 'integer'),
+                'customerGroupId' => new ListFilter('Only the rules of this customer group', 'integer'),
+                'activeOn' => new ListFilter('Only the rules that apply on this date, YYYY-MM-DD'),
+                'code' => new ListFilter('Only the rule with this exact coupon code'),
+                'usesAttribute' => new ListFilter('Only the rules whose trees use this product attribute code'),
+                'sort' => new ListFilter('The field to sort by', enum: ['id', 'name', 'sortOrder', 'fromDate', 'toDate']),
+                'order' => new ListFilter('The sort direction', enum: ['asc', 'desc']),
+            ],
         ),
         new Get(
             uriTemplate: '/cart-price-rules/{id}',
@@ -46,8 +61,8 @@ use Maho\Config\ApiResource;
             uriTemplate: '/cart-price-rules',
             deserialize: false,
             security: "is_granted('ROLE_ADMIN') or is_granted('cart-price-rules/create')",
-            description: 'Create a cart price rule. Required: name, websiteIds, customerGroupIds, and couponCode for couponType "specific". The trees use the types of GET /cart-price-rules/condition-metadata',
-            extraProperties: ['maho_mcp' => false],
+            description: 'Create a cart price rule. Required: name, websiteIds, customerGroupIds, and couponCode for couponType "specific". The trees use the types of GET /cart-price-rules/condition-metadata. '
+                . 'For the customers of a customer segment, put every customer group in customerGroupIds and add the Customer Segment condition of the metadata to the conditions tree',
         ),
         new Put(
             uriTemplate: '/cart-price-rules/{id}',
@@ -55,14 +70,12 @@ use Maho\Config\ApiResource;
             deserialize: false,
             security: "is_granted('ROLE_ADMIN') or is_granted('cart-price-rules/write')",
             description: 'Update a cart price rule. Only the fields in the body change. A conditions or actions tree in the body replaces the stored tree, and null resets it to an empty tree',
-            extraProperties: ['maho_mcp' => false],
         ),
         new Delete(
             uriTemplate: '/cart-price-rules/{id}',
             requirements: ['id' => '\d+'],
             security: "is_granted('ROLE_ADMIN') or is_granted('cart-price-rules/delete')",
             description: 'Delete a cart price rule and all its coupons',
-            extraProperties: ['maho_mcp' => false],
         ),
     ],
     graphQlOperations: [],
@@ -77,7 +90,7 @@ class CartPriceRule extends \Maho\ApiPlatform\Resource
 
     private const TREE_SCHEMA = [
         'type' => 'object',
-        'description' => 'Condition tree. A node has the keys type, attribute, operator, value, aggregator and conditions (a list of child nodes), and the read-only key label. GET /cart-price-rules/condition-metadata describes the allowed types, attributes, operators and values.',
+        'description' => 'Condition tree. A node has the keys type, attribute, operator, value, aggregator and conditions (the list of child nodes, never "children"), and the read-only key label. GET /cart-price-rules/condition-metadata describes the allowed types, attributes, operators and values.',
         'properties' => [
             'type' => ['type' => 'string'],
             'aggregator' => ['type' => 'string', 'enum' => ['all', 'any']],
@@ -101,12 +114,14 @@ class CartPriceRule extends \Maho\ApiPlatform\Resource
     public bool $isActive = false;
 
     /** @var int[] */
+    #[ApiProperty(extraProperties: [EnumSource::KEY => 'Maho\ApiPlatform\Metadata\ValueLists::websites'])]
     public array $websiteIds = [];
 
     /** @var int[] */
+    #[ApiProperty(description: 'The rule applies only to customers of these groups. A rule for a customer segment lists every group and selects the segment with a condition', extraProperties: [EnumSource::KEY => 'Maho\ApiPlatform\Metadata\ValueLists::ruleCustomerGroups'])]
     public array $customerGroupIds = [];
 
-    #[ApiProperty(description: 'none, specific (one code in couponCode) or auto (generated codes)', openapiContext: ['enum' => ['none', 'specific', 'auto']])]
+    #[ApiProperty(description: 'none, specific (one code in couponCode) or auto (generated codes)', extraProperties: [EnumSource::KEY => ['none', 'specific', 'auto']])]
     public string $couponType = self::COUPON_TYPE_NONE;
 
     #[ApiProperty(description: 'The code of a rule with couponType "specific"')]
@@ -130,7 +145,7 @@ class CartPriceRule extends \Maho\ApiPlatform\Resource
 
     public bool $isRss = false;
 
-    #[ApiProperty(description: 'by_percent, by_fixed, cart_fixed or buy_x_get_y', openapiContext: ['enum' => ['by_percent', 'by_fixed', 'cart_fixed', 'buy_x_get_y']])]
+    #[ApiProperty(description: 'by_percent, by_fixed, cart_fixed or buy_x_get_y', extraProperties: [EnumSource::KEY => ['by_percent', 'by_fixed', 'cart_fixed', 'buy_x_get_y']])]
     public string $simpleAction = \Mage_SalesRule_Model_Rule::BY_PERCENT_ACTION;
 
     #[ApiProperty(description: 'At most 100 for by_percent')]
@@ -144,7 +159,7 @@ class CartPriceRule extends \Maho\ApiPlatform\Resource
 
     public bool $applyToShipping = false;
 
-    #[ApiProperty(description: '0 (no), 1 (matching items) or 2 (whole shipment)')]
+    #[ApiProperty(description: '0 (no), 1 (matching items) or 2 (whole shipment)', extraProperties: [EnumSource::KEY => [0, 1, 2]])]
     public int $simpleFreeShipping = 0;
 
     /** @var list<array{storeId: int, label: string}> */

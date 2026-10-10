@@ -15,6 +15,7 @@ namespace Mage\SalesRule\Api;
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
+use Maho\ApiPlatform\Metadata\McpToolResourceMetadataCollectionFactory;
 
 // The cart-price-rules/read grant of CartPriceRule gives access, so this uses the plain
 // API Platform attribute and is not in the permission registry.
@@ -32,6 +33,7 @@ use ApiPlatform\Metadata\Get;
         ),
     ],
     graphQlOperations: [],
+    extraProperties: [McpToolResourceMetadataCollectionFactory::RESOURCE_SECTION => 'Sales'],
 )]
 class CartPriceRuleConditionMetadata extends \Maho\ApiPlatform\Resource
 {

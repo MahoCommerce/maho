@@ -18,8 +18,10 @@ class Mage_Adminhtml_Block_Notification_Grid_Renderer_Actions extends Mage_Admin
     #[\Override]
     public function render(\Maho\DataObject $row)
     {
-        $readDetailsHtml = ($row->getUrl())
-            ? '<a target="_blank" href="' . $row->getUrl() . '">'
+        $url = (string) $row->getUrl();
+        $readDetailsHtml = $url !== ''
+            ? '<a href="' . $this->escapeUrl($url) . '"'
+                . (Mage::helper('adminnotification')->isExternalUrl($url) ? ' target="_blank" rel="noopener"' : '') . '>'
                 . Mage::helper('adminnotification')->__('Read Details') . '</a> | '
             : '';
 

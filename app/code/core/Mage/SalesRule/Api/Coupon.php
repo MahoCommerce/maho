@@ -11,6 +11,8 @@ declare(strict_types=1);
 namespace Mage\SalesRule\Api;
 
 use ApiPlatform\Metadata\ApiProperty;
+use Maho\ApiPlatform\Metadata\EnumSource;
+use Maho\ApiPlatform\Metadata\ValueLists;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
@@ -154,6 +156,9 @@ class Coupon extends CrudResource
     /** Admin ACL gate. Mirrors backend Mage_Adminhtml_Promo_QuoteController. */
     public const ADMIN_RESOURCE = \Mage_Adminhtml_Promo_QuoteController::ADMIN_RESOURCE;
 
+    /** A coupon has no admin page of its own: it is a tab of the cart price rule page. */
+    public const ADMIN_RECORD_PAGE = false;
+
     private const DISCOUNT_TYPE_MAP = [
         'by_percent' => 'percent',
         'by_fixed' => 'fixed',
@@ -216,11 +221,11 @@ class Coupon extends CrudResource
     public ?string $createdAt = null;
 
     /** @var int[]|null */
-    #[ApiProperty(extraProperties: ['computed' => true])]
+    #[ApiProperty(extraProperties: [EnumSource::KEY => 'Maho\ApiPlatform\Metadata\ValueLists::websites', 'computed' => true])]
     public ?array $websiteIds = null;
 
     /** @var int[]|null */
-    #[ApiProperty(extraProperties: ['computed' => true])]
+    #[ApiProperty(extraProperties: [EnumSource::KEY => 'Maho\ApiPlatform\Metadata\ValueLists::ruleCustomerGroups', 'computed' => true])]
     public ?array $customerGroupIds = null;
 
     #[ApiProperty(extraProperties: ['computed' => true])]

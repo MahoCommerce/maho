@@ -308,7 +308,7 @@ describe('Customer segment conditions', function (): void {
         expect($leaf['attribute'])->toBe('lifetime_sales')
             ->and($leaf['operator'])->toBe('>=')
             ->and($leaf['value'])->toBe('500')
-            ->and($leaf['label'])->toBeString();
+            ->and($leaf['label'])->toEndWith('500 ' . Mage::app()->getWebsite(1)->getBaseCurrencyCode());
     });
 
     it('keeps the stored tree when a PATCH leaves out conditions, and empties it when a PATCH sends null', function (): void {

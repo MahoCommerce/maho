@@ -16,6 +16,7 @@ use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\State\Pagination\TraversablePaginator;
 use Maho\ApiPlatform\Service\StoreContext;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
  * Category State Provider - Fetches category data for API Platform.
@@ -143,18 +144,63 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
      * Keep only the categories under the root category of the current store. In the
      * admin (global) scope, which only backend callers can request, the root is the
      * tree root: it starts every path ("1/<store root>/..."), so the filter matches
-     * that prefix and keeps the categories of all store roots.
+     * that prefix and keeps the categories of all store roots. With $rootIds, keep the trees
+     * of those roots instead.
+     *
+     * @param list<int>|null $rootIds
      */
-    private function filterToRootTree(\Mage_Catalog_Model_Resource_Category_Collection $collection): void
+    private function filterToRootTree(\Mage_Catalog_Model_Resource_Category_Collection $collection, ?array $rootIds = null): void
     {
-        $rootCategoryId = (int) StoreContext::getRootCategoryId();
-        if ($rootCategoryId <= 0) {
-            return;
+        if ($rootIds === null) {
+            $rootCategoryId = (int) StoreContext::getRootCategoryId();
+            if ($rootCategoryId <= 0) {
+                return;
+            }
+            $rootIds = [$rootCategoryId];
         }
-        $pattern = $rootCategoryId === \Mage_Catalog_Model_Category::TREE_ROOT_ID
-            ? "{$rootCategoryId}/%"
-            : "%/{$rootCategoryId}/%";
-        $collection->addAttributeToFilter('path', ['like' => $pattern]);
+        $collection->addAttributeToFilter(array_map(static fn(int $rootId): array => [
+            'attribute' => 'path',
+            'like' => $rootId === \Mage_Catalog_Model_Category::TREE_ROOT_ID ? "{$rootId}/%" : "%/{$rootId}/%",
+        ], array_values(array_unique($rootIds))));
+    }
+
+    /**
+     * Whether a backend caller asked for the categories of every root tree (?scope=all), as the
+     * admin category tree shows them. Guests and customers are refused.
+     */
+    private function isScopeAll(array $filters): bool
+    {
+        if (($filters['scope'] ?? null) !== 'all') {
+            return false;
+        }
+        if (!$this->backendCategoriesAccess()) {
+            throw new AccessDeniedHttpException('scope=all requires a backend token');
+        }
+
+        return true;
+    }
+
+    /**
+     * The root categories whose trees the caller may read: the tree root for an unrestricted
+     * caller, and the roots of its own store views for a store-restricted token.
+     *
+     * @return list<int>
+     */
+    private function readableRootIds(): array
+    {
+        $allowed = $this->requireUser()->getAllowedStoreIds();
+        if ($allowed === null) {
+            return [\Mage_Catalog_Model_Category::TREE_ROOT_ID];
+        }
+        $rootIds = [];
+        foreach (\Mage::app()->getStores() as $store) {
+            if (in_array((int) $store->getId(), $allowed, true)) {
+                $rootIds[] = (int) $store->getRootCategoryId();
+            }
+        }
+
+        // A token without a store view reads no tree: -1 matches no path.
+        return $rootIds === [] ? [-1] : $rootIds;
     }
 
     /**
@@ -168,10 +214,11 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
         $parentId = $filters['parentId'] ?? null;
         $includeInMenu = $filters['includeInMenu'] ?? null;
         $search = $filters['search'] ?? $filters['q'] ?? null;
+        $allTrees = $this->isScopeAll($filters);
 
         // If searching, don't filter by parent - search all categories
         // If no parent specified and not searching, get root category children
-        if ($parentId === null && !$search) {
+        if ($parentId === null && !$search && !$allTrees) {
             $parentId = StoreContext::getRootCategoryId();
         }
 
@@ -194,11 +241,11 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
             $collection->addAttributeToFilter('name', ['like' => "%{$escapedSearch}%"]);
         }
 
-        // Always constrain to the current store's root tree. A client-supplied
-        // parentId would otherwise return another store's active categories
-        // (including their rendered landing_page CMS blocks); the search path
-        // needs it too since it applies no parent filter at all.
-        $this->filterToRootTree($collection);
+        // Always constrain to the current store's root tree, or with scope=all to the trees
+        // the caller may read. A client-supplied parentId would otherwise return another
+        // store's active categories (including their rendered landing_page CMS blocks);
+        // the search path needs it too since it applies no parent filter at all.
+        $this->filterToRootTree($collection, $allTrees ? $this->readableRootIds() : null);
 
         if ($includeInMenu !== null) {
             $collection->addAttributeToFilter('include_in_menu', (int) $includeInMenu);

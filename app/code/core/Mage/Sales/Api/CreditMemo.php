@@ -20,6 +20,7 @@ use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use ApiPlatform\Metadata\GraphQl\Mutation;
 use Maho\ApiPlatform\CrudResource;
+use Maho\ApiPlatform\Metadata\ListFilter;
 
 #[ApiResource(
     shortName: 'CreditMemo',
@@ -29,7 +30,14 @@ use Maho\ApiPlatform\CrudResource;
     operations: [
         new GetCollection(
             uriTemplate: '/credit-memos',
-            description: 'List the credit memos of all orders, newest first. Filters: search (every word must match part of the credit memo number, the order number, or the billing name), orderId, state (open, refunded, canceled), createdFrom, createdTo',
+            description: 'List the credit memos of all orders, newest first',
+            parameters: [
+                'search' => new ListFilter('Every word must match part of the credit memo number, the order number or the billing name. A credit memo and an order can have the same number'),
+                'orderId' => new ListFilter('Only the credit memos of this order ID', 'integer'),
+                'state' => new ListFilter('Only the credit memos in this state', enum: ['open', 'refunded', 'canceled']),
+                'createdFrom' => new ListFilter('Created at or after this UTC date or datetime; a bare date means from 00:00:00'),
+                'createdTo' => new ListFilter('Created at or before this UTC date or datetime; a bare date includes the whole day'),
+            ],
             security: "is_granted('ROLE_ADMIN') or is_granted('credit-memos/read')",
         ),
         new Get(

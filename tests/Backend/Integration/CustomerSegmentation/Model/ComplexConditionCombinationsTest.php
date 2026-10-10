@@ -507,6 +507,7 @@ describe('Complex Condition Combinations', function () {
             $order->setCustomerId($customer->getId());
             $order->setCustomerEmail($customer->getEmail());
             $order->setGrandTotal($orderData[$index]['grand_total']);
+            $order->setBaseGrandTotal($orderData[$index]['grand_total']);
             $order->setStoreId(1);
             $order->setData('state', orderStateForStatus($orderData[$index]['status']));
             $order->setStatus($orderData[$index]['status']);

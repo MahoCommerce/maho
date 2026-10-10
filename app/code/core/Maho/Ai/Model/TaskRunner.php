@@ -10,23 +10,30 @@ declare(strict_types=1);
 
 class Maho_Ai_Model_TaskRunner
 {
+    /** Pending tasks the cron job sends to the queue again in one run. */
+    private const REQUEUE_BATCH = 100;
+
     /**
-     * Process pending tasks from the queue (cron entry point)
+     * Cron entry point. With the queue module, workers run the tasks, and this job only
+     * queues the pending ones again: a retry, a task the async queue held while it was off,
+     * or a lost message. Without the queue module, the job runs the pending tasks itself.
+     * An agent run ignores the async queue setting: the administrator asked for it.
      */
     #[Maho\Config\CronJob('ai_process_queue', configPath: 'ai/queue/cron_schedule')]
     public function processQueue(): void
     {
-        if (!Mage::getStoreConfigFlag('ai/queue/enabled')) {
+        $enabled = Mage::getStoreConfigFlag('ai/queue/enabled');
+        $this->failLostAgentTasks();
+        if ($enabled) {
+            $this->recoverTimedOutTasks((int) Mage::getStoreConfig('ai/queue/task_timeout') ?: 120);
+        }
+
+        $queued = Mage::helper('core')->isModuleEnabled('Maho_Queue');
+        if (!$queued && !$enabled) {
             return;
         }
 
-        $maxTasks = (int) Mage::getStoreConfig('ai/queue/max_tasks_per_run') ?: 10;
-        $timeout  = (int) Mage::getStoreConfig('ai/queue/task_timeout') ?: 120;
-
-        // Mark timed-out processing tasks as failed first
-        $this->recoverTimedOutTasks($timeout);
-
-        // Load pending tasks ordered by priority (interactive first) then age
+        // Pending tasks, interactive first, then the oldest
         /** @var Maho_Ai_Model_Resource_Task_Collection $collection */
         $collection = Mage::getModel('ai/task')->getCollection();
         $collection->addFieldToFilter('status', Maho_Ai_Model_Task::STATUS_PENDING)
@@ -37,10 +44,17 @@ class Maho_Ai_Model_TaskRunner
             )
             ->setOrder('priority_order', 'ASC')
             ->setOrder('created_at', 'ASC')
-            ->setPageSize($maxTasks);
+            ->setPageSize($queued ? self::REQUEUE_BATCH : ((int) Mage::getStoreConfig('ai/queue/max_tasks_per_run') ?: 10));
+        if (!$enabled) {
+            $collection->addFieldToFilter('task_type', Maho_Ai_Model_Task::TYPE_AGENT);
+        }
 
         foreach ($collection as $task) {
-            $this->executeTask($task);
+            if ($queued) {
+                $task->queue();
+            } elseif ($this->claim($task)) {
+                $this->executeTask($task);
+            }
         }
     }
 
@@ -80,6 +94,8 @@ class Maho_Ai_Model_TaskRunner
             ])
             ->where('status = ?', Maho_Ai_Model_Task::STATUS_COMPLETE)
             ->where('platform IS NOT NULL')
+            // The assistant records the usage of every model call of an agent run as it happens.
+            ->where('task_type != ?', Maho_Ai_Model_Task::TYPE_AGENT)
             ->where('completed_at >= ?', $yesterdayStart)
             ->where('completed_at <= ?', $yesterdayEnd)
             ->group(['consumer', 'platform', 'model', 'store_id']);
@@ -126,6 +142,13 @@ class Maho_Ai_Model_TaskRunner
         ]);
     }
 
+    /** A chat attachment is kept for the conversation; the file goes after 30 days, the message keeps its name. */
+    #[Maho\Config\CronJob('ai_cleanup_old_attachments', schedule: '30 3 * * *')]
+    public function cleanupOldAttachments(): void
+    {
+        Maho_Ai_Model_Chat_Attachment::purgeOlderThan(Maho_Ai_Model_Chat_Attachment::KEEP_DAYS);
+    }
+
     /**
      * Process a single task by id, immediately, in the current process.
      *
@@ -145,16 +168,37 @@ class Maho_Ai_Model_TaskRunner
         if (!$task->getId()) {
             throw new Mage_Core_Exception("Maho AI task #{$taskId} not found");
         }
-        if ($task->getData('status') !== Maho_Ai_Model_Task::STATUS_PENDING) {
+        if (!$this->claim($task)) {
             return;
         }
         $this->executeTask($task);
     }
 
+    /**
+     * Move a pending task to processing in one statement, so a queue worker and a caller
+     * that runs the task in its own process never both take it.
+     */
+    private function claim(Maho_Ai_Model_Task $task): bool
+    {
+        $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
+        $now = Mage::app()->getLocale()->formatDateForDb('now');
+        $claimed = $connection->update(
+            Mage::getSingleton('core/resource')->getTableName('ai/task'),
+            ['status' => Maho_Ai_Model_Task::STATUS_PROCESSING, 'started_at' => $now],
+            ['task_id = ?' => (int) $task->getId(), 'status = ?' => Maho_Ai_Model_Task::STATUS_PENDING],
+        );
+        if ($claimed !== 1) {
+            return false;
+        }
+        $task->setData('status', Maho_Ai_Model_Task::STATUS_PROCESSING);
+        $task->setData('started_at', $now);
+
+        return true;
+    }
+
+    /** Run a task that this process claimed. */
     private function executeTask(Maho_Ai_Model_Task $task): void
     {
-        $task->markProcessing()->save();
-
         try {
             $taskType = $task->getData('task_type') ?: Maho_Ai_Model_Task::TYPE_COMPLETION;
 
@@ -162,6 +206,7 @@ class Maho_Ai_Model_TaskRunner
                 Maho_Ai_Model_Task::TYPE_COMPLETION => $this->executeCompletionTask($task),
                 Maho_Ai_Model_Task::TYPE_EMBEDDING  => $this->executeEmbedTask($task),
                 Maho_Ai_Model_Task::TYPE_IMAGE      => $this->executeImageTask($task),
+                Maho_Ai_Model_Task::TYPE_AGENT      => $this->executeAgentTask($task),
                 default => throw new Mage_Core_Exception("Unknown task type: {$taskType}"),
             };
         } catch (Throwable $e) {
@@ -296,6 +341,116 @@ class Maho_Ai_Model_TaskRunner
         $this->fireCallback($task, $response);
     }
 
+    /**
+     * The creator hears about a run that failed or waits for a confirmation, since only the
+     * creator can act on it, and about the end of a background job. A scheduled run that ends
+     * as expected puts its answer in the inbox of the audience, unless the model notified it.
+     */
+    private function executeAgentTask(Maho_Ai_Model_Task $task): void
+    {
+        $outcome = new Maho_Ai_Model_Chat_AgentRunner()->run($task);
+        /** @var Maho_Ai_Model_Conversation $conversation */
+        $conversation = Mage::getModel('ai/conversation')->load((int) $task->getConversationId());
+        $schedule = $task->getScheduleId() ? Mage::getModel('ai/task_schedule')->load($task->getScheduleId()) : null;
+        $schedule = $schedule?->getId() ? $schedule : null;
+        $title = (string) ($schedule?->getTitle() ?? $conversation->getTitle());
+        $helper = Mage::helper('ai');
+
+        if ($outcome['state'] === Maho_Ai_Model_Chat_AgentRunner::STATE_ERROR) {
+            $error = $outcome['error'] !== '' ? $outcome['error'] : 'The assistant run failed.';
+            if ($conversation->getId()) {
+                Maho_Ai_Model_Chat_Notifier::send(Mage_AdminNotification_Model_Inbox::SEVERITY_MAJOR, $helper->__('The assistant task "%s" failed', $title), $error, $conversation, $schedule, creatorOnly: true);
+            }
+            throw new Mage_Core_Exception($error);
+        }
+
+        $input = 0;
+        $output = 0;
+        $answer = '';
+        foreach ($conversation->messagesCollection()->addFieldToFilter('role', Maho_Ai_Model_Conversation_Message::ROLE_ASSISTANT) as $message) {
+            $input += (int) $message->getData('input_tokens');
+            $output += (int) $message->getData('output_tokens');
+            if ($message->getToolStatus() === null) {
+                $answer = (string) $message->getContent();
+            }
+        }
+
+        $task->markComplete(
+            response: $answer,
+            inputTokens: $input,
+            outputTokens: $output,
+            platform: (string) $conversation->getPlatform(),
+            model: (string) $conversation->getModel(),
+        )->save();
+
+        $summary = mb_substr($answer, 0, 2000);
+        if ($outcome['state'] === Maho_Ai_Model_Chat_AgentRunner::STATE_AWAITING_CONFIRMATION) {
+            Maho_Ai_Model_Chat_Notifier::send(Mage_AdminNotification_Model_Inbox::SEVERITY_MAJOR, $helper->__('The assistant task "%s" waits for your confirmation', $title), $summary, $conversation, $schedule, creatorOnly: true);
+        } elseif ($schedule === null) {
+            Maho_Ai_Model_Chat_Notifier::send(Mage_AdminNotification_Model_Inbox::SEVERITY_NOTICE, $helper->__('The background job "%s" is done', $title), $summary, $conversation);
+        } else {
+            // A run started by hand ends with its result for the owner, even when the model notified nobody.
+            if (!empty($task->getContextArray()['manual'])) {
+                Maho_Ai_Model_Chat_Notifier::send(Mage_AdminNotification_Model_Inbox::SEVERITY_NOTICE, $helper->__('The scheduled task "%s" is done', $title), $summary, $conversation, $schedule, creatorOnly: true);
+            } elseif (!$this->calledNotify($conversation)) {
+                $text = $summary !== '' ? $summary : $helper->__('The run ended without an answer. Open the conversation for its steps.');
+                Maho_Ai_Model_Chat_Notifier::send(Mage_AdminNotification_Model_Inbox::SEVERITY_NOTICE, $title, $text, $conversation, $schedule);
+            }
+            // A run with nothing to confirm stays out of the panel picker; the grid and its notifications still open it.
+            $conversation->setStatus(Maho_Ai_Model_Conversation::STATUS_ARCHIVED)->save();
+        }
+    }
+
+    /** A run that sent a notification of its own already told the audience what it found. */
+    private function calledNotify(Maho_Ai_Model_Conversation $conversation): bool
+    {
+        $calls = $conversation->messagesCollection()
+            ->addFieldToFilter('role', Maho_Ai_Model_Conversation_Message::ROLE_TOOL)
+            ->addFieldToFilter('tool_name', \Maho\Ai\Api\Agent\NotifyTool::NAME);
+        foreach ($calls as $call) {
+            if (!\Maho\Ai\Api\Agent\McpToolbox::isErrorText((string) $call->getContent())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * An agent task whose worker died can never end. It is not run again, since its writes
+     * may have run: it fails, and its conversation says so. The minute of grace covers the
+     * moment between the claim of the task and the claim of its queue message.
+     */
+    private function failLostAgentTasks(): void
+    {
+        if (!Mage::helper('core')->isModuleEnabled('Maho_Queue')) {
+            return;
+        }
+        /** @var Maho_Ai_Model_Resource_Task_Collection $collection */
+        $collection = Mage::getModel('ai/task')->getCollection();
+        $collection->addFieldToFilter('task_type', Maho_Ai_Model_Task::TYPE_AGENT)
+            ->addFieldToFilter('status', Maho_Ai_Model_Task::STATUS_PROCESSING)
+            ->addFieldToFilter('started_at', ['lt' => Mage::app()->getLocale()->formatDateForDb('-1 minute')]);
+        foreach ($collection as $task) {
+            if ($task->isQueued()) {
+                continue;
+            }
+            $task->markFailed('The worker stopped before the run ended.')->save();
+            /** @var Maho_Ai_Model_Conversation $conversation */
+            $conversation = Mage::getModel('ai/conversation')->load((int) $task->getConversationId());
+            if (!$conversation->getId()) {
+                continue;
+            }
+            $conversation->reconcileBackgroundJob();
+            Maho_Ai_Model_Chat_Notifier::send(
+                Mage_AdminNotification_Model_Inbox::SEVERITY_MAJOR,
+                Mage::helper('ai')->__('The assistant task "%s" failed', (string) $conversation->getTitle()),
+                Mage::helper('ai')->__('The worker stopped before the run ended.'),
+                $conversation,
+            );
+        }
+    }
+
     private function fireCallback(Maho_Ai_Model_Task $task, string $response): void
     {
         $callbackClass  = $task->getData('callback_class');
@@ -347,6 +502,7 @@ class Maho_Ai_Model_TaskRunner
             ],
             [
                 'status = ?'           => Maho_Ai_Model_Task::STATUS_PROCESSING,
+                'task_type != ?'       => Maho_Ai_Model_Task::TYPE_AGENT,
                 'started_at < ?'       => $cutoff,
                 'retries >= max_retries',
             ],
@@ -363,6 +519,7 @@ class Maho_Ai_Model_TaskRunner
             ],
             [
                 'status = ?'     => Maho_Ai_Model_Task::STATUS_PROCESSING,
+                'task_type != ?' => Maho_Ai_Model_Task::TYPE_AGENT,
                 'started_at < ?' => $cutoff,
             ],
         );

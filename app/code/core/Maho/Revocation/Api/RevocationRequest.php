@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Maho\Revocation\Api;
 
 use ApiPlatform\Metadata\ApiProperty;
+use Maho\ApiPlatform\Metadata\EnumSource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\GraphQl\Mutation;
@@ -138,7 +139,7 @@ class RevocationRequest extends Resource
     #[ApiProperty(description: 'When the declaration was received (UTC)', writable: false)]
     public ?string $receivedAt = null;
 
-    #[ApiProperty(description: 'Processing status: accepted, rejected, info_requested, or null when unprocessed', writable: true)]
+    #[ApiProperty(description: 'Processing status: accepted, rejected, info_requested, or null when unprocessed', writable: true, extraProperties: [EnumSource::KEY => ['accepted', 'rejected', 'info_requested']])]
     public ?string $processedStatus = null;
 
     #[ApiProperty(description: 'When the declaration was processed (UTC)', writable: false)]

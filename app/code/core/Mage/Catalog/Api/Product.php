@@ -11,6 +11,8 @@ declare(strict_types=1);
 namespace Mage\Catalog\Api;
 
 use ApiPlatform\Metadata\ApiProperty;
+use Maho\ApiPlatform\Metadata\EnumSource;
+use Maho\ApiPlatform\Metadata\ValueLists;
 use Maho\Config\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
@@ -159,7 +161,7 @@ class Product extends CrudResource
     public ?string $metaKeywords = null;
 
     #[Groups(['product:read'])]
-    #[ApiProperty(description: 'Page layout template (e.g. one_column, two_columns_left)')]
+    #[ApiProperty(description: 'Page layout template (e.g. one_column, two_columns_left)', extraProperties: [EnumSource::KEY => 'page/source_layout'])]
     public ?string $pageLayout = null;
 
     #[Groups(['product:read'])]
@@ -175,19 +177,19 @@ class Product extends CrudResource
     public ?string $shortDescription = null;
 
     #[Groups(['product:read'])]
-    #[ApiProperty(description: 'Product type: simple, configurable, grouped, bundle, virtual', extraProperties: ['modelField' => 'type_id'])]
+    #[ApiProperty(description: 'Product type: simple, configurable, grouped, bundle, virtual', extraProperties: [EnumSource::KEY => 'Mage_Catalog_Model_Product_Type::getOptionArray', 'modelField' => 'type_id'])]
     public string $type = 'simple';
 
     #[Groups(['product:read'])]
-    #[ApiProperty(description: 'Product status: enabled or disabled', writable: false, extraProperties: ['computed' => true])]
+    #[ApiProperty(description: 'Product status: enabled or disabled', writable: false, extraProperties: [EnumSource::KEY => ['enabled', 'disabled'], 'computed' => true])]
     public string $status = 'enabled';
 
     #[Groups(['product:read'])]
-    #[ApiProperty(description: 'Visibility: not_visible, catalog, search, catalog_search')]
+    #[ApiProperty(description: 'Visibility: not_visible, catalog, search, catalog_search', extraProperties: [EnumSource::KEY => ['not_visible', 'catalog', 'search', 'catalog_search']])]
     public ?string $visibility = null;
 
     #[Groups(['product:read'])]
-    #[ApiProperty(description: 'Stock status: in_stock or out_of_stock', writable: false, extraProperties: ['computed' => true])]
+    #[ApiProperty(description: 'Stock status: in_stock or out_of_stock', writable: false, extraProperties: [EnumSource::KEY => ['in_stock', 'out_of_stock'], 'computed' => true])]
     public string $stockStatus = 'in_stock';
 
     #[Groups(['product:read'])]
@@ -279,11 +281,11 @@ class Product extends CrudResource
     public ?string $optionsContainer = null;
 
     #[Groups(['product:read'])]
-    #[ApiProperty(description: 'SEO meta robots directive')]
+    #[ApiProperty(description: 'SEO meta robots directive', extraProperties: [EnumSource::KEY => ValueLists::META_ROBOTS])]
     public ?string $metaRobots = null;
 
     #[Groups(['product:read'])]
-    #[ApiProperty(description: 'Custom design/theme override; only visible to admin and API tokens', security: "has_backend_access('products')")]
+    #[ApiProperty(description: 'Custom design/theme override; only visible to admin and API tokens', security: "has_backend_access('products')", extraProperties: [EnumSource::KEY => 'core/design_source_design'])]
     public ?string $customDesign = null;
 
     #[Groups(['product:read'])]
@@ -315,15 +317,15 @@ class Product extends CrudResource
     public ?string $urlPath = null;
 
     #[Groups(['product:read'])]
-    #[ApiProperty(description: 'Bundle SKU type: 0 = dynamic, 1 = fixed')]
+    #[ApiProperty(description: 'Bundle SKU type: 0 = dynamic, 1 = fixed', extraProperties: [EnumSource::KEY => [0, 1]])]
     public ?int $skuType = null;
 
     #[Groups(['product:read'])]
-    #[ApiProperty(description: 'Bundle price type: 0 = dynamic, 1 = fixed')]
+    #[ApiProperty(description: 'Bundle price type: 0 = dynamic, 1 = fixed', extraProperties: [EnumSource::KEY => [0, 1]])]
     public ?int $priceType = null;
 
     #[Groups(['product:read'])]
-    #[ApiProperty(description: 'Bundle weight type: 0 = dynamic, 1 = fixed')]
+    #[ApiProperty(description: 'Bundle weight type: 0 = dynamic, 1 = fixed', extraProperties: [EnumSource::KEY => [0, 1]])]
     public ?int $weightType = null;
 
     #[Groups(['product:read'])]
@@ -331,7 +333,7 @@ class Product extends CrudResource
     public ?int $priceView = null;
 
     #[Groups(['product:read'])]
-    #[ApiProperty(description: 'Bundle shipment type: 0 = together, 1 = separately')]
+    #[ApiProperty(description: 'Bundle shipment type: 0 = together, 1 = separately', extraProperties: [EnumSource::KEY => [0, 1]])]
     public ?int $shipmentType = null;
 
     #[Groups(['product:read'])]
@@ -436,7 +438,7 @@ class Product extends CrudResource
     public array $bundleOptions = [];
 
     #[Groups(['product:detail'])]
-    #[ApiProperty(description: 'Gift card type: fixed | range | combined', writable: false, extraProperties: ['computed' => true])]
+    #[ApiProperty(description: 'Gift card type: fixed | range | combined', writable: false, extraProperties: [EnumSource::KEY => ['fixed', 'range', 'combined'], 'computed' => true])]
     public ?string $giftcardType = null;
 
     /** @var float[] */
@@ -467,7 +469,7 @@ class Product extends CrudResource
 
     /** @var int[]|null Website IDs for product assignment; populated on item detail reads */
     #[Groups(['product:detail'])]
-    #[ApiProperty(description: 'Website IDs for product assignment', extraProperties: ['computed' => true])]
+    #[ApiProperty(description: 'Website IDs for product assignment', extraProperties: [EnumSource::KEY => 'Maho\ApiPlatform\Metadata\ValueLists::websites', 'computed' => true])]
     public ?array $websiteIds = null;
 
     #[ApiProperty(description: 'Whether product is enabled (write to enable/disable; read reflects saved state)')]
@@ -487,11 +489,11 @@ class Product extends CrudResource
     public ?array $storeOverrides = null;
 
     #[Groups(['product:read'])]
-    #[ApiProperty(description: 'Attribute set ID', extraProperties: ['modelField' => 'attribute_set_id'])]
+    #[ApiProperty(description: 'Attribute set ID', extraProperties: [EnumSource::KEY => 'Maho\ApiPlatform\Metadata\ValueLists::productAttributeSets', 'modelField' => 'attribute_set_id'])]
     public ?int $attributeSetId = null;
 
     #[Groups(['product:read'])]
-    #[ApiProperty(description: 'Tax class ID', extraProperties: ['modelField' => 'tax_class_id'])]
+    #[ApiProperty(description: 'Tax class ID', extraProperties: [EnumSource::KEY => 'tax/class_source_product', 'modelField' => 'tax_class_id'])]
     public ?int $taxClassId = null;
 
     /** @var array<string, mixed>|null Arbitrary EAV attributes to set: {"attribute_code": value} (write only) */

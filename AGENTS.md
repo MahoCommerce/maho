@@ -165,6 +165,13 @@ public function __invoke(My_Module_Model_SomeMessage $message): void {}
   `ApiResource` that adds Maho permission metadata (`mahoLabel`, `mahoSection`, `mahoOperations`,
   `mahoCustomerScoped`). Most `maho*` fields are auto-derived; set them only when the default is
   wrong. See `app/code/core/Mage/Core/Api/Store.php` for a worked example.
+- A property whose valid values live in the store (a layout code, a store view code, a customer
+  group) names its source with `extraProperties: [EnumSource::KEY => 'page/source_layout']` on
+  `#[ApiProperty]`. The schema factories turn the live list into an `enum` for OpenAPI and the
+  MCP tools, so a client picks from a closed list. The source is a model alias with
+  `toOptionArray()`, an `alias::method` pair, a `Class::method` callable or an inline list for a set
+  that code defines; see `Maho\ApiPlatform\Metadata\EnumSource` and `ValueLists`. Never use
+  `openapiContext: ['enum' => …]`: it reaches the OpenAPI document only.
 - Writes follow HTTP. PATCH (`application/merge-patch+json`) changes the fields in the body. PUT
   replaces the record, so a field that the body leaves out gets its default value. Declare `Patch`
   before `Put`: the MCP update tool comes from the first one. Set

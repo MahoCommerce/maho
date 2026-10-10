@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Mage\CatalogInventory\Api;
 
 use ApiPlatform\Metadata\ApiProperty;
+use Maho\ApiPlatform\Metadata\EnumSource;
 use Maho\Config\ApiResource;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\GraphQl\Mutation;
@@ -100,7 +101,7 @@ class StockUpdate extends CrudResource
 
     public ?float $maxSaleQty = null;
 
-    #[ApiProperty(description: 'Backorders mode: 0 = no, 1 = allow qty below 0, 2 = allow and notify customer')]
+    #[ApiProperty(description: 'Backorders mode: 0 = no, 1 = allow qty below 0, 2 = allow and notify customer', extraProperties: [EnumSource::KEY => [0, 1, 2]])]
     public ?int $backorders = null;
 
     public ?float $notifyStockQty = null;

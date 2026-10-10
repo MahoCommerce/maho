@@ -130,18 +130,18 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Cart_Items extends Maho_
         // Handle product attributes (prefixed with 'product_')
         if (str_starts_with($attribute, 'product_')) {
             $productAttributeCode = substr($attribute, 8); // Remove 'product_' prefix
-            return $this->buildProductAttributeCondition($adapter, $productAttributeCode, $operator, $value);
+            return $this->buildProductAttributeCondition($adapter, $productAttributeCode, $operator, $value, $websiteId);
         }
 
         // Handle cart item attributes (direct quote_item fields)
         return match ($attribute) {
-            'qty', 'price', 'base_price', 'row_total', 'base_row_total', 'created_at', 'updated_at' => $this->buildCartItemFieldCondition($adapter, $attribute, $operator, $value),
-            'product_type' => $this->buildProductTypeCondition($adapter, $operator, $value),
+            'qty', 'price', 'base_price', 'row_total', 'base_row_total', 'created_at', 'updated_at' => $this->buildCartItemFieldCondition($adapter, $attribute, $operator, $value, $websiteId),
+            'product_type' => $this->buildProductTypeCondition($adapter, $operator, $value, $websiteId),
             default => false,
         };
     }
 
-    protected function buildCartItemFieldCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $field, string $operator, mixed $value): string
+    protected function buildCartItemFieldCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $field, string $operator, mixed $value, ?int $websiteId = null): string
     {
         $subselect = $adapter->select()
             ->from(['qi' => $this->getQuoteItemTable()], [])
@@ -150,10 +150,12 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Cart_Items extends Maho_
             ->where('q.is_active = ?', 1)
             ->where($this->buildSqlCondition($adapter, "qi.{$field}", $operator, $value));
 
+        $this->filterCurrencyStores($subselect, 'q', $websiteId);
+
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function buildProductAttributeCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $attributeCode, string $operator, mixed $value): string|false
+    protected function buildProductAttributeCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $attributeCode, string $operator, mixed $value, ?int $websiteId = null): string|false
     {
         $productResource = Mage::getResourceSingleton('catalog/product');
         $attribute = $productResource->getAttribute($attributeCode);
@@ -185,10 +187,12 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Cart_Items extends Maho_
             )->where($this->buildSqlCondition($adapter, 'attr.value', $operator, $value));
         }
 
+        $this->filterCurrencyStores($subselect, 'q', $websiteId);
+
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function buildProductTypeCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $operator, mixed $value): string
+    protected function buildProductTypeCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $operator, mixed $value, ?int $websiteId = null): string
     {
         $subselect = $adapter->select()
             ->from(['qi' => $this->getQuoteItemTable()], [])
@@ -197,6 +201,8 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Cart_Items extends Maho_
             ->where('q.customer_id IS NOT NULL')
             ->where('q.is_active = ?', 1)
             ->where($this->buildSqlCondition($adapter, 'p.type_id', $operator, $value));
+
+        $this->filterCurrencyStores($subselect, 'q', $websiteId);
 
         return 'e.entity_id IN (' . $subselect . ')';
     }
@@ -224,7 +230,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Cart_Items extends Maho_
         $attributeLabel = Mage::helper('customersegmentation')->__('Cart') . ':' . ' ' . $attributeLabel;
 
         $operatorName = $this->getOperatorName();
-        $valueName = $this->getValueName();
+        $valueName = in_array($attribute, ['base_price', 'base_row_total'], true) ? $this->getAmountValueName() : $this->getValueName();
         return $attributeLabel . ' ' . $operatorName . ' ' . $valueName;
     }
 }

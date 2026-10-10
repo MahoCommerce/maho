@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace Mage\Customer\Api;
 
+use Maho\ApiPlatform\Trait\DateRangeFilterTrait;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\State\Pagination\TraversablePaginator;
@@ -23,6 +24,8 @@ use Symfony\Bundle\SecurityBundle\Security;
  */
 final class CustomerProvider extends \Maho\ApiPlatform\Provider
 {
+    use DateRangeFilterTrait;
+
     private \Mage_Customer_Service_Customer $customerService;
 
     public function __construct(Security $security)
@@ -99,6 +102,14 @@ final class CustomerProvider extends \Maho\ApiPlatform\Provider
         $this->assertWebsiteAllowed($customer->getWebsiteId(), $this->requireUser(), 'customer');
     }
 
+    /** A registration date bound as the other collections take it: UTC, a bare date covering the whole day. */
+    private function dateBoundFilter(array $filters, string $key, bool $isUpperBound): ?string
+    {
+        $value = $this->stringFilter($filters, $key);
+
+        return $value === null ? null : $this->normalizeBoundary($value, $isUpperBound);
+    }
+
     /**
      * Get a single customer by ID
      */
@@ -127,6 +138,8 @@ final class CustomerProvider extends \Maho\ApiPlatform\Provider
             websiteIds: $this->allowedWebsiteIds($this->requireUser()),
             groupId: $this->intFilter($filters, 'groupId'),
             websiteId: $this->intFilter($filters, 'websiteId'),
+            createdFrom: $this->dateBoundFilter($filters, 'createdFrom', false),
+            createdTo: $this->dateBoundFilter($filters, 'createdTo', true),
         );
 
         if ($result['customers'] === []) {

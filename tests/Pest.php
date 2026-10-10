@@ -149,7 +149,7 @@ function adminToken(): string
  * Create an admin role granting only the listed ACL paths, plus an admin
  * user assigned to that role. Returns a JWT for the user.
  *
- * @param list<string> $allowedAclPaths e.g. ['catalog/products', 'sales']
+ * @param list<string> $allowedAclPaths e.g. ['admin/catalog/products', 'admin/sales'], or ['all']
  */
 function adminTokenWithAcl(array $allowedAclPaths, string $username): string
 {

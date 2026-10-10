@@ -125,6 +125,18 @@ final class ProductAttributeProvider extends CrudProvider
     }
 
     /**
+     * Build the DTO of an attribute for the processor, which runs without a provider read.
+     */
+    public function attributeDto(\Mage_Catalog_Model_Resource_Eav_Attribute $attribute): ProductAttribute
+    {
+        $this->resourceClass ??= ProductAttribute::class;
+        $this->modelAlias ??= ProductAttribute::MODEL;
+
+        /** @var ProductAttribute */
+        return $this->toDto($attribute);
+    }
+
+    /**
      * Populate source options for select/multiselect attributes.
      */
     #[\Override]

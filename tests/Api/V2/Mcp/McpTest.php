@@ -66,6 +66,54 @@ describe('MCP tool catalogue', function (): void {
             'catalog_categories_list',
             'sales_orders_list',
             'customers_customers_list',
+            'system_email_templates_list',
+            'system_email_templates_get',
+            'system_email_templates_create',
+            'system_email_templates_update',
+            'system_email_templates_delete',
+            'system_email_templates_defaults_list',
+            'system_email_templates_defaults_get',
+            'system_scheduled_tasks_list',
+            'system_scheduled_tasks_create',
+            'system_scheduled_tasks_update',
+            'system_scheduled_tasks_delete',
+            'system_design_changes_list',
+            'system_design_changes_create',
+            'system_themes_list',
+            'system_themes_get',
+            'content_widget_types_list',
+            'content_widget_types_get',
+            'catalog_url_rewrites_list',
+            'catalog_url_rewrites_create',
+            'catalog_url_rewrites_update',
+            'catalog_url_rewrites_delete',
+            'system_config_settings_list',
+            'system_config_settings_update',
+            'system_cache_types_list',
+            'system_cache_types_flush_all_create',
+            'system_index_processes_reindex_create',
+            'catalog_product_attributes_create',
+            'catalog_product_attributes_update',
+            'catalog_product_attributes_delete',
+            'catalog_product_attributes_options_create',
+            'catalog_product_attributes_options_update',
+            'catalog_product_attributes_options_delete',
+            'catalog_attribute_sets_create',
+            'catalog_attribute_sets_update',
+            'catalog_attribute_sets_delete',
+            'catalog_attribute_sets_groups_create',
+            'catalog_attribute_sets_attributes_create',
+            'catalog_attribute_sets_attributes_delete',
+            'promotions_catalog_price_rules_list',
+            'promotions_catalog_price_rules_get',
+            'promotions_catalog_price_rules_create',
+            'promotions_catalog_price_rules_update',
+            'promotions_catalog_price_rules_delete',
+            'promotions_catalog_price_rules_apply_create',
+            'system_admin_users_list',
+            'system_admin_users_get',
+            'system_admin_roles_list',
+            'system_admin_roles_get',
         );
     });
 
@@ -114,6 +162,30 @@ describe('MCP tool catalogue', function (): void {
         // Orders carry the rest of the set an agent needs to scope a question.
         expect(array_keys($tools['sales_orders_list']['inputSchema']['properties'] ?? []))
             ->toContain('state', 'storeId', 'customerId');
+    });
+
+    it('offers the filters that the providers of the content and review lists read', function (): void {
+        $token = adminToken();
+        $tools = mcpTools($token, mcpSession($token));
+
+        foreach (['content_cms_pages_list', 'content_cms_blocks_list', 'content_blog_posts_list', 'content_blog_categories_list'] as $name) {
+            expect(array_keys($tools[$name]['inputSchema']['properties'] ?? []))->toContain('scope');
+        }
+        expect(array_keys($tools['content_blog_categories_list']['inputSchema']['properties'] ?? []))->toContain('parentId');
+        expect(array_keys($tools['customers_reviews_list']['inputSchema']['properties'] ?? []))->toContain('status');
+        expect(array_keys($tools['catalog_categories_list']['inputSchema']['properties'] ?? []))->toContain('scope');
+    });
+
+    it('offers the query parameters of a list that has no GraphQL list query', function (): void {
+        $token = adminToken();
+        $tools = mcpTools($token, mcpSession($token));
+
+        $invoices = $tools['sales_invoices_list']['inputSchema']['properties'] ?? [];
+        expect(array_keys($invoices))->toContain('search', 'orderId', 'state', 'createdFrom', 'createdTo', 'page', 'itemsPerPage');
+        expect($invoices['state']['enum'] ?? null)->toBe(['open', 'paid', 'canceled']);
+        expect($invoices['orderId']['type'] ?? null)->toBe('integer');
+        expect(array_keys($tools['sales_cart_price_rules_list']['inputSchema']['properties'] ?? []))->toContain('search', 'isActive', 'customerGroupId', 'code');
+        expect(array_keys($tools['sales_rule_cart_price_rules_coupons_list']['inputSchema']['properties'] ?? []))->toContain('ruleId', 'search', 'isUsed');
     });
 
     it('gives the declared filters to the canonical collection, not a scoped variant', function (): void {
@@ -229,6 +301,25 @@ describe('MCP tool dispatch', function (): void {
         $payload = json_decode($result['content'][0]['text'] ?? '[]', true);
         expect($payload['totalItems'] ?? null)->toBeInt();
         expect($payload['member'] ?? null)->toBeArray();
+    });
+
+    it('lists a disabled page only when a backend caller gives scope all', function (): void {
+        $token = adminToken();
+        $create = apiPost('/api/rest/v2/cms-pages', [
+            'identifier' => 'test-mcp-scope-all-page',
+            'title' => 'MCP Scope All Page',
+            'content' => '<p>draft</p>',
+            'isActive' => false,
+            'stores' => ['all'],
+        ], $token);
+        expect($create['status'])->toBeIn([200, 201]);
+        trackCreated('cms_page', $create['json']['id']);
+
+        $session = mcpSession($token);
+        $count = fn(array $arguments): ?int => json_decode(mcpTool('content_cms_pages_list', $arguments, $token, $session)['json']['result']['content'][0]['text'] ?? '[]', true)['totalItems'] ?? null;
+
+        expect($count(['search' => 'test-mcp-scope-all-page']))->toBe(0);
+        expect($count(['search' => 'test-mcp-scope-all-page', 'scope' => 'all']))->toBe(1);
     });
 
     it('passes list arguments through as pagination', function (): void {

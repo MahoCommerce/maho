@@ -151,6 +151,50 @@ abstract class Maho_CustomerSegmentation_Model_Segment_Condition_Abstract extend
         return $html;
     }
 
+    /**
+     * Keep only the rows of the stores that use the base currency of the website, so that the amounts add up in one currency.
+     */
+    protected function filterCurrencyStores(\Maho\Db\Select $select, string $alias, ?int $websiteId): void
+    {
+        if ($websiteId) {
+            $select->where("{$alias}.store_id IN (?)", $this->getCurrencyStoreIds($websiteId));
+        }
+    }
+
+    /**
+     * Return the IDs of the stores of all websites that use the base currency of the website.
+     * With a global price scope, every website uses the same base currency.
+     *
+     * @return list<int>
+     */
+    protected function getCurrencyStoreIds(int $websiteId): array
+    {
+        $currency = Mage::app()->getWebsite($websiteId)->getBaseCurrencyCode();
+        $storeIds = [];
+        foreach (Mage::app()->getWebsites() as $website) {
+            if ($website->getBaseCurrencyCode() === $currency) {
+                array_push($storeIds, ...array_map(intval(...), $website->getStoreIds()));
+            }
+        }
+        return $storeIds;
+    }
+
+    /**
+     * Return the value name with the base currency code after it, when all websites of the segment use the same base currency.
+     * An amount condition compares the base currency amounts of the orders of each website.
+     */
+    protected function getAmountValueName(): string
+    {
+        $valueName = $this->getValueName();
+        $websites = Mage::app()->getWebsites();
+        $rule = $this->getRule();
+        if ($rule instanceof Maho_CustomerSegmentation_Model_Segment && $rule->getWebsiteIds() !== []) {
+            $websites = array_intersect_key($websites, array_flip($rule->getWebsiteIds()));
+        }
+        $codes = array_unique(array_map(fn(Mage_Core_Model_Website $website): string => (string) $website->getBaseCurrencyCode(), $websites));
+        return count($codes) === 1 ? $valueName . ' ' . reset($codes) : $valueName;
+    }
+
     #[\Override]
     public function loadArray($arr, string $key = 'conditions'): self
     {

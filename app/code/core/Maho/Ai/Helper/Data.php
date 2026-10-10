@@ -158,6 +158,7 @@ class Maho_Ai_Helper_Data extends Mage_Core_Helper_Abstract
                 : null,
         ]);
         $task->save();
+        $task->queue();
 
         return (int) $task->getId();
     }
@@ -266,6 +267,7 @@ class Maho_Ai_Helper_Data extends Mage_Core_Helper_Abstract
             'store_id'        => $data['store_id'] ?? 0,
         ]);
         $task->save();
+        $task->queue();
 
         return (int) $task->getId();
     }
@@ -372,6 +374,7 @@ class Maho_Ai_Helper_Data extends Mage_Core_Helper_Abstract
             'store_id'        => $data['store_id'] ?? 0,
         ]);
         $task->save();
+        $task->queue();
 
         return (int) $task->getId();
     }
@@ -404,6 +407,107 @@ class Maho_Ai_Helper_Data extends Mage_Core_Helper_Abstract
         return \Composer\InstalledVersions::isInstalled('symfony/ai-platform');
     }
 
+    /**
+     * The admin assistant needs the base toggle, its own toggle, the MCP tool layer of
+     * the API and the Symfony AI agent package.
+     */
+    public function isChatEnabled(?int $storeId = null): bool
+    {
+        return $this->isEnabled($storeId)
+            && Mage::getStoreConfigFlag('ai/chat/enabled', $storeId)
+            && Mage::helper('apiplatform')->isMcpAvailable()
+            && class_exists(\Symfony\AI\Agent\Agent::class);
+    }
+
+    /**
+     * An admin URL without a store code. The API and the queue workers run in a frontend store,
+     * whose code would end up in the path, so the URL is built in the admin store.
+     *
+     * @param array<string, mixed> $params
+     */
+    public function adminUrl(string $route, array $params = []): string
+    {
+        $code = Mage::app()->getStore()->getCode();
+        Mage::app()->setCurrentStore(Mage_Core_Model_Store::ADMIN_CODE);
+        try {
+            return Mage::helper('adminhtml')->getUrl($route, $params);
+        } finally {
+            Mage::app()->setCurrentStore($code);
+        }
+    }
+
+    /**
+     * The editor guide the panel generated in the browser, kept in the cache per version of
+     * the editor script, so the browser sends it once and not with every message.
+     */
+    public function editorGuide(): string
+    {
+        $guide = Mage::app()->loadCache($this->editorGuideCacheId());
+
+        return is_string($guide) ? $guide : '';
+    }
+
+    public function saveEditorGuide(string $guide): void
+    {
+        $guide = trim($guide);
+        if ($guide !== '') {
+            Mage::app()->saveCache($guide, $this->editorGuideCacheId(), [Mage_Core_Model_Config::CACHE_TAG]);
+        }
+    }
+
+    public function editorGuideCacheId(): string
+    {
+        $path = Mage::getBaseDir('public') . DS . 'js' . DS . 'mage' . DS . 'adminhtml' . DS . 'wysiwyg' . DS . 'tiptap' . DS . 'setup.js';
+
+        return 'ai_editor_guide_' . (is_file($path) ? (string) filemtime($path) : '0');
+    }
+
+    /**
+     * The labels of the tools that the assistant has besides the API tools, keyed by tool name.
+     *
+     * @return array<string, string>
+     */
+    public function localToolLabels(): array
+    {
+        return [
+            'admin_open_page' => $this->__('Open admin page'),
+            'admin_fill_form' => $this->__('Fill admin form'),
+            'admin_page_action' => $this->__('Act on the page'),
+            'admin_read_form' => $this->__('Read the form'),
+            'admin_edit_text' => $this->__('Correct text in the form'),
+            'admin_content_guide' => $this->__('Content editor guide'),
+            'enable_tools' => $this->__('Load tools'),
+            'remember' => $this->__('Remember a note'),
+            'forget' => $this->__('Forget a note'),
+            'run_in_background' => $this->__('Run in the background'),
+            'notify' => $this->__('Send a notification'),
+            'attachment_read' => $this->__('Read an attachment'),
+            'generate_image' => $this->__('Generate an image'),
+        ];
+    }
+
+    /** "content_cms_pages_update" reads as "Update cms pages": the verb first, without the section. */
+    public function toolLabel(string $name): string
+    {
+        $local = $this->localToolLabels();
+        if (isset($local[$name])) {
+            return $local[$name];
+        }
+        $parts = array_values(array_filter(explode('_', $name)));
+        $verbs = ['list' => $this->__('List'), 'get' => $this->__('Show'), 'create' => $this->__('Create'), 'update' => $this->__('Update'), 'delete' => $this->__('Delete')];
+        $verb = $verbs[$parts[count($parts) - 1] ?? ''] ?? null;
+        if (count($parts) > 2 && $verb !== null) {
+            return $verb . ' ' . implode(' ', array_slice($parts, 1, -1));
+        }
+
+        return implode(' ', $parts);
+    }
+
+    public function isChatAllowed(): bool
+    {
+        return Mage::getSingleton('admin/session')->isAllowed('system/ai/chat');
+    }
+
     private function getFactory(): Maho_Ai_Model_Platform_Factory
     {
         return Mage::getSingleton('ai/platform_factory');
@@ -416,7 +520,7 @@ class Maho_Ai_Helper_Data extends Mage_Core_Helper_Abstract
      * not permitted") and the original throwable is logged so the full
      * stack remains in the exception log for debugging.
      */
-    private function translateProviderException(
+    public function translateProviderException(
         \Symfony\AI\Platform\Exception\ExceptionInterface $e,
         string $platformCode,
     ): Mage_Core_Exception {

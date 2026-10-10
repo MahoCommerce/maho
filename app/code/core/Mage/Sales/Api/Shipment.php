@@ -23,6 +23,7 @@ use ApiPlatform\Metadata\GraphQl\Mutation;
 use ApiPlatform\OpenApi\Model\Operation as OpenApiOperation;
 use ApiPlatform\OpenApi\Model\RequestBody;
 use Maho\ApiPlatform\CrudResource;
+use Maho\ApiPlatform\Metadata\ListFilter;
 
 #[ApiResource(
     shortName: 'Shipment',
@@ -32,7 +33,13 @@ use Maho\ApiPlatform\CrudResource;
     operations: [
         new GetCollection(
             uriTemplate: '/shipments',
-            description: 'List the shipments of all orders, newest first. Filters: search (every word must match part of the shipment number, the order number, or the shipping name), orderId, createdFrom, createdTo',
+            description: 'List the shipments of all orders, newest first',
+            parameters: [
+                'search' => new ListFilter('Every word must match part of the shipment number, the order number or the shipping name. A shipment and an order can have the same number'),
+                'orderId' => new ListFilter('Only the shipments of this order ID', 'integer'),
+                'createdFrom' => new ListFilter('Created at or after this UTC date or datetime; a bare date means from 00:00:00'),
+                'createdTo' => new ListFilter('Created at or before this UTC date or datetime; a bare date includes the whole day'),
+            ],
             security: "is_granted('ROLE_ADMIN') or is_granted('shipments/read')",
         ),
         new Get(

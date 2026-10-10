@@ -413,7 +413,9 @@ function createOrderItemsTestOrder(int $customerId, array $items, string $state 
     }
 
     $order->setSubtotal($subTotal);
+    $order->setBaseSubtotal($subTotal);
     $order->setGrandTotal($grandTotal);
+    $order->setBaseGrandTotal($grandTotal);
     $order->setTotalQtyOrdered($totalQty);
     $order->setCreatedAt(date('Y-m-d H:i:s'));
 
@@ -437,8 +439,11 @@ function createOrderItemsTestOrder(int $customerId, array $items, string $state 
         $orderItem->setQtyOrdered($itemData['qty']);
         $orderItem->setPrice($itemData['price']);
         $orderItem->setRowTotal($itemData['qty'] * $itemData['price']);
+        $orderItem->setBaseRowTotal($itemData['qty'] * $itemData['price']);
         $orderItem->setRowTotalInclTax($itemData['qty'] * $itemData['price']);
+        $orderItem->setBaseRowTotalInclTax($itemData['qty'] * $itemData['price']);
         $orderItem->setDiscountAmount($itemData['discount'] ?? 0);
+        $orderItem->setBaseDiscountAmount($itemData['discount'] ?? 0);
         $orderItem->setProductType($itemData['type'] ?? 'simple');
 
         // Set a dummy product ID (in real scenario, this would reference actual products)

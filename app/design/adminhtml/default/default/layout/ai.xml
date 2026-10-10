@@ -4,6 +4,30 @@ SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
 SPDX-License-Identifier: OSL-3.0
 -->
 <layout>
+    <default>
+        <reference name="before_body_end">
+            <block type="ai/adminhtml_assistant" name="ai.assistant" template="maho/ai/assistant.phtml"/>
+        </reference>
+    </default>
+
+    <adminhtml_ai_chat_index>
+        <reference name="content">
+            <block type="ai/adminhtml_chat" name="ai.chat"/>
+        </reference>
+    </adminhtml_ai_chat_index>
+
+    <adminhtml_ai_schedule_index>
+        <reference name="content">
+            <block type="ai/adminhtml_schedule" name="ai.schedules"/>
+        </reference>
+    </adminhtml_ai_schedule_index>
+
+    <adminhtml_ai_chat_actions>
+        <reference name="content">
+            <block type="ai/adminhtml_action" name="ai.actions"/>
+        </reference>
+    </adminhtml_ai_chat_actions>
+
     <adminhtml_ai_tasks>
         <reference name="content">
             <block type="ai/adminhtml_task" name="ai.tasks"/>

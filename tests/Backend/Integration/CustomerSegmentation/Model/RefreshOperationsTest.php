@@ -318,6 +318,7 @@ describe('Segment Refresh Operations', function () {
                 $order->setCustomerId($customer->getId());
                 $order->setCustomerEmail($customer->getEmail());
                 $order->setGrandTotal($orderData[$orderIndex]['grand_total']);
+                $order->setBaseGrandTotal($orderData[$orderIndex]['grand_total']);
                 $order->setData('state', orderStateForStatus($orderData[$orderIndex]['status']));
                 $order->setStatus($orderData[$orderIndex]['status']);
                 $order->save();
