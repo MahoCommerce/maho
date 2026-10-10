@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Files an administrator attaches to a chat message, kept under var/ai/attachments per administrator.
+ * Files an administrator attaches to a chat message, kept on the ai_attachments mount per administrator.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -10,8 +10,11 @@
 
 declare(strict_types=1);
 
+use League\Flysystem\FilesystemException;
+use Maho\Storage\Mount;
+
 /**
- * A file lives at var/ai/attachments/<admin id>/<id>_<name>. The id is random, so a name
+ * A file lives at <admin id>/<id>_<name> on the ai_attachments mount. The id is random, so a name
  * never collides and a path never comes from the client. Text files are read by the
  * attachment_read tool; an image goes to the model with the message when the model can see.
  */
@@ -45,27 +48,47 @@ final class Maho_Ai_Model_Chat_Attachment
             Mage::throwException(Mage::helper('ai')->__('The file is not an image.'));
         }
         $id = bin2hex(random_bytes(8));
-        $directory = self::directory($adminId);
-        if (!is_dir($directory) && !mkdir($directory, 0o750, true) && !is_dir($directory)) {
-            Mage::throwException(Mage::helper('ai')->__('The attachment folder cannot be created.'));
-        }
-        $target = $directory . DS . $id . '_' . $name;
-        if (!(is_uploaded_file($tmpPath) ? move_uploaded_file($tmpPath, $target) : rename($tmpPath, $target))) {
+        try {
+            self::mount()->copyFromLocalFile($tmpPath, $adminId . '/' . $id . '_' . $name);
+        } catch (FilesystemException|\Maho\Storage\StorageException) {
             Mage::throwException(Mage::helper('ai')->__('The file cannot be stored.'));
         }
+        @unlink($tmpPath);
 
         return ['id' => $id, 'name' => $name, 'mime' => $mime, 'size' => $size];
     }
 
-    /** The path of an attachment of this administrator, or null when there is none with that id. */
+    /** The path on the ai_attachments mount of an attachment of this administrator, or null when there is none with that id. */
     public static function path(int $adminId, string $id): ?string
     {
         if (preg_match('/^[a-f0-9]{16}$/', $id) !== 1) {
             return null;
         }
-        $matches = glob(self::directory($adminId) . DS . $id . '_*');
+        $prefix = $adminId . '/' . $id . '_';
+        try {
+            foreach (self::mount()->listFiles((string) $adminId) as $file) {
+                if (str_starts_with($file->path(), $prefix)) {
+                    return $file->path();
+                }
+            }
+        } catch (FilesystemException) {
+        }
 
-        return is_array($matches) && isset($matches[0]) && is_file($matches[0]) ? $matches[0] : null;
+        return null;
+    }
+
+    /** The content of an attachment of this administrator, or null when there is none with that id. */
+    public static function read(int $adminId, string $id): ?string
+    {
+        $path = self::path($adminId, $id);
+        if ($path === null) {
+            return null;
+        }
+        try {
+            return self::mount()->read($path);
+        } catch (FilesystemException) {
+            return null;
+        }
     }
 
     /**
@@ -79,8 +102,13 @@ final class Maho_Ai_Model_Chat_Attachment
         }
         $name = substr(basename($path), 17);
         $extension = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+        try {
+            $size = self::mount()->fileSize($path);
+        } catch (FilesystemException) {
+            return null;
+        }
 
-        return ['id' => $id, 'name' => $name, 'mime' => self::TEXT_EXTENSIONS[$extension] ?? self::IMAGE_EXTENSIONS[$extension] ?? 'application/octet-stream', 'size' => (int) filesize($path)];
+        return ['id' => $id, 'name' => $name, 'mime' => self::TEXT_EXTENSIONS[$extension] ?? self::IMAGE_EXTENSIONS[$extension] ?? 'application/octet-stream', 'size' => $size];
     }
 
     /** Removes the file. A file that a sent message refers to stays, unless $force is set (a conversation delete). */
@@ -91,7 +119,13 @@ final class Maho_Ai_Model_Chat_Attachment
             return false;
         }
 
-        return @unlink($path);
+        try {
+            self::mount()->delete($path);
+        } catch (FilesystemException) {
+            return false;
+        }
+
+        return true;
     }
 
     /** True when a message of this administrator carries the attachment. */
@@ -123,18 +157,23 @@ final class Maho_Ai_Model_Chat_Attachment
     /** Removes files older than $days, and the per-administrator folder once it is empty. Returns the number of removed files. */
     public static function purgeOlderThan(int $days): int
     {
-        $root = Mage::getBaseDir('var') . DS . 'ai' . DS . 'attachments';
+        $mount = self::mount();
         $cutoff = time() - $days * 86400;
         $removed = 0;
-        foreach (glob($root . DS . '*', GLOB_ONLYDIR) ?: [] as $directory) {
-            foreach (glob($directory . DS . '*') ?: [] as $file) {
-                if (is_file($file) && filemtime($file) < $cutoff && @unlink($file)) {
+        try {
+            foreach ($mount->listFiles()->toArray() as $file) {
+                if (($file->lastModified() ?? $mount->lastModified($file->path())) < $cutoff) {
+                    $mount->delete($file->path());
                     $removed++;
                 }
             }
-            if ((glob($directory . DS . '*') ?: []) === []) {
-                @rmdir($directory);
+            foreach ($mount->listContents('')->filter(static fn($item): bool => $item->isDir())->toArray() as $directory) {
+                if ($mount->listFiles($directory->path())->toArray() === []) {
+                    $mount->deleteDirectory($directory->path());
+                }
             }
+        } catch (FilesystemException $e) {
+            Mage::logException($e);
         }
 
         return $removed;
@@ -189,9 +228,9 @@ final class Maho_Ai_Model_Chat_Attachment
         return in_array($mime, self::TEXT_EXTENSIONS, true);
     }
 
-    private static function directory(int $adminId): string
+    private static function mount(): Mount
     {
-        return Mage::getBaseDir('var') . DS . 'ai' . DS . 'attachments' . DS . $adminId;
+        return Mage::getStorage('ai_attachments');
     }
 
     private static function safeName(string $name): string

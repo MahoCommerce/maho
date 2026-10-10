@@ -119,9 +119,9 @@ class Maho_Ai_Model_Chat_MessageBagBuilder
             if (!Maho_Ai_Model_Chat_Attachment::isImage($file['mime'])) {
                 continue;
             }
-            $path = Maho_Ai_Model_Chat_Attachment::path($adminId, $file['id']);
-            if ($path !== null) {
-                $images[] = Image::fromFile($path);
+            $content = Maho_Ai_Model_Chat_Attachment::read($adminId, $file['id']);
+            if ($content !== null) {
+                $images[] = new Image($content, $file['mime']);
             }
         }
 
