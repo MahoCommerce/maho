@@ -35,6 +35,9 @@ final class McpToolbox implements ToolboxInterface
     /** The most tools one model request carries, under the 128 that OpenAI-compatible endpoints accept. */
     public const MAX_TOOLS = 120;
 
+    /** The path of the REST API, which the @id of every record starts with. */
+    private const API_PATH = '/api/rest/v2';
+
     public static function isErrorText(string $text): bool
     {
         return str_starts_with($text, self::ERROR_PREFIX);
@@ -279,10 +282,54 @@ final class McpToolbox implements ToolboxInterface
             $storeCode = $arguments[McpToolCatalog::STORE_ARGUMENT] ?? null;
             unset($arguments[McpToolCatalog::STORE_ARGUMENT]);
             $outcome = $this->inStore($storeCode, fn(): array => $this->dispatcher->call($name, $arguments));
+            if ($outcome['ok']) {
+                $outcome['text'] = $this->withRecordIds($name, $outcome['text']);
+            }
         }
         $text = $outcome['ok'] ? $outcome['text'] : self::ERROR_PREFIX . $outcome['text'];
 
         return new ToolResult($toolCall, $this->truncate($text));
+    }
+
+    /**
+     * Give each record of a tool result the API @id that the API leaves out, so the model can link every
+     * record it names, such as [100000073](/api/rest/v2/invoices/274). The resource is the last path
+     * segment of the list or of the tool, so a nested list such as /orders/302/invoices gives the same
+     * @id as the invoice list. Objects stay objects: {} never becomes [].
+     */
+    private function withRecordIds(string $name, string $text): string
+    {
+        $data = json_decode($text);
+        if (!$data instanceof \stdClass) {
+            return $text;
+        }
+        $collection = $data->{'@id'} ?? null;
+        if (isset($data->member) && is_array($data->member) && is_string($collection)) {
+            if (preg_match('~/([a-z0-9-]+)$~', (string) strtok($collection, '?'), $m) !== 1) {
+                return $text;
+            }
+            foreach ($data->member as $i => $item) {
+                $data->member[$i] = $this->withRecordId($item, self::API_PATH . '/' . $m[1]);
+            }
+        } elseif (preg_match('~/([a-z0-9-]+)(?:/\{[^}]+\})?$~', (string) $this->catalog->get($name)?->getUriTemplate(), $m) === 1) {
+            $data = $this->withRecordId($data, self::API_PATH . '/' . $m[1]);
+        } else {
+            return $text;
+        }
+
+        return json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?: $text;
+    }
+
+    private function withRecordId(mixed $item, string $base): mixed
+    {
+        if (!$item instanceof \stdClass || !isset($item->{'@type'}) || !is_scalar($item->id ?? null)) {
+            return $item;
+        }
+        if (is_string($item->{'@id'} ?? null)) {
+            return $item;
+        }
+
+        return (object) (['@id' => $base . '/' . rawurlencode((string) $item->id)] + get_object_vars($item));
     }
 
     /** Labels an administrator knows a record by, in the order a preview tries them. */

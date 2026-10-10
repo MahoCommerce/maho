@@ -273,7 +273,7 @@ it('turns the API links of an answer into admin page links', function (): void {
     $admin = aiChatAdmin('ai_chat_linker', ['all']);
     try {
         aiChatLogin($admin);
-        AiChatScript::reset(new TextResult('See [Blue Shirt](/api/rest/v2/products/12), [the page](/api/rest/v2/cms-pages/2), [Giulia](/api/rest/v2/customers/52), [her address](/api/rest/v2/addresses/52), [a coupon](/api/rest/v2/coupons/3) and [a store](/api/rest/v2/stores/1).'));
+        AiChatScript::reset(new TextResult('See [Blue Shirt](/api/rest/v2/products/12), [the page](/api/rest/v2/cms-pages/2), [Giulia](/api/rest/v2/customers/52), [her order](/api/rest/v2/customers/52/orders/302), [her review](/api/rest/v2/reviews/7), [her address](/api/rest/v2/addresses/52), [a coupon](/api/rest/v2/coupons/3) and [a store](/api/rest/v2/stores/1).'));
 
         $result = aiChatRequest('/api/admin/ai/chat', ['message' => 'Find the blue shirt']);
 
@@ -283,10 +283,41 @@ it('turns the API links of an answer into admin page links', function (): void {
         expect($replace[0]['text'])->toMatch('~\[Blue Shirt\]\(http://[^)]+/catalog_product/edit/id/12/[^)]*\)~');
         expect($replace[0]['text'])->toMatch('~\[the page\]\(http://[^)]+/cms_page/edit/page_id/2/[^)]*\)~');
         expect($replace[0]['text'])->toMatch('~\[Giulia\]\(http://[^)]+/customer/edit/id/52/[^)]*\)~');
+        expect($replace[0]['text'])->toMatch('~\[her order\]\(http://[^)]+/sales_order/view/order_id/302/[^)]*\)~');
+        expect($replace[0]['text'])->toMatch('~\[her review\]\(http://[^)]+/catalog_product_review/edit/id/7/[^)]*\)~');
         expect($replace[0]['text'])->toContain(', her address, a coupon and a store.');
         $stored = Mage::getModel('ai/conversation_message')->getCollection()->addFieldToFilter('role', 'assistant')->setOrder('message_id', 'DESC')->getFirstItem();
         expect((string) $stored->getContent())->toContain('/catalog_product/edit/id/12/');
     } finally {
+        aiChatDeleteConversations((int) $admin->getId());
+        aiChatDeleteAdmin($admin);
+    }
+});
+
+it('gives each record of a tool result its API @id', function (): void {
+    $admin = aiChatAdmin('ai_chat_record_ids', ['all']);
+    $page = Mage::getModel('cms/page')->setData(['identifier' => 'ai-chat-record-id', 'title' => 'Record id', 'content' => '<p>x</p>', 'is_active' => 1, 'stores' => [0], 'root_template' => 'one_column']);
+    $page->save();
+    $pageId = (int) $page->getId();
+    try {
+        aiChatLogin($admin);
+        AiChatScript::reset(
+            new ToolCallResult([
+                new ToolCall('call_l', 'content_cms_pages_list', ['identifier' => 'ai-chat-record-id']),
+                new ToolCall('call_g', 'content_cms_pages_get', ['id' => (string) $pageId]),
+            ]),
+            new TextResult('Done.'),
+        );
+
+        $result = aiChatRequest('/api/admin/ai/chat', ['message' => 'Find the page', 'context' => ['route' => 'cms_page/index']]);
+
+        $results = aiChatEvents($result['events'], 'tool_result');
+        expect($results[0]['ok'])->toBeTrue($result['raw']);
+        expect($results[0]['preview'])->toContain('"member":[{"@id":"/api/rest/v2/cms-pages/' . $pageId . '"');
+        expect($results[1]['ok'])->toBeTrue($result['raw']);
+        expect($results[1]['preview'])->toStartWith('{"@id":"/api/rest/v2/cms-pages/' . $pageId . '"');
+    } finally {
+        Mage::getModel('cms/page')->load($pageId)->delete();
         aiChatDeleteConversations((int) $admin->getId());
         aiChatDeleteAdmin($admin);
     }

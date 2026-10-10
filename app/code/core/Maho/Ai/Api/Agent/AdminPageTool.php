@@ -401,13 +401,14 @@ final class AdminPageTool
 
     /**
      * Turn the API links of an answer into admin page links, so a record name in the
-     * answer opens its edit page: [Blue Shirt](/api/rest/v2/products/12). An unknown
-     * resource keeps its text and loses the link.
+     * answer opens its edit page: [Blue Shirt](/api/rest/v2/products/12). A nested link,
+     * such as /api/rest/v2/orders/302/invoices/274, names the record by its last two
+     * segments. An unknown resource keeps its text and loses the link.
      */
     public function linkRecords(string $markdown): string
     {
         return (string) preg_replace_callback(
-            '~\\[([^\\]\\n]*)\\]\\((?:https?://[^/\\s)]+)?/api/rest/v2/([a-z0-9-]+)/([A-Za-z0-9_.%-]+)/?\\)~',
+            '~\\[([^\\]\\n]*)\\]\\((?:https?://[^/\\s)]+)?/api/rest/v2/(?:[a-z0-9-]+/[A-Za-z0-9_.%-]+/)*([a-z0-9-]+)/([A-Za-z0-9_.%-]+)/?\\)~',
             function (array $m): string {
                 $url = $this->recordUrl($m[2], rawurldecode($m[3]));
 
@@ -429,17 +430,16 @@ final class AdminPageTool
         if ($acl === null) {
             return null;
         }
-        foreach ($this->pages() as $page) {
-            if ($page['acl'] !== $acl) {
-                continue;
-            }
-            $record = $this->recordRoute($page['action']);
-            if ($record === null) {
-                continue;
-            }
-            [$route, $idParam] = $record;
+        // A page with the same ACL resource comes first, then a page under it: reviews are catalog/reviews_ratings/reviews/all.
+        foreach ([fn(string $page): bool => $page === $acl, fn(string $page): bool => str_starts_with($page, $acl . '/')] as $matches) {
+            foreach ($this->pages() as $page) {
+                $record = $matches($page['acl']) ? $this->recordRoute($page['action']) : null;
+                if ($record !== null) {
+                    [$route, $idParam] = $record;
 
-            return \Mage::helper('ai')->adminUrl($route, [$idParam => $this->cleanValue($id)]);
+                    return \Mage::helper('ai')->adminUrl($route, [$idParam => $this->cleanValue($id)]);
+                }
+            }
         }
 
         return null;
