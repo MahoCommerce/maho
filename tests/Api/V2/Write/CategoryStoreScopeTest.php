@@ -454,3 +454,38 @@ describe('Store-restricted category writes (REST)', function (): void {
     });
 
 });
+
+describe('Category list of every root tree (?scope=all)', function (): void {
+
+    beforeAll(function (): void {
+        ApiV2Helper::ensureMahoBootstrapped();
+        $category = Mage::getModel('catalog/category')->getCollection()
+            ->addAttributeToFilter('name', 'API Scope All Child')->getFirstItem();
+        if (!$category->getId()) {
+            Mage::getModel('catalog/category')->setStoreId(0)->setName('API Scope All Child')->setIsActive(1)
+                ->setPath('1/' . catRestrictRootId())->save();
+        }
+    });
+
+    $count = fn(array $response): ?int => $response['json']['totalItems'] ?? null;
+
+    it('finds a category of another root tree only with scope=all', function () use ($count): void {
+        $token = serviceToken(['categories/read']);
+
+        expect($count(apiGet('/api/rest/v2/categories?search=API%20Scope%20All%20Child', $token)))->toBe(0);
+        expect($count(apiGet('/api/rest/v2/categories?search=API%20Scope%20All%20Child&scope=all', $token)))->toBe(1);
+    });
+
+    it('keeps a store-restricted token in the root trees of its own store views', function () use ($count): void {
+        $default = serviceToken(['categories/read'], [(int) Mage::app()->getDefaultStoreView()->getId()]);
+        expect($count(apiGet('/api/rest/v2/categories?search=API%20Scope%20All%20Child&scope=all', $default)))->toBe(0);
+
+        $restricted = serviceToken(['categories/read'], [catRestrictStoreId()]);
+        expect($count(apiGet('/api/rest/v2/categories?search=API%20Scope%20All%20Child&scope=all&store=' . CAT_RESTRICT_STORE_CODE, $restricted)))->toBe(1);
+    });
+
+    it('refuses scope=all to a guest and to a customer', function (): void {
+        expect(apiGet('/api/rest/v2/categories?scope=all')['status'])->toBe(401);
+        expect(apiGet('/api/rest/v2/categories?scope=all', customerToken())['status'])->toBe(403);
+    });
+});

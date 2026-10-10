@@ -87,6 +87,9 @@ use Maho\ApiPlatform\CrudResource;
             security: 'true',
             name: 'collection_query',
             description: 'Get reviews',
+            extraArgs: [
+                'status' => ['type' => 'String', 'description' => 'Only the reviews with this status: pending, approved or not_approved'],
+            ],
         ),
         // Named 'product' → field `productReviews` (not `productReviewsReviews`).
         new QueryCollection(

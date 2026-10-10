@@ -164,6 +164,30 @@ describe('MCP tool catalogue', function (): void {
             ->toContain('state', 'storeId', 'customerId');
     });
 
+    it('offers the filters that the providers of the content and review lists read', function (): void {
+        $token = adminToken();
+        $tools = mcpTools($token, mcpSession($token));
+
+        foreach (['content_cms_pages_list', 'content_cms_blocks_list', 'content_blog_posts_list', 'content_blog_categories_list'] as $name) {
+            expect(array_keys($tools[$name]['inputSchema']['properties'] ?? []))->toContain('scope');
+        }
+        expect(array_keys($tools['content_blog_categories_list']['inputSchema']['properties'] ?? []))->toContain('parentId');
+        expect(array_keys($tools['customers_reviews_list']['inputSchema']['properties'] ?? []))->toContain('status');
+        expect(array_keys($tools['catalog_categories_list']['inputSchema']['properties'] ?? []))->toContain('scope');
+    });
+
+    it('offers the query parameters of a list that has no GraphQL list query', function (): void {
+        $token = adminToken();
+        $tools = mcpTools($token, mcpSession($token));
+
+        $invoices = $tools['sales_invoices_list']['inputSchema']['properties'] ?? [];
+        expect(array_keys($invoices))->toContain('search', 'orderId', 'state', 'createdFrom', 'createdTo', 'page', 'itemsPerPage');
+        expect($invoices['state']['enum'] ?? null)->toBe(['open', 'paid', 'canceled']);
+        expect($invoices['orderId']['type'] ?? null)->toBe('integer');
+        expect(array_keys($tools['sales_cart_price_rules_list']['inputSchema']['properties'] ?? []))->toContain('search', 'isActive', 'customerGroupId', 'code');
+        expect(array_keys($tools['sales_rule_cart_price_rules_coupons_list']['inputSchema']['properties'] ?? []))->toContain('ruleId', 'search', 'isUsed');
+    });
+
     it('gives the declared filters to the canonical collection, not a scoped variant', function (): void {
         // Order exposes /orders and /customers/me/orders, and declares one collection
         // query. The scoped variant takes a different branch in the provider and reads a
@@ -277,6 +301,25 @@ describe('MCP tool dispatch', function (): void {
         $payload = json_decode($result['content'][0]['text'] ?? '[]', true);
         expect($payload['totalItems'] ?? null)->toBeInt();
         expect($payload['member'] ?? null)->toBeArray();
+    });
+
+    it('lists a disabled page only when a backend caller gives scope all', function (): void {
+        $token = adminToken();
+        $create = apiPost('/api/rest/v2/cms-pages', [
+            'identifier' => 'test-mcp-scope-all-page',
+            'title' => 'MCP Scope All Page',
+            'content' => '<p>draft</p>',
+            'isActive' => false,
+            'stores' => ['all'],
+        ], $token);
+        expect($create['status'])->toBeIn([200, 201]);
+        trackCreated('cms_page', $create['json']['id']);
+
+        $session = mcpSession($token);
+        $count = fn(array $arguments): ?int => json_decode(mcpTool('content_cms_pages_list', $arguments, $token, $session)['json']['result']['content'][0]['text'] ?? '[]', true)['totalItems'] ?? null;
+
+        expect($count(['search' => 'test-mcp-scope-all-page']))->toBe(0);
+        expect($count(['search' => 'test-mcp-scope-all-page', 'scope' => 'all']))->toBe(1);
     });
 
     it('passes list arguments through as pagination', function (): void {

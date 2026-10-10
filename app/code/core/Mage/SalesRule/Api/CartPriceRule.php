@@ -21,6 +21,7 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use Maho\Config\ApiResource;
+use Maho\ApiPlatform\Metadata\ListFilter;
 
 #[ApiResource(
     // The operations that API Platform adds by itself, for example the GraphQL queries, use this expression
@@ -36,7 +37,19 @@ use Maho\Config\ApiResource;
         new GetCollection(
             uriTemplate: '/cart-price-rules',
             security: "is_granted('ROLE_ADMIN') or is_granted('cart-price-rules/read')",
-            description: 'List cart price rules without their trees. Filters: search (every word must match part of the name, the description or the coupon code), isActive, couponType (none, specific, auto), websiteId, customerGroupId, activeOn (YYYY-MM-DD), code (the exact coupon code), usesAttribute (a product attribute code in the trees), sort (id, name, sortOrder, fromDate, toDate), order (asc, desc)',
+            description: 'List cart price rules without their trees',
+            parameters: [
+                'search' => new ListFilter('Every word must match part of the name, the description or the coupon code'),
+                'isActive' => new ListFilter('Only the active rules, or only the inactive rules', 'boolean'),
+                'couponType' => new ListFilter('Only the rules with this coupon type', enum: ['none', 'specific', 'auto']),
+                'websiteId' => new ListFilter('Only the rules of this website', 'integer'),
+                'customerGroupId' => new ListFilter('Only the rules of this customer group', 'integer'),
+                'activeOn' => new ListFilter('Only the rules that apply on this date, YYYY-MM-DD'),
+                'code' => new ListFilter('Only the rule with this exact coupon code'),
+                'usesAttribute' => new ListFilter('Only the rules whose trees use this product attribute code'),
+                'sort' => new ListFilter('The field to sort by', enum: ['id', 'name', 'sortOrder', 'fromDate', 'toDate']),
+                'order' => new ListFilter('The sort direction', enum: ['asc', 'desc']),
+            ],
         ),
         new Get(
             uriTemplate: '/cart-price-rules/{id}',

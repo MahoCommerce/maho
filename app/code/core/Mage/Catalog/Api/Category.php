@@ -130,6 +130,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
                 'includeInMenu' => ['type' => 'Boolean', 'description' => 'Only include categories in menu'],
                 'urlKey' => ['type' => 'String', 'description' => 'Exact URL-key lookup (returns 0 or 1 category)'],
                 'search' => ['type' => 'String', 'description' => 'Partial match on the category name or URL key'],
+                'scope' => ['type' => 'String', 'description' => 'Give "all" to list the categories of every root category tree, as the admin category tree does. It needs backend access. Without it, the list holds only the tree of the current store view'],
             ],
         ),
     ],

@@ -23,6 +23,7 @@ use ApiPlatform\Metadata\Put;
 use ApiPlatform\OpenApi\Model\Operation as OpenApiOperation;
 use ApiPlatform\OpenApi\Model\Response as OpenApiResponse;
 use Maho\Config\ApiResource;
+use Maho\ApiPlatform\Metadata\ListFilter;
 
 #[ApiResource(
     // The operations that API Platform adds by itself, for example the GraphQL queries, use this expression
@@ -40,7 +41,15 @@ use Maho\Config\ApiResource;
         new GetCollection(
             uriTemplate: '/catalog-price-rules',
             security: "is_granted('ROLE_ADMIN') or is_granted('catalog-price-rules/read')",
-            description: 'List catalog price rules without their conditions tree. Filters: search (every word must match part of the name or the description), isActive, websiteId, customerGroupId, sort (id, name, sortOrder, fromDate, toDate), order (asc, desc)',
+            description: 'List catalog price rules without their conditions tree',
+            parameters: [
+                'search' => new ListFilter('Every word must match part of the name or the description'),
+                'isActive' => new ListFilter('Only the active rules, or only the inactive rules', 'boolean'),
+                'websiteId' => new ListFilter('Only the rules of this website', 'integer'),
+                'customerGroupId' => new ListFilter('Only the rules of this customer group', 'integer'),
+                'sort' => new ListFilter('The field to sort by', enum: ['id', 'name', 'sortOrder', 'fromDate', 'toDate']),
+                'order' => new ListFilter('The sort direction', enum: ['asc', 'desc']),
+            ],
         ),
         new Get(
             uriTemplate: '/catalog-price-rules/{id}',

@@ -68,7 +68,11 @@ use Maho\ApiPlatform\CrudResource;
         new QueryCollection(
             security: 'true',
             name: 'collection_query',
-            extraArgs: ['urlKey' => ['type' => 'String']],
+            extraArgs: [
+                'urlKey' => ['type' => 'String'],
+                'parentId' => ['type' => 'Int', 'description' => 'The child categories of a category; 0 for the top-level categories'],
+                'scope' => ['type' => 'String', 'description' => 'Give "all" to list the records of every store view, the disabled and unpublished ones too, as the admin grid does. It needs backend access. Without it, the list holds only the published records of the current store view'],
+            ],
             description: 'Get blog categories, optionally filter by URL key',
         ),
     ],
