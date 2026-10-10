@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2020-2025 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -33,6 +34,50 @@ class Mage_Sitemap_Model_Observer
      * 'Send error emails to' configuration
      */
     public const XML_PATH_ERROR_RECIPIENT = 'sitemap/generate/error_email';
+
+    /**
+     * Serve a sitemap file from a remote sitemaps mount. The web server serves a file on the
+     * local disk directly, so only a file that is not on this disk reaches the no-route action.
+     * It runs before the session starts, so a crawler gets no session.
+     */
+    #[Maho\Config\Observer('controller_action_predispatch_session_start')]
+    public function serveStoredSitemap(\Maho\Event\Observer $observer): void
+    {
+        /** @var Mage_Core_Controller_Varien_Action $action */
+        $action = $observer->getEvent()->getControllerAction();
+        $request = $action->getRequest();
+        // getPathInfo() can set the action name to noRoute, so check the request URI first
+        $requestPath = (string) strtok((string) $request->getRequestUri(), '?');
+        if ($request->getBeforeForwardInfo() || !str_ends_with(strtolower($requestPath), '.xml')) {
+            return;
+        }
+
+        $path = Mage::helper('sitemap')->getStoredFilePath($request->getPathInfo());
+        $mount = Mage::getStorage('sitemaps');
+        if ($path === null || !$mount->fileExists($path)) {
+            return;
+        }
+
+        $this->sendStoredSitemap($action->getResponse(), $mount, $path);
+    }
+
+    /**
+     * Send the headers, then stream the file, so a large sitemap never sits in memory
+     */
+    protected function sendStoredSitemap(Mage_Core_Controller_Response_Http $response, \Maho\Storage\Mount $mount, string $path): never
+    {
+        $response->setHttpResponseCode(200)
+            ->setHeader('Content-Type', 'application/xml; charset=UTF-8', true)
+            ->setHeader('Content-Length', (string) $mount->fileSize($path), true)
+            ->setHeader('Cache-Control', 'no-cache, must-revalidate', true)
+            ->clearBody()
+            ->sendHeaders();
+
+        $stream = $mount->readStream($path);
+        fpassthru($stream);
+        fclose($stream);
+        exit(0);
+    }
 
     /**
      * Generate sitemaps

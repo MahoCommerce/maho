@@ -87,16 +87,7 @@ class Mage_Dataflow_Model_Profile extends Mage_Core_Model_Abstract
                         . '.' . ($guiData['parse']['type'] == 'csv' ? $guiData['parse']['type'] : 'xml');
                 }
 
-                // Validate path is within allowed directories (var/export or var/import)
-                $filePath = \Symfony\Component\Filesystem\Path::makeAbsolute(
-                    $guiData['file']['path'],
-                    Mage::getBaseDir(),
-                );
-
-                $varDir = Mage::getBaseDir('var');
-                $isInExport = \Maho\Io::allowedPath($filePath, $varDir . DS . 'export');
-                $isInImport = \Maho\Io::allowedPath($filePath, $varDir . DS . 'import');
-                if (!$isInExport && !$isInImport) {
+                if (Mage::helper('dataflow')->getStorageLocation((string) $guiData['file']['path']) === null) {
                     Mage::throwException(
                         Mage::helper('dataflow')->__('Path "%s" is not allowed. Files must be in var/export or var/import.', $guiData['file']['path']),
                     );
@@ -146,6 +137,7 @@ class Mage_Dataflow_Model_Profile extends Mage_Core_Model_Abstract
         }
         $xmlParser = new DOMDocument();
         $newUploadedFilenames = [];
+        $helper = Mage::helper('dataflow');
 
         if (isset($_FILES['file_1']['tmp_name']) || isset($_FILES['file_2']['tmp_name'])
             || isset($_FILES['file_3']['tmp_name'])
@@ -154,7 +146,7 @@ class Mage_Dataflow_Model_Profile extends Mage_Core_Model_Abstract
                 if ($_FILES['file_' . ($index + 1)]['tmp_name']) {
                     $uploader = Mage::getModel('core/file_uploader', 'file_' . ($index + 1));
                     $uploader->setAllowedExtensions(['csv','xml']);
-                    $path = Mage::app()->getConfig()->getTempVarDir() . '/import/';
+                    $path = Mage::getBaseDir('tmp') . '/';
                     $uploader->save($path);
                     $uploadFile = $uploader->getUploadedFileName();
 
@@ -175,7 +167,7 @@ class Mage_Dataflow_Model_Profile extends Mage_Core_Model_Abstract
                             }
                         } catch (Exception) {
                             foreach ($newUploadedFilenames as $v) {
-                                unlink($path . $v);
+                                $helper->getUploadMount()->delete((string) $helper->getUploadPath($v));
                             }
                             unlink($path . $uploadFile);
                             Mage::throwException(
@@ -195,7 +187,7 @@ class Mage_Dataflow_Model_Profile extends Mage_Core_Model_Abstract
                     $colsAbsent = array_diff($attributes, $fileData);
                     if ($colsAbsent) {
                         foreach ($newUploadedFilenames as $v) {
-                            unlink($path . $v);
+                            $helper->getUploadMount()->delete((string) $helper->getUploadPath($v));
                         }
                         unlink($path . $uploadFile);
                         Mage::throwException(
@@ -220,6 +212,8 @@ class Mage_Dataflow_Model_Profile extends Mage_Core_Model_Abstract
                         file_put_contents($path . $newFilename, $contents);
                     }
                     unset($contents);
+                    $helper->storeUpload($path . $newFilename, $newFilename);
+                    unset($newFilename);
                 }
             }
         }

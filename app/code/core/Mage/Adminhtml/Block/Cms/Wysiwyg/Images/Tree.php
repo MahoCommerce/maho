@@ -18,15 +18,16 @@ class Mage_Adminhtml_Block_Cms_Wysiwyg_Images_Tree extends Mage_Adminhtml_Block_
     public function getTreeJson(?string $path = null)
     {
         $helper = Mage::helper('cms/wysiwyg_images');
-        $path ??= $helper->getStorageRoot();
+        $path ??= $helper->getStorageRootPath();
         $collection = Mage::registry('storage')->getDirsCollection($path);
         $jsonArray = [];
         foreach ($collection as $item) {
+            // A child folder loads its own children on expand, so one listing serves one folder
             $jsonArray[] = [
-                'text'  => $helper->getShortFilename($item->getBasename(), 20),
-                'id'    => $helper->convertPathToId($item->getFilename()),
+                'text'  => $helper->getShortFilename($item->getName(), 20),
+                'id'    => $item->getId(),
                 'cls'   => 'folder',
-                'children' => $item->getSubdirCount() === 0 ? [] : null,
+                'children' => null,
             ];
         }
         return Mage::helper('core')->jsonEncode($jsonArray);
@@ -70,12 +71,12 @@ class Mage_Adminhtml_Block_Cms_Wysiwyg_Images_Tree extends Mage_Adminhtml_Block_
         $treePath = '/root';
         $helper = Mage::helper('cms/wysiwyg_images');
         $path = $helper->getCurrentPath();
-        if ($path) {
-            $path = str_replace($helper->getStorageRoot(), '', $path);
+        $root = $helper->getStorageRootPath();
+        if (str_starts_with($path, $root . '/')) {
             $relative = '';
-            foreach (explode(DS, $path) as $dirName) {
+            foreach (explode('/', substr($path, strlen($root) + 1)) as $dirName) {
                 if ($dirName) {
-                    $relative .= DS . $dirName;
+                    $relative .= '/' . $dirName;
                     $treePath .= '/' . $helper->idEncode($relative);
                 }
             }

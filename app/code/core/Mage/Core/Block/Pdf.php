@@ -44,9 +44,13 @@ class Mage_Core_Block_Pdf extends Mage_Core_Block_Template
         // First, try the PDF-specific logo
         $logoFile = Mage::getStoreConfig('sales/identity/logo', $this->getStore());
         if (is_string($logoFile) && $logoFile !== '') {
-            $logoPath = Mage::getBaseDir('media') . DS . 'sales' . DS . 'store' . DS . 'logo' . DS . $logoFile;
-            if (file_exists($logoPath) && is_readable($logoPath)) {
-                return $this->processLogoFile($logoPath);
+            $mount = Mage::getStorage('media');
+            $path = \Maho\Io::getPathWithinMount($mount, 'sales/store/logo', $logoFile);
+            if ($path !== null && $mount->fileExists($path)) {
+                $url = $this->processLogoContent($mount->read($path), strtolower(pathinfo($path, PATHINFO_EXTENSION)));
+                if ($url !== null) {
+                    return $url;
+                }
             }
         }
 
@@ -72,32 +76,40 @@ class Mage_Core_Block_Pdf extends Mage_Core_Block_Template
      */
     protected function processLogoFile(string $logoPath): string
     {
-        $extension = strtolower(pathinfo($logoPath, PATHINFO_EXTENSION));
         $content = file_get_contents($logoPath);
-
         if (!$content) {
             return 'file://' . $logoPath;
         }
 
-        if ($extension === 'svg') {
-            $processedContent = str_replace('<svg ', '<svg fill="none" ', $content);
-            return 'data:image/svg+xml;base64,' . base64_encode($processedContent);
+        $url = $this->processLogoContent($content, strtolower(pathinfo($logoPath, PATHINFO_EXTENSION)));
+        if ($url !== null) {
+            return $url;
         }
 
-        $mimeType = null;
-        $finfo = finfo_open(FILEINFO_MIME_TYPE);
-        if ($finfo) {
-            $mimeType = finfo_buffer($finfo, $content);
-        }
-
-        if (!$mimeType) {
-            $mimeType = mime_content_type($logoPath);
-        }
-
+        $mimeType = mime_content_type($logoPath);
         if ($mimeType && str_starts_with($mimeType, 'image/')) {
             return 'data:' . $mimeType . ';base64,' . base64_encode($content);
         }
 
         return 'file://' . $logoPath;
+    }
+
+    /**
+     * The base64 data URL of logo content, or null when the content is not an image
+     */
+    protected function processLogoContent(string $content, string $extension): ?string
+    {
+        if ($extension === 'svg') {
+            $processedContent = str_replace('<svg ', '<svg fill="none" ', $content);
+            return 'data:image/svg+xml;base64,' . base64_encode($processedContent);
+        }
+
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mimeType = $finfo ? finfo_buffer($finfo, $content) : false;
+        if ($mimeType && str_starts_with($mimeType, 'image/')) {
+            return 'data:' . $mimeType . ';base64,' . base64_encode($content);
+        }
+
+        return null;
     }
 }

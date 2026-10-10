@@ -251,7 +251,6 @@
 "The assistant task ""%s"" waits for your confirmation","The assistant task ""%s"" waits for your confirmation"
 "The assistant wants to make these changes:","The assistant wants to make these changes:"
 "The async queue is disabled. Enable it under System &gt; AI &gt; Queue Settings or tasks will never be processed.","The async queue is disabled. Enable it under System &gt; AI &gt; Queue Settings or tasks will never be processed."
-"The attachment folder cannot be created.","The attachment folder cannot be created."
 "The background job ""%s"" is done","The background job ""%s"" is done"
 "The background job was lost before it ran. Ask again.","The background job was lost before it ran. Ask again."
 "The creator","The creator"

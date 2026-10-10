@@ -983,6 +983,33 @@ return function (SchemaEditor $schema): void {
             ->create(),
     );
 
+    // catalog_product_image_size: the option sets that templates render, so the image route can rebuild them
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('catalog_product_image_size')
+            ->addColumn(Schema::column('size_id', Types::INTEGER, unsigned: true, autoincrement: true))
+            ->addColumn(Schema::column('path', Types::STRING, length: 255))
+            ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('destination_subdir', Types::STRING, length: 255))
+            ->addColumn(Schema::column('params', Types::TEXT))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_MUTABLE))
+            ->addColumn(Schema::column('last_seen_at', Types::DATETIME_MUTABLE, notNull: false))
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('size_id')->create())
+            ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('path'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('store_id')
+                    ->setUnquotedReferencedTableName('core_store')
+                    ->setUnquotedReferencedColumnNames('store_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Catalog Product Image Size')
+            ->create(),
+    );
+
     // catalog_product_option
     $schema->addTable(
         Table::editor()

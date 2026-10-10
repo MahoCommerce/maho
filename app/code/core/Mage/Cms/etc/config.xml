@@ -149,12 +149,5 @@ SPDX-License-Identifier: AFL-3.0
                 <skin>oxide</skin>
             </wysiwyg>
         </cms>
-        <system>
-            <media_storage_configuration>
-                <allowed_resources>
-                    <wysiwyg_image_folder>wysiwyg</wysiwyg_image_folder>
-                </allowed_resources>
-            </media_storage_configuration>
-        </system>
     </default>
 </config>

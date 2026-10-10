@@ -33,6 +33,12 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
     public const SWATCH_FALLBACK_MEDIA_DIR = 'wysiwyg/swatches';
     public const SWATCH_CACHE_DIR = 'catalog/swatches';
 
+    /** Cache tag of the file checks on a remote media mount. */
+    public const CACHE_TAG = 'configurableswatches_image';
+
+    /** Seconds that a remote file check which found no file stays in the cache. */
+    public const MISSING_FILE_CACHE_LIFETIME = 3600;
+
     #[\Deprecated(message: 'since 26.3 — use {@see getSwatchFileExt()} instead')]
     public const SWATCH_FILE_EXT = '.png';
 
@@ -200,7 +206,7 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
             $filename = $image->getFile();
             $swatchImage = $this->_resizeSwatchImage($filename, 'product', $width, $height);
             $swatchType = 'product';
-            $url = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA) . $swatchImage;
+            $url = $swatchImage ? Mage::getStorage('media')->publicUrl($swatchImage) : '';
         }
 
         return $url;
@@ -259,7 +265,7 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
             }
         } while (true);
 
-        return Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA) . $swatchImage;
+        return Mage::getStorage('media')->publicUrl($swatchImage);
     }
 
     /**
@@ -280,23 +286,15 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
             return false;
         }
 
-        // Form full path to where we want to cache resized version
-        $destPathArr = [
-            self::SWATCH_CACHE_DIR,
-            Mage::app()->getStore()->getId(),
-            $width . 'x' . $height,
-            'media',
-            trim($filename, '/'),
-        ];
-        $destPath = implode('/', $destPathArr);
-        $fullDestPath = Mage::getBaseDir(Mage_Core_Model_Store::URL_TYPE_MEDIA) . DS . $destPath;
-        if (!is_dir(dirname($fullDestPath))) {
-            $io = new \Maho\Io\File();
-            $io->mkdir(dirname($fullDestPath), 0777, true);
+        $mount = Mage::getStorage('media');
+        $destPath = $this->getSwatchCachePath($mount, 'media', $filename, (int) $width, (int) $height);
+        if ($destPath === null) {
+            return false;
         }
 
         $image = Maho::getImageManager()->createImage($width, $height)->fill($optionSwatch->getValue());
-        Maho::encodeImage($image)->save($fullDestPath);
+        $mount->moveAtomic($destPath, Maho::encodeImage($image)->toString());
+        $this->rememberFileExists($mount, $destPath, true);
 
         return $destPath;
     }
@@ -313,48 +311,77 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
      */
     protected function _resizeSwatchImage($filename, $tag, $width, $height)
     {
-        // Form full path to where we want to cache resized version
-        $baseDir = Mage::getBaseDir(Mage_Core_Model_Store::URL_TYPE_MEDIA);
-        $destPathArr = [
-            $baseDir,
-            self::SWATCH_CACHE_DIR,
-            Mage::app()->getStore()->getId(),
-            $width . 'x' . $height,
-            $tag,
-            trim($filename, '/'),
-        ];
-
-        $destPath = implode('/', $destPathArr);
-        $targetDir = dirname($destPath);
-
-        $io = new \Maho\Io\File();
-        if (!$io->isWriteable($targetDir)) {
-            $io->mkdir($targetDir);
+        $mount = Mage::getStorage('media');
+        $destPath = $this->getSwatchCachePath($mount, $tag, (string) $filename, (int) $width, (int) $height);
+        if ($destPath === null) {
+            return false;
         }
-        if (!$io->isWriteable($targetDir)) {
+        if ($this->fileExists($mount, $destPath)) {
+            return $destPath;
+        }
+
+        $sourcePath = $tag == 'product'
+            ? \Maho\Io::getPathWithinMount($mount, Mage::getSingleton('catalog/product_media_config')->getBaseMediaStoragePath(), (string) $filename)
+            : \Maho\Io::getPathWithinMount($mount, self::SWATCH_FALLBACK_MEDIA_DIR, (string) $filename);
+        if ($sourcePath === null || !$this->fileExists($mount, $sourcePath)) {
             return false;
         }
 
-        // Check if cached image exists already
-        if (!file_exists($destPath)) {
-            // Check for source image
-            if ($tag == 'product') {
-                $sourceFilePath = Mage::getSingleton('catalog/product_media_config')->getBaseMediaPath() . $filename;
-            } else {
-                $sourceFilePath = "$baseDir/" . self::SWATCH_FALLBACK_MEDIA_DIR . "/$filename";
-            }
+        $image = Maho::getImageManager()->decodeBinary($mount->read($sourcePath));
+        $image->resize($width, $height);
+        $mount->moveAtomic($destPath, $image->encodeUsingPath($destPath)->toString());
+        $this->rememberFileExists($mount, $destPath, true);
 
-            if (!file_exists($sourceFilePath)) {
-                return false;
-            }
+        return $destPath;
+    }
 
-            // Do resize and save
-            $image = Maho::getImageManager()->decodePath($sourceFilePath);
-            $image->resize($width, $height);
-            $image->save($destPath);
+    /**
+     * Mount path of a cached swatch: "catalog/swatches/{store}/{width}x{height}/{tag}/{filename}".
+     * Null when $filename leaves that directory.
+     */
+    protected function getSwatchCachePath(\Maho\Storage\Mount $mount, string $tag, string $filename, int $width, int $height): ?string
+    {
+        $directory = implode('/', [self::SWATCH_CACHE_DIR, Mage::app()->getStore()->getId(), $width . 'x' . $height, $tag]);
+        return \Maho\Io::getPathWithinMount($mount, $directory, $filename);
+    }
+
+    /**
+     * Check a file during render. A remote mount keeps the answer in the cache, so a page with
+     * many swatches sends no request per swatch to the bucket. A missing file is checked again
+     * after MISSING_FILE_CACHE_LIFETIME, so a new fallback swatch shows up without a flush.
+     */
+    protected function fileExists(\Maho\Storage\Mount $mount, string $path): bool
+    {
+        if ($mount->isLocal()) {
+            return $mount->fileExists($path);
         }
 
-        return substr($destPath, strlen($baseDir) + 1);
+        $cached = Mage::app()->loadCache($this->getFileCacheId($path));
+        if ($cached === '1' || $cached === '0') {
+            return $cached === '1';
+        }
+
+        $exists = $mount->fileExists($path);
+        $this->rememberFileExists($mount, $path, $exists);
+        return $exists;
+    }
+
+    protected function rememberFileExists(\Maho\Storage\Mount $mount, string $path, bool $exists): void
+    {
+        if ($mount->isLocal()) {
+            return;
+        }
+        Mage::app()->saveCache(
+            $exists ? '1' : '0',
+            $this->getFileCacheId($path),
+            [self::CACHE_TAG],
+            $exists ? null : self::MISSING_FILE_CACHE_LIFETIME,
+        );
+    }
+
+    protected function getFileCacheId(string $path): string
+    {
+        return self::CACHE_TAG . '_' . md5($path);
     }
 
     /**
@@ -362,9 +389,8 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
      */
     public function clearSwatchesCache()
     {
-        $directory = Mage::getBaseDir(Mage_Core_Model_Store::URL_TYPE_MEDIA) . DS . self::SWATCH_CACHE_DIR;
-        $io = new \Maho\Io\File();
-        $io->rmdir($directory, true);
+        Mage::getStorage('media')->deleteDirectory(self::SWATCH_CACHE_DIR);
+        Mage::app()->cleanCache([self::CACHE_TAG]);
     }
 
     /**

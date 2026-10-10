@@ -27,7 +27,7 @@ class Mage_Adminhtml_Model_System_Config_Backend_File extends Mage_Core_Model_Co
     {
         $value = $this->getValue();
         if (!empty($_FILES['groups']['tmp_name'][$this->getGroupId()]['fields'][$this->getField()]['value'])) {
-            $uploadDir = $this->_getUploadDir();
+            $uploadDir = $this->getUploadStoragePath();
 
             try {
                 $file = [];
@@ -39,12 +39,12 @@ class Mage_Adminhtml_Model_System_Config_Backend_File extends Mage_Core_Model_Co
                 $uploader->setAllowedExtensions($this->_getAllowedExtensions());
                 $uploader->setAllowRenameFiles(true);
                 $this->addValidators($uploader);
-                $result = $uploader->save($uploadDir);
+                $result = $uploader->saveToStorage(Mage::getStorage('media'), $uploadDir);
             } catch (Exception $e) {
                 Mage::throwException($e->getMessage());
             }
 
-            $filename = $result['file'];
+            $filename = $result['file'] ?? null;
             if ($filename) {
                 if ($this->_addWhetherScopeInfo()) {
                     $filename = $this->_prependScopeInfo($filename);
@@ -91,7 +91,7 @@ class Mage_Adminhtml_Model_System_Config_Backend_File extends Mage_Core_Model_Co
     }
 
     /**
-     * Return path to directory for upload file
+     * The upload directory on the media mount
      *
      * @return string
      * @throw Mage_Core_Exception
@@ -115,7 +115,23 @@ class Mage_Adminhtml_Model_System_Config_Backend_File extends Mage_Core_Model_Co
             $uploadDir = $this->_appendScopeInfo($uploadDir);
         }
 
-        return Mage::getBaseDir('media') . '/' . $uploadDir;
+        return $uploadDir;
+    }
+
+    /**
+     * The upload directory on the media mount. A subclass written before 26.11 returns an
+     * absolute directory below the media folder, so that form still works.
+     */
+    private function getUploadStoragePath(): string
+    {
+        $uploadDir = $this->_getUploadDir();
+        if (!\Symfony\Component\Filesystem\Path::isAbsolute($uploadDir)) {
+            return $uploadDir;
+        }
+        $mediaDir = Mage::getBaseDir('media');
+        $path = \Maho\Io::getPathWithinDir($mediaDir, $uploadDir)
+            ?? Mage::throwException(Mage::helper('adminhtml')->__('The upload directory must be below the media folder.'));
+        return \Symfony\Component\Filesystem\Path::makeRelative($path, $mediaDir);
     }
 
     /**
@@ -198,11 +214,10 @@ class Mage_Adminhtml_Model_System_Config_Backend_File extends Mage_Core_Model_Co
         }
 
         try {
-            $uploadDir = $this->_getUploadDir();
-            $filePath = $uploadDir . '/' . $filename;
-
-            if (file_exists($filePath)) {
-                unlink($filePath);
+            $mount = Mage::getStorage('media');
+            $filePath = \Maho\Io::getPathWithinMount($mount, $this->getUploadStoragePath(), $filename);
+            if ($filePath !== null && $mount->fileExists($filePath)) {
+                $mount->delete($filePath);
             }
         } catch (Exception $e) {
             // Silently fail - file deletion is not critical

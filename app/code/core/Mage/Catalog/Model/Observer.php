@@ -54,6 +54,33 @@ class Mage_Catalog_Model_Observer
     }
 
     /**
+     * Queue the resize of the images of a saved product when a role image changed or the
+     * gallery got a new image. The message joins the transaction of the save.
+     */
+    #[Maho\Config\Observer('catalog_product_save_after')]
+    public function queueProductImageResize(\Maho\Event\Observer $observer): void
+    {
+        /** @var Mage_Catalog_Model_Product $product */
+        $product = $observer->getEvent()->getProduct();
+        $galleryImages = $product->getData('media_gallery')['images'] ?? [];
+        if (array_any(Mage_Catalog_Model_Product_Image_Resizer::ROLES, $product->dataHasChangedFor(...))
+            || (is_array($galleryImages) && array_any($galleryImages, fn($image) => !empty($image['new_file'])))
+        ) {
+            Mage::getSingleton('catalog/product_image_resizer')->queue([(int) $product->getId()]);
+        }
+    }
+
+    #[Maho\Config\Observer('catalog_product_import_finish_before')]
+    public function queueImportedProductImageResize(\Maho\Event\Observer $observer): void
+    {
+        /** @var Mage_ImportExport_Model_Import_Entity_Product $adapter */
+        $adapter = $observer->getEvent()->getAdapter();
+        if ($adapter->getBehavior() !== Mage_ImportExport_Model_Import::BEHAVIOR_DELETE) {
+            Mage::getSingleton('catalog/product_image_resizer')->queue($adapter->getAffectedEntityIds(true));
+        }
+    }
+
+    /**
      * Catalog Product Compare Items Clean
      *
      * @return $this

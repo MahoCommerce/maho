@@ -49,31 +49,40 @@ describe('\Maho\Io::getPathWithinDir()', function () {
     });
 
     it('rejects ../ traversal', function () {
-        expect(\Maho\Io::getPathWithinDir($this->base, '../' . basename($this->outside) . '/secret.txt'))->toBeFalse();
-        expect(\Maho\Io::getPathWithinDir($this->base, 'sub/../../etc/passwd'))->toBeFalse();
+        expect(\Maho\Io::getPathWithinDir($this->base, '../' . basename($this->outside) . '/secret.txt'))->toBeNull();
+        expect(\Maho\Io::getPathWithinDir($this->base, 'sub/../../etc/passwd'))->toBeNull();
     });
 
     it('rejects backslash traversal', function () {
-        expect(\Maho\Io::getPathWithinDir($this->base, '..\\..\\etc\\passwd'))->toBeFalse();
+        expect(\Maho\Io::getPathWithinDir($this->base, '..\\..\\etc\\passwd'))->toBeNull();
     });
 
     it('rejects an absolute path outside the base directory', function () {
-        expect(\Maho\Io::getPathWithinDir($this->base, '/etc/passwd'))->toBeFalse();
-        expect(\Maho\Io::getPathWithinDir($this->base, $this->outside . '/secret.txt'))->toBeFalse();
+        expect(\Maho\Io::getPathWithinDir($this->base, '/etc/passwd'))->toBeNull();
+        expect(\Maho\Io::getPathWithinDir($this->base, $this->outside . '/secret.txt'))->toBeNull();
     });
 
     it('rejects a sibling directory sharing the base prefix', function () {
-        expect(\Maho\Io::getPathWithinDir($this->base, $this->base . '_other/file.txt'))->toBeFalse();
+        expect(\Maho\Io::getPathWithinDir($this->base, $this->base . '_other/file.txt'))->toBeNull();
     });
 
     it('rejects stream wrappers and null bytes', function () {
-        expect(\Maho\Io::getPathWithinDir($this->base, 'phar://evil.phar/x'))->toBeFalse();
-        expect(\Maho\Io::getPathWithinDir('phar://evil.phar', 'x'))->toBeFalse();
-        expect(\Maho\Io::getPathWithinDir($this->base, "sub/file.txt\0.jpg"))->toBeFalse();
+        expect(\Maho\Io::getPathWithinDir($this->base, 'phar://evil.phar/x'))->toBeNull();
+        expect(\Maho\Io::getPathWithinDir('phar://evil.phar', 'x'))->toBeNull();
+        expect(\Maho\Io::getPathWithinDir($this->base, "sub/file.txt\0.jpg"))->toBeNull();
+    });
+
+    it('accepts the base directory itself and a child that does not exist yet', function () {
+        expect(\Maho\Io::getPathWithinDir($this->base, $this->base))->toBe($this->base);
+        expect(\Maho\Io::getPathWithinDir($this->base, 'future/sitemap/'))->toBe($this->base . '/future/sitemap');
+    });
+
+    it('rejects a base directory that does not exist when the path lies elsewhere', function () {
+        expect(\Maho\Io::getPathWithinDir('/nonexistent/directory', $this->base . '/sub/file.txt'))->toBeNull();
     });
 
     it('rejects an empty path', function () {
-        expect(\Maho\Io::getPathWithinDir($this->base, ''))->toBeFalse();
+        expect(\Maho\Io::getPathWithinDir($this->base, ''))->toBeNull();
     });
 
     it('does not expand a home directory shortcut', function () {
@@ -83,7 +92,7 @@ describe('\Maho\Io::getPathWithinDir()', function () {
 
     it('rejects a symlink that points outside the base directory', function () {
         symlink($this->outside, $this->base . '/link');
-        expect(\Maho\Io::getPathWithinDir($this->base, 'link/secret.txt'))->toBeFalse();
+        expect(\Maho\Io::getPathWithinDir($this->base, 'link/secret.txt'))->toBeNull();
     });
 
     it('accepts an absolute path spelled through a symlink to the base directory', function () {

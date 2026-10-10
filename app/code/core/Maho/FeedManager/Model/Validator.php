@@ -51,6 +51,23 @@ class Maho_FeedManager_Model_Validator
     }
 
     /**
+     * Validate a feed file on a mount. A remote mount gives a local temp copy, which is deleted after the check.
+     *
+     * @param string $format File format (xml, csv, json)
+     * @return bool True if valid
+     */
+    public function validateStoredFile(\Maho\Storage\Mount $mount, string $path, string $format): bool
+    {
+        if (!$mount->fileExists($path)) {
+            $this->_errors = ["File not found: {$path}"];
+            $this->_warnings = [];
+            return false;
+        }
+
+        return $mount->withLocalFile($path, fn(string $localPath): bool => $this->validate($localPath, $format));
+    }
+
+    /**
      * Validate XML file structure using streaming XMLReader to avoid OOM on large feeds
      */
     protected function _validateXml(string $filePath): bool

@@ -8,27 +8,20 @@
  * @package Mage_Catalog
  */
 
+/**
+ * @deprecated since 26.11 no attribute uses it, use Mage_Catalog_Model_Product_Attribute_Frontend_Image
+ */
 class Mage_Catalog_Model_Entity_Product_Attribute_Frontend_Image extends Mage_Eav_Model_Entity_Attribute_Frontend_Abstract
 {
     /**
      * @param \Maho\DataObject $object
      * @param string $size
-     * @return bool|string
+     * @return false|string
      */
     public function getUrl($object, $size = null)
     {
-        $image = $object->getData($this->getAttribute()->getAttributeCode());
-
-        if (!is_null($size) && file_exists(Mage::getBaseDir('media') . '/catalog/product/' . $size . '/' . $image)) {
-            // image is cached
-            $url = Mage::getBaseUrl('media') . 'catalog/product/' . $size . '/' . $image;
-        } elseif (!is_null($size)) {
-            // image is not cached
-            $url = Mage::getBaseUrl() . 'catalog/product/image/size/' . $size . '/' . $image;
-        } else {
-            // image is not cached
-            $url = Mage::getBaseUrl() . 'catalog/product/image' . $image;
-        }
-        return $url;
+        return Mage::getModel('catalog/product_attribute_frontend_image')
+            ->setAttribute($this->getAttribute())
+            ->getUrl($object, $size);
     }
 }
