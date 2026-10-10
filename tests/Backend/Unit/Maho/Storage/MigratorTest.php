@@ -82,11 +82,38 @@ describe('Maho\Storage\Migrator', function () {
             ->and($this->target->fileExists('catalog/product/cache/1/x.jpg'))->toBeFalse();
     });
 
+    it('counts the files that are not excluded, for the progress bar', function (): void {
+        expect(new Migrator()->countFiles($this->source, ['catalog/product/cache']))->toBe(2)
+            ->and(new Migrator()->countFiles($this->source))->toBe(3);
+    });
+
     it('copies nothing in a dry run', function (): void {
         $result = new Migrator()->migrate($this->source, $this->target, [], true);
 
         expect($result->copied)->toBe(3)
             ->and($this->target->listContents('', true)->toArray())->toBe([]);
+    });
+
+    it('splits the files into parts, and the parts together copy each file once', function (): void {
+        for ($i = 0; $i < 20; $i++) {
+            $this->source->write("p/{$i}.jpg", (string) $i);
+        }
+
+        $copied = [];
+        for ($part = 0; $part < 4; $part++) {
+            new Migrator()->migrate($this->source, $this->target, ['catalog/product/cache'], false, function (string $path) use (&$copied): void {
+                $copied[] = $path;
+            }, $part, 4);
+        }
+
+        expect($copied)->toHaveCount(22)
+            ->and(array_unique($copied))->toHaveCount(22)
+            ->and($this->target->read('p/19.jpg'))->toBe('19');
+    });
+
+    it('refuses a part that does not exist', function (): void {
+        expect(fn() => new Migrator()->migrate($this->source, $this->target, [], true, null, 4, 4))
+            ->toThrow(InvalidArgumentException::class);
     });
 
     it('records a file that fails and copies the others', function (): void {

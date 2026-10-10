@@ -55,6 +55,7 @@ final class Migrator
      * @param list<string> $exclude folders of the source that are not copied
      * @param (callable(string $path, string $action): void)|null $onFile called after each file,
      *        with the action "copied", "skipped" or "failed"
+     * @param int $part the part to copy, from 0 to $parts - 1, so that parallel jobs share the files
      */
     public function migrate(
         Mount $source,
@@ -62,17 +63,23 @@ final class Migrator
         array $exclude = [],
         bool $dryRun = false,
         ?callable $onFile = null,
+        int $part = 0,
+        int $parts = 1,
     ): MigrationResult {
+        if ($parts < 1 || $part < 0 || $part >= $parts) {
+            throw new \InvalidArgumentException("Part {$part} of {$parts} does not exist.");
+        }
+
         $existing = [];
         foreach ($target->listFiles() as $item) {
-            if (!$this->isExcluded($item->path(), $exclude)) {
+            if ($this->isInPart($item->path(), $part, $parts) && !$this->isExcluded($item->path(), $exclude)) {
                 $existing[$item->path()] = $item->fileSize();
             }
         }
 
         $result = new MigrationResult();
         foreach ($source->listFiles() as $item) {
-            if ($this->isExcluded($item->path(), $exclude)) {
+            if (!$this->isInPart($item->path(), $part, $parts) || $this->isExcluded($item->path(), $exclude)) {
                 continue;
             }
             $path = $item->path();
@@ -105,6 +112,30 @@ final class Migrator
         }
 
         return $result;
+    }
+
+    /**
+     * The number of files that migrate() looks at, to size a progress bar.
+     *
+     * @param list<string> $exclude
+     */
+    public function countFiles(Mount $source, array $exclude = []): int
+    {
+        $count = 0;
+        foreach ($source->listFiles() as $item) {
+            if (!$this->isExcluded($item->path(), $exclude)) {
+                $count++;
+            }
+        }
+        return $count;
+    }
+
+    /**
+     * The parts split the files by a hash of the path, so each file is in exactly one part.
+     */
+    private function isInPart(string $path, int $part, int $parts): bool
+    {
+        return $parts === 1 || crc32($path) % $parts === $part;
     }
 
     /**
