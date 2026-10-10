@@ -100,7 +100,7 @@ class StorageMigrate extends BaseMahoCommand
 
             $jobCount = max(1, $jobs ?? ($target->isLocal() ? 1 : self::DEFAULT_REMOTE_JOBS));
             $progress = $io->createProgressBar(new Migrator()->countFiles($source, $skip));
-            $progress->setFormat('very_verbose');
+            $progress->setFormat(' %current%/%max% [%bar%] %percent:3s%% | elapsed %elapsed% | left %remaining%');
             $progress->start();
             $result = $jobCount === 1
                 ? new Migrator()->migrate($source, $target, $skip, $dryRun, fn() => $progress->advance())
