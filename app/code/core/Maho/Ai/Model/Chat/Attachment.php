@@ -10,6 +10,7 @@
 
 declare(strict_types=1);
 
+use League\Flysystem\FileAttributes;
 use League\Flysystem\FilesystemException;
 use Maho\Storage\Mount;
 
@@ -61,20 +62,7 @@ final class Maho_Ai_Model_Chat_Attachment
     /** The path on the ai_attachments mount of an attachment of this administrator, or null when there is none with that id. */
     public static function path(int $adminId, string $id): ?string
     {
-        if (preg_match('/^[a-f0-9]{16}$/', $id) !== 1) {
-            return null;
-        }
-        $prefix = $adminId . '/' . $id . '_';
-        try {
-            foreach (self::mount()->listFiles((string) $adminId) as $file) {
-                if (str_starts_with($file->path(), $prefix)) {
-                    return $file->path();
-                }
-            }
-        } catch (FilesystemException) {
-        }
-
-        return null;
+        return self::find($adminId, $id)?->path();
     }
 
     /** The content of an attachment of this administrator, or null when there is none with that id. */
@@ -96,14 +84,14 @@ final class Maho_Ai_Model_Chat_Attachment
      */
     public static function describe(int $adminId, string $id): ?array
     {
-        $path = self::path($adminId, $id);
-        if ($path === null) {
+        $file = self::find($adminId, $id);
+        if ($file === null) {
             return null;
         }
-        $name = substr(basename($path), 17);
+        $name = substr(basename($file->path()), 17);
         $extension = strtolower(pathinfo($name, PATHINFO_EXTENSION));
         try {
-            $size = self::mount()->fileSize($path);
+            $size = $file->fileSize() ?? self::mount()->fileSize($file->path());
         } catch (FilesystemException) {
             return null;
         }
@@ -154,7 +142,7 @@ final class Maho_Ai_Model_Chat_Attachment
         }
     }
 
-    /** Removes files older than $days, and the per-administrator folder once it is empty. Returns the number of removed files. */
+    /** Removes files older than $days. Returns the number of removed files. */
     public static function purgeOlderThan(int $days): int
     {
         $mount = self::mount();
@@ -165,11 +153,6 @@ final class Maho_Ai_Model_Chat_Attachment
                 if (($file->lastModified() ?? $mount->lastModified($file->path())) < $cutoff) {
                     $mount->delete($file->path());
                     $removed++;
-                }
-            }
-            foreach ($mount->listContents('')->filter(static fn($item): bool => $item->isDir())->toArray() as $directory) {
-                if ($mount->listFiles($directory->path())->toArray() === []) {
-                    $mount->deleteDirectory($directory->path());
                 }
             }
         } catch (FilesystemException $e) {
@@ -226,6 +209,24 @@ final class Maho_Ai_Model_Chat_Attachment
     public static function isText(string $mime): bool
     {
         return in_array($mime, self::TEXT_EXTENSIONS, true);
+    }
+
+    private static function find(int $adminId, string $id): ?FileAttributes
+    {
+        if (preg_match('/^[a-f0-9]{16}$/', $id) !== 1) {
+            return null;
+        }
+        $prefix = $adminId . '/' . $id . '_';
+        try {
+            foreach (self::mount()->listFiles((string) $adminId) as $file) {
+                if (str_starts_with($file->path(), $prefix)) {
+                    return $file;
+                }
+            }
+        } catch (FilesystemException) {
+        }
+
+        return null;
     }
 
     private static function mount(): Mount

@@ -121,7 +121,7 @@ class Maho_Ai_Model_Chat_MessageBagBuilder
             }
             $content = Maho_Ai_Model_Chat_Attachment::read($adminId, $file['id']);
             if ($content !== null) {
-                $images[] = new Image($content, $file['mime']);
+                $images[] = new Image($content, new finfo(FILEINFO_MIME_TYPE)->buffer($content) ?: $file['mime']);
             }
         }
 
