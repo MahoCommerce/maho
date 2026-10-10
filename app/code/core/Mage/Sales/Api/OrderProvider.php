@@ -21,12 +21,12 @@ use Symfony\Bundle\SecurityBundle\Security;
  */
 final class OrderProvider extends \Maho\ApiPlatform\Provider
 {
-    private OrderService $orderService;
+    private \Mage_Sales_Service_Order $orderService;
 
     public function __construct(Security $security)
     {
         parent::__construct($security);
-        $this->orderService = new OrderService();
+        $this->orderService = \Mage::getService('sales/order');
     }
 
     /**
@@ -72,7 +72,7 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
                 return null;
             }
 
-            $order = $this->orderService->getGuestOrder($incrementId, $token);
+            $order = $this->orderService->getForGuest($incrementId, $token);
             if (!$order) {
                 return null;
             }
@@ -87,7 +87,7 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
                     ->loadByEmail($orderEmail);
 
                 if (!$existingCustomer->getId()) {
-                    $dto->accountToken = AccountTokenService::generate((int) $order->getId(), $orderEmail);
+                    $dto->accountToken = \Mage::helper('sales/accountToken')->generate((int) $order->getId(), $orderEmail);
                 }
             }
 
@@ -118,7 +118,7 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
                 return null;
             }
 
-            $order = $this->orderService->getGuestOrder($incrementId, $accessToken);
+            $order = $this->orderService->getForGuest($incrementId, $accessToken);
             if (!$order) {
                 return null;
             }
@@ -136,7 +136,7 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
                     ->loadByEmail($orderEmail);
 
                 if (!$existingCustomer->getId()) {
-                    $dto->accountToken = AccountTokenService::generate((int) $order->getId(), $orderEmail);
+                    $dto->accountToken = \Mage::helper('sales/accountToken')->generate((int) $order->getId(), $orderEmail);
                 }
             }
 
@@ -166,7 +166,7 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
             $pageSize = max(1, min((int) ($context['args']['pageSize'] ?? 20), 100));
             $status = $context['args']['status'] ?? null;
 
-            $result = $this->orderService->getCustomerOrders((int) $customerId, $page, $pageSize, $status);
+            $result = $this->orderService->getListForCustomer((int) $customerId, $page, $pageSize, $status);
 
             $orders = [];
             foreach ($result['orders'] as $order) {
@@ -183,7 +183,7 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
             return null;
         }
 
-        $order = $this->orderService->getOrder((int) $orderId);
+        $order = $this->orderService->getById((int) $orderId);
 
         if (!$order) {
             return null;
@@ -216,7 +216,7 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
         ['page' => $page, 'pageSize' => $pageSize] = $this->extractPagination($context, 10, 100);
         $status = $this->stringFilter($context['filters'] ?? [], 'status');
 
-        $result = $this->orderService->getCustomerOrders($customerId, $page, $pageSize, $status);
+        $result = $this->orderService->getListForCustomer($customerId, $page, $pageSize, $status);
 
         $orders = [];
         foreach ($result['orders'] as $order) {
@@ -234,7 +234,7 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
     private function getCollection(array $context): TraversablePaginator
     {
         ['page' => $page, 'pageSize' => $pageSize] = $this->extractPagination($context);
-        $result = $this->orderService->getAllOrders(
+        $result = $this->orderService->getList(
             $page,
             $pageSize,
             $context['filters'] ?? [],
@@ -357,7 +357,7 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
         $dto->shippingDescription = $order->getShippingDescription();
 
         // Map payment method. List paths batch-load payments in
-        // OrderService::paginateAndPreload(); fall back to the lazy per-order
+        // \Mage_Sales_Service_Order::paginateAndPreload(); fall back to the lazy per-order
         // load only for single-order views.
         $payment = $order->getData('_preloaded_payment') ?? $order->getPayment();
         if ($payment) {
@@ -382,10 +382,10 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
         if (!$isCollectionOrder) {
             $visibleOnly = !$this->isAdmin() && !$this->isApiUser();
             // Map status history (only for single-order detail views)
-            $dto->statusHistory = $this->orderService->getOrderNotes($order, $visibleOnly);
+            $dto->statusHistory = $this->orderService->getNotes($order, $visibleOnly);
 
             // Map shipments with tracking
-            $dto->shipments = $this->orderService->getOrderShipments($order, $visibleOnly);
+            $dto->shipments = array_map(Shipment::fromModel(...), $this->orderService->getShipments($order, $visibleOnly));
 
             if (!$visibleOnly) {
                 // The statuses the admin comment form offers, which addOrderComment accepts

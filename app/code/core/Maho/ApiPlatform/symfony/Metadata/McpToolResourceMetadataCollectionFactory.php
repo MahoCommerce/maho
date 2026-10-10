@@ -22,6 +22,7 @@ use ApiPlatform\Metadata\McpTool;
 use ApiPlatform\Metadata\McpToolCollection;
 use ApiPlatform\Metadata\NotExposed;
 use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\QueryParameterInterface;
 use ApiPlatform\Metadata\Resource\Factory\ResourceMetadataCollectionFactoryInterface;
 use ApiPlatform\Metadata\Resource\ResourceMetadataCollection;
 use Maho\ApiPlatform\Mcp\SourceOperationResolver;
@@ -50,6 +51,12 @@ final class McpToolResourceMetadataCollectionFactory implements ResourceMetadata
 
     /** Per-operation opt-out, set as `extraProperties: ['maho_mcp' => false]`. */
     public const OPERATION_OPT_OUT = 'maho_mcp';
+
+    /**
+     * The section of a plain API Platform resource that the grant of another resource protects,
+     * set as `extraProperties: ['maho_mcp_section' => 'Customers']`, so its tools load with the tools of that resource.
+     */
+    public const RESOURCE_SECTION = 'maho_mcp_section';
 
     /** `Put` and `Patch` share `update`; the de-duplication below keeps the first. */
     private const VERB_SUFFIX = [
@@ -127,7 +134,7 @@ final class McpToolResourceMetadataCollectionFactory implements ResourceMetadata
                 continue;
             }
 
-            $arguments = $sourceName === $canonical ? $listArguments : [];
+            $arguments = $sourceName === $canonical ? $this->withQueryParameters($listArguments, $operation) : [];
 
             $tools[$name] = $this->buildTool(
                 $name,
@@ -148,8 +155,10 @@ final class McpToolResourceMetadataCollectionFactory implements ResourceMetadata
      */
     private function toolNamePrefix(string $resourceClass, ApiResource $resource): string
     {
-        $section = $resource instanceof MahoApiResource ? $resource->mahoSection : null;
-        if ($section === null) {
+        $section = $resource instanceof MahoApiResource
+            ? $resource->mahoSection
+            : ($resource->getExtraProperties()[self::RESOURCE_SECTION] ?? null);
+        if (!is_string($section) || $section === '') {
             $parts = explode('\\', $resourceClass);
             array_pop($parts);
             $section = match (true) {
@@ -222,6 +231,37 @@ final class McpToolResourceMetadataCollectionFactory implements ResourceMetadata
         }
 
         return [];
+    }
+
+    /**
+     * Add the query parameters that the collection operation declares, such as a {@see ListFilter}.
+     * A resource without a GraphQL list query declares its filters here. A GraphQL arg with the
+     * same name wins.
+     *
+     * @param array<string, mixed> $arguments
+     * @return array<string, mixed>
+     */
+    private function withQueryParameters(array $arguments, HttpOperation $operation): array
+    {
+        $properties = $arguments['properties'] ?? [];
+        $required = $arguments['required'] ?? [];
+        foreach ($operation->getParameters() ?? [] as $key => $parameter) {
+            $key = $parameter->getKey() ?? $key;
+            if (!$parameter instanceof QueryParameterInterface || isset($properties[$key])) {
+                continue;
+            }
+            $schema = $parameter->getSchema() ?? [];
+            $properties[$key] = array_filter([
+                'type' => in_array($schema['type'] ?? null, ['integer', 'number', 'boolean'], true) ? $schema['type'] : 'string',
+                'enum' => $schema['enum'] ?? null,
+                'description' => $parameter->getDescription(),
+            ], static fn(mixed $value): bool => $value !== null);
+            if ($parameter->getRequired() === true) {
+                $required[] = $key;
+            }
+        }
+
+        return $properties === [] ? [] : ['properties' => $properties, 'required' => $required];
     }
 
     /**
@@ -302,7 +342,7 @@ final class McpToolResourceMetadataCollectionFactory implements ResourceMetadata
 
         return new $class(
             name: $name,
-            title: sprintf('%s %s', ucfirst($suffix), $operation->getShortName() ?? 'record'),
+            title: sprintf('%s %s', ucfirst($suffix), preg_replace('/(?<=[a-z0-9])(?=[A-Z])/', ' ', $operation->getShortName() ?? 'record')),
             description: $this->description($operation, $resource),
             annotations: $this->annotations($operation),
             method: $operation->getMethod(),

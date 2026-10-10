@@ -7,9 +7,8 @@
 
 declare(strict_types=1);
 
-use Mage\Checkout\Api\CartService;
+use Mage\Checkout\Api\CartRequest;
 use Maho\ApiPlatform\Service\StoreContext;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 uses(Tests\MahoBackendTestCase::class);
 
@@ -48,7 +47,7 @@ describe('Cart store currency', function (): void {
         // resolved a store the cart does not belong to.
         StoreContext::setStore(0);
 
-        $cart = (new CartService())->getCart((int) $this->quote->getId());
+        $cart = CartRequest::load((int) $this->quote->getId());
 
         expect($cart)->not->toBeNull();
         expect($cart->getStore()->getCurrentCurrencyCode())->toBe('EUR');
@@ -59,15 +58,15 @@ describe('Cart store currency', function (): void {
         StoreContext::setRequestedCurrencyCode('EUR');
         StoreContext::setStore(0);
 
-        expect(fn() => (new CartService())->getCart((int) $this->quote->getId()))
-            ->toThrow(BadRequestHttpException::class);
+        expect(fn() => CartRequest::load((int) $this->quote->getId()))
+            ->toThrow(Mage_Core_Exception::class);
     });
 
     test('the cart store is undone between requests', function (): void {
         StoreContext::setRequestedCurrencyCode('EUR');
         StoreContext::setStore(0);
 
-        $cart = (new CartService())->getCart((int) $this->quote->getId());
+        $cart = CartRequest::load((int) $this->quote->getId());
         expect($cart->getStore()->getCurrentCurrencyCode())->toBe('EUR');
 
         // What a worker runtime does between requests: the currency landed on
@@ -82,7 +81,7 @@ describe('Cart store currency', function (): void {
         StoreContext::setStore(1);
         $this->store->setRequestedCurrencyCode('EUR');
 
-        $cart = (new CartService())->getCart((int) $this->quote->getId());
+        $cart = CartRequest::load((int) $this->quote->getId());
 
         expect($cart->getStore()->getCurrentCurrencyCode())->toBe('EUR');
     });

@@ -110,7 +110,7 @@ abstract class Processor implements ProcessorInterface
         // `stores` defaulting to all-stores) are validated, not just raw input.
         $this->authorizeEntity($model, $user);
         $this->safeSave($model, "create {$this->entityLabel}");
-        $this->logApiActivity($this->entityType, 'create', null, $model, $user);
+        $this->logApiActivity($this->entityType, 'create', null, $model);
         return $this->buildResponse($model, $data);
     }
 
@@ -121,7 +121,7 @@ abstract class Processor implements ProcessorInterface
         $oldData = $model->getData();
         $this->applyData($model, $data, $user);
         $this->safeSave($model, "update {$this->entityLabel}");
-        $this->logApiActivity($this->entityType, 'update', $oldData, $model, $user);
+        $this->logApiActivity($this->entityType, 'update', $oldData, $model);
         return $this->buildResponse($model, $data);
     }
 
@@ -131,7 +131,7 @@ abstract class Processor implements ProcessorInterface
         $this->authorizeEntity($model, $user);
         $oldData = $model->getData();
         $this->safeDelete($model, "delete {$this->entityLabel}");
-        $this->logApiActivity($this->entityType, 'delete', $oldData, null, $user);
+        $this->logApiActivity($this->entityType, 'delete', $oldData, null);
         return null;
     }
 

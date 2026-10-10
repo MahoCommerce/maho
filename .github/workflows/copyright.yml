@@ -51,6 +51,7 @@ jobs:
           rector.php
           public/js/altcha-i18n.min.js
           public/js/chart.min.js
+          public/js/deep-chat.js
           public/js/sortable.min.js
           "
 

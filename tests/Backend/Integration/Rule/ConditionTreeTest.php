@@ -284,6 +284,14 @@ describe('condition tree validator', function (): void {
         expect(treeErrorFields($list))->toBe(['conditions.conditions[0].value']);
     });
 
+    it('names an unknown key and the keys a condition has', function (): void {
+        $leaf = ['type' => 'salesrule/rule_condition_address', 'attribute' => 'base_subtotal', 'operator' => '>=', 'value' => '1'];
+        $result = treeValidate(['children' => [$leaf]] + treeRoot([]));
+
+        expect(treeErrorFields($result))->toBe(['conditions.children']);
+        expect($result['errors'][0]['message'])->toContain('Unknown key "children"', 'conditions');
+    });
+
     it('validates the value of a subselection and keeps it as text', function (): void {
         $subselect = ['type' => 'salesrule/rule_condition_product_subselect', 'attribute' => 'qty', 'operator' => '>=', 'value' => 3, 'aggregator' => 'all', 'conditions' => []];
         $result = treeValidate(treeRoot([$subselect, ['value' => 'many'] + $subselect]));

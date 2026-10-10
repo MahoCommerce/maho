@@ -127,13 +127,13 @@ describe('Product Tier Prices, CRUD Lifecycle', function (): void {
         $response = apiPut("/api/rest/v2/products/{$productId}/tier-prices", [
             ['customerGroupId' => 'all', 'qty' => 5, 'price' => -10],
         ], $token);
-        expect($response['status'])->toBeIn([400, 422]);
+        expect($response['status'])->toBe(422);
 
         // Zero quantity
         $response2 = apiPut("/api/rest/v2/products/{$productId}/tier-prices", [
             ['customerGroupId' => 'all', 'qty' => 0, 'price' => 19.95],
         ], $token);
-        expect($response2['status'])->toBeIn([400, 422]);
+        expect($response2['status'])->toBe(422);
     });
 
 });

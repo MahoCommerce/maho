@@ -84,7 +84,7 @@ describe('Grouped Product Links, CRUD Lifecycle', function (): void {
     it('rejects grouped operations on a non-grouped product', function (): void {
         $simpleId = fixtures('product_id');
         $response = apiGet("/api/rest/v2/products/{$simpleId}/grouped");
-        expect($response['status'])->toBeIn([400, 422]);
+        expect($response['status'])->toBe(404);
     });
 
 });

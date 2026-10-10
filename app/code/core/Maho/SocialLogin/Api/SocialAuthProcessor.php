@@ -11,7 +11,6 @@ declare(strict_types=1);
 namespace Maho\SocialLogin\Api;
 
 use ApiPlatform\Metadata\Operation;
-use Mage\Checkout\Api\CartService;
 use Maho\ApiPlatform\Service\JwtService;
 use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -22,12 +21,14 @@ use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 class SocialAuthProcessor extends \Maho\ApiPlatform\Processor
 {
+    private readonly \Mage_Checkout_Service_Cart $cartService;
+
     public function __construct(
         Security $security,
         private JwtService $jwtService,
-        private CartService $cartService,
     ) {
         parent::__construct($security);
+        $this->cartService = \Mage::getService('checkout/cart');
     }
 
     #[\Override]
@@ -49,7 +50,7 @@ class SocialAuthProcessor extends \Maho\ApiPlatform\Processor
             // Headless nonce contract: the caller generates its own nonce, passes it
             // to the provider SDK, and repeats it here; when omitted (for example a
             // trusted server-side relay), the nonce constraint is skipped.
-            $result = \Mage::getModel('sociallogin/service')->authenticate(
+            $result = \Mage::getService('sociallogin/identity')->authenticate(
                 $data->provider,
                 $data->providerToken,
                 (int) \Mage::app()->getStore()->getId(),
@@ -101,11 +102,11 @@ class SocialAuthProcessor extends \Maho\ApiPlatform\Processor
         $guestCartMaskedId = $data->cartId;
         $cartId = null;
         $customerCart = null;
-        if (CartService::isValidMaskedId($guestCartMaskedId)) {
+        if ($this->cartService->isValidMaskedId($guestCartMaskedId)) {
             try {
-                // CartService::mergeCarts enforces the guest-cart ownership guard,
+                // \Mage_Checkout_Service_Cart::merge enforces the guest-cart ownership guard,
                 // re-collects totals, and deactivates the guest cart atomically.
-                $customerCart = $this->cartService->mergeCarts($guestCartMaskedId, (int) $customer->getId());
+                $customerCart = $this->cartService->merge($guestCartMaskedId, (int) $customer->getId());
                 $cartId = (int) $customerCart->getId();
             } catch (\Exception $e) {
                 \Mage::log('Cart merge failed: ' . $e->getMessage(), \Mage::LOG_WARNING);

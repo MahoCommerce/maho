@@ -39,7 +39,7 @@ class Maho_SocialLogin_SocialController extends Mage_Core_Controller_Front_Actio
         $token = (string) $request->getPost('token');
 
         try {
-            $service = Mage::getModel('sociallogin/service');
+            $service = Mage::getService('sociallogin/identity');
             $expectedNonce = null;
             if ($service->getProvider($provider)->requiresNonce()) {
                 // ID tokens must echo a nonce this session issued

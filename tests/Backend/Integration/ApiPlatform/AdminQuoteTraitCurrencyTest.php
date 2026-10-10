@@ -9,15 +9,14 @@ declare(strict_types=1);
 
 use Maho\ApiPlatform\Service\StoreContext;
 use Maho\ApiPlatform\Trait\AdminQuoteTrait;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 uses(Tests\MahoBackendTestCase::class);
 
 /**
  * placeOrder and the shipping estimate load a cart through AdminQuoteTrait,
- * not CartService::getCart(), so the trait has to perform the same
- * adapt-or-refuse step, or those paths ignore the X-Currency-Code header the
- * cart reads honored and stamp the order in a currency the caller never saw.
+ * so the trait has to perform the same adapt-or-refuse step as the cart reads,
+ * or those paths ignore the X-Currency-Code header the cart reads honored and
+ * stamp the order in a currency the caller never saw.
  */
 
 describe('Admin quote load currency', function (): void {
@@ -65,7 +64,7 @@ describe('Admin quote load currency', function (): void {
         StoreContext::setStore(0);
 
         expect(fn() => $this->loader->load((int) $this->quote->getId()))
-            ->toThrow(BadRequestHttpException::class);
+            ->toThrow(Mage_Core_Exception::class);
     });
 
 });

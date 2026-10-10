@@ -76,6 +76,27 @@ class Maho_ApiPlatform_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * Orientation text a model reads before it calls any tool. The MCP server sends it as
+     * the server instructions.
+     */
+    public function mcpInstructions(): string
+    {
+        $store = Mage::app()->getDefaultStoreView();
+        $name = (string) Mage::getStoreConfig('general/store_information/name') ?: (string) $store?->getFrontendName();
+        $currency = (string) $store?->getBaseCurrencyCode();
+
+        return implode("\n", array_filter([
+            'Maho Commerce store data and operations: catalog, inventory, pricing, orders and customers.',
+            $name === '' ? null : sprintf('Store: %s.', $name),
+            $currency === '' ? null : sprintf('Read the "currency" field of any response that carries one: cart and order amounts are in the currency named there, which is not always %1$s. Where no currency is given, amounts are in %1$s, the base currency of the default website; other websites may differ.', $currency),
+            'IDs are Maho entity IDs, not SKUs or increment IDs; look an entity up by its identifying field before writing to it.',
+            'Multi-store installs select a store view by its store code, never by name.',
+            'List tools are paginated and return one page at a time; ask for the next page rather than assuming the first is complete.',
+            'Tools mirror the REST API one-to-one, so a call is refused exactly when the same REST request would be.',
+        ]));
+    }
+
+    /**
      * Whether any bearer-authenticated API is reachable, which is what the discovery documents
      * under /.well-known describe.
      */

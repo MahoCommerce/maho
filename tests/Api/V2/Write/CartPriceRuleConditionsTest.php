@@ -23,6 +23,12 @@ afterAll(function (): void {
             $rule->delete();
         }
     }
+    foreach (cprcState()['segments'] as $segmentId) {
+        $segment = Mage::getModel('customersegmentation/segment')->load($segmentId);
+        if ($segment->getId()) {
+            $segment->delete();
+        }
+    }
     foreach (cprcState()['attributes'] as $attributeId) {
         $attribute = Mage::getModel('catalog/resource_eav_attribute')->load($attributeId);
         if ($attribute->getId()) {
@@ -35,7 +41,7 @@ afterAll(function (): void {
 
 function &cprcState(): array
 {
-    static $state = ['rules' => [], 'attributes' => []];
+    static $state = ['rules' => [], 'attributes' => [], 'segments' => []];
     return $state;
 }
 
@@ -102,6 +108,30 @@ function cprcWithoutLabels(?array $tree): ?array
         $tree['conditions'] = array_map(cprcWithoutLabels(...), $tree['conditions']);
     }
     return $tree;
+}
+
+function cprcSegmentId(): int
+{
+    $response = apiPost('/api/rest/v2/customer-segments', [
+        'name' => 'Pest rule segment ' . substr(uniqid(), -6),
+        'websiteIds' => [1],
+    ], adminToken());
+    expect($response['status'])->toBe(201);
+    $segmentId = (int) $response['json']['id'];
+    cprcState()['segments'][] = $segmentId;
+    return $segmentId;
+}
+
+function cprcSegmentConditions(int $segmentId): array
+{
+    return cprcRoot([
+        ['type' => 'customersegmentation/rule_condition_segment', 'attribute' => 'customer_segment', 'operator' => '==', 'value' => (string) $segmentId],
+    ]);
+}
+
+function cprcAllGroupIds(): array
+{
+    return array_map(intval(...), Mage::getResourceModel('customer/group_collection')->getAllIds());
 }
 
 function cprcErrorFields(array $response): array
@@ -226,8 +256,8 @@ describe('Cart price rule trees', function (): void {
     it('rejects a cart condition in the actions tree', function (): void {
         $response = cprcCreate(['actions' => cprcRoot([cprcSubtotal()], 'salesrule/rule_condition_product_combine')]);
 
-        expect($response['status'])->toBe(400)
-            ->and($response['json']['error'])->toBe('validation_error')
+        expect($response['status'])->toBe(422)
+            ->and($response['json']['error'])->toBe('unprocessable_entity')
             ->and(cprcErrorFields($response))->toBe(['actions.conditions[0].type']);
     });
 
@@ -239,11 +269,11 @@ describe('Cart price rule trees', function (): void {
         $inside = cprcCreate(['name' => $name, 'conditions' => $nested]);
         $inActions = cprcCreate(['name' => $name, 'actions' => cprcRoot([['type' => $type]], 'salesrule/rule_condition_product_combine')]);
 
-        expect($atRoot['status'])->toBe(400)
+        expect($atRoot['status'])->toBe(422)
             ->and(cprcErrorFields($atRoot))->toBe(['conditions.type'])
-            ->and($inside['status'])->toBe(400)
+            ->and($inside['status'])->toBe(422)
             ->and(cprcErrorFields($inside))->toBe(['conditions.conditions[1].conditions[0].type'])
-            ->and($inActions['status'])->toBe(400)
+            ->and($inActions['status'])->toBe(422)
             ->and(cprcErrorFields($inActions))->toBe(['actions.conditions[0].type']);
 
         $saved = Mage::getResourceModel('salesrule/rule_collection')->addFieldToFilter('name', $name);
@@ -265,7 +295,7 @@ describe('Cart price rule trees', function (): void {
             cprcSubtotal('abc'),
         ])]);
 
-        expect($response['status'])->toBe(400)
+        expect($response['status'])->toBe(422)
             ->and(cprcErrorFields($response))->toBe([
                 'conditions.conditions[0].attribute',
                 'conditions.conditions[1].operator',
@@ -282,11 +312,11 @@ describe('Cart price rule trees', function (): void {
             $deep = cprcRoot([$deep]);
         }
         $depth = cprcCreate(['conditions' => $deep]);
-        expect($depth['status'])->toBe(400)
+        expect($depth['status'])->toBe(422)
             ->and($depth['json']['message'])->toContain('levels');
 
         $large = cprcCreate(['conditions' => cprcRoot(array_fill(0, 250, cprcSubtotal()))]);
-        expect($large['status'])->toBe(400)
+        expect($large['status'])->toBe(422)
             ->and(cprcErrorFields($large))->toBe(['conditions.conditions[249]']);
     });
 
@@ -327,7 +357,7 @@ describe('Cart price rule trees', function (): void {
             ->and(cprcWithoutLabels($kept['json']['conditions'])['conditions'])->toBe([$legacy, cprcSubtotal('5')]);
 
         $changed = apiPut(CPRC_PATH . "/{$id}", ['conditions' => cprcRoot([['operator' => '!='] + $legacy])], adminToken());
-        expect($changed['status'])->toBe(400)
+        expect($changed['status'])->toBe(422)
             ->and(cprcErrorFields($changed))->toBe(['conditions.conditions[0].value']);
     });
 
@@ -372,4 +402,59 @@ describe('Cart price rule trees', function (): void {
             ->and((float) $single->getShippingAddress()->getDiscountAmount())->toBe(0.0);
     });
 
+});
+
+describe('Cart price rules for a customer segment', function (): void {
+
+    beforeEach(function (): void {
+        if (!Mage::helper('core')->isModuleEnabled('Maho_CustomerSegmentation')) {
+            $this->markTestSkipped('Maho_CustomerSegmentation is not active');
+        }
+    });
+
+    it('creates a rule with a customer segment condition and reads the condition back', function (): void {
+        $conditions = cprcSegmentConditions(cprcSegmentId());
+
+        $created = cprcCreate(['customerGroupIds' => cprcAllGroupIds(), 'conditions' => $conditions]);
+
+        expect($created['status'])->toBe(201)
+            ->and(cprcWithoutLabels($created['json']['conditions']))->toBe($conditions);
+        $stored = apiGet(CPRC_PATH . '/' . $created['json']['id'], adminToken());
+        expect(cprcWithoutLabels($stored['json']['conditions']))->toBe($conditions);
+    });
+
+    it('offers the create, update and delete tools of cart price rules over MCP', function (): void {
+        $token = adminToken();
+        $tools = array_keys(mcpTools($token, mcpSession($token)));
+
+        expect($tools)->toContain(
+            'sales_cart_price_rules_create',
+            'sales_cart_price_rules_update',
+            'sales_cart_price_rules_delete',
+            'sales_cart_price_rules_condition_metadata_get',
+        );
+    });
+
+    it('creates a rule for a customer segment with the MCP create tool', function (): void {
+        $token = adminToken();
+        $conditions = cprcSegmentConditions(cprcSegmentId());
+        $name = 'Pest MCP segment rule ' . substr(uniqid(), -6);
+
+        $created = mcpTool('sales_cart_price_rules_create', [
+            'name' => $name,
+            'websiteIds' => [1],
+            'customerGroupIds' => cprcAllGroupIds(),
+            'simpleAction' => 'by_percent',
+            'discountAmount' => 10,
+            'conditions' => $conditions,
+        ], $token, mcpSession($token));
+        $payload = json_decode($created['json']['result']['content'][0]['text'] ?? '{}', true);
+        if (isset($payload['id'])) {
+            cprcTrack((int) $payload['id']);
+        }
+
+        expect($payload['name'] ?? null)->toBe($name)
+            ->and($payload['isActive'] ?? null)->toBeFalse()
+            ->and(cprcWithoutLabels($payload['conditions'] ?? null))->toBe($conditions);
+    });
 });

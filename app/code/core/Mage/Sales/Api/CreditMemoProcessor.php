@@ -14,6 +14,7 @@ use ApiPlatform\Metadata\Operation;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 use Symfony\Bundle\SecurityBundle\Security;
 
 /**
@@ -23,12 +24,12 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
 {
     use \Maho\ApiPlatform\Trait\OrderItemsTrait;
 
-    private OrderService $orderService;
+    private \Mage_Sales_Service_Order $orderService;
 
     public function __construct(Security $security)
     {
         parent::__construct($security);
-        $this->orderService = new OrderService();
+        $this->orderService = \Mage::getService('sales/order');
     }
 
     #[\Override]
@@ -44,7 +45,7 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
         $args = $context['args']['input'] ?? [];
         $orderId = (int) ($uriVariables['orderId'] ?? $args['orderId'] ?? 0);
         if (!$orderId) {
-            throw new BadRequestHttpException('Order ID is required');
+            throw new UnprocessableEntityHttpException('Order ID is required');
         }
 
         $items = $args['items'] ?? null;
@@ -54,7 +55,7 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
 
         $shippingAmount = isset($args['shippingAmount']) ? (float) $args['shippingAmount'] : null;
         if ($shippingAmount !== null && $shippingAmount < 0) {
-            throw new BadRequestHttpException('Shipping amount must be >= 0');
+            throw new UnprocessableEntityHttpException('Shipping amount must be >= 0');
         }
 
         return $this->doCreateCreditMemo(
@@ -87,10 +88,10 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
 
         $this->assertStoreAllowed($order->getStoreId(), $this->requireUser(), 'order');
 
-        // Report an unrefundable order before the item input. OrderService
+        // Report an unrefundable order before the item input. The order service
         // checks this again under the lock, where the answer is authoritative.
         if (!$order->canCreditmemo()) {
-            throw new BadRequestHttpException('Order cannot be refunded (already fully refunded or not in a refundable state)');
+            throw new ConflictHttpException('Order cannot be refunded (already fully refunded or not in a refundable state)');
         }
 
         // Build qty data array: ['qtys' => [orderItemId => qty]]
@@ -140,17 +141,7 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
             $data['shipping_amount'] = 0.0;
         }
 
-        try {
-            $creditmemo = $this->orderService->createCreditMemoForOrder($order, $data, $comment, $offlineRefund, $backToStockItems);
-        } catch (\Mage_Core_Exception $e) {
-            throw new BadRequestHttpException($e->getMessage());
-        } catch (\RuntimeException) {
-            throw new ConflictHttpException('A refund is already in progress for this order');
-        }
-
-        if (!$creditmemo) {
-            throw new BadRequestHttpException('Order cannot be refunded (already fully refunded or not in a refundable state)');
-        }
+        $creditmemo = $this->orderService->refund($order, $data, $comment, $offlineRefund, $backToStockItems);
 
         return CreditMemo::fromModel($creditmemo);
     }

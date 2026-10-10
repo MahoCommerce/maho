@@ -107,7 +107,7 @@ describe('Product Links, CRUD Lifecycle', function (): void {
     it('rejects invalid link type', function (): void {
         $productId = fixtures('product_id');
         $response = apiGet("/api/rest/v2/products/{$productId}/links/invalid_type");
-        expect($response['status'])->toBeIn([400, 404]);
+        expect($response['status'])->toBe(404);
     });
 
     it('supports cross_sell and up_sell types', function (): void {

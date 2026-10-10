@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Mage\Catalog\Api;
 
 use ApiPlatform\Metadata\ApiProperty;
+use Maho\ApiPlatform\Metadata\EnumSource;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\GetCollection;
@@ -88,6 +89,6 @@ class ProductMedia extends \Maho\ApiPlatform\Resource
     public bool $disabled = false;
 
     /** @var string[] */
-    #[ApiProperty(description: 'Image roles (image, small_image, thumbnail)')]
+    #[ApiProperty(description: 'Image roles (image, small_image, thumbnail)', extraProperties: [EnumSource::KEY => ['image', 'small_image', 'thumbnail']])]
     public array $types = [];
 }

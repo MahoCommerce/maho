@@ -17,7 +17,7 @@ use ApiPlatform\Metadata\Delete;
 use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
  * Address State Processor - Handles address mutations.
@@ -125,22 +125,17 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
         $this->populateAddressFromDto($address, $data);
         $this->validateAddress($address);
 
-        try {
-            $address->save();
+        $address->save();
 
-            // Handle default billing/shipping
-            if ($data->isDefaultBilling) {
-                $customer->setDefaultBilling($address->getId());
-            }
-            if ($data->isDefaultShipping) {
-                $customer->setDefaultShipping($address->getId());
-            }
-            if ($data->isDefaultBilling || $data->isDefaultShipping) {
-                $customer->save();
-            }
-        } catch (\Exception $e) {
-            \Mage::logException($e);
-            throw new BadRequestHttpException('Failed to create address');
+        // Handle default billing/shipping
+        if ($data->isDefaultBilling) {
+            $customer->setDefaultBilling($address->getId());
+        }
+        if ($data->isDefaultShipping) {
+            $customer->setDefaultShipping($address->getId());
+        }
+        if ($data->isDefaultBilling || $data->isDefaultShipping) {
+            $customer->save();
         }
 
         return Address::fromCustomerAddress($address, $customer);
@@ -166,37 +161,32 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
         $this->populateAddressFromDto($address, $data);
         $this->validateAddress($address);
 
-        try {
-            $address->save();
+        $address->save();
 
-            // Handle default billing/shipping updates
-            $needsCustomerSave = false;
+        // Handle default billing/shipping updates
+        $needsCustomerSave = false;
 
-            // Only touch the customer's default pointers when the flag was
-            // explicitly provided. A null value means the field was omitted from
-            // a partial update and must not silently clear an existing default.
-            if ($data->isDefaultBilling === true && $customer->getDefaultBilling() != $addressId) {
-                $customer->setDefaultBilling($addressId);
-                $needsCustomerSave = true;
-            } elseif ($data->isDefaultBilling === false && $customer->getDefaultBilling() == $addressId) {
-                $customer->setDefaultBilling(null);
-                $needsCustomerSave = true;
-            }
+        // Only touch the customer's default pointers when the flag was
+        // explicitly provided. A null value means the field was omitted from
+        // a partial update and must not silently clear an existing default.
+        if ($data->isDefaultBilling === true && $customer->getDefaultBilling() != $addressId) {
+            $customer->setDefaultBilling($addressId);
+            $needsCustomerSave = true;
+        } elseif ($data->isDefaultBilling === false && $customer->getDefaultBilling() == $addressId) {
+            $customer->setDefaultBilling(null);
+            $needsCustomerSave = true;
+        }
 
-            if ($data->isDefaultShipping === true && $customer->getDefaultShipping() != $addressId) {
-                $customer->setDefaultShipping($addressId);
-                $needsCustomerSave = true;
-            } elseif ($data->isDefaultShipping === false && $customer->getDefaultShipping() == $addressId) {
-                $customer->setDefaultShipping(null);
-                $needsCustomerSave = true;
-            }
+        if ($data->isDefaultShipping === true && $customer->getDefaultShipping() != $addressId) {
+            $customer->setDefaultShipping($addressId);
+            $needsCustomerSave = true;
+        } elseif ($data->isDefaultShipping === false && $customer->getDefaultShipping() == $addressId) {
+            $customer->setDefaultShipping(null);
+            $needsCustomerSave = true;
+        }
 
-            if ($needsCustomerSave) {
-                $customer->save();
-            }
-        } catch (\Exception $e) {
-            \Mage::logException($e);
-            throw new BadRequestHttpException('Failed to update address');
+        if ($needsCustomerSave) {
+            $customer->save();
         }
 
         // Reload customer to get updated defaults
@@ -222,26 +212,21 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
             throw new NotFoundHttpException('Address not found');
         }
 
-        try {
-            // Clear default references if this was a default address
-            $needsCustomerSave = false;
-            if ($customer->getDefaultBilling() == $addressId) {
-                $customer->setDefaultBilling(null);
-                $needsCustomerSave = true;
-            }
-            if ($customer->getDefaultShipping() == $addressId) {
-                $customer->setDefaultShipping(null);
-                $needsCustomerSave = true;
-            }
-            if ($needsCustomerSave) {
-                $customer->save();
-            }
-
-            $address->delete();
-        } catch (\Exception $e) {
-            \Mage::logException($e);
-            throw new BadRequestHttpException('Failed to delete address');
+        // Clear default references if this was a default address
+        $needsCustomerSave = false;
+        if ($customer->getDefaultBilling() == $addressId) {
+            $customer->setDefaultBilling(null);
+            $needsCustomerSave = true;
         }
+        if ($customer->getDefaultShipping() == $addressId) {
+            $customer->setDefaultShipping(null);
+            $needsCustomerSave = true;
+        }
+        if ($needsCustomerSave) {
+            $customer->save();
+        }
+
+        $address->delete();
     }
 
     /**
@@ -272,7 +257,7 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
     {
         $errors = $address->validate();
         if ($errors !== true) {
-            throw new BadRequestHttpException(implode(' ', $errors));
+            throw new UnprocessableEntityHttpException(implode(' ', $errors));
         }
     }
 
@@ -351,7 +336,7 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
         $addressId = (int) ($args['id'] ?? 0);
 
         if (!$addressId) {
-            throw new BadRequestHttpException('Address ID is required');
+            throw new UnprocessableEntityHttpException('Address ID is required');
         }
 
         // Load address to get customerId
@@ -418,7 +403,7 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
         $addressId = (int) ($args['id'] ?? 0);
 
         if (!$addressId) {
-            throw new BadRequestHttpException('Address ID is required');
+            throw new UnprocessableEntityHttpException('Address ID is required');
         }
 
         $existingAddress = \Mage::getModel('customer/address')->load($addressId);

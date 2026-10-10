@@ -18,6 +18,8 @@ use Mage_Catalog_Model_Product;
 use Maho\ApiPlatform\Trait\ProductLoaderTrait;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
  */
@@ -56,7 +58,7 @@ final class ProductLinkProcessor extends \Maho\ApiPlatform\Processor
         $linkType = ProductLinkProvider::extractLinkType($context);
 
         if (!isset(self::LINK_SETTER_MAP[$linkType])) {
-            throw new BadRequestHttpException("Invalid link type: {$linkType}. Valid types: related, cross-sell, up-sell");
+            throw new NotFoundHttpException("Invalid link type: {$linkType}. Valid types: related, cross-sell, up-sell");
         }
 
         if ($operation instanceof DeleteOperationInterface) {
@@ -86,7 +88,7 @@ final class ProductLinkProcessor extends \Maho\ApiPlatform\Processor
             }
             $linkedId = (int) ($link['linkedProductId'] ?? $link['linked_product_id'] ?? 0);
             if ($linkedId <= 0) {
-                throw new BadRequestHttpException('linkedProductId is required and must be positive');
+                throw new UnprocessableEntityHttpException('linkedProductId is required and must be positive');
             }
             $this->authorizeAssociatedProductWebsites($linkedId);
             $linkData[$linkedId] = ['position' => (int) ($link['position'] ?? 0)];
@@ -106,7 +108,7 @@ final class ProductLinkProcessor extends \Maho\ApiPlatform\Processor
 
         $linkedId = (int) ($body['linkedProductId'] ?? $body['linked_product_id'] ?? 0);
         if ($linkedId <= 0) {
-            throw new BadRequestHttpException('linkedProductId is required and must be positive');
+            throw new UnprocessableEntityHttpException('linkedProductId is required and must be positive');
         }
 
         $this->authorizeAssociatedProductWebsites($linkedId);

@@ -331,7 +331,7 @@ describe('Cart Custom Options, File Security', function (): void {
             ],
         ]);
 
-        expect($response['status'])->toBe(400);
+        expect($response['status'])->toBe(422);
         expect($response['json']['message'])->toContain('not allowed');
     });
 
@@ -343,7 +343,7 @@ describe('Cart Custom Options, File Security', function (): void {
             ],
         ]);
 
-        expect($response['status'])->toBe(400);
+        expect($response['status'])->toBe(422);
         expect($response['json']['message'])->toContain('not allowed');
     });
 
@@ -355,7 +355,7 @@ describe('Cart Custom Options, File Security', function (): void {
             ],
         ]);
 
-        expect($response['status'])->toBe(400);
+        expect($response['status'])->toBe(422);
         expect($response['json']['message'])->toContain('not allowed');
     });
 
@@ -370,7 +370,7 @@ describe('Cart Custom Options, File Security', function (): void {
         ]);
 
         // Rejected by getimagesizefromstring, not valid image data
-        expect($response['status'])->toBe(400);
+        expect($response['status'])->toBe(422);
     });
 
     it('rejects image exceeding dimension limits', function (): void {
@@ -384,7 +384,7 @@ describe('Cart Custom Options, File Security', function (): void {
             ],
         ]);
 
-        expect($response['status'])->toBe(400);
+        expect($response['status'])->toBe(422);
         expect($response['json']['message'])->toContain('image size');
     });
 
@@ -396,7 +396,7 @@ describe('Cart Custom Options, File Security', function (): void {
             ],
         ]);
 
-        expect($response['status'])->toBe(400);
+        expect($response['status'])->toBe(422);
         expect($response['json']['message'])->toContain('base64');
     });
 
@@ -412,7 +412,7 @@ describe('Cart Custom Options, File Security', function (): void {
             ],
         ]);
 
-        expect($response['status'])->toBe(400);
+        expect($response['status'])->toBe(422);
         expect($response['json']['message'])->toContain('not a valid file-type option');
     });
 });

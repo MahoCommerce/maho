@@ -17,8 +17,8 @@ use Mage;
 use Mage_Downloadable_Model_Product_Type;
 use Maho\ApiPlatform\Trait\ProductLoaderTrait;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
  */
@@ -67,17 +67,17 @@ final class DownloadableLinkProcessor extends \Maho\ApiPlatform\Processor
 
         $title = (string) ($body['title'] ?? '');
         if ($title === '') {
-            throw new BadRequestHttpException('title is required');
+            throw new UnprocessableEntityHttpException('title is required');
         }
 
         $linkType = (string) ($body['linkType'] ?? $body['link_type'] ?? 'url');
         if (!in_array($linkType, ['url', 'file'], true)) {
-            throw new BadRequestHttpException("Invalid linkType: {$linkType}. Valid: url, file");
+            throw new UnprocessableEntityHttpException("Invalid linkType: {$linkType}. Valid: url, file");
         }
 
         $price = (float) ($body['price'] ?? 0);
         if ($price < 0) {
-            throw new BadRequestHttpException('Price must not be negative');
+            throw new UnprocessableEntityHttpException('Price must not be negative');
         }
 
         /** @var \Mage_Downloadable_Model_Link $link */
@@ -96,7 +96,7 @@ final class DownloadableLinkProcessor extends \Maho\ApiPlatform\Processor
         if ($linkType === 'url') {
             $linkUrl = (string) ($body['linkUrl'] ?? $body['link_url'] ?? '');
             if ($linkUrl === '') {
-                throw new BadRequestHttpException('linkUrl is required for url type links');
+                throw new UnprocessableEntityHttpException('linkUrl is required for url type links');
             }
             $link->setLinkUrl($linkUrl);
         }
@@ -131,7 +131,7 @@ final class DownloadableLinkProcessor extends \Maho\ApiPlatform\Processor
 
         $linkId = (int) ($body['linkId'] ?? $body['link_id'] ?? $body['id'] ?? 0);
         if ($linkId <= 0) {
-            throw new BadRequestHttpException('linkId is required');
+            throw new UnprocessableEntityHttpException('linkId is required');
         }
 
         /** @var \Mage_Downloadable_Model_Link $link */
@@ -146,7 +146,7 @@ final class DownloadableLinkProcessor extends \Maho\ApiPlatform\Processor
         if (isset($body['price'])) {
             $price = (float) $body['price'];
             if ($price < 0) {
-                throw new BadRequestHttpException('Price must not be negative');
+                throw new UnprocessableEntityHttpException('Price must not be negative');
             }
             $link->setPrice($price);
         }
@@ -183,7 +183,7 @@ final class DownloadableLinkProcessor extends \Maho\ApiPlatform\Processor
         $this->loadProduct($productId, Mage_Downloadable_Model_Product_Type::TYPE_DOWNLOADABLE);
 
         if ($linkId <= 0) {
-            throw new BadRequestHttpException('linkId is required');
+            throw new UnprocessableEntityHttpException('linkId is required');
         }
 
         /** @var \Mage_Downloadable_Model_Link $link */
@@ -205,7 +205,7 @@ final class DownloadableLinkProcessor extends \Maho\ApiPlatform\Processor
             \Mage_Downloadable_Model_Link::LINK_SHAREABLE_YES,
             \Mage_Downloadable_Model_Link::LINK_SHAREABLE_CONFIG,
         ], true)) {
-            throw new BadRequestHttpException('isShareable must be 0 (no), 1 (yes), or 2 (use config)');
+            throw new UnprocessableEntityHttpException('isShareable must be 0 (no), 1 (yes), or 2 (use config)');
         }
         return $isShareable;
     }

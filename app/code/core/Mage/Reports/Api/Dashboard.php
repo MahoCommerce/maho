@@ -13,6 +13,7 @@ declare(strict_types=1);
 namespace Mage\Reports\Api;
 
 use ApiPlatform\Metadata\ApiProperty;
+use Maho\ApiPlatform\Metadata\EnumSource;
 use ApiPlatform\Metadata\Get;
 use Maho\Config\ApiResource;
 
@@ -44,6 +45,6 @@ class Dashboard extends \Maho\ApiPlatform\Resource
 {
     public const ADMIN_RESOURCE = \Mage_Adminhtml_DashboardController::ADMIN_RESOURCE;
 
-    #[ApiProperty(identifier: true, description: 'Period of the totals and of the chart')]
+    #[ApiProperty(identifier: true, description: 'Period of the totals and of the chart', extraProperties: [EnumSource::KEY => ['24h', '7d', '1m', '3m', '6m', '1y', '2y']])]
     public string $period = '24h';
 }

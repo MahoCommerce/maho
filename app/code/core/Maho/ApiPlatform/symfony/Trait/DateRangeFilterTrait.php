@@ -55,7 +55,7 @@ trait DateRangeFilterTrait
      * order placed that day, which is precisely the range a caller asking for "today"
      * means to include.
      */
-    private function normalizeBoundary(string $value, bool $isUpperBound): string
+    protected function normalizeBoundary(string $value, bool $isUpperBound): string
     {
         $locale = \Mage::app()->getLocale();
         $dateOnly = preg_match('/^\d{4}-\d{2}-\d{2}$/', trim($value)) === 1;

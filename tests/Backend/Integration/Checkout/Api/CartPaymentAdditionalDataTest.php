@@ -8,8 +8,6 @@
 declare(strict_types=1);
 
 use Mage\Checkout\Api\CartMapper;
-use Mage\Checkout\Api\CartService;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 uses(Tests\MahoBackendTestCase::class);
 
@@ -29,7 +27,7 @@ describe('set-payment-method additionalData', function (): void {
 
         try {
             $loaded = Mage::getModel('sales/quote')->setStoreId(1)->load($quote->getId());
-            (new CartService())->setPaymentMethod($loaded, 'purchaseorder', ['po_number' => 'PO-1335']);
+            \Mage::getService('checkout/cart')->setPaymentMethod($loaded, 'purchaseorder', ['po_number' => 'PO-1335']);
 
             expect($loaded->getPayment()->getMethod())->toBe('purchaseorder')
                 ->and($loaded->getPayment()->getPoNumber())->toBe('PO-1335');
@@ -39,7 +37,7 @@ describe('set-payment-method additionalData', function (): void {
     });
 
     it('strips reserved keys and non-scalar values from additionalData', function (): void {
-        $built = CartService::buildPaymentImportData('checkmo', [
+        $built = \Mage::getService('checkout/cart')->buildPaymentImportData('checkmo', [
             'method' => 'purchaseorder',
             'checks' => 0,
             'additional_data' => ['x' => 'y'],
@@ -72,13 +70,13 @@ describe('set-payment-method additionalData', function (): void {
             $loaded = Mage::getModel('sales/quote')->setStoreId(1)->load($quote->getId());
             // txn_ref has no column of its own, so the flat delivery alone
             // would drop it at save time.
-            (new CartService())->setPaymentMethod($loaded, 'purchaseorder', [
+            \Mage::getService('checkout/cart')->setPaymentMethod($loaded, 'purchaseorder', [
                 'po_number' => 'PO-1335',
                 'txn_ref' => 'TXN-42',
                 'cc_number' => '4111111111111111',
             ]);
 
-            $backup = $loaded->getPayment()->getAdditionalInformation(CartService::PAYMENT_ADDITIONAL_DATA_KEY);
+            $backup = $loaded->getPayment()->getAdditionalInformation(\Mage_Checkout_Service_Cart::PAYMENT_ADDITIONAL_DATA_KEY);
 
             expect($backup)->toBe(['po_number' => 'PO-1335', 'txn_ref' => 'TXN-42']);
         } finally {
@@ -93,11 +91,11 @@ describe('set-payment-method additionalData', function (): void {
 
         try {
             $loaded = Mage::getModel('sales/quote')->setStoreId(1)->load($quote->getId());
-            $service = new CartService();
+            $service = \Mage::getService('checkout/cart');
             $service->setPaymentMethod($loaded, 'purchaseorder', ['po_number' => 'PO-1335']);
             $service->setPaymentMethod($loaded, 'checkmo');
 
-            expect($loaded->getPayment()->getAdditionalInformation(CartService::PAYMENT_ADDITIONAL_DATA_KEY))
+            expect($loaded->getPayment()->getAdditionalInformation(\Mage_Checkout_Service_Cart::PAYMENT_ADDITIONAL_DATA_KEY))
                 ->toBeNull();
         } finally {
             $quote->delete();
@@ -114,9 +112,9 @@ describe('set-payment-method additionalData', function (): void {
 
             // The message distinguishes the importData() checks from the
             // earlier assertPaymentMethodAvailable() gate, which would also
-            // throw BadRequestHttpException if checkmo were simply inactive.
-            expect(fn() => (new CartService())->setPaymentMethod($loaded, 'checkmo'))
-                ->toThrow(BadRequestHttpException::class, 'Payment method is not available: ');
+            // throw Mage_Core_Exception if checkmo were simply inactive.
+            expect(fn() => \Mage::getService('checkout/cart')->setPaymentMethod($loaded, 'checkmo'))
+                ->toThrow(Mage_Core_Exception::class, 'Payment method is not available: ');
         } finally {
             $quote->delete();
         }
@@ -125,8 +123,8 @@ describe('set-payment-method additionalData', function (): void {
     it('treats a card method as unusable over the API', function (): void {
         // buildPaymentImportData() strips every cc_* key, so Mage_Payment_Model_Method_Cc::validate()
         // can never pass. Such a method must not reach the setter nor the advertised list.
-        expect(CartService::isMethodUsableOverApi(new Mage_Paygate_Model_Authorizenet()))->toBeFalse()
-            ->and(CartService::isMethodUsableOverApi(new Mage_Payment_Model_Method_Checkmo()))->toBeTrue();
+        expect(\Mage::getService('checkout/cart')->isMethodUsableOverApi(new Mage_Paygate_Model_Authorizenet()))->toBeFalse()
+            ->and(\Mage::getService('checkout/cart')->isMethodUsableOverApi(new Mage_Payment_Model_Method_Checkmo()))->toBeTrue();
     });
 
     it('does not advertise a method the setter would reject', function (): void {

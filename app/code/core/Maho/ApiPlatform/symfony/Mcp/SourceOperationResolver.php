@@ -24,8 +24,8 @@ use ApiPlatform\Metadata\Resource\Factory\ResourceMetadataCollectionFactoryInter
  * to tell create from update, `getName()` to route named operations. So dispatch
  * swaps the mirrored operation back in and the pipeline below is unchanged REST.
  *
- * The execution flags mirror `ApiPlatform\Mcp\Server\Handler`. Its `ToolProvider`
- * fallback is not mirrored: argument mapping belongs to
+ * The execution flags mirror `ApiPlatform\Mcp\Server\Handler`, except `read`, which
+ * follows REST. Its `ToolProvider` fallback is not mirrored: argument mapping belongs to
  * {@see \Maho\ApiPlatform\State\McpDispatchProvider}, which uses the serializer
  * rather than the object mapper so groups match REST.
  */
@@ -79,7 +79,10 @@ final class SourceOperationResolver
             $operation = $operation->withValidate(false);
         }
         if ($operation->canRead() === null) {
-            $operation = $operation->withRead(true);
+            // The default of the REST MainController: a create has no record to read, so its provider answers 404 for ID 0.
+            $operation = $operation->withRead(
+                !empty($operation->getUriVariables()) || in_array(strtoupper($operation->getMethod()), ['GET', 'HEAD', 'OPTIONS'], true),
+            );
         }
         if ($operation->canDeserialize() === null) {
             $operation = $operation->withDeserialize(false);

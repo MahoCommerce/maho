@@ -22,11 +22,90 @@ class Maho_Ai_Model_Task extends Mage_Core_Model_Abstract
     public const TYPE_COMPLETION = 'completion';
     public const TYPE_EMBEDDING  = 'embedding';
     public const TYPE_IMAGE      = 'image';
+    /** A turn of the admin assistant with its tools, in a conversation of its own. */
+    public const TYPE_AGENT      = 'agent';
+
+    /** The queue that carries the tasks; nothing routes it, so the catch-all pool runs it. */
+    public const QUEUE = 'ai';
 
     #[\Override]
     protected function _construct(): void
     {
         $this->_init('ai/task');
+    }
+
+    public function getTaskType(): ?string
+    {
+        $value = $this->getData('task_type');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getConversationId(): ?int
+    {
+        $value = $this->getData('conversation_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setConversationId(?int $value): static
+    {
+        return $this->setData('conversation_id', $value);
+    }
+
+    public function getScheduleId(): ?int
+    {
+        $value = $this->getData('schedule_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setScheduleId(?int $value): static
+    {
+        return $this->setData('schedule_id', $value);
+    }
+
+    public function isAgent(): bool
+    {
+        return $this->getTaskType() === self::TYPE_AGENT;
+    }
+
+    /** The dedupe key of the queue message that runs this task. */
+    public static function queueKey(int $taskId): string
+    {
+        return 'ai_task_' . $taskId;
+    }
+
+    /**
+     * Send a pending task to a queue worker. A second call while the message waits does nothing.
+     * Without the queue module, or while the async queue is off for a task that is not an agent
+     * run, the task stays pending for the cron runner.
+     */
+    public function queue(): void
+    {
+        if (!$this->getId() || !$this->isPending() || !Mage::helper('core')->isModuleEnabled('Maho_Queue')) {
+            return;
+        }
+        if (!$this->isAgent() && !Mage::getStoreConfigFlag('ai/queue/enabled')) {
+            return;
+        }
+        \Maho\Queue\QueueManager::dispatch(
+            new Maho_Ai_Model_Task_QueueMessage((int) $this->getId()),
+            queue: self::QUEUE,
+            dedupeKey: self::queueKey((int) $this->getId()),
+        );
+    }
+
+    /** True while the queue holds a message for this task that a worker has not finished. */
+    public function isQueued(): bool
+    {
+        if (!$this->getId() || !Mage::helper('core')->isModuleEnabled('Maho_Queue')) {
+            return false;
+        }
+
+        return \Maho\Queue\QueueManager::dbTransport()->inFlightRowExists(self::queueKey((int) $this->getId()));
+    }
+
+    public function isProcessing(): bool
+    {
+        return $this->getData('status') === self::STATUS_PROCESSING;
     }
 
     public function getMessagesArray(): array

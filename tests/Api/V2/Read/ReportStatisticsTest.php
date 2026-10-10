@@ -114,8 +114,8 @@ describe('Report statistics', function (): void {
     });
 
     it('rejects an unknown mode or report code', function (): void {
-        expect(apiPost(REPORT_STATISTICS_PATH . '/refresh', ['mode' => 'all'], adminToken())['status'])->toBe(400)
-            ->and(apiPost(REPORT_STATISTICS_PATH . '/refresh', ['reports' => ['nope']], adminToken())['status'])->toBe(400)
+        expect(apiPost(REPORT_STATISTICS_PATH . '/refresh', ['mode' => 'all'], adminToken())['status'])->toBe(422)
+            ->and(apiPost(REPORT_STATISTICS_PATH . '/refresh', ['reports' => ['nope']], adminToken())['status'])->toBe(422)
             ->and(apiPost(REPORT_STATISTICS_PATH . '/refresh', ['reports' => 'sales'], adminToken())['status'])->toBe(400);
     });
 });

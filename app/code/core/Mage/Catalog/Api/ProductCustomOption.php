@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Mage\Catalog\Api;
 
 use ApiPlatform\Metadata\ApiProperty;
+use Maho\ApiPlatform\Metadata\EnumSource;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
@@ -87,7 +88,7 @@ class ProductCustomOption extends \Maho\ApiPlatform\Resource
     #[ApiProperty(description: 'Option title')]
     public string $title = '';
 
-    #[ApiProperty(description: 'Option type (field, area, drop_down, radio, checkbox, multiple, file, date, date_time, time)')]
+    #[ApiProperty(description: 'Option type (field, area, drop_down, radio, checkbox, multiple, file, date, date_time, time)', extraProperties: [EnumSource::KEY => ['field', 'area', 'drop_down', 'radio', 'checkbox', 'multiple', 'file', 'date', 'date_time', 'time']])]
     public string $type = 'field';
 
     #[ApiProperty(description: 'Whether option is required')]
@@ -99,7 +100,7 @@ class ProductCustomOption extends \Maho\ApiPlatform\Resource
     #[ApiProperty(description: 'Price (for non-select types)')]
     public ?float $price = null;
 
-    #[ApiProperty(description: 'Price type: fixed or percent (for non-select types)')]
+    #[ApiProperty(description: 'Price type: fixed or percent (for non-select types)', extraProperties: [EnumSource::KEY => ['fixed', 'percent']])]
     public string $priceType = 'fixed';
 
     #[ApiProperty(description: 'Max characters (for field/area types)')]

@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Maho\ApiPlatform\Trait;
 
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
  * Shared validation for an API items list that names order items.
@@ -40,12 +41,12 @@ trait OrderItemsTrait
 
         $orderItemId = $itemData['orderItemId'] ?? null;
         if (!is_numeric($orderItemId) || (int) $orderItemId <= 0) {
-            throw new BadRequestHttpException('Each item must have a valid orderItemId');
+            throw new UnprocessableEntityHttpException('Each item must have a valid orderItemId');
         }
 
         $qty = $itemData['qty'] ?? null;
         if (!is_numeric($qty) || ($allowZeroQty ? (float) $qty < 0 : (float) $qty <= 0)) {
-            throw new BadRequestHttpException($allowZeroQty
+            throw new UnprocessableEntityHttpException($allowZeroQty
                 ? 'Each item must have qty >= 0'
                 : 'Each item must have qty > 0');
         }
@@ -53,7 +54,7 @@ trait OrderItemsTrait
         $orderItemId = (int) $orderItemId;
         $orderItem = $order->getItemById($orderItemId);
         if (!$orderItem) {
-            throw new BadRequestHttpException("Order item {$orderItemId} does not belong to this order");
+            throw new UnprocessableEntityHttpException("Order item {$orderItemId} does not belong to this order");
         }
 
         return ['item' => $orderItem, 'qty' => (float) $qty];

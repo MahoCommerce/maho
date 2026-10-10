@@ -11,6 +11,8 @@ declare(strict_types=1);
 namespace Maho\Blog\Api;
 
 use ApiPlatform\Metadata\ApiProperty;
+use Maho\ApiPlatform\Metadata\EnumSource;
+use Maho\ApiPlatform\Metadata\ValueLists;
 use Maho\Config\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
@@ -25,6 +27,7 @@ use ApiPlatform\OpenApi\Model\Response as OpenApiResponse;
 use Maho\ApiPlatform\CrudProcessor;
 use Maho\ApiPlatform\CrudResource;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 #[ApiResource(
     mahoSection: 'Content',
@@ -121,6 +124,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
             extraArgs: [
                 'urlKey' => ['type' => 'String', 'description' => 'Exact URL-key lookup (returns 0 or 1 post)'],
                 'search' => ['type' => 'String', 'description' => 'Partial match on the post title or body'],
+                'scope' => ['type' => 'String', 'description' => 'Give "all" to list the records of every store view, the disabled and unpublished ones too, as the admin grid does. It needs backend access. Without it, the list holds only the published records of the current store view'],
                 'categoryId' => ['type' => 'Int', 'description' => 'Only posts in this blog category'],
                 'createdFrom' => ['type' => 'String', 'description' => 'Created at or after this UTC date or datetime; a bare date means from 00:00:00'],
                 'createdTo' => ['type' => 'String', 'description' => 'Created at or before this UTC date or datetime; a bare date includes the whole day'],
@@ -153,9 +157,10 @@ class BlogPost extends CrudResource
     public ?string $metaTitle = null;
     public ?string $metaDescription = null;
     public ?string $metaKeywords = null;
+    #[ApiProperty(extraProperties: [EnumSource::KEY => ValueLists::META_ROBOTS])]
     public ?string $metaRobots = null;
 
-    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
+    #[ApiProperty(writable: false, extraProperties: [EnumSource::KEY => ['enabled', 'disabled'], 'computed' => true])]
     public string $status = 'enabled';
 
     public ?bool $isActive = null;
@@ -227,7 +232,7 @@ class BlogPost extends CrudResource
             || preg_match('#^[a-z][a-z0-9+.-]*:#i', $normalized)
             || in_array('..', explode('/', $normalized), true)
         ) {
-            throw new BadRequestHttpException(
+            throw new UnprocessableEntityHttpException(
                 'image must be a path relative to media/blog, with no leading "/", no ".." segment and no scheme',
             );
         }
@@ -272,7 +277,7 @@ class BlogPost extends CrudResource
             ->getAllIds());
         $missing = array_diff($ids, $existing);
         if ($missing !== []) {
-            throw new BadRequestHttpException('Unknown blog category id(s): ' . implode(', ', $missing));
+            throw new UnprocessableEntityHttpException('Unknown blog category id(s): ' . implode(', ', $missing));
         }
     }
 

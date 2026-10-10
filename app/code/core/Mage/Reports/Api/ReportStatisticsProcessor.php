@@ -15,6 +15,7 @@ use Maho\Queue\QueueManager;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 use Symfony\Component\Messenger\Stamp\TransportMessageIdStamp;
 
 final class ReportStatisticsProcessor extends \Maho\ApiPlatform\Processor
@@ -38,7 +39,7 @@ final class ReportStatisticsProcessor extends \Maho\ApiPlatform\Processor
         $body = $this->parseRequestBody($context['request'] ?? null);
         $mode = $body['mode'] ?? self::MODE_RECENT;
         if (!in_array($mode, [self::MODE_RECENT, self::MODE_LIFETIME], true)) {
-            throw new BadRequestHttpException('mode must be recent or lifetime');
+            throw new UnprocessableEntityHttpException('mode must be recent or lifetime');
         }
         $codes = $this->readCodes($body['reports'] ?? []);
 
@@ -91,7 +92,7 @@ final class ReportStatisticsProcessor extends \Maho\ApiPlatform\Processor
         $codes = [];
         foreach ($reports as $code) {
             if (!is_string($code) || !$statistics->isKnownCode($code)) {
-                throw new BadRequestHttpException('reports must be a list of: ' . implode(', ', $statistics->getCodes()));
+                throw new UnprocessableEntityHttpException('reports must be a list of: ' . implode(', ', $statistics->getCodes()));
             }
             $codes[$code] = $code;
         }

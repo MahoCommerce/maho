@@ -165,6 +165,33 @@ public function __invoke(My_Module_Model_SomeMessage $message): void {}
   `ApiResource` that adds Maho permission metadata (`mahoLabel`, `mahoSection`, `mahoOperations`,
   `mahoCustomerScoped`). Most `maho*` fields are auto-derived; set them only when the default is
   wrong. See `app/code/core/Mage/Core/Api/Store.php` for a worked example.
+- A property whose valid values live in the store (a layout code, a store view code, a customer
+  group) names its source with `extraProperties: [EnumSource::KEY => 'page/source_layout']` on
+  `#[ApiProperty]`. The schema factories turn the live list into an `enum` for OpenAPI and the
+  MCP tools, so a client picks from a closed list. The source is a model alias with
+  `toOptionArray()`, an `alias::method` pair, a `Class::method` callable or an inline list for a set
+  that code defines; see `Maho\ApiPlatform\Metadata\EnumSource` and `ValueLists`. Never use
+  `openapiContext: ['enum' => …]`: it reaches the OpenAPI document only.
+- Writes follow HTTP. PATCH (`application/merge-patch+json`) changes the fields in the body. PUT
+  replaces the record, so a field that the body leaves out gets its default value. Declare `Patch`
+  before `Put`: the MCP update tool comes from the first one. Set
+  `denormalizationContext: ['allow_extra_attributes' => false, 'collect_denormalization_errors' => true]`
+  so an unknown field is a 400 and every type error comes back at once. Many older resources still
+  use PUT as a partial update; they move one at a time.
+- Pick the status code by what went wrong (RFC 9110). 400 (`BadRequestHttpException`): the request
+  cannot be read, such as invalid JSON, a value of the wrong type or shape, or a bad query string or
+  header. 404: the record in the URL does not exist. 409 (`ConflictHttpException`): the state of the
+  record does not allow the action. 422 (`UnprocessableEntityHttpException`, `ValidationException`):
+  any other problem in the body, such as a missing field, a value out of range or an unknown ID. The
+  OAuth token endpoints keep the 400 of RFC 6749. Never catch an exception only to throw it again with
+  another status: `ApiExceptionListener` maps `Mage_Core_Exception` and its subclasses, and an
+  unexpected exception must stay a 500
+- A resource whose writes go through a service maps to its model with the Symfony ObjectMapper: a
+  class `#[Map(target: Model::class)]` and a `#[Map]` on each DTO property (a model keeps its data
+  in `_data`, so implicit mapping finds nothing and writes nothing). A read-only property takes
+  `#[Map(if: new TargetClass(self::class))]`. The provider returns models (a `Post` sets `read: true`
+  and gets the new model from the service), and the processor receives the model and calls the
+  service. `Maho\CustomerSegmentation\Api\CustomerSegment` is the worked example
 - An HTTP QUERY collection operation (`ApiPlatform\Metadata\Query`, RFC 10008) receives its body as
   `$context['filters']` through `Maho\ApiPlatform\State\QueryBodyFiltersProvider`, so a provider
   serves GET and QUERY with one code path. Import it as `HttpQuery` next to the GraphQL `Query`.
@@ -254,6 +281,26 @@ class My_Module_Checkout_CartController extends Mage_Checkout_CartController { /
   directory: `$uploader->saveToStorage(Mage::getStorage('media'), 'catalog/category')` streams
   the PHP temp file to the mount with the same name rules as `save()`, and a model that later
   reads or deletes that file checks the stored name with `\Maho\Io::getPathWithinMount()` first
+- **Services** (#1348): a flow that two or more transports start (an admin controller, the API, a CLI
+  command) keeps its rules in one service class under `<Module>/Service/`, declared under
+  `<global><services>` and resolved with `Mage::getService('group/name')`, never `new`. No interface
+  and no base class: a `<rewrite>` extends the service, so the class is the contract. Name the methods
+  `getById()`, `save()`, `delete()`, plus one verb for each other action (`refresh()`). A service
+  takes and returns models, never a request or a session: the transport writes its input into the
+  model through the typed setters, and the service checks and saves it. It never throws an HTTP
+  exception. Pick the exception by what went wrong (RFC 9110):
+  `Mage_Core_Exception_NoSuchEntity` (404) when the record that the URL names does not exist,
+  `Mage_Core_Exception_Conflict` (409) when the current state of the record does not allow the action
+  (an order that is already canceled, an email that another customer uses, a lock that another request
+  holds), `Mage_Core_Exception_Input` (422 with `details.errors`) for errors of named fields, and a
+  plain `Mage_Core_Exception` (422) for any other content that the service cannot accept, such as an
+  unknown SKU in the body. 400 is for a malformed request only, which the transport detects. A
+  `\RuntimeException` is a server fault (500), so a transport never turns it into a client error, and
+  a transport never catches a `Mage_Core_Exception` only to throw it again with another status.
+  `ApiExceptionListener` maps these for REST and `MageExceptionNormalizer` for GraphQL. Code that
+  reads the request (a path, a body, the API Platform context) stays in the transport, as
+  `Mage\Checkout\Api\CartRequest` does. `tests/Backend/Unit/Maho/ServiceLayoutTest.php` enforces the
+  layout
 - **Errors**: `Mage::throwException()` for user-facing errors (`Mage_Core_Exception`),
   `Mage::log()` / `Mage::logException()` for logging
 

@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Mage\Newsletter\Api;
 
 use ApiPlatform\Metadata\ApiProperty;
+use Maho\ApiPlatform\Metadata\EnumSource;
 use Maho\Config\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GraphQl\Mutation;
@@ -101,7 +102,7 @@ class NewsletterSubscription extends CrudResource
     #[ApiProperty(writable: false)]
     public ?string $changeStatusAt = null;
 
-    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
+    #[ApiProperty(writable: false, extraProperties: [EnumSource::KEY => ['subscribed', 'not_active', 'unsubscribed', 'unconfirmed'], 'computed' => true])]
     public string $status = '';
 
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]

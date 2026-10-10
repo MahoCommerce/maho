@@ -252,12 +252,12 @@ describe('Segment Refresh Operations', function () {
         ]);
 
         // Test inactive segments - they should not be included in auto refresh
-        $segment->setIsActive(0);
+        $segment->setIsActive(false);
         $segment->setRefreshMode('auto');
         $segment->setRefreshStatus('pending');
         $segment->save();
 
-        expect($segment->getIsActive())->toBe(0);
+        expect($segment->getIsActive())->toBeFalse();
         expect($segment->getRefreshMode())->toBe('auto');
         expect($segment->getRefreshStatus())->toBe('pending');
 
@@ -318,6 +318,7 @@ describe('Segment Refresh Operations', function () {
                 $order->setCustomerId($customer->getId());
                 $order->setCustomerEmail($customer->getEmail());
                 $order->setGrandTotal($orderData[$orderIndex]['grand_total']);
+                $order->setBaseGrandTotal($orderData[$orderIndex]['grand_total']);
                 $order->setData('state', orderStateForStatus($orderData[$orderIndex]['status']));
                 $order->setStatus($orderData[$orderIndex]['status']);
                 $order->save();
@@ -342,9 +343,9 @@ describe('Segment Refresh Operations', function () {
         $segment = Mage::getModel('customersegmentation/segment');
         $segment->setName($name);
         $segment->setDescription('Test segment for ' . $name);
-        $segment->setIsActive(1);
-        $segment->setWebsiteIds('1'); // Base website
-        $segment->setCustomerGroupIds('0,1,2,3'); // All customer groups
+        $segment->setIsActive();
+        $segment->setWebsiteIds([1]); // Base website
+        $segment->setCustomerGroupIds([0, 1, 2, 3]); // All customer groups
         $segment->setConditionsSerialized(Mage::helper('core')->jsonEncode($conditions));
         $segment->setRefreshMode('manual');
         $segment->setRefreshStatus('pending');

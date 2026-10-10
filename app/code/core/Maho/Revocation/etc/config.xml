@@ -34,6 +34,11 @@ SPDX-License-Identifier: OSL-3.0
                 <class>Maho_Revocation_Helper</class>
             </revocation>
         </helpers>
+        <services>
+            <revocation>
+                <class>Maho_Revocation_Service</class>
+            </revocation>
+        </services>
         <resources>
             <revocation_setup>
                 <setup>

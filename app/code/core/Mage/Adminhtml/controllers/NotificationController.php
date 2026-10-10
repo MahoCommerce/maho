@@ -30,7 +30,7 @@ class Mage_Adminhtml_NotificationController extends Mage_Adminhtml_Controller_Ac
             $model = Mage::getModel('adminnotification/inbox')
                 ->load($id);
 
-            if (!$model->getId()) {
+            if (!$model->isVisibleToCurrentAdmin()) {
                 $session->addError(Mage::helper('adminnotification')->__('Unable to proceed. Please, try again.'));
                 $this->_redirect('*/*/');
                 return ;
@@ -64,7 +64,7 @@ class Mage_Adminhtml_NotificationController extends Mage_Adminhtml_Controller_Ac
                 foreach ($ids as $id) {
                     $model = Mage::getModel('adminnotification/inbox')
                         ->load($id);
-                    if ($model->getId()) {
+                    if ($model->isVisibleToCurrentAdmin()) {
                         $model->setIsRead()
                             ->save();
                     }
@@ -89,7 +89,7 @@ class Mage_Adminhtml_NotificationController extends Mage_Adminhtml_Controller_Ac
             $model = Mage::getModel('adminnotification/inbox')
                 ->load($id);
 
-            if (!$model->getId()) {
+            if (!$model->isVisibleToCurrentAdmin()) {
                 $this->_redirect('*/*/');
                 return ;
             }
@@ -122,7 +122,7 @@ class Mage_Adminhtml_NotificationController extends Mage_Adminhtml_Controller_Ac
                 foreach ($ids as $id) {
                     $model = Mage::getModel('adminnotification/inbox')
                         ->load($id);
-                    if ($model->getId()) {
+                    if ($model->isVisibleToCurrentAdmin()) {
                         $model->setIsRemove()
                             ->save();
                     }

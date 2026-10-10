@@ -249,7 +249,7 @@ describe('Product Create Lifecycle (REST)', function (): void {
             'price' => 10.00,
             'specialFromDate' => 'not-a-date',
         ], $token);
-        expect($badDate['status'])->toBe(400);
+        expect($badDate['status'])->toBe(422);
 
         $inverted = apiPost('/api/rest/v2/products', [
             'sku' => "PEST-INVDATE-{$suffix}",
@@ -258,7 +258,7 @@ describe('Product Create Lifecycle (REST)', function (): void {
             'specialFromDate' => '2026-09-01',
             'specialToDate' => '2026-08-01',
         ], $token);
-        expect($inverted['status'])->toBe(400);
+        expect($inverted['status'])->toBe(422);
     });
 
     it('creates a virtual product', function (): void {
@@ -307,14 +307,14 @@ describe('Product Create Lifecycle (REST)', function (): void {
             'name' => 'No SKU Product',
             'price' => 10.00,
         ], $token);
-        expect($noSku['status'])->toBeIn([400, 422]);
+        expect($noSku['status'])->toBe(422);
 
         // Missing name
         $noName = apiPost('/api/rest/v2/products', [
             'sku' => 'PEST-NO-NAME-' . substr(uniqid(), -8),
             'price' => 10.00,
         ], $token);
-        expect($noName['status'])->toBeIn([400, 422]);
+        expect($noName['status'])->toBe(422);
     });
 
 });
@@ -661,7 +661,7 @@ describe('Product Extended Fields (REST)', function (): void {
             'specialFromDate' => '20260801',
         ], $token);
 
-        expect($create['status'])->toBe(400);
+        expect($create['status'])->toBe(422);
     });
 
     it('rejects out-of-range extended stock values', function (): void {
@@ -683,13 +683,13 @@ describe('Product Extended Fields (REST)', function (): void {
             'sku' => $sku,
             'backorders' => 5,
         ], $token);
-        expect($badBackorders['status'])->toBe(400);
+        expect($badBackorders['status'])->toBe(422);
 
         $negativeMinQty = apiPut('/api/rest/v2/inventory', [
             'sku' => $sku,
             'minQty' => -3,
         ], $token);
-        expect($negativeMinQty['status'])->toBe(400);
+        expect($negativeMinQty['status'])->toBe(422);
 
         $goodBulk = apiPut('/api/rest/v2/inventory/bulk', [
             'items' => [
@@ -703,7 +703,7 @@ describe('Product Extended Fields (REST)', function (): void {
                 ['sku' => $sku, 'qty' => 2, 'qtyIncrements' => -1],
             ],
         ], $token);
-        expect($badBulk['status'])->toBe(400);
+        expect($badBulk['status'])->toBe(422);
     });
 
     it('writes extended stock data on create and reads it back through stockItem, backend columns only for privileged callers', function (): void {

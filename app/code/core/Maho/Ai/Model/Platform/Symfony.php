@@ -66,6 +66,17 @@ class Maho_Ai_Model_Platform_Symfony implements
         return $text;
     }
 
+    /** The Symfony AI platform behind this provider, for callers that need tool calling or streaming. */
+    public function getPlatform(): PlatformInterface
+    {
+        return $this->platform;
+    }
+
+    public function getDefaultChatModel(): string
+    {
+        return $this->defaultChatModel;
+    }
+
     #[\Override]
     public function getLastTokenUsage(): array
     {
@@ -244,10 +255,43 @@ class Maho_Ai_Model_Platform_Symfony implements
         $catalog = new \Symfony\AI\Platform\Bridge\Anthropic\ModelCatalog($additional);
 
         return new self(
-            platform: \Symfony\AI\Platform\Bridge\Anthropic\Factory::createPlatform($apiKey, modelCatalog: $catalog),
+            platform: \Symfony\AI\Platform\Bridge\Anthropic\Factory::createPlatform(
+                $apiKey,
+                httpClient: \Maho\Http\Client::create(['headers' => self::anthropicWorkspaceHeaders($storeId)]),
+                modelCatalog: $catalog,
+                eventDispatcher: self::anthropicEventDispatcher(),
+            ),
             platformCode: Maho_Ai_Model_Platform::ANTHROPIC,
             defaultChatModel: $chatModel,
         );
+    }
+
+    /**
+     * Give each request to Anthropic max_tokens 32000 when the request has no max_tokens. The Anthropic API
+     * requires the field, and the bridge sends 1000. 32000 is the output maximum of the Claude model with the
+     * smallest one (Opus 4 and 4.1).
+     */
+    public static function anthropicEventDispatcher(): \Symfony\Component\EventDispatcher\EventDispatcher
+    {
+        $dispatcher = new \Symfony\Component\EventDispatcher\EventDispatcher();
+        $dispatcher->addListener(
+            \Symfony\AI\Platform\Event\InvocationEvent::class,
+            static fn(\Symfony\AI\Platform\Event\InvocationEvent $event) => $event->setOptions($event->getOptions() + ['max_tokens' => 32000]),
+        );
+        return $dispatcher;
+    }
+
+    /**
+     * Return the anthropic-workspace-id header when a workspace ID is set.
+     *
+     * Anthropic refuses a request with an API key that is not scoped to a workspace, if the request has no such header.
+     *
+     * @return array<string, string>
+     */
+    public static function anthropicWorkspaceHeaders(?int $storeId): array
+    {
+        $workspaceId = trim((string) Mage::getStoreConfig('ai/general/anthropic_workspace_id', $storeId));
+        return $workspaceId === '' ? [] : ['anthropic-workspace-id' => $workspaceId];
     }
 
     public static function createForGoogle(?int $storeId): self
@@ -356,8 +400,25 @@ class Maho_Ai_Model_Platform_Symfony implements
         }
         $chatModel = (string) Mage::getStoreConfig('ai/general/openrouter_model', $storeId);
 
+        // The bridge ships a static model list that ages quickly; register the configured
+        // id on top so a newer model still resolves, with the capabilities every
+        // OpenRouter chat model offers.
+        $additional = [];
+        if ($chatModel !== '') {
+            $additional[$chatModel] = [
+                'class' => \Symfony\AI\Platform\Bridge\Generic\CompletionsModel::class,
+                'capabilities' => [
+                    \Symfony\AI\Platform\Capability::INPUT_MESSAGES,
+                    \Symfony\AI\Platform\Capability::OUTPUT_TEXT,
+                    \Symfony\AI\Platform\Capability::OUTPUT_STREAMING,
+                    \Symfony\AI\Platform\Capability::TOOL_CALLING,
+                ],
+            ];
+        }
+        $catalog = new \Symfony\AI\Platform\Bridge\OpenRouter\ModelCatalog($additional);
+
         return new self(
-            platform: \Symfony\AI\Platform\Bridge\OpenRouter\Factory::createPlatform($apiKey),
+            platform: \Symfony\AI\Platform\Bridge\OpenRouter\Factory::createPlatform($apiKey, modelCatalog: $catalog),
             platformCode: Maho_Ai_Model_Platform::OPENROUTER,
             defaultChatModel: $chatModel,
         );

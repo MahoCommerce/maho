@@ -69,11 +69,11 @@ class Maho_Ai_Adminhtml_AiController extends Mage_Adminhtml_Controller_Action
     #[Maho\Config\Route('/admin/ai/tasks')]
     public function tasksAction(): void
     {
-        $this->_title(Mage::helper('ai')->__('AI Task History'));
+        $this->_title(Mage::helper('ai')->__('AI Request Queue'));
         $this->_initAction();
         $this->_addBreadcrumb(
-            Mage::helper('ai')->__('Task History'),
-            Mage::helper('ai')->__('Task History'),
+            Mage::helper('ai')->__('Request Queue'),
+            Mage::helper('ai')->__('Request Queue'),
         );
         $this->renderLayout();
     }
@@ -85,23 +85,23 @@ class Maho_Ai_Adminhtml_AiController extends Mage_Adminhtml_Controller_Action
         $task = Mage::getModel('ai/task')->load($id);
 
         if (!$task->getId()) {
-            Mage::getSingleton('adminhtml/session')->addError(Mage::helper('ai')->__('Task not found.'));
+            Mage::getSingleton('adminhtml/session')->addError(Mage::helper('ai')->__('Request not found.'));
             $this->_redirect('*/*/tasks');
             return;
         }
 
         Mage::register('current_ai_task', $task);
 
-        $this->_title(Mage::helper('ai')->__('Task #%s', $id));
+        $this->_title(Mage::helper('ai')->__('Request #%s', $id));
         $this->_initAction();
         $this->_addBreadcrumb(
-            Mage::helper('ai')->__('Task History'),
-            Mage::helper('ai')->__('Task History'),
+            Mage::helper('ai')->__('Request Queue'),
+            Mage::helper('ai')->__('Request Queue'),
             $this->getUrl('*/*/tasks'),
         );
         $this->_addBreadcrumb(
-            Mage::helper('ai')->__('Task #%s', $id),
-            Mage::helper('ai')->__('Task #%s', $id),
+            Mage::helper('ai')->__('Request #%s', $id),
+            Mage::helper('ai')->__('Request #%s', $id),
         );
         $this->renderLayout();
     }
@@ -131,7 +131,7 @@ class Maho_Ai_Adminhtml_AiController extends Mage_Adminhtml_Controller_Action
         $task = Mage::getModel('ai/task')->load($id);
         if (!$task->getId()) {
             $this->getResponse()->setHttpResponseCode(404);
-            $this->getResponse()->setBodyJson(['error' => 'Task not found.']);
+            $this->getResponse()->setBodyJson(['error' => 'Request not found.']);
             return;
         }
 

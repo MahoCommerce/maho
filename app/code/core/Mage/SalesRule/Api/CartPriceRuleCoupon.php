@@ -18,6 +18,7 @@ use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\Post;
+use Maho\ApiPlatform\Metadata\ListFilter;
 
 // The grants of CartPriceRule give access, so this uses the plain API Platform
 // attribute and is not in the permission registry.
@@ -34,7 +35,12 @@ use ApiPlatform\Metadata\Post;
             uriVariables: ['ruleId' => new Link(fromClass: CartPriceRule::class, identifiers: ['id'])],
             requirements: ['ruleId' => '\d+'],
             security: "is_granted('ROLE_ADMIN') or is_granted('cart-price-rules/read')",
-            description: 'List the coupons of a cart price rule, newest first. Filters: search (every word must match part of the code), isUsed, isPrimary',
+            description: 'List the coupons of a cart price rule, newest first',
+            parameters: [
+                'search' => new ListFilter('Every word must match part of the code'),
+                'isUsed' => new ListFilter('Only the used coupons, or only the unused coupons', 'boolean'),
+                'isPrimary' => new ListFilter('Only the coupon of a rule with couponType "specific", or only the generated coupons', 'boolean'),
+            ],
         ),
         new Post(
             uriTemplate: '/cart-price-rules/{ruleId}/coupons/generate',

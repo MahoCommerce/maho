@@ -38,7 +38,7 @@ use Mage\Customer\Api\Address;
         new Get(
             uriTemplate: '/carts/{id}',
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('carts/read')",
-            description: 'Get a cart by numeric ID. CartProvider enforces per-customer ownership via verifyCartAccess(); guest masked-ID lookups go through /guest-carts/{id}.',
+            description: 'Get a cart by numeric ID. CartProvider enforces per-customer ownership via verifyAccess(); guest masked-ID lookups go through /guest-carts/{id}.',
         ),
         new Post(
             uriTemplate: '/carts',
@@ -74,8 +74,8 @@ use Mage\Customer\Api\Address;
         // Authenticated-cart checkout sub-resources. These mirror the guest-cart
         // endpoints onto the numeric /carts/{id} path so a logged-in customer can
         // run the full checkout flow over REST (not only GraphQL). CartProvider /
-        // CartProcessor resolve the cart generically via resolveCartFromRequest()
-        // and verifyCartAccess() enforces per-customer ownership.
+        // CartProcessor resolve the cart generically via CartRequest::resolve()
+        // and verifyAccess() enforces per-customer ownership.
         new Post(
             uriTemplate: '/carts/{id}/coupon',
             name: 'apply_my_coupon',
@@ -150,7 +150,7 @@ use Mage\Customer\Api\Address;
         ),
         // Gift messages — cart-level and per-item, for both authenticated and
         // guest carts. PUT sets/updates (body: {sender, recipient, message});
-        // DELETE clears. CartProcessor reuses CartService::setGiftMessage().
+        // DELETE clears. CartProcessor reuses \Mage_Checkout_Service_Cart::setGiftMessage().
         new Put(
             uriTemplate: '/carts/{id}/gift-message',
             name: 'set_my_cart_gift_message',

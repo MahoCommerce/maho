@@ -176,6 +176,11 @@ abstract class Mage_Rule_Model_Resource_Abstract extends Mage_Core_Model_Resourc
      */
     public function getAssociatedEntityIds($ruleId, $entityType)
     {
+        // A rule that is not saved has no associations, and PostgreSQL refuses to compare rule_id with ''
+        if (!$ruleId) {
+            return [];
+        }
+
         $entityInfo = $this->_getAssociatedEntityInfo($entityType);
 
         $select = $this->_getReadAdapter()->select()

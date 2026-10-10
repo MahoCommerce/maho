@@ -96,6 +96,6 @@ describe('PUT /api/rest/v2/inventory partial update', function (): void {
         $token = serviceToken(['inventory/write']);
 
         $response = apiPut('/api/rest/v2/inventory', ['sku' => $sku], $token);
-        expect($response['status'])->toBe(400);
+        expect($response['status'])->toBe(422);
     });
 });

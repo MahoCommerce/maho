@@ -104,7 +104,7 @@ class Mage_Rule_Model_Condition_TreeValidator
         }
         foreach (array_keys($node) as $key) {
             if (!in_array($key, self::NODE_KEYS, true)) {
-                $this->addError("{$path}.{$key}", 'Unknown key');
+                $this->addError("{$path}.{$key}", sprintf('Unknown key "%s". A condition has the keys %s', $key, implode(', ', self::NODE_KEYS)));
             }
         }
 

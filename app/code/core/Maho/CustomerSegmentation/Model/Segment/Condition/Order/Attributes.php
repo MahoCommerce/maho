@@ -10,6 +10,15 @@ declare(strict_types=1);
 
 class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends Maho_CustomerSegmentation_Model_Segment_Condition_Abstract
 {
+    private const BASE_AMOUNT_COLUMNS = [
+        'total_amount' => 'base_grand_total',
+        'subtotal' => 'base_subtotal',
+        'tax_amount' => 'base_tax_amount',
+        'shipping_amount' => 'base_shipping_amount',
+        'discount_amount' => 'base_discount_amount',
+        'grand_total' => 'base_grand_total',
+    ];
+
     public function __construct()
     {
         parent::__construct();
@@ -187,7 +196,9 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
             : (string) $attribute;
 
         $operatorName = $this->getOperatorName();
-        $valueName = $this->getValueName();
+        $valueName = isset(self::BASE_AMOUNT_COLUMNS[(string) $attribute]) || in_array($attribute, ['average_order_amount', 'total_ordered_amount'], true)
+            ? $this->getAmountValueName()
+            : $this->getValueName();
         return Mage::helper('customersegmentation')->__('Order') . ':' . ' ' . $attributeLabel . ' ' . $operatorName . ' ' . $valueName;
     }
 
@@ -198,25 +209,24 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
         $operator = $this->getMappedSqlOperator();
         $value = $this->getValue();
         return match ($attribute) {
-            'total_qty', 'total_amount', 'subtotal', 'tax_amount', 'shipping_amount', 'discount_amount', 'grand_total', 'status', 'created_at', 'updated_at', 'store_id', 'currency_code' => $this->buildOrderFieldCondition($adapter, $attribute, $operator, $value),
-            'payment_method' => $this->buildPaymentMethodCondition($adapter, $operator, $value),
-            'shipping_method' => $this->buildShippingMethodCondition($adapter, $operator, $value),
-            'coupon_code' => $this->buildCouponCondition($adapter, $operator, $value),
-            'days_since_last_order' => $this->buildDaysSinceLastOrderCondition($adapter, $operator, $value),
-            'average_order_amount' => $this->buildAverageOrderCondition($adapter, $operator, $value),
-            'total_ordered_amount' => $this->buildTotalOrderedCondition($adapter, $operator, $value),
+            'total_qty', 'total_amount', 'subtotal', 'tax_amount', 'shipping_amount', 'discount_amount', 'grand_total', 'status', 'created_at', 'updated_at', 'store_id', 'currency_code' => $this->buildOrderFieldCondition($adapter, $attribute, $operator, $value, $websiteId),
+            'payment_method' => $this->buildPaymentMethodCondition($adapter, $operator, $value, $websiteId),
+            'shipping_method' => $this->buildShippingMethodCondition($adapter, $operator, $value, $websiteId),
+            'coupon_code' => $this->buildCouponCondition($adapter, $operator, $value, $websiteId),
+            'days_since_last_order' => $this->buildDaysSinceLastOrderCondition($adapter, $operator, $value, $websiteId),
+            'average_order_amount' => $this->buildAverageOrderCondition($adapter, $operator, $value, $websiteId),
+            'total_ordered_amount' => $this->buildTotalOrderedCondition($adapter, $operator, $value, $websiteId),
             default => false,
         };
     }
 
-    protected function buildOrderFieldCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $field, string $operator, mixed $value): string
+    protected function buildOrderFieldCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $field, string $operator, mixed $value, ?int $websiteId = null): string
     {
         // Map attribute names to correct database field names
         $fieldMapping = [
             'currency_code' => 'order_currency_code',
             'total_qty' => 'total_qty_ordered',
-            'total_amount' => 'grand_total',
-        ];
+        ] + self::BASE_AMOUNT_COLUMNS;
 
         $dbField = $fieldMapping[$field] ?? $field;
 
@@ -228,10 +238,12 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
         $subselectSql = $subselect->__toString();
         Mage::log('Order field condition SQL for ' . $field . ' ' . $operator . ' ' . $value . ': ' . $subselectSql, null, 'customer_segmentation_debug.log');
 
+        $this->filterCurrencyStores($subselect, 'o', $websiteId);
+
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function buildPaymentMethodCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $operator, mixed $value): string
+    protected function buildPaymentMethodCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $operator, mixed $value, ?int $websiteId = null): string
     {
         $subselect = $adapter->select()
             ->from(['o' => $this->getOrderTable()], ['customer_id'])
@@ -239,30 +251,36 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
             ->where('o.customer_id IS NOT NULL')
             ->where($this->buildSqlCondition($adapter, 'p.method', $operator, $value));
 
+        $this->filterCurrencyStores($subselect, 'o', $websiteId);
+
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function buildShippingMethodCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $operator, mixed $value): string
+    protected function buildShippingMethodCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $operator, mixed $value, ?int $websiteId = null): string
     {
         $subselect = $adapter->select()
             ->from(['o' => $this->getOrderTable()], ['customer_id'])
             ->where('o.customer_id IS NOT NULL')
             ->where($this->buildSqlCondition($adapter, 'o.shipping_method', $operator, $value));
 
+        $this->filterCurrencyStores($subselect, 'o', $websiteId);
+
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function buildCouponCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $operator, mixed $value): string
+    protected function buildCouponCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $operator, mixed $value, ?int $websiteId = null): string
     {
         $subselect = $adapter->select()
             ->from(['o' => $this->getOrderTable()], ['customer_id'])
             ->where('o.customer_id IS NOT NULL')
             ->where($this->buildSqlCondition($adapter, 'o.coupon_code', $operator, $value));
 
+        $this->filterCurrencyStores($subselect, 'o', $websiteId);
+
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function buildDaysSinceLastOrderCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $operator, mixed $value): string
+    protected function buildDaysSinceLastOrderCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $operator, mixed $value, ?int $websiteId = null): string
     {
         $currentDate = Mage::app()->getLocale()->formatDateForDb('now');
         $dateDiff = $adapter->getDateDiffSql("'{$currentDate}'", 'MAX(o.created_at)');
@@ -272,30 +290,36 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
             ->group('o.customer_id')
             ->having($this->buildSqlCondition($adapter, (string) $dateDiff, $operator, $value));
 
+        $this->filterCurrencyStores($subselect, 'o', $websiteId);
+
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
 
-    protected function buildAverageOrderCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $operator, mixed $value): string
+    protected function buildAverageOrderCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $operator, mixed $value, ?int $websiteId = null): string
     {
         $subselect = $adapter->select()
             ->from(['o' => $this->getOrderTable()], ['customer_id'])
             ->where('o.customer_id IS NOT NULL')
             ->where('o.state NOT IN (?)', ['canceled'])
             ->group('o.customer_id')
-            ->having($this->buildSqlCondition($adapter, 'AVG(o.grand_total)', $operator, $this->prepareNumericValue($value)));
+            ->having($this->buildSqlCondition($adapter, 'AVG(o.base_grand_total)', $operator, $this->prepareNumericValue($value)));
+
+        $this->filterCurrencyStores($subselect, 'o', $websiteId);
 
         return 'e.entity_id IN (' . $subselect . ')';
     }
 
-    protected function buildTotalOrderedCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $operator, mixed $value): string
+    protected function buildTotalOrderedCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $operator, mixed $value, ?int $websiteId = null): string
     {
         $subselect = $adapter->select()
             ->from(['o' => $this->getOrderTable()], ['customer_id'])
             ->where('o.customer_id IS NOT NULL')
             ->where('o.state NOT IN (?)', ['canceled'])
             ->group('o.customer_id')
-            ->having($this->buildSqlCondition($adapter, 'SUM(o.grand_total)', $operator, $this->prepareNumericValue($value)));
+            ->having($this->buildSqlCondition($adapter, 'SUM(o.base_grand_total)', $operator, $this->prepareNumericValue($value)));
+
+        $this->filterCurrencyStores($subselect, 'o', $websiteId);
 
         return 'e.entity_id IN (' . $subselect . ')';
     }

@@ -8,6 +8,8 @@
  * @package Mage_Adminhtml
  */
 
+declare(strict_types=1);
+
 class Mage_Adminhtml_Block_Notification_Window extends Mage_Adminhtml_Block_Notification_Toolbar
 {
     /**
@@ -103,6 +105,14 @@ class Mage_Adminhtml_Block_Notification_Window extends Mage_Adminhtml_Block_Noti
     public function getSeverityText()
     {
         return strtolower(str_replace('SEVERITY_', '', $this->getNoticeSeverity()));
+    }
+
+    /**
+     * Return the translated name of the severity, such as MAJOR.
+     */
+    public function getSeverityLabel(): string
+    {
+        return (string) $this->getData($this->getSeverityText() . '_text');
     }
 
     /**

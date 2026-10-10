@@ -182,7 +182,7 @@ describe('Blog Post Image Upload, Replace and Delete', function (): void {
 
 describe('Blog Post Image Upload Validation', function (): void {
 
-    it('rejects an invalid upload with 400 and keeps no file', function (array $body, string $message): void {
+    it('rejects an invalid upload with 422 and keeps no file', function (array $body, string $message): void {
         $token = serviceToken(['blog-posts/write']);
         $postId = createBlogImageTestPost($token);
         ApiV2Helper::ensureMahoBootstrapped();
@@ -190,7 +190,7 @@ describe('Blog Post Image Upload Validation', function (): void {
 
         $response = apiPost("/api/rest/v2/blog-posts/{$postId}/image", $body, $token);
         blogImageTestFiles($response['json']['image'] ?? null);
-        expect($response['status'])->toBe(400);
+        expect($response['status'])->toBe(422);
         expect($response['json']['message'] ?? '')->toContain($message);
 
         $read = apiGet("/api/rest/v2/blog-posts/{$postId}", $token);
@@ -237,11 +237,11 @@ describe('Blog Post Image Path Field', function (): void {
         if (isset($create['json']['id'])) {
             trackCreated('blog_post', (int) $create['json']['id']);
         }
-        expect($create['status'])->toBe(400);
+        expect($create['status'])->toBe(422);
 
         $postId = createBlogImageTestPost($token);
         $update = apiPut("/api/rest/v2/blog-posts/{$postId}", ['image' => $path], $token);
-        expect($update['status'])->toBe(400);
+        expect($update['status'])->toBe(422);
     })->with([
         'absolute path' => ['/etc/passwd'],
         'absolute Windows path' => ['C:\\images\\photo.png'],

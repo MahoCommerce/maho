@@ -49,6 +49,18 @@ describe('Order hold / unhold', function (): void {
         expect(apiPost('/api/rest/v2/orders/999999999/hold', [], adminToken())['status'])->toBeNotFound();
     });
 
+    it('refuses to unhold an order that is not on hold with a 409', function (): void {
+        $orderId = findHoldableOrderId();
+        if (!$orderId) {
+            $this->markTestSkipped('No holdable order in the test database');
+        }
+
+        $response = apiPost("/api/rest/v2/orders/{$orderId}/unhold", [], adminToken());
+
+        expect($response['status'])->toBe(409)
+            ->and($response['json']['message'])->toBe('Order is not on hold');
+    });
+
 });
 
 describe('Order comments', function (): void {
@@ -119,7 +131,7 @@ describe('Order comments', function (): void {
             'status' => 'nonexistent_status_' . uniqid(),
         ], adminToken());
 
-        expect($response['status'])->toBe(400);
+        expect($response['status'])->toBe(422);
         expect(Mage::getModel('sales/order')->load($orderId)->getStatus())->toBe($before);
     });
 
@@ -140,6 +152,19 @@ describe('Order cancel (REST)', function (): void {
         $response = apiPost("/api/rest/v2/orders/{$orderId}/cancel", ['reason' => 'API test'], adminToken());
         expect($response['status'])->toBeSuccessful();
         expect($response['json']['status'])->toBe('canceled');
+    });
+
+    it('refuses to cancel an order again with a 409', function (): void {
+        $orderId = findCancellableOrderId();
+        if (!$orderId) {
+            $this->markTestSkipped('No cancellable order in the test database');
+        }
+        expect(apiPost("/api/rest/v2/orders/{$orderId}/cancel", [], adminToken())['status'])->toBeSuccessful();
+
+        $again = apiPost("/api/rest/v2/orders/{$orderId}/cancel", [], adminToken());
+
+        expect($again['status'])->toBe(409)
+            ->and($again['json']['message'])->toBe('Order cannot be cancelled');
     });
 
 });

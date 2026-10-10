@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Mage\Catalog\Api;
 
 use ApiPlatform\Metadata\ApiProperty;
+use Maho\ApiPlatform\Metadata\EnumSource;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\GetCollection;
@@ -84,7 +85,7 @@ class DownloadableLink extends \Maho\ApiPlatform\Resource
     #[ApiProperty(description: 'Shareable: 0 = no, 1 = yes, 2 = use config')]
     public int $isShareable = \Mage_Downloadable_Model_Link::LINK_SHAREABLE_CONFIG;
 
-    #[ApiProperty(description: 'Link type (url or file)')]
+    #[ApiProperty(description: 'Link type (url or file)', extraProperties: [EnumSource::KEY => ['url', 'file']])]
     public string $linkType = 'url';
 
     #[ApiProperty(description: 'Link URL (when linkType = url)')]
@@ -93,6 +94,6 @@ class DownloadableLink extends \Maho\ApiPlatform\Resource
     #[ApiProperty(description: 'Sample URL')]
     public ?string $sampleUrl = null;
 
-    #[ApiProperty(description: 'Sample type (url or file)')]
+    #[ApiProperty(description: 'Sample type (url or file)', extraProperties: [EnumSource::KEY => ['url', 'file']])]
     public ?string $sampleType = null;
 }

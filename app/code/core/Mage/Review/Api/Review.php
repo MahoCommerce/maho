@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Mage\Review\Api;
 
 use ApiPlatform\Metadata\ApiProperty;
+use Maho\ApiPlatform\Metadata\EnumSource;
 use Maho\Config\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
@@ -86,6 +87,9 @@ use Maho\ApiPlatform\CrudResource;
             security: 'true',
             name: 'collection_query',
             description: 'Get reviews',
+            extraArgs: [
+                'status' => ['type' => 'String', 'description' => 'Only the reviews with this status: pending, approved or not_approved'],
+            ],
         ),
         // Named 'product' → field `productReviews` (not `productReviewsReviews`).
         new QueryCollection(
@@ -142,7 +146,7 @@ class Review extends CrudResource
     public int $rating = 5;
 
     /** approved | pending | not_approved. Writable through the moderation Put only; submit always forces pending. */
-    #[ApiProperty(securityPostDenormalize: "is_granted('ROLE_ADMIN') or is_granted('reviews/write')", extraProperties: ['computed' => true])]
+    #[ApiProperty(securityPostDenormalize: "is_granted('ROLE_ADMIN') or is_granted('reviews/write')", extraProperties: [EnumSource::KEY => ['approved', 'pending', 'not_approved'], 'computed' => true])]
     public ?string $status = null;
 
     #[ApiProperty(writable: false)]

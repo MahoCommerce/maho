@@ -1008,6 +1008,7 @@ describe('Customer Attributes Integration Tests', function () {
                 $order->setCustomerId($customer->getId());
                 $order->setCustomerEmail($customer->getEmail());
                 $order->setGrandTotal($orderData['total']);
+                $order->setBaseGrandTotal($orderData['total']);
 
                 $order->setData('state', orderStateForStatus($orderData['status']));
                 $order->setStatus($orderData['status']);
@@ -1036,9 +1037,9 @@ describe('Customer Attributes Integration Tests', function () {
         $segment = Mage::getModel('customersegmentation/segment');
         $segment->setName($name);
         $segment->setDescription('Customer attributes test segment for ' . $name);
-        $segment->setIsActive(1);
-        $segment->setWebsiteIds('1');
-        $segment->setCustomerGroupIds('0,1,2,3');
+        $segment->setIsActive();
+        $segment->setWebsiteIds([1]);
+        $segment->setCustomerGroupIds([0, 1, 2, 3]);
         $segment->setConditionsSerialized(Mage::helper('core')->jsonEncode($conditions));
         $segment->setRefreshMode('manual');
         $segment->setRefreshStatus('pending');

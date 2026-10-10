@@ -338,6 +338,11 @@ SPDX-License-Identifier: AFL-3.0
                 <class>Mage_Customer_Block</class>
             </customer>
         </blocks>
+        <services>
+            <customer>
+                <class>Mage_Customer_Service</class>
+            </customer>
+        </services>
         <models>
             <customer>
                 <class>Mage_Customer_Model</class>

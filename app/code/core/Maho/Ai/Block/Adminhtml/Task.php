@@ -14,7 +14,7 @@ class Maho_Ai_Block_Adminhtml_Task extends Mage_Adminhtml_Block_Widget_Grid_Cont
     {
         $this->_blockGroup = 'ai';
         $this->_controller = 'adminhtml_task';
-        $this->_headerText = Mage::helper('ai')->__('AI Task History');
+        $this->_headerText = Mage::helper('ai')->__('AI Request Queue');
         parent::__construct();
         $this->_removeButton('add');
     }

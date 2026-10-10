@@ -15,12 +15,9 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use Mage;
 use Mage_Core_Model_File_Uploader;
-use Mage_Core_Model_Store;
-use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Trait\AuthenticationTrait;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
@@ -46,21 +43,21 @@ final class MediaProcessor implements ProcessorInterface
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): ?Media
     {
-        $user = $this->requireUser();
+        $this->requireUser();
 
         if ($operation instanceof DeleteOperationInterface) {
-            return $this->handleDelete($uriVariables['path'], $user);
+            return $this->handleDelete($uriVariables['path']);
         }
 
-        return $this->handleUpload($user);
+        return $this->handleUpload();
     }
 
-    private function handleUpload(ApiUser $user): Media
+    private function handleUpload(): Media
     {
         $request = $this->requestStack->getCurrentRequest();
 
         if (!isset($_FILES['file']) || $_FILES['file']['error'] !== UPLOAD_ERR_OK) {
-            throw new BadRequestHttpException('No valid file uploaded');
+            throw new UnprocessableEntityHttpException('No valid file uploaded');
         }
 
         // Storage::uploadFile() expects $_FILES['image']
@@ -71,7 +68,7 @@ final class MediaProcessor implements ProcessorInterface
         $mount = $helper->getMount();
 
         $targetDir = $helper->resolveFolder($request->request->get('folder', 'wysiwyg'))
-            ?? throw new BadRequestHttpException('Invalid folder path');
+            ?? throw new UnprocessableEntityHttpException('Invalid folder path');
 
         $result = $storage->uploadFile($targetDir, 'image');
         if (!$result) {
@@ -107,7 +104,7 @@ final class MediaProcessor implements ProcessorInterface
             $mount->delete($uploadedPath);
         }
 
-        $this->logActivity('upload', $targetPath, $user);
+        $this->logActivity('upload', $targetPath);
 
         $media = new Media();
         $media->url = $mount->publicUrl($targetPath);
@@ -120,7 +117,7 @@ final class MediaProcessor implements ProcessorInterface
         return $media;
     }
 
-    private function handleDelete(string $path, ApiUser $user): null
+    private function handleDelete(string $path): null
     {
         $helper = Mage::helper('cms/wysiwyg_images');
         $root = $helper->getStorageRootPath();
@@ -133,24 +130,22 @@ final class MediaProcessor implements ProcessorInterface
 
         $helper->getStorage()->deleteFile($fullPath);
 
-        $this->logActivity('delete', $path, $user);
+        $this->logActivity('delete', $path);
 
         return null;
     }
 
-    private function logActivity(string $action, string $path, ApiUser $user): void
+    private function logActivity(string $action, string $path): void
     {
         try {
             /** @var \Maho_AdminActivityLog_Model_Activity $activity */
             $activity = Mage::getModel('adminactivitylog/activity');
             $activity->logActivity([
                 'entity_type' => 'cms/media',
-                'action' => $action,
+                'action_type' => $action,
                 'entity_id' => 0,
                 'old_data' => $action === 'delete' ? ['path' => $path] : null,
                 'new_data' => $action === 'upload' ? ['path' => $path] : null,
-                'api_user_id' => $user->getApiUserId(),
-                'username' => 'API: ' . $user->getUserIdentifier(),
             ]);
         } catch (\Exception $e) {
             Mage::logException($e);

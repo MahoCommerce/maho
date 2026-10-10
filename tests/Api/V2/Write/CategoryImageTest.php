@@ -266,7 +266,7 @@ describe('Category Image Upload, Replace and Delete', function (): void {
 
 describe('Category Image Upload Validation', function (): void {
 
-    it('rejects an invalid upload with 400 and keeps no file', function (array $body, string $message): void {
+    it('rejects an invalid upload with 422 and keeps no file', function (array $body, string $message): void {
         $token = serviceToken(['categories/write', 'categories/delete']);
         $categoryId = createCategoryImageTestCategory($token);
         ApiV2Helper::ensureMahoBootstrapped();
@@ -274,7 +274,7 @@ describe('Category Image Upload Validation', function (): void {
 
         $response = apiPost("/api/rest/v2/categories/{$categoryId}/image", $body, $token);
         categoryImageName($response['json']['image'] ?? null);
-        expect($response['status'])->toBe(400);
+        expect($response['status'])->toBe(422);
         expect($response['json']['message'] ?? '')->toContain($message);
 
         $read = apiGet("/api/rest/v2/categories/{$categoryId}", $token);
@@ -321,11 +321,11 @@ describe('Category Image File Name Field', function (): void {
         if (isset($create['json']['id'])) {
             trackCreated('category', (int) $create['json']['id']);
         }
-        expect($create['status'])->toBe(400);
+        expect($create['status'])->toBe(422);
 
         $categoryId = createCategoryImageTestCategory($token);
         $update = apiPut("/api/rest/v2/categories/{$categoryId}", ['image' => $image], $token);
-        expect($update['status'])->toBe(400);
+        expect($update['status'])->toBe(422);
         expect(categoryImageRowsByStore($categoryId))->toBe([]);
     })->with([
         'absolute path' => ['/etc/passwd.png'],

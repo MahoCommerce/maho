@@ -135,7 +135,7 @@ describe('Product Custom Options, CRUD Lifecycle', function (): void {
             'title' => 'Empty Dropdown',
             'type' => 'drop_down',
         ], $token);
-        expect($response['status'])->toBeIn([400, 422]);
+        expect($response['status'])->toBe(422);
     });
 
     it('rejects option without title', function (): void {
@@ -145,7 +145,7 @@ describe('Product Custom Options, CRUD Lifecycle', function (): void {
         $response = apiPost("/api/rest/v2/products/{$productId}/custom-options", [
             'type' => 'field',
         ], $token);
-        expect($response['status'])->toBeIn([400, 422]);
+        expect($response['status'])->toBe(422);
     });
 
 });

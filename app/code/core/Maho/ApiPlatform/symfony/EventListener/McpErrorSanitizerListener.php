@@ -55,7 +55,7 @@ final class McpErrorSanitizerListener
 
         $error = $event->getError();
 
-        if ($this->isCallerFacing($throwable)) {
+        if (self::isCallerFacing($throwable)) {
             $event->setError(new Error($error->id, $error->code, $throwable->getMessage()));
             return;
         }
@@ -70,7 +70,8 @@ final class McpErrorSanitizerListener
         $event->setError(new Error($error->id, $error->code, 'An internal error occurred'));
     }
 
-    private function isCallerFacing(\Throwable $throwable): bool
+    /** An exception whose message is safe and useful for the caller, such as a validation or type error. */
+    public static function isCallerFacing(\Throwable $throwable): bool
     {
         return array_any(self::CALLER_FACING, fn(string $type): bool => $throwable instanceof $type);
     }

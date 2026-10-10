@@ -13,7 +13,7 @@ namespace Mage\Cms\Api;
 use Maho\ApiPlatform\CrudProcessor;
 use Maho\ApiPlatform\CrudResource;
 use Maho\ApiPlatform\Security\ApiUser;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 final class CmsPageProcessor extends CrudProcessor
 {
@@ -40,6 +40,9 @@ final class CmsPageProcessor extends CrudProcessor
             if ($data->metaRobots !== null) {
                 $model->setData('meta_robots', $this->normalizeMetaRobots($data->metaRobots));
             }
+            if ($data->pageLayout !== null) {
+                $model->setData('root_template', $this->normalizePageLayout($data->pageLayout));
+            }
             if ($data->layoutUpdateXml !== null) {
                 $model->setData('layout_update_xml', $this->validateLayoutUpdate($data->layoutUpdateXml, 'layoutUpdateXml'));
             }
@@ -55,13 +58,16 @@ final class CmsPageProcessor extends CrudProcessor
             // A page needs a URL identifier; reject a create that omits it with a
             // 4xx rather than persisting a page with an empty identifier.
             if (trim((string) $model->getData('identifier')) === '') {
-                throw new BadRequestHttpException('Identifier is required.');
+                throw new UnprocessableEntityHttpException('Identifier is required.');
             }
             if ($model->getData('is_active') === null) {
                 $model->setData('is_active', 1);
             }
             if ($model->getData('stores') === null) {
                 $model->setData('stores', [0]);
+            }
+            if ($model->getData('root_template') === null) {
+                $model->setData('root_template', \Mage::getSingleton('page/source_layout')->getDefaultValue());
             }
         }
 
@@ -78,7 +84,7 @@ final class CmsPageProcessor extends CrudProcessor
         try {
             return \Mage::app()->getLocale()->formatDateForDb($value, withTime: false);
         } catch (\Exception) {
-            throw new BadRequestHttpException("Invalid date for {$field}; use Y-m-d format.");
+            throw new UnprocessableEntityHttpException("Invalid date for {$field}; use Y-m-d format.");
         }
     }
 
@@ -103,10 +109,27 @@ final class CmsPageProcessor extends CrudProcessor
 
         if (!$isValid) {
             $messages = implode(' ', $validator->getMessages());
-            throw new BadRequestHttpException(trim("{$field} is not a valid layout update. " . $messages));
+            throw new UnprocessableEntityHttpException(trim("{$field} is not a valid layout update. " . $messages));
         }
 
         return $xml;
+    }
+
+    /**
+     * The layout codes come from the theme configuration, so an unknown code would render
+     * nothing; refuse it and name the codes the store knows.
+     */
+    private function normalizePageLayout(string $value): ?string
+    {
+        if ($value === '') {
+            return null;
+        }
+        $codes = array_map(strval(...), array_keys(\Mage::getSingleton('page/source_layout')->getOptions()));
+        if (!in_array($value, $codes, true)) {
+            throw new UnprocessableEntityHttpException('pageLayout must be one of: ' . implode(', ', $codes));
+        }
+
+        return $value;
     }
 
     private function normalizeMetaRobots(string $value): ?string
@@ -117,7 +140,7 @@ final class CmsPageProcessor extends CrudProcessor
 
         $normalized = strtoupper(str_replace(' ', '', $value));
         if (!in_array($normalized, self::VALID_META_ROBOTS, true)) {
-            throw new BadRequestHttpException('metaRobots must be one of: ' . implode(', ', self::VALID_META_ROBOTS));
+            throw new UnprocessableEntityHttpException('metaRobots must be one of: ' . implode(', ', self::VALID_META_ROBOTS));
         }
 
         return $normalized;

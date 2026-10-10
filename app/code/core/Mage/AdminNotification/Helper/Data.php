@@ -28,6 +28,16 @@ class Mage_AdminNotification_Helper_Data extends Mage_Core_Helper_Abstract
     protected $_unreadNoticeCounts;
 
     /**
+     * Tell whether a notice URL leads outside this admin. A link to such a URL opens in a new tab.
+     */
+    public function isExternalUrl(string $url): bool
+    {
+        $host = parse_url($url, PHP_URL_HOST);
+        $adminHost = (string) parse_url(Mage::helper('adminhtml')->getUrl('adminhtml'), PHP_URL_HOST);
+        return is_string($host) && strcasecmp($host, $adminHost) !== 0;
+    }
+
+    /**
      * Retrieve latest notice model
      *
      * @return Mage_AdminNotification_Model_Inbox

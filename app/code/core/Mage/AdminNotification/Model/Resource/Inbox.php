@@ -33,6 +33,7 @@ class Mage_AdminNotification_Model_Resource_Inbox extends Mage_Core_Model_Resour
             ->where('is_read != 1')
             ->where('is_remove != 1')
             ->limit(1);
+        $this->addAudienceFilter($select);
         $data = $adapter->fetchRow($select);
 
         if ($data) {
@@ -59,7 +60,34 @@ class Mage_AdminNotification_Model_Resource_Inbox extends Mage_Core_Model_Resour
             ->group('severity')
             ->where('is_remove=?', 0)
             ->where('is_read=?', 0);
+        $this->addAudienceFilter($select);
         return $adapter->fetchPairs($select);
+    }
+
+    /**
+     * Keep the notifications the current administrator may see: the ones for everyone, the
+     * ones for this administrator, and the ones for an ACL resource this administrator has.
+     */
+    public function addAudienceFilter(\Maho\Db\Select $select): \Maho\Db\Select
+    {
+        $session = Mage::getSingleton('admin/session');
+        $select->where('admin_user_id IS NULL OR admin_user_id = ?', (int) $session->getUser()?->getId());
+
+        $adapter = $this->_getReadAdapter();
+        $resources = $adapter->fetchCol(
+            $adapter->select()
+                ->distinct()
+                ->from($this->getMainTable(), ['acl_resource'])
+                ->where('acl_resource IS NOT NULL'),
+        );
+        $allowed = array_values(array_filter($resources, fn($resource) => $session->isAllowed((string) $resource)));
+        if ($allowed === []) {
+            $select->where('acl_resource IS NULL');
+        } else {
+            $select->where('acl_resource IS NULL OR acl_resource IN (?)', $allowed);
+        }
+
+        return $select;
     }
 
     /**

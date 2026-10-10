@@ -10,10 +10,10 @@ declare(strict_types=1);
 
 namespace Mage\Wishlist\Api;
 
+use Mage\Checkout\Api\CartRequest;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Delete;
 use Maho\ApiPlatform\Service\StoreContext;
-use Mage\Checkout\Api\CartService;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -23,9 +23,12 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 final class WishlistProcessor extends \Maho\ApiPlatform\Processor
 {
-    public function __construct(Security $security, private CartService $cartService)
+    private readonly \Mage_Checkout_Service_Cart $cartService;
+
+    public function __construct(Security $security)
     {
         parent::__construct($security);
+        $this->cartService = \Mage::getService('checkout/cart');
     }
 
     /**
@@ -215,7 +218,7 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
         return null;
     }
 
-    // TODO: Refactor cart loading to use CartService instead of inline quote loading logic
+    // TODO: Refactor cart loading to use the cart service instead of inline quote loading logic
     /**
      * Move wishlist item to cart
      */
@@ -246,19 +249,15 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
         /** @var \Mage_Sales_Model_Quote|null $quote */
         $quote = null;
         if ($cartId) {
-            // Use CartService to load the cart properly (handles numeric or masked IDs)
+            // Use the cart service to load the cart properly (handles numeric or masked IDs)
             $accessedByMaskedId = !is_numeric($cartId);
-            if ($accessedByMaskedId) {
-                $quote = $this->cartService->getCart(null, $cartId);
-            } else {
-                $quote = $this->cartService->getCart((int) $cartId);
-            }
+            $quote = $accessedByMaskedId ? CartRequest::load(null, $cartId) : CartRequest::load((int) $cartId);
 
-            // getCart() applies no ownership filtering, verify the caller owns
+            // CartRequest::load() applies no ownership filtering, verify the caller owns
             // this cart (or holds its masked guest token) before writing to it,
             // otherwise a customer could push items into another customer's cart.
             if ($quote && $quote->getId()) {
-                $this->cartService->verifyCartAccess(
+                $this->cartService->verifyAccess(
                     $quote,
                     $accessedByMaskedId,
                     $customerId,
@@ -283,12 +282,8 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
             }
         }
 
-        // Add to cart using CartService
-        try {
-            $this->cartService->addItem($quote, $product->getSku(), (float) $qty);
-        } catch (\Exception) {
-            throw new BadRequestHttpException('Failed to add item to cart');
-        }
+        // Add to cart using the cart service
+        $this->cartService->addItem($quote, $product->getSku(), (float) $qty);
 
         // Build response before deleting (we need the item data)
         $wishlistItem = WishlistItem::fromModel($item);

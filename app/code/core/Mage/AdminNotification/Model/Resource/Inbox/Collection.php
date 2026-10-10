@@ -32,4 +32,14 @@ class Mage_AdminNotification_Model_Resource_Inbox_Collection extends Mage_Core_M
             ->where('is_remove=?', 0);
         return $this;
     }
+
+    /** Keep the notifications that the current administrator may see. */
+    public function addAudienceFilter(): static
+    {
+        $resource = $this->getResource();
+        if ($resource instanceof Mage_AdminNotification_Model_Resource_Inbox) {
+            $resource->addAudienceFilter($this->getSelect());
+        }
+        return $this;
+    }
 }

@@ -10,7 +10,6 @@ declare(strict_types=1);
 
 namespace Maho\ApiPlatform\Service;
 
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Contracts\Service\ResetInterface;
 
 /**
@@ -66,7 +65,7 @@ final class StoreContext implements ResetInterface
         }
 
         if (!isset($store->getServeableCurrencyRates()[$code])) {
-            throw new BadRequestHttpException("Currency not available for this cart's store: {$code}");
+            throw new \Mage_Core_Exception("Currency not available for this cart's store: {$code}");
         }
 
         $store->setRequestedCurrencyCode($code);
@@ -158,6 +157,27 @@ final class StoreContext implements ResetInterface
     public static function withStore(int $storeId, \Closure $callback): mixed
     {
         return \Mage::app()->withStore($storeId, $callback);
+    }
+
+    /**
+     * Run $callback as if the caller had requested $storeId for this one call, then
+     * restore both the app scope and the explicit request. An in-process tool call
+     * uses this: it has no request of its own to carry ?store=.
+     */
+    public static function withExplicitStore(int $storeId, \Closure $callback): mixed
+    {
+        $previousCurrent = self::$currentStoreId;
+        $previousExplicit = self::$explicitStoreId;
+        try {
+            return self::withStore($storeId, static function () use ($storeId, $callback): mixed {
+                self::setExplicitStore($storeId);
+
+                return $callback();
+            });
+        } finally {
+            self::$currentStoreId = $previousCurrent;
+            self::$explicitStoreId = $previousExplicit;
+        }
     }
 
     /**

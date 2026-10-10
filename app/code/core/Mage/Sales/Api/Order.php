@@ -11,13 +11,13 @@ declare(strict_types=1);
 namespace Mage\Sales\Api;
 
 use Maho\Config\ApiResource;
+use Maho\ApiPlatform\Metadata\EnumSource;
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\Post;
 use Mage\Checkout\Api\Cart;
-use Mage\Checkout\Api\CartService;
 use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use ApiPlatform\Metadata\GraphQl\Mutation;
@@ -77,7 +77,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
             uriVariables: [
                 'maskedQuoteId' => new Link(fromClass: Cart::class, identifiers: []),
             ],
-            requirements: ['maskedQuoteId' => CartService::MASKED_ID_PATTERN],
+            requirements: ['maskedQuoteId' => \Mage_Checkout_Service_Cart::MASKED_ID_PATTERN],
             security: 'true',
             description: 'Place order from guest cart. Body carries the full checkout state in one shot: shippingAddress, billingAddress, guestEmail, paymentMethod, paymentData, shippingMethod (carrier_method), orderNote',
         ),
@@ -302,10 +302,10 @@ class Order extends CrudResource
     #[ApiProperty(writable: false, description: 'Customer note captured at checkout (orderNote at placement)')]
     public ?string $customerNote = null;
 
-    #[ApiProperty(writable: false, description: 'Order status (pending, processing, complete, canceled, etc.)')]
+    #[ApiProperty(writable: false, description: 'Order status (pending, processing, complete, canceled, etc.)', extraProperties: [EnumSource::KEY => 'sales/order_config::getStatuses'])]
     public ?string $status = null;
 
-    #[ApiProperty(writable: false, description: 'Order state (new, processing, complete, closed, canceled)')]
+    #[ApiProperty(writable: false, description: 'Order state (new, processing, complete, closed, canceled)', extraProperties: [EnumSource::KEY => 'sales/order_config::getStates'])]
     public ?string $state = null;
 
     /**

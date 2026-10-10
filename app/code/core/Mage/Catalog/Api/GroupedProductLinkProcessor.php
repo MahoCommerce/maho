@@ -18,6 +18,7 @@ use Mage_Catalog_Model_Product_Type;
 use Maho\ApiPlatform\Trait\ProductLoaderTrait;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
  */
@@ -87,7 +88,7 @@ final class GroupedProductLinkProcessor extends \Maho\ApiPlatform\Processor
             }
             $childId = (int) ($link['childProductId'] ?? $link['child_product_id'] ?? 0);
             if ($childId <= 0) {
-                throw new BadRequestHttpException('childProductId is required and must be positive');
+                throw new UnprocessableEntityHttpException('childProductId is required and must be positive');
             }
             $this->authorizeAssociatedProductWebsites($childId);
             $linkData[$childId] = [
@@ -109,7 +110,7 @@ final class GroupedProductLinkProcessor extends \Maho\ApiPlatform\Processor
 
         $childId = (int) ($body['childProductId'] ?? $body['child_product_id'] ?? 0);
         if ($childId <= 0) {
-            throw new BadRequestHttpException('childProductId is required and must be positive');
+            throw new UnprocessableEntityHttpException('childProductId is required and must be positive');
         }
 
         $this->authorizeAssociatedProductWebsites($childId);
@@ -134,7 +135,7 @@ final class GroupedProductLinkProcessor extends \Maho\ApiPlatform\Processor
         // this guard the unset() below is a no-op and the DELETE reports success
         // for a link it never removed. Mirrors ConfigurableSetupProcessor.
         if ($childProductId <= 0) {
-            throw new BadRequestHttpException('childProductId is required and must be positive');
+            throw new UnprocessableEntityHttpException('childProductId is required and must be positive');
         }
 
         $product = $this->loadProductForWrite($productId, $this->requireUser(), Mage_Catalog_Model_Product_Type::TYPE_GROUPED);

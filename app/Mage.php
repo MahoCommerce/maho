@@ -586,6 +586,33 @@ final class Mage
     }
 
     /**
+     * Return the service singleton of $serviceAlias. A service holds the rules of a flow that more
+     * than one transport starts: a controller, the API or a CLI command. Each transport reads its
+     * input, calls the service and renders the result.
+     *
+     * ```php
+     * $service = Mage::getService('customersegmentation/segment'); // Maho_CustomerSegmentation_Service_Segment
+     * ```
+     *
+     * @throws RuntimeException when the alias gives no class
+     */
+    public static function getService(string $serviceAlias): object
+    {
+        $registryKey = "_service/$serviceAlias";
+        if (!isset(self::$_registry[$registryKey])) {
+            if (!str_contains($serviceAlias, '/')) {
+                throw new RuntimeException("Service alias '$serviceAlias' must have the form group/name.");
+            }
+            $className = self::getConfig()->getServiceClassName($serviceAlias);
+            if (!class_exists($className)) {
+                throw new RuntimeException("Service class '$className' (alias: '$serviceAlias') could not be loaded.");
+            }
+            self::register($registryKey, new $className(), true);
+        }
+        return self::$_registry[$registryKey];
+    }
+
+    /**
      * Retrieve resource helper model singleton
      *
      * ```php

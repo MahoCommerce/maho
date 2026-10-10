@@ -333,16 +333,29 @@ big {
 .message-popup {
     position: absolute;
     z-index: 1990;
-    width: 407px;
+    width: 420px;
+    max-width: calc(100vw - 2rem);
     top: -9999em;
     left: 50%;
-    margin: 0 0 0-12.6875rem;
+    transform: translateX(-50%);
     background: var(--maho-surface-overlay);
     border: 1px solid var(--maho-border-soft);
     border-radius: var(--maho-radius-lg);
     box-shadow: var(--maho-shadow-float);
-    padding: var(--maho-space-3);
-    overflow: hidden
+    overflow: hidden;
+    --message-tone: var(--maho-ink-muted);
+    --message-tone-bg: var(--maho-surface-sunken)
+}
+
+.message-popup.severity-critical {
+    --message-tone: var(--maho-error);
+    --message-tone-bg: var(--maho-error-bg)
+}
+
+.message-popup.severity-major,
+.message-popup.severity-minor {
+    --message-tone: var(--maho-warning);
+    --message-tone-bg: var(--maho-warning-bg)
 }
 
 .message-popup.show {
@@ -353,77 +366,108 @@ big {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: var(--maho-space-1) 0
+    gap: var(--maho-space-3);
+    padding: var(--maho-space-3) var(--maho-space-3) var(--maho-space-3) var(--maho-space-5);
+    border-bottom: 1px solid var(--maho-border-soft)
 }
 
 .message-popup .message-popup-head h2 {
-    padding: 0 var(--maho-space-3);
     margin: 0;
-    font: 700 var(--maho-text-sm)/19px var(--maho-font-sans);
+    font: 600 var(--maho-text-lg)/1.4 var(--maho-font-sans);
     color: var(--maho-ink)
 }
 
-.message-popup .message-popup-head a {
-    border: 1px solid var(--maho-btn2-border);
-    border-radius: var(--maho-radius-sm);
-    padding: 0 var(--maho-space-3);
-    font: var(--maho-text-sm)/19px var(--maho-font-sans);
-    color: var(--maho-ink);
-    text-decoration: none!important;
+.message-popup .message-popup-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    border-radius: var(--maho-radius-md);
+    background: none;
+    color: var(--maho-ink-muted);
     cursor: pointer
 }
 
-.message-popup .message-popup-head a:hover {
-    background: var(--maho-surface-sunken)
-}
-
-.message-popup .message-popup-content {
-    background: var(--maho-warning-bg);
-    padding: var(--maho-space-5) var(--maho-space-5) var(--maho-space-3)
-}
-
-.message-popup .message-popup-content .message {
-    display: flex;
-    align-items: flex-start
-}
-
-.message-popup .message-popup-content .message-icon {
-    flex: 0 0 50px;
-    font-size: var(--maho-text-xs);
-    line-height: 12px;
-    text-transform: uppercase;
-    text-align: center
-}
-
-.message-popup .message-popup-content .message-text {
-    flex: 1;
-    min-height: 4.5em;
-    overflow: hidden;
+.message-popup .message-popup-close:hover {
+    background: var(--maho-surface-sunken);
     color: var(--maho-ink)
 }
 
-.message-popup .message-popup-content .read-more {
-    margin: var(--maho-space-2) 0 0;
-    text-align: right
+.message-popup .message-popup-close svg {
+    width: 18px;
+    height: 18px
 }
 
-.message-popup .message-popup-content .read-more a {
-    text-decoration: underline
+.message-popup .message-popup-content {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--maho-space-4);
+    padding: var(--maho-space-5)
 }
 
-.message-popup .message-popup-content .read-more a:after {
-    content: "";
+.message-popup .message-icon {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--maho-radius-pill);
+    background: var(--message-tone-bg);
+    color: var(--message-tone)
+}
+
+.message-popup .message-icon svg {
+    width: 24px;
+    height: 24px
+}
+
+.message-popup .message-body {
+    flex: 1;
+    min-width: 0
+}
+
+.message-popup .message-severity {
     display: inline-block;
-    width: 5px;
-    height: 5px;
-    margin-left: var(--maho-space-2);
-    border: 0 solid currentColor;
-    border-width: 2px 2px 0 0;
-    transform: rotate(45deg);
-    vertical-align: middle
+    margin-bottom: var(--maho-space-1);
+    font: 700 var(--maho-text-xs)/1.4 var(--maho-font-sans);
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--message-tone)
 }
 
-.message-popup .message-popup-content .read-more a:hover {
+.message-popup .message-text {
+    margin: 0;
+    font: var(--maho-text-xl)/1.45 var(--maho-font-sans);
+    color: var(--maho-ink);
+    overflow-wrap: anywhere
+}
+
+.message-popup .message-popup-actions {
+    display: flex;
+    justify-content: flex-end;
+    padding: var(--maho-space-3) var(--maho-space-5);
+    background: var(--maho-surface-sunken);
+    border-top: 1px solid var(--maho-border-soft)
+}
+
+.message-popup .message-popup-read {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--maho-space-2) var(--maho-space-4);
+    border-radius: var(--maho-radius-md);
+    background: var(--maho-btn-bg);
+    color: var(--maho-btn-ink);
+    font: 600 var(--maho-text-md)/1.4 var(--maho-font-sans);
+    text-decoration: none
+}
+
+.message-popup .message-popup-read:hover {
+    background: var(--maho-btn-bg-hover);
+    color: var(--maho-btn-ink-hover);
     text-decoration: none
 }
 
@@ -5881,19 +5925,6 @@ img.rule-param-add {
 .notification-global {
     background: var(--maho-warning-bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' style='width:24px;height:24px' viewBox='0 0 24 24'%3E%3Cpath fill='%23d50000' d='M13,13H11V7H13M13,17H11V15H13M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z' /%3E%3C/svg%3E")27px 5px no-repeat;
     background-size: 15px
-}
-
-.message-popup .message-popup-head h2 {
-    color: var(--maho-ink)
-}
-
-.message-popup .message-popup-content {
-    background: var(--maho-surface-overlay)
-}
-
-.message-popup .message-popup-content .read-more a {
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' style='width:24px;height:24px' viewBox='0 0 24 24'%3E%3Cpath fill='%236b7508' d='M2,12A10,10 0 0,1 12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12M10,17L15,12L10,7V17Z' /%3E%3C/svg%3E")no-repeat 0 50%;
-    background-size: 13px
 }
 
 .pager .pager-arrow {

@@ -1,0 +1,1451 @@
+// SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+// SPDX-License-Identifier: OSL-3.0
+
+/**
+ * The admin assistant panel: a deep-chat surface wired to the streaming chat endpoint.
+ *
+ * Text answers stream into a text bubble. Tool calls become small step cards. A write
+ * tool pauses the turn: the server sends a `confirm` event, the panel shows a card with
+ * the planned changes, and the administrator's decision starts a second stream.
+ */
+class MahoAiAssistant {
+    static STORAGE_OPEN = 'maho_ai_chat_open';
+    static STORAGE_PREFILL = 'maho_ai_chat_prefill';
+    static STORAGE_CONVERSATION = 'maho_ai_chat_conversation';
+
+    constructor(config) {
+        this.config = config;
+        this.labels = config.labels;
+        this.toolLabels = config.toolLabels;
+        this.panel = document.getElementById('ai-chat-panel');
+        this.toggle = document.getElementById('ai-chat-toggle');
+        this.chat = document.getElementById('ai-chat');
+        this.picker = document.getElementById('ai-chat-conversations');
+        this.deleteButton = document.getElementById('ai-chat-delete');
+        this.conversationId = null;
+        this.abortController = null;
+        this.pendingCard = null;
+        this.changedFields = new Set();
+        this.setupChat();
+        this.trackChanges();
+        this.bindEvents();
+        this.restoreState();
+        this.applyPrefill();
+    }
+
+    setupChat() {
+        const chat = this.chat;
+        // deep-chat renders inside a shadow root, so the page stylesheet does not reach
+        // the step and confirmation cards; load it inside the shadow root as well.
+        chat.onComponentRender = () => {
+            if (chat.shadowRoot && !chat.shadowRoot.querySelector('link[data-ai-chat]')) {
+                const link = document.createElement('link');
+                link.rel = 'stylesheet';
+                link.href = this.config.cssUrl;
+                link.dataset.aiChat = '1';
+                chat.shadowRoot.appendChild(link);
+                // deep-chat opens every link in a new tab; an admin page of this store opens here.
+                chat.shadowRoot.addEventListener('click', (event) => {
+                    const anchor = event.composedPath().find((node) => node.tagName === 'A' && node.href);
+                    if (anchor && ['javascript:', 'data:', 'vbscript:'].includes(anchor.protocol)) {
+                        event.preventDefault();
+                    } else if (anchor && new URL(anchor.href).origin === window.location.origin) {
+                        event.preventDefault();
+                        window.location.assign(anchor.href);
+                    }
+                });
+            }
+        };
+        chat.textInput = { placeholder: { text: this.labels.placeholder, style: { color: 'var(--maho-control-placeholder)' } } };
+        chat.customButtons = [{
+            position: 'inside-start',
+            tooltip: { text: this.labels.attach },
+            styles: { button: { default: { svg: { content: this.config.attachIcon } } } },
+            onClick: () => this.fileInput.click(),
+        }];
+        // The panel stylesheet gives the button its shape; each state only names its colors and icon.
+        const button = (icon, background, color) => ({
+            container: { default: { backgroundColor: background, color } },
+            svg: { content: icon },
+        });
+        chat.submitButtonStyles = {
+            position: 'inside-end',
+            tooltip: { text: this.labels.send },
+            submit: button(this.config.sendIcon, 'var(--maho-btn-bg)', 'var(--maho-btn-ink)'),
+            loading: button(this.config.sendIcon, 'var(--maho-surface-sunken)', 'var(--maho-ink-faint)'),
+            stop: button(this.config.stopIcon, 'var(--maho-btn-bg)', 'var(--maho-btn-ink)'),
+            disabled: button(this.config.sendIcon, 'var(--maho-surface-sunken)', 'var(--maho-ink-faint)'),
+        };
+        chat.introMessage = { html: this.renderIntro() };
+        chat.messageStyles = {
+            default: {
+                ai: { bubble: { maxWidth: '100%', padding: '0', backgroundColor: 'transparent', color: 'inherit' } },
+                user: { bubble: { maxWidth: '85%', padding: '.55em .85em', backgroundColor: 'var(--ai-chat-user-bg)', color: 'var(--ai-chat-user-ink)' } },
+            },
+            html: { shared: { bubble: { backgroundColor: 'transparent', padding: '0', maxWidth: '100%', width: '100%' } } },
+            loading: { message: { html: this.renderWorking(this.labels.thinking), styles: { bubble: { backgroundColor: 'transparent', padding: '0' } } } },
+        };
+        chat.htmlClassUtilities = {
+            'ai-chat-approve': { events: { click: (event) => this.onApprove(event) } },
+            'ai-chat-deny': { events: { click: (event) => this.onDeny(event) } },
+            'ai-chat-undo': { events: { click: (event) => { event.preventDefault(); this.undo(parseInt(event.target.dataset.message, 10), event.target); } } },
+            'ai-chat-example': { events: { click: (event) => this.chat.submitUserMessage({ text: event.currentTarget.dataset.text }) } },
+            'ai-chat-leave': { events: { click: () => this.pendingLeave?.() } },
+            'ai-chat-open-record': { events: { click: (event) => { event.preventDefault(); this.navigate(event.currentTarget.dataset.url, null); } } },
+        };
+        chat.connect = {
+            stream: true,
+            handler: (body, signals) => this.handleSubmit(body, signals),
+        };
+        chat.onError = (error) => console.error('[ai-chat]', error);
+    }
+
+    bindEvents() {
+        this.toggle.addEventListener('click', () => this.setOpen(this.panel.hidden));
+        document.getElementById('ai-chat-close').addEventListener('click', () => this.setOpen(false));
+        document.getElementById('ai-chat-new').addEventListener('click', () => this.newConversation());
+        this.attachments = [];
+        this.attachmentList = document.getElementById('ai-chat-attachments');
+        this.fileInput = document.getElementById('ai-chat-file');
+        this.fileInput.addEventListener('change', () => this.attachFiles(this.fileInput.files));
+        this.bindDrop();
+        this.deleteButton.addEventListener('click', () => this.deleteConversation());
+        this.picker.addEventListener('change', () => {
+            const id = parseInt(this.picker.value, 10);
+            if (id > 0) {
+                this.loadConversation(id);
+            } else {
+                this.newConversation();
+            }
+        });
+        document.addEventListener('keydown', (event) => {
+            // event.code names the physical key: on a Mac, Option+A reports the key as "å".
+            if (event.altKey && !event.ctrlKey && !event.metaKey && event.code === 'KeyA') {
+                event.preventDefault();
+                this.setOpen(this.panel.hidden);
+            }
+            if (event.key === 'Escape' && !this.panel.hidden) {
+                this.setOpen(false);
+            }
+        });
+    }
+
+    restoreState() {
+        let open = false;
+        let conversationId = 0;
+        try {
+            open = localStorage.getItem(MahoAiAssistant.STORAGE_OPEN) === '1';
+            conversationId = parseInt(sessionStorage.getItem(MahoAiAssistant.STORAGE_CONVERSATION) ?? '0', 10);
+        } catch (e) {
+            // storage can be unavailable; the panel starts closed
+        }
+        // A notification link names the conversation to open: it wins over the stored one.
+        const linked = this.config.openConversation > 0;
+        if (linked) {
+            conversationId = this.config.openConversation;
+            open = true;
+        }
+        // The greeting would show for a moment before the stored conversation replaces it.
+        this.panel.classList.toggle('is-restoring', conversationId > 0);
+        this.loadConversations().then(() => {
+            // The picker lists recent open conversations only; a linked one can be an archived run.
+            if (conversationId > 0 && (linked || [...this.picker.options].some((o) => parseInt(o.value, 10) === conversationId))) {
+                return this.loadConversation(conversationId);
+            }
+        }).finally(() => this.panel.classList.remove('is-restoring'));
+        if (open) {
+            this.setOpen(true);
+        }
+    }
+
+    setOpen(open) {
+        this.panel.hidden = !open;
+        this.toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        document.body.classList.toggle('ai-chat-open', open);
+        try {
+            localStorage.setItem(MahoAiAssistant.STORAGE_OPEN, open ? '1' : '0');
+        } catch (e) {
+            // ignore
+        }
+        if (open) {
+            this.chat.focusInput();
+        }
+    }
+
+    rememberConversation(id) {
+        this.conversationId = id;
+        this.deleteButton.hidden = !id;
+        try {
+            if (id) {
+                sessionStorage.setItem(MahoAiAssistant.STORAGE_CONVERSATION, String(id));
+            } else {
+                sessionStorage.removeItem(MahoAiAssistant.STORAGE_CONVERSATION);
+            }
+        } catch (e) {
+            // ignore
+        }
+        // A new conversation is in the list only after its first turn: until then its question names it.
+        if (id && ![...this.picker.options].some((o) => o.value === String(id))) {
+            const option = document.createElement('option');
+            option.value = String(id);
+            option.textContent = this.pendingTitle || this.labels.untitled;
+            this.picker.appendChild(option);
+        }
+        if (this.picker.value !== String(id ?? '')) {
+            this.picker.value = id ? String(id) : '';
+        }
+    }
+
+    // --- conversations -------------------------------------------------------------
+
+    async loadConversations() {
+        try {
+            const data = await mahoFetch(this.config.listUrl, { loaderArea: false });
+            const current = this.conversationId;
+            this.picker.replaceChildren();
+            const first = document.createElement('option');
+            first.value = '';
+            first.textContent = this.labels.newChat;
+            this.picker.appendChild(first);
+            for (const conversation of data.conversations ?? []) {
+                const option = document.createElement('option');
+                option.value = String(conversation.id);
+                option.textContent = (conversation.running ? '⚙ ' : '') + (conversation.pending ? '⏳ ' : '') + (conversation.title || this.labels.untitled);
+                this.picker.appendChild(option);
+            }
+            this.picker.value = current ? String(current) : '';
+        } catch (error) {
+            console.error('[ai-chat]', error);
+        }
+    }
+
+    newConversation() {
+        if (this.abortController) {
+            this.abortController.abort();
+        }
+        this.rememberConversation(null);
+        this.pendingCard = null;
+        this.renderedHistory = null;
+        this.chat.classList.remove('has-history');
+        this.chat.clearMessages(true);
+        this.chat.focusInput();
+        setTimeout(() => this.updateIntro(false), 100);
+    }
+
+    /** The greeting card shrinks to one line once the conversation has messages. */
+    updateIntro(hasMessages) {
+        this.chat.shadowRoot?.querySelector('.ai-chat-intro')?.classList.toggle('ai-chat-intro-compact', hasMessages);
+    }
+
+    async loadConversation(id) {
+        try {
+            const url = new URL(this.config.messagesUrl, window.location.href);
+            url.searchParams.set('id', String(id));
+            const data = await mahoFetch(url, { loaderArea: false });
+            // A poll of a running job finds the same history most of the time: nothing to redraw.
+            const signature = JSON.stringify([data.conversation, data.messages]);
+            if (signature === this.renderedHistory && this.conversationId === data.conversation.id) {
+                this.watchBackground(data.conversation.running ? id : null);
+                return;
+            }
+            this.renderedHistory = signature;
+            this.pendingTitle = data.conversation.title;
+            this.rememberConversation(data.conversation.id);
+            this.pendingCard = null;
+            // Set before the redraw: the greeting stays one line while the history is put back.
+            this.chat.classList.toggle('has-history', data.messages.length > 0);
+            this.chat.clearMessages(true);
+            const pending = [];
+            const history = [];
+            for (const message of data.messages) {
+                if (message.role === 'user') {
+                    history.push({ role: 'user', text: message.content });
+                } else if (message.role === 'assistant') {
+                    if (message.notice === 'error') {
+                        history.push({ role: 'ai', html: this.renderError(message.content) });
+                    } else if (message.notice) {
+                        history.push({ role: 'ai', text: '_' + message.content + '_' });
+                    } else if (message.content) {
+                        history.push({ role: 'ai', text: message.content });
+                    }
+                } else if (message.role === 'tool') {
+                    const tool = message.tool;
+                    if (tool.status === 'pending') {
+                        pending.push({ id: tool.id, name: tool.name, title: tool.name, arguments: tool.arguments, destructive: false });
+                    } else {
+                        history.push({ role: 'ai', html: this.renderStep({ id: tool.id, name: tool.name, title: tool.name, arguments: tool.arguments, read_only: !tool.is_write }, { status: tool.status, undo: tool.undo ?? null }) });
+                    }
+                }
+            }
+            if (pending.length > 0) {
+                history.push({ role: 'ai', html: this.renderConfirmCard(pending) });
+                this.pendingCard = { index: history.length - 1, calls: pending };
+            }
+            if (data.conversation.running) {
+                history.push({ role: 'ai', html: this.renderWorking(data.conversation.queued ? this.labels.queued : this.labels.running) });
+            }
+            this.chat.history = history;
+            setTimeout(() => this.updateIntro(history.length > 0), 100);
+            setTimeout(() => this.chat.scrollToBottom(), 50);
+            this.watchBackground(data.conversation.running ? id : null);
+        } catch (error) {
+            console.error('[ai-chat]', error);
+        }
+    }
+
+    /** Upload each chosen file now, so the next message only names the ids. */
+    /** Each file gets its chip at once, marked as uploading until the server answers. The uploads run in parallel. */
+    async attachFiles(files) {
+        const uploads = [];
+        for (const file of Array.from(files ?? [])) {
+            if (this.attachments.length >= this.config.uploadMaxFiles) {
+                this.notice(this.labels.tooManyFiles.replace('%s', String(this.config.uploadMaxFiles)));
+                break;
+            }
+            if (file.size > this.config.uploadMaxBytes) {
+                this.notice(this.labels.fileTooLarge.replace('%s', file.name));
+                continue;
+            }
+            const entry = { id: null, name: file.name, uploading: true };
+            this.attachments.push(entry);
+            const body = new FormData();
+            body.append('file', file, file.name);
+            uploads.push(mahoFetch(this.config.uploadUrl, { method: 'POST', body, loaderArea: false }).then((stored) => {
+                Object.assign(entry, stored, { uploading: false });
+            }).catch((error) => {
+                this.attachments = this.attachments.filter((f) => f !== entry);
+                this.notice(this.labels.uploadFailed.replace('%s', error.message));
+            }).finally(() => this.renderAttachments()));
+        }
+        this.fileInput.value = '';
+        this.renderAttachments();
+        this.pendingUploads = (this.pendingUploads ?? []).concat(uploads);
+        await Promise.allSettled(uploads);
+        this.pendingUploads = this.pendingUploads.filter((upload) => !uploads.includes(upload));
+    }
+
+    /** Resolves when no upload is in flight, so a message never leaves before its files have an id. */
+    async uploadsSettled() {
+        while ((this.pendingUploads ?? []).length > 0) {
+            await Promise.allSettled(this.pendingUploads);
+        }
+    }
+
+    /** Removes a chip. A file that is not sent yet goes from the server too. */
+    removeAttachment(file) {
+        this.attachments = this.attachments.filter((f) => f !== file);
+        this.renderAttachments();
+        if (file.id) {
+            mahoFetch(this.config.removeUploadUrl, { method: 'POST', body: JSON.stringify({ id: file.id }), loaderArea: false }).catch(() => {});
+        }
+    }
+
+    /** A file dragged anywhere over the panel attaches on drop. The counter survives the enter/leave pairs of child nodes. */
+    bindDrop() {
+        const hint = document.getElementById('ai-chat-drop');
+        let depth = 0;
+        const hasFiles = (event) => [...(event.dataTransfer?.types ?? [])].includes('Files');
+        this.panel.addEventListener('dragenter', (event) => {
+            if (!hasFiles(event)) {
+                return;
+            }
+            event.preventDefault();
+            depth++;
+            hint.hidden = false;
+        });
+        this.panel.addEventListener('dragover', (event) => {
+            if (hasFiles(event)) {
+                event.preventDefault();
+                event.dataTransfer.dropEffect = 'copy';
+            }
+        });
+        this.panel.addEventListener('dragleave', (event) => {
+            if (hasFiles(event) && --depth <= 0) {
+                depth = 0;
+                hint.hidden = true;
+            }
+        });
+        this.panel.addEventListener('drop', (event) => {
+            if (!hasFiles(event)) {
+                return;
+            }
+            event.preventDefault();
+            depth = 0;
+            hint.hidden = true;
+            this.attachFiles(event.dataTransfer.files);
+        });
+    }
+
+    renderAttachments() {
+        this.attachmentList.replaceChildren();
+        this.attachmentList.hidden = this.attachments.length === 0;
+        for (const file of this.attachments) {
+            const chip = document.createElement('span');
+            chip.className = 'ai-chat-attachment' + (file.uploading ? ' is-uploading' : '');
+            chip.title = file.uploading ? this.labels.uploading : '';
+            chip.textContent = file.name;
+            const remove = document.createElement('button');
+            remove.type = 'button';
+            remove.className = 'ai-chat-attachment-remove';
+            remove.title = this.labels.removeAttachment;
+            remove.textContent = '×';
+            remove.addEventListener('click', () => this.removeAttachment(file));
+            chip.appendChild(remove);
+            this.attachmentList.appendChild(chip);
+        }
+    }
+
+    clearAttachments() {
+        this.attachments = [];
+        this.renderAttachments();
+    }
+
+    /** A background job writes into its conversation from a worker; the panel re-reads it until the job ends. */
+    watchBackground(id) {
+        clearTimeout(this.backgroundTimer);
+        this.backgroundTimer = null;
+        if (!id) {
+            return;
+        }
+        this.backgroundTimer = setTimeout(() => {
+            if (this.conversationId === id && !this.abortController) {
+                this.loadConversation(id).then(() => this.loadConversations());
+            }
+        }, 5000);
+    }
+
+    async deleteConversation() {
+        if (!this.conversationId || !window.confirm(this.labels.deleteConfirm)) {
+            return;
+        }
+        try {
+            const body = new URLSearchParams({ id: String(this.conversationId) });
+            await mahoFetch(this.config.deleteUrl, { method: 'POST', body, loaderArea: false });
+            this.newConversation();
+            await this.loadConversations();
+        } catch (error) {
+            console.error('[ai-chat]', error);
+        }
+    }
+
+    // --- one turn ------------------------------------------------------------------
+
+    /**
+     * deep-chat calls this for every submitted message. The stream is driven by hand: text
+     * and cards are added with addMessage/updateMessage, and the final onResponse only tells
+     * deep-chat that the turn is over.
+     */
+    async handleSubmit(body, signals) {
+        const text = body.messages?.at(-1)?.text ?? '';
+        this.pendingTitle = text;
+        signals.onOpen();
+        this.abortController = new AbortController();
+        signals.stopClicked.listener = () => this.stop();
+        this.updateIntro(true);
+        this.chat.classList.add('has-history');
+        this.renderedHistory = null;
+
+        await this.uploadsSettled();
+        const attachments = this.attachments.map((file) => file.id).filter(Boolean);
+        this.clearAttachments();
+        const outcome = await this.streamTurn(this.config.chatUrl, {
+            conversation_id: this.conversationId,
+            message: text,
+            attachments,
+            context: { ...this.config.context, screen: this.screenDigest(), editor_guide: await this.contentGuide(), form: this.formDraft() },
+            form_key: this.config.formKey,
+        });
+
+        if (outcome.error) {
+            await signals.onResponse({ html: this.renderError(outcome.error) });
+        } else {
+            await signals.onResponse({ html: '<span class="ai-chat-turn-end"></span>' });
+        }
+        signals.onClose();
+        this.abortController = null;
+        if (outcome.newConversation) {
+            await this.loadConversations();
+        }
+    }
+
+    /** Stop tells the server to end the turn, then closes the stream. A closed stream alone lets the turn finish. */
+    stop() {
+        if (this.conversationId) {
+            mahoFetch(this.config.stopUrl, { method: 'POST', body: JSON.stringify({ conversation_id: this.conversationId }), loaderArea: false }).catch(() => {});
+        }
+        this.abortController?.abort();
+    }
+
+    async confirm(decisions) {
+        if (!this.conversationId || this.abortController) {
+            return;
+        }
+        this.abortController = new AbortController();
+        this.chat.disableSubmitButton(true);
+        const outcome = await this.streamTurn(this.config.confirmUrl, {
+            conversation_id: this.conversationId,
+            decisions,
+            context: { ...this.config.context, editor_guide: await this.contentGuide(), form: this.formDraft() },
+            form_key: this.config.formKey,
+        });
+        if (outcome.error) {
+            this.chat.addMessage({ html: this.renderError(outcome.error), role: 'ai' });
+        }
+        this.chat.disableSubmitButton(false);
+        this.abortController = null;
+        this.loadConversations();
+    }
+
+    /**
+     * POST the payload and render the server-sent events as they arrive.
+     * Native fetch on purpose: mahoFetch reads the whole body, and this one is a stream.
+     */
+    async streamTurn(url, payload) {
+        const state = { textIndex: null, text: '', steps: new Map(), error: null, done: false, navigateTo: null, pageAction: null, textEdits: [], changedRecords: [], thinkingIndex: null, newConversation: !this.conversationId };
+        let response;
+        try {
+            response = await fetch(url, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: { 'Content-Type': 'application/json', 'Accept': 'text/event-stream' },
+                body: JSON.stringify(payload),
+                signal: this.abortController?.signal,
+            });
+        } catch (error) {
+            state.error = error.name === 'AbortError' ? this.labels.stopped : this.labels.error;
+            return state;
+        }
+
+        if (!response.ok) {
+            let message = this.labels.error;
+            try {
+                const data = await response.json();
+                message = data.message || data.error || data.detail || message;
+            } catch (e) {
+                // keep the generic message
+            }
+            state.error = message;
+            return state;
+        }
+
+        try {
+            await this.readEvents(response.body, (event, data) => this.onEvent(state, event, data));
+            if (!state.done && !state.error) {
+                // The server stopped without a final event: a crashed or killed request.
+                state.error = this.labels.error;
+            }
+        } catch (error) {
+            if (error.name === 'AbortError') {
+                this.addText(state, '\n\n_' + this.labels.stopped + '_');
+            } else {
+                console.error('[ai-chat]', error);
+                state.error = this.labels.error;
+            }
+        }
+        this.hideThinking(state);
+        return state;
+    }
+
+    async readEvents(body, onEvent) {
+        const reader = body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        while (true) {
+            const { value, done } = await reader.read();
+            if (done) {
+                break;
+            }
+            buffer += decoder.decode(value, { stream: true });
+            let separator;
+            while ((separator = buffer.indexOf('\n\n')) !== -1) {
+                const chunk = buffer.slice(0, separator);
+                buffer = buffer.slice(separator + 2);
+                this.dispatchChunk(chunk, onEvent);
+            }
+        }
+        if (buffer.trim() !== '') {
+            this.dispatchChunk(buffer, onEvent);
+        }
+    }
+
+    dispatchChunk(chunk, onEvent) {
+        let event = 'message';
+        const dataLines = [];
+        for (const line of chunk.split('\n')) {
+            if (line.startsWith('event:')) {
+                event = line.slice(6).trim();
+            } else if (line.startsWith('data:')) {
+                dataLines.push(line.slice(5).replace(/^ /, ''));
+            }
+        }
+        if (dataLines.length === 0) {
+            return;
+        }
+        let data = {};
+        try {
+            data = JSON.parse(dataLines.join('\n'));
+        } catch (e) {
+            return;
+        }
+        onEvent(event, data);
+    }
+
+    onEvent(state, event, data) {
+        if (event !== 'tool_result' && event !== 'navigate') {
+            this.hideThinking(state);
+        }
+        switch (event) {
+            case 'delta':
+                this.addText(state, data.text ?? '');
+                break;
+            case 'replace':
+                if (state.textIndex !== null) {
+                    state.text = data.text ?? '';
+                    this.chat.updateMessage({ text: state.text }, state.textIndex);
+                }
+                break;
+            case 'tool_call': {
+                state.textIndex = null;
+                state.text = '';
+                this.chat.addMessage({ html: this.renderStep(data, { status: 'running' }), role: 'ai' });
+                state.steps.set(data.id, { index: this.lastIndex(), call: data });
+                break;
+            }
+            case 'tool_result': {
+                const step = state.steps.get(data.id);
+                if (step) {
+                    const status = data.denied ? 'denied' : (data.ok ? 'done' : 'error');
+                    this.chat.updateMessage({ html: this.renderStep(step.call, { status, preview: data.preview, undo: data.undo ?? null, recordUrl: data.record_url ?? null }) }, step.index);
+                } else if (data.denied) {
+                    this.chat.addMessage({ html: this.renderStep({ id: data.id, name: '', title: '', arguments: {} }, { status: 'denied' }), role: 'ai' });
+                }
+                if (data.record_url) {
+                    state.changedRecords.push(data.record_url);
+                }
+                this.showThinking(state);
+                break;
+            }
+            case 'confirm':
+                state.textIndex = null;
+                this.showConfirmCard(data.calls ?? []);
+                break;
+            case 'error':
+                state.error = data.message ?? this.labels.error;
+                break;
+            case 'navigate':
+                state.navigateTo = data.url ? { url: data.url, fields: data.fields ?? null } : null;
+                break;
+            case 'page_action':
+                state.pageAction = data.steps ?? null;
+                break;
+            case 'text_edits':
+                state.textEdits.push(...(data.edits ?? []));
+                break;
+            case 'start':
+                if (data.conversation_id) {
+                    this.rememberConversation(data.conversation_id);
+                }
+                break;
+            case 'done':
+                state.done = true;
+                if (data.conversation_id) {
+                    this.rememberConversation(data.conversation_id);
+                }
+                if (state.textEdits.length > 0 && data.state === 'complete') {
+                    const edits = state.textEdits;
+                    setTimeout(() => this.applyTextEdits(edits), 800);
+                }
+                if (state.navigateTo && data.state === 'complete') {
+                    const { url, fields } = state.navigateTo;
+                    setTimeout(() => this.navigate(url, fields), 800);
+                } else if (state.pageAction && data.state === 'complete') {
+                    const steps = state.pageAction;
+                    setTimeout(() => this.performPageActions(steps), 800);
+                } else if (data.state === 'complete' && state.changedRecords.some((url) => this.samePage(url, window.location.href))) {
+                    // A confirmed write changed the record on the screen: show its new data.
+                    setTimeout(() => this.leavePage(this.labels.reloadUnsaved, this.labels.reload, () => window.location.reload()), 800);
+                }
+                break;
+        }
+    }
+
+    addText(state, text) {
+        if (text === '') {
+            return;
+        }
+        state.text += text;
+        if (state.textIndex === null) {
+            this.chat.addMessage({ text: state.text, role: 'ai' });
+            state.textIndex = this.lastIndex();
+        } else {
+            this.chat.updateMessage({ text: state.text }, state.textIndex);
+        }
+    }
+
+    showThinking(state) {
+        if (state.thinkingIndex !== null) {
+            return;
+        }
+        this.chat.addMessage({ html: this.renderWorking(this.labels.thinking), role: 'ai' });
+        state.thinkingIndex = this.lastIndex();
+        setTimeout(() => this.chat.scrollToBottom(), 50);
+    }
+
+    hideThinking(state) {
+        if (state.thinkingIndex === null) {
+            return;
+        }
+        this.chat.updateMessage({ html: '<span class="ai-chat-turn-end"></span>' }, state.thinkingIndex);
+        state.thinkingIndex = null;
+    }
+
+    // --- screen digest ----------------------------------------------------------------
+    // A text description of the page the administrator sees, sent with each message, so
+    // the model can answer "where is the slideshow button" for this page, this tab.
+
+    /**
+     * The HTML the content editor writes for its layouts, generated by the editor script
+     * itself. The server keeps it per version of that script, so the panel generates and
+     * sends it only while the server has none. An empty string when nothing is needed.
+     */
+    async contentGuide() {
+        if (!this.config.needsEditorGuide) {
+            return '';
+        }
+        let guide = '';
+        try {
+            // A page with an editor loads the script by itself, but a browser may hold a stale
+            // copy without the guide: the versioned import then brings the current one.
+            if (typeof window.tiptapWysiwygSetup?.contentGuide !== 'function' && this.config.editorUrl) {
+                await import(this.config.editorUrl);
+            }
+            guide = window.tiptapWysiwygSetup?.contentGuide?.() ?? '';
+        } catch (error) {
+            console.warn('[ai-chat] editor guide unavailable', error);
+        }
+        if (guide !== '') {
+            this.config.needsEditorGuide = false;
+        }
+        return guide;
+    }
+
+    screenDigest() {
+        const lines = [];
+        const text = (node) => (node?.textContent ?? '').replace(/\s+/g, ' ').trim();
+        const clip = (value, max) => (value.length > max ? value.slice(0, max - 1) + '…' : value);
+        const visible = (node) => !!node && node.getClientRects().length > 0 && !node.closest('#ai-chat-panel, .ai-chat-toggle, [hidden]');
+        const heading = document.querySelector('.content-header h3, .content-header h1, h1');
+        lines.push('Page: ' + clip(text(heading) || document.title, 120));
+
+        const messages = [...document.querySelectorAll('#messages li, .message-popup .message-body')].filter(visible).map((m) => clip(text(m), 200));
+        if (messages.length > 0) {
+            lines.push('Messages: ' + messages.slice(0, 4).join(' | '));
+        }
+
+        const tabs = [...document.querySelectorAll('a.tab-item-link')].filter(visible);
+        let scope = document;
+        if (tabs.length > 0) {
+            const active = tabs.find((t) => t.classList.contains('active'));
+            lines.push('Tabs: ' + tabs.map((t) => (t === active ? '[' + text(t) + ']' : text(t))).join(', ') + (active ? ' (the one in brackets is open)' : ''));
+            scope = (active && document.getElementById(active.id + '_content')) || document;
+        }
+
+        const fields = [];
+        for (const element of scope.querySelectorAll('input, select, textarea')) {
+            if (fields.length >= 40 || !visible(element) || ['hidden', 'password', 'submit', 'button', 'file'].includes(element.type) || element.closest('.grid, #ai-chat-panel')) {
+                continue;
+            }
+            const label = this.fieldLabel(element);
+            let value;
+            if (element.tagName === 'SELECT') {
+                value = [...element.selectedOptions].map((o) => text(o)).join(', ');
+            } else if (element.type === 'checkbox' || element.type === 'radio') {
+                if (!element.checked) {
+                    continue;
+                }
+                value = 'checked';
+            } else {
+                value = element.value;
+            }
+            const editor = element.tagName === 'TEXTAREA' ? window.tiptapEditors?.get(element.id) : null;
+            fields.push(`${clip(label, 40)} = ${clip(String(value ?? ''), editor ? 400 : 80)}${editor ? ' (rich text editor)' : ''}`);
+        }
+        if (fields.length > 0) {
+            lines.push('Fields: ' + fields.join('; '));
+        }
+        const changed = [...this.changedFields].map((id) => document.getElementById(id)).filter(Boolean).map((element) => this.fieldLabel(element));
+        if (changed.length > 0) {
+            lines.push('Unsaved changes: ' + [...new Set(changed)].join(', '));
+        }
+
+        const toolbar = [...scope.querySelectorAll('.tiptap-toolbar button[title], .tiptap-toolbar select[title]')].filter(visible).map((b) => b.title);
+        if (toolbar.length > 0) {
+            lines.push('Editor toolbar buttons: ' + [...new Set(toolbar)].join(', '));
+        }
+
+        const buttons = [...document.querySelectorAll('button, a.button, input[type="submit"]')]
+            .filter((b) => visible(b) && !b.closest('.tiptap-toolbar, .grid, #ai-chat-panel'))
+            .map((b) => text(b) || b.title || b.value).filter(Boolean);
+        if (buttons.length > 0) {
+            lines.push('Page buttons: ' + [...new Set(buttons)].slice(0, 40).join(', '));
+        }
+
+        const grid = document.querySelector('.grid table');
+        if (grid && visible(grid)) {
+            const columns = [...grid.querySelectorAll('thead tr.headings th')].map(text);
+            const rows = [...grid.querySelectorAll('tbody tr')].filter(visible);
+            lines.push(`Grid: ${rows.length} rows on this page, columns: ${columns.filter(Boolean).join(', ')}`);
+            const total = text(document.querySelector('.grid-widget .pager, .pager'));
+            if (total) {
+                lines.push('Grid paging: ' + clip(total, 120));
+            }
+            // A row link ends with /id/<record ID>/, so "open the third one" can name its record.
+            rows.slice(0, 15).forEach((row, index) => {
+                const id = (row.getAttribute('title') ?? '').match(/\/id\/(\d+)/)?.[1];
+                const cells = [...row.cells].map(text).filter(Boolean);
+                lines.push(clip(`Row ${index + 1}${id ? ` (record ID ${id})` : ''}: ${cells.join(' | ')}`, 200));
+            });
+        }
+
+        return clip(lines.join('\n'), 6000);
+    }
+
+    fieldLabel(element) {
+        const text = (node) => (node?.textContent ?? '').replace(/\s+/g, ' ').trim().replace(/\s*\*$/, '');
+        return text(element.id ? document.querySelector(`label[for="${CSS.escape(element.id)}"]`) : null) || text(element.closest('tr')?.querySelector('td.label, th')) || element.name || element.id;
+    }
+
+    // --- form text --------------------------------------------------------------------
+    // The text fields of the open form go with each message. The server keeps them out of
+    // the prompt, and gives them to the model only when it calls the read tool.
+
+    /** Record the fields that change after the page loaded. A fill by the panel counts too: it is not saved either. */
+    trackChanges() {
+        const mark = (event) => {
+            if (!event.isTrusted) {
+                return;
+            }
+            const element = event.target;
+            const field = ['INPUT', 'TEXTAREA', 'SELECT'].includes(element.tagName)
+                ? element
+                : [...(window.tiptapEditors?.values() ?? [])].find((editor) => editor.wrapper?.contains(element))?.textarea;
+            if (field?.id && !field.closest('#ai-chat-panel')) {
+                this.changedFields.add(field.id);
+            }
+        };
+        document.addEventListener('input', mark, true);
+        document.addEventListener('change', mark, true);
+        // A toolbar button or a key that the editor handles changes the text without an input event.
+        const watch = (setup) => setup?.editor?.on('update', ({ editor }) => {
+            if (editor.isFocused && setup.textarea?.id) {
+                this.changedFields.add(setup.textarea.id);
+            }
+        });
+        window.tiptapEditors?.forEach(watch);
+        window.varienGlobalEvents?.attachEventHandler('wysiwygEditorInitialized', (editor) => watch(editor?.options?.wysiwygSetup));
+    }
+
+    /** The value of a field as the form saves it: the HTML of the rich text editor when it is on. */
+    fieldValue(element) {
+        const editor = element.tagName === 'TEXTAREA' ? window.tiptapEditors?.get(element.id) : null;
+        return editor?.editor && editor.isTiptapActive() ? editor.convertToPlain(editor.editor.getHTML()) : element.value;
+    }
+
+    /**
+     * The text fields of the forms on the page, in every tab, with their current values.
+     * The limits match the server: 80 fields of 60,000 characters each, 200,000 in total.
+     */
+    formDraft() {
+        const fields = [];
+        let budget = 200000;
+        for (const element of document.querySelectorAll('form input, form textarea')) {
+            const text = element.tagName === 'TEXTAREA' || ['text', 'email', 'url', 'search', 'tel'].includes(element.type);
+            if (fields.length >= 80 || !text || !element.id || element.disabled || element.readOnly || element.closest('.grid, #ai-chat-panel')) {
+                continue;
+            }
+            const value = this.fieldValue(element);
+            const changed = this.changedFields.has(element.id);
+            if ((value === '' && !changed) || value.length > Math.min(60000, budget)) {
+                continue;
+            }
+            budget -= value.length;
+            // "product[description]" is the field "description", as the API names it.
+            const name = element.name.match(/\[([^\]]+)\]$/)?.[1] ?? element.name;
+            fields.push({ id: element.id, name: name || element.id, label: this.fieldLabel(element), value, changed });
+        }
+        return fields;
+    }
+
+    /** The corrections of the edit tool, checked again against the live values: the administrator may have typed since. */
+    applyTextEdits(edits) {
+        const values = new Map();
+        const missing = [];
+        for (const edit of edits) {
+            const element = document.getElementById(edit.id);
+            const current = element ? (values.get(element) ?? this.fieldValue(element)) : '';
+            const at = current.indexOf(edit.find);
+            if (!element || at === -1 || current.indexOf(edit.find, at + 1) !== -1) {
+                missing.push(edit.find);
+                continue;
+            }
+            values.set(element, current.slice(0, at) + edit.replace + current.slice(at + edit.find.length));
+        }
+        for (const [element, value] of values) {
+            this.setFieldValue(element, value);
+        }
+        // The answer already names the corrections. Only a correction that the live form refused needs a note.
+        if (missing.length > 0) {
+            const note = this.labels.textEditMissing.replace('%s', missing.map((find) => `"${find}"`).join(', '));
+            this.chat.addMessage({ html: `<div class="ai-chat-note">${this.escape(note)}</div>`, role: 'ai' });
+        }
+        const first = values.keys().next().value;
+        if (first) {
+            this.showTabOf(first);
+            setTimeout(() => (window.tiptapEditors?.get(first.id)?.wrapper ?? first).scrollIntoView({ block: 'center', behavior: 'smooth' }), 150);
+        }
+    }
+
+    // --- page actions -----------------------------------------------------------------
+    // The model names a button, a tab or a field as the screen digest listed it. Only
+    // visible elements qualify, so the model cannot reach what the administrator does not see.
+
+    /** Steps run in order. A click is always the last one: the page may reload after it. */
+    performPageActions(steps) {
+        const done = [];
+        const missing = [];
+        let clicked = null;
+        for (const step of steps) {
+            const outcome = this.performPageAction(step);
+            (outcome.ok ? done : missing).push(step.action === 'open_row' ? this.labels.gridRow.replace('%s', step.target) : step.target);
+            if (outcome.click) {
+                clicked = outcome.click;
+                break;
+            }
+        }
+        const notes = [];
+        if (done.length > 0) {
+            notes.push(this.labels.actionDone.replace('%s', done.join(', ')));
+        }
+        if (missing.length > 0) {
+            notes.push(this.labels.actionNotFound.replace('%s', missing.join(', ')));
+        }
+        this.chat.addMessage({ html: `<div class="ai-chat-note">${this.escape(notes.join(' '))}</div>`, role: 'ai' });
+        if (clicked) {
+            this.flash(clicked);
+            setTimeout(() => clicked.click(), 300);
+        }
+    }
+
+    /** @return {{ok: boolean, click?: Element}} */
+    performPageAction(action) {
+        const target = String(action.target ?? '').trim();
+        const normalize = (text) => String(text ?? '').replace(/\s+/g, ' ').trim().toLowerCase();
+        const visible = (node) => !!node && node.getClientRects().length > 0 && !node.closest('#ai-chat-panel, .ai-chat-toggle, [hidden]');
+        const matches = (candidates, label) => {
+            const wanted = normalize(target);
+            const exact = candidates.find((c) => normalize(label(c)) === wanted);
+            return exact ?? candidates.find((c) => normalize(label(c)).includes(wanted));
+        };
+        if (action.action === 'click') {
+            const buttons = [...document.querySelectorAll('button, a.button, input[type="submit"], .tiptap-toolbar button[title]')].filter(visible);
+            const button = matches(buttons, (b) => b.textContent || b.title || b.value);
+            return button ? { ok: true, click: button } : { ok: false };
+        }
+        if (action.action === 'open_row') {
+            // The rows the screen digest numbered. A plain cell gets the click, so the grid opens the row
+            // as for a person: a cell with a link, a field or a checkbox does something else.
+            const rows = [...document.querySelectorAll('.grid table tbody tr')].filter(visible);
+            const row = rows[Number(target) - 1];
+            const cell = row ? [...row.cells].find((td) => visible(td) && !td.querySelector('input, select, textarea, a, button')) : null;
+            return cell ? { ok: true, click: cell } : { ok: false };
+        }
+        if (action.action === 'open_tab') {
+            const tabs = [...document.querySelectorAll('a.tab-item-link')].filter(visible);
+            const tab = matches(tabs, (t) => t.textContent);
+            if (tab) {
+                tab.click();
+                this.flash(tab);
+            }
+            return { ok: !!tab };
+        }
+        if (action.action === 'set_field') {
+            const field = this.findField(target) || this.findFieldByLabel(target);
+            if (field) {
+                this.showTabOf(field);
+                this.setFieldValue(field, action.value ?? '');
+                field.scrollIntoView({ block: 'center', behavior: 'smooth' });
+            }
+            return { ok: !!field };
+        }
+        return { ok: false };
+    }
+
+    findFieldByLabel(text) {
+        const wanted = String(text).replace(/\s+/g, ' ').trim().toLowerCase().replace(/\s*\*$/, '');
+        for (const label of document.querySelectorAll('label[for]')) {
+            if (label.textContent.replace(/\s+/g, ' ').trim().toLowerCase().replace(/\s*\*$/, '') === wanted) {
+                const field = document.getElementById(label.htmlFor);
+                if (field && ['INPUT', 'TEXTAREA', 'SELECT'].includes(field.tagName)) {
+                    return field;
+                }
+            }
+        }
+        return null;
+    }
+
+    /** Shows a message that belongs to the panel, not to the model, as an error bubble. */
+    notice(message) {
+        this.chat.addMessage({ html: this.renderError(message), role: 'ai' });
+    }
+
+    flash(element) {
+        element.classList.add('ai-chat-prefilled');
+        setTimeout(() => element.classList.remove('ai-chat-prefilled'), 1500);
+    }
+
+    // --- form prefill -----------------------------------------------------------------
+    // A fill tool hands the panel a page URL and field values. The values wait in session
+    // storage across the navigation, and the panel fills the form once the page is loaded.
+
+    /**
+     * Open the page that a tool asked for, without losing the changes that the open form did not save:
+     * the same form gets the values in place, and another page waits for the administrator.
+     */
+    navigate(url, fields) {
+        if (fields && this.samePage(url, window.location.href)) {
+            this.fillForm(fields, 0, false);
+            return;
+        }
+        this.leavePage(this.labels.unsavedChanges, this.labels.openAnyway, () => this.openPage(url, fields));
+    }
+
+    /** Run leave at once, or, when the form has unsaved changes, show a note that names them, with a button that runs it. */
+    leavePage(message, buttonLabel, leave) {
+        const unsaved = this.unsavedFields();
+        if (unsaved.length === 0) {
+            leave();
+            return;
+        }
+        this.pendingLeave = leave;
+        const note = this.escape(message.replace('%s', unsaved.join(', ')));
+        this.chat.addMessage({ html: `<div class="ai-chat-note">${note} <button type="button" class="ai-chat-leave">${this.escape(buttonLabel)}</button></div>`, role: 'ai' });
+    }
+
+    openPage(url, fields) {
+        if (fields) {
+            this.rememberPrefill(url, fields);
+        }
+        window.location.assign(url);
+    }
+
+    /** The labels of the fields of this page that changed and are not saved. */
+    unsavedFields() {
+        const fields = [...this.changedFields].map((id) => document.getElementById(id)).filter(Boolean);
+        return [...new Set(fields.map((field) => this.fieldLabel(field)))];
+    }
+
+    rememberPrefill(url, fields) {
+        try {
+            sessionStorage.setItem(MahoAiAssistant.STORAGE_PREFILL, JSON.stringify({ url, fields }));
+        } catch (e) {
+            // without storage the page opens empty
+        }
+    }
+
+    applyPrefill() {
+        let prefill = null;
+        try {
+            prefill = JSON.parse(sessionStorage.getItem(MahoAiAssistant.STORAGE_PREFILL) ?? 'null');
+            sessionStorage.removeItem(MahoAiAssistant.STORAGE_PREFILL);
+        } catch (e) {
+            return;
+        }
+        if (!prefill || !prefill.fields || !this.samePage(prefill.url, window.location.href)) {
+            return;
+        }
+        const run = () => this.fillForm(prefill.fields, 0);
+        if (document.readyState === 'complete') {
+            setTimeout(run, 300);
+        } else {
+            window.addEventListener('load', () => setTimeout(run, 300), { once: true });
+        }
+    }
+
+    /** Same admin page: path without the secret key segment and without the trailing slash. */
+    samePage(a, b) {
+        const strip = (href) => {
+            try {
+                return new URL(href, window.location.href).pathname.replace(/\/key\/[^/]+/, '').replace(/\/+$/, '');
+            } catch (e) {
+                return '';
+            }
+        };
+        return strip(a) !== '' && strip(a) === strip(b);
+    }
+
+    /** A page that just loaded can still build its editors, so a textarea waits for them unless waitForEditors is false. */
+    fillForm(fields, attempt, waitForEditors = true) {
+        const filled = [];
+        const missing = [];
+        const retry = [];
+        for (const [name, value] of Object.entries(fields)) {
+            const element = this.findField(name);
+            if (!element) {
+                missing.push(name);
+                continue;
+            }
+            if (waitForEditors && element.tagName === 'TEXTAREA' && element.id && window.tiptapEditors === undefined && attempt < 10) {
+                retry.push(name);
+                continue;
+            }
+            this.setFieldValue(element, value);
+            filled.push(name);
+        }
+        if (retry.length > 0) {
+            const pending = Object.fromEntries(retry.map((n) => [n, fields[n]]));
+            setTimeout(() => this.fillForm(pending, attempt + 1), 300);
+        }
+        if (filled.length === 0 && missing.length === 0) {
+            return;
+        }
+        this.setOpen(true);
+        const notes = [];
+        if (filled.length > 0) {
+            notes.push(this.labels.formFilled.replace('%s', filled.join(', ')));
+        }
+        if (missing.length > 0) {
+            notes.push(this.labels.formFieldsMissing.replace('%s', missing.join(', ')));
+        }
+        const show = () => this.chat.addMessage({ html: `<div class="ai-chat-note">${this.escape(notes.join(' '))}</div>`, role: 'ai' });
+        customElements.whenDefined('deep-chat').then(() => setTimeout(show, 400));
+        if (filled.length > 0) {
+            const first = this.findField(filled[0]);
+            this.showTabOf(first);
+            setTimeout(() => first?.scrollIntoView({ block: 'center', behavior: 'smooth' }), 150);
+        }
+    }
+
+    /** Admin edit forms keep every tab in the page; the tab link of the field's content pane opens it. */
+    showTabOf(element) {
+        // A field id can end in "_content" too (page_content), so every ancestor is a candidate.
+        for (let pane = element?.parentElement; pane; pane = pane.parentElement) {
+            if (!pane.id || !pane.id.endsWith('_content')) {
+                continue;
+            }
+            const link = document.getElementById(pane.id.slice(0, -'_content'.length));
+            if (link?.classList.contains('tab-item-link')) {
+                if (!link.classList.contains('active')) {
+                    link.click();
+                }
+                return;
+            }
+        }
+    }
+
+    /** The form control for an API field name: "contentHeading" matches name="content_heading", "product[content_heading]" or "content_heading[]". */
+    findField(name) {
+        const snake = name.replace(/([a-z0-9])([A-Z])/g, '$1_$2').toLowerCase();
+        const candidates = [...new Set([name, snake])];
+        for (const field of candidates) {
+            const escaped = CSS.escape(field);
+            const selectors = [`[name="${escaped}"]`, `[name$="[${escaped}]"]`, `[name="${escaped}[]"]`, `[name$="[${escaped}][]"]`];
+            for (const selector of selectors) {
+                const element = [...document.querySelectorAll(selector)].find((e) => ['INPUT', 'TEXTAREA', 'SELECT'].includes(e.tagName) && e.type !== 'hidden' && !e.disabled);
+                if (element) {
+                    return element;
+                }
+            }
+        }
+        return null;
+    }
+
+    setFieldValue(element, value) {
+        // {prepend} or {append} adds to the current value, so a long field is never resent.
+        if (value && typeof value === 'object' && !Array.isArray(value) && ('prepend' in value || 'append' in value)) {
+            const current = this.fieldValue(element) ?? '';
+            value = String(value.prepend ?? '') + current + String(value.append ?? '');
+        }
+        const asList = Array.isArray(value) ? value.map(String) : String(value ?? '').split(',').map((v) => v.trim());
+        if (element.tagName === 'SELECT' && element.multiple) {
+            for (const option of element.options) {
+                option.selected = asList.includes(option.value);
+            }
+        } else if (element.type === 'checkbox') {
+            element.checked = value === true || value === 1 || value === '1' || value === 'true';
+        } else if (element.type === 'radio') {
+            const group = document.querySelectorAll(`input[type="radio"][name="${CSS.escape(element.name)}"]`);
+            for (const radio of group) {
+                radio.checked = radio.value === String(value);
+            }
+        } else {
+            const text = typeof value === 'boolean' ? (value ? '1' : '0') : (value === null ? '' : (typeof value === 'object' ? JSON.stringify(value) : String(value)));
+            element.value = text;
+            const editor = element.tagName === 'TEXTAREA' ? window.tiptapEditors?.get(element.id) : null;
+            if (editor) {
+                editor.syncPlainToWysiwyg();
+                editor.updateContentNotice?.();
+                editor.wrapper?.classList.add('ai-chat-prefilled');
+            }
+        }
+        element.dispatchEvent(new Event('input', { bubbles: true }));
+        element.dispatchEvent(new Event('change', { bubbles: true }));
+        element.classList.add('ai-chat-prefilled');
+        if (element.id) {
+            this.changedFields.add(element.id);
+        }
+    }
+
+    lastIndex() {
+        return this.chat.getMessages().length - 1;
+    }
+
+    shortcutLabel() {
+        const mac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
+        return mac ? '\u2325 Option+A' : 'Alt+A';
+    }
+
+    renderIntro() {
+        const greeting = this.config.adminName
+            ? this.labels.introGreeting.replace('%s', this.escape(this.config.adminName))
+            : this.labels.introGreetingAnonymous;
+        const examples = (this.config.examples ?? [])
+            .map((text) => `<button type="button" class="ai-chat-example" data-text="${this.escape(text)}">${this.escape(text)}</button>`)
+            .join('');
+        return `<div class="ai-chat-intro">`
+            + `<div class="ai-chat-intro-icon">${this.config.logo ?? ''}</div>`
+            + `<h3 class="ai-chat-intro-title">${greeting}</h3>`
+            + `<p class="ai-chat-intro-text">${this.escape(this.labels.intro)}</p>`
+            + (examples ? `<p class="ai-chat-intro-label">${this.escape(this.labels.introExamples)}</p><div class="ai-chat-intro-examples">${examples}</div>` : '')
+            + `<p class="ai-chat-intro-hint">${this.escape(this.labels.introHint.replace('%s', this.shortcutLabel()))}</p>`
+            + `</div>`;
+    }
+
+    /** Three pulsing dots and a label: the model is working on the turn. */
+    renderWorking(label) {
+        return `<div class="ai-chat-working" role="status"><span class="ai-chat-dots"><i></i><i></i><i></i></span>${this.escape(label)}</div>`;
+    }
+
+    // --- cards ---------------------------------------------------------------------
+
+    renderStep(call, result) {
+        const labels = {
+            running: this.labels.running,
+            done: this.labels.done,
+            error: this.labels.failed,
+            denied: this.labels.denied,
+            cancelled: this.labels.cancelled,
+            pending: this.labels.pending,
+        };
+        const status = result.status ?? 'done';
+        const title = call.title && call.title !== call.name ? call.title : this.humanizeTool(call.name);
+        const args = this.renderArguments(call.arguments);
+        const preview = result.preview ? `<pre class="ai-chat-step-preview">${this.escape(this.prettyPreview(result.preview))}</pre>` : '';
+        const undo = result.undo ? `<button type="button" class="ai-chat-undo" data-message="${this.escape(String(result.undo))}">${this.escape(this.labels.undo)}</button>` : '';
+        // The record on the screen reloads by itself; another record gets a button to its page.
+        const open = result.recordUrl && !this.samePage(result.recordUrl, window.location.href)
+            ? `<button type="button" class="ai-chat-open-record" data-url="${this.escape(result.recordUrl)}">${this.escape(this.labels.openRecord)}</button>`
+            : '';
+        const label = this.escape(labels[status] ?? status);
+        return `<details class="ai-chat-step ai-chat-step-${this.escape(status)}${args || preview ? '' : ' ai-chat-step-plain'}">`
+            + `<summary><span class="ai-chat-step-status" role="img" title="${label}" aria-label="${label}"></span>`
+            + `<span class="ai-chat-step-title">${this.escape(title)}</span>`
+            + (call.destructive ? `<span class="ai-chat-badge">${this.escape(this.labels.destructive)}</span>` : '')
+            + open
+            + undo
+            + (args || preview ? '<span class="ai-chat-step-chevron" aria-hidden="true"></span>' : '')
+            + `</summary>`
+            + args
+            + preview
+            + `</details>`;
+    }
+
+    showConfirmCard(calls) {
+        this.chat.addMessage({ html: this.renderConfirmCard(calls), role: 'ai' });
+        this.pendingCard = { index: this.lastIndex(), calls };
+        setTimeout(() => this.chat.scrollToBottom(), 50);
+    }
+
+    renderConfirmCard(calls) {
+        const rows = calls.map((call) => {
+            const title = call.title && call.title !== call.name ? call.title : this.humanizeTool(call.name);
+            return `<li class="ai-chat-confirm-row">`
+                + `<label><input type="checkbox" class="ai-chat-confirm-check" data-id="${this.escape(call.id)}" checked> `
+                + `<strong>${this.escape(title)}</strong>`
+                + (call.destructive ? ` <span class="ai-chat-badge">${this.escape(this.labels.destructive)}</span>` : '')
+                + `</label>`
+                + (call.preview ? this.renderPreview(call.preview, call.arguments) : this.renderArguments(call.arguments))
+                + `</li>`;
+        }).join('');
+        const html = `<div class="ai-chat-confirm" data-ids="${this.escape(calls.map((c) => c.id).join(','))}">`
+            + `<p class="ai-chat-confirm-title">${this.escape(this.labels.confirmTitle)}</p>`
+            + `<ul class="ai-chat-confirm-list">${rows}</ul>`
+            + `<div class="ai-chat-confirm-actions">`
+            + `<button type="button" class="ai-chat-approve">${this.escape(calls.length > 1 ? this.labels.approveSelected : this.labels.approve)}</button>`
+            + `<button type="button" class="ai-chat-deny">${this.escape(this.labels.deny)}</button>`
+            + `</div></div>`;
+        return html;
+    }
+
+    /**
+     * What a write does, before the administrator approves it: the record, the scope, and a
+     * before/after table for an update. A create lists its fields; a delete says so.
+     */
+    renderPreview(preview, args) {
+        const parts = [];
+        const meta = [];
+        if (preview.record) {
+            meta.push(`<span class="ai-chat-preview-record">${this.escape(this.labels.changeRecord)}: ${this.escape(preview.record)}</span>`);
+        }
+        if (preview.kind === 'update' || preview.kind === 'create') {
+            meta.push(`<span class="ai-chat-preview-scope">${this.escape(preview.scope ? this.labels.changeScopeStore.replace('%s', preview.scope) : this.labels.changeScopeDefault)}</span>`);
+        }
+        if (meta.length > 0) {
+            parts.push(`<p class="ai-chat-preview-meta">${meta.join(' · ')}</p>`);
+        }
+        if (preview.kind === 'delete') {
+            parts.push(`<p class="ai-chat-preview-delete">${this.escape(this.labels.changeDelete)}</p>`);
+            return parts.join('');
+        }
+        if (preview.kind === 'update' && preview.changes.length === 0) {
+            parts.push(`<p class="ai-chat-preview-none">${this.escape(this.labels.changeNone)}</p>`);
+            return parts.join('');
+        }
+        if (preview.kind !== 'update' || preview.changes.length === 0) {
+            parts.push(this.renderArguments(args));
+            return parts.join('');
+        }
+        const rows = preview.changes.map((change) => `<tr><th>${this.escape(this.humanizeKey(change.field))}</th>`
+            + `<td class="ai-chat-preview-from">${this.renderValue(change.from)}</td>`
+            + `<td class="ai-chat-preview-to">${this.renderValue(change.to)}</td></tr>`).join('');
+        parts.push(`<table class="ai-chat-preview-table"><thead><tr><th>${this.escape(this.labels.changeField)}</th>`
+            + `<th>${this.escape(this.labels.changeFrom)}</th><th>${this.escape(this.labels.changeTo)}</th></tr></thead><tbody>${rows}</tbody></table>`);
+        return parts.join('');
+    }
+
+    /** A value in the preview table: an object as JSON, nothing as "(empty)". */
+    renderValue(value) {
+        if (value === null || value === undefined || value === '') {
+            return `<em>${this.escape(this.labels.changeEmpty)}</em>`;
+        }
+        const text = typeof value === 'string' ? value : JSON.stringify(value, null, 2);
+        return text.length > 80 || text.includes('\n') ? `<pre>${this.escape(text)}</pre>` : this.escape(text);
+    }
+
+    async undo(messageId, button) {
+        if (!this.conversationId || this.abortController) {
+            return;
+        }
+        button?.remove();
+        this.abortController = new AbortController();
+        this.chat.disableSubmitButton(true);
+        const outcome = await this.streamTurn(this.config.undoUrl, {
+            conversation_id: this.conversationId,
+            message_id: messageId,
+            form_key: this.config.formKey,
+        });
+        if (outcome.error) {
+            this.chat.addMessage({ html: this.renderError(outcome.error), role: 'ai' });
+        }
+        this.chat.disableSubmitButton(false);
+        this.abortController = null;
+    }
+
+    onApprove(event) {
+        const card = event.target.closest('.ai-chat-confirm');
+        if (!card || !this.pendingCard) {
+            return;
+        }
+        const decisions = {};
+        for (const call of this.pendingCard.calls) {
+            const check = card.querySelector(`.ai-chat-confirm-check[data-id="${CSS.escape(call.id)}"]`);
+            decisions[call.id] = check ? check.checked : true;
+        }
+        this.settleCard(decisions);
+    }
+
+    onDeny() {
+        if (!this.pendingCard) {
+            return;
+        }
+        const decisions = {};
+        for (const call of this.pendingCard.calls) {
+            decisions[call.id] = false;
+        }
+        this.settleCard(decisions);
+    }
+
+    settleCard(decisions) {
+        const card = this.pendingCard;
+        this.pendingCard = null;
+        const summary = card.calls.map((call) => {
+            const title = call.title && call.title !== call.name ? call.title : this.humanizeTool(call.name);
+            const verdict = decisions[call.id] ? this.labels.approved : this.labels.denied;
+            return `<li>${this.escape(verdict)}: ${this.escape(title)}</li>`;
+        }).join('');
+        this.chat.updateMessage({ html: `<div class="ai-chat-confirm ai-chat-confirm-settled"><ul>${summary}</ul></div>` }, card.index);
+        this.confirm(decisions);
+    }
+
+    renderError(message) {
+        return `<div class="ai-chat-error">${this.escape(message)}</div>`;
+    }
+
+    // --- helpers -------------------------------------------------------------------
+
+    /** "content_cms_pages_update" reads as "Update cms pages": the verb first, without the section. */
+    humanizeTool(name) {
+        if (this.toolLabels[name]) {
+            return this.toolLabels[name];
+        }
+        const parts = String(name ?? '').split('_').filter(Boolean);
+        const verbs = { list: this.labels.verbList, get: this.labels.verbGet, create: this.labels.verbCreate, update: this.labels.verbUpdate, delete: this.labels.verbDelete };
+        const verb = verbs[parts[parts.length - 1]];
+        if (parts.length > 2 && verb) {
+            return `${verb} ${parts.slice(1, -1).join(' ')}`;
+        }
+        return parts.join(' ');
+    }
+
+    humanizeKey(key) {
+        const words = String(key).replace(/([a-z0-9])([A-Z])/g, '$1 $2').replace(/_/g, ' ').toLowerCase();
+        return words.charAt(0).toUpperCase() + words.slice(1);
+    }
+
+    /**
+     * One row per argument. A short value sits next to its label. A long value takes the
+     * full width below it.
+     */
+    renderArguments(args) {
+        if (!args || typeof args !== 'object' || Object.keys(args).length === 0) {
+            return '';
+        }
+        const rows = Object.entries(args).map(([key, value]) => {
+            const label = `<dt>${this.escape(this.humanizeKey(key))}</dt>`;
+            const text = typeof value === 'string' ? value : JSON.stringify(value, null, 2);
+            if (text.length > 80 || text.includes('\n')) {
+                // A sentence reads as text; only a structure keeps the code font.
+                const body = typeof value === 'string' ? `<div class="ai-chat-arg-text">${this.escape(text)}</div>` : `<pre>${this.escape(text)}</pre>`;
+                return `<div class="ai-chat-arg ai-chat-arg-block">${label}<dd>${body}</dd></div>`;
+            }
+            return `<div class="ai-chat-arg">${label}<dd>${this.escape(text)}</dd></div>`;
+        });
+        return `<dl class="ai-chat-args">${rows.join('')}</dl>`;
+    }
+
+    prettyPreview(text) {
+        try {
+            return JSON.stringify(JSON.parse(text), null, 2);
+        } catch {
+            return text;
+        }
+    }
+
+    escape(value) {
+        return String(value ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+}

@@ -11,6 +11,8 @@ declare(strict_types=1);
 namespace Mage\Catalog\Api;
 
 use Maho\Config\ApiResource;
+use Maho\ApiPlatform\Metadata\EnumSource;
+use Maho\ApiPlatform\Metadata\ValueLists;
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
@@ -128,6 +130,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
                 'includeInMenu' => ['type' => 'Boolean', 'description' => 'Only include categories in menu'],
                 'urlKey' => ['type' => 'String', 'description' => 'Exact URL-key lookup (returns 0 or 1 category)'],
                 'search' => ['type' => 'String', 'description' => 'Partial match on the category name or URL key'],
+                'scope' => ['type' => 'String', 'description' => 'Give "all" to list the categories of every root category tree, as the admin category tree does. It needs backend access. Without it, the list holds only the tree of the current store view'],
             ],
         ),
     ],
@@ -184,7 +187,7 @@ class Category extends CrudResource
     public ?array $availableSortBy = null;
 
     #[Groups(['category:read'])]
-    #[ApiProperty(description: 'Default product listing sort-by code ("" clears, falls back to config)')]
+    #[ApiProperty(description: 'Default product listing sort-by code ("" clears, falls back to config)', extraProperties: [EnumSource::KEY => 'catalog/category_attribute_source_sortby'])]
     public ?string $defaultSortBy = null;
 
     #[Groups(['category:read'])]
@@ -214,6 +217,7 @@ class Category extends CrudResource
     public ?string $path = null;
 
     #[Groups(['category:read'])]
+    #[ApiProperty(extraProperties: [EnumSource::KEY => 'catalog/category_attribute_source_mode'])]
     public ?string $displayMode = null;
 
     #[Groups(['category:detail'])]
@@ -230,9 +234,11 @@ class Category extends CrudResource
     public ?string $metaDescription = null;
 
     #[Groups(['category:read'])]
+    #[ApiProperty(extraProperties: [EnumSource::KEY => 'page/source_layout'])]
     public ?string $pageLayout = null;
 
     #[Groups(['category:read'])]
+    #[ApiProperty(extraProperties: [EnumSource::KEY => ValueLists::META_ROBOTS])]
     public ?string $metaRobots = null;
 
     #[Groups(['category:read'])]

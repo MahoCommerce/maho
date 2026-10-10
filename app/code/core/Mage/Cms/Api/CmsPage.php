@@ -11,6 +11,8 @@ declare(strict_types=1);
 namespace Mage\Cms\Api;
 
 use ApiPlatform\Metadata\ApiProperty;
+use Maho\ApiPlatform\Metadata\EnumSource;
+use Maho\ApiPlatform\Metadata\ValueLists;
 use Maho\Config\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
@@ -63,6 +65,7 @@ use Maho\ApiPlatform\CrudResource;
                 'updatedSince' => ['type' => 'String', 'description' => 'Updated at or after this UTC date or datetime'],
                 'identifier' => ['type' => 'String', 'description' => 'Exact identifier lookup (returns 0 or 1 page)'],
                 'search' => ['type' => 'String', 'description' => 'Partial match on the page title or identifier, minimum 3 characters'],
+                'scope' => ['type' => 'String', 'description' => 'Give "all" to list the records of every store view, the disabled and unpublished ones too, as the admin grid does. It needs backend access. Without it, the list holds only the published records of the current store view'],
             ],
         ),
     ],
@@ -89,7 +92,7 @@ class CmsPage extends CrudResource
 
     public ?string $metaDescription = null;
 
-    #[ApiProperty(extraProperties: ['modelField' => 'root_template'])]
+    #[ApiProperty(description: 'Page layout code, one of the codes the theme declares. Omitted on create, the page gets the default layout.', extraProperties: ['modelField' => 'root_template', EnumSource::KEY => 'page/source_layout'])]
     public ?string $pageLayout = null;
 
     public ?int $sortOrder = null;
@@ -100,10 +103,10 @@ class CmsPage extends CrudResource
     #[ApiProperty(security: "has_backend_access('cms-pages')")]
     public ?string $layoutUpdateXml = null;
 
-    #[ApiProperty(security: "has_backend_access('cms-pages')")]
+    #[ApiProperty(security: "has_backend_access('cms-pages')", extraProperties: [EnumSource::KEY => 'core/design_source_design'])]
     public ?string $customTheme = null;
 
-    #[ApiProperty(security: "has_backend_access('cms-pages')")]
+    #[ApiProperty(description: 'Layout code the custom design uses while it is active', security: "has_backend_access('cms-pages')", extraProperties: [EnumSource::KEY => 'page/source_layout'])]
     public ?string $customRootTemplate = null;
 
     #[ApiProperty(security: "has_backend_access('cms-pages')")]
@@ -118,14 +121,16 @@ class CmsPage extends CrudResource
     public ?string $customThemeTo = null;
 
     /** One of INDEX,FOLLOW / NOINDEX,FOLLOW / INDEX,NOFOLLOW / NOINDEX,NOFOLLOW; empty string clears */
+    #[ApiProperty(extraProperties: [EnumSource::KEY => ValueLists::META_ROBOTS])]
     public ?string $metaRobots = null;
 
-    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
+    #[ApiProperty(writable: false, extraProperties: [EnumSource::KEY => ['enabled', 'disabled'], 'computed' => true])]
     public string $status = 'enabled';
 
     public ?bool $isActive = null;
 
     /** @var int[]|null */
+    #[ApiProperty(description: 'Store view ids the page belongs to. 0 means every store view. Several pages can share an identifier, one per store view, and the store view\'s own page wins over the one for every store view. Filter the list with the store code to get the page one store view shows.')]
     public ?array $stores = null;
 
     #[ApiProperty(writable: false, extraProperties: ['modelField' => 'creation_time'])]

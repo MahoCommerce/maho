@@ -17,8 +17,8 @@ use Mage;
 use Mage_Catalog_Model_Product_Option;
 use Maho\ApiPlatform\Trait\ProductLoaderTrait;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
  */
@@ -81,7 +81,7 @@ final class ProductCustomOptionProcessor extends \Maho\ApiPlatform\Processor
         if (in_array($body['type'], self::SELECT_TYPES)) {
             $values = $body['values'] ?? [];
             if (empty($values)) {
-                throw new BadRequestHttpException('Select-type options require at least one value');
+                throw new UnprocessableEntityHttpException('Select-type options require at least one value');
             }
             $cleanValues = $this->prepareValues($values);
             $option->setData('values', $cleanValues);
@@ -89,7 +89,7 @@ final class ProductCustomOptionProcessor extends \Maho\ApiPlatform\Processor
             if (isset($body['price'])) {
                 $price = (float) $body['price'];
                 if ($price < 0) {
-                    throw new BadRequestHttpException('Price must not be negative');
+                    throw new UnprocessableEntityHttpException('Price must not be negative');
                 }
                 $option->setPrice($price);
             }
@@ -146,7 +146,7 @@ final class ProductCustomOptionProcessor extends \Maho\ApiPlatform\Processor
         $optionUpdate = [];
         if (isset($body['type'])) {
             if (!in_array($body['type'], self::VALID_TYPES)) {
-                throw new BadRequestHttpException('Invalid option type: ' . $body['type']);
+                throw new UnprocessableEntityHttpException('Invalid option type: ' . $body['type']);
             }
             $optionUpdate['type'] = $body['type'];
         }
@@ -216,7 +216,7 @@ final class ProductCustomOptionProcessor extends \Maho\ApiPlatform\Processor
             if (isset($body['price'])) {
                 $price = (float) $body['price'];
                 if ($price < 0) {
-                    throw new BadRequestHttpException('Price must not be negative');
+                    throw new UnprocessableEntityHttpException('Price must not be negative');
                 }
                 $priceUpdate['price'] = $price;
             }
@@ -281,13 +281,13 @@ final class ProductCustomOptionProcessor extends \Maho\ApiPlatform\Processor
     private function validateOptionData(array $body): void
     {
         if (empty($body['title'])) {
-            throw new BadRequestHttpException('Title is required');
+            throw new UnprocessableEntityHttpException('Title is required');
         }
         if (empty($body['type'])) {
-            throw new BadRequestHttpException('Type is required');
+            throw new UnprocessableEntityHttpException('Type is required');
         }
         if (!in_array($body['type'], self::VALID_TYPES)) {
-            throw new BadRequestHttpException('Invalid option type: ' . $body['type']);
+            throw new UnprocessableEntityHttpException('Invalid option type: ' . $body['type']);
         }
     }
 
@@ -299,7 +299,7 @@ final class ProductCustomOptionProcessor extends \Maho\ApiPlatform\Processor
         $cleanValues = [];
         foreach ($values as $i => $value) {
             if (!is_array($value) || empty($value['title'])) {
-                throw new BadRequestHttpException("Value at index {$i} must have a title");
+                throw new UnprocessableEntityHttpException("Value at index {$i} must have a title");
             }
             $cleanValues[] = [
                 'title' => $value['title'],

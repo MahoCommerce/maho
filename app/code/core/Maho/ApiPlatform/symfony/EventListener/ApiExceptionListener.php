@@ -12,16 +12,21 @@ namespace Maho\ApiPlatform\EventListener;
 
 use ApiPlatform\Metadata\Exception\AccessDeniedException as MetadataAccessDeniedException;
 use ApiPlatform\Metadata\HttpOperation;
+use ApiPlatform\Validator\Exception\ConstraintViolationListAwareExceptionInterface;
 use Maho\ApiPlatform\Exception\ApiException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Exception\InsufficientAuthenticationException;
+use Symfony\Component\Serializer\Exception\ExtraAttributesException;
 use Symfony\Component\Serializer\Exception\NotEncodableValueException;
+use Symfony\Component\Serializer\Exception\NotNormalizableValueException;
+use Symfony\Component\Serializer\Exception\PartialDenormalizationException;
 use Symfony\Component\Serializer\Exception\UnexpectedValueException as SerializerUnexpectedValueException;
 
 /**
@@ -116,8 +121,7 @@ class ApiExceptionListener implements EventSubscriberInterface
         if ($exception instanceof AccessDeniedException || $exception instanceof MetadataAccessDeniedException) {
             // If user is not authenticated at all, return 401
             // Check for Bearer token specifically (Basic auth is site-level, not API auth)
-            $hasBearerToken = $request !== null
-                && str_starts_with($request->headers->get('Authorization', ''), 'Bearer ');
+            $hasBearerToken = $this->hasCredentials($request);
             // Use the exception class to recognize "not authenticated" rather
             // than matching on the message string (Symfony has rephrased it
             // before; a security-component upgrade silently flips 401 ↔ 403).
@@ -186,8 +190,7 @@ class ApiExceptionListener implements EventSubscriberInterface
             // exception's own message is preserved (even for 401).
             $customErrorCode = $exception->getHeaders()['X-Api-Error-Code'] ?? null;
 
-            $hasBearerToken = $request !== null
-                && str_starts_with($request->headers->get('Authorization', ''), 'Bearer ');
+            $hasBearerToken = $this->hasCredentials($request);
             // A bare 403 with no Bearer token usually means "authenticate"
             // (Basic auth is site-level, not API auth), so surface it as 401.
             // But an endpoint that deliberately chose 403 — e.g. a public,
@@ -206,6 +209,12 @@ class ApiExceptionListener implements EventSubscriberInterface
                         : ($exception->getMessage() ?: $this->getDefaultMessageForStatusCode($statusCode))),
                 'code' => $statusCode,
             ];
+            if ($exception instanceof ConstraintViolationListAwareExceptionInterface) {
+                $data['details'] = ['errors' => []];
+                foreach ($exception->getConstraintViolationList() as $violation) {
+                    $data['details']['errors'][] = ['field' => $violation->getPropertyPath(), 'message' => (string) $violation->getMessage()];
+                }
+            }
 
             if ($this->showDebug()) {
                 $data['debug'] = [
@@ -227,15 +236,22 @@ class ApiExceptionListener implements EventSubscriberInterface
         // type of the "email" attribute must be ..."), safe to pass through.
         // Processor::parseRequestBody() already maps its own JSON errors to 400;
         // this mirrors that for the DTO path, which otherwise surfaced as 500.
-        if ($exception instanceof SerializerUnexpectedValueException) {
+        // ExtraAttributesException = a field that the DTO does not accept, when the operation sets allow_extra_attributes to false.
+        if ($exception instanceof SerializerUnexpectedValueException || $exception instanceof ExtraAttributesException) {
             $statusCode = 400;
+            $errors = self::serializerErrors($exception);
             $data = [
                 'error' => 'bad_request',
-                'message' => $exception instanceof NotEncodableValueException
-                    ? 'Invalid JSON in request body'
-                    : ($exception->getMessage() ?: 'Invalid request body'),
+                'message' => match (true) {
+                    $exception instanceof NotEncodableValueException => 'Invalid JSON in request body',
+                    $errors !== [] => implode("\n", array_column($errors, 'message')),
+                    default => $exception->getMessage() ?: 'Invalid request body',
+                },
                 'code' => $statusCode,
             ];
+            if ($errors !== []) {
+                $data['details'] = ['errors' => $errors];
+            }
 
             if ($this->showDebug()) {
                 $data['debug'] = [
@@ -249,23 +265,35 @@ class ApiExceptionListener implements EventSubscriberInterface
 
         // Mage_Core_Exception is the canonical user-facing validation/business
         // rule signal in Maho models (Mage::throwException()). Treat it as a
-        // 422 Unprocessable Entity with the model's message instead of a 500.
+        // client error with the model's message instead of a 500.
         // The trust assumption is that callers of Mage::throwException() pass
-        // safe, translated messages, log every occurrence to api.log so
+        // safe, translated messages, log every 422 to api.log so
         // anomalous leaks (DB error fragments, internal IDs, file paths) can
         // be detected post-hoc by reviewing the channel.
         if ($exception instanceof \Mage_Core_Exception) {
-            $statusCode = 422;
-            \Mage::log(
-                'API 422 Mage_Core_Exception: ' . $exception->getMessage(),
-                \Mage::LOG_INFO,
-                'api.log',
-            );
+            $statusCode = self::mageExceptionStatus($exception);
+            if ($statusCode === 422) {
+                \Mage::log(
+                    'API 422 Mage_Core_Exception: ' . $exception->getMessage(),
+                    \Mage::LOG_INFO,
+                    'api.log',
+                );
+            }
             $data = [
-                'error' => 'unprocessable_entity',
+                'error' => match ($statusCode) {
+                    404 => 'not_found',
+                    409 => 'conflict',
+                    default => 'unprocessable_entity',
+                },
                 'message' => $exception->getMessage(),
                 'code' => $statusCode,
             ];
+            if ($exception instanceof \Mage_Core_Exception_Input) {
+                $data['details'] = ['errors' => array_map(
+                    fn(array $error): array => ['field' => self::apiFieldName($error['field']), 'message' => $error['message']],
+                    $exception->getErrors(),
+                )];
+            }
 
             if ($this->showDebug()) {
                 $data['debug'] = [
@@ -298,6 +326,79 @@ class ApiExceptionListener implements EventSubscriberInterface
         \Mage::logException($exception);
 
         return new JsonResponse($data, $statusCode);
+    }
+
+    /**
+     * Return the HTTP status of a Mage_Core_Exception. GraphQL uses the same status.
+     */
+    public static function mageExceptionStatus(\Mage_Core_Exception $exception): int
+    {
+        return match (true) {
+            $exception instanceof \Mage_Core_Exception_NoSuchEntity => 404,
+            $exception instanceof \Mage_Core_Exception_Conflict => 409,
+            default => 422,
+        };
+    }
+
+    /**
+     * Whether the caller presented credentials, so a refusal is a 403 and not a 401. A
+     * bearer token counts, and so does the admin session cookie that the bridge verified
+     * on an `/api/admin/` request.
+     */
+    private function hasCredentials(?Request $request): bool
+    {
+        if ($request === null) {
+            return false;
+        }
+        if (str_starts_with($request->headers->get('Authorization', ''), 'Bearer ')) {
+            return true;
+        }
+
+        return str_contains($request->getPathInfo(), '/api/admin/')
+            && ($_SERVER['MAHO_IS_ADMIN'] ?? '') === '1'
+            && isset($_SERVER['MAHO_API_BRIDGE_TOKEN']);
+    }
+
+    /**
+     * Return one error for each field that the serializer refused: a value of a wrong type, or a field that the DTO does not accept.
+     *
+     * @return list<array{field: string, message: string}>
+     */
+    private static function serializerErrors(\Throwable $exception): array
+    {
+        $typeErrors = match (true) {
+            $exception instanceof PartialDenormalizationException => $exception->getNotNormalizableValueErrors(),
+            $exception instanceof NotNormalizableValueException => [$exception],
+            default => [],
+        };
+        $extra = match (true) {
+            $exception instanceof PartialDenormalizationException => $exception->getExtraAttributesError(),
+            $exception instanceof ExtraAttributesException => $exception,
+            default => null,
+        };
+
+        $errors = [];
+        foreach ($typeErrors as $error) {
+            if ($error->getPath() !== null) {
+                $errors[] = ['field' => $error->getPath(), 'message' => $error->getMessage()];
+            }
+        }
+        foreach ($extra?->getExtraAttributes() ?? [] as $field) {
+            $errors[] = ['field' => (string) $field, 'message' => sprintf('The field "%s" is unknown or read-only.', $field)];
+        }
+        return $errors;
+    }
+
+    /**
+     * Return the API name of a model field: an API property is the camel case form of its column, website_ids is websiteIds.
+     * Return a path such as conditions.conditions[0].is_value_parsed as it is, because it names the keys that the client sent.
+     */
+    private static function apiFieldName(string $field): string
+    {
+        if (!preg_match('/^[a-z][a-z0-9_]*$/', $field)) {
+            return $field;
+        }
+        return lcfirst(str_replace('_', '', ucwords($field, '_')));
     }
 
     /**

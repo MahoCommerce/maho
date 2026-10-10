@@ -592,7 +592,7 @@ describe('Order Attributes Condition Integration Tests', function () {
             $sql = $condition->getConditionsSql($adapter);
 
             expect($sql)->toBeString();
-            expect($sql)->toContain('AVG(o.grand_total)');
+            expect($sql)->toContain('AVG(o.base_grand_total)');
             expect($sql)->toContain("o.state NOT IN ('canceled')");
             expect($sql)->toContain('HAVING');
         });
@@ -633,7 +633,7 @@ describe('Order Attributes Condition Integration Tests', function () {
             $sql = $condition->getConditionsSql($adapter);
 
             expect($sql)->toBeString();
-            expect($sql)->toContain('SUM(o.grand_total)');
+            expect($sql)->toContain('SUM(o.base_grand_total)');
             expect($sql)->toContain("o.state NOT IN ('canceled')");
             expect($sql)->toContain('HAVING');
         });
@@ -873,8 +873,8 @@ describe('Order Attributes Condition Integration Tests', function () {
         test('SQL contains proper subqueries for calculated fields', function () {
             $calculatedFields = [
                 'days_since_last_order' => ['pattern' => '/DATEDIFF|::date|DATE\\(|JULIANDAY/', 'contains' => ['MAX(o.created_at)']],
-                'average_order_amount' => ['contains' => ['AVG(o.grand_total)', 'HAVING']],
-                'total_ordered_amount' => ['contains' => ['SUM(o.grand_total)', 'HAVING']],
+                'average_order_amount' => ['contains' => ['AVG(o.base_grand_total)', 'HAVING']],
+                'total_ordered_amount' => ['contains' => ['SUM(o.base_grand_total)', 'HAVING']],
             ];
 
             $adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
@@ -1162,10 +1162,15 @@ describe('Order Attributes Condition Integration Tests', function () {
 
                 // Set order amounts
                 $order->setGrandTotal($orderData['grand_total']);
+                $order->setBaseGrandTotal($orderData['grand_total']);
                 $order->setSubtotal($orderData['subtotal']);
+                $order->setBaseSubtotal($orderData['subtotal']);
                 $order->setTaxAmount($orderData['tax_amount']);
+                $order->setBaseTaxAmount($orderData['tax_amount']);
                 $order->setShippingAmount($orderData['shipping_amount']);
+                $order->setBaseShippingAmount($orderData['shipping_amount']);
                 $order->setDiscountAmount($orderData['discount_amount']);
+                $order->setBaseDiscountAmount($orderData['discount_amount']);
                 $order->setTotalQtyOrdered($orderData['total_qty_ordered']);
 
                 $order->setData('state', orderStateForStatus($orderData['status']));
@@ -1215,9 +1220,9 @@ describe('Order Attributes Condition Integration Tests', function () {
         $segment = Mage::getModel('customersegmentation/segment');
         $segment->setName($name);
         $segment->setDescription('Order attributes test segment for ' . $name);
-        $segment->setIsActive(1);
-        $segment->setWebsiteIds('1');
-        $segment->setCustomerGroupIds('0,1,2,3');
+        $segment->setIsActive();
+        $segment->setWebsiteIds([1]);
+        $segment->setCustomerGroupIds([0, 1, 2, 3]);
         $segment->setConditionsSerialized(Mage::helper('core')->jsonEncode($conditions));
         $segment->setRefreshMode('manual');
         $segment->setRefreshStatus('pending');

@@ -25,7 +25,6 @@ use Maho\ApiPlatform\Trait\ProductLoaderTrait;
 use Maho\ApiPlatform\Trait\StockWriterTrait;
 use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
@@ -126,11 +125,11 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         StoreContext::ensureStore();
 
         if (empty($data->sku)) {
-            throw new BadRequestHttpException('SKU is required');
+            throw new UnprocessableEntityHttpException('SKU is required');
         }
 
         if (empty($data->name)) {
-            throw new BadRequestHttpException('Name is required');
+            throw new UnprocessableEntityHttpException('Name is required');
         }
 
         /** @var Mage_Catalog_Model_Product $product */
@@ -169,7 +168,7 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
 
         $this->updateStockData($product, $data);
         $this->invalidateCache((int) $product->getId());
-        $this->logApiActivity('catalog/product', 'create', null, $product, $user);
+        $this->logApiActivity('catalog/product', 'create', null, $product);
 
         return $this->refreshDto($product);
     }
@@ -244,7 +243,7 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         $this->updateStockData($product, $data);
         StoreScopeWrite::restoreInheritedValues($product, $oldData, $inherited);
         $this->invalidateCache((int) $product->getId());
-        $this->logApiActivity('catalog/product', 'update', $oldData, $product, $user);
+        $this->logApiActivity('catalog/product', 'update', $oldData, $product);
 
         return $this->refreshDto($product);
     }
@@ -345,12 +344,8 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
 
         // Bulk EAV update, bypasses model save, observers, URL rewrites
         if (!empty($attrData)) {
-            try {
-                Mage::getSingleton('catalog/product_action')
-                    ->updateAttributes([$id], $attrData, $storeId);
-            } catch (\Throwable $e) {
-                throw new UnprocessableEntityHttpException('Failed to update product: ' . $e->getMessage());
-            }
+            Mage::getSingleton('catalog/product_action')
+                ->updateAttributes([$id], $attrData, $storeId);
             // Reflect the written values so the activity log records the new
             // state, not the pre-update snapshot.
             $product->addData($attrData);
@@ -378,7 +373,7 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         }
 
         $this->invalidateCache($id);
-        $this->logApiActivity('catalog/product', 'update', $oldData, $product, $user);
+        $this->logApiActivity('catalog/product', 'update', $oldData, $product);
 
         return $this->refreshDto($product);
     }
@@ -399,7 +394,7 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         $this->secureAreaDelete($product, 'delete product');
 
         $this->invalidateCache($id);
-        $this->logApiActivity('catalog/product', 'delete', $oldData, null, $user);
+        $this->logApiActivity('catalog/product', 'delete', $oldData, null);
 
         return null;
     }
@@ -501,7 +496,7 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         }
 
         if ($storeId === Mage_Core_Model_App::ADMIN_STORE_ID) {
-            throw new BadRequestHttpException('useDefault requires a store context (?store=): global values have no default to revert to.');
+            throw new UnprocessableEntityHttpException('useDefault requires a store context (?store=): global values have no default to revert to.');
         }
 
         $attributes = [];
@@ -509,10 +504,10 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
             $code = (string) $code;
             $attribute = Mage::getSingleton('eav/config')->getAttribute(Mage_Catalog_Model_Product::ENTITY, $code);
             if (!$attribute instanceof \Mage_Catalog_Model_Resource_Eav_Attribute || !$attribute->getId() || $attribute->getBackend()->isStatic()) {
-                throw new BadRequestHttpException("Unknown attribute in useDefault: {$code}");
+                throw new UnprocessableEntityHttpException("Unknown attribute in useDefault: {$code}");
             }
             if ($attribute->isScopeGlobal()) {
-                throw new BadRequestHttpException("Attribute '{$code}' is global scope and has no store override to revert.");
+                throw new UnprocessableEntityHttpException("Attribute '{$code}' is global scope and has no store override to revert.");
             }
             $attributes[] = $attribute;
         }
@@ -571,7 +566,7 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
 
         if (!$isValid) {
             $message = $messages === [] ? 'XML data is invalid.' : (string) reset($messages);
-            throw new BadRequestHttpException("Invalid customLayoutUpdate: {$message}");
+            throw new UnprocessableEntityHttpException("Invalid customLayoutUpdate: {$message}");
         }
     }
 
@@ -608,7 +603,7 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
             $code = (string) $code;
 
             if (in_array($code, self::PROTECTED_ATTRIBUTE_CODES, true)) {
-                throw new BadRequestHttpException(
+                throw new UnprocessableEntityHttpException(
                     "Attribute '{$code}' cannot be set via customAttributes; use the dedicated field.",
                 );
             }
@@ -834,12 +829,12 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         // formatDateForDb() reads a numeric string as a unix timestamp, so an
         // unseparated date such as "20260801" would silently store 1970-08-22.
         if (is_numeric($value)) {
-            throw new BadRequestHttpException("Invalid date for {$field}; use Y-m-d format.");
+            throw new UnprocessableEntityHttpException("Invalid date for {$field}; use Y-m-d format.");
         }
         try {
             $date = Mage::app()->getLocale()->formatDateForDb($value, withTime: false);
         } catch (\Exception) {
-            throw new BadRequestHttpException("Invalid date for {$field}; use Y-m-d format.");
+            throw new UnprocessableEntityHttpException("Invalid date for {$field}; use Y-m-d format.");
         }
         return $date === null ? null : $date . ' 00:00:00';
     }
@@ -847,7 +842,7 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
     private function validateDateRange(?string $from, ?string $to, string $fromField, string $toField): void
     {
         if ($from !== null && $to !== null && $from > $to) {
-            throw new BadRequestHttpException("{$fromField} must not be later than {$toField}.");
+            throw new UnprocessableEntityHttpException("{$fromField} must not be later than {$toField}.");
         }
     }
 

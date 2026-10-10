@@ -1,0 +1,607 @@
+<?php
+
+/**
+ * Symfony AI toolbox backed by the in-process MCP tools.
+ *
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_Ai
+ */
+
+declare(strict_types=1);
+
+namespace Maho\Ai\Api\Agent;
+
+use Maho\ApiPlatform\Service\StoreContext;
+use Symfony\AI\Agent\Toolbox\ToolboxInterface;
+use Symfony\AI\Agent\Toolbox\ToolResult;
+use Symfony\AI\Platform\Tool\ExecutionReference;
+use Symfony\AI\Platform\Tool\Tool;
+use Symfony\AI\Platform\Result\ToolCall;
+
+/**
+ * The MCP tools are grouped in sections and loaded on demand: a model request with every
+ * tool is too large for most providers, and OpenAI-compatible endpoints stop at 128 tools.
+ * The agent starts with the local tools and the sections the assistant enabled from the
+ * page and the conversation; enable_tools loads more, and the agent runs again with them.
+ */
+final class McpToolbox implements ToolboxInterface
+{
+    /** A failed call is reported to the model as text that starts with this. */
+    public const ERROR_PREFIX = 'Tool error: ';
+
+    public const ENABLE_NAME = 'enable_tools';
+
+    /** The most tools one model request carries, under the 128 that OpenAI-compatible endpoints accept. */
+    public const MAX_TOOLS = 120;
+
+    /** The path of the REST API, which the @id of every record starts with. */
+    private const API_PATH = '/api/rest/v2';
+
+    public static function isErrorText(string $text): bool
+    {
+        return str_starts_with($text, self::ERROR_PREFIX);
+    }
+
+    /** @var list<string>|null */
+    private ?array $excludedSections = null;
+
+    private ?int $resultMaxChars = null;
+
+    /** @var array{url?: string, fields?: array<string, mixed>, steps?: list<array{action: string, target: string, value: string|null}>, edits?: list<array{id: string, find: string, replace: string}>}|null */
+    private ?array $navigation = null;
+
+    /** @var list<string> enabled sections, most recent last */
+    private array $enabledSections = [];
+
+    private bool $toolsetChanged = false;
+
+    public function __construct(
+        private readonly McpToolCatalog $catalog,
+        private readonly McpToolDispatcher $dispatcher,
+        private readonly AdminPageTool $adminPageTool,
+        private readonly ContentGuideTool $contentGuideTool,
+        private readonly FormTool $formTool,
+        private readonly MemoryTool $memoryTool,
+        private readonly BackgroundTaskTool $backgroundTaskTool,
+        private readonly NotifyTool $notifyTool,
+        private readonly AttachmentTool $attachmentTool,
+        private readonly ImageTool $imageTool,
+    ) {}
+
+    private \Maho_Ai_Model_Chat_RunMode $mode = \Maho_Ai_Model_Chat_RunMode::Chat;
+
+    public function setMode(\Maho_Ai_Model_Chat_RunMode $mode): void
+    {
+        $this->mode = $mode;
+    }
+
+    public function mode(): \Maho_Ai_Model_Chat_RunMode
+    {
+        return $this->mode;
+    }
+
+    /** The background run that the notify tool reports on; null in the chat. */
+    public function setRun(?\Maho_Ai_Model_Conversation $conversation, ?\Maho_Ai_Model_Task_Schedule $schedule = null): void
+    {
+        $this->notifyTool->setRun($conversation, $schedule);
+    }
+
+    /** Keep the editor guide the panel sent with this request, when it sent one. */
+    public function storeContentGuide(string $guide): void
+    {
+        $this->contentGuideTool->store($guide);
+    }
+
+    /**
+     * Keep the text fields of the open form that the panel sent with this request.
+     *
+     * @param list<array{id: string, name: string, label: string, value: string, changed: bool}> $fields
+     */
+    public function storeForm(array $fields): void
+    {
+        $this->formTool->store($fields);
+    }
+
+    /** The editor guide known to the server, or an empty string before the panel sent one. */
+    public function contentGuide(): string
+    {
+        return $this->contentGuideTool->guide();
+    }
+
+    #[\Override]
+    public function getTools(): array
+    {
+        $tools = [$this->enableTool(), $this->memoryTool->rememberTool(), $this->memoryTool->forgetTool(), $this->attachmentTool->tool()];
+        if ($this->imageTool->isAvailable()) {
+            $tools[] = $this->imageTool->tool();
+        }
+        if ($this->mode->hasBrowser()) {
+            // A worker has no browser to open a page in, and no administrator to confirm another job.
+            $tools = [...$tools, $this->adminPageTool->tool(), $this->adminPageTool->fillTool(), $this->adminPageTool->actionTool(), $this->backgroundTaskTool->tool()];
+            if ($this->formTool->hasForm()) {
+                $tools = [...$tools, $this->formTool->readTool(), $this->formTool->editTool()];
+            }
+        } elseif ($this->notifyTool->isAvailable()) {
+            $tools[] = $this->notifyTool->tool();
+        }
+        if ($this->contentGuideTool->hasGuide()) {
+            $tools[] = $this->contentGuideTool->tool();
+        }
+        // The most recently enabled section wins the budget: it is the one the model asked for last.
+        foreach (array_reverse($this->enabledSections) as $section) {
+            $sectionTools = $this->catalog->tools($this->excludedSections(), [$section]);
+            if (count($tools) + count($sectionTools) > self::MAX_TOOLS) {
+                continue;
+            }
+            $tools = [...$tools, ...$sectionTools];
+        }
+
+        return $tools;
+    }
+
+    /**
+     * Load sections before the agent runs: the ones the page context and the conversation
+     * history point to. Unknown names are ignored.
+     *
+     * @param list<string> $sections
+     */
+    public function enableSections(array $sections): void
+    {
+        $known = array_keys($this->catalog->sections($this->excludedSections()));
+        foreach ($sections as $section) {
+            if (in_array($section, $known, true) && !in_array($section, $this->enabledSections, true)) {
+                $this->enabledSections[] = $section;
+            }
+        }
+    }
+
+    /**
+     * Every section the current administrator can load, with its tool names.
+     *
+     * @return array<string, list<string>>
+     */
+    public function sections(): array
+    {
+        return $this->catalog->sections($this->excludedSections());
+    }
+
+    /** @return list<string> */
+    public function enabledSections(): array
+    {
+        return $this->enabledSections;
+    }
+
+    /** True once after enable_tools changed the set, so the executor can restart the run. */
+    public function takeToolsetChange(): bool
+    {
+        $changed = $this->toolsetChanged;
+        $this->toolsetChanged = false;
+
+        return $changed;
+    }
+
+    private function enableTool(): Tool
+    {
+        $sections = $this->catalog->sections($this->excludedSections());
+        $lines = [];
+        foreach ($sections as $section => $names) {
+            $state = in_array($section, $this->enabledSections, true) ? 'loaded' : 'not loaded';
+            $lines[] = sprintf('%s (%s): %s', $section, $state, implode(', ', $names));
+        }
+
+        return ToolDefinition::create(
+            new ExecutionReference(self::class, 'execute'),
+            self::ENABLE_NAME,
+            'Load the tools of one or more sections. The store tools are grouped in sections and only the loaded sections are callable. Call this first when the tool you need is not loaded, then continue. Sections and their tools: ' . implode('; ', $lines) . '.',
+            [
+                'type' => 'object',
+                'properties' => [
+                    'sections' => [
+                        'type' => 'array',
+                        'description' => 'The sections to load.',
+                        'items' => ['type' => 'string', 'enum' => array_keys($sections)],
+                    ],
+                ],
+                'required' => ['sections'],
+                'additionalProperties' => false,
+            ],
+            ['title' => 'Load tools', 'read_only' => true, 'destructive' => false, 'local' => true],
+        );
+    }
+
+    /**
+     * @param array<string, mixed> $arguments
+     * @return array{ok: bool, text: string}
+     */
+    private function enable(array $arguments): array
+    {
+        $known = array_keys($this->catalog->sections($this->excludedSections()));
+        $wanted = array_values(array_filter((array) ($arguments['sections'] ?? []), is_string(...)));
+        $unknown = array_diff($wanted, $known);
+        if ($wanted === [] || $unknown !== []) {
+            return ['ok' => false, 'text' => sprintf('Unknown section%s: %s. Sections: %s.', count($unknown) === 1 ? '' : 's', implode(', ', $unknown) ?: '(none given)', implode(', ', $known))];
+        }
+        $before = $this->enabledSections;
+        $this->enableSections($wanted);
+        $this->toolsetChanged = $this->enabledSections !== $before;
+
+        return ['ok' => true, 'text' => sprintf('Loaded sections: %s. Their tools are callable from your next request. Loaded now: %s.', implode(', ', $wanted), implode(', ', $this->enabledSections))];
+    }
+
+    /** A tool that runs in this process, outside the MCP catalog. */
+    public static function isLocal(string $name): bool
+    {
+        return in_array($name, [self::ENABLE_NAME, ContentGuideTool::NAME, BackgroundTaskTool::NAME, AttachmentTool::NAME, ImageTool::NAME, NotifyTool::NAME], true)
+            || in_array($name, AdminPageTool::NAMES, true) || in_array($name, MemoryTool::NAMES, true) || in_array($name, FormTool::NAMES, true);
+    }
+
+    #[\Override]
+    public function execute(ToolCall $toolCall): ToolResult
+    {
+        if ($toolCall->getName() === self::ENABLE_NAME) {
+            $outcome = $this->enable($toolCall->getArguments());
+        } elseif ($toolCall->getName() === ContentGuideTool::NAME) {
+            $outcome = $this->contentGuideTool->read();
+        } elseif ($toolCall->getName() === BackgroundTaskTool::NAME) {
+            $outcome = $this->backgroundTaskTool->start($toolCall->getArguments());
+        } elseif ($toolCall->getName() === NotifyTool::NAME) {
+            $outcome = $this->notifyTool->notify($toolCall->getArguments());
+        } elseif ($toolCall->getName() === AttachmentTool::NAME) {
+            $outcome = $this->attachmentTool->read($toolCall->getArguments());
+        } elseif ($toolCall->getName() === ImageTool::NAME) {
+            $outcome = $this->imageTool->generate($toolCall->getArguments());
+        } elseif ($toolCall->getName() === FormTool::READ_NAME) {
+            $outcome = $this->formTool->read($toolCall->getArguments());
+        } elseif ($toolCall->getName() === FormTool::EDIT_NAME) {
+            $outcome = $this->formTool->edit($toolCall->getArguments());
+            if (isset($outcome['edits'])) {
+                $this->navigation = ['edits' => $outcome['edits']];
+            }
+        } elseif (in_array($toolCall->getName(), MemoryTool::NAMES, true)) {
+            $outcome = $toolCall->getName() === MemoryTool::FORGET
+                ? $this->memoryTool->forget($toolCall->getArguments())
+                : $this->memoryTool->remember($toolCall->getArguments());
+        } elseif (in_array($toolCall->getName(), AdminPageTool::NAMES, true)) {
+            $outcome = match ($toolCall->getName()) {
+                AdminPageTool::FILL_NAME => $this->adminPageTool->fill($toolCall->getArguments()),
+                AdminPageTool::ACTION_NAME => $this->adminPageTool->act($toolCall->getArguments()),
+                default => $this->adminPageTool->open($toolCall->getArguments()),
+            };
+            if (isset($outcome['url'])) {
+                $this->navigation = ['url' => $outcome['url']];
+                if (isset($outcome['fields'])) {
+                    $this->navigation['fields'] = $outcome['fields'];
+                }
+            } elseif (isset($outcome['steps'])) {
+                $this->navigation = ['steps' => $outcome['steps']];
+            }
+        } else {
+            $name = $this->catalog->resolve($toolCall->getName());
+            $arguments = $this->catalog->coerce($name, $toolCall->getArguments());
+            $storeCode = $arguments[McpToolCatalog::STORE_ARGUMENT] ?? null;
+            unset($arguments[McpToolCatalog::STORE_ARGUMENT]);
+            $outcome = $this->inStore($storeCode, fn(): array => $this->dispatcher->call($name, $arguments));
+            if ($outcome['ok']) {
+                $outcome['text'] = $this->withRecordIds($name, $outcome['text']);
+            }
+        }
+        $text = $outcome['ok'] ? $outcome['text'] : self::ERROR_PREFIX . $outcome['text'];
+
+        return new ToolResult($toolCall, $this->truncate($text));
+    }
+
+    /**
+     * Give each record of a tool result the API @id that the API leaves out, so the model can link every
+     * record it names, such as [100000073](/api/rest/v2/invoices/274). The resource is the last path
+     * segment of the list or of the tool, so a nested list such as /orders/302/invoices gives the same
+     * @id as the invoice list. Objects stay objects: {} never becomes [].
+     */
+    private function withRecordIds(string $name, string $text): string
+    {
+        $data = json_decode($text);
+        if (!$data instanceof \stdClass) {
+            return $text;
+        }
+        $collection = $data->{'@id'} ?? null;
+        if (isset($data->member) && is_array($data->member) && is_string($collection)) {
+            if (preg_match('~/([a-z0-9-]+)$~', (string) strtok($collection, '?'), $m) !== 1) {
+                return $text;
+            }
+            foreach ($data->member as $i => $item) {
+                $data->member[$i] = $this->withRecordId($item, self::API_PATH . '/' . $m[1]);
+            }
+        } elseif (preg_match('~/([a-z0-9-]+)(?:/\{[^}]+\})?$~', (string) $this->catalog->get($name)?->getUriTemplate(), $m) === 1) {
+            $data = $this->withRecordId($data, self::API_PATH . '/' . $m[1]);
+        } else {
+            return $text;
+        }
+
+        return json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?: $text;
+    }
+
+    private function withRecordId(mixed $item, string $base): mixed
+    {
+        if (!$item instanceof \stdClass || !isset($item->{'@type'}) || !is_scalar($item->id ?? null)) {
+            return $item;
+        }
+        if (is_string($item->{'@id'} ?? null)) {
+            return $item;
+        }
+
+        return (object) (['@id' => $base . '/' . rawurlencode((string) $item->id)] + get_object_vars($item));
+    }
+
+    /** Labels an administrator knows a record by, in the order a preview tries them. */
+    private const RECORD_LABELS = ['name', 'title', 'incrementId', 'sku', 'email', 'code', 'identifier', 'label', 'templateCode', 'username'];
+
+    /**
+     * What a write will do, for the confirmation card: the record it touches, the scope it
+     * writes in, the fields it changes with their current values, and the arguments that
+     * would undo it. A local tool and a tool without a record give an empty preview.
+     *
+     * @param array<string, mixed> $arguments
+     * @return array{kind: string, scope: string, record: ?string, changes: list<array{field: string, from: mixed, to: mixed}>, undo: ?array<string, mixed>}
+     */
+    public function previewWrite(string $name, array $arguments): array
+    {
+        $storeCode = $arguments[McpToolCatalog::STORE_ARGUMENT] ?? null;
+        $scope = is_string($storeCode) && trim($storeCode) !== '' ? trim($storeCode) : '';
+        $empty = ['kind' => 'other', 'scope' => $scope, 'record' => null, 'changes' => [], 'undo' => null];
+        if (self::isLocal($name)) {
+            return $empty;
+        }
+        $shape = $this->catalog->writeShape($name);
+        if ($shape === null) {
+            return $empty;
+        }
+        $arguments = $this->catalog->coerce($this->catalog->resolve($name), $arguments);
+        unset($arguments[McpToolCatalog::STORE_ARGUMENT]);
+        $preview = $empty;
+        $preview['kind'] = $shape['kind'];
+
+        $current = null;
+        $idVariable = $shape['id'];
+        $id = $idVariable !== null ? ($arguments[$idVariable] ?? null) : null;
+        if ($shape['read'] !== null && is_scalar($id)) {
+            $outcome = $this->inStore($storeCode, fn(): array => $this->dispatcher->call($shape['read'], [$idVariable => $id]));
+            if ($outcome['ok']) {
+                try {
+                    $decoded = \Mage::helper('core')->jsonDecode($outcome['text']);
+                    $current = is_array($decoded) ? $decoded : null;
+                } catch (\JsonException) {
+                }
+            }
+        }
+        if ($current !== null) {
+            $preview['record'] = self::recordLabel($current);
+        }
+
+        if ($shape['kind'] === 'create') {
+            foreach ($arguments as $field => $to) {
+                $preview['changes'][] = ['field' => (string) $field, 'from' => null, 'to' => $to];
+            }
+
+            return $preview;
+        }
+        if ($shape['kind'] !== 'update' || $current === null) {
+            return $preview;
+        }
+
+        $undo = [$idVariable => $id];
+        if ($scope !== '') {
+            $undo[McpToolCatalog::STORE_ARGUMENT] = $scope;
+        }
+        $canUndo = true;
+        foreach ($arguments as $field => $to) {
+            if ($field === $idVariable) {
+                continue;
+            }
+            $from = $current[$field] ?? null;
+            if (json_encode($from) === json_encode($to)) {
+                continue;
+            }
+            $preview['changes'][] = ['field' => (string) $field, 'from' => $from, 'to' => $to];
+            $undo[$field] = $from;
+            // The call drops an empty argument, so an undo cannot put an empty value back.
+            $canUndo = $canUndo && !in_array($from, [null, '', []], true);
+        }
+        if ($preview['changes'] !== [] && $canUndo) {
+            $preview['undo'] = $undo;
+        }
+        $preview['changes'] = self::withOptionLabels($preview['changes'], $current);
+
+        return $preview;
+    }
+
+    /**
+     * The name an administrator knows a record by. A configuration setting gives its section,
+     * group and field labels, because many fields share a label such as "Enable".
+     *
+     * @param array<string, mixed> $current
+     */
+    private static function recordLabel(array $current): ?string
+    {
+        if (isset($current['groupLabel'], $current['label']) && is_string($current['groupLabel']) && is_string($current['label'])) {
+            $sectionLabel = is_string($current['sectionLabel'] ?? null) ? $current['sectionLabel'] : '';
+
+            return implode(' > ', array_filter([$sectionLabel, $current['groupLabel'], $current['label']], static fn(string $part): bool => $part !== ''));
+        }
+        foreach (self::RECORD_LABELS as $label) {
+            if (isset($current[$label]) && is_scalar($current[$label]) && (string) $current[$label] !== '') {
+                return (string) $current[$label];
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Put the option label in place of the stored value of a configuration setting, so the card
+     * shows "Yes" and not "1". A multiselect value is a comma-separated list.
+     *
+     * @param list<array{field: string, from: mixed, to: mixed}> $changes
+     * @param array<string, mixed>|null $current
+     * @return list<array{field: string, from: mixed, to: mixed}>
+     */
+    private static function withOptionLabels(array $changes, ?array $current): array
+    {
+        if (!is_array($current['options'] ?? null)) {
+            return $changes;
+        }
+        $labels = [];
+        foreach ($current['options'] as $option) {
+            if (is_array($option) && isset($option['value'], $option['label'])) {
+                $labels[(string) $option['value']] = (string) $option['label'];
+            }
+        }
+        $label = static function (mixed $value) use ($labels): mixed {
+            if (is_bool($value)) {
+                $value = $value ? '1' : '0';
+            }
+            if (!is_scalar($value) || (string) $value === '') {
+                return $value;
+            }
+            if (isset($labels[(string) $value])) {
+                return $labels[(string) $value];
+            }
+            $parts = array_map(static fn(string $part): string => $labels[$part] ?? $part, explode(',', (string) $value));
+
+            return implode(', ', $parts);
+        };
+
+        return array_map(static fn(array $change): array => $change['field'] === 'value'
+            ? ['field' => $change['field'], 'from' => $label($change['from']), 'to' => $label($change['to'])]
+            : $change, $changes);
+    }
+
+    /**
+     * @param \Closure(): array{ok: bool, text: string} $call
+     * @return array{ok: bool, text: string}
+     */
+    private function inStore(mixed $storeCode, \Closure $call): array
+    {
+        if (!is_string($storeCode) || trim($storeCode) === '') {
+            return $call();
+        }
+        $stores = \Mage::app()->getStores();
+        foreach ($stores as $store) {
+            if ($store->getCode() === trim($storeCode)) {
+                return StoreContext::withExplicitStore((int) $store->getId(), $call);
+            }
+        }
+        $codes = array_map(static fn(\Mage_Core_Model_Store $s): string => sprintf('%s (%s)', $s->getCode(), $s->getName()), array_values($stores));
+
+        return ['ok' => false, 'text' => sprintf('Unknown store view code "%s". Store view codes: %s.', $storeCode, implode(', ', $codes))];
+    }
+
+    /** Admin page links in place of the API links of an answer; see AdminPageTool::linkRecords(). */
+    public function linkRecords(string $markdown): string
+    {
+        return $this->adminPageTool->linkRecords($markdown);
+    }
+
+    /**
+     * What the last local tool asked the browser to do, once: open an admin page, with form
+     * values to fill in when the tool gave some, act on the open page, or correct its text.
+     *
+     * @return array{url?: string, fields?: array<string, mixed>, steps?: list<array{action: string, target: string, value: string|null}>, edits?: list<array{id: string, find: string, replace: string}>}|null
+     */
+    public function takeNavigation(): ?array
+    {
+        $navigation = $this->navigation;
+        $this->navigation = null;
+
+        return $navigation;
+    }
+
+    /**
+     * The admin page of the record that a successful write tool changed or created, or null for a record
+     * without a page. The record of /orders/{id} or /orders/{id}/cancel has its id in the arguments, and
+     * the record of a create such as /cart-price-rules has it in the result. The panel offers that page,
+     * and loads it again when the administrator has it open, so the page never shows old data.
+     *
+     * @param array<string, mixed> $arguments
+     */
+    public function changedRecordUrl(string $name, array $arguments, string $result): ?string
+    {
+        $shape = self::isLocal($name) ? null : $this->catalog->writeShape($name);
+        if ($shape === null || $shape['kind'] === 'delete') {
+            return null;
+        }
+        $uri = (string) $this->catalog->get($name)?->getUriTemplate();
+        if (preg_match('~/([a-z0-9-]+)/\{([^}]+)\}(?:/[a-z0-9-]+)*$~', $uri, $m) === 1) {
+            [, $resource, $id] = [null, $m[1], $arguments[$m[2]] ?? null];
+        } elseif ($shape['kind'] === 'create' && preg_match('~/([a-z0-9-]+)$~', $uri, $m) === 1) {
+            $data = json_decode($result, true);
+            [$resource, $id] = [$m[1], is_array($data) ? ($data['id'] ?? null) : null];
+        } else {
+            return null;
+        }
+
+        return is_scalar($id) && (string) $id !== '' ? $this->adminPageTool->recordUrl($resource, (string) $id) : null;
+    }
+
+    /** A tool that never changes data, so it runs without the administrator's confirmation. */
+    public function isReadOnly(string $name): bool
+    {
+        return $name !== BackgroundTaskTool::NAME && $name !== ImageTool::NAME && (self::isLocal($name) || $this->catalog->isReadOnly($name));
+    }
+
+    public function isDestructive(string $name): bool
+    {
+        return !self::isLocal($name) && $this->catalog->isDestructive($name);
+    }
+
+    /** A write that changes one record that the API can read back, so the panel can show and undo it. */
+    public function isRecordUpdate(string $name): bool
+    {
+        $shape = self::isLocal($name) ? null : $this->catalog->writeShape($name);
+
+        return $shape !== null && $shape['kind'] === 'update' && $shape['read'] !== null;
+    }
+
+    public function title(string $name): string
+    {
+        return match (true) {
+            $name === self::ENABLE_NAME => 'Load tools',
+            $name === ContentGuideTool::NAME => ContentGuideTool::TITLE,
+            in_array($name, MemoryTool::NAMES, true) => MemoryTool::title($name),
+            $name === BackgroundTaskTool::NAME => BackgroundTaskTool::TITLE,
+            $name === NotifyTool::NAME => 'Send a notification',
+            $name === AttachmentTool::NAME => AttachmentTool::TITLE,
+            $name === ImageTool::NAME => ImageTool::TITLE,
+            in_array($name, AdminPageTool::NAMES, true) => AdminPageTool::title($name),
+            in_array($name, FormTool::NAMES, true) => FormTool::title($name),
+            default => $this->catalog->title($name),
+        };
+    }
+
+    public function resolve(string $name): string
+    {
+        return self::isLocal($name) ? $name : $this->catalog->resolve($name);
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function excludedSections(): array
+    {
+        if ($this->excludedSections === null) {
+            $raw = (string) \Mage::getStoreConfig('ai/chat/excluded_sections');
+            $this->excludedSections = array_values(array_filter(array_map(trim(...), explode(',', $raw))));
+        }
+
+        return $this->excludedSections;
+    }
+
+    private function truncate(string $text): string
+    {
+        $max = $this->resultMaxChars ??= max(1000, (int) \Mage::getStoreConfig('ai/chat/tool_result_max_chars'));
+        if (mb_strlen($text) <= $max) {
+            return $text;
+        }
+
+        return mb_substr($text, 0, $max) . sprintf("\n[truncated: %d more characters. Ask for a smaller page or fewer fields. Never write a truncated field back.]", mb_strlen($text) - $max);
+    }
+}

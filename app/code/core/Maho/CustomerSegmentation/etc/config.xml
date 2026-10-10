@@ -50,6 +50,11 @@ SPDX-License-Identifier: AFL-3.0
                 <class>Maho_CustomerSegmentation_Helper</class>
             </customersegmentation>
         </helpers>
+        <services>
+            <customersegmentation>
+                <class>Maho_CustomerSegmentation_Service</class>
+            </customersegmentation>
+        </services>
     </global>
     <adminhtml>
         <layout>

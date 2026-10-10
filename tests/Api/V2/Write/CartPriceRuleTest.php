@@ -141,8 +141,8 @@ describe('Cart price rule fields', function (): void {
 
     it('lists every missing and wrong field in one answer', function (): void {
         $missing = apiPost(CPRW_PATH, ['description' => 'x'], adminToken());
-        expect($missing['status'])->toBe(400)
-            ->and($missing['json']['error'])->toBe('validation_error')
+        expect($missing['status'])->toBe(422)
+            ->and($missing['json']['error'])->toBe('unprocessable_entity')
             ->and(cprwFields($missing))->toBe(['name', 'websiteIds', 'customerGroupIds']);
 
         $wrong = cprwCreate([
@@ -150,16 +150,19 @@ describe('Cart price rule fields', function (): void {
             'usesPerCoupon' => -1,
             'fromDate' => '31/12/2030',
             'simpleAction' => 'to_percent',
-            'unknownField' => 1,
             'customerGroupIds' => [999999],
         ]);
-        expect($wrong['status'])->toBe(400)
-            ->and(cprwFields($wrong))->toEqualCanonicalizing(['unknownField', 'isActive', 'usesPerCoupon', 'customerGroupIds', 'fromDate', 'simpleAction']);
+        expect($wrong['status'])->toBe(422)
+            ->and(cprwFields($wrong))->toEqualCanonicalizing(['isActive', 'usesPerCoupon', 'customerGroupIds', 'fromDate', 'simpleAction']);
+
+        $unknown = cprwCreate(['unknownField' => 1, 'isActive' => 'yes']);
+        expect($unknown['status'])->toBe(400)
+            ->and(cprwFields($unknown))->toBe(['unknownField']);
     });
 
     it('rejects a percent discount above 100 and a start date after the end date', function (): void {
         $percent = cprwCreate(['simpleAction' => 'by_percent', 'discountAmount' => 150]);
-        expect($percent['status'])->toBe(400)
+        expect($percent['status'])->toBe(422)
             ->and(cprwFields($percent))->toBe(['discountAmount']);
 
         $fixed = cprwCreate(['simpleAction' => 'by_fixed', 'discountAmount' => 150]);
@@ -167,11 +170,11 @@ describe('Cart price rule fields', function (): void {
 
         // The check uses the stored action when the body changes only the amount
         $toPercent = apiPut(CPRW_PATH . "/{$fixed['json']['id']}", ['simpleAction' => 'by_percent'], adminToken());
-        expect($toPercent['status'])->toBe(400)
+        expect($toPercent['status'])->toBe(422)
             ->and(cprwFields($toPercent))->toBe(['discountAmount']);
 
         $dates = cprwCreate(['fromDate' => '2030-02-01', 'toDate' => '2030-01-31']);
-        expect($dates['status'])->toBe(400)
+        expect($dates['status'])->toBe(422)
             ->and(cprwFields($dates))->toBe(['toDate']);
     });
 
@@ -183,8 +186,7 @@ describe('Cart price rule fields', function (): void {
         expect($rule['json']['primaryCouponId'])->toBeInt();
 
         $duplicate = cprwCreate(['couponType' => 'specific', 'couponCode' => strtolower($code)]);
-        expect($duplicate['status'])->toBe(400)
-            ->and(cprwFields($duplicate))->toBe(['couponCode']);
+        expect($duplicate['status'])->toBe(409);
 
         expect(cprwFields(cprwCreate(['couponType' => 'specific'])))->toBe(['couponCode'])
             ->and(cprwFields(cprwCreate(['couponType' => 'specific', 'couponCode' => 'bad code!'])))->toBe(['couponCode'])
@@ -241,7 +243,7 @@ describe('Cart price rule fields', function (): void {
         expect($replaced['json']['storeLabels'])->toBe([['storeId' => 1, 'label' => 'Only English']]);
 
         $bad = apiPut(CPRW_PATH . "/{$id}", ['storeLabels' => [['storeId' => 999999, 'label' => 'x'], ['storeId' => 1]]], $token);
-        expect($bad['status'])->toBe(400)
+        expect($bad['status'])->toBe(422)
             ->and(cprwFields($bad))->toBe(['storeLabels[0].storeId', 'storeLabels[1].label']);
     });
 

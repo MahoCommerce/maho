@@ -16,7 +16,6 @@ use Mage_Catalog_Model_Product_Status;
 use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
@@ -50,7 +49,7 @@ trait ProductLoaderTrait
         }
 
         if ($requiredType !== null && $product->getTypeId() !== $requiredType) {
-            throw new BadRequestHttpException("Product is not a {$requiredType} product");
+            throw new NotFoundHttpException("Product is not a {$requiredType} product");
         }
 
         return $product;
@@ -80,7 +79,7 @@ trait ProductLoaderTrait
         }
 
         if ($requiredType !== null && $product->getTypeId() !== $requiredType) {
-            throw new BadRequestHttpException("Product is not a {$requiredType} product");
+            throw new NotFoundHttpException("Product is not a {$requiredType} product");
         }
 
         return $product;
@@ -117,7 +116,7 @@ trait ProductLoaderTrait
         }
 
         if ($requiredType !== null && $product->getTypeId() !== $requiredType) {
-            throw new BadRequestHttpException("Product is not a {$requiredType} product");
+            throw new NotFoundHttpException("Product is not a {$requiredType} product");
         }
 
         return $product;

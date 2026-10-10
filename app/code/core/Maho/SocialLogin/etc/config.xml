@@ -34,6 +34,11 @@ SPDX-License-Identifier: AFL-3.0
                 <class>Maho_SocialLogin_Helper</class>
             </sociallogin>
         </helpers>
+        <services>
+            <sociallogin>
+                <class>Maho_SocialLogin_Service</class>
+            </sociallogin>
+        </services>
         <resources>
             <sociallogin_setup>
                 <setup>
