@@ -82,20 +82,23 @@ describe('storage:migrate', function () {
             ->and($this->target->read('tmp/y.jpg'))->toBe('y');
     });
 
-    it('copies one part with --part and prints a line for each file, then the counts as JSON', function (): void {
-        $status = $this->tester->execute(['mounts' => ['media'], '--part' => '0/1']);
+    it('copies the files that stdin lists with --files-from-stdin, then prints the counts as JSON', function (): void {
+        $this->tester->setInputs([json_encode(['a.jpg' => 1])]);
+        $status = $this->tester->execute(['mounts' => ['media'], '--files-from-stdin' => true]);
 
         $lines = explode("\n", trim($this->tester->getDisplay()));
         expect($status)->toBe(Command::SUCCESS)
             ->and($lines[0])->toBe('file')
             ->and(json_decode(substr(end($lines), strlen('result ')), true))
             ->toBe(['copied' => 1, 'skipped' => 0, 'bytes' => 1, 'failed' => []])
-            ->and($this->target->read('a.jpg'))->toBe('a');
+            ->and($this->target->read('a.jpg'))->toBe('a')
+            ->and($this->target->fileExists('catalog/swatches/s.png'))->toBeFalse();
     });
 
-    it('refuses a --part that does not exist', function (): void {
-        expect($this->tester->execute(['mounts' => ['media'], '--part' => '1/1']))->toBe(Command::FAILURE)
-            ->and($this->target->fileExists('a.jpg'))->toBeFalse();
+    it('refuses --files-from-stdin without exactly one mount', function (): void {
+        $this->tester->setInputs(['{}']);
+
+        expect($this->tester->execute(['mounts' => [], '--files-from-stdin' => true]))->toBe(Command::FAILURE);
     });
 
     it('does not copy the sitemaps mount, whose local folder is public/', function (): void {

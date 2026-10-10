@@ -94,26 +94,23 @@ describe('Maho\Storage\Migrator', function () {
             ->and($this->target->listContents('', true)->toArray())->toBe([]);
     });
 
-    it('splits the files into parts, and the parts together copy each file once', function (): void {
-        for ($i = 0; $i < 20; $i++) {
-            $this->source->write("p/{$i}.jpg", (string) $i);
-        }
+    it('lists the target once, then copies a given share of the missing files', function (): void {
+        $this->target->write('a/one.jpg', 'one');
+        $result = new \Maho\Storage\MigrationResult();
 
-        $copied = [];
-        for ($part = 0; $part < 4; $part++) {
-            new Migrator()->migrate($this->source, $this->target, ['catalog/product/cache'], false, function (string $path) use (&$copied): void {
-                $copied[] = $path;
-            }, $part, 4);
-        }
+        $listed = [];
+        $existing = new Migrator()->listFiles($this->target, ['catalog/product/cache'], function (string $path) use (&$listed): void {
+            $listed[] = $path;
+        });
+        $files = new Migrator()->findMissingFiles($this->source, $existing, ['catalog/product/cache'], $result);
+        new Migrator()->copyFiles($this->source, $this->target, $files, false, $result);
 
-        expect($copied)->toHaveCount(22)
-            ->and(array_unique($copied))->toHaveCount(22)
-            ->and($this->target->read('p/19.jpg'))->toBe('19');
-    });
-
-    it('refuses a part that does not exist', function (): void {
-        expect(fn() => new Migrator()->migrate($this->source, $this->target, [], true, null, 4, 4))
-            ->toThrow(InvalidArgumentException::class);
+        expect($listed)->toBe(['a/one.jpg'])
+            ->and($files)->toBe(['a/two.jpg' => 7])
+            ->and($result->skipped)->toBe(1)
+            ->and($result->copied)->toBe(1)
+            ->and($result->bytes)->toBe(7)
+            ->and($this->target->read('a/two.jpg'))->toBe('two two');
     });
 
     it('records a file that fails and copies the others', function (): void {

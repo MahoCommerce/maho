@@ -18,6 +18,8 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\StreamableInputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Process\Process;
@@ -41,6 +43,7 @@ class StorageMigrate extends BaseMahoCommand
      */
     public function __invoke(
         SymfonyStyle $io,
+        InputInterface $input,
         #[Argument(description: 'Mounts to migrate, for example media. Default: every mount that local.xml points at a remote adapter')]
         array $mounts = [],
         #[Option(description: 'Show what would be copied, and copy nothing')]
@@ -51,13 +54,13 @@ class StorageMigrate extends BaseMahoCommand
         array $exclude = [],
         #[Option(description: 'The number of parallel jobs. Default: 1 to a local folder, ' . self::DEFAULT_REMOTE_JOBS . ' to a bucket')]
         ?int $jobs = null,
-        #[Option(description: 'Copy only one part of the files, for example 3/16, and print the counts as JSON. The parallel jobs use it')]
-        ?string $part = null,
+        #[Option(description: 'Copy the files that stdin lists as JSON, and print the counts as JSON. The parallel jobs use it')]
+        bool $filesFromStdin = false,
     ): int {
         $this->initMaho();
 
-        if ($part !== null) {
-            return $this->migratePart($io, $mounts, $part, $dryRun, $includeCache, $exclude);
+        if ($filesFromStdin) {
+            return $this->copyFilesFromStdin($io, $input, $mounts, $dryRun);
         }
 
         if ($mounts === []) {
@@ -99,12 +102,27 @@ class StorageMigrate extends BaseMahoCommand
             }
 
             $jobCount = max(1, $jobs ?? ($target->isLocal() ? 1 : self::DEFAULT_REMOTE_JOBS));
-            $progress = $io->createProgressBar(new Migrator()->countFiles($source, $skip));
+            $migrator = new Migrator();
+            $io->text('Step 1 of 2: list the files that the target holds already.');
+            $listing = $io->createProgressBar();
+            $listing->setFormat(' %current% files | elapsed %elapsed%');
+            $listing->start();
+            $existing = $migrator->listFiles($target, $skip, fn() => $listing->advance());
+            $listing->finish();
+            $io->newLine(2);
+
+            $io->text('Step 2 of 2: ' . ($dryRun ? 'find' : 'copy') . ' the missing files' . ($jobCount > 1 ? " with {$jobCount} jobs." : '.'));
+            $progress = $io->createProgressBar($migrator->countFiles($source, $skip));
             $progress->setFormat(' %current%/%max% [%bar%] %percent:3s%% | elapsed %elapsed% | left %remaining%');
             $progress->start();
-            $result = $jobCount === 1
-                ? new Migrator()->migrate($source, $target, $skip, $dryRun, fn() => $progress->advance())
-                : $this->runJobs($progress, $name, $jobCount, $dryRun, $includeCache, $exclude);
+            $result = new MigrationResult();
+            $files = $migrator->findMissingFiles($source, $existing, $skip, $result, fn() => $progress->advance());
+            unset($existing);
+            if ($jobCount === 1) {
+                $migrator->copyFiles($source, $target, $files, $dryRun, $result, fn() => $progress->advance());
+            } else {
+                $this->runJobs($progress, $result, $name, $files, $jobCount, $dryRun);
+            }
             $progress->finish();
             $io->newLine(2);
 
@@ -142,30 +160,30 @@ class StorageMigrate extends BaseMahoCommand
     }
 
     /**
-     * Start $jobCount processes of this command, each one with its own --part, and add up their counts.
+     * Share $files among $jobCount processes of this command, and add their counts to $result.
+     * Each process gets its files as JSON on stdin, so no process lists the target again.
      *
-     * @param list<string> $exclude
+     * @param array<string, int> $files the size of each file to copy, by path
      */
-    private function runJobs(ProgressBar $progress, string $name, int $jobCount, bool $dryRun, bool $includeCache, array $exclude): MigrationResult
+    private function runJobs(ProgressBar $progress, MigrationResult $result, string $name, array $files, int $jobCount, bool $dryRun): void
     {
+        $parts = array_fill(0, $jobCount, []);
+        $i = 0;
+        foreach ($files as $path => $size) {
+            $parts[$i++ % $jobCount][$path] = $size;
+        }
+
         $processes = [];
-        for ($i = 0; $i < $jobCount; $i++) {
-            $command = [PHP_BINARY, MAHO_ROOT_DIR . '/maho', 'storage:migrate', $name, "--part={$i}/{$jobCount}"];
+        foreach (array_filter($parts) as $i => $part) {
+            $command = [PHP_BINARY, MAHO_ROOT_DIR . '/maho', 'storage:migrate', $name, '--files-from-stdin'];
             if ($dryRun) {
                 $command[] = '--dry-run';
             }
-            if ($includeCache) {
-                $command[] = '--include-cache';
-            }
-            foreach ($exclude as $folder) {
-                $command[] = "--exclude={$folder}";
-            }
-            $process = new Process($command, MAHO_ROOT_DIR, null, null, null);
+            $process = new Process($command, MAHO_ROOT_DIR, null, Mage::helper('core')->jsonEncode($part), null);
             $process->start();
             $processes[$i] = $process;
         }
 
-        $result = new MigrationResult();
         $buffers = array_fill_keys(array_keys($processes), '');
         $reported = [];
         while ($processes !== []) {
@@ -192,8 +210,6 @@ class StorageMigrate extends BaseMahoCommand
             }
             usleep(50_000);
         }
-
-        return $result;
     }
 
     private function addPartResult(MigrationResult $result, string $json): void
@@ -207,32 +223,35 @@ class StorageMigrate extends BaseMahoCommand
     }
 
     /**
-     * Copy one part of one mount. Print a line for each file, then a line with the counts as JSON.
+     * Copy the files that stdin lists as a JSON object of sizes by path. Print a line for each
+     * file, then a line with the counts as JSON.
      *
      * @param list<string> $mounts
-     * @param list<string> $exclude
      */
-    private function migratePart(SymfonyStyle $io, array $mounts, string $part, bool $dryRun, bool $includeCache, array $exclude): int
+    private function copyFilesFromStdin(SymfonyStyle $io, InputInterface $input, array $mounts, bool $dryRun): int
     {
-        if (count($mounts) !== 1 || !preg_match('#^(\d+)/(\d+)$#', $part, $match) || (int) $match[1] >= (int) $match[2]) {
-            $io->error('--part needs one mount and a part such as 3/16, from 0 to the count minus 1.');
+        $name = $mounts[0] ?? '';
+        $source = count($mounts) === 1 && MountRegistry::has($name) ? MountRegistry::getDeclaredLocalMount($name) : null;
+        if ($source === null) {
+            $io->error('--files-from-stdin needs one mount with a local folder.');
             return Command::FAILURE;
         }
 
-        $name = $mounts[0];
-        $source = MountRegistry::getDeclaredLocalMount($name);
-        if ($source === null) {
-            $io->error("The mount \"{$name}\" has no local folder to copy.");
+        $stdin = $input instanceof StreamableInputInterface ? $input->getStream() : null;
+        $files = Mage::helper('core')->jsonDecode((string) stream_get_contents($stdin ?? STDIN));
+        if (!is_array($files)) {
+            $io->error('--files-from-stdin needs a JSON object of sizes by path.');
             return Command::FAILURE;
         }
-        $result = new Migrator()->migrate(
+
+        $result = new MigrationResult();
+        new Migrator()->copyFiles(
             $source,
             MountRegistry::get($name),
-            $this->excludedFolders($name, $exclude, $includeCache),
+            array_map(intval(...), $files),
             $dryRun,
+            $result,
             fn() => $io->writeln(self::PART_FILE_LINE, OutputInterface::OUTPUT_RAW),
-            (int) $match[1],
-            (int) $match[2],
         );
         $io->writeln(self::PART_RESULT_PREFIX . Mage::helper('core')->jsonEncode([
             'copied' => $result->copied,

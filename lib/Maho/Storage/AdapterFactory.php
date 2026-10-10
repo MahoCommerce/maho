@@ -22,6 +22,9 @@ use League\Flysystem\UnixVisibility\PortableVisibilityConverter;
  */
 final class AdapterFactory
 {
+    /** Seconds to open a connection to a bucket. */
+    private const S3_CONNECT_TIMEOUT = 10;
+
     private const REMOTE_PACKAGES = [
         's3' => ['League\Flysystem\AwsS3V3\AwsS3V3Adapter', 'league/flysystem-aws-s3-v3'],
         'gcs' => ['League\Flysystem\GoogleCloudStorage\GoogleCloudStorageAdapter', 'league/flysystem-google-cloud-storage'],
@@ -81,6 +84,7 @@ final class AdapterFactory
         $config = [
             'version' => 'latest',
             'region' => $definition->option('region') ?? 'us-east-1',
+            'http' => ['connect_timeout' => self::S3_CONNECT_TIMEOUT],
         ];
         if ($key !== null && $secret !== null) {
             $config['credentials'] = ['key' => $key, 'secret' => $secret];

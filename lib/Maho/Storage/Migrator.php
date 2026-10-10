@@ -55,42 +55,71 @@ final class Migrator
      * @param list<string> $exclude folders of the source that are not copied
      * @param (callable(string $path, string $action): void)|null $onFile called after each file,
      *        with the action "copied", "skipped" or "failed"
-     * @param int $part the part to copy, from 0 to $parts - 1, so that parallel jobs share the files
      */
-    public function migrate(
-        Mount $source,
-        Mount $target,
-        array $exclude = [],
-        bool $dryRun = false,
-        ?callable $onFile = null,
-        int $part = 0,
-        int $parts = 1,
-    ): MigrationResult {
-        if ($parts < 1 || $part < 0 || $part >= $parts) {
-            throw new \InvalidArgumentException("Part {$part} of {$parts} does not exist.");
-        }
-
-        $existing = [];
-        foreach ($target->listFiles() as $item) {
-            if ($this->isInPart($item->path(), $part, $parts) && !$this->isExcluded($item->path(), $exclude)) {
-                $existing[$item->path()] = $item->fileSize();
-            }
-        }
-
+    public function migrate(Mount $source, Mount $target, array $exclude = [], bool $dryRun = false, ?callable $onFile = null): MigrationResult
+    {
         $result = new MigrationResult();
-        foreach ($source->listFiles() as $item) {
-            if (!$this->isInPart($item->path(), $part, $parts) || $this->isExcluded($item->path(), $exclude)) {
-                continue;
-            }
-            $path = $item->path();
-            $size = (int) $item->fileSize();
+        $existing = $this->listFiles($target, $exclude);
+        $files = $this->findMissingFiles($source, $existing, $exclude, $result, $onFile);
+        $this->copyFiles($source, $target, $files, $dryRun, $result, $onFile);
+        return $result;
+    }
 
-            if (array_key_exists($path, $existing) && $existing[$path] === $size) {
+    /**
+     * List the files of $mount with one deep listing.
+     *
+     * @param list<string> $exclude
+     * @param (callable(string $path): void)|null $onFile called for each listed file
+     * @return array<string, int> the size of each file, by path
+     */
+    public function listFiles(Mount $mount, array $exclude = [], ?callable $onFile = null): array
+    {
+        $files = [];
+        foreach ($mount->listFiles() as $item) {
+            if (!$this->isExcluded($item->path(), $exclude)) {
+                $files[$item->path()] = (int) $item->fileSize();
+                $onFile !== null && $onFile($item->path());
+            }
+        }
+        return $files;
+    }
+
+    /**
+     * Find the files of $source that $existing does not hold with the same size. Each file that
+     * is there already adds to $result->skipped.
+     *
+     * @param array<string, int> $existing the size of each file of the target, by path, from listFiles()
+     * @param list<string> $exclude
+     * @param (callable(string $path, string $action): void)|null $onFile called for each skipped file
+     * @return array<string, int> the size of each missing file, by path
+     */
+    public function findMissingFiles(Mount $source, array $existing, array $exclude, MigrationResult $result, ?callable $onFile = null): array
+    {
+        $missing = [];
+        foreach ($this->listFiles($source, $exclude) as $path => $size) {
+            $path = (string) $path;
+            if (($existing[$path] ?? null) === $size) {
                 $result->skipped++;
                 $onFile !== null && $onFile($path, 'skipped');
                 continue;
             }
+            $missing[$path] = $size;
+        }
 
+        return $missing;
+    }
+
+    /**
+     * Copy each file of $files from $source to $target, and add the counts to $result.
+     *
+     * @param array<string, int> $files the size of each file, by path
+     * @param (callable(string $path, string $action): void)|null $onFile called after each file,
+     *        with the action "copied" or "failed"
+     */
+    public function copyFiles(Mount $source, Mount $target, array $files, bool $dryRun, MigrationResult $result, ?callable $onFile = null): void
+    {
+        foreach ($files as $path => $size) {
+            $path = (string) $path;
             try {
                 if (!$dryRun) {
                     $stream = $source->readStream($path);
@@ -110,8 +139,6 @@ final class Migrator
                 $onFile !== null && $onFile($path, 'failed');
             }
         }
-
-        return $result;
     }
 
     /**
@@ -121,21 +148,7 @@ final class Migrator
      */
     public function countFiles(Mount $source, array $exclude = []): int
     {
-        $count = 0;
-        foreach ($source->listFiles() as $item) {
-            if (!$this->isExcluded($item->path(), $exclude)) {
-                $count++;
-            }
-        }
-        return $count;
-    }
-
-    /**
-     * The parts split the files by a hash of the path, so each file is in exactly one part.
-     */
-    private function isInPart(string $path, int $part, int $parts): bool
-    {
-        return $parts === 1 || crc32($path) % $parts === $part;
+        return count($this->listFiles($source, $exclude));
     }
 
     /**
