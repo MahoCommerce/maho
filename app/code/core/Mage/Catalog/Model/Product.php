@@ -1059,8 +1059,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      ** Media API
      */
     /**
-     * Retrieve attributes for media gallery. The small_image and thumbnail roles are left out:
-     * a product has one image since 26.11, even when a store still has these attributes.
+     * Retrieve attributes for media gallery
      *
      * @return Mage_Catalog_Model_Resource_Eav_Attribute[]
      */
@@ -1069,9 +1068,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
         if (!$this->hasMediaAttributes()) {
             $mediaAttributes = [];
             foreach ($this->getAttributes() as $attribute) {
-                if ($attribute->getFrontend()->getInputType() == 'media_image'
-                    && !in_array($attribute->getAttributeCode(), Mage_Catalog_Helper_Image::DEPRECATED_ROLES, true)
-                ) {
+                if ($attribute->getFrontend()->getInputType() == 'media_image') {
                     $mediaAttributes[$attribute->getAttributeCode()] = $attribute;
                 }
             }
