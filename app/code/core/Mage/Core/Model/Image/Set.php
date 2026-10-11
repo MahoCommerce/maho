@@ -176,14 +176,16 @@ class Mage_Core_Model_Image_Set
 
     /**
      * The src, srcset and sizes attributes of an img element. The browser picks the file from
-     * srcset with $sizes. src is for a client without srcset, such as most email clients: for a
-     * fixed $sizes such as "80px" it is the file for twice that width, else the largest file.
+     * srcset with the sizes value of $slot. src is for a client without srcset, such as most email
+     * clients: for a fixed sizes value such as "100px" it is the file for twice that width, else
+     * the largest file.
      *
-     * @param string $sizes how wide the image shows in the layout, such as "80px" or "(min-width: 768px) 33vw, 100vw"
+     * @param string $slot a slot of the theme, such as "thumbnail" or "listing", or a sizes value
      */
-    public function getSrcAttributes(string $sizes = '100vw'): string
+    public function getSrcAttributes(string $slot = 'banner'): string
     {
-        $width = preg_match('/^\s*(\d+)px\s*$/', $sizes, $match) ? 2 * (int) $match[1] : 0;
+        $sizes = $this->getSizes($slot);
+        $width = preg_match('/^\s*(\d+)px\s*$/', $sizes) ? 2 * $this->getDisplayWidth($slot) : 0;
         $attributes = ['src' => $this->getUrl($width)];
         if (!$this->isSvg()) {
             $attributes['srcset'] = $this->getSrcset();
@@ -193,23 +195,48 @@ class Mage_Core_Model_Image_Set
     }
 
     /**
-     * The attributes of getSrcAttributes(), with a width and a height that give the ratio of the
-     * files, so the page reserves the space of the image before it loads. Use it when the
-     * template does not set the size of the image.
-     *
-     * @param string $sizes how wide the image shows in the layout, such as "(min-width: 768px) 33vw, 100vw"
+     * The sizes value of $slot in the theme. A value that is not a slot name, such as "80px",
+     * is a sizes value already. An unknown slot gives 100vw.
      */
-    public function getImgAttributes(string $sizes = '100vw'): string
+    public function getSizes(string $slot): string
     {
-        $html = $this->getSrcAttributes($sizes);
-        if ($this->isSvg()) {
-            return $html;
+        if (!preg_match('/^[a-z][a-z0-9_]*$/', $slot)) {
+            return $slot;
         }
-        $width = $this->getSettings()->getWidthFor(0);
+        return Mage::getSingleton('core/image_config')->getSlotSizes(
+            $slot,
+            $this->storeId ?? (int) Mage::app()->getStore()->getId(),
+        ) ?? '100vw';
+    }
+
+    /**
+     * The attributes of getSrcAttributes(), with a width and a height. For a fixed slot such as
+     * "100px", the width is that width, so a client without CSS, such as an email client, shows
+     * the image at that size. For a fluid slot, the width is the largest width, and the CSS of the
+     * theme sets the size: the attributes then only give the ratio, so the page reserves the
+     * space of the image before it loads. The height follows the ratio of the settings, or of
+     * the source.
+     *
+     * @param string $slot a slot of the theme, such as "thumbnail" or "listing", or a sizes value
+     */
+    public function getImgAttributes(string $slot = 'banner'): string
+    {
+        $html = $this->getSrcAttributes($slot);
+        $width = $this->getDisplayWidth($slot);
         $height = $this->getHeightFor($width);
         return $height === null
             ? $html
             : $html . ' ' . self::formatAttributes(['width' => (string) $width, 'height' => (string) $height]);
+    }
+
+    /**
+     * The width of a fixed slot such as "100px", or the largest width for a fluid slot.
+     */
+    public function getDisplayWidth(string $slot): int
+    {
+        return preg_match('/^\s*(\d+)px\s*$/', $this->getSizes($slot), $match)
+            ? (int) $match[1]
+            : $this->getSettings()->getWidthFor(0);
     }
 
     /**

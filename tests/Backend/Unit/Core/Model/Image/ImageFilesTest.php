@@ -97,6 +97,18 @@ describe('resized image files of an image entity', function () {
             ->and($set->getSrcAttributes('(min-width: 768px) 33vw, 100vw'))->toStartWith('src="' . $base . ($this->pathOf)(1800) . '"');
     });
 
+    it('reads the sizes value and the width of a slot of the theme, and gives 100vw for an unknown slot', function (): void {
+        $set = Mage::helper('core/image')->init('product', '/a/b/shirt.png');
+        $base = $this->mount->publicUrl('');
+
+        expect($set->getSizes('thumbnail'))->toBe('100px')
+            ->and($set->getSrcAttributes('thumbnail'))->toStartWith('src="' . $base . ($this->pathOf)(300) . '"')
+            ->and($set->getImgAttributes('thumbnail'))->toEndWith(' sizes="100px" width="100" height="50"')
+            ->and($set->getSizes('listing'))->toBe('(min-width: 771px) 300px, 50vw')
+            ->and($set->getSizes('nothing'))->toBe('100vw')
+            ->and($set->getSizes('(min-width: 900px) 50vw, 100vw'))->toBe('(min-width: 900px) 50vw, 100vw');
+    });
+
     it('refuses a file that leaves the source folder or is a resized file', function (): void {
         $helper = Mage::helper('core/image');
 
@@ -189,6 +201,8 @@ describe('resized image files of an image entity', function () {
         $design->setNode("frontend/{$package}/image_test_child/images/product/fit", 'cover');
         $design->setNode("frontend/{$package}/image_test_parent/images/widths", '200,100');
         $design->setNode("frontend/{$package}/image_test_parent/images/product/ratio", '1:1');
+        $design->setNode("frontend/{$package}/image_test_parent/images/slots/thumbnail", '64px');
+        $design->setNode("frontend/{$package}/image_test_child/images/slots/card", '50vw');
         $store->setConfig('design/theme/skin', 'image_test_child');
         Mage::getSingleton('core/image_config')->reset();
 
@@ -198,6 +212,9 @@ describe('resized image files of an image entity', function () {
         expect($settings->widths)->toBe([100, 200])
             ->and($settings->ratio)->toBe([3, 4])
             ->and($settings->fit)->toBe('cover')
-            ->and($blog->ratio)->toBeNull();
+            ->and($blog->ratio)->toBeNull()
+            ->and(Mage::getSingleton('core/image_config')->getSlotSizes('thumbnail', $this->storeId))->toBe('64px')
+            ->and(Mage::getSingleton('core/image_config')->getSlotSizes('card', $this->storeId))->toBe('50vw')
+            ->and(Mage::getSingleton('core/image_config')->getSlotSizes('banner', $this->storeId))->toBeNull();
     });
 });

@@ -69,7 +69,7 @@ describe('product image URLs and the creation of their files', function () {
             ->and(Mage::helper('catalog/image')->init($product, 'small_image')->getOriginalSizeArray())->toBe([400, 200]);
     });
 
-    it('writes the src attributes, and only a src for the skin placeholder', function (): void {
+    it('writes the src attributes, and only a src and a square box for the skin placeholder', function (): void {
         $store = Mage::app()->getStore($this->storeId);
         $store->setConfig('catalog/placeholder/small_image_placeholder', '');
         $product = Mage::getModel('catalog/product')->setData('small_image', '/a/b/shirt.png');
@@ -78,7 +78,9 @@ describe('product image URLs and the creation of their files', function () {
             ->toContain("/{$this->hash}/300/a/b/shirt.png")
             ->toContain(' sizes="80px"')
             ->and(Mage::helper('catalog/image')->init(Mage::getModel('catalog/product'), 'small_image')->getSrcAttributes('80px'))
-            ->toMatch('/^src="[^"]*placeholder\.svg"$/');
+            ->toMatch('/^src="[^"]*placeholder\.svg"$/')
+            ->and(Mage::helper('catalog/image')->init(Mage::getModel('catalog/product'), 'small_image')->getImgAttributes('thumbnail'))
+            ->toMatch('/^src="[^"]*placeholder\.svg" width="100" height="100"$/');
     });
 
     it('takes the larger side of a requested box', function (): void {

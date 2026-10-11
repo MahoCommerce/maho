@@ -13,6 +13,5 @@ $item = $this->getItem();
 $product = $item->getProduct();
 ?>
 <a class="product-image" href="<?= $this->getProductUrl($item) ?>" title="<?= $this->escapeHtml($product->getName()) ?>">
-    <img <?= $this->helper('catalog/image')->init($product, 'small_image')->getSrcAttributes('113px') ?>
-         width="113" height="113" alt="<?= $this->escapeHtml($product->getName()) ?>">
+    <img <?= $this->helper('catalog/image')->init($product, 'small_image')->getImgAttributes('small') ?> alt="<?= $this->escapeHtml($product->getName()) ?>">
 </a>

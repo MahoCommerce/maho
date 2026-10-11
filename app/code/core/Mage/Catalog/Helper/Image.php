@@ -114,12 +114,39 @@ class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract implements \St
      * The src, srcset and sizes attributes of an img element for the image, see
      * Mage_Core_Model_Image_Set::getSrcAttributes(). The skin placeholder gets only a src.
      *
-     * @param string $sizes how wide the image shows in the layout, such as "80px"
+     * @param string $slot a slot of the theme, such as "thumbnail" or "listing", or a sizes value
      */
-    public function getSrcAttributes(string $sizes = '100vw'): string
+    public function getSrcAttributes(string $slot = 'listing'): string
     {
-        return $this->set?->getSrcAttributes($sizes)
+        return $this->set?->getSrcAttributes($slot)
             ?? 'src="' . htmlspecialchars(Mage::getDesign()->getSkinUrl($this->getPlaceholder()), ENT_QUOTES | ENT_SUBSTITUTE) . '"';
+    }
+
+    /**
+     * The attributes of getSrcAttributes() with a width and a height, see
+     * Mage_Core_Model_Image_Set::getImgAttributes(). The skin placeholder is square.
+     *
+     * @param string $slot a slot of the theme, such as "thumbnail" or "listing", or a sizes value
+     */
+    public function getImgAttributes(string $slot = 'listing'): string
+    {
+        if ($this->set !== null) {
+            return $this->set->getImgAttributes($slot);
+        }
+        $size = preg_match('/^\s*(\d+)px\s*$/', $this->getSlotSizes($slot), $match) ? $match[1] : (string) self::FALLBACK_SIZE;
+        return $this->getSrcAttributes($slot) . ' width="' . $size . '" height="' . $size . '"';
+    }
+
+    /**
+     * The sizes value of $slot in the theme of the current store view, or $slot itself when it
+     * is a sizes value already.
+     */
+    protected function getSlotSizes(string $slot): string
+    {
+        if (!preg_match('/^[a-z][a-z0-9_]*$/', $slot)) {
+            return $slot;
+        }
+        return Mage::getSingleton('core/image_config')->getSlotSizes($slot, (int) Mage::app()->getStore()->getId()) ?? '100vw';
     }
 
     /**

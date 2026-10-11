@@ -12,17 +12,15 @@
 <?php
 $_product = $this->getProduct();
 $mainImage = $this->helper('catalog/image')->init($_product, 'image');
-$gallerySizes = '(min-width: 771px) 55vw, 100vw';
 ?>
     <div class="product-image" role="region" aria-label="<?= $this->__('Product Images') ?>">
         <div class="product-image-gallery" style="aspect-ratio: <?= $mainImage->getOriginalWidth() ?>/<?= $mainImage->getOriginalHeight() ?>">
             <img id="image-main"
                 class="gallery-image visible"
-                <?= $mainImage->getSrcAttributes($gallerySizes) ?>
+                <?= $mainImage->getImgAttributes('gallery') ?>
                 alt="<?= $this->escapeHtml($this->getImageLabel()) ?>"
                 title="<?= $this->escapeHtml($this->getImageLabel()) ?>"
-                fetchpriority="high"
-                width="<?= $mainImage->getOriginalWidth() ?>" height="<?= $mainImage->getOriginalHeight() ?>">
+                fetchpriority="high">
 
             <?php $i = 0;
             foreach ($this->getGalleryImages() as $_image): ?>
@@ -32,9 +30,8 @@ $gallerySizes = '(min-width: 771px) 55vw, 100vw';
                     ?>
                     <img id="image-<?= $i ?>"
                          class="gallery-image" loading="lazy"
-                         <?= $galleryHelper->getSrcAttributes($gallerySizes) ?>
+                         <?= $galleryHelper->getImgAttributes('gallery') ?>
                          data-zoom-image="<?= $galleryHelper ?>"
-                         width="<?= $galleryHelper->getOriginalWidth() ?>" height="<?= $galleryHelper->getOriginalHeight() ?>"
                          alt="<?= $this->escapeHtml($_image->getLabel() ?: $_product->getName() . ' - ' . $this->__('Image') . ' ' . ($i + 1)) ?>">
                 <?php endif ?>
                 <?php $i++; endforeach; ?>
@@ -50,8 +47,7 @@ $gallerySizes = '(min-width: 771px) 55vw, 100vw';
                 <?php if ($this->isGalleryImageVisible($_image)): ?>
                     <li>
                         <a class="thumb-link" href="#" title="<?= $this->escapeHtml($_image->getLabel() ?: $_product->getName() . ' - ' . $this->__('Thumbnail') . ' ' . ($i + 1)) ?>" data-image-index="<?= $i ?>" role="button" aria-label="<?= $this->__('View image %s', $i + 1) ?>">
-                            <img <?= $this->helper('catalog/image')->init($this->getProduct(), 'thumbnail', $_image->getFile())->getSrcAttributes('75px') ?>
-                                 width="75" height="75" alt="<?= $this->escapeHtml($_image->getLabel() ?: $_product->getName() . ' - ' . $this->__('Thumbnail') . ' ' . ($i + 1)) ?>">
+                            <img <?= $this->helper('catalog/image')->init($this->getProduct(), 'thumbnail', $_image->getFile())->getImgAttributes('thumbnail') ?> alt="<?= $this->escapeHtml($_image->getLabel() ?: $_product->getName() . ' - ' . $this->__('Thumbnail') . ' ' . ($i + 1)) ?>">
                         </a>
                     </li>
                 <?php endif ?>

@@ -36,8 +36,7 @@ $_params = $this->escapeHtml(json_encode(['form_key' => $this->getFormKey()]));
                         (one column, two column, three column) and number of product columns. */ ?>
                             <?php $_imgSize = 300; ?>
                             <img id="product-collection-image-<?= $_product->getId() ?>"
-                                 <?= $this->helper('catalog/image')->init($_product, 'small_image')->getSrcAttributes($_imgSize . 'px') ?>
-                                 width="<?= $_imgSize ?>" height="<?= $_imgSize ?>"
+                                 <?= $this->helper('catalog/image')->init($_product, 'small_image')->getImgAttributes('email') ?>
                                  alt="<?= $this->stripTags($this->getImageLabel($_product, 'small_image'), null, true) ?>">
                         </a>
                         <?php // Product description?>
@@ -126,8 +125,7 @@ $_params = $this->escapeHtml(json_encode(['form_key' => $this->getFormKey()]));
                         <a href="<?= $_product->getProductUrl() ?>" title="<?= $this->stripTags($this->getImageLabel($_product, 'small_image'), null, true) ?>" class="product-image">
                             <?php $_imgSize = 210; ?>
                             <img id="product-collection-image-<?= $_product->getId() ?>"
-                                 <?= $this->helper('catalog/image')->init($_product, 'small_image')->getSrcAttributes($_imgSize . 'px') ?>
-                                 width="<?= $_imgSize ?>" height="<?= $_imgSize ?>"
+                                 <?= $this->helper('catalog/image')->init($_product, 'small_image')->getImgAttributes('email') ?>
                                  alt="<?= $this->stripTags($this->getImageLabel($_product, 'small_image'), null, true) ?>">
                         </a>
                         <div class="product-info">

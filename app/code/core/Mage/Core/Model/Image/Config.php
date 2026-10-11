@@ -42,6 +42,9 @@ class Mage_Core_Model_Image_Config
     /** @var array<string, Mage_Core_Model_Image_Settings> */
     protected array $activeSettings = [];
 
+    /** @var array<int, array<string, string>> */
+    protected array $slots = [];
+
     /**
      * @return array<string, string> the source folder of each entity, by entity
      */
@@ -117,6 +120,17 @@ class Mage_Core_Model_Image_Config
     }
 
     /**
+     * The sizes value of a slot of the theme of the store view, such as "100px" for thumbnail.
+     * A slot names a place where images show, so that a template does not hold the width of its
+     * layout. Null when no theme in the chain declares the slot.
+     */
+    public function getSlotSizes(string $slot, int $storeId): ?string
+    {
+        $this->slots[$storeId] ??= $this->getThemeImagesNode($storeId)['slots'] ?? [];
+        return $this->slots[$storeId][$slot] ?? null;
+    }
+
+    /**
      * Make the given settings the active settings of $entity, for each store view in the
      * list. Call it only after the files for the settings exist. The config reloads once.
      *
@@ -184,6 +198,7 @@ class Mage_Core_Model_Image_Config
     {
         $this->liveSettings = [];
         $this->activeSettings = [];
+        $this->slots = [];
         Mage::app()->cleanCache([self::CACHE_TAG]);
     }
 
@@ -219,7 +234,7 @@ class Mage_Core_Model_Image_Config
      * The <images> settings of the skin theme of the store view. A theme without a value takes
      * the value of its parent theme.
      *
-     * @return array{widths?: list<int>, entities?: array<string, array{ratio?: string, fit?: string}>}
+     * @return array{widths?: list<int>, slots?: array<string, string>, entities?: array<string, array{ratio?: string, fit?: string}>}
      */
     protected function getThemeImagesNode(int $storeId): array
     {
@@ -239,8 +254,13 @@ class Mage_Core_Model_Image_Config
                 if (!isset($result['widths']) && trim((string) $node->widths) !== '') {
                     $result['widths'] = Mage_Core_Model_Image_Settings::parseWidths((string) $node->widths);
                 }
+                foreach ($node->slots ? $node->slots->children() : [] as $name => $child) {
+                    if (!isset($result['slots'][$name]) && trim((string) $child) !== '') {
+                        $result['slots'][$name] = trim((string) $child);
+                    }
+                }
                 foreach ($node->children() as $name => $child) {
-                    if ($name === 'widths') {
+                    if ($name === 'widths' || $name === 'slots') {
                         continue;
                     }
                     foreach (['ratio', 'fit'] as $field) {

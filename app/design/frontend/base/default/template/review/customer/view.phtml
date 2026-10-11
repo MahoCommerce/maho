@@ -15,7 +15,7 @@
         <h1><?= $this->__('Review Details') ?></h1>
     </div>
     <div class="product-img-box">
-        <a href="<?= $this->getProductData()->getProductUrl() ?>" title="<?= $this->escapeHtml($this->getProductData()->getName()) ?>" class="product-image"><img <?= $this->helper('catalog/image')->init($this->getProductData(), 'small_image')->getSrcAttributes('325px') ?> width="325" height="" alt="<?= $this->escapeHtml($this->getProductData()->getName()) ?>"></a>
+        <a href="<?= $this->getProductData()->getProductUrl() ?>" title="<?= $this->escapeHtml($this->getProductData()->getName()) ?>" class="product-image"><img <?= $this->helper('catalog/image')->init($this->getProductData(), 'small_image')->getImgAttributes('listing') ?> alt="<?= $this->escapeHtml($this->getProductData()->getName()) ?>"></a>
         <?php if ($this->getRating() && $this->getRating()->getSize()): ?>
             <p class="label"><?= $this->__('Average Customer Rating:') ?></p>
             <?= $this->getReviewsSummaryHtml($this->getProductData()) ?>

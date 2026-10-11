@@ -14,7 +14,7 @@
     $_category  = $this->getCurrentCategory();
     $_imgHtml   = '';
     if ($_image = $_category->getImageSet()) {
-        $_imgHtml = '<p class="category-image"><img ' . $_image->getImgAttributes('(min-width: 1280px) 1200px, 100vw') . ' alt="' . $this->escapeHtml($_category->getName()) . '" title="' . $this->escapeHtml($_category->getName()) . '"></p>';
+        $_imgHtml = '<p class="category-image"><img ' . $_image->getImgAttributes('banner') . ' alt="' . $this->escapeHtml($_category->getName()) . '" title="' . $this->escapeHtml($_category->getName()) . '"></p>';
         $_imgHtml = $_helper->categoryAttribute($_category, $_imgHtml, 'image');
     }
 ?>
