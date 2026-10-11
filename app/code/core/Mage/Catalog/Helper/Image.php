@@ -20,6 +20,7 @@ declare(strict_types=1);
 class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract implements \Stringable
 {
     public const XML_NODE_PRODUCT_BASE_IMAGE_WIDTH = 'catalog/product_image/base_width';
+    /** @deprecated since 26.11 the listing slot of the theme sets the width */
     public const XML_NODE_PRODUCT_SMALL_IMAGE_WIDTH = 'catalog/product_image/small_width';
     public const XML_NODE_PRODUCT_MAX_DIMENSION = 'catalog/product_image/max_dimension';
 
@@ -47,18 +48,22 @@ class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract implements \St
     /** Skin path of the placeholder when the product has no image and the config names none. */
     protected ?string $placeholder = null;
 
+    /** The image attributes that a product had before 26.11. They now give the image attribute. */
+    public const DEPRECATED_ROLES = ['small_image', 'thumbnail'];
+
     /**
      * Start an image of the product: the file of $attributeName, or $imageFile when it is given.
      * A product without the image gets the placeholder of $attributeName.
      *
-     * @param string $attributeName image, small_image or thumbnail
+     * @param string $attributeName image, or another media image attribute. small_image and
+     *                              thumbnail are deprecated and give image.
      * @param string|null $imageFile path below catalog/product, such as /a/b/shirt.jpg
      * @return $this
      */
     public function init(Mage_Catalog_Model_Product $product, $attributeName, $imageFile = null)
     {
         $this->product = $product;
-        $this->attributeName = (string) $attributeName;
+        $this->attributeName = in_array($attributeName, self::DEPRECATED_ROLES, true) ? 'image' : (string) $attributeName;
         $this->size = 0;
         $this->placeholder = null;
 

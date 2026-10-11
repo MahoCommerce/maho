@@ -363,8 +363,11 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
      * @var array
      */
     protected $_imagesArrayKeys = [
-        '_media_image', 'image', 'small_image', 'thumbnail',
+        '_media_image', 'image',
     ];
+
+    /** Image columns of files from before 26.11. Their file goes to the image column when it is empty. */
+    protected const DEPRECATED_IMAGE_COLUMNS = ['small_image', 'thumbnail'];
 
     /**
      * Permanent entity columns.
@@ -1422,6 +1425,12 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
                             ? 0 : $this->_websiteCodeToId[$rowData['_group_price_website']],
                     ];
                 }
+                foreach (self::DEPRECATED_IMAGE_COLUMNS as $imageCol) {
+                    if (empty($rowData['image']) && !empty($rowData[$imageCol])) {
+                        $rowData['image'] = $rowData[$imageCol];
+                    }
+                    unset($rowData[$imageCol]);
+                }
                 foreach ($this->_imagesArrayKeys as $imageCol) {
                     if (!empty($rowData[$imageCol])) { // 5. Media gallery phase
                         if (!array_key_exists($rowData[$imageCol], $uploadedGalleryFiles)) {
@@ -2140,7 +2149,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
                         $productIds[] = $productId;
                     }
                 }
-                if ($withImagesOnly && $productId !== null && array_any($this->_imagesArrayKeys, fn($col) => !empty($rowData[$col]))) {
+                if ($withImagesOnly && $productId !== null && array_any([...$this->_imagesArrayKeys, ...self::DEPRECATED_IMAGE_COLUMNS], fn($col) => !empty($rowData[$col]))) {
                     $productIds[$productId] = $productId;
                 }
             }

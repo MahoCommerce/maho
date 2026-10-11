@@ -29,8 +29,6 @@ function cifCreateProduct(string $sku, ?string $image): int
     $product->setWebsiteIds([1]);
     if ($image !== null) {
         $product->setData('image', $image);
-        $product->setData('small_image', $image);
-        $product->setData('thumbnail', $image);
     }
     $product->save();
     return (int) $product->getId();

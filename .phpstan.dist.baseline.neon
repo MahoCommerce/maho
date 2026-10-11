@@ -5490,7 +5490,7 @@ parameters:
 		-
 			rawMessage: 'Call to an undefined method Mage_Eav_Model_Entity_Attribute_Frontend_Abstract::getUrl().'
 			identifier: method.notFound
-			count: 3
+			count: 1
 			path: app/code/core/Mage/Catalog/Helper/Product.php
 
 		-

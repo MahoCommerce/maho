@@ -38,8 +38,6 @@ final class ProductMediaProvider extends \Maho\ApiPlatform\Provider
 
         // Get image role assignments
         $mainImage = $product->getData('image');
-        $smallImage = $product->getData('small_image');
-        $thumbnail = $product->getData('thumbnail');
 
         $result = [];
         foreach ($gallery as $image) {
@@ -51,17 +49,7 @@ final class ProductMediaProvider extends \Maho\ApiPlatform\Provider
             $dto->position = (int) $image->getPosition();
             $dto->disabled = (bool) $image->getDisabled();
 
-            $types = [];
-            if ($mainImage === $dto->file) {
-                $types[] = 'image';
-            }
-            if ($smallImage === $dto->file) {
-                $types[] = 'small_image';
-            }
-            if ($thumbnail === $dto->file) {
-                $types[] = 'thumbnail';
-            }
-            $dto->types = $types;
+            $dto->types = $mainImage === $dto->file ? ['image'] : [];
 
             $result[] = $dto;
         }

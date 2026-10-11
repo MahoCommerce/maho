@@ -305,11 +305,11 @@ class Product extends CrudResource
     public ?string $imageLabel = null;
 
     #[Groups(['product:read'])]
-    #[ApiProperty(description: 'Label for the small image')]
+    #[ApiProperty(description: 'The label of the image', deprecationReason: 'A product has one image since 26.11. Use imageLabel.')]
     public ?string $smallImageLabel = null;
 
     #[Groups(['product:read'])]
-    #[ApiProperty(description: 'Label for the thumbnail image')]
+    #[ApiProperty(description: 'The label of the image', deprecationReason: 'A product has one image since 26.11. Use imageLabel.')]
     public ?string $thumbnailLabel = null;
 
     #[Groups(['product:read'])]
@@ -341,11 +341,11 @@ class Product extends CrudResource
     public ?string $imageUrl = null;
 
     #[Groups(['product:read'])]
-    #[ApiProperty(description: 'Small product image URL', writable: false, extraProperties: ['computed' => true])]
+    #[ApiProperty(description: 'Main product image URL', writable: false, deprecationReason: 'A product has one image since 26.11. Use imageUrl.', extraProperties: ['computed' => true])]
     public ?string $smallImageUrl = null;
 
     #[Groups(['product:read'])]
-    #[ApiProperty(description: 'Thumbnail image URL', writable: false, extraProperties: ['computed' => true])]
+    #[ApiProperty(description: 'Main product image URL', writable: false, deprecationReason: 'A product has one image since 26.11. Use imageUrl.', extraProperties: ['computed' => true])]
     public ?string $thumbnailUrl = null;
 
     #[Groups(['product:read'])]
@@ -590,12 +590,11 @@ class Product extends CrudResource
         static $mediaConfig = null;
         $mediaConfig ??= \Mage::getModel('catalog/product_media_config');
 
-        foreach (['image' => 'imageUrl', 'small_image' => 'smallImageUrl', 'thumbnail' => 'thumbnailUrl'] as $field => $prop) {
-            $value = $model->getData($field);
-            if ($value && $value !== 'no_selection') {
-                $dto->$prop = $mediaConfig->getMediaUrl($value);
-            }
+        $image = $model->getImage();
+        if ($image && $image !== 'no_selection') {
+            $dto->imageUrl = $dto->smallImageUrl = $dto->thumbnailUrl = $mediaConfig->getMediaUrl($image);
         }
+        $dto->smallImageLabel = $dto->thumbnailLabel = $dto->imageLabel;
     }
 
     private static function getGroupedMinPrice(object $product): ?float

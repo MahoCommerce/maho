@@ -298,7 +298,7 @@ class Mage_Catalog_Model_Product_Attribute_Media_Api extends Mage_Catalog_Model_
     }
 
     /**
-     * Retrieve image types (image, small_image, thumbnail, etc...)
+     * Retrieve image types (image, and any other media image attribute)
      *
      * @param int $setId
      * @return array

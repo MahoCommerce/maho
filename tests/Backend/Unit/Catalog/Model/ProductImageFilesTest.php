@@ -23,7 +23,7 @@ describe('product image URLs and the creation of their files', function () {
 
         $this->storeId = (int) Mage::app()->getDefaultStoreView()->getId();
         Mage::app()->setCurrentStore($this->storeId);
-        $this->placeholder = Mage::getStoreConfig('catalog/placeholder/small_image_placeholder', $this->storeId);
+        $this->placeholder = Mage::getStoreConfig('catalog/placeholder/image_placeholder', $this->storeId);
         Mage::getSingleton('core/image_config')->reset();
         $this->hash = Mage::getSingleton('core/image_config')->getActiveSettings('product', $this->storeId)->getHash();
 
@@ -44,7 +44,7 @@ describe('product image URLs and the creation of their files', function () {
     });
 
     afterEach(function (): void {
-        Mage::app()->getStore($this->storeId)->setConfig('catalog/placeholder/small_image_placeholder', $this->placeholder);
+        Mage::app()->getStore($this->storeId)->setConfig('catalog/placeholder/image_placeholder', $this->placeholder);
         Mage::unregister('_singleton/core/image_resizer');
         Mage::getSingleton('core/image_config')->reset();
         MountRegistry::reset();
@@ -59,42 +59,53 @@ describe('product image URLs and the creation of their files', function () {
     });
 
     it('gives the file of the next larger width for a requested size', function (): void {
-        $product = Mage::getModel('catalog/product')->setData('small_image', '/a/b/shirt.png');
+        $product = Mage::getModel('catalog/product')->setData('image', '/a/b/shirt.png');
 
-        $url = (string) Mage::helper('catalog/image')->init($product, 'small_image')->resize(75);
-        $srcset = Mage::helper('catalog/image')->init($product, 'small_image')->getSrcset();
+        $url = (string) Mage::helper('catalog/image')->init($product, 'image')->resize(75);
+        $srcset = Mage::helper('catalog/image')->init($product, 'image')->getSrcset();
 
         expect($url)->toEndWith("/catalog/product/cache/{$this->hash}/150/a/b/shirt.png" . Maho::getConfiguredImageExtension())
             ->and($srcset)->toContain(' 150w, ')
-            ->and(Mage::helper('catalog/image')->init($product, 'small_image')->getOriginalSizeArray())->toBe([400, 200]);
+            ->and(Mage::helper('catalog/image')->init($product, 'image')->getOriginalSizeArray())->toBe([400, 200]);
     });
 
     it('writes the img attributes of a slot, and only a src and a square box for the skin placeholder', function (): void {
         $store = Mage::app()->getStore($this->storeId);
-        $store->setConfig('catalog/placeholder/small_image_placeholder', '');
-        $product = Mage::getModel('catalog/product')->setData('small_image', '/a/b/shirt.png');
+        $store->setConfig('catalog/placeholder/image_placeholder', '');
+        $product = Mage::getModel('catalog/product')->setData('image', '/a/b/shirt.png');
 
-        expect(Mage::helper('catalog/image')->init($product, 'small_image')->getImgAttributes('thumbnail'))
+        expect(Mage::helper('catalog/image')->init($product, 'image')->getImgAttributes('thumbnail'))
             ->toContain("/{$this->hash}/300/a/b/shirt.png")
             ->toEndWith(' sizes="(max-width: 150px) 100vw, 150px" width="150" height="75"')
-            ->and(Mage::helper('catalog/image')->init(Mage::getModel('catalog/product'), 'small_image')->getImgAttributes('thumbnail'))
+            ->and(Mage::helper('catalog/image')->init(Mage::getModel('catalog/product'), 'image')->getImgAttributes('thumbnail'))
             ->toMatch('/^src="[^"]*placeholder\.svg" width="150" height="150"$/');
     });
 
     it('takes the larger side of a requested box', function (): void {
-        $product = Mage::getModel('catalog/product')->setData('thumbnail', '/a/b/shirt.png');
+        $product = Mage::getModel('catalog/product')->setData('image', '/a/b/shirt.png');
 
-        expect((string) Mage::helper('catalog/image')->init($product, 'thumbnail')->resize(105, 280))->toContain('/300/a/b/shirt.png');
+        expect((string) Mage::helper('catalog/image')->init($product, 'image')->resize(105, 280))->toContain('/300/a/b/shirt.png');
+    });
+
+    it('gives the image for the deprecated small_image and thumbnail roles', function (): void {
+        $product = Mage::getModel('catalog/product')->setData(['image' => '/a/b/shirt.png', 'image_label' => 'Red shirt']);
+        $block = Mage::app()->getLayout()->createBlock('catalog/product_list');
+
+        expect((string) Mage::helper('catalog/image')->init($product, 'small_image')->resize(300))->toContain('/300/a/b/shirt.png')
+            ->and((string) Mage::helper('catalog/image')->init($product, 'thumbnail')->resize(300))->toContain('/300/a/b/shirt.png')
+            ->and($product->getSmallImage())->toBe('/a/b/shirt.png')
+            ->and($product->getThumbnail())->toBe('/a/b/shirt.png')
+            ->and($block->getImageLabel($product, 'small_image'))->toBe('Red shirt');
     });
 
     it('uses the placeholder of the config, and the skin placeholder when the config names none', function (): void {
         $product = Mage::getModel('catalog/product');
         $store = Mage::app()->getStore($this->storeId);
 
-        $store->setConfig('catalog/placeholder/small_image_placeholder', 'default/ph.png');
-        $configured = (string) Mage::helper('catalog/image')->init($product, 'small_image')->resize(300);
-        $store->setConfig('catalog/placeholder/small_image_placeholder', '');
-        $skin = (string) Mage::helper('catalog/image')->init($product, 'small_image')->resize(300);
+        $store->setConfig('catalog/placeholder/image_placeholder', 'default/ph.png');
+        $configured = (string) Mage::helper('catalog/image')->init($product, 'image')->resize(300);
+        $store->setConfig('catalog/placeholder/image_placeholder', '');
+        $skin = (string) Mage::helper('catalog/image')->init($product, 'image')->resize(300);
 
         expect($configured)->toContain("/catalog/product/cache/{$this->hash}/300/placeholder/default/ph.png")
             ->and($skin)->toEndWith('images/catalog/product/placeholder.svg');

@@ -59,8 +59,6 @@ abstract class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_AbstractBu
         // Images
         $html .= '<optgroup label="' . $this->__('Images') . '">';
         $html .= '<option value="image">Main Image URL</option>';
-        $html .= '<option value="small_image">Small Image URL</option>';
-        $html .= '<option value="thumbnail">Thumbnail URL</option>';
         $html .= '<option value="additional_images_csv">Additional Images (comma-separated)</option>';
         for ($i = 1; $i <= 10; $i++) {
             $html .= '<option value="image_' . $i . '">Gallery Image ' . $i . '</option>';

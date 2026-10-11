@@ -1,7 +1,7 @@
 <?php
 
 /**
- * The source files of the product image entity: the role images, the gallery images and the
+ * The source files of the product image entity: the main images, the gallery images and the
  * placeholders.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
@@ -14,9 +14,6 @@ declare(strict_types=1);
 class Mage_Catalog_Model_Product_Image_Resizer
 {
     public const ENTITY = 'product';
-
-    /** The image attributes of a product. */
-    public const ROLES = ['image', 'small_image', 'thumbnail'];
 
     /**
      * Queue the creation of the files of the images of the products.
@@ -73,22 +70,16 @@ class Mage_Catalog_Model_Product_Image_Resizer
             $gallery->where('entity_id IN (?)', $ids);
         }
 
-        $attributeIds = [];
-        foreach (self::ROLES as $role) {
-            $attribute = Mage::getSingleton('eav/config')->getAttribute(Mage_Catalog_Model_Product::ENTITY, $role);
-            if ($attribute && $attribute->getId()) {
-                $attributeIds[] = (int) $attribute->getId();
-            }
-        }
-        $roles = $adapter->select()
+        $attribute = Mage::getSingleton('eav/config')->getAttribute(Mage_Catalog_Model_Product::ENTITY, 'image');
+        $images = $adapter->select()
             ->distinct()
             ->from($resource->getTableName(['catalog/product', 'varchar']), ['value'])
-            ->where('attribute_id IN (?)', $attributeIds ?: [0]);
+            ->where('attribute_id = ?', $attribute ? (int) $attribute->getId() : 0);
         if ($ids !== null) {
-            $roles->where('entity_id IN (?)', $ids);
+            $images->where('entity_id IN (?)', $ids);
         }
 
-        $files = [...$adapter->fetchCol($gallery), ...$adapter->fetchCol($roles)];
+        $files = [...$adapter->fetchCol($gallery), ...$adapter->fetchCol($images)];
         return array_values(array_unique(array_filter(
             array_map(strval(...), $files),
             fn(string $file): bool => $file !== '' && $file !== 'no_selection',

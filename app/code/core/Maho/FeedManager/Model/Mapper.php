@@ -497,8 +497,8 @@ class Maho_FeedManager_Model_Mapper
 
         // Images
         $data['image'] = $this->_getImageUrl($product, 'image');
-        $data['small_image'] = $this->_getImageUrl($product, 'small_image');
-        $data['thumbnail'] = $this->_getImageUrl($product, 'thumbnail');
+        // small_image and thumbnail are gone since 26.11, and stay for the feeds that map them
+        $data['small_image'] = $data['thumbnail'] = $data['image'];
         $galleryImages = $this->_extractGallery ? $this->_getGalleryImages($product) : [];
         $additionalImages = $this->_withoutMainImage($galleryImages, $data['image']);
         $data['gallery_images'] = $galleryImages;
@@ -653,8 +653,7 @@ class Maho_FeedManager_Model_Mapper
         $data['category_names'] = $this->_getCategoryNames($parent);
         $data['category_path'] = $this->_getCategoryPath($parent);
         $data['image'] = $this->_getImageUrl($parent, 'image');
-        $data['small_image'] = $this->_getImageUrl($parent, 'small_image');
-        $data['thumbnail'] = $this->_getImageUrl($parent, 'thumbnail');
+        $data['small_image'] = $data['thumbnail'] = $data['image'];
 
         $galleryImages = $this->_extractGallery ? $this->_getGalleryImages($parent) : [];
         $additionalImages = $this->_withoutMainImage($galleryImages, $data['image']);

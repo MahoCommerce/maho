@@ -115,7 +115,6 @@ SPDX-License-Identifier: AFL-3.0
                             <gallery>1</gallery>
                             <media_gallery>1</media_gallery>
                             <price_view>1</price_view>
-                            <small_image>1</small_image>
                             <image_url>1</image_url>
                             <is_saleable>1</is_saleable>
                             <total_reviews_count>1</total_reviews_count>
@@ -128,7 +127,6 @@ SPDX-License-Identifier: AFL-3.0
                             <final_price_with_tax>1</final_price_with_tax>
                             <final_price_without_tax>1</final_price_without_tax>
                             <recurring_profile>1</recurring_profile>
-                            <thumbnail>1</thumbnail>
                             <url_key_create_redirect>1</url_key_create_redirect>
                         </read>
                         <write>
@@ -141,7 +139,6 @@ SPDX-License-Identifier: AFL-3.0
                             <gallery>1</gallery>
                             <media_gallery>1</media_gallery>
                             <price_view>1</price_view>
-                            <small_image>1</small_image>
                             <image_url>1</image_url>
                             <is_saleable>1</is_saleable>
                             <total_reviews_count>1</total_reviews_count>
@@ -154,7 +151,6 @@ SPDX-License-Identifier: AFL-3.0
                             <final_price_with_tax>1</final_price_with_tax>
                             <final_price_without_tax>1</final_price_without_tax>
                             <recurring_profile>1</recurring_profile>
-                            <thumbnail>1</thumbnail>
                             <entity_id>1</entity_id>
                             <created_at>1</created_at>
                             <updated_at>1</updated_at>

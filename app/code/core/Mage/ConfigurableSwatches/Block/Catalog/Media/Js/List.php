@@ -40,14 +40,14 @@ class Mage_ConfigurableSwatches_Block_Catalog_Media_Js_List extends Mage_Configu
     }
 
     /**
-     * instruct small_image image type to be loaded
+     * Load the listing size of the images.
      *
      * @return array
      */
     #[\Override]
     protected function _getImageSizes()
     {
-        return ['small_image'];
+        return [Mage_ConfigurableSwatches_Helper_Productimg::MEDIA_IMAGE_TYPE_SMALL];
     }
 
     /**

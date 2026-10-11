@@ -24,7 +24,7 @@ $_helper = $this->helper('catalog/output');
             <li class="item">
                 <a href="<?= $_product->getProductUrl() ?>" title="<?= $_productNameStripped ?>" class="product-image">
                     <img
-                         <?= $this->helper('catalog/image')->init($_product, 'small_image')->getImgAttributes('listing') ?>
+                         <?= $this->helper('catalog/image')->init($_product, 'image')->getImgAttributes('listing') ?>
                          alt="<?= $_productNameStripped ?>">
                 </a>
                 <div class="product-shop">

@@ -66,10 +66,8 @@ class Mage_Catalog_Model_Observer
             $files = Mage::getSingleton('catalog/product_image_resizer')->getProductImageFiles([(int) $product->getId()]);
         } else {
             $files = [];
-            foreach (Mage_Catalog_Model_Product_Image_Resizer::ROLES as $role) {
-                if ($product->dataHasChangedFor($role) && is_string($product->getData($role))) {
-                    $files[] = $product->getData($role);
-                }
+            if ($product->dataHasChangedFor('image') && is_string($product->getImage())) {
+                $files[] = $product->getImage();
             }
             $galleryImages = $product->getData('media_gallery')['images'] ?? [];
             foreach (is_array($galleryImages) ? $galleryImages : [] as $image) {

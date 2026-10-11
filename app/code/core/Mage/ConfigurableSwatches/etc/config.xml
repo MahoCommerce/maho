@@ -55,9 +55,7 @@ SPDX-License-Identifier: AFL-3.0
                 <child>
                     <attributes>
                         <image/>
-                        <small_image/>
                         <image_label/>
-                        <small_image_label/>
                     </attributes>
                 </child>
             </configurable>

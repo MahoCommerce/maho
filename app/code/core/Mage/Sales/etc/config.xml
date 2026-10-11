@@ -1185,8 +1185,7 @@ SPDX-License-Identifier: AFL-3.0
                         <weight/>
                         <url_path/>
                         <url_key/>
-                        <thumbnail/>
-                        <small_image/>
+                        <image/>
                         <tax_class_id/>
                         <special_from_date/>
                         <special_to_date/>
