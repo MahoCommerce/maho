@@ -507,7 +507,7 @@ class Mage_Catalog_Model_Resource_Setup extends Mage_Eav_Model_Entity_Setup
                     ],
                     'image'              => [
                         'type'                       => 'varchar',
-                        'label'                      => 'Base Image',
+                        'label'                      => 'Main Image',
                         'input'                      => 'media_image',
                         'frontend'                   => 'catalog/product_attribute_frontend_image',
                         'required'                   => false,

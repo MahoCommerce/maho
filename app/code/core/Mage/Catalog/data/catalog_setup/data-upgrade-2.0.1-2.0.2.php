@@ -18,6 +18,7 @@ foreach (['small_image', 'thumbnail', 'small_image_label', 'thumbnail_label'] as
     $installer->removeAttribute(Mage_Catalog_Model_Product::ENTITY, $code);
 }
 $installer->updateAttribute(Mage_Catalog_Model_Product::ENTITY, 'image', 'used_in_product_listing', 1);
+$installer->updateAttribute(Mage_Catalog_Model_Product::ENTITY, 'image', 'frontend_label', 'Main Image');
 
 $paths = ['catalog/product_image/small_width'];
 foreach (['small_image', 'thumbnail'] as $role) {
