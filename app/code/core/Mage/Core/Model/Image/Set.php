@@ -175,22 +175,23 @@ class Mage_Core_Model_Image_Set
     }
 
     /**
-     * The attributes of an img element that shows the file for $width by default and lets the
-     * browser pick another width: src, srcset, sizes, width and height. The width and the height
-     * reserve the space of the image before it loads.
+     * The attributes of an img element: src, srcset, sizes, width and height. The browser picks
+     * the file from srcset with $sizes, and src is the largest file for a client without srcset.
+     * The width and the height give the ratio, so the page reserves the space of the image
+     * before it loads.
      *
-     * @param string $sizes the value of the sizes attribute, such as "(min-width: 768px) 33vw, 100vw"
+     * @param string $sizes how wide the image shows in the layout, such as "(min-width: 768px) 33vw, 100vw"
      */
-    public function getImgAttributes(int $width, string $sizes = '100vw'): string
+    public function getImgAttributes(string $sizes = '100vw'): string
     {
-        $attributes = ['src' => $this->getUrl($width)];
+        $attributes = ['src' => $this->getUrl()];
         if (!$this->isSvg()) {
-            $width = $this->getSettings()->getWidthFor($width);
+            $width = $this->getSettings()->getWidthFor(0);
             $attributes['srcset'] = $this->getSrcset();
             $attributes['sizes'] = $sizes;
-            $attributes['width'] = (string) $width;
             $height = $this->getHeightFor($width);
             if ($height !== null) {
+                $attributes['width'] = (string) $width;
                 $attributes['height'] = (string) $height;
             }
         }

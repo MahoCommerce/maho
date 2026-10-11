@@ -78,6 +78,16 @@ describe('resized image files of an image entity', function () {
             ->and($this->mount->fileExists(($this->pathOf)(300)))->toBeFalse();
     });
 
+    it('writes img attributes with the largest file as src and the ratio of the source', function (): void {
+        $set = Mage::helper('core/image')->init('product', '/a/b/shirt.png');
+        $base = $this->mount->publicUrl('');
+
+        expect($set->getImgAttributes('(min-width: 768px) 33vw, 100vw'))->toBe(
+            'src="' . $base . ($this->pathOf)(1800) . '" srcset="' . htmlspecialchars($set->getSrcset()) . '"'
+            . ' sizes="(min-width: 768px) 33vw, 100vw" width="1800" height="900"',
+        );
+    });
+
     it('refuses a file that leaves the source folder or is a resized file', function (): void {
         $helper = Mage::helper('core/image');
 

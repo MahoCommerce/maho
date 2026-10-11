@@ -12,7 +12,7 @@ $post = $this->getPost();
 <div class="blog_post_date"><?= $this->formatDate($post->getPublishDate() ?? $post->getCreatedAt()) ?></div>
 
 <?php if ($image = $post->getImageSet()): ?>
-    <img class="blog_post_image" <?= $image->getImgAttributes(1200, '(min-width: 1280px) 1200px, 100vw') ?> alt="<?= $this->escapeHtml($post->getTitle()) ?>">
+    <img class="blog_post_image" <?= $image->getImgAttributes('(min-width: 1280px) 1200px, 100vw') ?> alt="<?= $this->escapeHtml($post->getTitle()) ?>">
 <?php endif ?>
 
 <div><?= $post->getFilteredContent() ?></div>
