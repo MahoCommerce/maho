@@ -19,6 +19,7 @@ declare(strict_types=1);
 
 class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract implements \Stringable
 {
+    /** @deprecated since 26.11 the slots of the theme set the widths */
     public const XML_NODE_PRODUCT_BASE_IMAGE_WIDTH = 'catalog/product_image/base_width';
     /** @deprecated since 26.11 the listing slot of the theme sets the width */
     public const XML_NODE_PRODUCT_SMALL_IMAGE_WIDTH = 'catalog/product_image/small_width';
@@ -173,7 +174,7 @@ class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract implements \St
      */
     public function getOriginalWidth()
     {
-        return $this->set?->getOriginalSize()[0] ?? $this->getFallbackSize();
+        return $this->set?->getOriginalSize()[0] ?? self::FALLBACK_SIZE;
     }
 
     /**
@@ -181,7 +182,7 @@ class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract implements \St
      */
     public function getOriginalHeight()
     {
-        return $this->set?->getOriginalSize()[1] ?? $this->getFallbackSize();
+        return $this->set?->getOriginalSize()[1] ?? self::FALLBACK_SIZE;
     }
 
     /**
@@ -317,10 +318,5 @@ class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract implements \St
         }
 
         return $imageInfo['mime'] != null;
-    }
-
-    protected function getFallbackSize(): int
-    {
-        return (int) Mage::getStoreConfig(self::XML_NODE_PRODUCT_BASE_IMAGE_WIDTH) ?: self::FALLBACK_SIZE;
     }
 }

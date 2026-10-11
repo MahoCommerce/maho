@@ -53,7 +53,7 @@ class Mage_Catalog_Block_Product_View_Media extends Mage_Catalog_Block_Product_V
     }
 
     /**
-     * Retrieve gallery image url
+     * The URL of the largest file of a gallery image.
      *
      * @param null|\Maho\DataObject $image
      * @return string|null
@@ -63,10 +63,7 @@ class Mage_Catalog_Block_Product_View_Media extends Mage_Catalog_Block_Product_V
         if ($image) {
             /** @var Mage_Catalog_Helper_Image $helper */
             $helper = $this->helper('catalog/image');
-            $helper
-                ->init($this->getProduct(), 'image', $image->getFile())
-                ->resize((int) Mage::getStoreConfig(Mage_Catalog_Helper_Image::XML_NODE_PRODUCT_BASE_IMAGE_WIDTH));
-            return (string) $helper;
+            return (string) $helper->init($this->getProduct(), 'image', $image->getFile());
         }
         return null;
     }

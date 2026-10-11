@@ -695,7 +695,6 @@ SPDX-License-Identifier: AFL-3.0
                 <default_tax_group>2</default_tax_group>
             </product>
             <product_image>
-                <base_width>1800</base_width>
                 <max_dimension>5000</max_dimension>
                 <background_color>#ffffff</background_color>
             </product_image>
