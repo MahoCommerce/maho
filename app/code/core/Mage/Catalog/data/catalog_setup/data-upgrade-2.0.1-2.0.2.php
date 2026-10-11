@@ -29,9 +29,4 @@ foreach (['small_image', 'thumbnail'] as $role) {
 }
 $installer->getConnection()->delete($installer->getTable('core/config_data'), ['path IN (?)' => $paths]);
 
-$indexProcess = Mage::getSingleton('index/indexer')->getProcessByCode('catalog_product_flat');
-if ($indexProcess) {
-    $indexProcess->changeStatus(Mage_Index_Model_Process::STATUS_REQUIRE_REINDEX);
-}
-
 $installer->endSetup();
