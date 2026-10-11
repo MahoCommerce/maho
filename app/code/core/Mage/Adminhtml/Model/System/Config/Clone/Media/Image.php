@@ -27,6 +27,9 @@ class Mage_Adminhtml_Model_System_Config_Clone_Media_Image extends Mage_Core_Mod
 
         foreach ($collection as $attribute) {
             /** @var Mage_Eav_Model_Entity_Attribute $attribute */
+            if (in_array($attribute->getAttributeCode(), Mage_Catalog_Helper_Image::DEPRECATED_ROLES, true)) {
+                continue;
+            }
             $prefixes[] = [
                 'field' => $attribute->getAttributeCode() . '_',
                 'label' => $attribute->getFrontend()->getLabel(),
