@@ -30,6 +30,7 @@
             <a href="<?= $_product->getProductUrl() ?>" title="<?= $this->stripTags($this->getImageLabel($_product, 'image'), null, true) ?>" class="product-image">
                 <img id="product-collection-image-<?= $_product->getId() ?>"
                      <?= $this->helper('catalog/image')->init($_product, 'image')->getImgAttributes('listing') ?>
+                     <?php if ($_iterator === 1): ?>fetchpriority="high"<?php endif ?>
                      alt="<?= $this->stripTags($this->getImageLabel($_product, 'image'), null, true) ?>">
             </a>
             <?php // Product description?>
@@ -122,6 +123,7 @@
                     <a href="<?= $_product->getProductUrl() ?>" title="<?= $this->stripTags($this->getImageLabel($_product, 'image'), null, true) ?>" class="product-image">
                         <img id="product-collection-image-<?= $_product->getId() ?>"
                              <?= $this->helper('catalog/image')->init($_product, 'image')->getImgAttributes('listing') ?>
+                             <?php if ($i++ === 0): ?>fetchpriority="high"<?php endif ?>
                              alt="<?= $this->stripTags($this->getImageLabel($_product, 'image'), null, true) ?>">
                     </a>
                     <ul>
