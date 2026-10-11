@@ -25,8 +25,7 @@ $_helper = $this->helper('catalog/output');
                 <a href="<?= $_product->getProductUrl() ?>" title="<?= $_productNameStripped ?>" class="product-image">
                     <?php $_imgSize = 300; ?>
                     <img width="<?= $_imgSize ?>" height="<?= $_imgSize ?>"
-                         src="<?= $this->helper('catalog/image')->init($_product, 'small_image')->resize($_imgSize) ?>"
-                         srcset="<?= $this->helper('catalog/image')->init($_product, 'small_image')->resize($_imgSize * 2) ?> 2x"
+                         <?= $this->helper('catalog/image')->init($_product, 'small_image')->getSrcAttributes($_imgSize . 'px') ?>
                          alt="<?= $_productNameStripped ?>">
                 </a>
                 <div class="product-shop">

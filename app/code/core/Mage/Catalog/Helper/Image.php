@@ -111,6 +111,18 @@ class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract implements \St
     }
 
     /**
+     * The src, srcset and sizes attributes of an img element for the image, see
+     * Mage_Core_Model_Image_Set::getSrcAttributes(). The skin placeholder gets only a src.
+     *
+     * @param string $sizes how wide the image shows in the layout, such as "80px"
+     */
+    public function getSrcAttributes(string $sizes = '100vw'): string
+    {
+        return $this->set?->getSrcAttributes($sizes)
+            ?? 'src="' . htmlspecialchars(Mage::getDesign()->getSkinUrl($this->getPlaceholder()), ENT_QUOTES | ENT_SUBSTITUTE) . '"';
+    }
+
+    /**
      * The resized files of the image, or null for the skin placeholder.
      */
     public function getImageSet(): ?Mage_Core_Model_Image_Set

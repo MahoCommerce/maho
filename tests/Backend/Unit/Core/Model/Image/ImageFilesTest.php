@@ -88,6 +88,15 @@ describe('resized image files of an image entity', function () {
         );
     });
 
+    it('takes the file for twice a fixed width as src, for a client without srcset', function (): void {
+        $set = Mage::helper('core/image')->init('product', '/a/b/shirt.png');
+        $base = $this->mount->publicUrl('');
+
+        expect($set->getSrcAttributes('80px'))->toStartWith('src="' . $base . ($this->pathOf)(300) . '" srcset="')
+            ->and($set->getSrcAttributes('80px'))->toEndWith(' sizes="80px"')
+            ->and($set->getSrcAttributes('(min-width: 768px) 33vw, 100vw'))->toStartWith('src="' . $base . ($this->pathOf)(1800) . '"');
+    });
+
     it('refuses a file that leaves the source folder or is a resized file', function (): void {
         $helper = Mage::helper('core/image');
 

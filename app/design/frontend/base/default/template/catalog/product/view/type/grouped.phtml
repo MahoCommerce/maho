@@ -26,8 +26,7 @@
             <tr>
                 <td class='image'>
                     <img class="thumbnail"
-                         src="<?= $this->helper('catalog/image')->init($_item, 'thumbnail')->resize(105, 80) ?>"
-                         srcset="<?= $this->helper('catalog/image')->init($_item, 'thumbnail')->resize(210, 160) ?> 2x"
+                         <?= $this->helper('catalog/image')->init($_item, 'thumbnail')->getSrcAttributes('105px') ?>
                          width="105" height="80"
                          alt="<?= $this->escapeHtml($this->getImageLabel()) ?>"
                          title="<?= $this->escapeHtml($this->getImageLabel()) ?>">

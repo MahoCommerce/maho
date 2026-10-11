@@ -13,7 +13,6 @@ $item = $this->getItem();
 $product = $item->getProduct();
 ?>
 <a class="product-image" href="<?= $this->getProductUrl($item) ?>" title="<?= $this->escapeHtml($product->getName()) ?>">
-    <img src="<?= $this->helper('catalog/image')->init($product, 'small_image')->resize(113, 113) ?>"
-         srcset="<?= $this->helper('catalog/image')->init($product, 'small_image')->resize(226, 226) ?> 2x"
+    <img <?= $this->helper('catalog/image')->init($product, 'small_image')->getSrcAttributes('113px') ?>
          width="113" height="113" alt="<?= $this->escapeHtml($product->getName()) ?>">
 </a>

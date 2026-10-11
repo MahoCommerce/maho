@@ -18,8 +18,7 @@
         <li class="item">
             <div class="product-info">
                 <a class="product-image" href="<?= $_item->getProductUrl() ?>" title="<?= $this->escapeHtml($_item->getName()) ?>">
-                    <img src="<?= $this->helper('catalog/image')->init($_item, 'thumbnail')->resize(210) ?>"
-                         srcset="<?= $this->helper('catalog/image')->init($_item, 'thumbnail')->resize(420) ?> 2x"
+                    <img <?= $this->helper('catalog/image')->init($_item, 'thumbnail')->getSrcAttributes('210px') ?>
                          width="210" height="210"
                          alt="<?= $this->escapeHtml($_item->getName()) ?>">
                 </a>

@@ -175,27 +175,48 @@ class Mage_Core_Model_Image_Set
     }
 
     /**
-     * The attributes of an img element: src, srcset, sizes, width and height. The browser picks
-     * the file from srcset with $sizes, and src is the largest file for a client without srcset.
-     * The width and the height give the ratio, so the page reserves the space of the image
-     * before it loads.
+     * The src, srcset and sizes attributes of an img element. The browser picks the file from
+     * srcset with $sizes. src is for a client without srcset, such as most email clients: for a
+     * fixed $sizes such as "80px" it is the file for twice that width, else the largest file.
+     *
+     * @param string $sizes how wide the image shows in the layout, such as "80px" or "(min-width: 768px) 33vw, 100vw"
+     */
+    public function getSrcAttributes(string $sizes = '100vw'): string
+    {
+        $width = preg_match('/^\s*(\d+)px\s*$/', $sizes, $match) ? 2 * (int) $match[1] : 0;
+        $attributes = ['src' => $this->getUrl($width)];
+        if (!$this->isSvg()) {
+            $attributes['srcset'] = $this->getSrcset();
+            $attributes['sizes'] = $sizes;
+        }
+        return self::formatAttributes($attributes);
+    }
+
+    /**
+     * The attributes of getSrcAttributes(), with a width and a height that give the ratio of the
+     * files, so the page reserves the space of the image before it loads. Use it when the
+     * template does not set the size of the image.
      *
      * @param string $sizes how wide the image shows in the layout, such as "(min-width: 768px) 33vw, 100vw"
      */
     public function getImgAttributes(string $sizes = '100vw'): string
     {
-        $attributes = ['src' => $this->getUrl()];
-        if (!$this->isSvg()) {
-            $width = $this->getSettings()->getWidthFor(0);
-            $attributes['srcset'] = $this->getSrcset();
-            $attributes['sizes'] = $sizes;
-            $height = $this->getHeightFor($width);
-            if ($height !== null) {
-                $attributes['width'] = (string) $width;
-                $attributes['height'] = (string) $height;
-            }
+        $html = $this->getSrcAttributes($sizes);
+        if ($this->isSvg()) {
+            return $html;
         }
+        $width = $this->getSettings()->getWidthFor(0);
+        $height = $this->getHeightFor($width);
+        return $height === null
+            ? $html
+            : $html . ' ' . self::formatAttributes(['width' => (string) $width, 'height' => (string) $height]);
+    }
 
+    /**
+     * @param array<string, string> $attributes
+     */
+    protected static function formatAttributes(array $attributes): string
+    {
         $html = [];
         foreach ($attributes as $name => $value) {
             $html[] = $name . '="' . htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE) . '"';
