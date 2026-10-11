@@ -113,7 +113,7 @@ class Mage_Adminhtml_System_CacheController extends Mage_Adminhtml_Controller_Ac
 
                 case 'clear_images_cache':
                     try {
-                        Mage::getModel('catalog/product_image')->clearCache();
+                        Mage::getSingleton('core/image_resizer')->refreshAll();
                         $this->_getSession()->addSuccess(
                             Mage::helper('adminhtml')->__('The image cache was cleared.'),
                         );
@@ -241,7 +241,7 @@ class Mage_Adminhtml_System_CacheController extends Mage_Adminhtml_Controller_Ac
     public function clearImagesCacheAction(): void
     {
         try {
-            Mage::getModel('catalog/product_image')->clearCache();
+            Mage::getSingleton('core/image_resizer')->refreshAll();
             $this->_getSession()->addSuccess(
                 Mage::helper('adminhtml')->__('The image cache was cleared.'),
             );

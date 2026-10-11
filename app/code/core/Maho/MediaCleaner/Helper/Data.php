@@ -155,7 +155,7 @@ class Maho_MediaCleaner_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * A cache file is "{store}/{subdir}/[{WxH}/]{hash}/{a}/{b}/{name}{extension}". Its source is
+     * A cache file is "{settings hash}/{width}/{a}/{b}/{name}{extension}". Its source is
      * "{a}/{b}/{name}" below catalog/product. A cache file is unused when that source is not in
      * $sourceFiles, or when its name does not end with the configured $extension.
      *

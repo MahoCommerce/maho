@@ -83,6 +83,8 @@ class Mage_Catalog_Model_Category_Attribute_Backend_Image extends Mage_Eav_Model
             $this->deleteUnusedFile((string) $oldValue);
         }
 
+        Mage::getSingleton('core/image_resizer')->createFilesAfterCommit(Mage_Catalog_Model_Category_Image::ENTITY, [$fileName]);
+
         return $fileName;
     }
 
@@ -130,6 +132,7 @@ class Mage_Catalog_Model_Category_Attribute_Backend_Image extends Mage_Eav_Model
             if ($filePath !== null && $mount->fileExists($filePath)) {
                 $mount->delete($filePath);
             }
+            Mage::getSingleton('core/image_resizer')->deleteFiles(Mage_Catalog_Model_Category_Image::ENTITY, $fileName);
         } catch (Exception $e) {
             // Silently fail - file deletion is not critical
             Mage::logException($e);

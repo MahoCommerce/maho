@@ -200,6 +200,18 @@ SPDX-License-Identifier: AFL-3.0
         </fieldsets>
     </admin>
     <global>
+        <images>
+            <entities>
+                <product>
+                    <source>catalog/product</source>
+                    <provider>catalog/product_image_resizer</provider>
+                </product>
+                <category>
+                    <source>catalog/category</source>
+                    <provider>catalog/category_image</provider>
+                </category>
+            </entities>
+        </images>
         <!-- Files that customers attach to a custom option. They are private: no public URL. -->
         <storage>
             <mounts>
@@ -280,9 +292,6 @@ SPDX-License-Identifier: AFL-3.0
                     <product_attribute_media_gallery_value>
                         <table>catalog_product_entity_media_gallery_value</table>
                     </product_attribute_media_gallery_value>
-                    <product_image_size>
-                        <table>catalog_product_image_size</table>
-                    </product_image_size>
                     <product_option>
                         <table>catalog_product_option</table>
                     </product_option>
@@ -699,7 +708,6 @@ SPDX-License-Identifier: AFL-3.0
                 <base_width>1800</base_width>
                 <small_width>210</small_width>
                 <max_dimension>5000</max_dimension>
-                <keep_frame>1</keep_frame>
                 <background_color>#ffffff</background_color>
             </product_image>
             <seo>

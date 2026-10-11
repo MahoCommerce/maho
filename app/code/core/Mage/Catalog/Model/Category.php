@@ -472,6 +472,22 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
     }
 
     /**
+     * The resized files of the image of the category, its own or the product image that it falls
+     * back to. Null when there is none.
+     */
+    public function getImageSet(): ?Mage_Core_Model_Image_Set
+    {
+        $helper = Mage::helper('core/image');
+        if ($image = $this->getImage()) {
+            return $helper->init(Mage_Catalog_Model_Category_Image::ENTITY, (string) $image);
+        }
+        if ($image = $this->getFallbackImage()) {
+            return $helper->init(Mage_Catalog_Model_Product_Image_Resizer::ENTITY, (string) $image);
+        }
+        return null;
+    }
+
+    /**
      * Mount path of the image on the media mount, the category's own or the product image it
      * falls back to. Null when there is none or when the stored name leaves its directory.
      */

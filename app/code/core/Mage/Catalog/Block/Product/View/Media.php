@@ -65,12 +65,7 @@ class Mage_Catalog_Block_Product_View_Media extends Mage_Catalog_Block_Product_V
             $helper = $this->helper('catalog/image');
             $helper
                 ->init($this->getProduct(), 'image', $image->getFile())
-                ->keepFrame(false);
-
-            $size = Mage::getStoreConfig(Mage_Catalog_Helper_Image::XML_NODE_PRODUCT_BASE_IMAGE_WIDTH);
-            if (is_numeric($size)) {
-                $helper->constrainOnly(true)->resize($size);
-            }
+                ->resize((int) Mage::getStoreConfig(Mage_Catalog_Helper_Image::XML_NODE_PRODUCT_BASE_IMAGE_WIDTH));
             return (string) $helper;
         }
         return null;

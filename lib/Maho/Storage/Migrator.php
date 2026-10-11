@@ -19,9 +19,12 @@ use League\Flysystem\FilesystemException;
 
 final class Migrator
 {
-    /** Folders that Maho creates again on demand, by mount. They are not copied unless asked. */
+    /**
+     * Folders that Maho creates again on demand, by mount. They are not copied unless asked.
+     * The resized images are not in the list: nothing creates them on a request.
+     */
     public const REGENERATED = [
-        'media' => ['catalog/product/cache', 'catalog/swatches', 'tmp'],
+        'media' => ['catalog/swatches', 'tmp'],
     ];
 
     /** Mounts whose local folder holds more than their files, with the step that fills the target. */

@@ -86,6 +86,8 @@ class Maho_Blog_Model_Post_Attribute_Backend_Image extends Mage_Eav_Model_Entity
         $object->setData($name, $fileName);
         $this->_updateAttributeValue($object, $fileName);
 
+        Mage::getSingleton('core/image_resizer')->createFilesAfterCommit(Maho_Blog_Model_Post_Image::ENTITY, [$fileName]);
+
         return $fileName;
     }
 
@@ -169,6 +171,7 @@ class Maho_Blog_Model_Post_Attribute_Backend_Image extends Mage_Eav_Model_Entity
             if ($filePath !== null && $mount->fileExists($filePath)) {
                 $mount->delete($filePath);
             }
+            Mage::getSingleton('core/image_resizer')->deleteFiles(Maho_Blog_Model_Post_Image::ENTITY, $fileName);
         } catch (Exception $e) {
             Mage::logException($e);
         }

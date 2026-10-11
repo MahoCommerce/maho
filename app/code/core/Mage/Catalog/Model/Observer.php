@@ -54,20 +54,58 @@ class Mage_Catalog_Model_Observer
     }
 
     /**
-     * Queue the resize of the images of a saved product when a role image changed or the
-     * gallery got a new image. The message joins the transaction of the save.
+     * Create the resized files of the new images of a saved product, after the save commits. A
+     * duplicate gets new copies of all images, so all its images are resized.
      */
     #[Maho\Config\Observer('catalog_product_save_after')]
-    public function queueProductImageResize(\Maho\Event\Observer $observer): void
+    public function createProductImageFiles(\Maho\Event\Observer $observer): void
     {
         /** @var Mage_Catalog_Model_Product $product */
         $product = $observer->getEvent()->getProduct();
-        $galleryImages = $product->getData('media_gallery')['images'] ?? [];
-        if (array_any(Mage_Catalog_Model_Product_Image_Resizer::ROLES, $product->dataHasChangedFor(...))
-            || (is_array($galleryImages) && array_any($galleryImages, fn($image) => !empty($image['new_file'])))
-        ) {
-            Mage::getSingleton('catalog/product_image_resizer')->queue([(int) $product->getId()]);
+        if ($product->getIsDuplicate()) {
+            $files = Mage::getSingleton('catalog/product_image_resizer')->getProductImageFiles([(int) $product->getId()]);
+        } else {
+            $files = [];
+            foreach (Mage_Catalog_Model_Product_Image_Resizer::ROLES as $role) {
+                if ($product->dataHasChangedFor($role) && is_string($product->getData($role))) {
+                    $files[] = $product->getData($role);
+                }
+            }
+            $galleryImages = $product->getData('media_gallery')['images'] ?? [];
+            foreach (is_array($galleryImages) ? $galleryImages : [] as $image) {
+                if (!empty($image['new_file']) && empty($image['removed'])) {
+                    $files[] = (string) $image['new_file'];
+                }
+            }
         }
+
+        Mage::getSingleton('core/image_resizer')->createFilesAfterCommit(Mage_Catalog_Model_Product_Image_Resizer::ENTITY, $files);
+    }
+
+    /**
+     * Create the resized files of a new category image that was set by name, as an import does.
+     * An upload creates them in Mage_Catalog_Model_Category_Attribute_Backend_Image::saveImage().
+     */
+    #[Maho\Config\Observer('catalog_category_save_after')]
+    public function createCategoryImageFiles(\Maho\Event\Observer $observer): void
+    {
+        /** @var Mage_Catalog_Model_Category $category */
+        $category = $observer->getEvent()->getCategory();
+        if ($category->dataHasChangedFor('image') && is_string($category->getData('image'))) {
+            Mage::getSingleton('core/image_resizer')->createFilesAfterCommit(Mage_Catalog_Model_Category_Image::ENTITY, [$category->getData('image')]);
+        }
+    }
+
+    /**
+     * Create the resized files of the placeholders after a save of the catalog config.
+     */
+    #[Maho\Config\Observer('admin_system_config_changed_section_catalog')]
+    public function createPlaceholderImageFiles(\Maho\Event\Observer $observer): void
+    {
+        Mage::getSingleton('core/image_resizer')->createFilesAfterCommit(
+            Mage_Catalog_Model_Product_Image_Resizer::ENTITY,
+            Mage::getSingleton('catalog/product_image_resizer')->getPlaceholderFiles(),
+        );
     }
 
     #[Maho\Config\Observer('catalog_product_import_finish_before')]

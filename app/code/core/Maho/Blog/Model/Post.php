@@ -67,6 +67,15 @@ class Maho_Blog_Model_Post extends Mage_Core_Model_Abstract
         return Mage::getBaseUrl('media') . 'blog/' . $image;
     }
 
+    /**
+     * The resized files of the image of the post, or null when it has none.
+     */
+    public function getImageSet(): ?Mage_Core_Model_Image_Set
+    {
+        $image = $this->getImage();
+        return is_string($image) ? Mage::helper('core/image')->init(Maho_Blog_Model_Post_Image::ENTITY, $image) : null;
+    }
+
     public function hasImage(): bool
     {
         return !empty($this->getImage());

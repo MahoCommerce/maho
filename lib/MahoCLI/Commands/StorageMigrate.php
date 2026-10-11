@@ -48,7 +48,7 @@ class StorageMigrate extends BaseMahoCommand
         array $mounts = [],
         #[Option(description: 'Show what would be copied, and copy nothing')]
         bool $dryRun = false,
-        #[Option(description: 'Also copy the caches that Maho creates again on demand, such as the resized product images')]
+        #[Option(description: 'Also copy the caches that Maho creates again on demand, such as the swatch images')]
         bool $includeCache = false,
         #[Option(description: 'A folder of the mount that is not copied. Repeat it for more folders')]
         array $exclude = [],

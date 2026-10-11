@@ -131,7 +131,7 @@ class Mage_ConfigurableSwatches_Helper_Mediafallback extends Mage_Core_Helper_Ab
      * - product must have child products attached
      *
      * @param array $imageTypes - image types to select for child products
-     * @param bool $keepFrame
+     * @param bool $keepFrame not used since 26.11, the theme sets the fit
      * @return array
      */
     public function getConfigurableImagesFallbackArray(
@@ -232,7 +232,7 @@ class Mage_ConfigurableSwatches_Helper_Mediafallback extends Mage_Core_Helper_Ab
      *
      * @param Mage_Catalog_Model_Product $product
      * @param string $type
-     * @param bool $keepFrame
+     * @param bool $keepFrame not used since 26.11, the theme sets the fit
      * @param string $image
      * @param bool $placeholder
      * @return string|bool
@@ -244,19 +244,10 @@ class Mage_ConfigurableSwatches_Helper_Mediafallback extends Mage_Core_Helper_Ab
             $image = null;
         }
         if ($hasTypeData || $placeholder || $image) {
-            $helper = Mage::helper('catalog/image')
-                ->init($product, $type, $image)
-                ->keepFrame(($hasTypeData || $image) ? $keepFrame : false)  // don't keep frame if placeholder
-            ;
-
-            $size = Mage::getStoreConfig(Mage_Catalog_Helper_Image::XML_NODE_PRODUCT_BASE_IMAGE_WIDTH);
-            if ($type == 'small_image') {
-                $size = Mage::getStoreConfig(Mage_Catalog_Helper_Image::XML_NODE_PRODUCT_SMALL_IMAGE_WIDTH);
-            }
-            if (is_numeric($size)) {
-                $helper->constrainOnly(true)->resize($size);
-            }
-            return (string) $helper;
+            $size = Mage::getStoreConfig($type == 'small_image'
+                ? Mage_Catalog_Helper_Image::XML_NODE_PRODUCT_SMALL_IMAGE_WIDTH
+                : Mage_Catalog_Helper_Image::XML_NODE_PRODUCT_BASE_IMAGE_WIDTH);
+            return (string) Mage::helper('catalog/image')->init($product, $type, $image)->resize((int) $size);
         }
         return false;
     }

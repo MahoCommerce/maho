@@ -29,11 +29,7 @@ $mainImage = $this->helper('catalog/image')->init($_product, 'image');
                     <?php
                         $galleryHelper = $this->helper('catalog/image')
                             ->init($_product, 'image', $_image->getFile())
-                            ->keepFrame(false);
-                        $gallerySize = Mage::getStoreConfig(Mage_Catalog_Helper_Image::XML_NODE_PRODUCT_BASE_IMAGE_WIDTH);
-                        if (is_numeric($gallerySize)) {
-                            $galleryHelper->constrainOnly(true)->resize($gallerySize);
-                        }
+                            ->resize((int) Mage::getStoreConfig(Mage_Catalog_Helper_Image::XML_NODE_PRODUCT_BASE_IMAGE_WIDTH));
                     ?>
                     <img id="image-<?= $i ?>"
                          class="gallery-image" loading="lazy"
