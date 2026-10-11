@@ -4,9 +4,10 @@
  * The image entities and the settings of their resized files in each store view.
  *
  * A module declares an entity under global/images/entities/<entity>/source, the folder of its
- * originals on the media mount. The theme of a store view gives the widths and, for each
+ * originals on the media mount. The theme of a store view gives the slots and, for each
  * entity, the ratio and the fit, in the <images> node of its etc/theme.xml or of a parent
- * theme. The store config gives the quality, the background color, the output format and the
+ * theme. A slot is the largest width in px of the images in one place of the layout, and
+ * each image has a file at 1x and 2x of each slot. The store config gives the quality, the background color, the output format and the
  * watermark.
  *
  * Two sets of settings exist for each store view and entity. The live settings come from the
@@ -30,8 +31,8 @@ class Mage_Core_Model_Image_Config
 
     public const CACHE_TAG = 'image_settings';
 
-    /** Widths when no theme in the chain declares them. */
-    public const DEFAULT_WIDTHS = [150, 300, 600, 1200, 1800];
+    /** The theme that every theme chain ends with, as in the design fallback. */
+    public const BASE_THEME = 'base/default';
 
     /** The product image role whose watermark settings apply to the product entity. */
     public const WATERMARK_ROLE = 'image';
@@ -42,7 +43,7 @@ class Mage_Core_Model_Image_Config
     /** @var array<string, Mage_Core_Model_Image_Settings> */
     protected array $activeSettings = [];
 
-    /** @var array<int, array<string, string>> */
+    /** @var array<int, array<string, int>> */
     protected array $slots = [];
 
     /**
@@ -120,11 +121,11 @@ class Mage_Core_Model_Image_Config
     }
 
     /**
-     * The sizes value of a slot of the theme of the store view, such as "100px" for thumbnail.
-     * A slot names a place where images show, so that a template does not hold the width of its
+     * The width in px of a slot of the theme of the store view, such as 150 for thumbnail. A
+     * slot names a place where images show, so that a template does not hold the width of its
      * layout. Null when no theme in the chain declares the slot.
      */
-    public function getSlotSizes(string $slot, int $storeId): ?string
+    public function getSlotWidth(string $slot, int $storeId): ?int
     {
         $this->slots[$storeId] ??= $this->getThemeImagesNode($storeId)['slots'] ?? [];
         return $this->slots[$storeId][$slot] ?? null;
@@ -213,12 +214,12 @@ class Mage_Core_Model_Image_Config
     protected function buildLiveSettings(string $entity, int $storeId): Mage_Core_Model_Image_Settings
     {
         $theme = $this->getThemeImagesNode($storeId);
-        $widths = $theme['widths'] ?? [];
+        $slots = array_values($theme['slots'] ?? []);
         $entityNode = $theme['entities'][$entity] ?? [];
         $background = ltrim((string) Mage::getStoreConfig('catalog/product_image/background_color', $storeId), '#');
 
         return new Mage_Core_Model_Image_Settings(
-            widths: $widths !== [] ? $widths : self::DEFAULT_WIDTHS,
+            widths: Mage_Core_Model_Image_Settings::parseWidths([...$slots, ...array_map(fn(int $width): int => 2 * $width, $slots)]),
             ratio: Mage_Core_Model_Image_Settings::parseRatio($entityNode['ratio'] ?? ''),
             fit: ($entityNode['fit'] ?? '') === Mage_Core_Model_Image_Settings::FIT_COVER
                 ? Mage_Core_Model_Image_Settings::FIT_COVER
@@ -232,9 +233,9 @@ class Mage_Core_Model_Image_Config
 
     /**
      * The <images> settings of the skin theme of the store view. A theme without a value takes
-     * the value of its parent theme.
+     * the value of its parent theme, and the last parent takes the value of base/default.
      *
-     * @return array{widths?: list<int>, slots?: array<string, string>, entities?: array<string, array{ratio?: string, fit?: string}>}
+     * @return array{slots?: array<string, int>, entities?: array<string, array{ratio?: string, fit?: string}>}
      */
     protected function getThemeImagesNode(int $storeId): array
     {
@@ -251,16 +252,13 @@ class Mage_Core_Model_Image_Config
             $visited["{$package}/{$theme}"] = true;
             $node = $designConfig->getNode("{$area}/{$package}/{$theme}/images");
             if ($node) {
-                if (!isset($result['widths']) && trim((string) $node->widths) !== '') {
-                    $result['widths'] = Mage_Core_Model_Image_Settings::parseWidths((string) $node->widths);
-                }
                 foreach ($node->slots ? $node->slots->children() : [] as $name => $child) {
-                    if (!isset($result['slots'][$name]) && trim((string) $child) !== '') {
-                        $result['slots'][$name] = trim((string) $child);
+                    if (!isset($result['slots'][$name]) && (int) $child > 0) {
+                        $result['slots'][$name] = (int) $child;
                     }
                 }
                 foreach ($node->children() as $name => $child) {
-                    if ($name === 'widths' || $name === 'slots') {
+                    if ($name === 'slots') {
                         continue;
                     }
                     foreach (['ratio', 'fit'] as $field) {
@@ -271,10 +269,7 @@ class Mage_Core_Model_Image_Config
                 }
             }
 
-            $parent = trim((string) $designConfig->getNode("{$area}/{$package}/{$theme}/parent"));
-            if ($parent === '') {
-                break;
-            }
+            $parent = trim((string) $designConfig->getNode("{$area}/{$package}/{$theme}/parent")) ?: self::BASE_THEME;
             $parts = explode('/', $parent);
             [$package, $theme] = count($parts) === 2 ? $parts : [$package, $parts[0]];
         }

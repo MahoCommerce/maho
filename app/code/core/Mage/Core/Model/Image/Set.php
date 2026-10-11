@@ -177,47 +177,40 @@ class Mage_Core_Model_Image_Set
     /**
      * The src, srcset and sizes attributes of an img element. The browser picks the file from
      * srcset with the sizes value of $slot. src is for a client without srcset, such as most email
-     * clients: for a fixed sizes value such as "100px" it is the file for twice that width, else
-     * the largest file.
+     * clients: it is the 2x file of the slot, or the largest file for an unknown slot.
      *
-     * @param string $slot a slot of the theme, such as "thumbnail" or "listing", or a sizes value
+     * @param string $slot a slot of the theme, such as "thumbnail" or "listing"
      */
     public function getSrcAttributes(string $slot = 'banner'): string
     {
-        $sizes = $this->getSizes($slot);
-        $width = preg_match('/^\s*(\d+)px\s*$/', $sizes) ? 2 * $this->getDisplayWidth($slot) : 0;
-        $attributes = ['src' => $this->getUrl($width)];
+        $attributes = ['src' => $this->getUrl(2 * ($this->getSlotWidth($slot) ?? 0))];
         if (!$this->isSvg()) {
             $attributes['srcset'] = $this->getSrcset();
-            $attributes['sizes'] = $sizes;
+            $attributes['sizes'] = $this->getSizes($slot);
         }
         return self::formatAttributes($attributes);
     }
 
     /**
-     * The sizes value of $slot in the theme. A value that is not a slot name, such as "80px",
-     * is a sizes value already. An unknown slot gives 100vw.
+     * The sizes value of $slot: the full window when the window is narrower than the slot, else
+     * the slot width. An unknown slot gives 100vw. No "auto": Chrome reads it as 100vw for an
+     * image that is not lazy.
+     * Example for a slot of 300: "(max-width: 300px) 100vw, 300px".
      */
     public function getSizes(string $slot): string
     {
-        if (!preg_match('/^[a-z][a-z0-9_]*$/', $slot)) {
-            return $slot;
-        }
-        return Mage::getSingleton('core/image_config')->getSlotSizes(
-            $slot,
-            $this->storeId ?? (int) Mage::app()->getStore()->getId(),
-        ) ?? '100vw';
+        $width = $this->getSlotWidth($slot);
+        return $width === null ? '100vw' : "(max-width: {$width}px) 100vw, {$width}px";
     }
 
     /**
-     * The attributes of getSrcAttributes(), with a width and a height. For a fixed slot such as
-     * "100px", the width is that width, so a client without CSS, such as an email client, shows
-     * the image at that size. For a fluid slot, the width is the largest width, and the CSS of the
-     * theme sets the size: the attributes then only give the ratio, so the page reserves the
-     * space of the image before it loads. The height follows the ratio of the settings, or of
-     * the source.
+     * The attributes of getSrcAttributes(), with a width and a height. The width is the width of
+     * the slot, so a client without CSS, such as an email client, shows the image at that size.
+     * The CSS of the theme can change the size: the attributes still give the ratio, so the page
+     * keeps the space of the image before it loads. The height follows the ratio of the settings,
+     * or of the source.
      *
-     * @param string $slot a slot of the theme, such as "thumbnail" or "listing", or a sizes value
+     * @param string $slot a slot of the theme, such as "thumbnail" or "listing"
      */
     public function getImgAttributes(string $slot = 'banner'): string
     {
@@ -230,13 +223,22 @@ class Mage_Core_Model_Image_Set
     }
 
     /**
-     * The width of a fixed slot such as "100px", or the largest width for a fluid slot.
+     * The width of $slot, or the largest width for an unknown slot.
      */
     public function getDisplayWidth(string $slot): int
     {
-        return preg_match('/^\s*(\d+)px\s*$/', $this->getSizes($slot), $match)
-            ? (int) $match[1]
-            : $this->getSettings()->getWidthFor(0);
+        return $this->getSlotWidth($slot) ?? $this->getSettings()->getWidthFor(0);
+    }
+
+    /**
+     * The width in px of $slot in the theme of the store view, or null for an unknown slot.
+     */
+    public function getSlotWidth(string $slot): ?int
+    {
+        return Mage::getSingleton('core/image_config')->getSlotWidth(
+            $slot,
+            $this->storeId ?? (int) Mage::app()->getStore()->getId(),
+        );
     }
 
     /**

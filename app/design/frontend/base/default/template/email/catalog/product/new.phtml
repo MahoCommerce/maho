@@ -21,8 +21,7 @@
             <td>
                 <div class="product-wrapper">
                     <a href="<?= $_product->getProductUrl() ?>" title="<?= $this->escapeHtml($_product->getName()) ?>" class="product-image">
-                        <?php $_imgSize = 260; ?>
-                        <img <?= $this->helper('catalog/image')->init($_product, 'small_image')->getImgAttributes('email') ?>
+                        <img <?= $this->helper('catalog/image')->init($_product, 'small_image')->getImgAttributes('listing') ?>
                              alt="<?= $this->stripTags($this->getImageLabel($_product, 'small_image'), null, true) ?>">
                     </a>
                     <h3 class="product-name"><a href="<?= $_product->getProductUrl() ?>" title="<?= $this->escapeHtml($_product->getName()) ?>"><?= $this->escapeHtml($_product->getName()) ?></a></h3>

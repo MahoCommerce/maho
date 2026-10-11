@@ -19,7 +19,7 @@ $posts = $this->getPosts();
         <?php foreach ($posts->getItems() as $post): ?>
             <a href="<?= $post->getUrl() ?>" class="blog_post_item">
                 <?php if ($image = $post->getImageSet()): ?>
-                    <img <?= $image->getImgAttributes('card') ?> alt="<?= $this->escapeHtml($post->getTitle()) ?>" loading="lazy">
+                    <img <?= $image->getImgAttributes('listing') ?> alt="<?= $this->escapeHtml($post->getTitle()) ?>" loading="lazy">
                 <?php endif ?>
                 <strong><?= $this->escapeHtml($post->getTitle()) ?></strong>
                 <div class="blog_post_date"><?= $this->formatDate($post->getPublishDate() ?? $post->getCreatedAt()) ?></div>

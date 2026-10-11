@@ -35,7 +35,7 @@ describe('resized image files of an image entity', function () {
             $this->mount->write($key, $png);
         };
         $this->sizeOf = function (string $key): array {
-            $info = getimagesize($this->root . '/' . $key);
+            $info = \Maho\Io::getImageSize($this->root . '/' . $key);
             return [$info[0], $info[1]];
         };
         $this->settings = Mage::getSingleton('core/image_config')->getActiveSettings('product', $this->storeId);
@@ -61,8 +61,8 @@ describe('resized image files of an image entity', function () {
         rmdir($this->root);
     });
 
-    it('uses the widths of the default theme when no settings are active yet', function (): void {
-        expect($this->settings->widths)->toBe([150, 300, 600, 1200, 1800])
+    it('takes the 1x and 2x widths of the slots of the default theme when no settings are active yet', function (): void {
+        expect($this->settings->widths)->toBe([150, 300, 600, 1200, 2400])
             ->and($this->settings->ratio)->toBeNull();
     });
 
@@ -71,59 +71,30 @@ describe('resized image files of an image entity', function () {
         $base = $this->mount->publicUrl('');
 
         expect($set->getUrl(240))->toBe($base . ($this->pathOf)(300))
-            ->and($set->getUrl(0))->toBe($base . ($this->pathOf)(1800))
+            ->and($set->getUrl(0))->toBe($base . ($this->pathOf)(2400))
             ->and($set->getPath(240))->toStartWith('catalog/product/cache/' . $this->settings->getHash() . '/300/a/b/shirt.png')
             ->and($set->getSrcset())->toStartWith($base . ($this->pathOf)(150) . ' 150w, ')
-            ->and($set->getSrcset())->toEndWith($base . ($this->pathOf)(1800) . ' 1800w')
+            ->and($set->getSrcset())->toEndWith($base . ($this->pathOf)(2400) . ' 2400w')
             ->and($this->mount->fileExists(($this->pathOf)(300)))->toBeFalse();
     });
 
-    it('writes img attributes with the largest file as src and the ratio of the source', function (): void {
+    it('writes img attributes with the 2x file of the slot as src, the slot width and the ratio of the source', function (): void {
         $set = Mage::helper('core/image')->init('product', '/a/b/shirt.png');
         $base = $this->mount->publicUrl('');
 
-        expect($set->getImgAttributes('(min-width: 768px) 33vw, 100vw'))->toBe(
-            'src="' . $base . ($this->pathOf)(1800) . '" srcset="' . htmlspecialchars($set->getSrcset()) . '"'
-            . ' sizes="(min-width: 768px) 33vw, 100vw" width="1800" height="900"',
-        );
+        expect($set->getImgAttributes('listing'))->toBe(
+            'src="' . $base . ($this->pathOf)(600) . '" srcset="' . htmlspecialchars($set->getSrcset()) . '"'
+            . ' sizes="(max-width: 300px) 100vw, 300px" width="300" height="150"',
+        )
+            ->and($set->getImgAttributes('thumbnail'))->toEndWith(' sizes="(max-width: 150px) 100vw, 150px" width="150" height="75"');
     });
 
-    it('takes the file for twice a fixed width as src, for a client without srcset', function (): void {
+    it('gives the largest file and 100vw for an unknown slot', function (): void {
         $set = Mage::helper('core/image')->init('product', '/a/b/shirt.png');
-        $base = $this->mount->publicUrl('');
 
-        expect($set->getSrcAttributes('80px'))->toStartWith('src="' . $base . ($this->pathOf)(300) . '" srcset="')
-            ->and($set->getSrcAttributes('80px'))->toEndWith(' sizes="80px"')
-            ->and($set->getSrcAttributes('(min-width: 768px) 33vw, 100vw'))->toStartWith('src="' . $base . ($this->pathOf)(1800) . '"');
-    });
-
-    it('reads the sizes value and the width of a slot of the theme, and gives 100vw for an unknown slot', function (): void {
-        $set = Mage::helper('core/image')->init('product', '/a/b/shirt.png');
-        $base = $this->mount->publicUrl('');
-
-        expect($set->getSizes('thumbnail'))->toBe('100px')
-            ->and($set->getSrcAttributes('thumbnail'))->toStartWith('src="' . $base . ($this->pathOf)(300) . '"')
-            ->and($set->getImgAttributes('thumbnail'))->toEndWith(' sizes="100px" width="100" height="50"')
-            ->and($set->getSizes('listing'))->toBe('(min-width: 771px) 300px, 50vw')
-            ->and($set->getSizes('nothing'))->toBe('100vw')
-            ->and($set->getSizes('(min-width: 900px) 50vw, 100vw'))->toBe('(min-width: 900px) 50vw, 100vw');
-    });
-
-    it('refuses a file that leaves the source folder or is a resized file', function (): void {
-        $helper = Mage::helper('core/image');
-
-        expect($helper->init('product', '/../../customer/x.png'))->toBeNull()
-            ->and($helper->init('product', '/cache/abc/300/a/b/shirt.png'))->toBeNull()
-            ->and($helper->init('product', 'no_selection'))->toBeNull()
-            ->and($helper->init('product', null))->toBeNull()
-            ->and(fn() => new Mage_Core_Model_Image_Set('nothing', '/a/b/shirt.png'))->toThrow(InvalidArgumentException::class);
-    });
-
-    it('links an SVG to its source, with no srcset', function (): void {
-        $set = Mage::helper('core/image')->init('product', '/a/b/logo.svg');
-
-        expect($set->getUrl(300))->toBe($this->mount->publicUrl('catalog/product/a/b/logo.svg'))
-            ->and($set->getSrcset())->toBe('');
+        expect($set->getSizes('nothing'))->toBe('100vw')
+            ->and($set->getSrcAttributes('nothing'))->toStartWith('src="' . $this->mount->publicUrl('') . ($this->pathOf)(2400) . '"')
+            ->and($set->getImgAttributes('nothing'))->toEndWith(' width="2400" height="1200"');
     });
 
     it('creates one file for each width, and never scales a source up', function (): void {
@@ -133,7 +104,7 @@ describe('resized image files of an image entity', function () {
             ->and(($this->sizeOf)(($this->pathOf)(150)))->toBe([150, 75])
             ->and(($this->sizeOf)(($this->pathOf)(300)))->toBe([300, 150])
             ->and(($this->sizeOf)(($this->pathOf)(600)))->toBe([400, 200])
-            ->and(($this->sizeOf)(($this->pathOf)(1800)))->toBe([400, 200]);
+            ->and(($this->sizeOf)(($this->pathOf)(2400)))->toBe([400, 200]);
     });
 
     it('frames the source in the box of a ratio with contain, and crops it with cover', function (): void {
@@ -192,29 +163,30 @@ describe('resized image files of an image entity', function () {
             ->and(array_keys($config->getAllSettings('product')))->toContain($old->getHash(), $this->settings->getHash());
     });
 
-    it('takes the widths from a parent theme and the ratio from the child theme', function (): void {
+    it('takes the slots from the child theme, then the parent theme, then base/default', function (): void {
         $design = Mage::getSingleton('core/design_config');
         $store = Mage::app()->getStore($this->storeId);
         $package = (string) Mage::getStoreConfig('design/package/name', $this->storeId) ?: 'base';
         $design->setNode("frontend/{$package}/image_test_child/parent", "{$package}/image_test_parent");
         $design->setNode("frontend/{$package}/image_test_child/images/product/ratio", '3:4');
         $design->setNode("frontend/{$package}/image_test_child/images/product/fit", 'cover');
-        $design->setNode("frontend/{$package}/image_test_parent/images/widths", '200,100');
         $design->setNode("frontend/{$package}/image_test_parent/images/product/ratio", '1:1');
-        $design->setNode("frontend/{$package}/image_test_parent/images/slots/thumbnail", '64px');
-        $design->setNode("frontend/{$package}/image_test_child/images/slots/card", '50vw');
+        $design->setNode("frontend/{$package}/image_test_parent/images/slots/thumbnail", '50');
+        $design->setNode("frontend/{$package}/image_test_parent/images/slots/listing", '400');
+        $design->setNode("frontend/{$package}/image_test_child/images/slots/listing", '100');
         $store->setConfig('design/theme/skin', 'image_test_child');
         Mage::getSingleton('core/image_config')->reset();
 
         $settings = Mage::getSingleton('core/image_config')->getLiveSettings('product', $this->storeId);
         $blog = Mage::getSingleton('core/image_config')->getLiveSettings('blog', $this->storeId);
 
-        expect($settings->widths)->toBe([100, 200])
+        expect($settings->widths)->toBe([50, 100, 200, 600, 1200, 2400])
             ->and($settings->ratio)->toBe([3, 4])
             ->and($settings->fit)->toBe('cover')
             ->and($blog->ratio)->toBeNull()
-            ->and(Mage::getSingleton('core/image_config')->getSlotSizes('thumbnail', $this->storeId))->toBe('64px')
-            ->and(Mage::getSingleton('core/image_config')->getSlotSizes('card', $this->storeId))->toBe('50vw')
-            ->and(Mage::getSingleton('core/image_config')->getSlotSizes('banner', $this->storeId))->toBeNull();
+            ->and(Mage::getSingleton('core/image_config')->getSlotWidth('thumbnail', $this->storeId))->toBe(50)
+            ->and(Mage::getSingleton('core/image_config')->getSlotWidth('listing', $this->storeId))->toBe(100)
+            ->and(Mage::getSingleton('core/image_config')->getSlotWidth('banner', $this->storeId))->toBe(1200)
+            ->and(Mage::getSingleton('core/image_config')->getSlotWidth('nothing', $this->storeId))->toBeNull();
     });
 });

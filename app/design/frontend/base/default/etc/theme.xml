@@ -12,15 +12,13 @@ SPDX-License-Identifier: AFL-3.0
          the sizes value of each place where images show, so the browser can pick the width;
          a template names the slot. A child theme inherits each value that it does not set. -->
     <images>
-        <widths>150,300,600,1200,1800</widths>
+        <!-- Each slot is the largest width in px of the images in one place of the layout. Each image
+             gets a file at 1x and 2x of each slot, so slots that double each other share files. -->
         <slots>
-            <thumbnail>100px</thumbnail>
-            <small>180px</small>
-            <listing>(min-width: 771px) 300px, 50vw</listing>
-            <gallery>(min-width: 771px) 55vw, 100vw</gallery>
-            <card>(min-width: 768px) 33vw, 100vw</card>
-            <banner>(min-width: 1280px) 1200px, 100vw</banner>
-            <email>300px</email>
+            <thumbnail>150</thumbnail>
+            <listing>300</listing>
+            <gallery>600</gallery>
+            <banner>1200</banner>
         </slots>
         <product>
             <ratio>original</ratio>
