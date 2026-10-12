@@ -1771,6 +1771,9 @@ it('offers every closed list as strings and every array with its items, as Gemin
             if (($schema['type'] ?? null) === 'array') {
                 expect($schema['items'] ?? null)->toBeArray("An array without items at $path");
             }
+            if (isset($schema['enum'])) {
+                expect($schema['type'] ?? null)->toBe('string', "An enum on a type other than string at $path");
+            }
             foreach ($schema['enum'] ?? [] as $value) {
                 expect($value)->toBeString("A value that is not a string in the enum at $path");
             }
@@ -1785,6 +1788,34 @@ it('offers every closed list as strings and every array with its items, as Gemin
             $check($schema, $name);
         }
     } finally {
+        aiChatDeleteConversations((int) $admin->getId());
+        aiChatDeleteAdmin($admin);
+    }
+});
+
+it('turns the string that the model picks from an integer enum back into the integer', function (): void {
+    $admin = aiChatAdmin('ai_chat_enum_value', ['all']);
+    $taxClassId = (string) Mage::getModel('tax/class_source_customer')->getAllOptions()[0]['value'];
+    try {
+        aiChatLogin($admin);
+        AiChatScript::reset(
+            new ToolCallResult([new ToolCall('call_g1', 'customers_customer_groups_create', ['code' => 'ai_chat_enum_value', 'taxClassId' => $taxClassId])]),
+        );
+        $first = aiChatRequest('/api/admin/ai/chat', ['message' => 'Create a customer group', 'context' => ['route' => 'customer_group/index']]);
+        expect(AiChatScript::$offeredSchemas[0]['customers_customer_groups_create']['properties']['taxClassId']['enum'] ?? null)->toContain($taxClassId);
+        $conversationId = (int) aiChatEvents($first['events'], 'confirm')[0]['conversation_id'];
+
+        AiChatScript::reset(new TextResult('Created.'));
+        $approved = aiChatRequest('/api/admin/ai/chat/confirm', ['conversation_id' => $conversationId, 'decisions' => ['call_g1' => true]]);
+
+        expect(aiChatEvents($approved['events'], 'tool_result')[0]['ok'])->toBeTrue($approved['raw']);
+        $group = Mage::getModel('customer/group')->load('ai_chat_enum_value', 'customer_group_code');
+        expect((int) $group->getTaxClassId())->toBe((int) $taxClassId);
+    } finally {
+        $created = Mage::getModel('customer/group')->load('ai_chat_enum_value', 'customer_group_code');
+        if ($created->getId()) {
+            $created->delete();
+        }
         aiChatDeleteConversations((int) $admin->getId());
         aiChatDeleteAdmin($admin);
     }
