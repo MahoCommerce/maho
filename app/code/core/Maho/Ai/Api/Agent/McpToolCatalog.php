@@ -78,7 +78,7 @@ final class McpToolCatalog
                 new ExecutionReference(McpToolbox::class, 'execute'),
                 $this->alias($name),
                 $this->describe($mcp),
-                $this->parameters($mcp),
+                self::stringEnums($this->parameters($mcp)),
                 [
                     'mcp_name' => $name,
                     'title' => (string) ($mcp->getTitle() ?? $name),
@@ -463,6 +463,38 @@ final class McpToolCatalog
             ['<', '>', '&', '"', "'", '/'],
             $value,
         );
+    }
+
+    /**
+     * Give each enum that holds a value other than a string the type string and string values.
+     * Gemini refuses a number in an enum. coerce() reads the schema of parameters(), so it
+     * changes the value that the model sends back into the type of the property.
+     *
+     * @param array<string, mixed> $schema
+     * @return array<string, mixed>
+     */
+    private static function stringEnums(array $schema): array
+    {
+        $enum = is_array($schema['enum'] ?? null) ? $schema['enum'] : [];
+        if (array_any($enum, static fn(mixed $value): bool => !is_string($value))) {
+            $values = array_map(
+                static fn(mixed $value): string => is_bool($value) ? ($value ? 'true' : 'false') : (string) $value,
+                array_filter($enum, is_scalar(...)),
+            );
+            $schema['type'] = 'string';
+            $schema['enum'] = array_values(array_unique($values));
+        }
+        if (is_array($schema['properties'] ?? null)) {
+            $schema['properties'] = array_map(
+                static fn(mixed $property): mixed => is_array($property) ? self::stringEnums($property) : $property,
+                $schema['properties'],
+            );
+        }
+        if (is_array($schema['items'] ?? null)) {
+            $schema['items'] = self::stringEnums($schema['items']);
+        }
+
+        return $schema;
     }
 
     /** @param array<string, mixed> $property */

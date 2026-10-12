@@ -1743,3 +1743,40 @@ it('hands the opening of a grid row to the browser by its number', function (): 
         aiChatDeleteAdmin($admin);
     }
 });
+
+it('offers every closed list as strings, since Gemini refuses a number in an enum', function (): void {
+    $admin = aiChatAdmin('ai_chat_enum', ['all']);
+    try {
+        aiChatLogin($admin);
+        AiChatScript::reset(
+            new ToolCallResult([new ToolCall('call_e0', 'enable_tools', ['sections' => ['sales']])]),
+            new TextResult('The sales tools are loaded.'),
+        );
+
+        $result = aiChatRequest('/api/admin/ai/chat', ['message' => 'Create a cart price rule', 'context' => ['route' => 'promo_quote/index']]);
+
+        expect($result['status'])->toBe(200);
+        $schemas = AiChatScript::$offeredSchemas[1];
+        $rule = $schemas['sales_cart_price_rules_create']['properties'] ?? [];
+        expect($rule['websiteIds']['items'])->toMatchArray(['type' => 'string']);
+        expect($rule['websiteIds']['items']['enum'])->toContain((string) Mage::app()->getDefaultStoreView()->getWebsiteId());
+        expect($rule['simpleFreeShipping'])->toMatchArray(['type' => 'string', 'enum' => ['0', '1', '2']]);
+        $check = function (array $schema, string $path) use (&$check): void {
+            foreach ($schema['enum'] ?? [] as $value) {
+                expect($value)->toBeString("A value that is not a string in the enum at $path");
+            }
+            foreach ($schema['properties'] ?? [] as $name => $child) {
+                $check($child, "$path.$name");
+            }
+            if (is_array($schema['items'] ?? null)) {
+                $check($schema['items'], "$path.items");
+            }
+        };
+        foreach ($schemas as $name => $schema) {
+            $check($schema, $name);
+        }
+    } finally {
+        aiChatDeleteConversations((int) $admin->getId());
+        aiChatDeleteAdmin($admin);
+    }
+});
