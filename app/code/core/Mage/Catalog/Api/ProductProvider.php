@@ -820,8 +820,8 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         if ($stockData) {
             // Full column set on purpose: this feeds the cache, and
             // ProductStockItemNormalizer drops the policy columns per request.
-            $dto->stockItem = [];
-            $columns = ['qty' => 'float', 'is_in_stock' => 'bool', 'manage_stock' => 'bool'] + self::STOCK_ITEM_EXTENDED_COLUMNS;
+            $dto->stockItem = ['qty' => $dto->stockQty];
+            $columns = ['is_in_stock' => 'bool', 'manage_stock' => 'bool'] + self::STOCK_ITEM_EXTENDED_COLUMNS;
             foreach ($columns as $column => $type) {
                 $dto->stockItem[$column] = $this->castStockColumnValue($stockData->getData($column), $type);
             }

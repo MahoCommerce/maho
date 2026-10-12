@@ -124,15 +124,8 @@ class Mage_CatalogInventory_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Check if the storefront shows this stock quantity: it is above 0 and at or below the "Only X Left" threshold.
-     */
-    public function isQtyVisible(float $qty): bool
-    {
-        return $qty > 0 && $qty <= Mage::getStoreConfigAsFloat(self::XML_PATH_STOCK_THRESHOLD_QTY);
-    }
-
-    /**
      * Quantity of the stock item that the storefront shows, or null when the storefront hides it.
+     * The storefront shows a quantity above 0 and at or below the "Only X Left" threshold.
      */
     public function getVisibleQty(Mage_CatalogInventory_Model_Stock_Item $stockItem): ?float
     {
@@ -140,6 +133,6 @@ class Mage_CatalogInventory_Helper_Data extends Mage_Core_Helper_Abstract
             return null;
         }
         $qty = (float) $stockItem->getQty();
-        return $this->isQtyVisible($qty) ? $qty : null;
+        return $qty > 0 && $qty <= Mage::getStoreConfigAsFloat(self::XML_PATH_STOCK_THRESHOLD_QTY) ? $qty : null;
     }
 }
