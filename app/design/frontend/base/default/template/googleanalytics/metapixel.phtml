@@ -9,7 +9,6 @@
 $_helper = $this->helper('googleanalytics');
 ?>
 <?php if (!$this->helper('core/cookie')->isUserNotAllowSaveCookie()): ?>
-    <!-- BEGIN META PIXEL CODE -->
     <script>
         !function(f,b,e,v,n,t,s)
         {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -26,5 +25,4 @@ $_helper = $this->helper('googleanalytics');
     <script>
         <?= $this->_getEnhancedEcommerceData() ?>
     </script>
-    <!-- END META PIXEL CODE -->
 <?php endif ?>
