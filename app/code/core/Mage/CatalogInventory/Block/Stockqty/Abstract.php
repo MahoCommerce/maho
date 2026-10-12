@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -11,7 +12,7 @@ declare(strict_types=1);
 
 abstract class Mage_CatalogInventory_Block_Stockqty_Abstract extends Mage_Core_Block_Template
 {
-    public const XML_PATH_STOCK_THRESHOLD_QTY = 'cataloginventory/options/stock_threshold_qty';
+    public const XML_PATH_STOCK_THRESHOLD_QTY = Mage_CatalogInventory_Helper_Data::XML_PATH_STOCK_THRESHOLD_QTY;
 
     /**
      * Retrieve current product object
