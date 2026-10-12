@@ -11,7 +11,7 @@ declare(strict_types=1);
 
 abstract class Mage_CatalogInventory_Block_Stockqty_Abstract extends Mage_Core_Block_Template
 {
-    public const XML_PATH_STOCK_THRESHOLD_QTY = 'cataloginventory/options/stock_threshold_qty';
+    public const XML_PATH_STOCK_THRESHOLD_QTY = Mage_CatalogInventory_Helper_Data::XML_PATH_STOCK_THRESHOLD_QTY;
 
     /**
      * Retrieve current product object
@@ -71,6 +71,6 @@ abstract class Mage_CatalogInventory_Block_Stockqty_Abstract extends Mage_Core_B
      */
     public function isMsgVisible()
     {
-        return ($this->getStockQty() > 0 && $this->getStockQty() <= $this->getThresholdQty());
+        return Mage::helper('cataloginventory')->isQtyVisible((float) $this->getStockQty());
     }
 }

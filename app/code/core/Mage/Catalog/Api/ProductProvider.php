@@ -81,6 +81,18 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         return $this->backendProductsAccess ??= $this->hasBackendAccess('products');
     }
 
+    /**
+     * Exact quantity for backend readers. Other callers get only the quantity
+     * that the product page shows, so a scraper cannot read the stock of the catalog.
+     */
+    private function stockQtyFor(\Mage_CatalogInventory_Model_Stock_Item $stockItem): ?float
+    {
+        if ($this->backendProductsAccess()) {
+            return (float) $stockItem->getQty();
+        }
+        return \Mage::helper('cataloginventory')->getVisibleQty($stockItem);
+    }
+
     private bool $displayRateResolved = false;
     private ?float $displayRate = null;
 
@@ -757,7 +769,8 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
      *
      * Builds the unfiltered DTO, backend fields included: this is what the
      * response cache stores. Serialization drops them per request, so the cached
-     * payload can stay the same for every caller.
+     * payload can stay the same for every caller. The stock quantities are the
+     * exception: stockQtyFor() masks them here, since only public reads use the cache.
      */
     private function enrichProduct(
         Product $dto,
@@ -769,7 +782,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
     ): void {
         $stockData = $stockItem ?? $product->getStockItem();
         if ($stockData) {
-            $dto->stockQty = (float) $stockData->getQty();
+            $dto->stockQty = $this->stockQtyFor($stockData);
             $dto->stockStatus = $stockData->getIsInStock() ? 'in_stock' : 'out_of_stock';
         }
 
@@ -886,7 +899,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
                     'sku' => $child->getSku(),
                     'price' => (float) $child->getPrice(),
                     'finalPrice' => (float) $child->getFinalPrice(),
-                    'stockQty' => $si ? (float) $si->getQty() : 0,
+                    'stockQty' => $si ? $this->stockQtyFor($si) : 0,
                     'inStock' => $si ? (bool) $si->getIsInStock() : false,
                     'attributes' => $attrs,
                 ];
@@ -964,7 +977,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
                         'finalPrice' => (float) $child->getFinalPrice(),
                         'imageUrl' => $imgUrl,
                         'inStock' => $si ? (bool) $si->getIsInStock() : false,
-                        'stockQty' => $si ? (float) $si->getQty() : 0,
+                        'stockQty' => $si ? $this->stockQtyFor($si) : 0,
                         'defaultQty' => (float) ($child->getQty() ?: 0),
                         'position' => (int) ($child->getPosition() ?: 0),
                     ];
