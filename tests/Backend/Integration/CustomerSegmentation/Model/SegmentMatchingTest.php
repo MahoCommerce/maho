@@ -843,6 +843,7 @@ describe('Segment Matching Integration', function () {
                 $order->setBaseGrandTotal($orderData[$orderIndex]['grand_total']);
                 $order->setData('state', orderStateForStatus($orderData[$orderIndex]['status']));
                 $order->setStatus($orderData[$orderIndex]['status']);
+                $order->setStoreId(1);
                 $order->save();
 
                 $orderIndex++;
