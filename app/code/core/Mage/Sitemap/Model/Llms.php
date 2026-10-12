@@ -402,7 +402,7 @@ class Mage_Sitemap_Model_Llms
     {
         $skip = [Mage_Cms_Model_Page::NOROUTE_PAGE_ID];
         foreach (['web/default/cms_home_page', 'web/default/cms_no_route', 'web/default/cms_no_cookies'] as $path) {
-            $identifier = trim((string) Mage::getStoreConfig($path, $store->getId()));
+            $identifier = trim(Mage::helper('cms/page')->getConfigPageIdentifier($path, $store));
             if ($identifier !== '') {
                 $skip[] = $identifier;
             }
