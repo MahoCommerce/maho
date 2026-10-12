@@ -40,6 +40,8 @@ final class AdminPageTool
     public const ACTION_NAME = 'admin_page_action';
     public const NAMES = [self::NAME, self::FILL_NAME, self::ACTION_NAME];
     public const ACTIONS = ['click', 'open_tab', 'set_field', 'open_row'];
+    /** Enough for a comment form: the text, two checkboxes and the submit button. */
+    public const MAX_STEPS = 5;
 
     public static function title(string $name): string
     {
@@ -60,7 +62,7 @@ final class AdminPageTool
         return ToolDefinition::create(
             new ExecutionReference(self::class, 'act'),
             self::ACTION_NAME,
-            'Act on the admin page the administrator has open, after you answer: open a tab by its name, set a form field by its label or name, click a button by its label (for example "Save Page" when the administrator says "save"), or open a grid row by its number in the row list (target "3" for "the third one"). Use the buttons, tabs, fields and rows listed under what the administrator sees; never guess a label. Up to three steps in order, and a click or an open_row must be the last step because the page may reload. The next message shows you the result.',
+            'Act on the admin page the administrator has open, after you answer: open a tab by its name, set a form field by its label or name, click a button by its label (for example "Save Page" when the administrator says "save"), or open a grid row by its number in the row list (target "3" for "the third one"). Use the buttons, tabs, fields and rows listed under what the administrator sees; never guess a label. Up to ' . self::MAX_STEPS . ' steps in order, in one call, and a click or an open_row must be the last step because the page may reload. The next message shows you the result.',
             [
                 'type' => 'object',
                 'properties' => [
@@ -68,7 +70,7 @@ final class AdminPageTool
                         'type' => 'array',
                         'description' => 'The steps, in order. Example: set the Comment field, then click Submit Comment.',
                         'minItems' => 1,
-                        'maxItems' => 3,
+                        'maxItems' => self::MAX_STEPS,
                         'items' => [
                             'type' => 'object',
                             'properties' => [
@@ -94,8 +96,8 @@ final class AdminPageTool
     public function act(array $arguments): array
     {
         $raw = $arguments['steps'] ?? null;
-        if (!is_array($raw) || $raw === [] || count($raw) > 3) {
-            return ['ok' => false, 'text' => 'Pass one to three steps, each with an action (' . implode(', ', self::ACTIONS) . ') and a target.'];
+        if (!is_array($raw) || $raw === [] || count($raw) > self::MAX_STEPS) {
+            return ['ok' => false, 'text' => 'Pass one to ' . self::MAX_STEPS . ' steps, each with an action (' . implode(', ', self::ACTIONS) . ') and a target.'];
         }
         $steps = [];
         foreach (array_values($raw) as $i => $step) {

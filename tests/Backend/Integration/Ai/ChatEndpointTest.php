@@ -1607,6 +1607,52 @@ it('hands a page action to the browser', function (): void {
     }
 });
 
+it('fills a comment form and submits it in one page action', function (): void {
+    $admin = aiChatAdmin('ai_chat_comment', ['all']);
+    try {
+        aiChatLogin($admin);
+        $steps = [
+            ['action' => 'set_field', 'target' => 'Comment Text', 'value' => 'ciao come stai'],
+            ['action' => 'set_field', 'target' => 'Notify Customer by Email', 'value' => 'true'],
+            ['action' => 'set_field', 'target' => 'Visible on Frontend', 'value' => 'true'],
+            ['action' => 'click', 'target' => 'Submit Comment', 'value' => null],
+        ];
+        AiChatScript::reset(new ToolCallResult([new ToolCall('call_c1', 'admin_page_action', ['steps' => $steps])]), new TextResult('Adding the comment.'));
+
+        $result = aiChatRequest('/api/admin/ai/chat', ['message' => 'add a comment to this invoice', 'context' => ['route' => 'sales_order_invoice/view']]);
+
+        expect(aiChatEvents($result['events'], 'tool_result')[0]['ok'])->toBeTrue($result['raw']);
+        expect(aiChatEvents($result['events'], 'page_action')[0]['steps'])->toBe($steps);
+    } finally {
+        aiChatDeleteConversations((int) $admin->getId());
+        aiChatDeleteAdmin($admin);
+    }
+});
+
+it('tells the model that the administrator opened another page since the last message', function (): void {
+    $admin = aiChatAdmin('ai_chat_moved', ['all']);
+    try {
+        aiChatLogin($admin);
+        AiChatScript::reset(new TextResult('Done.'));
+        $first = aiChatRequest('/api/admin/ai/chat', ['message' => 'add a comment to this order', 'context' => ['route' => 'sales_order/view', 'entity_type' => 'order', 'entity_id' => 302]]);
+        $conversationId = (int) aiChatEvents($first['events'], 'done')[0]['conversation_id'];
+        expect((string) AiChatScript::$lastInput->getSystemMessage()?->getContent())->not->toContain('The last message came from');
+
+        AiChatScript::reset(new TextResult('Done.'));
+        aiChatRequest('/api/admin/ai/chat', ['message' => 'add a comment to this invoice', 'conversation_id' => $conversationId, 'context' => ['route' => 'sales_order_invoice/view', 'entity_type' => 'invoice', 'entity_id' => 274]]);
+        expect((string) AiChatScript::$lastInput->getSystemMessage()?->getContent())->toContain('The last message came from the admin page "sales_order/view", which shows order with ID 302.');
+        $conversation = Mage::getModel('ai/conversation')->load($conversationId);
+        expect([$conversation->getContextRoute(), $conversation->getContextEntityType(), $conversation->getContextEntityId()])->toBe(['sales_order_invoice/view', 'invoice', 274]);
+
+        AiChatScript::reset(new TextResult('Done.'));
+        aiChatRequest('/api/admin/ai/chat', ['message' => 'thanks', 'conversation_id' => $conversationId, 'context' => ['route' => 'sales_order_invoice/view', 'entity_type' => 'invoice', 'entity_id' => 274]]);
+        expect((string) AiChatScript::$lastInput->getSystemMessage()?->getContent())->not->toContain('The last message came from');
+    } finally {
+        aiChatDeleteConversations((int) $admin->getId());
+        aiChatDeleteAdmin($admin);
+    }
+});
+
 it('reads the text of the open form and hands the text corrections to the browser', function (): void {
     $admin = aiChatAdmin('ai_chat_form', ['all']);
     $form = [

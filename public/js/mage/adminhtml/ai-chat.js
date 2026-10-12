@@ -636,7 +636,8 @@ class MahoAiAssistant {
                 state.navigateTo = data.url ? { url: data.url, fields: data.fields ?? null } : null;
                 break;
             case 'page_action':
-                state.pageAction = data.steps ?? null;
+                // The model can split one task over several calls: each call adds its steps.
+                state.pageAction = [...(state.pageAction ?? []), ...(data.steps ?? [])];
                 break;
             case 'text_edits':
                 state.textEdits.push(...(data.edits ?? []));
@@ -759,7 +760,10 @@ class MahoAiAssistant {
             let value;
             if (element.tagName === 'SELECT') {
                 value = [...element.selectedOptions].map((o) => text(o)).join(', ');
-            } else if (element.type === 'checkbox' || element.type === 'radio') {
+            } else if (element.type === 'checkbox') {
+                // An unchecked box is listed too: the model needs its label to check it.
+                value = element.checked ? 'checked' : 'not checked';
+            } else if (element.type === 'radio') {
                 if (!element.checked) {
                     continue;
                 }

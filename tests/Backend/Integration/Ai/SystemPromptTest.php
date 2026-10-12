@@ -45,6 +45,19 @@ it('names the record the admin page shows', function (): void {
     expect($prompt)->toContain('store view "default"');
 });
 
+it('names the page of the last message when the administrator opened another page since', function (): void {
+    $prompt = new Maho_Ai_Model_Chat_SystemPrompt()->build(aiPromptAdmin(), [
+        'route' => 'sales_order_invoice/view',
+        'entity_type' => 'invoice',
+        'entity_id' => 274,
+        'previous_page' => ['route' => 'sales_order/view', 'entity_type' => 'order', 'entity_id' => 302],
+    ]);
+
+    expect($prompt)->toContain('The last message came from the admin page "sales_order/view", which shows order with ID 302.');
+    expect($prompt)->toContain('A different page now does not make an earlier answer wrong.');
+    expect(new Maho_Ai_Model_Chat_SystemPrompt()->build(aiPromptAdmin(), ['route' => 'sales_order_invoice/view']))->not->toContain('The last message came from');
+});
+
 it('leaves the page section out when no route is known', function (): void {
     $prompt = new Maho_Ai_Model_Chat_SystemPrompt()->build(aiPromptAdmin(), ['entity_type' => 'product', 'entity_id' => 1]);
 
