@@ -133,8 +133,17 @@ class Mage_Cms_Helper_Page extends Mage_Core_Helper_Abstract
      */
     public function isHomePage(Mage_Cms_Model_Page $page): bool
     {
-        $identifier = strtok((string) Mage::getStoreConfig(self::XML_PATH_HOME_PAGE), '|');
-        return $identifier !== false && $page->getIdentifier() === $identifier;
+        $identifier = $this->getConfigPageIdentifier(self::XML_PATH_HOME_PAGE);
+        return $identifier !== '' && $page->getIdentifier() === $identifier;
+    }
+
+    /**
+     * Return the page identifier that the setting at $path holds, without the "|page_id" part.
+     * The admin saves "identifier|page_id" when two pages share the identifier.
+     */
+    public function getConfigPageIdentifier(string $path, Mage_Core_Model_Store|int|null $store = null): string
+    {
+        return explode('|', (string) Mage::getStoreConfig($path, $store))[0];
     }
 
     /**
