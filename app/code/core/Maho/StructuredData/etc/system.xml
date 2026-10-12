@@ -117,7 +117,7 @@ SPDX-License-Identifier: AFL-3.0
                         </shipping_heading>
                         <shipping_rate translate="label comment">
                             <label>Shipping Rate</label>
-                            <comment>Flat shipping rate in base currency for the schema.org shippingDetails node. Leave empty to derive the rate from the active Flat Rate and Free Shipping carriers. Destination countries come from the carrier and store shipping country settings.</comment>
+                            <comment>Flat shipping rate in base currency for the schema.org shippingDetails node. Leave empty to derive the rate from the carriers below. Destination countries come from the store shipping country settings.</comment>
                             <config_path>catalog/structured_data/shipping/rate</config_path>
                             <validate>validate-number validate-zero-or-greater</validate>
                             <sort_order>310</sort_order>
@@ -126,6 +126,19 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_store>1</show_in_store>
                             <depends><enabled>1</enabled></depends>
                         </shipping_rate>
+                        <shipping_carriers translate="label comment">
+                            <label>Derive Rate From Carriers</label>
+                            <comment>Carriers that give the rate when Shipping Rate is empty. Each destination country gets the lowest rate for one unit of the product. Select none to use Free Shipping, Flat Rate and Table Rates. A carrier that calls an outside service slows down each product page.</comment>
+                            <config_path>catalog/structured_data/shipping/carriers</config_path>
+                            <frontend_type>multiselect</frontend_type>
+                            <source_model>structureddata/system_config_source_shipping_carrier</source_model>
+                            <can_be_empty>1</can_be_empty>
+                            <sort_order>320</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </shipping_carriers>
                         <shipping_handling_min translate="label comment">
                             <label>Handling Time Minimum (days)</label>
                             <comment>Days between order and shipment. Both minimum and maximum are needed to emit handlingTime.</comment>

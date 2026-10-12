@@ -84,9 +84,14 @@ function sdConfigureShipping(array $values = []): void
         'carriers/freeshipping/active' => '0',
         'carriers/freeshipping/free_shipping_subtotal' => '',
         'carriers/freeshipping/sallowspecific' => '0',
+        'carriers/tablerate/active' => '0',
+        'carriers/tablerate/condition_name' => 'package_weight',
+        'carriers/tablerate/handling_fee' => '',
+        'carriers/tablerate/sallowspecific' => '0',
         'shipping/origin/country_id' => 'US',
         'general/country/allow_shipping' => 'US',
         Maho_StructuredData_Helper_Data::XML_PATH_SHIPPING_RATE => '',
+        'catalog/structured_data/shipping/carriers' => '',
         Maho_StructuredData_Helper_Data::XML_PATH_SHIPPING_HANDLING_MIN => '',
         Maho_StructuredData_Helper_Data::XML_PATH_SHIPPING_HANDLING_MAX => '',
         Maho_StructuredData_Helper_Data::XML_PATH_SHIPPING_TRANSIT_MIN => '',
@@ -95,6 +100,44 @@ function sdConfigureShipping(array $values = []): void
     foreach ([...$defaults, ...$values] as $path => $value) {
         $store->setConfig($path, $value);
     }
+}
+
+/**
+ * Insert package_weight table rate rows for the website of the current store.
+ *
+ * @param array<int, array{0: string, 1: float, 2: float}> $rows country, minimum weight and price of each row
+ * @return array<int, int> the pk of each row
+ */
+function sdInsertTableRates(array $rows): array
+{
+    $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
+    $table = Mage::getSingleton('core/resource')->getTableName('shipping/tablerate');
+    $pks = [];
+    foreach ($rows as [$country, $weight, $price]) {
+        $adapter->insert($table, [
+            'website_id' => (int) Mage::app()->getStore()->getWebsiteId(),
+            'dest_country_id' => $country,
+            'dest_region_id' => 0,
+            'dest_zip' => '*',
+            'condition_name' => 'package_weight',
+            'condition_value' => $weight,
+            'price' => $price,
+            'cost' => 0,
+        ]);
+        $pks[] = (int) $adapter->lastInsertId($table);
+    }
+    return $pks;
+}
+
+/**
+ * @param array<int, int> $pks
+ */
+function sdDeleteTableRates(array $pks): void
+{
+    Mage::getSingleton('core/resource')->getConnection('core_write')->delete(
+        Mage::getSingleton('core/resource')->getTableName('shipping/tablerate'),
+        ['pk IN (?)' => $pks],
+    );
 }
 
 beforeEach(function () {
@@ -540,6 +583,78 @@ describe('offer completeness', function () {
         ]);
 
         expect(sdRenderProductJsonLd($product)['offers']['shippingDetails']['shippingRate']['value'])->toBe('0.00');
+    });
+
+    test('table rates give the rate for the product weight, with one node for each rate', function () {
+        $product = sdLoadProduct('simple');
+        if (!$product) {
+            $this->markTestSkipped('No simple product in catalog.');
+        }
+        $product->setWeight(2.0);
+        sdConfigureShipping([
+            'carriers/flatrate/active' => '0',
+            'carriers/tablerate/active' => '1',
+            'general/country/allow_shipping' => 'US,CA,DE',
+            Maho_StructuredData_Helper_Data::XML_PATH_SHIPPING_HANDLING_MIN => '1',
+            Maho_StructuredData_Helper_Data::XML_PATH_SHIPPING_HANDLING_MAX => '2',
+        ]);
+        $pks = sdInsertTableRates([
+            ['US', 0.0, 4.0],
+            ['US', 1.5, 8.0],
+            ['CA', 0.0, 8.0],
+            ['DE', 0.0, 12.0],
+        ]);
+
+        try {
+            $details = sdRenderProductJsonLd($product)['offers']['shippingDetails'];
+        } finally {
+            sdDeleteTableRates($pks);
+        }
+
+        expect($details)->toHaveCount(2);
+        expect($details[0]['@type'])->toBe('OfferShippingDetails');
+        expect($details[0]['shippingRate']['value'])->toBe('8.00');
+        expect($details[0]['shippingDestination']['addressCountry'])->toBe(['US', 'CA']);
+        expect($details[1]['shippingRate']['value'])->toBe('12.00');
+        expect($details[1]['shippingDestination']['addressCountry'])->toBe('DE');
+        expect($details[0]['deliveryTime']['handlingTime']['maxValue'])->toBe(2);
+        expect($details[1]['deliveryTime']['handlingTime']['maxValue'])->toBe(2);
+    });
+
+    test('a country without a table rate gets no shipping node', function () {
+        $product = sdLoadProduct('simple');
+        if (!$product) {
+            $this->markTestSkipped('No simple product in catalog.');
+        }
+        sdConfigureShipping([
+            'carriers/flatrate/active' => '0',
+            'carriers/tablerate/active' => '1',
+            'general/country/allow_shipping' => 'US,DE',
+        ]);
+        $pks = sdInsertTableRates([['DE', 0.0, 12.0]]);
+
+        try {
+            $details = sdRenderProductJsonLd($product)['offers']['shippingDetails'];
+        } finally {
+            sdDeleteTableRates($pks);
+        }
+
+        expect($details['shippingRate']['value'])->toBe('12.00');
+        expect($details['shippingDestination']['addressCountry'])->toBe('DE');
+    });
+
+    test('the selected carriers replace the automatic carrier list', function () {
+        $product = sdLoadProduct('simple');
+        if (!$product) {
+            $this->markTestSkipped('No simple product in catalog.');
+        }
+        sdConfigureShipping([
+            'carriers/freeshipping/active' => '1',
+            'carriers/freeshipping/free_shipping_subtotal' => '0.01',
+            'catalog/structured_data/shipping/carriers' => 'flatrate',
+        ]);
+
+        expect(sdRenderProductJsonLd($product)['offers']['shippingDetails']['shippingRate']['value'])->toBe('5.00');
     });
 
     test('no shippingDetails is emitted when no rate is derivable', function () {
