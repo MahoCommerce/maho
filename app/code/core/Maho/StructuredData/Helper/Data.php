@@ -399,19 +399,24 @@ class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
     protected function _collectCarrierRates(Mage_Catalog_Model_Product $product): array
     {
         $store = Mage::app()->getStore($product->getStoreId());
+        $price = (float) $product->getFinalPrice();
+        $weight = (float) $product->getWeight();
         $carriers = array_filter(
             $this->getShippingCarriers($store),
             static fn(string $carrier): bool => Mage::getStoreConfigFlag("carriers/{$carrier}/active", $store),
         );
+        // A grouped product or a dynamic bundle has no weight, and Table Rates would give the rate of 0 kg.
+        if ($weight <= 0 && $product->isComposite()) {
+            $carriers = array_intersect($carriers, ['freeshipping', 'flatrate']);
+        }
 
         $countries = [];
         foreach ($carriers as $carrier) {
             $countries = [...$countries, ...$this->_getCarrierShippingCountries($carrier, $store)];
         }
 
-        $price = (float) $product->getFinalPrice();
-        $weight = (float) $product->getWeight();
         $request = Mage::getModel('shipping/rate_request')
+            ->setLimitCarrier(array_values($carriers))
             ->setAllItems([])
             ->setStoreId((int) $store->getId())
             ->setWebsiteId((int) $store->getWebsiteId())
@@ -429,10 +434,7 @@ class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
         $rates = [];
         foreach (array_unique($countries) as $country) {
             $shipping->resetResult();
-            foreach ($carriers as $carrier) {
-                // A carrier can change the request, for example the table rate condition name.
-                $shipping->collectCarrierRates($carrier, (clone $request)->setDestCountryId($country));
-            }
+            $shipping->collectRates((clone $request)->setDestCountryId($country));
             $cheapest = $shipping->getResult()->getCheapestRate();
             if ($cheapest !== null) {
                 $rates[$country] = max(0.0, (float) $cheapest->getPrice());
