@@ -455,14 +455,10 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
         return $value !== null ? (float) $value : null;
     }
 
-    /**
-     * Get discount step with proper float casting
-     * DBAL returns DECIMAL as string, so we cast to float
-     */
-    public function getDiscountStep(): ?float
+    public function getDiscountStep(): ?int
     {
         $value = $this->getData('discount_step');
-        return $value !== null ? (float) $value : null;
+        return $value === null ? null : (int) $value;
     }
 
     /**
@@ -517,6 +513,11 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
     public function setDescription(?string $value): static
     {
         return $this->setData('description', $value);
+    }
+
+    public function setDiscountAmount(?float $value): static
+    {
+        return $this->setData('discount_amount', $value);
     }
 
     public function setDiscountQty(?float $value): static
