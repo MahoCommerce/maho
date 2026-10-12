@@ -746,7 +746,7 @@ describe('Product Extended Fields (REST)', function (): void {
         expect($public['status'])->toBe(200);
         $publicStock = $public['json']['stockItem'] ?? null;
         expect($publicStock)->toBeArray();
-        expect((float) $publicStock['qty'])->toBe(25.0);
+        expect($publicStock['qty'])->toBeNull();
         expect($publicStock['is_in_stock'])->toBeTrue();
         expect((float) $publicStock['min_sale_qty'])->toBe(3.0);
         expect((float) $publicStock['max_sale_qty'])->toBe(10.0);

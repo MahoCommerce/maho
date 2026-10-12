@@ -27,7 +27,8 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
  * out-of-stock threshold, the admin low-stock alert level, the backorder policy
  * and whether stock is tracked at all, plus every `use_config_*` flag (pure
  * admin config-inheritance metadata). Shopper-relevant columns (qty,
- * is_in_stock, sale quantity bounds, qty increments) stay public.
+ * is_in_stock, sale quantity bounds, qty increments) stay public. ProductProvider
+ * already masks qty to the "Only X Left" threshold for these callers.
  */
 final class ProductStockItemNormalizer implements NormalizerInterface, NormalizerAwareInterface
 {
