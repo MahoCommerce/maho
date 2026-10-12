@@ -239,7 +239,7 @@ class Product extends CrudResource
     public array $tierPrices = [];
 
     #[Groups(['product:read'])]
-    #[ApiProperty(description: 'Available stock quantity')]
+    #[ApiProperty(description: 'Available stock quantity. Admin and API tokens with product access get the exact quantity. Other callers get it only when it is at or below the "Only X Left" threshold of the store, and null otherwise')]
     public ?float $stockQty = null;
 
     #[Groups(['product:read'])]

@@ -188,9 +188,15 @@ class Maho_ApiPlatform_Model_Observer
     #[Maho\Config\Observer('core_config_data_save_after')]
     #[Maho\Config\Observer('core_config_data_delete_after')]
     #[Maho\Config\Observer('core_store_save_after')]
-    public function invalidateStoreConfigCache(\Maho\Event\Observer $_observer): void
+    public function invalidateStoreConfigCache(\Maho\Event\Observer $observer): void
     {
         $this->cleanApiCache(['API_STORE_CONFIG', 'API_COUNTRIES']);
+
+        // Cached product DTOs hold the stock quantity that this threshold masks
+        $configData = $observer->getEvent()->getConfigData();
+        if ($configData?->getPath() === Mage_CatalogInventory_Helper_Data::XML_PATH_STOCK_THRESHOLD_QTY) {
+            $this->cleanApiCache(['API_PRODUCTS']);
+        }
     }
 
     /**
