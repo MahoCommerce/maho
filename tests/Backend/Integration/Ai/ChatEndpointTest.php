@@ -1744,13 +1744,13 @@ it('hands the opening of a grid row to the browser by its number', function (): 
     }
 });
 
-it('offers every closed list as strings, since Gemini refuses a number in an enum', function (): void {
+it('offers every closed list as strings and every array with its items, as Gemini requires', function (): void {
     $admin = aiChatAdmin('ai_chat_enum', ['all']);
     try {
         aiChatLogin($admin);
         AiChatScript::reset(
-            new ToolCallResult([new ToolCall('call_e0', 'enable_tools', ['sections' => ['sales']])]),
-            new TextResult('The sales tools are loaded.'),
+            new ToolCallResult([new ToolCall('call_e0', 'enable_tools', ['sections' => ['sales', 'customers']])]),
+            new TextResult('The tools are loaded.'),
         );
 
         $result = aiChatRequest('/api/admin/ai/chat', ['message' => 'Create a cart price rule', 'context' => ['route' => 'promo_quote/index']]);
@@ -1761,7 +1761,16 @@ it('offers every closed list as strings, since Gemini refuses a number in an enu
         expect($rule['websiteIds']['items'])->toMatchArray(['type' => 'string']);
         expect($rule['websiteIds']['items']['enum'])->toContain((string) Mage::app()->getDefaultStoreView()->getWebsiteId());
         expect($rule['simpleFreeShipping'])->toMatchArray(['type' => 'string', 'enum' => ['0', '1', '2']]);
+        // Street is string[]|string: the array variant of the union keeps its items.
+        $streets = array_filter(array_map(static fn(array $schema): ?array => $schema['properties']['street'] ?? null, $schemas));
+        expect($streets)->not->toBeEmpty();
+        foreach ($streets as $street) {
+            expect($street)->toMatchArray(['type' => 'array', 'items' => ['type' => 'string', 'description' => '']]);
+        }
         $check = function (array $schema, string $path) use (&$check): void {
+            if (($schema['type'] ?? null) === 'array') {
+                expect($schema['items'] ?? null)->toBeArray("An array without items at $path");
+            }
             foreach ($schema['enum'] ?? [] as $value) {
                 expect($value)->toBeString("A value that is not a string in the enum at $path");
             }

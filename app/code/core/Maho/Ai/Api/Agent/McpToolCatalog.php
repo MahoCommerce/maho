@@ -423,12 +423,6 @@ final class McpToolCatalog
             }
             // Gemini rejects any keyword outside its subset, such as writeOnly or format, so only the common core stays.
             $property = array_intersect_key($property, array_flip(self::SCHEMA_KEYWORDS));
-            if (isset($property['properties']) && is_array($property['properties'])) {
-                $property['properties'] = $this->plainProperties($property['properties']);
-            }
-            if (isset($property['items']) && is_array($property['items'])) {
-                $property['items'] = $this->plainProperties(['item' => $property['items']])['item'] ?? ['type' => 'string', 'description' => ''];
-            }
             $type = $property['type'] ?? null;
             if (is_array($type)) {
                 // A nullable column comes back as ['string', 'null']; keep the first concrete type.
@@ -437,9 +431,21 @@ final class McpToolCatalog
             }
             if (!is_string($type) || $type === '') {
                 // A nullable property can also arrive as anyOf [{type: integer}, {type: null}].
-                $type = self::unionType($property) ?? (isset($property['properties']) ? 'object' : 'string');
+                $variant = self::unionVariant($property);
+                $type = $variant['type'] ?? (isset($property['properties']) ? 'object' : 'string');
+                $property += array_intersect_key($variant ?? [], array_flip(['items', 'properties', 'enum']));
             }
             unset($property['anyOf'], $property['oneOf']);
+            if (isset($property['properties']) && is_array($property['properties'])) {
+                $property['properties'] = $this->plainProperties($property['properties']);
+            }
+            if ($type === 'array') {
+                // Gemini refuses an array without items.
+                $items = is_array($property['items'] ?? null) ? $property['items'] : [];
+                $property['items'] = $this->plainProperties(['item' => $items])['item'];
+            } else {
+                unset($property['items']);
+            }
             $property['type'] = $type;
             $property['description'] = is_string($property['description'] ?? null) ? $property['description'] : '';
             $plain[(string) $name] = $property;
@@ -497,15 +503,20 @@ final class McpToolCatalog
         return $schema;
     }
 
-    /** @param array<string, mixed> $property */
-    private static function unionType(array $property): ?string
+    /**
+     * The first variant of an anyOf or a oneOf that has a type other than null, with that type.
+     *
+     * @param array<string, mixed> $property
+     * @return array{type: string, ...<string, mixed>}|null
+     */
+    private static function unionVariant(array $property): ?array
     {
         foreach (['anyOf', 'oneOf'] as $key) {
             foreach (is_array($property[$key] ?? null) ? $property[$key] : [] as $variant) {
                 $type = is_array($variant) ? ($variant['type'] ?? null) : null;
                 foreach (is_array($type) ? $type : [$type] as $candidate) {
                     if (is_string($candidate) && $candidate !== '' && $candidate !== 'null') {
-                        return $candidate;
+                        return ['type' => $candidate] + $variant;
                     }
                 }
             }
