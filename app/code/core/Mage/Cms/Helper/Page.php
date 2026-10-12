@@ -129,6 +129,15 @@ class Mage_Cms_Helper_Page extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * Tell if $page is the CMS Home Page of the current store.
+     */
+    public function isHomePage(Mage_Cms_Model_Page $page): bool
+    {
+        $identifier = strtok((string) Mage::getStoreConfig(self::XML_PATH_HOME_PAGE), '|');
+        return $identifier !== false && $page->getIdentifier() === $identifier;
+    }
+
+    /**
      * Retrieve page direct URL
      *
      * @param string $pageId
