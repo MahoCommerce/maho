@@ -408,23 +408,20 @@ class Mage_Core_Model_Image_Resizer
     }
 
     /**
-     * The image of the source file, or null when it cannot be read. Its size goes to the
-     * core_image_size table, so a page does not read the file to find it.
+     * The image of the source file, or null when it cannot be read.
      */
     protected function decode(string $sourcePath): ?ImageInterface
     {
         $mount = Mage::getStorage('media');
         try {
             $root = $mount->localRoot();
-            $image = $root !== null
+            return $root !== null
                 ? Maho::getImageManager()->decodePath($root . '/' . $sourcePath)
                 : Maho::getImageManager()->decodeBinary($mount->read($sourcePath));
         } catch (\Throwable $e) {
             Mage::log("The image {$sourcePath} cannot be read: {$e->getMessage()}", Mage::LOG_WARNING);
             return null;
         }
-        Mage_Core_Model_Image_Set::storeOriginalSize($sourcePath, $image->width(), $image->height());
-        return $image;
     }
 
     protected function isPlaceholder(string $source, string $sourcePath): bool

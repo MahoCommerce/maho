@@ -507,15 +507,4 @@ return function (SchemaEditor $schema): void {
             ->setComment('Email Log')
             ->create(),
     );
-
-    $schema->addTable(
-        Table::editor()
-            ->setUnquotedName('core_image_size')
-            ->addColumn(Schema::column('path_hash', Types::STRING, length: 32, comment: 'md5 of the path on the media mount'))
-            ->addColumn(Schema::column('width', Types::INTEGER, unsigned: true))
-            ->addColumn(Schema::column('height', Types::INTEGER, unsigned: true))
-            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('path_hash')->create())
-            ->setComment('Width and Height of Source Images on the Media Mount')
-            ->create(),
-    );
 };

@@ -46,8 +46,6 @@ describe('resized image files of an image entity', function () {
     });
 
     afterEach(function (): void {
-        $resource = Mage::getSingleton('core/resource');
-        $resource->getConnection('core_write')->delete($resource->getTableName('core/image_size'), ['path_hash = ?' => md5('catalog/product/a/b/shirt.png')]);
         foreach ($this->restore as $path => $value) {
             Mage::app()->getStore($this->storeId)->setConfig($path, $value);
         }
@@ -61,39 +59,6 @@ describe('resized image files of an image entity', function () {
             $item->isDir() ? rmdir($item->getPathname()) : unlink($item->getPathname());
         }
         rmdir($this->root);
-    });
-
-    it('stores the size of a source when it creates a file of it', function (): void {
-        Mage::getSingleton('core/image_resizer')->createFileAtPath(($this->pathOf)(300));
-
-        $adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
-        $row = $adapter->fetchRow($adapter->select()
-            ->from(Mage::getSingleton('core/resource')->getTableName('core/image_size'), ['width', 'height'])
-            ->where('path_hash = ?', md5('catalog/product/a/b/shirt.png')));
-
-        expect([(int) $row['width'], (int) $row['height']])->toBe([400, 200]);
-    });
-
-    it('takes the size of a source on a remote mount from the table, not from the file', function (): void {
-        MountRegistry::register(new Mount('media', new LocalFilesystemAdapter($this->root), null, new StoreBaseUrlGenerator('media')));
-        Mage_Core_Model_Image_Set::storeOriginalSize('catalog/product/a/b/shirt.png', 40, 30);
-
-        $set = Mage::helper('core/image')->init('product', '/a/b/shirt.png');
-
-        expect($set->getOriginalSize())->toBe([40, 30])
-            ->and($set->getHeightFor(300))->toBe(225);
-    });
-
-    it('reads the size of a source on a remote mount once and stores it when the table has none', function (): void {
-        MountRegistry::register(new Mount('media', new LocalFilesystemAdapter($this->root), null, new StoreBaseUrlGenerator('media')));
-
-        $first = Mage::helper('core/image')->init('product', '/a/b/shirt.png')->getOriginalSize();
-        $this->mount->delete('catalog/product/a/b/shirt.png');
-        Mage::app()->cleanCache([Mage_Core_Model_Image_Set::SIZE_CACHE_TAG]);
-        $second = Mage::helper('core/image')->init('product', '/a/b/shirt.png')->getOriginalSize();
-
-        expect($first)->toBe([400, 200])
-            ->and($second)->toBe([400, 200]);
     });
 
     it('takes the 1x and 2x widths of the slots of the default theme when no settings are active yet', function (): void {
