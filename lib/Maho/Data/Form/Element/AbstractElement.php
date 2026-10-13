@@ -425,15 +425,12 @@ abstract class AbstractElement extends AbstractForm
         return $value === null ? null : (bool) $value;
     }
 
-    /**
-     * A select holds a list of options here, and a checkbox list can hold one value.
-     */
-    public function getValues(): array|int|string|null
+    public function getValues(): ?array
     {
         return $this->getData('values');
     }
 
-    public function setValues(array|int|string|null $value): static
+    public function setValues(?array $value): static
     {
         return $this->setData('values', $value);
     }

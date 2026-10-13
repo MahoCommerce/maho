@@ -49,11 +49,7 @@ class Checkboxes extends AbstractElement
         $values  = [];
 
         if ($this->getValues()) {
-            if (!is_array($this->getValues())) {
-                $options = [$this->getValues()];
-            } else {
-                $options = $this->getValues();
-            }
+            $options = $this->getValues();
         } elseif ($this->getOptions() && is_array($this->getOptions())) {
             $options = $this->getOptions();
         }
