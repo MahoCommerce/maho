@@ -206,7 +206,9 @@ class Mage_Catalog_Model_Product_Url extends \Maho\DataObject
      */
     protected function _getCategoryIdForUrl($product, $params)
     {
-        if (isset($params['_ignore_category'])) {
+        if (isset($params['_ignore_category'])
+            || !Mage::getStoreConfigFlag(Mage_Catalog_Helper_Product::XML_PATH_PRODUCT_URL_USE_CATEGORY, $product->getStoreId())
+        ) {
             return null;
         }
         return $product->getCategoryId() && !$product->getDoNotUseCategoryId()

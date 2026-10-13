@@ -7,6 +7,8 @@
  * SPDX-License-Identifier: OSL-3.0
  */
 
+declare(strict_types=1);
+
 namespace Maho\Data\Form\Filter;
 
 use Maho\Data\Form\Filter\FilterInterface;
@@ -22,7 +24,7 @@ class Striptags implements FilterInterface
     #[\Override]
     public function inputFilter($value)
     {
-        return strip_tags($value);
+        return strip_tags((string) $value);
     }
 
     /**

@@ -17,7 +17,6 @@ declare(strict_types=1);
  * @method Mage_Sales_Model_Resource_Order_Creditmemo_Collection getResourceCollection()
  *
  * @method bool hasBaseShippingAmount()
- * @method getCanVoidFlag()
  */
 class Mage_Sales_Model_Order_Creditmemo extends Mage_Sales_Model_Abstract
 {
@@ -1127,6 +1126,12 @@ class Mage_Sales_Model_Order_Creditmemo extends Mage_Sales_Model_Abstract
     public function setBillingAddressId(?int $value): static
     {
         return $this->setData('billing_address_id', $value);
+    }
+
+    public function getCanVoidFlag(): ?bool
+    {
+        $value = $this->getData('can_void_flag');
+        return $value === null ? null : (bool) $value;
     }
 
     public function setCanVoidFlag(?bool $value = true): static

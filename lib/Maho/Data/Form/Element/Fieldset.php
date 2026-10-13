@@ -7,14 +7,13 @@
  * SPDX-License-Identifier: OSL-3.0
  */
 
+declare(strict_types=1);
+
 namespace Maho\Data\Form\Element;
 
 use Maho\Data\Form;
 use Maho\Data\Form\Element\AbstractElement;
 
-/**
- * @method string getLegend()
- */
 class Fieldset extends AbstractElement
 {
     /**
@@ -155,5 +154,11 @@ class Fieldset extends AbstractElement
             }
         }
         return $elements;
+    }
+
+    public function getLegend(): ?string
+    {
+        $value = $this->getData('legend');
+        return $value === null ? null : (string) $value;
     }
 }

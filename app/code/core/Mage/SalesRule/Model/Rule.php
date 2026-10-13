@@ -239,18 +239,14 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
         return $this->_primaryCoupon;
     }
 
-    /**
-     * Get sales rule customer group Ids
-     *
-     * @return array
-     */
-    public function getCustomerGroupIds()
+    #[\Override]
+    public function getCustomerGroupIds(): array
     {
         if (!$this->hasCustomerGroupIds()) {
             $customerGroupIds = $this->_getResource()->getCustomerGroupIds($this->getId());
             $this->setData('customer_group_ids', (array) $customerGroupIds);
         }
-        return $this->_getData('customer_group_ids');
+        return parent::getCustomerGroupIds() ?? [];
     }
 
     /**
@@ -459,16 +455,6 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
     {
         $value = $this->getData('discount_step');
         return $value === null ? null : (int) $value;
-    }
-
-    /**
-     * Get discount amount with proper float casting
-     * DBAL returns DECIMAL as string, so we cast to float
-     */
-    public function getDiscountAmount(): ?float
-    {
-        $value = $this->getData('discount_amount');
-        return $value !== null ? (float) $value : null;
     }
 
     public function getApplyToShipping(): ?bool

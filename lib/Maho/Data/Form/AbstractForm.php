@@ -7,6 +7,8 @@
  * SPDX-License-Identifier: OSL-3.0
  */
 
+declare(strict_types=1);
+
 namespace Maho\Data\Form;
 
 use Maho\Data\Form\Element\AbstractElement;
@@ -17,14 +19,7 @@ use Maho\DataObject;
  * Abstract class for form, coumn and fieldset
  *
  * @method \Maho\Data\Form getForm()
- * @method bool getUseContainer()
- * @method $this setAction(string $value)
- * @method $this setMethod(string $value)
- * @method $this setName(string $value)
  * @method $this setValue(mixed $value)
- * @method $this setUseContainer(bool $value)
- * @method $this setDisabled(bool $value)
- * @method $this setRequired(bool $value)
  */
 abstract class AbstractForm extends \Maho\DataObject
 {
@@ -75,11 +70,9 @@ abstract class AbstractForm extends \Maho\DataObject
     /**
      * Disable elements
      *
-     * @param boolean $readonly
-     * @param boolean $useDisabled
      * @return $this
      */
-    public function setReadonly($readonly, $useDisabled = false)
+    public function setReadonly(bool $readonly, bool $useDisabled = false)
     {
         if ($useDisabled) {
             $this->setDisabled($readonly);
@@ -192,5 +185,41 @@ abstract class AbstractForm extends \Maho\DataObject
             $res['formElements'][] = $element->toArray();
         }
         return $res;
+    }
+
+    public function setAction(?string $value): static
+    {
+        return $this->setData('action', $value);
+    }
+
+    public function setDisabled(?bool $value = true): static
+    {
+        return $this->setData('disabled', $value);
+    }
+
+    public function setMethod(?string $value): static
+    {
+        return $this->setData('method', $value);
+    }
+
+    public function setName(?string $value): static
+    {
+        return $this->setData('name', $value);
+    }
+
+    public function setRequired(?bool $value = true): static
+    {
+        return $this->setData('required', $value);
+    }
+
+    public function getUseContainer(): ?bool
+    {
+        $value = $this->getData('use_container');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setUseContainer(?bool $value = true): static
+    {
+        return $this->setData('use_container', $value);
     }
 }

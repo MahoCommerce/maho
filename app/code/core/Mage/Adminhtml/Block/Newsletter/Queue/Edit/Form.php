@@ -162,12 +162,12 @@ class Mage_Adminhtml_Block_Newsletter_Queue_Edit_Form extends Mage_Adminhtml_Blo
                 'value'         => $queue->getNewsletterStyles(),
             ]);
 
-            $form->getElement('text')->setDisabled('true')->setRequired(false);
-            $form->getElement('styles')->setDisabled('true')->setRequired(false);
-            $form->getElement('subject')->setDisabled('true')->setRequired(false);
-            $form->getElement('sender_name')->setDisabled('true')->setRequired(false);
-            $form->getElement('sender_email')->setDisabled('true')->setRequired(false);
-            $form->getElement('stores')->setDisabled('true');
+            $form->getElement('text')->setDisabled(true)->setRequired(false);
+            $form->getElement('styles')->setDisabled(true)->setRequired(false);
+            $form->getElement('subject')->setDisabled(true)->setRequired(false);
+            $form->getElement('sender_name')->setDisabled(true)->setRequired(false);
+            $form->getElement('sender_email')->setDisabled(true)->setRequired(false);
+            $form->getElement('stores')->setDisabled(true);
         } else {
             $fieldset->addField('text', 'editor', [
                 'name'      =>    'text',

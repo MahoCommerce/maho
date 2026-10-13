@@ -7,13 +7,12 @@
  * SPDX-License-Identifier: OSL-3.0
  */
 
+declare(strict_types=1);
+
 namespace Maho\Data\Form\Element;
 
 use Maho\Data\Form\Element\AbstractElement;
 
-/**
- * @method bool getBold()
- */
 class Label extends AbstractElement
 {
     /**
@@ -40,5 +39,11 @@ class Label extends AbstractElement
         $html .= $this->getBold() ? '</strong>' : '';
         $html .= $this->getAfterElementHtml();
         return $html;
+    }
+
+    public function getBold(): ?bool
+    {
+        $value = $this->getData('bold');
+        return $value === null ? null : (bool) $value;
     }
 }

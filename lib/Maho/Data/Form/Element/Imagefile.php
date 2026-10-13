@@ -7,11 +7,10 @@
  * SPDX-License-Identifier: OSL-3.0
  */
 
+declare(strict_types=1);
+
 namespace Maho\Data\Form\Element;
 
-/**
- * @method $this setAutosubmit(bool $false)
- */
 class Imagefile extends AbstractElement
 {
     /**
@@ -26,5 +25,10 @@ class Imagefile extends AbstractElement
         $this->setAutosubmit(false);
         $this->setData('autoSubmit', false);
         //$this->setExtType('file');
+    }
+
+    public function setAutosubmit(?bool $value = true): static
+    {
+        return $this->setData('autosubmit', $value);
     }
 }

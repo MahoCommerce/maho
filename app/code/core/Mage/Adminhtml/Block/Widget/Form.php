@@ -189,7 +189,7 @@ class Mage_Adminhtml_Block_Widget_Form extends Mage_Adminhtml_Block_Widget
                         Mage::app()->getLocale()->getDateTimeFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT),
                     );
                 } elseif ($inputType == 'multiline') {
-                    $element->setLineCount($attribute->getMultilineCount());
+                    $element->setLineCount((int) $attribute->getMultilineCount());
                 }
             }
         }

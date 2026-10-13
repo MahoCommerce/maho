@@ -8,6 +8,8 @@
  * @package Mage_Eav
  */
 
+declare(strict_types=1);
+
 abstract class Mage_Eav_Model_Attribute extends Mage_Eav_Model_Entity_Attribute
 {
     /**

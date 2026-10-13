@@ -10,9 +10,6 @@
 
 declare(strict_types=1);
 
-/**
- * @method getTemplateText()
- */
 abstract class Mage_Core_Model_Email_Template_Abstract extends Mage_Core_Model_Template
 {
     public const XML_PATH_DESIGN_EMAIL_LOGO            = 'design/email/logo';
@@ -267,6 +264,12 @@ abstract class Mage_Core_Model_Email_Template_Abstract extends Mage_Core_Model_T
     public function getTemplateStyles(): ?string
     {
         $value = $this->getData('template_styles');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getTemplateText(): ?string
+    {
+        $value = $this->getData('template_text');
         return $value === null ? null : (string) $value;
     }
 

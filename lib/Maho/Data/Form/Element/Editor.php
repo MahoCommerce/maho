@@ -7,16 +7,12 @@
  * SPDX-License-Identifier: OSL-3.0
  */
 
+declare(strict_types=1);
+
 namespace Maho\Data\Form\Element;
 
 use Maho\Data\Form\Element\AbstractElement;
 
-/**
- * @method string getTitle()
- * @method string getForceLoad()
- * @method $this setConfig(\Maho\DataObject $value)
- * @method bool getWysiwyg()
- */
 class Editor extends Textarea
 {
     /**
@@ -216,7 +212,7 @@ class Editor extends Textarea
             if (is_array($value) && isset($value['search']) && isset($value['subject'])) {
                 $subject = $value['subject'];
                 foreach ($value['search'] as $part) {
-                    $subject = str_replace('{{' . $part . '}}', $this->getDataUsingMethod($part), $subject);
+                    $subject = str_replace('{{' . $part . '}}', (string) $this->getDataUsingMethod($part), $subject);
                 }
                 $preparedOptions[$name] = $subject;
             } else {
@@ -337,5 +333,28 @@ class Editor extends Textarea
     public function isHidden()
     {
         return $this->getConfig('hidden');
+    }
+
+    public function getForceLoad(): ?bool
+    {
+        $value = $this->getData('force_load');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getTitle(): ?string
+    {
+        $value = $this->getData('title');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getWysiwyg(): ?bool
+    {
+        $value = $this->getData('wysiwyg');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setConfig(?\Maho\DataObject $value): static
+    {
+        return $this->setData('config', $value);
     }
 }

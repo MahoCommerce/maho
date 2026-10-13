@@ -8,9 +8,6 @@
  * @package Mage_Eav
  */
 
-/**
- * @method $this setExceptionLocation(string $string)
- */
 class Mage_Eav_Model_Convert_Adapter_Grid extends Mage_Dataflow_Model_Convert_Adapter_Abstract
 {
     protected $_entity;
@@ -21,15 +18,16 @@ class Mage_Eav_Model_Convert_Adapter_Grid extends Mage_Dataflow_Model_Convert_Ad
     protected $_entityType;
 
     /**
-     * @return Mage_Eav_Model_Entity_Interface
+     * @return Mage_Eav_Model_Entity_Interface|null
      */
     public function getEntity()
     {
-        if (!$this->_entityType) {
-            if (!($entityType = $this->getVar('entity_type'))
-                || !(($entity = Mage::getResourceSingleton($entityType)) instanceof Mage_Eav_Model_Entity_Interface)
-            ) {
+        if (!$this->_entity) {
+            $entityType = $this->getVar('entity_type');
+            $entity = $entityType ? Mage::getResourceSingleton($entityType) : null;
+            if (!$entity instanceof Mage_Eav_Model_Entity_Interface) {
                 $this->addException(Mage::helper('eav')->__('Invalid entity specified'), \Maho\Convert\Exception::FATAL);
+                return null;
             }
             $this->_entity = $entity;
         }
@@ -42,11 +40,15 @@ class Mage_Eav_Model_Convert_Adapter_Grid extends Mage_Dataflow_Model_Convert_Ad
     #[\Override]
     public function load()
     {
+        if (!$this->getEntity()) {
+            return $this;
+        }
         try {
-            $collection = Mage::getResourceModel($this->getEntity() . '_collection');
+            $collection = Mage::getResourceModel($this->getVar('entity_type') . '_collection');
             $collection->load();
         } catch (Exception $e) {
             $this->addException(Mage::helper('eav')->__('An error occurred while loading the collection, aborting. Error: %s', $e->getMessage()), \Maho\Convert\Exception::FATAL);
+            return $this;
         }
 
         $data = [];
@@ -63,13 +65,16 @@ class Mage_Eav_Model_Convert_Adapter_Grid extends Mage_Dataflow_Model_Convert_Ad
     #[\Override]
     public function save()
     {
+        if (!$this->getEntity()) {
+            return $this;
+        }
         foreach ($this->getData() as $i => $row) {
-            $this->setExceptionLocation('Line: ' . $i);
-            $entity = Mage::getResourceModel($this->getEntity());
+            $this->setPosition('Line: ' . $i);
+            $entity = Mage::getModel($this->getVar('entity_type'));
             if (!empty($row['entity_id'])) {
                 try {
                     $entity->load($row['entity_id']);
-                    $this->setPosition('Line: ' . $i . (isset($row['entity_id']) ? ', entity_id: ' . $row['entity_id'] : ''));
+                    $this->setPosition('Line: ' . $i . ', entity_id: ' . $row['entity_id']);
                 } catch (Exception $e) {
                     $this->addException(Mage::helper('eav')->__('An error occurred while loading a record, aborting. Error: %s', $e->getMessage()), \Maho\Convert\Exception::FATAL);
                 }
@@ -81,7 +86,7 @@ class Mage_Eav_Model_Convert_Adapter_Grid extends Mage_Dataflow_Model_Convert_Ad
             try {
                 $entity->addData($row)->save();
             } catch (Exception $e) {
-                $this->addException(Mage::helper('eav')->__('An error occurred while saving a record, aborting. Error: ', $e->getMessage()), \Maho\Convert\Exception::FATAL);
+                $this->addException(Mage::helper('eav')->__('An error occurred while saving a record, aborting. Error: %s', $e->getMessage()), \Maho\Convert\Exception::FATAL);
             }
         }
         return $this;

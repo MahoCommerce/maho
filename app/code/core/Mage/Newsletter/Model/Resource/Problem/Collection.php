@@ -15,8 +15,6 @@
  *
  * @method Mage_Newsletter_Model_Problem[] getItems()
  * @method Mage_Newsletter_Model_Problem[] getItemsByColumnValue(string $column, string $value)
- * @method $this setCustomerFirstName(string $value)
- * @method $this setCustomerLastName(string $value)
  */
 class Mage_Newsletter_Model_Resource_Problem_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract
 {

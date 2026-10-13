@@ -149,7 +149,8 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      *
      * @return int
      */
-    public function getStoreId()
+    #[\Override]
+    public function getStoreId(): ?int
     {
         if ($this->hasData('store_id')) {
             return (int) $this->getData('store_id');

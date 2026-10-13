@@ -234,6 +234,27 @@ class Mage_Catalog_Model_Url
         return $this->_saveRewritesHistory ?? Mage::helper('catalog')->shouldSaveUrlRewritesHistory($storeId);
     }
 
+    protected function _useCategoryPath(int $storeId): bool
+    {
+        return Mage::getStoreConfigFlag(Mage_Catalog_Helper_Product::XML_PATH_PRODUCT_URL_USE_CATEGORY, $storeId);
+    }
+
+    /**
+     * Remove the rewrites of the products in categories, if the store does not use the category path in product URLs.
+     *
+     * @param int[] $productIds
+     */
+    protected function _clearCategoryProductRewrites(int $storeId, array $productIds): void
+    {
+        if (!$this->_useCategoryPath($storeId)) {
+            $this->getResource()->clearCategoryProductSystemRewrites(
+                $storeId,
+                $productIds,
+                $this->getShouldSaveRewritesHistory($storeId),
+            );
+        }
+    }
+
     /**
      * Refresh all rewrite urls for some store or for all stores
      * Used to make full reindexing of url rewrites
@@ -351,6 +372,9 @@ class Mage_Catalog_Model_Url
         if ($category->getId() == $category->getPath()) {
             return $this;
         }
+        if ($category->getLevel() > 1 && !$this->_useCategoryPath((int) $category->getStoreId())) {
+            return $this;
+        }
 
         $idProduct = $product->getId();
         $locale = Mage::getStoreConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_LOCALE, $product->getStoreId());
@@ -451,6 +475,7 @@ class Mage_Catalog_Model_Url
                 $this->_refreshProductRewrite($product, $rootCategory);
                 $this->_refreshProductRewrite($product, $category);
             }
+            $this->_clearCategoryProductRewrites((int) $category->getStoreId(), array_keys($products));
             $firstIteration = false;
             unset($products);
         }
@@ -535,6 +560,7 @@ class Mage_Catalog_Model_Url
             // Remove all other product rewrites created earlier for this store - they're invalid now
             $excludeCategoryIds = array_keys($categories);
             $this->getResource()->clearProductRewrites($productId, $storeId, $excludeCategoryIds);
+            $this->_clearCategoryProductRewrites((int) $storeId, [(int) $productId]);
 
             unset($categories);
             unset($product);
@@ -563,6 +589,7 @@ class Mage_Catalog_Model_Url
         $storeRootCategoryId    = $store->getRootCategoryId();
         $storeRootCategoryPath  = $store->getRootCategoryPath();
         $this->_categories[$storeRootCategoryId] = $this->getResource()->getCategory($storeRootCategoryId, $storeId);
+        $useCategoryPath = $this->_useCategoryPath((int) $storeId);
 
         $lastEntityId = 0;
 
@@ -583,7 +610,7 @@ class Mage_Catalog_Model_Url
                 }
             }
 
-            if ($loadCategories) {
+            if ($loadCategories && $useCategoryPath) {
                 $categories = $this->getResource()->getCategories($loadCategories, $storeId) ?: [];
                 foreach ($categories as $category) {
                     $this->_categories[$category->getId()] = $category;
@@ -601,6 +628,7 @@ class Mage_Catalog_Model_Url
                     }
                 }
             }
+            $this->_clearCategoryProductRewrites((int) $storeId, array_keys($products));
 
             unset($products);
             $this->_rewrites = [];
@@ -857,6 +885,10 @@ class Mage_Catalog_Model_Url
             if ($this->_deleteOldTargetPath($fullPath, $idPath, $storeId)) {
                 return $fullPath;
             }
+        }
+        if ($category->getLevel() > 1) {
+            // Delete a redirect from this path to the product URL without category, so that this rewrite can use the path again
+            $this->_deleteOldTargetPath($requestPath . $suffix, 'product/' . $product->getId(), $storeId);
         }
         /**
          * Check 2 variants: $requestPath and $requestPath . '-' . $productId

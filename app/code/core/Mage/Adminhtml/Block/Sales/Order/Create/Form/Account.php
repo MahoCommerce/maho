@@ -89,7 +89,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Form_Account extends Mage_Adminhtm
     {
         switch ($element->getId()) {
             case 'email':
-                $element->setRequired(0);
+                $element->setRequired(false);
                 $element->setClass('validate-email');
                 break;
         }

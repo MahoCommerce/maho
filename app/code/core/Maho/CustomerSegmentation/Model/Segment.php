@@ -435,17 +435,6 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
         return $this->setData('is_active', $value);
     }
 
-    public function getConditionsSerialized(): ?string
-    {
-        $value = $this->getData('conditions_serialized');
-        return $value === null ? null : (string) $value;
-    }
-
-    public function setConditionsSerialized(?string $value): static
-    {
-        return $this->setData('conditions_serialized', $value);
-    }
-
     /**
      * The websites of the segment. The column stores a comma-separated list, and a load turns it into an array.
      *
@@ -460,6 +449,7 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
     /**
      * @param list<int> $value
      */
+    #[\Override]
     public function setWebsiteIds(array $value): static
     {
         return $this->setData('website_ids', $value);
@@ -470,6 +460,7 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
      *
      * @return list<int>
      */
+    #[\Override]
     public function getCustomerGroupIds(): array
     {
         return self::idList($this->getData('customer_group_ids'));
@@ -478,6 +469,7 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
     /**
      * @param list<int> $value
      */
+    #[\Override]
     public function setCustomerGroupIds(array $value): static
     {
         return $this->setData('customer_group_ids', $value);
