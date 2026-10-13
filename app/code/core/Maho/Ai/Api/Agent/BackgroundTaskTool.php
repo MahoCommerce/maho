@@ -61,9 +61,6 @@ final class BackgroundTaskTool
         if ($instruction === '') {
             return ['ok' => false, 'text' => 'The instruction is empty.'];
         }
-        if (!\Mage::helper('core')->isModuleEnabled('Maho_Queue')) {
-            return ['ok' => false, 'text' => 'The queue is not available, so nothing can run in the background. Do the job in this chat.'];
-        }
 
         /** @var \Maho_Ai_Model_Conversation $conversation */
         $conversation = \Mage::getModel('ai/conversation');

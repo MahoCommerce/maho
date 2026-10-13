@@ -19,7 +19,7 @@ class Maho_Ai_Model_Task_Scheduler
     #[Maho\Config\CronJob('ai_run_schedules', schedule: '* * * * *')]
     public function runDueSchedules(): void
     {
-        if (!Mage::helper('ai')->isChatEnabled() || !Mage::helper('core')->isModuleEnabled('Maho_Queue')) {
+        if (!Mage::helper('ai')->isChatEnabled()) {
             return;
         }
         $now = Mage::app()->getLocale()->formatDateForDb('now');

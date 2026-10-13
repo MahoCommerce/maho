@@ -75,12 +75,12 @@ class Maho_Ai_Model_Task extends Mage_Core_Model_Abstract
 
     /**
      * Send a pending task to a queue worker. A second call while the message waits does nothing.
-     * Without the queue module, or while the async queue is off for a task that is not an agent
-     * run, the task stays pending for the cron runner.
+     * While the async queue is off for a task that is not an agent run, the task stays pending for
+     * the cron runner.
      */
     public function queue(): void
     {
-        if (!$this->getId() || !$this->isPending() || !Mage::helper('core')->isModuleEnabled('Maho_Queue')) {
+        if (!$this->getId() || !$this->isPending()) {
             return;
         }
         if (!$this->isAgent() && !Mage::getStoreConfigFlag('ai/queue/enabled')) {
@@ -96,7 +96,7 @@ class Maho_Ai_Model_Task extends Mage_Core_Model_Abstract
     /** True while the queue holds a message for this task that a worker has not finished. */
     public function isQueued(): bool
     {
-        if (!$this->getId() || !Mage::helper('core')->isModuleEnabled('Maho_Queue')) {
+        if (!$this->getId()) {
             return false;
         }
 

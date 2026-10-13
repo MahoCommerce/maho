@@ -43,8 +43,8 @@ use ApiPlatform\OpenApi\Model\RequestBody;
             security: "is_granted('ROLE_ADMIN') or is_granted('reports/refresh')",
             description: 'Refresh the statistics of the aggregated reports. Body: mode (recent or lifetime, default recent), reports (list of codes, empty or absent for all). '
                 . 'recent aggregates the orders of the last 25 hours again and responds 200 when it is done. '
-                . 'lifetime empties the tables and aggregates all orders again. It puts one message per report in the queue and responds 202, '
-                . 'or runs at once and responds 200 when the queue is disabled. A report that is already in the queue is not added again. '
+                . 'lifetime empties the tables and aggregates all orders again. It puts one message per report in the queue and responds 202. '
+                . 'A report that is already in the queue is not added again. '
                 . 'Response: mode, queued, reports, alreadyQueued, totalItems and member (the statistics after the request). '
                 . 'A token with a store restriction cannot refresh statistics.',
             openapi: new OpenApiOperation(

@@ -14,6 +14,7 @@ SPDX-License-Identifier: AFL-3.0
                 <Mage_Customer/>
                 <Mage_Eav/>
                 <Mage_Widget/>
+                <Maho_Queue/>
             </depends>
         </Mage_Newsletter>
     </modules>

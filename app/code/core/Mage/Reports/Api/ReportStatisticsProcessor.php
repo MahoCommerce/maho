@@ -52,7 +52,7 @@ final class ReportStatisticsProcessor extends \Maho\ApiPlatform\Processor
 
         if ($mode === self::MODE_RECENT) {
             $statistics->refreshRecent($codes);
-        } elseif (\Mage::helper('core')->isModuleEnabled('Maho_Queue')) {
+        } else {
             $queued = true;
             foreach ($codes as $code) {
                 $message = new \Mage_Reports_Model_Queue_RefreshStatistics($code);
@@ -65,8 +65,6 @@ final class ReportStatisticsProcessor extends \Maho\ApiPlatform\Processor
                     $alreadyQueued[] = $code;
                 }
             }
-        } else {
-            $statistics->refreshLifetime($codes);
         }
 
         return $this->respondRaw(
