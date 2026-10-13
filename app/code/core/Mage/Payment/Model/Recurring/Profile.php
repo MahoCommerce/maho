@@ -14,9 +14,7 @@ declare(strict_types=1);
  * Recurring payment profile
  * Extends from Mage_Core_Abstract for a reason: to make descendants have its own resource
  *
- * @method float getBillingAmount()
  * @method bool hasScheduleDescription()
- * @method float getTrialBillingAmount()
  */
 class Mage_Payment_Model_Recurring_Profile extends Mage_Core_Model_Abstract
 {

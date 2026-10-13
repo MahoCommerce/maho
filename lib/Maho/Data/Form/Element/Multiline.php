@@ -13,9 +13,6 @@ use Maho\Data\Form\Element\AbstractElement;
 
 /**
  * Form multiline text elements
- *
- * @method int getLineCount()
- * @method $this setLineCount(int $value)
  */
 class Multiline extends AbstractElement
 {
@@ -106,5 +103,16 @@ class Multiline extends AbstractElement
             $html .= ($this->getNoSpan() === true) ? '' : '</span>' . "\n";
         }
         return $html;
+    }
+
+    public function getLineCount(): ?int
+    {
+        $value = $this->getData('line_count');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setLineCount(?int $value): static
+    {
+        return $this->setData('line_count', $value);
     }
 }

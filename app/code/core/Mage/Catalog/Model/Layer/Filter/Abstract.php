@@ -8,6 +8,8 @@
  * @package Mage_Catalog
  */
 
+declare(strict_types=1);
+
 abstract class Mage_Catalog_Model_Layer_Filter_Abstract extends \Maho\DataObject
 {
     /**
@@ -186,9 +188,9 @@ abstract class Mage_Catalog_Model_Layer_Filter_Abstract extends \Maho\DataObject
     {
         return Mage::getModel('catalog/layer_filter_item')
             ->setFilter($this)
-            ->setLabel($label)
-            ->setValue($value)
-            ->setCount($count);
+            ->setLabel($label === null ? null : (string) $label)
+            ->setValue($value === null || is_array($value) ? $value : (string) $value)
+            ->setCount($count === null ? null : (int) $count);
     }
 
     /**

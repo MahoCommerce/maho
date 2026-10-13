@@ -140,18 +140,14 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
         return Mage::getModel('catalogrule/rule_action_collection');
     }
 
-    /**
-     * Get catalog rule customer group Ids
-     *
-     * @return array
-     */
-    public function getCustomerGroupIds()
+    #[\Override]
+    public function getCustomerGroupIds(): array
     {
         if (!$this->hasCustomerGroupIds()) {
             $customerGroupIds = $this->_getResource()->getCustomerGroupIds($this->getId());
             $this->setData('customer_group_ids', (array) $customerGroupIds);
         }
-        return $this->_getData('customer_group_ids');
+        return parent::getCustomerGroupIds() ?? [];
     }
 
     /**

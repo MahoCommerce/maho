@@ -132,10 +132,10 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Main_Abstract extends Mag
         ]);
 
         if ($attributeObject->getId()) {
-            $form->getElement('attribute_code')->setDisabled(1);
-            $form->getElement('frontend_input')->setDisabled(1);
+            $form->getElement('attribute_code')->setDisabled(true);
+            $form->getElement('frontend_input')->setDisabled(true);
             if (!$attributeObject->getIsUserDefined()) {
-                $form->getElement('is_unique')->setDisabled(1);
+                $form->getElement('is_unique')->setDisabled(true);
             }
         }
 
@@ -170,7 +170,7 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Main_Abstract extends Mag
             if (isset($disableAttributeFields[$attributeObject->getAttributeCode()])) {
                 foreach ($disableAttributeFields[$attributeObject->getAttributeCode()] as $field) {
                     if ($elm = $form->getElement($field)) {
-                        $elm->setDisabled(1);
+                        $elm->setDisabled(true);
                         $elm->setReadonly(1);
                     }
                 }

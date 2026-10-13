@@ -51,8 +51,8 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Account extends Mage_Adminhtml_Bloc
             ->setDisableAutoGroupChangeAttributeValue($customer->getData($disableAutoGroupChangeAttributeName)));
 
         if ($customer->getId()) {
-            $form->getElement('website_id')->setDisabled('disabled');
-            $form->getElement('created_in')->setDisabled('disabled');
+            $form->getElement('website_id')->setDisabled(true);
+            $form->getElement('created_in')->setDisabled(true);
         } else {
             $fieldset->removeField('created_in');
             $form->getElement('website_id')->addClass('validate-website-has-store');

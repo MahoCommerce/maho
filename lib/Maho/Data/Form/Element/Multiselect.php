@@ -11,12 +11,6 @@ namespace Maho\Data\Form\Element;
 
 use Maho\Data\Form\Element\AbstractElement;
 
-/**
- * @method $this setSize(int $value)
- * @method bool getCanBeEmpty()
- * @method string getSelectAll()
- * @method string getDeselectAll()
- */
 class Multiselect extends AbstractElement
 {
     /**
@@ -158,5 +152,28 @@ class Multiselect extends AbstractElement
         }
         $html .= '>' . $this->_escape($option['label']) . '</option>' . "\n";
         return $html;
+    }
+
+    public function getCanBeEmpty(): ?bool
+    {
+        $value = $this->getData('can_be_empty');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getDeselectAll(): ?string
+    {
+        $value = $this->getData('deselect_all');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getSelectAll(): ?string
+    {
+        $value = $this->getData('select_all');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setSize(?int $value): static
+    {
+        return $this->setData('size', $value);
     }
 }

@@ -8,9 +8,6 @@
  * @package Mage_Eav
  */
 
-/**
- * @method array getDefaultEntities()
- */
 class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
 {
     /**
@@ -1166,6 +1163,14 @@ class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
     }
 
     /******************* BULK INSTALL *****************/
+
+    /**
+     * Return the entities and attributes that installEntities() installs when it gets no list.
+     */
+    public function getDefaultEntities(): array
+    {
+        return [];
+    }
 
     /**
      * Install entities

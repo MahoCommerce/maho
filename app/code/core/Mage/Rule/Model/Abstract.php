@@ -8,24 +8,18 @@
  * @package Mage_Rule
  */
 
+declare(strict_types=1);
+
 /**
  * @method $this unsActions()
  * @method bool hasActionsSerialized()
  * @method $this unsActionsSerialized()
- * @method string getActionsSerialized()
- * @method $this setActionsSerialized(string $value)
  * @method $this unsConditions()
  * @method bool hasConditionsSerialized()
  * @method $this unsConditionsSerialized()
- * @method string getConditionsSerialized()
- * @method $this setConditionsSerialized(string $value)
  * @method bool hasCustomerGroupIds()
- * @method array getCustomerGroupIds()
- * @method $this setCustomerGroupIds(array $value)
  * @method bool hasDiscountAmount()
- * @method float getDiscountAmount()
  * @method bool hasWebsiteIds()
- * @method $this setWebsiteIds(array $value)
  */
 abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
 {
@@ -158,7 +152,7 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
          * Backwards compatibility.
          */
         if ($this->hasCustomerGroupIds()) {
-            $groupIds = $this->getCustomerGroupIds();
+            $groupIds = $this->getData('customer_group_ids');
             if (is_string($groupIds) && !empty($groupIds)) {
                 $this->setCustomerGroupIds(explode(',', $groupIds));
             }
@@ -454,5 +448,58 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
             $this->setData('website_ids', (array) $websiteIds);
         }
         return $this->_getData('website_ids');
+    }
+
+    /**
+     * @param list<int|string> $value
+     */
+    public function setWebsiteIds(array $value): static
+    {
+        return $this->setData('website_ids', $value);
+    }
+
+    public function getActionsSerialized(): ?string
+    {
+        $value = $this->getData('actions_serialized');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setActionsSerialized(?string $value): static
+    {
+        return $this->setData('actions_serialized', $value);
+    }
+
+    public function getConditionsSerialized(): ?string
+    {
+        $value = $this->getData('conditions_serialized');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setConditionsSerialized(?string $value): static
+    {
+        return $this->setData('conditions_serialized', $value);
+    }
+
+    /**
+     * Older code sets the groups as a comma-separated string, so a string becomes a list.
+     */
+    public function getCustomerGroupIds(): ?array
+    {
+        $value = $this->getData('customer_group_ids');
+        return $value === null || is_array($value) ? $value : explode(',', (string) $value);
+    }
+
+    /**
+     * @param list<int|string> $value
+     */
+    public function setCustomerGroupIds(array $value): static
+    {
+        return $this->setData('customer_group_ids', $value);
+    }
+
+    public function getDiscountAmount(): ?float
+    {
+        $value = $this->getData('discount_amount');
+        return $value === null ? null : (float) $value;
     }
 }

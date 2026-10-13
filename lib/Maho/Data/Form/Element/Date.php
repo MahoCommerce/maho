@@ -13,14 +13,6 @@ use DateTime;
 use DateTimeInterface;
 use Maho\Data\Form\Element\AbstractElement;
 
-/**
- * @method string getFormat()
- * @method string getInputFormat()
- * @method string getLocale()
- * @method string getImage()
- * @method string getTime()
- * @method bool getDisabled()
- */
 class Date extends AbstractElement
 {
     /**
@@ -200,5 +192,41 @@ class Date extends AbstractElement
 
         $html .= $this->getAfterElementHtml();
         return $html;
+    }
+
+    public function getDisabled(): ?bool
+    {
+        $value = $this->getData('disabled');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getFormat(): ?string
+    {
+        $value = $this->getData('format');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getImage(): ?string
+    {
+        $value = $this->getData('image');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getInputFormat(): ?string
+    {
+        $value = $this->getData('input_format');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getLocale(): ?string
+    {
+        $value = $this->getData('locale');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function getTime(): ?bool
+    {
+        $value = $this->getData('time');
+        return $value === null ? null : (bool) $value;
     }
 }

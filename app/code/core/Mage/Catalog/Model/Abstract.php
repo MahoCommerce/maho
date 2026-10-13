@@ -12,8 +12,6 @@
  * Abstract model for catalog entities
  *
  * @package    Mage_Catalog
- *
- * @method int getStoreId()
  */
 abstract class Mage_Catalog_Model_Abstract extends Mage_Core_Model_Abstract
 {
@@ -398,5 +396,11 @@ abstract class Mage_Catalog_Model_Abstract extends Mage_Core_Model_Abstract
     {
         $this->_isReadonly = (bool) $value;
         return $this;
+    }
+
+    public function getStoreId(): ?int
+    {
+        $value = $this->getData('store_id');
+        return $value === null ? null : (int) $value;
     }
 }

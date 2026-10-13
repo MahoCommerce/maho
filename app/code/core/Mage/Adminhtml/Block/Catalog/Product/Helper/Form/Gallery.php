@@ -33,7 +33,8 @@ class Mage_Adminhtml_Block_Catalog_Product_Helper_Form_Gallery extends \Maho\Dat
         return $content->toHtml();
     }
 
-    public function getLabel()
+    #[\Override]
+    public function getLabel(): string
     {
         return '';
     }
@@ -117,12 +118,14 @@ class Mage_Adminhtml_Block_Catalog_Product_Helper_Form_Gallery extends \Maho\Dat
 
     /**
      * Retrieve data object related with form
-     *
-     * @return Mage_Catalog_Model_Product|Mage_Catalog_Model_Category
      */
-    public function getDataObject()
+    public function getDataObject(): Mage_Catalog_Model_Product|Mage_Catalog_Model_Category
     {
-        return $this->getForm()->getDataObject();
+        $object = $this->getForm()->getDataObject();
+        if (!$object instanceof Mage_Catalog_Model_Product && !$object instanceof Mage_Catalog_Model_Category) {
+            throw new LogicException('The gallery element needs a form with a product or a category.');
+        }
+        return $object;
     }
 
     /**

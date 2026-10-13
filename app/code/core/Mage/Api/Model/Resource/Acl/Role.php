@@ -8,9 +8,9 @@
  * @package Mage_Api
  */
 
+declare(strict_types=1);
+
 /**
- * @method $this setCreated(string $value)
- *
  * @deprecated since 26.7 Use Maho_ApiPlatform instead.
  */
 class Mage_Api_Model_Resource_Acl_Role extends Mage_Core_Model_Resource_Db_Abstract
@@ -19,19 +19,5 @@ class Mage_Api_Model_Resource_Acl_Role extends Mage_Core_Model_Resource_Db_Abstr
     protected function _construct()
     {
         $this->_init('api/role', 'role_id');
-    }
-
-    /**
-     * Action before save
-     *
-     * @return $this
-     */
-    #[\Override]
-    protected function _beforeSave(Mage_Core_Model_Abstract $object)
-    {
-        if (!$object->getId()) {
-            $this->setCreated(Mage::app()->getLocale()->formatDateForDb('now'));
-        }
-        return $this;
     }
 }

@@ -13,8 +13,6 @@ declare(strict_types=1);
  * Customer attribute resource model
  *
  * @package    Mage_Customer
- *
- * @method int getId()
  */
 
 class Mage_Customer_Model_Entity_Attribute extends Mage_Customer_Model_Resource_Attribute {}

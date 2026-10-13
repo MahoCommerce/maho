@@ -11,9 +11,6 @@ namespace Maho\Data\Form\Element;
 
 use Maho\Data\Form\Element\AbstractElement;
 
-/**
- * @method array<int, string>|string getOptions()
- */
 class Checkboxes extends AbstractElement
 {
     /**
@@ -195,5 +192,10 @@ class Checkboxes extends AbstractElement
             . ' <label for="' . $id . '">' . $option['label'] . '</label></li>'
             . "\n";
         return $html;
+    }
+
+    public function getOptions(): array|string|null
+    {
+        return $this->getData('options');
     }
 }

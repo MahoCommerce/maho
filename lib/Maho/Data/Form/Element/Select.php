@@ -11,9 +11,6 @@ namespace Maho\Data\Form\Element;
 
 use Maho\Data\Form\Element\AbstractElement;
 
-/**
- * @method array<int, string>|string getOptions()
- */
 class Select extends AbstractElement
 {
     /**
@@ -118,5 +115,10 @@ class Select extends AbstractElement
     public function getHtmlAttributes()
     {
         return ['title', 'class', 'style', 'onclick', 'onchange', 'disabled', 'readonly', 'tabindex'];
+    }
+
+    public function getOptions(): array|string|null
+    {
+        return $this->getData('options');
     }
 }

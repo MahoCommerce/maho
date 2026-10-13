@@ -14,20 +14,8 @@ use Maho\Data\Form\AbstractForm;
 use Maho\Data\Form\Element\Renderer\RendererInterface;
 
 /**
- * @method $this setAfterElementHtml(string $value)
- * @method string getClass()
- * @method $this setClass(string $value)
- * @method $this setContainer(Form $value)
- * @method $this setExtType(string $value)
  * @method Form getForm()
- * @method string getLabel()
- * @method $this setLabel(string $value)
- * @method bool getNoSpan()
- * @method $this setName(string $value)
- * @method bool getRequired()
  * @method string getValue()
- * @method array getValues()
- * @method $this setValues(array|int|string $value)
  * @method $this unsCanUseDefaultValue()
  * @method $this unsCanUseWebsiteValue()
  * @method $this unsScope()
@@ -384,5 +372,67 @@ abstract class AbstractElement extends AbstractForm
         $this->setValues($values);
 
         return $this;
+    }
+
+    public function setAfterElementHtml(?string $value): static
+    {
+        return $this->setData('after_element_html', $value);
+    }
+
+    public function getClass(): ?string
+    {
+        $value = $this->getData('class');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setClass(?string $value): static
+    {
+        return $this->setData('class', $value);
+    }
+
+    public function setContainer(?AbstractForm $value): static
+    {
+        return $this->setData('container', $value);
+    }
+
+    public function setExtType(?string $value): static
+    {
+        return $this->setData('ext_type', $value);
+    }
+
+    public function getLabel(): ?string
+    {
+        $value = $this->getData('label');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setLabel(?string $value): static
+    {
+        return $this->setData('label', $value);
+    }
+
+    public function getNoSpan(): ?bool
+    {
+        $value = $this->getData('no_span');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function getRequired(): ?bool
+    {
+        $value = $this->getData('required');
+        return $value === null ? null : (bool) $value;
+    }
+
+    /**
+     * A select holds a list of options here, and a checkbox list can hold one value.
+     */
+    public function getValues(): array|int|string|null
+    {
+        return $this->getData('values');
+    }
+
+    public function setValues(array|int|string|null $value): static
+    {
+        return $this->setData('values', $value);
     }
 }

@@ -16,8 +16,6 @@ use Mage_Adminhtml_Block_Widget_Grid_Massaction_Abstract as MassAction;
  * Grid widget massaction block
  *
  * @package    Mage_Adminhtml
- *
- * @method $this setHideFormElement(bool $value) Hide Form element to prevent IE errors
  */
 abstract class Mage_Adminhtml_Block_Widget_Grid_Massaction_Abstract extends Mage_Adminhtml_Block_Widget
 {
@@ -359,5 +357,10 @@ abstract class Mage_Adminhtml_Block_Widget_Grid_Massaction_Abstract extends Mage
     {
         $value = $this->getData('hide_form_element');
         return $value === null ? null : (bool) $value;
+    }
+
+    public function setHideFormElement(?bool $value = true): static
+    {
+        return $this->setData('hide_form_element', $value);
     }
 }

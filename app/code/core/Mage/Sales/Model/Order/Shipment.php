@@ -14,8 +14,6 @@ declare(strict_types=1);
  * @method Mage_Sales_Model_Resource_Order_Shipment _getResource()
  * @method Mage_Sales_Model_Resource_Order_Shipment getResource()
  * @method Mage_Sales_Model_Resource_Order_Shipment_Collection getCollection()
- *
- * @method float getTotalQty()
  */
 class Mage_Sales_Model_Order_Shipment extends Mage_Sales_Model_Abstract
 {

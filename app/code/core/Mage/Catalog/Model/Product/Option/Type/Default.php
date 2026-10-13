@@ -11,8 +11,8 @@
 declare(strict_types=1);
 
 /**
- * @method array|int getUserValue()
- * @method $this setUserValue(array|int $value)
+ * @method array|int|string|null getUserValue()
+ * @method $this setUserValue(array|int|string|null $value)
  */
 class Mage_Catalog_Model_Product_Option_Type_Default extends \Maho\DataObject
 {

@@ -11,9 +11,6 @@ namespace Maho\Data\Form\Element;
 
 use Maho\Data\Form\Element\AbstractElement;
 
-/**
- * @method bool getChecked()
- */
 class Checkbox extends AbstractElement
 {
     /**
@@ -70,5 +67,11 @@ class Checkbox extends AbstractElement
     public function getIsChecked()
     {
         return $this->getData('checked');
+    }
+
+    public function getChecked(): ?bool
+    {
+        $value = $this->getData('checked');
+        return $value === null ? null : (bool) $value;
     }
 }

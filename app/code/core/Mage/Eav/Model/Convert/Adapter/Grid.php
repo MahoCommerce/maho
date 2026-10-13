@@ -8,9 +8,6 @@
  * @package Mage_Eav
  */
 
-/**
- * @method $this setExceptionLocation(string $string)
- */
 class Mage_Eav_Model_Convert_Adapter_Grid extends Mage_Dataflow_Model_Convert_Adapter_Abstract
 {
     protected $_entity;
@@ -64,7 +61,7 @@ class Mage_Eav_Model_Convert_Adapter_Grid extends Mage_Dataflow_Model_Convert_Ad
     public function save()
     {
         foreach ($this->getData() as $i => $row) {
-            $this->setExceptionLocation('Line: ' . $i);
+            $this->setPosition('Line: ' . $i);
             $entity = Mage::getResourceModel($this->getEntity());
             if (!empty($row['entity_id'])) {
                 try {

@@ -11,9 +11,6 @@ namespace Maho\Data\Form\Element;
 
 use Maho\Data\Form\Element\AbstractElement;
 
-/**
- * @method string getText()
- */
 class Note extends AbstractElement
 {
     /**
@@ -36,5 +33,11 @@ class Note extends AbstractElement
         $html = '<span id="' . $this->getHtmlId() . '">' . $this->getText() . '</span>';
         $html .= $this->getAfterElementHtml();
         return $html;
+    }
+
+    public function getText(): ?string
+    {
+        $value = $this->getData('text');
+        return $value === null ? null : (string) $value;
     }
 }

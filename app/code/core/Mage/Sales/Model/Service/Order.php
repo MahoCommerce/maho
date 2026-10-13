@@ -10,8 +10,6 @@
 
 /**
  * Quote submit service model
- *
- * @method $this setEmailSent(bool $value)
  */
 class Mage_Sales_Model_Service_Order
 {

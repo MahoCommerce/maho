@@ -16,7 +16,6 @@ declare(strict_types=1);
  * For block generation you must define Data source class, data source class method,
  * parameters array and block template
  *
- * @method string getPosition()
  * @method $this setType(string $value)
  * @method bool hasWrapperMustBeVisible()
  */
@@ -1560,6 +1559,12 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
         $moduleName ??= $this->getModuleName();
 
         return Mage::helper($helperAlias)->isModuleOutputEnabled($moduleName);
+    }
+
+    public function getPosition(): ?int
+    {
+        $value = $this->getData('position');
+        return $value === null ? null : (int) $value;
     }
 
     public function setAdditionalHtml(?string $value): static
