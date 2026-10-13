@@ -136,7 +136,7 @@ abstract class Mage_Adminhtml_Block_Sales_Order_Create_Form_Abstract extends Mag
                     'note'      => $this->escapeHtml($this->__($attribute->getNote())),
                 ]);
                 if ($inputType == 'multiline') {
-                    $element->setLineCount($attribute->getMultilineCount());
+                    $element->setLineCount((int) $attribute->getMultilineCount());
                 }
                 $element->setEntityAttribute($attribute);
                 $this->_addAdditionalFormElementData($element);

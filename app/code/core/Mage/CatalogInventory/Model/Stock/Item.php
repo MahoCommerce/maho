@@ -23,7 +23,6 @@ declare(strict_types=1);
  * @method $this hasIsChildItem()
  * @method $this unsIsChildItem()
  * @method bool hasStockQty()
- * @method float getQtyCorrection()
  */
 class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
 {

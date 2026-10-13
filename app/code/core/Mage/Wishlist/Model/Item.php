@@ -20,7 +20,6 @@ declare(strict_types=1);
  * @method Mage_Wishlist_Model_Resource_Item_Collection getCollection()
  *
  * @method $this unsProduct()
- * @method float getQty()
  */
 class Mage_Wishlist_Model_Item extends Mage_Core_Model_Abstract implements Mage_Catalog_Model_Product_Configuration_Item_Interface
 {

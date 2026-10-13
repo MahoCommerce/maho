@@ -7,6 +7,8 @@
  * SPDX-License-Identifier: OSL-3.0
  */
 
+declare(strict_types=1);
+
 namespace Maho\Data\Form\Filter;
 
 use Maho\Data\Form\Filter\FilterInterface;
@@ -34,6 +36,6 @@ class Escapehtml implements FilterInterface
     #[\Override]
     public function outputFilter($value)
     {
-        return htmlspecialchars($value);
+        return htmlspecialchars((string) $value);
     }
 }

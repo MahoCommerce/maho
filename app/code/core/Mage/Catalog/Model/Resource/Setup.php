@@ -48,10 +48,9 @@ class Mage_Catalog_Model_Resource_Setup extends Mage_Eav_Model_Entity_Setup
 
     /**
      * Default entities and attributes
-     *
-     * @return array
      */
-    public function getDefaultEntities()
+    #[\Override]
+    public function getDefaultEntities(): array
     {
         return [
             'catalog_category'               => [

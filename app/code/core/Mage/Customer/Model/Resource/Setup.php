@@ -109,10 +109,9 @@ class Mage_Customer_Model_Resource_Setup extends Mage_Eav_Model_Entity_Setup
 
     /**
      * Retrieve default entities: customer, customer_address
-     *
-     * @return array
      */
-    public function getDefaultEntities()
+    #[\Override]
+    public function getDefaultEntities(): array
     {
         return [
             'customer'                       => [

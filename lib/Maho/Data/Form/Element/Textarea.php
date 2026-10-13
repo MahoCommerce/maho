@@ -7,14 +7,12 @@
  * SPDX-License-Identifier: OSL-3.0
  */
 
+declare(strict_types=1);
+
 namespace Maho\Data\Form\Element;
 
 use Maho\Data\Form\Element\AbstractElement;
 
-/**
- * @method $this setCols(int $int)
- * @method $this setRows(int $int)
- */
 class Textarea extends AbstractElement
 {
     /**
@@ -51,5 +49,15 @@ class Textarea extends AbstractElement
         $html .= '</textarea>';
         $html .= $this->getAfterElementHtml();
         return $html;
+    }
+
+    public function setCols(?int $value): static
+    {
+        return $this->setData('cols', $value);
+    }
+
+    public function setRows(?int $value): static
+    {
+        return $this->setData('rows', $value);
     }
 }

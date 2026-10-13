@@ -5,6 +5,8 @@
  * SPDX-License-Identifier: OSL-3.0
  */
 
+declare(strict_types=1);
+
 namespace Maho\Data\Form\Element;
 
 use Maho\Data\Form\Element\AbstractElement;

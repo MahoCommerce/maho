@@ -16,7 +16,6 @@ declare(strict_types=1);
  * @method Mage_Rating_Model_Resource_Rating_Collection getCollection()
  * @method Mage_Rating_Model_Resource_Rating_Collection getResourceCollection()
  *
- * @method $this setId(string $value)
  * @method bool hasRatingCodes()
  * @method bool hasStores()
  */

@@ -16,8 +16,6 @@ declare(strict_types=1);
  *
  * @method Mage_Sales_Model_Resource_Recurring_Profile _getResource()
  * @method Mage_Sales_Model_Resource_Recurring_Profile getResource()
- * @method float getBillingAmount()
- * @method float getTrialBillingAmount()
  */
 class Mage_Sales_Model_Recurring_Profile extends Mage_Payment_Model_Recurring_Profile
 {

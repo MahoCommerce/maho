@@ -7,6 +7,8 @@
  * SPDX-License-Identifier: OSL-3.0
  */
 
+declare(strict_types=1);
+
 namespace Maho\Data\Form\Element;
 
 use Maho\Data\Form\Element\AbstractElement;
@@ -30,7 +32,7 @@ class Time extends AbstractElement
     public function getName()
     {
         $name = parent::getName();
-        if (!str_contains($name, '[]')) {
+        if (!str_contains((string) $name, '[]')) {
             $name .= '[]';
         }
         return $name;
@@ -49,7 +51,7 @@ class Time extends AbstractElement
         $value_sec = 0;
 
         if ($value = $this->getValue()) {
-            $values = explode(',', $value);
+            $values = explode(',', (string) $value);
             if (count($values) === 3) {
                 $value_hrs = $values[0];
                 $value_min = $values[1];
@@ -60,21 +62,21 @@ class Time extends AbstractElement
         $html = '<input type="hidden" id="' . $this->getHtmlId() . '">';
         $html .= '<select name="' . $this->getName() . '" ' . $this->serialize($this->getHtmlAttributes()) . ' style="width:40px">' . "\n";
         for ($i = 0; $i < 24; $i++) {
-            $hour = str_pad($i, 2, '0', STR_PAD_LEFT);
+            $hour = str_pad((string) $i, 2, '0', STR_PAD_LEFT);
             $html .= '<option value="' . $hour . '" ' . (($value_hrs == $i) ? 'selected="selected"' : '') . '>' . $hour . '</option>';
         }
         $html .= '</select>' . "\n";
 
         $html .= '&nbsp;:&nbsp;<select name="' . $this->getName() . '" ' . $this->serialize($this->getHtmlAttributes()) . ' style="width:40px">' . "\n";
         for ($i = 0; $i < 60; $i++) {
-            $hour = str_pad($i, 2, '0', STR_PAD_LEFT);
+            $hour = str_pad((string) $i, 2, '0', STR_PAD_LEFT);
             $html .= '<option value="' . $hour . '" ' . (($value_min == $i) ? 'selected="selected"' : '') . '>' . $hour . '</option>';
         }
         $html .= '</select>' . "\n";
 
         $html .= '&nbsp;:&nbsp;<select name="' . $this->getName() . '" ' . $this->serialize($this->getHtmlAttributes()) . ' style="width:40px">' . "\n";
         for ($i = 0; $i < 60; $i++) {
-            $hour = str_pad($i, 2, '0', STR_PAD_LEFT);
+            $hour = str_pad((string) $i, 2, '0', STR_PAD_LEFT);
             $html .= '<option value="' . $hour . '" ' . (($value_sec == $i) ? 'selected="selected"' : '') . '>' . $hour . '</option>';
         }
         $html .= '</select>' . "\n";

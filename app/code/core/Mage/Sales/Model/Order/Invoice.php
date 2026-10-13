@@ -13,9 +13,6 @@ declare(strict_types=1);
 /**
  * @method Mage_Sales_Model_Resource_Order_Invoice _getResource()
  * @method Mage_Sales_Model_Resource_Order_Invoice getResource()
- * @method float getShippingAmount()
- * @method float getTotalQty()
- * @method float getDiscountAmount()
  */
 class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
 {

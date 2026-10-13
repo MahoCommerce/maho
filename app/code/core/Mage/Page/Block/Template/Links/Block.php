@@ -90,10 +90,9 @@ class Mage_Page_Block_Template_Links_Block extends Mage_Core_Block_Template
 
     /**
      * Return link position in link list
-     *
-     * @return int
      */
-    public function getPosition()
+    #[\Override]
+    public function getPosition(): int
     {
         return $this->_position;
     }

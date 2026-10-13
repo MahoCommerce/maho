@@ -28,7 +28,6 @@ declare(strict_types=1);
  * @method Mage_Core_Model_Resource_Email_Template _getResource()
  * @method Mage_Core_Model_Resource_Email_Template getResource()
  * @method int hasQueue()
- * @method setUseAbsoluteLinks(bool $value)
  */
 class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abstract
 {
@@ -771,6 +770,11 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
     {
         $value = $this->getData('use_absolute_links');
         return $value === null ? null : (bool) $value;
+    }
+
+    public function setUseAbsoluteLinks(?bool $value = true): static
+    {
+        return $this->setData('use_absolute_links', $value);
     }
 
 }

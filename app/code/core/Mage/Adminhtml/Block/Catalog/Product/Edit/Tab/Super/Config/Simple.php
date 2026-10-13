@@ -77,7 +77,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Super_Config_Simple extends 
                 )->setEntityAttribute($attribute);
 
                 if (in_array($attributeCode, $attributesConfig['autogenerate'])) {
-                    $element->setDisabled('true');
+                    $element->setDisabled(true);
                     $element->setValue($this->_getProduct()->getData($attributeCode));
                     $element->setAfterElementHtml(
                         '<input type="checkbox" id="simple_product_' . $attributeCode . '_autogenerate" '

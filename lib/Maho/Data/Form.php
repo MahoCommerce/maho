@@ -7,6 +7,8 @@
  * SPDX-License-Identifier: OSL-3.0
  */
 
+declare(strict_types=1);
+
 namespace Maho\Data;
 
 use Maho\Data\Form\AbstractForm;
@@ -14,14 +16,6 @@ use Maho\Data\Form\Element\Collection as ElementCollection;
 use Maho\Data\Form\Element\Renderer\RendererInterface;
 use Maho\Profiler;
 
-/**
- * @method string getHtmlIdPrefix()
- * @method $this setHtmlIdPrefix(string $value)
- * @method string getHtmlIdSuffix()
- * @method string getFieldNameSuffix()
- * @method setDataObject(\Mage_Core_Model_Abstract $value)
- * @method $this setFieldNameSuffix(string $value)
- */
 class Form extends AbstractForm
 {
     /**
@@ -106,7 +100,7 @@ class Form extends AbstractForm
     #[\Override]
     public function addElement(Form\Element\AbstractElement $element, $after = false)
     {
-        $this->checkElementId($element->getId());
+        $this->checkElementId((string) $element->getId());
         parent::addElement($element, $after);
         $this->addElementToCollection($element);
         return $this;
@@ -177,7 +171,7 @@ class Form extends AbstractForm
             return $this;
         }
         foreach ($values as $elementId => $value) {
-            if ($element = $this->getElement($elementId)) {
+            if ($element = $this->getElement((string) $elementId)) {
                 $element->setValue($value);
             }
         }
@@ -283,5 +277,43 @@ class Form extends AbstractForm
     public function getHtml()
     {
         return $this->toHtml();
+    }
+
+    public function getDataObject(): ?\Mage_Core_Model_Abstract
+    {
+        return $this->getData('data_object');
+    }
+
+    public function setDataObject(?\Mage_Core_Model_Abstract $value): static
+    {
+        return $this->setData('data_object', $value);
+    }
+
+    public function getFieldNameSuffix(): ?string
+    {
+        $value = $this->getData('field_name_suffix');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setFieldNameSuffix(?string $value): static
+    {
+        return $this->setData('field_name_suffix', $value);
+    }
+
+    public function getHtmlIdPrefix(): ?string
+    {
+        $value = $this->getData('html_id_prefix');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setHtmlIdPrefix(?string $value): static
+    {
+        return $this->setData('html_id_prefix', $value);
+    }
+
+    public function getHtmlIdSuffix(): ?string
+    {
+        $value = $this->getData('html_id_suffix');
+        return $value === null ? null : (string) $value;
     }
 }

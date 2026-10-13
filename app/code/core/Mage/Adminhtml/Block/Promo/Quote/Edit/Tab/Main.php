@@ -115,7 +115,8 @@ class Mage_Adminhtml_Block_Promo_Quote_Edit_Tab_Main extends Mage_Adminhtml_Bloc
                 'name'     => 'website_ids[]',
                 'value'    => $websiteId,
             ]);
-            $model->setWebsiteIds($websiteId);
+            // The hidden field reads this key through setValues(), and it renders a scalar only
+            $model->setData('website_ids', $websiteId);
         } else {
             $field = $fieldset->addField('website_ids', 'multiselect', [
                 'name'     => 'website_ids[]',

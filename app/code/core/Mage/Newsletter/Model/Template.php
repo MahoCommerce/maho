@@ -245,10 +245,9 @@ class Mage_Newsletter_Model_Template extends Mage_Core_Model_Email_Template_Abst
 
     /**
      * Retrieve template text wrapper
-     *
-     * @return string
      */
-    public function getTemplateText()
+    #[\Override]
+    public function getTemplateText(): ?string
     {
         if (!$this->getData('template_text') && !$this->getId()) {
             $this->setData(
@@ -257,7 +256,7 @@ class Mage_Newsletter_Model_Template extends Mage_Core_Model_Email_Template_Abst
             );
         }
 
-        return $this->getData('template_text');
+        return parent::getTemplateText();
     }
 
     public function getAddedAt(): ?string

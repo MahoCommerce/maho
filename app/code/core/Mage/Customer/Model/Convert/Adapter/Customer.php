@@ -356,7 +356,7 @@ class Mage_Customer_Model_Convert_Adapter_Customer extends Mage_Eav_Model_Conver
 
         $collections = $this->getData();
         if ($collections instanceof Mage_Customer_Model_Entity_Customer_Collection) {
-            $collections = [$collections->getEntity()->getStoreId() => $collections];
+            $collections = [Mage_Core_Model_App::ADMIN_STORE_ID => $collections];
         } elseif (!is_array($collections)) {
             $this->addException(Mage::helper('customer')->__('No customer collections found'), Mage_Dataflow_Model_Convert_Exception::FATAL);
         }

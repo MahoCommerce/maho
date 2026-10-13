@@ -18,7 +18,6 @@ declare(strict_types=1);
  * @method Mage_Newsletter_Model_Resource_Subscriber _getResource()
  * @method Mage_Newsletter_Model_Resource_Subscriber getResource()
  * @method bool hasCheckCode()
- * @method setImportMode(bool $value)
  * @method bool hasCustomerFirstname()
  * @method bool hasCustomerLastname()
  */
@@ -607,6 +606,11 @@ class Mage_Newsletter_Model_Subscriber extends Mage_Core_Model_Abstract
     {
         $value = $this->getData('import_mode');
         return $value === null ? null : (bool) $value;
+    }
+
+    public function setImportMode(?bool $value = true): static
+    {
+        return $this->setData('import_mode', $value);
     }
 
     public function getName(): ?string

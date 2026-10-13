@@ -7,13 +7,12 @@
  * SPDX-License-Identifier: OSL-3.0
  */
 
+declare(strict_types=1);
+
 namespace Maho\Data\Form\Element;
 
 use Maho\Data\Form\Element\AbstractElement;
 
-/**
- * @method bool getDisabled()
- */
 class Image extends AbstractElement
 {
     /**
@@ -120,5 +119,11 @@ class Image extends AbstractElement
     public function getName()
     {
         return  $this->getData('name');
+    }
+
+    public function getDisabled(): ?bool
+    {
+        $value = $this->getData('disabled');
+        return $value === null ? null : (bool) $value;
     }
 }

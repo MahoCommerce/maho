@@ -8,6 +8,8 @@
  * @package Mage_Adminhtml
  */
 
+declare(strict_types=1);
+
 class Mage_Adminhtml_Block_System_Store_Delete extends Mage_Adminhtml_Block_Widget_Form_Container
 {
     /**

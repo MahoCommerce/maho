@@ -7,13 +7,12 @@
  * SPDX-License-Identifier: OSL-3.0
  */
 
+declare(strict_types=1);
+
 namespace Maho\Data\Form\Element;
 
 use Maho\Data\Form\Element\AbstractElement;
 
-/**
- * @method string getBeforeElementHtml()
- */
 class Link extends AbstractElement
 {
     /**
@@ -53,5 +52,11 @@ class Link extends AbstractElement
             'tabindex', 'title', 'xml:lang', 'onblur', 'onclick', 'ondblclick',
             'onfocus', 'onmousedown', 'onmousemove', 'onmouseout', 'onmouseover',
             'onmouseup', 'onkeydown', 'onkeypress', 'onkeyup'];
+    }
+
+    public function getBeforeElementHtml(): ?string
+    {
+        $value = $this->getData('before_element_html');
+        return $value === null ? null : (string) $value;
     }
 }

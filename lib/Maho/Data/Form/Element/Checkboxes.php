@@ -7,13 +7,12 @@
  * SPDX-License-Identifier: OSL-3.0
  */
 
+declare(strict_types=1);
+
 namespace Maho\Data\Form\Element;
 
 use Maho\Data\Form\Element\AbstractElement;
 
-/**
- * @method array<int, string>|string getOptions()
- */
 class Checkboxes extends AbstractElement
 {
     /**
@@ -50,11 +49,7 @@ class Checkboxes extends AbstractElement
         $values  = [];
 
         if ($this->getValues()) {
-            if (!is_array($this->getValues())) {
-                $options = [$this->getValues()];
-            } else {
-                $options = $this->getValues();
-            }
+            $options = $this->getValues();
         } elseif ($this->getOptions() && is_array($this->getOptions())) {
             $options = $this->getOptions();
         }
@@ -152,7 +147,7 @@ class Checkboxes extends AbstractElement
     public function getOnclick($value)
     {
         if ($onclick = $this->getData('onclick')) {
-            return str_replace('$value', $value, $onclick);
+            return str_replace('$value', (string) $value, $onclick);
         }
         return;
     }
@@ -164,7 +159,7 @@ class Checkboxes extends AbstractElement
     public function getOnchange($value)
     {
         if ($onchange = $this->getData('onchange')) {
-            return str_replace('$value', $value, $onchange);
+            return str_replace('$value', (string) $value, $onchange);
         }
         return;
     }
@@ -195,5 +190,10 @@ class Checkboxes extends AbstractElement
             . ' <label for="' . $id . '">' . $option['label'] . '</label></li>'
             . "\n";
         return $html;
+    }
+
+    public function getOptions(): array|string|null
+    {
+        return $this->getData('options');
     }
 }

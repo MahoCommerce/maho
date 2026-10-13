@@ -91,12 +91,14 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
         return $this->hasData('source_conditions_serialized');
     }
 
+    #[\Override]
     public function getConditionsSerialized(): string
     {
         return (string) $this->getData('source_conditions_serialized');
     }
 
-    public function setConditionsSerialized(string $value): self
+    #[\Override]
+    public function setConditionsSerialized(?string $value): static
     {
         return $this->setData('source_conditions_serialized', $value);
     }
@@ -111,12 +113,14 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
         return $this->hasData('target_conditions_serialized');
     }
 
+    #[\Override]
     public function getActionsSerialized(): string
     {
         return (string) $this->getData('target_conditions_serialized');
     }
 
-    public function setActionsSerialized(string $value): self
+    #[\Override]
+    public function setActionsSerialized(?string $value): static
     {
         return $this->setData('target_conditions_serialized', $value);
     }

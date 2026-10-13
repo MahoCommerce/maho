@@ -8,10 +8,6 @@
  * @package Mage_Catalog
  */
 
-/**
- * @method int getStoreId()
- * @method bool getUseDataSharing()
- */
 abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entity_Abstract
 {
     /**

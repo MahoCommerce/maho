@@ -660,11 +660,6 @@ parameters:
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Grid.php
 
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Catalog_Product_Helper_Form_Gallery::getLabel() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Helper/Form/Gallery.php
 
 		-
 			rawMessage: 'Method Mage_Adminhtml_Block_Catalog_Product_Helper_Form_Price::_getTaxObservingCode() has parameter $attribute with no type specified.'
@@ -10716,11 +10711,6 @@ parameters:
 			count: 1
 			path: app/code/core/Mage/Downloadable/controllers/DownloadController.php
 
-		-
-			rawMessage: 'Parameter #1 $readonly of method Maho\Data\Form\AbstractForm::setReadonly() expects bool, int given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Eav/Block/Adminhtml/Attribute/Edit/Main/Abstract.php
 
 		-
 			rawMessage: Property Mage_Eav_Block_Adminhtml_Attribute_Edit_Main_Abstract::$_attribute has no type specified.
@@ -10861,44 +10851,8 @@ parameters:
 			path: app/code/core/Mage/Eav/Model/Convert/Adapter/Entity.php
 
 		-
-			rawMessage: Binary operation "." between Mage_Eav_Model_Entity_Interface and '_collection' results in an error.
-			identifier: binaryOp.invalid
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Convert/Adapter/Grid.php
-
-		-
-			rawMessage: 'Cannot call method addData() on Mage_Core_Model_Resource_Db_Collection_Abstract|false.'
-			identifier: method.nonObject
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Convert/Adapter/Grid.php
-
-		-
-			rawMessage: 'Cannot call method getId() on Mage_Core_Model_Resource_Db_Collection_Abstract|false.'
-			identifier: method.nonObject
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Convert/Adapter/Grid.php
-
-		-
-			rawMessage: 'Parameter #1 $modelAlias of static method Mage::getResourceModel() expects string, Mage_Eav_Model_Entity_Interface given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Convert/Adapter/Grid.php
-
-		-
 			rawMessage: Property Mage_Eav_Model_Convert_Adapter_Grid::$_entity has no type specified.
 			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Convert/Adapter/Grid.php
-
-		-
-			rawMessage: Variable $collection might not be defined.
-			identifier: variable.undefined
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Convert/Adapter/Grid.php
-
-		-
-			rawMessage: Variable $entity might not be defined.
-			identifier: variable.undefined
 			count: 1
 			path: app/code/core/Mage/Eav/Model/Convert/Adapter/Grid.php
 
@@ -15889,11 +15843,6 @@ parameters:
 			count: 1
 			path: lib/Maho/Data/Form/Element/Collection.php
 
-		-
-			rawMessage: 'Parameter #1 $value of method Maho\Data\Form\Element\AbstractElement::setContainer() expects Maho\Data\Form, Maho\Data\Form\AbstractForm given.'
-			identifier: argument.type
-			count: 1
-			path: lib/Maho/Data/Form/Element/Collection.php
 
 		-
 			rawMessage: Access to an undefined property Maho\Data\Form\Element\Fieldset::$_sortDirection.
@@ -15931,17 +15880,7 @@ parameters:
 			count: 1
 			path: lib/Maho/Data/Form/Element/Select.php
 
-		-
-			rawMessage: 'Parameter #1 $string of function str_pad expects string, int<0, 23> given.'
-			identifier: argument.type
-			count: 1
-			path: lib/Maho/Data/Form/Element/Time.php
 
-		-
-			rawMessage: 'Parameter #1 $string of function str_pad expects string, int<0, 59> given.'
-			identifier: argument.type
-			count: 2
-			path: lib/Maho/Data/Form/Element/Time.php
 
 		-
 			rawMessage: 'Method Maho\Data\Tree::copyNodeTo() has no return type specified.'

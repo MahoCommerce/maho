@@ -20,7 +20,7 @@
 "A joint field with this alias (%s) is already declared","A joint field with this alias (%s) is already declared"
 "An error occurred while loading a record, aborting. Error: %s","An error occurred while loading a record, aborting. Error: %s"
 "An error occurred while loading the collection, aborting. Error: %s","An error occurred while loading the collection, aborting. Error: %s"
-"An error occurred while saving a record, aborting. Error: ","An error occurred while saving a record, aborting. Error: "
+"An error occurred while saving a record, aborting. Error: %s","An error occurred while saving a record, aborting. Error: %s"
 "Are you sure you want to delete this set? Type ""confirm"" to proceed.","Are you sure you want to delete this set? Type ""confirm"" to proceed."
 "Attempt to add an invalid object","Attempt to add an invalid object"
 "Attribute '%s' used in configurable products","Attribute '%s' used in configurable products"
