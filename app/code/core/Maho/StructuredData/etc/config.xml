@@ -60,6 +60,7 @@ SPDX-License-Identifier: AFL-3.0
                 </organization>
                 <shipping>
                     <rate/>
+                    <carriers/>
                     <handling_min/>
                     <handling_max/>
                     <transit_min/>

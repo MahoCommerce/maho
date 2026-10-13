@@ -21,6 +21,9 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
     /** Cap the number of hasVariant nodes emitted, mirroring REVIEWS_LIMIT, to bound page weight. */
     protected const VARIANTS_LIMIT = 100;
 
+    /** @var array<string, array<string, float>> the shipping rates for each product weight and final price */
+    protected array $_shippingRates = [];
+
     #[\Override]
     protected string $_eventObject = 'product';
 
@@ -577,10 +580,11 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
     }
 
     /**
-     * Build the OfferShippingDetails node. Empty for virtual products and when no rate is
-     * derivable or configured, so an invented rate is never advertised.
+     * Build one OfferShippingDetails node for each rate. Empty for virtual products and when no
+     * rate is derivable or configured, so an invented rate is never advertised. Google reads only
+     * one shippingRate in each node, so the countries with another rate get their own node.
      *
-     * @return array<string, mixed>
+     * @return array<int|string, mixed> one node, or a list of nodes when the rates differ
      */
     protected function _getShippingDetails(Mage_Catalog_Model_Product $product, string $currency): array
     {
@@ -589,36 +593,27 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
         }
 
         $helper = Mage::helper('structureddata');
-        $rate = $helper->getShippingRate($product);
-        if ($rate === null) {
+
+        // Variants often have the same weight and price, so they share one rate calculation.
+        $key = $product->getWeight() . '|' . $product->getFinalPrice();
+        $this->_shippingRates[$key] ??= $helper->getShippingRates($product);
+
+        $countriesByRate = [];
+        foreach ($this->_shippingRates[$key] as $country => $rate) {
+            $countriesByRate[$helper->formatPrice($rate)][] = (string) $country;
+        }
+        // Google requires shippingDestination inside OfferShippingDetails, so a rate without a
+        // country gives no node.
+        if ($countriesByRate === []) {
             return [];
         }
 
-        // Google requires shippingDestination inside OfferShippingDetails, so without a
-        // resolvable country list the node is worth less than no node.
-        $countries = $helper->getShippingCountries($product);
-        if ($countries === []) {
-            return [];
-        }
-
-        $details = [
-            '@type' => 'OfferShippingDetails',
-            'shippingRate' => [
-                '@type' => 'MonetaryAmount',
-                'value' => $helper->formatPrice($rate),
-                'currency' => $currency,
-            ],
-            'shippingDestination' => [
-                '@type' => 'DefinedRegion',
-                'addressCountry' => count($countries) === 1 ? $countries[0] : $countries,
-            ],
-        ];
-
+        $shared = [];
         // For a physical product the shipping weight is the same attribute, so this is accurate
         // rather than a guess. Google documents no reader for it and ignores what it does not read.
         $weight = $helper->getWeightData($product);
         if ($weight !== []) {
-            $details['weight'] = $weight;
+            $shared['weight'] = $weight;
         }
 
         $deliveryTime = [];
@@ -633,10 +628,26 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
             }
         }
         if ($deliveryTime !== []) {
-            $details['deliveryTime'] = ['@type' => 'ShippingDeliveryTime'] + $deliveryTime;
+            $shared['deliveryTime'] = ['@type' => 'ShippingDeliveryTime'] + $deliveryTime;
         }
 
-        return $details;
+        $nodes = [];
+        foreach ($countriesByRate as $rate => $countries) {
+            $nodes[] = [
+                '@type' => 'OfferShippingDetails',
+                'shippingRate' => [
+                    '@type' => 'MonetaryAmount',
+                    'value' => (string) $rate,
+                    'currency' => $currency,
+                ],
+                'shippingDestination' => [
+                    '@type' => 'DefinedRegion',
+                    'addressCountry' => count($countries) === 1 ? $countries[0] : $countries,
+                ],
+            ] + $shared;
+        }
+
+        return count($nodes) === 1 ? $nodes[0] : $nodes;
     }
 
     /**

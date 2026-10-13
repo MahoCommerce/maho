@@ -1604,6 +1604,52 @@ it('hands a page action to the browser', function (): void {
     }
 });
 
+it('fills a comment form and submits it in one page action', function (): void {
+    $admin = aiChatAdmin('ai_chat_comment', ['all']);
+    try {
+        aiChatLogin($admin);
+        $steps = [
+            ['action' => 'set_field', 'target' => 'Comment Text', 'value' => 'ciao come stai'],
+            ['action' => 'set_field', 'target' => 'Notify Customer by Email', 'value' => 'true'],
+            ['action' => 'set_field', 'target' => 'Visible on Frontend', 'value' => 'true'],
+            ['action' => 'click', 'target' => 'Submit Comment', 'value' => null],
+        ];
+        AiChatScript::reset(new ToolCallResult([new ToolCall('call_c1', 'admin_page_action', ['steps' => $steps])]), new TextResult('Adding the comment.'));
+
+        $result = aiChatRequest('/api/admin/ai/chat', ['message' => 'add a comment to this invoice', 'context' => ['route' => 'sales_order_invoice/view']]);
+
+        expect(aiChatEvents($result['events'], 'tool_result')[0]['ok'])->toBeTrue($result['raw']);
+        expect(aiChatEvents($result['events'], 'page_action')[0]['steps'])->toBe($steps);
+    } finally {
+        aiChatDeleteConversations((int) $admin->getId());
+        aiChatDeleteAdmin($admin);
+    }
+});
+
+it('tells the model that the administrator opened another page since the last message', function (): void {
+    $admin = aiChatAdmin('ai_chat_moved', ['all']);
+    try {
+        aiChatLogin($admin);
+        AiChatScript::reset(new TextResult('Done.'));
+        $first = aiChatRequest('/api/admin/ai/chat', ['message' => 'add a comment to this order', 'context' => ['route' => 'sales_order/view', 'entity_type' => 'order', 'entity_id' => 302]]);
+        $conversationId = (int) aiChatEvents($first['events'], 'done')[0]['conversation_id'];
+        expect((string) AiChatScript::$lastInput->getSystemMessage()?->getContent())->not->toContain('The last message came from');
+
+        AiChatScript::reset(new TextResult('Done.'));
+        aiChatRequest('/api/admin/ai/chat', ['message' => 'add a comment to this invoice', 'conversation_id' => $conversationId, 'context' => ['route' => 'sales_order_invoice/view', 'entity_type' => 'invoice', 'entity_id' => 274]]);
+        expect((string) AiChatScript::$lastInput->getSystemMessage()?->getContent())->toContain('The last message came from the admin page "sales_order/view", which shows order with ID 302.');
+        $conversation = Mage::getModel('ai/conversation')->load($conversationId);
+        expect([$conversation->getContextRoute(), $conversation->getContextEntityType(), $conversation->getContextEntityId()])->toBe(['sales_order_invoice/view', 'invoice', 274]);
+
+        AiChatScript::reset(new TextResult('Done.'));
+        aiChatRequest('/api/admin/ai/chat', ['message' => 'thanks', 'conversation_id' => $conversationId, 'context' => ['route' => 'sales_order_invoice/view', 'entity_type' => 'invoice', 'entity_id' => 274]]);
+        expect((string) AiChatScript::$lastInput->getSystemMessage()?->getContent())->not->toContain('The last message came from');
+    } finally {
+        aiChatDeleteConversations((int) $admin->getId());
+        aiChatDeleteAdmin($admin);
+    }
+});
+
 it('reads the text of the open form and hands the text corrections to the browser', function (): void {
     $admin = aiChatAdmin('ai_chat_form', ['all']);
     $form = [
@@ -1690,6 +1736,83 @@ it('hands the opening of a grid row to the browser by its number', function (): 
             ['action' => 'open_row', 'target' => '3', 'value' => null],
         ]);
     } finally {
+        aiChatDeleteConversations((int) $admin->getId());
+        aiChatDeleteAdmin($admin);
+    }
+});
+
+it('offers every closed list as strings and every array with its items, as Gemini requires', function (): void {
+    $admin = aiChatAdmin('ai_chat_enum', ['all']);
+    try {
+        aiChatLogin($admin);
+        AiChatScript::reset(
+            new ToolCallResult([new ToolCall('call_e0', 'enable_tools', ['sections' => ['sales', 'customers']])]),
+            new TextResult('The tools are loaded.'),
+        );
+
+        $result = aiChatRequest('/api/admin/ai/chat', ['message' => 'Create a cart price rule', 'context' => ['route' => 'promo_quote/index']]);
+
+        expect($result['status'])->toBe(200);
+        $schemas = AiChatScript::$offeredSchemas[1];
+        $rule = $schemas['sales_cart_price_rules_create']['properties'] ?? [];
+        expect($rule['websiteIds']['items'])->toMatchArray(['type' => 'string']);
+        expect($rule['websiteIds']['items']['enum'])->toContain((string) Mage::app()->getDefaultStoreView()->getWebsiteId());
+        expect($rule['simpleFreeShipping'])->toMatchArray(['type' => 'string', 'enum' => ['0', '1', '2']]);
+        // Street is string[]|string: the array variant of the union keeps its items.
+        $streets = array_filter(array_map(static fn(array $schema): ?array => $schema['properties']['street'] ?? null, $schemas));
+        expect($streets)->not->toBeEmpty();
+        foreach ($streets as $street) {
+            expect($street)->toMatchArray(['type' => 'array', 'items' => ['type' => 'string', 'description' => '']]);
+        }
+        $check = function (array $schema, string $path) use (&$check): void {
+            if (($schema['type'] ?? null) === 'array') {
+                expect($schema['items'] ?? null)->toBeArray("An array without items at $path");
+            }
+            if (isset($schema['enum'])) {
+                expect($schema['type'] ?? null)->toBe('string', "An enum on a type other than string at $path");
+            }
+            foreach ($schema['enum'] ?? [] as $value) {
+                expect($value)->toBeString("A value that is not a string in the enum at $path");
+            }
+            foreach ($schema['properties'] ?? [] as $name => $child) {
+                $check($child, "$path.$name");
+            }
+            if (is_array($schema['items'] ?? null)) {
+                $check($schema['items'], "$path.items");
+            }
+        };
+        foreach ($schemas as $name => $schema) {
+            $check($schema, $name);
+        }
+    } finally {
+        aiChatDeleteConversations((int) $admin->getId());
+        aiChatDeleteAdmin($admin);
+    }
+});
+
+it('turns the string that the model picks from an integer enum back into the integer', function (): void {
+    $admin = aiChatAdmin('ai_chat_enum_value', ['all']);
+    $taxClassId = (string) Mage::getModel('tax/class_source_customer')->getAllOptions()[0]['value'];
+    try {
+        aiChatLogin($admin);
+        AiChatScript::reset(
+            new ToolCallResult([new ToolCall('call_g1', 'customers_customer_groups_create', ['code' => 'ai_chat_enum_value', 'taxClassId' => $taxClassId])]),
+        );
+        $first = aiChatRequest('/api/admin/ai/chat', ['message' => 'Create a customer group', 'context' => ['route' => 'customer_group/index']]);
+        expect(AiChatScript::$offeredSchemas[0]['customers_customer_groups_create']['properties']['taxClassId']['enum'] ?? null)->toContain($taxClassId);
+        $conversationId = (int) aiChatEvents($first['events'], 'confirm')[0]['conversation_id'];
+
+        AiChatScript::reset(new TextResult('Created.'));
+        $approved = aiChatRequest('/api/admin/ai/chat/confirm', ['conversation_id' => $conversationId, 'decisions' => ['call_g1' => true]]);
+
+        expect(aiChatEvents($approved['events'], 'tool_result')[0]['ok'])->toBeTrue($approved['raw']);
+        $group = Mage::getModel('customer/group')->load('ai_chat_enum_value', 'customer_group_code');
+        expect((int) $group->getTaxClassId())->toBe((int) $taxClassId);
+    } finally {
+        $created = Mage::getModel('customer/group')->load('ai_chat_enum_value', 'customer_group_code');
+        if ($created->getId()) {
+            $created->delete();
+        }
         aiChatDeleteConversations((int) $admin->getId());
         aiChatDeleteAdmin($admin);
     }

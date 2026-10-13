@@ -79,6 +79,14 @@ final class Assistant
         }
 
         $conversation->cancelPendingWrites();
+        $previousPage = $conversation->moveToPage(
+            (string) ($pageContext['route'] ?? ''),
+            (string) ($pageContext['entity_type'] ?? ''),
+            is_int($pageContext['entity_id'] ?? null) ? $pageContext['entity_id'] : null,
+        );
+        if ($previousPage !== null) {
+            $pageContext['previous_page'] = $previousPage;
+        }
         if ($conversation->getStatus() === Maho_Ai_Model_Conversation::STATUS_ARCHIVED) {
             // The administrator answers an archived run: it is a conversation of the panel again.
             $conversation->setStatus(Maho_Ai_Model_Conversation::STATUS_ACTIVE)->save();

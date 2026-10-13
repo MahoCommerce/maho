@@ -16,6 +16,7 @@ class Mage_CatalogInventory_Helper_Data extends Mage_Core_Helper_Abstract
      * Path to configuration option 'Display product stock status'
      */
     public const XML_PATH_DISPLAY_PRODUCT_STOCK_STATUS = 'cataloginventory/options/display_product_stock_status';
+    public const XML_PATH_STOCK_THRESHOLD_QTY = 'cataloginventory/options/stock_threshold_qty';
 
     /**
      * Error codes, that Catalog Inventory module can set to quote or quote items
@@ -120,5 +121,18 @@ class Mage_CatalogInventory_Helper_Data extends Mage_Core_Helper_Abstract
     public function isDisplayProductStockStatus()
     {
         return Mage::getStoreConfigFlag(self::XML_PATH_DISPLAY_PRODUCT_STOCK_STATUS);
+    }
+
+    /**
+     * Quantity of the stock item that the storefront shows, or null when the storefront hides it.
+     * The storefront shows a quantity above 0 and at or below the "Only X Left" threshold.
+     */
+    public function getVisibleQty(Mage_CatalogInventory_Model_Stock_Item $stockItem): ?float
+    {
+        if (!$stockItem->getManageStock() || !$stockItem->getIsInStock()) {
+            return null;
+        }
+        $qty = (float) $stockItem->getQty();
+        return $qty > 0 && $qty <= Mage::getStoreConfigAsFloat(self::XML_PATH_STOCK_THRESHOLD_QTY) ? $qty : null;
     }
 }

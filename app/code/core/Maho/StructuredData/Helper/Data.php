@@ -23,6 +23,7 @@ class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
     public const XML_PATH_PRODUCT_CONDITION_ATTRIBUTE = 'catalog/structured_data/product/condition_attribute';
     public const XML_PATH_ORGANIZATION_TYPE = 'catalog/structured_data/organization/type';
     public const XML_PATH_SHIPPING_RATE = 'catalog/structured_data/shipping/rate';
+    public const XML_PATH_SHIPPING_CARRIERS = 'catalog/structured_data/shipping/carriers';
     public const XML_PATH_SHIPPING_HANDLING_MIN = 'catalog/structured_data/shipping/handling_min';
     public const XML_PATH_SHIPPING_HANDLING_MAX = 'catalog/structured_data/shipping/handling_max';
     public const XML_PATH_SHIPPING_TRANSIT_MIN = 'catalog/structured_data/shipping/transit_min';
@@ -35,6 +36,9 @@ class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
     public const XML_PATH_WEIGHT_UNIT = Mage_Core_Model_Locale::XML_PATH_WEIGHT_UNIT;
 
     public const SCHEMA = 'https://schema.org/';
+
+    /** Carriers that calculate a rate from the configuration and the database, with no call to an outside service. */
+    public const DEFAULT_SHIPPING_CARRIERS = ['freeshipping', 'flatrate', 'tablerate'];
 
     /** UN/CEFACT codes for the weight units a store can declare, as Google expects them. */
     public const WEIGHT_UNIT_CODES = [
@@ -351,27 +355,117 @@ class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Countries the advertised rate ships to, from the settings that already govern shipping:
-     * the rate-source carrier's "Ship to Applicable Countries" restriction when set, else the
-     * store's shipping country list (general/country/allow_shipping), else the shipping origin.
-     * The general allowed-countries list is deliberately not used: it is an address allow-list
-     * that defaults to the whole world, not a shipping promise.
+     * The shipping rate to advertise for each destination country, in the current display currency.
+     * A configured Shipping Rate applies to each store shipping country. Otherwise each country gets
+     * the lowest rate that the carriers give for one unit of the product. A country without a rate
+     * is left out, so an invented rate is never advertised.
+     *
+     * @return array<string, float> the rate for each country code
+     */
+    public function getShippingRates(Mage_Catalog_Model_Product $product): array
+    {
+        $store = Mage::app()->getStore($product->getStoreId());
+
+        $override = trim((string) Mage::getStoreConfig(self::XML_PATH_SHIPPING_RATE, $store));
+        $rates = $override !== '' && is_numeric($override)
+            ? array_fill_keys($this->_getStoreShippingCountries($store), max(0.0, (float) $override))
+            : $this->_collectCarrierRates($product);
+
+        return array_map(static fn(float $rate): float => (float) $store->convertPrice($rate), $rates);
+    }
+
+    /**
+     * The carriers that give the derived rate: the selected carriers, or DEFAULT_SHIPPING_CARRIERS
+     * when no carrier is selected.
      *
      * @return array<int, string>
      */
-    public function getShippingCountries(Mage_Catalog_Model_Product $product): array
+    public function getShippingCarriers(int|string|Mage_Core_Model_Store|null $store = null): array
     {
-        $store = $product->getStoreId();
+        $carriers = array_values(array_filter(
+            explode(',', (string) Mage::getStoreConfig(self::XML_PATH_SHIPPING_CARRIERS, $store)),
+            static fn(string $carrier): bool => $carrier !== '',
+        ));
+        return $carriers !== [] ? $carriers : self::DEFAULT_SHIPPING_CARRIERS;
+    }
 
-        $override = trim((string) Mage::getStoreConfig(self::XML_PATH_SHIPPING_RATE, $store));
-        $carrier = ($override !== '' && is_numeric($override)) ? null : $this->_resolveAutoShippingCarrier($product);
-        if ($carrier !== null && Mage::getStoreConfigFlag("carriers/{$carrier}/sallowspecific", $store)) {
-            $countries = $this->_parseCountryList((string) Mage::getStoreConfig("carriers/{$carrier}/specificcountry", $store));
-            if ($countries !== []) {
-                return $countries;
+    /**
+     * Ask each active carrier for the rate of one unit of the product. Ask once for each country
+     * that a carrier ships to, and keep the lowest rate of each country.
+     *
+     * @return array<string, float> the rate in base currency for each country code
+     */
+    protected function _collectCarrierRates(Mage_Catalog_Model_Product $product): array
+    {
+        $store = Mage::app()->getStore($product->getStoreId());
+        $price = (float) $product->getFinalPrice();
+        $weight = (float) $product->getWeight();
+        $carriers = array_filter(
+            $this->getShippingCarriers($store),
+            static fn(string $carrier): bool => Mage::getStoreConfigFlag("carriers/{$carrier}/active", $store),
+        );
+        // A grouped product or a dynamic bundle has no weight, and Table Rates would give the rate of 0 kg.
+        if ($weight <= 0 && $product->isComposite()) {
+            $carriers = array_intersect($carriers, ['freeshipping', 'flatrate']);
+        }
+
+        $countries = [];
+        foreach ($carriers as $carrier) {
+            $countries = [...$countries, ...$this->_getCarrierShippingCountries($carrier, $store)];
+        }
+
+        $request = Mage::getModel('shipping/rate_request')
+            ->setLimitCarrier(array_values($carriers))
+            ->setAllItems([])
+            ->setStoreId((int) $store->getId())
+            ->setWebsiteId((int) $store->getWebsiteId())
+            ->setBaseCurrency($store->getBaseCurrency())
+            ->setPackageCurrency($store->getCurrentCurrency())
+            ->setPackageQty(1.0)
+            ->setPackageWeight($weight)
+            ->setFreeMethodWeight($weight)
+            ->setPackageValue($price)
+            ->setPackageValueWithDiscount($price)
+            ->setPackagePhysicalValue($price)
+            ->setBaseSubtotalInclTax($price);
+        $shipping = Mage::getModel('shipping/shipping');
+
+        $rates = [];
+        foreach (array_unique($countries) as $country) {
+            $shipping->resetResult();
+            $shipping->collectRates((clone $request)->setDestCountryId($country));
+            $cheapest = $shipping->getResult()->getCheapestRate();
+            if ($cheapest !== null) {
+                $rates[$country] = max(0.0, (float) $cheapest->getPrice());
             }
         }
 
+        return $rates;
+    }
+
+    /**
+     * The countries that a carrier ships to: its "Ship to Applicable Countries" list when it has
+     * one, else the store shipping countries.
+     *
+     * @return array<int, string>
+     */
+    protected function _getCarrierShippingCountries(string $carrier, Mage_Core_Model_Store $store): array
+    {
+        if (Mage::getStoreConfigFlag("carriers/{$carrier}/sallowspecific", $store)) {
+            return $this->_parseCountryList((string) Mage::getStoreConfig("carriers/{$carrier}/specificcountry", $store));
+        }
+        return $this->_getStoreShippingCountries($store);
+    }
+
+    /**
+     * The store shipping country list (general/country/allow_shipping), else the shipping origin.
+     * The general allowed-countries list is not used: it is a list of allowed addresses that
+     * defaults to the whole world, not a promise to ship there.
+     *
+     * @return array<int, string>
+     */
+    protected function _getStoreShippingCountries(Mage_Core_Model_Store $store): array
+    {
         $countries = $this->_parseCountryList((string) Mage::getStoreConfig('general/country/allow_shipping', $store));
         if ($countries !== []) {
             return $countries;
@@ -379,69 +473,6 @@ class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
 
         $origin = trim((string) Mage::getStoreConfig('shipping/origin/country_id', $store));
         return $origin !== '' ? [$origin] : [];
-    }
-
-    /**
-     * Derive a single-unit shipping rate (base currency) from the active flat-style carriers.
-     * Null means no honest rate can be derived (e.g. only table rates are active).
-     */
-    public function getAutoShippingRate(Mage_Catalog_Model_Product $product): ?float
-    {
-        $store = $product->getStoreId();
-
-        $carrier = $this->_resolveAutoShippingCarrier($product);
-        if ($carrier === 'freeshipping') {
-            return 0.0;
-        }
-        if ($carrier === 'flatrate') {
-            $rate = (float) Mage::getStoreConfig('carriers/flatrate/price', $store);
-            $fee = (float) Mage::getStoreConfig('carriers/flatrate/handling_fee', $store);
-            if ($fee > 0) {
-                $type = (string) Mage::getStoreConfig('carriers/flatrate/handling_type', $store);
-                $rate += $type === Mage_Shipping_Model_Carrier_Abstract::HANDLING_TYPE_PERCENT
-                    ? $rate * $fee / 100
-                    : $fee;
-            }
-            return max(0.0, $rate);
-        }
-
-        return null;
-    }
-
-    /**
-     * The flat-style carrier the auto-derived rate would come from, or null when none applies.
-     */
-    protected function _resolveAutoShippingCarrier(Mage_Catalog_Model_Product $product): ?string
-    {
-        $store = $product->getStoreId();
-
-        if (Mage::getStoreConfigFlag('carriers/freeshipping/active', $store)) {
-            $threshold = (float) Mage::getStoreConfig('carriers/freeshipping/free_shipping_subtotal', $store);
-            if ($threshold <= 0 || (float) $product->getFinalPrice() >= $threshold) {
-                return 'freeshipping';
-            }
-        }
-
-        return Mage::getStoreConfigFlag('carriers/flatrate/active', $store) ? 'flatrate' : null;
-    }
-
-    /**
-     * The shipping rate to advertise, in the current display currency: the configured override
-     * when set, otherwise derived from the active carriers. Null means "do not emit".
-     */
-    public function getShippingRate(Mage_Catalog_Model_Product $product): ?float
-    {
-        $override = trim((string) Mage::getStoreConfig(self::XML_PATH_SHIPPING_RATE, $product->getStoreId()));
-        if ($override !== '' && is_numeric($override)) {
-            $rate = max(0.0, (float) $override);
-        } else {
-            $rate = $this->getAutoShippingRate($product);
-            if ($rate === null) {
-                return null;
-            }
-        }
-
-        return (float) Mage::app()->getStore($product->getStoreId())->convertPrice($rate);
     }
 
     /**
