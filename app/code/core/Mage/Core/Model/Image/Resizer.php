@@ -167,7 +167,7 @@ class Mage_Core_Model_Image_Resizer
     public function queue(string $entity, array $files): void
     {
         $files = array_values(array_unique(array_filter($files, fn($file): bool => is_string($file) && $file !== '' && $file !== 'no_selection')));
-        if ($files === [] || !Mage::helper('core')->isModuleEnabled('Maho_Queue')) {
+        if ($files === []) {
             return;
         }
 
@@ -195,14 +195,10 @@ class Mage_Core_Model_Image_Resizer
     }
 
     /**
-     * Queue createAll() for $entity. Without the queue module, it runs now.
+     * Queue createAll() for $entity.
      */
     public function queueAll(string $entity): void
     {
-        if (!Mage::helper('core')->isModuleEnabled('Maho_Queue')) {
-            $this->createAll($entity);
-            return;
-        }
         \Maho\Queue\QueueManager::dispatch(new Mage_Core_Model_Image_ResizeAllMessage($entity), queue: self::QUEUE_NAME);
     }
 

@@ -222,8 +222,8 @@ abstract class Io implements IoInterface
 
     /**
      * The getimagesize() data of the file at $path on $mount, or false when it cannot be read.
-     * A remote mount reads the file once and keeps the data in the cache for a year, so a page
-     * render does not download it.
+     * A remote mount reads only the start of the file, where the size is, and keeps the data in
+     * the cache for a year, so a page render does not download the file.
      *
      * @param list<string> $cacheTags
      * @return array<int|string, mixed>|false
@@ -243,7 +243,16 @@ abstract class Io implements IoInterface
         }
 
         try {
-            $info = @getimagesizefromstring($mount->read($path));
+            $stream = $mount->readStream($path);
+            $head = '';
+            $info = false;
+            while (($info === false || $info[0] < 1 || $info[1] < 1)
+                && ($chunk = (string) stream_get_contents($stream, 65536)) !== ''
+            ) {
+                $head .= $chunk;
+                $info = @getimagesizefromstring($head);
+            }
+            fclose($stream);
         } catch (\League\Flysystem\FilesystemException) {
             return false;
         }
