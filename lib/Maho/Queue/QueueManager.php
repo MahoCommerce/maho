@@ -68,10 +68,6 @@ final class QueueManager
         ?string $dedupeKey = null,
         array $stamps = [],
     ): Envelope {
-        if (!\Mage::helper('core')->isModuleEnabled('Maho_Queue')) {
-            throw new \RuntimeException('Cannot dispatch queue message: the Maho_Queue module is disabled');
-        }
-
         $stamps[] = new QueueNameStamp($queue);
         if ($delaySeconds !== null && $delaySeconds > 0) {
             $stamps[] = new DelayStamp($delaySeconds * 1000);

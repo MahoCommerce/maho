@@ -10,6 +10,9 @@
 
 class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
 {
+    /** Modules that the core needs. Their <active> flag is always true. */
+    public const REQUIRED_MODULES = ['Maho_Queue'];
+
     public const MAGE_MODULES = [
         'Mage_Core' => 0,
         'Mage_Eav' => 1,
@@ -850,6 +853,12 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         foreach ($moduleFiles as $file) {
             $fileConfig->loadFile($file);
             $unsortedConfig->extend($fileConfig);
+        }
+
+        foreach (self::REQUIRED_MODULES as $moduleName) {
+            if ($unsortedConfig->getNode("modules/{$moduleName}")) {
+                $unsortedConfig->setNode("modules/{$moduleName}/active", 'true');
+            }
         }
 
         $moduleDepends = [];

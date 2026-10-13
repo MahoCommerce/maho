@@ -87,9 +87,6 @@ describe('Report statistics', function (): void {
     });
 
     it('queues a lifetime refresh once per report and runs it in the queue handler', function (): void {
-        if (!Mage::helper('core')->isModuleEnabled('Maho_Queue')) {
-            $this->markTestSkipped('Maho_Queue is disabled');
-        }
         ReportFixture::adapter()->update(ReportFixture::table('core/flag'), ['last_update' => '2001-01-01 00:00:00'], ['flag_code = ?' => Mage_Reports_Model_Flag::REPORT_PRODUCT_VIEWED_FLAG_CODE]);
         expect(reportStatisticsQueueRows())->toBe([]);
 

@@ -14,10 +14,8 @@ class Maho_Ai_Model_TaskRunner
     private const REQUEUE_BATCH = 100;
 
     /**
-     * Cron entry point. With the queue module, workers run the tasks, and this job only
-     * queues the pending ones again: a retry, a task the async queue held while it was off,
-     * or a lost message. Without the queue module, the job runs the pending tasks itself.
-     * An agent run ignores the async queue setting: the administrator asked for it.
+     * Cron entry point. Workers run the tasks, and this job only queues the pending ones again:
+     * a retry, a task the async queue held while it was off, or a lost message. An agent run ignores the async queue setting: the administrator asked for it.
      */
     #[Maho\Config\CronJob('ai_process_queue', configPath: 'ai/queue/cron_schedule')]
     public function processQueue(): void
@@ -26,11 +24,6 @@ class Maho_Ai_Model_TaskRunner
         $this->failLostAgentTasks();
         if ($enabled) {
             $this->recoverTimedOutTasks((int) Mage::getStoreConfig('ai/queue/task_timeout') ?: 120);
-        }
-
-        $queued = Mage::helper('core')->isModuleEnabled('Maho_Queue');
-        if (!$queued && !$enabled) {
-            return;
         }
 
         // Pending tasks, interactive first, then the oldest
@@ -44,17 +37,13 @@ class Maho_Ai_Model_TaskRunner
             )
             ->setOrder('priority_order', 'ASC')
             ->setOrder('created_at', 'ASC')
-            ->setPageSize($queued ? self::REQUEUE_BATCH : ((int) Mage::getStoreConfig('ai/queue/max_tasks_per_run') ?: 10));
+            ->setPageSize(self::REQUEUE_BATCH);
         if (!$enabled) {
             $collection->addFieldToFilter('task_type', Maho_Ai_Model_Task::TYPE_AGENT);
         }
 
         foreach ($collection as $task) {
-            if ($queued) {
-                $task->queue();
-            } elseif ($this->claim($task)) {
-                $this->executeTask($task);
-            }
+            $task->queue();
         }
     }
 
@@ -423,9 +412,6 @@ class Maho_Ai_Model_TaskRunner
      */
     private function failLostAgentTasks(): void
     {
-        if (!Mage::helper('core')->isModuleEnabled('Maho_Queue')) {
-            return;
-        }
         /** @var Maho_Ai_Model_Resource_Task_Collection $collection */
         $collection = Mage::getModel('ai/task')->getCollection();
         $collection->addFieldToFilter('task_type', Maho_Ai_Model_Task::TYPE_AGENT)

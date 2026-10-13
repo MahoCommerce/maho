@@ -38,9 +38,6 @@ function aiTaskQueueCleanup(): void
 }
 
 beforeEach(function (): void {
-    if (!Mage::helper('core')->isModuleEnabled('Maho_Queue')) {
-        $this->markTestSkipped('Maho_Queue is disabled');
-    }
     aiTaskQueueCleanup();
 });
 
