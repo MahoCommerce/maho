@@ -237,6 +237,7 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
             empty($items['js']) ? [] : $items['js'],
             empty($items['skin_js']) ? [] : $items['skin_js'],
         );
+        Mage::helper('core/minify')->sendEarlyHints();
 
         // other stuff
         if (!empty($items['other'])) {

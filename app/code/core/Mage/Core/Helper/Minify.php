@@ -22,6 +22,8 @@ class Mage_Core_Helper_Minify extends Mage_Core_Helper_Abstract
     private static array $processedCssFiles = [];
     private static array $processedJsFiles = [];
 
+    private bool $hasUnsentPreloadHeaders = false;
+
     /**
      * Check if CSS minification is enabled
      */
@@ -44,26 +46,26 @@ class Mage_Core_Helper_Minify extends Mage_Core_Helper_Abstract
     public function minifyCss(string $filePath): string
     {
         if (!$this->isCssMinificationEnabled()) {
-            $this->sendEarlyHint($filePath, 'style');
+            $this->addPreloadHeader($filePath, 'style');
             return $filePath;
         }
 
-        // Don't minify external URLs, but still send Early Hint
+        // Don't minify external URLs, but still preload them
         if ($this->isExternalUrl($filePath)) {
-            $this->sendEarlyHint($filePath, 'style');
+            $this->addPreloadHeader($filePath, 'style');
             return $filePath;
         }
 
         // Check runtime cache first
         if (isset(self::$processedCssFiles[$filePath])) {
-            $this->sendEarlyHint(self::$processedCssFiles[$filePath], 'style');
+            $this->addPreloadHeader(self::$processedCssFiles[$filePath], 'style');
             return self::$processedCssFiles[$filePath];
         }
 
         $result = $this->processFile($filePath, 'css');
         self::$processedCssFiles[$filePath] = $result;
 
-        $this->sendEarlyHint($result, 'style');
+        $this->addPreloadHeader($result, 'style');
         return $result;
     }
 
@@ -73,26 +75,26 @@ class Mage_Core_Helper_Minify extends Mage_Core_Helper_Abstract
     public function minifyJs(string $filePath): string
     {
         if (!$this->isJsMinificationEnabled()) {
-            $this->sendEarlyHint($filePath, 'script');
+            $this->addPreloadHeader($filePath, 'script');
             return $filePath;
         }
 
-        // Don't minify external URLs, but still send Early Hint
+        // Don't minify external URLs, but still preload them
         if ($this->isExternalUrl($filePath)) {
-            $this->sendEarlyHint($filePath, 'script');
+            $this->addPreloadHeader($filePath, 'script');
             return $filePath;
         }
 
         // Check runtime cache first
         if (isset(self::$processedJsFiles[$filePath])) {
-            $this->sendEarlyHint(self::$processedJsFiles[$filePath], 'script');
+            $this->addPreloadHeader(self::$processedJsFiles[$filePath], 'script');
             return self::$processedJsFiles[$filePath];
         }
 
         $result = $this->processFile($filePath, 'js');
         self::$processedJsFiles[$filePath] = $result;
 
-        $this->sendEarlyHint($result, 'script');
+        $this->addPreloadHeader($result, 'script');
         return $result;
     }
 
@@ -284,9 +286,9 @@ class Mage_Core_Helper_Minify extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Send preload hint with Early Hints support for FrankenPHP
+     * Add a preload Link header. sendEarlyHints() sends the 103 response for all of them.
      */
-    private function sendEarlyHint(string $url, string $as): void
+    private function addPreloadHeader(string $url, string $as): void
     {
         // Only send preload hints on frontend and if headers haven't been sent
         if (Mage::app()->getStore()->isAdmin() || headers_sent()) {
@@ -301,10 +303,21 @@ class Mage_Core_Helper_Minify extends Mage_Core_Helper_Abstract
             return;
         }
 
-        // Send Link header for preload
         header("Link: <{$url}>; rel=preload; as={$as}", false);
+        $this->hasUnsentPreloadHeaders = true;
+    }
 
-        // If running under FrankenPHP, send Early Hints
+    /**
+     * Send one 103 Early Hints response with the preload Link headers, under FrankenPHP.
+     * A 103 response repeats every header set so far, so send it once, after the last file.
+     */
+    public function sendEarlyHints(): void
+    {
+        if (!$this->hasUnsentPreloadHeaders || headers_sent()) {
+            return;
+        }
+        $this->hasUnsentPreloadHeaders = false;
+
         if (function_exists('headers_send')) {
             headers_send(103);
         }
