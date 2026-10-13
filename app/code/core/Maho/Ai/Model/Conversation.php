@@ -136,6 +136,27 @@ class Maho_Ai_Model_Conversation extends Mage_Core_Model_Abstract
         return $this->setData('context_entity_id', $value);
     }
 
+    /**
+     * Record the admin page of a new message. Return the page of the message before it when the
+     * administrator opened another page in between, and null when the page is the same.
+     *
+     * @return array{route: string, entity_type: string, entity_id: int|null}|null
+     */
+    public function moveToPage(string $route, string $entityType, ?int $entityId): ?array
+    {
+        $previous = ['route' => (string) $this->getContextRoute(), 'entity_type' => (string) $this->getContextEntityType(), 'entity_id' => $this->getContextEntityId()];
+        $current = ['route' => $route, 'entity_type' => $entityType, 'entity_id' => $entityId];
+        if ($previous === $current) {
+            return null;
+        }
+        $this->setContextRoute($route !== '' ? $route : null)
+            ->setContextEntityType($entityType !== '' ? $entityType : null)
+            ->setContextEntityId($entityId)
+            ->save();
+
+        return $previous['route'] === '' ? null : $previous;
+    }
+
     public function getLockedUntil(): ?string
     {
         $value = $this->getData('locked_until');

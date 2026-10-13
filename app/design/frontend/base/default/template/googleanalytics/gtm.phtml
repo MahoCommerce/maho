@@ -13,7 +13,6 @@ $_helper = $this->helper('googleanalytics');
 <?php if (!$this->helper('core/cookie')->isUserNotAllowSaveCookie()): ?>
     <?php if ($_helper->isUseGoogleTagManager()): ?>
         <?php $_gtmAccountId = $_helper->getGoogleTagManagerContainerId() ?>
-        <!-- BEGIN GOOGLE TAG MANAGER CODE -->
         <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
                     new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
                 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
@@ -21,6 +20,5 @@ $_helper = $this->helper('googleanalytics');
             })(window,document,'script','dataLayer','<?= $_gtmAccountId ?>');</script>
         <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=<?= $_gtmAccountId ?>"
                           height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-        <!-- END GOOGLE TAG MANAGER CODE -->
     <?php endif ?>
 <?php endif ?>
