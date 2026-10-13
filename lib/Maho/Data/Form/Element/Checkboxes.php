@@ -7,6 +7,8 @@
  * SPDX-License-Identifier: OSL-3.0
  */
 
+declare(strict_types=1);
+
 namespace Maho\Data\Form\Element;
 
 use Maho\Data\Form\Element\AbstractElement;
@@ -149,7 +151,7 @@ class Checkboxes extends AbstractElement
     public function getOnclick($value)
     {
         if ($onclick = $this->getData('onclick')) {
-            return str_replace('$value', $value, $onclick);
+            return str_replace('$value', (string) $value, $onclick);
         }
         return;
     }
@@ -161,7 +163,7 @@ class Checkboxes extends AbstractElement
     public function getOnchange($value)
     {
         if ($onchange = $this->getData('onchange')) {
-            return str_replace('$value', $value, $onchange);
+            return str_replace('$value', (string) $value, $onchange);
         }
         return;
     }

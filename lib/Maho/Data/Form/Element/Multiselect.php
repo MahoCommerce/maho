@@ -7,6 +7,8 @@
  * SPDX-License-Identifier: OSL-3.0
  */
 
+declare(strict_types=1);
+
 namespace Maho\Data\Form\Element;
 
 use Maho\Data\Form\Element\AbstractElement;
@@ -32,7 +34,7 @@ class Multiselect extends AbstractElement
     public function getName()
     {
         $name = parent::getName();
-        if (!str_contains($name, '[]')) {
+        if (!str_contains((string) $name, '[]')) {
             $name .= '[]';
         }
         return $name;

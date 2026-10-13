@@ -7,6 +7,8 @@
  * SPDX-License-Identifier: OSL-3.0
  */
 
+declare(strict_types=1);
+
 namespace Maho\Data\Form\Element;
 
 use Maho\Data\Form\Element\AbstractElement;
@@ -210,7 +212,7 @@ class Editor extends Textarea
             if (is_array($value) && isset($value['search']) && isset($value['subject'])) {
                 $subject = $value['subject'];
                 foreach ($value['search'] as $part) {
-                    $subject = str_replace('{{' . $part . '}}', $this->getDataUsingMethod($part), $subject);
+                    $subject = str_replace('{{' . $part . '}}', (string) $this->getDataUsingMethod($part), $subject);
                 }
                 $preparedOptions[$name] = $subject;
             } else {

@@ -7,6 +7,8 @@
  * SPDX-License-Identifier: OSL-3.0
  */
 
+declare(strict_types=1);
+
 namespace Maho\Data\Form;
 
 use Maho\Data\Form\Element\AbstractElement;
@@ -68,11 +70,9 @@ abstract class AbstractForm extends \Maho\DataObject
     /**
      * Disable elements
      *
-     * @param boolean $readonly
-     * @param boolean $useDisabled
      * @return $this
      */
-    public function setReadonly($readonly, $useDisabled = false)
+    public function setReadonly(bool $readonly, bool $useDisabled = false)
     {
         if ($useDisabled) {
             $this->setDisabled($readonly);

@@ -7,6 +7,8 @@
  * SPDX-License-Identifier: OSL-3.0
  */
 
+declare(strict_types=1);
+
 namespace Maho\Data\Form\Element;
 
 use Maho\Data\Form;
@@ -53,7 +55,7 @@ abstract class AbstractElement extends AbstractForm
     public function addElement(AbstractElement $element, $after = false)
     {
         if ($this->getForm()) {
-            $this->getForm()->checkElementId($element->getId());
+            $this->getForm()->checkElementId((string) $element->getId());
             $this->getForm()->addElementToCollection($element);
         }
 
@@ -173,7 +175,7 @@ abstract class AbstractElement extends AbstractForm
      */
     public function removeClass($class)
     {
-        $classes = array_unique(explode(' ', $this->getClass()));
+        $classes = array_unique(explode(' ', (string) $this->getClass()));
         if (false !== ($key = array_search($class, $classes))) {
             unset($classes[$key]);
         }
@@ -357,7 +359,7 @@ abstract class AbstractElement extends AbstractForm
             return $this;
         }
         if (!is_array($values)) {
-            $values = \Mage::helper('core')->escapeHtml(trim($values));
+            $values = \Mage::helper('core')->escapeHtml(trim((string) $values));
             $values = [$values => $values];
         }
         $elementValues = $this->getValues();

@@ -7,6 +7,8 @@
  * SPDX-License-Identifier: OSL-3.0
  */
 
+declare(strict_types=1);
+
 namespace Maho\Data\Form\Element;
 
 use DateTime;
@@ -78,6 +80,7 @@ class Date extends AbstractElement
             $this->_value = $value;
             return $this;
         }
+        $value = (string) $value;
         if (preg_match('/^[0-9]+$/', $value)) {
             $this->_value = new DateTime('@' . $this->_toTimestamp($value));
             return $this;

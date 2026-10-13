@@ -7,6 +7,8 @@
  * SPDX-License-Identifier: OSL-3.0
  */
 
+declare(strict_types=1);
+
 namespace Maho\Data;
 
 use Maho\Data\Form\AbstractForm;
@@ -98,7 +100,7 @@ class Form extends AbstractForm
     #[\Override]
     public function addElement(Form\Element\AbstractElement $element, $after = false)
     {
-        $this->checkElementId($element->getId());
+        $this->checkElementId((string) $element->getId());
         parent::addElement($element, $after);
         $this->addElementToCollection($element);
         return $this;
@@ -169,7 +171,7 @@ class Form extends AbstractForm
             return $this;
         }
         foreach ($values as $elementId => $value) {
-            if ($element = $this->getElement($elementId)) {
+            if ($element = $this->getElement((string) $elementId)) {
                 $element->setValue($value);
             }
         }

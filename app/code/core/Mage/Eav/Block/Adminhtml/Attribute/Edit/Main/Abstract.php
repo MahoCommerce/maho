@@ -171,7 +171,7 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Main_Abstract extends Mag
                 foreach ($disableAttributeFields[$attributeObject->getAttributeCode()] as $field) {
                     if ($elm = $form->getElement($field)) {
                         $elm->setDisabled(true);
-                        $elm->setReadonly(1);
+                        $elm->setReadonly(true);
                     }
                 }
             }

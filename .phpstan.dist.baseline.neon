@@ -10711,11 +10711,6 @@ parameters:
 			count: 1
 			path: app/code/core/Mage/Downloadable/controllers/DownloadController.php
 
-		-
-			rawMessage: 'Parameter #1 $readonly of method Maho\Data\Form\AbstractForm::setReadonly() expects bool, int given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Eav/Block/Adminhtml/Attribute/Edit/Main/Abstract.php
 
 		-
 			rawMessage: Property Mage_Eav_Block_Adminhtml_Attribute_Edit_Main_Abstract::$_attribute has no type specified.
@@ -15921,17 +15916,7 @@ parameters:
 			count: 1
 			path: lib/Maho/Data/Form/Element/Select.php
 
-		-
-			rawMessage: 'Parameter #1 $string of function str_pad expects string, int<0, 23> given.'
-			identifier: argument.type
-			count: 1
-			path: lib/Maho/Data/Form/Element/Time.php
 
-		-
-			rawMessage: 'Parameter #1 $string of function str_pad expects string, int<0, 59> given.'
-			identifier: argument.type
-			count: 2
-			path: lib/Maho/Data/Form/Element/Time.php
 
 		-
 			rawMessage: 'Method Maho\Data\Tree::copyNodeTo() has no return type specified.'

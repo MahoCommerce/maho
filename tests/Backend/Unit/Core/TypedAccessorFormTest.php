@@ -94,3 +94,14 @@ it('holds the data object of a form', function () {
     expect($form->getDataObject())->toBe($product)
         ->and($form->getUseContainer())->toBeTrue();
 });
+
+it('accepts an int element id and an int timestamp in the strict form classes', function () {
+    $form = new Form();
+    $form->addField('5', 'text', ['name' => 'five']);
+    $form->addValues([5 => 'x']);
+    $date = $form->addField('when', 'date', ['format' => 'Y-m-d']);
+    $date->setValue(86400);
+
+    expect($form->getElement('5')->getValue())->toBe('x')
+        ->and($date->getValue())->toBe('1970-01-02');
+});
