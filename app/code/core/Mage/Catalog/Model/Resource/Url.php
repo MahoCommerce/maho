@@ -1091,6 +1091,63 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
     }
 
     /**
+     * Delete the system rewrites of the products in categories of a store.
+     * If $saveHistory is true, change each one into a permanent redirect to the product rewrite without category.
+     *
+     * @param int[] $productIds
+     */
+    public function clearCategoryProductSystemRewrites(int $storeId, array $productIds, bool $saveHistory): static
+    {
+        if ($productIds === []) {
+            return $this;
+        }
+
+        $adapter = $this->_getWriteAdapter();
+        if ($saveHistory) {
+            $select = $adapter->select()
+                ->from(['category_rewrite' => $this->getMainTable()], [$this->getIdFieldName(), 'id_path', 'request_path'])
+                ->join(
+                    ['product_rewrite' => $this->getMainTable()],
+                    'product_rewrite.product_id = category_rewrite.product_id'
+                        . ' AND product_rewrite.store_id = category_rewrite.store_id'
+                        . ' AND product_rewrite.category_id IS NULL AND product_rewrite.is_system = 1',
+                    ['target_path' => 'product_rewrite.request_path'],
+                )
+                ->where('category_rewrite.store_id = ?', $storeId)
+                ->where('category_rewrite.is_system = ?', 1)
+                ->where('category_rewrite.category_id IS NOT NULL')
+                ->where('category_rewrite.product_id IN (?)', $productIds);
+            foreach ($adapter->fetchAll($select) as $row) {
+                // Older redirects to this URL go to the product URL directly, not through a second redirect
+                $adapter->update(
+                    $this->getMainTable(),
+                    ['target_path' => $row['target_path']],
+                    ['store_id = ?' => $storeId, 'target_path = ?' => $row['request_path']],
+                );
+                $adapter->update(
+                    $this->getMainTable(),
+                    [
+                        'id_path' => $row['id_path'] . '/' . $row[$this->getIdFieldName()],
+                        'target_path' => $row['target_path'],
+                        'is_system' => 0,
+                        'options' => 'RP',
+                    ],
+                    [$this->getIdFieldName() . ' = ?' => $row[$this->getIdFieldName()]],
+                );
+            }
+        }
+
+        $adapter->delete($this->getMainTable(), [
+            'store_id = ?' => $storeId,
+            'is_system = ?' => 1,
+            'category_id IS NOT NULL',
+            'product_id IN (?)' => $productIds,
+        ]);
+
+        return $this;
+    }
+
+    /**
      * Finds and deletes all old category and category/product rewrites for store
      * left from the times when categories/products belonged to store
      *
