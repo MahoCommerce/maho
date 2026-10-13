@@ -7,6 +7,15 @@
     </modules>
 
     <global>
+        <!-- Files that administrators attach to a chat message. They are private: no public URL. -->
+        <storage>
+            <mounts>
+                <ai_attachments>
+                    <dir>var</dir>
+                    <path>ai/attachments</path>
+                </ai_attachments>
+            </mounts>
+        </storage>
         <models>
             <ai>
                 <class>Maho_Ai_Model</class>

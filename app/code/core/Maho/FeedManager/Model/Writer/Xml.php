@@ -95,7 +95,7 @@ class Maho_FeedManager_Model_Writer_Xml implements Maho_FeedManager_Model_Writer
     }
 
     #[\Override]
-    public function resume(string $filePath, ?Maho_FeedManager_Model_Platform_AdapterInterface $platform = null): void
+    public function resume(string $filePath, ?Maho_FeedManager_Model_Platform_AdapterInterface $platform = null, array $state = []): void
     {
         $this->_platform = $platform;
         $this->_handle = fopen($filePath, 'a');
@@ -111,6 +111,12 @@ class Maho_FeedManager_Model_Writer_Xml implements Maho_FeedManager_Model_Writer
             $this->_namespaces = $platform->getNamespaces();
             $this->_isRss = ($platform->getRootElement() === 'rss');
         }
+    }
+
+    #[\Override]
+    public function getResumeState(): array
+    {
+        return [];
     }
 
     #[\Override]

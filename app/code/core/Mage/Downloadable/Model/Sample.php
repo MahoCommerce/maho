@@ -64,10 +64,23 @@ class Mage_Downloadable_Model_Sample extends Mage_Core_Model_Abstract
         return $this->getSampleFile();
     }
 
+    /** Directory of temporary sample files on the downloadable mount. */
+    public static function getBaseTmpStoragePath(): string
+    {
+        return 'tmp/samples';
+    }
+
+    /** Directory of sample files on the downloadable mount. */
+    public static function getBaseStoragePath(): string
+    {
+        return 'files/samples';
+    }
+
     /**
      * Retrieve base tmp path
      *
      * @return string
+     * @deprecated since 26.11 the file is on the downloadable mount, use getBaseTmpStoragePath()
      */
     public static function getBaseTmpPath()
     {
@@ -78,6 +91,7 @@ class Mage_Downloadable_Model_Sample extends Mage_Core_Model_Abstract
      * Retrieve sample files path
      *
      * @return string
+     * @deprecated since 26.11 the file is on the downloadable mount, use getBaseStoragePath()
      */
     public static function getBasePath()
     {

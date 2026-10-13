@@ -15,8 +15,7 @@
     $_imgHtml   = '';
     if ($_imgUrl = $_category->getImageUrl()) {
         $imageWidth = $imageHeight = '';
-        $imagePath = $_category->getImagePath();
-        $imageSize = getimagesize($imagePath);
+        $imageSize = $_category->getImageSize();
         if ($imageSize) {
             $imageWidth = $imageSize[0];
             $imageHeight = $imageSize[1];

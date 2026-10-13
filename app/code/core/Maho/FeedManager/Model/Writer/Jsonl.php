@@ -63,13 +63,19 @@ class Maho_FeedManager_Model_Writer_Jsonl implements Maho_FeedManager_Model_Writ
     }
 
     #[\Override]
-    public function resume(string $filePath, ?Maho_FeedManager_Model_Platform_AdapterInterface $platform = null): void
+    public function resume(string $filePath, ?Maho_FeedManager_Model_Platform_AdapterInterface $platform = null, array $state = []): void
     {
         $this->_handle = fopen($filePath, 'a');
 
         if ($this->_handle === false) {
             throw new RuntimeException("Cannot open file for appending: {$filePath}");
         }
+    }
+
+    #[\Override]
+    public function getResumeState(): array
+    {
+        return [];
     }
 
     #[\Override]

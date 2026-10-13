@@ -95,7 +95,7 @@ class Maho_FeedManager_Model_Writer_Csv implements Maho_FeedManager_Model_Writer
     }
 
     #[\Override]
-    public function resume(string $filePath, ?Maho_FeedManager_Model_Platform_AdapterInterface $platform = null): void
+    public function resume(string $filePath, ?Maho_FeedManager_Model_Platform_AdapterInterface $platform = null, array $state = []): void
     {
         $this->_handle = fopen($filePath, 'a');
 
@@ -103,12 +103,22 @@ class Maho_FeedManager_Model_Writer_Csv implements Maho_FeedManager_Model_Writer
             throw new RuntimeException("Cannot open file for appending: {$filePath}");
         }
 
+        if (!empty($state['headers']) && is_array($state['headers'])) {
+            $this->_headers = $state['headers'];
+        }
+
         // Restore headers from platform so writeProduct() maintains column order
         if ($platform && empty($this->_headers)) {
             $this->_headers = array_keys($platform->getAllAttributes());
         }
 
-        $this->_headerWritten = true;
+        $this->_headerWritten = (bool) ($state['header_written'] ?? true);
+    }
+
+    #[\Override]
+    public function getResumeState(): array
+    {
+        return ['headers' => $this->_headers, 'header_written' => $this->_headerWritten];
     }
 
     #[\Override]

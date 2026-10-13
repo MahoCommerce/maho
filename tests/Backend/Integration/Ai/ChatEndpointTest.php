@@ -730,7 +730,7 @@ it('attaches a CSV to a message, lets the model read it, and shows an attached i
 
         // The cron keeps a recent file and removes an old one.
         $old = aiChatUpload('old.txt', 'old', 'text/plain');
-        touch((string) Maho_Ai_Model_Chat_Attachment::path((int) $admin->getId(), $old['json']['id']), time() - 31 * 86400);
+        touch(Mage::getStorage('ai_attachments')->localRoot() . '/' . Maho_Ai_Model_Chat_Attachment::path((int) $admin->getId(), $old['json']['id']), time() - 31 * 86400);
         expect(Maho_Ai_Model_Chat_Attachment::purgeOlderThan(Maho_Ai_Model_Chat_Attachment::KEEP_DAYS))->toBeGreaterThanOrEqual(1);
         expect(Maho_Ai_Model_Chat_Attachment::path((int) $admin->getId(), $old['json']['id']))->toBeNull();
         expect(Maho_Ai_Model_Chat_Attachment::path((int) $admin->getId(), $csv['json']['id']))->not->toBeNull();
@@ -754,10 +754,7 @@ it('attaches a CSV to a message, lets the model read it, and shows an attached i
         expect(Maho_Ai_Model_Chat_Attachment::path((int) $admin->getId(), $png['json']['id']))->toBeNull();
     } finally {
         aiChatLogin($admin);
-        foreach (glob(Mage::getBaseDir('var') . '/ai/attachments/' . (int) $admin->getId() . '/*') ?: [] as $file) {
-            unlink($file);
-        }
-        @rmdir(Mage::getBaseDir('var') . '/ai/attachments/' . (int) $admin->getId());
+        Mage::getStorage('ai_attachments')->deleteDirectory((string) (int) $admin->getId());
         aiChatDeleteConversations((int) $admin->getId());
         aiChatDeleteAdmin($admin);
     }

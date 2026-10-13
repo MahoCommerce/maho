@@ -168,8 +168,6 @@ class LegacyRenameMysql4Classes extends BaseMahoCommand
             'Mage_Core_Model_Mysql4_Design_Theme_Collection' => 'Mage_Core_Model_Resource_Design_Theme_Collection',
             'Mage_Core_Model_Mysql4_Email_Template' => 'Mage_Core_Model_Resource_Email_Template',
             'Mage_Core_Model_Mysql4_Email_Template_Collection' => 'Mage_Core_Model_Resource_Email_Template_Collection',
-            'Mage_Core_Model_Mysql4_File_Storage_Abstract' => 'Mage_Core_Model_Resource_File_Storage_Abstract',
-            'Mage_Core_Model_Mysql4_File_Storage_File' => 'Mage_Core_Model_Resource_File_Storage_File',
             'Mage_Core_Model_Mysql4_Flag' => 'Mage_Core_Model_Resource_Flag',
             'Mage_Core_Model_Mysql4_Language' => 'Mage_Core_Model_Resource_Language',
             'Mage_Core_Model_Mysql4_Language_Collection' => 'Mage_Core_Model_Resource_Language_Collection',

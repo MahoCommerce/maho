@@ -24,8 +24,12 @@ class Mage_Adminhtml_Block_Sitemap_Grid_Renderer_Link extends Mage_Adminhtml_Blo
             Mage::app()->getStore($row->getStoreId())->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB) . $fileName,
         );
 
-        // Sitemap files are stored in the public directory
-        if (file_exists(Mage::getBaseDir('public') . DS . $fileName)) {
+        /** @var Mage_Sitemap_Model_Sitemap $sitemap */
+        $sitemap = $row;
+        $path = $sitemap->getStoragePath();
+        $mount = $sitemap->getMount();
+        // A bucket answers each check with a request, so the grid trusts the generation time there
+        if ($path !== null && ($mount->localRoot() === null ? $sitemap->getSitemapTime() !== null : $mount->fileExists($path))) {
             return sprintf('<a href="%1$s" target="_blank">%1$s</a>', $url);
         }
         return $url;

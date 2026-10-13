@@ -26,7 +26,6 @@
 "Error Email Template","Error Email Template"
 "Extra Content","Extra Content"
 "Feeding the pages to an AI model at answer time, which is how a store reaches AI search answers. Reserving it asks assistants to leave the store out of their answers.","Feeding the pages to an AI model at answer time, which is how a store reaches AI search answers. Reserving it asks assistants to leave the store out of their answers."
-"File ""%s"" cannot be saved. Please, make sure the directory ""%s"" is writeable by web server.","File ""%s"" cannot be saved. Please, make sure the directory ""%s"" is writeable by web server."
 "Filename","Filename"
 "Frequency","Frequency"
 "Full: keep and reuse the content","Full: keep and reuse the content"

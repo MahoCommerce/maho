@@ -26,17 +26,14 @@ class Mage_Adminhtml_Model_System_Config_Backend_Email_Logo extends Mage_Adminht
     protected $_maxFileSize = 2048;
 
     /**
-     * Return path to directory for upload file
+     * The upload directory on the media mount
      *
      * @return string
      */
     #[\Override]
     protected function _getUploadDir()
     {
-        $uploadDir = $this->_appendScopeInfo(self::UPLOAD_DIR);
-        $uploadRoot = Mage::getBaseDir('media');
-        $uploadDir = $uploadRoot . DS . $uploadDir;
-        return $uploadDir;
+        return $this->_appendScopeInfo(self::UPLOAD_DIR);
     }
 
     /**

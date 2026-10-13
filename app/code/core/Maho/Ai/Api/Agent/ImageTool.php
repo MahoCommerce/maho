@@ -98,24 +98,26 @@ final class ImageTool
         };
 
         $helper = \Mage::helper('cms/wysiwyg_images');
-        $directory = rtrim((string) $helper->getStorageRoot(), '/\\') . DS . self::FOLDER;
-        if (!is_dir($directory) && !mkdir($directory, 0o755, true) && !is_dir($directory)) {
-            return ['ok' => false, 'text' => 'The media folder cannot be created.'];
-        }
+        $mount = $helper->getMount();
+        $directory = $helper->getStorageRootPath() . '/' . self::FOLDER;
         $file = $name . '.' . $extension;
         $counter = 1;
-        while (file_exists($directory . DS . $file)) {
+        while ($mount->fileExists($directory . '/' . $file)) {
             $file = $name . '-' . (++$counter) . '.' . $extension;
         }
-        file_put_contents($directory . DS . $file, $bytes);
-        $mediaPath = 'wysiwyg/' . self::FOLDER . '/' . $file;
+        $mediaPath = $directory . '/' . $file;
+        try {
+            $mount->write($mediaPath, $bytes);
+        } catch (\League\Flysystem\FilesystemException) {
+            return ['ok' => false, 'text' => 'The image cannot be saved in the media library.'];
+        }
 
         return ['ok' => true, 'text' => sprintf(
             'Image saved as %s (%dx%d). URL: %s. Directive for page content: <img src="{{media url=\\"%s\\"}}" alt="">. It is in the media library under wysiwyg/%s.',
             $mediaPath,
             (int) ($info[0] ?? 0),
             (int) ($info[1] ?? 0),
-            rtrim((string) \Mage::getBaseUrl('media'), '/') . '/' . $mediaPath,
+            $mount->publicUrl($mediaPath),
             $mediaPath,
             self::FOLDER,
         )];

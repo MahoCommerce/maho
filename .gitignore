@@ -20,6 +20,7 @@
 !/public/media/.htaccess
 !/public/media/custom_options/.htaccess
 !/public/media/customer/.htaccess
+!/public/media/customer_address/.htaccess
 !/public/media/dhl/logo.jpg
 !/public/media/downloadable/.htaccess
 

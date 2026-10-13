@@ -11,6 +11,15 @@ SPDX-License-Identifier: AFL-3.0
         </Mage_Sitemap>
     </modules>
     <global>
+        <!-- Rooted at public/ because sitemap_path is a per-sitemap column: the key is {sitemap_path}/{filename} -->
+        <storage>
+            <mounts>
+                <sitemaps>
+                    <dir>public</dir>
+                    <url_type>web</url_type>
+                </sitemaps>
+            </mounts>
+        </storage>
         <models>
             <sitemap>
                 <class>Mage_Sitemap_Model</class>

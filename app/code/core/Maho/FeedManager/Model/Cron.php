@@ -172,8 +172,12 @@ class Maho_FeedManager_Model_Cron
                 Mage::LOG_INFO,
             );
 
+            $autoUpload = $feed->getAutoUpload() && $feed->getDestinationId();
             $generator = new Maho_FeedManager_Model_Generator();
-            $log = $generator->generate($feed);
+            $log = $generator->generate(
+                $feed,
+                $autoUpload ? fn(string $localPath, Maho_FeedManager_Model_Log $log) => $this->_uploadFeed($feed, $log, $localPath) : null,
+            );
 
             if ($log->getStatus() === Maho_FeedManager_Model_Log::STATUS_COMPLETED) {
                 Mage::log(
@@ -181,10 +185,7 @@ class Maho_FeedManager_Model_Cron
                     Mage::LOG_INFO,
                 );
 
-                // Auto-upload if configured
-                if ($feed->getAutoUpload() && $feed->getDestinationId()) {
-                    $this->_uploadFeed($feed, $log);
-                } else {
+                if (!$autoUpload) {
                     $log->recordUploadSkipped(
                         $feed->getAutoUpload() ? 'No destination configured' : 'Auto-upload disabled',
                     );
@@ -206,8 +207,10 @@ class Maho_FeedManager_Model_Cron
 
     /**
      * Upload feed to configured destination
+     *
+     * @param string $localPath A local copy of the published feed
      */
-    protected function _uploadFeed(Maho_FeedManager_Model_Feed $feed, ?Maho_FeedManager_Model_Log $log = null): void
+    protected function _uploadFeed(Maho_FeedManager_Model_Feed $feed, Maho_FeedManager_Model_Log $log, string $localPath): void
     {
         $destinationId = (int) $feed->getDestinationId();
 
@@ -220,19 +223,14 @@ class Maho_FeedManager_Model_Cron
                     "FeedManager: {$message} for feed '{$feed->getName()}'",
                     Mage::LOG_WARNING,
                 );
-                $log?->recordUploadFailure($destinationId, $message);
+                $log->recordUploadFailure($destinationId, $message);
                 return;
             }
 
             $uploader = new Maho_FeedManager_Model_Uploader($destination);
-            $filePath = $feed->getOutputFilePath();
-            $extension = $feed->getFileFormat();
-            if ($feed->getGzipCompression()) {
-                $extension .= '.gz';
-            }
-            $remoteName = $feed->getFilename() . '.' . $extension;
+            $remoteName = $feed->getOutputFilename();
 
-            $success = $uploader->upload($filePath, $remoteName);
+            $success = $uploader->upload($localPath, $remoteName);
 
             $destination->setLastUploadAt(Mage::app()->getLocale()->formatDateForDb('now'))
                 ->setLastUploadStatus($success ? 'success' : 'failed')
@@ -244,18 +242,18 @@ class Maho_FeedManager_Model_Cron
                     "FeedManager: Successfully uploaded feed '{$feed->getName()}' to destination '{$destination->getName()}'",
                     Mage::LOG_INFO,
                 );
-                $log?->recordUploadSuccess($destinationId, $message);
+                $log->recordUploadSuccess($destinationId, $message);
             } else {
                 $message = 'Upload returned false';
                 Mage::log(
                     "FeedManager: Failed to upload feed '{$feed->getName()}' to destination '{$destination->getName()}'",
                     Mage::LOG_ERROR,
                 );
-                $log?->recordUploadFailure($destinationId, $message);
+                $log->recordUploadFailure($destinationId, $message);
             }
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             Mage::logException($e);
-            $log?->recordUploadFailure($destinationId, $e->getMessage());
+            $log->recordUploadFailure($destinationId, $e->getMessage());
 
             // Send failure notification
             $notifier = new Maho_FeedManager_Model_Notifier();
@@ -271,6 +269,8 @@ class Maho_FeedManager_Model_Cron
     #[Maho\Config\CronJob('feedmanager_cleanup_logs', schedule: '30 3 * * *')]
     public function cleanupOldLogs(): void
     {
+        Maho_FeedManager_Model_Generator_Batch::cleanupOldJobs();
+
         $retentionDays = (int) Mage::getStoreConfig('feedmanager/general/log_retention_days');
 
         // If set to 0, cleanup is disabled

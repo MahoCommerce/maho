@@ -159,24 +159,24 @@ class Maho_Blog_Model_Observer
         $itemCount = count($items);
         $fileCount = 1;
         $currentFileItemCount = 0;
-        $io = null;
+        $file = null;
 
         foreach ($items as $index => $item) {
             // Start new file if needed
             if ($currentFileItemCount === 0) {
-                if ($io) {
-                    $io->streamWrite('</urlset>');
-                    $io->streamClose();
+                if ($file) {
+                    $file->write('</urlset>');
+                    $file->close();
                 }
 
                 $filename = $this->getBlogSitemapFilename($sitemap, $fileCount, $itemCount, $maxUrlsPerFile);
-                $io = $this->openBlogSitemapFile($sitemap, $filename);
+                $file = $sitemap->openUrlsetFile($filename);
                 $sitemap->addSitemapFile($filename, $lastmod);
             }
 
             // Write URL to sitemap
             $xml = $this->getSitemapRow($baseUrl . $item->getUrl(), $lastmod, $changefreq, $priority, $item->getImageUrl(), $item->getImageTitle());
-            $io->streamWrite($xml);
+            $file->write($xml);
 
             $currentFileItemCount++;
 
@@ -188,9 +188,9 @@ class Maho_Blog_Model_Observer
         }
 
         // Close last file
-        if ($io) {
-            $io->streamWrite('</urlset>');
-            $io->streamClose();
+        if ($file) {
+            $file->write('</urlset>');
+            $file->close();
         }
     }
 
@@ -208,30 +208,6 @@ class Maho_Blog_Model_Observer
 
         // Multiple files needed, add number
         return $baseName . '-blog-' . $fileNumber . '.xml';
-    }
-
-    /**
-     * Open and initialize a blog sitemap file
-     */
-    protected function openBlogSitemapFile(Mage_Sitemap_Model_Sitemap $sitemap, string $filename): \Maho\Io\File
-    {
-        $io = new \Maho\Io\File();
-        $io->setAllowCreateFolders(true);
-
-        // Files should be saved in public/{sitemap_path} for web accessibility
-        $resolvedPath = rtrim(Mage::getBaseDir('public') . '/' . $sitemap->getSitemapPath(), '/');
-
-        $io->open(['path' => $resolvedPath]);
-
-        if ($io->fileExists($filename) && !$io->isWriteable($filename)) {
-            Mage::throwException(Mage::helper('sitemap')->__('File "%s" cannot be saved. Please, make sure the directory "%s" is writeable by web server.', $filename, $resolvedPath));
-        }
-
-        $io->streamOpen($filename);
-        $io->streamWrite('<?xml version="1.0" encoding="UTF-8"?>' . "\n");
-        $io->streamWrite('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">' . "\n");
-
-        return $io;
     }
 
     /**

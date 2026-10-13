@@ -142,9 +142,8 @@ class Mage_Adminhtml_Cms_WysiwygController extends Mage_Adminhtml_Controller_Act
     {
         try {
             $directive = $this->getRequest()->getParam('___directive');
-            $path = Mage::getModel('cms/adminhtml_template_filter')->filter(Mage::helper('core')->urlDecode((string) $directive));
-
-            $image = Maho::getImageManager()->decodePath($path)->encodeUsingPath($path);
+            $image = Mage::getModel('cms/adminhtml_template_filter')
+                ->encodeDirectiveImage(Mage::helper('core')->urlDecode((string) $directive));
 
             $this->getResponse()
                 ->setHttpResponseCode(200)

@@ -48,14 +48,16 @@ final class AttachmentTool
         $adminId = (int) (\Mage::getSingleton('admin/session')->getUser()?->getId() ?? 0);
         $id = (string) ($arguments['id'] ?? '');
         $file = \Maho_Ai_Model_Chat_Attachment::describe($adminId, $id);
-        $path = \Maho_Ai_Model_Chat_Attachment::path($adminId, $id);
-        if ($file === null || $path === null) {
+        if ($file === null) {
             return ['ok' => false, 'text' => sprintf('There is no attachment "%s".', $id)];
         }
         if (!\Maho_Ai_Model_Chat_Attachment::isText($file['mime'])) {
             return ['ok' => false, 'text' => sprintf('"%s" is a %s file, not a text file; it was shown to you with the message when the model can see images.', $file['name'], $file['mime'])];
         }
-        $content = (string) file_get_contents($path);
+        $content = \Maho_Ai_Model_Chat_Attachment::read($adminId, $id);
+        if ($content === null) {
+            return ['ok' => false, 'text' => sprintf('There is no attachment "%s".', $id)];
+        }
         if (!mb_check_encoding($content, 'UTF-8')) {
             $content = mb_convert_encoding($content, 'UTF-8', 'ISO-8859-1');
         }

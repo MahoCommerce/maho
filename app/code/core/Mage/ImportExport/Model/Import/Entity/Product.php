@@ -1656,17 +1656,15 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
             $this->_fileUploader->setTrustedMedia((bool) ($this->_parameters['trusted_media'] ?? false));
             $this->_fileUploader->init();
 
-            $tmpDir     = $this->_parameters['media_dir'] ?? Mage::getConfig()->getOptions()->getMediaDir() . '/import';
-            $destDir    = Mage::getConfig()->getOptions()->getMediaDir() . '/catalog/product';
-            if (!is_writable($destDir)) {
-                @mkdir($destDir, 0777, true);
-            }
-            if (!$this->_fileUploader->setTmpDir($tmpDir)) {
+            // With no media_dir the images are below import/ on the media mount, which has no local folder on a bucket
+            $root = Mage::getStorage('media')->localRoot();
+            $tmpDir = $this->_parameters['media_dir'] ?? ($root === null ? null : $root . '/import');
+            if ($tmpDir !== null && !$this->_fileUploader->setTmpDir($tmpDir)) {
                 Mage::throwException("File directory '{$tmpDir}' is not readable.");
             }
-            if (!$this->_fileUploader->setDestDir($destDir)) {
-                Mage::throwException("File directory '{$destDir}' is not writable.");
-            }
+            $this->_fileUploader->setDestStoragePath(
+                Mage::getSingleton('catalog/product_media_config')->getBaseMediaStoragePath(),
+            );
         }
         return $this->_fileUploader;
     }
@@ -2124,23 +2122,30 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
     /**
      * Get array of affected products
      *
+     * @param bool $withImagesOnly Only the products whose rows set an image column
      * @return array
      */
-    public function getAffectedEntityIds()
+    public function getAffectedEntityIds(bool $withImagesOnly = false)
     {
         $productIds = [];
+        $productId = null;
         while ($bunch = $this->_dataSourceModel->getNextBunch()) {
             foreach ($bunch as $rowNum => $rowData) {
                 if (!$this->isRowAllowedToImport($rowData, $rowNum)) {
                     continue;
                 }
-                if (!isset($this->_newSku[$rowData[self::COL_SKU]]['entity_id'])) {
-                    continue;
+                if (isset($this->_newSku[$rowData[self::COL_SKU]]['entity_id'])) {
+                    $productId = $this->_newSku[$rowData[self::COL_SKU]]['entity_id'];
+                    if (!$withImagesOnly) {
+                        $productIds[] = $productId;
+                    }
                 }
-                $productIds[] = $this->_newSku[$rowData[self::COL_SKU]]['entity_id'];
+                if ($withImagesOnly && $productId !== null && array_any($this->_imagesArrayKeys, fn($col) => !empty($rowData[$col]))) {
+                    $productIds[$productId] = $productId;
+                }
             }
         }
-        return $productIds;
+        return array_values($productIds);
     }
 
     /**

@@ -23,19 +23,14 @@ class Mage_Sales_DownloadController extends Mage_Core_Controller_Front_Action
                 throw new Exception();
             }
 
-            $optionFile = Mage::getModel('catalog/product_option_type_file');
-            $filePath = $optionFile->resolveStoredPath($info, 'order_path');
-            if ($filePath === null || !is_file($filePath) || !is_readable($filePath)) {
-                //try get file from quote
-                $filePath = $optionFile->resolveStoredPath($info, 'quote_path');
-                if ($filePath === null || !is_file($filePath) || !is_readable($filePath)) {
-                    throw new Exception();
-                }
+            $file = Mage::getModel('catalog/product_option_type_file')->openStoredFile($info);
+            if ($file === null) {
+                throw new Exception();
             }
             $this->_prepareDownloadResponse($info['title'], [
-                'value' => $filePath,
-                'type'  => 'filename',
-            ]);
+                'value' => $file['stream'],
+                'type'  => 'stream',
+            ], contentLength: $file['size']);
         } catch (Exception) {
             $this->_forward('noRoute');
         }

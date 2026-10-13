@@ -596,7 +596,7 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
     }
 
     /**
-     * Copy the image from the media folder of the import into media/catalog/category, and return its file name.
+     * Copy the image from the media folder of the import into catalog/category on the media mount, and return its file name.
      */
     protected function _importImage(string $image): string
     {
@@ -604,12 +604,12 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
             return $image;
         }
         $source = $this->_getImageSource($image);
-        $target = Mage::getBaseDir('media') . '/catalog/category/' . basename($source);
-        if (realpath($source) !== realpath($target)) {
-            if (!is_dir(dirname($target))) {
-                mkdir(dirname($target), 0777, true);
-            }
-            copy($source, $target);
+        $path = Mage_Catalog_Model_Category_Attribute_Backend_Image::STORAGE_PATH . '/' . basename($source);
+        $mount = Mage::getStorage('media');
+        $root = $mount->localRoot();
+        // A copy of a file onto itself truncates it
+        if ($root === null || realpath($source) !== realpath($root . '/' . $path)) {
+            $mount->copyFromLocalFile($source, $path);
         }
         return basename($source);
     }

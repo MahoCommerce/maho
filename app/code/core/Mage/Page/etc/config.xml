@@ -118,12 +118,5 @@ SPDX-License-Identifier: AFL-3.0
                 <copyright>All Rights Reserved.</copyright>
             </footer>
         </design>
-        <system>
-            <media_storage_configuration>
-                <allowed_resources>
-                    <site_favicons>favicon</site_favicons>
-                </allowed_resources>
-            </media_storage_configuration>
-        </system>
     </default>
 </config>
