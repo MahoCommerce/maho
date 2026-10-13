@@ -4,6 +4,9 @@
         <Maho_Ai>
             <active>true</active>
             <codePool>core</codePool>
+            <depends>
+                <Maho_Queue/>
+            </depends>
         </Maho_Ai>
     </modules>
 </config>
