@@ -316,7 +316,7 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
         foreach ($data as $key => $value) {
             if (($key === 'conditions' || $key === 'actions') && is_array($value)) {
                 foreach ($value as $id => $data) {
-                    $path = explode('--', $id);
+                    $path = explode('--', (string) $id);
                     $node = & $arr;
                     for ($i = 0, $l = count($path); $i < $l; $i++) {
                         $node = & $node[$key][$path[$i]] ?? [];

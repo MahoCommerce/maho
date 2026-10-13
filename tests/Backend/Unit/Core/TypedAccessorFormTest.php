@@ -57,15 +57,15 @@ it('keeps the default line count of a multiline element', function () {
     expect(new Multiline()->getLineCount())->toBe(2);
 });
 
-it('keeps the options and the values of a select and a checkbox list as given', function () {
+it('keeps the options of a select and the option list of a checkbox list as given', function () {
     $form = new Form();
     $select = $form->addField('color', 'select', ['options' => ['1' => 'Red', '2' => 'Blue']]);
-    $single = $form->addField('flags', 'checkboxes', ['values' => 'one']);
+    $list = $form->addField('flags', 'checkboxes', ['values' => [['value' => 'one', 'label' => 'One']]]);
 
     expect($select)->toBeInstanceOf(Select::class)
         ->and($select->getOptions())->toBe(['1' => 'Red', '2' => 'Blue'])
-        ->and($single)->toBeInstanceOf(Checkboxes::class)
-        ->and($single->getValues())->toBe('one');
+        ->and($list)->toBeInstanceOf(Checkboxes::class)
+        ->and($list->getValues())->toBe([['value' => 'one', 'label' => 'One']]);
 });
 
 it('builds the html id and the name from the typed form settings', function () {
