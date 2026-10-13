@@ -105,3 +105,16 @@ it('accepts an int element id and an int timestamp in the strict form classes', 
     expect($form->getElement('5')->getValue())->toBe('x')
         ->and($date->getValue())->toBe('1970-01-02');
 });
+
+it('gives the gallery element the product of its form, and throws without one', function () {
+    $form = new Form();
+    $gallery = new Mage_Adminhtml_Block_Catalog_Product_Helper_Form_Gallery();
+    $gallery->setForm($form);
+
+    expect(fn() => $gallery->getDataObject())->toThrow(LogicException::class);
+
+    $product = Mage::getModel('catalog/product');
+    $form->setDataObject($product);
+
+    expect($gallery->getDataObject())->toBe($product);
+});

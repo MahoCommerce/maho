@@ -10851,44 +10851,8 @@ parameters:
 			path: app/code/core/Mage/Eav/Model/Convert/Adapter/Entity.php
 
 		-
-			rawMessage: Binary operation "." between Mage_Eav_Model_Entity_Interface and '_collection' results in an error.
-			identifier: binaryOp.invalid
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Convert/Adapter/Grid.php
-
-		-
-			rawMessage: 'Cannot call method addData() on Mage_Core_Model_Resource_Db_Collection_Abstract|false.'
-			identifier: method.nonObject
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Convert/Adapter/Grid.php
-
-		-
-			rawMessage: 'Cannot call method getId() on Mage_Core_Model_Resource_Db_Collection_Abstract|false.'
-			identifier: method.nonObject
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Convert/Adapter/Grid.php
-
-		-
-			rawMessage: 'Parameter #1 $modelAlias of static method Mage::getResourceModel() expects string, Mage_Eav_Model_Entity_Interface given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Convert/Adapter/Grid.php
-
-		-
 			rawMessage: Property Mage_Eav_Model_Convert_Adapter_Grid::$_entity has no type specified.
 			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Convert/Adapter/Grid.php
-
-		-
-			rawMessage: Variable $collection might not be defined.
-			identifier: variable.undefined
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Convert/Adapter/Grid.php
-
-		-
-			rawMessage: Variable $entity might not be defined.
-			identifier: variable.undefined
 			count: 1
 			path: app/code/core/Mage/Eav/Model/Convert/Adapter/Grid.php
 
