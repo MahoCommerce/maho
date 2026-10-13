@@ -63,6 +63,22 @@ describe('media browser storage on a registered media mount', function () {
         expect($names)->toBe(['banners' => 'wysiwyg/banners']);
     });
 
+    it('hides the cache folder of an image entity and deletes the resized files of a deleted image', function (): void {
+        $this->mount->write('wysiwyg/swatches/red.png', base64_decode(WYSIWYG_TEST_PNG));
+        $resized = 'wysiwyg/swatches/cache/0123456789ab/36/red.png' . Maho::getConfiguredImageExtension();
+        $this->mount->write($resized, 'x');
+        $this->mount->createDirectory('wysiwyg/swatches/fabrics');
+
+        $names = [];
+        foreach ($this->storage->getDirsCollection('wysiwyg/swatches') as $item) {
+            $names[] = $item->getName();
+        }
+        $this->storage->deleteFile('wysiwyg/swatches/red.png');
+
+        expect($names)->toBe(['fabrics'])
+            ->and($this->mount->fileExists($resized))->toBeFalse();
+    });
+
     it('lists files with the thumbnail from one listing of the thumbnail directory', function (): void {
         $this->mount->write('wysiwyg/banners/old.png', base64_decode(WYSIWYG_TEST_PNG));
         $this->mount->write('wysiwyg/banners/notes.txt', 'text');

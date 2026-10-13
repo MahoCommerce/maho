@@ -8,8 +8,8 @@
  * entity, the ratio and the fit, in the <images> node of its etc/theme.xml or of a parent
  * theme. A slot is the largest width in px of the images in one place of the layout, and
  * each image has a file at 1x and 2x of each slot. An entity can name the slots that it uses and
- * give its own width to a slot. The store config gives the quality, the background color, the
- * output format and the watermark.
+ * give its own width to a slot. The store config gives the background color and the watermark.
+ * The output format and the quality are the same for the whole installation.
  *
  * Two sets of settings exist for each store view and entity. The live settings come from the
  * theme and the store config now. The active settings are the ones that the URLs use. A
@@ -252,9 +252,9 @@ class Mage_Core_Model_Image_Config
             fit: ($entityNode['fit'] ?? '') === Mage_Core_Model_Image_Settings::FIT_COVER
                 ? Mage_Core_Model_Image_Settings::FIT_COVER
                 : Mage_Core_Model_Image_Settings::FIT_CONTAIN,
-            quality: (int) Mage::getStoreConfig('system/media_storage_configuration/image_quality', $storeId) ?: 85,
+            quality: (int) Mage::getStoreConfig('system/media_storage_configuration/image_quality') ?: 85,
             background: preg_match('/^[0-9a-f]{6}$/i', $background) ? strtolower($background) : 'ffffff',
-            extension: $this->getExtension($storeId),
+            extension: Maho::getConfiguredImageExtension(),
             watermark: $entity === 'product' ? $this->getWatermark($storeId) : null,
         );
     }
@@ -319,17 +319,6 @@ class Mage_Core_Model_Image_Config
         }
 
         return $result;
-    }
-
-    protected function getExtension(int $storeId): string
-    {
-        return match ((int) Mage::getStoreConfig('system/media_storage_configuration/image_file_type', $storeId)) {
-            IMAGETYPE_AVIF => '.avif',
-            IMAGETYPE_GIF => '.gif',
-            IMAGETYPE_JPEG => '.jpg',
-            IMAGETYPE_PNG => '.png',
-            default => '.webp',
-        };
     }
 
     /**

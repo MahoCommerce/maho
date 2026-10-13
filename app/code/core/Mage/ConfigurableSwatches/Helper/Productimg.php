@@ -203,13 +203,43 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
         }
 
         if (!is_null($image)) {
-            $filename = $image->getFile();
-            $swatchImage = $this->_resizeSwatchImage($filename, 'product', $width, $height);
+            $set = Mage::helper('core/image')->init(Mage_Catalog_Model_Product_Image_Resizer::ENTITY, (string) $image->getFile());
             $swatchType = 'product';
-            $url = $swatchImage ? Mage::getStorage('media')->publicUrl($swatchImage) : '';
+            $url = $set?->getUrl($this->getSwatchFileWidth((int) $width, (int) $height)) ?? '';
         }
 
         return $url;
+    }
+
+    /**
+     * The width of the file of a swatch: 2x the width of the swatch slot of the theme, or 2x the
+     * larger side of the box when it is larger. The theme sets the size that a swatch shows at,
+     * so the box of the config can be smaller.
+     */
+    protected function getSwatchFileWidth(int $width, int $height): int
+    {
+        $slotWidth = Mage::getSingleton('core/image_config')->getSlotWidth(
+            Mage_ConfigurableSwatches_Model_Swatch_Image::SLOT,
+            (int) Mage::app()->getStore()->getId(),
+            Mage_ConfigurableSwatches_Model_Swatch_Image::ENTITY,
+        ) ?? 0;
+        return 2 * max($slotWidth, $width, $height);
+    }
+
+    /**
+     * The URL of the resized file of a swatch image in wysiwyg/swatches, or null when the image
+     * does not exist.
+     */
+    protected function getSwatchImageUrl(string $filename, int $width, int $height): ?string
+    {
+        $mount = Mage::getStorage('media');
+        $sourcePath = \Maho\Io::getPathWithinMount($mount, self::SWATCH_FALLBACK_MEDIA_DIR, $filename);
+        if ($sourcePath === null || !$this->fileExists($mount, $sourcePath)) {
+            return null;
+        }
+        return Mage::helper('core/image')
+            ->init(Mage_ConfigurableSwatches_Model_Swatch_Image::ENTITY, '/' . ltrim($filename, '/'))
+            ?->getUrl($this->getSwatchFileWidth($width, $height));
     }
 
     /**
@@ -252,20 +282,21 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
 
         do {
             $filename = Mage::helper('configurableswatches')->getHyphenatedString($value) . $fileExt;
-            $swatchImage = $this->_resizeSwatchImage($filename, 'media', $width, $height);
-            if (!$swatchImage) {
+            $url = $this->getSwatchImageUrl($filename, (int) $width, (int) $height);
+            if ($url === null) {
                 $swatchImage = $this->createSwatchImage($value, $width, $height);
+                $url = $swatchImage ? Mage::getStorage('media')->publicUrl($swatchImage) : null;
             }
-            if (!$swatchImage && $defaultValue == $value) {
+            if ($url === null && $defaultValue == $value) {
                 return '';  // no image found and no further fallback
-            } elseif (!$swatchImage) {
+            } elseif ($url === null) {
                 $value = $defaultValue; // fallback to default value
             } else {
                 break;  // we found an image
             }
         } while (true);
 
-        return Mage::getStorage('media')->publicUrl($swatchImage);
+        return $url;
     }
 
     /**
@@ -303,6 +334,7 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
      * Performs the resize operation on the given swatch image file and returns a
      * relative path to the resulting image file
      *
+     * @deprecated since 26.11 a swatch image has the resized files of its image entity, product or swatch
      * @param string $filename
      * @param string $tag
      * @param int $width

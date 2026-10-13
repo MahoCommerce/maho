@@ -363,17 +363,9 @@ final class Maho
      */
     public static function encodeImage(\Intervention\Image\Interfaces\ImageInterface $image, ?int $quality = null): \Intervention\Image\Interfaces\EncodedImageInterface
     {
-        $format = match (self::getConfiguredImageType()) {
-            IMAGETYPE_AVIF => \Intervention\Image\Format::AVIF,
-            IMAGETYPE_GIF  => \Intervention\Image\Format::GIF,
-            IMAGETYPE_JPEG => \Intervention\Image\Format::JPEG,
-            IMAGETYPE_PNG  => \Intervention\Image\Format::PNG,
-            default        => \Intervention\Image\Format::WEBP,
-        };
-
         $args = $quality !== null ? ['quality' => $quality] : [];
 
-        return $image->encodeUsingFormat($format, ...$args);
+        return $image->encodeUsingFileExtension(ltrim(self::getConfiguredImageExtension(), '.'), ...$args);
     }
 
     /**

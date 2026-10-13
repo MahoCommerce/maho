@@ -254,6 +254,38 @@ class Mage_Core_Model_Image_Resizer
     }
 
     /**
+     * The entity and the file of $path when it is a source file of an image entity, or null.
+     * Example: wysiwyg/swatches/red.png gives ['swatch', '/red.png'].
+     *
+     * @param string $path mount path
+     * @return array{0: string, 1: string}|null
+     */
+    public function findSourceFile(string $path): ?array
+    {
+        foreach (Mage::getSingleton('core/image_config')->getEntities() as $entity => $source) {
+            if (str_starts_with($path, $source . '/')
+                && Mage_Core_Model_Image_Set::resolveSourcePath($source, substr($path, strlen($source))) !== null
+            ) {
+                return [$entity, substr($path, strlen($source))];
+            }
+        }
+        return null;
+    }
+
+    /**
+     * The cache folders of every image entity, as mount paths.
+     *
+     * @return list<string>
+     */
+    public function getCacheFolders(): array
+    {
+        return array_values(array_map(
+            fn(string $source): string => $source . '/' . Mage_Core_Model_Image_Set::CACHE_FOLDER,
+            Mage::getSingleton('core/image_config')->getEntities(),
+        ));
+    }
+
+    /**
      * Delete the resized files of $file in every settings folder of $entity. The delete of a
      * missing file is no error.
      */
@@ -420,14 +452,7 @@ class Mage_Core_Model_Image_Resizer
             $this->addWatermark($image, $settings->watermark);
         }
 
-        $format = match ($settings->extension) {
-            '.avif' => \Intervention\Image\Format::AVIF,
-            '.gif' => \Intervention\Image\Format::GIF,
-            '.jpg' => \Intervention\Image\Format::JPEG,
-            '.png' => \Intervention\Image\Format::PNG,
-            default => \Intervention\Image\Format::WEBP,
-        };
-        return $image->encodeUsingFormat($format, quality: $settings->quality)->toString();
+        return $image->encodeUsingFileExtension(ltrim($settings->extension, '.'), quality: $settings->quality)->toString();
     }
 
     /**

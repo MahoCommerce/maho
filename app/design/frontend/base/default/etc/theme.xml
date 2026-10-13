@@ -38,5 +38,13 @@ SPDX-License-Identifier: AFL-3.0
         <blog>
             <ratio>original</ratio>
         </blog>
+        <!-- The swatches show as a circle of 2.25rem -->
+        <swatch>
+            <ratio>1:1</ratio>
+            <fit>cover</fit>
+            <slots>
+                <listing>36</listing>
+            </slots>
+        </swatch>
     </images>
 </theme>

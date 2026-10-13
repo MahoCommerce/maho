@@ -17,6 +17,14 @@ SPDX-License-Identifier: AFL-3.0
                 <class>Mage_ConfigurableSwatches_Block</class>
             </configurableswatches>
         </blocks>
+        <images>
+            <entities>
+                <swatch>
+                    <source>wysiwyg/swatches</source>
+                    <provider>configurableswatches/swatch_image</provider>
+                </swatch>
+            </entities>
+        </images>
         <models>
             <configurableswatches>
                 <class>Mage_ConfigurableSwatches_Model</class>
