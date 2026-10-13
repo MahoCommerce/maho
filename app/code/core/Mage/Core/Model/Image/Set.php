@@ -146,18 +146,46 @@ class Mage_Core_Model_Image_Set
     }
 
     /**
-     * The width and the height of the source file. A remote mount reads the file once and keeps
-     * the size in the cache. Null when the file cannot be read.
+     * The width and the height of the source file. On a remote mount, they come from the
+     * core_image_size table, and a source that the table does not hold is read once and stored.
+     * Null when the file cannot be read.
      *
      * @return array{0: int, 1: int}|null
      */
     public function getOriginalSize(): ?array
     {
         if ($this->originalSize === null) {
-            $info = \Maho\Io::getImageSizeOnMount(Mage::getStorage('media'), $this->sourcePath, [self::SIZE_CACHE_TAG]);
-            $this->originalSize = $info === false ? false : [(int) $info[0], (int) $info[1]];
+            $mount = Mage::getStorage('media');
+            $remote = $mount->localRoot() === null;
+            $resource = Mage::getSingleton('core/resource');
+            $adapter = $resource->getConnection('core_read');
+            $row = !$remote ? false : $adapter->fetchRow($adapter->select()
+                ->from($resource->getTableName('core/image_size'), ['width', 'height'])
+                ->where('path_hash = ?', md5($this->sourcePath)));
+            if ($row) {
+                $this->originalSize = [(int) $row['width'], (int) $row['height']];
+            } else {
+                $info = \Maho\Io::getImageSizeOnMount($mount, $this->sourcePath, [self::SIZE_CACHE_TAG]);
+                $this->originalSize = $info === false ? false : [(int) $info[0], (int) $info[1]];
+                if ($info !== false && $remote) {
+                    self::storeOriginalSize($this->sourcePath, $this->originalSize[0], $this->originalSize[1]);
+                }
+            }
         }
         return $this->originalSize === false ? null : $this->originalSize;
+    }
+
+    /**
+     * Keep the width and the height of a source file in the core_image_size table.
+     */
+    public static function storeOriginalSize(string $sourcePath, int $width, int $height): void
+    {
+        $resource = Mage::getSingleton('core/resource');
+        $resource->getConnection('core_write')->insertOnDuplicate(
+            $resource->getTableName('core/image_size'),
+            ['path_hash' => md5($sourcePath), 'width' => $width, 'height' => $height],
+            ['width', 'height'],
+        );
     }
 
     /**

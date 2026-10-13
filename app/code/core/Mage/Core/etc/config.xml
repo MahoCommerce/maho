@@ -207,6 +207,9 @@ SPDX-License-Identifier: AFL-3.0
                     <email_log>
                         <table>core_email_log</table>
                     </email_log>
+                    <image_size>
+                        <table>core_image_size</table>
+                    </image_size>
                 </entities>
             </core_resource>
         </models>
