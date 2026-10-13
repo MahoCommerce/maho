@@ -35,10 +35,19 @@ describe('product image URLs and the creation of their files', function () {
             /** @var list<array{string, list<string>}> */
             public array $calls = [];
 
+            /** @var list<array{string, list<string>}> */
+            public array $queued = [];
+
             #[\Override]
             public function createFilesAfterCommit(string $entity, array $files): void
             {
                 $this->calls[] = [$entity, $files];
+            }
+
+            #[\Override]
+            public function queue(string $entity, array $files): void
+            {
+                $this->queued[] = [$entity, $files];
             }
         };
     });
@@ -111,7 +120,7 @@ describe('product image URLs and the creation of their files', function () {
             ->and($skin)->toEndWith('images/catalog/product/placeholder.svg');
     });
 
-    it('creates the files of the changed role images and of the new gallery images after a save', function (): void {
+    it('creates the files of a changed main image after a save, and queues the new gallery images', function (): void {
         Mage::register('_singleton/core/image_resizer', $this->spy);
         $product = Mage::getModel('catalog/product')->setOrigData('image', '/o/l/old.png')->setData([
             'image' => '/a/b/shirt.png',
@@ -124,7 +133,50 @@ describe('product image URLs and the creation of their files', function () {
 
         Mage::getSingleton('catalog/observer')->createProductImageFiles(new \Maho\Event\Observer(['event' => new \Maho\Event(['product' => $product])]));
 
-        expect($this->spy->calls)->toBe([['product', ['/a/b/shirt.png', '/n/e/new_1.png']]]);
+        expect($this->spy->calls)->toBe([['product', ['/a/b/shirt.png']]])
+            ->and($this->spy->queued)->toBe([['product', ['/n/e/new_1.png']]]);
+    });
+
+    it('creates the files of a new gallery image that becomes the main image after a save', function (): void {
+        Mage::register('_singleton/core/image_resizer', $this->spy);
+        $product = Mage::getModel('catalog/product')->setOrigData('image', '/n/e/new_1.png')->setData([
+            'image' => '/n/e/new_1.png',
+            'media_gallery' => ['images' => [
+                ['file' => '/n/e/new.png', 'new_file' => '/n/e/new_1.png'],
+                ['file' => '/o/t/other.png', 'new_file' => '/o/t/other.png'],
+            ]],
+        ]);
+
+        Mage::getSingleton('catalog/observer')->createProductImageFiles(new \Maho\Event\Observer(['event' => new \Maho\Event(['product' => $product])]));
+
+        expect($this->spy->calls)->toBe([['product', ['/n/e/new_1.png']]])
+            ->and($this->spy->queued)->toBe([['product', ['/o/t/other.png']]]);
+    });
+
+    it('queues the files that cannot be written after the commit', function (): void {
+        $resizer = new class extends Mage_Core_Model_Image_Resizer {
+            /** @var list<array{string, list<string>}> */
+            public array $queued = [];
+
+            #[\Override]
+            public function createFiles(string $entity, iterable $files, ?array $settingsList = null, ?array $existing = null, ?callable $onFile = null, ?callable $onFailure = null): int
+            {
+                foreach ($files as $file) {
+                    $onFailure !== null && $onFailure($file);
+                }
+                return 0;
+            }
+
+            #[\Override]
+            public function queue(string $entity, array $files): void
+            {
+                $this->queued[] = [$entity, $files];
+            }
+        };
+
+        $resizer->createFilesAfterCommit('product', ['/a/b/shirt.png']);
+
+        expect($resizer->queued)->toBe([['product', ['/a/b/shirt.png']]]);
     });
 
     it('creates the files after the commit of an open transaction, and at once without one', function (): void {

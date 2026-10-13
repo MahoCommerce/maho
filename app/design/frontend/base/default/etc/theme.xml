@@ -20,6 +20,15 @@ SPDX-License-Identifier: AFL-3.0
             <gallery>600</gallery>
             <banner>1200</banner>
         </slots>
+        <!-- An entity can list the slots that its images use, so it gets no files for the other
+             slots. A slot with a value has that width for this entity only. A slot without a
+             value takes the width above. The list of a child theme replaces the list of its
+             parent. Example:
+             <slots>
+                 <thumbnail/>
+                 <listing/>
+                 <gallery>800</gallery>
+             </slots> -->
         <product>
             <ratio>original</ratio>
         </product>

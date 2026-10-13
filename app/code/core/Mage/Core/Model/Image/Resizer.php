@@ -40,10 +40,18 @@ class Mage_Core_Model_Image_Resizer
      * @param array<string, Mage_Core_Model_Image_Settings>|null $settingsList default: every settings set of the entity
      * @param array<string, true>|null $existing mount paths of files to skip, from listExistingFiles()
      * @param (callable(string $file): void)|null $onFile called after each source file
+     * @param (callable(string $file): void)|null $onFailure called for each source file with a file
+     *        that could not be written. A source that cannot be read is no failure: a retry cannot fix it.
      * @return int the number of files written
      */
-    public function createFiles(string $entity, iterable $files, ?array $settingsList = null, ?array $existing = null, ?callable $onFile = null): int
-    {
+    public function createFiles(
+        string $entity,
+        iterable $files,
+        ?array $settingsList = null,
+        ?array $existing = null,
+        ?callable $onFile = null,
+        ?callable $onFailure = null,
+    ): int {
         $config = Mage::getSingleton('core/image_config');
         $source = $config->getSource($entity);
         $settingsList ??= $config->getAllSettings($entity);
@@ -52,7 +60,9 @@ class Mage_Core_Model_Image_Resizer
         foreach ($files as $file) {
             $sourcePath = Mage_Core_Model_Image_Set::resolveSourcePath($source, (string) $file);
             if ($sourcePath !== null && !str_ends_with(strtolower($sourcePath), '.svg')) {
-                $count += $this->createFilesOfSource($source, $sourcePath, $settingsList, $existing);
+                $failed = false;
+                $count += $this->createFilesOfSource($source, $sourcePath, $settingsList, $existing, $failed);
+                $failed && $onFailure !== null && $onFailure((string) $file);
             }
             $onFile !== null && $onFile((string) $file);
         }
@@ -61,9 +71,54 @@ class Mage_Core_Model_Image_Resizer
     }
 
     /**
+     * Create the resized file at $path and return its bytes. This repairs a file that a page links
+     * to but that does not exist, when the web server sends the request for a missing file to Maho.
+     * Null when $path is not a file of the settings that a store view uses, or when its source is
+     * missing.
+     *
+     * @param string $path mount path, such as catalog/product/cache/3f9a1c2b0d4e/300/a/b/shirt.jpg.webp
+     */
+    public function createFileAtPath(string $path): ?string
+    {
+        $config = Mage::getSingleton('core/image_config');
+        foreach ($config->getEntities() as $entity => $source) {
+            $prefix = $source . '/' . Mage_Core_Model_Image_Set::CACHE_FOLDER . '/';
+            if (!str_starts_with($path, $prefix)
+                || !preg_match('#^([0-9a-f]{12})/(\d+)(/.+)$#', substr($path, strlen($prefix)), $match)
+            ) {
+                continue;
+            }
+
+            $settings = $config->getAllSettings($entity)[$match[1]] ?? null;
+            $width = (int) $match[2];
+            if ($settings === null || !in_array($width, $settings->widths, true) || !str_ends_with($match[3], $settings->extension)) {
+                return null;
+            }
+            $sourcePath = Mage_Core_Model_Image_Set::resolveSourcePath($source, substr($match[3], 0, -strlen($settings->extension)));
+            if ($sourcePath === null
+                || str_ends_with(strtolower($sourcePath), '.svg')
+                || Mage_Core_Model_Image_Set::buildPath($source, $sourcePath, $settings, $width) !== $path
+                || !Mage::getStorage('media')->fileExists($sourcePath)
+            ) {
+                return null;
+            }
+
+            $image = $this->decode($sourcePath);
+            if ($image === null) {
+                return null;
+            }
+            $binary = $this->render($image, $settings, $width, !$this->isPlaceholder($source, $sourcePath));
+            Mage::getStorage('media')->moveAtomic($path, $binary);
+            return $binary;
+        }
+        return null;
+    }
+
+    /**
      * Create the files of $files after the open database transaction commits, or now when no
      * transaction is open. A resize on a bucket takes seconds, so it must not hold the
-     * transaction of a save. An error is logged and does not stop the caller.
+     * transaction of a save. An error is logged and does not stop the caller, and the queue
+     * tries the files that failed again.
      *
      * @param list<string> $files paths below the source folder of $entity
      */
@@ -81,11 +136,16 @@ class Mage_Core_Model_Image_Resizer
         }
 
         $run = function () use ($entity, $files): void {
+            $failed = [];
             try {
-                $this->createFiles($entity, $files);
+                $this->createFiles($entity, $files, onFailure: function (string $file) use (&$failed): void {
+                    $failed[] = $file;
+                });
             } catch (\Throwable $e) {
                 Mage::logException($e);
+                $failed = $files;
             }
+            $this->queue($entity, $failed);
         };
 
         if (Mage::getSingleton('core/resource')->getConnection('core_write')->getTransactionLevel() > 0) {
@@ -178,6 +238,7 @@ class Mage_Core_Model_Image_Resizer
      * under global/images/entities/<entity>/provider.
      *
      * @return iterable<string>
+     * @throws UnexpectedValueException when the provider does not implement Mage_Core_Model_Image_ProviderInterface
      */
     public function getSourceFiles(string $entity): iterable
     {
@@ -186,7 +247,10 @@ class Mage_Core_Model_Image_Resizer
             return [];
         }
         $provider = Mage::getSingleton($alias);
-        return method_exists($provider, 'getImageFiles') ? $provider->getImageFiles() : [];
+        if (!$provider instanceof Mage_Core_Model_Image_ProviderInterface) {
+            throw new UnexpectedValueException("The provider of the image entity \"{$entity}\" must implement Mage_Core_Model_Image_ProviderInterface.");
+        }
+        return $provider->getImageFiles();
     }
 
     /**
@@ -271,8 +335,9 @@ class Mage_Core_Model_Image_Resizer
     /**
      * @param array<string, Mage_Core_Model_Image_Settings> $settingsList
      * @param array<string, true>|null $existing
+     * @param bool $failed set to true when a file could not be written
      */
-    protected function createFilesOfSource(string $source, string $sourcePath, array $settingsList, ?array $existing): int
+    protected function createFilesOfSource(string $source, string $sourcePath, array $settingsList, ?array $existing, bool &$failed = false): int
     {
         $missing = [];
         foreach ($settingsList as $settings) {
@@ -287,18 +352,13 @@ class Mage_Core_Model_Image_Resizer
             return 0;
         }
 
-        $mount = Mage::getStorage('media');
-        try {
-            $root = $mount->localRoot();
-            $image = $root !== null
-                ? Maho::getImageManager()->decodePath($root . '/' . $sourcePath)
-                : Maho::getImageManager()->decodeBinary($mount->read($sourcePath));
-        } catch (\Throwable $e) {
-            Mage::log("The image {$sourcePath} cannot be read: {$e->getMessage()}", Mage::LOG_WARNING);
+        $image = $this->decode($sourcePath);
+        if ($image === null) {
             return 0;
         }
 
-        $isPlaceholder = str_starts_with($sourcePath, $source . '/' . self::PLACEHOLDER_FOLDER . '/');
+        $mount = Mage::getStorage('media');
+        $isPlaceholder = $this->isPlaceholder($source, $sourcePath);
         $count = 0;
         $rendered = [];
         foreach ($missing as $path => [$settings, $width]) {
@@ -309,9 +369,32 @@ class Mage_Core_Model_Image_Resizer
                 $count++;
             } catch (\Throwable $e) {
                 Mage::logException($e);
+                $failed = true;
             }
         }
         return $count;
+    }
+
+    /**
+     * The image of the source file, or null when it cannot be read.
+     */
+    protected function decode(string $sourcePath): ?ImageInterface
+    {
+        $mount = Mage::getStorage('media');
+        try {
+            $root = $mount->localRoot();
+            return $root !== null
+                ? Maho::getImageManager()->decodePath($root . '/' . $sourcePath)
+                : Maho::getImageManager()->decodeBinary($mount->read($sourcePath));
+        } catch (\Throwable $e) {
+            Mage::log("The image {$sourcePath} cannot be read: {$e->getMessage()}", Mage::LOG_WARNING);
+            return null;
+        }
+    }
+
+    protected function isPlaceholder(string $source, string $sourcePath): bool
+    {
+        return str_starts_with($sourcePath, $source . '/' . self::PLACEHOLDER_FOLDER . '/');
     }
 
     /**

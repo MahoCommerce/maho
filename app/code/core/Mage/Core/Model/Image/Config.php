@@ -7,8 +7,9 @@
  * originals on the media mount. The theme of a store view gives the slots and, for each
  * entity, the ratio and the fit, in the <images> node of its etc/theme.xml or of a parent
  * theme. A slot is the largest width in px of the images in one place of the layout, and
- * each image has a file at 1x and 2x of each slot. The store config gives the quality, the background color, the output format and the
- * watermark.
+ * each image has a file at 1x and 2x of each slot. An entity can name the slots that it uses and
+ * give its own width to a slot. The store config gives the quality, the background color, the
+ * output format and the watermark.
  *
  * Two sets of settings exist for each store view and entity. The live settings come from the
  * theme and the store config now. The active settings are the ones that the URLs use. A
@@ -43,8 +44,8 @@ class Mage_Core_Model_Image_Config
     /** @var array<string, Mage_Core_Model_Image_Settings> */
     protected array $activeSettings = [];
 
-    /** @var array<int, array<string, int>> */
-    protected array $slots = [];
+    /** @var array<int, array{slots?: array<string, int>, entities?: array<string, array{ratio?: string, fit?: string, slots?: array<string, int>}>}> */
+    protected array $themeNodes = [];
 
     /**
      * @return array<string, string> the source folder of each entity, by entity
@@ -123,12 +124,40 @@ class Mage_Core_Model_Image_Config
     /**
      * The width in px of a slot of the theme of the store view, such as 150 for thumbnail. A
      * slot names a place where images show, so that a template does not hold the width of its
-     * layout. Null when no theme in the chain declares the slot.
+     * layout. The width that $entity gives to the slot comes first. Null when no theme in the
+     * chain declares the slot.
      */
-    public function getSlotWidth(string $slot, int $storeId): ?int
+    public function getSlotWidth(string $slot, int $storeId, ?string $entity = null): ?int
     {
-        $this->slots[$storeId] ??= $this->getThemeImagesNode($storeId)['slots'] ?? [];
-        return $this->slots[$storeId][$slot] ?? null;
+        return ($entity === null ? null : $this->getEntitySlots($entity, $storeId)[$slot] ?? null)
+            ?? $this->getThemeNode($storeId)['slots'][$slot]
+            ?? null;
+    }
+
+    /**
+     * The slots that the images of $entity use, with their width in px. An entity without its
+     * own list uses every slot of the theme. A slot of the list without a width takes the width
+     * of the theme, and a slot that the theme does not declare is ignored.
+     *
+     * @return array<string, int>
+     */
+    public function getEntitySlots(string $entity, int $storeId): array
+    {
+        $theme = $this->getThemeNode($storeId);
+        $themeSlots = $theme['slots'] ?? [];
+        $own = $theme['entities'][$entity]['slots'] ?? null;
+        if ($own === null) {
+            return $themeSlots;
+        }
+
+        $slots = [];
+        foreach ($own as $name => $width) {
+            $width = $width > 0 ? $width : $themeSlots[$name] ?? 0;
+            if ($width > 0) {
+                $slots[$name] = $width;
+            }
+        }
+        return $slots ?: $themeSlots;
     }
 
     /**
@@ -199,7 +228,7 @@ class Mage_Core_Model_Image_Config
     {
         $this->liveSettings = [];
         $this->activeSettings = [];
-        $this->slots = [];
+        $this->themeNodes = [];
         Mage::app()->cleanCache([self::CACHE_TAG]);
     }
 
@@ -213,9 +242,8 @@ class Mage_Core_Model_Image_Config
 
     protected function buildLiveSettings(string $entity, int $storeId): Mage_Core_Model_Image_Settings
     {
-        $theme = $this->getThemeImagesNode($storeId);
-        $slots = array_values($theme['slots'] ?? []);
-        $entityNode = $theme['entities'][$entity] ?? [];
+        $entityNode = $this->getThemeNode($storeId)['entities'][$entity] ?? [];
+        $slots = array_values($this->getEntitySlots($entity, $storeId));
         $background = ltrim((string) Mage::getStoreConfig('catalog/product_image/background_color', $storeId), '#');
 
         return new Mage_Core_Model_Image_Settings(
@@ -232,10 +260,20 @@ class Mage_Core_Model_Image_Config
     }
 
     /**
+     * @return array{slots?: array<string, int>, entities?: array<string, array{ratio?: string, fit?: string, slots?: array<string, int>}>}
+     */
+    protected function getThemeNode(int $storeId): array
+    {
+        return $this->themeNodes[$storeId] ??= $this->getThemeImagesNode($storeId);
+    }
+
+    /**
      * The <images> settings of the skin theme of the store view. A theme without a value takes
-     * the value of its parent theme, and the last parent takes the value of base/default.
+     * the value of its parent theme, and the last parent takes the value of base/default. The
+     * slot list of an entity is one value: the list of a child theme replaces the list of its
+     * parent.
      *
-     * @return array{slots?: array<string, int>, entities?: array<string, array{ratio?: string, fit?: string}>}
+     * @return array{slots?: array<string, int>, entities?: array<string, array{ratio?: string, fit?: string, slots?: array<string, int>}>}
      */
     protected function getThemeImagesNode(int $storeId): array
     {
@@ -264,6 +302,12 @@ class Mage_Core_Model_Image_Config
                     foreach (['ratio', 'fit'] as $field) {
                         if (!isset($result['entities'][$name][$field]) && trim((string) $child->$field) !== '') {
                             $result['entities'][$name][$field] = trim((string) $child->$field);
+                        }
+                    }
+                    if (!isset($result['entities'][$name]['slots']) && $child->slots && $child->slots->children()->count() > 0) {
+                        $result['entities'][$name]['slots'] = [];
+                        foreach ($child->slots->children() as $slotName => $width) {
+                            $result['entities'][$name]['slots'][$slotName] = max(0, (int) $width);
                         }
                     }
                 }

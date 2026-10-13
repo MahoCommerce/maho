@@ -10,7 +10,7 @@
 
 declare(strict_types=1);
 
-class Mage_Catalog_Model_Category_Image
+class Mage_Catalog_Model_Category_Image implements Mage_Core_Model_Image_ProviderInterface
 {
     public const ENTITY = 'category';
 
@@ -19,6 +19,7 @@ class Mage_Catalog_Model_Category_Image
      *
      * @return list<string>
      */
+    #[\Override]
     public function getImageFiles(): array
     {
         $attribute = Mage::getSingleton('eav/config')->getAttribute(Mage_Catalog_Model_Category::ENTITY, 'image');

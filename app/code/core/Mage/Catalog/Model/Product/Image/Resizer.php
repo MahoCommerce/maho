@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-class Mage_Catalog_Model_Product_Image_Resizer
+class Mage_Catalog_Model_Product_Image_Resizer implements Mage_Core_Model_Image_ProviderInterface
 {
     public const ENTITY = 'product';
 
@@ -45,6 +45,7 @@ class Mage_Catalog_Model_Product_Image_Resizer
      *
      * @return iterable<string>
      */
+    #[\Override]
     public function getImageFiles(): iterable
     {
         yield from $this->getPlaceholderFiles();

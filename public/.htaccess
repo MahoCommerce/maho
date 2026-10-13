@@ -95,6 +95,11 @@ DirectoryIndex index.php
         </IfModule>
     </IfModule>
 
+    # A missing resized image goes to Maho, which creates it from the original
+    RewriteCond %{REQUEST_URI} ^/media/.+/cache/[0-9a-f]{12}/[0-9]+/
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule .* index.php [L]
+
     # Always send 404 on missing files in these folders
     RewriteCond %{REQUEST_URI} !^/(media|skin|js)/
 

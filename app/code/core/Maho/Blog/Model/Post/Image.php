@@ -10,7 +10,7 @@
 
 declare(strict_types=1);
 
-class Maho_Blog_Model_Post_Image
+class Maho_Blog_Model_Post_Image implements Mage_Core_Model_Image_ProviderInterface
 {
     public const ENTITY = 'blog';
 
@@ -19,6 +19,7 @@ class Maho_Blog_Model_Post_Image
      *
      * @return list<string>
      */
+    #[\Override]
     public function getImageFiles(): array
     {
         $attribute = Mage::getSingleton('eav/config')->getAttribute(Maho_Blog_Model_Post::ENTITY, 'image');

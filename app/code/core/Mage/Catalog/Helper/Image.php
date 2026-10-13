@@ -139,7 +139,7 @@ class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract implements \St
         if ($this->set !== null) {
             return $this->set->getImgAttributes($slot);
         }
-        $size = Mage::getSingleton('core/image_config')->getSlotWidth($slot, (int) Mage::app()->getStore()->getId()) ?? self::FALLBACK_SIZE;
+        $size = Mage::getSingleton('core/image_config')->getSlotWidth($slot, (int) Mage::app()->getStore()->getId(), Mage_Catalog_Model_Product_Image_Resizer::ENTITY) ?? self::FALLBACK_SIZE;
         return $this->getSrcAttributes($slot) . " width=\"{$size}\" height=\"{$size}\"";
     }
 

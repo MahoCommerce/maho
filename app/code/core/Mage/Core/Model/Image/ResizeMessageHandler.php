@@ -10,10 +10,19 @@ declare(strict_types=1);
 
 class Mage_Core_Model_Image_ResizeMessageHandler
 {
+    /**
+     * @throws RuntimeException when a file could not be written, so the queue tries the message again
+     */
     #[Maho\Config\MessageHandler]
     public function createFiles(Mage_Core_Model_Image_ResizeMessage $message): void
     {
-        Mage::getSingleton('core/image_resizer')->createFiles($message->entity, $message->files);
+        $failed = [];
+        Mage::getSingleton('core/image_resizer')->createFiles($message->entity, $message->files, onFailure: function (string $file) use (&$failed): void {
+            $failed[] = $file;
+        });
+        if ($failed !== []) {
+            throw new RuntimeException(sprintf('%d images of the entity "%s" could not be written.', count($failed), $message->entity));
+        }
     }
 
     #[Maho\Config\MessageHandler]

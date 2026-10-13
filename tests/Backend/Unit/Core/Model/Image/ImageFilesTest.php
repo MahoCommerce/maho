@@ -189,4 +189,48 @@ describe('resized image files of an image entity', function () {
             ->and(Mage::getSingleton('core/image_config')->getSlotWidth('banner', $this->storeId))->toBe(1200)
             ->and(Mage::getSingleton('core/image_config')->getSlotWidth('nothing', $this->storeId))->toBeNull();
     });
+    it('creates a missing file of the active settings on request', function (): void {
+        $resizer = Mage::getSingleton('core/image_resizer');
+        $path = ($this->pathOf)(300);
+
+        $binary = $resizer->createFileAtPath($path);
+
+        expect($binary)->toBeString()
+            ->and($this->mount->read($path))->toBe($binary)
+            ->and(($this->sizeOf)($path))->toBe([300, 150]);
+    });
+
+    it('creates no file for an unknown settings folder, a width of no slot or a missing source', function (): void {
+        $resizer = Mage::getSingleton('core/image_resizer');
+        $hash = $this->settings->getHash();
+        $extension = $this->settings->extension;
+
+        expect($resizer->createFileAtPath("catalog/product/cache/0123456789ab/300/a/b/shirt.png{$extension}"))->toBeNull()
+            ->and($resizer->createFileAtPath("catalog/product/cache/{$hash}/301/a/b/shirt.png{$extension}"))->toBeNull()
+            ->and($resizer->createFileAtPath("catalog/product/cache/{$hash}/300/a/b/missing.png{$extension}"))->toBeNull()
+            ->and($resizer->createFileAtPath("catalog/product/cache/{$hash}/300/a/b/shirt.png.gif"))->toBeNull()
+            ->and($resizer->createFileAtPath("catalog/product/cache/{$hash}/300/../../../etc/x.png{$extension}"))->toBeNull()
+            ->and($resizer->createFileAtPath("customer/cache/{$hash}/300/a/b/shirt.png{$extension}"))->toBeNull()
+            ->and($this->mount->directoryExists('catalog/product/cache'))->toBeFalse();
+    });
+
+    it('gives an entity only the slots that it lists, with its own width for a slot', function (): void {
+        $design = Mage::getSingleton('core/design_config');
+        $store = Mage::app()->getStore($this->storeId);
+        $package = (string) Mage::getStoreConfig('design/package/name', $this->storeId) ?: 'base';
+        $design->setNode("frontend/{$package}/image_test_slots/parent", "{$package}/image_test_slots_parent");
+        $design->setNode("frontend/{$package}/image_test_slots/images/slots/hero", '1600');
+        $design->setNode("frontend/{$package}/image_test_slots_parent/images/product/slots/thumbnail", '');
+        $design->setNode("frontend/{$package}/image_test_slots_parent/images/product/slots/gallery", '800');
+        $store->setConfig('design/theme/skin', 'image_test_slots');
+        $config = Mage::getSingleton('core/image_config');
+        $config->reset();
+
+        expect($config->getLiveSettings('product', $this->storeId)->widths)->toBe([150, 300, 800, 1600])
+            ->and($config->getLiveSettings('blog', $this->storeId)->widths)->toBe([150, 300, 600, 1200, 1600, 2400, 3200])
+            ->and($config->getSlotWidth('gallery', $this->storeId, 'product'))->toBe(800)
+            ->and($config->getSlotWidth('gallery', $this->storeId, 'blog'))->toBe(600)
+            ->and($config->getSlotWidth('hero', $this->storeId, 'product'))->toBe(1600)
+            ->and($config->getSlotWidth('gallery', $this->storeId))->toBe(600);
+    });
 });

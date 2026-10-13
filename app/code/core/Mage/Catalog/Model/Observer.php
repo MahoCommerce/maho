@@ -54,30 +54,37 @@ class Mage_Catalog_Model_Observer
     }
 
     /**
-     * Create the resized files of the new images of a saved product, after the save commits. A
-     * duplicate gets new copies of all images, so all its images are resized.
+     * Create the resized files of the new images of a saved product. The main image shows in
+     * the listings, so its files are created after the save commits. The other gallery images
+     * go to the queue, so a save with many images returns fast. A duplicate gets new copies of
+     * all images, so all its images are resized.
      */
     #[Maho\Config\Observer('catalog_product_save_after')]
     public function createProductImageFiles(\Maho\Event\Observer $observer): void
     {
         /** @var Mage_Catalog_Model_Product $product */
         $product = $observer->getEvent()->getProduct();
+        $main = is_string($product->getImage()) ? $product->getImage() : null;
         if ($product->getIsDuplicate()) {
             $files = Mage::getSingleton('catalog/product_image_resizer')->getProductImageFiles([(int) $product->getId()]);
         } else {
             $files = [];
-            if ($product->dataHasChangedFor('image') && is_string($product->getImage())) {
-                $files[] = $product->getImage();
-            }
             $galleryImages = $product->getData('media_gallery')['images'] ?? [];
             foreach (is_array($galleryImages) ? $galleryImages : [] as $image) {
                 if (!empty($image['new_file']) && empty($image['removed'])) {
                     $files[] = (string) $image['new_file'];
                 }
             }
+            if (!$product->dataHasChangedFor('image') && !in_array($main, $files, true)) {
+                $main = null;
+            }
         }
 
-        Mage::getSingleton('core/image_resizer')->createFilesAfterCommit(Mage_Catalog_Model_Product_Image_Resizer::ENTITY, $files);
+        $resizer = Mage::getSingleton('core/image_resizer');
+        if ($main !== null) {
+            $resizer->createFilesAfterCommit(Mage_Catalog_Model_Product_Image_Resizer::ENTITY, [$main]);
+        }
+        $resizer->queue(Mage_Catalog_Model_Product_Image_Resizer::ENTITY, array_values(array_diff($files, [$main])));
     }
 
     /**

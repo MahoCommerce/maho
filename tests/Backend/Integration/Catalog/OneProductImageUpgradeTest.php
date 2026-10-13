@@ -90,6 +90,46 @@ function oneImageConfigPaths(): array
     );
 }
 
+/**
+ * Write the value of a product attribute in one store view, or delete it when $value is null.
+ */
+function oneImageSetValue(int $productId, string $code, int $storeId, ?string $value): void
+{
+    $resource = Mage::getSingleton('core/resource');
+    $adapter = $resource->getConnection('core_write');
+    $table = $resource->getTableName(['catalog/product', 'varchar']);
+    $attributeId = (int) Mage::getResourceModel('catalog/setup', 'catalog_setup')
+        ->getAttributeId(Mage_Catalog_Model_Product::ENTITY, $code);
+
+    $adapter->delete($table, ['entity_id = ?' => $productId, 'attribute_id = ?' => $attributeId, 'store_id = ?' => $storeId]);
+    if ($value !== null) {
+        $adapter->insert($table, [
+            'entity_type_id' => (int) Mage::getSingleton('eav/config')->getEntityType('catalog_product')->getId(),
+            'attribute_id' => $attributeId,
+            'store_id' => $storeId,
+            'entity_id' => $productId,
+            'value' => $value,
+        ]);
+    }
+}
+
+/**
+ * @return array<int, string> the values of image or image_label of the product, by store view
+ */
+function oneImageValues(int $productId, string $code): array
+{
+    $resource = Mage::getSingleton('core/resource');
+    $adapter = $resource->getConnection('core_read');
+    $attributeId = (int) Mage::getResourceModel('catalog/setup', 'catalog_setup')
+        ->getAttributeId(Mage_Catalog_Model_Product::ENTITY, $code);
+
+    return array_map(strval(...), $adapter->fetchPairs($adapter->select()
+        ->from($resource->getTableName(['catalog/product', 'varchar']), ['store_id', 'value'])
+        ->where('entity_id = ?', $productId)
+        ->where('attribute_id = ?', $attributeId)
+        ->order('store_id')));
+}
+
 function oneImageRemoveTestData(Mage_Catalog_Model_Resource_Setup $setup): void
 {
     foreach (ONE_IMAGE_OLD_ATTRIBUTES as $code) {
@@ -98,6 +138,7 @@ function oneImageRemoveTestData(Mage_Catalog_Model_Resource_Setup $setup): void
     foreach ([...ONE_IMAGE_OLD_PATHS, ...ONE_IMAGE_KEPT_PATHS] as $path) {
         $setup->deleteConfigData($path);
     }
+    $setup->deleteConfigData('catalog/placeholder/image_placeholder');
 }
 
 beforeEach(function () {
@@ -126,9 +167,32 @@ beforeEach(function () {
     foreach ([...ONE_IMAGE_OLD_PATHS, ...ONE_IMAGE_KEPT_PATHS] as $path) {
         $this->setup->setConfigData($path, 'old');
     }
+
+    $adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
+    $this->productId = (int) $adapter->fetchOne($adapter->select()
+        ->from(Mage::getSingleton('core/resource')->getTableName('catalog/product'), ['entity_id'])
+        ->order('entity_id')
+        ->limit(1));
+    $this->savedValues = [
+        'image' => oneImageValues($this->productId, 'image'),
+        'image_label' => oneImageValues($this->productId, 'image_label'),
+    ];
+    foreach ($this->savedValues as $code => $values) {
+        foreach (array_keys($values) as $storeId) {
+            oneImageSetValue($this->productId, $code, $storeId, null);
+        }
+    }
 });
 
 afterEach(function () {
+    foreach ($this->savedValues as $code => $values) {
+        foreach (array_keys(oneImageValues($this->productId, $code)) as $storeId) {
+            oneImageSetValue($this->productId, $code, $storeId, null);
+        }
+        foreach ($values as $storeId => $value) {
+            oneImageSetValue($this->productId, $code, $storeId, $value);
+        }
+    }
     oneImageRemoveTestData($this->setup);
     $this->setup->updateAttribute(Mage_Catalog_Model_Product::ENTITY, 'image', 'used_in_product_listing', 1);
     $this->setup->updateAttribute(Mage_Catalog_Model_Product::ENTITY, 'image', 'frontend_label', 'Main Image');
@@ -166,4 +230,65 @@ it('runs a second time without errors', function () {
 
     expect(oneImageAttributeCodes())->toBe(['image'])
         ->and(oneImageMainAttribute())->toEqual(['frontend_label' => 'Main Image', 'used_in_product_listing' => 1]);
+});
+
+it('copies small_image into an empty image', function () {
+    oneImageSetValue($this->productId, 'image', 0, 'no_selection');
+    oneImageSetValue($this->productId, 'small_image', 0, '/s/m/small.jpg');
+    oneImageSetValue($this->productId, 'thumbnail', 0, '/t/h/thumb.jpg');
+
+    oneImageRunUpgrade();
+
+    expect(oneImageValues($this->productId, 'image'))->toBe([0 => '/s/m/small.jpg']);
+});
+
+it('copies thumbnail into an empty image when small_image is empty too', function () {
+    oneImageSetValue($this->productId, 'small_image', 0, 'no_selection');
+    oneImageSetValue($this->productId, 'thumbnail', 0, '/t/h/thumb.jpg');
+
+    oneImageRunUpgrade();
+
+    expect(oneImageValues($this->productId, 'image'))->toBe([0 => '/t/h/thumb.jpg']);
+});
+
+it('copies small_image into a store view whose image is empty', function () {
+    oneImageSetValue($this->productId, 'image', 0, '/m/a/main.jpg');
+    oneImageSetValue($this->productId, 'image', 1, 'no_selection');
+    oneImageSetValue($this->productId, 'small_image', 1, '/s/m/store.jpg');
+
+    oneImageRunUpgrade();
+
+    expect(oneImageValues($this->productId, 'image'))->toBe([0 => '/m/a/main.jpg', 1 => '/s/m/store.jpg']);
+});
+
+it('keeps an image that is not empty', function () {
+    oneImageSetValue($this->productId, 'image', 0, '/m/a/main.jpg');
+    oneImageSetValue($this->productId, 'small_image', 0, '/s/m/small.jpg');
+    oneImageSetValue($this->productId, 'small_image', 1, '/s/m/small-store.jpg');
+
+    oneImageRunUpgrade();
+
+    expect(oneImageValues($this->productId, 'image'))->toBe([0 => '/m/a/main.jpg']);
+});
+
+it('copies the label of small_image into an empty image label', function () {
+    oneImageSetValue($this->productId, 'small_image_label', 0, 'Front');
+    oneImageSetValue($this->productId, 'thumbnail_label', 1, 'Side');
+
+    oneImageRunUpgrade();
+
+    expect(oneImageValues($this->productId, 'image_label'))->toBe([0 => 'Front']);
+});
+
+it('copies the placeholder of small_image to a scope without an image placeholder', function () {
+    $this->setup->setConfigData('catalog/placeholder/small_image_placeholder', 'default/small.png', 'websites', 1);
+
+    oneImageRunUpgrade();
+
+    $adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
+    expect($adapter->fetchOne($adapter->select()
+        ->from(Mage::getSingleton('core/resource')->getTableName('core/config_data'), ['value'])
+        ->where('path = ?', 'catalog/placeholder/image_placeholder')
+        ->where('scope = ?', 'websites')
+        ->where('scope_id = ?', 1)))->toBe('default/small.png');
 });

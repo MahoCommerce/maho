@@ -231,13 +231,15 @@ class Mage_Core_Model_Image_Set
     }
 
     /**
-     * The width in px of $slot in the theme of the store view, or null for an unknown slot.
+     * The width in px of $slot for the entity in the theme of the store view, or null for an
+     * unknown slot.
      */
     public function getSlotWidth(string $slot): ?int
     {
         return Mage::getSingleton('core/image_config')->getSlotWidth(
             $slot,
             $this->storeId ?? (int) Mage::app()->getStore()->getId(),
+            $this->entity,
         );
     }
 
