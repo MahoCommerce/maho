@@ -589,6 +589,7 @@ class Mage_Catalog_Model_Url
         $storeRootCategoryId    = $store->getRootCategoryId();
         $storeRootCategoryPath  = $store->getRootCategoryPath();
         $this->_categories[$storeRootCategoryId] = $this->getResource()->getCategory($storeRootCategoryId, $storeId);
+        $useCategoryPath = $this->_useCategoryPath((int) $storeId);
 
         $lastEntityId = 0;
 
@@ -609,7 +610,7 @@ class Mage_Catalog_Model_Url
                 }
             }
 
-            if ($loadCategories) {
+            if ($loadCategories && $useCategoryPath) {
                 $categories = $this->getResource()->getCategories($loadCategories, $storeId) ?: [];
                 foreach ($categories as $category) {
                     $this->_categories[$category->getId()] = $category;
@@ -884,6 +885,10 @@ class Mage_Catalog_Model_Url
             if ($this->_deleteOldTargetPath($fullPath, $idPath, $storeId)) {
                 return $fullPath;
             }
+        }
+        if ($category->getLevel() > 1) {
+            // Delete a redirect from this path to the product URL without category, so that this rewrite can use the path again
+            $this->_deleteOldTargetPath($requestPath . $suffix, 'product/' . $product->getId(), $storeId);
         }
         /**
          * Check 2 variants: $requestPath and $requestPath . '-' . $productId
