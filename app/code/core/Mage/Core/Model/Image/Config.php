@@ -181,6 +181,7 @@ class Mage_Core_Model_Image_Config
         }
         Mage::getConfig()->reinit();
         Mage::app()->reinitStores();
+        Mage::app()->cleanCache([Mage_Core_Block_Abstract::CACHE_GROUP]);
         $this->activeSettings = [];
     }
 
@@ -205,7 +206,8 @@ class Mage_Core_Model_Image_Config
     }
 
     /**
-     * The store views whose live settings of $entity are not active yet.
+     * The store views whose live settings of $entity are not active yet, or that have no stored
+     * active settings.
      *
      * @return list<int>
      */
@@ -213,7 +215,9 @@ class Mage_Core_Model_Image_Config
     {
         $pending = [];
         foreach ($this->getStoreIds() as $storeId) {
-            if ($this->getActiveSettings($entity, $storeId) != $this->getLiveSettings($entity, $storeId)) {
+            if ((string) Mage::getStoreConfig(self::XML_PATH_ACTIVE . $entity, $storeId) === ''
+                || $this->getActiveSettings($entity, $storeId) != $this->getLiveSettings($entity, $storeId)
+            ) {
                 $pending[] = $storeId;
             }
         }
@@ -269,9 +273,10 @@ class Mage_Core_Model_Image_Config
 
     /**
      * The <images> settings of the skin theme of the store view. A theme without a value takes
-     * the value of its parent theme, and the last parent takes the value of base/default. The
-     * slot list of an entity is one value: the list of a child theme replaces the list of its
-     * parent.
+     * the value of its parent theme, and the last parent takes the value of base/default. As in the
+     * design fallback, when the theme declares no parent, the default theme of the store view and
+     * then the default theme of the package come before base/default. The slot list of an entity
+     * is one value: the list of a child theme replaces the list of its parent.
      *
      * @return array{slots?: array<string, int>, entities?: array<string, array{ratio?: string, fit?: string, slots?: array<string, int>}>}
      */
@@ -280,9 +285,14 @@ class Mage_Core_Model_Image_Config
         $designConfig = Mage::getSingleton('core/design_config');
         $area = Mage_Core_Model_Design_Package::DEFAULT_AREA;
         $package = (string) Mage::getStoreConfig('design/package/name', $storeId) ?: Mage_Core_Model_Design_Package::DEFAULT_PACKAGE;
+        $defaultTheme = (string) Mage::getStoreConfig('design/theme/default', $storeId);
         $theme = (string) Mage::getStoreConfig('design/theme/skin', $storeId)
-            ?: (string) Mage::getStoreConfig('design/theme/default', $storeId)
+            ?: $defaultTheme
             ?: Mage_Core_Model_Design_Package::DEFAULT_THEME;
+
+        $legacyThemes = $designConfig->getNode("{$area}/{$package}/{$theme}/parent")
+            ? []
+            : array_filter([$defaultTheme, Mage_Core_Model_Design_Package::DEFAULT_THEME]);
 
         $result = [];
         $visited = [];
@@ -313,7 +323,12 @@ class Mage_Core_Model_Image_Config
                 }
             }
 
-            $parent = trim((string) $designConfig->getNode("{$area}/{$package}/{$theme}/parent")) ?: self::BASE_THEME;
+            $parent = trim((string) $designConfig->getNode("{$area}/{$package}/{$theme}/parent"));
+            while ($parent === '' && $legacyThemes !== []) {
+                $legacyTheme = array_shift($legacyThemes);
+                $parent = isset($visited["{$package}/{$legacyTheme}"]) ? '' : $legacyTheme;
+            }
+            $parent = $parent ?: self::BASE_THEME;
             $parts = explode('/', $parent);
             [$package, $theme] = count($parts) === 2 ? $parts : [$package, $parts[0]];
         }
@@ -351,7 +366,7 @@ class Mage_Core_Model_Image_Config
                 'position' => (string) Mage::getStoreConfig($prefix . 'position', $storeId) ?: 'stretch',
                 'width' => count($size) === 2 && (int) $size[0] > 0 ? (int) $size[0] : null,
                 'height' => count($size) === 2 && (int) $size[1] > 0 ? (int) $size[1] : null,
-                'opacity' => (int) (Mage::getStoreConfig($prefix . 'imageOpacity', $storeId) ?? 70),
+                'opacity' => (int) (Mage::getStoreConfig($prefix . 'imageOpacity', $storeId) ?: 70),
             ];
         }
 

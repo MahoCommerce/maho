@@ -311,15 +311,18 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
     public function createSwatchImage($value, $width, $height)
     {
         $filename = Mage::helper('configurableswatches')->getHyphenatedString($value) . self::getSwatchFileExt();
-        $optionSwatch = Mage::getModel('eav/entity_attribute_option_swatch')
-            ->load($filename, 'filename');
-        if (!$optionSwatch->getValue()) {
-            return false;
-        }
-
         $mount = Mage::getStorage('media');
         $destPath = $this->getSwatchCachePath($mount, 'media', $filename, (int) $width, (int) $height);
         if ($destPath === null) {
+            return false;
+        }
+        if ($this->fileExists($mount, $destPath)) {
+            return $destPath;
+        }
+
+        $optionSwatch = Mage::getModel('eav/entity_attribute_option_swatch')
+            ->load($filename, 'filename');
+        if (!$optionSwatch->getValue()) {
             return false;
         }
 
