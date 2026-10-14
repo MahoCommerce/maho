@@ -100,6 +100,11 @@ final class Installer
         $this->step(++$done, $steps, 'Activity');
         $this->installActivity($result, array_map($package->packDir(...), $packs));
 
+        // copyMedia() writes the originals directly, so nothing has created their resized files yet
+        foreach (array_keys(Mage::getSingleton('core/image_config')->getEntities()) as $entity) {
+            Mage::getSingleton('core/image_resizer')->queueAll($entity);
+        }
+
         if ($reindex) {
             $this->step(++$done, $steps, 'Reindex');
             $this->reindexAll();

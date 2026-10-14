@@ -66,13 +66,14 @@ class Mage_Core_Model_Image_Set
 
     /**
      * The mount path of the file of $sourcePath for $settings and $width. $width must be one of
-     * the widths of $settings.
-     * Example: catalog/product/cache/3f9a1c2b0d4e/300/a/b/shirt.jpg.webp
+     * the widths of $settings. An original in the output format keeps its name.
+     * Example: catalog/product/cache/3f9a1c2b0d4e/300/a/b/shirt.jpg.webp, or .../shirt.webp
      */
     public static function buildPath(string $source, string $sourcePath, Mage_Core_Model_Image_Settings $settings, int $width): string
     {
-        return $source . '/' . self::CACHE_FOLDER . '/' . $settings->getHash() . '/' . $width
-            . substr($sourcePath, strlen($source)) . $settings->extension;
+        $file = substr($sourcePath, strlen($source));
+        return $source . '/' . self::CACHE_FOLDER . '/' . $settings->getHash() . '/' . $width . $file
+            . (str_ends_with(strtolower($file), $settings->extension) ? '' : $settings->extension);
     }
 
     public function getEntity(): string

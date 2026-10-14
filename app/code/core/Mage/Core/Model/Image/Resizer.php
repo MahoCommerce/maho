@@ -94,22 +94,25 @@ class Mage_Core_Model_Image_Resizer
             if ($settings === null || !in_array($width, $settings->widths, true) || !str_ends_with($match[3], $settings->extension)) {
                 return null;
             }
-            $sourcePath = Mage_Core_Model_Image_Set::resolveSourcePath($source, substr($match[3], 0, -strlen($settings->extension)));
-            if ($sourcePath === null
-                || str_ends_with(strtolower($sourcePath), '.svg')
-                || Mage_Core_Model_Image_Set::buildPath($source, $sourcePath, $settings, $width) !== $path
-                || !Mage::getStorage('media')->fileExists($sourcePath)
-            ) {
-                return null;
-            }
+            foreach ([$match[3], substr($match[3], 0, -strlen($settings->extension))] as $file) {
+                $sourcePath = Mage_Core_Model_Image_Set::resolveSourcePath($source, $file);
+                if ($sourcePath === null
+                    || str_ends_with(strtolower($sourcePath), '.svg')
+                    || Mage_Core_Model_Image_Set::buildPath($source, $sourcePath, $settings, $width) !== $path
+                    || !Mage::getStorage('media')->fileExists($sourcePath)
+                ) {
+                    continue;
+                }
 
-            $image = $this->decode($sourcePath);
-            if ($image === null) {
-                return null;
+                $image = $this->decode($sourcePath);
+                if ($image === null) {
+                    return null;
+                }
+                $binary = $this->render($image, $settings, $width, !$this->isPlaceholder($source, $sourcePath));
+                Mage::getStorage('media')->moveAtomic($path, $binary);
+                return $binary;
             }
-            $binary = $this->render($image, $settings, $width, !$this->isPlaceholder($source, $sourcePath));
-            Mage::getStorage('media')->moveAtomic($path, $binary);
-            return $binary;
+            return null;
         }
         return null;
     }

@@ -201,6 +201,17 @@ describe('resized image files of an image entity', function () {
             ->and(($this->sizeOf)($path))->toBe([300, 150]);
     });
 
+    it('keeps the name of an original that is in the output format, and creates its missing file', function (): void {
+        $file = '/a/b/flat' . $this->settings->extension;
+        ($this->writePng)('catalog/product' . $file, 400, 200);
+        $path = ($this->pathOf)(300, $file);
+
+        expect($path)->toEndWith('/300' . $file)
+            ->and(($this->pathOf)(300))->toEndWith('/300/a/b/shirt.png' . $this->settings->extension)
+            ->and(Mage::getSingleton('core/image_resizer')->createFileAtPath($path))->toBeString()
+            ->and(($this->sizeOf)($path))->toBe([300, 150]);
+    });
+
     it('creates a missing file on a mount that is not local, for a CDN that sends a miss to Maho', function (): void {
         $adapter = new RemoteFilesystemAdapter(new LocalFilesystemAdapter($this->root));
         MountRegistry::register(new Mount('media', $adapter, $this->root, new StoreBaseUrlGenerator('media')));
