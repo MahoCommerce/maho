@@ -69,10 +69,7 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
         $base64 = $body['base64'] ?? $body['imageData'] ?? $body['image_data'] ?? null;
         $imageUrl = $body['imageUrl'] ?? $body['image_url'] ?? null;
         $filename = $body['filename'] ?? 'upload.jpg';
-        $types = array_values(array_unique(array_map(
-            fn(mixed $type): mixed => in_array($type, \Mage_Catalog_Helper_Image::DEPRECATED_ROLES, true) ? 'image' : $type,
-            (array) ($body['types'] ?? []),
-        )));
+        $types = \Mage_Catalog_Helper_Image::mapDeprecatedRoles((array) ($body['types'] ?? []));
         $label = $body['label'] ?? null;
 
         $position = $body['position'] ?? null;

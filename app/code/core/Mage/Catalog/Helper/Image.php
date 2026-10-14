@@ -53,6 +53,20 @@ class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract implements \St
     public const DEPRECATED_ROLES = ['small_image', 'thumbnail'];
 
     /**
+     * Replace each deprecated role in $types with image.
+     *
+     * @param array<mixed> $types
+     * @return list<mixed>
+     */
+    public static function mapDeprecatedRoles(array $types): array
+    {
+        return array_values(array_unique(array_map(
+            fn(mixed $type): mixed => in_array($type, self::DEPRECATED_ROLES, true) ? 'image' : $type,
+            $types,
+        )));
+    }
+
+    /**
      * Start an image of the product: the file of $attributeName, or $imageFile when it is given.
      * A product without the image gets the placeholder of $attributeName.
      *
