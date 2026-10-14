@@ -65,7 +65,8 @@ class Mage_Core_Model_Image_Observer
     {
         $event = $observer->getEvent();
         $mount = $event->getData('mount');
-        if ($mount instanceof \Maho\Storage\Mount) {
+        // Before the install, no table holds sizes, and there can be no database at all
+        if ($mount instanceof \Maho\Storage\Mount && Mage::isInstalled()) {
             Mage::getSingleton('core/image_size')->forget($mount->name(), (array) $event->getData('paths'), (array) $event->getData('folders'));
         }
     }
