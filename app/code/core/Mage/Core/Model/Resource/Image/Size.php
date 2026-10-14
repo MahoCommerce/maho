@@ -54,14 +54,28 @@ class Mage_Core_Model_Resource_Image_Size extends Mage_Core_Model_Resource_Db_Ab
      */
     public function deleteFolder(string $mount, string $folder): void
     {
+        $this->deleteHashes(array_map(strval(...), array_keys($this->fetchFolderSizes($mount, $folder))));
+    }
+
+    /**
+     * @return array<string, array{0: int, 1: int}> the width and the height of each file below $folder on $mount, by hash
+     */
+    public function fetchFolderSizes(string $mount, string $folder): array
+    {
         $prefix = $folder . '/';
         $adapter = $this->_getReadAdapter();
-        // LIKE ignores the case on MySQL and reads "_" as any character, so PHP checks each path
-        $rows = $adapter->fetchPairs($adapter->select()
-            ->from($this->getMainTable(), ['path_hash', 'path'])
+        $rows = $adapter->fetchAll($adapter->select()
+            ->from($this->getMainTable(), ['path_hash', 'path', 'width', 'height'])
             ->where('mount = ?', $mount)
             ->where('path LIKE ?', $prefix . '%'));
-        $this->deleteHashes(array_map(strval(...), array_keys(array_filter($rows, fn($path): bool => str_starts_with((string) $path, $prefix)))));
+        $sizes = [];
+        foreach ($rows as $row) {
+            // LIKE ignores the case on MySQL and reads "_" as any character
+            if (str_starts_with((string) $row['path'], $prefix)) {
+                $sizes[(string) $row['path_hash']] = [(int) $row['width'], (int) $row['height']];
+            }
+        }
+        return $sizes;
     }
 
     /**

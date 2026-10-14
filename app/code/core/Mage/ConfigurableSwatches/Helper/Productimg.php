@@ -231,13 +231,16 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
 
     /**
      * The URL of the resized file of a swatch image in wysiwyg/swatches, or null when the image
-     * does not exist.
+     * does not exist. The stored image sizes tell whether the file exists, so a page sends no
+     * request to a bucket. A file on a bucket with no stored size shows once the queue read it.
      */
     protected function getSwatchImageUrl(string $filename, int $width, int $height): ?string
     {
         $mount = Mage::getStorage('media');
         $sourcePath = \Maho\Io::getPathWithinMount($mount, self::SWATCH_FALLBACK_MEDIA_DIR, $filename);
-        if ($sourcePath === null || !$this->fileExists($mount, $sourcePath)) {
+        $sizes = Mage::getSingleton('core/image_size');
+        $sizes->preloadFolder($mount, self::SWATCH_FALLBACK_MEDIA_DIR);
+        if ($sourcePath === null || $sizes->get($mount, $sourcePath) === null) {
             return null;
         }
         return Mage::helper('core/image')

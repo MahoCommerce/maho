@@ -106,6 +106,22 @@ describe('the stored sizes of the images', function () {
         expect($sizes->get($this->mount, $this->path))->toBe([40, 30]);
     });
 
+    it('reads the sizes of a folder with one query, for the swatch images that a page looks up by name', function (): void {
+        $sizes = ($this->sizes)();
+        $sizes->save('media', $this->path, 40, 30);
+        $sizes->save('media', $this->folder . '/missing.png', 0, 0);
+        $sizes->save('media', $this->folder . '_b/other.png', 2, 2);
+        $sizes = ($this->sizes)();
+
+        $sizes->preloadFolder($this->mount, $this->folder);
+        $this->resource->deleteFolder('media', $this->folder);
+
+        expect($sizes->get($this->mount, $this->path))->toBe([40, 30])
+            ->and($sizes->get($this->mount, $this->folder . '/missing.png'))->toBeNull()
+            ->and(($this->rowOf)($this->folder . '/missing.png'))->toBeNull();
+        $this->resource->deleteFolder('media', $this->folder . '_b');
+    });
+
     it('stores 0 x 0 for a missing file, so a page does not ask for it again', function (): void {
         $missing = $this->folder . '/missing.png';
 

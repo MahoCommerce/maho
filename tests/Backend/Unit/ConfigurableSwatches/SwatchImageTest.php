@@ -24,6 +24,9 @@ describe('the swatch image entity', function () {
         $this->storeId = (int) Mage::app()->getDefaultStoreView()->getId();
         Mage::app()->setCurrentStore($this->storeId);
         Mage::getSingleton('core/image_config')->reset();
+        // The stored sizes tell whether a swatch file exists, so they must match the folder of the test
+        Mage::getResourceSingleton('core/image_size')->deleteFolder('media', 'wysiwyg/swatches');
+        Mage::unregister('_singleton/core/image_size');
 
         $png = Maho::getImageManager()->createImage(80, 40)->fill('ff0000')
             ->encodeUsingFormat(\Intervention\Image\Format::PNG)->toString();
@@ -31,6 +34,8 @@ describe('the swatch image entity', function () {
     });
 
     afterEach(function (): void {
+        Mage::getResourceSingleton('core/image_size')->deleteFolder('media', 'wysiwyg/swatches');
+        Mage::unregister('_singleton/core/image_size');
         Mage::getSingleton('core/image_config')->reset();
         MountRegistry::reset();
         $items = new RecursiveIteratorIterator(

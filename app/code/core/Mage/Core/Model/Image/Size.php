@@ -30,6 +30,9 @@ class Mage_Core_Model_Image_Size
     /** @var array<string, array{0: int, 1: int}|false> the sizes that this request knows, by hash. False: no size */
     protected array $sizes = [];
 
+    /** @var array<string, true> the folders that preloadFolder() read in this request */
+    protected array $preloadedFolders = [];
+
     /**
      * The key of the row of $path on the mount $mount. The md5 keeps two names that differ only in
      * case apart: MySQL compares text without case.
@@ -93,6 +96,23 @@ class Mage_Core_Model_Image_Size
     }
 
     /**
+     * Read the stored sizes of every file below $folder on $mount with one query, once in a
+     * request. This is for a small folder whose files a page looks up by name, such as the
+     * swatch images.
+     */
+    public function preloadFolder(Mount $mount, string $folder): void
+    {
+        $key = $mount->name() . '/' . $folder;
+        if (isset($this->preloadedFolders[$key])) {
+            return;
+        }
+        $this->preloadedFolders[$key] = true;
+        foreach ($this->getResource()->fetchFolderSizes($mount->name(), self::normalizePath($folder)) as $hash => $size) {
+            $this->sizes[$hash] ??= $size[0] > 0 && $size[1] > 0 ? $size : false;
+        }
+    }
+
+    /**
      * Read the size of $path from $mount and store it. A missing file, or a file that is not an
      * image, gets a row of 0 x 0, so a page does not ask for it again.
      *
@@ -142,6 +162,7 @@ class Mage_Core_Model_Image_Size
             if (!$this->isResized($mount, $folder)) {
                 $this->getResource()->deleteFolder($mount, $folder);
                 $this->sizes = [];
+                $this->preloadedFolders = [];
             }
         }
     }
@@ -294,6 +315,7 @@ class Mage_Core_Model_Image_Size
             $after = (string) end($rows)['path_hash'];
         }
         $this->sizes = [];
+        $this->preloadedFolders = [];
         return $count;
     }
 
