@@ -29,6 +29,9 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
      */
     protected $_productImageFilters = [];
 
+    /** @var array<string, string>|null the color of each swatch, by the file name without its extension */
+    protected ?array $swatchColors = null;
+
     public const SWATCH_LABEL_SUFFIX = '-swatch';
     public const SWATCH_FALLBACK_MEDIA_DIR = 'wysiwyg/swatches';
     public const SWATCH_CACHE_DIR = 'catalog/swatches';
@@ -283,10 +286,7 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
         do {
             $filename = Mage::helper('configurableswatches')->getHyphenatedString($value) . $fileExt;
             $url = $this->getSwatchImageUrl($filename, (int) $width, (int) $height);
-            if ($url === null) {
-                $swatchImage = $this->createSwatchImage($value, $width, $height);
-                $url = $swatchImage ? Mage::getStorage('media')->publicUrl($swatchImage) : null;
-            }
+            $url ??= $this->getColorSwatchUrl((string) $value, (int) $width, (int) $height);
             if ($url === null && $defaultValue == $value) {
                 return '';  // no image found and no further fallback
             } elseif ($url === null) {
@@ -300,8 +300,33 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
     }
 
     /**
+     * The color of the swatch of $value as an SVG data URL, or null when the option has no color.
+     */
+    public function getColorSwatchUrl(string $value, int $width, int $height): ?string
+    {
+        if ($this->swatchColors === null) {
+            $resource = Mage::getSingleton('core/resource');
+            $adapter = $resource->getConnection('core_read');
+            $this->swatchColors = [];
+            foreach ($adapter->fetchAll($adapter->select()
+                ->from($resource->getTableName('eav/attribute_option_swatch'), ['filename', 'value'])
+                ->where('value IS NOT NULL')) as $row) {
+                $this->swatchColors[pathinfo((string) $row['filename'], PATHINFO_FILENAME)] ??= (string) $row['value'];
+            }
+        }
+
+        $color = $this->swatchColors[Mage::helper('configurableswatches')->getHyphenatedString($value)] ?? '';
+        if (!preg_match('/^#?([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i', $color, $match)) {
+            return null;
+        }
+        $svg = "<svg xmlns='http://www.w3.org/2000/svg' width='{$width}' height='{$height}'><rect width='100%' height='100%' fill='#{$match[1]}'/></svg>";
+        return 'data:image/svg+xml,' . rawurlencode($svg);
+    }
+
+    /**
      * Create a swatch image for the given filename
      *
+     * @deprecated since 26.11 a color swatch is an SVG data URL, see getColorSwatchUrl()
      * @param string $value
      * @param int $width
      * @param int $height
