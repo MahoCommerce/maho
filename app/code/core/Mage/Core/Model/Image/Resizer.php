@@ -222,14 +222,46 @@ class Mage_Core_Model_Image_Resizer
         }
 
         $count = $this->createFiles($entity, $this->getSourceFiles($entity), $settingsList, $existing, $onFile);
+        $this->activateLiveSettings($entity);
 
+        return $count;
+    }
+
+    /**
+     * Switch each store view to the live settings of $entity. Call it when their files exist.
+     */
+    public function activateLiveSettings(string $entity): void
+    {
+        $config = Mage::getSingleton('core/image_config');
         $pending = [];
         foreach ($config->getPendingStoreIds($entity) as $storeId) {
             $pending[$storeId] = $config->getLiveSettings($entity, $storeId);
         }
         $config->activate($entity, $pending);
+    }
 
-        return $count;
+    /**
+     * The files of $files that miss at least one resized file of $settingsList in $existing.
+     *
+     * @param iterable<string> $files paths below the source folder of $entity
+     * @param array<string, Mage_Core_Model_Image_Settings> $settingsList
+     * @param array<string, true> $existing the mount paths of the resized files that exist
+     * @return list<string>
+     */
+    public function filterMissing(string $entity, iterable $files, array $settingsList, array $existing): array
+    {
+        $source = Mage::getSingleton('core/image_config')->getSource($entity);
+        $missing = [];
+        foreach ($files as $file) {
+            $sourcePath = Mage_Core_Model_Image_Set::resolveSourcePath($source, (string) $file);
+            if ($sourcePath !== null
+                && !str_ends_with(strtolower($sourcePath), '.svg')
+                && $this->getMissingPaths($source, $sourcePath, $settingsList, $existing) !== []
+            ) {
+                $missing[] = (string) $file;
+            }
+        }
+        return $missing;
     }
 
     /**
@@ -386,11 +418,14 @@ class Mage_Core_Model_Image_Resizer
     }
 
     /**
+     * The resized files of $sourcePath that $existing does not hold, or all of them when $existing
+     * is null.
+     *
      * @param array<string, Mage_Core_Model_Image_Settings> $settingsList
      * @param array<string, true>|null $existing
-     * @param bool $failed set to true when a file could not be written
+     * @return array<string, array{0: Mage_Core_Model_Image_Settings, 1: int}> the settings and the width, by mount path
      */
-    protected function createFilesOfSource(string $source, string $sourcePath, array $settingsList, ?array $existing, bool &$failed = false): int
+    protected function getMissingPaths(string $source, string $sourcePath, array $settingsList, ?array $existing): array
     {
         $missing = [];
         foreach ($settingsList as $settings) {
@@ -401,6 +436,17 @@ class Mage_Core_Model_Image_Resizer
                 }
             }
         }
+        return $missing;
+    }
+
+    /**
+     * @param array<string, Mage_Core_Model_Image_Settings> $settingsList
+     * @param array<string, true>|null $existing
+     * @param bool $failed set to true when a file could not be written
+     */
+    protected function createFilesOfSource(string $source, string $sourcePath, array $settingsList, ?array $existing, bool &$failed = false): int
+    {
+        $missing = $this->getMissingPaths($source, $sourcePath, $settingsList, $existing);
         if ($missing === []) {
             return 0;
         }
