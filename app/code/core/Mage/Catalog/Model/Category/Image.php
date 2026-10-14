@@ -22,17 +22,6 @@ class Mage_Catalog_Model_Category_Image implements Mage_Core_Model_Image_Provide
     #[\Override]
     public function getImageFiles(): array
     {
-        $attribute = Mage::getSingleton('eav/config')->getAttribute(Mage_Catalog_Model_Category::ENTITY, 'image');
-        if (!$attribute || !$attribute->getId()) {
-            return [];
-        }
-
-        $adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
-        $files = $adapter->fetchCol($adapter->select()
-            ->distinct()
-            ->from($attribute->getBackend()->getTable(), ['value'])
-            ->where('attribute_id = ?', (int) $attribute->getId()));
-
-        return array_values(array_filter(array_map(strval(...), $files), fn(string $file): bool => $file !== ''));
+        return Mage::getSingleton('core/image_resizer')->getAttributeImageFiles(Mage_Catalog_Model_Category::ENTITY);
     }
 }

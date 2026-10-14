@@ -253,6 +253,27 @@ class Mage_Core_Model_Image_Resizer
     }
 
     /**
+     * The values of the image attribute of $entityType in every store.
+     *
+     * @return list<string>
+     */
+    public function getAttributeImageFiles(string $entityType): array
+    {
+        $attribute = Mage::getSingleton('eav/config')->getAttribute($entityType, 'image');
+        if (!$attribute || !$attribute->getId()) {
+            return [];
+        }
+
+        $adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
+        $files = $adapter->fetchCol($adapter->select()
+            ->distinct()
+            ->from($attribute->getBackend()->getTable(), ['value'])
+            ->where('attribute_id = ?', (int) $attribute->getId()));
+
+        return array_values(array_filter(array_map(strval(...), $files), fn(string $file): bool => $file !== ''));
+    }
+
+    /**
      * The entity and the file of $path when it is a source file of an image entity, or null.
      * Example: wysiwyg/swatches/red.png gives ['swatch', '/red.png'].
      *

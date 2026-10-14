@@ -342,6 +342,12 @@ class Mage_Catalog_Model_Product_Attribute_Media_Api extends Mage_Catalog_Model_
      */
     protected function _prepareImageData($data)
     {
+        if (isset($data['types']) && is_array($data['types'])) {
+            $data['types'] = array_values(array_unique(array_map(
+                fn(mixed $type): mixed => in_array($type, Mage_Catalog_Helper_Image::DEPRECATED_ROLES, true) ? 'image' : $type,
+                $data['types'],
+            )));
+        }
         return $data;
     }
 
