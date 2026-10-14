@@ -11,6 +11,7 @@ use League\Flysystem\Local\LocalFilesystemAdapter;
 use Maho\Storage\Mount;
 use Maho\Storage\MountRegistry;
 use Maho\Storage\Url\StoreBaseUrlGenerator;
+use Tests\Helpers\RemoteFilesystemAdapter;
 
 uses(Tests\MahoBackendTestCase::class);
 
@@ -198,6 +199,17 @@ describe('resized image files of an image entity', function () {
         expect($binary)->toBeString()
             ->and($this->mount->read($path))->toBe($binary)
             ->and(($this->sizeOf)($path))->toBe([300, 150]);
+    });
+
+    it('creates a missing file on a mount that is not local, for a CDN that sends a miss to Maho', function (): void {
+        $adapter = new RemoteFilesystemAdapter(new LocalFilesystemAdapter($this->root));
+        MountRegistry::register(new Mount('media', $adapter, $this->root, new StoreBaseUrlGenerator('media')));
+        $path = ($this->pathOf)(300);
+
+        $binary = Mage::getSingleton('core/image_resizer')->createFileAtPath($path);
+
+        expect($binary)->toBeString()
+            ->and($this->mount->read($path))->toBe($binary);
     });
 
     it('creates no file for an unknown settings folder, a width of no slot or a missing source', function (): void {

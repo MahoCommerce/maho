@@ -73,16 +73,13 @@ class Mage_Core_Model_Image_Resizer
     /**
      * Create the resized file at $path and return its bytes. This repairs a file that a page links
      * to but that does not exist, when the web server sends the request for a missing file to Maho.
-     * Null when $path is not a file of the settings that a store view uses, when its source is
-     * missing, or when the media mount is not local.
+     * Null when $path is not a file of the settings that a store view uses, or when its source is
+     * missing.
      *
      * @param string $path mount path, such as catalog/product/cache/3f9a1c2b0d4e/300/a/b/shirt.jpg.webp
      */
     public function createFileAtPath(string $path): ?string
     {
-        if (!Mage::getStorage('media')->isLocal()) {
-            return null;
-        }
         $config = Mage::getSingleton('core/image_config');
         foreach ($config->getEntities() as $entity => $source) {
             $prefix = $source . '/' . Mage_Core_Model_Image_Set::CACHE_FOLDER . '/';
