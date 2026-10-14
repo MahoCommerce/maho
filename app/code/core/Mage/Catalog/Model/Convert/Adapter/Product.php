@@ -788,6 +788,12 @@ class Mage_Catalog_Model_Convert_Adapter_Product extends Mage_Eav_Model_Convert_
         }
         $product->setStockData($stockData);
 
+        foreach (Mage_Catalog_Helper_Image::DEPRECATED_ROLES as $role) {
+            if (empty($importData['image']) && !empty($importData[$role])) {
+                $importData['image'] = $importData[$role];
+            }
+        }
+
         $arrayToMassAdd = [];
 
         foreach ($product->getMediaAttributes() as $mediaAttributeCode => $mediaAttribute) {
