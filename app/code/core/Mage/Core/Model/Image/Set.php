@@ -19,17 +19,11 @@ class Mage_Core_Model_Image_Set
 {
     public const CACHE_FOLDER = 'cache';
 
-    /** Cache tag of the stored sizes of the source images on a remote mount. */
-    public const SIZE_CACHE_TAG = 'image_size';
-
     protected readonly string $source;
 
     protected readonly string $sourcePath;
 
     protected ?Mage_Core_Model_Image_Settings $settings = null;
-
-    /** @var array{0: int, 1: int}|false|null */
-    protected array|false|null $originalSize = null;
 
     /**
      * @param string $file path below the source folder of the entity, such as /a/b/shirt.jpg
@@ -148,18 +142,14 @@ class Mage_Core_Model_Image_Set
     }
 
     /**
-     * The width and the height of the source file. A remote mount reads the file once and keeps
-     * the size in the cache. Null when the file cannot be read.
+     * The width and the height of the source file, from core_image_size. Null when the file
+     * cannot be read, or when it is on a bucket and the queue did not read its size yet.
      *
      * @return array{0: int, 1: int}|null
      */
     public function getOriginalSize(): ?array
     {
-        if ($this->originalSize === null) {
-            $info = \Maho\Io::getImageSizeOnMount(Mage::getStorage('media'), $this->sourcePath, [self::SIZE_CACHE_TAG]);
-            $this->originalSize = $info === false ? false : [(int) $info[0], (int) $info[1]];
-        }
-        return $this->originalSize === false ? null : $this->originalSize;
+        return Mage::getSingleton('core/image_size')->get(Mage::getStorage('media'), $this->sourcePath);
     }
 
     /**

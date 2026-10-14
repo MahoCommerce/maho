@@ -30,4 +30,19 @@ class Mage_Core_Model_Image_ResizeMessageHandler
     {
         Mage::getSingleton('core/image_resizer')->createAll($message->entity);
     }
+
+    /**
+     * @throws RuntimeException when the mount could not read a file, so the queue tries the message again
+     */
+    #[Maho\Config\MessageHandler]
+    public function readSizes(Mage_Core_Model_Image_SizeMessage $message): void
+    {
+        $failed = 0;
+        Mage::getSingleton('core/image_size')->readAll($message->mount, $message->paths, function () use (&$failed): void {
+            $failed++;
+        });
+        if ($failed > 0) {
+            throw new RuntimeException(sprintf('The mount "%s" could not read %d images.', $message->mount, $failed));
+        }
+    }
 }

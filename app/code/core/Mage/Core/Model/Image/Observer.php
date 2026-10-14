@@ -5,6 +5,7 @@
  *
  * The settings come from the theme and from the store config. A config save checks them at
  * once. A theme changes with a deploy, which fires no event, so a cron job checks them too.
+ * The observer also deletes the stored size of each image that a mount changes.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -52,6 +53,20 @@ class Mage_Core_Model_Image_Observer
             }
             Mage::app()->saveCache('1', $cacheId, [Mage_Core_Model_Image_Config::CACHE_TAG], self::QUEUED_LIFETIME);
             $resizer->queueAll($entity);
+        }
+    }
+
+    /**
+     * Delete the stored size of each image that a mount operation changed. The next page or the
+     * resizer stores the new size.
+     */
+    #[Maho\Config\Observer('storage_mount_change', id: 'image_size_forget')]
+    public function forgetSizes(\Maho\Event\Observer $observer): void
+    {
+        $event = $observer->getEvent();
+        $mount = $event->getData('mount');
+        if ($mount instanceof \Maho\Storage\Mount) {
+            Mage::getSingleton('core/image_size')->forget($mount->name(), (array) $event->getData('paths'), (array) $event->getData('folders'));
         }
     }
 }

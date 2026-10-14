@@ -509,20 +509,15 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
     }
 
     /**
-     * Width and height of the image, or null when it cannot be read. A remote mount reads the
-     * file once and keeps the size in the cache, so a page render does not download it.
+     * Width and height of the image, from core_image_size. Null when the file cannot be read, or
+     * when it is on a bucket and the queue did not read its size yet.
      *
      * @return array{0: int, 1: int}|null
      */
     public function getImageSize(): ?array
     {
         $path = $this->getImageStoragePath();
-        if ($path === null) {
-            return null;
-        }
-
-        $info = \Maho\Io::getImageSizeOnMount(Mage::getStorage('media'), $path, [self::CACHE_TAG]);
-        return $info === false ? null : [$info[0], $info[1]];
+        return $path === null ? null : Mage::getSingleton('core/image_size')->get(Mage::getStorage('media'), $path);
     }
 
     /**

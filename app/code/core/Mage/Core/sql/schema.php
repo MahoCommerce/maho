@@ -507,4 +507,17 @@ return function (SchemaEditor $schema): void {
             ->setComment('Email Log')
             ->create(),
     );
+
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('core_image_size')
+            ->addColumn(Schema::column('path_hash', Types::STRING, length: 32, comment: 'md5 of the mount name, a slash and the path'))
+            ->addColumn(Schema::column('mount', Types::STRING, length: 64))
+            ->addColumn(Schema::column('path', Types::STRING, length: 512))
+            ->addColumn(Schema::column('width', Types::INTEGER, unsigned: true, comment: '0 when the file cannot be read'))
+            ->addColumn(Schema::column('height', Types::INTEGER, unsigned: true, comment: '0 when the file cannot be read'))
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('path_hash')->create())
+            ->setComment('Width and Height of the Images on the Mounts')
+            ->create(),
+    );
 };

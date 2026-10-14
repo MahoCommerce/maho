@@ -16,8 +16,8 @@ declare(strict_types=1);
  */
 class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
 {
-    /** Cache tag of the stored sizes of the source images on a remote mount. */
-    public const CACHE_TAG = Mage_Core_Model_Image_Set::SIZE_CACHE_TAG;
+    /** @deprecated since 26.11 no cache holds the sizes of the source images, see Mage_Core_Model_Image_Size */
+    public const CACHE_TAG = 'catalog_product_image';
 
     public const CACHE_DIRECTORY = 'catalog/product/' . Mage_Core_Model_Image_Set::CACHE_FOLDER;
 

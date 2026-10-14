@@ -16,7 +16,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
     name: 'storage:image:clean',
-    description: 'Delete the resized files of image settings that no store view uses',
+    description: 'Delete the resized files of image settings that no store view uses, and the stored sizes of images that no record uses',
 )]
 class StorageImageClean extends BaseMahoCommand
 {
@@ -30,7 +30,9 @@ class StorageImageClean extends BaseMahoCommand
             $count += $resizer->clean($entity);
         }
 
-        $io->success("Deleted {$count} folder(s) of unused image settings.");
+        $sizes = Mage::getSingleton('core/image_size')->deleteOrphans();
+
+        $io->success("Deleted {$count} folder(s) of unused image settings and {$sizes} stored size(s) of unused images.");
         return Command::SUCCESS;
     }
 }

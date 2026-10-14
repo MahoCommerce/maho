@@ -181,9 +181,10 @@ class Mage_Core_Model_Image_Resizer
     }
 
     /**
-     * Delete the settings folders that no store view uses, and queue the creation of the missing
-     * files, for every image entity. The files that the URLs use stay, so no image goes missing
-     * in the meantime. This is the "Flush Catalog Images Cache" action of the admin.
+     * Delete the settings folders that no store view uses, queue the creation of the missing
+     * files for every image entity, and queue a new read of every stored image size. The files
+     * that the URLs use and the sizes stay, so no image goes missing in the meantime. This is the
+     * "Flush Catalog Images Cache" action of the admin.
      */
     public function refreshAll(): void
     {
@@ -191,7 +192,7 @@ class Mage_Core_Model_Image_Resizer
             $this->clean($entity);
             $this->queueAll($entity);
         }
-        Mage::app()->cleanCache([Mage_Core_Model_Image_Set::SIZE_CACHE_TAG]);
+        Mage::getSingleton('core/image_size')->refreshAll();
     }
 
     /**
@@ -475,20 +476,23 @@ class Mage_Core_Model_Image_Resizer
     }
 
     /**
-     * The image of the source file, or null when it cannot be read.
+     * The image of the source file, or null when it cannot be read. Its size goes to
+     * core_image_size, so a page does not read the file to find it.
      */
     protected function decode(string $sourcePath): ?ImageInterface
     {
         $mount = Mage::getStorage('media');
         try {
             $root = $mount->localRoot();
-            return $root !== null
+            $image = $root !== null
                 ? Maho::getImageManager()->decodePath($root . '/' . $sourcePath)
                 : Maho::getImageManager()->decodeBinary($mount->read($sourcePath));
         } catch (\Throwable $e) {
             Mage::log("The image {$sourcePath} cannot be read: {$e->getMessage()}", Mage::LOG_WARNING);
             return null;
         }
+        Mage::getSingleton('core/image_size')->save($mount->name(), $sourcePath, $image->width(), $image->height());
+        return $image;
     }
 
     protected function isPlaceholder(string $source, string $sourcePath): bool

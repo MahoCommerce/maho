@@ -82,7 +82,8 @@ class StorageMigrate extends BaseMahoCommand
                 continue;
             }
 
-            $target = MountRegistry::get($name);
+            // The copies are the same files, so the data that modules keep about them stays valid
+            $target = MountRegistry::get($name)->withoutChangeEvents();
             $source = MountRegistry::getDeclaredLocalMount($name);
             if ($source === null || ($target->isLocal() && realpath((string) $target->localRoot()) === realpath((string) $source->localRoot()))) {
                 $io->warning("The mount \"{$name}\" uses its local folder already, so there is nothing to copy.");
@@ -209,7 +210,7 @@ class StorageMigrate extends BaseMahoCommand
         $result = new MigrationResult();
         new Migrator()->copyFiles(
             $source,
-            MountRegistry::get($name),
+            MountRegistry::get($name)->withoutChangeEvents(),
             array_map(intval(...), $files),
             $dryRun,
             $result,

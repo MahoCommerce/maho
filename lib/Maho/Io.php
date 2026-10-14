@@ -243,7 +243,32 @@ abstract class Io implements IoInterface
         }
 
         try {
-            $stream = $mount->readStream($path);
+            $info = self::readImageSizeOnMount($mount, $path);
+        } catch (\League\Flysystem\FilesystemException) {
+            return false;
+        }
+        if ($info !== false) {
+            \Mage::app()->saveCache((string) json_encode($info), $cacheId, $cacheTags, 86400 * 365);
+        }
+        return $info;
+    }
+
+    /**
+     * The getimagesize() data of the file at $path on $mount, or false when the file is not an
+     * image. A remote mount reads only the start of the file, where the size is.
+     *
+     * @return array<int|string, mixed>|false
+     * @throws \League\Flysystem\FilesystemException when the mount cannot read the file
+     */
+    public static function readImageSizeOnMount(Storage\Mount $mount, string $path): array|false
+    {
+        $root = $mount->localRoot();
+        if ($root !== null) {
+            return self::getImageSize($root . '/' . $path);
+        }
+
+        $stream = $mount->readStream($path);
+        try {
             $head = '';
             $info = false;
             while (($info === false || $info[0] < 1 || $info[1] < 1)
@@ -252,12 +277,8 @@ abstract class Io implements IoInterface
                 $head .= $chunk;
                 $info = @getimagesizefromstring($head);
             }
+        } finally {
             fclose($stream);
-        } catch (\League\Flysystem\FilesystemException) {
-            return false;
-        }
-        if ($info !== false) {
-            \Mage::app()->saveCache((string) json_encode($info), $cacheId, $cacheTags, 86400 * 365);
         }
         return $info;
     }
