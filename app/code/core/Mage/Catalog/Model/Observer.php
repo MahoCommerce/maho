@@ -66,7 +66,7 @@ class Mage_Catalog_Model_Observer
         $product = $observer->getEvent()->getProduct();
         $main = is_string($product->getImage()) ? $product->getImage() : null;
         if ($product->getIsDuplicate()) {
-            $files = Mage::getSingleton('catalog/product_image_resizer')->getProductImageFiles([(int) $product->getId()]);
+            $files = Mage::getSingleton('catalog/product_image_provider')->getProductImageFiles([(int) $product->getId()]);
         } else {
             $files = [];
             $galleryImages = $product->getData('media_gallery')['images'] ?? [];
@@ -82,9 +82,9 @@ class Mage_Catalog_Model_Observer
 
         $resizer = Mage::getSingleton('core/image_resizer');
         if ($main !== null) {
-            $resizer->createFilesAfterCommit(Mage_Catalog_Model_Product_Image_Resizer::ENTITY, [$main]);
+            $resizer->createFilesAfterCommit(Mage_Catalog_Model_Product_Image_Provider::ENTITY, [$main]);
         }
-        $resizer->queue(Mage_Catalog_Model_Product_Image_Resizer::ENTITY, array_values(array_diff($files, [$main])));
+        $resizer->queue(Mage_Catalog_Model_Product_Image_Provider::ENTITY, array_values(array_diff($files, [$main])));
     }
 
     /**
@@ -108,8 +108,8 @@ class Mage_Catalog_Model_Observer
     public function createPlaceholderImageFiles(\Maho\Event\Observer $observer): void
     {
         Mage::getSingleton('core/image_resizer')->createFilesAfterCommit(
-            Mage_Catalog_Model_Product_Image_Resizer::ENTITY,
-            Mage::getSingleton('catalog/product_image_resizer')->getPlaceholderFiles(),
+            Mage_Catalog_Model_Product_Image_Provider::ENTITY,
+            Mage::getSingleton('catalog/product_image_provider')->getPlaceholderFiles(),
         );
     }
 
@@ -119,7 +119,7 @@ class Mage_Catalog_Model_Observer
         /** @var Mage_ImportExport_Model_Import_Entity_Product $adapter */
         $adapter = $observer->getEvent()->getAdapter();
         if ($adapter->getBehavior() !== Mage_ImportExport_Model_Import::BEHAVIOR_DELETE) {
-            Mage::getSingleton('catalog/product_image_resizer')->queue($adapter->getAffectedEntityIds(true));
+            Mage::getSingleton('catalog/product_image_provider')->queue($adapter->getAffectedEntityIds(true));
         }
     }
 

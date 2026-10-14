@@ -84,12 +84,12 @@ class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract implements \St
 
         $helper = Mage::helper('core/image');
         $file = $imageFile ?: $product->getData($this->attributeName);
-        $this->set = $helper->init(Mage_Catalog_Model_Product_Image_Resizer::ENTITY, is_string($file) ? $file : null);
+        $this->set = $helper->init(Mage_Catalog_Model_Product_Image_Provider::ENTITY, is_string($file) ? $file : null);
         if ($this->set === null) {
             $placeholder = (string) Mage::getStoreConfig("catalog/placeholder/{$this->attributeName}_placeholder");
             if ($placeholder !== '') {
                 $this->set = $helper->init(
-                    Mage_Catalog_Model_Product_Image_Resizer::ENTITY,
+                    Mage_Catalog_Model_Product_Image_Provider::ENTITY,
                     '/' . Mage_Core_Model_Image_Resizer::PLACEHOLDER_FOLDER . '/' . $placeholder,
                 );
             }
@@ -153,7 +153,7 @@ class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract implements \St
         if ($this->set !== null) {
             return $this->set->getImgAttributes($slot);
         }
-        $size = Mage::getSingleton('core/image_config')->getSlotWidth($slot, (int) Mage::app()->getStore()->getId(), Mage_Catalog_Model_Product_Image_Resizer::ENTITY) ?? self::FALLBACK_SIZE;
+        $size = Mage::getSingleton('core/image_config')->getSlotWidth($slot, (int) Mage::app()->getStore()->getId(), Mage_Catalog_Model_Product_Image_Provider::ENTITY) ?? self::FALLBACK_SIZE;
         return $this->getSrcAttributes($slot) . " width=\"{$size}\" height=\"{$size}\"";
     }
 
@@ -175,26 +175,17 @@ class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract implements \St
         $this->placeholder = $fileName;
     }
 
-    /**
-     * @return string
-     */
-    public function getPlaceholder()
+    public function getPlaceholder(): string
     {
         return $this->placeholder ??= 'images/catalog/product/placeholder.svg';
     }
 
-    /**
-     * @return int
-     */
-    public function getOriginalWidth()
+    public function getOriginalWidth(): int
     {
         return $this->set?->getOriginalSize()[0] ?? self::FALLBACK_SIZE;
     }
 
-    /**
-     * @return int
-     */
-    public function getOriginalHeight()
+    public function getOriginalHeight(): int
     {
         return $this->set?->getOriginalSize()[1] ?? self::FALLBACK_SIZE;
     }
@@ -202,7 +193,7 @@ class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract implements \St
     /**
      * @return array{0: int, 1: int} the width and the height of the original
      */
-    public function getOriginalSizeArray()
+    public function getOriginalSizeArray(): array
     {
         return [$this->getOriginalWidth(), $this->getOriginalHeight()];
     }

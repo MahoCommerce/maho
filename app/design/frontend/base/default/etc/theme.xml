@@ -10,7 +10,9 @@ SPDX-License-Identifier: AFL-3.0
     <!-- The widths of the resized images, and for each image entity its ratio (original, or
          such as 1:1 or 3:4) and its fit (contain adds a frame, cover crops). The slots give
          the sizes value of each place where images show, so the browser can pick the width;
-         a template names the slot. A child theme inherits each value that it does not set. -->
+         a template names the slot. A child theme inherits each value that it does not set.
+         Only the theme in the store config of a store view gives these values. A design change,
+         a user agent exception or the custom design of a category or a product does not. -->
     <images>
         <!-- Each slot is the largest width in px of the images in one place of the layout. Each image
              gets a file at 1x and 2x of each slot, so slots that double each other share files. -->

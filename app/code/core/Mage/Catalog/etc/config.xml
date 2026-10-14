@@ -198,11 +198,14 @@ SPDX-License-Identifier: AFL-3.0
             <entities>
                 <product>
                     <source>catalog/product</source>
-                    <provider>catalog/product_image_resizer</provider>
+                    <provider>catalog/product_image_provider</provider>
+                    <background>catalog/product_image/background_color</background>
+                    <watermark>design/watermark/image</watermark>
                 </product>
                 <category>
                     <source>catalog/category</source>
                     <provider>catalog/category_image</provider>
+                    <background>catalog/product_image/background_color</background>
                 </category>
             </entities>
         </images>

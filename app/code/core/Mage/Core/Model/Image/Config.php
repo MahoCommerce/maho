@@ -8,7 +8,8 @@
  * entity, the ratio and the fit, in the <images> node of its etc/theme.xml or of a parent
  * theme. A slot is the largest width in px of the images in one place of the layout, and
  * each image has a file at 1x and 2x of each slot. An entity can name the slots that it uses and
- * give its own width to a slot. The store config gives the background color and the watermark.
+ * give its own width to a slot. The entity node can name the store config path of its
+ * <background> color, and the prefix of its <watermark> settings, such as design/watermark/image.
  * The output format and the quality are the same for the whole installation.
  *
  * Two sets of settings exist for each store view and entity. The live settings come from the
@@ -34,9 +35,6 @@ class Mage_Core_Model_Image_Config
 
     /** The theme that every theme chain ends with, as in the design fallback. */
     public const BASE_THEME = 'base/default';
-
-    /** The product image role whose watermark settings apply to the product entity. */
-    public const WATERMARK_ROLE = 'image';
 
     /** @var array<string, Mage_Core_Model_Image_Settings> */
     protected array $liveSettings = [];
@@ -248,7 +246,10 @@ class Mage_Core_Model_Image_Config
     {
         $entityNode = $this->getThemeNode($storeId)['entities'][$entity] ?? [];
         $slots = array_values($this->getEntitySlots($entity, $storeId));
-        $background = ltrim((string) Mage::getStoreConfig('catalog/product_image/background_color', $storeId), '#');
+        $config = Mage::getConfig()->getNode(self::XML_PATH_ENTITIES . "/{$entity}");
+        $backgroundPath = trim((string) $config?->background);
+        $background = $backgroundPath === '' ? '' : ltrim((string) Mage::getStoreConfig($backgroundPath, $storeId), '#');
+        $watermarkPrefix = trim((string) $config?->watermark);
 
         return new Mage_Core_Model_Image_Settings(
             widths: Mage_Core_Model_Image_Settings::parseWidths([...$slots, ...array_map(fn(int $width): int => 2 * $width, $slots)]),
@@ -259,7 +260,7 @@ class Mage_Core_Model_Image_Config
             quality: (int) Mage::getStoreConfig('system/media_storage_configuration/image_quality') ?: 85,
             background: preg_match('/^[0-9a-f]{6}$/i', $background) ? strtolower($background) : 'ffffff',
             extension: Maho::getConfiguredImageExtension(),
-            watermark: $entity === 'product' ? $this->getWatermark($storeId) : null,
+            watermark: $watermarkPrefix === '' ? null : $this->getWatermark($entity, $watermarkPrefix, $storeId),
         );
     }
 
@@ -339,21 +340,22 @@ class Mage_Core_Model_Image_Config
     }
 
     /**
-     * The watermark of the product images in the store view. The store folder comes first, then
-     * the website folder, the default folder and the watermark folder itself.
+     * The watermark of $entity in the store view, from the store config paths that start with
+     * $prefix. The file is in the watermark folder below the source folder of the entity. The store
+     * folder comes first, then the website folder, the default folder and the watermark folder itself.
      *
      * @return array{path: string, position: string, width: int|null, height: int|null, opacity: int}|null
      */
-    protected function getWatermark(int $storeId): ?array
+    protected function getWatermark(string $entity, string $prefix, int $storeId): ?array
     {
-        $prefix = 'design/watermark/' . self::WATERMARK_ROLE . '_';
+        $prefix .= '_';
         $file = (string) Mage::getStoreConfig($prefix . 'image', $storeId);
         if ($file === '') {
             return null;
         }
 
         $mount = Mage::getStorage('media');
-        $baseDir = Mage::getSingleton('catalog/product_media_config')->getBaseMediaStoragePath() . '/watermark';
+        $baseDir = $this->getSource($entity) . '/watermark';
         $file = '/' . ltrim($file, '/');
         $websiteId = (int) Mage::app()->getStore($storeId)->getWebsiteId();
         foreach (["/stores/{$storeId}{$file}", "/websites/{$websiteId}{$file}", "/default{$file}", $file] as $candidate) {

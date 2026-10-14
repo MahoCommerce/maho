@@ -245,7 +245,7 @@ class Mage_ConfigurableSwatches_Helper_Mediafallback extends Mage_Core_Helper_Ab
         }
         if ($hasImage || $placeholder || $image) {
             $slot = $type === Mage_ConfigurableSwatches_Helper_Productimg::MEDIA_IMAGE_TYPE_SMALL ? 'listing' : 'gallery';
-            $width = Mage::getSingleton('core/image_config')->getSlotWidth($slot, (int) Mage::app()->getStore()->getId(), Mage_Catalog_Model_Product_Image_Resizer::ENTITY) ?? 0;
+            $width = Mage::getSingleton('core/image_config')->getSlotWidth($slot, (int) Mage::app()->getStore()->getId(), Mage_Catalog_Model_Product_Image_Provider::ENTITY) ?? 0;
             return (string) Mage::helper('catalog/image')->init($product, 'image', $image)->resize(2 * $width);
         }
         return false;

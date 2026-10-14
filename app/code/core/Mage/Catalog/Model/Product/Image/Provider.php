@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-class Mage_Catalog_Model_Product_Image_Resizer implements Mage_Core_Model_Image_ProviderInterface
+class Mage_Catalog_Model_Product_Image_Provider implements Mage_Core_Model_Image_ProviderInterface
 {
     public const ENTITY = 'product';
 
@@ -25,19 +25,6 @@ class Mage_Catalog_Model_Product_Image_Resizer implements Mage_Core_Model_Image_
         if ($productIds !== []) {
             Mage::getSingleton('core/image_resizer')->queue(self::ENTITY, $this->getProductImageFiles($productIds));
         }
-    }
-
-    /**
-     * Create the files of the images of the products now.
-     *
-     * @param array<int|string> $productIds
-     * @return int the number of files written
-     */
-    public function resizeProducts(array $productIds): int
-    {
-        return $productIds === []
-            ? 0
-            : Mage::getSingleton('core/image_resizer')->createFiles(self::ENTITY, $this->getProductImageFiles($productIds));
     }
 
     /**

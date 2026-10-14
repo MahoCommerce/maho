@@ -40,7 +40,7 @@ class Mage_Core_IndexController extends Mage_Core_Controller_Front_Action
         }
 
         $file = $params['_sourceFile'] ?? null;
-        $set = is_string($file) ? Mage::helper('core/image')->init(Mage_Catalog_Model_Product_Image_Resizer::ENTITY, $file) : null;
+        $set = is_string($file) ? Mage::helper('core/image')->init(Mage_Catalog_Model_Product_Image_Provider::ENTITY, $file) : null;
         if ($set === null) {
             $this->getResponse()->setHttpResponseCode(404);
             return;

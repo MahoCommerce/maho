@@ -483,7 +483,7 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
             return $helper->init(Mage_Catalog_Model_Category_Image::ENTITY, (string) $image);
         }
         if ($image = $this->getFallbackImage()) {
-            return $helper->init(Mage_Catalog_Model_Product_Image_Resizer::ENTITY, (string) $image);
+            return $helper->init(Mage_Catalog_Model_Product_Image_Provider::ENTITY, (string) $image);
         }
         return null;
     }

@@ -203,7 +203,7 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
         }
 
         if (!is_null($image)) {
-            $set = Mage::helper('core/image')->init(Mage_Catalog_Model_Product_Image_Resizer::ENTITY, (string) $image->getFile());
+            $set = Mage::helper('core/image')->init(Mage_Catalog_Model_Product_Image_Provider::ENTITY, (string) $image->getFile());
             $swatchType = 'product';
             $url = $set?->getUrl($this->getSwatchFileWidth((int) $width, (int) $height)) ?? '';
         }

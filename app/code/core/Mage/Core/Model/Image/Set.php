@@ -3,9 +3,10 @@
 /**
  * The resized files of one source image of an entity, with the active settings of a store view.
  *
- * It builds URLs only: it reads no file and resizes nothing. The files exist because the save
- * of the entity, the import or image:resize created them, and the settings that the URLs use
- * become active only after their files exist.
+ * It builds URLs and resizes nothing. It reads only the size of the source image, when the
+ * settings keep the ratio of the source. The files exist because the save of the entity, the
+ * import or image:resize created them, and the settings that the URLs use become active only
+ * after their files exist.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
