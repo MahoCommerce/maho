@@ -129,6 +129,12 @@ class Maho_Blog_Model_Resource_Post_Collection extends Mage_Eav_Model_Entity_Col
                 $item->setStores([]);
             }
         }
+        if (!Mage::app()->getStore()->isAdmin()) {
+            Mage::getSingleton('core/image_size')->preload(
+                Maho_Blog_Model_Post_Image::ENTITY,
+                array_map(fn(Maho_Blog_Model_Post $post): mixed => $post->getData('image'), $this->_items),
+            );
+        }
 
         return $this;
     }

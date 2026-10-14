@@ -34,7 +34,12 @@ class Mage_Catalog_Block_Product_View_Media extends Mage_Catalog_Block_Product_V
         if ($this->_isGalleryDisabled) {
             return [];
         }
-        return $this->getProduct()->getMediaGalleryImages();
+        $product = $this->getProduct();
+        Mage::getSingleton('core/image_size')->preload(
+            Mage_Catalog_Model_Product_Image_Provider::ENTITY,
+            [$product->getData('image'), ...array_column($product->getMediaGallery()['images'] ?? [], 'file')],
+        );
+        return $product->getMediaGalleryImages();
     }
 
     /**

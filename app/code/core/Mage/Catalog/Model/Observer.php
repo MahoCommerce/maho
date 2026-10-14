@@ -332,4 +332,19 @@ class Mage_Catalog_Model_Observer
 
         return $this;
     }
+
+    /**
+     * Read the stored sizes of the images of a storefront product collection with one query.
+     */
+    #[Maho\Config\Observer('catalog_product_collection_load_after', area: 'frontend', id: 'catalog_image_size_preload')]
+    public function preloadImageSizes(\Maho\Event\Observer $observer): void
+    {
+        $collection = $observer->getEvent()->getData('collection');
+        if ($collection instanceof Mage_Catalog_Model_Resource_Product_Collection) {
+            Mage::getSingleton('core/image_size')->preload(
+                Mage_Catalog_Model_Product_Image_Provider::ENTITY,
+                array_map(fn(Mage_Catalog_Model_Product $product): mixed => $product->getData('image'), $collection->getItems()),
+            );
+        }
+    }
 }

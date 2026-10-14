@@ -65,21 +65,22 @@ class Mage_Core_Model_Resource_Image_Size extends Mage_Core_Model_Resource_Db_Ab
     }
 
     /**
-     * The hashes of $hashes that have a row.
-     *
      * @param list<string> $hashes
-     * @return array<string, true>
+     * @return array<string, array{0: int, 1: int}> the width and the height of each hash of $hashes that has a row
      */
-    public function fetchExistingHashes(array $hashes): array
+    public function fetchSizes(array $hashes): array
     {
         $adapter = $this->_getReadAdapter();
-        $existing = [];
+        $sizes = [];
         foreach (array_chunk($hashes, 1000) as $chunk) {
-            foreach ($adapter->fetchCol($adapter->select()->from($this->getMainTable(), ['path_hash'])->where('path_hash IN (?)', $chunk)) as $hash) {
-                $existing[(string) $hash] = true;
+            $rows = $adapter->fetchAll($adapter->select()
+                ->from($this->getMainTable(), ['path_hash', 'width', 'height'])
+                ->where('path_hash IN (?)', $chunk));
+            foreach ($rows as $row) {
+                $sizes[(string) $row['path_hash']] = [(int) $row['width'], (int) $row['height']];
             }
         }
-        return $existing;
+        return $sizes;
     }
 
     /**

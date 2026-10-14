@@ -95,6 +95,17 @@ describe('the stored sizes of the images', function () {
             ->and(Mage::helper('core/image')->init('product', $file)->getImgAttributes('listing'))->toContain('height="150"');
     });
 
+    it('reads the sizes of a listing with one query, and keeps them for the request', function (): void {
+        $sizes = ($this->sizes)();
+        $sizes->save('media', $this->path, 40, 30);
+        $sizes = ($this->sizes)();
+
+        $sizes->preload('product', [substr($this->path, strlen('catalog/product')), null, '', '/../../etc/passwd']);
+        $this->resource->deleteHashes([Mage_Core_Model_Image_Size::getHash('media', $this->path)]);
+
+        expect($sizes->get($this->mount, $this->path))->toBe([40, 30]);
+    });
+
     it('stores 0 x 0 for a missing file, so a page does not ask for it again', function (): void {
         $missing = $this->folder . '/missing.png';
 

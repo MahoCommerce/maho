@@ -68,6 +68,31 @@ class Mage_Core_Model_Image_Size
     }
 
     /**
+     * Read the stored sizes of $files of the image entity $entity with one query, so a listing
+     * does not query each of its images. get() then finds them in the memory of the request.
+     *
+     * @param iterable<mixed> $files paths below the source folder of $entity. Other values are skipped
+     */
+    public function preload(string $entity, iterable $files): void
+    {
+        $source = Mage::getSingleton('core/image_config')->getSource($entity);
+        $mount = Mage::getStorage('media')->name();
+        $hashes = [];
+        foreach ($files as $file) {
+            $sourcePath = is_string($file) && $file !== '' ? Mage_Core_Model_Image_Set::resolveSourcePath($source, $file) : null;
+            if ($sourcePath !== null && !array_key_exists($hash = self::getHash($mount, $sourcePath), $this->sizes)) {
+                $hashes[$hash] = true;
+            }
+        }
+        if ($hashes === []) {
+            return;
+        }
+        foreach ($this->getResource()->fetchSizes(array_map(strval(...), array_keys($hashes))) as $hash => $size) {
+            $this->sizes[$hash] = $size[0] > 0 && $size[1] > 0 ? $size : false;
+        }
+    }
+
+    /**
      * Read the size of $path from $mount and store it. A missing file, or a file that is not an
      * image, gets a row of 0 x 0, so a page does not ask for it again.
      *
@@ -100,18 +125,10 @@ class Mage_Core_Model_Image_Size
      */
     public function forget(string $mount, array $paths, array $folders = []): void
     {
-        $cacheFolders = [];
-        if ($mount === 'media') {
-            foreach (Mage::getSingleton('core/image_config')->getEntities() as $source) {
-                $cacheFolders[] = $source . '/' . Mage_Core_Model_Image_Set::CACHE_FOLDER . '/';
-            }
-        }
-        $isResized = fn(string $path): bool => array_any($cacheFolders, fn(string $folder): bool => str_starts_with($path . '/', $folder));
-
         $hashes = [];
         foreach ($paths as $path) {
             $path = self::normalizePath($path);
-            if (!$isResized($path) && in_array(strtolower(pathinfo($path, PATHINFO_EXTENSION)), [...\Maho\Io\File::ALLOWED_IMAGES_EXTENSIONS, 'svg'], true)) {
+            if ($this->canHaveSize($mount, $path)) {
                 $hashes[] = $hash = self::getHash($mount, $path);
                 unset($this->sizes[$hash]);
             }
@@ -122,11 +139,37 @@ class Mage_Core_Model_Image_Size
 
         foreach ($folders as $folder) {
             $folder = self::normalizePath($folder);
-            if (!$isResized($folder)) {
+            if (!$this->isResized($mount, $folder)) {
                 $this->getResource()->deleteFolder($mount, $folder);
                 $this->sizes = [];
             }
         }
+    }
+
+    /**
+     * Whether $path on the mount $mount is an image that can have a stored size. The resized
+     * files of the image entities have none.
+     */
+    protected function canHaveSize(string $mount, string $path): bool
+    {
+        return !$this->isResized($mount, $path)
+            && in_array(strtolower(pathinfo($path, PATHINFO_EXTENSION)), [...\Maho\Io\File::ALLOWED_IMAGES_EXTENSIONS, 'svg'], true);
+    }
+
+    /**
+     * Whether $path on the mount $mount is a resized file or folder of an image entity.
+     */
+    protected function isResized(string $mount, string $path): bool
+    {
+        if ($mount !== 'media') {
+            return false;
+        }
+        foreach (Mage::getSingleton('core/image_config')->getEntities() as $source) {
+            if (str_starts_with($path . '/', $source . '/' . Mage_Core_Model_Image_Set::CACHE_FOLDER . '/')) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -212,7 +255,7 @@ class Mage_Core_Model_Image_Size
                 $paths[self::getHash('media', $sourcePath)] = $sourcePath;
             }
         }
-        $existing = $this->getResource()->fetchExistingHashes(array_map(strval(...), array_keys($paths)));
+        $existing = $this->getResource()->fetchSizes(array_map(strval(...), array_keys($paths)));
         return array_values(array_diff_key($paths, $existing));
     }
 
