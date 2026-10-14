@@ -15,10 +15,10 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
-    name: 'image:clean',
+    name: 'storage:image:clean',
     description: 'Delete the resized files of image settings that no store view uses',
 )]
-class ImageClean extends BaseMahoCommand
+class StorageImageClean extends BaseMahoCommand
 {
     public function __invoke(SymfonyStyle $io): int
     {

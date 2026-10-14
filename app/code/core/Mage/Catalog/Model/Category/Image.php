@@ -15,7 +15,7 @@ class Mage_Catalog_Model_Category_Image implements Mage_Core_Model_Image_Provide
     public const ENTITY = 'category';
 
     /**
-     * The image of every category in every store, for image:resize.
+     * The image of every category in every store, for storage:image:resize.
      *
      * @return list<string>
      */

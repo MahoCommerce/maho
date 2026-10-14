@@ -28,7 +28,7 @@ class Mage_Catalog_Model_Product_Image_Provider implements Mage_Core_Model_Image
     }
 
     /**
-     * Every source file of the entity, for image:resize.
+     * Every source file of the entity, for storage:image:resize.
      *
      * @return iterable<string>
      */

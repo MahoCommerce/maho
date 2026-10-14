@@ -15,7 +15,7 @@ class Maho_Blog_Model_Post_Image implements Mage_Core_Model_Image_ProviderInterf
     public const ENTITY = 'blog';
 
     /**
-     * The image of every post in every store, for image:resize.
+     * The image of every post in every store, for storage:image:resize.
      *
      * @return list<string>
      */

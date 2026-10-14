@@ -3,8 +3,9 @@
 /**
  * Creates a resized image that a page links to but that does not exist.
  *
- * The save of an entity, the import and image:resize create the files before a page links to
- * them. A file can still go missing: a resize failed, or an extension wrote an image with SQL.
+ * The save of an entity, the import and storage:image:resize create the files before a page
+ * links to them. A file can still go missing: a resize failed, or an extension wrote an image with
+ * SQL.
  * The web server serves a file that exists and sends a miss to this route: the rewrite rule in
  * public/.htaccess, or a try_files in nginx. On a bucket, the CDN can send a miss here at the same
  * path, and the file goes to the bucket.

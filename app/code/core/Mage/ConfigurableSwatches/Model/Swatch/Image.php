@@ -20,7 +20,7 @@ class Mage_ConfigurableSwatches_Model_Swatch_Image implements Mage_Core_Model_Im
     public const SLOT = 'listing';
 
     /**
-     * Every swatch image in wysiwyg/swatches, for image:resize.
+     * Every swatch image in wysiwyg/swatches, for storage:image:resize.
      *
      * @return iterable<string>
      */

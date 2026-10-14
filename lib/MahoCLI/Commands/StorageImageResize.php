@@ -16,10 +16,10 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
-    name: 'image:resize',
+    name: 'storage:image:resize',
     description: 'Create the missing resized files of the images, then switch the store views to the current image settings',
 )]
-class ImageResize extends BaseMahoCommand
+class StorageImageResize extends BaseMahoCommand
 {
     public function __invoke(
         SymfonyStyle $io,
