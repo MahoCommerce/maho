@@ -229,7 +229,7 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
 
         // Update role assignments
         $types = $body['types'] ?? null;
-        if (is_array($types) && array_intersect(['image', 'small_image', 'thumbnail'], $types)) {
+        if (is_array($types) && in_array('image', \Mage_Catalog_Helper_Image::mapDeprecatedRoles($types), true)) {
             $product->setData('image', $file);
         }
 
