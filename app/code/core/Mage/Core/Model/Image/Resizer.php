@@ -73,8 +73,8 @@ class Mage_Core_Model_Image_Resizer
     /**
      * Create the resized file at $path and return its bytes. This repairs a file that a page links
      * to but that does not exist, when the web server sends the request for a missing file to Maho.
-     * Null when $path is not a file of the settings that a store view uses, or when its source is
-     * missing.
+     * Null when $path is not a file of the settings that a store view uses, or when no source of it
+     * exists and can be read.
      *
      * @param string $path mount path, such as catalog/product/cache/3f9a1c2b0d4e/300/a/b/shirt.jpg.webp
      */
@@ -95,7 +95,7 @@ class Mage_Core_Model_Image_Resizer
             }
             $image = $this->decode($sourcePath);
             if ($image === null) {
-                return null;
+                continue;
             }
             $binary = $this->render($image, $settings, $width, !$this->isPlaceholder($source, $sourcePath));
             $mount->moveAtomic($path, $binary);
@@ -423,7 +423,7 @@ class Mage_Core_Model_Image_Resizer
             $settings = $settingsList[basename($folder)] ?? null;
             $unused = $settings === null
                 ? [$folder]
-                : array_filter($this->listFolders($folder), fn(string $widthFolder): bool => !in_array((int) basename($widthFolder), $settings->widths, true));
+                : array_filter($this->listFolders($folder), fn(string $widthFolder): bool => !in_array(basename($widthFolder), array_map(strval(...), $settings->widths), true));
             foreach ($unused as $unusedFolder) {
                 $mount->deleteDirectory($unusedFolder);
                 $count++;
