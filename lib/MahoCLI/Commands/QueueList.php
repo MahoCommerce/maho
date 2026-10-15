@@ -68,7 +68,7 @@ class QueueList extends BaseMahoCommand
             $orphaned = $orphaned || $pool === null;
             $table->addRow([
                 $queue,
-                $pool?->name ?? '<error>none</error>',
+                $pool->name ?? '<error>none</error>',
                 $counts[DbTransport::STATUS_PENDING],
                 $counts[DbTransport::STATUS_PROCESSING],
                 $counts[DbTransport::STATUS_FAILED],
