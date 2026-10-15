@@ -63,29 +63,40 @@ class Maho_MediaCleaner_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * The files below $directory on the mount that a scan examines, relative to $directory.
+     * The files below $directory on the mount that a scan examines, relative to $directory. Each
+     * folder directly below $directory is one deep listing, which reads many files with each
+     * request to a bucket.
      *
+     * @param (callable(int $done, int $total): void)|null $onProgress called after each folder
      * @return list<string>
      * @throws FilesystemException
      */
-    public function listScannedFiles(Mount $mount, string $directory): array
+    public function listScannedFiles(Mount $mount, string $directory, ?callable $onProgress = null): array
     {
         $directory = trim($directory, '/');
         $blacklistedPatterns = $this->getBlacklistedPatterns();
         $files = [];
-        $folders = [$directory];
-        while (($folder = array_pop($folders)) !== null) {
-            foreach ($mount->listContents($folder, false) as $item) {
+        $folders = [];
+        foreach ($mount->listContents($directory, false) as $item) {
+            $file = ltrim(substr($item->path(), strlen($directory)), '/');
+            if ($this->isExcluded($file, $directory, $blacklistedPatterns)) {
+                continue;
+            }
+            if ($item->isDir()) {
+                $folders[] = $item->path();
+            } else {
+                $files[] = $file;
+            }
+        }
+
+        foreach ($folders as $i => $folder) {
+            foreach ($mount->listFiles($folder) as $item) {
                 $file = ltrim(substr($item->path(), strlen($directory)), '/');
-                if ($this->isExcluded($file, $directory, $blacklistedPatterns)) {
-                    continue;
-                }
-                if ($item->isDir()) {
-                    $folders[] = $item->path();
-                } else {
+                if (!$this->isExcluded($file, $directory, $blacklistedPatterns)) {
                     $files[] = $file;
                 }
             }
+            $onProgress !== null && $onProgress($i + 1, count($folders));
         }
         sort($files, SORT_STRING);
 
@@ -132,21 +143,47 @@ class Maho_MediaCleaner_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * The files of the product image cache that no page links to, relative to catalog/product/cache.
-     * One deep listing of catalog/product gives both the cache files and the source files.
+     * Each folder of originals and each "cache/{settings hash}/{width}" folder is one deep listing.
      *
+     * @param (callable(int $done, int $total): void)|null $onProgress called after each folder
      * @return list<string>
      * @throws FilesystemException
      */
-    public function findUnusedProductCacheFiles(Mount $mount): array
+    public function findUnusedProductCacheFiles(Mount $mount, ?callable $onProgress = null): array
     {
+        $root = 'catalog/product';
         $cacheFiles = [];
         $sourceFiles = [];
-        foreach ($this->listAllFiles($mount, 'catalog/product') as $file) {
+        $folders = [];
+        $add = function (string $path) use ($root, &$cacheFiles, &$sourceFiles): void {
+            $file = substr($path, strlen($root) + 1);
             if (str_starts_with($file, 'cache/')) {
                 $cacheFiles[] = substr($file, strlen('cache/'));
             } else {
                 $sourceFiles[$file] = true;
             }
+        };
+
+        // The cache holds most files, so each of its "{hash}/{width}" folders is a listing of its own
+        $pending = [[$root, 0]];
+        while ($pending !== []) {
+            [$folder, $depth] = array_pop($pending);
+            foreach ($mount->listContents($folder, false) as $item) {
+                if (!$item->isDir()) {
+                    $add($item->path());
+                } elseif (($depth === 0 && $item->path() === "{$root}/cache") || $depth === 1) {
+                    $pending[] = [$item->path(), $depth + 1];
+                } else {
+                    $folders[] = $item->path();
+                }
+            }
+        }
+
+        foreach ($folders as $i => $folder) {
+            foreach ($mount->listFiles($folder) as $item) {
+                $add($item->path());
+            }
+            $onProgress !== null && $onProgress($i + 1, count($folders));
         }
 
         $cacheFiles = $this->filterFiles($cacheFiles, 'catalog/product/cache', $this->getBlacklistedPatterns());

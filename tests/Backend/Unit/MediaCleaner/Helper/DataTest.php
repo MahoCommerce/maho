@@ -55,6 +55,20 @@ describe('Maho_MediaCleaner_Helper_Data', function () {
             ->and($this->helper->listAllFiles($this->mount, 'missing'))->toBe([]);
     });
 
+    it('lists the scanned files with one deep listing for each folder, and reports each folder', function (): void {
+        foreach (['root.jpg', 'a/1.jpg', 'a/b/2.jpg', 'c/3.jpg', 'c/cache/4.jpg', 'cache/5.jpg'] as $file) {
+            $this->mount->write('catalog/category/' . $file, 'x');
+        }
+        $calls = [];
+
+        $files = $this->helper->listScannedFiles($this->mount, 'catalog/category', function (int $done, int $total) use (&$calls): void {
+            $calls[] = "{$done}/{$total}";
+        });
+
+        expect($files)->toBe(['a/1.jpg', 'a/b/2.jpg', 'c/3.jpg', 'root.jpg'])
+            ->and($calls)->toBe(['1/2', '2/2']);
+    });
+
     it('leaves out the files below an excluded folder at any depth', function (): void {
         $files = ['a/b/c.jpg', 'cache/1/x.jpg', 'a/watermark/w.jpg', 'optimized/o.jpg', 'x/.thumbs/t.jpg', 'cache.jpg'];
 
@@ -100,8 +114,13 @@ describe('Maho_MediaCleaner_Helper_Data', function () {
         $this->mount->write("catalog/product/cache/{$settings->getHash()}/{$settings->widths[0]}/a/b/kept{$settings->extension}", 'x');
         $this->mount->write('catalog/product/cache/1/image/265x/0123abcd/a/b/kept.jpg.webp', 'x');
 
-        expect($this->helper->findUnusedProductCacheFiles($this->mount))
-            ->toBe(['1/image/265x/0123abcd/a/b/kept.jpg.webp']);
+        $calls = [];
+
+        expect($this->helper->findUnusedProductCacheFiles($this->mount, function (int $done, int $total) use (&$calls): void {
+            $calls[] = "{$done}/{$total}";
+        }))->toBe(['1/image/265x/0123abcd/a/b/kept.jpg.webp'])
+            // a, cache/{hash}/{width} and cache/1/image are one listing each
+            ->and($calls)->toBe(['1/3', '2/3', '3/3']);
     });
 
     it('finds the wysiwyg files that no content names', function (): void {

@@ -13,7 +13,7 @@
         foreach ($this->getDropdowns() as $dropdown):
             ?><span class="btn-dropdown"><button type="button" class="scalable"><?= $this->escapeHtml($dropdown['label']) ?> &#9662;</button><span class="btn-dropdown-menu"><?php
                 foreach ($dropdown['items'] as $item):
-                    ?><a href="<?= $this->escapeUrl($item['url']) ?>"><?= $this->escapeHtml($item['label']) ?></a><?php
+                    ?><a href="<?= $this->escapeUrl($item['url']) ?>"<?php if (isset($item['onclick'])): ?> onclick="<?= $this->escapeHtml($item['onclick']) ?>"<?php endif ?>><?= $this->escapeHtml($item['label']) ?></a><?php
                 endforeach;
             ?></span></span><?php
         endforeach;
@@ -22,3 +22,4 @@
 <div>
     <?= $this->getGridHtml() ?>
 </div>
+<?= $this->getScanScriptHtml() ?>

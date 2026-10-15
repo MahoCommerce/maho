@@ -5,7 +5,8 @@
  * Dialog for a job that outlives the request that started it.
  *
  * The start url answers with { token, steps } and keeps working with the connection closed; the
- * status url reports { finished, steps } until the run reaches a terminal state.
+ * status url reports { finished, steps } until the run reaches a terminal state. A running step
+ * with a progress from 0 to 100 shows a bar.
  */
 class MahoJobDialog {
     static POLL_FAST_MS = 1000;
@@ -189,6 +190,9 @@ class MahoJobDialog {
             + `<span class="maho-job-step-name">${escapeHtml(step.name ?? '')}</span>`
             + `<span class="maho-job-step-meta">${escapeHtml(meta)}</span>`
             + '</div>'
+            + (step.state === 'running' && Number.isFinite(step.progress)
+                ? `<div class="maho-job-progress"><div class="maho-job-progress-bar" style="width: ${Math.min(100, Math.max(0, step.progress))}%"></div></div>`
+                : '')
             + (step.message ? `<pre class="maho-job-step-message">${escapeHtml(step.message)}</pre>` : '')
             + '</li>';
     }

@@ -37,12 +37,11 @@ class Maho_MediaCleaner_Block_Adminhtml_Mediacleaner extends Mage_Adminhtml_Bloc
         return [
             [
                 'label' => $helper->__('Scan'),
-                'items' => $this->buildItems([
-                    'syncproduct'      => $helper->__('Products'),
-                    'synccategory'     => $helper->__('Categories'),
-                    'syncwysiwyg'      => $helper->__('WYSIWYG'),
-                    'syncproductcache' => $helper->__('Product Cache'),
-                ]),
+                'items' => array_map(
+                    fn(string $type, string $label): array => ['label' => $label, 'url' => '#', 'onclick' => "mediaCleanerScan('{$type}'); return false;"],
+                    array_keys($types = Mage::getModel('mediacleaner/scanner')->getTypes()),
+                    $types,
+                ),
             ],
             [
                 'label' => $helper->__('Flush'),
@@ -54,6 +53,35 @@ class Maho_MediaCleaner_Block_Adminhtml_Mediacleaner extends Mage_Adminhtml_Bloc
                 ]),
             ],
         ];
+    }
+
+    /**
+     * The script that runs a scan in a MahoJobDialog.
+     */
+    public function getScanScriptHtml(): string
+    {
+        $helper = Mage::helper('mediacleaner');
+        $config = Mage::helper('core')->jsonEncode([
+            'title' => $helper->__('Media Cleaner'),
+            'startUrl' => $this->getUrl('*/*/scan'),
+            'statusUrl' => $this->getUrl('*/*/scanStatus'),
+            'width' => 520,
+            'labels' => [
+                'close' => $helper->__('Close'),
+                'done' => $helper->__('Scan complete'),
+                'failed' => $helper->__('The scan failed'),
+                'incomplete' => $helper->__('The scan did not complete'),
+                'requestFailed' => $helper->__('Request failed'),
+            ],
+        ]);
+
+        return <<<HTML
+            <script>
+            function mediaCleanerScan(type) {
+                new MahoJobDialog({ ...{$config}, startParams: { type } }).run();
+            }
+            </script>
+            HTML;
     }
 
     protected function buildItems(array $actionLabels): array
