@@ -113,7 +113,7 @@ class Maho_MediaCleaner_Adminhtml_MediacleanerController extends Mage_Adminhtml_
 
         $start = microtime(true);
         $failed = 0;
-        $lastPercent = -1;
+        $lastReport = 0.0;
         try {
             $progress->startStep('delete');
             foreach ($ids as $i => $imageId) {
@@ -121,10 +121,9 @@ class Maho_MediaCleaner_Adminhtml_MediacleanerController extends Mage_Adminhtml_
                 if ($image && $image->getId() && !$this->deleteImage($image)) {
                     $failed++;
                 }
-                // Write the record once for each percent, not once for each file
-                $percent = (int) floor(100 * ($i + 1) / count($ids));
-                if ($percent !== $lastPercent) {
-                    $lastPercent = $percent;
+                // Write the record at most once a second, not once for each file
+                if (microtime(true) - $lastReport >= 1.0 || $i + 1 === count($ids)) {
+                    $lastReport = microtime(true);
                     $progress->reportProgress('delete', $i + 1, count($ids), $this->__('%d of %d files deleted', $i + 1, count($ids)));
                 }
             }
