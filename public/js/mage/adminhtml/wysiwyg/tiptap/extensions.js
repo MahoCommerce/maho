@@ -133,6 +133,7 @@ export const GlobalAttributes = Extension.create({
             {
                 types: [
                     'heading', 'paragraph', 'bulletList', 'orderedList', 'listItem', 'blockquote', 'codeBlock',
+                    'mahoImage',
                     'tableRow', 'tableCell', 'tableHeader', 'table',
                     'mahoColumns', 'mahoColumn',
                     'mahoBentoGrid', 'mahoBentoCell',
