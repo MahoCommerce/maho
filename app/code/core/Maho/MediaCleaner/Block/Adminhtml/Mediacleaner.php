@@ -56,7 +56,7 @@ class Maho_MediaCleaner_Block_Adminhtml_Mediacleaner extends Mage_Adminhtml_Bloc
     }
 
     /**
-     * The script that runs a scan in a MahoJobDialog.
+     * The script that runs a scan or a mass delete in a MahoJobDialog.
      */
     public function getScanScriptHtml(): string
     {
@@ -68,9 +68,9 @@ class Maho_MediaCleaner_Block_Adminhtml_Mediacleaner extends Mage_Adminhtml_Bloc
             'width' => 520,
             'labels' => [
                 'close' => $helper->__('Close'),
-                'done' => $helper->__('Scan complete'),
-                'failed' => $helper->__('The scan failed'),
-                'incomplete' => $helper->__('The scan did not complete'),
+                'done' => $helper->__('Done'),
+                'failed' => $helper->__('Finished with errors'),
+                'incomplete' => $helper->__('Did not complete'),
                 'requestFailed' => $helper->__('Request failed'),
             ],
         ]);
@@ -79,6 +79,16 @@ class Maho_MediaCleaner_Block_Adminhtml_Mediacleaner extends Mage_Adminhtml_Bloc
             <script>
             function mediaCleanerScan(type) {
                 new MahoJobDialog({ ...{$config}, startParams: { type } }).run();
+            }
+
+            function mediaCleanerMassDeleteComplete(grid, massaction, transport) {
+                let result;
+                try {
+                    result = JSON.parse(transport.responseText);
+                } catch (e) {
+                    result = { error: true, message: transport.responseText };
+                }
+                new MahoJobDialog({$config}).attach(result);
             }
             </script>
             HTML;

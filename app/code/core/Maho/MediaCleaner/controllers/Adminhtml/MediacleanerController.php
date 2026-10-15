@@ -55,7 +55,7 @@ class Maho_MediaCleaner_Adminhtml_MediacleanerController extends Mage_Adminhtml_
         $start = microtime(true);
         try {
             $progress->startStep($type);
-            $count = $scanner->scan($type, fn(int $done, int $total) => $progress->reportProgress($type, $done, $total));
+            $count = $scanner->scan($type, fn(int $done, int $total) => $progress->reportProgress($type, $done, $total, $this->__('%d of %d folders read', $done, $total)));
             $progress->finishStepWithMessage($type, microtime(true) - $start, $this->__('%d unused files found', $count));
         } catch (Throwable $e) {
             Mage::logException($e);
@@ -93,25 +93,54 @@ class Maho_MediaCleaner_Adminhtml_MediacleanerController extends Mage_Adminhtml_
         $this->_redirect('*/*');
     }
 
-    #[Maho\Config\Route('/admin/mediacleaner/massDelete')]
+    /**
+     * Delete the files of the selected results in a job that outlives the request: each delete on
+     * a bucket is a request, so many files take longer than any request timeout.
+     */
+    #[Maho\Config\Route('/admin/mediacleaner/massDelete', methods: ['POST'])]
     public function massDeleteAction(): void
     {
-        $ids = $this->getRequest()->getParam('ids');
-        $errorMessageThrown = false;
-        if (is_array($ids)) {
-            foreach ($ids as $imageId) {
+        $ids = array_values(array_filter((array) $this->getRequest()->getParam('ids'), is_numeric(...)));
+        if ($ids === []) {
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $this->__('Please select the files to delete.')]);
+            return;
+        }
+
+        Maho_MediaCleaner_Model_Progress::cleanupStale();
+        $progress = Mage::getModel('mediacleaner/progress');
+        $progress->init([['code' => 'delete', 'name' => $this->__('Delete %d files', count($ids))]]);
+        $this->getResponse()->sendJsonAndDetach($progress->toArray());
+
+        $start = microtime(true);
+        $failed = 0;
+        $lastPercent = -1;
+        try {
+            $progress->startStep('delete');
+            foreach ($ids as $i => $imageId) {
                 $image = $this->loadImage($imageId);
                 if ($image && $image->getId() && !$this->deleteImage($image)) {
-                    $errorMessageThrown = true;
+                    $failed++;
+                }
+                // Write the record once for each percent, not once for each file
+                $percent = (int) floor(100 * ($i + 1) / count($ids));
+                if ($percent !== $lastPercent) {
+                    $lastPercent = $percent;
+                    $progress->reportProgress('delete', $i + 1, count($ids), $this->__('%d of %d files deleted', $i + 1, count($ids)));
                 }
             }
+            if ($failed > 0) {
+                $progress->failStep('delete', $this->__('%d files could not be deleted. The log has the reason.', $failed), microtime(true) - $start);
+            } else {
+                $progress->finishStepWithMessage('delete', microtime(true) - $start, $this->__('%d files deleted', count($ids)));
+            }
+        } catch (Throwable $e) {
+            Mage::logException($e);
+            $progress->failStep('delete', $this->__('The delete failed'), microtime(true) - $start);
+        } finally {
+            $progress->finish();
+            // Prevent the framework from sending a second response
+            exit;
         }
-
-        if ($errorMessageThrown) {
-            $this->_getSession()->addError($this->__('It was not possible to delete one or more files from the filesystem.'));
-        }
-
-        $this->_redirect('*/*');
     }
 
     #[Maho\Config\Route('/admin/mediacleaner/flushmediatmp')]

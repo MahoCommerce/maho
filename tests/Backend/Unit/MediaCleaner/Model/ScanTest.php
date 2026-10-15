@@ -66,7 +66,7 @@ describe('a Media Cleaner scan in a job dialog', function () {
 
     it('shows the folders read as a running step with a percent', function (): void {
         $this->progress->startStep('category');
-        $this->progress->reportProgress('category', 1, 4);
+        $this->progress->reportProgress('category', 1, 4, '1 of 4 folders read');
         $step = $this->progress->read()['steps'][0];
 
         expect($step['state'])->toBe(StepState::Running->value)
