@@ -31,7 +31,7 @@ $mainImage = $this->helper('catalog/image')->init($_product, 'image');
                     <img id="image-<?= $i ?>"
                          class="gallery-image" loading="lazy"
                          <?= $galleryHelper->getImgAttributes('gallery') ?>
-                         data-zoom-image="<?= $galleryHelper ?>"
+                         data-zoom-image="<?= $this->escapeUrl((string) $galleryHelper) ?>"
                          alt="<?= $this->escapeHtml($_image->getLabel() ?: $_product->getName() . ' - ' . $this->__('Image') . ' ' . ($i + 1)) ?>">
                 <?php endif ?>
                 <?php $i++; endforeach; ?>
