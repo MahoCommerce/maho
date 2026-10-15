@@ -37,6 +37,12 @@ const ONE_IMAGE_KEPT_PATHS = [
     'design/watermark/image_image',
 ];
 
+const ONE_IMAGE_COPIED_WATERMARK_PATHS = [
+    'design/watermark/image_imageOpacity',
+    'design/watermark/image_size',
+    'design/watermark/image_position',
+];
+
 function oneImageRunUpgrade(): void
 {
     $script = Mage::getModuleDir('data', 'Mage_Catalog') . '/catalog_setup/data-upgrade-2.0.1-2.0.2.php';
@@ -138,12 +144,32 @@ function oneImageRemoveTestData(Mage_Catalog_Model_Resource_Setup $setup): void
     foreach ([...ONE_IMAGE_OLD_PATHS, ...ONE_IMAGE_KEPT_PATHS] as $path) {
         $setup->deleteConfigData($path);
     }
-    $setup->deleteConfigData('catalog/placeholder/image_placeholder');
+    foreach (ONE_IMAGE_COPIED_WATERMARK_PATHS as $path) {
+        $setup->deleteConfigData($path, 'websites');
+    }
 }
 
 beforeEach(function () {
     $this->setup = Mage::getResourceModel('catalog/setup', 'catalog_setup');
     oneImageRemoveTestData($this->setup);
+
+    $product = Mage::getModel('catalog/product');
+    $product->setStoreId(Mage_Catalog_Model_Abstract::DEFAULT_STORE_ID);
+    $product->setName('One Image Upgrade');
+    $product->setSku('one-image-upgrade-' . uniqid());
+    $product->setPrice(10.00);
+    $product->setStatus(Mage_Catalog_Model_Product_Status::STATUS_ENABLED);
+    $product->setVisibility(Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH);
+    $product->setTypeId(Mage_Catalog_Model_Product_Type::TYPE_SIMPLE);
+    $product->setAttributeSetId($product->getDefaultAttributeSetId());
+    $product->setWebsiteIds([1]);
+    $product->save();
+    $this->productId = (int) $product->getId();
+    foreach (['image', 'image_label'] as $code) {
+        foreach (array_keys(oneImageValues($this->productId, $code)) as $storeId) {
+            oneImageSetValue($this->productId, $code, $storeId, null);
+        }
+    }
 
     foreach (['small_image' => 'Small Image', 'thumbnail' => 'Thumbnail'] as $code => $label) {
         $this->setup->addAttribute(Mage_Catalog_Model_Product::ENTITY, $code, [
@@ -167,32 +193,10 @@ beforeEach(function () {
     foreach ([...ONE_IMAGE_OLD_PATHS, ...ONE_IMAGE_KEPT_PATHS] as $path) {
         $this->setup->setConfigData($path, 'old');
     }
-
-    $adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
-    $this->productId = (int) $adapter->fetchOne($adapter->select()
-        ->from(Mage::getSingleton('core/resource')->getTableName('catalog/product'), ['entity_id'])
-        ->order('entity_id')
-        ->limit(1));
-    $this->savedValues = [
-        'image' => oneImageValues($this->productId, 'image'),
-        'image_label' => oneImageValues($this->productId, 'image_label'),
-    ];
-    foreach ($this->savedValues as $code => $values) {
-        foreach (array_keys($values) as $storeId) {
-            oneImageSetValue($this->productId, $code, $storeId, null);
-        }
-    }
 });
 
 afterEach(function () {
-    foreach ($this->savedValues as $code => $values) {
-        foreach (array_keys(oneImageValues($this->productId, $code)) as $storeId) {
-            oneImageSetValue($this->productId, $code, $storeId, null);
-        }
-        foreach ($values as $storeId => $value) {
-            oneImageSetValue($this->productId, $code, $storeId, $value);
-        }
-    }
+    Mage::getModel('catalog/product')->load($this->productId)->delete();
     oneImageRemoveTestData($this->setup);
     $this->setup->updateAttribute(Mage_Catalog_Model_Product::ENTITY, 'image', 'used_in_product_listing', 1);
     $this->setup->updateAttribute(Mage_Catalog_Model_Product::ENTITY, 'image', 'frontend_label', 'Main Image');
@@ -291,4 +295,20 @@ it('copies the placeholder of small_image to a scope without an image placeholde
         ->where('path = ?', 'catalog/placeholder/image_placeholder')
         ->where('scope = ?', 'websites')
         ->where('scope_id = ?', 1)))->toBe('default/small.png');
+});
+
+it('copies the watermark opacity of small_image to a scope without an image watermark', function () {
+    $this->setup->setConfigData('design/watermark/small_image_image', 'w.png', 'websites', 1);
+    $this->setup->setConfigData('design/watermark/small_image_imageOpacity', '40', 'websites', 1);
+
+    oneImageRunUpgrade();
+
+    $adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
+    $read = fn(string $path): string|false => $adapter->fetchOne($adapter->select()
+        ->from(Mage::getSingleton('core/resource')->getTableName('core/config_data'), ['value'])
+        ->where('path = ?', $path)
+        ->where('scope = ?', 'websites')
+        ->where('scope_id = ?', 1));
+    expect($read('design/watermark/image_imageOpacity'))->toBe('40')
+        ->and($read('design/watermark/image_image'))->toBe('w.png');
 });

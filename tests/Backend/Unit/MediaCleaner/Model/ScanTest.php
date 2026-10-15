@@ -27,11 +27,18 @@ describe('a Media Cleaner scan in a job dialog', function () {
         $resource = Mage::getSingleton('core/resource');
         $this->db = $resource->getConnection('core_write');
         $this->table = $resource->getTableName('mediacleaner/image');
-        $this->results = fn(): array => $this->db->fetchCol($this->db->select()->from($this->table, 'path')->where('type = ?', 'category'));
+        $this->results = fn(string $type = 'category'): array => $this->db->fetchCol($this->db->select()->from($this->table, 'path')->where('type = ?', $type));
+        $this->configTable = $resource->getTableName('core/config_data');
+        $this->placeholderWhere = ['path = ?' => 'catalog/placeholder/image_placeholder', 'scope = ?' => 'default', 'scope_id = ?' => 0];
+        $this->oldPlaceholder = $this->db->fetchOne($this->db->select()->from($this->configTable, 'value')->where('path = ?', 'catalog/placeholder/image_placeholder')->where('scope = ?', 'default')->where('scope_id = ?', 0));
     });
 
     afterEach(function (): void {
-        $this->db->delete($this->table, ['type = ?' => 'category']);
+        $this->db->delete($this->table, ['type IN (?)' => ['category', 'product']]);
+        $this->db->delete($this->configTable, $this->placeholderWhere);
+        if ($this->oldPlaceholder !== false) {
+            $this->db->insert($this->configTable, ['scope' => 'default', 'scope_id' => 0, 'path' => 'catalog/placeholder/image_placeholder', 'value' => $this->oldPlaceholder]);
+        }
         @unlink($this->progress->getFilePath());
         MountRegistry::reset();
         $items = new RecursiveIteratorIterator(
@@ -58,6 +65,19 @@ describe('a Media Cleaner scan in a job dialog', function () {
         expect($first)->toBe(1)
             ->and($found)->toBe([$name])
             ->and(($this->results)())->toBe(['keep/' . $name]);
+    });
+
+    it('does not report the placeholder file that the config names as unused in the product scan', function (): void {
+        $this->db->delete($this->configTable, $this->placeholderWhere);
+        $this->db->insert($this->configTable, ['scope' => 'default', 'scope_id' => 0, 'path' => 'catalog/placeholder/image_placeholder', 'value' => '/default/ph.png']);
+        $unused = 'x/y/scan_test_' . uniqid() . '.jpg';
+        $this->mount->write('catalog/product/placeholder/default/ph.png', 'x');
+        $this->mount->write('catalog/product/' . $unused, 'x');
+
+        $count = Mage::getModel('mediacleaner/scanner')->scan('product');
+
+        expect($count)->toBe(1)
+            ->and(($this->results)('product'))->toBe([$unused]);
     });
 
     it('refuses an unknown scan type', function (): void {

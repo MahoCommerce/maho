@@ -50,11 +50,32 @@ describe('product image URLs and the creation of their files', function () {
                 $this->queued[] = [$entity, $files];
             }
         };
+        $this->provider = new class extends Mage_Catalog_Model_Product_Image_Provider {
+            /** @var list<array<int|string>> */
+            public array $queued = [];
+
+            #[\Override]
+            public function queue(array $productIds): void
+            {
+                $this->queued[] = $productIds;
+            }
+        };
+        $this->importEvent = function (string $behavior, bool $expectsIds): \Maho\Event\Observer {
+            $adapter = $this->createMock(Mage_ImportExport_Model_Import_Entity_Product::class);
+            $adapter->method('getBehavior')->willReturn($behavior);
+            if ($expectsIds) {
+                $adapter->expects($this->once())->method('getAffectedEntityIds')->with(true)->willReturn([7, 9]);
+            } else {
+                $adapter->expects($this->never())->method('getAffectedEntityIds');
+            }
+            return new \Maho\Event\Observer(['event' => new \Maho\Event(['adapter' => $adapter])]);
+        };
     });
 
     afterEach(function (): void {
         Mage::app()->getStore($this->storeId)->setConfig('catalog/placeholder/image_placeholder', $this->placeholder);
         Mage::unregister('_singleton/core/image_resizer');
+        Mage::unregister('_singleton/catalog/product_image_provider');
         Mage::getSingleton('core/image_config')->reset();
         MountRegistry::reset();
         $items = new RecursiveIteratorIterator(
@@ -172,6 +193,110 @@ describe('product image URLs and the creation of their files', function () {
 
         expect($this->spy->calls)->toBe([['product', ['/n/e/new_1.png']]])
             ->and($this->spy->queued)->toBe([['product', ['/o/t/other.png']]]);
+    });
+
+    it('creates and queues no file after a save that does not change the main image', function (): void {
+        Mage::register('_singleton/core/image_resizer', $this->spy);
+        $product = Mage::getModel('catalog/product')->setOrigData('image', '/a/b/shirt.png')->setData('image', '/a/b/shirt.png');
+
+        Mage::getSingleton('catalog/observer')->createProductImageFiles(new \Maho\Event\Observer(['event' => new \Maho\Event(['product' => $product])]));
+
+        expect($this->spy->calls)->toBe([])
+            ->and(array_merge([], ...array_column($this->spy->queued, 1)))->toBe([]);
+    });
+
+    it('creates the files of the main image of a duplicate, and queues its other stored images', function (): void {
+        $resource = Mage::getSingleton('core/resource');
+        $connection = $resource->getConnection('core_write');
+        $eavConfig = Mage::getSingleton('eav/config');
+        $entityTable = $resource->getTableName('catalog/product');
+
+        $connection->beginTransaction();
+        try {
+            $connection->insert($entityTable, [
+                'entity_type_id' => (int) $eavConfig->getEntityType(Mage_Catalog_Model_Product::ENTITY)->getId(),
+                'attribute_set_id' => (int) Mage::getModel('catalog/product')->getDefaultAttributeSetId(),
+                'type_id' => Mage_Catalog_Model_Product_Type::TYPE_SIMPLE,
+                'sku' => 'image-files-duplicate-' . uniqid(),
+            ]);
+            $productId = (int) $connection->lastInsertId($entityTable);
+            foreach (['/a/b/shirt.png', '/g/a/gallery.png'] as $file) {
+                $connection->insert($resource->getTableName(Mage_Catalog_Model_Resource_Product_Attribute_Backend_Media::GALLERY_TABLE), [
+                    'attribute_id' => (int) $eavConfig->getAttribute(Mage_Catalog_Model_Product::ENTITY, 'media_gallery')->getId(),
+                    'entity_id' => $productId,
+                    'value' => $file,
+                ]);
+            }
+            $connection->insert($resource->getTableName(['catalog/product', 'varchar']), [
+                'entity_type_id' => (int) $eavConfig->getEntityType(Mage_Catalog_Model_Product::ENTITY)->getId(),
+                'attribute_id' => (int) $eavConfig->getAttribute(Mage_Catalog_Model_Product::ENTITY, 'image')->getId(),
+                'store_id' => 0,
+                'entity_id' => $productId,
+                'value' => '/a/b/shirt.png',
+            ]);
+
+            Mage::register('_singleton/core/image_resizer', $this->spy);
+            $product = Mage::getModel('catalog/product')->setId($productId)->setIsDuplicate()->setData('image', '/a/b/shirt.png');
+
+            Mage::getSingleton('catalog/observer')->createProductImageFiles(new \Maho\Event\Observer(['event' => new \Maho\Event(['product' => $product])]));
+        } finally {
+            $connection->rollBack();
+        }
+
+        expect($this->spy->calls)->toBe([['product', ['/a/b/shirt.png']]])
+            ->and($this->spy->queued)->toBe([['product', ['/g/a/gallery.png']]]);
+    });
+
+    it('queues the images of the products of an import', function (): void {
+        Mage::register('_singleton/catalog/product_image_provider', $this->provider);
+
+        Mage::getSingleton('catalog/observer')->queueImportedProductImageResize(($this->importEvent)(Mage_ImportExport_Model_Import::BEHAVIOR_APPEND, true));
+
+        expect($this->provider->queued)->toBe([[7, 9]]);
+    });
+
+    it('queues nothing for an import that deletes products', function (): void {
+        Mage::register('_singleton/catalog/product_image_provider', $this->provider);
+
+        Mage::getSingleton('catalog/observer')->queueImportedProductImageResize(($this->importEvent)(Mage_ImportExport_Model_Import::BEHAVIOR_DELETE, false));
+
+        expect($this->provider->queued)->toBe([]);
+    });
+
+    it('creates the files of a changed category image after a save', function (): void {
+        Mage::register('_singleton/core/image_resizer', $this->spy);
+        $category = Mage::getModel('catalog/category')->setOrigData('image', 'old.png')->setData('image', 'new.png');
+
+        Mage::getSingleton('catalog/observer')->createCategoryImageFiles(new \Maho\Event\Observer(['event' => new \Maho\Event(['category' => $category])]));
+
+        expect($this->spy->calls)->toBe([['category', ['new.png']]]);
+    });
+
+    it('creates no file after a save that does not change the category image', function (): void {
+        Mage::register('_singleton/core/image_resizer', $this->spy);
+        $category = Mage::getModel('catalog/category')->setOrigData('image', 'same.png')->setData('image', 'same.png');
+
+        Mage::getSingleton('catalog/observer')->createCategoryImageFiles(new \Maho\Event\Observer(['event' => new \Maho\Event(['category' => $category])]));
+
+        expect($this->spy->calls)->toBe([]);
+    });
+
+    it('creates the files of a changed blog post image after a save', function (): void {
+        Mage::register('_singleton/core/image_resizer', $this->spy);
+        $post = Mage::getModel('blog/post')->setOrigData('image', 'old.png')->setData('image', 'new.png');
+
+        (new Maho_Blog_Model_Observer())->createPostImageFiles(new \Maho\Event\Observer(['event' => new \Maho\Event(['object' => $post])]));
+
+        expect($this->spy->calls)->toBe([['blog', ['new.png']]]);
+    });
+
+    it('creates no file after a save that does not change the blog post image', function (): void {
+        Mage::register('_singleton/core/image_resizer', $this->spy);
+        $post = Mage::getModel('blog/post')->setOrigData('image', 'same.png')->setData('image', 'same.png');
+
+        (new Maho_Blog_Model_Observer())->createPostImageFiles(new \Maho\Event\Observer(['event' => new \Maho\Event(['object' => $post])]));
+
+        expect($this->spy->calls)->toBe([]);
     });
 
     it('queues the files that cannot be written after the commit', function (): void {

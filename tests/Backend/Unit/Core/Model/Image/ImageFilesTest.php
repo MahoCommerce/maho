@@ -7,7 +7,9 @@
 
 declare(strict_types=1);
 
+use League\Flysystem\Config;
 use League\Flysystem\Local\LocalFilesystemAdapter;
+use League\Flysystem\UnableToWriteFile;
 use Maho\Storage\Mount;
 use Maho\Storage\MountRegistry;
 use Maho\Storage\Url\StoreBaseUrlGenerator;
@@ -27,7 +29,25 @@ describe('resized image files of an image entity', function () {
         $this->restore = [
             'design/theme/skin' => Mage::getStoreConfig('design/theme/skin', $this->storeId),
             Mage_Core_Model_Image_Config::XML_PATH_ACTIVE . 'product' => Mage::getStoreConfig(Mage_Core_Model_Image_Config::XML_PATH_ACTIVE . 'product', $this->storeId),
+            Mage_Core_Model_Image_Config::XML_PATH_ACTIVE . 'swatch' => Mage::getStoreConfig(Mage_Core_Model_Image_Config::XML_PATH_ACTIVE . 'swatch', $this->storeId),
         ];
+        $this->readActiveRows = function (): array {
+            $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
+            return $adapter->fetchAll($adapter->select()
+                ->from(Mage::getSingleton('core/resource')->getTableName('core/config_data'))
+                ->where('path LIKE ?', Mage_Core_Model_Image_Config::XML_PATH_ACTIVE . '%')
+                ->order('config_id'));
+        };
+        $this->activeRows = ($this->readActiveRows)();
+        $this->singletons = [];
+        $this->replaceSingleton = function (string $alias, object $instance): void {
+            $key = "_singleton/{$alias}";
+            if (!array_key_exists($key, $this->singletons)) {
+                $this->singletons[$key] = Mage::registry($key);
+            }
+            Mage::unregister($key);
+            Mage::register($key, $instance);
+        };
         Mage::getSingleton('core/image_config')->reset();
 
         $this->writePng = function (string $key, int $width, int $height): void {
@@ -47,6 +67,23 @@ describe('resized image files of an image entity', function () {
     });
 
     afterEach(function (): void {
+        foreach ($this->singletons as $key => $original) {
+            Mage::unregister($key);
+            if ($original !== null) {
+                Mage::register($key, $original);
+            }
+        }
+        if (($this->readActiveRows)() !== $this->activeRows) {
+            $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
+            $table = Mage::getSingleton('core/resource')->getTableName('core/config_data');
+            $adapter->delete($table, ['path LIKE ?' => Mage_Core_Model_Image_Config::XML_PATH_ACTIVE . '%']);
+            foreach ($this->activeRows as $row) {
+                $adapter->insert($table, $row);
+            }
+            Mage::app()->cleanCache([Mage_Core_Model_Config::CACHE_TAG]);
+            Mage::getConfig()->reinit();
+            Mage::app()->reinitStores();
+        }
         foreach ($this->restore as $path => $value) {
             Mage::app()->getStore($this->storeId)->setConfig($path, $value);
         }
@@ -255,5 +292,187 @@ describe('resized image files of an image entity', function () {
             ->and($config->getSlotWidth('gallery', $this->storeId, 'blog'))->toBe(600)
             ->and($config->getSlotWidth('hero', $this->storeId, 'product'))->toBe(1600)
             ->and($config->getSlotWidth('gallery', $this->storeId))->toBe(600);
+    });
+
+    it('keeps the old active settings and throws when a resized file cannot be written', function (): void {
+        $config = Mage::getSingleton('core/image_config');
+        $old = new Mage_Core_Model_Image_Settings([150, 300], quality: 50);
+        Mage::app()->getStore($this->storeId)->setConfig(Mage_Core_Model_Image_Config::XML_PATH_ACTIVE . 'swatch', json_encode($old->toArray()));
+        $config->reset();
+        ($this->writePng)('wysiwyg/swatches/red.png', 40, 40);
+        $adapter = new class ($this->root) extends LocalFilesystemAdapter {
+            #[\Override]
+            public function write(string $path, string $contents, Config $config): void
+            {
+                if (str_contains($path, '/cache/')) {
+                    throw UnableToWriteFile::atLocation($path, 'The test refuses each write to a cache folder.');
+                }
+                parent::write($path, $contents, $config);
+            }
+
+            #[\Override]
+            public function writeStream(string $path, $contents, Config $config): void
+            {
+                if (str_contains($path, '/cache/')) {
+                    throw UnableToWriteFile::atLocation($path, 'The test refuses each write to a cache folder.');
+                }
+                parent::writeStream($path, $contents, $config);
+            }
+        };
+        MountRegistry::register(new Mount('media', $adapter, $this->root, new StoreBaseUrlGenerator('media')));
+
+        expect(fn() => Mage::getSingleton('core/image_resizer')->createAll('swatch'))->toThrow(RuntimeException::class, 'could not be written');
+
+        $config->reset();
+        expect($config->getActiveSettings('swatch', $this->storeId))->toEqual($old)
+            ->and($config->getPendingStoreIds('swatch'))->toContain($this->storeId)
+            ->and(($this->readActiveRows)())->toBe($this->activeRows);
+    });
+
+    it('creates every file of an entity, then makes the live settings active', function (): void {
+        $config = Mage::getSingleton('core/image_config');
+        $old = new Mage_Core_Model_Image_Settings([150, 300], quality: 50);
+        Mage::app()->getStore($this->storeId)->setConfig(Mage_Core_Model_Image_Config::XML_PATH_ACTIVE . 'swatch', json_encode($old->toArray()));
+        $config->reset();
+        ($this->writePng)('wysiwyg/swatches/red.png', 40, 40);
+        $live = $config->getLiveSettings('swatch', $this->storeId);
+
+        $count = Mage::getSingleton('core/image_resizer')->createAll('swatch');
+
+        expect($count)->toBeGreaterThanOrEqual(count($live->widths));
+        foreach ($live->widths as $width) {
+            expect($this->mount->fileExists(Mage_Core_Model_Image_Set::buildPath('wysiwyg/swatches', 'wysiwyg/swatches/red.png', $live, $width)))->toBeTrue();
+        }
+        expect($config->getActiveSettings('swatch', $this->storeId))->toEqual($live)
+            ->and($config->getActiveSettings('swatch', $this->storeId))->not->toEqual($old)
+            ->and($config->getPendingStoreIds('swatch'))->not->toContain($this->storeId);
+    });
+
+    it('returns the bytes of a resized file that exists, and does not write it again', function (): void {
+        $path = ($this->pathOf)(300);
+        $this->mount->write($path, 'bytes of the existing file');
+
+        expect(Mage::getSingleton('core/image_resizer')->createFileAtPath($path))->toBe('bytes of the existing file')
+            ->and($this->mount->read($path))->toBe('bytes of the existing file');
+    });
+
+    it('creates no file and returns nothing for a path with dot segments, when the file of that path exists', function (): void {
+        $resizer = Mage::getSingleton('core/image_resizer');
+        $hash = $this->settings->getHash();
+        $extension = $this->settings->extension;
+        ($this->writePng)('catalog/product/etc/x.png', 400, 200);
+        $this->mount->write("catalog/product/etc/x.png{$extension}", 'bytes outside the cache folder');
+
+        expect($resizer->createFileAtPath("catalog/product/cache/{$hash}/300/../../../etc/x.png{$extension}"))->toBeNull()
+            ->and($resizer->createFileAtPath("catalog/product/cache/{$hash}/300/..\\..\\..\\etc\\x.png{$extension}"))->toBeNull()
+            ->and($this->mount->read("catalog/product/etc/x.png{$extension}"))->toBe('bytes outside the cache folder')
+            ->and($this->mount->directoryExists('catalog/product/cache'))->toBeFalse();
+    });
+
+    it('creates the file of a source whose name ends with the output extension in upper case', function (): void {
+        $file = '/a/b/flat' . strtoupper($this->settings->extension);
+        ($this->writePng)('catalog/product' . $file, 400, 200);
+        $path = ($this->pathOf)(300, $file);
+
+        expect($path)->toEndWith('/300' . $file)
+            ->and(Mage::getSingleton('core/image_resizer')->createFileAtPath($path))->toBeString()
+            ->and(($this->sizeOf)($path))->toBe([300, 150]);
+    });
+
+    it('deletes the resized files of a source whose name ends with the output extension', function (): void {
+        $file = '/a/b/flat' . $this->settings->extension;
+        ($this->writePng)('catalog/product' . $file, 400, 200);
+        $resizer = Mage::getSingleton('core/image_resizer');
+        $resizer->createFiles('product', [$file], [$this->settings->getHash() => $this->settings]);
+        $path = ($this->pathOf)(300, $file);
+        expect($path)->toEndWith('/300' . $file)
+            ->and($this->mount->fileExists($path))->toBeTrue();
+
+        $resizer->deleteFiles('product', $file);
+
+        expect($this->mount->fileExists($path))->toBeFalse()
+            ->and($this->mount->fileExists(($this->pathOf)(150, $file)))->toBeFalse()
+            ->and($this->mount->fileExists('catalog/product' . $file))->toBeTrue();
+    });
+
+    it('deletes a width folder that no settings use, and keeps the other widths of its settings folder', function (): void {
+        $resizer = Mage::getSingleton('core/image_resizer');
+        $resizer->createFiles('product', ['/a/b/shirt.png'], [$this->settings->getHash() => $this->settings]);
+        $unused = 'catalog/product/cache/' . $this->settings->getHash() . '/999';
+        $this->mount->write($unused . '/a/b/shirt.png' . $this->settings->extension, 'old width');
+
+        expect($resizer->clean('product'))->toBe(1)
+            ->and($this->mount->directoryExists($unused))->toBeFalse()
+            ->and($this->mount->fileExists(($this->pathOf)(150)))->toBeTrue()
+            ->and($this->mount->fileExists(($this->pathOf)(300)))->toBeTrue()
+            ->and($this->mount->fileExists(($this->pathOf)(2400)))->toBeTrue();
+    });
+
+    it('keeps a settings folder whose hash holds only digits', function (): void {
+        $config = new class (['123456789012' => $this->settings]) extends Mage_Core_Model_Image_Config {
+            /**
+             * @param array<string, Mage_Core_Model_Image_Settings> $allSettings
+             */
+            public function __construct(private readonly array $allSettings) {}
+
+            #[\Override]
+            public function getAllSettings(string $entity): array
+            {
+                return $this->allSettings;
+            }
+        };
+        ($this->replaceSingleton)('core/image_config', $config);
+        $path = 'catalog/product/cache/123456789012/300/a/b/shirt.png' . $this->settings->extension;
+        $this->mount->write($path, 'file of a digit hash');
+
+        expect(Mage::getSingleton('core/image_resizer')->clean('product'))->toBe(0)
+            ->and($this->mount->fileExists($path))->toBeTrue();
+    });
+
+    it('throws from the queue handler when a file of the message cannot be written', function (): void {
+        $resizer = new class extends Mage_Core_Model_Image_Resizer {
+            #[\Override]
+            public function createFiles(
+                string $entity,
+                iterable $files,
+                ?array $settingsList = null,
+                ?array $existing = null,
+                ?callable $onFile = null,
+                ?callable $onFailure = null,
+            ): int {
+                foreach ($files as $file) {
+                    $onFailure !== null && $onFailure((string) $file);
+                }
+                return 0;
+            }
+        };
+        ($this->replaceSingleton)('core/image_resizer', $resizer);
+        $message = new Mage_Core_Model_Image_ResizeMessage('product', ['/a/b/shirt.png']);
+
+        expect(fn() => new Mage_Core_Model_Image_ResizeMessageHandler()->createFiles($message))->toThrow(RuntimeException::class, 'could not be written');
+    });
+
+    it('gives the product placeholder for a file with no source, and no placeholder for a placeholder file or an unknown path', function (): void {
+        $resizer = Mage::getSingleton('core/image_resizer');
+        $placeholder = Mage::getSingleton('catalog/product_image_provider')->getPlaceholderUrl(300);
+
+        expect($resizer->getPlaceholderUrl(($this->pathOf)(300, '/a/b/missing.png')))->toBeString()->toBe($placeholder)
+            ->and($resizer->getPlaceholderUrl(($this->pathOf)(300, '/placeholder/default/image.png')))->toBeNull()
+            ->and($resizer->getPlaceholderUrl('catalog/product/cache/0123456789ab/300/a/b/missing.png' . $this->settings->extension))->toBeNull();
+    });
+
+    it('reads the settings, the width and the source files from the path of a resized file', function (): void {
+        $hash = $this->settings->getHash();
+        $extension = $this->settings->extension;
+        $list = [$hash => $this->settings];
+
+        expect(Mage_Core_Model_Image_Set::parsePath('catalog/product', ($this->pathOf)(300), $list))
+            ->toBe([$this->settings, 300, ['catalog/product/a/b/shirt.png']])
+            ->and(Mage_Core_Model_Image_Set::parsePath('catalog/product', ($this->pathOf)(300, '/shirt' . $extension), $list))
+            ->toBe([$this->settings, 300, ['catalog/product/shirt' . $extension, 'catalog/product/shirt']])
+            ->and(Mage_Core_Model_Image_Set::parsePath('catalog/product', "catalog/product/cache/0123456789ab/300/a/b/shirt.png{$extension}", $list))->toBeNull()
+            ->and(Mage_Core_Model_Image_Set::parsePath('catalog/product', "catalog/product/cache/{$hash}/301/a/b/shirt.png{$extension}", $list))->toBeNull()
+            ->and(Mage_Core_Model_Image_Set::parsePath('catalog/product', "catalog/product/a/b/shirt.png{$extension}", $list))->toBeNull()
+            ->and(Mage_Core_Model_Image_Set::parsePath('catalog/product', "catalog/category/cache/{$hash}/300/a/b/shirt.png{$extension}", $list))->toBeNull();
     });
 });
