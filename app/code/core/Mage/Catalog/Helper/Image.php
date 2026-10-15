@@ -158,6 +158,23 @@ class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract implements \St
     }
 
     /**
+     * The CSS aspect-ratio of the image in $slot, such as "600/300". It follows the ratio of the
+     * theme, or the original when the theme keeps it, so a box has the shape of its resized
+     * files. The skin placeholder, and an image whose size is not known yet, are square.
+     *
+     * @param string $slot a slot of the theme, such as "gallery"
+     */
+    public function getAspectRatio(string $slot = 'listing'): string
+    {
+        if ($this->set === null) {
+            return '1/1';
+        }
+        $width = $this->set->getDisplayWidth($slot);
+        $height = $this->set->getHeightFor($width);
+        return $height !== null && $height > 0 ? "{$width}/{$height}" : '1/1';
+    }
+
+    /**
      * The resized files of the image, or null for the skin placeholder.
      */
     public function getImageSet(): ?Mage_Core_Model_Image_Set

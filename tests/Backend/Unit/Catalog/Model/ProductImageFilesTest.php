@@ -90,6 +90,27 @@ describe('product image URLs and the creation of their files', function () {
             ->toMatch('/^src="[^"]*placeholder\.svg" width="150" height="150"$/');
     });
 
+    it('gives the gallery box the ratio of the theme, or of the original when the theme keeps it', function (): void {
+        $store = Mage::app()->getStore($this->storeId);
+        $path = Mage_Core_Model_Image_Config::XML_PATH_ACTIVE . 'product';
+        $active = Mage::getStoreConfig($path, $this->storeId);
+        $product = Mage::getModel('catalog/product')->setData('image', '/a/b/shirt.png');
+
+        $original = Mage::helper('catalog/image')->init($product, 'image')->getAspectRatio('gallery');
+        $square = new Mage_Core_Model_Image_Settings([150, 300, 600, 1200, 2400], ratio: [1, 1]);
+        $store->setConfig($path, json_encode($square->toArray()));
+        Mage::getSingleton('core/image_config')->reset();
+        try {
+            $fixed = Mage::helper('catalog/image')->init($product, 'image')->getAspectRatio('gallery');
+        } finally {
+            $store->setConfig($path, $active);
+        }
+
+        expect($original)->toBe('600/300')
+            ->and($fixed)->toBe('600/600')
+            ->and(Mage::helper('catalog/image')->init(Mage::getModel('catalog/product'), 'image')->getAspectRatio('gallery'))->toBe('1/1');
+    });
+
     it('takes the larger side of a requested box', function (): void {
         $product = Mage::getModel('catalog/product')->setData('image', '/a/b/shirt.png');
 

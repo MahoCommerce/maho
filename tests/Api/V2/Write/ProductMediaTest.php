@@ -79,6 +79,32 @@ describe('Product Media Gallery, Permission Enforcement', function (): void {
 
 describe('Product Media Gallery, Upload & Manage', function (): void {
 
+    it('gives the image role to an upload with only the deprecated small_image and thumbnail roles', function (): void {
+        $token = serviceToken(['products/write', 'products/delete', 'products/read']);
+        $product = apiPost('/api/rest/v2/products', [
+            'sku' => 'PEST-MEDIA-ROLES-' . substr(uniqid(), -6),
+            'name' => 'Media Roles Test Product',
+            'price' => 10,
+        ], $token);
+        expect($product['status'])->toBeIn([200, 201]);
+        $productId = $product['json']['id'];
+        trackCreated('product', $productId);
+
+        $img = imagecreatetruecolor(1, 1);
+        ob_start();
+        imagepng($img);
+        $upload = apiPost("/api/rest/v2/products/{$productId}/media", [
+            'base64' => base64_encode((string) ob_get_clean()),
+            'filename' => 'roles-image.png',
+            'types' => ['small_image', 'thumbnail'],
+        ], $token);
+        $images = getItems(apiGet("/api/rest/v2/products/{$productId}/media"));
+
+        expect($upload['status'])->toBeIn([200, 201])
+            ->and($images)->toHaveCount(1)
+            ->and($images[0]['types'])->toBe(['image']);
+    });
+
     it('uploads a base64 image, updates label, then deletes it', function (): void {
         $token = serviceToken(['products/write', 'products/delete', 'products/read']);
         $suffix = substr(uniqid(), -6);

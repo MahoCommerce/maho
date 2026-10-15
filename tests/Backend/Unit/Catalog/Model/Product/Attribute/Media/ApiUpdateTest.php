@@ -67,4 +67,12 @@ describe('Mage_Catalog_Model_Product_Attribute_Media_Api::update() on the media 
             ->toThrow(Mage_Api_Exception::class)
             ->and($this->mount->read('catalog/product/t/e/test.png'))->toBe($original);
     });
+
+    it('gives the image role for the deprecated thumbnail role', function (): void {
+        $productId = ($this->galleryProduct)('/t/e/thumb.png');
+
+        Mage::getModel('catalog/product_attribute_media_api')->update($productId, '/t/e/thumb.png', ['types' => ['thumbnail']]);
+
+        expect(Mage::getResourceSingleton('catalog/product')->getAttributeRawValue($productId, 'image', 0))->toBe('/t/e/thumb.png');
+    });
 });

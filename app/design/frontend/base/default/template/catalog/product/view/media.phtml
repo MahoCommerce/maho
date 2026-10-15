@@ -14,7 +14,7 @@ $_product = $this->getProduct();
 $mainImage = $this->helper('catalog/image')->init($_product, 'image');
 ?>
     <div class="product-image" role="region" aria-label="<?= $this->__('Product Images') ?>">
-        <div class="product-image-gallery" style="aspect-ratio: <?= $mainImage->getOriginalWidth() ?>/<?= $mainImage->getOriginalHeight() ?>">
+        <div class="product-image-gallery" style="aspect-ratio: <?= $mainImage->getAspectRatio('gallery') ?>">
             <img id="image-main"
                 class="gallery-image visible"
                 <?= $mainImage->getImgAttributes('gallery') ?>
