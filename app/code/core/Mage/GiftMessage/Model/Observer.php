@@ -15,8 +15,7 @@ class Mage_GiftMessage_Model_Observer extends \Maho\DataObject
      *
      * @return $this
      */
-    #[Maho\Config\Observer('sales_convert_quote_item_to_order_item', area: 'adminhtml')]
-    #[Maho\Config\Observer('sales_convert_quote_item_to_order_item', area: 'frontend')]
+    #[Maho\Config\Observer('sales_convert_quote_item_to_order_item')]
     public function salesEventConvertQuoteItemToOrderItem(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Sales_Model_Order_Item $orderItem */
@@ -40,8 +39,7 @@ class Mage_GiftMessage_Model_Observer extends \Maho\DataObject
      *
      * @return $this
      */
-    #[Maho\Config\Observer('sales_convert_quote_address_to_order', area: 'adminhtml')]
-    #[Maho\Config\Observer('sales_convert_quote_address_to_order', area: 'frontend')]
+    #[Maho\Config\Observer('sales_convert_quote_address_to_order')]
     public function salesEventConvertQuoteAddressToOrder(\Maho\Event\Observer $observer)
     {
         if ($observer->getEvent()->getAddress()->getGiftMessageId()) {
@@ -56,8 +54,7 @@ class Mage_GiftMessage_Model_Observer extends \Maho\DataObject
      *
      * @return $this
      */
-    #[Maho\Config\Observer('sales_convert_quote_to_order', area: 'adminhtml')]
-    #[Maho\Config\Observer('sales_convert_quote_to_order', area: 'frontend')]
+    #[Maho\Config\Observer('sales_convert_quote_to_order')]
     public function salesEventConvertQuoteToOrder(\Maho\Event\Observer $observer)
     {
         $observer->getEvent()->getOrder()
