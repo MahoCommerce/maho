@@ -217,12 +217,19 @@ class StorageImageResize extends BaseMahoCommand
             return Command::FAILURE;
         }
 
+        $config = Mage::getSingleton('core/image_config');
+        $resizer = Mage::getSingleton('core/image_resizer');
+        $existing = [];
+        foreach ($config->getAllSettings($entity) as $settings) {
+            $existing += $resizer->listExistingFiles($config->getSource($entity), $settings);
+        }
+
         $failed = [];
-        $count = Mage::getSingleton('core/image_resizer')->createFiles(
+        $count = $resizer->createFiles(
             $entity,
             array_map(strval(...), array_values($files)),
             null,
-            null,
+            $existing,
             fn() => $io->writeln(self::JOB_ITEM_LINE, OutputInterface::OUTPUT_RAW),
             function (string $file) use (&$failed): void {
                 $failed[] = $file;

@@ -47,12 +47,14 @@ class Mage_Core_Model_Image_Observer
                 continue;
             }
 
-            $cacheId = 'image_settings_queued_' . $entity . '_' . md5(implode(',', $hashes));
+            $key = md5($entity . ',' . implode(',', $hashes));
+            $cacheId = 'image_settings_queued_' . $key;
             if (Mage::app()->loadCache($cacheId)) {
                 continue;
             }
             Mage::app()->saveCache('1', $cacheId, [Mage_Core_Model_Image_Config::CACHE_TAG], self::QUEUED_LIFETIME);
-            $resizer->queueAll($entity);
+            // A config save cleans the cache marker, so the queue must also refuse a second message while one runs
+            $resizer->queueAll($entity, 'image_resize_all_' . $key);
         }
     }
 

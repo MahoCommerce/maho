@@ -121,13 +121,8 @@ class Maho_MediaCleaner_Model_Scanner
                 ->where('value <> ?', 'no_selection')));
         }
 
-        $placeholders = $db->fetchCol($db->select()
-            ->distinct()
-            ->from($resource->getTableName('core/config_data'), 'value')
-            ->where('path LIKE ?', 'catalog/placeholder/%_placeholder'));
-        foreach ($placeholders as $placeholder) {
-            $dbImages[] = "placeholder/{$placeholder}";
-        }
+        $placeholders = Mage::getSingleton('catalog/product_image_provider')->getPlaceholderFiles();
+        $dbImages = [...$dbImages, ...array_map($removeLeadingSlash, $placeholders)];
 
         $mediaGallery = array_map($removeLeadingSlash, $db->fetchCol($db->select()
             ->from($resource->getTableName('catalog/product_attribute_media_gallery'), 'value')

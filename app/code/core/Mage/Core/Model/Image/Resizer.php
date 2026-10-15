@@ -91,8 +91,11 @@ class Mage_Core_Model_Image_Resizer
 
             $settings = $config->getAllSettings($entity)[$match[1]] ?? null;
             $width = (int) $match[2];
-            if ($settings === null || !in_array($width, $settings->widths, true) || !str_ends_with($match[3], $settings->extension)) {
+            if ($settings === null || !in_array($width, $settings->widths, true) || !str_ends_with(strtolower($match[3]), $settings->extension)) {
                 return null;
+            }
+            if (Mage::getStorage('media')->fileExists($path)) {
+                return Mage::getStorage('media')->read($path);
             }
             foreach ([$match[3], substr($match[3], 0, -strlen($settings->extension))] as $file) {
                 $sourcePath = Mage_Core_Model_Image_Set::resolveSourcePath($source, $file);
@@ -198,9 +201,9 @@ class Mage_Core_Model_Image_Resizer
     /**
      * Queue createAll() for $entity.
      */
-    public function queueAll(string $entity): void
+    public function queueAll(string $entity, ?string $dedupeKey = null): void
     {
-        \Maho\Queue\QueueManager::dispatch(new Mage_Core_Model_Image_ResizeAllMessage($entity), queue: self::QUEUE_NAME);
+        \Maho\Queue\QueueManager::dispatch(new Mage_Core_Model_Image_ResizeAllMessage($entity), queue: self::QUEUE_NAME, dedupeKey: $dedupeKey);
     }
 
     /**
@@ -210,6 +213,7 @@ class Mage_Core_Model_Image_Resizer
      *
      * @param (callable(string $file): void)|null $onFile called after each source file
      * @return int the number of files written
+     * @throws RuntimeException when a file could not be written. The store views then keep their settings.
      */
     public function createAll(string $entity, ?callable $onFile = null): int
     {
@@ -222,7 +226,13 @@ class Mage_Core_Model_Image_Resizer
             $existing += $this->listExistingFiles($source, $settings);
         }
 
-        $count = $this->createFiles($entity, $this->getSourceFiles($entity), $settingsList, $existing, $onFile);
+        $failed = 0;
+        $count = $this->createFiles($entity, $this->getSourceFiles($entity), $settingsList, $existing, $onFile, function () use (&$failed): void {
+            $failed++;
+        });
+        if ($failed > 0) {
+            throw new RuntimeException(sprintf('%d images of the entity "%s" could not be written, so its store views keep their settings.', $failed, $entity));
+        }
         $this->activateLiveSettings($entity);
 
         return $count;
@@ -355,7 +365,7 @@ class Mage_Core_Model_Image_Resizer
         $extensions = $this->getExtensions();
         foreach ($this->listFolders($source . '/' . Mage_Core_Model_Image_Set::CACHE_FOLDER) as $hashFolder) {
             foreach ($this->listFolders($hashFolder) as $widthFolder) {
-                foreach ($extensions as $extension) {
+                foreach (['', ...$extensions] as $extension) {
                     $mount->delete($widthFolder . $relative . $extension);
                 }
             }
@@ -363,8 +373,8 @@ class Mage_Core_Model_Image_Resizer
     }
 
     /**
-     * Delete the settings folders of $entity that no store view uses, active or live, with the
-     * files of earlier releases in the same cache folder.
+     * Delete the settings folders and the width folders of $entity that no store view uses,
+     * active or live, with the files of earlier releases in the same cache folder.
      *
      * @return int the number of deleted folders
      */
@@ -372,13 +382,17 @@ class Mage_Core_Model_Image_Resizer
     {
         $config = Mage::getSingleton('core/image_config');
         $source = $config->getSource($entity);
-        $keep = array_keys($config->getAllSettings($entity));
+        $settingsList = $config->getAllSettings($entity);
 
         $mount = Mage::getStorage('media');
         $count = 0;
         foreach ($this->listFolders($source . '/' . Mage_Core_Model_Image_Set::CACHE_FOLDER) as $folder) {
-            if (!in_array(basename($folder), $keep, true)) {
-                $mount->deleteDirectory($folder);
+            $settings = $settingsList[basename($folder)] ?? null;
+            $unused = $settings === null
+                ? [$folder]
+                : array_filter($this->listFolders($folder), fn(string $widthFolder): bool => !in_array((int) basename($widthFolder), $settings->widths, true));
+            foreach ($unused as $unusedFolder) {
+                $mount->deleteDirectory($unusedFolder);
                 $count++;
             }
         }
