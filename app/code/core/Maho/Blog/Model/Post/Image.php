@@ -24,4 +24,10 @@ class Maho_Blog_Model_Post_Image implements Mage_Core_Model_Image_ProviderInterf
     {
         return Mage::getSingleton('core/image_resizer')->getAttributeImageFiles(Maho_Blog_Model_Post::ENTITY);
     }
+
+    #[\Override]
+    public function getPlaceholderUrl(int $width): ?string
+    {
+        return null;
+    }
 }

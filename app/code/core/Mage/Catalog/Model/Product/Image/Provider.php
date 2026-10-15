@@ -40,6 +40,15 @@ class Mage_Catalog_Model_Product_Image_Provider implements Mage_Core_Model_Image
     }
 
     /**
+     * The placeholder of the image role from the config, or the placeholder of the skin.
+     */
+    #[\Override]
+    public function getPlaceholderUrl(int $width): ?string
+    {
+        return (string) Mage::helper('catalog/image')->init(Mage::getModel('catalog/product'), 'image')->resize($width);
+    }
+
+    /**
      * The role and gallery images of the products, or of every product when $productIds is null.
      *
      * @param array<int|string>|null $productIds

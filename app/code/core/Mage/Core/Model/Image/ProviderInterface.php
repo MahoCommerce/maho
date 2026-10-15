@@ -22,4 +22,11 @@ interface Mage_Core_Model_Image_ProviderInterface
      * @return iterable<string>
      */
     public function getImageFiles(): iterable;
+
+    /**
+     * The URL of the placeholder at $width or more, for a page that links to a file of the entity
+     * that cannot be created, for example because its source is gone. Null when the entity has
+     * no placeholder: the request then gets a 404.
+     */
+    public function getPlaceholderUrl(int $width): ?string;
 }

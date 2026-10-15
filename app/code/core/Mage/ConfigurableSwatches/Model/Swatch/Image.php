@@ -44,4 +44,10 @@ class Mage_ConfigurableSwatches_Model_Swatch_Image implements Mage_Core_Model_Im
             Mage::logException($e);
         }
     }
+
+    #[\Override]
+    public function getPlaceholderUrl(int $width): ?string
+    {
+        return null;
+    }
 }

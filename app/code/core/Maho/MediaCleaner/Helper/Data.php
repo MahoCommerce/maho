@@ -207,15 +207,11 @@ class Maho_MediaCleaner_Helper_Data extends Mage_Core_Helper_Abstract
         $source = 'catalog/product';
         $unusedFiles = [];
         foreach ($cacheFiles as $cacheFile) {
-            [$hash, $width, $file] = array_pad(explode('/', $cacheFile, 3), 3, '');
-            $settings = $settingsList[$hash] ?? null;
-            $used = $settings !== null && in_array((int) $width, $settings->widths, true)
-                && array_any(
-                    // The original in the output format keeps its name, any other gets the extension
-                    [$file, substr($file, 0, -strlen($settings->extension))],
-                    fn(string $candidate): bool => isset($sourceFiles[$candidate])
-                        && Mage_Core_Model_Image_Set::buildPath($source, "{$source}/{$candidate}", $settings, (int) $width) === "{$source}/cache/{$cacheFile}",
-                );
+            $parsed = Mage_Core_Model_Image_Set::parsePath($source, "{$source}/" . Mage_Core_Model_Image_Set::CACHE_FOLDER . "/{$cacheFile}", $settingsList);
+            $used = $parsed !== null && array_any(
+                $parsed[2],
+                fn(string $sourcePath): bool => isset($sourceFiles[substr($sourcePath, strlen($source) + 1)]),
+            );
             if (!$used) {
                 $unusedFiles[] = $cacheFile;
             }

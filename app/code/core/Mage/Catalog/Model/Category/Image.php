@@ -24,4 +24,10 @@ class Mage_Catalog_Model_Category_Image implements Mage_Core_Model_Image_Provide
     {
         return Mage::getSingleton('core/image_resizer')->getAttributeImageFiles(Mage_Catalog_Model_Category::ENTITY);
     }
+
+    #[\Override]
+    public function getPlaceholderUrl(int $width): ?string
+    {
+        return null;
+    }
 }

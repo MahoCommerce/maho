@@ -8,7 +8,8 @@
  * SQL.
  * The web server serves a file that exists and sends a miss to this route: the rewrite rule in
  * public/.htaccess, or a try_files in nginx. On a bucket, the CDN can send a miss here at the same
- * path, and the file goes to the bucket.
+ * path, and the file goes to the bucket. When the file cannot be created, for example because its
+ * source is gone, the request goes to the placeholder of the entity, or gets a 404.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -39,9 +40,16 @@ class Mage_Core_ImageController extends Mage_Core_Controller_Front_Action
     {
         $response = $this->getResponse();
         $path = (string) $this->getRequest()->getParam('path', '');
-        $binary = Mage::getSingleton('core/image_resizer')->createFileAtPath($path);
+        $resizer = Mage::getSingleton('core/image_resizer');
+        $binary = $resizer->createFileAtPath($path);
         if ($binary === null) {
-            $response->setHeader('Cache-Control', 'no-store', true)->setHttpResponseCode(404);
+            $response->setHeader('Cache-Control', 'no-store', true);
+            $placeholder = $resizer->getPlaceholderUrl($path);
+            if ($placeholder === null) {
+                $response->setHttpResponseCode(404);
+            } else {
+                $response->setRedirect($placeholder);
+            }
             return;
         }
 

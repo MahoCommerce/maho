@@ -80,44 +80,64 @@ class Mage_Core_Model_Image_Resizer
      */
     public function createFileAtPath(string $path): ?string
     {
-        $config = Mage::getSingleton('core/image_config');
-        foreach ($config->getEntities() as $entity => $source) {
-            $prefix = $source . '/' . Mage_Core_Model_Image_Set::CACHE_FOLDER . '/';
-            if (!str_starts_with($path, $prefix)
-                || !preg_match('#^([0-9a-f]{12})/(\d+)(/.+)$#', substr($path, strlen($prefix)), $match)
-            ) {
+        $parsed = $this->parsePath($path);
+        if ($parsed === null) {
+            return null;
+        }
+        [, $source, $settings, $width, $sourcePaths] = $parsed;
+        $mount = Mage::getStorage('media');
+        if ($mount->fileExists($path)) {
+            return $mount->read($path);
+        }
+        foreach ($sourcePaths as $sourcePath) {
+            if (!$mount->fileExists($sourcePath)) {
                 continue;
             }
-
-            $settings = $config->getAllSettings($entity)[$match[1]] ?? null;
-            $width = (int) $match[2];
-            if ($settings === null || !in_array($width, $settings->widths, true) || !str_ends_with(strtolower($match[3]), $settings->extension)) {
+            $image = $this->decode($sourcePath);
+            if ($image === null) {
                 return null;
             }
-            foreach ([$match[3], substr($match[3], 0, -strlen($settings->extension))] as $file) {
-                $sourcePath = Mage_Core_Model_Image_Set::resolveSourcePath($source, $file);
-                if ($sourcePath === null
-                    || str_ends_with(strtolower($sourcePath), '.svg')
-                    || Mage_Core_Model_Image_Set::buildPath($source, $sourcePath, $settings, $width) !== $path
-                ) {
-                    continue;
-                }
-                if (Mage::getStorage('media')->fileExists($path)) {
-                    return Mage::getStorage('media')->read($path);
-                }
-                if (!Mage::getStorage('media')->fileExists($sourcePath)) {
-                    continue;
-                }
+            $binary = $this->render($image, $settings, $width, !$this->isPlaceholder($source, $sourcePath));
+            $mount->moveAtomic($path, $binary);
+            return $binary;
+        }
+        return null;
+    }
 
-                $image = $this->decode($sourcePath);
-                if ($image === null) {
-                    return null;
-                }
-                $binary = $this->render($image, $settings, $width, !$this->isPlaceholder($source, $sourcePath));
-                Mage::getStorage('media')->moveAtomic($path, $binary);
-                return $binary;
-            }
+    /**
+     * The URL of the placeholder for the resized file at $path, when $path is a file of the
+     * settings that a store view uses but createFileAtPath() cannot create it. Null for any other
+     * path, for the file of a placeholder, and for an entity with no placeholder.
+     *
+     * @param string $path mount path, such as catalog/product/cache/3f9a1c2b0d4e/300/a/b/shirt.jpg.webp
+     */
+    public function getPlaceholderUrl(string $path): ?string
+    {
+        $parsed = $this->parsePath($path);
+        if ($parsed === null) {
             return null;
+        }
+        [$entity, $source, , $width, $sourcePaths] = $parsed;
+        if (array_any($sourcePaths, fn(string $sourcePath): bool => $this->isPlaceholder($source, $sourcePath))) {
+            return null;
+        }
+        return $this->getProvider($entity)?->getPlaceholderUrl($width);
+    }
+
+    /**
+     * The entity, the source folder, the settings, the width and the source files of the resized
+     * file at $path, or null when $path is not a file of the settings that a store view uses.
+     *
+     * @return array{0: string, 1: string, 2: Mage_Core_Model_Image_Settings, 3: int, 4: non-empty-list<string>}|null
+     */
+    protected function parsePath(string $path): ?array
+    {
+        $config = Mage::getSingleton('core/image_config');
+        foreach ($config->getEntities() as $entity => $source) {
+            $parsed = Mage_Core_Model_Image_Set::parsePath($source, $path, $config->getAllSettings($entity));
+            if ($parsed !== null) {
+                return [$entity, $source, ...$parsed];
+            }
         }
         return null;
     }
@@ -286,15 +306,26 @@ class Mage_Core_Model_Image_Resizer
      */
     public function getSourceFiles(string $entity): iterable
     {
+        return $this->getProvider($entity)?->getImageFiles() ?? [];
+    }
+
+    /**
+     * The provider that $entity declares under global/images/entities/<entity>/provider, or null
+     * when it declares none.
+     *
+     * @throws UnexpectedValueException when the provider does not implement Mage_Core_Model_Image_ProviderInterface
+     */
+    protected function getProvider(string $entity): ?Mage_Core_Model_Image_ProviderInterface
+    {
         $alias = (string) Mage::getConfig()->getNode(Mage_Core_Model_Image_Config::XML_PATH_ENTITIES . "/{$entity}/provider");
         if ($alias === '') {
-            return [];
+            return null;
         }
         $provider = Mage::getSingleton($alias);
         if (!$provider instanceof Mage_Core_Model_Image_ProviderInterface) {
             throw new UnexpectedValueException("The provider of the image entity \"{$entity}\" must implement Mage_Core_Model_Image_ProviderInterface.");
         }
-        return $provider->getImageFiles();
+        return $provider;
     }
 
     /**

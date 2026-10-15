@@ -70,6 +70,40 @@ class Mage_Core_Model_Image_Set
             . (str_ends_with(strtolower($file), $settings->extension) ? '' : $settings->extension);
     }
 
+    /**
+     * The settings, the width and the source files of the resized file at $path. This is the
+     * reverse of buildPath(). Null when $path is not what buildPath() gives for a source file of
+     * $source and one of $settingsList. Two sources can give one path: shirt.webp keeps its name,
+     * and shirt gets the extension.
+     *
+     * @param array<string, Mage_Core_Model_Image_Settings> $settingsList by hash
+     * @return array{0: Mage_Core_Model_Image_Settings, 1: int, 2: non-empty-list<string>}|null
+     */
+    public static function parsePath(string $source, string $path, array $settingsList): ?array
+    {
+        $prefix = $source . '/' . self::CACHE_FOLDER . '/';
+        if (!str_starts_with($path, $prefix) || !preg_match('#^([0-9a-f]{12})/(\d+)(/.+)$#', substr($path, strlen($prefix)), $match)) {
+            return null;
+        }
+        $settings = $settingsList[$match[1]] ?? null;
+        $width = (int) $match[2];
+        if ($settings === null || !in_array($width, $settings->widths, true) || !str_ends_with(strtolower($match[3]), $settings->extension)) {
+            return null;
+        }
+
+        $sourcePaths = [];
+        foreach ([$match[3], substr($match[3], 0, -strlen($settings->extension))] as $file) {
+            $sourcePath = self::resolveSourcePath($source, $file);
+            if ($sourcePath !== null
+                && !str_ends_with(strtolower($sourcePath), '.svg')
+                && self::buildPath($source, $sourcePath, $settings, $width) === $path
+            ) {
+                $sourcePaths[] = $sourcePath;
+            }
+        }
+        return $sourcePaths === [] ? null : [$settings, $width, $sourcePaths];
+    }
+
     public function getEntity(): string
     {
         return $this->entity;
