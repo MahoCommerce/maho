@@ -90,9 +90,23 @@ class StorageImageResize extends BaseMahoCommand
                     $failed[] = $file;
                 });
             } else {
+                $parts = [];
+                foreach ($this->splitIntoParts($files, $jobCount) as $part) {
+                    $known = [];
+                    foreach ($part as $file) {
+                        $sourcePath = \Mage_Core_Model_Image_Set::resolveSourcePath($source, $file);
+                        foreach ($sourcePath === null ? [] : $settingsList as $settings) {
+                            foreach ($settings->widths as $width) {
+                                $path = \Mage_Core_Model_Image_Set::buildPath($source, $sourcePath, $settings, $width);
+                                isset($existing[$path]) && $known[] = $path;
+                            }
+                        }
+                    }
+                    $parts[] = ['files' => array_values($part), 'existing' => $known];
+                }
                 $this->runJobs(
                     $progress,
-                    $this->splitIntoParts($files, $jobCount),
+                    $parts,
                     ['storage:image:resize', '--entity=' . $name, '--files-from-stdin'],
                     function (array $part) use (&$count, &$failed): void {
                         $count += (int) $part['created'];
@@ -205,31 +219,24 @@ class StorageImageResize extends BaseMahoCommand
     }
 
     /**
-     * Create the files of the images that stdin lists as JSON. Print a line for each image, then
-     * a line with the counts as JSON.
+     * Create the missing files of the images that stdin lists as JSON, next to the list of the
+     * resized files that exist. Print a line for each image, then a line with the counts as JSON.
      */
     private function resizeFilesFromStdin(SymfonyStyle $io, InputInterface $input, string $entity): int
     {
         $stdin = $input instanceof StreamableInputInterface ? $input->getStream() : null;
-        $files = Mage::helper('core')->jsonDecode((string) stream_get_contents($stdin ?? STDIN));
-        if (!is_array($files)) {
-            $io->error('--files-from-stdin needs a JSON list of image files.');
+        $part = Mage::helper('core')->jsonDecode((string) stream_get_contents($stdin ?? STDIN));
+        if (!is_array($part) || !is_array($part['files'] ?? null) || !is_array($part['existing'] ?? null)) {
+            $io->error('--files-from-stdin needs a JSON object with a list of image files in "files" and a list of resized files in "existing".');
             return Command::FAILURE;
         }
 
-        $config = Mage::getSingleton('core/image_config');
-        $resizer = Mage::getSingleton('core/image_resizer');
-        $existing = [];
-        foreach ($config->getAllSettings($entity) as $settings) {
-            $existing += $resizer->listExistingFiles($config->getSource($entity), $settings);
-        }
-
         $failed = [];
-        $count = $resizer->createFiles(
+        $count = Mage::getSingleton('core/image_resizer')->createFiles(
             $entity,
-            array_map(strval(...), array_values($files)),
+            array_map(strval(...), array_values($part['files'])),
             null,
-            $existing,
+            array_fill_keys(array_map(strval(...), $part['existing']), true),
             fn() => $io->writeln(self::JOB_ITEM_LINE, OutputInterface::OUTPUT_RAW),
             function (string $file) use (&$failed): void {
                 $failed[] = $file;
