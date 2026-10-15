@@ -94,16 +94,18 @@ class Mage_Core_Model_Image_Resizer
             if ($settings === null || !in_array($width, $settings->widths, true) || !str_ends_with(strtolower($match[3]), $settings->extension)) {
                 return null;
             }
-            if (Mage::getStorage('media')->fileExists($path)) {
-                return Mage::getStorage('media')->read($path);
-            }
             foreach ([$match[3], substr($match[3], 0, -strlen($settings->extension))] as $file) {
                 $sourcePath = Mage_Core_Model_Image_Set::resolveSourcePath($source, $file);
                 if ($sourcePath === null
                     || str_ends_with(strtolower($sourcePath), '.svg')
                     || Mage_Core_Model_Image_Set::buildPath($source, $sourcePath, $settings, $width) !== $path
-                    || !Mage::getStorage('media')->fileExists($sourcePath)
                 ) {
+                    continue;
+                }
+                if (Mage::getStorage('media')->fileExists($path)) {
+                    return Mage::getStorage('media')->read($path);
+                }
+                if (!Mage::getStorage('media')->fileExists($sourcePath)) {
                     continue;
                 }
 
