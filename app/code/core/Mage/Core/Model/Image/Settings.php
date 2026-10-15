@@ -19,9 +19,6 @@ final readonly class Mage_Core_Model_Image_Settings
     public const FIT_CONTAIN = 'contain';
     public const FIT_COVER = 'cover';
 
-    /** Version 2 has no doubled extension, such as shirt.webp.webp, so storage:image:clean deletes those files. */
-    private const NAMES_VERSION = 2;
-
     /** Output formats that can keep the transparent areas of the source. */
     private const ALPHA_EXTENSIONS = ['.png', '.webp', '.avif', '.gif'];
 
@@ -139,7 +136,6 @@ final readonly class Mage_Core_Model_Image_Settings
     {
         $data = $this->toArray();
         unset($data['widths']);
-        $data['names'] = self::NAMES_VERSION;
         return substr(md5((string) json_encode($data)), 0, 12);
     }
 

@@ -21,7 +21,7 @@ final class Migrator
 {
     /**
      * Folders that Maho creates again on demand, by mount. They are not copied unless asked.
-     * The resized images are not in the list: nothing creates them on a request.
+     * The resized images are not in the list: on a bucket, only a CDN rule sends a missing file to Maho.
      */
     public const REGENERATED = [
         'media' => ['catalog/swatches', 'tmp'],

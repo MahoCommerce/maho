@@ -283,6 +283,30 @@ class Mage_Core_Model_Image_Config
      */
     protected function getThemeImagesNode(int $storeId): array
     {
+        $result = [];
+        foreach ($this->getThemeImagesNodes($storeId) as $node) {
+            foreach ($node->slots ? $node->slots->children() : [] as $name => $child) {
+                if (!isset($result['slots'][$name]) && (int) $child > 0) {
+                    $result['slots'][$name] = (int) $child;
+                }
+            }
+            foreach ($node->children() as $name => $child) {
+                if ($name !== 'slots') {
+                    $result['entities'][$name] = $this->mergeEntityNode($result['entities'][$name] ?? [], $child);
+                }
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * The <images> nodes of the skin theme of the store view and of its parents, child first, up to
+     * and with base/default.
+     *
+     * @return list<\Maho\Simplexml\Element>
+     */
+    protected function getThemeImagesNodes(int $storeId): array
+    {
         $designConfig = Mage::getSingleton('core/design_config');
         $area = Mage_Core_Model_Design_Package::DEFAULT_AREA;
         $package = (string) Mage::getStoreConfig('design/package/name', $storeId) ?: Mage_Core_Model_Design_Package::DEFAULT_PACKAGE;
@@ -295,33 +319,13 @@ class Mage_Core_Model_Image_Config
             ? null
             : array_filter([$defaultTheme, Mage_Core_Model_Design_Package::DEFAULT_THEME]);
 
-        $result = [];
+        $nodes = [];
         $visited = [];
         while ($theme !== '' && !isset($visited["{$package}/{$theme}"])) {
             $visited["{$package}/{$theme}"] = true;
             $node = $designConfig->getNode("{$area}/{$package}/{$theme}/images");
             if ($node) {
-                foreach ($node->slots ? $node->slots->children() : [] as $name => $child) {
-                    if (!isset($result['slots'][$name]) && (int) $child > 0) {
-                        $result['slots'][$name] = (int) $child;
-                    }
-                }
-                foreach ($node->children() as $name => $child) {
-                    if ($name === 'slots') {
-                        continue;
-                    }
-                    foreach (['ratio', 'fit'] as $field) {
-                        if (!isset($result['entities'][$name][$field]) && trim((string) $child->$field) !== '') {
-                            $result['entities'][$name][$field] = trim((string) $child->$field);
-                        }
-                    }
-                    if (!isset($result['entities'][$name]['slots']) && $child->slots && $child->slots->children()->count() > 0) {
-                        $result['entities'][$name]['slots'] = [];
-                        foreach ($child->slots->children() as $slotName => $width) {
-                            $result['entities'][$name]['slots'][$slotName] = max(0, (int) $width);
-                        }
-                    }
-                }
+                $nodes[] = $node;
             }
 
             $parent = $legacyThemes === null
@@ -335,8 +339,29 @@ class Mage_Core_Model_Image_Config
             $parts = explode('/', $parent);
             [$package, $theme] = count($parts) === 2 ? $parts : [$package, $parts[0]];
         }
+        return $nodes;
+    }
 
-        return $result;
+    /**
+     * Add to $entity each value of the entity node $node that $entity does not hold yet.
+     *
+     * @param array{ratio?: string, fit?: string, slots?: array<string, int>} $entity
+     * @return array{ratio?: string, fit?: string, slots?: array<string, int>}
+     */
+    protected function mergeEntityNode(array $entity, \Maho\Simplexml\Element $node): array
+    {
+        foreach (['ratio', 'fit'] as $field) {
+            if (!isset($entity[$field]) && trim((string) $node->$field) !== '') {
+                $entity[$field] = trim((string) $node->$field);
+            }
+        }
+        if (!isset($entity['slots']) && $node->slots && $node->slots->children()->count() > 0) {
+            $entity['slots'] = [];
+            foreach ($node->slots->children() as $slotName => $width) {
+                $entity['slots'][$slotName] = max(0, (int) $width);
+            }
+        }
+        return $entity;
     }
 
     /**

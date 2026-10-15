@@ -219,8 +219,9 @@ class StorageImageResize extends BaseMahoCommand
     }
 
     /**
-     * Create the missing files of the images that stdin lists as JSON, next to the list of the
-     * resized files that exist. Print a line for each image, then a line with the counts as JSON.
+     * Create the missing files of the images that stdin lists. Stdin holds a JSON object: "files"
+     * lists the images, and "existing" lists their resized files that exist, which the job skips.
+     * Print a line for each image, then a line with the counts as JSON.
      */
     private function resizeFilesFromStdin(SymfonyStyle $io, InputInterface $input, string $entity): int
     {
