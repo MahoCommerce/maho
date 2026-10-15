@@ -431,7 +431,10 @@ export const MahoImage = Image.extend({
                 onCommit: (width, height) => {
                     const pos = getPos();
                     if (pos !== undefined) {
-                        editor.chain().setNodeSelection(pos).updateAttributes(this.name, { width, height }).run();
+                        // A width or height in the style overrides the new width and height attributes
+                        const style = editor.state.doc.nodeAt(pos)?.attrs.style
+                            ?.replace(/(?<=^|;)\s*(width|height)\s*:[^;]*(;|$)/gi, '').trim() || null;
+                        editor.chain().setNodeSelection(pos).updateAttributes(this.name, { width, height, style }).run();
                     }
                 },
                 onUpdate: (updatedNode) => updatedNode.type === node.type,
