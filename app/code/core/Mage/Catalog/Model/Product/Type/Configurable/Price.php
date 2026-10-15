@@ -155,8 +155,8 @@ class Mage_Catalog_Model_Product_Type_Configurable_Price extends Mage_Catalog_Mo
         $currentItemId = $product->getCustomOption('item_id') ? $product->getCustomOption('item_id')->getValue() : null;
 
         foreach ($this->getAllVisibleItems() as $item) {
-            // Check if this is the same configurable product
-            if ($item->getProduct()->getId() == $configurableProductId) {
+            // getProduct() writes the options of $item into the product object that all lines of this product share
+            if ($item->getProductId() == $configurableProductId) {
                 // If this is the current item being calculated, use the provided qty
                 if ($currentItemId && $item->getId() == $currentItemId) {
                     $totalQty += $qty;
