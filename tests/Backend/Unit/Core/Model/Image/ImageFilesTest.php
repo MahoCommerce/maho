@@ -467,7 +467,7 @@ describe('resized image files of an image entity', function () {
         $list = [$hash => $this->settings];
 
         expect(Mage_Core_Model_Image_Set::parsePath('catalog/product', ($this->pathOf)(300), $list))
-            ->toBe([$this->settings, 300, ['catalog/product/a/b/shirt.png']])
+            ->toBe([$this->settings, 300, ['catalog/product/a/b/shirt.png' . $extension, 'catalog/product/a/b/shirt.png']])
             ->and(Mage_Core_Model_Image_Set::parsePath('catalog/product', ($this->pathOf)(300, '/shirt' . $extension), $list))
             ->toBe([$this->settings, 300, ['catalog/product/shirt' . $extension, 'catalog/product/shirt']])
             ->and(Mage_Core_Model_Image_Set::parsePath('catalog/product', "catalog/product/cache/0123456789ab/300/a/b/shirt.png{$extension}", $list))->toBeNull()
