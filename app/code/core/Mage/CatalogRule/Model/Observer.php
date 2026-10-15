@@ -117,6 +117,7 @@ class Mage_CatalogRule_Model_Observer
      * @return  $this
      */
     #[Maho\Config\Observer('sales_quote_collect_totals_before', area: 'frontend', type: 'singleton', id: 'preload_price_rules')]
+    #[Maho\Config\Observer('sales_quote_collect_totals_before', area: 'api', type: 'singleton', id: 'preload_price_rules')]
     public function preloadPriceRules(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Sales_Model_Quote $quote */
@@ -151,6 +152,7 @@ class Mage_CatalogRule_Model_Observer
      * @return  $this
      */
     #[Maho\Config\Observer('catalog_product_get_final_price', area: 'frontend', type: 'singleton')]
+    #[Maho\Config\Observer('catalog_product_get_final_price', area: 'api', type: 'singleton')]
     public function processFrontFinalPrice($observer)
     {
         /** @var Mage_Catalog_Model_Product $product */
