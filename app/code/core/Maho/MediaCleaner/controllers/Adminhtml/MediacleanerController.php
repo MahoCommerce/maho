@@ -136,7 +136,7 @@ class Maho_MediaCleaner_Adminhtml_MediacleanerController extends Mage_Adminhtml_
                 return;
             }
             $unusedImages = Mage::helper('mediacleaner')
-                ->findUnusedProductCacheFiles(Mage::getStorage('media'), Maho::getConfiguredImageExtension());
+                ->findUnusedProductCacheFiles(Mage::getStorage('media'));
         } catch (FilesystemException $e) {
             Mage::logException($e);
             $this->_getSession()->addError($this->__('It was not possible to read the "%s" folder.', 'media/catalog/product'));

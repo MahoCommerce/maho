@@ -131,13 +131,13 @@ class Maho_MediaCleaner_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * The files of the product image cache whose source image is gone, relative to catalog/product/cache.
+     * The files of the product image cache that no page links to, relative to catalog/product/cache.
      * One deep listing of catalog/product gives both the cache files and the source files.
      *
      * @return list<string>
      * @throws FilesystemException
      */
-    public function findUnusedProductCacheFiles(Mount $mount, string $extension): array
+    public function findUnusedProductCacheFiles(Mount $mount): array
     {
         $cacheFiles = [];
         $sourceFiles = [];
@@ -150,31 +150,36 @@ class Maho_MediaCleaner_Helper_Data extends Mage_Core_Helper_Abstract
         }
 
         $cacheFiles = $this->filterFiles($cacheFiles, 'catalog/product/cache', $this->getBlacklistedPatterns());
+        $settingsList = Mage::getSingleton('core/image_config')->getAllSettings(Mage_Catalog_Model_Product_Image_Provider::ENTITY);
 
-        return $this->getUnusedProductCacheFiles($cacheFiles, $sourceFiles, $extension);
+        return $this->getUnusedProductCacheFiles($cacheFiles, $sourceFiles, $settingsList);
     }
 
     /**
-     * A cache file is "{settings hash}/{width}/{a}/{b}/{name}{extension}". Its source is
-     * "{a}/{b}/{name}" below catalog/product. A cache file is unused when that source is not in
-     * $sourceFiles, or when its name does not end with the configured $extension.
+     * A cache file is "{settings hash}/{width}/{a}/{b}/{name}", see Mage_Core_Model_Image_Set::buildPath().
+     * It is unused when no store view uses its settings or its width, or when it is not the file
+     * that those settings give to a source in $sourceFiles.
      *
      * @param list<string> $cacheFiles paths relative to catalog/product/cache
      * @param array<string, true> $sourceFiles paths relative to catalog/product
+     * @param array<string, Mage_Core_Model_Image_Settings> $settingsList the settings that store views use, by hash
      * @return list<string>
      */
-    public function getUnusedProductCacheFiles(array $cacheFiles, array $sourceFiles, string $extension): array
+    public function getUnusedProductCacheFiles(array $cacheFiles, array $sourceFiles, array $settingsList): array
     {
+        $source = 'catalog/product';
         $unusedFiles = [];
         foreach ($cacheFiles as $cacheFile) {
-            if (str_contains($cacheFile, '/placeholder/')) {
-                continue;
-            }
-
-            $source = implode('/', array_slice(explode('/', $cacheFile), -3));
-            if (!str_ends_with($source, $extension)
-                || !isset($sourceFiles[substr($source, 0, -strlen($extension))])
-            ) {
+            [$hash, $width, $file] = array_pad(explode('/', $cacheFile, 3), 3, '');
+            $settings = $settingsList[$hash] ?? null;
+            $used = $settings !== null && in_array((int) $width, $settings->widths, true)
+                && array_any(
+                    // The original in the output format keeps its name, any other gets the extension
+                    [$file, substr($file, 0, -strlen($settings->extension))],
+                    fn(string $candidate): bool => isset($sourceFiles[$candidate])
+                        && Mage_Core_Model_Image_Set::buildPath($source, "{$source}/{$candidate}", $settings, (int) $width) === "{$source}/cache/{$cacheFile}",
+                );
+            if (!$used) {
                 $unusedFiles[] = $cacheFile;
             }
         }
