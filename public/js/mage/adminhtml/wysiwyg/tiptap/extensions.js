@@ -489,10 +489,12 @@ export const MahoImage = Image.extend({
                         // Keep some attributes of old image
                         const title = node?.attrs.title;
                         const width = node?.attrs.width;
+                        const className = node?.attrs.class;
+                        const style = node?.attrs.style;
 
                         editor.commands.insertContentAt({ from, to }, {
                             type: this.name,
-                            attrs: { directiveObj, alt, title, width },
+                            attrs: { directiveObj, alt, title, width, class: className, style },
                         });
                     },
                 });
