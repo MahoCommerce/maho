@@ -33,7 +33,7 @@ class Mage_Core_Model_Image_Size
     /** @var array<string, true> the hashes that preload() found no row for */
     protected array $missing = [];
 
-    /** @var array<string, true> the folders that preloadFolder() read in this request */
+    /** @var array<string, true> the folders that preloadFolder() read in this request, as mount name/folder */
     protected array $preloadedFolders = [];
 
     /**
@@ -62,7 +62,11 @@ class Mage_Core_Model_Image_Size
         $path = self::normalizePath($path);
         $hash = self::getHash($mount->name(), $path);
         if (!array_key_exists($hash, $this->sizes)) {
-            $size = isset($this->missing[$hash]) ? null : $this->getResource()->fetchSize($hash);
+            $inPreloadedFolder = array_any(
+                array_keys($this->preloadedFolders),
+                fn(string $folder): bool => str_starts_with($mount->name() . '/' . $path, $folder . '/'),
+            );
+            $size = isset($this->missing[$hash]) || $inPreloadedFolder ? null : $this->getResource()->fetchSize($hash);
             if ($size === null && $mount->isLocal()) {
                 $size = $this->read($mount, $path);
             } elseif ($size === null) {
@@ -107,12 +111,13 @@ class Mage_Core_Model_Image_Size
      */
     public function preloadFolder(Mount $mount, string $folder): void
     {
+        $folder = self::normalizePath($folder);
         $key = $mount->name() . '/' . $folder;
         if (isset($this->preloadedFolders[$key])) {
             return;
         }
         $this->preloadedFolders[$key] = true;
-        foreach ($this->getResource()->fetchFolderSizes($mount->name(), self::normalizePath($folder)) as $hash => $size) {
+        foreach ($this->getResource()->fetchFolderSizes($mount->name(), $folder) as $hash => $size) {
             $this->sizes[$hash] ??= $size[0] > 0 && $size[1] > 0 ? $size : false;
         }
     }
@@ -262,7 +267,9 @@ class Mage_Core_Model_Image_Size
         $storage = Mage::getStorage($mount);
         foreach ($paths as $path) {
             try {
-                $this->read($storage, $path);
+                if ($this->read($storage, $path) === null && $storage->isLocal() && !$storage->fileExists($path)) {
+                    $this->forget($mount, [$path]);
+                }
             } catch (\League\Flysystem\FilesystemException $e) {
                 $onFailure !== null && $onFailure($path, $e);
             }
