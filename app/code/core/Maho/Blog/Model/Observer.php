@@ -23,19 +23,6 @@ class Maho_Blog_Model_Observer
         Mage::register('current_entity_key', $entityKey, true);
     }
 
-    /**
-     * Create the resized files of a new post image that was set by name, as an import does. An
-     * upload creates them in Maho_Blog_Model_Post_Attribute_Backend_Image::saveImage().
-     */
-    #[Maho\Config\Observer('blog_post_save_after', id: 'blog_create_image_files')]
-    public function createPostImageFiles(\Maho\Event\Observer $observer): void
-    {
-        $post = $observer->getEvent()->getObject();
-        if ($post instanceof Maho_Blog_Model_Post && $post->dataHasChangedFor('image') && is_string($post->getData('image'))) {
-            Mage::getSingleton('core/image_resizer')->createFilesAfterCommit(Maho_Blog_Model_Post_Image::ENTITY, [$post->getData('image')]);
-        }
-    }
-
     #[Maho\Config\Observer('page_block_html_topmenu_gethtml_before', id: 'blog_add_topmenu_items')]
     public function addBlogToTopmenuItems(\Maho\Event\Observer $observer): void
     {

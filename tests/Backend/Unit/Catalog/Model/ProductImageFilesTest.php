@@ -293,40 +293,28 @@ describe('product image URLs and the creation of their files', function () {
         expect($this->provider->queued)->toBe([]);
     });
 
-    it('creates the files of a changed category image after a save', function (): void {
+    it('creates the files of a category image that a save changes by name', function (): void {
         Mage::register('_singleton/core/image_resizer', $this->spy);
-        $category = Mage::getModel('catalog/category')->setOrigData('image', 'old.png')->setData('image', 'new.png');
+        $backend = Mage::getResourceSingleton('catalog/category')->getAttribute('image')->getBackend();
 
-        Mage::getSingleton('catalog/observer')->createCategoryImageFiles(new \Maho\Event\Observer(['event' => new \Maho\Event(['category' => $category])]));
+        $backend->afterSave(Mage::getModel('catalog/category')->setOrigData('image', 'old.png')->setData('image', 'new.png'));
+        $backend->afterSave(Mage::getModel('catalog/category')->setOrigData('image', 'same.png')->setData('image', 'same.png'));
 
-        expect($this->spy->calls)->toBe([['category', ['new.png']]]);
+        expect($backend)->toBeInstanceOf(Mage_Eav_Model_Entity_Attribute_Backend_Image::class)
+            ->and($backend->getSource())->toBe('catalog/category')
+            ->and($this->spy->calls)->toBe([['category', ['new.png']]]);
     });
 
-    it('creates no file after a save that does not change the category image', function (): void {
+    it('creates the files of a blog post image that a save changes by name', function (): void {
         Mage::register('_singleton/core/image_resizer', $this->spy);
-        $category = Mage::getModel('catalog/category')->setOrigData('image', 'same.png')->setData('image', 'same.png');
+        $backend = Mage::getResourceSingleton('blog/post')->getAttribute('image')->getBackend();
 
-        Mage::getSingleton('catalog/observer')->createCategoryImageFiles(new \Maho\Event\Observer(['event' => new \Maho\Event(['category' => $category])]));
+        $backend->afterSave(Mage::getModel('blog/post')->setOrigData('image', 'old.png')->setData('image', 'new.png'));
+        $backend->afterSave(Mage::getModel('blog/post')->setOrigData('image', 'same.png')->setData('image', 'same.png'));
 
-        expect($this->spy->calls)->toBe([]);
-    });
-
-    it('creates the files of a changed blog post image after a save', function (): void {
-        Mage::register('_singleton/core/image_resizer', $this->spy);
-        $post = Mage::getModel('blog/post')->setOrigData('image', 'old.png')->setData('image', 'new.png');
-
-        (new Maho_Blog_Model_Observer())->createPostImageFiles(new \Maho\Event\Observer(['event' => new \Maho\Event(['object' => $post])]));
-
-        expect($this->spy->calls)->toBe([['blog', ['new.png']]]);
-    });
-
-    it('creates no file after a save that does not change the blog post image', function (): void {
-        Mage::register('_singleton/core/image_resizer', $this->spy);
-        $post = Mage::getModel('blog/post')->setOrigData('image', 'same.png')->setData('image', 'same.png');
-
-        (new Maho_Blog_Model_Observer())->createPostImageFiles(new \Maho\Event\Observer(['event' => new \Maho\Event(['object' => $post])]));
-
-        expect($this->spy->calls)->toBe([]);
+        expect($backend)->toBeInstanceOf(Mage_Eav_Model_Entity_Attribute_Backend_Image::class)
+            ->and($backend->getSource())->toBe('blog')
+            ->and($this->spy->calls)->toBe([['blog', ['new.png']]]);
     });
 
     it('queues the files that cannot be written after the commit', function (): void {

@@ -88,20 +88,6 @@ class Mage_Catalog_Model_Observer
     }
 
     /**
-     * Create the resized files of a new category image that was set by name, as an import does.
-     * An upload creates them in Mage_Catalog_Model_Category_Attribute_Backend_Image::saveImage().
-     */
-    #[Maho\Config\Observer('catalog_category_save_after')]
-    public function createCategoryImageFiles(\Maho\Event\Observer $observer): void
-    {
-        /** @var Mage_Catalog_Model_Category $category */
-        $category = $observer->getEvent()->getCategory();
-        if ($category->dataHasChangedFor('image') && is_string($category->getData('image'))) {
-            Mage::getSingleton('core/image_resizer')->createFilesAfterCommit(Mage_Catalog_Model_Category_Image::ENTITY, [$category->getData('image')]);
-        }
-    }
-
-    /**
      * Create the resized files of the placeholders after a save of the catalog config.
      */
     #[Maho\Config\Observer('admin_system_config_changed_section_catalog')]
