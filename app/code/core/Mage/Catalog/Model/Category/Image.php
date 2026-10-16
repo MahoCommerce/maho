@@ -22,7 +22,9 @@ class Mage_Catalog_Model_Category_Image implements Mage_Core_Model_Image_Provide
     #[\Override]
     public function getImageFiles(): array
     {
-        return Mage::getSingleton('core/image_resizer')->getAttributeImageFiles(Mage_Catalog_Model_Category::ENTITY);
+        $attribute = Mage::getResourceSingleton('catalog/category')->getAttribute('image');
+        $backend = $attribute ? $attribute->getBackend() : null;
+        return $backend instanceof Mage_Eav_Model_Entity_Attribute_Backend_Image ? $backend->getImageFiles() : [];
     }
 
     #[\Override]

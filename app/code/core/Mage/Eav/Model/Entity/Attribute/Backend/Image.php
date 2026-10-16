@@ -30,6 +30,22 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Image extends Mage_Eav_Mo
     }
 
     /**
+     * Every file that the attribute holds, in every store.
+     *
+     * @return list<string>
+     */
+    public function getImageFiles(): array
+    {
+        $adapter = $this->getAttribute()->getEntity()->getReadConnection();
+        $files = $adapter->fetchCol($adapter->select()
+            ->distinct()
+            ->from($this->getTable(), ['value'])
+            ->where('attribute_id = ?', (int) $this->getAttribute()->getId()));
+
+        return array_values(array_filter(array_map(strval(...), $files), fn(string $file): bool => $file !== ''));
+    }
+
+    /**
      * @return list<string>
      */
     public function getAllowedExtensions(): array

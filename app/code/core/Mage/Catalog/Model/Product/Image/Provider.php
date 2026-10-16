@@ -49,7 +49,8 @@ class Mage_Catalog_Model_Product_Image_Provider implements Mage_Core_Model_Image
     }
 
     /**
-     * The role and gallery images of the products, or of every product when $productIds is null.
+     * The gallery images and the images of every Media Image attribute of the products, or of every
+     * product when $productIds is null.
      *
      * @param array<int|string>|null $productIds
      * @return list<string>
@@ -67,10 +68,18 @@ class Mage_Catalog_Model_Product_Image_Provider implements Mage_Core_Model_Image
             $gallery->where('entity_id IN (?)', $ids);
         }
 
-        $files = [
-            ...$adapter->fetchCol($gallery),
-            ...Mage::getSingleton('core/image_resizer')->getAttributeImageFiles(Mage_Catalog_Model_Product::ENTITY, $ids),
-        ];
+        $mediaAttributeIds = Mage::getResourceModel('catalog/product_attribute_collection')
+            ->addFieldToFilter('frontend_input', 'media_image')
+            ->getAllIds();
+        $roles = $adapter->select()
+            ->distinct()
+            ->from($resource->getTableName(['catalog/product', 'varchar']), ['value'])
+            ->where('attribute_id IN (?)', $mediaAttributeIds ?: [0]);
+        if ($ids !== null) {
+            $roles->where('entity_id IN (?)', $ids);
+        }
+
+        $files = [...$adapter->fetchCol($gallery), ...$adapter->fetchCol($roles)];
         return array_values(array_unique(array_filter(
             array_map(strval(...), $files),
             fn(string $file): bool => $file !== '' && $file !== 'no_selection',

@@ -22,7 +22,9 @@ class Maho_Blog_Model_Post_Image implements Mage_Core_Model_Image_ProviderInterf
     #[\Override]
     public function getImageFiles(): array
     {
-        return Mage::getSingleton('core/image_resizer')->getAttributeImageFiles(Maho_Blog_Model_Post::ENTITY);
+        $attribute = Mage::getResourceSingleton('blog/post')->getAttribute('image');
+        $backend = $attribute ? $attribute->getBackend() : null;
+        return $backend instanceof Mage_Eav_Model_Entity_Attribute_Backend_Image ? $backend->getImageFiles() : [];
     }
 
     #[\Override]
