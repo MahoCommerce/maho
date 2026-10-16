@@ -208,7 +208,7 @@ class Maho_ApiPlatform_Model_Observer
     #[Maho\Config\Observer('catalogrule_after_apply')]
     public function invalidatePriceCache(\Maho\Event\Observer $_observer): void
     {
-        $this->cleanApiCache(['API_PRODUCTS']);
+        $this->cleanApiCache(['API_PRODUCTS', 'API_WISHLIST']);
     }
 
     /**

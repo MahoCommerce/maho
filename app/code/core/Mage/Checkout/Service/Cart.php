@@ -84,7 +84,7 @@ class Mage_Checkout_Service_Cart
             $quote->setStore(\Mage::app()->getStore($quote->getStoreId()));
         }
 
-        return $quote;
+        return $this->syncCustomerGroup($quote);
     }
 
     /**
@@ -117,8 +117,38 @@ class Mage_Checkout_Service_Cart
             // dropped on the next load. That's a rare, low-impact outcome (an
             // empty cart), so we don't serialize creation: the cost of a lock on
             // every cart bootstrap isn't worth guarding against it.
-            $quote = $this->create($customerId, $storeId);
+            return $this->create($customerId, $storeId);
         }
+
+        return $this->syncCustomerGroup($quote);
+    }
+
+    /**
+     * Give an active customer cart the current group of its customer, as the storefront does at login
+     *
+     * A cart keeps the group it was saved with: an admin can move the customer to another group, and
+     * carts created through the API before the customer was set on them were saved as NOT LOGGED IN.
+     */
+    private function syncCustomerGroup(\Mage_Sales_Model_Quote $quote): \Mage_Sales_Model_Quote
+    {
+        $customerId = (int) $quote->getCustomerId();
+        if (!$customerId || !$quote->getIsActive()) {
+            return $quote;
+        }
+
+        $resource = \Mage::getSingleton('core/resource');
+        $read = $resource->getConnection('core_read');
+        $groupId = $read->fetchOne(
+            $read->select()
+                ->from($resource->getTableName('customer/entity'), ['group_id'])
+                ->where('entity_id = ?', $customerId),
+        );
+        if ($groupId === false || (int) $groupId === $quote->getCustomerGroupId()) {
+            return $quote;
+        }
+
+        $quote->setCustomer(\Mage::getModel('customer/customer')->load($customerId));
+        $this->collectAndSave($quote);
 
         return $quote;
     }
