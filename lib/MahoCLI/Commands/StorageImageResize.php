@@ -125,6 +125,8 @@ class StorageImageResize extends BaseMahoCommand
                 $io->listing($failed);
                 $io->error("Some files of {$name} were not created. Run the command again: it creates only what is missing.");
                 $status = Command::FAILURE;
+            } else {
+                $resizer->createFolders($name);
             }
 
             if (!$this->readMissingSizes($io, $name, $sourceFiles, $jobCount)) {

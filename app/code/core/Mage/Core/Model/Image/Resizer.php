@@ -254,8 +254,25 @@ class Mage_Core_Model_Image_Resizer
         if ($failed > 0) {
             throw new RuntimeException(sprintf('%d images of the entity "%s" could not be written.', $failed, $entity));
         }
+        $this->createFolders($entity);
 
         return $count;
+    }
+
+    /**
+     * Create every settings folder and width folder of $entity on the media mount, so the check for
+     * missing folders finds them also when the entity has no image.
+     */
+    public function createFolders(string $entity): void
+    {
+        $config = Mage::getSingleton('core/image_config');
+        $cache = $config->getSource($entity) . '/' . Mage_Core_Model_Image_Set::CACHE_FOLDER;
+        $mount = Mage::getStorage('media');
+        foreach ($config->getAllSettings($entity) as $hash => $settings) {
+            foreach ($settings->widths as $width) {
+                $mount->createDirectory("{$cache}/{$hash}/{$width}");
+            }
+        }
     }
 
     /**
