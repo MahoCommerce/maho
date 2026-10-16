@@ -119,10 +119,10 @@ class Template
             self::CONSTRUCTION_IF_PATTERN     => 'ifDirective',
         ];
         foreach ($directives as $pattern => $directive) {
-            $value = $this->replaceConstructions($pattern, $value, [$this, $directive]);
+            $value = $this->replaceDirectives($pattern, $value, [$this, $directive]);
         }
 
-        return $this->replaceConstructions(self::CONSTRUCTION_PATTERN, $value, function (array $construction) {
+        return $this->replaceDirectives(self::CONSTRUCTION_PATTERN, $value, function (array $construction) {
             $callback = [$this, $construction[1] . 'Directive'];
             return is_callable($callback) ? call_user_func($callback, $construction) : $construction[0];
         });
@@ -134,7 +134,7 @@ class Template
      * The scan runs one time over $value. A directive result is never scanned again, so a
      * variable value that contains directive text stays literal text.
      */
-    protected function replaceConstructions(string $pattern, string $value, callable $callback): string
+    protected function replaceDirectives(string $pattern, string $value, callable $callback): string
     {
         $result = preg_replace_callback(
             $pattern,
