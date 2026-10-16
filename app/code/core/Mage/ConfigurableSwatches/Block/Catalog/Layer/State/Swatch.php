@@ -40,7 +40,8 @@ class Mage_ConfigurableSwatches_Block_Catalog_Layer_State_Swatch extends Mage_Co
     }
 
     /**
-     * Set one-time data on the renderer
+     * Set the swatch dimensions once, and the swatch URL of $filter.
+     * The layer state renders all active filters with one instance of this block.
      *
      * @param Mage_Catalog_Model_Layer_Filter_Item $filter
      */
@@ -61,17 +62,17 @@ class Mage_ConfigurableSwatches_Block_Catalog_Layer_State_Swatch extends Mage_Co
                 $dimHelper->getOuterHeight(Mage_ConfigurableSwatches_Helper_Swatchdimensions::AREA_LAYER),
             );
 
-            $swatchUrl = Mage::helper('configurableswatches/productimg')
-                ->getGlobalSwatchUrl(
-                    $filter,
-                    $this->stripTags($filter->getLabel()),
-                    $this->getSwatchInnerWidth(),
-                    $this->getSwatchInnerHeight(),
-                );
-            $this->setSwatchUrl($swatchUrl);
-
             $this->_initDone = true;
         }
+
+        $swatchUrl = Mage::helper('configurableswatches/productimg')
+            ->getGlobalSwatchUrl(
+                $filter,
+                $this->stripTags($filter->getLabel()),
+                $this->getSwatchInnerWidth(),
+                $this->getSwatchInnerHeight(),
+            );
+        $this->setSwatchUrl($swatchUrl);
     }
 
     public function setJsonConfig(?string $value): static
