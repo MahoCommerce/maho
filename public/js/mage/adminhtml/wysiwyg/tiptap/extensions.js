@@ -133,6 +133,7 @@ export const GlobalAttributes = Extension.create({
             {
                 types: [
                     'heading', 'paragraph', 'bulletList', 'orderedList', 'listItem', 'blockquote', 'codeBlock',
+                    'mahoImage',
                     'tableRow', 'tableCell', 'tableHeader', 'table',
                     'mahoColumns', 'mahoColumn',
                     'mahoBentoGrid', 'mahoBentoCell',
@@ -430,7 +431,10 @@ export const MahoImage = Image.extend({
                 onCommit: (width, height) => {
                     const pos = getPos();
                     if (pos !== undefined) {
-                        editor.chain().setNodeSelection(pos).updateAttributes(this.name, { width, height }).run();
+                        // A width or height in the style overrides the new width and height attributes
+                        const style = editor.state.doc.nodeAt(pos)?.attrs.style
+                            ?.replace(/(?<=^|;)\s*(width|height)\s*:[^;]*(;|$)/gi, '').trim() || null;
+                        editor.chain().setNodeSelection(pos).updateAttributes(this.name, { width, height, style }).run();
                     }
                 },
                 onUpdate: (updatedNode) => updatedNode.type === node.type,
@@ -485,10 +489,12 @@ export const MahoImage = Image.extend({
                         // Keep some attributes of old image
                         const title = node?.attrs.title;
                         const width = node?.attrs.width;
+                        const className = node?.attrs.class;
+                        const style = node?.attrs.style;
 
                         editor.commands.insertContentAt({ from, to }, {
                             type: this.name,
-                            attrs: { directiveObj, alt, title, width },
+                            attrs: { directiveObj, alt, title, width, class: className, style },
                         });
                     },
                 });
