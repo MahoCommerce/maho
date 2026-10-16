@@ -53,4 +53,15 @@ describe('Email template variable values stay inert', function () {
 
         expect($template->getProcessedTemplateSubject(['reason' => $payload]))->toContain($payload);
     });
+
+    test('a variable value that repeats a later directive of the template renders as literal text', function () {
+        $template = Mage::getModel('core/email_template');
+        $template->setTemplateType(Mage_Core_Model_Email_Template::TYPE_HTML);
+        $template->setTemplateText('<p>{{var reason}}</p><p>{{var secret}}</p>');
+
+        $html = $template->getProcessedTemplate(['reason' => '{{var secret}}', 'secret' => 'S3CRET']);
+
+        expect($html)->toContain('<p>{{var secret}}</p>')
+            ->and(substr_count($html, 'S3CRET'))->toBe(1);
+    });
 });

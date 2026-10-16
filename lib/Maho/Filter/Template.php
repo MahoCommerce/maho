@@ -119,34 +119,31 @@ class Template
             self::CONSTRUCTION_IF_PATTERN     => 'ifDirective',
         ];
         foreach ($directives as $pattern => $directive) {
-            if (preg_match_all($pattern, $value, $constructions, PREG_SET_ORDER)) {
-                foreach ($constructions as $construction) {
-                    $callback = [$this, $directive];
-                    try {
-                        $replacedValue = call_user_func($callback, $construction);
-                    } catch (\Exception $e) {
-                        throw $e;
-                    }
-                    $value = str_replace($construction[0], $replacedValue, $value);
-                }
-            }
+            $value = $this->replaceDirectives($pattern, $value, [$this, $directive]);
         }
 
-        if (preg_match_all(self::CONSTRUCTION_PATTERN, $value, $constructions, PREG_SET_ORDER)) {
-            foreach ($constructions as $construction) {
-                $callback = [$this, $construction[1] . 'Directive'];
-                if (!is_callable($callback)) {
-                    continue;
-                }
-                try {
-                    $replacedValue = call_user_func($callback, $construction);
-                } catch (\Exception $e) {
-                    throw $e;
-                }
-                $value = str_replace($construction[0], $replacedValue ?? '', $value);
-            }
-        }
-        return $value;
+        return $this->replaceDirectives(self::CONSTRUCTION_PATTERN, $value, function (array $construction) {
+            $callback = [$this, $construction[1] . 'Directive'];
+            return is_callable($callback) ? call_user_func($callback, $construction) : $construction[0];
+        });
+    }
+
+    /**
+     * Replace each match of $pattern in $value with the result of $callback.
+     *
+     * The scan runs one time over $value. A directive result is never scanned again, so a
+     * variable value that contains directive text stays literal text.
+     */
+    protected function replaceDirectives(string $pattern, string $value, callable $callback): string
+    {
+        $result = preg_replace_callback(
+            $pattern,
+            fn(array $construction): string => (string) $callback($construction),
+            $value,
+        );
+
+        // On a PCRE error, such as the backtrack limit, return the text unchanged.
+        return $result ?? $value;
     }
 
     public function varDirective($construction)
