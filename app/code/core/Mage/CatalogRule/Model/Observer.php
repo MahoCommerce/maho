@@ -175,7 +175,7 @@ class Mage_CatalogRule_Model_Observer
         } elseif ($product->hasCustomerGroupId()) {
             $gId = $product->getCustomerGroupId();
         } else {
-            $gId = Mage::getSingleton('customer/session')->getCustomerGroupId();
+            $gId = Mage::helper('customer')->getCurrentGroupId();
         }
 
         $key = $this->_getRulePricesKey([$date, $wId, $gId, $pId]);
@@ -424,13 +424,7 @@ class Mage_CatalogRule_Model_Observer
         if ($observer->getEvent()->hasCustomerGroupId()) {
             $groupId = $observer->getEvent()->getCustomerGroupId();
         } else {
-            /** @var Mage_Customer_Model_Session $session */
-            $session = Mage::getSingleton('customer/session');
-            if ($session->isLoggedIn()) {
-                $groupId = Mage::getSingleton('customer/session')->getCustomerGroupId();
-            } else {
-                $groupId = Mage_Customer_Model_Group::NOT_LOGGED_IN_ID;
-            }
+            $groupId = Mage::helper('customer')->getCurrentGroupId();
         }
         if ($observer->getEvent()->hasDate()) {
             $date = $observer->getEvent()->getDate();

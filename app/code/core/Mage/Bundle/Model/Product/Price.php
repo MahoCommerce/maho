@@ -733,7 +733,7 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
         }
 
         if (!$gId) {
-            $gId = Mage::getSingleton('customer/session')->getCustomerGroupId();
+            $gId = Mage::helper('customer')->getCurrentGroupId();
         } elseif ($gId instanceof Mage_Customer_Model_Group) {
             $gId = $gId->getId();
         }

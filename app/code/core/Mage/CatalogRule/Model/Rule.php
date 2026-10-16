@@ -328,7 +328,7 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
         if ($product->hasCustomerGroupId()) {
             $customerGroupId = $product->getCustomerGroupId();
         } else {
-            $customerGroupId = Mage::getSingleton('customer/session')->getCustomerGroupId();
+            $customerGroupId = Mage::helper('customer')->getCurrentGroupId();
         }
         $storeNow   = Mage::app()->getLocale()->utcToStore();
         $cacheKey   = $storeNow->format(Mage_Core_Model_Locale::DATE_FORMAT) . "|$websiteId|$customerGroupId|$productId|$price";

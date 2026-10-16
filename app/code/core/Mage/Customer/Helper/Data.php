@@ -162,6 +162,8 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
      */
     protected $_groups;
 
+    private ?int $currentGroupId = null;
+
     /**
      * Check customer is logged in
      *
@@ -183,6 +185,26 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
             $this->_customer = Mage::getSingleton('customer/session')->getCustomer();
         }
         return $this->_customer;
+    }
+
+    /**
+     * Customer group that prices products for the current request
+     *
+     * Code that has no customer group at hand reads it here. The group a stateless caller such as the
+     * API set wins over the customer session, which only the storefront fills.
+     */
+    public function getCurrentGroupId(): int
+    {
+        return $this->currentGroupId ?? (int) Mage::getSingleton('customer/session')->getCustomerGroupId();
+    }
+
+    /**
+     * Set the customer group of the current request, or null to go back to the customer session
+     */
+    public function setCurrentGroupId(?int $groupId): self
+    {
+        $this->currentGroupId = $groupId;
+        return $this;
     }
 
     /**
