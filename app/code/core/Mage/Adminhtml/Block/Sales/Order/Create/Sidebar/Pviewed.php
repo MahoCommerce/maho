@@ -58,7 +58,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Pviewed extends Mage_Admin
                     ->addStoreFilter($this->getQuote()->getStoreId())
                     ->addAttributeToSelect('name')
                     ->addAttributeToSelect('price')
-                    ->addAttributeToSelect('small_image')
+                    ->addAttributeToSelect('image')
                     ->addIdFilter($productIds)
                     ->load();
             }

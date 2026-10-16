@@ -57,7 +57,7 @@ class Mage_Rss_Block_Catalog_Special extends Mage_Rss_Block_Catalog_Abstract
             ->addPriceData($customerGroupId, $websiteId)
             ->addAttributeToSelect(
                 [
-                    'name', 'short_description', 'description', 'price', 'thumbnail',
+                    'name', 'short_description', 'description', 'price', 'image',
                     'special_price', 'special_to_date',
                     'msrp_enabled', 'msrp_display_actual_price_type', 'msrp',
                 ],
@@ -108,10 +108,10 @@ class Mage_Rss_Block_Catalog_Special extends Mage_Rss_Block_Catalog_Abstract
                 $product->setData($result);
                 $html = sprintf(
                     '<table><tr>
-                    <td><a href="%s"><img src="%s" alt="" border="0" align="left" height="75" width="75"></a></td>
+                    <td><a href="%s"><img src="%s" alt="" border="0" align="left" width="75"></a></td>
                     <td style="text-decoration:none;">%s',
                     $product->getProductUrl(),
-                    $imageHelper->init($product, 'thumbnail')->resize(75, 75),
+                    $imageHelper->init($product, 'image')->resize(75, 75),
                     $outputHelper->productAttribute(
                         $product,
                         $product->getDescription(),

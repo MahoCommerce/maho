@@ -105,10 +105,13 @@ class Maho_MediaCleaner_Block_Adminhtml_Mediacleaner_Grid extends Mage_Adminhtml
     {
         $this->setMassactionIdField('image_id');
         $this->getMassactionBlock()->setFormFieldName('ids');
+        // The delete answers with a job token instead of a redirect, so the job dialog can take over
+        $this->getMassactionBlock()->setUseAjax(true);
         $this->getMassactionBlock()->addItem('delete', [
-            'label'   => $this->__('Delete'),
-            'url'     => $this->getUrl('*/*/massDelete'),
-            'confirm' => $this->__('Are you sure?'),
+            'label'    => $this->__('Delete'),
+            'url'      => $this->getUrl('*/*/massDelete'),
+            'confirm'  => $this->__('Are you sure?'),
+            'complete' => 'mediaCleanerMassDeleteComplete',
         ]);
         return $this;
     }

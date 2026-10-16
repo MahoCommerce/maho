@@ -69,7 +69,7 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
         $base64 = $body['base64'] ?? $body['imageData'] ?? $body['image_data'] ?? null;
         $imageUrl = $body['imageUrl'] ?? $body['image_url'] ?? null;
         $filename = $body['filename'] ?? 'upload.jpg';
-        $types = $body['types'] ?? [];
+        $types = \Mage_Catalog_Helper_Image::mapDeprecatedRoles((array) ($body['types'] ?? []));
         $label = $body['label'] ?? null;
 
         $position = $body['position'] ?? null;
@@ -180,13 +180,7 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
         $dto->position = (int) ($newest['position'] ?? 0);
         $dto->disabled = (bool) ($newest['disabled'] ?? false);
 
-        $types = [];
-        foreach (['image', 'small_image', 'thumbnail'] as $role) {
-            if ($product->getData($role) === $file) {
-                $types[] = $role;
-            }
-        }
-        $dto->types = $types;
+        $dto->types = $product->getImage() === $file ? ['image'] : [];
 
         return $dto;
     }
@@ -235,16 +229,8 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
 
         // Update role assignments
         $types = $body['types'] ?? null;
-        if (is_array($types)) {
-            if (in_array('image', $types, true)) {
-                $product->setData('image', $file);
-            }
-            if (in_array('small_image', $types, true)) {
-                $product->setData('small_image', $file);
-            }
-            if (in_array('thumbnail', $types, true)) {
-                $product->setData('thumbnail', $file);
-            }
+        if (is_array($types) && in_array('image', \Mage_Catalog_Helper_Image::mapDeprecatedRoles($types), true)) {
+            $product->setData('image', $file);
         }
 
         $product->unsetData('stock_data');

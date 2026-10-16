@@ -54,20 +54,49 @@ class Mage_Catalog_Model_Observer
     }
 
     /**
-     * Queue the resize of the images of a saved product when a role image changed or the
-     * gallery got a new image. The message joins the transaction of the save.
+     * Create the resized files of the new images of a saved product. The main image shows in
+     * the listings, so its files are created after the save commits. The other gallery images
+     * go to the queue, so a save with many images returns fast. A duplicate gets new copies of
+     * all images, so all its images are resized.
      */
     #[Maho\Config\Observer('catalog_product_save_after')]
-    public function queueProductImageResize(\Maho\Event\Observer $observer): void
+    public function createProductImageFiles(\Maho\Event\Observer $observer): void
     {
         /** @var Mage_Catalog_Model_Product $product */
         $product = $observer->getEvent()->getProduct();
-        $galleryImages = $product->getData('media_gallery')['images'] ?? [];
-        if (array_any(Mage_Catalog_Model_Product_Image_Resizer::ROLES, $product->dataHasChangedFor(...))
-            || (is_array($galleryImages) && array_any($galleryImages, fn($image) => !empty($image['new_file'])))
-        ) {
-            Mage::getSingleton('catalog/product_image_resizer')->queue([(int) $product->getId()]);
+        $main = is_string($product->getImage()) ? $product->getImage() : null;
+        if ($product->getIsDuplicate()) {
+            $files = Mage::getSingleton('catalog/product_image_provider')->getProductImageFiles([(int) $product->getId()]);
+        } else {
+            $files = [];
+            $galleryImages = $product->getData('media_gallery')['images'] ?? [];
+            foreach (is_array($galleryImages) ? $galleryImages : [] as $image) {
+                if (!empty($image['new_file']) && empty($image['removed'])) {
+                    $files[] = (string) $image['new_file'];
+                }
+            }
+            if (!$product->dataHasChangedFor('image') && !in_array($main, $files, true)) {
+                $main = null;
+            }
         }
+
+        $resizer = Mage::getSingleton('core/image_resizer');
+        if ($main !== null) {
+            $resizer->createFilesAfterCommit(Mage_Catalog_Model_Product_Image_Provider::ENTITY, [$main]);
+        }
+        $resizer->queue(Mage_Catalog_Model_Product_Image_Provider::ENTITY, array_values(array_diff($files, [$main])));
+    }
+
+    /**
+     * Create the resized files of the placeholders after a save of the catalog config.
+     */
+    #[Maho\Config\Observer('admin_system_config_changed_section_catalog')]
+    public function createPlaceholderImageFiles(\Maho\Event\Observer $observer): void
+    {
+        Mage::getSingleton('core/image_resizer')->createFilesAfterCommit(
+            Mage_Catalog_Model_Product_Image_Provider::ENTITY,
+            Mage::getSingleton('catalog/product_image_provider')->getPlaceholderFiles(),
+        );
     }
 
     #[Maho\Config\Observer('catalog_product_import_finish_before')]
@@ -76,7 +105,7 @@ class Mage_Catalog_Model_Observer
         /** @var Mage_ImportExport_Model_Import_Entity_Product $adapter */
         $adapter = $observer->getEvent()->getAdapter();
         if ($adapter->getBehavior() !== Mage_ImportExport_Model_Import::BEHAVIOR_DELETE) {
-            Mage::getSingleton('catalog/product_image_resizer')->queue($adapter->getAffectedEntityIds(true));
+            Mage::getSingleton('catalog/product_image_provider')->queue($adapter->getAffectedEntityIds(true));
         }
     }
 
@@ -288,5 +317,20 @@ class Mage_Catalog_Model_Observer
         $response->setTypes($types);
 
         return $this;
+    }
+
+    /**
+     * Read the stored sizes of the images of a storefront product collection with one query.
+     */
+    #[Maho\Config\Observer('catalog_product_collection_load_after', area: 'frontend', id: 'catalog_image_size_preload')]
+    public function preloadImageSizes(\Maho\Event\Observer $observer): void
+    {
+        $collection = $observer->getEvent()->getData('collection');
+        if ($collection instanceof Mage_Catalog_Model_Resource_Product_Collection) {
+            Mage::getSingleton('core/image_size')->preload(
+                Mage_Catalog_Model_Product_Image_Provider::ENTITY,
+                array_map(fn(Mage_Catalog_Model_Product $product): mixed => $product->getData('image'), $collection->getItems()),
+            );
+        }
     }
 }

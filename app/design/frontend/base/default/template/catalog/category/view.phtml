@@ -13,20 +13,14 @@
     $_helper    = $this->helper('catalog/output');
     $_category  = $this->getCurrentCategory();
     $_imgHtml   = '';
-    if ($_imgUrl = $_category->getImageUrl()) {
-        $imageWidth = $imageHeight = '';
-        $imageSize = $_category->getImageSize();
-        if ($imageSize) {
-            $imageWidth = $imageSize[0];
-            $imageHeight = $imageSize[1];
-        }
-        $_imgHtml = '<p class="category-image"><img src="' . $_imgUrl . '" width="' . $imageWidth . '" height="' . $imageHeight . '" alt="' . $this->escapeHtml($_category->getName()) . '" title="' . $this->escapeHtml($_category->getName()) . '"></p>';
+    if ($_image = $_category->getImageSet()) {
+        $_imgHtml = '<p class="category-image"><img ' . $_image->getImgAttributes('banner') . ' fetchpriority="high" alt="' . $this->escapeHtml($_category->getName()) . '" title="' . $this->escapeHtml($_category->getName()) . '"></p>';
         $_imgHtml = $_helper->categoryAttribute($_category, $_imgHtml, 'image');
     }
 ?>
 <?= $this->getMessagesBlock()->toHtml() ?>
 
-<?php if ($_imgUrl): ?>
+<?php if ($_imgHtml !== ''): ?>
     <?= $_imgHtml ?>
 <?php endif ?>
 

@@ -23,9 +23,8 @@
             <?php foreach ($_products->getItems() as $_product): ?>
                 <li class="item">
                     <div>
-                        <?php $_imgSize = 210; ?>
                         <a href="<?= $_product->getProductUrl() ?>" title="<?= $this->stripTags($_product->getName(), null, true) ?>" class="product-image">
-                            <img src="<?= $this->helper('catalog/image')->init($_product, 'small_image')->resize($_imgSize) ?>" srcset="<?= $this->helper('catalog/image')->init($_product, 'small_image')->resize($_imgSize * 2) ?> 2x" width="<?= $_imgSize ?>" height="<?= $_imgSize ?>" alt="<?= $this->stripTags($_product->getName(), null, true) ?>">
+                            <img <?= $this->helper('catalog/image')->init($_product, 'image')->getImgAttributes('listing') ?> alt="<?= $this->stripTags($_product->getName(), null, true) ?>">
                         </a>
                         <ul>
                             <?php if ($this->helper('wishlist')->isAllow()): ?>

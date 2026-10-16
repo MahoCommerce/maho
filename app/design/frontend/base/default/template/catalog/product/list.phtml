@@ -27,18 +27,11 @@
     <?php foreach ($_productCollection as $_product): ?>
         <li class="item<?php if (++$_iterator === $_productCollectionCount): ?> last<?php endif ?>">
             <?php // Product Image?>
-            <a href="<?= $_product->getProductUrl() ?>" title="<?= $this->stripTags($this->getImageLabel($_product, 'small_image'), null, true) ?>" class="product-image">
-                <?php /* Based on the native RWD styling, product images are displayed at a max of ~400px wide when viewed on a
-                        one column page layout with four product columns from a 1280px viewport. For bandwidth reasons,
-                        we are going to serve a 300px image, as it will look fine at 400px and most of the times, the image
-                        will be displayed at a smaller size (eg, if two column are being used or viewport is smaller than 1280px).
-                        This $_imgSize value could even be decreased further, based on the page layout
-                        (one column, two column, three column) and number of product columns. */ ?>
-                <?php $_imgSize = 300; ?>
-                <img id="product-collection-image-<?= $_product->getId() ?>" width="<?= $_imgSize ?>" height="<?= $_imgSize ?>"
-                     src="<?= $this->helper('catalog/image')->init($_product, 'small_image')->resize($_imgSize) ?>"
-                     srcset="<?= $this->helper('catalog/image')->init($_product, 'small_image')->resize($_imgSize * 2) ?> 2x"
-                     alt="<?= $this->stripTags($this->getImageLabel($_product, 'small_image'), null, true) ?>">
+            <a href="<?= $_product->getProductUrl() ?>" title="<?= $this->stripTags($this->getImageLabel($_product, 'image'), null, true) ?>" class="product-image">
+                <img id="product-collection-image-<?= $_product->getId() ?>"
+                     <?= $this->helper('catalog/image')->init($_product, 'image')->getImgAttributes('listing') ?>
+                     <?php if ($_iterator === 1): ?>fetchpriority="high"<?php endif ?>
+                     alt="<?= $this->stripTags($this->getImageLabel($_product, 'image'), null, true) ?>">
             </a>
             <?php // Product description?>
             <div class="product-shop">
@@ -127,12 +120,11 @@
         foreach ($_productCollection as $_product): ?>
             <li>
                 <div>
-                    <a href="<?= $_product->getProductUrl() ?>" title="<?= $this->stripTags($this->getImageLabel($_product, 'small_image'), null, true) ?>" class="product-image">
-                        <?php $_imgSize = 210; ?>
-                        <img id="product-collection-image-<?= $_product->getId() ?>" width="<?= $_imgSize ?>" height="<?= $_imgSize ?>"
-                             src="<?= $this->helper('catalog/image')->init($_product, 'small_image')->resize($_imgSize) ?>"
-                             srcset="<?= $this->helper('catalog/image')->init($_product, 'small_image')->resize($_imgSize * 2) ?> 2x"
-                             alt="<?= $this->stripTags($this->getImageLabel($_product, 'small_image'), null, true) ?>">
+                    <a href="<?= $_product->getProductUrl() ?>" title="<?= $this->stripTags($this->getImageLabel($_product, 'image'), null, true) ?>" class="product-image">
+                        <img id="product-collection-image-<?= $_product->getId() ?>"
+                             <?= $this->helper('catalog/image')->init($_product, 'image')->getImgAttributes('listing') ?>
+                             <?php if ($i++ === 0): ?>fetchpriority="high"<?php endif ?>
+                             alt="<?= $this->stripTags($this->getImageLabel($_product, 'image'), null, true) ?>">
                     </a>
                     <ul>
                         <?php if ($this->helper('wishlist')->isAllow()): ?>

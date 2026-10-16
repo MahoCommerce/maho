@@ -70,8 +70,6 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         'customDesign' => 'custom_design',
         'customLayoutUpdate' => 'custom_layout_update',
         'imageLabel' => 'image_label',
-        'smallImageLabel' => 'small_image_label',
-        'thumbnailLabel' => 'thumbnail_label',
         'skuType' => 'sku_type',
         'priceType' => 'price_type',
         'weightType' => 'weight_type',

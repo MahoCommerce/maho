@@ -89,6 +89,6 @@ class ProductMedia extends \Maho\ApiPlatform\Resource
     public bool $disabled = false;
 
     /** @var string[] */
-    #[ApiProperty(description: 'Image roles (image, small_image, thumbnail)', extraProperties: [EnumSource::KEY => ['image', 'small_image', 'thumbnail']])]
+    #[ApiProperty(description: 'Image roles. A product has one role, image. small_image and thumbnail are deprecated aliases of image in a write.', extraProperties: [EnumSource::KEY => ['image', 'small_image', 'thumbnail']])]
     public array $types = [];
 }

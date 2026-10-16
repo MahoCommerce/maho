@@ -473,6 +473,22 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
     }
 
     /**
+     * The resized files of the image of the category, its own or the product image that it falls
+     * back to. Null when there is none.
+     */
+    public function getImageSet(): ?Mage_Core_Model_Image_Set
+    {
+        $helper = Mage::helper('core/image');
+        if ($image = $this->getImage()) {
+            return $helper->init(Mage_Catalog_Model_Category_Image::ENTITY, (string) $image);
+        }
+        if ($image = $this->getFallbackImage()) {
+            return $helper->init(Mage_Catalog_Model_Product_Image_Provider::ENTITY, (string) $image);
+        }
+        return null;
+    }
+
+    /**
      * Mount path of the image on the media mount, the category's own or the product image it
      * falls back to. Null when there is none or when the stored name leaves its directory.
      */
@@ -493,20 +509,15 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
     }
 
     /**
-     * Width and height of the image, or null when it cannot be read. A remote mount reads the
-     * file once and keeps the size in the cache, so a page render does not download it.
+     * Width and height of the image, from core_image_size. Null when the file cannot be read, or
+     * when it is on a bucket and the queue did not read its size yet.
      *
      * @return array{0: int, 1: int}|null
      */
     public function getImageSize(): ?array
     {
         $path = $this->getImageStoragePath();
-        if ($path === null) {
-            return null;
-        }
-
-        $info = \Maho\Io::getImageSizeOnMount(Mage::getStorage('media'), $path, [self::CACHE_TAG]);
-        return $info === false ? null : [$info[0], $info[1]];
+        return $path === null ? null : Mage::getSingleton('core/image_size')->get(Mage::getStorage('media'), $path);
     }
 
     /**

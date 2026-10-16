@@ -655,7 +655,7 @@ class Mage_Catalog_Model_Resource_Product extends Mage_Catalog_Model_Resource_Ab
             )
             ->where('entity_id = ?', $product->getId())
             ->where('store_id IN (?)', $storeIds)
-            ->where('attribute_code IN (?)', ['small_image', 'thumbnail', 'image']);
+            ->where('attribute_code = ?', 'image');
 
         return $read->fetchAll($select);
     }

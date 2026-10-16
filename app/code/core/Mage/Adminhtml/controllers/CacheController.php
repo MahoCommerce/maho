@@ -170,7 +170,7 @@ class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
     public function cleanImagesAction(): void
     {
         try {
-            Mage::getModel('catalog/product_image')->clearCache();
+            Mage::getSingleton('core/image_resizer')->refreshAll();
             Mage::dispatchEvent('clean_catalog_images_cache_after');
             $this->_getSession()->addSuccess(
                 Mage::helper('adminhtml')->__('The image cache was cleaned.'),

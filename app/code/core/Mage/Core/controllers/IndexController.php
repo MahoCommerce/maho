@@ -20,13 +20,13 @@ class Mage_Core_IndexController extends Mage_Core_Controller_Front_Action
 
     /**
      * The signed resize URL of earlier releases. Sent emails and cached pages still hold it,
-     * so it records the size and redirects to the cache URL, which the image route serves.
+     * so it redirects to the product image file of the nearest width.
      */
     #[Maho\Config\Route('/core/index/resize', name: 'core.index.resize', methods: ['GET'])]
     public function resizeAction(): void
     {
-        $t = $this->getRequest()->getParam('t', '');
-        $s = $this->getRequest()->getParam('s', '');
+        $t = (string) $this->getRequest()->getParam('t', '');
+        $s = (string) $this->getRequest()->getParam('s', '');
 
         if ($t === '' || $s === '') {
             $this->getResponse()->setHttpResponseCode(400);
@@ -39,18 +39,14 @@ class Mage_Core_IndexController extends Mage_Core_Controller_Front_Action
             return;
         }
 
-        if (!isset($params['_sourceFile']) || !is_string($params['_sourceFile'])) {
-            $this->getResponse()->setHttpResponseCode(400);
+        $file = $params['_sourceFile'] ?? null;
+        $set = is_string($file) ? Mage::helper('core/image')->init(Mage_Catalog_Model_Product_Image_Provider::ENTITY, $file) : null;
+        if ($set === null) {
+            $this->getResponse()->setHttpResponseCode(404);
             return;
         }
 
-        /** @var Mage_Catalog_Model_Product_Image $model */
-        $model = Mage::getModel('catalog/product_image');
-        $model->setTransformParams($params)->setBaseFile($params['_sourceFile']);
-        if ($model->getResizedStoragePath() !== null) {
-            Mage::getSingleton('catalog/product_image_size')->record($model);
-        }
-
-        $this->getResponse()->setRedirect($model->getUrl(), 301);
+        $size = max((int) ($params['_width'] ?? 0), (int) ($params['_height'] ?? 0));
+        $this->getResponse()->setRedirect($set->getUrl($size), 301);
     }
 }

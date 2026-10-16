@@ -1,6 +1,13 @@
 <?php
 
 /**
+ * Resized product image URLs for templates.
+ *
+ * A product image has a fixed list of widths, which the theme declares. resize() picks the
+ * smallest width that is the requested size or more, so a template can ask for any size
+ * without a new file. The ratio, the fit, the quality and the watermark come from the theme
+ * and the store config, see Mage_Core_Model_Image_Config.
+ *
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2018-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
@@ -8,11 +15,18 @@
  * @package Mage_Catalog
  */
 
+declare(strict_types=1);
+
 class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract implements \Stringable
 {
+    /** @deprecated since 26.11 the slots of the theme set the widths */
     public const XML_NODE_PRODUCT_BASE_IMAGE_WIDTH = 'catalog/product_image/base_width';
+    /** @deprecated since 26.11 the listing slot of the theme sets the width */
     public const XML_NODE_PRODUCT_SMALL_IMAGE_WIDTH = 'catalog/product_image/small_width';
     public const XML_NODE_PRODUCT_MAX_DIMENSION = 'catalog/product_image/max_dimension';
+
+    /** The size of the original when it cannot be read. */
+    public const FALLBACK_SIZE = 1800;
 
     /**
      * @deprecated since 26.11 image URLs no longer depend on a cache file, so they are always
@@ -23,290 +37,271 @@ class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract implements \St
     #[\Override]
     protected $_moduleName = 'Mage_Catalog';
 
-    /**
-     * Current model
-     *
-     * @var Mage_Catalog_Model_Product_Image|null
-     */
-    protected $_model;
+    protected ?Mage_Catalog_Model_Product $product = null;
+
+    protected string $attributeName = 'image';
+
+    protected ?Mage_Core_Model_Image_Set $set = null;
+
+    /** The requested size. 0 asks for the largest width. */
+    protected int $size = 0;
+
+    /** Skin path of the placeholder when the product has no image and the config names none. */
+    protected ?string $placeholder = null;
+
+    /** The image attributes that a product had before 26.11. They now give the image attribute. */
+    public const DEPRECATED_ROLES = ['small_image', 'thumbnail'];
+
+    /** The product attributes that 26.11 removed, and the attribute that replaces each one. */
+    public const DEPRECATED_ATTRIBUTES = [
+        'small_image' => 'image',
+        'thumbnail' => 'image',
+        'small_image_label' => 'image_label',
+        'thumbnail_label' => 'image_label',
+    ];
 
     /**
-     * Scheduled for resize image
-     *
-     * @var bool
+     * The attribute that replaces $code when 26.11 removed it, or $code itself.
      */
-    protected $_scheduleResize = false;
-
-    /**
-     * Scheduled for rotate image
-     *
-     * @var bool
-     */
-    protected $_scheduleRotate = false;
-
-    /**
-     * Angle
-     *
-     * @var int|null
-     */
-    protected $_angle;
-
-    /**
-     * Watermark file name
-     *
-     * @var string|null
-     */
-    protected $_watermark;
-
-    /**
-     * Watermark Position
-     *
-     * @var string|null
-     */
-    protected $_watermarkPosition;
-
-    /**
-     * Watermark Size
-     *
-     * @var string|null
-     */
-    protected $_watermarkSize;
-
-    /**
-     * Watermark Image opacity
-     *
-     * @var int|null
-     */
-    protected $_watermarkImageOpacity;
-
-    /**
-     * Current Product
-     *
-     * @var Mage_Catalog_Model_Product|null
-     */
-    protected $_product;
-
-    /**
-     * Image File
-     *
-     * @var string|null
-     */
-    protected $_imageFile;
-
-    /**
-     * Image Placeholder
-     *
-     * @var string
-     */
-    protected $_placeholder;
-
-    /**
-     * Reset all previous data
-     *
-     * @return $this
-     */
-    protected function _reset()
+    public static function mapDeprecatedAttribute(mixed $code): mixed
     {
-        $this->_model = null;
-        $this->_scheduleResize = false;
-        $this->_scheduleRotate = false;
-        $this->_angle = null;
-        $this->_watermark = null;
-        $this->_watermarkPosition = null;
-        $this->_watermarkSize = null;
-        $this->_watermarkImageOpacity = null;
-        $this->_product = null;
-        $this->_imageFile = null;
-        return $this;
+        return is_string($code) ? self::DEPRECATED_ATTRIBUTES[$code] ?? $code : $code;
     }
 
     /**
-     * Initialize Helper to work with Image
+     * Replace each deprecated role or attribute in $types with the attribute that replaces it.
      *
-     * @param string $attributeName
-     * @param mixed $imageFile
+     * @param array<mixed> $types
+     * @return list<mixed>
+     */
+    public static function mapDeprecatedRoles(array $types): array
+    {
+        return array_values(array_unique(array_map(self::mapDeprecatedAttribute(...), $types)));
+    }
+
+    /**
+     * Start an image of the product: the file of $attributeName, or $imageFile when it is given.
+     * A product without the image gets the placeholder of $attributeName.
+     *
+     * @param string $attributeName image, or another media image attribute. small_image and
+     *                              thumbnail are deprecated and give image.
+     * @param string|null $imageFile path below catalog/product, such as /a/b/shirt.jpg
      * @return $this
      */
     public function init(Mage_Catalog_Model_Product $product, $attributeName, $imageFile = null)
     {
-        $this->_reset();
-        $this->_setModel(Mage::getModel('catalog/product_image'));
-        $this->_getModel()->setDestinationSubdir($attributeName);
-        $this->setProduct($product);
+        $this->product = $product;
+        $this->attributeName = (string) self::mapDeprecatedAttribute($attributeName);
+        $this->size = 0;
+        $this->placeholder = null;
 
-        $watermark = Mage::getStoreConfig("design/watermark/{$this->_getModel()->getDestinationSubdir()}_image");
-        if ($watermark) {
-            $this->setWatermark($watermark);
-        }
-
-        $waterImageOpaticy = Mage::getStoreConfigAsInt("design/watermark/{$this->_getModel()->getDestinationSubdir()}_imageOpacity");
-        if ($waterImageOpaticy) {
-            $this->setWatermarkImageOpacity($waterImageOpaticy);
-        }
-
-        $watermarkPosition = Mage::getStoreConfig("design/watermark/{$this->_getModel()->getDestinationSubdir()}_position");
-        if ($watermarkPosition) {
-            $this->setWatermarkPosition($watermarkPosition);
-        }
-
-        $watermarkSize = Mage::getStoreConfig("design/watermark/{$this->_getModel()->getDestinationSubdir()}_size");
-        if ($watermarkSize) {
-            $this->setWatermarkSize($watermarkSize);
-        }
-
-        $keepFrame = Mage::getStoreConfig('catalog/product_image/keep_frame');
-        if ($keepFrame !== null) {
-            $this->keepFrame((bool) (int) $keepFrame);
-        }
-
-        $bgColor = Mage::getStoreConfig('catalog/product_image/background_color');
-        if ($bgColor) {
-            $rgb = sscanf(ltrim($bgColor, '#'), '%02x%02x%02x');
-            if (count(array_filter($rgb, fn($v) => $v !== null)) === 3) {
-                $this->backgroundColor($rgb);
+        $helper = Mage::helper('core/image');
+        $file = $imageFile ?: $product->getData($this->attributeName);
+        $this->set = $helper->init(Mage_Catalog_Model_Product_Image_Provider::ENTITY, is_string($file) ? $file : null);
+        if ($this->set === null) {
+            $placeholder = (string) Mage::getStoreConfig("catalog/placeholder/{$this->attributeName}_placeholder");
+            if ($placeholder !== '') {
+                $this->set = $helper->init(
+                    Mage_Catalog_Model_Product_Image_Provider::ENTITY,
+                    '/' . Mage_Core_Model_Image_Resizer::PLACEHOLDER_FOLDER . '/' . $placeholder,
+                );
             }
-        }
-
-        if ($imageFile) {
-            $this->setImageFile($imageFile);
-        } else {
-            $this->_getModel()->setBaseFile($this->getProduct()->getData($this->_getModel()->getDestinationSubdir()));
         }
         return $this;
     }
 
     /**
-     * Schedule resize of the image
-     * $width *or* $height can be null - in this case, lacking dimension will be calculated.
+     * Ask for an image of this size. The URL is the one of the smallest width that is the
+     * larger of $width and $height or more.
      *
-     * @see Mage_Catalog_Model_Product_Image
-     * @param int $width
-     * @param int $height
+     * @param int|string|null $width
+     * @param int|string|null $height
      * @return $this
      */
     public function resize($width, $height = null)
     {
-        $this->_getModel()->setWidth($width)->setHeight($height);
-        $this->_scheduleResize = true;
+        $this->size = max((int) $width, (int) $height);
         return $this;
     }
 
     /**
-     * Set image quality, values in percentage from 0 to 100
+     * The URL of the image for the requested size, or of the skin placeholder. It reads no file
+     * and resizes nothing.
+     */
+    #[\Override]
+    public function __toString(): string
+    {
+        return $this->set?->getUrl($this->size) ?? Mage::getDesign()->getSkinUrl($this->getPlaceholder());
+    }
+
+    /**
+     * The value of a srcset attribute with every width of the image. Empty for the skin
+     * placeholder and for an SVG.
+     */
+    public function getSrcset(): string
+    {
+        return $this->set?->getSrcset() ?? '';
+    }
+
+    /**
+     * The src, srcset and sizes attributes of an img element for the image, see
+     * Mage_Core_Model_Image_Set::getSrcAttributes(). The skin placeholder gets only a src.
      *
+     * @param string $slot a slot of the theme, such as "thumbnail" or "listing"
+     */
+    public function getSrcAttributes(string $slot = 'listing'): string
+    {
+        return $this->set?->getSrcAttributes($slot)
+            ?? 'src="' . htmlspecialchars(Mage::getDesign()->getSkinUrl($this->getPlaceholder()), ENT_QUOTES | ENT_SUBSTITUTE) . '"';
+    }
+
+    /**
+     * The attributes of getSrcAttributes() with a width and a height, see
+     * Mage_Core_Model_Image_Set::getImgAttributes(). The skin placeholder is square.
+     *
+     * @param string $slot a slot of the theme, such as "thumbnail" or "listing"
+     */
+    public function getImgAttributes(string $slot = 'listing'): string
+    {
+        if ($this->set !== null) {
+            return $this->set->getImgAttributes($slot);
+        }
+        $size = Mage::getSingleton('core/image_config')->getSlotWidth($slot, (int) Mage::app()->getStore()->getId(), Mage_Catalog_Model_Product_Image_Provider::ENTITY) ?? self::FALLBACK_SIZE;
+        return $this->getSrcAttributes($slot) . " width=\"{$size}\" height=\"{$size}\"";
+    }
+
+    /**
+     * The CSS aspect-ratio of the image in $slot, such as "600/300". It follows the ratio of the
+     * theme, or the original when the theme keeps it, so a box has the shape of its resized
+     * files. The skin placeholder, and an image whose size is not known yet, are square.
+     *
+     * @param string $slot a slot of the theme, such as "gallery"
+     */
+    public function getAspectRatio(string $slot = 'listing'): string
+    {
+        if ($this->set === null) {
+            return '1/1';
+        }
+        $width = $this->set->getDisplayWidth($slot);
+        $height = $this->set->getHeightFor($width);
+        return $height !== null && $height > 0 ? "{$width}/{$height}" : '1/1';
+    }
+
+    /**
+     * The resized files of the image, or null for the skin placeholder.
+     */
+    public function getImageSet(): ?Mage_Core_Model_Image_Set
+    {
+        return $this->set;
+    }
+
+    /**
+     * Set the skin path of the placeholder for a product with no image.
+     *
+     * @param string $fileName
+     */
+    public function placeholder($fileName)
+    {
+        $this->placeholder = $fileName;
+    }
+
+    public function getPlaceholder(): string
+    {
+        return $this->placeholder ??= 'images/catalog/product/placeholder.svg';
+    }
+
+    public function getOriginalWidth(): int
+    {
+        return $this->set?->getOriginalSize()[0] ?? self::FALLBACK_SIZE;
+    }
+
+    public function getOriginalHeight(): int
+    {
+        return $this->set?->getOriginalSize()[1] ?? self::FALLBACK_SIZE;
+    }
+
+    /**
+     * @return array{0: int, 1: int} the width and the height of the original
+     */
+    public function getOriginalSizeArray(): array
+    {
+        return [$this->getOriginalWidth(), $this->getOriginalHeight()];
+    }
+
+    /**
+     * @deprecated since 26.11 the store config sets the quality of all images
      * @param int $quality
      * @return $this
      */
     public function setQuality($quality)
     {
-        $this->_getModel()->setQuality($quality);
         return $this;
     }
 
     /**
-     * Guarantee, that image picture width/height will not be distorted.
-     * Applicable before calling resize()
-     * It is true by default.
-     *
-     * @see Mage_Catalog_Model_Product_Image
+     * @deprecated since 26.11 the ratio of the theme applies to all images
      * @param bool $flag
      * @return $this
      */
     public function keepAspectRatio($flag)
     {
-        $this->_getModel()->setKeepAspectRatio($flag);
         return $this;
     }
 
     /**
-     * Guarantee, that image will have dimensions, set in $width/$height
-     * Applicable before calling resize()
-     * Not applicable, if keepAspectRatio(false)
-     *
-     * $position - TODO, not used for now - picture position inside the frame.
-     *
-     * @see Mage_Catalog_Model_Product_Image
+     * @deprecated since 26.11 the fit of the theme applies to all images
      * @param bool $flag
      * @param array $position
      * @return $this
      */
     public function keepFrame($flag, $position = ['center', 'middle'])
     {
-        $this->_getModel()->setKeepFrame($flag);
         return $this;
     }
 
     /**
-     * Guarantee, that image will not lose transparency if any.
-     * Applicable before calling resize()
-     * It is true by default.
-     *
-     * $alphaOpacity - TODO, not used for now
-     *
-     * @see Mage_Catalog_Model_Product_Image
+     * @deprecated since 26.11 the output format decides whether transparency stays
      * @param bool $flag
      * @param int $alphaOpacity
      * @return $this
      */
     public function keepTransparency($flag, $alphaOpacity = null)
     {
-        $this->_getModel()->setKeepTransparency($flag);
         return $this;
     }
 
     /**
-     * Guarantee, that image picture will not be bigger, than it was.
-     * Applicable before calling resize()
-     * It is false by default
-     *
+     * @deprecated since 26.11 an image is never scaled up
      * @param bool $flag
      * @return $this
      */
     public function constrainOnly($flag)
     {
-        $this->_getModel()->setConstrainOnly($flag);
         return $this;
     }
 
     /**
-     * Set color to fill image frame with.
-     * Applicable before calling resize()
-     * The keepTransparency(true) overrides this (if image has transparent color)
-     * It is white by default.
-     *
-     * @see Mage_Catalog_Model_Product_Image
+     * @deprecated since 26.11 the store config sets the background color of all images
      * @param array $colorRGB
      * @return $this
      */
     public function backgroundColor($colorRGB)
     {
-        $args = func_get_args();
-        // assume that 3 params were given instead of array
-        if (!is_array($colorRGB)) {
-            $colorRGB = $args;
-        }
-        $this->_getModel()->setBackgroundColor($colorRGB);
         return $this;
     }
 
     /**
-     * Rotate image into specified angle
-     *
+     * @deprecated since 26.11 a rotation is not supported, rotate the original instead
      * @param int $angle
      * @return $this
      */
     public function rotate($angle)
     {
-        $this->setAngle($angle);
-        $this->_getModel()->setAngle($angle);
-        $this->_scheduleRotate = true;
         return $this;
     }
 
     /**
-     * Add watermark to image
-     * size param in format 100x200
-     *
+     * @deprecated since 26.11 the store config sets the watermark of all product images
      * @param string $fileName
      * @param string $position
      * @param string $size
@@ -315,302 +310,27 @@ class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract implements \St
      */
     public function watermark($fileName, $position, $size = null, $imageOpacity = null)
     {
-        $this->setWatermark($fileName)
-            ->setWatermarkPosition($position)
-            ->setWatermarkSize($size)
-            ->setWatermarkImageOpacity($imageOpacity);
         return $this;
     }
 
     /**
-     * Set placeholder
-     *
-     * @param string $fileName
-     */
-    public function placeholder($fileName)
-    {
-        $this->_placeholder = $fileName;
-    }
-
-    /**
-     * Get Placeholder
-     *
-     * @return string
-     */
-    public function getPlaceholder()
-    {
-        if (!$this->_placeholder) {
-            $this->_placeholder = 'images/catalog/product/placeholder.svg';
-        }
-        return $this->_placeholder;
-    }
-
-    /**
-     * Return the image URL. It depends on the params only: no file is read and no resize runs.
-     * A missing cache file is created by the image route on the first request.
-     */
-    #[\Override]
-    public function __toString(): string
-    {
-        if ($this->getImageFile() && str_ends_with($this->getImageFile(), '.svg')) {
-            return $this->getImageFile();
-        }
-
-        try {
-            $model = $this->_getModel();
-            $model->setBaseFile($this->getImageFile() ?: $this->getProduct()->getData($model->getDestinationSubdir()));
-
-            if ($model->getResizedStoragePath() !== null) {
-                Mage::getSingleton('catalog/product_image_size')->record($model);
-            }
-
-            return $model->getUrl();
-        } catch (Exception $e) {
-            Mage::logException($e);
-            return Mage::getDesign()->getSkinUrl($this->getPlaceholder());
-        }
-    }
-
-    /**
-     * Set current Image model
-     *
-     * @param Mage_Catalog_Model_Product_Image $model
-     * @return $this
-     */
-    protected function _setModel($model)
-    {
-        $this->_model = $model;
-        return $this;
-    }
-
-    /**
-     * Get current Image model
-     *
-     * @return Mage_Catalog_Model_Product_Image
-     */
-    protected function _getModel()
-    {
-        return $this->_model;
-    }
-
-    /**
-     * Set Rotation Angle
-     *
-     * @param int $angle
-     * @return $this
-     */
-    protected function setAngle($angle)
-    {
-        $this->_angle = $angle;
-        return $this;
-    }
-
-    /**
-     * Get Rotation Angle
-     *
-     * @return int
-     */
-    protected function getAngle()
-    {
-        return $this->_angle;
-    }
-
-    /**
-     * Set watermark file name
-     *
-     * @param string $watermark
-     * @return $this
-     */
-    protected function setWatermark($watermark)
-    {
-        $this->_watermark = $watermark;
-        $this->_getModel()->setWatermarkFile($watermark);
-        return $this;
-    }
-
-    /**
-     * Get watermark file name
-     *
-     * @return string
-     */
-    protected function getWatermark()
-    {
-        return $this->_watermark;
-    }
-
-    /**
-     * Set watermark position
-     *
-     * @param string $position
-     * @return $this
-     */
-    protected function setWatermarkPosition($position)
-    {
-        $this->_watermarkPosition = $position;
-        $this->_getModel()->setWatermarkPosition($position);
-        return $this;
-    }
-
-    /**
-     * Get watermark position
-     *
-     * @return string
-     */
-    protected function getWatermarkPosition()
-    {
-        return $this->_watermarkPosition;
-    }
-
-    /**
-     * Set watermark size
-     * param size in format 100x200
-     *
+     * @deprecated since 26.11 the store config sets the watermark of all product images
      * @param string $size
      * @return $this
      */
     public function setWatermarkSize($size)
     {
-        $this->_watermarkSize = $size;
-        $this->_getModel()->setWatermarkSize($this->parseSize($size));
         return $this;
     }
 
     /**
-     * Get watermark size
-     *
-     * @return string
-     */
-    protected function getWatermarkSize()
-    {
-        return $this->_watermarkSize;
-    }
-
-    /**
-     * Set watermark image opacity
-     *
+     * @deprecated since 26.11 the store config sets the watermark of all product images
      * @param int $imageOpacity
      * @return $this
      */
     public function setWatermarkImageOpacity($imageOpacity)
     {
-        $this->_watermarkImageOpacity = $imageOpacity;
-        $this->_getModel()->setWatermarkImageOpacity($imageOpacity);
         return $this;
-    }
-
-    /**
-     * Get watermark image opacity
-     *
-     * @return int
-     */
-    protected function getWatermarkImageOpacity()
-    {
-        if ($this->_watermarkImageOpacity) {
-            return $this->_watermarkImageOpacity;
-        }
-
-        return $this->_getModel()->getWatermarkImageOpacity();
-    }
-
-    /**
-     * Set current Product
-     *
-     * @param Mage_Catalog_Model_Product $product
-     * @return $this
-     */
-    protected function setProduct($product)
-    {
-        $this->_product = $product;
-        return $this;
-    }
-
-    /**
-     * Get current Product
-     *
-     * @return Mage_Catalog_Model_Product
-     */
-    protected function getProduct()
-    {
-        return $this->_product;
-    }
-
-    /**
-     * Set Image file
-     *
-     * @param string $file
-     * @return $this
-     */
-    protected function setImageFile($file)
-    {
-        $this->_imageFile = $file;
-        return $this;
-    }
-
-    /**
-     * Get Image file
-     *
-     * @return string
-     */
-    protected function getImageFile()
-    {
-        return $this->_imageFile;
-    }
-
-    /**
-     * Retrieve size from string
-     *
-     * @param string $string
-     * @return array|bool
-     */
-    protected function parseSize($string)
-    {
-        if ($string === null) {
-            return false;
-        }
-
-        $size = explode('x', strtolower($string));
-        if (count($size) === 2) {
-            return [
-                'width' => ($size[0] > 0) ? $size[0] : null,
-                'heigth' => ($size[1] > 0) ? $size[1] : null,
-            ];
-        }
-
-        return false;
-    }
-
-    /**
-     * Retrieve original image width
-     *
-     * @return int|null
-     */
-    public function getOriginalWidth()
-    {
-        return $this->_getModel()->getOriginalWidth();
-    }
-
-    /**
-     * Retrieve original image height
-     *
-     * @return int|null
-     */
-    public function getOriginalHeight()
-    {
-        return $this->_getModel()->getOriginalHeight();
-    }
-
-    /**
-     * Retrieve Original image size as array
-     * 0 - width, 1 - height
-     *
-     * @return array
-     */
-    public function getOriginalSizeArray()
-    {
-        return [
-            $this->getOriginalWidth(),
-            $this->getOriginalHeight(),
-        ];
     }
 
     /**

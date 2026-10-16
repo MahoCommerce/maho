@@ -131,7 +131,7 @@ class Mage_ConfigurableSwatches_Helper_Mediafallback extends Mage_Core_Helper_Ab
      * - product must have child products attached
      *
      * @param array $imageTypes - image types to select for child products
-     * @param bool $keepFrame
+     * @param bool $keepFrame not used since 26.11, the theme sets the fit
      * @return array
      */
     public function getConfigurableImagesFallbackArray(
@@ -147,7 +147,7 @@ class Mage_ConfigurableSwatches_Helper_Mediafallback extends Mage_Core_Helper_Ab
             }
 
             // ensure we only attempt to process valid image types we know about
-            $imageTypes = array_intersect(['image', 'small_image'], $imageTypes);
+            $imageTypes = array_intersect(['image', Mage_ConfigurableSwatches_Helper_Productimg::MEDIA_IMAGE_TYPE_SMALL], $imageTypes);
 
             $imagesByLabel = [];
             $imageHaystack = array_map(fn($value) => Mage_ConfigurableSwatches_Helper_Data::normalizeKey($value['label']), $mediaGallery['images']);
@@ -178,7 +178,7 @@ class Mage_ConfigurableSwatches_Helper_Mediafallback extends Mage_Core_Helper_Ab
                 if ($imagePath) {
                     $imagesByLabel[$map['label']]['configurable_product']
                         [Mage_ConfigurableSwatches_Helper_Productimg::MEDIA_IMAGE_TYPE_SMALL]
-                            = $this->_resizeProductImage($product, 'small_image', $keepFrame, $imagePath);
+                            = $this->_resizeProductImage($product, Mage_ConfigurableSwatches_Helper_Productimg::MEDIA_IMAGE_TYPE_SMALL, $keepFrame, $imagePath);
 
                     $imagesByLabel[$map['label']]['configurable_product']
                         [Mage_ConfigurableSwatches_Helper_Productimg::MEDIA_IMAGE_TYPE_BASE]
@@ -188,7 +188,7 @@ class Mage_ConfigurableSwatches_Helper_Mediafallback extends Mage_Core_Helper_Ab
 
             $imagesByType = [
                 'image' => [],
-                'small_image' => [],
+                Mage_ConfigurableSwatches_Helper_Productimg::MEDIA_IMAGE_TYPE_SMALL => [],
             ];
 
             // iterate image types to build image array, normally one type is passed in at a time, but could be two
@@ -216,7 +216,7 @@ class Mage_ConfigurableSwatches_Helper_Mediafallback extends Mage_Core_Helper_Ab
 
             $array = [
                 'option_labels' => $imagesByLabel,
-                Mage_ConfigurableSwatches_Helper_Productimg::MEDIA_IMAGE_TYPE_SMALL => $imagesByType['small_image'],
+                Mage_ConfigurableSwatches_Helper_Productimg::MEDIA_IMAGE_TYPE_SMALL => $imagesByType[Mage_ConfigurableSwatches_Helper_Productimg::MEDIA_IMAGE_TYPE_SMALL],
                 Mage_ConfigurableSwatches_Helper_Productimg::MEDIA_IMAGE_TYPE_BASE => $imagesByType['image'],
             ];
 
@@ -227,36 +227,26 @@ class Mage_ConfigurableSwatches_Helper_Mediafallback extends Mage_Core_Helper_Ab
     }
 
     /**
-     * Resize specified type of image on the product for use in the fallback and returns the image URL
-     * or returns the image URL for the specified image path if present
+     * The URL of the image of the product, or of $image when it is given, for the fallback. The
+     * small type is the 2x file of the listing slot, any other type the 2x file of the gallery slot.
      *
      * @param Mage_Catalog_Model_Product $product
-     * @param string $type
-     * @param bool $keepFrame
+     * @param string $type MEDIA_IMAGE_TYPE_SMALL, or image
+     * @param bool $keepFrame not used since 26.11, the theme sets the fit
      * @param string $image
      * @param bool $placeholder
      * @return string|bool
      */
     protected function _resizeProductImage($product, $type, $keepFrame, $image = null, $placeholder = false)
     {
-        $hasTypeData = $product->hasData($type) && $product->getData($type) != 'no_selection';
+        $hasImage = $product->getImage() && $product->getImage() != 'no_selection';
         if ($image == 'no_selection') {
             $image = null;
         }
-        if ($hasTypeData || $placeholder || $image) {
-            $helper = Mage::helper('catalog/image')
-                ->init($product, $type, $image)
-                ->keepFrame(($hasTypeData || $image) ? $keepFrame : false)  // don't keep frame if placeholder
-            ;
-
-            $size = Mage::getStoreConfig(Mage_Catalog_Helper_Image::XML_NODE_PRODUCT_BASE_IMAGE_WIDTH);
-            if ($type == 'small_image') {
-                $size = Mage::getStoreConfig(Mage_Catalog_Helper_Image::XML_NODE_PRODUCT_SMALL_IMAGE_WIDTH);
-            }
-            if (is_numeric($size)) {
-                $helper->constrainOnly(true)->resize($size);
-            }
-            return (string) $helper;
+        if ($hasImage || $placeholder || $image) {
+            $slot = $type === Mage_ConfigurableSwatches_Helper_Productimg::MEDIA_IMAGE_TYPE_SMALL ? 'listing' : 'gallery';
+            $width = Mage::getSingleton('core/image_config')->getSlotWidth($slot, (int) Mage::app()->getStore()->getId(), Mage_Catalog_Model_Product_Image_Provider::ENTITY) ?? 0;
+            return (string) Mage::helper('catalog/image')->init($product, 'image', $image)->resize(2 * $width);
         }
         return false;
     }
@@ -361,10 +351,8 @@ class Mage_ConfigurableSwatches_Helper_Mediafallback extends Mage_Core_Helper_Ab
     protected function _getChildrenProductsAttributes()
     {
         return [
-            'small_image',
             'image',
             'image_label',
-            'small_image_label',
             Mage::helper('configurableswatches/productlist')->getSwatchAttribute()->getAttributeCode(),
         ];
     }

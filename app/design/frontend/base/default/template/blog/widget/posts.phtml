@@ -18,8 +18,8 @@ $posts = $this->getPosts();
     <div class="blog-posts-grid">
         <?php foreach ($posts->getItems() as $post): ?>
             <a href="<?= $post->getUrl() ?>" class="blog_post_item">
-                <?php if ($post->hasImage()): ?>
-                    <img src="<?= $post->getImageUrl() ?>" alt="<?= $this->escapeHtml($post->getTitle()) ?>" loading="lazy">
+                <?php if ($image = $post->getImageSet()): ?>
+                    <img <?= $image->getImgAttributes('listing') ?> alt="<?= $this->escapeHtml($post->getTitle()) ?>" loading="lazy">
                 <?php endif ?>
                 <strong><?= $this->escapeHtml($post->getTitle()) ?></strong>
                 <div class="blog_post_date"><?= $this->formatDate($post->getPublishDate() ?? $post->getCreatedAt()) ?></div>

@@ -2982,9 +2982,20 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
         return $this->setData('sku', $value);
     }
 
+    /**
+     * @deprecated since 26.11 a product has one image, use getImage()
+     */
     public function getSmallImage(): ?string
     {
-        $value = $this->getData('small_image');
+        return $this->getImage();
+    }
+
+    /**
+     * @deprecated since 26.11 a product has one image, use getData('image_label')
+     */
+    public function getSmallImageLabel(): ?string
+    {
+        $value = $this->getData('image_label');
         return $value === null ? null : (string) $value;
     }
 
@@ -3034,9 +3045,20 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
         return $value === null ? null : (int) $value;
     }
 
+    /**
+     * @deprecated since 26.11 a product has one image, use getImage()
+     */
     public function getThumbnail(): ?string
     {
-        $value = $this->getData('thumbnail');
+        return $this->getImage();
+    }
+
+    /**
+     * @deprecated since 26.11 a product has one image, use getData('image_label')
+     */
+    public function getThumbnailLabel(): ?string
+    {
+        $value = $this->getData('image_label');
         return $value === null ? null : (string) $value;
     }
 

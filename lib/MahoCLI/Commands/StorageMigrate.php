@@ -22,7 +22,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\StreamableInputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\Process\Process;
 
 #[AsCommand(
     name: 'storage:migrate',
@@ -32,10 +31,6 @@ class StorageMigrate extends BaseMahoCommand
 {
     /** A bucket answers each put in about 250 ms, so the copy to a bucket runs this many jobs. */
     public const DEFAULT_REMOTE_JOBS = 16;
-
-    private const PART_FILE_LINE = 'file';
-
-    private const PART_RESULT_PREFIX = 'result ';
 
     /**
      * @param list<string> $mounts
@@ -48,7 +43,7 @@ class StorageMigrate extends BaseMahoCommand
         array $mounts = [],
         #[Option(description: 'Show what would be copied, and copy nothing')]
         bool $dryRun = false,
-        #[Option(description: 'Also copy the caches that Maho creates again on demand, such as the resized product images')]
+        #[Option(description: 'Also copy the caches that Maho creates again on demand, such as the swatch images')]
         bool $includeCache = false,
         #[Option(description: 'A folder of the mount that is not copied. Repeat it for more folders')]
         array $exclude = [],
@@ -87,7 +82,8 @@ class StorageMigrate extends BaseMahoCommand
                 continue;
             }
 
-            $target = MountRegistry::get($name);
+            // The copies are the same files, so the data that modules keep about them stays valid
+            $target = MountRegistry::get($name)->withoutChangeEvents();
             $source = MountRegistry::getDeclaredLocalMount($name);
             if ($source === null || ($target->isLocal() && realpath((string) $target->localRoot()) === realpath((string) $source->localRoot()))) {
                 $io->warning("The mount \"{$name}\" uses its local folder already, so there is nothing to copy.");
@@ -121,7 +117,7 @@ class StorageMigrate extends BaseMahoCommand
             if ($jobCount === 1) {
                 $migrator->copyFiles($source, $target, $files, $dryRun, $result, fn() => $progress->advance());
             } else {
-                $this->runJobs($progress, $result, $name, $files, $jobCount, $dryRun);
+                $this->runCopyJobs($progress, $result, $name, $files, $jobCount, $dryRun);
             }
             $progress->finish();
             $io->newLine(2);
@@ -165,57 +161,24 @@ class StorageMigrate extends BaseMahoCommand
      *
      * @param array<string, int> $files the size of each file to copy, by path
      */
-    private function runJobs(ProgressBar $progress, MigrationResult $result, string $name, array $files, int $jobCount, bool $dryRun): void
+    private function runCopyJobs(ProgressBar $progress, MigrationResult $result, string $name, array $files, int $jobCount, bool $dryRun): void
     {
-        $parts = array_fill(0, $jobCount, []);
-        $i = 0;
-        foreach ($files as $path => $size) {
-            $parts[$i++ % $jobCount][$path] = $size;
-        }
-
-        $processes = [];
-        foreach (array_filter($parts) as $i => $part) {
-            $command = [PHP_BINARY, MAHO_ROOT_DIR . '/maho', 'storage:migrate', $name, '--files-from-stdin'];
-            if ($dryRun) {
-                $command[] = '--dry-run';
-            }
-            $process = new Process($command, MAHO_ROOT_DIR, null, Mage::helper('core')->jsonEncode($part), null);
-            $process->start();
-            $processes[$i] = $process;
-        }
-
-        $buffers = array_fill_keys(array_keys($processes), '');
-        $reported = [];
-        while ($processes !== []) {
-            foreach ($processes as $i => $process) {
-                $running = $process->isRunning();
-                $buffers[$i] .= $process->getIncrementalOutput();
-                while (($end = strpos($buffers[$i], "\n")) !== false) {
-                    $line = substr($buffers[$i], 0, $end);
-                    $buffers[$i] = substr($buffers[$i], $end + 1);
-                    if ($line === self::PART_FILE_LINE) {
-                        $progress->advance();
-                    } elseif (str_starts_with($line, self::PART_RESULT_PREFIX)) {
-                        $this->addPartResult($result, substr($line, strlen(self::PART_RESULT_PREFIX)));
-                        $reported[$i] = true;
-                    }
-                }
-                if ($running) {
-                    continue;
-                }
-                if (!isset($reported[$i])) {
-                    $result->failed["(job {$i}/{$jobCount})"] = trim($process->getErrorOutput()) ?: "The job stopped with exit code {$process->getExitCode()}.";
-                }
-                unset($processes[$i]);
-            }
-            usleep(50_000);
-        }
+        $this->runJobs(
+            $progress,
+            $this->splitIntoParts($files, $jobCount),
+            array_values(array_filter(['storage:migrate', $name, '--files-from-stdin', $dryRun ? '--dry-run' : null])),
+            fn(array $part) => $this->addPartResult($result, $part),
+            function (int $i, string $error) use ($result, $jobCount): void {
+                $result->failed["(job {$i}/{$jobCount})"] = $error;
+            },
+        );
     }
 
-    private function addPartResult(MigrationResult $result, string $json): void
+    /**
+     * @param array<string, mixed> $part
+     */
+    private function addPartResult(MigrationResult $result, array $part): void
     {
-        /** @var array{copied: int, skipped: int, bytes: int, failed: array<string, string>} $part */
-        $part = Mage::helper('core')->jsonDecode($json);
         $result->copied += $part['copied'];
         $result->skipped += $part['skipped'];
         $result->bytes += $part['bytes'];
@@ -247,13 +210,13 @@ class StorageMigrate extends BaseMahoCommand
         $result = new MigrationResult();
         new Migrator()->copyFiles(
             $source,
-            MountRegistry::get($name),
+            MountRegistry::get($name)->withoutChangeEvents(),
             array_map(intval(...), $files),
             $dryRun,
             $result,
-            fn() => $io->writeln(self::PART_FILE_LINE, OutputInterface::OUTPUT_RAW),
+            fn() => $io->writeln(self::JOB_ITEM_LINE, OutputInterface::OUTPUT_RAW),
         );
-        $io->writeln(self::PART_RESULT_PREFIX . Mage::helper('core')->jsonEncode([
+        $io->writeln(self::JOB_RESULT_PREFIX . Mage::helper('core')->jsonEncode([
             'copied' => $result->copied,
             'skipped' => $result->skipped,
             'bytes' => $result->bytes,

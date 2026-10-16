@@ -65,7 +65,7 @@ class Mage_Rss_Block_Catalog_New extends Mage_Rss_Block_Catalog_Abstract
                 ],
             )
             ->addAttributeToSort('news_from_date', 'desc')
-            ->addAttributeToSelect(['name', 'short_description', 'description', 'thumbnail'], 'inner')
+            ->addAttributeToSelect(['name', 'short_description', 'description', 'image'], 'inner')
             ->addAttributeToSelect(
                 [
                     'price', 'special_price', 'special_from_date', 'special_to_date',
@@ -117,8 +117,8 @@ class Mage_Rss_Block_Catalog_New extends Mage_Rss_Block_Catalog_Abstract
         $product->setData($args['row']);
         $description = '<table><tr>'
             . '<td><a href="' . $product->getProductUrl() . '"><img src="'
-            . $helper->init($product, 'thumbnail')->resize(75, 75)
-            . '" border="0" align="left" height="75" width="75"></a></td>'
+            . $helper->init($product, 'image')->resize(75, 75)
+            . '" border="0" align="left" width="75"></a></td>'
             . '<td  style="text-decoration:none;">' . $product->getDescription();
 
         if ($allowedPriceInRss) {

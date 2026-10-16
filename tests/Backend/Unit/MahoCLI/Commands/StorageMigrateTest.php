@@ -63,12 +63,12 @@ describe('storage:migrate', function () {
             ->and($this->target->fileExists('downloadable/files/private.zip'))->toBeFalse();
     });
 
-    it('leaves the caches that Maho creates again out of the media copy', function (): void {
+    it('leaves the caches that Maho creates again out of the media copy, but copies the resized images', function (): void {
         $status = $this->tester->execute(['mounts' => ['media']]);
 
         expect($status)->toBe(Command::SUCCESS)
-            ->and($this->tester->getDisplay())->toContain('catalog/product/cache')
-            ->and($this->target->fileExists('catalog/product/cache/1/x.jpg'))->toBeFalse()
+            ->and($this->tester->getDisplay())->toContain('catalog/swatches')
+            ->and($this->target->read('catalog/product/cache/1/x.jpg'))->toBe('x')
             ->and($this->target->fileExists('catalog/swatches/s.png'))->toBeFalse()
             ->and($this->target->fileExists('tmp/y.jpg'))->toBeFalse();
     });

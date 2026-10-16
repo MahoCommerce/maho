@@ -466,6 +466,7 @@ abstract class Mage_Catalog_Block_Product_Abstract extends Mage_Core_Block_Templ
     public function getImageLabel($product = null, $mediaAttributeCode = 'image')
     {
         $product ??= $this->getProduct();
+        $mediaAttributeCode = Mage_Catalog_Helper_Image::mapDeprecatedAttribute($mediaAttributeCode);
 
         $label = $product->getData($mediaAttributeCode . '_label');
         if (empty($label)) {

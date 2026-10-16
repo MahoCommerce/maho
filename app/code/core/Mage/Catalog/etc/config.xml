@@ -8,7 +8,7 @@ SPDX-License-Identifier: AFL-3.0
 <config>
     <modules>
         <Mage_Catalog>
-            <version>2.0.1</version>
+            <version>2.0.2</version>
         </Mage_Catalog>
     </modules>
     <admin>
@@ -102,12 +102,6 @@ SPDX-License-Identifier: AFL-3.0
                 <image>
                     <img>1</img>
                 </image>
-                <small_image>
-                    <img>1</img>
-                </small_image>
-                <thumbnail>
-                    <img>1</img>
-                </thumbnail>
                 <store>
                     <external>1</external>
                 </store>
@@ -200,6 +194,21 @@ SPDX-License-Identifier: AFL-3.0
         </fieldsets>
     </admin>
     <global>
+        <images>
+            <entities>
+                <product>
+                    <source>catalog/product</source>
+                    <provider>catalog/product_image_provider</provider>
+                    <background>catalog/product_image/background_color</background>
+                    <watermark>design/watermark/image</watermark>
+                </product>
+                <category>
+                    <source>catalog/category</source>
+                    <provider>catalog/category_image</provider>
+                    <background>catalog/product_image/background_color</background>
+                </category>
+            </entities>
+        </images>
         <!-- Files that customers attach to a custom option. They are private: no public URL. -->
         <storage>
             <mounts>
@@ -280,9 +289,6 @@ SPDX-License-Identifier: AFL-3.0
                     <product_attribute_media_gallery_value>
                         <table>catalog_product_entity_media_gallery_value</table>
                     </product_attribute_media_gallery_value>
-                    <product_image_size>
-                        <table>catalog_product_image_size</table>
-                    </product_image_size>
                     <product_option>
                         <table>catalog_product_option</table>
                     </product_option>
@@ -648,11 +654,7 @@ SPDX-License-Identifier: AFL-3.0
                     <special_to_date/>
                     <short_description/>
                     <image/>
-                    <thumbnail/>
-                    <small_image/>
                     <image_label/>
-                    <thumbnail_label/>
-                    <small_image_label/>
                     <tax_class_id/>
                     <status/>
                     <news_from_date/>
@@ -696,10 +698,7 @@ SPDX-License-Identifier: AFL-3.0
                 <default_tax_group>2</default_tax_group>
             </product>
             <product_image>
-                <base_width>1800</base_width>
-                <small_width>210</small_width>
                 <max_dimension>5000</max_dimension>
-                <keep_frame>1</keep_frame>
                 <background_color>#ffffff</background_color>
             </product_image>
             <seo>

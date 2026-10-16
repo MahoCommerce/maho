@@ -53,7 +53,7 @@ class Mage_Customer_Block_Account_Dashboard_Sidebar extends Mage_Core_Block_Temp
             $this->_wishlist->getItemsCollection()
                 ->addAttributeToSelect('name')
                 ->addAttributeToSelect('price')
-                ->addAttributeToSelect('small_image')
+                ->addAttributeToSelect('image')
                 ->addAttributeToFilter('store_id', ['in' => $this->_wishlist->getSharedStoreIds()])
                 ->addAttributeToSort('added_at', 'desc')
                 ->setCurPage(1)

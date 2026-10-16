@@ -34,7 +34,12 @@ class Mage_Catalog_Block_Product_View_Media extends Mage_Catalog_Block_Product_V
         if ($this->_isGalleryDisabled) {
             return [];
         }
-        return $this->getProduct()->getMediaGalleryImages();
+        $product = $this->getProduct();
+        Mage::getSingleton('core/image_size')->preload(
+            Mage_Catalog_Model_Product_Image_Provider::ENTITY,
+            [$product->getData('image'), ...array_column($product->getMediaGallery()['images'] ?? [], 'file')],
+        );
+        return $product->getMediaGalleryImages();
     }
 
     /**
@@ -53,7 +58,7 @@ class Mage_Catalog_Block_Product_View_Media extends Mage_Catalog_Block_Product_V
     }
 
     /**
-     * Retrieve gallery image url
+     * The URL of the largest file of a gallery image.
      *
      * @param null|\Maho\DataObject $image
      * @return string|null
@@ -63,15 +68,7 @@ class Mage_Catalog_Block_Product_View_Media extends Mage_Catalog_Block_Product_V
         if ($image) {
             /** @var Mage_Catalog_Helper_Image $helper */
             $helper = $this->helper('catalog/image');
-            $helper
-                ->init($this->getProduct(), 'image', $image->getFile())
-                ->keepFrame(false);
-
-            $size = Mage::getStoreConfig(Mage_Catalog_Helper_Image::XML_NODE_PRODUCT_BASE_IMAGE_WIDTH);
-            if (is_numeric($size)) {
-                $helper->constrainOnly(true)->resize($size);
-            }
-            return (string) $helper;
+            return (string) $helper->init($this->getProduct(), 'image', $image->getFile());
         }
         return null;
     }

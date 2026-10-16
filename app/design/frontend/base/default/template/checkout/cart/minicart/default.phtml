@@ -16,9 +16,9 @@
 ?>
 <li class="item">
     <?php if ($this->hasProductUrl()): ?>
-        <a href="<?= $this->getProductUrl() ?>" title="<?= $this->escapeHtml($this->getProductName()) ?>" class="product-image"><img src="<?= $this->getProductThumbnail()->resize(160, 160)->setWatermarkSize('30x10') ?>" width="80" height="80" alt="<?= $this->escapeHtml($this->getProductName()) ?>"></a>
+        <a href="<?= $this->getProductUrl() ?>" title="<?= $this->escapeHtml($this->getProductName()) ?>" class="product-image"><img <?= $this->getProductThumbnail()->getImgAttributes('thumbnail') ?> alt="<?= $this->escapeHtml($this->getProductName()) ?>"></a>
     <?php else: ?>
-        <span class="product-image"><img src="<?= $this->getProductThumbnail()->resize(160, 160)->setWatermarkSize('30x10') ?>" width="80" height="80" alt="<?= $this->escapeHtml($this->getProductName()) ?>"></span>
+        <span class="product-image"><img <?= $this->getProductThumbnail()->getImgAttributes('thumbnail') ?> alt="<?= $this->escapeHtml($this->getProductName()) ?>"></span>
     <?php endif ?>
     <div class="product-details">
         <p class="product-name"><?php if ($this->hasProductUrl()): ?><a href="<?= $this->getProductUrl() ?>"><?php endif ?><?= $this->escapeHtml($this->getProductName()) ?><?php if ($this->hasProductUrl()): ?></a><?php endif ?></p>

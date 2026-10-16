@@ -68,9 +68,9 @@ class Mage_Index_Model_Progress
             Mage::throwException(Mage::helper('index')->__('Invalid reindex token.'));
         }
 
-        $dir = Mage::getConfig()->getVarDir(self::VAR_SUBDIR);
+        $dir = Mage::getConfig()->getVarDir(static::VAR_SUBDIR);
         if ($dir === false) {
-            Mage::throwException(Mage::helper('index')->__('Unable to create directory var/%s.', self::VAR_SUBDIR));
+            Mage::throwException(Mage::helper('index')->__('Unable to create directory var/%s.', static::VAR_SUBDIR));
         }
 
         return $dir . DS . $this->token . '.json';
@@ -169,7 +169,7 @@ class Mage_Index_Model_Progress
     public static function cleanupStale(int $olderThanSeconds = 86400): int
     {
         // Resolve without getVarDir(): a cleanup pass must not create the directory it cleans
-        $dir = Mage::getBaseDir('var') . DS . self::VAR_SUBDIR;
+        $dir = Mage::getBaseDir('var') . DS . static::VAR_SUBDIR;
         if (!is_dir($dir)) {
             return 0;
         }

@@ -32,153 +32,54 @@ class Maho_MediaCleaner_Adminhtml_MediacleanerController extends Mage_Adminhtml_
         $this->renderLayout();
     }
 
-    #[Maho\Config\Route('/admin/mediacleaner/synccategory')]
-    public function synccategoryAction(): void
+    /**
+     * Start a scan that outlives the request. The client gets the token of the run at once and
+     * polls scanStatus for the rest, in a MahoJobDialog.
+     */
+    #[Maho\Config\Route('/admin/mediacleaner/scan', methods: ['POST'])]
+    public function scanAction(): void
     {
-        $fsImages = $this->listMediaFiles('catalog/category', $this->__('"media/catalog/category" folder does not exist.'));
-        if ($fsImages === null) {
-            $this->_redirect('*/*');
+        $type = (string) $this->getRequest()->getParam('type');
+        $scanner = Mage::getModel('mediacleaner/scanner');
+        $types = $scanner->getTypes();
+        if (!isset($types[$type])) {
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $this->__('Unknown scan type.')]);
             return;
         }
 
-        $entityTypeId = Mage::getModel('catalog/category')->getResource()->getTypeId();
-        $resource = Mage::getSingleton('core/resource');
-        $db = $resource->getConnection('core_write');
+        Maho_MediaCleaner_Model_Progress::cleanupStale();
+        $progress = Mage::getModel('mediacleaner/progress');
+        $progress->init([['code' => $type, 'name' => $this->__('Scan %s', $types[$type])]]);
+        $this->getResponse()->sendJsonAndDetach($progress->toArray());
 
-        $attributeIds = $db->fetchCol(
-            $db->select()
-                ->from($resource->getTableName('eav/attribute'), 'attribute_id')
-                ->where('entity_type_id = ?', $entityTypeId)
-                ->where('frontend_input = ?', 'image'),
-        );
-
-        $dbImages = [];
-        if ($attributeIds) {
-            $dbImages = $db->fetchCol(
-                $db->select()
-                    ->from($resource->getTableName('catalog_category_entity_varchar'), 'value')
-                    ->where('value IS NOT NULL')
-                    ->where('LENGTH(value) > 0')
-                    ->where('entity_type_id = ?', $entityTypeId)
-                    ->where('attribute_id IN (?)', $attributeIds),
-            );
+        $start = microtime(true);
+        try {
+            $progress->startStep($type);
+            $count = $scanner->scan($type, fn(int $done, int $total) => $progress->reportProgress($type, $done, $total, $this->__('%d of %d folders read', $done, $total)));
+            $progress->finishStepWithMessage($type, microtime(true) - $start, $this->__('%d unused files found', $count));
+        } catch (Throwable $e) {
+            Mage::logException($e);
+            $progress->failStep($type, $e instanceof Mage_Core_Exception ? $e->getMessage() : $this->__('The scan failed'), microtime(true) - $start);
+        } finally {
+            $progress->finish();
+            // Prevent the framework from sending a second response
+            exit;
         }
-
-        $this->storeUnusedImages('category', array_diff($fsImages, $dbImages));
-
-        $this->_redirect('*/*');
     }
 
-    #[Maho\Config\Route('/admin/mediacleaner/syncproduct')]
-    public function syncproductAction(): void
-    {
-        $fsImages = $this->listMediaFiles('catalog/product', $this->__('"media/catalog/product" folder does not exist.'));
-        if ($fsImages === null) {
-            $this->_redirect('*/*');
-            return;
-        }
-
-        $entityTypeId = Mage::getModel('catalog/product')->getResource()->getTypeId();
-        $resource = Mage::getSingleton('core/resource');
-        $db = $resource->getConnection('core_write');
-
-        $attributeIds = $db->fetchCol(
-            $db->select()
-                ->from($resource->getTableName('eav/attribute'), 'attribute_id')
-                ->where('entity_type_id = ?', $entityTypeId)
-                ->where('frontend_input = ?', 'media_image'),
-        );
-
-        $dbImages = [];
-        if ($attributeIds) {
-            $dbImages = $db->fetchCol(
-                $db->select()
-                    ->from($resource->getTableName('catalog_product_entity_varchar'), 'value')
-                    ->where('value IS NOT NULL')
-                    ->where('LENGTH(value) > 0')
-                    ->where('entity_type_id = ?', $entityTypeId)
-                    ->where('attribute_id IN (?)', $attributeIds)
-                    ->where('value <> ?', 'no_selection'),
-            );
-            $dbImages = array_map($this->removeLeadingSlash(...), $dbImages);
-        }
-
-        $placeholders = $db->fetchCol(
-            $db->select()
-                ->distinct()
-                ->from($resource->getTableName('core/config_data'), 'value')
-                ->where('path LIKE ?', 'catalog/placeholder/%_placeholder'),
-        );
-        foreach ($placeholders as $placeholder) {
-            $dbImages[] = "placeholder/{$placeholder}";
-        }
-
-        $mediaGallery = $db->fetchCol(
-            $db->select()
-                ->from($resource->getTableName('catalog/product_attribute_media_gallery'), 'value')
-                ->where('value IS NOT NULL')
-                ->where('LENGTH(value) > 0'),
-        );
-        $mediaGallery = array_map($this->removeLeadingSlash(...), $mediaGallery);
-
-        $this->storeUnusedImages('product', array_diff($fsImages, $dbImages, $mediaGallery));
-
-        $this->_redirect('*/*');
-    }
-
-    #[Maho\Config\Route('/admin/mediacleaner/syncproductcache')]
-    public function syncproductcacheAction(): void
+    #[Maho\Config\Route('/admin/mediacleaner/scanStatus')]
+    public function scanStatusAction(): void
     {
         try {
-            if ($this->isMissingDirectory('catalog/product/cache')) {
-                $this->_getSession()->addError($this->__('"media/catalog/product/cache" folder does not exist.'));
-                $this->_redirect('*/*');
-                return;
-            }
-            $unusedImages = Mage::helper('mediacleaner')
-                ->findUnusedProductCacheFiles(Mage::getStorage('media'), Maho::getConfiguredImageExtension());
-        } catch (FilesystemException $e) {
-            Mage::logException($e);
-            $this->_getSession()->addError($this->__('It was not possible to read the "%s" folder.', 'media/catalog/product'));
-            $this->_redirect('*/*');
+            $record = Mage::getModel('mediacleaner/progress')->setToken((string) $this->getRequest()->getParam('token'))->read();
+        } catch (Mage_Core_Exception $e) {
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $e->getMessage()]);
             return;
         }
 
-        $this->storeUnusedImages('product_cache', $unusedImages);
-
-        $this->_redirect('*/*');
-    }
-
-    #[Maho\Config\Route('/admin/mediacleaner/syncwysiwyg')]
-    public function syncwysiwygAction(): void
-    {
-        $fsImages = $this->listMediaFiles('wysiwyg', $this->__('"media/wysiwyg" folder does not exist.'));
-        if ($fsImages === null) {
-            $this->_redirect('*/*');
-            return;
-        }
-
-        $resource = Mage::getSingleton('core/resource');
-        $db = $resource->getConnection('core_write');
-        $helper = Mage::helper('mediacleaner');
-
-        $contents = array_merge(
-            $db->fetchCol($db->select()->from($resource->getTableName('cms/page'), 'content')),
-            $db->fetchCol($db->select()->from($resource->getTableName('cms/block'), 'content')),
-            $db->fetchCol($db->select()->from($resource->getTableName('core/email_template'), 'template_text')),
-            $db->fetchCol($db->select()->from($resource->getTableName('core/email_template'), 'template_styles')),
-            $helper->getAllCSSFilesContents(),
-        );
-
-        $unusedImages = $helper->getUnusedWysiwygFiles(
-            $fsImages,
-            array_map(strval(...), $contents),
-            Mage::getStoreConfigFlag('configswatches/general/enabled'),
-        );
-
-        $this->storeUnusedImages('wysiwyg', $unusedImages);
-
-        $this->_redirect('*/*');
+        $this->getResponse()->setBodyJson($record === []
+            ? ['error' => true, 'message' => $this->__('Unknown scan.')]
+            : Maho_MediaCleaner_Model_Progress::detectInterruptedRun($record));
     }
 
     #[Maho\Config\Route('/admin/mediacleaner/delete')]
@@ -192,25 +93,53 @@ class Maho_MediaCleaner_Adminhtml_MediacleanerController extends Mage_Adminhtml_
         $this->_redirect('*/*');
     }
 
-    #[Maho\Config\Route('/admin/mediacleaner/massDelete')]
+    /**
+     * Delete the files of the selected results in a job that outlives the request: each delete on
+     * a bucket is a request, so many files take longer than any request timeout.
+     */
+    #[Maho\Config\Route('/admin/mediacleaner/massDelete', methods: ['POST'])]
     public function massDeleteAction(): void
     {
-        $ids = $this->getRequest()->getParam('ids');
-        $errorMessageThrown = false;
-        if (is_array($ids)) {
-            foreach ($ids as $imageId) {
+        $ids = array_values(array_filter((array) $this->getRequest()->getParam('ids'), is_numeric(...)));
+        if ($ids === []) {
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $this->__('Please select the files to delete.')]);
+            return;
+        }
+
+        Maho_MediaCleaner_Model_Progress::cleanupStale();
+        $progress = Mage::getModel('mediacleaner/progress');
+        $progress->init([['code' => 'delete', 'name' => $this->__('Delete %d files', count($ids))]]);
+        $this->getResponse()->sendJsonAndDetach($progress->toArray());
+
+        $start = microtime(true);
+        $failed = 0;
+        $lastReport = 0.0;
+        try {
+            $progress->startStep('delete');
+            foreach ($ids as $i => $imageId) {
                 $image = $this->loadImage($imageId);
                 if ($image && $image->getId() && !$this->deleteImage($image)) {
-                    $errorMessageThrown = true;
+                    $failed++;
+                }
+                // Write the record at most once a second, not once for each file
+                if (microtime(true) - $lastReport >= 1.0 || $i + 1 === count($ids)) {
+                    $lastReport = microtime(true);
+                    $progress->reportProgress('delete', $i + 1, count($ids), $this->__('%d of %d files deleted', $i + 1, count($ids)));
                 }
             }
+            if ($failed > 0) {
+                $progress->failStep('delete', $this->__('%d files could not be deleted. The log has the reason.', $failed), microtime(true) - $start);
+            } else {
+                $progress->finishStepWithMessage('delete', microtime(true) - $start, $this->__('%d files deleted', count($ids)));
+            }
+        } catch (Throwable $e) {
+            Mage::logException($e);
+            $progress->failStep('delete', $this->__('The delete failed'), microtime(true) - $start);
+        } finally {
+            $progress->finish();
+            // Prevent the framework from sending a second response
+            exit;
         }
-
-        if ($errorMessageThrown) {
-            $this->_getSession()->addError($this->__('It was not possible to delete one or more files from the filesystem.'));
-        }
-
-        $this->_redirect('*/*');
     }
 
     #[Maho\Config\Route('/admin/mediacleaner/flushmediatmp')]
@@ -297,22 +226,6 @@ class Maho_MediaCleaner_Adminhtml_MediacleanerController extends Mage_Adminhtml_
         $this->_redirect('*/*');
     }
 
-    protected function storeUnusedImages(string $type, array $unusedImages): void
-    {
-        $resource = Mage::getSingleton('core/resource');
-        $db = $resource->getConnection('core_write');
-        $table = $resource->getTableName('mediacleaner/image');
-
-        // Replace this type's previous results so files that are no longer orphan
-        // drop off the list (otherwise a re-scan could leave a now-referenced file
-        // flagged for deletion).
-        $db->delete($table, $db->quoteInto('type = ?', $type));
-
-        foreach ($unusedImages as $path) {
-            $db->insertIgnore($table, ['type' => $type, 'path' => $path]);
-        }
-    }
-
     protected function loadImage(mixed $imageId): ?Maho_MediaCleaner_Model_Image
     {
         if (!is_numeric($imageId)) {
@@ -343,43 +256,5 @@ class Maho_MediaCleaner_Adminhtml_MediacleanerController extends Mage_Adminhtml_
         } else {
             $this->_getSession()->addError($this->__('It was not possible to delete one or more files from the %s folder.', $label));
         }
-    }
-
-    /**
-     * The files that a scan examines below $directory on the media mount, or null after an error message.
-     *
-     * @return list<string>|null
-     */
-    protected function listMediaFiles(string $directory, string $missingMessage): ?array
-    {
-        try {
-            if ($this->isMissingDirectory($directory)) {
-                $this->_getSession()->addError($missingMessage);
-                return null;
-            }
-
-            return Mage::helper('mediacleaner')->listScannedFiles(Mage::getStorage('media'), $directory);
-        } catch (FilesystemException $e) {
-            Mage::logException($e);
-            $this->_getSession()->addError($this->__('It was not possible to read the "%s" folder.', 'media/' . $directory));
-            return null;
-        }
-    }
-
-    /**
-     * Only a local disk has real directories. On a bucket, a directory without files is an empty listing.
-     *
-     * @throws FilesystemException
-     */
-    protected function isMissingDirectory(string $directory): bool
-    {
-        $mount = Mage::getStorage('media');
-
-        return $mount->isLocal() && !$mount->directoryExists($directory);
-    }
-
-    protected function removeLeadingSlash(string $imagePath): string
-    {
-        return ltrim($imagePath, '/');
     }
 }

@@ -169,24 +169,6 @@ SPDX-License-Identifier: AFL-3.0
                     <show_in_website>1</show_in_website>
                     <show_in_store>1</show_in_store>
                     <fields>
-                        <base_width translate="label comment">
-                            <label>Base Image Width</label>
-                            <comment>Maximum width base product image will be scaled down to in pixels</comment>
-                            <sort_order>10</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                            <validate>required-entry validate-digits validate-greater-than-zero</validate>
-                        </base_width>
-                        <small_width translate="label comment">
-                            <label>Small Image Width</label>
-                            <comment>Maximum width small product image will be scaled down to in pixels</comment>
-                            <sort_order>20</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                            <validate>required-entry validate-digits validate-greater-than-zero</validate>
-                        </small_width>
                         <max_dimension translate="label comment">
                             <label>Maximum resolution for upload image</label>
                             <comment>Maximum width and height resolutions for upload image</comment>
@@ -196,18 +178,9 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_store>1</show_in_store>
                             <validate>required-entry validate-digits validate-greater-than-zero</validate>
                         </max_dimension>
-                        <keep_frame translate="label comment">
-                            <label>Keep Frame</label>
-                            <comment>Pad resized images to exact dimensions with background color</comment>
-                            <frontend_type>boolean</frontend_type>
-                            <sort_order>40</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                        </keep_frame>
                         <background_color translate="label comment">
                             <label>Background Color</label>
-                            <comment>Used to fill the frame when Keep Frame is enabled</comment>
+                            <comment>Fills the frame of a theme with the contain fit, and the transparent areas of an image in a format without transparency</comment>
                             <frontend_type>color</frontend_type>
                             <backend_model>adminhtml/system_config_backend_color</backend_model>
                             <sort_order>50</sort_order>

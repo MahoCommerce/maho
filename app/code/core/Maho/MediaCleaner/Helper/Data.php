@@ -63,29 +63,40 @@ class Maho_MediaCleaner_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * The files below $directory on the mount that a scan examines, relative to $directory.
+     * The files below $directory on the mount that a scan examines, relative to $directory. Each
+     * folder directly below $directory is one deep listing, which reads many files with each
+     * request to a bucket.
      *
+     * @param (callable(int $done, int $total): void)|null $onProgress called after each folder
      * @return list<string>
      * @throws FilesystemException
      */
-    public function listScannedFiles(Mount $mount, string $directory): array
+    public function listScannedFiles(Mount $mount, string $directory, ?callable $onProgress = null): array
     {
         $directory = trim($directory, '/');
         $blacklistedPatterns = $this->getBlacklistedPatterns();
         $files = [];
-        $folders = [$directory];
-        while (($folder = array_pop($folders)) !== null) {
-            foreach ($mount->listContents($folder, false) as $item) {
+        $folders = [];
+        foreach ($mount->listContents($directory, false) as $item) {
+            $file = ltrim(substr($item->path(), strlen($directory)), '/');
+            if ($this->isExcluded($file, $directory, $blacklistedPatterns)) {
+                continue;
+            }
+            if ($item->isDir()) {
+                $folders[] = $item->path();
+            } else {
+                $files[] = $file;
+            }
+        }
+
+        foreach ($folders as $i => $folder) {
+            foreach ($mount->listFiles($folder) as $item) {
                 $file = ltrim(substr($item->path(), strlen($directory)), '/');
-                if ($this->isExcluded($file, $directory, $blacklistedPatterns)) {
-                    continue;
-                }
-                if ($item->isDir()) {
-                    $folders[] = $item->path();
-                } else {
+                if (!$this->isExcluded($file, $directory, $blacklistedPatterns)) {
                     $files[] = $file;
                 }
             }
+            $onProgress !== null && $onProgress($i + 1, count($folders));
         }
         sort($files, SORT_STRING);
 
@@ -131,50 +142,77 @@ class Maho_MediaCleaner_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * The files of the product image cache whose source image is gone, relative to catalog/product/cache.
-     * One deep listing of catalog/product gives both the cache files and the source files.
+     * The files of the product image cache that no page links to, relative to catalog/product/cache.
+     * Each folder of originals and each "cache/{settings hash}/{width}" folder is one deep listing.
      *
+     * @param (callable(int $done, int $total): void)|null $onProgress called after each folder
      * @return list<string>
      * @throws FilesystemException
      */
-    public function findUnusedProductCacheFiles(Mount $mount, string $extension): array
+    public function findUnusedProductCacheFiles(Mount $mount, ?callable $onProgress = null): array
     {
+        $root = 'catalog/product';
         $cacheFiles = [];
         $sourceFiles = [];
-        foreach ($this->listAllFiles($mount, 'catalog/product') as $file) {
+        $folders = [];
+        $add = function (string $path) use ($root, &$cacheFiles, &$sourceFiles): void {
+            $file = substr($path, strlen($root) + 1);
             if (str_starts_with($file, 'cache/')) {
                 $cacheFiles[] = substr($file, strlen('cache/'));
             } else {
                 $sourceFiles[$file] = true;
             }
+        };
+
+        // The cache holds most files, so each of its "{hash}/{width}" folders is a listing of its own
+        $pending = [[$root, 0]];
+        while ($pending !== []) {
+            [$folder, $depth] = array_pop($pending);
+            foreach ($mount->listContents($folder, false) as $item) {
+                if (!$item->isDir()) {
+                    $add($item->path());
+                } elseif (($depth === 0 && $item->path() === "{$root}/cache") || $depth === 1) {
+                    $pending[] = [$item->path(), $depth + 1];
+                } else {
+                    $folders[] = $item->path();
+                }
+            }
+        }
+
+        foreach ($folders as $i => $folder) {
+            foreach ($mount->listFiles($folder) as $item) {
+                $add($item->path());
+            }
+            $onProgress !== null && $onProgress($i + 1, count($folders));
         }
 
         $cacheFiles = $this->filterFiles($cacheFiles, 'catalog/product/cache', $this->getBlacklistedPatterns());
+        $settingsList = Mage::getSingleton('core/image_config')->getAllSettings(Mage_Catalog_Model_Product_Image_Provider::ENTITY);
 
-        return $this->getUnusedProductCacheFiles($cacheFiles, $sourceFiles, $extension);
+        return $this->getUnusedProductCacheFiles($cacheFiles, $sourceFiles, $settingsList);
     }
 
     /**
-     * A cache file is "{store}/{subdir}/[{WxH}/]{hash}/{a}/{b}/{name}{extension}". Its source is
-     * "{a}/{b}/{name}" below catalog/product. A cache file is unused when that source is not in
-     * $sourceFiles, or when its name does not end with the configured $extension.
+     * A cache file is "{settings hash}/{width}/{a}/{b}/{name}", see Mage_Core_Model_Image_Set::buildPath().
+     * It is unused when no store view uses its settings or its width, or when it is not the file
+     * that those settings give to a source in $sourceFiles.
      *
      * @param list<string> $cacheFiles paths relative to catalog/product/cache
      * @param array<string, true> $sourceFiles paths relative to catalog/product
+     * @param array<string, Mage_Core_Model_Image_Settings> $settingsList the settings that store views use, by hash
      * @return list<string>
      */
-    public function getUnusedProductCacheFiles(array $cacheFiles, array $sourceFiles, string $extension): array
+    public function getUnusedProductCacheFiles(array $cacheFiles, array $sourceFiles, array $settingsList): array
     {
+        $source = 'catalog/product';
         $unusedFiles = [];
         foreach ($cacheFiles as $cacheFile) {
-            if (str_contains($cacheFile, '/placeholder/')) {
-                continue;
-            }
-
-            $source = implode('/', array_slice(explode('/', $cacheFile), -3));
-            if (!str_ends_with($source, $extension)
-                || !isset($sourceFiles[substr($source, 0, -strlen($extension))])
-            ) {
+            $parsed = Mage_Core_Model_Image_Set::parsePath($source, "{$source}/" . Mage_Core_Model_Image_Set::CACHE_FOLDER . "/{$cacheFile}", $settingsList);
+            $used = $parsed !== null && array_any(
+                $parsed[2],
+                fn(string $sourcePath): bool => isset($sourceFiles[substr($sourcePath, strlen($source) + 1)]),
+            );
+            if (!$used) {
                 $unusedFiles[] = $cacheFile;
             }
         }
@@ -221,6 +259,10 @@ class Maho_MediaCleaner_Helper_Data extends Mage_Core_Helper_Abstract
 
         try {
             $mount->delete($file);
+            $imageFile = Mage::getSingleton('core/image_resizer')->findSourceFile($file);
+            if ($imageFile !== null) {
+                Mage::getSingleton('core/image_resizer')->deleteFiles(...$imageFile);
+            }
         } catch (FilesystemException $e) {
             Mage::logException($e);
             return false;

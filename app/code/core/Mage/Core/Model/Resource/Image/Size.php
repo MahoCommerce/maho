@@ -1,0 +1,115 @@
+<?php
+
+/**
+ * The rows of core_image_size: the width and the height of an image file on a mount.
+ *
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Core
+ */
+
+declare(strict_types=1);
+
+class Mage_Core_Model_Resource_Image_Size extends Mage_Core_Model_Resource_Db_Abstract
+{
+    #[\Override]
+    protected function _construct(): void
+    {
+        $this->_init('core/image_size', 'path_hash');
+    }
+
+    /**
+     * @return array{0: int, 1: int}|null the width and the height of the row of $hash, or null when there is no row
+     */
+    public function fetchSize(string $hash): ?array
+    {
+        $adapter = $this->_getReadAdapter();
+        $row = $adapter->fetchRow($adapter->select()
+            ->from($this->getMainTable(), ['width', 'height'])
+            ->where('path_hash = ?', $hash));
+        return $row ? [(int) $row['width'], (int) $row['height']] : null;
+    }
+
+    public function saveSize(string $hash, string $mount, string $path, int $width, int $height): void
+    {
+        $this->_getWriteAdapter()->insertOnDuplicate(
+            $this->getMainTable(),
+            ['path_hash' => $hash, 'mount' => $mount, 'path' => $path, 'width' => $width, 'height' => $height],
+            ['mount', 'path', 'width', 'height'],
+        );
+    }
+
+    /**
+     * @param list<string> $hashes
+     */
+    public function deleteHashes(array $hashes): void
+    {
+        foreach (array_chunk($hashes, 500) as $chunk) {
+            $this->_getWriteAdapter()->delete($this->getMainTable(), ['path_hash IN (?)' => $chunk]);
+        }
+    }
+
+    /**
+     * Delete the rows of the files below $folder on $mount.
+     */
+    public function deleteFolder(string $mount, string $folder): void
+    {
+        $this->deleteHashes(array_map(strval(...), array_keys($this->fetchFolderSizes($mount, $folder))));
+    }
+
+    /**
+     * @return array<string, array{0: int, 1: int}> the width and the height of each file below $folder on $mount, by hash
+     */
+    public function fetchFolderSizes(string $mount, string $folder): array
+    {
+        $prefix = $folder . '/';
+        $adapter = $this->_getReadAdapter();
+        $rows = $adapter->fetchAll($adapter->select()
+            ->from($this->getMainTable(), ['path_hash', 'path', 'width', 'height'])
+            ->where('mount = ?', $mount)
+            ->where('path LIKE ?', $prefix . '%'));
+        $sizes = [];
+        foreach ($rows as $row) {
+            // LIKE ignores the case on MySQL and reads "_" as any character
+            if (str_starts_with((string) $row['path'], $prefix)) {
+                $sizes[(string) $row['path_hash']] = [(int) $row['width'], (int) $row['height']];
+            }
+        }
+        return $sizes;
+    }
+
+    /**
+     * @param list<string> $hashes
+     * @return array<string, array{0: int, 1: int}> the width and the height of each hash of $hashes that has a row
+     */
+    public function fetchSizes(array $hashes): array
+    {
+        $adapter = $this->_getReadAdapter();
+        $sizes = [];
+        foreach (array_chunk($hashes, 1000) as $chunk) {
+            $rows = $adapter->fetchAll($adapter->select()
+                ->from($this->getMainTable(), ['path_hash', 'width', 'height'])
+                ->where('path_hash IN (?)', $chunk));
+            foreach ($rows as $row) {
+                $sizes[(string) $row['path_hash']] = [(int) $row['width'], (int) $row['height']];
+            }
+        }
+        return $sizes;
+    }
+
+    /**
+     * Up to $limit rows in the order of their hash, after the row of $afterHash.
+     *
+     * @return list<array{path_hash: string, mount: string, path: string}>
+     */
+    public function fetchBatch(string $afterHash, int $limit): array
+    {
+        $adapter = $this->_getReadAdapter();
+        /** @var list<array{path_hash: string, mount: string, path: string}> */
+        return $adapter->fetchAll($adapter->select()
+            ->from($this->getMainTable(), ['path_hash', 'mount', 'path'])
+            ->where('path_hash > ?', $afterHash)
+            ->order('path_hash')
+            ->limit($limit));
+    }
+}

@@ -43,8 +43,8 @@ class Mage_Checkout_Block_Cart_Item_Renderer_Grouped extends Mage_Checkout_Block
     public function getProductThumbnail()
     {
         $product = $this->getProduct();
-        if (!$product->getData('thumbnail')
-            || ($product->getData('thumbnail') === 'no_selection')
+        if (!$product->getImage()
+            || ($product->getImage() === 'no_selection')
             || (Mage::getStoreConfig(self::GROUPED_PRODUCT_IMAGE) === self::USE_PARENT_IMAGE)
         ) {
             $product = $this->getGroupedProduct();
@@ -52,7 +52,7 @@ class Mage_Checkout_Block_Cart_Item_Renderer_Grouped extends Mage_Checkout_Block
 
         /** @var Mage_Catalog_Helper_Image $helper */
         $helper = $this->helper('catalog/image');
-        return $helper->init($product, 'thumbnail');
+        return $helper->init($product, 'image');
     }
 
     /**

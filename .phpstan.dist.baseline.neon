@@ -5485,7 +5485,7 @@ parameters:
 		-
 			rawMessage: 'Call to an undefined method Mage_Eav_Model_Entity_Attribute_Frontend_Abstract::getUrl().'
 			identifier: method.notFound
-			count: 3
+			count: 1
 			path: app/code/core/Mage/Catalog/Helper/Product.php
 
 		-
@@ -6059,66 +6059,6 @@ parameters:
 			identifier: arguments.count
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Product/Compare/Item.php
-
-		-
-			rawMessage: 'Parameter #1 $size of method Mage_Catalog_Model_Product_Image::setWatermarkSize() expects array, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product/Image.php
-
-		-
-			rawMessage: Property Mage_Catalog_Model_Product_Image::$_backgroundColorStr has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product/Image.php
-
-		-
-			rawMessage: Property Mage_Catalog_Model_Product_Image::$_isBaseFilePlaceholder has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product/Image.php
-
-		-
-			rawMessage: Property Mage_Catalog_Model_Product_Image::$_keepFrame has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product/Image.php
-
-		-
-			rawMessage: Property Mage_Catalog_Model_Product_Image::$_quality has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product/Image.php
-
-		-
-			rawMessage: Property Mage_Catalog_Model_Product_Image::$_watermarkFile has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product/Image.php
-
-		-
-			rawMessage: Property Mage_Catalog_Model_Product_Image::$_watermarkHeigth has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product/Image.php
-
-		-
-			rawMessage: Property Mage_Catalog_Model_Product_Image::$_watermarkImageOpacity has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product/Image.php
-
-		-
-			rawMessage: Property Mage_Catalog_Model_Product_Image::$_watermarkPosition has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product/Image.php
-
-		-
-			rawMessage: Property Mage_Catalog_Model_Product_Image::$_watermarkWidth has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product/Image.php
 
 		-
 			rawMessage: 'Cannot call method isIndexable() on Mage_Eav_Model_Entity_Attribute_Abstract|false.'

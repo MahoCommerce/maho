@@ -1,9 +1,52 @@
 <?xml version="1.0"?>
 <!--
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
 SPDX-FileCopyrightText: 2022 The OpenMage Contributors <https://openmage.org>
 SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
 SPDX-License-Identifier: AFL-3.0
 -->
 <theme>
     <parent />
+    <!-- The widths of the resized images, and for each image entity its ratio (original, or
+         such as 1:1 or 3:4) and its fit (contain adds a frame, cover crops). The slots give
+         the sizes value of each place where images show, so the browser can pick the width;
+         a template names the slot. A child theme inherits each value that it does not set.
+         Only the theme in the store config of a store view gives these values. A design change,
+         a user agent exception or the custom design of a category or a product does not. -->
+    <images>
+        <!-- Each slot is the largest width in px of the images in one place of the layout. Each image
+             gets a file at 1x and 2x of each slot, so slots that double each other share files. -->
+        <slots>
+            <thumbnail>150</thumbnail>
+            <listing>300</listing>
+            <gallery>600</gallery>
+            <banner>1200</banner>
+        </slots>
+        <!-- An entity can list the slots that its images use, so it gets no files for the other
+             slots. A slot with a value has that width for this entity only. A slot without a
+             value takes the width above. The list of a child theme replaces the list of its
+             parent. Example:
+             <slots>
+                 <thumbnail/>
+                 <listing/>
+                 <gallery>800</gallery>
+             </slots> -->
+        <product>
+            <ratio>original</ratio>
+        </product>
+        <category>
+            <ratio>original</ratio>
+        </category>
+        <blog>
+            <ratio>original</ratio>
+        </blog>
+        <!-- The swatches show as a circle of 2.25rem -->
+        <swatch>
+            <ratio>1:1</ratio>
+            <fit>cover</fit>
+            <slots>
+                <listing>36</listing>
+            </slots>
+        </swatch>
+    </images>
 </theme>

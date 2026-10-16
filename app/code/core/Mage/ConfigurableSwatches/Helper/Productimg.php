@@ -29,6 +29,9 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
      */
     protected $_productImageFilters = [];
 
+    /** @var array<string, string>|null the color of each swatch, by the file name without its extension */
+    protected ?array $swatchColors = null;
+
     public const SWATCH_LABEL_SUFFIX = '-swatch';
     public const SWATCH_FALLBACK_MEDIA_DIR = 'wysiwyg/swatches';
     public const SWATCH_CACHE_DIR = 'catalog/swatches';
@@ -203,13 +206,46 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
         }
 
         if (!is_null($image)) {
-            $filename = $image->getFile();
-            $swatchImage = $this->_resizeSwatchImage($filename, 'product', $width, $height);
+            $set = Mage::helper('core/image')->init(Mage_Catalog_Model_Product_Image_Provider::ENTITY, (string) $image->getFile());
             $swatchType = 'product';
-            $url = $swatchImage ? Mage::getStorage('media')->publicUrl($swatchImage) : '';
+            $url = $set?->getUrl($this->getSwatchFileWidth((int) $width, (int) $height)) ?? '';
         }
 
         return $url;
+    }
+
+    /**
+     * The width of the file of a swatch: 2x the width of the swatch slot of the theme, or 2x the
+     * larger side of the box when it is larger. The theme sets the size that a swatch shows at,
+     * so the box of the config can be smaller.
+     */
+    protected function getSwatchFileWidth(int $width, int $height): int
+    {
+        $slotWidth = Mage::getSingleton('core/image_config')->getSlotWidth(
+            Mage_ConfigurableSwatches_Model_Swatch_Image::SLOT,
+            (int) Mage::app()->getStore()->getId(),
+            Mage_ConfigurableSwatches_Model_Swatch_Image::ENTITY,
+        ) ?? 0;
+        return 2 * max($slotWidth, $width, $height);
+    }
+
+    /**
+     * The URL of the resized file of a swatch image in wysiwyg/swatches, or null when the image
+     * does not exist. The stored image sizes tell whether the file exists, so a page sends no
+     * request to a bucket. A file on a bucket with no stored size shows once the queue read it.
+     */
+    protected function getSwatchImageUrl(string $filename, int $width, int $height): ?string
+    {
+        $mount = Mage::getStorage('media');
+        $sourcePath = \Maho\Io::getPathWithinMount($mount, self::SWATCH_FALLBACK_MEDIA_DIR, $filename);
+        $sizes = Mage::getSingleton('core/image_size');
+        $sizes->preloadFolder($mount, self::SWATCH_FALLBACK_MEDIA_DIR);
+        if ($sourcePath === null || $sizes->get($mount, $sourcePath) === null) {
+            return null;
+        }
+        return Mage::helper('core/image')
+            ->init(Mage_ConfigurableSwatches_Model_Swatch_Image::ENTITY, '/' . ltrim($filename, '/'))
+            ?->getUrl($this->getSwatchFileWidth($width, $height));
     }
 
     /**
@@ -252,25 +288,48 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
 
         do {
             $filename = Mage::helper('configurableswatches')->getHyphenatedString($value) . $fileExt;
-            $swatchImage = $this->_resizeSwatchImage($filename, 'media', $width, $height);
-            if (!$swatchImage) {
-                $swatchImage = $this->createSwatchImage($value, $width, $height);
-            }
-            if (!$swatchImage && $defaultValue == $value) {
+            $url = $this->getSwatchImageUrl($filename, (int) $width, (int) $height);
+            $url ??= $this->getColorSwatchUrl((string) $value, (int) $width, (int) $height);
+            if ($url === null && $defaultValue == $value) {
                 return '';  // no image found and no further fallback
-            } elseif (!$swatchImage) {
+            } elseif ($url === null) {
                 $value = $defaultValue; // fallback to default value
             } else {
                 break;  // we found an image
             }
         } while (true);
 
-        return Mage::getStorage('media')->publicUrl($swatchImage);
+        return $url;
+    }
+
+    /**
+     * The color of the swatch of $value as an SVG data URL, or null when the option has no color.
+     */
+    public function getColorSwatchUrl(string $value, int $width, int $height): ?string
+    {
+        if ($this->swatchColors === null) {
+            $resource = Mage::getSingleton('core/resource');
+            $adapter = $resource->getConnection('core_read');
+            $this->swatchColors = [];
+            foreach ($adapter->fetchAll($adapter->select()
+                ->from($resource->getTableName('eav/attribute_option_swatch'), ['filename', 'value'])
+                ->where('value IS NOT NULL')) as $row) {
+                $this->swatchColors[pathinfo((string) $row['filename'], PATHINFO_FILENAME)] ??= (string) $row['value'];
+            }
+        }
+
+        $color = $this->swatchColors[Mage::helper('configurableswatches')->getHyphenatedString($value)] ?? '';
+        if (!preg_match('/^#?([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i', $color, $match)) {
+            return null;
+        }
+        $svg = "<svg xmlns='http://www.w3.org/2000/svg' width='{$width}' height='{$height}'><rect width='100%' height='100%' fill='#{$match[1]}'/></svg>";
+        return 'data:image/svg+xml,' . rawurlencode($svg);
     }
 
     /**
      * Create a swatch image for the given filename
      *
+     * @deprecated since 26.11 a color swatch is an SVG data URL, see getColorSwatchUrl()
      * @param string $value
      * @param int $width
      * @param int $height
@@ -280,15 +339,18 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
     public function createSwatchImage($value, $width, $height)
     {
         $filename = Mage::helper('configurableswatches')->getHyphenatedString($value) . self::getSwatchFileExt();
-        $optionSwatch = Mage::getModel('eav/entity_attribute_option_swatch')
-            ->load($filename, 'filename');
-        if (!$optionSwatch->getValue()) {
-            return false;
-        }
-
         $mount = Mage::getStorage('media');
         $destPath = $this->getSwatchCachePath($mount, 'media', $filename, (int) $width, (int) $height);
         if ($destPath === null) {
+            return false;
+        }
+        if ($this->fileExists($mount, $destPath)) {
+            return $destPath;
+        }
+
+        $optionSwatch = Mage::getModel('eav/entity_attribute_option_swatch')
+            ->load($filename, 'filename');
+        if (!$optionSwatch->getValue()) {
             return false;
         }
 
@@ -303,6 +365,7 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
      * Performs the resize operation on the given swatch image file and returns a
      * relative path to the resulting image file
      *
+     * @deprecated since 26.11 a swatch image has the resized files of its image entity, product or swatch
      * @param string $filename
      * @param string $tag
      * @param int $width

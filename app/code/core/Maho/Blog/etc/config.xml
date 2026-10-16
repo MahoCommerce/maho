@@ -10,6 +10,15 @@ SPDX-License-Identifier: AFL-3.0
         </Maho_Blog>
     </modules>
     <global>
+        <images>
+            <entities>
+                <blog>
+                    <source>blog</source>
+                    <provider>blog/post_image</provider>
+                    <background>catalog/product_image/background_color</background>
+                </blog>
+            </entities>
+        </images>
         <models>
             <blog>
                 <class>Maho_Blog_Model</class>

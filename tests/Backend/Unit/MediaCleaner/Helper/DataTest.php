@@ -55,6 +55,20 @@ describe('Maho_MediaCleaner_Helper_Data', function () {
             ->and($this->helper->listAllFiles($this->mount, 'missing'))->toBe([]);
     });
 
+    it('lists the scanned files with one deep listing for each folder, and reports each folder', function (): void {
+        foreach (['root.jpg', 'a/1.jpg', 'a/b/2.jpg', 'c/3.jpg', 'c/cache/4.jpg', 'cache/5.jpg'] as $file) {
+            $this->mount->write('catalog/category/' . $file, 'x');
+        }
+        $calls = [];
+
+        $files = $this->helper->listScannedFiles($this->mount, 'catalog/category', function (int $done, int $total) use (&$calls): void {
+            $calls[] = "{$done}/{$total}";
+        });
+
+        expect($files)->toBe(['a/1.jpg', 'a/b/2.jpg', 'c/3.jpg', 'root.jpg'])
+            ->and($calls)->toBe(['1/2', '2/2']);
+    });
+
     it('leaves out the files below an excluded folder at any depth', function (): void {
         $files = ['a/b/c.jpg', 'cache/1/x.jpg', 'a/watermark/w.jpg', 'optimized/o.jpg', 'x/.thumbs/t.jpg', 'cache.jpg'];
 
@@ -68,28 +82,45 @@ describe('Maho_MediaCleaner_Helper_Data', function () {
             ->toBe(['landing1/a.png', 'keep/a.jpg']);
     });
 
-    it('finds the cache files whose source image is gone', function (): void {
+    it('finds the cache files that no page links to, and keeps an original that is in the output format', function (): void {
+        $settings = new Mage_Core_Model_Image_Settings([150, 300]);
+        $hash = $settings->getHash();
         $cacheFiles = [
+            "{$hash}/300/a/b/kept.jpg.webp",
+            "{$hash}/300/a/b/flat.webp",
+            "{$hash}/300/placeholder/default/p.png.webp",
+            "{$hash}/300/a/b/flat.webp.webp",
+            "{$hash}/300/a/b/gone.jpg.webp",
+            "{$hash}/600/a/b/kept.jpg.webp",
+            "{$hash}/300/a/b/kept.jpg.png",
+            '0123456789ab/300/a/b/kept.jpg.webp',
             '1/image/265x/0123abcd/a/b/kept.jpg.webp',
-            '1/image/0123abcd/a/b/kept.jpg.webp',
-            '1/image/265x/0123abcd/a/b/gone.jpg.webp',
-            '1/image/265x/0123abcd/a/b/kept.jpg.png',
-            '1/image/265x/0123abcd/placeholder/default/p.jpg.webp',
         ];
+        $sources = ['a/b/kept.jpg' => true, 'a/b/flat.webp' => true, 'placeholder/default/p.png' => true];
 
-        expect($this->helper->getUnusedProductCacheFiles($cacheFiles, ['a/b/kept.jpg' => true], '.webp'))->toBe([
-            '1/image/265x/0123abcd/a/b/gone.jpg.webp',
-            '1/image/265x/0123abcd/a/b/kept.jpg.png',
+        expect($this->helper->getUnusedProductCacheFiles($cacheFiles, $sources, [$hash => $settings]))->toBe([
+            "{$hash}/300/a/b/flat.webp.webp",
+            "{$hash}/300/a/b/gone.jpg.webp",
+            "{$hash}/600/a/b/kept.jpg.webp",
+            "{$hash}/300/a/b/kept.jpg.png",
+            '0123456789ab/300/a/b/kept.jpg.webp',
+            '1/image/265x/0123abcd/a/b/kept.jpg.webp',
         ]);
     });
 
     it('finds the unused cache files with one listing of the product directory', function (): void {
-        $this->mount->write('catalog/product/a/b/kept.jpg', 'x');
+        $settings = Mage::getSingleton('core/image_config')->getSettings('product', (int) Mage::app()->getDefaultStoreView()->getId());
+        $this->mount->write("catalog/product/a/b/kept{$settings->extension}", 'x');
+        $this->mount->write("catalog/product/cache/{$settings->getHash()}/{$settings->widths[0]}/a/b/kept{$settings->extension}", 'x');
         $this->mount->write('catalog/product/cache/1/image/265x/0123abcd/a/b/kept.jpg.webp', 'x');
-        $this->mount->write('catalog/product/cache/1/image/265x/0123abcd/a/b/gone.jpg.webp', 'x');
 
-        expect($this->helper->findUnusedProductCacheFiles($this->mount, '.webp'))
-            ->toBe(['1/image/265x/0123abcd/a/b/gone.jpg.webp']);
+        $calls = [];
+
+        expect($this->helper->findUnusedProductCacheFiles($this->mount, function (int $done, int $total) use (&$calls): void {
+            $calls[] = "{$done}/{$total}";
+        }))->toBe(['1/image/265x/0123abcd/a/b/kept.jpg.webp'])
+            // a, cache/{hash}/{width} and cache/1/image are one listing each
+            ->and($calls)->toBe(['1/3', '2/3', '3/3']);
     });
 
     it('finds the wysiwyg files that no content names', function (): void {

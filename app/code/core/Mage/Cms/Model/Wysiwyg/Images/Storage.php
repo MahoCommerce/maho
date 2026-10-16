@@ -46,8 +46,9 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends \Maho\DataObject
 
     /**
      * The child directories of $path, as items with 'path' (the mount path)
-     * and 'name' (the last segment). Hidden directories and the ones the
-     * cms/browser/dirs config excludes are left out.
+     * and 'name' (the last segment). Hidden directories, the cache folders of
+     * the image entities and the ones the cms/browser/dirs config excludes are
+     * left out.
      */
     public function getDirsCollection(string $path): \Maho\Data\Collection
     {
@@ -62,6 +63,7 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends \Maho\DataObject
         }
 
         $regExp = $conditions['reg_exp'] ? ('~' . implode('|', array_keys($conditions['reg_exp'])) . '~i') : null;
+        $cacheFolders = Mage::getSingleton('core/image_resizer')->getCacheFolders();
         $collection = new \Maho\Data\Collection();
         foreach ($this->listDirectory($path) as $item) {
             if (!$item->isDir()) {
@@ -69,6 +71,7 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends \Maho\DataObject
             }
             $name = basename($item->path());
             if (str_starts_with($name, '.')
+                || in_array($item->path(), $cacheFolders, true)
                 || array_key_exists($name, $conditions['plain'])
                 || ($regExp && preg_match($regExp, $item->path()))
             ) {
@@ -287,6 +290,10 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends \Maho\DataObject
         if ($mount->fileExists($target)) {
             $mount->delete($target);
         }
+        $imageFile = Mage::getSingleton('core/image_resizer')->findSourceFile($target);
+        if ($imageFile !== null) {
+            Mage::getSingleton('core/image_resizer')->deleteFiles(...$imageFile);
+        }
 
         $thumb = $this->getThumbnailPath($target, true);
         if ($thumb) {
@@ -327,6 +334,10 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends \Maho\DataObject
         // create thumbnail
         if ($type == 'image') {
             $this->resizeFile($result['path'] . '/' . $uploader->getUploadedFileName(), true);
+            $imageFile = Mage::getSingleton('core/image_resizer')->findSourceFile(trim($result['path'], '/') . '/' . $uploader->getUploadedFileName());
+            if ($imageFile !== null) {
+                Mage::getSingleton('core/image_resizer')->createFilesAfterCommit($imageFile[0], [$imageFile[1]]);
+            }
         }
 
         return $result;

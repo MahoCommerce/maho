@@ -43,6 +43,7 @@ dataset('frontend_routes', [
     'wishlist'              => ['/wishlist',                      Mage_Wishlist_IndexController::class,         'indexAction'],
     'search results'        => ['/catalogsearch/result',          Mage_CatalogSearch_ResultController::class,   'indexAction'],
     'contacts'              => ['/contacts',                      Mage_Contacts_IndexController::class,         'indexAction'],
+    'resized image'         => ['/media/catalog/product/cache/0123456789ab/300/a/b/x.png.webp', Mage_Core_ImageController::class, 'createAction'],
 ]);
 
 dataset('admin_routes', [

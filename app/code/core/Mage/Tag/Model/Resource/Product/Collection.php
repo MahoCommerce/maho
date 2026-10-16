@@ -312,7 +312,7 @@ class Mage_Tag_Model_Resource_Product_Collection extends Mage_Catalog_Model_Reso
 
         $this->addAttributeToSelect('name')
             ->addAttributeToSelect('price')
-            ->addAttributeToSelect('small_image');
+            ->addAttributeToSelect('image');
 
         $this->getSelect()
             ->join(['relation' => $tagRelationTable], 'relation.product_id = e.entity_id', [

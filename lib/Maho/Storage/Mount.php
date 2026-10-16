@@ -26,7 +26,8 @@ use League\Flysystem\UrlGeneration\TemporaryUrlGenerator;
  * returns folders on some adapters only, so use listFiles() for the files.
  * Review each call site for those assumptions instead of relying on the
  * mount. Use moveAtomic() for a file that a web server or a crawler can read
- * while it is written.
+ * while it is written. Each write, move, copy and delete dispatches the event
+ * storage_mount_change with the changed paths.
  */
 final class Mount extends Filesystem
 {
@@ -43,9 +44,65 @@ final class Mount extends Filesystem
         parent::__construct($adapter, $config, null, $publicUrlGenerator);
     }
 
+    /** False on a copy from withoutChangeEvents(). */
+    private bool $dispatchesChanges = true;
+
     public function name(): string
     {
         return $this->name;
+    }
+
+    /**
+     * This mount without the storage_mount_change event, for a copy of files that do not change,
+     * such as storage:migrate.
+     */
+    public function withoutChangeEvents(): self
+    {
+        $mount = clone $this;
+        $mount->dispatchesChanges = false;
+        return $mount;
+    }
+
+    #[\Override]
+    public function write(string $location, string $contents, array $config = []): void
+    {
+        parent::write($location, $contents, $config);
+        $this->dispatchChange([$location]);
+    }
+
+    #[\Override]
+    public function writeStream(string $location, $contents, array $config = []): void
+    {
+        parent::writeStream($location, $contents, $config);
+        $this->dispatchChange([$location]);
+    }
+
+    #[\Override]
+    public function move(string $source, string $destination, array $config = []): void
+    {
+        parent::move($source, $destination, $config);
+        $this->dispatchChange([$source, $destination]);
+    }
+
+    #[\Override]
+    public function copy(string $source, string $destination, array $config = []): void
+    {
+        parent::copy($source, $destination, $config);
+        $this->dispatchChange([$destination]);
+    }
+
+    #[\Override]
+    public function delete(string $location): void
+    {
+        parent::delete($location);
+        $this->dispatchChange([$location]);
+    }
+
+    #[\Override]
+    public function deleteDirectory(string $location): void
+    {
+        parent::deleteDirectory($location);
+        $this->dispatchChange([], [$location]);
     }
 
     public function isLocal(): bool
@@ -186,6 +243,20 @@ final class Mount extends Filesystem
             return $callback($localPath);
         } finally {
             @unlink($localPath);
+        }
+    }
+
+    /**
+     * Tell the modules which files and folders an operation changed, so they can delete the data
+     * that they keep about them, such as the size of an image.
+     *
+     * @param list<string> $paths
+     * @param list<string> $folders
+     */
+    private function dispatchChange(array $paths, array $folders = []): void
+    {
+        if ($this->dispatchesChanges) {
+            \Mage::dispatchEvent('storage_mount_change', ['mount' => $this, 'paths' => $paths, 'folders' => $folders]);
         }
     }
 

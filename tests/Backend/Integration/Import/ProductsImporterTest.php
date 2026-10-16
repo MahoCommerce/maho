@@ -117,6 +117,27 @@ it('imports a simple product with a picture from the media folder and reruns wit
     rmdir($mediaDir);
 });
 
+it('takes the file of an old small_image column as the image of the product', function (): void {
+    $website = Mage::app()->getStore(1)->getWebsite()->getCode();
+    $mediaDir = sys_get_temp_dir() . '/imp-products-' . uniqid();
+    mkdir($mediaDir);
+    imagepng(imagecreatetruecolor(4, 4), $mediaDir . '/imp-pic.png');
+    $path = productsCsv([
+        ['sku', '_attribute_set', '_type', '_product_websites', '_root_category', 'name', 'price', 'status', 'visibility', 'tax_class_id', 'weight', 'description', 'short_description', 'qty', 'is_in_stock', '_media_image', 'small_image', 'thumbnail'],
+        ['IMP-OLD', 'Default', 'simple', $website, productsRootName(), 'Imp Old', '12.50', '1', '4', '2', '1', 'Long', 'Short', '5', '1', 'imp-pic.png', 'imp-pic.png', 'imp-pic.png'],
+    ]);
+
+    (new Products())->import($path, [Products::OPTION_MEDIA_DIR => $mediaDir]);
+
+    $product = Mage::getModel('catalog/product')->load(Mage::getModel('catalog/product')->getIdBySku('IMP-OLD'));
+    expect($product->getImage())->toBe('/i/m/imp-pic.png')
+        ->and($product->getSmallImage())->toBe('/i/m/imp-pic.png');
+
+    unlink($path);
+    unlink($mediaDir . '/imp-pic.png');
+    rmdir($mediaDir);
+});
+
 it('rejects a missing picture, a category without a root and an entity error, with line numbers, and keeps an exported injected column', function (): void {
     $website = Mage::app()->getStore(1)->getWebsite()->getCode();
     $importer = new Products();

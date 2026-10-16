@@ -111,37 +111,23 @@ class Mage_Catalog_Helper_Product extends Mage_Core_Helper_Url
     }
 
     /**
-     * Retrieve small image url
-     *
+     * @deprecated since 26.11 a product has one image, use getImageUrl()
      * @param  Mage_Catalog_Model_Product $product
      * @return string
      */
     public function getSmallImageUrl($product)
     {
-        $url = false;
-        if (!$product->getSmallImage()) {
-            $url = Mage::getDesign()->getSkinUrl('images/no_image.jpg');
-        } elseif ($attribute = $product->getResource()->getAttribute('small_image')) {
-            $url = $attribute->getFrontend()->getUrl($product);
-        }
-        return $url;
+        return $this->getImageUrl($product);
     }
 
     /**
-     * Retrieve thumbnail image url
-     *
+     * @deprecated since 26.11 a product has one image, use getImageUrl()
      * @param  Mage_Catalog_Model_Product $product
      * @return string
      */
     public function getThumbnailUrl($product)
     {
-        $url = false;
-        if (!$product->getThumbnail()) {
-            $url = Mage::getDesign()->getSkinUrl('images/no_image.jpg');
-        } elseif ($attribute = $product->getResource()->getAttribute('thumbnail')) {
-            $url = $attribute->getFrontend()->getUrl($product);
-        }
-        return $url;
+        return $this->getImageUrl($product);
     }
 
     /**

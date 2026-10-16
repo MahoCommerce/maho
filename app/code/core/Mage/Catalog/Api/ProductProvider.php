@@ -961,14 +961,8 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
                 $dto->groupedProducts = [];
                 foreach ($associated as $child) {
                     $si = $stockByChild[(int) $child->getId()] ?? null;
-                    $imgUrl = null;
-                    foreach (['getThumbnail', 'getSmallImage'] as $method) {
-                        $img = $child->$method();
-                        if ($img && $img !== 'no_selection') {
-                            $imgUrl = $mediaConfig->getMediaUrl($img);
-                            break;
-                        }
-                    }
+                    $img = $child->getImage();
+                    $imgUrl = $img && $img !== 'no_selection' ? $mediaConfig->getMediaUrl($img) : null;
                     $dto->groupedProducts[] = [
                         'id' => (int) $child->getId(),
                         'sku' => $child->getSku(),
@@ -1119,7 +1113,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         $excludeCodes = [
             'sku', 'name', 'description', 'short_description', 'price', 'special_price',
             'weight', 'status', 'visibility', 'url_key', 'meta_title', 'meta_description',
-            'meta_keyword', 'image', 'small_image', 'thumbnail', 'page_layout',
+            'meta_keyword', 'image', 'page_layout',
             'tax_class_id', 'country_of_manufacture',
         ];
         $dto->additionalAttributes = [];
@@ -1220,7 +1214,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
      */
     private function getLinkedProducts(\Mage_Catalog_Model_Resource_Product_Collection $collection): array
     {
-        $collection->addAttributeToSelect(['name', 'price', 'special_price', 'image', 'small_image', 'thumbnail', 'url_key', 'status', 'visibility'])
+        $collection->addAttributeToSelect(['name', 'price', 'special_price', 'image', 'url_key', 'status', 'visibility'])
             ->addFieldToFilter('status', \Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
             ->setPageSize(20);
         $collection->setVisibility(\Mage::getSingleton('catalog/product_visibility')->getVisibleInCatalogIds());

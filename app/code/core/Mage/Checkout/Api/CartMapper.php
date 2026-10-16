@@ -260,13 +260,13 @@ class CartMapper
 
         $collection = \Mage::getResourceModel('catalog/product_collection')
             ->addIdFilter($productIds)
-            ->addAttributeToSelect(['small_image', 'thumbnail']);
+            ->addAttributeToSelect('image');
 
         $thumbnails = [];
         $mediaConfig = \Mage::getModel('catalog/product_media_config');
 
         foreach ($collection as $product) {
-            $image = $product->getSmallImage() ?: $product->getThumbnail();
+            $image = $product->getImage();
             if ($image && $image !== 'no_selection') {
                 $thumbnails[(int) $product->getId()] = $mediaConfig->getMediaUrl($image);
             }

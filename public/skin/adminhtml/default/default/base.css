@@ -257,6 +257,20 @@ big {
     white-space: pre-wrap
 }
 
+.maho-job-progress {
+    height: 6px;
+    margin: var(--maho-space-2) 0 0 calc(20px + var(--maho-space-3));
+    border-radius: var(--maho-radius-sm);
+    background: var(--maho-surface-sunken);
+    overflow: hidden
+}
+
+.maho-job-progress-bar {
+    height: 100%;
+    background: var(--maho-accent);
+    transition: width 0.3s
+}
+
 .maho-job-result {
     margin-top: var(--maho-space-4);
     font-size: var(--maho-text-lg);
