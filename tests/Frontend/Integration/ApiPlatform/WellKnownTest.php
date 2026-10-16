@@ -135,6 +135,52 @@ describe('mcp server card', function () {
     test('a URL with no host still yields a valid name', function () {
         expect(discoveryModel()->getServerName('/'))->toBe('localhost/maho');
     });
+
+    test('the name keeps the "0" labels of the host', function () {
+        expect(discoveryModel()->getServerName('http://0.0.0.0/'))->toBe('0.0.0.0/maho');
+        expect(discoveryModel()->getServerName('http://127.0.0.1/'))->toBe('1.0.0.127/maho');
+    });
+});
+
+describe('ai catalog', function () {
+    test('answers 404 while MCP is off', function () {
+        expect(wellKnownResponse('aiCatalogAction')->getHttpResponseCode())->toBe(404);
+    });
+
+    /**
+     * Lighthouse runs the ARD conformance test on this file. An error fails the audit, and a
+     * warning lowers the score to 0.9.
+     */
+    test('lists the MCP server card with what the ARD conformance test requires', function () {
+        configureProtocols(['apiplatform/protocols/mcp' => '1']);
+        $catalog = decodedBody(wellKnownResponse('aiCatalogAction'));
+
+        expect(array_keys($catalog))->toBe(['specVersion', 'host', 'entries']);
+        expect($catalog['specVersion'])->toBe('1.0');
+        expect($catalog['host']['displayName'])->not->toBe('');
+        expect($catalog['entries'])->toHaveCount(1);
+
+        $entry = $catalog['entries'][0];
+        expect($entry['identifier'])->toMatch('/^urn:air:([a-zA-Z0-9.-]+)(?::([a-zA-Z0-9._:-]+))?:([a-zA-Z0-9._-]+)$/');
+        expect($entry['displayName'])->not->toBe('');
+        expect($entry['type'])->toBe('application/mcp-server-card+json');
+        expect($entry['url'])->toBe(apiHelper()->getRequestRoot() . '/.well-known/mcp.json');
+        expect($entry)->not->toHaveKey('data');
+        expect(count($entry['representativeQueries']))->toBeGreaterThanOrEqual(2)->toBeLessThanOrEqual(5);
+        expect($entry['representativeQueries'])->each->toBeString();
+    });
+
+    test('the publisher is the host name without the port', function () {
+        expect(discoveryModel()->getPublisher('https://shop.example.com:8443/'))->toBe('shop.example.com');
+    });
+
+    test('a URL with no host still yields a valid publisher', function () {
+        expect(discoveryModel()->getPublisher('/'))->toBe('localhost');
+    });
+
+    test('the publisher drops the characters that an urn:air identifier refuses', function () {
+        expect(discoveryModel()->getPublisher('http://my_shop.test/'))->toBe('myshop.test');
+    });
 });
 
 describe('protected resource metadata', function () {

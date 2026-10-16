@@ -13,12 +13,16 @@ declare(strict_types=1);
 class Maho_ApiPlatform_Model_Discovery
 {
     public const PATH_API_CATALOG = '.well-known/api-catalog';
+    public const PATH_AI_CATALOG = '.well-known/ai-catalog.json';
     public const PATH_SERVER_CARD = '.well-known/mcp.json';
     public const PATH_PROTECTED_RESOURCE = '.well-known/oauth-protected-resource';
     public const PATH_AUTHORIZATION_SERVER = '.well-known/oauth-authorization-server';
 
     public const TYPE_LINKSET = 'application/linkset+json';
     public const TYPE_JSON = 'application/json';
+    public const TYPE_MCP_SERVER_CARD = 'application/mcp-server-card+json';
+
+    public const AI_CATALOG_SPEC_VERSION = '1.0';
 
     /** The registry schema the server card is written against. */
     public const SERVER_CARD_SCHEMA = 'https://static.modelcontextprotocol.io/schemas/2025-10-17/server.schema.json';
@@ -116,6 +120,42 @@ class Maho_ApiPlatform_Model_Discovery
     }
 
     /**
+     * Agentic Resource Discovery: the AI catalog that lists the MCP server card. Lighthouse checks
+     * it with the ARD conformance test, which requires `displayName` on each entry and expects
+     * 2 to 5 `representativeQueries`.
+     *
+     * @return array<string, mixed>
+     */
+    public function getAiCatalog(): array
+    {
+        $helper = $this->helper();
+        $root = $helper->getRequestRoot() . '/';
+        $storeName = $this->getStoreName();
+
+        return [
+            'specVersion' => self::AI_CATALOG_SPEC_VERSION,
+            'host' => ['displayName' => $storeName],
+            'entries' => [
+                [
+                    'identifier' => 'urn:air:' . $this->getPublisher($root) . ':mcp:maho',
+                    'displayName' => $storeName,
+                    'type' => self::TYPE_MCP_SERVER_CARD,
+                    'url' => $root . self::PATH_SERVER_CARD,
+                    'description' => $helper->__('Catalog, cart and order tools for %s', $storeName),
+                    'tags' => ['ecommerce', 'catalog', 'cart', 'orders'],
+                    'representativeQueries' => [
+                        $helper->__('Find a product in %s', $storeName),
+                        $helper->__('Check the price and the stock of a product'),
+                        $helper->__('Add a product to my cart'),
+                        $helper->__('Check the status of my order'),
+                    ],
+                    'version' => Mage::getVersion(),
+                ],
+            ],
+        ];
+    }
+
+    /**
      * RFC 9728. `authorization_servers` appears only when the authorization server is enabled:
      * naming one that does not answer sends a conformant client down a path that cannot finish.
      * With it off, tokens still come from the JSON endpoint at /auth/token, which is not an
@@ -198,11 +238,19 @@ class Maho_ApiPlatform_Model_Discovery
      */
     public function getServerName(string $root): string
     {
-        $host = (string) parse_url($root, PHP_URL_HOST);
-        $labels = array_reverse(array_filter(explode('.', $host)));
-        $namespace = (string) preg_replace('/[^a-zA-Z0-9.-]/', '', implode('.', $labels));
+        $labels = array_reverse(array_filter(explode('.', $this->getPublisher($root)), fn(string $label): bool => $label !== ''));
 
-        return ($namespace === '' ? 'localhost' : $namespace) . '/maho';
+        return implode('.', $labels) . '/maho';
+    }
+
+    /**
+     * The publisher segment of an `urn:air:` identifier: the host name, without the port.
+     */
+    public function getPublisher(string $root): string
+    {
+        $host = (string) preg_replace('/[^a-zA-Z0-9.-]/', '', (string) parse_url($root, PHP_URL_HOST));
+
+        return trim($host, '.') === '' ? 'localhost' : $host;
     }
 
     protected function getStoreName(): string

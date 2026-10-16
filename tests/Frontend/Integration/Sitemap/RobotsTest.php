@@ -384,10 +384,11 @@ describe('web server configuration', function () {
         $pattern = '/' . str_replace('/', '\/', $matches[1]) . '/';
         expect(preg_match($pattern, 'robots.txt'))->toBe(0);
         expect(preg_match($pattern, 'llms.txt'))->toBe(0);
-        // The OpenAPI description and the MCP server card are generated the same way.
+        // The OpenAPI description, the MCP server card and the AI catalog are generated the same way.
         expect(preg_match($pattern, 'docs.json'))->toBe(0);
         expect(preg_match($pattern, 'mcp.json'))->toBe(0);
         expect(preg_match($pattern, 'server-card.json'))->toBe(0);
+        expect(preg_match($pattern, 'ai-catalog.json'))->toBe(0);
         // A page URL with a .md suffix is the markdown version generated for AI agents.
         expect(preg_match($pattern, 'women.md'))->toBe(0);
         // The rule still has to do its job for everything else.

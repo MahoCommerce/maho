@@ -5,6 +5,7 @@
 "Account Information","Account Information"
 "Act as you until you revoke this application, or your admin account is disabled.","Act as you until you revoke this application, or your admin account is disabled."
 Active,Active
+"Add a product to my cart","Add a product to my cart"
 "Add New Role","Add New Role"
 "Add New User","Add New User"
 "A disconnected application must ask for your approval again. Access tokens already issued stop working when they expire.","A disconnected application must ask for your approval again. Access tokens already issued stop working when they expire."
@@ -34,6 +35,8 @@ Approve,Approve
 "Cache TTL (seconds)","Cache TTL (seconds)"
 "Can reach","Can reach"
 "Catalog, cart and order tools for %s","Catalog, cart and order tools for %s"
+"Check the price and the stock of a product","Check the price and the stock of a product"
+"Check the status of my order","Check the status of my order"
 "Check to generate new client_id and client_secret. The old credentials will stop working.","Check to generate new client_id and client_secret. The old credentials will stop working."
 "Client Credentials","Client Credentials"
 "Client ID","Client ID"
@@ -62,6 +65,7 @@ Deny,Deny
 "Edit Role '%s'","Edit Role '%s'"
 Email,Email
 "Exposes the REST v2 resource surface to AI agents at /api/mcp. Same bearer tokens and permissions as REST.","Exposes the REST v2 resource surface to AI agents at /api/mcp. Same bearer tokens and permissions as REST."
+"Find a product in %s","Find a product in %s"
 "First Name","First Name"
 "Frontend/customer-facing GraphQL at /api/graphql","Frontend/customer-facing GraphQL at /api/graphql"
 "General Settings","General Settings"
