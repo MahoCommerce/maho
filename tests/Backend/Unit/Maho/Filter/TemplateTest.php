@@ -7,6 +7,8 @@
 
 declare(strict_types=1);
 
+uses(Tests\MahoBackendTestCase::class);
+
 describe(\Maho\Filter\Template::class, function () {
     beforeEach(function () {
         $this->filter = new \Maho\Filter\Template();
