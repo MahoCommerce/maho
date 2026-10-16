@@ -19,7 +19,7 @@ declare(strict_types=1);
 
 uses(Tests\MahoBackendTestCase::class);
 
-it('finds the class file of every layout block type with the same case', function () {
+it('finds the class file of every layout and widget block type with the same case', function () {
     $types = [];
 
     $designFiles = new RecursiveIteratorIterator(
@@ -31,6 +31,12 @@ it('finds the class file of every layout block type with the same case', functio
         }
         foreach (simplexml_load_file($file->getPathname())->xpath('//block[@type]') as $block) {
             $types[(string) $block['type']] = $file->getPathname();
+        }
+    }
+
+    foreach (glob(Mage::getBaseDir('code') . '/*/*/*/etc/widget.xml') ?: [] as $file) {
+        foreach (simplexml_load_file($file)->xpath('/widgets/*/@type | //helper_block/type') as $type) {
+            $types[(string) $type] = $file;
         }
     }
 
