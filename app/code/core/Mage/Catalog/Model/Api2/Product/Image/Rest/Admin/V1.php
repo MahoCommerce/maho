@@ -66,7 +66,7 @@ class Mage_Catalog_Model_Api2_Product_Image_Rest_Admin_V1 extends Mage_Catalog_M
             $this->_getMediaGallery()->updateImage($product, $imageFileUri, $data);
 
             if (isset($data['types'])) {
-                $this->_getMediaGallery()->setMediaAttribute($product, Mage_Catalog_Helper_Image::mapDeprecatedRoles((array) $data['types']), $imageFileUri);
+                $this->_getMediaGallery()->setMediaAttribute($product, (array) $data['types'], $imageFileUri);
             }
             $product->save();
             return $this->_getImageLocation($this->_getCreatedImageId($imageFileUri));

@@ -2990,6 +2990,15 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
         return $this->getImage();
     }
 
+    /**
+     * @deprecated since 26.11 a product has one image, use getData('image_label')
+     */
+    public function getSmallImageLabel(): ?string
+    {
+        $value = $this->getData('image_label');
+        return $value === null ? null : (string) $value;
+    }
+
     public function setStatus(int|false|null $value): static
     {
         return $this->setData('status', $value);
@@ -3042,6 +3051,15 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     public function getThumbnail(): ?string
     {
         return $this->getImage();
+    }
+
+    /**
+     * @deprecated since 26.11 a product has one image, use getData('image_label')
+     */
+    public function getThumbnailLabel(): ?string
+    {
+        $value = $this->getData('image_label');
+        return $value === null ? null : (string) $value;
     }
 
     public function getTaxPercent(): ?float

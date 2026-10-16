@@ -1078,9 +1078,19 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
     }
 
     #[\Override]
+    public function addAttributeToSelect($attribute, $joinType = false)
+    {
+        $attribute = is_array($attribute)
+            ? array_map(Mage_Catalog_Helper_Image::mapDeprecatedAttribute(...), $attribute)
+            : Mage_Catalog_Helper_Image::mapDeprecatedAttribute($attribute);
+        return parent::addAttributeToSelect($attribute, $joinType);
+    }
+
+    #[\Override]
     public function addAttributeToFilter($attribute, $condition = null, $joinType = 'inner')
     {
         $this->_allIdsCache = null;
+        $attribute = Mage_Catalog_Helper_Image::mapDeprecatedAttribute($attribute);
 
         if (is_string($attribute) && $attribute == 'is_saleable') {
             $columns = $this->getSelect()->getPart(Maho\Db\Select::COLUMNS);
@@ -1186,6 +1196,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
     #[\Override]
     public function addAttributeToSort($attribute, $dir = self::SORT_ORDER_ASC)
     {
+        $attribute = Mage_Catalog_Helper_Image::mapDeprecatedAttribute($attribute);
         if ($attribute == 'position') {
             if (isset($this->_joinFields[$attribute])) {
                 $this->getSelect()->order($this->_getAttributeFieldName($attribute) . ' ' . $dir);

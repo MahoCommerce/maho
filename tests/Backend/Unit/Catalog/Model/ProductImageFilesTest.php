@@ -146,7 +146,37 @@ describe('product image URLs and the creation of their files', function () {
             ->and((string) Mage::helper('catalog/image')->init($product, 'thumbnail')->resize(300))->toContain('/300/a/b/shirt.png')
             ->and($product->getSmallImage())->toBe('/a/b/shirt.png')
             ->and($product->getThumbnail())->toBe('/a/b/shirt.png')
+            ->and($product->getSmallImageLabel())->toBe('Red shirt')
+            ->and($product->getThumbnailLabel())->toBe('Red shirt')
             ->and($block->getImageLabel($product, 'small_image'))->toBe('Red shirt');
+    });
+
+    it('sets the image for the deprecated roles of a gallery image', function (): void {
+        $product = Mage::getModel('catalog/product')->setTypeId('simple');
+        $product->setAttributeSetId((int) $product->getDefaultAttributeSetId());
+        $backend = Mage::getModel('catalog/product_attribute_backend_media');
+
+        $backend->setMediaAttribute($product, ['small_image', 'thumbnail'], '/a/b/shirt.png');
+        $fromList = $product->getImage();
+        $product->unsetData('image');
+        $backend->setMediaAttribute($product, 'thumbnail', '/a/b/shirt.png');
+
+        expect($fromList)->toBe('/a/b/shirt.png')
+            ->and($product->getImage())->toBe('/a/b/shirt.png');
+    });
+
+    it('reads, filters and sorts by image for the deprecated attributes of a product collection', function (): void {
+        $product = Mage::getResourceModel('catalog/product_collection')
+            ->addAttributeToSelect(['small_image', 'thumbnail_label'])
+            ->addAttributeToSelect('thumbnail', 'left')
+            ->addAttributeToFilter('small_image', ['neq' => 'no_selection'])
+            ->addAttributeToSort('thumbnail')
+            ->setPageSize(1)
+            ->getFirstItem();
+
+        expect($product->getId())->not->toBeNull()
+            ->and($product->getImage())->toBeString()->not->toBe('no_selection')
+            ->and($product->getSmallImage())->toBe($product->getImage());
     });
 
     it('uses the placeholder of the config, and the skin placeholder when the config names none', function (): void {

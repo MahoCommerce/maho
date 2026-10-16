@@ -516,6 +516,9 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
     public function setMediaAttribute(Mage_Catalog_Model_Product $product, $mediaAttribute, $value)
     {
         $mediaAttributeCodes = array_keys($product->getMediaAttributes());
+        $mediaAttribute = is_array($mediaAttribute)
+            ? Mage_Catalog_Helper_Image::mapDeprecatedRoles($mediaAttribute)
+            : Mage_Catalog_Helper_Image::mapDeprecatedAttribute($mediaAttribute);
 
         if (is_array($mediaAttribute)) {
             foreach ($mediaAttribute as $attribute) {

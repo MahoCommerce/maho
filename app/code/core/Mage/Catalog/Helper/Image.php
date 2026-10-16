@@ -52,18 +52,31 @@ class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract implements \St
     /** The image attributes that a product had before 26.11. They now give the image attribute. */
     public const DEPRECATED_ROLES = ['small_image', 'thumbnail'];
 
+    /** The product attributes that 26.11 removed, and the attribute that replaces each one. */
+    public const DEPRECATED_ATTRIBUTES = [
+        'small_image' => 'image',
+        'thumbnail' => 'image',
+        'small_image_label' => 'image_label',
+        'thumbnail_label' => 'image_label',
+    ];
+
     /**
-     * Replace each deprecated role in $types with image.
+     * The attribute that replaces $code when 26.11 removed it, or $code itself.
+     */
+    public static function mapDeprecatedAttribute(mixed $code): mixed
+    {
+        return is_string($code) ? self::DEPRECATED_ATTRIBUTES[$code] ?? $code : $code;
+    }
+
+    /**
+     * Replace each deprecated role or attribute in $types with the attribute that replaces it.
      *
      * @param array<mixed> $types
      * @return list<mixed>
      */
     public static function mapDeprecatedRoles(array $types): array
     {
-        return array_values(array_unique(array_map(
-            fn(mixed $type): mixed => in_array($type, self::DEPRECATED_ROLES, true) ? 'image' : $type,
-            $types,
-        )));
+        return array_values(array_unique(array_map(self::mapDeprecatedAttribute(...), $types)));
     }
 
     /**
@@ -78,7 +91,7 @@ class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract implements \St
     public function init(Mage_Catalog_Model_Product $product, $attributeName, $imageFile = null)
     {
         $this->product = $product;
-        $this->attributeName = in_array($attributeName, self::DEPRECATED_ROLES, true) ? 'image' : (string) $attributeName;
+        $this->attributeName = (string) self::mapDeprecatedAttribute($attributeName);
         $this->size = 0;
         $this->placeholder = null;
 
