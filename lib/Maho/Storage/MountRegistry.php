@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Maho\Storage;
 
+use League\Flysystem\Config;
 use League\Flysystem\UrlGeneration\PrefixPublicUrlGenerator;
 use Maho\Storage\Url\StoreBaseUrlGenerator;
 
@@ -134,7 +135,10 @@ final class MountRegistry
 
         $config = [];
         if ($definition->visibility !== null) {
-            $config['visibility'] = $definition->visibility;
+            $config[Config::OPTION_VISIBILITY] = $definition->visibility;
+        }
+        if ($definition->retainVisibility !== null) {
+            $config[Config::OPTION_RETAIN_VISIBILITY] = $definition->retainVisibility;
         }
 
         return new Mount(

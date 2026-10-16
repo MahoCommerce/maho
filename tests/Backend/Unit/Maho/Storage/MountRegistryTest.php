@@ -15,6 +15,38 @@ use Maho\Storage\UnknownMountException;
 
 uses(Tests\MahoBackendTestCase::class);
 
+/**
+ * Copies and moves a private file on a local mount that local.xml declares with $nodes.
+ *
+ * @param array<string, string> $nodes
+ * @return array{copy: int, move: int} the mode of the copy and of the moved file
+ */
+function storageRegistryCopyAndMoveModes(array $nodes): array
+{
+    $root = sys_get_temp_dir() . '/maho_retain_' . uniqid();
+    Mage::getConfig()->setNode('global/storage/mounts/retain/path', $root, true);
+    foreach ($nodes as $node => $value) {
+        Mage::getConfig()->setNode('global/storage/mounts/retain/' . $node, $value, true);
+    }
+    MountRegistry::reset();
+    $mount = Mage::getStorage('retain')->withoutChangeEvents();
+
+    $umask = umask(0027);
+    try {
+        $mount->write('a.txt', 'x', ['visibility' => 'private']);
+        $mount->write('b.txt', 'x', ['visibility' => 'private']);
+        $mount->copy('a.txt', 'copy.txt');
+        $mount->move('b.txt', 'moved.txt');
+        clearstatcache();
+
+        return ['copy' => fileperms($root . '/copy.txt') & 0777, 'move' => fileperms($root . '/moved.txt') & 0777];
+    } finally {
+        umask($umask);
+        array_map(unlink(...), glob($root . '/*') ?: []);
+        rmdir($root);
+    }
+}
+
 describe(\Maho\Storage\MountRegistry::class, function () {
     it('declares the core mounts on their local directories', function (string $name, string $path): void {
         $mount = Mage::getStorage($name);
@@ -81,6 +113,17 @@ describe(\Maho\Storage\MountRegistry::class, function () {
 
         expect(Mage::getStorage('custom')->localRoot())->toBe(Mage::getBaseDir() . '/var/custom');
     });
+
+    // The source file is private (0600), a public file is 0644, and a plain copy gets 0640 from the umask.
+    it('lets local.xml turn off the visibility that a move or copy keeps from the source', function (array $nodes, int $copy, int $move): void {
+        expect(storageRegistryCopyAndMoveModes($nodes))->toBe(['copy' => $copy, 'move' => $move]);
+    })->with([
+        'neither element' => [[], 0600, 0600],
+        'retain_visibility 0' => [['retain_visibility' => '0'], 0640, 0600],
+        'visibility public' => [['visibility' => 'public'], 0600, 0600],
+        'visibility public, retain_visibility 0' => [['visibility' => 'public', 'retain_visibility' => '0'], 0644, 0644],
+        'visibility public, retain_visibility 1' => [['visibility' => 'public', 'retain_visibility' => '1'], 0600, 0600],
+    ]);
 
     it('accepts a registered mount for the rest of the request', function (): void {
         $mount = new Mount('media', new League\Flysystem\Local\LocalFilesystemAdapter(sys_get_temp_dir()), sys_get_temp_dir());
