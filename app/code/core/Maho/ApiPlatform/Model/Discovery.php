@@ -238,7 +238,7 @@ class Maho_ApiPlatform_Model_Discovery
      */
     public function getServerName(string $root): string
     {
-        $labels = array_reverse(array_filter(explode('.', $this->getPublisher($root))));
+        $labels = array_reverse(array_filter(explode('.', $this->getPublisher($root)), fn(string $label): bool => $label !== ''));
 
         return implode('.', $labels) . '/maho';
     }
