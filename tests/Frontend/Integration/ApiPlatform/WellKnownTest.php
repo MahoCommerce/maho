@@ -172,6 +172,10 @@ describe('ai catalog', function () {
     test('a URL with no host still yields a valid publisher', function () {
         expect(discoveryModel()->getPublisher('/'))->toBe('localhost');
     });
+
+    test('the publisher drops the characters that an urn:air identifier refuses', function () {
+        expect(discoveryModel()->getPublisher('http://my_shop.test/'))->toBe('myshop.test');
+    });
 });
 
 describe('protected resource metadata', function () {

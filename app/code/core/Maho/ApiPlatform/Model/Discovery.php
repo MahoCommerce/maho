@@ -131,30 +131,27 @@ class Maho_ApiPlatform_Model_Discovery
         $helper = $this->helper();
         $root = $helper->getRequestRoot() . '/';
         $storeName = $this->getStoreName();
-        $entries = [];
-
-        if ($helper->isMcpEnabled()) {
-            $entries[] = [
-                'identifier' => 'urn:air:' . $this->getPublisher($root) . ':mcp:maho',
-                'displayName' => $storeName,
-                'type' => self::TYPE_MCP_SERVER_CARD,
-                'url' => $root . self::PATH_SERVER_CARD,
-                'description' => $helper->__('Catalog, cart and order tools for %s', $storeName),
-                'tags' => ['ecommerce', 'catalog', 'cart', 'orders'],
-                'representativeQueries' => [
-                    $helper->__('Find a product in %s', $storeName),
-                    $helper->__('Check the price and the stock of a product'),
-                    $helper->__('Add a product to my cart'),
-                    $helper->__('Check the status of my order'),
-                ],
-                'version' => Mage::getVersion(),
-            ];
-        }
 
         return [
             'specVersion' => self::AI_CATALOG_SPEC_VERSION,
             'host' => ['displayName' => $storeName],
-            'entries' => $entries,
+            'entries' => [
+                [
+                    'identifier' => 'urn:air:' . $this->getPublisher($root) . ':mcp:maho',
+                    'displayName' => $storeName,
+                    'type' => self::TYPE_MCP_SERVER_CARD,
+                    'url' => $root . self::PATH_SERVER_CARD,
+                    'description' => $helper->__('Catalog, cart and order tools for %s', $storeName),
+                    'tags' => ['ecommerce', 'catalog', 'cart', 'orders'],
+                    'representativeQueries' => [
+                        $helper->__('Find a product in %s', $storeName),
+                        $helper->__('Check the price and the stock of a product'),
+                        $helper->__('Add a product to my cart'),
+                        $helper->__('Check the status of my order'),
+                    ],
+                    'version' => Mage::getVersion(),
+                ],
+            ],
         ];
     }
 
@@ -241,11 +238,9 @@ class Maho_ApiPlatform_Model_Discovery
      */
     public function getServerName(string $root): string
     {
-        $host = (string) parse_url($root, PHP_URL_HOST);
-        $labels = array_reverse(array_filter(explode('.', $host)));
-        $namespace = (string) preg_replace('/[^a-zA-Z0-9.-]/', '', implode('.', $labels));
+        $labels = array_reverse(array_filter(explode('.', $this->getPublisher($root))));
 
-        return ($namespace === '' ? 'localhost' : $namespace) . '/maho';
+        return implode('.', $labels) . '/maho';
     }
 
     /**
