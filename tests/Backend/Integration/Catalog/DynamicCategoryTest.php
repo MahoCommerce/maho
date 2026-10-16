@@ -497,3 +497,127 @@ it('empties the category when one of several rules matches nothing', function ()
 
     expect(dynPositions($category))->toBe([]);
 });
+
+/**
+ * Create a multiselect attribute with the options A and B in every product attribute set.
+ *
+ * @return array{code: string, optionA: int}
+ */
+function dynMultiselectAttribute(bool $global): array
+{
+    $code = 'dyn_ms_' . uniqid();
+    Mage::getResourceModel('catalog/setup', 'catalog_setup')->addAttribute(Mage_Catalog_Model_Product::ENTITY, $code, [
+        'group' => 'General',
+        'type' => 'varchar',
+        'backend' => 'eav/entity_attribute_backend_array',
+        'input' => 'multiselect',
+        'label' => $code,
+        'source' => 'eav/entity_attribute_source_table',
+        'global' => $global
+            ? Mage_Catalog_Model_Resource_Eav_Attribute::SCOPE_GLOBAL
+            : Mage_Catalog_Model_Resource_Eav_Attribute::SCOPE_STORE,
+        'required' => false,
+        'user_defined' => true,
+        'option' => ['values' => ['A', 'B']],
+    ]);
+    // The setup writes the options with raw SQL, so the cached attribute does not have them
+    Mage::getSingleton('eav/config')->clear();
+
+    $attribute = Mage::getSingleton('eav/config')->getAttribute(Mage_Catalog_Model_Product::ENTITY, $code);
+    $options = array_column($attribute->getSource()->getAllOptions(false), 'value', 'label');
+
+    return ['code' => $code, 'optionA' => (int) $options['A']];
+}
+
+function dynMultiselectCondition(string $type, array $attribute): array
+{
+    return [
+        'type' => $type,
+        'attribute' => $attribute['code'],
+        'operator' => '()',
+        'value' => (string) $attribute['optionA'],
+    ];
+}
+
+/**
+ * Run $callback and return the deprecations that the rule condition classes raise.
+ *
+ * @return list<string>
+ */
+function dynConditionDeprecations(callable $callback): array
+{
+    $deprecations = [];
+    set_error_handler(function (int $errno, string $errstr, string $errfile, int $errline) use (&$deprecations): bool {
+        if (str_contains($errfile, '/Rule/Condition/')) {
+            $deprecations[] = "$errstr in $errfile:$errline";
+        }
+        return true;
+    }, E_DEPRECATED);
+
+    try {
+        $callback();
+    } finally {
+        restore_error_handler();
+    }
+
+    return $deprecations;
+}
+
+function dynDeleteMultiselectFixture(string $code, Mage_Catalog_Model_Product ...$products): void
+{
+    foreach ($products as $product) {
+        $product->delete();
+    }
+    Mage::getModel('catalog/resource_eav_attribute')
+        ->loadByCode(Mage_Catalog_Model_Product::ENTITY, $code)
+        ->delete();
+}
+
+it('matches a multiselect attribute without a deprecation for a product that has no value', function (bool $global) {
+    $attribute = dynMultiselectAttribute($global);
+    $token = uniqid();
+    $with = dynProduct("dyn-ms-with-$token", [], [$attribute['code'] => [$attribute['optionA']]]);
+    $without = dynProduct("dyn-ms-without-$token");
+
+    try {
+        $category = dynCategory();
+        dynRule($category, [dynMultiselectCondition('catalog/category_dynamic_rule_condition_product', $attribute)]);
+
+        $deprecations = dynConditionDeprecations(fn() => dynProcess($category));
+
+        expect(array_keys(dynPositions($category)))->toBe([(int) $with->getId()])
+            ->and($deprecations)->toBe([]);
+    } finally {
+        dynDeleteMultiselectFixture($attribute['code'], $with, $without);
+    }
+})->with(['global' => [true], 'store view' => [false]]);
+
+it('matches a multiselect attribute in a catalog price rule without a deprecation for a product that has no value', function (bool $global) {
+    $attribute = dynMultiselectAttribute($global);
+    $token = uniqid();
+    $with = dynProduct("dyn-ms-cr-with-$token", [], [$attribute['code'] => [$attribute['optionA']]]);
+    $without = dynProduct("dyn-ms-cr-without-$token");
+
+    try {
+        $rule = Mage::getModel('catalogrule/rule');
+        $rule->setWebsiteIds([1]);
+        $rule->getConditions()->loadArray([
+            'type' => 'catalogrule/rule_condition_combine',
+            'aggregator' => 'all',
+            'value' => 1,
+            'conditions' => [dynMultiselectCondition('catalogrule/rule_condition_product', $attribute)],
+        ]);
+        $rule->setProductsFilter([(int) $with->getId(), (int) $without->getId()]);
+
+        $matches = [];
+        $deprecations = dynConditionDeprecations(function () use ($rule, &$matches): void {
+            $matches = $rule->getMatchingProductIds();
+        });
+
+        expect($matches[(int) $with->getId()][1])->toBe(1)
+            ->and($matches[(int) $without->getId()][1])->toBe(0)
+            ->and($deprecations)->toBe([]);
+    } finally {
+        dynDeleteMultiselectFixture($attribute['code'], $with, $without);
+    }
+})->with(['global' => [true], 'store view' => [false]]);
