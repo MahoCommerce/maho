@@ -135,6 +135,11 @@ describe('mcp server card', function () {
     test('a URL with no host still yields a valid name', function () {
         expect(discoveryModel()->getServerName('/'))->toBe('localhost/maho');
     });
+
+    test('the name keeps the "0" labels of the host', function () {
+        expect(discoveryModel()->getServerName('http://0.0.0.0/'))->toBe('0.0.0.0/maho');
+        expect(discoveryModel()->getServerName('http://127.0.0.1/'))->toBe('1.0.0.127/maho');
+    });
 });
 
 describe('ai catalog', function () {
