@@ -22,7 +22,7 @@ use Symfony\Component\Filesystem\Path;
  *     <url_type>media</url_type>           <!-- media or web: the store base URL that serves this path -->
  *     <public_url>https://cdn.example.com/files/</public_url>   <!-- for a mount with no url_type; wins over url_type -->
  *     <visibility>public</visibility>      <!-- default visibility for every write -->
- *     <retain_visibility>0</retain_visibility>   <!-- 0: move and copy do not read the source visibility, for a store without ACLs -->
+ *     <retain_visibility>0</retain_visibility>   <!-- 0: move and copy do not read the source visibility; absent means 0 with <visibility>, else 1 -->
  *     <adapter>                            <!-- absent means local -->
  *         <type>s3</type>
  *         <bucket>my-store</bucket>

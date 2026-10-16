@@ -57,7 +57,7 @@ describe('Maho\Storage\Mount on S3 without object ACLs', function () {
         }
     });
 
-    it('moves and copies without reading the source ACL when local.xml asks for it', function (string $xml, string $acl): void {
+    it('moves and copies without reading the source ACL when local.xml sets a visibility or asks for it', function (string $xml, string $acl): void {
         $sent = [];
         $mount = storageS3MockMount($xml, $sent);
         $mount->move('tmp/a.jpg', 'a.jpg');
@@ -67,9 +67,10 @@ describe('Maho\Storage\Mount on S3 without object ACLs', function () {
     })->with([
         'retain_visibility 0' => ['<retain_visibility>0</retain_visibility>', 'private'],
         'visibility public, retain_visibility 0' => ['<visibility>public</visibility><retain_visibility>0</retain_visibility>', 'public-read'],
+        'visibility public' => ['<visibility>public</visibility>', 'public-read'],
     ]);
 
-    it('reads the source ACL by default', function (string $xml): void {
+    it('reads the source ACL when local.xml sets neither or asks for it', function (string $xml): void {
         $sent = [];
         $mount = storageS3MockMount($xml, $sent);
 
@@ -78,7 +79,6 @@ describe('Maho\Storage\Mount on S3 without object ACLs', function () {
             ->and($sent)->toBe(['GetObjectAcl', 'GetObjectAcl']);
     })->with([
         'neither element' => [''],
-        'visibility public' => ['<visibility>public</visibility>'],
         'visibility public, retain_visibility 1' => ['<visibility>public</visibility><retain_visibility>1</retain_visibility>'],
     ]);
 })->group('storage-s3');

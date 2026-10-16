@@ -115,12 +115,12 @@ describe(\Maho\Storage\MountRegistry::class, function () {
     });
 
     // The source file is private (0600), a public file is 0644, and a plain copy gets 0640 from the umask.
-    it('lets local.xml turn off the visibility that a move or copy keeps from the source', function (array $nodes, int $copy, int $move): void {
+    it('gives a move or copy the visibility of the mount, or of the source when local.xml asks for it', function (array $nodes, int $copy, int $move): void {
         expect(storageRegistryCopyAndMoveModes($nodes))->toBe(['copy' => $copy, 'move' => $move]);
     })->with([
         'neither element' => [[], 0600, 0600],
         'retain_visibility 0' => [['retain_visibility' => '0'], 0640, 0600],
-        'visibility public' => [['visibility' => 'public'], 0600, 0600],
+        'visibility public' => [['visibility' => 'public'], 0644, 0644],
         'visibility public, retain_visibility 0' => [['visibility' => 'public', 'retain_visibility' => '0'], 0644, 0644],
         'visibility public, retain_visibility 1' => [['visibility' => 'public', 'retain_visibility' => '1'], 0600, 0600],
     ]);

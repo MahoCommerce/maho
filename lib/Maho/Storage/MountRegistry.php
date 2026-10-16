@@ -136,6 +136,8 @@ final class MountRegistry
         $config = [];
         if ($definition->visibility !== null) {
             $config[Config::OPTION_VISIBILITY] = $definition->visibility;
+            // Flysystem ignores a default visibility on a move or copy while retain_visibility is on.
+            $config[Config::OPTION_RETAIN_VISIBILITY] = false;
         }
         if ($definition->retainVisibility !== null) {
             $config[Config::OPTION_RETAIN_VISIBILITY] = $definition->retainVisibility;
