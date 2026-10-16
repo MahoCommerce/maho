@@ -276,6 +276,7 @@ it('keeps an image that is not empty', function () {
 });
 
 it('copies the label of small_image into an empty image label', function () {
+    oneImageSetValue($this->productId, 'small_image', 0, '/s/m/small.jpg');
     oneImageSetValue($this->productId, 'small_image_label', 0, 'Front');
     oneImageSetValue($this->productId, 'thumbnail_label', 1, 'Side');
 

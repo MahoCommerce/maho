@@ -30,6 +30,9 @@ class Mage_Core_Model_Image_Size
     /** @var array<string, array{0: int, 1: int}|false> the sizes that this request knows, by hash. False: no size */
     protected array $sizes = [];
 
+    /** @var array<string, true> the hashes that preload() found no row for */
+    protected array $missing = [];
+
     /** @var array<string, true> the folders that preloadFolder() read in this request */
     protected array $preloadedFolders = [];
 
@@ -59,7 +62,7 @@ class Mage_Core_Model_Image_Size
         $path = self::normalizePath($path);
         $hash = self::getHash($mount->name(), $path);
         if (!array_key_exists($hash, $this->sizes)) {
-            $size = $this->getResource()->fetchSize($hash);
+            $size = isset($this->missing[$hash]) ? null : $this->getResource()->fetchSize($hash);
             if ($size === null && $mount->isLocal()) {
                 $size = $this->read($mount, $path);
             } elseif ($size === null) {
@@ -90,9 +93,11 @@ class Mage_Core_Model_Image_Size
         if ($hashes === []) {
             return;
         }
-        foreach ($this->getResource()->fetchSizes(array_map(strval(...), array_keys($hashes))) as $hash => $size) {
+        $found = $this->getResource()->fetchSizes(array_map(strval(...), array_keys($hashes)));
+        foreach ($found as $hash => $size) {
             $this->sizes[$hash] = $size[0] > 0 && $size[1] > 0 ? $size : false;
         }
+        $this->missing += array_diff_key($hashes, $found);
     }
 
     /**
@@ -113,15 +118,20 @@ class Mage_Core_Model_Image_Size
     }
 
     /**
-     * Read the size of $path from $mount and store it. A missing file, or a file that is not an
-     * image, gets a row of 0 x 0, so a page does not ask for it again.
+     * Read the size of $path from $mount and store it. A file that is not an image, or a missing
+     * file on a bucket, gets a row of 0 x 0, so a page does not ask for it again. A missing file on
+     * a local disk gets no row, so a file that is copied there later shows.
      *
      * @return array{0: int, 1: int}|null null when the file is missing or is not an image
      * @throws \League\Flysystem\FilesystemException when the mount cannot read the file
      */
     public function read(Mount $mount, string $path): ?array
     {
-        $info = $mount->fileExists($path) ? \Maho\Io::readImageSizeOnMount($mount, $path) : false;
+        $exists = $mount->fileExists($path);
+        if (!$exists && $mount->isLocal()) {
+            return null;
+        }
+        $info = $exists ? \Maho\Io::readImageSizeOnMount($mount, $path) : false;
         $width = $info === false ? 0 : (int) $info[0];
         $height = $info === false ? 0 : (int) $info[1];
         $this->save($mount->name(), $path, $width, $height);

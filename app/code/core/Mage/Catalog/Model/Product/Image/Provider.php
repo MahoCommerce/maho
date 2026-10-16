@@ -67,16 +67,10 @@ class Mage_Catalog_Model_Product_Image_Provider implements Mage_Core_Model_Image
             $gallery->where('entity_id IN (?)', $ids);
         }
 
-        $attribute = Mage::getSingleton('eav/config')->getAttribute(Mage_Catalog_Model_Product::ENTITY, 'image');
-        $images = $adapter->select()
-            ->distinct()
-            ->from($resource->getTableName(['catalog/product', 'varchar']), ['value'])
-            ->where('attribute_id = ?', $attribute ? (int) $attribute->getId() : 0);
-        if ($ids !== null) {
-            $images->where('entity_id IN (?)', $ids);
-        }
-
-        $files = [...$adapter->fetchCol($gallery), ...$adapter->fetchCol($images)];
+        $files = [
+            ...$adapter->fetchCol($gallery),
+            ...Mage::getSingleton('core/image_resizer')->getAttributeImageFiles(Mage_Catalog_Model_Product::ENTITY, $ids),
+        ];
         return array_values(array_unique(array_filter(
             array_map(strval(...), $files),
             fn(string $file): bool => $file !== '' && $file !== 'no_selection',

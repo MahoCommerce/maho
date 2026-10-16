@@ -259,6 +259,10 @@ class Maho_MediaCleaner_Helper_Data extends Mage_Core_Helper_Abstract
 
         try {
             $mount->delete($file);
+            $imageFile = Mage::getSingleton('core/image_resizer')->findSourceFile($file);
+            if ($imageFile !== null) {
+                Mage::getSingleton('core/image_resizer')->deleteFiles(...$imageFile);
+            }
         } catch (FilesystemException $e) {
             Mage::logException($e);
             return false;

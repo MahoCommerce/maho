@@ -17,14 +17,14 @@ $table = $installer->getTable(['catalog/product', 'varchar']);
 $entityTypeId = (int) $installer->getEntityTypeId(Mage_Catalog_Model_Product::ENTITY);
 $isEmpty = fn(?string $value): bool => $value === null || $value === '' || $value === 'no_selection';
 
-// Where $target is empty in a store view, write the value of the first $sources attribute that
-// is not empty there. A store view without its own value reads the value of the default scope.
-$copyWhereEmpty = function (string $target, array $sources) use ($installer, $adapter, $table, $entityTypeId, $isEmpty): void {
-    $targetId = (int) $installer->getAttributeId($entityTypeId, $target);
-    $sourceIds = array_values(array_filter(array_map(
-        fn(string $code): int => (int) $installer->getAttributeId($entityTypeId, $code),
-        $sources,
-    )));
+// Where the file of $target is empty in a store view, write the file of the first $sources role
+// that is not empty there, and its label where the label of $target is empty. A role is a pair of
+// a file and a label code. A store view without its own value reads the value of the default scope.
+$copyWhereEmpty = function (array $target, array $sources) use ($installer, $adapter, $table, $entityTypeId, $isEmpty): void {
+    $attributeIds = fn(array $codes): array => array_map(fn(string $code): int => (int) $installer->getAttributeId($entityTypeId, $code), $codes);
+    [$targetId, $targetLabelId] = $attributeIds($target);
+    $sourcePairs = array_values(array_filter(array_map($attributeIds, $sources), fn(array $ids): bool => $ids[0] !== 0));
+    $sourceIds = array_column($sourcePairs, 0);
     if ($targetId === 0 || $sourceIds === []) {
         return;
     }
@@ -46,7 +46,7 @@ $copyWhereEmpty = function (string $target, array $sources) use ($installer, $ad
         $values = [];
         $rows = $adapter->fetchAll($adapter->select()
             ->from($table, ['entity_id', 'attribute_id', 'store_id', 'value'])
-            ->where('attribute_id IN (?)', [$targetId, ...$sourceIds])
+            ->where('attribute_id IN (?)', [$targetId, $targetLabelId, ...array_merge(...$sourcePairs)])
             ->where('entity_id IN (?)', $entityIds));
         foreach ($rows as $row) {
             $values[(int) $row['entity_id']][(int) $row['attribute_id']][(int) $row['store_id']] = $row['value'];
@@ -61,7 +61,7 @@ $copyWhereEmpty = function (string $target, array $sources) use ($installer, $ad
                 if (!$isEmpty($read($targetId))) {
                     continue;
                 }
-                foreach ($sourceIds as $sourceId) {
+                foreach ($sourcePairs as [$sourceId, $sourceLabelId]) {
                     $value = $read($sourceId);
                     if (!$isEmpty($value)) {
                         $byAttribute[$targetId][$storeId] = $value;
@@ -72,13 +72,17 @@ $copyWhereEmpty = function (string $target, array $sources) use ($installer, $ad
                             'entity_id' => $entityId,
                             'value' => $value,
                         ];
+                        $label = $read($sourceLabelId);
+                        if ($targetLabelId !== 0 && $isEmpty($read($targetLabelId)) && !$isEmpty($label)) {
+                            $inserts[] = ['entity_type_id' => $entityTypeId, 'attribute_id' => $targetLabelId, 'store_id' => $storeId, 'entity_id' => $entityId, 'value' => $label];
+                        }
                         break;
                     }
                 }
             }
         }
-        if ($inserts !== []) {
-            $adapter->insertOnDuplicate($table, $inserts, ['value']);
+        foreach (array_chunk($inserts, 1000) as $chunk) {
+            $adapter->insertOnDuplicate($table, $chunk, ['value']);
         }
     }
 };
@@ -86,8 +90,7 @@ $copyWhereEmpty = function (string $target, array $sources) use ($installer, $ad
 // A product has one image from this version on. The theme slots set the size of each place where
 // it shows, so the small_image and thumbnail roles and their labels go, and the listings read image.
 // A product whose image is empty keeps the file and the label of its old roles.
-$copyWhereEmpty('image', ['small_image', 'thumbnail']);
-$copyWhereEmpty('image_label', ['small_image_label', 'thumbnail_label']);
+$copyWhereEmpty(['image', 'image_label'], [['small_image', 'small_image_label'], ['thumbnail', 'thumbnail_label']]);
 foreach (['small_image', 'thumbnail', 'small_image_label', 'thumbnail_label'] as $code) {
     $installer->removeAttribute(Mage_Catalog_Model_Product::ENTITY, $code);
 }

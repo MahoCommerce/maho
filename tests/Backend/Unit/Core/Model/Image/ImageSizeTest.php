@@ -122,11 +122,14 @@ describe('the stored sizes of the images', function () {
         $this->resource->deleteFolder('media', $this->folder . '_b');
     });
 
-    it('stores 0 x 0 for a missing file, so a page does not ask for it again', function (): void {
+    it('stores no size for a missing file on a local disk, so a file that is copied there later shows', function (): void {
         $missing = $this->folder . '/missing.png';
 
         expect(($this->sizes)()->get($this->mount, $missing))->toBeNull()
-            ->and(($this->rowOf)($missing))->toBe([0, 0]);
+            ->and(($this->rowOf)($missing))->toBeNull();
+
+        file_put_contents($this->root . '/' . $missing, ($this->png)(40, 30));
+        expect(($this->sizes)()->get($this->mount, $missing))->toBe([40, 30]);
     });
 
     it('deletes the size of a file that the mount writes, moves, copies or deletes', function (): void {

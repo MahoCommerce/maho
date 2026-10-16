@@ -33,9 +33,6 @@ class Mage_Core_Model_Image_Config
 
     public const CACHE_TAG = 'image_settings';
 
-    /** The theme that every theme chain ends with, as in the design fallback. */
-    public const BASE_THEME = 'base/default';
-
     /** @var array<string, Mage_Core_Model_Image_Settings> */
     protected array $liveSettings = [];
 
@@ -310,34 +307,22 @@ class Mage_Core_Model_Image_Config
         $designConfig = Mage::getSingleton('core/design_config');
         $area = Mage_Core_Model_Design_Package::DEFAULT_AREA;
         $package = (string) Mage::getStoreConfig('design/package/name', $storeId) ?: Mage_Core_Model_Design_Package::DEFAULT_PACKAGE;
-        $defaultTheme = (string) Mage::getStoreConfig('design/theme/default', $storeId);
         $theme = (string) Mage::getStoreConfig('design/theme/skin', $storeId)
-            ?: $defaultTheme
+            ?: (string) Mage::getStoreConfig('design/theme/default', $storeId)
             ?: Mage_Core_Model_Design_Package::DEFAULT_THEME;
 
-        $legacyThemes = $designConfig->getNode("{$area}/{$package}/{$theme}/parent")
-            ? null
-            : array_filter([$defaultTheme, Mage_Core_Model_Design_Package::DEFAULT_THEME]);
-
+        $steps = [
+            ...Mage::getModel('core/design_fallback', ['config' => $designConfig])->setStore($storeId)->getFallbackScheme($area, $package, $theme),
+            ['_package' => Mage_Core_Model_Design_Package::BASE_PACKAGE, '_theme' => Mage_Core_Model_Design_Package::DEFAULT_THEME],
+        ];
         $nodes = [];
-        $visited = [];
-        while ($theme !== '' && !isset($visited["{$package}/{$theme}"])) {
-            $visited["{$package}/{$theme}"] = true;
+        foreach ($steps as $step) {
+            $package = $step['_package'] ?? $package;
+            $theme = $step['_theme'] ?? $theme;
             $node = $designConfig->getNode("{$area}/{$package}/{$theme}/images");
             if ($node) {
                 $nodes[] = $node;
             }
-
-            $parent = $legacyThemes === null
-                ? trim((string) $designConfig->getNode("{$area}/{$package}/{$theme}/parent"))
-                : '';
-            while ($parent === '' && $legacyThemes) {
-                $legacyTheme = array_shift($legacyThemes);
-                $parent = isset($visited["{$package}/{$legacyTheme}"]) ? '' : $legacyTheme;
-            }
-            $parent = $parent ?: self::BASE_THEME;
-            $parts = explode('/', $parent);
-            [$package, $theme] = count($parts) === 2 ? $parts : [$package, $parts[0]];
         }
         return $nodes;
     }
