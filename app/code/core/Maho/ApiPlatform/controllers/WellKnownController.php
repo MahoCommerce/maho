@@ -39,6 +39,21 @@ class Maho_ApiPlatform_WellKnownController extends Mage_Core_Controller_Front_Ac
     }
 
     /**
+     * Agentic Resource Discovery. The catalog lists the MCP server card only, so it answers 404
+     * while MCP is off.
+     */
+    #[Maho\Config\Route('/.well-known/ai-catalog.json', name: 'apiplatform.wellknown.ai_catalog', methods: ['GET'])]
+    public function aiCatalogAction(): void
+    {
+        if (!$this->helper()->isMcpEnabled()) {
+            $this->getResponse()->setHttpResponseCode(404);
+            return;
+        }
+
+        $this->_renderJson($this->discovery()->getAiCatalog());
+    }
+
+    /**
      * The MCP server card, read before a client connects to /api/mcp. Served at both paths the
      * draft has used, since neither is settled.
      */
