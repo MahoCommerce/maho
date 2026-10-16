@@ -151,9 +151,16 @@ it('creates the purchased links of a downloadable line', function (): void {
     $order = placeGuestOrder($quote);
 
     $item = $order->getAllVisibleItems()[0];
-    expect(Mage::getModel('downloadable/link_purchased')->load($item->getId(), 'order_item_id')->getId())->not->toBeNull()
-        ->and(Mage::getModel('downloadable/link_purchased_item')->getCollection()
-            ->addFieldToFilter('order_item_id', $item->getId())->getSize())->toBe(count($linkIds));
+    $countLinks = fn() => [
+        Mage::getModel('downloadable/link_purchased')->getCollection()->addFieldToFilter('order_item_id', $item->getId())->getSize(),
+        Mage::getModel('downloadable/link_purchased_item')->getCollection()->addFieldToFilter('order_item_id', $item->getId())->getSize(),
+    ];
+    expect($countLinks())->toBe([1, count($linkIds)]);
+
+    // The listeners run on every later save of the order, so they must not add links twice
+    $item->save();
+    $order->save();
+    expect($countLinks())->toBe([1, count($linkIds)]);
 });
 
 it('copies an uploaded file option to the order directory', function (): void {
