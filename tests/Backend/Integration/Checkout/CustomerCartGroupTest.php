@@ -53,3 +53,10 @@ it('creates a guest cart in the NOT LOGGED IN group', function (): void {
 
     expect($reloaded->getCustomerGroupId())->toBe(Mage_Customer_Model_Group::NOT_LOGGED_IN_ID);
 });
+
+it('refuses a cart for a customer that does not exist', function (): void {
+    $missingId = (int) $this->customer->getId() + 100000;
+
+    expect(fn() => Mage::getService('checkout/cart')->create($missingId, 1))
+        ->toThrow(Mage_Core_Exception::class, "Invalid customer: {$missingId}");
+});

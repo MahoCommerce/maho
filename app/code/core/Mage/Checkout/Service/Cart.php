@@ -48,13 +48,12 @@ class Mage_Checkout_Service_Cart
         $quote->setStoreId((int) $store->getId());
 
         if ($customerId) {
-            // setCustomer() also copies the customer group, which prices the cart
             $customer = \Mage::getModel('customer/customer')->load($customerId);
-            if ($customer->getId()) {
-                $quote->setCustomer($customer);
-            } else {
-                $quote->setCustomerId($customerId);
+            if (!$customer->getId()) {
+                throw new \Mage_Core_Exception("Invalid customer: {$customerId}");
             }
+            // setCustomer() also copies the customer group, which prices the cart
+            $quote->setCustomer($customer);
             $quote->setCustomerIsGuest(false);
         } else {
             $quote->setCustomerIsGuest();
