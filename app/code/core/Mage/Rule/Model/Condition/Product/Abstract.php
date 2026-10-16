@@ -495,9 +495,9 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
         foreach ($this->_entityAttributeValues[$object->getId()] as $value) {
             $attr = $object->getResource()->getAttribute($attrCode);
             if ($attr && $attr->getBackendType() == 'datetime') {
-                $value = strtotime($value);
+                $value = strtotime((string) $value);
             } elseif ($attr && $attr->getFrontendInput() == 'multiselect') {
-                $value = strlen($value) ? explode(',', $value) : [];
+                $value = $value === null || $value === '' ? [] : explode(',', $value);
             }
 
             $object->setData($attrCode, $value);
