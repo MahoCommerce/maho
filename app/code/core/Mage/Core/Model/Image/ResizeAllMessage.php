@@ -1,8 +1,8 @@
 <?php
 
 /**
- * Queue message for the creation of every missing resized file of an entity, followed by the
- * switch to its live settings. Handled by Mage_Core_Model_Image_ResizeMessageHandler.
+ * Queue message for the creation of every missing resized file of an entity. Handled by
+ * Mage_Core_Model_Image_ResizeMessageHandler.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0

@@ -20,7 +20,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
     name: 'storage:image:resize',
-    description: 'Create the missing resized files of the images, switch the store views to the current image settings, and store the missing image sizes',
+    description: 'Create the missing resized files of the images, and store the missing image sizes',
 )]
 class StorageImageResize extends BaseMahoCommand
 {
@@ -123,10 +123,8 @@ class StorageImageResize extends BaseMahoCommand
 
             if ($failed !== []) {
                 $io->listing($failed);
-                $io->error("Some files of {$name} were not created, so its store views keep their settings. Run the command again: it creates only what is missing.");
+                $io->error("Some files of {$name} were not created. Run the command again: it creates only what is missing.");
                 $status = Command::FAILURE;
-            } else {
-                $resizer->activateLiveSettings($name);
             }
 
             if (!$this->readMissingSizes($io, $name, $sourceFiles, $jobCount)) {
@@ -135,7 +133,7 @@ class StorageImageResize extends BaseMahoCommand
         }
 
         if ($status === Command::SUCCESS) {
-            $io->success('The resized files exist, every store view uses its current image settings, and every image has a stored size.');
+            $io->success('The resized files exist, and every image has a stored size.');
         }
         return $status;
     }

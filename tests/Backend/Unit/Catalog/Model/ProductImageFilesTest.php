@@ -25,7 +25,7 @@ describe('product image URLs and the creation of their files', function () {
         Mage::app()->setCurrentStore($this->storeId);
         $this->placeholder = Mage::getStoreConfig('catalog/placeholder/image_placeholder', $this->storeId);
         Mage::getSingleton('core/image_config')->reset();
-        $this->hash = Mage::getSingleton('core/image_config')->getActiveSettings('product', $this->storeId)->getHash();
+        $this->hash = Mage::getSingleton('core/image_config')->getSettings('product', $this->storeId)->getHash();
 
         $png = Maho::getImageManager()->createImage(400, 200)->fill('ff0000')
             ->encodeUsingFormat(\Intervention\Image\Format::PNG)->toString();
@@ -112,19 +112,26 @@ describe('product image URLs and the creation of their files', function () {
     });
 
     it('gives the gallery box the ratio of the theme, or of the original when the theme keeps it', function (): void {
-        $store = Mage::app()->getStore($this->storeId);
-        $path = Mage_Core_Model_Image_Config::XML_PATH_ACTIVE . 'product';
-        $active = Mage::getStoreConfig($path, $this->storeId);
         $product = Mage::getModel('catalog/product')->setData('image', '/a/b/shirt.png');
 
         $original = Mage::helper('catalog/image')->init($product, 'image')->getAspectRatio('gallery');
-        $square = new Mage_Core_Model_Image_Settings([150, 300, 600, 1200, 2400], ratio: [1, 1]);
-        $store->setConfig($path, json_encode($square->toArray()));
-        Mage::getSingleton('core/image_config')->reset();
+        $square = new class extends Mage_Core_Model_Image_Config {
+            #[\Override]
+            public function getSettings(string $entity, int $storeId): Mage_Core_Model_Image_Settings
+            {
+                return new Mage_Core_Model_Image_Settings([150, 300, 600, 1200, 2400], ratio: [1, 1]);
+            }
+        };
+        $config = Mage::registry('_singleton/core/image_config');
+        Mage::unregister('_singleton/core/image_config');
+        Mage::register('_singleton/core/image_config', $square);
         try {
             $fixed = Mage::helper('catalog/image')->init($product, 'image')->getAspectRatio('gallery');
         } finally {
-            $store->setConfig($path, $active);
+            Mage::unregister('_singleton/core/image_config');
+            if ($config !== null) {
+                Mage::register('_singleton/core/image_config', $config);
+            }
         }
 
         expect($original)->toBe('600/300')
@@ -346,7 +353,7 @@ describe('product image URLs and the creation of their files', function () {
     it('creates the files after the commit of an open transaction, and at once without one', function (): void {
         $resizer = Mage::getSingleton('core/image_resizer');
         $resource = Mage::getResourceSingleton('core/config');
-        $settings = Mage::getSingleton('core/image_config')->getActiveSettings('product', $this->storeId);
+        $settings = Mage::getSingleton('core/image_config')->getSettings('product', $this->storeId);
         $path = Mage_Core_Model_Image_Set::buildPath('catalog/product', 'catalog/product/a/b/shirt.png', $settings, 300);
 
         $resource->beginTransaction();

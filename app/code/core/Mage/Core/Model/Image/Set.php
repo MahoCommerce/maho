@@ -1,12 +1,12 @@
 <?php
 
 /**
- * The resized files of one source image of an entity, with the active settings of a store view.
+ * The resized files of one source image of an entity, with the settings of a store view.
  *
  * It builds URLs and resizes nothing. It reads only the size of the source image, when the
  * settings keep the ratio of the source. The files exist because the save of the entity, the
- * import or storage:image:resize created them, and the settings that the URLs use become active
- * only after their files exist.
+ * import or storage:image:resize created them. After a change of the settings, the queue creates
+ * the files of the new settings.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -122,7 +122,7 @@ class Mage_Core_Model_Image_Set
 
     public function getSettings(): Mage_Core_Model_Image_Settings
     {
-        return $this->settings ??= Mage::getSingleton('core/image_config')->getActiveSettings(
+        return $this->settings ??= Mage::getSingleton('core/image_config')->getSettings(
             $this->entity,
             $this->storeId ?? (int) Mage::app()->getStore()->getId(),
         );

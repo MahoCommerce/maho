@@ -25,29 +25,26 @@ class Mage_Core_Model_Image_Observer
     public function checkAfterConfigSave(\Maho\Event\Observer $observer): void
     {
         Mage::getSingleton('core/image_config')->reset();
-        $this->queuePendingEntities();
+        $this->queueNewSettings();
     }
 
     /**
-     * Queue the creation of the files of each entity whose live settings are not active in some
-     * store view. The same pending settings are queued once a day at most, so a long run is not
-     * queued again while it works.
+     * Queue the creation of the files of each entity whose settings miss a folder on the media
+     * mount. The same missing folders are queued once a day at most, so a long run is not queued
+     * again while it works.
      */
     #[Maho\Config\CronJob('image_settings_check', schedule: '*/15 * * * *')]
-    public function queuePendingEntities(): void
+    public function queueNewSettings(): void
     {
         $config = Mage::getSingleton('core/image_config');
         $resizer = Mage::getSingleton('core/image_resizer');
         foreach (array_keys($config->getEntities()) as $entity) {
-            $hashes = [];
-            foreach ($config->getPendingStoreIds($entity) as $storeId) {
-                $hashes[] = $storeId . ':' . $config->getLiveSettings($entity, $storeId)->getHash();
-            }
-            if ($hashes === []) {
+            $folders = $resizer->getMissingFolders($entity);
+            if ($folders === []) {
                 continue;
             }
 
-            $key = md5($entity . ',' . implode(',', $hashes));
+            $key = md5($entity . ',' . implode(',', $folders));
             $cacheId = 'image_settings_queued_' . $key;
             if (Mage::app()->loadCache($cacheId)) {
                 continue;

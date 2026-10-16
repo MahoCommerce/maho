@@ -58,7 +58,7 @@ describe('the stored sizes of the images', function () {
     });
 
     it('stores the size of a source when the resizer decodes it', function (): void {
-        $settings = Mage::getSingleton('core/image_config')->getActiveSettings('product', (int) Mage::app()->getDefaultStoreView()->getId());
+        $settings = Mage::getSingleton('core/image_config')->getSettings('product', (int) Mage::app()->getDefaultStoreView()->getId());
         $file = substr($this->path, strlen('catalog/product'));
         Mage::getSingleton('core/image_resizer')->createFileAtPath(Mage_Core_Model_Image_Set::buildPath('catalog/product', $this->path, $settings, 300));
 

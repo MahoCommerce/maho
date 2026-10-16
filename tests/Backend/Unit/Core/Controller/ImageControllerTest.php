@@ -29,7 +29,7 @@ describe('the route that creates a missing resized image', function () {
         Mage::getSingleton('core/image_config')->reset();
 
         $this->folder = 'catalog/product/image_controller_' . uniqid();
-        $this->settings = Mage::getSingleton('core/image_config')->getActiveSettings('product', $this->storeId);
+        $this->settings = Mage::getSingleton('core/image_config')->getSettings('product', $this->storeId);
         $this->pathOf = fn(string $name, int $width): string
             => Mage_Core_Model_Image_Set::buildPath('catalog/product', $this->folder . '/' . $name, $this->settings, $width);
 

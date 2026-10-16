@@ -49,7 +49,7 @@ describe('the swatch image entity', function () {
     });
 
     it('makes square files at 1x and 2x of the listing slot of the swatch entity', function (): void {
-        $settings = Mage::getSingleton('core/image_config')->getLiveSettings('swatch', $this->storeId);
+        $settings = Mage::getSingleton('core/image_config')->getSettings('swatch', $this->storeId);
 
         expect($settings->widths)->toBe([36, 72])
             ->and($settings->ratio)->toBe([1, 1])
@@ -73,7 +73,7 @@ describe('the swatch image entity', function () {
 
     it('links a global swatch to its 2x file, at least the size of the box', function (): void {
         $helper = Mage::helper('configurableswatches/productimg');
-        $settings = Mage::getSingleton('core/image_config')->getActiveSettings('swatch', $this->storeId);
+        $settings = Mage::getSingleton('core/image_config')->getSettings('swatch', $this->storeId);
         $base = $this->mount->publicUrl('');
 
         expect($helper->getGlobalSwatchUrl(null, 'Red', 24, 24, '.png'))

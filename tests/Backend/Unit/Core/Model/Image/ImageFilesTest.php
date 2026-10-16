@@ -28,17 +28,7 @@ describe('resized image files of an image entity', function () {
         Mage::app()->setCurrentStore($this->storeId);
         $this->restore = [
             'design/theme/skin' => Mage::getStoreConfig('design/theme/skin', $this->storeId),
-            Mage_Core_Model_Image_Config::XML_PATH_ACTIVE . 'product' => Mage::getStoreConfig(Mage_Core_Model_Image_Config::XML_PATH_ACTIVE . 'product', $this->storeId),
-            Mage_Core_Model_Image_Config::XML_PATH_ACTIVE . 'swatch' => Mage::getStoreConfig(Mage_Core_Model_Image_Config::XML_PATH_ACTIVE . 'swatch', $this->storeId),
         ];
-        $this->readActiveRows = function (): array {
-            $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
-            return $adapter->fetchAll($adapter->select()
-                ->from(Mage::getSingleton('core/resource')->getTableName('core/config_data'))
-                ->where('path LIKE ?', Mage_Core_Model_Image_Config::XML_PATH_ACTIVE . '%')
-                ->order('config_id'));
-        };
-        $this->activeRows = ($this->readActiveRows)();
         $this->singletons = [];
         $this->replaceSingleton = function (string $alias, object $instance): void {
             $key = "_singleton/{$alias}";
@@ -59,7 +49,7 @@ describe('resized image files of an image entity', function () {
             $info = \Maho\Io::getImageSize($this->root . '/' . $key);
             return [$info[0], $info[1]];
         };
-        $this->settings = Mage::getSingleton('core/image_config')->getActiveSettings('product', $this->storeId);
+        $this->settings = Mage::getSingleton('core/image_config')->getSettings('product', $this->storeId);
         $this->pathOf = fn(int $width, string $file = '/a/b/shirt.png', ?Mage_Core_Model_Image_Settings $settings = null): string
             => Mage_Core_Model_Image_Set::buildPath('catalog/product', 'catalog/product' . $file, $settings ?? $this->settings, $width);
 
@@ -72,17 +62,6 @@ describe('resized image files of an image entity', function () {
             if ($original !== null) {
                 Mage::register($key, $original);
             }
-        }
-        if (($this->readActiveRows)() !== $this->activeRows) {
-            $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
-            $table = Mage::getSingleton('core/resource')->getTableName('core/config_data');
-            $adapter->delete($table, ['path LIKE ?' => Mage_Core_Model_Image_Config::XML_PATH_ACTIVE . '%']);
-            foreach ($this->activeRows as $row) {
-                $adapter->insert($table, $row);
-            }
-            Mage::app()->cleanCache([Mage_Core_Model_Config::CACHE_TAG]);
-            Mage::getConfig()->reinit();
-            Mage::app()->reinitStores();
         }
         foreach ($this->restore as $path => $value) {
             Mage::app()->getStore($this->storeId)->setConfig($path, $value);
@@ -187,18 +166,23 @@ describe('resized image files of an image entity', function () {
             ->and($this->mount->directoryExists('catalog/product/cache/1'))->toBeFalse();
     });
 
-    it('keeps the active settings until the files of the live settings exist', function (): void {
-        $config = Mage::getSingleton('core/image_config');
-        $store = Mage::app()->getStore($this->storeId);
-        $old = new Mage_Core_Model_Image_Settings([150, 300], quality: 50);
-        $store->setConfig(Mage_Core_Model_Image_Config::XML_PATH_ACTIVE . 'product', json_encode($old->toArray()));
-        $config->reset();
+    it('lists the folders of the settings that do not exist on the mount yet, also for a new width', function (): void {
+        $resizer = Mage::getSingleton('core/image_resizer');
+        $hash = $this->settings->getHash();
+        [$first, $last] = [$this->settings->widths[0], array_last($this->settings->widths)];
 
-        expect($config->getActiveSettings('product', $this->storeId))->toEqual($old)
-            ->and($config->getPendingStoreIds('product'))->toContain($this->storeId)
-            ->and(Mage::helper('core/image')->init('product', '/a/b/shirt.png')->getPath(300))
-            ->toContain('/' . $old->getHash() . '/300/')
-            ->and(array_keys($config->getAllSettings('product')))->toContain($old->getHash(), $this->settings->getHash());
+        $before = $resizer->getMissingFolders('product');
+        foreach ($this->settings->widths as $width) {
+            $this->mount->createDirectory("catalog/product/cache/{$hash}/{$width}");
+        }
+        $after = $resizer->getMissingFolders('product');
+        $this->mount->deleteDirectory("catalog/product/cache/{$hash}/{$last}");
+
+        expect($before)->toContain("{$hash}/{$first}", "{$hash}/{$last}")
+            ->and($after)->not->toContain("{$hash}/{$first}")
+            ->and($after)->not->toContain("{$hash}/{$last}")
+            ->and($resizer->getMissingFolders('product'))->toContain("{$hash}/{$last}")
+            ->and(Mage::helper('core/image')->init('product', '/a/b/shirt.png')->getPath(300))->toContain('/' . $hash . '/300/');
     });
 
     it('takes the slots from the child theme, then the parent theme, then base/default', function (): void {
@@ -215,8 +199,8 @@ describe('resized image files of an image entity', function () {
         $store->setConfig('design/theme/skin', 'image_test_child');
         Mage::getSingleton('core/image_config')->reset();
 
-        $settings = Mage::getSingleton('core/image_config')->getLiveSettings('product', $this->storeId);
-        $blog = Mage::getSingleton('core/image_config')->getLiveSettings('blog', $this->storeId);
+        $settings = Mage::getSingleton('core/image_config')->getSettings('product', $this->storeId);
+        $blog = Mage::getSingleton('core/image_config')->getSettings('blog', $this->storeId);
 
         expect($settings->widths)->toBe([50, 100, 200, 600, 1200, 2400])
             ->and($settings->ratio)->toBe([3, 4])
@@ -227,7 +211,7 @@ describe('resized image files of an image entity', function () {
             ->and(Mage::getSingleton('core/image_config')->getSlotWidth('banner', $this->storeId))->toBe(1200)
             ->and(Mage::getSingleton('core/image_config')->getSlotWidth('nothing', $this->storeId))->toBeNull();
     });
-    it('creates a missing file of the active settings on request', function (): void {
+    it('creates a missing file of the settings on request', function (): void {
         $resizer = Mage::getSingleton('core/image_resizer');
         $path = ($this->pathOf)(300);
 
@@ -286,19 +270,15 @@ describe('resized image files of an image entity', function () {
         $config = Mage::getSingleton('core/image_config');
         $config->reset();
 
-        expect($config->getLiveSettings('product', $this->storeId)->widths)->toBe([150, 300, 800, 1600])
-            ->and($config->getLiveSettings('blog', $this->storeId)->widths)->toBe([150, 300, 600, 1200, 1600, 2400, 3200])
+        expect($config->getSettings('product', $this->storeId)->widths)->toBe([150, 300, 800, 1600])
+            ->and($config->getSettings('blog', $this->storeId)->widths)->toBe([150, 300, 600, 1200, 1600, 2400, 3200])
             ->and($config->getSlotWidth('gallery', $this->storeId, 'product'))->toBe(800)
             ->and($config->getSlotWidth('gallery', $this->storeId, 'blog'))->toBe(600)
             ->and($config->getSlotWidth('hero', $this->storeId, 'product'))->toBe(1600)
             ->and($config->getSlotWidth('gallery', $this->storeId))->toBe(600);
     });
 
-    it('keeps the old active settings and throws when a resized file cannot be written', function (): void {
-        $config = Mage::getSingleton('core/image_config');
-        $old = new Mage_Core_Model_Image_Settings([150, 300], quality: 50);
-        Mage::app()->getStore($this->storeId)->setConfig(Mage_Core_Model_Image_Config::XML_PATH_ACTIVE . 'swatch', json_encode($old->toArray()));
-        $config->reset();
+    it('throws when a resized file cannot be written', function (): void {
         ($this->writePng)('wysiwyg/swatches/red.png', 40, 40);
         $adapter = new class ($this->root) extends LocalFilesystemAdapter {
             #[\Override]
@@ -322,20 +302,11 @@ describe('resized image files of an image entity', function () {
         MountRegistry::register(new Mount('media', $adapter, $this->root, new StoreBaseUrlGenerator('media')));
 
         expect(fn() => Mage::getSingleton('core/image_resizer')->createAll('swatch'))->toThrow(RuntimeException::class, 'could not be written');
-
-        $config->reset();
-        expect($config->getActiveSettings('swatch', $this->storeId))->toEqual($old)
-            ->and($config->getPendingStoreIds('swatch'))->toContain($this->storeId)
-            ->and(($this->readActiveRows)())->toBe($this->activeRows);
     });
 
-    it('creates every file of an entity, then makes the live settings active', function (): void {
-        $config = Mage::getSingleton('core/image_config');
-        $old = new Mage_Core_Model_Image_Settings([150, 300], quality: 50);
-        Mage::app()->getStore($this->storeId)->setConfig(Mage_Core_Model_Image_Config::XML_PATH_ACTIVE . 'swatch', json_encode($old->toArray()));
-        $config->reset();
+    it('creates every file of an entity', function (): void {
         ($this->writePng)('wysiwyg/swatches/red.png', 40, 40);
-        $live = $config->getLiveSettings('swatch', $this->storeId);
+        $live = Mage::getSingleton('core/image_config')->getSettings('swatch', $this->storeId);
 
         $count = Mage::getSingleton('core/image_resizer')->createAll('swatch');
 
@@ -343,9 +314,6 @@ describe('resized image files of an image entity', function () {
         foreach ($live->widths as $width) {
             expect($this->mount->fileExists(Mage_Core_Model_Image_Set::buildPath('wysiwyg/swatches', 'wysiwyg/swatches/red.png', $live, $width)))->toBeTrue();
         }
-        expect($config->getActiveSettings('swatch', $this->storeId))->toEqual($live)
-            ->and($config->getActiveSettings('swatch', $this->storeId))->not->toEqual($old)
-            ->and($config->getPendingStoreIds('swatch'))->not->toContain($this->storeId);
     });
 
     it('returns the bytes of a resized file that exists, and does not write it again', function (): void {

@@ -54,7 +54,7 @@ describe('the watermark of the live image settings', function () {
         foreach (['', '/default', "/websites/{$websiteId}", "/stores/{$this->storeId}"] as $folder) {
             $this->mount->write("{$base}{$folder}/wm.png", $png);
             $this->config->reset();
-            $found[] = $this->config->getLiveSettings('product', $this->storeId)->watermark['path'] ?? null;
+            $found[] = $this->config->getSettings('product', $this->storeId)->watermark['path'] ?? null;
         }
 
         expect($found)->toBe([

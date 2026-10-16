@@ -109,7 +109,7 @@ describe('Maho_MediaCleaner_Helper_Data', function () {
     });
 
     it('finds the unused cache files with one listing of the product directory', function (): void {
-        $settings = Mage::getSingleton('core/image_config')->getActiveSettings('product', (int) Mage::app()->getDefaultStoreView()->getId());
+        $settings = Mage::getSingleton('core/image_config')->getSettings('product', (int) Mage::app()->getDefaultStoreView()->getId());
         $this->mount->write("catalog/product/a/b/kept{$settings->extension}", 'x');
         $this->mount->write("catalog/product/cache/{$settings->getHash()}/{$settings->widths[0]}/a/b/kept{$settings->extension}", 'x');
         $this->mount->write('catalog/product/cache/1/image/265x/0123abcd/a/b/kept.jpg.webp', 'x');

@@ -3,8 +3,8 @@
 /**
  * Creates and deletes the resized files of image entities on the media mount.
  *
- * Each source file gets one file for each width of each settings set that a store view uses,
- * active or live. A width larger than the source gives a file at the size of the source, so
+ * Each source file gets one file for each width of each settings set that a store view uses.
+ * A width larger than the source gives a file at the size of the source, so
  * every width in a srcset exists.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
@@ -229,13 +229,12 @@ class Mage_Core_Model_Image_Resizer
     }
 
     /**
-     * Create the missing files of every source file of $entity, then make the live settings of
-     * every store view active. This is the step after a change of a theme or of the image
-     * settings, and the repair after a loss of files.
+     * Create the missing files of every source file of $entity. This is the step after a change
+     * of a theme or of the image settings, and the repair after a loss of files.
      *
      * @param (callable(string $file): void)|null $onFile called after each source file
      * @return int the number of files written
-     * @throws RuntimeException when a file could not be written. The store views then keep their settings.
+     * @throws RuntimeException when a file could not be written
      */
     public function createAll(string $entity, ?callable $onFile = null): int
     {
@@ -253,24 +252,32 @@ class Mage_Core_Model_Image_Resizer
             $failed++;
         });
         if ($failed > 0) {
-            throw new RuntimeException(sprintf('%d images of the entity "%s" could not be written, so its store views keep their settings.', $failed, $entity));
+            throw new RuntimeException(sprintf('%d images of the entity "%s" could not be written.', $failed, $entity));
         }
-        $this->activateLiveSettings($entity);
 
         return $count;
     }
 
     /**
-     * Switch each store view to the live settings of $entity. Call it when their files exist.
+     * The folders of the settings of $entity that do not exist on the media mount yet, as hash and
+     * width, such as 0123456789ab/300. The files of these folders must be created.
+     *
+     * @return list<string>
      */
-    public function activateLiveSettings(string $entity): void
+    public function getMissingFolders(string $entity): array
     {
         $config = Mage::getSingleton('core/image_config');
-        $pending = [];
-        foreach ($config->getPendingStoreIds($entity) as $storeId) {
-            $pending[$storeId] = $config->getLiveSettings($entity, $storeId);
+        $cache = $config->getSource($entity) . '/' . Mage_Core_Model_Image_Set::CACHE_FOLDER;
+        $hashes = array_map(basename(...), $this->listFolders($cache));
+        $missing = [];
+        foreach ($config->getAllSettings($entity) as $hash => $settings) {
+            $hash = (string) $hash;
+            $widths = in_array($hash, $hashes, true) ? array_map(basename(...), $this->listFolders("{$cache}/{$hash}")) : [];
+            foreach (array_diff(array_map(strval(...), $settings->widths), $widths) as $width) {
+                $missing[] = "{$hash}/{$width}";
+            }
         }
-        $config->activate($entity, $pending);
+        return $missing;
     }
 
     /**
@@ -386,7 +393,7 @@ class Mage_Core_Model_Image_Resizer
 
     /**
      * Delete the settings folders and the width folders of $entity that no store view uses,
-     * active or live, with the files of earlier releases in the same cache folder.
+     * with the files of earlier releases in the same cache folder.
      *
      * @return int the number of deleted folders
      */
@@ -621,8 +628,7 @@ class Mage_Core_Model_Image_Resizer
         $extensions = [];
         foreach ($config->getStoreIds() as $storeId) {
             foreach (array_keys($config->getEntities()) as $entity) {
-                $extensions[] = $config->getActiveSettings($entity, $storeId)->extension;
-                $extensions[] = $config->getLiveSettings($entity, $storeId)->extension;
+                $extensions[] = $config->getSettings($entity, $storeId)->extension;
             }
         }
         return array_values(array_unique($extensions));

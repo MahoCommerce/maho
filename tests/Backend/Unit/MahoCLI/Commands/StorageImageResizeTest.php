@@ -54,11 +54,6 @@ describe('storage:image:resize', function () {
         };
         ($this->useMount)(new LocalFilesystemAdapter($this->root));
 
-        $this->adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
-        $this->configTable = Mage::getSingleton('core/resource')->getTableName('core/config_data');
-        $this->activeRows = $this->adapter->fetchAll($this->adapter->select()
-            ->from($this->configTable)
-            ->where('path = ?', Mage_Core_Model_Image_Config::XML_PATH_ACTIVE . 'swatch'));
 
         $this->storeId = (int) Mage::app()->getDefaultStoreView()->getId();
         Mage::app()->setCurrentStore($this->storeId);
@@ -74,22 +69,9 @@ describe('storage:image:resize', function () {
         $command = new StorageImageResize('storage:image:resize');
         new Application()->addCommand($command);
         $this->tester = new CommandTester($command);
-
-        $this->setOldActiveSettings = function (): Mage_Core_Model_Image_Settings {
-            $old = new Mage_Core_Model_Image_Settings([36, 72], quality: 50);
-            Mage::app()->getStore($this->storeId)->setConfig(Mage_Core_Model_Image_Config::XML_PATH_ACTIVE . 'swatch', json_encode($old->toArray()));
-            Mage::getSingleton('core/image_config')->reset();
-            return $old;
-        };
     });
 
     afterEach(function (): void {
-        $this->adapter->delete($this->configTable, ['path = ?' => Mage_Core_Model_Image_Config::XML_PATH_ACTIVE . 'swatch']);
-        foreach ($this->activeRows as $row) {
-            $this->adapter->insert($this->configTable, $row);
-        }
-        Mage::getConfig()->reinit();
-        Mage::app()->reinitStores();
         Mage::getResourceSingleton('core/image_size')->deleteFolder('media', 'wysiwyg/swatches');
         Mage::unregister('_singleton/core/image_size');
         Mage::getSingleton('core/image_config')->reset();
@@ -133,30 +115,20 @@ describe('storage:image:resize', function () {
             ->and($this->mount->directoryExists('catalog/product/cache'))->toBeFalse();
     });
 
-    it('fails and keeps the old active settings when the mount refuses to write the resized files', function (): void {
+    it('fails when the mount refuses to write the resized files', function (): void {
         ($this->useMount)(new StorageImageResizeTestCacheFailingAdapter($this->root));
-        $old = ($this->setOldActiveSettings)();
-        $config = Mage::getSingleton('core/image_config');
 
         $status = $this->tester->execute(['--entity' => 'swatch', '--jobs' => 1]);
 
         expect($status)->toBe(Command::FAILURE)
-            ->and($config->getActiveSettings('swatch', $this->storeId))->toEqual($old)
-            ->and($config->getPendingStoreIds('swatch'))->toContain($this->storeId)
             ->and($this->mount->directoryExists('wysiwyg/swatches/cache'))->toBeFalse();
     });
 
-    it('creates the resized files and makes the live settings active when every write succeeds', function (): void {
-        $old = ($this->setOldActiveSettings)();
-
+    it('creates the resized files when every write succeeds', function (): void {
         $status = $this->tester->execute(['--entity' => 'swatch', '--jobs' => 1]);
 
-        $config = Mage::getSingleton('core/image_config');
-        $live = $config->getLiveSettings('swatch', $this->storeId);
+        $live = Mage::getSingleton('core/image_config')->getSettings('swatch', $this->storeId);
         expect($status)->toBe(Command::SUCCESS)
-            ->and($config->getActiveSettings('swatch', $this->storeId))->toEqual($live)
-            ->and($config->getActiveSettings('swatch', $this->storeId))->not->toEqual($old)
-            ->and($config->getPendingStoreIds('swatch'))->toBe([])
             ->and($this->mount->fileExists(Mage_Core_Model_Image_Set::buildPath('wysiwyg/swatches', 'wysiwyg/swatches/red.png', $live, 72)))->toBeTrue();
     });
 });

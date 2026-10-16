@@ -12,11 +12,6 @@
  * <background> color, and the prefix of its <watermark> settings, such as design/watermark/image.
  * The output format and the quality are the same for the whole installation.
  *
- * Two sets of settings exist for each store view and entity. The live settings come from the
- * theme and the store config now. The active settings are the ones that the URLs use. A
- * change of the live settings becomes active only after the files for it exist, so a page
- * never links to a file that is not there yet.
- *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Core
@@ -28,16 +23,10 @@ class Mage_Core_Model_Image_Config
 {
     public const XML_PATH_ENTITIES = 'global/images/entities';
 
-    /** Store config path of the active settings of an entity, followed by the entity name. */
-    public const XML_PATH_ACTIVE = 'images/active/';
-
     public const CACHE_TAG = 'image_settings';
 
     /** @var array<string, Mage_Core_Model_Image_Settings> */
-    protected array $liveSettings = [];
-
-    /** @var array<string, Mage_Core_Model_Image_Settings> */
-    protected array $activeSettings = [];
+    protected array $settings = [];
 
     /** @var array<int, array{slots?: array<string, int>, entities?: array<string, array{ratio?: string, fit?: string, slots?: array<string, int>}>}> */
     protected array $themeNodes = [];
@@ -70,30 +59,14 @@ class Mage_Core_Model_Image_Config
     }
 
     /**
-     * The settings that the URLs of $entity use in the store view.
+     * The settings of $entity that the theme and the store config of the store view give. A
+     * remote mount checks the watermark file, so the result stays in the app cache.
      */
-    public function getActiveSettings(string $entity, int $storeId): Mage_Core_Model_Image_Settings
+    public function getSettings(string $entity, int $storeId): Mage_Core_Model_Image_Settings
     {
         $key = "{$entity}/{$storeId}";
-        if (isset($this->activeSettings[$key])) {
-            return $this->activeSettings[$key];
-        }
-
-        $stored = (string) Mage::getStoreConfig(self::XML_PATH_ACTIVE . $entity, $storeId);
-        $settings = $stored !== '' ? Mage_Core_Model_Image_Settings::fromArray((array) json_decode($stored, true)) : null;
-
-        return $this->activeSettings[$key] = $settings ?? $this->getLiveSettings($entity, $storeId);
-    }
-
-    /**
-     * The settings that the theme and the store config of the store view give now. A remote
-     * mount checks the watermark file, so the result stays in the app cache.
-     */
-    public function getLiveSettings(string $entity, int $storeId): Mage_Core_Model_Image_Settings
-    {
-        $key = "{$entity}/{$storeId}";
-        if (isset($this->liveSettings[$key])) {
-            return $this->liveSettings[$key];
+        if (isset($this->settings[$key])) {
+            return $this->settings[$key];
         }
 
         $cacheId = 'image_settings_' . $entity . '_' . $storeId;
@@ -103,7 +76,7 @@ class Mage_Core_Model_Image_Config
             : null;
 
         if ($settings === null) {
-            $settings = $this->buildLiveSettings($entity, $storeId);
+            $settings = $this->buildSettings($entity, $storeId);
             if (Mage::app()->useCache('config')) {
                 Mage::app()->saveCache(
                     (string) json_encode($settings->toArray()),
@@ -113,7 +86,7 @@ class Mage_Core_Model_Image_Config
             }
         }
 
-        return $this->liveSettings[$key] = $settings;
+        return $this->settings[$key] = $settings;
     }
 
     /**
@@ -156,33 +129,8 @@ class Mage_Core_Model_Image_Config
     }
 
     /**
-     * Make the given settings the active settings of $entity, for each store view in the
-     * list. Call it only after the files for the settings exist. The config reloads once.
-     *
-     * @param array<int, Mage_Core_Model_Image_Settings> $settingsByStore
-     */
-    public function activate(string $entity, array $settingsByStore): void
-    {
-        if ($settingsByStore === []) {
-            return;
-        }
-        foreach ($settingsByStore as $storeId => $settings) {
-            Mage::getConfig()->saveConfig(
-                self::XML_PATH_ACTIVE . $entity,
-                (string) json_encode($settings->toArray()),
-                'stores',
-                (int) $storeId,
-            );
-        }
-        Mage::getConfig()->reinit();
-        Mage::app()->reinitStores();
-        Mage::app()->cleanCache([Mage_Core_Block_Abstract::CACHE_GROUP]);
-        $this->activeSettings = [];
-    }
-
-    /**
-     * The different settings of $entity over all store views, active and live, by hash. A
-     * file of an entity must exist for each of them.
+     * The different settings of $entity over all store views, by hash. A file of an entity must
+     * exist for each of them.
      *
      * @return array<string, Mage_Core_Model_Image_Settings>
      */
@@ -190,33 +138,11 @@ class Mage_Core_Model_Image_Config
     {
         $result = [];
         foreach ($this->getStoreIds() as $storeId) {
-            foreach ([$this->getActiveSettings($entity, $storeId), $this->getLiveSettings($entity, $storeId)] as $settings) {
-                $hash = $settings->getHash();
-                $result[$hash] = isset($result[$hash])
-                    ? $this->mergeWidths($result[$hash], $settings)
-                    : $settings;
-            }
+            $settings = $this->getSettings($entity, $storeId);
+            $hash = $settings->getHash();
+            $result[$hash] = isset($result[$hash]) ? $this->mergeWidths($result[$hash], $settings) : $settings;
         }
         return $result;
-    }
-
-    /**
-     * The store views whose live settings of $entity are not active yet, or that have no stored
-     * active settings.
-     *
-     * @return list<int>
-     */
-    public function getPendingStoreIds(string $entity): array
-    {
-        $pending = [];
-        foreach ($this->getStoreIds() as $storeId) {
-            if ((string) Mage::getStoreConfig(self::XML_PATH_ACTIVE . $entity, $storeId) === ''
-                || $this->getActiveSettings($entity, $storeId) != $this->getLiveSettings($entity, $storeId)
-            ) {
-                $pending[] = $storeId;
-            }
-        }
-        return $pending;
     }
 
     /**
@@ -225,8 +151,7 @@ class Mage_Core_Model_Image_Config
      */
     public function reset(): void
     {
-        $this->liveSettings = [];
-        $this->activeSettings = [];
+        $this->settings = [];
         $this->themeNodes = [];
         Mage::app()->cleanCache([self::CACHE_TAG]);
     }
@@ -239,7 +164,7 @@ class Mage_Core_Model_Image_Config
         return array_values(array_map(fn($store): int => (int) $store->getId(), Mage::app()->getStores()));
     }
 
-    protected function buildLiveSettings(string $entity, int $storeId): Mage_Core_Model_Image_Settings
+    protected function buildSettings(string $entity, int $storeId): Mage_Core_Model_Image_Settings
     {
         $entityNode = $this->getThemeNode($storeId)['entities'][$entity] ?? [];
         $slots = array_values($this->getEntitySlots($entity, $storeId));
