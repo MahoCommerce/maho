@@ -22,6 +22,7 @@ use Symfony\Component\Filesystem\Path;
  *     <url_type>media</url_type>           <!-- media or web: the store base URL that serves this path -->
  *     <public_url>https://cdn.example.com/files/</public_url>   <!-- for a mount with no url_type; wins over url_type -->
  *     <visibility>public</visibility>      <!-- default visibility for every write -->
+ *     <retain_visibility>0</retain_visibility>   <!-- 0: move and copy do not read the source visibility; absent means 0 with <visibility>, else 1 -->
  *     <adapter>                            <!-- absent means local -->
  *         <type>s3</type>
  *         <bucket>my-store</bucket>
@@ -46,6 +47,7 @@ final readonly class MountDefinition
         public ?string $visibility = null,
         public string $adapterType = self::ADAPTER_LOCAL,
         public array $adapterOptions = [],
+        public ?bool $retainVisibility = null,
     ) {
         if (preg_match('/^[a-z][a-z0-9_]*$/', $name) !== 1) {
             throw new StorageException(sprintf('Invalid storage mount name "%s": use lowercase letters, digits and underscores.', $name));
@@ -101,6 +103,7 @@ final readonly class MountDefinition
             visibility: self::text($node, 'visibility'),
             adapterType: $adapterType,
             adapterOptions: $adapterOptions,
+            retainVisibility: self::flag($node, 'retain_visibility'),
         );
     }
 
@@ -132,9 +135,21 @@ final readonly class MountDefinition
     /** Same truth table as Mage_Core_Model_Config_Element::is(): empty, "0", "false" and "off" are false. */
     public function boolOption(string $key): bool
     {
-        $value = strtolower((string) $this->option($key));
+        return self::isTrue($this->option($key));
+    }
+
+    private static function isTrue(?string $value): bool
+    {
+        $value = strtolower((string) $value);
 
         return $value !== '' && $value !== '0' && $value !== 'false' && $value !== 'off';
+    }
+
+    private static function flag(\Mage_Core_Model_Config_Element $node, string $child): ?bool
+    {
+        $value = self::text($node, $child);
+
+        return $value === null ? null : self::isTrue($value);
     }
 
     private static function text(\Mage_Core_Model_Config_Element $node, string $child): ?string

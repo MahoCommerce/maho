@@ -81,7 +81,7 @@ class Mage_Catalog_Model_Rule_Condition_Product extends Mage_Rule_Model_Conditio
     {
         $attribute = $object->getResource()->getAttribute($this->getAttribute());
         if ($attribute && $attribute->getFrontendInput() == 'multiselect') {
-            $value = strlen($value) ? explode(',', $value) : [];
+            $value = $value === null || $value === '' ? [] : explode(',', $value);
         }
         return $value;
     }
