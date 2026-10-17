@@ -47,7 +47,9 @@ class Mage_Downloadable_Model_Observer
             return $this;
         }
         // Every save of every order line runs this, so skip other lines without loading their product
-        if ($orderItem->getProductType() !== Mage_Downloadable_Model_Product_Type::TYPE_DOWNLOADABLE) {
+        if ($orderItem->getProductType() !== Mage_Downloadable_Model_Product_Type::TYPE_DOWNLOADABLE
+            && $orderItem->getRealProductType() !== Mage_Downloadable_Model_Product_Type::TYPE_DOWNLOADABLE
+        ) {
             return $this;
         }
         if (Mage::getModel('downloadable/link_purchased')->load($orderItem->getId(), 'order_item_id')->getId()) {
