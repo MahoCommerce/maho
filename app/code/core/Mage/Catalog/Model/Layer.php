@@ -46,7 +46,7 @@ class Mage_Catalog_Model_Layer extends \Maho\DataObject
         if ($this->_stateKey === null) {
             $this->_stateKey = 'STORE_' . Mage::app()->getStore()->getId()
                 . '_CAT_' . $this->getCurrentCategory()->getId()
-                . '_CUSTGROUP_' . Mage::getSingleton('customer/session')->getCustomerGroupId();
+                . '_CUSTGROUP_' . Mage::helper('customer')->getCurrentGroupId();
         }
 
         return $this->_stateKey;

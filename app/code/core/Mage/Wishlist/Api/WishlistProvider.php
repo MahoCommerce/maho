@@ -68,7 +68,8 @@ final class WishlistProvider extends \Maho\ApiPlatform\Provider
     {
         $customerId = $this->requireCustomerId();
         $storeId = \Mage::app()->getStore()->getId();
-        $cacheKey = "api_wishlist_{$customerId}_{$storeId}";
+        $groupId = \Mage::helper('customer')->getCurrentGroupId();
+        $cacheKey = "api_wishlist_{$customerId}_{$storeId}_{$groupId}";
 
         $cached = \Mage::app()->getCache()->load($cacheKey);
         if ($cached !== false) {

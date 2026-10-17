@@ -48,7 +48,12 @@ class Mage_Checkout_Service_Cart
         $quote->setStoreId((int) $store->getId());
 
         if ($customerId) {
-            $quote->setCustomerId($customerId);
+            $customer = \Mage::getModel('customer/customer')->load($customerId);
+            if (!$customer->getId()) {
+                throw new \Mage_Core_Exception("Invalid customer: {$customerId}");
+            }
+            // setCustomer() also copies the customer group, which prices the cart
+            $quote->setCustomer($customer);
             $quote->setCustomerIsGuest(false);
         } else {
             $quote->setCustomerIsGuest();
@@ -79,7 +84,7 @@ class Mage_Checkout_Service_Cart
             $quote->setStore(\Mage::app()->getStore($quote->getStoreId()));
         }
 
-        return $quote;
+        return $this->syncCustomerGroup($quote);
     }
 
     /**
@@ -112,10 +117,36 @@ class Mage_Checkout_Service_Cart
             // dropped on the next load. That's a rare, low-impact outcome (an
             // empty cart), so we don't serialize creation: the cost of a lock on
             // every cart bootstrap isn't worth guarding against it.
-            $quote = $this->create($customerId, $storeId);
+            return $this->create($customerId, $storeId);
         }
 
-        return $quote;
+        return $this->syncCustomerGroup($quote);
+    }
+
+    /**
+     * Give an active customer cart the current group of its customer.
+     *
+     * Change the cart in memory only. A read must not save a cart before the access check.
+     */
+    private function syncCustomerGroup(\Mage_Sales_Model_Quote $quote): \Mage_Sales_Model_Quote
+    {
+        $customerId = $quote->getCustomerId();
+        if (!$customerId || !$quote->getIsActive()) {
+            return $quote;
+        }
+
+        $resource = \Mage::getSingleton('core/resource');
+        $read = $resource->getConnection('core_read');
+        $groupId = $read->fetchOne(
+            $read->select()
+                ->from($resource->getTableName('customer/entity'), ['group_id'])
+                ->where('entity_id = ?', $customerId),
+        );
+        if ($groupId === false || (int) $groupId === $quote->getCustomerGroupId()) {
+            return $quote;
+        }
+
+        return $quote->setCustomer(\Mage::getModel('customer/customer')->load($customerId));
     }
 
     /**
