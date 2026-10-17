@@ -188,10 +188,8 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Customer group that prices products for the current request
-     *
-     * Code that has no customer group at hand reads it here. The group a stateless caller such as the
-     * API set wins over the customer session, which only the storefront fills.
+     * Customer group of the current request: the one a stateless caller such as the API set, or else
+     * the group of the customer session
      */
     public function getCurrentGroupId(): int
     {
@@ -201,7 +199,7 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Set the customer group of the current request, or null to go back to the customer session
      */
-    public function setCurrentGroupId(?int $groupId): self
+    public function setCurrentGroupId(?int $groupId): static
     {
         $this->currentGroupId = $groupId;
         return $this;

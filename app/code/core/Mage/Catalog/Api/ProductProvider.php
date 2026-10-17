@@ -363,9 +363,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         if ($visibleOnly && (int) $product->getStatus() !== \Mage_Catalog_Model_Product_Status::STATUS_ENABLED) {
             return null;
         }
-        // Price models read the group off the product (falling back to the
-        // session, which is empty in the API), so set it explicitly to make
-        // tier, catalog-rule and final prices match the cache key's group.
+        // Set the group on the product too, so tier, catalog-rule and final prices match the cache key's group
         $product->setCustomerGroupId($this->getCustomerGroupId());
         $dto = $this->toDto($product);
         // Backend only: public reads go into the shared response cache, and the
@@ -520,9 +518,8 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         }
 
         // Re-target the price index to this customer group so price filters,
-        // price sorting and listing prices match the cache key's group. The
-        // layer already joined it for the session group (guest); addPriceData()
-        // is idempotent and just overrides the group on the existing join.
+        // price sorting and listing prices match the cache key's group.
+        // addPriceData() is idempotent and just overrides the group on the existing join.
         $collection->addPriceData($this->getCustomerGroupId());
         if ($backend) {
             // The price index holds only enabled products of this website, so an inner join would hide the rest
