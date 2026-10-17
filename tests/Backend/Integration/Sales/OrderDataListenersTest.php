@@ -56,31 +56,15 @@ function orderDataQuote(): Mage_Sales_Model_Quote
     return $quote;
 }
 
-function orderDataSampleProduct(string $type): Mage_Catalog_Model_Product
-{
-    $product = Mage::getResourceModel('catalog/product_collection')
-        ->addAttributeToFilter('type_id', $type)
-        ->addAttributeToFilter('status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
-        ->addWebsiteFilter(1)
-        ->setOrder('entity_id', 'ASC')
-        ->setPageSize(1)
-        ->getFirstItem();
-    if (!$product->getId()) {
-        test()->markTestSkipped("No enabled {$type} product in the sample data");
-    }
-
-    return Mage::getModel('catalog/product')->setStoreId(1)->load($product->getId());
-}
-
 /**
- * A simple product that manages no stock, so the orders of this file leave the sample data unchanged.
+ * A product that manages no stock, made here since the sample data has no bundle and no downloadable product
  *
  * @param array<string, mixed> $data
  */
-function orderDataProduct(array $data = []): Mage_Catalog_Model_Product
+function orderDataProduct(array $data = [], string $type = Mage_Catalog_Model_Product_Type::TYPE_SIMPLE): Mage_Catalog_Model_Product
 {
     $product = Mage::getModel('catalog/product')->setStoreId(0)
-        ->setTypeId(Mage_Catalog_Model_Product_Type::TYPE_SIMPLE)
+        ->setTypeId($type)
         ->setAttributeSetId(Mage::getModel('catalog/product')->getDefaultAttributeSetId())
         ->setSku('pest-order-data-' . uniqid())->setName('Pest order data product')->setPrice(10.0)->setWeight(1)
         ->setStatus(Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
@@ -88,33 +72,91 @@ function orderDataProduct(array $data = []): Mage_Catalog_Model_Product
         ->setTaxClassId(0)->setWebsiteIds([1])
         ->setStockData(['use_config_manage_stock' => 0, 'manage_stock' => 0, 'is_in_stock' => 1, 'qty' => 100])
         ->addData($data);
-    $product->save();
+    // Bundle selections read the product from the registry, which the admin product save fills
+    Mage::register('product', $product, true);
+    try {
+        $product->save();
+    } finally {
+        Mage::unregister('product');
+    }
     $created = &orderDataCreated();
     $created['products'][] = (int) $product->getId();
 
     return $product;
 }
 
+function orderDataBundle(): Mage_Catalog_Model_Product
+{
+    $options = [];
+    $selections = [];
+    foreach (['First', 'Second'] as $position => $title) {
+        $options[] = ['title' => $title, 'default_title' => $title, 'type' => 'select', 'required' => 1, 'position' => $position, 'delete' => ''];
+        $selections[] = [[
+            'product_id' => (int) orderDataProduct()->getId(), 'selection_qty' => 1, 'selection_can_change_qty' => 0,
+            'position' => 0, 'is_default' => 1, 'selection_price_type' => 0, 'selection_price_value' => 0, 'delete' => '',
+        ]];
+    }
+
+    return orderDataProduct([
+        'price' => null,
+        'price_type' => Mage_Bundle_Model_Product_Price::PRICE_TYPE_DYNAMIC,
+        'sku_type' => 0,
+        'weight_type' => 0,
+        'shipment_type' => 0,
+        'price_view' => 0,
+        'can_save_bundle_selections' => true,
+        'bundle_options_data' => $options,
+        'bundle_selections_data' => $selections,
+    ], Mage_Catalog_Model_Product_Type::TYPE_BUNDLE);
+}
+
+function orderDataDownloadable(): Mage_Catalog_Model_Product
+{
+    $product = orderDataProduct(['links_purchased_separately' => 1], Mage_Downloadable_Model_Product_Type::TYPE_DOWNLOADABLE);
+    foreach (['first', 'second'] as $position => $name) {
+        $link = Mage::getModel('downloadable/link')
+            ->setProductId((int) $product->getId())
+            ->setSortOrder($position)
+            ->setNumberOfDownloads(0)
+            ->setIsShareable(Mage_Downloadable_Model_Link::LINK_SHAREABLE_CONFIG)
+            ->setLinkType(Mage_Downloadable_Helper_Download::LINK_TYPE_URL)
+            ->setLinkUrl("https://example.com/{$name}")
+            ->setTitle($name)
+            ->setStoreId(0)
+            ->setWebsiteId(0)
+            ->setPrice(0.0);
+        $link->save();
+        Mage::getResourceSingleton('downloadable/link')->saveItemTitleAndPrice($link);
+    }
+
+    return Mage::getModel('catalog/product')->setStoreId(1)->load($product->getId());
+}
+
 afterEach(function (): void {
-    // Cancel first: a canceled order gives the stock of the sample products back.
     $created = &orderDataCreated();
+    $messageIds = [];
     foreach ($created['orders'] as $orderId) {
         $order = Mage::getModel('sales/order')->load($orderId);
-        if ($order->canCancel()) {
-            $order->cancel()->save();
-        }
-        // Neither purchased links nor gift messages are deleted with the order
+        // Neither purchased links nor gift messages are deleted with the order or the cart
         foreach (Mage::getModel('downloadable/link_purchased')->getCollection()->addFieldToFilter('order_id', $orderId) as $purchased) {
             $purchased->delete();
         }
-        $messageIds = array_map(fn($item) => $item->getGiftMessageId(), $order->getAllItems());
-        foreach (array_filter([$order->getGiftMessageId(), ...$messageIds]) as $messageId) {
-            Mage::getModel('giftmessage/message')->load($messageId)->delete();
+        $messageIds[] = $order->getGiftMessageId();
+        foreach ($order->getAllItems() as $item) {
+            $messageIds[] = $item->getGiftMessageId();
         }
         $order->delete();
     }
     foreach ($created['quotes'] as $quoteId) {
-        Mage::getModel('sales/quote')->setStoreId(1)->load($quoteId)->delete();
+        $quote = Mage::getModel('sales/quote')->setStoreId(1)->load($quoteId);
+        $messageIds[] = $quote->getGiftMessageId();
+        foreach ($quote->getAllItems() as $item) {
+            $messageIds[] = $item->getGiftMessageId();
+        }
+        $quote->delete();
+    }
+    foreach (array_unique(array_filter($messageIds)) as $messageId) {
+        Mage::getModel('giftmessage/message')->load($messageId)->delete();
     }
     foreach ($created['products'] as $productId) {
         Mage::getModel('catalog/product')->load($productId)->delete();
@@ -146,7 +188,7 @@ it('copies the gift messages of the cart and of a cart line to the order', funct
 });
 
 it('stores the selection attributes on each child line of a bundle', function (): void {
-    $bundle = orderDataSampleProduct(Mage_Catalog_Model_Product_Type::TYPE_BUNDLE);
+    $bundle = Mage::getModel('catalog/product')->setStoreId(1)->load(orderDataBundle()->getId());
     $selections = [];
     $typeInstance = $bundle->getTypeInstance(true);
     foreach ($typeInstance->getSelectionsCollection($typeInstance->getOptionsIds($bundle), $bundle) as $selection) {
@@ -166,7 +208,7 @@ it('stores the selection attributes on each child line of a bundle', function ()
 });
 
 it('creates the purchased links of a downloadable line', function (): void {
-    $product = orderDataSampleProduct(Mage_Downloadable_Model_Product_Type::TYPE_DOWNLOADABLE);
+    $product = orderDataDownloadable();
     $linkIds = array_keys($product->getTypeInstance(true)->getLinks($product));
 
     $quote = Mage::getService('checkout/cart')->addItem(orderDataQuote(), $product->getSku(), 1, ['links' => $linkIds]);
