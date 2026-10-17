@@ -124,14 +124,13 @@ class Mage_Checkout_Service_Cart
     }
 
     /**
-     * Give an active customer cart the current group of its customer, as the storefront does at login
-     *
-     * A cart keeps the group it was saved with: an admin can move the customer to another group, and
-     * carts created through the API before the customer was set on them were saved as NOT LOGGED IN.
+     * Sets the customer on an active customer cart whose group is not the current group of the
+     * customer, as the storefront does at login, in memory only: a read must not save the cart of
+     * a caller that has not passed the access check yet
      */
     private function syncCustomerGroup(\Mage_Sales_Model_Quote $quote): \Mage_Sales_Model_Quote
     {
-        $customerId = (int) $quote->getCustomerId();
+        $customerId = $quote->getCustomerId();
         if (!$customerId || !$quote->getIsActive()) {
             return $quote;
         }
@@ -147,10 +146,7 @@ class Mage_Checkout_Service_Cart
             return $quote;
         }
 
-        $quote->setCustomer(\Mage::getModel('customer/customer')->load($customerId));
-        $this->collectAndSave($quote);
-
-        return $quote;
+        return $quote->setCustomer(\Mage::getModel('customer/customer')->load($customerId));
     }
 
     /**

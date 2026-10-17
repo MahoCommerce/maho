@@ -73,8 +73,9 @@ it('moves a saved customer cart to the current group of the customer when the ca
 
     $service = Mage::getService('checkout/cart');
 
+    // A read gives the cart the group in memory only, so it never saves a cart before the access check
     expect($service->getById((int) $quote->getId())->getCustomerGroupId())->toBe(2)
-        ->and(Mage::getModel('sales/quote')->setStoreId(1)->load($quote->getId())->getCustomerGroupId())->toBe(2);
+        ->and(Mage::getModel('sales/quote')->setStoreId(1)->load($quote->getId())->getCustomerGroupId())->toBe(Mage_Customer_Model_Group::NOT_LOGGED_IN_ID);
 
     $this->customer->setGroupId(3)->save();
 
