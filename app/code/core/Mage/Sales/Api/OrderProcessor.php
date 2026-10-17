@@ -13,6 +13,7 @@ namespace Mage\Sales\Api;
 use Mage\Checkout\Api\CartRequest;
 use ApiPlatform\Metadata\Operation;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
@@ -126,6 +127,11 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
 
         // Verify cart ownership
         $this->verifyCartOwnership($quote, $accessedByMaskedId);
+
+        // The admin places guest orders for any product, as in the admin order form
+        if (!$isAdminOrder && !$quote->getCustomerId() && !$quote->isAllowedGuestCheckout()) {
+            throw new AccessDeniedHttpException('Guest checkout is not allowed for this cart');
+        }
 
         // Frontend callers send the full checkout state in the body. Apply any
         // provided addresses in-memory; the single collection below prices them
