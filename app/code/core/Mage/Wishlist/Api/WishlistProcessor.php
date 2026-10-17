@@ -268,19 +268,7 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
         }
 
         if (!$quote || !$quote->getId()) {
-            // Fall back to customer's active quote
-            $quote = \Mage::getModel('sales/quote')
-                ->setSharedStoreIds([\Mage::app()->getStore()->getId()])
-                ->loadByCustomer($customerId);
-
-            if (!$quote->getId()) {
-                // Create new quote for customer
-                $quote = \Mage::getModel('sales/quote');
-                $quote->setStoreId(\Mage::app()->getStore()->getId());
-                $quote->setCustomerId($customerId);
-                $quote->setIsActive(1);
-                $quote->save();
-            }
+            $quote = $this->cartService->getCustomerCart($customerId);
         }
 
         // Add to cart using CartService
