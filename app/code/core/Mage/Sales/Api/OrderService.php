@@ -47,6 +47,14 @@ class OrderService
             throw new \RuntimeException('Cart is empty');
         }
 
+        // A cart assigned to a customer before its guest flag was cleared still carries it
+        $quote->setCustomerIsGuest(!$quote->getCustomerId());
+        // The cart keeps the email the account had when the customer was set on it
+        $accountEmail = $quote->getCustomerId() ? $quote->getCustomer()->getEmail() : null;
+        if ($accountEmail) {
+            $quote->setCustomerEmail($accountEmail);
+        }
+
         // Validate addresses
         if (!$quote->isVirtual()) {
             $shippingAddress = $quote->getShippingAddress();
@@ -143,7 +151,7 @@ class OrderService
 
             // Generate access token for guest orders
             $accessToken = null;
-            if (!$order->getCustomerId() || $quote->getCustomerIsGuest()) {
+            if (!$order->getCustomerId()) {
                 $accessToken = $this->generateAccessToken();
                 $order->setData('guest_access_token', $accessToken);
                 $order->save();
