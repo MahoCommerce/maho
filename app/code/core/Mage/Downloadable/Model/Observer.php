@@ -50,13 +50,10 @@ class Mage_Downloadable_Model_Observer
         if ($orderItem->getProductType() !== Mage_Downloadable_Model_Product_Type::TYPE_DOWNLOADABLE) {
             return $this;
         }
-        $product = $orderItem->getProduct();
-        if ($product && $product->getTypeId() != Mage_Downloadable_Model_Product_Type::TYPE_DOWNLOADABLE) {
-            return $this;
-        }
         if (Mage::getModel('downloadable/link_purchased')->load($orderItem->getId(), 'order_item_id')->getId()) {
             return $this;
         }
+        $product = $orderItem->getProduct();
         if (!$product) {
             $product = Mage::getModel('catalog/product')
                 ->setStoreId($orderItem->getOrder()->getStoreId())
