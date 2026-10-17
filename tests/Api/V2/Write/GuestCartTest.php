@@ -403,3 +403,66 @@ describe('Cart Item Response Structure', function (): void {
     });
 
 });
+<<<<<<< HEAD
+=======
+
+describe('Guest cart order placement errors', function (): void {
+
+    it('refuses an order from an empty cart with a 422', function (): void {
+        $cartId = createGuestCart()['json']['maskedId'];
+
+        $response = apiPost("/api/rest/v2/guest-carts/{$cartId}/place-order", []);
+
+        expect($response['status'])->toBe(422)
+            ->and($response['json']['message'])->toBe('Cart is empty');
+    });
+
+    it('refuses a guest order with a downloadable product when the store disables it', function (): void {
+        expect(Mage::getStoreConfigFlag(Mage_Downloadable_Model_Observer::XML_PATH_DISABLE_GUEST_CHECKOUT, 1))->toBeTrue();
+
+        $product = Mage::getModel('catalog/product');
+        $product->setStoreId(Mage_Catalog_Model_Abstract::DEFAULT_STORE_ID)
+            ->setSku('PEST-GUEST-DOWNLOADABLE-' . uniqid())
+            ->setName('Pest guest downloadable')
+            ->setPrice(10)
+            ->setStatus(Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
+            ->setVisibility(Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH)
+            ->setTypeId(Mage_Downloadable_Model_Product_Type::TYPE_DOWNLOADABLE)
+            ->setAttributeSetId(4)
+            ->setTaxClassId(0)
+            ->setWebsiteIds([1])
+            ->setData('links_purchased_separately', 0)
+            ->setStockData(['use_config_manage_stock' => 0, 'manage_stock' => 0, 'is_in_stock' => 1, 'qty' => 100])
+            ->save();
+        trackCreated('product', (int) $product->getId());
+        $link = Mage::getModel('downloadable/link')
+            ->setProductId((int) $product->getId())
+            ->setNumberOfDownloads(0)
+            ->setIsShareable(Mage_Downloadable_Model_Link::LINK_SHAREABLE_CONFIG)
+            ->setLinkType(Mage_Downloadable_Helper_Download::LINK_TYPE_URL)
+            ->setLinkUrl('https://example.com/file')
+            ->setTitle('File')
+            ->setStoreId(0)
+            ->setWebsiteId(0)
+            ->setPrice(0.0);
+        $link->save();
+        Mage::getResourceSingleton('downloadable/link')->saveItemTitleAndPrice($link);
+        Mage::app()->cleanCache();
+
+        $cartId = createGuestCart()['json']['maskedId'];
+        $add = apiPost("/api/rest/v2/guest-carts/{$cartId}/items", ['sku' => $product->getSku(), 'qty' => 1]);
+        expect($add['status'])->toBe(200);
+
+        $response = apiPost("/api/rest/v2/guest-carts/{$cartId}/place-order", [
+            'guestEmail' => 'guest@example.com',
+            'billingAddress' => [
+                'firstName' => 'Test', 'lastName' => 'Buyer', 'street' => ['123 Test St'], 'city' => 'Los Angeles',
+                'region' => 'California', 'postcode' => '90210', 'countryId' => 'US', 'telephone' => '5550100',
+            ],
+            'paymentMethod' => 'checkmo',
+        ]);
+
+        expect($response['status'])->toBe(403);
+    });
+});
+>>>>>>> 625f98f1 (Fixed orders placed through the REST API or the CLI losing their gift messages, bundle data, downloadable links and uploaded files (#1565))

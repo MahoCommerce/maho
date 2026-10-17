@@ -37,8 +37,7 @@ class Mage_Downloadable_Model_Observer
      *
      * @return $this
      */
-    #[Maho\Config\Observer('sales_order_item_save_commit_after', area: 'adminhtml')]
-    #[Maho\Config\Observer('sales_order_item_save_commit_after', area: 'frontend')]
+    #[Maho\Config\Observer('sales_order_item_save_commit_after')]
     public function saveDownloadableOrderItem(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Sales_Model_Order_Item $orderItem */
@@ -47,13 +46,16 @@ class Mage_Downloadable_Model_Observer
             //order not saved in the database
             return $this;
         }
-        $product = $orderItem->getProduct();
-        if ($product && $product->getTypeId() != Mage_Downloadable_Model_Product_Type::TYPE_DOWNLOADABLE) {
+        // Every save of every order line runs this, so skip other lines without loading their product
+        if ($orderItem->getProductType() !== Mage_Downloadable_Model_Product_Type::TYPE_DOWNLOADABLE
+            && $orderItem->getRealProductType() !== Mage_Downloadable_Model_Product_Type::TYPE_DOWNLOADABLE
+        ) {
             return $this;
         }
         if (Mage::getModel('downloadable/link_purchased')->load($orderItem->getId(), 'order_item_id')->getId()) {
             return $this;
         }
+        $product = $orderItem->getProduct();
         if (!$product) {
             $product = Mage::getModel('catalog/product')
                 ->setStoreId($orderItem->getOrder()->getStoreId())
@@ -143,8 +145,7 @@ class Mage_Downloadable_Model_Observer
      * @param \Maho\Event\Observer $observer
      * @return $this
      */
-    #[Maho\Config\Observer('sales_order_save_commit_after', area: 'adminhtml')]
-    #[Maho\Config\Observer('sales_order_save_commit_after', area: 'frontend')]
+    #[Maho\Config\Observer('sales_order_save_commit_after')]
     public function setLinkStatus($observer)
     {
         /** @var Mage_Sales_Model_Order $order */
@@ -246,7 +247,7 @@ class Mage_Downloadable_Model_Observer
      *
      * @return $this
      */
-    #[Maho\Config\Observer('checkout_allow_guest', area: 'frontend')]
+    #[Maho\Config\Observer('checkout_allow_guest')]
     public function isAllowedGuestCheckout(\Maho\Event\Observer $observer)
     {
         $quote  = $observer->getEvent()->getQuote();
