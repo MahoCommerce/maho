@@ -5646,16 +5646,16 @@
         },
         {
             "name": "symfony/expression-language",
-            "version": "v8.1.6",
+            "version": "v8.1.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/expression-language.git",
-                "reference": "bda5b15a7658d256bcfe67d23eb0e10d437dc708"
+                "reference": "9c2729bca940d84938dc0b435d037e4844f237c9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/expression-language/zipball/bda5b15a7658d256bcfe67d23eb0e10d437dc708",
-                "reference": "bda5b15a7658d256bcfe67d23eb0e10d437dc708",
+                "url": "https://api.github.com/repos/symfony/expression-language/zipball/9c2729bca940d84938dc0b435d037e4844f237c9",
+                "reference": "9c2729bca940d84938dc0b435d037e4844f237c9",
                 "shasum": ""
             },
             "require": {
@@ -5689,7 +5689,7 @@
             "description": "Provides an engine that can compile and evaluate expressions",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/expression-language/tree/v8.1.6"
+                "source": "https://github.com/symfony/expression-language/tree/v8.1.9"
             },
             "funding": [
                 {
@@ -5709,7 +5709,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-08-30T01:03:44+00:00"
+            "time": "2026-10-09T13:58:01+00:00"
         },
         {
             "name": "symfony/filesystem",
