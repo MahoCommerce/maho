@@ -782,6 +782,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
     }
 
     /**
+<<<<<<< HEAD
      * Delete custom option files before deleting quote item
      */
     #[\Override]
@@ -817,6 +818,8 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
     }
 
     /**
+=======
+>>>>>>> ce4d00a1 (Fixed uploaded option files that stayed after their cart was deleted, or were deleted while another cart still used them (#1567))
      * Clone quote item
      */
     #[\Override]

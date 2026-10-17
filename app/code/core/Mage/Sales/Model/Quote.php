@@ -405,11 +405,15 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Delete custom option files before deleting quote
+     * Gives an order placed from this quote an order copy of each uploaded option file it lacks
+     *
+     * The quote copies stay: other quotes can name the same file, and the nightly sweep deletes the
+     * ones that nothing uses.
      */
     #[\Override]
     protected function _beforeDelete()
     {
+<<<<<<< HEAD
         // Delete custom option files from all quote items
         foreach ($this->getAllItems() as $item) {
             $options = $item->getOptions();
@@ -431,6 +435,10 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
                 }
             }
         }
+=======
+        // A copy that fails keeps the quote, so the sweep keeps its files for the next attempt
+        $this->_getResource()->copyOrderedItemFiles($this);
+>>>>>>> ce4d00a1 (Fixed uploaded option files that stayed after their cart was deleted, or were deleted while another cart still used them (#1567))
 
         return parent::_beforeDelete();
     }

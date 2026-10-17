@@ -268,4 +268,169 @@ class Mage_Sales_Model_Resource_Quote extends Mage_Sales_Model_Resource_Abstract
 
         return $this;
     }
+
+    /**
+     * Copies the uploaded option files of the items of $quote that an order was placed from to their
+     * order path, where the order has no copy yet
+     */
+    public function copyOrderedItemFiles(Mage_Sales_Model_Quote $quote): void
+    {
+        if (!$quote->getId()) {
+            return;
+        }
+        $adapter = $this->_getReadAdapter();
+        $orderIds = $adapter->fetchCol(
+            $adapter->select()
+                ->from($this->getTable('sales/order'), ['entity_id'])
+                ->where('quote_id = ?', (int) $quote->getId()),
+        );
+        if ($orderIds === []) {
+            return;
+        }
+        $fileType = Mage::getModel('catalog/product_option_type_file');
+        $stringHelper = Mage::helper('core/string');
+        $values = [];
+        foreach ($quote->getItemsCollection()->getItems() as $item) {
+            foreach ($item->getOptions() as $option) {
+                if (!str_starts_with((string) $option->getCode(), Mage_Catalog_Model_Product_Type_Abstract::OPTION_PREFIX)) {
+                    continue;
+                }
+                $value = $stringHelper->unserialize($option->getValue());
+                if (is_array($value) && isset($value['quote_path'])) {
+                    $values[(int) $item->getId()][] = $value;
+                }
+            }
+        }
+        if ($values === []) {
+            return;
+        }
+
+        foreach ($this->getOrderedItemIds($orderIds, array_keys($values)) as $itemId) {
+            foreach ($values[$itemId] as $value) {
+                $fileType->copyQuoteFileToOrder($value);
+            }
+        }
+    }
+
+    /**
+     * Deletes the uploaded option files of quotes that no quote item, wishlist item or recurring
+     * profile names, and returns how many it deleted
+     *
+     * The file name is the hash of the file content, so a merged cart, a cart with the same upload or
+     * a wishlist item can name the file of another cart. A file younger than $minAge seconds is kept,
+     * since its upload may not be saved to an item yet.
+     */
+    public function deleteUnusedOptionFiles(int $minAge = 86400): int
+    {
+        // Until the Sales 2.0.2 data upgrade ran, old orders can have only the quote copy of a file
+        $dataVersion = (string) Mage::getResourceSingleton('core/resource')->getDataVersion('sales_setup');
+        if (version_compare($dataVersion, '2.0.2', '<')) {
+            return 0;
+        }
+
+        $used = $this->getUsedOptionFiles();
+        $mount = Mage::getStorage('custom_options');
+        $quoteDir = Mage::getModel('catalog/product_option_type_file')->getQuoteTargetStoragePath();
+        $before = time() - $minAge;
+        $deleted = 0;
+        foreach ($mount->listFiles($quoteDir) as $file) {
+            $path = $file->path();
+            if (isset($used[$path]) || ($file->lastModified() ?? $mount->lastModified($path)) > $before) {
+                continue;
+            }
+            $mount->delete($path);
+            $deleted++;
+        }
+        return $deleted;
+    }
+
+    /**
+     * Mount paths of the uploaded option files that a quote item or a wishlist item names
+     *
+     * @return array<string, true>
+     */
+    protected function getUsedOptionFiles(): array
+    {
+        $fileType = Mage::getModel('catalog/product_option_type_file');
+        $stringHelper = Mage::helper('core/string');
+        $adapter = $this->_getReadAdapter();
+        $used = [];
+        $sources = [
+            'sales/quote_item_option' => ['option_id', 'value'],
+            'wishlist/item_option' => ['option_id', 'value'],
+            'sales/recurring_profile' => ['profile_id', 'order_item_info'],
+        ];
+        foreach ($sources as $tableAlias => [$idColumn, $valueColumn]) {
+            try {
+                $table = $this->getTable($tableAlias);
+            } catch (Mage_Core_Exception) {
+                continue;
+            }
+            if (!$adapter->isTableExists($table)) {
+                continue;
+            }
+            $lastId = 0;
+            do {
+                $rows = $adapter->fetchPairs(
+                    $adapter->select()
+                        ->from($table, [$idColumn, $valueColumn])
+                        ->where("{$idColumn} > ?", $lastId)
+                        ->where("{$valueColumn} LIKE ?", '%quote_path%')
+                        ->order($idColumn)
+                        ->limit(5000),
+                );
+                foreach ($rows as $id => $value) {
+                    $lastId = (int) $id;
+                    foreach ($this->findQuotePaths($stringHelper->unserialize((string) $value), $fileType) as $path) {
+                        $used[$path] = true;
+                    }
+                }
+            } while (count($rows) === 5000);
+        }
+        return $used;
+    }
+
+    /**
+     * Mount paths of the quote copies that an option value names, at any depth, since a recurring
+     * profile keeps the option values inside its buy request
+     *
+     * @return list<string>
+     */
+    protected function findQuotePaths(mixed $value, Mage_Catalog_Model_Product_Option_Type_File $fileType): array
+    {
+        if (is_string($value) && str_contains($value, 'quote_path')) {
+            $value = Mage::helper('core/string')->unserialize($value);
+        }
+        if (!is_array($value)) {
+            return [];
+        }
+        if (isset($value['quote_path'])) {
+            $path = $fileType->resolveStoragePath($value, 'quote_path');
+            return $path === null ? [] : [$path];
+        }
+        $paths = [];
+        foreach ($value as $child) {
+            array_push($paths, ...$this->findQuotePaths($child, $fileType));
+        }
+        return $paths;
+    }
+
+    /**
+     * IDs of the quote items in $itemIds that the orders $orderIds hold
+     *
+     * @param list<int|string> $orderIds
+     * @param list<int> $itemIds
+     * @return list<int>
+     */
+    protected function getOrderedItemIds(array $orderIds, array $itemIds): array
+    {
+        $adapter = $this->_getReadAdapter();
+        return array_map(intval(...), $adapter->fetchCol(
+            $adapter->select()
+                ->distinct()
+                ->from($this->getTable('sales/order_item'), ['quote_item_id'])
+                ->where('order_id IN (?)', $orderIds)
+                ->where('quote_item_id IN (?)', $itemIds),
+        ));
+    }
 }

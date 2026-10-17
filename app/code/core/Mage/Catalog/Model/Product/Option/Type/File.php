@@ -638,6 +638,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
         $quoteOption = $this->getConfigurationItemOption();
         try {
             $value = Mage::helper('core/unserializeArray')->unserialize($quoteOption->getValue());
+<<<<<<< HEAD
             if (!isset($value['quote_path'])) {
                 throw new Exception();
             }
@@ -651,11 +652,128 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
             @copy($quoteFileFullPath, $orderFileFullPath);
         } catch (Exception) {
             return $this;
+=======
+            if (is_array($value)) {
+                $this->copyQuoteFileToOrder($value);
+            }
+        } catch (Exception $e) {
+            Mage::logException($e);
+>>>>>>> ce4d00a1 (Fixed uploaded option files that stayed after their cart was deleted, or were deleted while another cart still used them (#1567))
         }
         return $this;
     }
 
     /**
+<<<<<<< HEAD
+=======
+     * Copies the quote copy of a stored option file to its order path, unless the order copy exists
+     *
+     * @param array<string, mixed> $value Unserialized option value
+     */
+    public function copyQuoteFileToOrder(array $value): void
+    {
+        $orderPath = $this->resolveStoragePath($value, 'order_path');
+        $quotePath = $this->resolveStoragePath($value, 'quote_path');
+        if ($orderPath === null || $quotePath === null) {
+            return;
+        }
+        $mount = Mage::getStorage('custom_options');
+        if (!$mount->fileExists($orderPath) && $mount->fileExists($quotePath)) {
+            $mount->copy($quotePath, $orderPath);
+        }
+    }
+
+    /**
+     * Mount path of a stored option file, or null when the stored value leaves its target directory
+     *
+     * The stored value is relative to the Maho base directory, as getQuoteTargetDir(true) writes
+     * it. Only its part below the target directory names the file on the custom_options mount.
+     *
+     * @param array<string, mixed> $value Unserialized option value
+     */
+    public function resolveStoragePath(array $value, string $key): ?string
+    {
+        if (!isset($value[$key]) || !is_string($value[$key]) || $value[$key] === '') {
+            return null;
+        }
+        $isOrder = $key === 'order_path';
+        $targetDir = trim(str_replace('\\', '/', $isOrder ? $this->getOrderTargetDir(true) : $this->getQuoteTargetDir(true)), '/');
+        $stored = trim(str_replace('\\', '/', $value[$key]), '/');
+        if (!str_starts_with($stored, $targetDir . '/')) {
+            return null;
+        }
+
+        return \Maho\Io::getPathWithinMount(
+            Mage::getStorage('custom_options'),
+            $isOrder ? $this->getOrderTargetStoragePath() : $this->getQuoteTargetStoragePath(),
+            substr($stored, strlen($targetDir) + 1),
+        );
+    }
+
+    /**
+     * Opens a stored option file on the custom_options mount for a download response, or null when
+     * neither the order copy nor the quote copy exists.
+     *
+     * @param array<string, mixed> $value Unserialized option value
+     * @return array{stream: resource, size: int|null}|null
+     */
+    public function openStoredFile(array $value): ?array
+    {
+        $mount = Mage::getStorage('custom_options');
+        foreach (['order_path', 'quote_path'] as $key) {
+            $path = $this->resolveStoragePath($value, $key);
+            if ($path === null || !$mount->fileExists($path)) {
+                continue;
+            }
+            try {
+                $size = $mount->fileSize($path);
+            } catch (\League\Flysystem\FilesystemException) {
+                $size = null;
+            }
+
+            return ['stream' => $mount->readStream($path), 'size' => $size];
+        }
+
+        return null;
+    }
+
+    /**
+     * Deletes the quote copy of a stored option file, if the stored value names one.
+     *
+     * @param array<string, mixed> $value Unserialized option value
+     */
+    public function deleteQuoteFile(array $value): void
+    {
+        $path = $this->resolveStoragePath($value, 'quote_path');
+        if ($path === null) {
+            return;
+        }
+        $mount = Mage::getStorage('custom_options');
+        if ($mount->fileExists($path)) {
+            $mount->delete($path);
+        }
+    }
+
+    /**
+     * Absolute path of a stored option file, or null when the stored value leaves its target directory
+     *
+     * The stored value is relative to the Maho base directory. A 'quote_path' must stay inside the
+     * quote target directory and an 'order_path' inside the order target directory.
+     *
+     * @deprecated since 26.11 the file is on the custom_options mount, use resolveStoragePath()
+     * @param array<string, mixed> $value Unserialized option value
+     */
+    public function resolveStoredPath(array $value, string $key): ?string
+    {
+        if (!isset($value[$key]) || !is_string($value[$key]) || $value[$key] === '') {
+            return null;
+        }
+        $targetDir = $key === 'order_path' ? $this->getOrderTargetDir() : $this->getQuoteTargetDir();
+        return \Maho\Io::getPathWithinDir($targetDir, Mage::getBaseDir() . DS . ltrim($value[$key], '\\/'));
+    }
+
+    /**
+>>>>>>> ce4d00a1 (Fixed uploaded option files that stayed after their cart was deleted, or were deleted while another cart still used them (#1567))
      * Main Destination directory
      *
      * @param bool $relative If true - returns relative path to the webroot
