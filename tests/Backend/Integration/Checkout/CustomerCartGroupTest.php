@@ -8,6 +8,8 @@
 
 declare(strict_types=1);
 
+use Mage\Checkout\Api\CartService;
+
 uses(Tests\MahoBackendTestCase::class);
 
 /**
@@ -36,28 +38,28 @@ afterEach(function (): void {
 });
 
 it('creates a customer cart in the group of the customer', function (): void {
-    $quote = Mage::getService('checkout/cart')->create((int) $this->customer->getId(), 1);
+    $quote = (new CartService())->createEmptyCart((int) $this->customer->getId(), 1)['quote'];
     $this->quoteIds[] = (int) $quote->getId();
 
     $reloaded = Mage::getModel('sales/quote')->setStoreId(1)->load($quote->getId());
 
-    expect($reloaded->getCustomerGroupId())->toBe(2)
+    expect($reloaded->getCustomerGroupId())->toEqual(2)
         ->and((int) $reloaded->getCustomerId())->toBe((int) $this->customer->getId());
 });
 
 it('creates a guest cart in the NOT LOGGED IN group', function (): void {
-    $quote = Mage::getService('checkout/cart')->create(null, 1);
+    $quote = (new CartService())->createEmptyCart(null, 1)['quote'];
     $this->quoteIds[] = (int) $quote->getId();
 
     $reloaded = Mage::getModel('sales/quote')->setStoreId(1)->load($quote->getId());
 
-    expect($reloaded->getCustomerGroupId())->toBe(Mage_Customer_Model_Group::NOT_LOGGED_IN_ID);
+    expect($reloaded->getCustomerGroupId())->toEqual(Mage_Customer_Model_Group::NOT_LOGGED_IN_ID);
 });
 
 it('refuses a cart for a customer that does not exist', function (): void {
     $missingId = (int) $this->customer->getId() + 100000;
 
-    expect(fn() => Mage::getService('checkout/cart')->create($missingId, 1))
+    expect(fn() => (new CartService())->createEmptyCart($missingId, 1))
         ->toThrow(Mage_Core_Exception::class, "Invalid customer: {$missingId}");
 });
 
@@ -67,19 +69,19 @@ it('moves a saved customer cart to the current group of the customer when the ca
         ->setStoreId(1)
         ->setCustomerId((int) $this->customer->getId())
         ->setCustomerGroupId(Mage_Customer_Model_Group::NOT_LOGGED_IN_ID)
-        ->setIsActive(true);
+        ->setIsActive(1);
     $quote->save();
     $this->quoteIds[] = (int) $quote->getId();
 
-    $service = Mage::getService('checkout/cart');
+    $service = new CartService();
 
     // A read gives the cart the group in memory only, so it never saves a cart before the access check
-    expect($service->getById((int) $quote->getId())->getCustomerGroupId())->toBe(2)
-        ->and(Mage::getModel('sales/quote')->setStoreId(1)->load($quote->getId())->getCustomerGroupId())->toBe(Mage_Customer_Model_Group::NOT_LOGGED_IN_ID);
+    expect($service->getCart((int) $quote->getId())->getCustomerGroupId())->toEqual(2)
+        ->and(Mage::getModel('sales/quote')->setStoreId(1)->load($quote->getId())->getCustomerGroupId())->toEqual(Mage_Customer_Model_Group::NOT_LOGGED_IN_ID);
 
     $this->customer->setGroupId(3)->save();
 
-    expect($service->getForCustomer((int) $this->customer->getId(), 1)->getCustomerGroupId())->toBe(3);
+    expect($service->getCustomerCart((int) $this->customer->getId())->getCustomerGroupId())->toEqual(3);
 });
 
 it('leaves a placed customer cart in the group it was placed with', function (): void {
@@ -87,9 +89,9 @@ it('leaves a placed customer cart in the group it was placed with', function ():
         ->setStoreId(1)
         ->setCustomerId((int) $this->customer->getId())
         ->setCustomerGroupId(1)
-        ->setIsActive(false);
+        ->setIsActive(0);
     $quote->save();
     $this->quoteIds[] = (int) $quote->getId();
 
-    expect(Mage::getService('checkout/cart')->getById((int) $quote->getId())->getCustomerGroupId())->toBe(1);
+    expect((new CartService())->getCart((int) $quote->getId())->getCustomerGroupId())->toEqual(1);
 });
