@@ -37,7 +37,8 @@ describe('Maho\Storage\MountDefinition::fromElement', function () {
             ->and($definition->adapterOptions)->toBe([])
             ->and($definition->urlType)->toBeNull()
             ->and($definition->publicUrl)->toBeNull()
-            ->and($definition->visibility)->toBeNull();
+            ->and($definition->visibility)->toBeNull()
+            ->and($definition->retainVisibility)->toBeNull();
     });
 
     it('resolves a relative path against the base dir and keeps an absolute one', function (): void {
@@ -63,6 +64,17 @@ describe('Maho\Storage\MountDefinition::fromElement', function () {
             ->and($definition->publicUrl)->toBe('https://cdn.example.com/')
             ->and($definition->visibility)->toBe('private');
     });
+
+    it('reads retain_visibility like a flag, and an empty element as absent', function (string $xml, ?bool $expected): void {
+        expect(storageDefinition("<m><path>p</path>$xml</m>", 'm')->retainVisibility)->toBe($expected);
+    })->with([
+        ['<retain_visibility>0</retain_visibility>', false],
+        ['<retain_visibility>off</retain_visibility>', false],
+        ['<retain_visibility>1</retain_visibility>', true],
+        ['<retain_visibility>true</retain_visibility>', true],
+        ['<retain_visibility/>', null],
+        ['', null],
+    ]);
 
     it('reads the adapter type and options', function (): void {
         $definition = storageDefinition(

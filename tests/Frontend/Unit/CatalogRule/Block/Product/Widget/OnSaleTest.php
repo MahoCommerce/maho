@@ -11,7 +11,7 @@ uses(Tests\MahoFrontendTestCase::class);
 
 describe('On Sale widget block', function () {
     beforeEach(function () {
-        $this->block = new Mage_CatalogRule_Block_Product_Widget_OnSale();
+        $this->block = new Mage_CatalogRule_Block_Product_Widget_Onsale();
     });
 
     it('exposes sensible defaults', function () {
