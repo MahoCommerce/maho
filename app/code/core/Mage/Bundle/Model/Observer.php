@@ -126,8 +126,7 @@ class Mage_Bundle_Model_Observer
      * @param \Maho\Event\Observer $observer
      * @return $this
      */
-    #[Maho\Config\Observer('sales_convert_quote_item_to_order_item', area: 'frontend')]
-    #[Maho\Config\Observer('sales_convert_quote_item_to_order_item', area: 'adminhtml')]
+    #[Maho\Config\Observer('sales_convert_quote_item_to_order_item')]
     public function appendBundleSelectionData($observer)
     {
         /** @var Mage_Sales_Model_Order_Item $orderItem */
