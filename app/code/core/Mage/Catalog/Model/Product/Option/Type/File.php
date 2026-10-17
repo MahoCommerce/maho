@@ -634,20 +634,31 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
         $quoteOption = $this->getConfigurationItemOption();
         try {
             $value = Mage::helper('core/unserializeArray')->unserialize($quoteOption->getValue());
-            if (!is_array($value)) {
-                return $this;
+            if (is_array($value)) {
+                $this->copyQuoteFileToOrder($value);
             }
-            $mount = Mage::getStorage('custom_options');
-            $quotePath = $this->resolveStoragePath($value, 'quote_path');
-            $orderPath = $this->resolveStoragePath($value, 'order_path');
-            if ($quotePath === null || $orderPath === null || !$mount->fileExists($quotePath)) {
-                return $this;
-            }
-            $mount->copy($quotePath, $orderPath);
         } catch (Exception $e) {
             Mage::logException($e);
         }
         return $this;
+    }
+
+    /**
+     * Copies the quote copy of a stored option file to its order path, unless the order copy exists
+     *
+     * @param array<string, mixed> $value Unserialized option value
+     */
+    public function copyQuoteFileToOrder(array $value): void
+    {
+        $orderPath = $this->resolveStoragePath($value, 'order_path');
+        $quotePath = $this->resolveStoragePath($value, 'quote_path');
+        if ($orderPath === null || $quotePath === null) {
+            return;
+        }
+        $mount = Mage::getStorage('custom_options');
+        if (!$mount->fileExists($orderPath) && $mount->fileExists($quotePath)) {
+            $mount->copy($quotePath, $orderPath);
+        }
     }
 
     /**
