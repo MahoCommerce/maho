@@ -240,7 +240,7 @@ class Maho_ContentNegotiation_Helper_Data extends Mage_Core_Helper_Abstract
         return 'contentnegotiation_' . md5(implode('|', [
             (string) $store->getId(),
             (string) $store->getCurrentCurrencyCode(),
-            (string) Mage::getSingleton('customer/session')->getCustomerGroupId(),
+            (string) Mage::helper('customer')->getCurrentGroupId(),
             (string) $request->getRequestUri(),
         ]));
     }

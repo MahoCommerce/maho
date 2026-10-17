@@ -241,10 +241,8 @@ class Mage_Catalog_Model_Product_Type_Price
      */
     protected function _getCustomerGroupId($product)
     {
-        if ($product->getCustomerGroupId()) {
-            return $product->getCustomerGroupId();
-        }
-        return Mage::getSingleton('customer/session')->getCustomerGroupId();
+        // A guest cart sets group 0 on its products, which must not fall back to the caller
+        return $product->getCustomerGroupId() ?? Mage::helper('customer')->getCurrentGroupId();
     }
 
     /**
