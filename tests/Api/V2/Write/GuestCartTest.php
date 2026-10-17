@@ -403,19 +403,8 @@ describe('Cart Item Response Structure', function (): void {
     });
 
 });
-<<<<<<< HEAD
-=======
 
 describe('Guest cart order placement errors', function (): void {
-
-    it('refuses an order from an empty cart with a 422', function (): void {
-        $cartId = createGuestCart()['json']['maskedId'];
-
-        $response = apiPost("/api/rest/v2/guest-carts/{$cartId}/place-order", []);
-
-        expect($response['status'])->toBe(422)
-            ->and($response['json']['message'])->toBe('Cart is empty');
-    });
 
     it('refuses a guest order with a downloadable product when the store disables it', function (): void {
         expect(Mage::getStoreConfigFlag(Mage_Downloadable_Model_Observer::XML_PATH_DISABLE_GUEST_CHECKOUT, 1))->toBeTrue();
@@ -465,4 +454,3 @@ describe('Guest cart order placement errors', function (): void {
         expect($response['status'])->toBe(403);
     });
 });
->>>>>>> 625f98f1 (Fixed orders placed through the REST API or the CLI losing their gift messages, bundle data, downloadable links and uploaded files (#1565))

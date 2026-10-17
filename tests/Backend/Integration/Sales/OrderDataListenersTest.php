@@ -8,6 +8,9 @@
 
 declare(strict_types=1);
 
+use Mage\Checkout\Api\CartService;
+use Mage\Sales\Api\OrderService;
+
 uses(Tests\MahoBackendTestCase::class);
 
 /**
@@ -26,7 +29,7 @@ function &orderDataCreated(): array
 
 function orderDataPlace(Mage_Sales_Model_Quote $quote): Mage_Sales_Model_Order
 {
-    $cart = Mage::getService('checkout/cart');
+    $cart = new CartService();
     $address = $cart->mapAddressInput([
         'firstName' => 'Test', 'lastName' => 'Buyer', 'street' => ['123 Test St'], 'city' => 'Los Angeles',
         'region' => 'California', 'postcode' => '90210', 'countryId' => 'US', 'telephone' => '5550100',
@@ -36,11 +39,11 @@ function orderDataPlace(Mage_Sales_Model_Quote $quote): Mage_Sales_Model_Order
         $cart->applyShippingAddress($quote, $address);
         $quote->getShippingAddress()->setShippingMethod('flatrate_flatrate');
     }
-    $cart->collectAndVerifyTotals($quote);
+    CartService::collectAndVerifyTotals($quote);
     $cart->importPaymentData($quote, 'checkmo', null, Mage_Payment_Model_Method_Abstract::checksForCurrentScope());
     $quote->save();
 
-    $order = Mage::getService('sales/order')->place($quote, 'buyer@example.com')['order'];
+    $order = CartService::inQuoteStoreScope($quote, fn() => (new OrderService())->placeAdminOrder($quote, 'buyer@example.com'))['order'];
     $created = &orderDataCreated();
     $created['orders'][] = (int) $order->getId();
 
@@ -49,7 +52,7 @@ function orderDataPlace(Mage_Sales_Model_Quote $quote): Mage_Sales_Model_Order
 
 function orderDataQuote(): Mage_Sales_Model_Quote
 {
-    $quote = Mage::getService('checkout/cart')->create(null, 1);
+    $quote = (new CartService())->createEmptyCart(null, 1)['quote'];
     $created = &orderDataCreated();
     $created['quotes'][] = (int) $quote->getId();
 
@@ -161,10 +164,9 @@ afterEach(function (): void {
     foreach ($created['products'] as $productId) {
         Mage::getModel('catalog/product')->load($productId)->delete();
     }
-    $mount = Mage::getStorage('custom_options');
     foreach ($created['files'] as $path) {
-        if ($mount->fileExists($path)) {
-            $mount->delete($path);
+        if (is_file($path)) {
+            unlink($path);
         }
     }
     $created = ['orders' => [], 'quotes' => [], 'products' => [], 'files' => []];
@@ -175,7 +177,7 @@ it('copies the gift messages of the cart and of a cart line to the order', funct
     $store->setConfig(Mage_GiftMessage_Helper_Message::XPATH_CONFIG_GIFT_MESSAGE_ALLOW_ORDER, '1');
     $store->setConfig(Mage_GiftMessage_Helper_Message::XPATH_CONFIG_GIFT_MESSAGE_ALLOW_ITEMS, '1');
 
-    $cart = Mage::getService('checkout/cart');
+    $cart = new CartService();
     $quote = $cart->addItem(orderDataQuote(), orderDataProduct()->getSku(), 1);
     $itemId = (int) $quote->getAllVisibleItems()[0]->getId();
     $cart->setGiftMessage($quote, null, 'Alice', 'Bob', 'Order message');
@@ -197,7 +199,7 @@ it('stores the selection attributes on each child line of a bundle', function ()
         }
     }
 
-    $quote = Mage::getService('checkout/cart')->addItem(orderDataQuote(), $bundle->getSku(), 1, ['bundle_option' => $selections]);
+    $quote = (new CartService())->addItem(orderDataQuote(), $bundle->getSku(), 1, ['bundle_option' => $selections]);
     $order = orderDataPlace($quote);
 
     $children = array_filter($order->getAllItems(), fn(Mage_Sales_Model_Order_Item $item) => $item->getParentItemId() !== null);
@@ -211,7 +213,7 @@ it('creates the purchased links of a downloadable line', function (): void {
     $product = orderDataDownloadable();
     $linkIds = array_keys($product->getTypeInstance(true)->getLinks($product));
 
-    $quote = Mage::getService('checkout/cart')->addItem(orderDataQuote(), $product->getSku(), 1, ['links' => $linkIds]);
+    $quote = (new CartService())->addItem(orderDataQuote(), $product->getSku(), 1, ['links' => $linkIds]);
     $order = orderDataPlace($quote);
 
     $item = $order->getAllVisibleItems()[0];
@@ -242,12 +244,11 @@ it('copies an uploaded file option to the order directory', function (): void {
     imagepng($image);
     $png = (string) ob_get_clean();
 
-    $quote = Mage::getService('checkout/cart')->addItem(orderDataQuote(), $product->getSku(), 1, [
+    $quote = (new CartService())->addItem(orderDataQuote(), $product->getSku(), 1, [
         'options_files' => [(string) $optionId => ['name' => 'pixel.png', 'base64_encoded_data' => base64_encode($png)]],
     ]);
     $order = orderDataPlace($quote);
 
-    $fileOption = Mage::getModel('catalog/product_option_type_file');
     $value = null;
     foreach ($order->getAllVisibleItems()[0]->getProductOptions()['options'] ?? [] as $option) {
         if ($option['option_type'] === 'file') {
@@ -256,9 +257,9 @@ it('copies an uploaded file option to the order directory', function (): void {
     }
     expect($value)->toBeArray();
 
-    $orderPath = (string) $fileOption->resolveStoragePath($value, 'order_path');
+    $orderPath = Mage::getBaseDir() . $value['order_path'];
     $created = &orderDataCreated();
-    array_push($created['files'], $orderPath, (string) $fileOption->resolveStoragePath($value, 'quote_path'));
+    array_push($created['files'], $orderPath, Mage::getBaseDir() . $value['quote_path']);
 
-    expect(Mage::getStorage('custom_options')->fileExists($orderPath))->toBeTrue();
+    expect(is_file($orderPath))->toBeTrue();
 });
