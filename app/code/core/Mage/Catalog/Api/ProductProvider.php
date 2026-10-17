@@ -138,6 +138,11 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         $rate = $this->displayCurrencyRate();
         if ($rate === null) {
             $dto->currency = $store->getBaseCurrencyCode();
+            foreach ($dto->variants as &$variant) {
+                $variant['price'] = (float) $store->roundPrice($variant['price']);
+                $variant['finalPrice'] = (float) $store->roundPrice($variant['finalPrice']);
+            }
+            unset($variant);
             return;
         }
 
@@ -1258,8 +1263,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
 
     /**
      * Price a variant as the cart does: the parent price plus the price of each
-     * selected option, rounded as the cart line. The own price of the child plays
-     * no part in it.
+     * selected option. The own price of the child plays no part in it.
      *
      * @param iterable<\Mage_Catalog_Model_Product_Type_Configurable_Attribute> $configAttributes
      * @return array{price: float, finalPrice: float}
@@ -1291,11 +1295,9 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         // A collection sets calculated_final_price, and getFinalPrice() returns it as is when qty is null
         $priced->unsetData('calculated_final_price');
 
-        $store = StoreContext::getStore();
-
         return [
-            'price' => (float) $store->roundPrice(max(0.0, $price)),
-            'finalPrice' => (float) $store->roundPrice($priced->getFinalPrice()),
+            'price' => max(0.0, $price),
+            'finalPrice' => (float) $priced->getFinalPrice(),
         ];
     }
 
