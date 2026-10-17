@@ -124,9 +124,9 @@ class Mage_Checkout_Service_Cart
     }
 
     /**
-     * Sets the customer on an active customer cart whose group is not the current group of the
-     * customer, as the storefront does at login, in memory only: a read must not save the cart of
-     * a caller that has not passed the access check yet
+     * Give an active customer cart the current group of its customer.
+     *
+     * Change the cart in memory only. A read must not save a cart before the access check.
      */
     private function syncCustomerGroup(\Mage_Sales_Model_Quote $quote): \Mage_Sales_Model_Quote
     {

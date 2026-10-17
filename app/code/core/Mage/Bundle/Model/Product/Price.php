@@ -71,13 +71,15 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
                 $productType = $product->getTypeInstance(true);
                 $selections = $productType->getSelectionsByIds($selectionIds, $product);
                 $selections->addTierPriceData();
-                Mage::dispatchEvent('prepare_catalog_product_collection_prices', [
-                    'collection' => $selections,
-                    'store_id' => $product->getStoreId(),
-                ]);
+                $groupId = $product->getCustomerGroupId();
+                $eventData = ['collection' => $selections, 'store_id' => $product->getStoreId()];
+                if ($groupId !== null) {
+                    $eventData['customer_group_id'] = $groupId;
+                }
+                Mage::dispatchEvent('prepare_catalog_product_collection_prices', $eventData);
                 foreach ($selections->getItems() as $selection) {
-                    if ($product->getCustomerGroupId() !== null) {
-                        $selection->setCustomerGroupId($product->getCustomerGroupId());
+                    if ($groupId !== null) {
+                        $selection->setCustomerGroupId($groupId);
                     }
                     if ($selection->isSalable()) {
                         $selectionQty = $product->getCustomOption('selection_qty_' . $selection->getSelectionId());

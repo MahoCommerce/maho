@@ -17,16 +17,6 @@ uses(Tests\MahoBackendTestCase::class);
 
 const API_RULE_NAME = 'pest-api-catalog-rule-price';
 
-function apiRuleWrite(): Maho\Db\Adapter\AdapterInterface
-{
-    return Mage::getSingleton('core/resource')->getConnection('core_write');
-}
-
-function apiRuleTable(string $name): string
-{
-    return Mage::getSingleton('core/resource')->getTableName($name);
-}
-
 beforeEach(function (): void {
     Mage::app()->loadAreaPart(Mage_Core_Model_App_Area::AREA_API, Mage_Core_Model_App_Area::PART_EVENTS);
 
@@ -64,16 +54,11 @@ beforeEach(function (): void {
 });
 
 afterEach(function (): void {
-    $write = apiRuleWrite();
-    $ruleIds = $write->fetchCol(
-        $write->select()->from(apiRuleTable('catalogrule/rule'), 'rule_id')->where('name = ?', API_RULE_NAME),
-    );
-    if ($ruleIds) {
-        $write->delete(apiRuleTable('catalogrule/rule_product'), ['rule_id IN (?)' => $ruleIds]);
-        $write->delete(apiRuleTable('catalogrule/rule'), ['rule_id IN (?)' => $ruleIds]);
+    foreach (Mage::getResourceModel('catalogrule/rule_collection')->addFieldToFilter('name', API_RULE_NAME) as $rule) {
+        $rule->delete();
     }
-    $write->delete(apiRuleTable('catalogrule/rule_product_price'), ['product_id = ?' => $this->productId]);
-    $write->delete(apiRuleTable('catalog/product'), ['entity_id = ?' => $this->productId]);
+    // Deleting the product also deletes its rule prices
+    Mage::getModel('catalog/product')->load($this->productId)->delete();
 });
 
 it('prices a cart line with the catalog rule price', function (): void {

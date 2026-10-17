@@ -188,8 +188,9 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Customer group of the current request: the one a stateless caller such as the API set, or else
-     * the group of the customer session
+     * Return the group that setCurrentGroupId() set for this request.
+     *
+     * Without one, return the group of the customer session.
      */
     public function getCurrentGroupId(): int
     {
