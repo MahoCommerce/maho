@@ -268,6 +268,7 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
         }
 
         if (!$quote || !$quote->getId()) {
+<<<<<<< HEAD
             // Fall back to customer's active quote
             $quote = \Mage::getModel('sales/quote')
                 ->setSharedStoreIds([\Mage::app()->getStore()->getId()])
@@ -281,6 +282,9 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
                 $quote->setIsActive(1);
                 $quote->save();
             }
+=======
+            $quote = $this->cartService->getForCustomer($customerId, (int) \Mage::app()->getStore()->getId());
+>>>>>>> be58ee68 (Fixed REST API prices that ignored catalog price rules and the customer group of the caller (#1563))
         }
 
         // Add to cart using CartService

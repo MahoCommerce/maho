@@ -43,7 +43,34 @@ class CartService
         if (!preg_match('#/guest-carts/([^/?]+)#', $path, $m)) {
             return null;
         }
+<<<<<<< HEAD:app/code/core/Mage/Checkout/Api/CartService.php
         return self::isValidMaskedId($m[1]) ? $m[1] : null;
+=======
+        if (!$store || !$store->getId() || !$store->getIsActive()) {
+            throw new \Mage_Core_Exception("Invalid store: {$storeId}");
+        }
+
+        $quote = \Mage::getModel('sales/quote');
+        $quote->setStoreId((int) $store->getId());
+
+        if ($customerId) {
+            $customer = \Mage::getModel('customer/customer')->load($customerId);
+            if (!$customer->getId()) {
+                throw new \Mage_Core_Exception("Invalid customer: {$customerId}");
+            }
+            // setCustomer() also copies the customer group, which prices the cart
+            $quote->setCustomer($customer);
+            $quote->setCustomerIsGuest(false);
+        } else {
+            $quote->setCustomerIsGuest();
+        }
+
+        $quote->setIsActive();
+        $quote->setData('masked_quote_id', $this->generateSecureMaskedId());
+        $quote->save();
+
+        return $quote;
+>>>>>>> be58ee68 (Fixed REST API prices that ignored catalog price rules and the customer group of the caller (#1563)):app/code/core/Mage/Checkout/Service/Cart.php
     }
 
     /**
@@ -127,7 +154,7 @@ class CartService
             StoreContext::applyRequestedCurrencyToQuote($quote);
         }
 
-        return $quote;
+        return $this->syncCustomerGroup($quote);
     }
 
     /**
@@ -152,10 +179,40 @@ class CartService
             // dropped on the next load. That's a rare, low-impact outcome (an
             // empty cart), so we don't serialize creation: the cost of a lock on
             // every cart bootstrap isn't worth guarding against it.
+<<<<<<< HEAD:app/code/core/Mage/Checkout/Api/CartService.php
             $quote = $this->createEmptyCart($customerId)['quote'];
+=======
+            return $this->create($customerId, $storeId);
+>>>>>>> be58ee68 (Fixed REST API prices that ignored catalog price rules and the customer group of the caller (#1563)):app/code/core/Mage/Checkout/Service/Cart.php
         }
 
-        return $quote;
+        return $this->syncCustomerGroup($quote);
+    }
+
+    /**
+     * Give an active customer cart the current group of its customer.
+     *
+     * Change the cart in memory only. A read must not save a cart before the access check.
+     */
+    private function syncCustomerGroup(\Mage_Sales_Model_Quote $quote): \Mage_Sales_Model_Quote
+    {
+        $customerId = $quote->getCustomerId();
+        if (!$customerId || !$quote->getIsActive()) {
+            return $quote;
+        }
+
+        $resource = \Mage::getSingleton('core/resource');
+        $read = $resource->getConnection('core_read');
+        $groupId = $read->fetchOne(
+            $read->select()
+                ->from($resource->getTableName('customer/entity'), ['group_id'])
+                ->where('entity_id = ?', $customerId),
+        );
+        if ($groupId === false || (int) $groupId === $quote->getCustomerGroupId()) {
+            return $quote;
+        }
+
+        return $quote->setCustomer(\Mage::getModel('customer/customer')->load($customerId));
     }
 
     /**
