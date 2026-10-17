@@ -271,10 +271,10 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
     public function getMinSaleQty(): ?float
     {
         $customerGroupId = $this->getCustomerGroupId();
-        if (!$customerGroupId) {
-            $customerGroupId = Mage::app()->getStore()->isAdmin()
-                ? Mage_Customer_Model_Group::CUST_GROUP_ALL
-                : Mage::helper('customer')->getCurrentGroupId();
+        if (!$customerGroupId && Mage::app()->getStore()->isAdmin()) {
+            $customerGroupId = Mage_Customer_Model_Group::CUST_GROUP_ALL;
+        } elseif ($customerGroupId === null || $customerGroupId === '') {
+            $customerGroupId = Mage::helper('customer')->getCurrentGroupId();
         }
 
         if (!isset($this->_minSaleQtyCache[$customerGroupId])) {

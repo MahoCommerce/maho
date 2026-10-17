@@ -11,10 +11,9 @@ declare(strict_types=1);
 /**
  * API v2 catalog rule prices follow the caller's customer group (WRITE)
  *
- * The catalog rule listener falls back to the customer session for the group of a
- * product without one, and that session is always NOT LOGGED IN in the API. A rule
- * for NOT LOGGED IN only must therefore lower the guest price and leave the price
- * of a logged-in customer alone on every path that reads a final price.
+ * A rule for NOT LOGGED IN only must lower the guest price and leave the price of a
+ * logged-in customer alone on every path that reads a final price, including the
+ * paths that find no customer group on the product.
  *
  * @group write
  */
@@ -268,6 +267,46 @@ it('applies the group price of the caller group to related products', function (
     }
 });
 
+it('prices a guest cart for guests when a customer token adds to it', function (): void {
+    $productId = $this->ids['linked'];
+    $groupId = (int) Mage::getModel('customer/customer')->load((int) fixtures('customer_id'))->getGroupId();
+    $write = Mage::getSingleton('core/resource')->getConnection('core_write');
+    $table = groupRuleTable('catalog/product_attribute_group_price');
+    $where = ['entity_id = ?' => $productId, 'customer_group_id = ?' => $groupId, 'website_id = ?' => 0];
+    $existing = $write->fetchAll(
+        $write->select()->from($table)->where('entity_id = ?', $productId)->where('customer_group_id = ?', $groupId)->where('website_id = ?', 0),
+    );
+    $write->delete($table, $where);
+    $write->insert($table, [
+        'entity_id' => $productId,
+        'all_groups' => 0,
+        'customer_group_id' => $groupId,
+        'value' => round($this->fullPrice[$productId] * 0.3, 2),
+        'website_id' => 0,
+    ]);
+
+    try {
+        groupRuleReindexPrice($productId);
+        $maskedId = apiPost('/api/rest/v2/guest-carts', [])['json']['maskedId'];
+        trackCreated('quote', (int) Mage::getSingleton('core/resource')->getConnection('core_read')->fetchOne(
+            'SELECT entity_id FROM ' . groupRuleTable('sales/quote') . ' WHERE masked_quote_id = ?',
+            [$maskedId],
+        ));
+        $sku = (string) groupRuleProduct($productId)->getSku();
+        expect(apiPost("/api/rest/v2/guest-carts/{$maskedId}/items", ['sku' => $sku, 'qty' => 1], $this->customerToken)['status'])->toBeIn([200, 201]);
+
+        $cart = apiGet("/api/rest/v2/guest-carts/{$maskedId}", $this->customerToken)['json'];
+
+        expect((float) $cart['items'][0]['price'])->toBe($this->fullPrice[$productId] / 2);
+    } finally {
+        $write->delete($table, $where);
+        foreach ($existing as $row) {
+            $write->insert($table, $row);
+        }
+        groupRuleReindexPrice($productId);
+    }
+});
+
 it('prices a dynamic bundle in a customer cart with the rules of the customer group', function (): void {
     $bundle = groupRuleProduct($this->ids['bundle']);
     $type = $bundle->getTypeInstance(true);
@@ -285,6 +324,10 @@ it('prices a dynamic bundle in a customer cart with the rules of the customer gr
     $item = ['sku' => $bundle->getSku(), 'qty' => 1, 'bundleOption' => $options];
 
     $maskedId = apiPost('/api/rest/v2/guest-carts', [])['json']['maskedId'];
+    trackCreated('quote', (int) Mage::getSingleton('core/resource')->getConnection('core_read')->fetchOne(
+        'SELECT entity_id FROM ' . groupRuleTable('sales/quote') . ' WHERE masked_quote_id = ?',
+        [$maskedId],
+    ));
     expect(apiPost("/api/rest/v2/guest-carts/{$maskedId}/items", $item)['status'])->toBeIn([200, 201]);
     $guestPrice = (float) apiGet("/api/rest/v2/guest-carts/{$maskedId}")['json']['items'][0]['price'];
 

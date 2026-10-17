@@ -262,7 +262,7 @@ class Mage_Weee_Model_Tax extends Mage_Core_Model_Abstract
     protected function _getDiscountPercentForProduct($product)
     {
         $website = Mage::app()->getStore()->getWebsiteId();
-        $group = Mage::helper('customer')->getCurrentGroupId();
+        $group = $product->getCustomerGroupId() ?? Mage::helper('customer')->getCurrentGroupId();
         $key = implode('-', [$website, $group, $product->getId()]);
         $this->_productDiscounts[$key] ??= (int) $this->getResource()
             ->getProductDiscountPercent($product->getId(), $website, $group);
