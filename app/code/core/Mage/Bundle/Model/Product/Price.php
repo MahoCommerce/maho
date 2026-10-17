@@ -76,6 +76,9 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
                     'store_id' => $product->getStoreId(),
                 ]);
                 foreach ($selections->getItems() as $selection) {
+                    if ($product->getCustomerGroupId() !== null) {
+                        $selection->setCustomerGroupId($product->getCustomerGroupId());
+                    }
                     if ($selection->isSalable()) {
                         $selectionQty = $product->getCustomOption('selection_qty_' . $selection->getSelectionId());
                         if ($selectionQty) {
