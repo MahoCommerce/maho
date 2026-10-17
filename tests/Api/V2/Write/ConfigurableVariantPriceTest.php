@@ -94,7 +94,7 @@ beforeAll(function (): void {
 });
 
 beforeEach(function (): void {
-    // Made here, so the prices under test do not depend on the sample data
+    // The test makes its own products, so the sample data does not change the prices
     $this->attribute = variantPriceCreateAttribute();
     $code = (string) $this->attribute->getAttributeCode();
     $options = array_values(array_filter(
@@ -102,7 +102,7 @@ beforeEach(function (): void {
         fn(array $option) => $option['value'] !== '',
     ));
 
-    // A child price apart from the parent price shows that the child price plays no part
+    // The child price differs from the parent price, so a test fails if the API uses the child price
     $childIds = [];
     foreach ($options as $option) {
         $childIds[] = (int) variantPriceCreateProduct(Mage_Catalog_Model_Product_Type::TYPE_SIMPLE, [
@@ -230,6 +230,26 @@ it('takes the percent option price of the regular price for price and of the spe
         ->and($read['cartPrice'])->toBe(variantPriceWithPercent($specialPrice, 10))
         ->and((float) $read['variant']['price'])->toBe(variantPriceWithPercent($this->parentPrice, 10))
         ->and((float) $read['variant']['finalPrice'])->toBe($read['cartPrice']);
+});
+
+it('takes a tier price for a qty of 1 into finalPrice, as the cart does', function (): void {
+    $tierPrice = $this->parentPrice - 20;
+    variantPriceWrite()->insert(variantPriceTable('catalog/product_attribute_tier_price'), [
+        'entity_id' => $this->parentId,
+        'all_groups' => 1,
+        'customer_group_id' => 0,
+        'qty' => 1,
+        'value' => $tierPrice,
+        'website_id' => 0,
+    ]);
+    Mage::app()->cleanCache(['API_PRODUCTS']);
+
+    $read = variantPriceRead($this);
+
+    expect($read['cartPrice'])->toBe($tierPrice)
+        ->and((float) $read['product']['finalPrice'])->toBe($tierPrice)
+        ->and((float) $read['variant']['price'])->toBe($this->parentPrice)
+        ->and((float) $read['variant']['finalPrice'])->toBe($tierPrice);
 });
 
 it('never prices a variant below zero', function (): void {

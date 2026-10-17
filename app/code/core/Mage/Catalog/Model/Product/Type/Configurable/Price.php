@@ -73,7 +73,7 @@ class Mage_Catalog_Model_Product_Type_Configurable_Price extends Mage_Catalog_Mo
             $product->setParentId(true);
             if ($value) {
                 if ($value['pricing_value'] != 0) {
-                    $product->setConfigurablePrice($this->_calcSelectionPrice($value, $finalPrice));
+                    $product->setConfigurablePrice($this->calcSelectionPrice($value, (float) $finalPrice));
                     Mage::dispatchEvent(
                         'catalog_product_type_configurable_price',
                         ['product' => $product],
@@ -86,21 +86,17 @@ class Mage_Catalog_Model_Product_Type_Configurable_Price extends Mage_Catalog_Mo
     }
 
     /**
-     * Calculate configurable product selection price
+     * The price of one option value, as a percent of $productPrice when the value is a percent.
+     * It fires no event, so no catalog price rule changes the result.
      *
-     * @param   array $priceInfo
-     * @param   float $productPrice
-     * @return  float
+     * @param array<string, mixed> $priceInfo a row of getPrices() of a configurable attribute
      */
-    protected function _calcSelectionPrice($priceInfo, $productPrice)
+    public function calcSelectionPrice(array $priceInfo, float $productPrice): float
     {
         if ($priceInfo['is_percent']) {
-            $ratio = $priceInfo['pricing_value'] / 100;
-            $price = $productPrice * $ratio;
-        } else {
-            $price = $priceInfo['pricing_value'];
+            return $productPrice * ($priceInfo['pricing_value'] / 100);
         }
-        return $price;
+        return (float) $priceInfo['pricing_value'];
     }
 
     /**

@@ -633,6 +633,8 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         $total = $collection->getSize();
         $collection->setPageSize($pageSize);
         $collection->setCurPage($page);
+        // One query for all tier prices, as the finalPrice of each product reads them
+        $collection->addTierPriceData();
 
         $result = [
             'products' => iterator_to_array($collection),
@@ -1263,7 +1265,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
 
     /**
      * Price a variant as the cart does: the parent price plus the price of each
-     * selected option. The own price of the child plays no part in it.
+     * selected option. The cart ignores the price of the child, so this method ignores it too.
      *
      * @param iterable<\Mage_Catalog_Model_Product_Type_Configurable_Attribute> $configAttributes
      * @return array{price: float, finalPrice: float}
@@ -1273,6 +1275,8 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         iterable $configAttributes,
         \Mage_Catalog_Model_Product $child,
     ): array {
+        /** @var \Mage_Catalog_Model_Product_Type_Configurable_Price $priceModel */
+        $priceModel = \Mage_Catalog_Model_Product_Type::priceFactory(\Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE);
         $basePrice = (float) $product->getPrice();
         $price = $basePrice;
         $selected = [];
@@ -1282,9 +1286,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
             $selected[$productAttribute->getId()] = $valueIndex;
             foreach ($attr->getPrices() ?: [] as $value) {
                 if ($value['value_index'] == $valueIndex) {
-                    $price += $value['is_percent']
-                        ? $basePrice * $value['pricing_value'] / 100
-                        : (float) $value['pricing_value'];
+                    $price += $priceModel->calcSelectionPrice($value, $basePrice);
                 }
             }
         }
@@ -1292,12 +1294,10 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         $priced = clone $product;
         $priced->addCustomOption('attributes', \Mage::helper('core')->jsonEncode($selected));
         $priced->setFinalPrice(null);
-        // A collection sets calculated_final_price, and getFinalPrice() returns it as is when qty is null
-        $priced->unsetData('calculated_final_price');
 
         return [
             'price' => max(0.0, $price),
-            'finalPrice' => (float) $priced->getFinalPrice(),
+            'finalPrice' => (float) $priced->getFinalPrice(1),
         ];
     }
 

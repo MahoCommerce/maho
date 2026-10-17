@@ -234,8 +234,7 @@ class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Per-attribute option price deltas ([attribute_code][value_index] => delta) mirroring
-     * Mage_Catalog_Model_Product_Type_Configurable_Price::_calcSelectionPrice(). Checkout charges
+     * Per-attribute option price deltas ([attribute_code][value_index] => delta). Checkout charges
      * the parent price plus these deltas, never the child's own price.
      *
      * @param array<int, array<string, mixed>> $attributesInfo from getConfigurableAttributesAsArray()
@@ -243,17 +242,16 @@ class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getVariantPriceDeltas(array $attributesInfo, float $basePrice): array
     {
+        /** @var Mage_Catalog_Model_Product_Type_Configurable_Price $priceModel */
+        $priceModel = Mage_Catalog_Model_Product_Type::priceFactory(Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE);
         $deltas = [];
         foreach ($attributesInfo as $attribute) {
             $code = (string) $attribute['attribute_code'];
             foreach ($attribute['values'] ?? [] as $value) {
-                $pricingValue = (float) ($value['pricing_value'] ?? 0);
-                if ($pricingValue == 0.0) {
+                if ((float) ($value['pricing_value'] ?? 0) == 0.0) {
                     continue;
                 }
-                $deltas[$code][(string) $value['value_index']] = !empty($value['is_percent'])
-                    ? $basePrice * $pricingValue / 100
-                    : $pricingValue;
+                $deltas[$code][(string) $value['value_index']] = $priceModel->calcSelectionPrice($value, $basePrice);
             }
         }
         return $deltas;

@@ -559,7 +559,9 @@ class Product extends CrudResource
         $dto->msrp = $model->getMsrp();
 
         try {
-            $dto->finalPrice = $model->getFinalPrice() ? (float) $model->getFinalPrice() : null;
+            // The cart charges a tier price for a qty of 1, and the price model applies it only when it gets a qty
+            $finalPrice = $model->getFinalPrice(1);
+            $dto->finalPrice = $finalPrice ? (float) $finalPrice : null;
         } catch (\Throwable) {
             $dto->finalPrice = $dto->specialPrice ?? $dto->price;
         }
