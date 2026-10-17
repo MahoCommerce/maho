@@ -278,6 +278,15 @@ class Mage_Sales_Model_Resource_Quote extends Mage_Sales_Model_Resource_Abstract
         if (!$quote->getId()) {
             return;
         }
+        $adapter = $this->_getReadAdapter();
+        $orderIds = $adapter->fetchCol(
+            $adapter->select()
+                ->from($this->getTable('sales/order'), ['entity_id'])
+                ->where('quote_id = ?', (int) $quote->getId()),
+        );
+        if ($orderIds === []) {
+            return;
+        }
         $fileType = Mage::getModel('catalog/product_option_type_file');
         $stringHelper = Mage::helper('core/string');
         $values = [];
@@ -296,7 +305,7 @@ class Mage_Sales_Model_Resource_Quote extends Mage_Sales_Model_Resource_Abstract
             return;
         }
 
-        foreach ($this->getOrderedItemIds((int) $quote->getId(), array_keys($values)) as $itemId) {
+        foreach ($this->getOrderedItemIds($orderIds, array_keys($values)) as $itemId) {
             foreach ($values[$itemId] as $value) {
                 $fileType->copyQuoteFileToOrder($value);
             }
@@ -407,22 +416,15 @@ class Mage_Sales_Model_Resource_Quote extends Mage_Sales_Model_Resource_Abstract
     }
 
     /**
-     * IDs of the items in $itemIds of the quote $quoteId that an order was placed from
+     * IDs of the quote items in $itemIds that the orders $orderIds hold
      *
+     * @param list<int|string> $orderIds
      * @param list<int> $itemIds
      * @return list<int>
      */
-    protected function getOrderedItemIds(int $quoteId, array $itemIds): array
+    protected function getOrderedItemIds(array $orderIds, array $itemIds): array
     {
         $adapter = $this->_getReadAdapter();
-        $orderIds = $adapter->fetchCol(
-            $adapter->select()
-                ->from($this->getTable('sales/order'), ['entity_id'])
-                ->where('quote_id = ?', $quoteId),
-        );
-        if ($orderIds === []) {
-            return [];
-        }
         return array_map(intval(...), $adapter->fetchCol(
             $adapter->select()
                 ->distinct()
