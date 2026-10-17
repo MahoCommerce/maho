@@ -368,7 +368,7 @@ class Mage_Catalog_Model_Layer_Filter_Price extends Mage_Catalog_Model_Layer_Fil
     public function getCustomerGroupId()
     {
         $customerGroupId = $this->_getData('customer_group_id');
-        $customerGroupId ??= Mage::getSingleton('customer/session')->getCustomerGroupId();
+        $customerGroupId ??= Mage::helper('customer')->getCurrentGroupId();
         return $customerGroupId;
     }
 

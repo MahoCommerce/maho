@@ -162,6 +162,8 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
      */
     protected $_groups;
 
+    private ?int $currentGroupId = null;
+
     /**
      * Check customer is logged in
      *
@@ -183,6 +185,25 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
             $this->_customer = Mage::getSingleton('customer/session')->getCustomer();
         }
         return $this->_customer;
+    }
+
+    /**
+     * Return the group that setCurrentGroupId() set for this request.
+     *
+     * Without one, return the group of the customer session.
+     */
+    public function getCurrentGroupId(): int
+    {
+        return $this->currentGroupId ?? (int) Mage::getSingleton('customer/session')->getCustomerGroupId();
+    }
+
+    /**
+     * Set the customer group of the current request, or null to go back to the customer session
+     */
+    public function setCurrentGroupId(?int $groupId): static
+    {
+        $this->currentGroupId = $groupId;
+        return $this;
     }
 
     /**
