@@ -46,6 +46,10 @@ class Mage_Downloadable_Model_Observer
             //order not saved in the database
             return $this;
         }
+        // Every save of every order line runs this, so skip other lines without loading their product
+        if ($orderItem->getProductType() !== Mage_Downloadable_Model_Product_Type::TYPE_DOWNLOADABLE) {
+            return $this;
+        }
         $product = $orderItem->getProduct();
         if ($product && $product->getTypeId() != Mage_Downloadable_Model_Product_Type::TYPE_DOWNLOADABLE) {
             return $this;
