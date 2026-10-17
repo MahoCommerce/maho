@@ -247,7 +247,7 @@ class Mage_Downloadable_Model_Observer
      *
      * @return $this
      */
-    #[Maho\Config\Observer('checkout_allow_guest', area: 'frontend')]
+    #[Maho\Config\Observer('checkout_allow_guest')]
     public function isAllowedGuestCheckout(\Maho\Event\Observer $observer)
     {
         $quote  = $observer->getEvent()->getQuote();
