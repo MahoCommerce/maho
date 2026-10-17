@@ -130,7 +130,8 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
 
         // The admin places guest orders for any product, as in the admin order form
         if (!$isAdminOrder && !$quote->getCustomerId() && !$quote->isAllowedGuestCheckout()) {
-            throw new AccessDeniedHttpException('Guest checkout is not allowed for this cart');
+            // The error code keeps a call without a token from reading as a missing login (401)
+            throw new AccessDeniedHttpException('Guest checkout is not allowed for this cart', null, 0, ['X-Api-Error-Code' => 'forbidden']);
         }
 
         // Frontend callers send the full checkout state in the body. Apply any
@@ -144,7 +145,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         }
 
         // Set customer email from the body if provided (guest checkout)
-        if ($guestEmail && \Mage::helper('core')->isValidEmail($guestEmail)) {
+        if ($guestEmail && !$quote->getCustomerId() && \Mage::helper('core')->isValidEmail($guestEmail)) {
             $quote->setCustomerEmail($guestEmail);
         }
 

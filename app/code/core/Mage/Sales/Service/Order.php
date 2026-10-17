@@ -46,6 +46,14 @@ class Mage_Sales_Service_Order
             throw new \Mage_Core_Exception('Cart is empty');
         }
 
+        // A cart assigned to a customer before its guest flag was cleared still carries it
+        $quote->setCustomerIsGuest(!$quote->getCustomerId());
+        // The cart keeps the email the account had when the customer was set on it
+        $accountEmail = $quote->getCustomerId() ? $quote->getCustomer()->getEmail() : null;
+        if ($accountEmail) {
+            $quote->setCustomerEmail($accountEmail);
+        }
+
         // Validate addresses
         if (!$quote->isVirtual()) {
             $shippingAddress = $quote->getShippingAddress();
@@ -142,7 +150,7 @@ class Mage_Sales_Service_Order
 
             // Generate access token for guest orders
             $accessToken = null;
-            if (!$order->getCustomerId() || $quote->getCustomerIsGuest()) {
+            if (!$order->getCustomerId()) {
                 $accessToken = $this->generateAccessToken();
                 $order->setData('guest_access_token', $accessToken);
                 $order->save();
