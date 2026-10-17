@@ -12,7 +12,7 @@ declare(strict_types=1);
  * Frontend widget listing products with an active catalog price rule discount,
  * optionally restricted to a single rule ("offer of the month").
  */
-class Mage_CatalogRule_Block_Product_Widget_OnSale extends Mage_Catalog_Block_Product_Widget_Abstract
+class Mage_CatalogRule_Block_Product_Widget_Onsale extends Mage_Catalog_Block_Product_Widget_Abstract
 {
     public const DEFAULT_ORDER = 'newest';
 
