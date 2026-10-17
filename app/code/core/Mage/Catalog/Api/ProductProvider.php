@@ -138,6 +138,11 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         $rate = $this->displayCurrencyRate();
         if ($rate === null) {
             $dto->currency = $store->getBaseCurrencyCode();
+            foreach ($dto->variants as &$variant) {
+                $variant['price'] = (float) $store->roundPrice($variant['price']);
+                $variant['finalPrice'] = (float) $store->roundPrice($variant['finalPrice']);
+            }
+            unset($variant);
             return;
         }
 
@@ -628,6 +633,8 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         $total = $collection->getSize();
         $collection->setPageSize($pageSize);
         $collection->setCurPage($page);
+        // One query for all tier prices, as the finalPrice of each product reads them
+        $collection->addTierPriceData();
 
         $result = [
             'products' => iterator_to_array($collection),
@@ -883,6 +890,8 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
 
             $childIds = array_map(fn($c) => $c->getId(), $childProducts);
             $stockByChild = $this->batchLoadStockItems($childIds);
+            // Load the group prices once, as each variant is priced on a clone of the parent
+            $product->getPriceModel()->getGroupPrice($product);
 
             $dto->variants = [];
             foreach ($childProducts as $child) {
@@ -891,11 +900,12 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
                     $attrs[$attr->getProductAttribute()->getAttributeCode()] = (int) $child->getData($attr->getProductAttribute()->getAttributeCode());
                 }
                 $si = $stockByChild[$child->getId()] ?? null;
+                $prices = $this->getVariantPrices($product, $configAttributes, $child);
                 $variant = [
                     'id' => (int) $child->getId(),
                     'sku' => $child->getSku(),
-                    'price' => (float) $child->getPrice(),
-                    'finalPrice' => (float) $child->getFinalPrice(),
+                    'price' => $prices['price'],
+                    'finalPrice' => $prices['finalPrice'],
                     'stockQty' => $si ? $this->stockQtyFor($si) : 0,
                     'inStock' => $si ? (bool) $si->getIsInStock() : false,
                     'attributes' => $attrs,
@@ -1250,6 +1260,44 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
             'imageUrl'     => $p->imageUrl,
             'smallImageUrl' => $p->smallImageUrl,
             'thumbnailUrl' => $p->thumbnailUrl,
+        ];
+    }
+
+    /**
+     * Price a variant as the cart does: the parent price plus the price of each
+     * selected option. The cart ignores the price of the child, so this method ignores it too.
+     *
+     * @param iterable<\Mage_Catalog_Model_Product_Type_Configurable_Attribute> $configAttributes
+     * @return array{price: float, finalPrice: float}
+     */
+    private function getVariantPrices(
+        \Mage_Catalog_Model_Product $product,
+        iterable $configAttributes,
+        \Mage_Catalog_Model_Product $child,
+    ): array {
+        /** @var \Mage_Catalog_Model_Product_Type_Configurable_Price $priceModel */
+        $priceModel = \Mage_Catalog_Model_Product_Type::priceFactory(\Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE);
+        $basePrice = (float) $product->getPrice();
+        $price = $basePrice;
+        $selected = [];
+        foreach ($configAttributes as $attr) {
+            $productAttribute = $attr->getProductAttribute();
+            $valueIndex = $child->getData($productAttribute->getAttributeCode());
+            $selected[$productAttribute->getId()] = $valueIndex;
+            foreach ($attr->getPrices() ?: [] as $value) {
+                if ($value['value_index'] == $valueIndex) {
+                    $price += $priceModel->calcSelectionPrice($value, $basePrice);
+                }
+            }
+        }
+
+        $priced = clone $product;
+        $priced->addCustomOption('attributes', \Mage::helper('core')->jsonEncode($selected));
+        $priced->setFinalPrice(null);
+
+        return [
+            'price' => max(0.0, $price),
+            'finalPrice' => (float) $priced->getFinalPrice(1),
         ];
     }
 
