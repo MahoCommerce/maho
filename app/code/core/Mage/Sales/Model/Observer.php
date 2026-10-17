@@ -46,8 +46,18 @@ class Mage_Sales_Model_Observer
             }
 
             foreach ($quotes as $quote) {
-                $quote->delete();
+                try {
+                    $quote->delete();
+                } catch (Exception $e) {
+                    Mage::logException($e);
+                }
             }
+        }
+
+        try {
+            Mage::getResourceSingleton('sales/quote')->deleteUnusedOptionFiles();
+        } catch (Exception $e) {
+            Mage::logException($e);
         }
 
         return $this;
