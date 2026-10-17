@@ -20,11 +20,6 @@ declare(strict_types=1);
 
 const GROUP_RULE_NAME = 'pest-api-rule-customer-group';
 
-function groupRuleRead(): Maho\Db\Adapter\AdapterInterface
-{
-    return Mage::getSingleton('core/resource')->getConnection('core_read');
-}
-
 function groupRuleTable(string $name): string
 {
     return Mage::getSingleton('core/resource')->getTableName($name);
@@ -44,58 +39,71 @@ function groupRuleReapply(array $productIds): void
 }
 
 /**
+ * A product of the default website that manages no stock
+ *
+ * @param array<string, mixed> $data
+ */
+function groupRuleNewProduct(string $type, ?float $price, array $data = []): Mage_Catalog_Model_Product
+{
+    $sku = "pest-group-rule-{$type}-" . uniqid();
+    $product = Mage::getModel('catalog/product')->setStoreId(0)
+        ->setTypeId($type)
+        ->setAttributeSetId(Mage::getModel('catalog/product')->getDefaultAttributeSetId())
+        ->setSku($sku)->setName("Pest group rule {$type}")->setUrlKey($sku)->setPrice($price)->setWeight(1)
+        ->setStatus(Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
+        ->setVisibility(Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH)
+        ->setTaxClassId(0)->setWebsiteIds([1])
+        ->setStockData(['use_config_manage_stock' => 0, 'manage_stock' => 0, 'is_in_stock' => 1, 'qty' => 100])
+        ->addData($data);
+    // Bundle selections read the product from the registry, which the admin product save fills
+    Mage::register('product', $product, true);
+    try {
+        $product->save();
+    } finally {
+        Mage::unregister('product');
+    }
+    trackCreated('product', (int) $product->getId());
+
+    return $product;
+}
+
+/**
+ * A related product, a grouped child and a dynamic bundle selection, made here since the sample
+ * data has no bundle and no product links
+ *
  * @return array{grouped: int, groupedChild: int, bundle: int, selection: int, linkedFrom: int, linked: int}
  */
-function groupRuleSampleProducts(): array
+function groupRuleFixtures(): array
 {
-    $read = groupRuleRead();
-    $website = groupRuleTable('catalog/product_website');
-
-    $grouped = (int) $read->fetchOne(
-        $read->select()
-            ->from(['e' => groupRuleTable('catalog/product')], 'entity_id')
-            ->join(['w' => $website], 'w.product_id = e.entity_id AND w.website_id = 1', [])
-            ->where('e.type_id = ?', Mage_Catalog_Model_Product_Type::TYPE_GROUPED)
-            ->order('e.entity_id')
-            ->limit(1),
-    );
-    $groupedChild = (int) groupRuleProduct($grouped)->getTypeInstance(true)
-        ->getAssociatedProducts(groupRuleProduct($grouped))[0]->getId();
-
-    // A dynamic price bundle, and one of its selections that the price index holds
-    $selectionRow = $read->fetchRow(
-        $read->select()
-            ->from(['s' => groupRuleTable('bundle/selection')], ['bundle' => 'parent_product_id', 'selection' => 'product_id'])
-            ->join(['e' => groupRuleTable('catalog/product')], 'e.entity_id = s.parent_product_id', [])
-            ->join(['w' => $website], 'w.product_id = e.entity_id AND w.website_id = 1', [])
-            ->join(['i' => groupRuleTable('catalog/product_index_price')], 'i.entity_id = s.product_id AND i.website_id = 1 AND i.customer_group_id = 0', [])
-            ->where('e.type_id = ?', Mage_Catalog_Model_Product_Type::TYPE_BUNDLE)
-            ->order(['s.parent_product_id', 's.product_id'])
-            ->limit(1),
-    );
-    $bundle = (int) $selectionRow['bundle'];
-    expect((int) groupRuleProduct($bundle)->getPriceType())->toBe(Mage_Bundle_Model_Product_Price::PRICE_TYPE_DYNAMIC);
-
-    $linkedFrom = (int) $read->fetchOne(
-        $read->select()
-            ->from(['l' => groupRuleTable('catalog/product_link')], 'product_id')
-            ->where('l.link_type_id = ?', Mage_Catalog_Model_Product_Link::LINK_TYPE_RELATED)
-            ->order('l.product_id')
-            ->limit(1),
-    );
-    $related = Mage::getModel('catalog/product')->setStoreId(1)->load($linkedFrom)->getRelatedProductCollection()
-        ->addAttributeToFilter('type_id', Mage_Catalog_Model_Product_Type::TYPE_SIMPLE)
-        ->addAttributeToFilter('status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
-        ->setVisibility(Mage::getSingleton('catalog/product_visibility')->getVisibleInCatalogIds());
-    Mage::getModel('cataloginventory/stock_status')->addIsInStockFilterToCollection($related);
+    $simple = Mage_Catalog_Model_Product_Type::TYPE_SIMPLE;
+    $linked = (int) groupRuleNewProduct($simple, 40.0)->getId();
+    $groupedChild = (int) groupRuleNewProduct($simple, 60.0)->getId();
+    $selection = (int) groupRuleNewProduct($simple, 80.0)->getId();
+    $linkedFrom = groupRuleNewProduct($simple, 20.0, ['related_link_data' => [$linked => ['position' => 1]]]);
+    $grouped = groupRuleNewProduct(Mage_Catalog_Model_Product_Type::TYPE_GROUPED, null, [
+        'grouped_link_data' => [$groupedChild => ['qty' => 1, 'position' => 1]],
+    ]);
+    $bundle = groupRuleNewProduct(Mage_Catalog_Model_Product_Type::TYPE_BUNDLE, null, [
+        'price_type' => Mage_Bundle_Model_Product_Price::PRICE_TYPE_DYNAMIC,
+        'sku_type' => 0,
+        'weight_type' => 0,
+        'shipment_type' => 0,
+        'price_view' => 0,
+        'can_save_bundle_selections' => true,
+        'bundle_options_data' => [['title' => 'Pick', 'default_title' => 'Pick', 'type' => 'select', 'required' => 1, 'position' => 0, 'delete' => '']],
+        'bundle_selections_data' => [[[
+            'product_id' => $selection, 'selection_qty' => 1, 'selection_can_change_qty' => 0, 'position' => 0,
+            'is_default' => 1, 'selection_price_type' => 0, 'selection_price_value' => 0, 'delete' => '',
+        ]]],
+    ]);
 
     return [
-        'grouped' => $grouped,
+        'grouped' => (int) $grouped->getId(),
         'groupedChild' => $groupedChild,
-        'bundle' => $bundle,
-        'selection' => (int) $selectionRow['selection'],
-        'linkedFrom' => $linkedFrom,
-        'linked' => (int) $related->getFirstItem()->getId(),
+        'bundle' => (int) $bundle->getId(),
+        'selection' => $selection,
+        'linkedFrom' => (int) $linkedFrom->getId(),
+        'linked' => $linked,
     ];
 }
 
@@ -107,6 +115,18 @@ function groupRuleReindexPrice(int $productId): void
         Mage_Catalog_Model_Product_Indexer_Price::EVENT_TYPE_REINDEX_PRICE,
     );
     Mage::app()->cleanCache(['API_PRODUCTS']);
+}
+
+function groupRuleSetGroupPrice(int $productId, int $groupId, float $value): void
+{
+    Mage::getSingleton('core/resource')->getConnection('core_write')->insert(groupRuleTable('catalog/product_attribute_group_price'), [
+        'entity_id' => $productId,
+        'all_groups' => 0,
+        'customer_group_id' => $groupId,
+        'value' => $value,
+        'website_id' => 0,
+    ]);
+    groupRuleReindexPrice($productId);
 }
 
 function groupRuleRow(array $rows, string $key, int $id): array
@@ -124,9 +144,8 @@ beforeAll(function (): void {
 });
 
 beforeEach(function (): void {
-    $this->ids = groupRuleSampleProducts();
+    $this->ids = groupRuleFixtures();
     $ruled = [$this->ids['groupedChild'], $this->ids['selection'], $this->ids['linked']];
-    expect($ruled)->each->toBeGreaterThan(0);
 
     $this->fullPrice = [];
     foreach ($ruled as $productId) {
@@ -153,7 +172,6 @@ beforeEach(function (): void {
     $rule->save();
     groupRuleReapply($ruled);
 
-    $this->ruled = $ruled;
     $this->customerToken = customerToken();
 });
 
@@ -161,7 +179,7 @@ afterEach(function (): void {
     foreach (Mage::getResourceModel('catalogrule/rule_collection')->addFieldToFilter('name', GROUP_RULE_NAME) as $rule) {
         $rule->delete();
     }
-    groupRuleReapply($this->ruled ?? []);
+    // Deleting the products also deletes their rule prices
     cleanupTestData();
 });
 
@@ -234,77 +252,31 @@ it('applies the group price of the caller group to related products', function (
     $productId = $this->ids['linked'];
     $groupId = (int) Mage::getModel('customer/customer')->load((int) fixtures('customer_id'))->getGroupId();
     $groupPrice = round($this->fullPrice[$productId] * 0.8, 2);
-    $write = Mage::getSingleton('core/resource')->getConnection('core_write');
-    $table = groupRuleTable('catalog/product_attribute_group_price');
-    $where = ['entity_id = ?' => $productId, 'customer_group_id = ?' => $groupId, 'website_id = ?' => 0];
-    $existing = $write->fetchAll(
-        $write->select()->from($table)->where('entity_id = ?', $productId)->where('customer_group_id = ?', $groupId)->where('website_id = ?', 0),
-    );
-    $write->delete($table, $where);
-    $write->insert($table, [
-        'entity_id' => $productId,
-        'all_groups' => 0,
-        'customer_group_id' => $groupId,
-        'value' => $groupPrice,
-        'website_id' => 0,
-    ]);
+    groupRuleSetGroupPrice($productId, $groupId, $groupPrice);
+    $path = "/api/rest/v2/products/{$this->ids['linkedFrom']}";
 
-    try {
-        groupRuleReindexPrice($productId);
-        $path = "/api/rest/v2/products/{$this->ids['linkedFrom']}";
+    $guest = apiGet($path)['json']['relatedProducts'] ?? [];
+    $customer = apiGet($path, $this->customerToken)['json']['relatedProducts'] ?? [];
 
-        $guest = apiGet($path)['json']['relatedProducts'] ?? [];
-        $customer = apiGet($path, $this->customerToken)['json']['relatedProducts'] ?? [];
-
-        expect((float) groupRuleRow($guest, 'id', $productId)['finalPrice'])->toBe($this->fullPrice[$productId] / 2)
-            ->and((float) groupRuleRow($customer, 'id', $productId)['finalPrice'])->toBe($groupPrice);
-    } finally {
-        $write->delete($table, $where);
-        foreach ($existing as $row) {
-            $write->insert($table, $row);
-        }
-        groupRuleReindexPrice($productId);
-    }
+    expect((float) groupRuleRow($guest, 'id', $productId)['finalPrice'])->toBe($this->fullPrice[$productId] / 2)
+        ->and((float) groupRuleRow($customer, 'id', $productId)['finalPrice'])->toBe($groupPrice);
 });
 
 it('prices a guest cart for guests when a customer token adds to it', function (): void {
     $productId = $this->ids['linked'];
     $groupId = (int) Mage::getModel('customer/customer')->load((int) fixtures('customer_id'))->getGroupId();
-    $write = Mage::getSingleton('core/resource')->getConnection('core_write');
-    $table = groupRuleTable('catalog/product_attribute_group_price');
-    $where = ['entity_id = ?' => $productId, 'customer_group_id = ?' => $groupId, 'website_id = ?' => 0];
-    $existing = $write->fetchAll(
-        $write->select()->from($table)->where('entity_id = ?', $productId)->where('customer_group_id = ?', $groupId)->where('website_id = ?', 0),
-    );
-    $write->delete($table, $where);
-    $write->insert($table, [
-        'entity_id' => $productId,
-        'all_groups' => 0,
-        'customer_group_id' => $groupId,
-        'value' => round($this->fullPrice[$productId] * 0.3, 2),
-        'website_id' => 0,
-    ]);
+    groupRuleSetGroupPrice($productId, $groupId, round($this->fullPrice[$productId] * 0.3, 2));
+    $maskedId = apiPost('/api/rest/v2/guest-carts', [])['json']['maskedId'];
+    trackCreated('quote', (int) Mage::getSingleton('core/resource')->getConnection('core_read')->fetchOne(
+        'SELECT entity_id FROM ' . groupRuleTable('sales/quote') . ' WHERE masked_quote_id = ?',
+        [$maskedId],
+    ));
+    $sku = (string) groupRuleProduct($productId)->getSku();
+    expect(apiPost("/api/rest/v2/guest-carts/{$maskedId}/items", ['sku' => $sku, 'qty' => 1], $this->customerToken)['status'])->toBeIn([200, 201]);
 
-    try {
-        groupRuleReindexPrice($productId);
-        $maskedId = apiPost('/api/rest/v2/guest-carts', [])['json']['maskedId'];
-        trackCreated('quote', (int) Mage::getSingleton('core/resource')->getConnection('core_read')->fetchOne(
-            'SELECT entity_id FROM ' . groupRuleTable('sales/quote') . ' WHERE masked_quote_id = ?',
-            [$maskedId],
-        ));
-        $sku = (string) groupRuleProduct($productId)->getSku();
-        expect(apiPost("/api/rest/v2/guest-carts/{$maskedId}/items", ['sku' => $sku, 'qty' => 1], $this->customerToken)['status'])->toBeIn([200, 201]);
+    $cart = apiGet("/api/rest/v2/guest-carts/{$maskedId}", $this->customerToken)['json'];
 
-        $cart = apiGet("/api/rest/v2/guest-carts/{$maskedId}", $this->customerToken)['json'];
-
-        expect((float) $cart['items'][0]['price'])->toBe($this->fullPrice[$productId] / 2);
-    } finally {
-        $write->delete($table, $where);
-        foreach ($existing as $row) {
-            $write->insert($table, $row);
-        }
-        groupRuleReindexPrice($productId);
-    }
+    expect((float) $cart['items'][0]['price'])->toBe($this->fullPrice[$productId] / 2);
 });
 
 it('prices a dynamic bundle in a customer cart with the rules of the customer group', function (): void {
