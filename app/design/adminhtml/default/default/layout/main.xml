@@ -228,7 +228,7 @@ Base preview layout
 
     <adminhtml_dashboard_entryexit>
         <block type="core/text_list" name="root" output="toHtml">
-            <block type="log/dashboard_entryexit" name="adminhtml.dashboard.tab.entryexit"/>
+            <block type="log/dashboard_entryExit" name="adminhtml.dashboard.tab.entryexit"/>
         </block>
     </adminhtml_dashboard_entryexit>
 
@@ -240,7 +240,7 @@ Base preview layout
 
     <adminhtml_dashboard_toppages>
         <block type="core/text_list" name="root" output="toHtml">
-            <block type="log/dashboard_toppages" name="adminhtml.dashboard.tab.toppages"/>
+            <block type="log/dashboard_topPages" name="adminhtml.dashboard.tab.toppages"/>
         </block>
     </adminhtml_dashboard_toppages>
 
