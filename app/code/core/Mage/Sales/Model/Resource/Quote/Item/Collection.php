@@ -178,6 +178,10 @@ class Mage_Sales_Model_Resource_Quote_Item_Collection extends Mage_Core_Model_Re
 
         $recollectQuote = false;
         foreach ($this as $item) {
+            if ($item->isCustomItem()) {
+                $item->checkData();
+                continue;
+            }
             $product = $productCollection->getItemById($item->getProductId());
             if ($product) {
                 $product->setCustomOptions([]);

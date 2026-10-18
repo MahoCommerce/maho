@@ -542,12 +542,54 @@ restored **unsanitized**. Read the `MaliciousCode` docblocks before you change i
 **Commits** describe only the code change. **NEVER** add "Co-Authored-By: Claude", any other AI
 attribution, or a mention of Claude, AI, or assistants.
 
-**Pull request titles**
+**Pull requests** have two readers: the maintainer who reviews, and the author of the release
+notes, who reads the titles and the `## Release notes` section. Write the
+title and the opening of the body for the person who uses the change (a merchant, an admin user,
+an API client), in their words. Code terms go in `## How it works`.
 
-- Plain, descriptive, with **no** conventional-commit prefix (`feat(...)`, `fix(...)`, etc.)
-- Past tense, describing what was done (e.g. "Added schema.org structured data for products
-  and blog posts")
-- Spell out what the change delivers rather than using a vague summary
+- Title: plain, past tense, with **no** conventional-commit prefix (`feat(...)`, `fix(...)`).
+  It names the result for that user and where it shows: "Fixed the REST API returning a price of
+  0 for every variant of a configurable product", "Added items that are not in the catalog to
+  admin order creation, with a free name, price and tax class"
+- Body: these `##` sections, in this order. Leave out an optional section that has nothing in it
+  1. `## What it does`: what the user can now do, or what was broken, and where (admin path,
+     endpoint, CLI command). One to three sentences, then `Closes #N`
+  2. `## Decision needed` (optional): a choice that the maintainer must make before the merge
+  3. `## How it works`: the design, for the reviewer. The first sentence says what the code does
+     and where, as a fact: "A custom line is a quote item and an order item with `product_id`
+     NULL", not "Maho creates no product". The next sentence gives the reason for the design.
+     Then one paragraph for each other part. Never open with what the change does not do, or with
+     a detail
+  4. `## Also in this PR` (optional): a change that is not part of the main one, and its reason
+  5. `## Good to know` (optional): limits of the change, and anything you could not confirm,
+     with where you looked
+  6. `## Release notes`: what reaches a store that upgrades and does nothing more: a break, a
+     change in what the store already does, or a step that someone must run. The test: does an
+     existing store notice the upgrade before anyone uses the new feature? A schema change that
+     the sync applies, or a limit of the new feature, stays out. Write "Nothing to note." when
+     there is none, so the release author knows that it was checked
+- Screenshots: a change that shows on a page (admin, storefront, PDF, email) gets one or more
+  screenshots in `## What it does`, under the sentences. An API, CLI or schema change gets none
+  - Use a store with sample data (`./maho import:sample-data`), never real customer data. Pick a
+    sample customer and product by name: the first row of a grid can be a real account
+  - Take them with Playwright (`npm install` adds it) on `./maho serve`: light color scheme,
+    1280x800 viewport, device scale factor 2. 1280 is the narrowest width where the admin layout
+    does not wrap, so the text stays readable in the pull request column. Set the width of each
+    `<img>` to half its pixel width
+  - For an admin page, create a temporary admin user on the development store, log in with it in
+    the same browser context, and delete it after
+  - Show the path that the user takes: first the page and the control that starts the feature
+    (a menu entry, a button), then each step, then the result. Number the captions in that order
+  - Mark the control or the result in each screenshot with a 3px red (`#e11d48`) box that the
+    script draws on the page. A dialog needs no box: its backdrop already shows it
+  - Put each image in a macOS-style window frame: a title bar with the three window buttons and
+    the page name, rounded corners and a soft shadow, on a light gray background. Render the
+    frame as an HTML page with Playwright, at the same scale factor
+  - Crop to the changed area, with enough of the page around it to show where it is. For a
+    change to an existing page, show the page before and after, each with a one-line caption
+  - `gh` cannot attach an image. Upload the files through the body editor on github.com (drag
+    them in, or use its file input), then move each image link under the step that it shows
+- These rules take priority over the template of any PR skill
 
 ## Write Simple Technical English
 
@@ -574,7 +616,8 @@ who is not a native English speaker must understand them on the first read.
 
 ## Be Brief
 
-Applies to issue and PR bodies, review comments, replies on GitHub, and answers in chat.
+Applies to issue bodies, review comments, replies on GitHub, and answers in chat. A pull request
+body follows **Pull requests** under Git Conventions, and stays short the same way.
 
 - Start with what you need from the maintainer: an open decision, or a change to approve
 - Mark anything that you could not confirm, and say where you looked

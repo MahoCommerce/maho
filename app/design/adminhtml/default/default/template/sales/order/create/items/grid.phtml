@@ -84,10 +84,12 @@
                     <tr>
                         <td class="first">
                             <h5 class="title"><span id="order_item_<?= $_item->getId() ?>_title"><?= $this->escapeHtml($_item->getName()) ?></span></h5>
+                            <?php if (!$_item->isCustomItem()): ?>
                             <div>
                                 <strong><?= $this->helper('sales')->__('SKU') ?>:</strong>
                                 <?= implode('<br>', Mage::helper('catalog')->splitSku($this->escapeHtml($_item->getSku()))) ?>
                             </div>
+                            <?php endif ?>
                             <?php if ($_item->getMessage(false)): ?>
                                 <?php foreach ($_item->getMessage(false) as $message): ?>
                                 <div class="<?php if ($_item->getHasError()): ?>error<?php else: ?>notice<?php endif ?>">
@@ -97,7 +99,9 @@
                             <?php endif ?>
                         </td>
                         <td class="a-center v-middle">
+                            <?php if (!$_item->isCustomItem()): ?>
                             <?= $this->getConfigureButtonHtml($_item) ?>
+                            <?php endif ?>
                         </td>
                         <td class="price">
 
@@ -195,7 +199,7 @@
                             <label class="normal" for="item_use_custom_price_<?= $_item->getId() ?>"><?= $this->helper('sales')->__('Custom Price') ?>*</label>
                             </div>
                             <?php endif ?>
-                            <input id="item_custom_price_<?= $_item->getId() ?>" name="item[<?= $_item->getId() ?>][custom_price]" value="<?= sprintf('%.2f', $this->getOriginalEditablePrice($_item)) ?>"<?php if (!$_isCustomPrice): ?> style="display:none" disabled="disabled"<?php endif ?> class="input-text item-price">
+                            <div><input id="item_custom_price_<?= $_item->getId() ?>" name="item[<?= $_item->getId() ?>][custom_price]" value="<?= sprintf('%.2f', $this->getOriginalEditablePrice($_item)) ?>"<?php if (!$_isCustomPrice): ?> style="display:none" disabled="disabled"<?php endif ?> class="input-text item-price"></div>
                         </td>
                         <td><input name="item[<?= $_item->getId() ?>][qty]" class="input-text item-qty" value="<?= $_item->getQty() * 1 ?>" maxlength="12"></td>
                         <td class="price">
@@ -377,7 +381,7 @@
                             <select name="item[<?= $_item->getId() ?>][action]" style="width:100px;">
                                 <option value=""></option>
                                 <option value="remove"><?= $this->helper('sales')->__('Remove') ?></option>
-                                <?php if ($this->getCustomerId() && $this->getMoveToCustomerStorage()): ?>
+                                <?php if ($this->getCustomerId() && $this->getMoveToCustomerStorage() && !$_item->isCustomItem()): ?>
                                     <option value="cart"><?= $this->helper('sales')->__('Move to Shopping Cart') ?></option>
                                     <?php if ($this->isMoveToWishlistAllowed($_item)): ?>
                                         <?php $wishlists = $this->getCustomerWishlists(); ?>

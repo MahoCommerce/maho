@@ -425,7 +425,7 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
     {
         $dto = new OrderItem();
         $dto->id = (int) $item->getId();
-        $dto->sku = $item->getSku();
+        $dto->sku = $item->getSku() ?? '';
         $dto->name = $item->getName() ?? '';
         $dto->qty = (float) $item->getQtyOrdered();
         $dto->qtyOrdered = (float) $item->getQtyOrdered();

@@ -445,6 +445,48 @@ class AdminOrder
         this.showArea('search');
     }
 
+    customItemShow() {
+        const template = document.getElementById('order-custom-item-form');
+        Dialog.confirm(template.innerHTML, {
+            title: template.dataset.title,
+            okLabel: template.dataset.okLabel,
+            className: 'maho-dialog custom-item-dialog',
+            width: 600,
+            onOpen: (dialog) => dialog.querySelector('[name="name"]').focus(),
+            onOk: (dialog) => this.customItemSubmit(dialog),
+        });
+    }
+
+    customItemToggleWeight(checkbox) {
+        checkbox.closest('dialog').querySelector('.custom-item-weight-row').hidden = !checkbox.checked;
+    }
+
+    customItemSubmit(dialog) {
+        const field = (name) => dialog.querySelector(`[name="${name}"]`);
+        const requiresShipping = field('requires_shipping').checked;
+        const required = ['name', 'price', 'tax_class_id', ...(requiresShipping ? ['weight'] : [])];
+        let valid = true;
+        for (const name of required) {
+            const empty = field(name).value.trim() === '';
+            field(name).classList.toggle('validation-failed', empty);
+            valid &&= !empty;
+        }
+        // Returning false keeps the dialog open, so the entered values stay
+        dialog.querySelector('.custom-item-error').hidden = valid;
+        if (!valid) {
+            return false;
+        }
+
+        this.loadArea(['items', 'shipping_method', 'totals', 'billing_method'], true, {
+            'custom_item[name]': field('name').value,
+            'custom_item[price]': field('price').value,
+            'custom_item[tax_class_id]': field('tax_class_id').value,
+            'custom_item[requires_shipping]': requiresShipping ? 1 : 0,
+            'custom_item[weight]': requiresShipping ? field('weight').value : '',
+            reset_shipping: true,
+        });
+    }
+
     productGridHide() {
         this.hideArea('search');
         this.gridProducts.clear();

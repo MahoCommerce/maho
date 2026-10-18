@@ -543,6 +543,9 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
      */
     public function getRulePrice($date, $wId, $gId, $pId)
     {
+        if ($pId === null) {
+            return false;
+        }
         $data = $this->getRulePrices($date, $wId, $gId, [$pId]);
         return $data[$pId] ?? false;
     }

@@ -206,6 +206,10 @@ class Mage_CatalogRule_Model_Observer
     {
         /** @var Mage_Catalog_Model_Product $product */
         $product = $observer->getEvent()->getProduct();
+        // A product with no id, such as a custom order line, has no rule price
+        if (!$product->getId()) {
+            return $this;
+        }
         $storeId = $product->getStoreId();
         $date = Mage::app()->getLocale()->utcToStore($storeId)->format(Mage_Core_Model_Locale::DATE_FORMAT);
         $key = false;
@@ -224,7 +228,7 @@ class Mage_CatalogRule_Model_Observer
         }
 
         if ($key) {
-            if (isset($wId, $gId, $pId) && !isset($this->_rulePrices[$key])) {
+            if (isset($wId, $gId) && !isset($this->_rulePrices[$key])) {
                 $rulePrice = Mage::getResourceModel('catalogrule/rule')
                     ->getRulePrice($date, $wId, $gId, $pId);
                 $this->_rulePrices[$key] = $rulePrice;

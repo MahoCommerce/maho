@@ -291,6 +291,50 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
     }
 
     /**
+     * Check if the item is a custom line: it has a name and no catalog product.
+     */
+    public function isCustomItem(): bool
+    {
+        return $this->getProductId() === null && $this->getName() !== null;
+    }
+
+    /**
+     * Retrieve product model object associated with item.
+     * A custom line gets a product that exists in memory only.
+     *
+     * @return Mage_Catalog_Model_Product
+     */
+    #[\Override]
+    public function getProduct()
+    {
+        if ($this->_getData('product') === null && $this->isCustomItem()) {
+            $this->setProduct($this->_createCustomItemProduct());
+        }
+        return parent::getProduct();
+    }
+
+    /**
+     * Make an unsaved product from the columns of a custom line.
+     */
+    protected function _createCustomItemProduct(): Mage_Catalog_Model_Product
+    {
+        // The custom price is in quote currency, and a product price is in base currency.
+        $price = (float) $this->getOriginalCustomPrice();
+        $rate = (float) $this->getStore()->convertPrice(1.0);
+
+        return Mage::getModel('catalog/product')
+            ->setStoreId($this->getQuote()->getStoreId())
+            ->setTypeId($this->getData('product_type'))
+            ->setName($this->getName())
+            ->setTaxClassId($this->getTaxClassId())
+            ->setWeight($this->getWeight())
+            ->setPrice($rate > 0 ? $price / $rate : $price)
+            ->setStatus(Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
+            ->setGroupPrice([])
+            ->setTierPrice([]);
+    }
+
+    /**
      * Check product representation in item
      *
      * @param   Mage_Catalog_Model_Product $product
@@ -1027,6 +1071,12 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
     public function setStoreId(?int $value): static
     {
         return $this->setData('store_id', $value);
+    }
+
+    public function getTaxClassId(): ?int
+    {
+        $value = $this->getData('tax_class_id');
+        return $value === null ? null : (int) $value;
     }
 
     public function setTaxClassId(?int $value): static

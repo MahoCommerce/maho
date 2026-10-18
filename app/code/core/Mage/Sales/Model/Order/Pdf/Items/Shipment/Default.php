@@ -19,6 +19,6 @@ class Mage_Sales_Model_Order_Pdf_Items_Shipment_Default extends Mage_Sales_Model
     public function getSku(): string
     {
         $item = $this->getItem();
-        return $item ? $item->getSku() : '';
+        return $item ? ($item->getSku() ?? '') : '';
     }
 }

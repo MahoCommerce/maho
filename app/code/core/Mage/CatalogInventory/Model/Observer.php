@@ -709,6 +709,9 @@ class Mage_CatalogInventory_Model_Observer
         $productIds = [];
         foreach ($quote->getAllItems() as $item) {
             $productId = $item->getProductId();
+            if ($productId === null) {
+                continue;
+            }
             $productIds[$productId] = $productId;
             $children   = $item->getChildrenItems();
             if ($children) {
@@ -772,7 +775,7 @@ class Mage_CatalogInventory_Model_Observer
             } elseif (Mage::helper('cataloginventory')->isAutoReturnEnabled()) {
                 $return = true;
             }
-            if ($return) {
+            if ($return && $item->getProductId() !== null) {
                 $parentOrderId = $item->getOrderItem()->getParentItemId();
                 /** @var Mage_Sales_Model_Order_Creditmemo_Item $parentItem */
                 $parentItem = $parentOrderId ? $creditmemo->getItemByOrderId($parentOrderId) : false;

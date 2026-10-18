@@ -471,7 +471,7 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
             return $this->validateAttribute($object->getCategoryIds());
         }
 
-        if (!isset($this->_entityAttributeValues[$object->getId()])) {
+        if ($object->getId() === null || !isset($this->_entityAttributeValues[$object->getId()])) {
             if (!$object->getResource()) {
                 return false;
             }

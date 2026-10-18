@@ -221,7 +221,8 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Items_Grid extends Mage_Adminhtml_
      */
     public function usedCustomPriceForItem($item)
     {
-        return $item->hasCustomPrice();
+        // The custom price of a custom line is its own price, not an override
+        return $item->hasCustomPrice() && !$item->isCustomItem();
     }
 
     /**
