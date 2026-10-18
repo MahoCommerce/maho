@@ -70,16 +70,16 @@ function customItemPlace(Mage_Sales_Model_Quote $quote): Mage_Sales_Model_Order
 }
 
 /**
- * Run $body and fail on a deprecation. A NULL product id used as an array key is a deprecation
- * in PHP 8.5, and the test runner only reports those.
+ * Run $body and fail on a PHP warning or deprecation. A NULL product id used as an array key is a
+ * deprecation in PHP 8.5, a missing key is a warning, and the test runner only reports those.
  *
  * @param callable():void $body
  */
-function customItemFailOnDeprecation(callable $body): void
+function customItemFailOnPhpError(callable $body): void
 {
     set_error_handler(
         fn(int $errno, string $errstr, string $errfile, int $errline) => throw new ErrorException($errstr, 0, $errno, $errfile, $errline),
-        E_DEPRECATED,
+        E_WARNING | E_DEPRECATED,
     );
     try {
         $body();
@@ -102,7 +102,7 @@ afterEach(function () {
 it('adds a line with the entered name, price and tax class', function () {
     $quote = customItemEmptyQuote();
     customItemOrderCreate($quote)->addCustomItem('Installation', 40.0, CUSTOM_ITEM_TAX_CLASS, false, 0.0);
-    customItemFailOnDeprecation(fn() => $quote->collectTotals()->save());
+    customItemFailOnPhpError(fn() => $quote->collectTotals()->save());
 
     $items = customItemsOf($quote);
     expect($items)->toHaveCount(1);
@@ -188,7 +188,7 @@ it('places an order with the line, then invoices and refunds it with return to s
     customItemOrderCreate($quote)->addCustomItem('Installation', 40.0, CUSTOM_ITEM_TAX_CLASS, true, 2.0);
 
     $order = null;
-    customItemFailOnDeprecation(function () use ($quote, &$order) {
+    customItemFailOnPhpError(function () use ($quote, &$order) {
         $order = customItemPlace($quote);
     });
     $orderItem = null;
@@ -215,7 +215,7 @@ it('places an order with the line, then invoices and refunds it with return to s
     }
     $creditmemo->setOfflineRequested(true);
     $creditmemo->register();
-    customItemFailOnDeprecation(function () use ($creditmemo, $order) {
+    customItemFailOnPhpError(function () use ($creditmemo, $order) {
         Mage::getModel('core/resource_transaction')->addObject($creditmemo)->addObject($order)->save();
     });
 
@@ -248,7 +248,19 @@ it('lets the admin reorder a real product next to a line', function () {
 });
 
 it('finds no catalog rule price for an item with no product', function () {
-    customItemFailOnDeprecation(function () {
+    customItemFailOnPhpError(function () {
         expect(Mage::getResourceModel('catalogrule/rule')->getRulePrice(time(), 1, 0, null))->toBeFalse();
     });
+});
+
+it('applies no catalog rule price to a custom line in the admin', function () {
+    $product = Mage::getModel('catalog/product')
+        ->setStoreId(1)
+        ->setCustomerGroupId(0)
+        ->setFinalPrice(5.0);
+    $observer = new Maho\Event\Observer(['event' => new Maho\Event(['product' => $product])]);
+
+    customItemFailOnPhpError(fn() => Mage::getSingleton('catalogrule/observer')->processAdminFinalPrice($observer));
+
+    expect($product->getData('final_price'))->toBe(5.0);
 });

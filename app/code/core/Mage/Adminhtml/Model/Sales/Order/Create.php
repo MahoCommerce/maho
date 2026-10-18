@@ -427,6 +427,10 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
             if (is_numeric($qty)) {
                 $item->setQty((float) $qty);
             }
+            Mage::dispatchEvent('sales_convert_order_item_to_quote_item', [
+                'order_item' => $orderItem,
+                'quote_item' => $item,
+            ]);
             return $item;
         }
 
