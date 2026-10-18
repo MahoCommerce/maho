@@ -554,11 +554,12 @@ an API client), in their words. Code terms go in `## How it works`.
 - Body: these `##` sections, in this order. Leave out an optional section that has nothing in it
   1. `## What it does`: what the user can now do, or what was broken, and where (admin path,
      endpoint, CLI command). One to three sentences, then `Closes #N`
-  2. `## How it works`: the design choice and its reason, for the reviewer
-  3. `## Also in this PR` (optional): a change that is not part of the main one, and its reason
-  4. `## Open points` (optional): decisions for the maintainer, and anything you could not
-     confirm, with where you looked
-  5. `## Release notes`: what reaches a store that upgrades and does nothing more: a break, a
+  2. `## Decision needed` (optional): a choice that the maintainer must make before the merge
+  3. `## How it works`: the design choice and its reason, for the reviewer
+  4. `## Also in this PR` (optional): a change that is not part of the main one, and its reason
+  5. `## Good to know` (optional): limits of the change, and anything you could not confirm,
+     with where you looked
+  6. `## Release notes`: what reaches a store that upgrades and does nothing more: a break, a
      change in what the store already does, or a step that someone must run. The test: does an
      existing store notice the upgrade before anyone uses the new feature? A schema change that
      the sync applies, or a limit of the new feature, stays out. Write "Nothing to note." when
