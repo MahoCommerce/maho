@@ -326,7 +326,6 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
             ->setStoreId($this->getQuote()->getStoreId())
             ->setTypeId($this->getData('product_type'))
             ->setName($this->getName())
-            ->setSku('')
             ->setTaxClassId($this->getTaxClassId())
             ->setWeight($this->getWeight())
             ->setPrice($rate > 0 ? $price / $rate : $price)

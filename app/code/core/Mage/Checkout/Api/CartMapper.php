@@ -177,7 +177,7 @@ class CartMapper
     ): CartItem {
         $dto = new CartItem();
         $dto->id = (int) $item->getId();
-        $dto->sku = $item->getSku();
+        $dto->sku = $item->getSku() ?? '';
         $dto->name = $item->getName() ?? '';
         $dto->qty = (float) $item->getQty();
         // Quote currency, like every other non-base money field in the response.
