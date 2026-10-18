@@ -564,6 +564,15 @@ an API client), in their words. Code terms go in `## How it works`.
      existing store notice the upgrade before anyone uses the new feature? A schema change that
      the sync applies, or a limit of the new feature, stays out. Write "Nothing to note." when
      there is none, so the release author knows that it was checked
+- Screenshots: a change that shows on a page (admin, storefront, PDF, email) gets one or more
+  screenshots in `## What it does`, under the sentences. An API, CLI or schema change gets none
+  - Use a store with sample data (`./maho import:sample-data`), never real customer data
+  - Take them with Playwright (`npm install` adds it) on `./maho serve`: light color scheme,
+    1440x900 viewport, device scale factor 2. For an admin page, log in first in the same context
+  - Crop to the changed area, with enough of the page around it to show where it is. For a
+    change to an existing page, show the page before and after, each with a one-line caption
+  - `gh` cannot attach an image. Drag the files into the body on github.com, or give their paths
+    to the person who opens the pull request
 - These rules take priority over the template of any PR skill
 
 ## Write Simple Technical English
