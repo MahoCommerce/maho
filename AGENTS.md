@@ -582,6 +582,9 @@ an API client), in their words. Code terms go in `## How it works`.
     (a menu entry, a button), then each step, then the result. Number the captions in that order
   - Mark the control or the result in each screenshot with a 3px red (`#e11d48`) box that the
     script draws on the page. A dialog needs no box: its backdrop already shows it
+  - Put each image in a macOS-style window frame: a title bar with the three window buttons and
+    the page name, rounded corners and a soft shadow, on a light gray background. Render the
+    frame as an HTML page with Playwright, at the same scale factor
   - Crop to the changed area, with enough of the page around it to show where it is. For a
     change to an existing page, show the page before and after, each with a one-line caption
   - `gh` cannot attach an image. Upload the files through the body editor on github.com (drag
