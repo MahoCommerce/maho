@@ -3088,6 +3088,12 @@ class Mysql extends AbstractPdoAdapter
         return new \Maho\Db\Expr($expression);
     }
 
+    #[\Override]
+    public function getNullSafeEqualsSql(string $left, string $right): \Maho\Db\Expr
+    {
+        return new \Maho\Db\Expr(sprintf('(%s <=> %s)', $left, $right));
+    }
+
     /**
      * Returns valid IFNULL expression
      *

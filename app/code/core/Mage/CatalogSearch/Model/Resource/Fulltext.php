@@ -10,6 +10,9 @@
 
 class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resource_Db_Abstract
 {
+    public const XML_PATH_INDEX_BATCH_SIZE = 'catalog/search/index_batch_size';
+    public const DEFAULT_INDEX_BATCH_SIZE = 500;
+
     /**
      * Searchable attributes cache
      *
@@ -204,24 +207,20 @@ class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resourc
         $allowedVisibilityValues = $this->_engine->getAllowedVisibility();
 
         $websiteId = Mage::app()->getStore($storeId)->getWebsite()->getId();
+        $batchSize = $this->getIndexBatchSize();
         $lastProductId = 0;
         while (true) {
-            $products = $this->_getSearchableProducts($storeId, $staticFields, $productIds, $lastProductId);
+            $products = $this->_getSearchableProducts($storeId, $staticFields, $productIds, $lastProductId, $batchSize);
             if (!$products) {
                 break;
             }
 
             $productAttributes = [];
-            $productRelations  = [];
+            $productRelations  = $this->_getProductChildrenIdsBatch($products, (int) $websiteId);
             foreach ($products as $productData) {
                 $lastProductId = $productData['entity_id'];
                 $productAttributes[$productData['entity_id']] = $productData['entity_id'];
-                $productChildren = $this->_getProductChildrenIds(
-                    $productData['entity_id'],
-                    $productData['type_id'],
-                    $websiteId,
-                );
-                $productRelations[$productData['entity_id']] = $productChildren;
+                $productChildren = $productRelations[$productData['entity_id']];
                 if ($productChildren) {
                     foreach ($productChildren as $productChildId) {
                         $productAttributes[$productChildId] = $productChildId;
@@ -703,6 +702,71 @@ class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resourc
         }
 
         return null;
+    }
+
+    /**
+     * Return the children ids of each product in $products, with one query for each product type.
+     * A product that is not composite gets null. A composite product without children gets an empty array.
+     *
+     * @param list<array{entity_id: int|string, type_id: string}> $products
+     * @return array<int|string, list<int|string>|null>
+     */
+    protected function _getProductChildrenIdsBatch(array $products, ?int $websiteId = null): array
+    {
+        $result = [];
+        $productIdsByType = [];
+        foreach ($products as $productData) {
+            $result[$productData['entity_id']] = null;
+            $productIdsByType[$productData['type_id']][] = $productData['entity_id'];
+        }
+
+        $adapter = $this->_getReadAdapter();
+        foreach ($productIdsByType as $typeId => $productIds) {
+            $typeInstance = $this->_getProductTypeInstance($typeId);
+            $relation = $typeInstance->isComposite()
+                ? $typeInstance->getRelationInfo()
+                : false;
+            if (!$relation || !$relation->getTable() || !$relation->getParentFieldName() || !$relation->getChildFieldName()) {
+                continue;
+            }
+
+            foreach ($productIds as $productId) {
+                $result[$productId] = [];
+            }
+
+            $parentField = $relation->getParentFieldName();
+            $childField = $relation->getChildFieldName();
+            $select = $adapter->select()
+                ->from(
+                    ['main' => $this->getTable($relation->getTable())],
+                    ['parent_id' => $parentField, 'child_id' => $childField],
+                )
+                ->where("main.{$parentField} IN (?)", $productIds);
+            if (!is_null($relation->getWhere())) {
+                $select->where($relation->getWhere());
+            }
+
+            Mage::dispatchEvent('prepare_product_children_id_list_select', [
+                'select'        => $select,
+                'entity_field'  => 'main.product_id',
+                'website_field' => $websiteId,
+            ]);
+
+            foreach ($adapter->fetchAll($select) as $row) {
+                $result[$row['parent_id']][] = $row['child_id'];
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Return the number of products that the indexer reads in each step.
+     */
+    public function getIndexBatchSize(): int
+    {
+        $batchSize = Mage::getStoreConfigAsInt(self::XML_PATH_INDEX_BATCH_SIZE);
+        return $batchSize > 0 ? $batchSize : self::DEFAULT_INDEX_BATCH_SIZE;
     }
 
     /**

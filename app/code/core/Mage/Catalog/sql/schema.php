@@ -39,6 +39,7 @@ return function (SchemaEditor $schema): void {
             ->addIndex(Index::editor()->setUnquotedColumnNames('entity_type_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('attribute_set_id'))
             ->addIndex(Index::editor()->setUnquotedColumnNames('sku'))
+            ->addIndex(Index::editor()->setUnquotedColumnNames('type_id', 'entity_id'))
             ->addForeignKeyConstraint(
                 ForeignKeyConstraint::editor()
                     ->setUnquotedReferencingColumnNames('attribute_set_id')
@@ -1666,10 +1667,6 @@ return function (SchemaEditor $schema): void {
                         ->setUnquotedColumnNames('entity_id', 'attribute_id', 'store_id', 'value')
                         ->create(),
                 )
-                ->addIndex(Index::editor()->setUnquotedColumnNames('entity_id'))
-                ->addIndex(Index::editor()->setUnquotedColumnNames('attribute_id'))
-                ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
-                ->addIndex(Index::editor()->setUnquotedColumnNames('value'))
                 ->setComment("Catalog Product EAV Indexer {$suffix} Table")
                 ->create(),
         );
@@ -1687,10 +1684,6 @@ return function (SchemaEditor $schema): void {
                     ->setUnquotedColumnNames('entity_id', 'attribute_id', 'store_id', 'value')
                     ->create(),
             )
-            ->addIndex(Index::editor()->setUnquotedColumnNames('entity_id'))
-            ->addIndex(Index::editor()->setUnquotedColumnNames('attribute_id'))
-            ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
-            ->addIndex(Index::editor()->setUnquotedColumnNames('value'))
             ->setComment('Catalog Product EAV Decimal Indexer Index Table')
             ->create(),
     );
@@ -1707,10 +1700,6 @@ return function (SchemaEditor $schema): void {
                     ->setUnquotedColumnNames('entity_id', 'attribute_id', 'store_id')
                     ->create(),
             )
-            ->addIndex(Index::editor()->setUnquotedColumnNames('entity_id'))
-            ->addIndex(Index::editor()->setUnquotedColumnNames('attribute_id'))
-            ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
-            ->addIndex(Index::editor()->setUnquotedColumnNames('value'))
             ->setComment('Catalog Product EAV Decimal Indexer Temp Table')
             ->create(),
     );
@@ -1735,9 +1724,6 @@ return function (SchemaEditor $schema): void {
                         ->setUnquotedColumnNames('entity_id', 'customer_group_id', 'website_id')
                         ->create(),
                 )
-                ->addIndex(Index::editor()->setUnquotedColumnNames('customer_group_id'))
-                ->addIndex(Index::editor()->setUnquotedColumnNames('website_id'))
-                ->addIndex(Index::editor()->setUnquotedColumnNames('min_price'))
                 ->setComment("Catalog Product Price Indexer {$suffix} Table")
                 ->create(),
         );

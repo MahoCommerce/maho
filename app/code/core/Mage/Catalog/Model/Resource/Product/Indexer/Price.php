@@ -275,8 +275,10 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price extends Mage_Index_Model
                     )
                     ->where('l.child_id IN(?)', $notCompositeIds);
                 $pairs  = $write->fetchPairs($select);
+                $known = array_flip($ids);
                 foreach ($pairs as $productId => $productType) {
-                    if (!in_array($productId, $ids)) {
+                    if (!isset($known[$productId])) {
+                        $known[$productId] = true;
                         $ids[] = $productId;
                         $byType[$productType][$productId] = $productId;
                         $compositeIds[$productId] = $productId;
@@ -287,6 +289,10 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price extends Mage_Index_Model
             if (!empty($compositeIds)) {
                 $this->_copyRelationIndexData($compositeIds, $notCompositeIds);
             }
+
+            $this->_prepareWebsiteDateTable();
+            $this->_prepareTierPriceIndex($ids);
+            $this->_prepareGroupPriceIndex($ids);
 
             $indexers = $this->getTypeIndexers();
             foreach ($indexers as $indexer) {
@@ -349,8 +355,8 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price extends Mage_Index_Model
     public function reindexAll()
     {
         $this->useIdxTable(true);
-        $this->beginTransaction();
-        try {
+        // A partial reindex rebuilds the same website date, tier price and group price tables
+        self::runWithTmpTableLock(function (): void {
             $this->clearTemporaryIndexTable();
             $this->_prepareWebsiteDateTable();
             $this->_prepareTierPriceIndex();
@@ -363,11 +369,7 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price extends Mage_Index_Model
             }
 
             $this->syncData();
-            $this->commit();
-        } catch (Exception $e) {
-            $this->rollBack();
-            throw $e;
-        }
+        });
         return $this;
     }
 
@@ -401,7 +403,7 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price extends Mage_Index_Model
     {
         $write = $this->_getWriteAdapter();
         $table = $this->_getTierPriceIndexTable();
-        $write->delete($table);
+        $write->delete($table, empty($entityIds) ? '' : $write->quoteInto('entity_id IN(?)', $entityIds));
 
         $websiteExpression = $write->getCheckSql('tp.website_id = 0', $write->getRoundSql('tp.value * cwd.rate', 4), 'tp.value');
         $select = $write->select()
@@ -432,7 +434,7 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price extends Mage_Index_Model
             $select->where('tp.entity_id IN(?)', $entityIds);
         }
 
-        $query = $select->insertFromSelect($table);
+        $query = $select->insertFromSelect($table, [], false);
         $write->query($query);
 
         return $this;
@@ -448,7 +450,7 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price extends Mage_Index_Model
     {
         $write = $this->_getWriteAdapter();
         $table = $this->_getGroupPriceIndexTable();
-        $write->delete($table);
+        $write->delete($table, empty($entityIds) ? '' : $write->quoteInto('entity_id IN(?)', $entityIds));
 
         $websiteExpression = $write->getCheckSql('gp.website_id = 0', $write->getRoundSql('gp.value * cwd.rate', 4), 'gp.value');
         $select = $write->select()
@@ -479,7 +481,7 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price extends Mage_Index_Model
             $select->where('gp.entity_id IN(?)', $entityIds);
         }
 
-        $query = $select->insertFromSelect($table);
+        $query = $select->insertFromSelect($table, [], false);
         $write->query($query);
 
         return $this;
@@ -494,23 +496,19 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price extends Mage_Index_Model
      */
     protected function _copyRelationIndexData($parentIds, $excludeIds = null)
     {
-        $write  = $this->_getWriteAdapter();
-        $select = $write->select()
+        $write    = $this->_getWriteAdapter();
+        $children = $write->select()
+            ->distinct()
             ->from($this->getTable('catalog/product_relation'), ['child_id'])
             ->where('parent_id IN(?)', $parentIds);
         if (!empty($excludeIds)) {
-            $select->where('child_id NOT IN(?)', $excludeIds);
+            $children->where('child_id NOT IN(?)', $excludeIds);
         }
 
-        $children = $write->fetchCol($select);
-
-        if ($children) {
-            $select = $write->select()
-                ->from($this->getMainTable())
-                ->where('entity_id IN(?)', $children);
-            $query  = $select->insertFromSelect($this->getIdxTable(), [], false);
-            $write->query($query);
-        }
+        $select = $write->select()
+            ->from($this->getMainTable())
+            ->where('entity_id IN (' . $children . ')');
+        $write->query($select->insertFromSelect($this->getIdxTable(), [], false));
 
         return $this;
     }

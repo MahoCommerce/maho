@@ -373,6 +373,14 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price_Default extends Mage_Cat
         $this->_prepareCustomOptionAggregateTable();
         $this->_prepareCustomOptionPriceTable();
 
+        $hasOptions = $write->fetchOne($write->select()
+            ->from(['i' => $this->_getDefaultFinalPriceTable()], [new Maho\Db\Expr('1')])
+            ->join(['o' => $this->getTable('catalog/product_option')], 'o.product_id = i.entity_id', [])
+            ->limit(1));
+        if (!$hasOptions) {
+            return $this;
+        }
+
         $select = $write->select()
             ->from(
                 ['i' => $this->_getDefaultFinalPriceTable()],

@@ -318,4 +318,32 @@ class Mage_Catalog_Model_Product_Indexer_Eav extends Mage_Index_Model_Indexer_Ab
         return $this->setData('value', $value);
     }
 
+    #[\Override]
+    public function supportsBatchEvents(): bool
+    {
+        return true;
+    }
+
+    #[\Override]
+    public function getBatchEntityIds(Mage_Index_Model_Event $event): ?array
+    {
+        $data = $event->getNewData();
+        if ($event->getEntity() !== Mage_Catalog_Model_Product::ENTITY || !empty($data['catalog_product_eav_reindex_all'])) {
+            return null;
+        }
+        if (!empty($data['catalog_product_eav_skip_call_event_handler'])) {
+            return [];
+        }
+        return match ($event->getType()) {
+            Mage_Index_Model_Event::TYPE_SAVE => empty($data['reindex_eav']) ? [] : [(int) $event->getEntityPk()],
+            Mage_Index_Model_Event::TYPE_MASS_ACTION => (array) ($data['reindex_eav_product_ids'] ?? []),
+            default => null,
+        };
+    }
+
+    #[\Override]
+    public function processBatch(array $entityIds): void
+    {
+        $this->_getResource()->reindexEntities($entityIds);
+    }
 }

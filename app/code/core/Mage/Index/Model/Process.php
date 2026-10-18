@@ -146,7 +146,7 @@ class Mage_Index_Model_Process extends Mage_Core_Model_Abstract
             /** @var Mage_Index_Model_Resource_Event $eventResource */
             $eventResource = Mage::getResourceSingleton('index/event');
 
-            if ($eventsCollection->count() > 0 && $processStatus == self::STATUS_PENDING
+            if ($eventResource->hasUnprocessedEvents($this) && $processStatus == self::STATUS_PENDING
                 || $this->getForcePartialReindex()
             ) {
                 Mage_Index_Model_Resource_Abstract::runWithTmpTableLock(function () use ($eventsCollection): void {
@@ -171,11 +171,11 @@ class Mage_Index_Model_Process extends Mage_Core_Model_Abstract
                 } finally {
                     \Maho\Profiler::stop('index.reindex');
                 }
+                Mage::getSingleton('core/resource')->getConnection('core_write')->optimizeStatistics();
             }
             $this->unlock();
 
-            $unprocessedEvents = $eventResource->getUnprocessedEvents($this);
-            if ($this->getMode() == self::MODE_MANUAL && (count($unprocessedEvents) > 0)) {
+            if ($this->getMode() == self::MODE_MANUAL && $eventResource->hasUnprocessedEvents($this)) {
                 $this->_getResource()->updateStatus($this, self::STATUS_REQUIRE_REINDEX);
             } else {
                 $this->_getResource()->endProcess($this);
@@ -204,8 +204,7 @@ class Mage_Index_Model_Process extends Mage_Core_Model_Abstract
 
         /** @var Mage_Index_Model_Resource_Event $eventResource */
         $eventResource = Mage::getResourceSingleton('index/event');
-        $unprocessedEvents = $eventResource->getUnprocessedEvents($this);
-        $this->setForcePartialReindex(count($unprocessedEvents) > 0 && $this->getStatus() == self::STATUS_PENDING);
+        $this->setForcePartialReindex($eventResource->hasUnprocessedEvents($this) && $this->getStatus() == self::STATUS_PENDING);
 
         if ($this->getDepends()) {
             /** @var Mage_Index_Model_Indexer $indexer */
@@ -340,23 +339,111 @@ class Mage_Index_Model_Process extends Mage_Core_Model_Abstract
         Mage_Index_Model_Resource_Event_Collection $eventsCollection,
         $skipUnmatched = true,
     ) {
+        $indexer = $this->getIndexer();
+        $batchSize = $indexer->supportsBatchEvents() && $this->getMode() != self::MODE_MANUAL
+            ? $indexer->getBatchSize()
+            : 0;
+        $batch = [];
+        $entityIds = [];
+
         // We can't reload the collection because of transaction
         while ($event = $eventsCollection->fetchItem()) {
             /** @var Mage_Index_Model_Event $event */
-            try {
-                $this->processEvent($event);
-                if (!$skipUnmatched) {
-                    $eventProcessIds = $event->getProcessIds();
-                    if (!isset($eventProcessIds[$this->getId()])) {
-                        $event->addProcessId($this->getId());
-                    }
+            $ids = $batchSize ? $this->_getBatchEntityIds($event) : null;
+            if ($ids !== null) {
+                $batch[] = $event;
+                array_push($entityIds, ...array_values($ids));
+                if (count($batch) >= $batchSize || count($entityIds) >= $batchSize) {
+                    $this->_processEventBatch($batch, $entityIds, $skipUnmatched);
+                    $batch = [];
+                    $entityIds = [];
                 }
-            } catch (Exception) {
-                $event->addProcessId($this->getId(), self::EVENT_STATUS_ERROR);
+                continue;
             }
+
+            // An event that cannot join the batch runs after the events that came before it
+            $this->_processEventBatch($batch, $entityIds, $skipUnmatched);
+            $batch = [];
+            $entityIds = [];
+            $this->_processCollectedEvent($event, $skipUnmatched);
+        }
+        $this->_processEventBatch($batch, $entityIds, $skipUnmatched);
+
+        return $this;
+    }
+
+    /**
+     * Process one event of a collection, and save its status
+     */
+    protected function _processCollectedEvent(Mage_Index_Model_Event $event, bool $skipUnmatched): void
+    {
+        try {
+            $this->processEvent($event);
+            if (!$skipUnmatched) {
+                $eventProcessIds = $event->getProcessIds();
+                if (!isset($eventProcessIds[$this->getId()])) {
+                    $event->addProcessId($this->getId());
+                }
+            }
+        } catch (Exception) {
+            $event->addProcessId($this->getId(), self::EVENT_STATUS_ERROR);
+        }
+        $event->save();
+    }
+
+    /**
+     * Return the entity ids of $event for a batch, or null when $event must run alone
+     */
+    protected function _getBatchEntityIds(Mage_Index_Model_Event $event): ?array
+    {
+        if (!$this->matchEvent($event)) {
+            return null;
+        }
+        $this->_setEventNamespace($event);
+        try {
+            $ids = $this->getIndexer()->getBatchEntityIds($event);
+        } finally {
+            $this->_resetEventNamespace($event);
+        }
+        // A large mass action keeps its own rule, which can choose a full reindex
+        return $ids !== null && count($ids) > $this->getIndexer()->getBatchSize() ? null : $ids;
+    }
+
+    /**
+     * Reindex the entities of $events in one call, then mark each event done. When the call
+     * fails, process each event alone, so that each one gets its own status.
+     *
+     * @param Mage_Index_Model_Event[] $events
+     * @param array<int|string> $entityIds
+     */
+    protected function _processEventBatch(array $events, array $entityIds, bool $skipUnmatched): void
+    {
+        if ($events === []) {
+            return;
+        }
+
+        $entityIds = array_values(array_unique(array_map(intval(...), $entityIds)));
+        try {
+            $this->_getResource()->updateProcessStartDate($this);
+            if ($entityIds !== []) {
+                $this->getIndexer()->processBatch($entityIds);
+            }
+            $this->_getResource()->updateProcessEndDate($this);
+        } catch (Exception $e) {
+            Mage::logException($e);
+            foreach ($events as $event) {
+                $this->_processCollectedEvent($event, $skipUnmatched);
+            }
+            return;
+        }
+
+        foreach ($events as $event) {
+            $this->_setEventNamespace($event);
+            $event->resetData();
+            $this->_resetEventNamespace($event);
+            $event->addProcessId($this->getId(), self::EVENT_STATUS_DONE);
             $event->save();
         }
-        return $this;
     }
 
     /**
@@ -600,6 +687,8 @@ class Mage_Index_Model_Process extends Mage_Core_Model_Abstract
         /** @var Mage_Index_Model_Resource_Event_Collection $eventsCollection */
         $eventsCollection = Mage::getResourceModel('index/event_collection');
         $eventsCollection->addProcessFilter($this, self::EVENT_STATUS_NEW);
+        // A batch of events must not overtake an event that was logged before it
+        $eventsCollection->getSelect()->order('main_table.event_id ' . \Maho\Db\Select::SQL_ASC);
         return $eventsCollection;
     }
 

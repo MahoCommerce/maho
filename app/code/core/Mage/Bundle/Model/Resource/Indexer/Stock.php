@@ -43,7 +43,7 @@ class Mage_Bundle_Model_Resource_Indexer_Stock extends Mage_CatalogInventory_Mod
      */
     protected function _prepareBundleOptionStockData($entityIds = null, $usePrimaryTable = false)
     {
-        $this->_cleanBundleOptionStockData();
+        $this->_cleanBundleOptionStockData($entityIds);
         $idxTable = $usePrimaryTable ? $this->getMainTable() : $this->getIdxTable();
         $adapter  = $this->_getWriteAdapter();
         $select   = $adapter->select()
@@ -181,7 +181,7 @@ class Mage_Bundle_Model_Resource_Indexer_Stock extends Mage_CatalogInventory_Mod
     protected function _prepareIndexTable($entityIds = null)
     {
         parent::_prepareIndexTable($entityIds);
-        $this->_cleanBundleOptionStockData();
+        $this->_cleanBundleOptionStockData($entityIds);
 
         return $this;
     }
@@ -196,19 +196,24 @@ class Mage_Bundle_Model_Resource_Indexer_Stock extends Mage_CatalogInventory_Mod
     protected function _updateIndex($entityIds)
     {
         parent::_updateIndex($entityIds);
-        $this->_cleanBundleOptionStockData();
+        $this->_cleanBundleOptionStockData($entityIds);
 
         return $this;
     }
 
     /**
-     * Clean temporary bundle options stock data
+     * Clean temporary bundle options stock data of $entityIds, or of all products when it is null
      *
+     * @param int|array|null $entityIds
      * @return $this
      */
-    protected function _cleanBundleOptionStockData()
+    protected function _cleanBundleOptionStockData($entityIds = null)
     {
-        $this->_getWriteAdapter()->delete($this->_getBundleOptionTable());
+        $adapter = $this->_getWriteAdapter();
+        $adapter->delete(
+            $this->_getBundleOptionTable(),
+            $entityIds === null ? '' : $adapter->quoteInto('entity_id IN(?)', $entityIds),
+        );
         return $this;
     }
 }

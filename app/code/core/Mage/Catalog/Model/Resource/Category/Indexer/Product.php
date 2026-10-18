@@ -134,7 +134,18 @@ class Mage_Catalog_Model_Resource_Category_Indexer_Product extends Mage_Index_Mo
         if (!isset($data['product_ids'])) {
             return $this;
         }
-        $productIds     = $data['product_ids'];
+        $this->reindexProductIds((array) $data['product_ids']);
+        return $this;
+    }
+
+    /**
+     * Rebuild the index rows of $productIds in every category and store
+     */
+    public function reindexProductIds(array $productIds): static
+    {
+        if ($productIds === []) {
+            return $this;
+        }
         $categoryIds    = [];
         $allCategoryIds = [];
 
@@ -859,37 +870,47 @@ class Mage_Catalog_Model_Resource_Category_Indexer_Product extends Mage_Index_Mo
                 $anchorProductsTable = $this->_getAnchorCategoriesProductsTemporaryTable();
                 $idxAdapter->delete($anchorProductsTable);
 
-                $position = 'MIN('
-                    . $idxAdapter->getCheckSql(
-                        'ca.category_id = ce.entity_id',
-                        $idxAdapter->quoteIdentifier('cp.position'),
-                        '(' . $idxAdapter->quoteIdentifier('ce.position') . ' + 1) * '
-                        . '(' . $idxAdapter->quoteIdentifier('ce.level') . ' + 1 * 10000)'
-                        . ' + ' . $idxAdapter->quoteIdentifier('cp.position'),
+                // Two branches instead of "path LIKE ... OR entity_id = ...", so each join can use an index.
+                // A category never matches its own path pattern, so the branches do not overlap.
+                $ownProductsSelect = $idxAdapter->select()
+                    ->useStraightJoin(true)
+                    ->from(['ca' => $anchorTable], ['category_id'])
+                    ->joinInner(['ce' => $this->_categoryTable], 'ce.entity_id = ca.category_id', [])
+                    ->joinInner(['cp' => $this->_categoryProductTable], 'cp.category_id = ce.entity_id', ['product_id'])
+                    ->joinInner(['pv' => $enabledTable], 'pv.product_id = cp.product_id', ['position' => 'cp.position']);
+
+                $childProductsSelect = $idxAdapter->select()
+                    ->useStraightJoin(true)
+                    ->from(['ca' => $anchorTable], ['category_id'])
+                    ->joinInner(
+                        ['ce' => $this->_categoryTable],
+                        $idxAdapter->quoteIdentifier('ce.path') . ' LIKE ' . $idxAdapter->quoteIdentifier('ca.path'),
+                        [],
                     )
-                . ')';
+                    ->joinInner(['cp' => $this->_categoryProductTable], 'cp.category_id = ce.entity_id', ['product_id'])
+                    ->joinInner(
+                        ['pv' => $enabledTable],
+                        'pv.product_id = cp.product_id',
+                        ['position' => new Maho\Db\Expr(
+                            '(' . $idxAdapter->quoteIdentifier('ce.position') . ' + 1) * '
+                            . '(' . $idxAdapter->quoteIdentifier('ce.level') . ' + 1 * 10000)'
+                            . ' + ' . $idxAdapter->quoteIdentifier('cp.position'),
+                        )],
+                    );
 
                 $select = $idxAdapter->select()
-                ->useStraightJoin(true)
-                ->distinct()
-                ->from(['ca' => $anchorTable], ['category_id'])
-                ->joinInner(
-                    ['ce' => $this->_categoryTable],
-                    $idxAdapter->quoteIdentifier('ce.path') . ' LIKE '
-                    . $idxAdapter->quoteIdentifier('ca.path') . ' OR ce.entity_id = ca.category_id',
-                    [],
-                )
-                ->joinInner(
-                    ['cp' => $this->_categoryProductTable],
-                    'cp.category_id = ce.entity_id',
-                    ['product_id'],
-                )
-                ->joinInner(
-                    ['pv' => $enabledTable],
-                    'pv.product_id = cp.product_id',
-                    ['position' => $position],
-                )
-                ->group(['ca.category_id', 'cp.product_id']);
+                    ->from(
+                        ['u' => $idxAdapter->select()->union(
+                            [$ownProductsSelect, $childProductsSelect],
+                            Maho\Db\Select::SQL_UNION_ALL,
+                        )],
+                        [
+                            'category_id',
+                            'product_id',
+                            'position' => new Maho\Db\Expr('MIN(' . $idxAdapter->quoteIdentifier('u.position') . ')'),
+                        ],
+                    )
+                    ->group(['u.category_id', 'u.product_id']);
                 $query = $select->insertFromSelect(
                     $anchorProductsTable,
                     ['category_id', 'product_id', 'position'],

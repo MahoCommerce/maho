@@ -577,6 +577,9 @@ class Mage_Bundle_Model_Resource_Indexer_Price extends Mage_Catalog_Model_Resour
                 [],
             )
             ->where('e.type_id=?', $this->getTypeId());
+        if (!empty($entityIds)) {
+            $select->where('i.entity_id IN(?)', $entityIds);
+        }
         $query   = $select->deleteFromSelect('i');
         $adapter->query($query);
 
@@ -636,6 +639,9 @@ class Mage_Bundle_Model_Resource_Indexer_Price extends Mage_Catalog_Model_Resour
                 [],
             )
             ->where('e.type_id=?', $this->getTypeId());
+        if (!empty($entityIds)) {
+            $select->where('i.entity_id IN(?)', $entityIds);
+        }
         $query   = $select->deleteFromSelect('i');
         $adapter->query($query);
 

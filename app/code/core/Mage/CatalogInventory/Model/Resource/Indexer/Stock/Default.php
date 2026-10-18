@@ -213,27 +213,12 @@ class Mage_CatalogInventory_Model_Resource_Indexer_Stock_Default extends Mage_Ca
     protected function _updateIndex($entityIds)
     {
         $adapter = $this->_getWriteAdapter();
-        $select  = $this->_getStockStatusSelect($entityIds, true);
-        $query   = $adapter->query($select);
-
-        $i      = 0;
-        $data   = [];
-        // Fetch as associative array (default mode)
-        while ($row = $query->fetch()) {
-            $i++;
-            $data[] = [
-                'product_id'    => (int) $row['entity_id'],
-                'website_id'    => (int) $row['website_id'],
-                'stock_id'      => (int) $row['stock_id'],
-                'qty'           => (float) $row['qty'],
-                'stock_status'  => (int) $row['status'],
-            ];
-            if (($i % 1000) == 0) {
-                $this->_updateIndexTable($data);
-                $data = [];
-            }
-        }
-        $this->_updateIndexTable($data);
+        $adapter->query($adapter->insertFromSelect(
+            $this->_getStockStatusSelect($entityIds, true),
+            $this->getMainTable(),
+            ['product_id', 'website_id', 'stock_id', 'qty', 'stock_status'],
+            Maho\Db\Adapter\AdapterInterface::INSERT_ON_DUPLICATE,
+        ));
 
         return $this;
     }

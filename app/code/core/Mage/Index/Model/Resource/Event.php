@@ -93,12 +93,30 @@ class Mage_Index_Model_Resource_Event extends Mage_Core_Model_Resource_Db_Abstra
         } else {
             $whereCondition = ['process_id = ?' => $process];
         }
+        // A done event has no row, as in _afterSave(), so the table does not grow
+        if ($status === Mage_Index_Model_Process::EVENT_STATUS_DONE) {
+            $this->_getWriteAdapter()->delete($this->getTable('index/process_event'), $whereCondition);
+            return $this;
+        }
         $this->_getWriteAdapter()->update(
             $this->getTable('index/process_event'),
             ['status' => $status],
             $whereCondition,
         );
         return $this;
+    }
+
+    /**
+     * Whether $process has an event that is not processed
+     */
+    public function hasUnprocessedEvents(Mage_Index_Model_Process $process): bool
+    {
+        $adapter = $this->_getReadAdapter();
+        return (bool) $adapter->fetchOne($adapter->select()
+            ->from($this->getTable('index/process_event'), [new Maho\Db\Expr('1')])
+            ->where('process_id = ?', $process->getId())
+            ->where('status = ?', Mage_Index_Model_Process::EVENT_STATUS_NEW)
+            ->limit(1));
     }
 
     /**

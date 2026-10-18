@@ -115,9 +115,18 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Eav extends Mage_Catalog_Model
             return $this;
         }
 
+        $this->reindexEntities($data['reindex_eav_product_ids']);
+        return $this;
+    }
+
+    /**
+     * Rebuild the EAV index rows of $productIds and of their parents
+     */
+    public function reindexEntities(array $productIds): static
+    {
         foreach ($this->getIndexers() as $indexer) {
             /** @var Mage_Catalog_Model_Resource_Product_Indexer_Eav_Abstract $indexer */
-            $indexer->reindexEntities($data['reindex_eav_product_ids']);
+            $indexer->reindexEntities($productIds);
         }
 
         return $this;

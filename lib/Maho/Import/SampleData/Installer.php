@@ -232,8 +232,7 @@ final class Installer
     private function reindexAll(): void
     {
         $this->reinitStores();
-        foreach (Mage::getResourceModel('index/process_collection') as $process) {
-            /** @var \Mage_Index_Model_Process $process */
+        foreach (Mage::getModel('index/runner')->buildQueue() as $process) {
             if ($process->isLocked()) {
                 $process->unlock();
             }

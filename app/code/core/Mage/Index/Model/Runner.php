@@ -63,6 +63,39 @@ class Mage_Index_Model_Runner
     }
 
     /**
+     * Split $queue into lanes. A process and the processes it depends on are in the same lane,
+     * so two lanes can run at the same time. Each lane keeps the order of $queue.
+     *
+     * @param Mage_Index_Model_Process[] $queue
+     * @return list<list<Mage_Index_Model_Process>>
+     */
+    public function buildLanes(array $queue): array
+    {
+        $parent = [];
+        foreach ($queue as $process) {
+            $parent[$process->getIndexerCode()] = $process->getIndexerCode();
+        }
+
+        $find = function (string $code) use (&$parent, &$find): string {
+            return $parent[$code] === $code ? $code : $parent[$code] = $find($parent[$code]);
+        };
+
+        foreach ($queue as $process) {
+            foreach ($process->getDepends() as $dependency) {
+                if (isset($parent[$dependency])) {
+                    $parent[$find($process->getIndexerCode())] = $find($dependency);
+                }
+            }
+        }
+
+        $lanes = [];
+        foreach ($queue as $process) {
+            $lanes[$find($process->getIndexerCode())][] = $process;
+        }
+        return array_values($lanes);
+    }
+
+    /**
      * Reindex every process in the queue, writing per-index state to the progress record.
      *
      * A failing index is recorded and the batch carries on: with a dozen indexes queued, aborting

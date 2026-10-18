@@ -272,6 +272,10 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
      */
     public function saveRewrite($rewriteData, $rewrite)
     {
+        if ($rewrite && $rewrite->getId() && $this->isRewriteUnchanged($rewriteData, $rewrite)) {
+            return $this;
+        }
+
         $adapter = $this->_getWriteAdapter();
         try {
             // The identity is id_path, is_system and store_id; naming the rest keeps
@@ -305,6 +309,23 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
         unset($rewriteData);
 
         return $this;
+    }
+
+    /**
+     * Return true when $rewrite is the row of $rewriteData and holds the same values.
+     *
+     * @param array<string, mixed> $rewriteData
+     */
+    public function isRewriteUnchanged(array $rewriteData, \Maho\DataObject $rewrite): bool
+    {
+        foreach (['id_path', 'store_id', 'is_system', 'request_path', 'target_path', 'category_id', 'product_id'] as $field) {
+            $new = $rewriteData[$field] ?? null;
+            $old = $rewrite->getData($field);
+            if ($new === null || $old === null ? $new !== $old : (string) $new !== (string) $old) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -362,37 +383,11 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
             $attributeData['store_id'] = 0;
         }
 
-        $select = $adapter->select()
-            ->from($attributeTable)
-            ->where('entity_type_id = ?', (int) $attributeData['entity_type_id'])
-            ->where('attribute_id = ?', (int) $attributeData['attribute_id'])
-            ->where('store_id = ?', (int) $attributeData['store_id'])
-            ->where('entity_id = ?', (int) $attributeData['entity_id']);
-
-        $row = $adapter->fetchRow($select);
-        if ($row) {
-            $whereCond = ['value_id = ?' => $row['value_id']];
-            $adapter->update($attributeTable, $attributeData, $whereCond);
-        } else {
-            $adapter->insert($attributeTable, $attributeData);
-        }
+        $adapter->insertOnDuplicate($attributeTable, $attributeData, ['value']);
 
         if (!$ignoreDefault && $attributeData['store_id'] != 0) {
             $attributeData['store_id'] = 0;
-            $select = $adapter->select()
-                ->from($attributeTable)
-                ->where('entity_type_id = ?', (int) $attributeData['entity_type_id'])
-                ->where('attribute_id = ?', (int) $attributeData['attribute_id'])
-                ->where('store_id = ?', (int) $attributeData['store_id'])
-                ->where('entity_id = ?', (int) $attributeData['entity_id']);
-
-            $row = $adapter->fetchRow($select);
-            if ($row) {
-                $whereCond = ['value_id = ?' => $row['value_id']];
-                $adapter->update($attributeTable, $attributeData, $whereCond);
-            } else {
-                $adapter->insert($attributeTable, $attributeData);
-            }
+            $adapter->insertOnDuplicate($attributeTable, $attributeData, ['value']);
         }
         unset($attributeData);
 
@@ -514,37 +509,11 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
             $attributeData['store_id'] = 0;
         }
 
-        $select = $adapter->select()
-            ->from($attributeTable)
-            ->where('entity_type_id = ?', (int) $attributeData['entity_type_id'])
-            ->where('attribute_id = ?', (int) $attributeData['attribute_id'])
-            ->where('store_id = ?', (int) $attributeData['store_id'])
-            ->where('entity_id = ?', (int) $attributeData['entity_id']);
-
-        $row = $adapter->fetchRow($select);
-        if ($row) {
-            $whereCond = ['value_id = ?' => $row['value_id']];
-            $adapter->update($attributeTable, $attributeData, $whereCond);
-        } else {
-            $adapter->insert($attributeTable, $attributeData);
-        }
+        $adapter->insertOnDuplicate($attributeTable, $attributeData, ['value']);
 
         if (!$ignoreDefault && $attributeData['store_id'] != 0) {
             $attributeData['store_id'] = 0;
-            $select = $adapter->select()
-                ->from($attributeTable)
-                ->where('entity_type_id = ?', (int) $attributeData['entity_type_id'])
-                ->where('attribute_id = ?', (int) $attributeData['attribute_id'])
-                ->where('store_id = ?', (int) $attributeData['store_id'])
-                ->where('entity_id = ?', (int) $attributeData['entity_id']);
-
-            $row = $adapter->fetchRow($select);
-            if ($row) {
-                $whereCond = ['value_id = ?' => $row['value_id']];
-                $adapter->update($attributeTable, $attributeData, $whereCond);
-            } else {
-                $adapter->insert($attributeTable, $attributeData);
-            }
+            $adapter->insertOnDuplicate($attributeTable, $attributeData, ['value']);
         }
         unset($attributeData);
 
@@ -1023,11 +992,31 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
      */
     public function getProductsByCategory(\Maho\DataObject $category, &$lastEntityId)
     {
-        $productIds = $this->getProductIdsByCategory($category);
+        $productIds = array_filter(
+            $this->getProductIdsByCategory($category),
+            fn($productId): bool => (int) $productId > (int) $lastEntityId,
+        );
         if (!$productIds) {
             return [];
         }
-        return $this->_getProducts($productIds, $category->getStoreId(), $lastEntityId, $lastEntityId);
+        return $this->_getProducts(array_values($productIds), $category->getStoreId(), $lastEntityId, $lastEntityId);
+    }
+
+    /**
+     * Retrieve the product data objects of the IDs that belong to the website of the store, ordered by ID.
+     *
+     * @param int[] $productIds
+     * @return array<int, \Maho\DataObject>
+     */
+    public function getProductsByIds(array $productIds, int $storeId): array
+    {
+        $products = [];
+        $lastEntityId = 0;
+        foreach (array_chunk($productIds, $this->_productLimit) as $chunk) {
+            $products += $this->_getProducts($chunk, $storeId, 0, $lastEntityId);
+        }
+        ksort($products);
+        return $products;
     }
 
     /**
