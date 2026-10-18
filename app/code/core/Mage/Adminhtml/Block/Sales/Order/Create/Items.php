@@ -24,6 +24,20 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Items extends Mage_Adminhtml_Block
             'label' => Mage::helper('sales')->__('Add Products'),
             'onclick' => 'order.productGridShow()',
         ]);
+        $this->addButton([
+            'label' => Mage::helper('sales')->__('Add Custom Item'),
+            'onclick' => 'order.customItemShow()',
+        ]);
+    }
+
+    /**
+     * The product tax classes that a custom item can use
+     *
+     * @return list<array{value: string, label: string}>
+     */
+    public function getProductTaxClassOptions(): array
+    {
+        return Mage::getSingleton('tax/class_source_product')->getAllOptions(true);
     }
 
     /**

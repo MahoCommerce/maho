@@ -445,6 +445,32 @@ class AdminOrder
         this.showArea('search');
     }
 
+    customItemShow() {
+        toggleVis('order-custom-item', true);
+        document.getElementById('custom_item_name').focus();
+    }
+
+    customItemHide() {
+        toggleVis('order-custom-item', false);
+    }
+
+    customItemToggleWeight(requiresShipping) {
+        toggleVis('custom_item_weight_row', requiresShipping);
+    }
+
+    customItemSubmit() {
+        const value = (id) => document.getElementById(id).value;
+        const requiresShipping = document.getElementById('custom_item_requires_shipping').checked;
+        this.loadArea(['items', 'shipping_method', 'totals', 'billing_method'], true, {
+            'custom_item[name]': value('custom_item_name'),
+            'custom_item[price]': value('custom_item_price'),
+            'custom_item[tax_class_id]': value('custom_item_tax_class'),
+            'custom_item[requires_shipping]': requiresShipping ? 1 : 0,
+            'custom_item[weight]': requiresShipping ? value('custom_item_weight') : '',
+            reset_shipping: true,
+        });
+    }
+
     productGridHide() {
         this.hideArea('search');
         this.gridProducts.clear();

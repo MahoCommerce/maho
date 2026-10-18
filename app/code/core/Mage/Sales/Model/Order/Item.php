@@ -653,6 +653,14 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
     }
 
     /**
+     * Check if the item is a custom line, with no catalog product.
+     */
+    public function isCustomItem(): bool
+    {
+        return $this->getProductId() === null;
+    }
+
+    /**
      * Get the discount amount applied on weee in base
      *
      * @return float
@@ -808,6 +816,17 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
     public function setName(?string $value): static
     {
         return $this->setData('name', $value);
+    }
+
+    public function getTaxClassId(): ?int
+    {
+        $value = $this->getData('tax_class_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setTaxClassId(?int $value): static
+    {
+        return $this->setData('tax_class_id', $value);
     }
 
     public function getDescription(): ?string

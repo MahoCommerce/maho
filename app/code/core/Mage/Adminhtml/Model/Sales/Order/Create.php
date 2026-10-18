@@ -413,6 +413,23 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
             return $this;
         }
 
+        if ($orderItem->isCustomItem()) {
+            $price = Mage::helper('tax')->priceIncludesTax($this->getQuote()->getStore())
+                ? $orderItem->getPriceInclTax()
+                : $orderItem->getPrice();
+            $item = $this->addCustomItem(
+                (string) $orderItem->getName(),
+                (float) $price,
+                (int) $orderItem->getTaxClassId(),
+                !$orderItem->getIsVirtual(),
+                (float) $orderItem->getWeight(),
+            );
+            if (is_numeric($qty)) {
+                $item->setQty((float) $qty);
+            }
+            return $item;
+        }
+
         $product = Mage::getModel('catalog/product')
             ->setStoreId($this->getSession()->getStoreId())
             ->load($orderItem->getProductId());
@@ -563,7 +580,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
                     break;
                 case 'cart':
                     $cart = $this->getCustomerCart();
-                    if ($cart && is_null($item->getOptionByCode('additional_options'))) {
+                    if ($cart && !$item->isCustomItem() && is_null($item->getOptionByCode('additional_options'))) {
                         //options and info buy request
                         $product = Mage::getModel('catalog/product')
                             ->setStoreId($this->getQuote()->getStoreId())
@@ -812,6 +829,58 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
             }
         }
         return $this;
+    }
+
+    /**
+     * Add a custom line to the order quote: a name, a price and a tax class, with no catalog product.
+     *
+     * @throws Mage_Core_Exception
+     */
+    public function addCustomItem(
+        string $name,
+        float $price,
+        int $taxClassId,
+        bool $requiresShipping,
+        float $weight,
+    ): Mage_Sales_Model_Quote_Item {
+        $helper = Mage::helper('sales');
+        $name = trim($name);
+        if ($name === '') {
+            Mage::throwException($helper->__('Enter a name for the custom item.'));
+        }
+        if ($price < 0) {
+            Mage::throwException($helper->__('The price of the custom item cannot be negative.'));
+        }
+        if ($taxClassId !== 0) {
+            $taxClass = Mage::getModel('tax/class')->load($taxClassId);
+            if (!$taxClass->getId() || $taxClass->getClassType() !== Mage_Tax_Model_Class::TAX_CLASS_TYPE_PRODUCT) {
+                Mage::throwException($helper->__('The tax class of the custom item does not exist.'));
+            }
+        }
+        if ($requiresShipping && $weight <= 0) {
+            Mage::throwException($helper->__('Enter a weight for a custom item that requires shipping.'));
+        }
+
+        $quote = $this->getQuote();
+        $item = Mage::getModel('sales/quote_item');
+        $item->setQuote($quote)
+            ->setStoreId((int) $quote->getStoreId())
+            ->setName($name)
+            ->setProductType($requiresShipping
+                ? Mage_Catalog_Model_Product_Type::TYPE_SIMPLE
+                : Mage_Catalog_Model_Product_Type::TYPE_VIRTUAL)
+            ->setWeight($requiresShipping ? $weight : 0.0)
+            ->setTaxClassId($taxClassId)
+            ->setCustomPrice($price)
+            ->setOriginalCustomPrice($price);
+        $item->getProduct();
+        $item->setQty(1);
+
+        // addProduct() would merge this line into another one, since both have no product id.
+        $quote->addItem($item);
+        $this->setRecollect(true);
+
+        return $item;
     }
 
     /**

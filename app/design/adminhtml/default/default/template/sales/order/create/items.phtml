@@ -14,5 +14,40 @@
         <h4><?= $this->getHeaderText() ?></h4>
         <div class="form-buttons"><?= $this->getButtonsHtml() ?></div>
     </div>
+    <?php /* The fields have no name, so that the final order submit does not post them. */ ?>
+    <div id="order-custom-item" class="no-display">
+        <fieldset class="np">
+            <div class="content">
+                <p>
+                    <label for="custom_item_name"><?= $this->__('Name') ?> <span class="required">*</span></label><br>
+                    <input type="text" id="custom_item_name" class="input-text" style="width:300px" maxlength="255">
+                </p>
+                <p>
+                    <label for="custom_item_price"><?= $this->__('Price') ?> <span class="required">*</span></label><br>
+                    <input type="text" id="custom_item_price" class="input-text" style="width:100px">
+                </p>
+                <p>
+                    <label for="custom_item_tax_class"><?= $this->__('Tax Class') ?> <span class="required">*</span></label><br>
+                    <select id="custom_item_tax_class">
+                        <?php foreach ($this->getProductTaxClassOptions() as $option): ?>
+                            <option value="<?= $this->escapeHtml($option['value']) ?>"><?= $this->escapeHtml($option['label']) ?></option>
+                        <?php endforeach ?>
+                    </select>
+                </p>
+                <p>
+                    <input type="checkbox" id="custom_item_requires_shipping" onchange="order.customItemToggleWeight(this.checked)">
+                    <label for="custom_item_requires_shipping"><?= $this->__('Requires shipping') ?></label>
+                </p>
+                <p id="custom_item_weight_row" class="no-display">
+                    <label for="custom_item_weight"><?= $this->__('Weight') ?> <span class="required">*</span></label><br>
+                    <input type="text" id="custom_item_weight" class="input-text" style="width:100px">
+                </p>
+                <p>
+                    <?= $this->getButtonHtml($this->__('Add Custom Item'), 'order.customItemSubmit()', 'add') ?>
+                    <?= $this->getButtonHtml($this->__('Cancel'), 'order.customItemHide()', 'cancel') ?>
+                </p>
+            </div>
+        </fieldset>
+    </div>
     <?= $this->getChildHtml() ?>
 </div>

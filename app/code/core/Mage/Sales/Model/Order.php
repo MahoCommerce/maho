@@ -594,7 +594,9 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
 
         $products = [];
         foreach ($this->getItemsCollection() as $item) {
-            $products[] = $item->getProductId();
+            if (!$item->isCustomItem()) {
+                $products[] = $item->getProductId();
+            }
         }
 
         if (!empty($products)) {

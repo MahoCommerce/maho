@@ -204,6 +204,22 @@ class Mage_Adminhtml_Sales_Order_CreateController extends Mage_Adminhtml_Control
             $this->_getOrderCreateModel()->addProduct($productId, $this->getRequest()->getPost());
         }
 
+        $customItem = $this->getRequest()->getPost('custom_item');
+        if (is_array($customItem)) {
+            // An empty choice is "Please Select", not the tax class "None".
+            if ((string) ($customItem['tax_class_id'] ?? '') === '') {
+                Mage::throwException(Mage::helper('sales')->__('Select a tax class for the custom item.'));
+            }
+            $locale = Mage::app()->getLocale();
+            $this->_getOrderCreateModel()->addCustomItem(
+                (string) ($customItem['name'] ?? ''),
+                (float) $locale->getNumber((string) ($customItem['price'] ?? '')),
+                (int) ($customItem['tax_class_id'] ?? 0),
+                !empty($customItem['requires_shipping']),
+                (float) $locale->getNumber((string) ($customItem['weight'] ?? '')),
+            );
+        }
+
         /**
          * Adding products to quote from special grid
          */

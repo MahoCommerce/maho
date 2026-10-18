@@ -232,7 +232,8 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Items_Grid extends Mage_Adminhtml_
      */
     public function canApplyCustomPrice($item)
     {
-        return !$item->isChildrenCalculated();
+        // The price of a custom line is always its custom price, so its checkbox stays hidden.
+        return !$item->isChildrenCalculated() && !$item->isCustomItem();
     }
 
     /**

@@ -422,6 +422,9 @@ SPDX-License-Identifier: AFL-3.0
                 <base_calculation_price>
                     <to_order_item>base_price</to_order_item>
                 </base_calculation_price>
+                <tax_class_id>
+                    <to_order_item>*</to_order_item>
+                </tax_class_id>
                 <tax_percent>
                     <to_order_item>*</to_order_item>
                 </tax_percent>

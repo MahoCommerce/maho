@@ -97,7 +97,9 @@
                             <?php endif ?>
                         </td>
                         <td class="a-center v-middle">
+                            <?php if (!$_item->isCustomItem()): ?>
                             <?= $this->getConfigureButtonHtml($_item) ?>
+                            <?php endif ?>
                         </td>
                         <td class="price">
 
@@ -377,7 +379,7 @@
                             <select name="item[<?= $_item->getId() ?>][action]" style="width:100px;">
                                 <option value=""></option>
                                 <option value="remove"><?= $this->helper('sales')->__('Remove') ?></option>
-                                <?php if ($this->getCustomerId() && $this->getMoveToCustomerStorage()): ?>
+                                <?php if ($this->getCustomerId() && $this->getMoveToCustomerStorage() && !$_item->isCustomItem()): ?>
                                     <option value="cart"><?= $this->helper('sales')->__('Move to Shopping Cart') ?></option>
                                     <?php if ($this->isMoveToWishlistAllowed($_item)): ?>
                                         <?php $wishlists = $this->getCustomerWishlists(); ?>
