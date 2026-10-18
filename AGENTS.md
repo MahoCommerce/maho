@@ -573,7 +573,10 @@ an API client), in their words. Code terms go in `## How it works`.
   - Use a store with sample data (`./maho import:sample-data`), never real customer data. Pick a
     sample customer and product by name: the first row of a grid can be a real account
   - Take them with Playwright (`npm install` adds it) on `./maho serve`: light color scheme,
-    1440x900 viewport, device scale factor 2. For an admin page, create a temporary admin user
+    1280x800 viewport, device scale factor 2. 1280 is the narrowest width where the admin layout
+    does not wrap, so the text stays readable in the pull request column. Set the width of each
+    `<img>` to half its pixel width.
+    For an admin page, create a temporary admin user
     on the development store, log in with it in the same context, and delete it after
   - Show the path that the user takes: first the page and the control that starts the feature
     (a menu entry, a button), then each step, then the result. Number the captions in that order
