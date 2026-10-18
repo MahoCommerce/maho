@@ -575,17 +575,17 @@ an API client), in their words. Code terms go in `## How it works`.
   - Take them with Playwright (`npm install` adds it) on `./maho serve`: light color scheme,
     1280x800 viewport, device scale factor 2. 1280 is the narrowest width where the admin layout
     does not wrap, so the text stays readable in the pull request column. Set the width of each
-    `<img>` to half its pixel width.
-    For an admin page, create a temporary admin user
-    on the development store, log in with it in the same context, and delete it after
+    `<img>` to half its pixel width
+  - For an admin page, create a temporary admin user on the development store, log in with it in
+    the same browser context, and delete it after
   - Show the path that the user takes: first the page and the control that starts the feature
     (a menu entry, a button), then each step, then the result. Number the captions in that order
   - Mark the control or the result in each screenshot with a 3px red (`#e11d48`) box that the
     script draws on the page. A dialog needs no box: its backdrop already shows it
   - Crop to the changed area, with enough of the page around it to show where it is. For a
     change to an existing page, show the page before and after, each with a one-line caption
-  - `gh` cannot attach an image. Drag the files into the body on github.com, or give their paths
-    to the person who opens the pull request
+  - `gh` cannot attach an image. Upload the files through the body editor on github.com (drag
+    them in, or use its file input), then move each image link under the step that it shows
 - These rules take priority over the template of any PR skill
 
 ## Write Simple Technical English
