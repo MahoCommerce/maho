@@ -341,6 +341,10 @@ class Mage_Core_Model_App
         // them, so getTracer() returns null here and the whole request stays untraced
         $tracer = Mage::getTracer();
         $rootSpan = $tracer ? Maho_OpenTelemetry_Model_Request::start($tracer) : null;
+        if ($rootSpan) {
+            // Actions that exit() skip the finally below
+            register_shutdown_function([Maho_OpenTelemetry_Model_Request::class, 'finishAtShutdown'], $tracer, $rootSpan);
+        }
 
         $dispatchError = false;
         try {

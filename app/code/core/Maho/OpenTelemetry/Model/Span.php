@@ -280,4 +280,12 @@ class Maho_OpenTelemetry_Model_Span
         }
         return false;
     }
+
+    /**
+     * Unlike isRecording(), also true for a span the sampler dropped
+     */
+    public function isEnded(): bool
+    {
+        return $this->_ended;
+    }
 }
