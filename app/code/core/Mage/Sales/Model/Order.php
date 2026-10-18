@@ -563,7 +563,9 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
      */
     public function canReorder()
     {
-        return $this->_canReorder(true);
+        // The storefront cart cannot take a custom line, so an order needs a catalog line
+        return $this->_canReorder(true)
+            && array_any($this->getItemsCollection()->getItems(), fn($item) => !$item->isCustomItem());
     }
 
     /**

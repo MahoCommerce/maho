@@ -243,6 +243,7 @@
 "Enable","Enable"
 "Enabled","Enabled"
 "Enter a name for the custom item.","Enter a name for the custom item."
+"Enter a valid price for the custom item.","Enter a valid price for the custom item."
 "Enter a weight for a custom item that requires shipping.","Enter a weight for a custom item that requires shipping."
 "Enter the billing last name and email/ZIP as in the order billing address","Enter the billing last name and email/ZIP as in the order billing address"
 "Error creating shipping labels archive: %s","Error creating shipping labels archive: %s"

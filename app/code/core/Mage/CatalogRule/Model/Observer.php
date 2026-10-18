@@ -158,9 +158,6 @@ class Mage_CatalogRule_Model_Observer
         /** @var Mage_Catalog_Model_Product $product */
         $product    = $observer->getEvent()->getProduct();
         $pId        = $product->getId();
-        if (!$pId) {
-            return $this;
-        }
         $storeId    = $product->getStoreId();
 
         if ($observer->hasDate()) {
