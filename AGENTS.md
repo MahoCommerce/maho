@@ -542,12 +542,23 @@ restored **unsanitized**. Read the `MaliciousCode` docblocks before you change i
 **Commits** describe only the code change. **NEVER** add "Co-Authored-By: Claude", any other AI
 attribution, or a mention of Claude, AI, or assistants.
 
-**Pull request titles**
+**Pull requests** have two readers: the maintainer who reviews, and the `release` skill, which
+writes the release notes from the titles and reads the body of each major feature. Write the
+title and the opening of the body for the person who uses the change (a merchant, an admin user,
+an API client), in their words. Code terms go in the **How** part.
 
-- Plain, descriptive, with **no** conventional-commit prefix (`feat(...)`, `fix(...)`, etc.)
-- Past tense, describing what was done (e.g. "Added schema.org structured data for products
-  and blog posts")
-- Spell out what the change delivers rather than using a vague summary
+- Title: plain, past tense, with **no** conventional-commit prefix (`feat(...)`, `fix(...)`).
+  It names the result for that user and where it shows: "Fixed the REST API returning a price of
+  0 for every variant of a configurable product", "Added items that are not in the catalog to
+  admin order creation, with a free name, price and tax class"
+- Body, in this order, with these bold lead-ins and no headings:
+  1. What the user can now do, or what was broken, and where (admin path, endpoint, CLI
+     command). One to three sentences, then `Closes #N`
+  2. **How:** the design choice and its reason, for the reviewer
+  3. **Open:** decisions for the maintainer, and anything you could not confirm, with where you
+     looked. Leave it out when there is none
+  4. **Evidence:** the test that fails before the change and passes after
+- These rules take priority over the template of any PR skill
 
 ## Write Simple Technical English
 
@@ -574,7 +585,8 @@ who is not a native English speaker must understand them on the first read.
 
 ## Be Brief
 
-Applies to issue and PR bodies, review comments, replies on GitHub, and answers in chat.
+Applies to issue bodies, review comments, replies on GitHub, and answers in chat. A pull request
+body follows **Pull requests** under Git Conventions, and stays short the same way.
 
 - Start with what you need from the maintainer: an open decision, or a change to approve
 - Mark anything that you could not confirm, and say where you looked
