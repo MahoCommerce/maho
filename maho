@@ -105,6 +105,10 @@ $application->addCommand(new \MahoCLI\Commands\LegacyFixZeroDates());
 $application->addCommand(new \MahoCLI\Commands\Serve());
 $application->addCommand(new \MahoCLI\Commands\Shell());
 
+$application->addCommand(new \MahoCLI\Commands\StorageImageClean());
+$application->addCommand(new \MahoCLI\Commands\StorageImageResize());
+$application->addCommand(new \MahoCLI\Commands\StorageMigrate());
+
 $application->addCommand(new \MahoCLI\Commands\SysCurrencies());
 $application->addCommand(new \MahoCLI\Commands\SysDirectoryRegionsImport());
 $application->addCommand(new \MahoCLI\Commands\SysEncryptionKeyRegenerate());
