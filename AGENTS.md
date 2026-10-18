@@ -542,8 +542,8 @@ restored **unsanitized**. Read the `MaliciousCode` docblocks before you change i
 **Commits** describe only the code change. **NEVER** add "Co-Authored-By: Claude", any other AI
 attribution, or a mention of Claude, AI, or assistants.
 
-**Pull requests** have two readers: the maintainer who reviews, and the release notes, which are
-written from the titles and the `## Release notes` section. Write the
+**Pull requests** have two readers: the maintainer who reviews, and the author of the release
+notes, who reads the titles and the `## Release notes` section. Write the
 title and the opening of the body for the person who uses the change (a merchant, an admin user,
 an API client), in their words. Code terms go in `## How it works`.
 
@@ -558,10 +558,11 @@ an API client), in their words. Code terms go in `## How it works`.
   3. `## Also in this PR` (optional): a change that is not part of the main one, and its reason
   4. `## Open points` (optional): decisions for the maintainer, and anything you could not
      confirm, with where you looked
-  5. `## Release notes`: one item, ready to copy into the release notes. It uses the house voice,
-     not Simplified Technical English: `- **[Title for the merchant](PR link)**: what was missing
-     or broken, why, and what now happens.` The title starts with a past-tense verb (Added,
-     Fixed, Prevented) and names what the merchant sees, not the code change
+  5. `## Release notes`: what a store owner or a developer must know or do when they upgrade: a
+     breaking change, a step to run, a changed default or behavior, a new setting, a schema
+     change, a changed template that theme overrides must copy, data that third-party code can
+     now meet. Write "Nothing to note." when there is none, so the release author knows that it
+     was checked
 - These rules take priority over the template of any PR skill
 
 ## Write Simple Technical English
