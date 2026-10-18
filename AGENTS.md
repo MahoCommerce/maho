@@ -566,9 +566,11 @@ an API client), in their words. Code terms go in `## How it works`.
      there is none, so the release author knows that it was checked
 - Screenshots: a change that shows on a page (admin, storefront, PDF, email) gets one or more
   screenshots in `## What it does`, under the sentences. An API, CLI or schema change gets none
-  - Use a store with sample data (`./maho import:sample-data`), never real customer data
+  - Use a store with sample data (`./maho import:sample-data`), never real customer data. Pick a
+    sample customer and product by name: the first row of a grid can be a real account
   - Take them with Playwright (`npm install` adds it) on `./maho serve`: light color scheme,
-    1440x900 viewport, device scale factor 2. For an admin page, log in first in the same context
+    1440x900 viewport, device scale factor 2. For an admin page, create a temporary admin user
+    on the development store, log in with it in the same context, and delete it after
   - Crop to the changed area, with enough of the page around it to show where it is. For a
     change to an existing page, show the page before and after, each with a one-line caption
   - `gh` cannot attach an image. Drag the files into the body on github.com, or give their paths
