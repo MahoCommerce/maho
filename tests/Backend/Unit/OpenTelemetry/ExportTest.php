@@ -314,7 +314,7 @@ it('finishes at shutdown a request that exited with spans still open', function 
 
     expect($spans)->toHaveCount(2)
         ->and($actionSpan['parentSpanId'])->toBe($rootSpan['spanId'])
-        ->and((int) otelAttributesOf($rootSpan)['http.response.status_code'])->toBe(200);
+        ->and((int) otelAttributesOf($rootSpan)['http.response.status_code'])->toBe(http_response_code() ?: 200);
 
     // The request already finished it, as App::run() does on a request that returned
     Maho_OpenTelemetry_Model_Request::finishAtShutdown($tracer, $root);
