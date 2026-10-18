@@ -14,40 +14,43 @@
         <h4><?= $this->getHeaderText() ?></h4>
         <div class="form-buttons"><?= $this->getButtonsHtml() ?></div>
     </div>
-    <?php /* The fields have no name, so that the final order submit does not post them. */ ?>
-    <div id="order-custom-item" class="no-display">
-        <fieldset class="np">
-            <div class="content">
-                <p>
-                    <label for="custom_item_name"><?= $this->__('Name') ?> <span class="required">*</span></label><br>
-                    <input type="text" id="custom_item_name" class="input-text" style="width:300px" maxlength="255">
-                </p>
-                <p>
-                    <label for="custom_item_price"><?= $this->__('Price') ?> <span class="required">*</span></label><br>
-                    <input type="text" id="custom_item_price" class="input-text" style="width:100px">
-                </p>
-                <p>
-                    <label for="custom_item_tax_class"><?= $this->__('Tax Class') ?> <span class="required">*</span></label><br>
-                    <select id="custom_item_tax_class">
+    <?= $this->getChildHtml() ?>
+</div>
+<template id="order-custom-item-form"
+          data-title="<?= $this->escapeHtml($this->__('Add Custom Item')) ?>"
+          data-ok-label="<?= $this->escapeHtml($this->__('Add Custom Item')) ?>">
+    <table class="form-list">
+        <tbody>
+            <tr>
+                <td class="label"><label for="custom_item_name"><?= $this->__('Name') ?> <span class="required">*</span></label></td>
+                <td class="value"><input type="text" id="custom_item_name" name="name" class="input-text" maxlength="255"></td>
+            </tr>
+            <tr>
+                <td class="label"><label for="custom_item_price"><?= $this->__('Price') ?> <span class="required">*</span></label></td>
+                <td class="value">
+                    <input type="text" id="custom_item_price" name="price" class="input-text">
+                    <p class="note"><span><?= Mage::helper('tax')->priceIncludesTax($this->getStore()) ? $this->__('Incl. Tax') : $this->__('Excl. Tax') ?></span></p>
+                </td>
+            </tr>
+            <tr>
+                <td class="label"><label for="custom_item_tax_class"><?= $this->__('Tax Class') ?> <span class="required">*</span></label></td>
+                <td class="value">
+                    <select id="custom_item_tax_class" name="tax_class_id">
                         <?php foreach ($this->getProductTaxClassOptions() as $option): ?>
                             <option value="<?= $this->escapeHtml($option['value']) ?>"><?= $this->escapeHtml($option['label']) ?></option>
                         <?php endforeach ?>
                     </select>
-                </p>
-                <p>
-                    <input type="checkbox" id="custom_item_requires_shipping" onchange="order.customItemToggleWeight(this.checked)">
-                    <label for="custom_item_requires_shipping"><?= $this->__('Requires shipping') ?></label>
-                </p>
-                <p id="custom_item_weight_row" class="no-display">
-                    <label for="custom_item_weight"><?= $this->__('Weight') ?> <span class="required">*</span></label><br>
-                    <input type="text" id="custom_item_weight" class="input-text" style="width:100px">
-                </p>
-                <p>
-                    <?= $this->getButtonHtml($this->__('Add Custom Item'), 'order.customItemSubmit()', 'add') ?>
-                    <?= $this->getButtonHtml($this->__('Cancel'), 'order.customItemHide()', 'cancel') ?>
-                </p>
-            </div>
-        </fieldset>
-    </div>
-    <?= $this->getChildHtml() ?>
-</div>
+                </td>
+            </tr>
+            <tr>
+                <td class="label"><label for="custom_item_requires_shipping"><?= $this->__('Requires shipping') ?></label></td>
+                <td class="value"><input type="checkbox" id="custom_item_requires_shipping" name="requires_shipping" onchange="order.customItemToggleWeight(this)"></td>
+            </tr>
+            <tr class="custom-item-weight-row" hidden>
+                <td class="label"><label for="custom_item_weight"><?= $this->__('Weight') ?> <span class="required">*</span></label></td>
+                <td class="value"><input type="text" id="custom_item_weight" name="weight" class="input-text"></td>
+            </tr>
+        </tbody>
+    </table>
+    <p class="custom-item-error error" hidden><?= $this->__('This is a required field.') ?></p>
+</template>

@@ -446,27 +446,43 @@ class AdminOrder
     }
 
     customItemShow() {
-        toggleVis('order-custom-item', true);
-        document.getElementById('custom_item_name').focus();
+        const template = document.getElementById('order-custom-item-form');
+        Dialog.confirm(template.innerHTML, {
+            title: template.dataset.title,
+            okLabel: template.dataset.okLabel,
+            className: 'maho-dialog custom-item-dialog',
+            width: 600,
+            onOpen: (dialog) => dialog.querySelector('[name="name"]').focus(),
+            onOk: (dialog) => this.customItemSubmit(dialog),
+        });
     }
 
-    customItemHide() {
-        toggleVis('order-custom-item', false);
+    customItemToggleWeight(checkbox) {
+        checkbox.closest('dialog').querySelector('.custom-item-weight-row').hidden = !checkbox.checked;
     }
 
-    customItemToggleWeight(requiresShipping) {
-        toggleVis('custom_item_weight_row', requiresShipping);
-    }
+    customItemSubmit(dialog) {
+        const field = (name) => dialog.querySelector(`[name="${name}"]`);
+        const requiresShipping = field('requires_shipping').checked;
+        const required = ['name', 'price', 'tax_class_id', ...(requiresShipping ? ['weight'] : [])];
+        let valid = true;
+        for (const name of required) {
+            const empty = field(name).value.trim() === '';
+            field(name).classList.toggle('validation-failed', empty);
+            valid &&= !empty;
+        }
+        // Returning false keeps the dialog open, so the entered values stay
+        dialog.querySelector('.custom-item-error').hidden = valid;
+        if (!valid) {
+            return false;
+        }
 
-    customItemSubmit() {
-        const value = (id) => document.getElementById(id).value;
-        const requiresShipping = document.getElementById('custom_item_requires_shipping').checked;
         this.loadArea(['items', 'shipping_method', 'totals', 'billing_method'], true, {
-            'custom_item[name]': value('custom_item_name'),
-            'custom_item[price]': value('custom_item_price'),
-            'custom_item[tax_class_id]': value('custom_item_tax_class'),
+            'custom_item[name]': field('name').value,
+            'custom_item[price]': field('price').value,
+            'custom_item[tax_class_id]': field('tax_class_id').value,
             'custom_item[requires_shipping]': requiresShipping ? 1 : 0,
-            'custom_item[weight]': requiresShipping ? value('custom_item_weight') : '',
+            'custom_item[weight]': requiresShipping ? field('weight').value : '',
             reset_shipping: true,
         });
     }
