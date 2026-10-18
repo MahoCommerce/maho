@@ -542,8 +542,8 @@ restored **unsanitized**. Read the `MaliciousCode` docblocks before you change i
 **Commits** describe only the code change. **NEVER** add "Co-Authored-By: Claude", any other AI
 attribution, or a mention of Claude, AI, or assistants.
 
-**Pull requests** have two readers: the maintainer who reviews, and the `release` skill, which
-writes the release notes from the titles and reads the body of each major feature. Write the
+**Pull requests** have two readers: the maintainer who reviews, and the release notes, which are
+written from the titles and the `## Release notes` section. Write the
 title and the opening of the body for the person who uses the change (a merchant, an admin user,
 an API client), in their words. Code terms go in `## How it works`.
 
@@ -558,7 +558,10 @@ an API client), in their words. Code terms go in `## How it works`.
   3. `## Also in this PR` (optional): a change that is not part of the main one, and its reason
   4. `## Open points` (optional): decisions for the maintainer, and anything you could not
      confirm, with where you looked
-  5. `## Tests`: the test that fails before the change and passes after
+  5. `## Release notes`: one item, ready to copy into the release notes. It uses the house voice,
+     not Simplified Technical English: `- **[Title for the merchant](PR link)**: what was missing
+     or broken, why, and what now happens.` The title starts with a past-tense verb (Added,
+     Fixed, Prevented) and names what the merchant sees, not the code change
 - These rules take priority over the template of any PR skill
 
 ## Write Simple Technical English
