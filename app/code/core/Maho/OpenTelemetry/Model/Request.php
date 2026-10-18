@@ -129,6 +129,26 @@ class Maho_OpenTelemetry_Model_Request
     }
 
     /**
+     * Describe and finish a root span still open when the script ends, as it is
+     * after an action that called exit(). Does nothing once the span is finished.
+     */
+    public static function finishAtShutdown(
+        Maho_OpenTelemetry_Model_Tracer $tracer,
+        Maho_OpenTelemetry_Model_Span $span,
+    ): void {
+        if ($span->isEnded()) {
+            return;
+        }
+
+        // The action already sent its output, so a slow collector never holds the client
+        Mage_Core_Controller_Response_Http::finishRequest();
+
+        $statusCode = http_response_code() ?: 200;
+        self::describe($span, $statusCode);
+        self::finish($tracer, $span, $statusCode);
+    }
+
+    /**
      * Pseudonymous id of the signed-in user, empty when nobody is signed in.
      * Outside the admin area the session is read only if the request already
      * built one: creating it here would start a session for every visitor.

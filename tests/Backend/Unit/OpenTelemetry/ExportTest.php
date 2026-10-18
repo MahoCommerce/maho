@@ -299,3 +299,24 @@ it('propagates trace context to the outgoing request headers', function () {
     expect($traceparent)->toHaveCount(1)
         ->and($traceparent[0])->toBe("traceparent: 00-{$httpSpan['traceId']}-{$httpSpan['spanId']}-01");
 });
+
+it('finishes at shutdown a request that exited with spans still open', function () {
+    $tracer = otelExportTracer();
+    $root = $tracer->startRootSpan('GET', ['http.request.method' => 'GET'], 'server');
+    $tracer->startSpan('mage::dispatch::controller::action', [], 'internal');
+
+    Maho_OpenTelemetry_Model_Request::finishAtShutdown($tracer, $root);
+
+    expect($tracer->transport->payloads)->toHaveCount(1);
+    $spans = otelSpansIn($tracer->transport->payloads[0]);
+    $rootSpan = array_values(array_filter($spans, static fn(array $span): bool => ($span['parentSpanId'] ?? '') === ''))[0];
+    $actionSpan = otelSpanNamed($spans, 'mage::dispatch::controller::action');
+
+    expect($spans)->toHaveCount(2)
+        ->and($actionSpan['parentSpanId'])->toBe($rootSpan['spanId'])
+        ->and((int) otelAttributesOf($rootSpan)['http.response.status_code'])->toBe(http_response_code() ?: 200);
+
+    // The request already finished it, as App::run() does on a request that returned
+    Maho_OpenTelemetry_Model_Request::finishAtShutdown($tracer, $root);
+    expect($tracer->transport->payloads)->toHaveCount(1);
+});
