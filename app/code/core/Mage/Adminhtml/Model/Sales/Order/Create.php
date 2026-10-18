@@ -917,6 +917,9 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
                         $itemQty    = $itemQty > 0 ? $itemQty : 1;
                         if (isset($info['custom_price'])) {
                             $itemPrice  = $this->_parseCustomPrice($info['custom_price']);
+                        } elseif ($item->isCustomItem()) {
+                            // A custom line has no catalog price to go back to, so it keeps its own price
+                            $itemPrice = $item->getOriginalCustomPrice();
                         } else {
                             $itemPrice = null;
                         }

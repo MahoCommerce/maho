@@ -264,3 +264,33 @@ it('applies no catalog rule price to a custom line in the admin', function () {
 
     expect($product->getData('final_price'))->toBe(5.0);
 });
+
+it('keeps the price of the line when the grid posts no custom price', function () {
+    $quote = customItemEmptyQuote();
+    $create = customItemOrderCreate($quote);
+    $item = $create->addCustomItem('Fee', 12.0, CUSTOM_ITEM_TAX_CLASS, false, 0.0);
+    $quote->collectTotals()->save();
+
+    $create->updateQuoteItems([$item->getId() => ['qty' => 2]]);
+    // The admin collects totals once on each request; here the same quote object collects again
+    $quote->setTotalsCollectedFlag(false)->collectTotals()->save();
+
+    $items = customItemsOf(customItemReload($quote));
+    expect($items[0]->getOriginalCustomPrice())->toEqualWithDelta(12.0, 0.0001);
+    expect((float) $items[0]->getRowTotal())->toEqualWithDelta(24.0, 0.0001);
+});
+
+it('changes the price of the line when the grid posts a custom price', function () {
+    $quote = customItemEmptyQuote();
+    $create = customItemOrderCreate($quote);
+    $item = $create->addCustomItem('Fee', 12.0, CUSTOM_ITEM_TAX_CLASS, false, 0.0);
+    $quote->collectTotals()->save();
+
+    $create->updateQuoteItems([$item->getId() => ['qty' => 1, 'custom_price' => '15']]);
+    // The admin collects totals once on each request; here the same quote object collects again
+    $quote->setTotalsCollectedFlag(false)->collectTotals()->save();
+
+    $items = customItemsOf(customItemReload($quote));
+    expect($items[0]->getOriginalCustomPrice())->toEqualWithDelta(15.0, 0.0001);
+    expect((float) $items[0]->getRowTotal())->toEqualWithDelta(15.0, 0.0001);
+});

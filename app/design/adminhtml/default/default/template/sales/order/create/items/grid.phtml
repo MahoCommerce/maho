@@ -195,7 +195,7 @@
                             <?php endif ?>
                             <?php if ($this->canApplyCustomPrice($_item)): ?>
                             <div class="nobr">
-                            <input type="checkbox" id="item_use_custom_price_<?= $_item->getId() ?>"<?php if ($_isCustomPrice): ?> checked="checked"<?php endif ?><?php if ($_item->isCustomItem()): ?> disabled="disabled"<?php endif ?> onclick="order.toggleCustomPrice(this, 'item_custom_price_<?= $_item->getId() ?>', 'item_tier_block_<?= $_item->getId() ?>');">
+                            <input type="checkbox" id="item_use_custom_price_<?= $_item->getId() ?>"<?php if ($_isCustomPrice): ?> checked="checked"<?php endif ?> onclick="order.toggleCustomPrice(this, 'item_custom_price_<?= $_item->getId() ?>', 'item_tier_block_<?= $_item->getId() ?>');">
                             <label class="normal" for="item_use_custom_price_<?= $_item->getId() ?>"><?= $this->helper('sales')->__('Custom Price') ?>*</label>
                             </div>
                             <?php endif ?>
