@@ -545,19 +545,20 @@ attribution, or a mention of Claude, AI, or assistants.
 **Pull requests** have two readers: the maintainer who reviews, and the `release` skill, which
 writes the release notes from the titles and reads the body of each major feature. Write the
 title and the opening of the body for the person who uses the change (a merchant, an admin user,
-an API client), in their words. Code terms go in the **How** part.
+an API client), in their words. Code terms go in `## How it works`.
 
 - Title: plain, past tense, with **no** conventional-commit prefix (`feat(...)`, `fix(...)`).
   It names the result for that user and where it shows: "Fixed the REST API returning a price of
   0 for every variant of a configurable product", "Added items that are not in the catalog to
   admin order creation, with a free name, price and tax class"
-- Body, in this order, with these bold lead-ins and no headings:
-  1. What the user can now do, or what was broken, and where (admin path, endpoint, CLI
-     command). One to three sentences, then `Closes #N`
-  2. **How:** the design choice and its reason, for the reviewer
-  3. **Open:** decisions for the maintainer, and anything you could not confirm, with where you
-     looked. Leave it out when there is none
-  4. **Evidence:** the test that fails before the change and passes after
+- Body: these `##` sections, in this order. Leave out an optional section that has nothing in it
+  1. `## What it does`: what the user can now do, or what was broken, and where (admin path,
+     endpoint, CLI command). One to three sentences, then `Closes #N`
+  2. `## How it works`: the design choice and its reason, for the reviewer
+  3. `## Also in this PR` (optional): a change that is not part of the main one, and its reason
+  4. `## Open points` (optional): decisions for the maintainer, and anything you could not
+     confirm, with where you looked
+  5. `## Tests`: the test that fails before the change and passes after
 - These rules take priority over the template of any PR skill
 
 ## Write Simple Technical English
