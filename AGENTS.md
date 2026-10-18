@@ -558,11 +558,11 @@ an API client), in their words. Code terms go in `## How it works`.
   3. `## Also in this PR` (optional): a change that is not part of the main one, and its reason
   4. `## Open points` (optional): decisions for the maintainer, and anything you could not
      confirm, with where you looked
-  5. `## Release notes`: what a store owner or a developer must know or do when they upgrade: a
-     breaking change, a step to run, a changed default or behavior, a new setting, a schema
-     change, a changed template that theme overrides must copy, data that third-party code can
-     now meet. Write "Nothing to note." when there is none, so the release author knows that it
-     was checked
+  5. `## Release notes`: what reaches a store that upgrades and does nothing more: a break, a
+     change in what the store already does, or a step that someone must run. The test: does an
+     existing store notice the upgrade before anyone uses the new feature? A schema change that
+     the sync applies, or a limit of the new feature, stays out. Write "Nothing to note." when
+     there is none, so the release author knows that it was checked
 - These rules take priority over the template of any PR skill
 
 ## Write Simple Technical English
