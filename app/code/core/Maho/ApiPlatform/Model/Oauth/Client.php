@@ -135,12 +135,17 @@ class Maho_ApiPlatform_Model_Oauth_Client extends Mage_Core_Model_Abstract
             return false;
         }
 
+        // With a user part or a backslash, a browser can go to a host other than the one parse_url() returns.
+        if (isset($parts['user']) || str_contains($uri, '\\')) {
+            return false;
+        }
+
         $scheme = strtolower($parts['scheme']);
         if ($scheme === 'https') {
             return true;
         }
 
-        return $scheme === 'http' && self::isLoopbackRedirectUri($uri);
+        return $scheme === 'http' && in_array(strtolower($parts['host']), self::LOOPBACK_HOSTS, true);
     }
 
     /**
@@ -149,7 +154,8 @@ class Maho_ApiPlatform_Model_Oauth_Client extends Mage_Core_Model_Abstract
      */
     public static function isLoopbackRedirectUri(string $uri): bool
     {
-        return in_array(strtolower((string) parse_url($uri, PHP_URL_HOST)), self::LOOPBACK_HOSTS, true);
+        return self::isAllowedRedirectUri($uri)
+            && in_array(strtolower((string) parse_url($uri, PHP_URL_HOST)), self::LOOPBACK_HOSTS, true);
     }
 
     #[\Override]
