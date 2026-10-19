@@ -44,8 +44,10 @@ class OAuthController
      * The public face of the authorization endpoint. It validates what it can
      * without a session, then hands the browser to the admin consent screen.
      *
-     * The alias exists so the RFC 8414 document, which anyone may fetch, does
-     * not have to name the store's admin path.
+     * The alias exists so that no public response names the store's admin path:
+     * not the RFC 8414 document, and not this redirect. Only a browser that
+     * already holds an admin session goes on to the admin area. Any other
+     * browser gets a page that asks the admin to sign in first.
      */
     #[Route('/api/oauth/authorize', name: 'api_oauth_authorize', methods: ['GET'])]
     public function authorize(Request $request): Response
@@ -64,6 +66,10 @@ class OAuthController
             $validated = $this->server()->validateAuthorizationRequest($params);
         } catch (OauthException $e) {
             return $this->authorizationError($e, $this->stringParam($params, 'redirect_uri'), $this->stringParam($params, 'state'));
+        }
+
+        if (!$this->hasAdminSession($request)) {
+            return $this->signInPage($request, $validated);
         }
 
         // The request is parked server-side and named by a cookie, so the consent
@@ -160,14 +166,100 @@ class OAuthController
             return $this->error($e->getError(), $e->getDescription(), $e->getHttpStatus());
         }
 
-        $query = ['error' => $e->getError(), 'error_description' => $e->getDescription()];
+        return new RedirectResponse($this->clientRedirectUrl($redirectUri, $state, [
+            'error' => $e->getError(),
+            'error_description' => $e->getDescription(),
+        ]));
+    }
+
+    /**
+     * @param array<string, string> $query
+     */
+    private function clientRedirectUrl(string $redirectUri, string $state, array $query): string
+    {
         if ($state !== '') {
             $query['state'] = $state;
         }
 
         $separator = str_contains($redirectUri, '?') ? '&' : '?';
 
-        return new RedirectResponse($redirectUri . $separator . http_build_query($query));
+        return $redirectUri . $separator . http_build_query($query);
+    }
+
+    /**
+     * The admin cookie names a session that only the admin front controller starts,
+     * so start it here as AdminBridgeListener does.
+     */
+    private function hasAdminSession(Request $request): bool
+    {
+        $sessionName = \Mage_Adminhtml_Controller_Action::SESSION_NAMESPACE;
+        if (!$request->cookies->has($sessionName)) {
+            return false;
+        }
+
+        Mage::getSingleton('core/session', ['name' => $sessionName])->start();
+
+        return (bool) Mage::getSingleton('admin/session')->isLoggedIn();
+    }
+
+    /**
+     * Ask the admin to sign in, without a link to the admin area. The admin knows
+     * where to sign in, and a link would give the admin path to any visitor.
+     * Continue sends the same request again, which now finds the admin session.
+     *
+     * @param array{client: \Maho_ApiPlatform_Model_Oauth_Client, redirect_uri: string, scope: string, resource: string, code_challenge: string, state: string} $validated
+     */
+    private function signInPage(Request $request, array $validated): Response
+    {
+        $helper = $this->helper();
+        $escape = fn(string $value): string => htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5);
+
+        $cancelUrl = $this->clientRedirectUrl($validated['redirect_uri'], $validated['state'], [
+            'error' => OauthException::ERROR_ACCESS_DENIED,
+            'error_description' => (string) $helper->__('You denied the connection.'),
+        ]);
+
+        $lang = $escape(str_replace('_', '-', Mage::app()->getLocale()->getLocaleCode()));
+        $title = $escape((string) $helper->__('Sign in to continue'));
+        $intro = $escape((string) $helper->__('%s wants to connect to your store.', (string) $validated['client']->getData('client_name')));
+        $instruction = $escape((string) $helper->__('Sign in to the admin of this store in this browser, then select Continue.'));
+        $continue = $escape((string) $helper->__('Continue'));
+        $cancel = $escape((string) $helper->__('Cancel'));
+        $continueUrl = $escape($request->getRequestUri());
+        $cancelUrl = $escape($cancelUrl);
+
+        $html = <<<HTML
+            <!doctype html>
+            <html lang="{$lang}">
+            <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <meta name="robots" content="noindex">
+            <title>{$title}</title>
+            <style>
+            :root { color-scheme: light dark; font-family: system-ui, sans-serif; }
+            body { max-width: 28rem; margin: 4rem auto; padding: 0 1rem; line-height: 1.5; }
+            .actions { display: flex; gap: 1rem; align-items: center; margin-top: 2rem; }
+            .button { padding: .6rem 1.2rem; border-radius: .4rem; background: #2563eb; color: #fff; text-decoration: none; }
+            </style>
+            </head>
+            <body>
+            <h1>{$title}</h1>
+            <p>{$intro}</p>
+            <p>{$instruction}</p>
+            <div class="actions">
+            <a class="button" href="{$continueUrl}">{$continue}</a>
+            <a href="{$cancelUrl}">{$cancel}</a>
+            </div>
+            </body>
+            </html>
+            HTML;
+
+        return new Response($html, 200, [
+            'Content-Type' => 'text/html; charset=UTF-8',
+            'Cache-Control' => 'no-store',
+            'Content-Security-Policy' => "default-src 'none'; style-src 'unsafe-inline'; frame-ancestors 'none'",
+        ]);
     }
 
     /**
