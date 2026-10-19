@@ -11965,7 +11965,6 @@ parameters:
 			path: app/code/core/Mage/Checkout/controllers/CartController.php
 
 		-
-<<<<<<< HEAD
 			rawMessage: 'Method Mage_Checkout_Model_Session::getNoCartRedirect() invoked with 1 parameter, 0 required.'
 			identifier: arguments.count
 			count: 2
@@ -11996,12 +11995,6 @@ parameters:
 			path: app/code/core/Mage/Checkout/controllers/CartController.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Address::setRegionId() expects int, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Checkout/controllers/CartController.php
-
-		-
 			rawMessage: '''
 				Call to method disableFlatCollection() of deprecated class Mage_Catalog_Helper_Product_Flat:
 				since 26.5 Flat Catalog will be removed in a future version
@@ -12029,8 +12022,6 @@ parameters:
 			path: app/code/core/Mage/Checkout/controllers/OnepageController.php
 
 		-
-=======
->>>>>>> 801c5ac8 (Fixed the shipping estimate of the cart failing for a country without regions (#1587))
 			rawMessage: 'Method Mage_Cms_Controller_Router::initControllerRouters() has no return type specified.'
 			identifier: missingType.return
 			count: 1

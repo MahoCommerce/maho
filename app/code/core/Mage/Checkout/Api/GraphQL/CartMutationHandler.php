@@ -357,11 +357,7 @@ class CartMutationHandler
             $shippingAddress = $quote->getShippingAddress();
             if (!$shippingAddress->getCountryId()) {
                 $defaults = \Maho\ApiPlatform\Service\StoreDefaults::getPosAddress($quote->getStoreId() ? (int) $quote->getStoreId() : null);
-<<<<<<< HEAD
-                $shippingAddress->setCountryId($defaults['country_id'])->setPostcode($defaults['postcode'])->setRegionId($defaults['region_id'])->setCollectShippingRates(1);
-=======
-                $shippingAddress->setCountryId($defaults['country_id'])->setPostcode($defaults['postcode'])->setCollectShippingRates();
->>>>>>> 801c5ac8 (Fixed the shipping estimate of the cart failing for a country without regions (#1587))
+                $shippingAddress->setCountryId($defaults['country_id'])->setPostcode($defaults['postcode'])->setCollectShippingRates(1);
             }
 
             $currency = $quote->getStore()->getCurrentCurrencyCode();
