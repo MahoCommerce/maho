@@ -84,6 +84,36 @@ describe('OAuth machine endpoints', function (): void {
         expect($response['json']['error'])->toBe('invalid_request');
     });
 
+    it('does not give the admin path to a browser without an admin session', function (): void {
+        $client = apiPost('/api/oauth/register', [
+            'client_name' => 'Path <b>Test</b>',
+            'redirect_uris' => ['http://127.0.0.1:41234/callback'],
+        ])['json'];
+
+        $response = apiGetRaw('/api/oauth/authorize?' . http_build_query([
+            'client_id' => $client['client_id'],
+            'redirect_uri' => 'http://127.0.0.1:41234/callback',
+            'response_type' => 'code',
+            'code_challenge' => str_repeat('a', 43),
+            'code_challenge_method' => 'S256',
+            'state' => 'xyz',
+        ]));
+
+        $config = Mage::getConfig();
+        $adminPath = (bool) (string) $config->getNode(Mage_Adminhtml_Helper_Data::XML_PATH_USE_CUSTOM_ADMIN_PATH)
+            ? (string) $config->getNode(Mage_Adminhtml_Helper_Data::XML_PATH_CUSTOM_ADMIN_PATH)
+            : (string) $config->getNode(Mage_Adminhtml_Helper_Data::XML_PATH_ADMINHTML_ROUTER_FRONTNAME);
+
+        expect($response['status'])->toBe(200);
+        expect($response['headers'])->not->toHaveKey('location');
+        expect(implode("\n", $response['headers']['set-cookie'] ?? []))->not->toContain(Maho_ApiPlatform_Model_Oauth_Server::PENDING_REQUEST_COOKIE);
+        expect($response['raw'])->not->toContain('/' . $adminPath . '/')
+            ->and($response['raw'])->not->toContain('apiplatform_oauth')
+            ->and($response['raw'])->not->toContain('<b>Test</b>')
+            ->and($response['raw'])->toContain('Path &lt;b&gt;Test&lt;/b&gt;')
+            ->and($response['raw'])->toContain('http://127.0.0.1:41234/callback?error=access_denied');
+    });
+
     it('hides every endpoint while the feature is off', function (): void {
         enableOauthServer(false);
 
