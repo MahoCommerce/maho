@@ -398,6 +398,7 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
         ];
 
         $urlHelper = Mage::helper('core/url');
+        $webBasePath = parse_url(Mage::app()->getStore($this->getStoreId())->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB, false), PHP_URL_PATH);
         foreach ($items as $item) {
             // Write URL to sitemap
             $imageUrl = null;
@@ -419,8 +420,11 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
                 $imageTitle = $item->getName();
             }
 
-            // The base URL keeps its trailing slash, as Mage_Core_Model_Controller_Front_Observer::checkCanonicalUri() does
-            $url = $item->getUrl() === '' ? $baseUrl : $urlHelper->addOrRemoveTrailingSlash($baseUrl . $item->getUrl(), $storeId);
+            $url = $urlHelper->addOrRemoveTrailingSlash($baseUrl . $item->getUrl(), $storeId);
+            // Mage_Core_Model_Controller_Front_Observer::checkCanonicalUri() keeps the trailing slash on the path of the web base URL
+            if (parse_url($url . '/', PHP_URL_PATH) === $webBasePath) {
+                $url .= '/';
+            }
             $xml = $this->getSitemapRow($url, $lastmod, $changefreq, $priority, $imageUrl, $imageTitle);
             $file->write($xml);
         }
