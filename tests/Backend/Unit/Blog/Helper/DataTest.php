@@ -39,6 +39,22 @@ describe('Blog Helper Data', function () {
         expect($url)->toContain($expectedPrefix);
     });
 
+    test('getCategoryUrl follows the trailing slash behavior of the store', function (string $mode, string $expectedEnd) {
+        $store = Mage::app()->getStore();
+        $previousMode = $store->getConfig('web/url/trailing_slash_behavior');
+        $store->setConfig('web/url/trailing_slash_behavior', $mode);
+        try {
+            $url = $this->helper->getCategoryUrl(Mage::getModel('blog/category')->setUrlKey('news'));
+        } finally {
+            $store->setConfig('web/url/trailing_slash_behavior', $previousMode);
+        }
+
+        expect($url)->toEndWith($expectedEnd);
+    })->with([
+        'add' => [Mage_Adminhtml_Model_System_Config_Source_Catalog_Trailingslash::ADD_TRAILING_SLASH, '/news/'],
+        'remove' => [Mage_Adminhtml_Model_System_Config_Source_Catalog_Trailingslash::REMOVE_TRAILING_SLASH, '/news'],
+    ]);
+
     test('shouldShowInNavigation works with different scenarios', function () {
         $currentStore = Mage::app()->getStore();
 

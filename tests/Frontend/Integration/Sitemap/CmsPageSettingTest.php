@@ -43,7 +43,7 @@ function cmsPageSettingSitemapUrls(int $storeId): array
         }
 
         #[\Override]
-        protected function writeSingleSitemapFile(string $type, array $items, string $baseUrl, string $lastmod, string $changefreq, float $priority, int $pageNumber, int $totalItems, int $maxUrlsPerFile): void
+        public function writeSingleSitemapFile(string $type, array $items, string $baseUrl, string $lastmod, string $changefreq, float $priority, int $pageNumber, int $totalItems, int $maxUrlsPerFile): void
         {
             foreach ($items as $item) {
                 $this->urls[] = (string) $item->getUrl();

@@ -262,7 +262,7 @@ class Mage_Core_Helper_Url extends Mage_Core_Helper_Abstract
     /**
      * Add or remove trailing slash from URL based on store config
      */
-    public function addOrRemoveTrailingSlash(string $url): string
+    public function addOrRemoveTrailingSlash(string $url, int|Mage_Core_Model_Store|null $store = null): string
     {
         if (!Mage::isInstalled()) {
             return $url;
@@ -272,7 +272,7 @@ class Mage_Core_Helper_Url extends Mage_Core_Helper_Abstract
             return $url;
         }
 
-        $mode = Mage::getStoreConfig('web/url/trailing_slash_behavior');
+        $mode = Mage::getStoreConfig('web/url/trailing_slash_behavior', $store);
         if ($mode === Mage_Adminhtml_Model_System_Config_Source_Catalog_Trailingslash::REMOVE_TRAILING_SLASH) {
             return $this->removeTrailingSlash($url);
         }
