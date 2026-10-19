@@ -992,14 +992,11 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
      */
     public function getProductsByCategory(\Maho\DataObject $category, &$lastEntityId)
     {
-        $productIds = array_filter(
-            $this->getProductIdsByCategory($category),
-            fn($productId): bool => (int) $productId > (int) $lastEntityId,
-        );
+        $productIds = $this->getProductIdsByCategory($category);
         if (!$productIds) {
             return [];
         }
-        return $this->_getProducts(array_values($productIds), $category->getStoreId(), $lastEntityId, $lastEntityId);
+        return $this->_getProducts($productIds, $category->getStoreId(), $lastEntityId, $lastEntityId);
     }
 
     /**

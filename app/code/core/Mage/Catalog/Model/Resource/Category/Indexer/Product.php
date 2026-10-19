@@ -72,8 +72,7 @@ class Mage_Catalog_Model_Resource_Category_Indexer_Product extends Mage_Index_Mo
      */
     public function catalogProductSave(Mage_Index_Model_Event $event)
     {
-        $productId = $event->getEntityPk();
-        $data      = $event->getNewData();
+        $data = $event->getNewData();
 
         /**
          * Check if category ids were updated
@@ -82,40 +81,7 @@ class Mage_Catalog_Model_Resource_Category_Indexer_Product extends Mage_Index_Mo
             return $this;
         }
 
-        /**
-         * Select relations to categories
-         */
-        $select = $this->_getWriteAdapter()->select()
-            ->from(['cp' => $this->_categoryProductTable], 'category_id')
-            ->joinInner(['ce' => $this->_categoryTable], 'ce.entity_id=cp.category_id', 'path')
-            ->where('cp.product_id=:product_id');
-
-        /**
-         * Get information about product categories
-         */
-        $categories = $this->_getWriteAdapter()->fetchPairs($select, ['product_id' => $productId]);
-        $categoryIds = [];
-        $allCategoryIds = [];
-
-        foreach ($categories as $id => $path) {
-            $categoryIds[]  = $id;
-            $allCategoryIds = array_merge($allCategoryIds, explode('/', $path));
-        }
-        $allCategoryIds = array_unique($allCategoryIds);
-        $allCategoryIds = array_diff($allCategoryIds, $categoryIds);
-
-        /**
-         * Delete previous index data
-         */
-        $this->_getWriteAdapter()->delete(
-            $this->getMainTable(),
-            ['product_id = ?' => $productId],
-        );
-
-        $this->_refreshAnchorRelations($allCategoryIds, $productId);
-        $this->_refreshDirectRelations($categoryIds, $productId);
-        $this->_refreshRootRelations($productId);
-
+        $this->reindexProductIds([(int) $event->getEntityPk()]);
         return $this;
     }
 

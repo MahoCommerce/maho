@@ -89,11 +89,16 @@ class Mage_Bundle_Model_Resource_Indexer_Stock extends Mage_CatalogInventory_Mod
         $select->where('bo.required = ?', 1);
         $selectNonRequired->where('bo.required = ?', 0)
             ->having($status . ' = 1');
-        $query = $select->insertFromSelect($this->_getBundleOptionTable());
-        $adapter->query($query);
-
-        $query = $selectNonRequired->insertFromSelect($this->_getBundleOptionTable());
-        $adapter->query($query);
+        foreach ([$select, $selectNonRequired] as $optionSelect) {
+            if (!$usePrimaryTable) {
+                $adapter->query($optionSelect->insertFromSelect($this->_getBundleOptionTable()));
+                continue;
+            }
+            // Not INSERT ... SELECT: on MySQL it locks the rows that it reads, and two checkouts can deadlock
+            foreach (array_chunk($adapter->fetchAll($optionSelect, [], PDO::FETCH_NUM), 1000) as $rows) {
+                $adapter->insertArray($this->_getBundleOptionTable(), ['entity_id', 'website_id', 'stock_id', 'option_id', 'stock_status'], $rows);
+            }
+        }
 
         return $this;
     }
@@ -204,10 +209,9 @@ class Mage_Bundle_Model_Resource_Indexer_Stock extends Mage_CatalogInventory_Mod
     /**
      * Clean temporary bundle options stock data of $entityIds, or of all products when it is null
      *
-     * @param int|array|null $entityIds
      * @return $this
      */
-    protected function _cleanBundleOptionStockData($entityIds = null)
+    protected function _cleanBundleOptionStockData(int|array|null $entityIds = null)
     {
         $adapter = $this->_getWriteAdapter();
         $adapter->delete(
