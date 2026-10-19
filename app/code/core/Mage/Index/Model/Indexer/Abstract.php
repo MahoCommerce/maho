@@ -231,7 +231,10 @@ abstract class Mage_Index_Model_Indexer_Abstract extends Mage_Core_Model_Abstrac
      *
      * @param list<int> $entityIds
      */
-    public function processBatch(array $entityIds): void {}
+    public function processBatch(array $entityIds): void
+    {
+        $this->reindexEntity($entityIds);
+    }
 
     public function reindexEntity(int|array $entityIds): self
     {

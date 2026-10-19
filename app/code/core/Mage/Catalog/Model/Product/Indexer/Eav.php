@@ -340,10 +340,4 @@ class Mage_Catalog_Model_Product_Indexer_Eav extends Mage_Index_Model_Indexer_Ab
             default => null,
         };
     }
-
-    #[\Override]
-    public function processBatch(array $entityIds): void
-    {
-        $this->_getResource()->reindexEntities($entityIds);
-    }
 }

@@ -169,7 +169,6 @@ class Mage_Catalog_Model_Resource_Category_Indexer_Product extends Mage_Index_Mo
         }
 
         $allCategoryIds = array_unique($allCategoryIds);
-        $allCategoryIds = array_diff($allCategoryIds, $categoryIds);
 
         /**
          * Delete previous index data

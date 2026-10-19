@@ -390,10 +390,4 @@ class Mage_CatalogInventory_Model_Indexer_Stock extends Mage_Index_Model_Indexer
             default => null,
         };
     }
-
-    #[\Override]
-    public function processBatch(array $entityIds): void
-    {
-        $this->_getResource()->reindexProducts($entityIds);
-    }
 }

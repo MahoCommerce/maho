@@ -527,50 +527,12 @@ class Mage_Catalog_Model_Url
      */
     public function refreshProductRewrite($productId, $storeId = null)
     {
-        if (is_null($storeId)) {
-            foreach ($this->getStores() as $store) {
-                $this->refreshProductRewrite($productId, $store->getId());
-            }
-            return $this;
-        }
-
-        $product = $this->getResource()->getProduct($productId, $storeId);
-        if ($product) {
-            $store = $this->getStores($storeId);
-            $storeRootCategoryId = $store->getRootCategoryId();
-
-            // List of categories the product is assigned to, filtered by being within the store's categories root
-            $categories = $this->getResource()->getCategories($product->getCategoryIds(), $storeId) ?: [];
-            $this->_rewrites = $this->getResource()->prepareRewrites($storeId, '', $productId);
-
-            // Add rewrites for all needed categories
-            // If product is assigned to any of store's categories -
-            // we also should use store root category to create root product url rewrite
-            $categories[$storeRootCategoryId] ??= $this->getResource()->getCategory($storeRootCategoryId, $storeId);
-
-            // Create product url rewrites
-            foreach ($categories as $category) {
-                $this->_refreshProductRewrite($product, $category);
-            }
-
-            // Remove all other product rewrites created earlier for this store - they're invalid now
-            $excludeCategoryIds = array_keys($categories);
-            $this->getResource()->clearProductRewrites($productId, $storeId, $excludeCategoryIds);
-            $this->_clearCategoryProductRewrites((int) $storeId, [(int) $productId]);
-
-            unset($categories);
-            unset($product);
-        } else {
-            // Product doesn't belong to this store - clear all its url rewrites including root one
-            $this->getResource()->clearProductRewrites($productId, $storeId, []);
-        }
-
+        $this->refreshProductsRewrites([(int) $productId], $storeId === null ? null : (int) $storeId);
         return $this;
     }
 
     /**
      * Refresh the rewrites of the products in one store, or in each store when $storeId is null.
-     * Give the same rows as refreshProductRewrite() for each ID, with fewer queries.
      *
      * @param int[] $productIds
      */
@@ -591,7 +553,7 @@ class Mage_Catalog_Model_Url
         $store = $this->getStores($storeId);
         if (!$store instanceof Mage_Core_Model_Store) {
             foreach ($productIds as $productId) {
-                $this->refreshProductRewrite($productId, $storeId);
+                $this->getResource()->clearProductRewrites($productId, $storeId, []);
             }
             return $this;
         }
@@ -634,23 +596,6 @@ class Mage_Catalog_Model_Url
             $this->_rewrites = [];
         }
 
-        return $this;
-    }
-
-    /**
-     * Delete the rewrites without category of the products that are no longer in the website of each store.
-     *
-     * @param int[] $productIds
-     */
-    public function clearProductsInvalidRewrites(array $productIds): static
-    {
-        if ($productIds === []) {
-            return $this;
-        }
-
-        foreach ($this->getStores() as $store) {
-            $this->getResource()->clearStoreProductsInvalidRewrites($store->getId(), $productIds);
-        }
         return $this;
     }
 

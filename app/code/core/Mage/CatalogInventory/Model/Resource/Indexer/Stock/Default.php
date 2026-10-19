@@ -212,13 +212,23 @@ class Mage_CatalogInventory_Model_Resource_Indexer_Stock_Default extends Mage_Ca
      */
     protected function _updateIndex($entityIds)
     {
-        $adapter = $this->_getWriteAdapter();
-        $adapter->query($adapter->insertFromSelect(
-            $this->_getStockStatusSelect($entityIds, true),
-            $this->getMainTable(),
-            ['product_id', 'website_id', 'stock_id', 'qty', 'stock_status'],
-            Maho\Db\Adapter\AdapterInterface::INSERT_ON_DUPLICATE,
-        ));
+        // Not INSERT ... SELECT: on MySQL it locks the rows that it reads, and two checkouts can deadlock
+        $query = $this->_getWriteAdapter()->query($this->_getStockStatusSelect($entityIds, true));
+        $data  = [];
+        while ($row = $query->fetch()) {
+            $data[] = [
+                'product_id'   => (int) $row['entity_id'],
+                'website_id'   => (int) $row['website_id'],
+                'stock_id'     => (int) $row['stock_id'],
+                'qty'          => (float) $row['qty'],
+                'stock_status' => (int) $row['status'],
+            ];
+            if (count($data) === 1000) {
+                $this->_updateIndexTable($data);
+                $data = [];
+            }
+        }
+        $this->_updateIndexTable($data);
 
         return $this;
     }

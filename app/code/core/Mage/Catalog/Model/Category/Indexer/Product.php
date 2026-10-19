@@ -325,10 +325,4 @@ class Mage_Catalog_Model_Category_Indexer_Product extends Mage_Index_Model_Index
             default => null,
         };
     }
-
-    #[\Override]
-    public function processBatch(array $entityIds): void
-    {
-        $this->_getResource()->reindexProductIds($entityIds);
-    }
 }

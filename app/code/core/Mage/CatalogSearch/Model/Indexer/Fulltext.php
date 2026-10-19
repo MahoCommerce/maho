@@ -453,13 +453,4 @@ class Mage_CatalogSearch_Model_Indexer_Fulltext extends Mage_Index_Model_Indexer
         }
         return isset($data['catalogsearch_status']) ? null : [];
     }
-
-    #[\Override]
-    public function processBatch(array $entityIds): void
-    {
-        $parentIds = $this->_getResource()->getRelationsByChild($entityIds);
-        $this->_getIndexer()
-            ->rebuildIndex(null, array_values(array_unique(array_merge($entityIds, $parentIds ?: []))))
-            ->resetSearchResults();
-    }
 }

@@ -379,10 +379,4 @@ class Mage_Catalog_Model_Product_Indexer_Price extends Mage_Index_Model_Indexer_
             default => null,
         };
     }
-
-    #[\Override]
-    public function processBatch(array $entityIds): void
-    {
-        $this->_getResource()->reindexProductIds($entityIds);
-    }
 }

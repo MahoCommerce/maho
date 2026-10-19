@@ -269,7 +269,6 @@ class Mage_Catalog_Model_Indexer_Url extends Mage_Index_Model_Indexer_Abstract
 
         /** @var Mage_Catalog_Model_Url $urlModel */
         $urlModel = Mage::getSingleton('catalog/url');
-        $urlModel->clearProductsInvalidRewrites($productIds);
         $urlModel->refreshProductsRewrites($productIds);
 
         return $this;
@@ -293,11 +292,5 @@ class Mage_Catalog_Model_Indexer_Url extends Mage_Index_Model_Indexer_Abstract
             return null;
         }
         return (array) ($data['rewrite_product_ids'] ?? []);
-    }
-
-    #[\Override]
-    public function processBatch(array $entityIds): void
-    {
-        $this->reindexEntity($entityIds);
     }
 }
