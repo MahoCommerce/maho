@@ -27,17 +27,17 @@ function guestFlagCustomer(): Mage_Customer_Model_Customer
 }
 
 it('turns a guest cart into a customer cart when a customer is assigned', function (): void {
-    $cartService = Mage::getService('checkout/cart');
+    $cartService = new \Mage\Checkout\Api\CartService();
     $customer = guestFlagCustomer();
-    $quote = $cartService->create(null, 1);
+    $quote = $cartService->createEmptyCart(null, 1)['quote'];
 
     try {
-        expect($quote->getCustomerIsGuest())->toBeTrue();
+        expect((bool) $quote->getCustomerIsGuest())->toBeTrue();
 
         $cartService->assignCustomer($quote, $customer);
 
-        expect($quote->getCustomerIsGuest())->toBeFalse();
-        expect(Mage::getModel('sales/quote')->loadByIdWithoutStore((int) $quote->getId())->getCustomerIsGuest())->toBeFalse();
+        expect((bool) $quote->getCustomerIsGuest())->toBeFalse();
+        expect((bool) Mage::getModel('sales/quote')->loadByIdWithoutStore((int) $quote->getId())->getCustomerIsGuest())->toBeFalse();
     } finally {
         $quote->delete();
         $customer->delete();
@@ -45,17 +45,17 @@ it('turns a guest cart into a customer cart when a customer is assigned', functi
 });
 
 it('clears the guest flag of a customer cart that a guest cart is merged into', function (): void {
-    $cartService = Mage::getService('checkout/cart');
+    $cartService = new \Mage\Checkout\Api\CartService();
     $customer = guestFlagCustomer();
-    $customerCart = $cartService->create((int) $customer->getId(), 1);
-    $customerCart->setCustomerIsGuest(true)->save();
-    $guestCart = $cartService->create(null, 1);
+    $customerCart = $cartService->createEmptyCart((int) $customer->getId(), 1)['quote'];
+    $customerCart->setCustomerIsGuest(1)->save();
+    $guestCart = $cartService->createEmptyCart(null, 1)['quote'];
 
     try {
-        $merged = $cartService->merge((string) $guestCart->getData('masked_quote_id'), (int) $customer->getId());
+        $merged = $cartService->mergeCarts((string) $guestCart->getData('masked_quote_id'), (int) $customer->getId());
 
         expect((int) $merged->getId())->toBe((int) $customerCart->getId());
-        expect($merged->getCustomerIsGuest())->toBeFalse();
+        expect((bool) $merged->getCustomerIsGuest())->toBeFalse();
     } finally {
         $guestCart->delete();
         $customerCart->delete();
