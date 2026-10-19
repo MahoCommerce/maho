@@ -1,0 +1,92 @@
+name: Release build
+
+# Run this on a draft release, before it is published: an immutable release accepts no new assets.
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag of the draft release, for example 26.11.0'
+        required: true
+        type: string
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ inputs.tag }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Package, SBOM and provenance
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    env:
+      TAG: ${{ inputs.tag }}
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+
+    steps:
+      # The provenance names the commit that the workflow runs from, so the package must be built from that commit.
+      - name: Check the draft release
+        id: draft
+        run: |
+          if [[ ! "$TAG" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::'$TAG' is not a release version"
+            exit 1
+          fi
+          if [[ "$GITHUB_REF" != refs/heads/main && ! "$GITHUB_REF" =~ ^refs/heads/[0-9]{2}\.[0-9]+$ ]]; then
+            echo "::error::Run this workflow from main or from a maintenance branch, not from $GITHUB_REF"
+            exit 1
+          fi
+          read -r is_draft target < <(gh release view "$TAG" --json isDraft,targetCommitish --jq '"\(.isDraft) \(.targetCommitish)"')
+          if [[ "$is_draft" != true ]]; then
+            echo "::error::Release $TAG is not a draft"
+            exit 1
+          fi
+          if [[ "$target" != "$GITHUB_SHA" ]]; then
+            echo "::error::Release $TAG targets '$target', but this run is on $GITHUB_SHA"
+            exit 1
+          fi
+          echo "zip=$RUNNER_TEMP/maho-$TAG.zip" >> "$GITHUB_OUTPUT"
+          echo "sbom=$RUNNER_TEMP/maho-$TAG.cdx.json" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Build the package
+        env:
+          ZIP: ${{ steps.draft.outputs.zip }}
+        run: git archive --format=zip --prefix="maho-$TAG/" -o "$ZIP" "$GITHUB_SHA"
+
+      - name: Install Syft
+        id: syft
+        uses: anchore/sbom-action/download-syft@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
+
+      # The package leaves out composer.lock, so the SBOM comes from the commit, with the dependencies that the release was tested with.
+      - name: Generate the SBOM
+        env:
+          SYFT: ${{ steps.syft.outputs.cmd }}
+          SBOM: ${{ steps.draft.outputs.sbom }}
+        run: '"$SYFT" scan dir:. --source-name maho --source-version "$TAG" -o "cyclonedx-json=$SBOM" --quiet'
+
+      - name: Attest the build provenance
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: ${{ steps.draft.outputs.zip }}
+
+      - name: Attest the SBOM
+        uses: actions/attest-sbom@c604332985a26aa8cf1bdc465b92731239ec6b9e # v4.1.0
+        with:
+          subject-path: ${{ steps.draft.outputs.zip }}
+          sbom-path: ${{ steps.draft.outputs.sbom }}
+
+      - name: Upload to the draft release
+        env:
+          ZIP: ${{ steps.draft.outputs.zip }}
+          SBOM: ${{ steps.draft.outputs.sbom }}
+        run: gh release upload "$TAG" "$ZIP" "$SBOM" --clobber

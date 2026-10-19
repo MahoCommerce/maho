@@ -15,3 +15,29 @@ Please include the following information to help us better understand and resolv
 - Proof-of-concept or exploit code (if possible)
 - Impact assessment, including potential attack vectors
 - Any proposed mitigations or fixes (optional)
+
+## Verifying a Release
+
+Each release from 26.11.0 has two assets: `maho-<version>.zip` and its CycloneDX SBOM,
+`maho-<version>.cdx.json`. The `release-build.yml` workflow builds them on a GitHub-hosted runner
+and signs the build provenance (SLSA v1) and the SBOM with GitHub artifact attestations.
+
+Check the provenance of a downloaded package:
+
+```bash
+gh attestation verify maho-26.11.0.zip --repo MahoCommerce/maho \
+  --signer-workflow MahoCommerce/maho/.github/workflows/release-build.yml \
+  --source-ref refs/heads/main
+```
+
+For a patch release from a maintenance branch, use that branch in `--source-ref`, for example
+`refs/heads/26.11`. Check the SBOM attestation with `--predicate-type https://cyclonedx.org/bom`.
+
+Releases are immutable. Check that the release and its assets are the ones GitHub published:
+
+```bash
+gh release verify 26.11.0 --repo MahoCommerce/maho
+gh release verify-asset 26.11.0 maho-26.11.0.zip --repo MahoCommerce/maho
+```
+
+Composer installs the source archive that GitHub generates for the tag, not this package.
