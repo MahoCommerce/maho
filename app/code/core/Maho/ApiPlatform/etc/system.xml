@@ -169,8 +169,8 @@ SPDX-License-Identifier: AFL-3.0
                         </dynamic_registration_enabled>
                         <allowed_redirect_hosts translate="label comment">
                             <label>Allowed Redirect Hosts</label>
-                            <comment><![CDATA[Comma-separated host names, for example claude.ai, chatgpt.com. When this list is not empty, an application can connect only if it sends the approval to one of these hosts or to a loopback address, and the approval screen shows no warning for these hosts. Leave it empty to allow any https host.]]></comment>
-                            <frontend_type>text</frontend_type>
+                            <comment><![CDATA[Host names, one per line, for example claude.ai. When this list is not empty, an application can connect only if it sends the approval to one of these hosts or to a loopback address, and the approval screen shows no warning for these hosts. Leave it empty to allow any https host.]]></comment>
+                            <frontend_type>textarea</frontend_type>
                             <sort_order>42</sort_order>
                             <show_in_default>1</show_in_default>
                             <depends><authorization_enabled>1</authorization_enabled></depends>

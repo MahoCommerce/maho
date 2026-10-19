@@ -45,7 +45,6 @@ Approve,Approve
 "Client ID: %s","Client ID: %s"
 "Client Secret","Client Secret"
 "Client Secret: %s","Client Secret: %s"
-"Comma-separated host names, for example claude.ai, chatgpt.com. When this list is not empty, an application can connect only if it sends the approval to one of these hosts or to a loopback address, and the approval screen shows no warning for these hosts. Leave it empty to allow any https host.","Comma-separated host names, for example claude.ai, chatgpt.com. When this list is not empty, an application can connect only if it sends the approval to one of these hosts or to a loopback address, and the approval screen shows no warning for these hosts. Leave it empty to allow any https host."
 "Comma-separated list of allowed origins. Defaults to store base URL if empty.","Comma-separated list of allowed origins. Defaults to store base URL if empty."
 "Connect Applications","Connect Applications"
 "Connected","Connected"
@@ -76,6 +75,7 @@ Email,Email
 "GraphQL, admin","GraphQL, admin"
 "GraphQL, public","GraphQL, public"
 "Hidden (stored hashed). Regenerate if needed.","Hidden (stored hashed). Regenerate if needed."
+"Host names, one per line, for example claude.ai. When this list is not empty, an application can connect only if it sends the approval to one of these hosts or to a loopback address, and the approval screen shows no warning for these hosts. Leave it empty to allow any https host.","Host names, one per line, for example claude.ai. When this list is not empty, an application can connect only if it sends the approval to one of these hosts or to a loopback address, and the approval screen shows no warning for these hosts. Leave it empty to allow any https host."
 "How long API responses are cached. Default: 300 (5 minutes). Set to 0 to disable caching.","How long API responses are cached. Default: 300 (5 minutes). Set to 0 to disable caching."
 ID,ID
 "If you approve, %s receives access to your store. Approve only if you started this connection yourself.","If you approve, %s receives access to your store. Approve only if you started this connection yourself."

@@ -46,8 +46,8 @@ describe('The allowed redirect hosts', function (): void {
         expect(Maho_ApiPlatform_Model_Oauth_Client::isAllowedRedirectUri($redirectUri))->toBe($expected);
     })->with([
         'any https host with an empty list' => ['', 'https://anything.example/cb', true],
-        'a host on the list' => ['chatgpt.com, claude.ai', 'https://claude.ai/api/mcp/auth_callback', true],
-        'a host on the list in other letter case' => [' CLAUDE.ai ', 'https://Claude.AI/api/mcp/auth_callback', true],
+        'a host on the list' => ["chatgpt.com\nclaude.ai", 'https://claude.ai/api/mcp/auth_callback', true],
+        'a host on a line with spaces and a Windows line end' => ["chatgpt.com\r\n CLAUDE.ai \r\n", 'https://Claude.AI/api/mcp/auth_callback', true],
         'a host that is not on the list' => ['claude.ai', 'https://attacker.example/cb', false],
         'a subdomain of a host on the list' => ['claude.ai', 'https://attacker.claude.ai/cb', false],
         'a loopback address that is not on the list' => ['claude.ai', 'http://127.0.0.1:41234/callback', true],

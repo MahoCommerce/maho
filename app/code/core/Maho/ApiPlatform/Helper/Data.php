@@ -217,7 +217,7 @@ class Maho_ApiPlatform_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getAllowedRedirectHosts(): array
     {
-        $hosts = explode(',', strtolower((string) Mage::getStoreConfig(self::XML_PATH_ALLOWED_REDIRECT_HOSTS)));
+        $hosts = explode("\n", strtolower((string) Mage::getStoreConfig(self::XML_PATH_ALLOWED_REDIRECT_HOSTS)));
         return array_values(array_filter(array_map(trim(...), $hosts)));
     }
 
