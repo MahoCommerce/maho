@@ -140,7 +140,16 @@ class Maho_ApiPlatform_Model_Oauth_Client extends Mage_Core_Model_Abstract
             return true;
         }
 
-        return $scheme === 'http' && in_array(strtolower($parts['host']), self::LOOPBACK_HOSTS, true);
+        return $scheme === 'http' && self::isLoopbackRedirectUri($uri);
+    }
+
+    /**
+     * A loopback redirect sends the code to the computer of the admin, so a link
+     * from another person cannot get the code.
+     */
+    public static function isLoopbackRedirectUri(string $uri): bool
+    {
+        return in_array(strtolower((string) parse_url($uri, PHP_URL_HOST)), self::LOOPBACK_HOSTS, true);
     }
 
     #[\Override]

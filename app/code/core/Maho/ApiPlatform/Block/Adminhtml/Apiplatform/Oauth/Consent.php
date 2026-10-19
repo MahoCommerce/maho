@@ -46,9 +46,15 @@ class Maho_ApiPlatform_Block_Adminhtml_Apiplatform_Oauth_Consent extends Mage_Ad
         return (string) ($this->getData('authorization_request')['resource'] ?? '');
     }
 
+    public function getRedirectHost(): string
+    {
+        return (string) parse_url($this->getRedirectUri(), PHP_URL_HOST);
+    }
+
     public function isUnverified(): bool
     {
-        return $this->getClient()?->isTrusted() !== true;
+        return $this->getClient()?->isTrusted() !== true
+            && !Maho_ApiPlatform_Model_Oauth_Client::isLoopbackRedirectUri($this->getRedirectUri());
     }
 
     /**

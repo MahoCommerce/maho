@@ -40,7 +40,7 @@ $errorMessage = $this->getErrorMessage();
                     <?php if ($this->isUnverified()): ?>
                         <div id="messages">
                             <ul>
-                                <li class="warning-msg"><?= $this->escapeHtml($this->__('This application registered itself and has not been verified. Approve it only if you started this connection yourself.')) ?></li>
+                                <li class="warning-msg"><?= $this->__('%s gets the approval. Approve only if you started this connection yourself.', '<strong>' . $this->escapeHtml($this->getRedirectHost()) . '</strong>') ?></li>
                             </ul>
                         </div>
                     <?php endif ?>

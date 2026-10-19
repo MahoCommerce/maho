@@ -319,8 +319,8 @@ describe('OAuth client registration', function (): void {
         $model = Mage::getModel('apiplatform/oauth_client');
         $model->loadByClientId($client['client_id']);
 
-        // The consent screen warns about this, so nobody approves a client they
-        // did not start a connection with.
+        // The consent screen warns about this when the code leaves the computer
+        // of the admin, so nobody approves a client they did not start a connection with.
         expect($model->isTrusted())->toBeFalse();
     });
 

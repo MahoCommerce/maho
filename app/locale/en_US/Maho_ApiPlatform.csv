@@ -151,7 +151,7 @@ System,System
 "These permissions control what API users (service accounts) can do. Grant only the operations each integration needs.","These permissions control what API users (service accounts) can do. Grant only the operations each integration needs."
 "These resources are publicly readable without authentication. Any visitor or app can access this data via GET requests.","These resources are publicly readable without authentication. Any visitor or app can access this data via GET requests."
 "This API user no longer exists.","This API user no longer exists."
-"This application registered itself and has not been verified. Approve it only if you started this connection yourself.","This application registered itself and has not been verified. Approve it only if you started this connection yourself."
+"%s gets the approval. Approve only if you started this connection yourself.","%s gets the approval. Approve only if you started this connection yourself."
 "This authorization request expired or is no longer valid. Start again from the application.","This authorization request expired or is no longer valid. Start again from the application."
 "This connection does not exist.","This connection does not exist."
 "This role no longer exists.","This role no longer exists."
