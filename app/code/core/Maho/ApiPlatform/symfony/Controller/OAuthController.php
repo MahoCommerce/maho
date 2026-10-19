@@ -20,6 +20,7 @@ namespace Maho\ApiPlatform\Controller;
 use Mage;
 use Maho_ApiPlatform_Model_Oauth_Exception as OauthException;
 use Maho_ApiPlatform_Model_Oauth_Server as OauthServer;
+use Maho\ApiPlatform\Security\AdminSessionAuthenticator;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -36,7 +37,7 @@ class OAuthController
     private const TOKEN_MAX_ATTEMPTS = 60;
     private const TOKEN_WINDOW = 60;
 
-    /** Each call parks a row, so an unauthenticated caller needs a ceiling here too. */
+    /** Each call from a signed-in admin parks a row, and any caller can reach the sign-in page. */
     private const AUTHORIZE_MAX_ATTEMPTS = 30;
     private const AUTHORIZE_WINDOW = 300;
 
@@ -68,7 +69,7 @@ class OAuthController
             return $this->authorizationError($e, $this->stringParam($params, 'redirect_uri'), $this->stringParam($params, 'state'));
         }
 
-        if (!$this->hasAdminSession($request)) {
+        if (!AdminSessionAuthenticator::startAdminSession($request)) {
             return $this->signInPage($request, $validated);
         }
 
@@ -76,9 +77,8 @@ class OAuthController
         // URL carries no parameters. See Server::createPendingRequest for why.
         $secret = $this->server()->createPendingRequest($validated);
 
-        // _nosecret: the caller has no admin session, so any key minted here is
-        // meaningless. The action is public for exactly this reason, and the
-        // approval POST is protected by the admin form key instead.
+        // _nosecret: the consent action is public, so it needs no secret key. The
+        // admin form key protects the approval POST.
         $response = new RedirectResponse(
             Mage::helper('adminhtml')->getUrl('adminhtml/apiplatform_oauth/authorize', ['_nosecret' => true]),
         );
@@ -184,24 +184,6 @@ class OAuthController
         $separator = str_contains($redirectUri, '?') ? '&' : '?';
 
         return $redirectUri . $separator . http_build_query($query);
-    }
-
-    /**
-     * The admin cookie names a session that only the admin front controller starts,
-     * so start it here as AdminBridgeListener does.
-     */
-    private function hasAdminSession(Request $request): bool
-    {
-        $sessionName = \Mage_Adminhtml_Controller_Action::SESSION_NAMESPACE;
-        if (!$request->cookies->has($sessionName)) {
-            return false;
-        }
-
-        // The start sends the cookie again. Without the admin store, it loses the Secure flag on an http storefront.
-        Mage::getSingleton('core/cookie')->setStore(\Mage_Core_Model_Store::ADMIN_CODE);
-        Mage::getSingleton('core/session', ['name' => $sessionName])->start();
-
-        return (bool) Mage::getSingleton('admin/session')->isLoggedIn();
     }
 
     /**

@@ -121,6 +121,24 @@ class AdminSessionAuthenticator extends AbstractAuthenticator
     }
 
     /**
+     * Start the admin session that the request cookie names, and tell if an admin is logged in.
+     * Only the admin front controller starts this session, so code under /api/ calls this first.
+     */
+    public static function startAdminSession(Request $request): bool
+    {
+        $sessionName = \Mage_Adminhtml_Controller_Action::SESSION_NAMESPACE;
+        if (!$request->cookies->has($sessionName)) {
+            return false;
+        }
+
+        // The start sends the cookie again. Without the admin store, it loses the Secure flag on an http storefront.
+        \Mage::getSingleton('core/cookie')->setStore(\Mage_Core_Model_Store::ADMIN_CODE);
+        \Mage::getSingleton('core/session', ['name' => $sessionName])->start();
+
+        return (bool) \Mage::getSingleton('admin/session')->isLoggedIn();
+    }
+
+    /**
      * Generate HMAC bridge token for admin context verification.
      *
      * Ensures $_SERVER vars were set by our authenticator, not injected

@@ -10,7 +10,6 @@ declare(strict_types=1);
 
 namespace Maho\ApiPlatform\EventListener;
 
-use Mage_Adminhtml_Controller_Action;
 use Mage_Core_Model_App_Area;
 use Mage_Core_Model_Store_Exception;
 use Maho\ApiPlatform\Security\AdminSessionAuthenticator;
@@ -46,27 +45,19 @@ class AdminBridgeListener
             Mage_Core_Model_App_Area::PART_EVENTS,
         );
 
-        // The admin cookie names a session that only the admin front controller starts.
-        // Start it here, or admin/session reads an empty session and nobody is logged in.
-        $sessionName = Mage_Adminhtml_Controller_Action::SESSION_NAMESPACE;
-        if ($request->cookies->has($sessionName)) {
-            \Mage::getSingleton('core/session', ['name' => $sessionName])->start();
+        if (!AdminSessionAuthenticator::startAdminSession($request)) {
+            return;
+        }
+
+        $adminUser = \Mage::getSingleton('admin/session')->getUser();
+        if ($adminUser === null) {
+            return;
         }
 
         try {
             $input = (array) \Mage::helper('core')->jsonDecode($request->getContent() ?: '[]');
         } catch (\JsonException) {
             $input = [];
-        }
-
-        $adminSession = \Mage::getSingleton('admin/session');
-        if (!$adminSession->isLoggedIn()) {
-            return;
-        }
-
-        $adminUser = $adminSession->getUser();
-        if ($adminUser === null) {
-            return;
         }
 
         $_SERVER['MAHO_ADMIN_USER_ID'] = $adminUser->getId();
