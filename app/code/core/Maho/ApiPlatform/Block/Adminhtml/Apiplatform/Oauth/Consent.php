@@ -48,10 +48,7 @@ class Maho_ApiPlatform_Block_Adminhtml_Apiplatform_Oauth_Consent extends Mage_Ad
 
     public function getRedirectHost(): string
     {
-        $uri = $this->getRedirectUri();
-
-        // A client that registered before the current rules can hold a URI whose host parse_url() reads wrong.
-        return Maho_ApiPlatform_Model_Oauth_Client::isAllowedRedirectUri($uri) ? (string) parse_url($uri, PHP_URL_HOST) : $uri;
+        return (string) parse_url($this->getRedirectUri(), PHP_URL_HOST);
     }
 
     public function isUnverified(): bool

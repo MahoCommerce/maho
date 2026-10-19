@@ -39,4 +39,6 @@ it('warns about an unverified client only when the code leaves the computer of t
     'a localhost redirect' => ['http://LocalHost:41234/callback', false],
     'an https redirect' => ['https://claude.ai/api/mcp/auth_callback', true],
     'an https redirect to a host that starts with localhost' => ['https://localhost.attacker.example/callback', true],
+    'a loopback host behind a user part' => ['http://evil.example@localhost/cb', true],
+    'a loopback host behind a user part and a backslash' => ['http://evil.example\@localhost/cb', true],
 ]);

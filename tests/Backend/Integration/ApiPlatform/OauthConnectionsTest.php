@@ -260,6 +260,24 @@ describe('The consent page', function (): void {
             ->and($html)->toContain('&lt;script&gt;alert(&quot;client&quot;)&lt;/script&gt;');
     });
 
+    it('names the escaped redirect host in the warning', function (string $redirectUri, string $expected): void {
+        $client = Mage::getModel('apiplatform/oauth_client')->setData('client_name', 'Web App');
+        $html = connectionsRenderConsent(['authorization_request' => [
+            'client' => $client,
+            'redirect_uri' => $redirectUri,
+            'scope' => 'mcp',
+            'resource' => 'https://maho.example',
+            'code_challenge' => 'x',
+            'state' => '',
+        ]]);
+
+        expect($html)->toContain($expected)
+            ->and($html)->not->toContain('a<b>c.example');
+    })->with([
+        'a plain host' => ['https://claude.ai/api/mcp/auth_callback', 'If you approve, <strong>claude.ai</strong> receives access to your store.'],
+        'a host with markup' => ['https://a<b>c.example/cb', 'If you approve, <strong>a&lt;b&gt;c.example</strong> receives access to your store.'],
+    ]);
+
     it('shows an error in place of the approval form', function (): void {
         $html = connectionsRenderConsent(['error_message' => 'This authorization request expired <now>.']);
 

@@ -1,5 +1,4 @@
 "%d application(s) still have approved connections. Revoke their access first.","%d application(s) still have approved connections. Revoke their access first."
-"%s gets the approval. Approve only if you started this connection yourself.","%s gets the approval. Approve only if you started this connection yourself."
 "%s wants to connect to your store.","%s wants to connect to your store."
 "-- No Role --","-- No Role --"
 "Access Token Lifetime","Access Token Lifetime"
@@ -77,6 +76,7 @@ Email,Email
 "Hidden (stored hashed). Regenerate if needed.","Hidden (stored hashed). Regenerate if needed."
 "How long API responses are cached. Default: 300 (5 minutes). Set to 0 to disable caching.","How long API responses are cached. Default: 300 (5 minutes). Set to 0 to disable caching."
 ID,ID
+"If you approve, %s receives access to your store. Approve only if you started this connection yourself.","If you approve, %s receives access to your store. Approve only if you started this connection yourself."
 "If you approve, this application can:","If you approve, this application can:"
 Inactive,Inactive
 "In seconds (default: 60). A code is used once, seconds after it is issued.","In seconds (default: 60). A code is used once, seconds after it is issued."
@@ -159,7 +159,6 @@ System,System
 "User Info","User Info"
 Username,Username
 "User Role","User Role"
-Verified,Verified
 "You denied the connection.","You denied the connection."
 "Your account","Your account"
 "Your admin role may not approve API connections.","Your admin role may not approve API connections."

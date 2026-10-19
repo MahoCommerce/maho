@@ -62,6 +62,11 @@ class Maho_ApiPlatform_Model_Oauth_Server
             throw $this->fail(Maho_ApiPlatform_Model_Oauth_Exception::ERROR_INVALID_REQUEST, 'redirect_uri does not match a registered value', false);
         }
 
+        // A client that registered before the current rules can hold a redirect URI that they now refuse.
+        if (!Maho_ApiPlatform_Model_Oauth_Client::isAllowedRedirectUri($redirectUri)) {
+            throw $this->fail(Maho_ApiPlatform_Model_Oauth_Exception::ERROR_INVALID_REQUEST, 'redirect_uri is no longer allowed', false);
+        }
+
         // From here the redirect URI is trusted, so errors may travel back to it.
         if (!$client->hasGrantType(Maho_ApiPlatform_Model_Oauth_Client::GRANT_AUTHORIZATION_CODE)) {
             throw $this->fail(Maho_ApiPlatform_Model_Oauth_Exception::ERROR_UNAUTHORIZED_CLIENT, 'Client may not use the authorization code grant');
@@ -337,7 +342,7 @@ class Maho_ApiPlatform_Model_Oauth_Server
             if (!is_string($uri) || !Maho_ApiPlatform_Model_Oauth_Client::isAllowedRedirectUri($uri)) {
                 throw $this->fail(
                     Maho_ApiPlatform_Model_Oauth_Exception::ERROR_INVALID_REDIRECT_URI,
-                    'Every redirect URI must use https, or http on loopback, and carry no fragment',
+                    'Every redirect URI must use https, or http on loopback, and carry no fragment, no user part and no backslash',
                 );
             }
             $clean[] = $uri;

@@ -257,6 +257,35 @@ describe('OAuth authorization request validation', function (): void {
         ]))->toThrow(Maho_ApiPlatform_Model_Oauth_Exception::class);
     });
 
+    it('refuses a stored redirect URI that the current rules refuse, without redirecting to it', function (): void {
+        // A browser goes to evil.example, while parse_url() reads the host as localhost.
+        $redirectUri = 'https://evil.example\@localhost/cb';
+
+        /** @var Maho_ApiPlatform_Model_Oauth_Client $client */
+        $client = Mage::getModel('apiplatform/oauth_client');
+        $client->setData([
+            'client_id' => bin2hex(random_bytes(16)),
+            'client_name' => 'Registered before the rule',
+            'grant_types' => 'authorization_code,refresh_token',
+            'token_endpoint_auth_method' => 'none',
+        ]);
+        $client->setRedirectUris([$redirectUri]);
+        $client->save();
+
+        try {
+            oauthServer()->validateAuthorizationRequest([
+                'client_id' => $client->getData('client_id'),
+                'redirect_uri' => $redirectUri,
+                'response_type' => 'code',
+                'code_challenge' => oauthPkce()['challenge'],
+                'code_challenge_method' => 'S256',
+            ]);
+            $this->fail('A redirect URI that the current rules refuse must be refused.');
+        } catch (Maho_ApiPlatform_Model_Oauth_Exception $e) {
+            expect($e->isRedirectable())->toBeFalse();
+        }
+    });
+
     it('reports an unknown client without redirecting anywhere', function (): void {
         $pkce = oauthPkce();
 
@@ -293,6 +322,18 @@ describe('OAuth client registration', function (): void {
             'redirect_uris' => ['https://example.com/callback#token'],
         ]))->toThrow(Maho_ApiPlatform_Model_Oauth_Exception::class);
     });
+
+    it('refuses a redirect URI whose host a browser reads differently', function (string $redirectUri): void {
+        expect(fn() => oauthServer()->registerClient([
+            'client_name' => 'Hidden host',
+            'redirect_uris' => [$redirectUri],
+        ]))->toThrow(Maho_ApiPlatform_Model_Oauth_Exception::class);
+    })->with([
+        'a user part' => ['https://evil.example@localhost/cb'],
+        'an empty user part' => ['https://:secret@localhost/cb'],
+        'a backslash before a user part' => ['https://evil.example\@localhost/cb'],
+        'a backslash in the host' => ['https://evil.example\.localhost/cb'],
+    ]);
 
     it('accepts HTTPS and loopback redirect URIs', function (): void {
         $client = oauthServer()->registerClient([

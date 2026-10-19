@@ -45,14 +45,6 @@ class Maho_ApiPlatform_Block_Adminhtml_Apiplatform_Oauth_Grid extends Mage_Admin
             'width' => '260px',
         ]);
 
-        $this->addColumn('is_trusted', [
-            'header' => $this->__('Verified'),
-            'index' => 'is_trusted',
-            'type' => 'options',
-            'options' => [1 => $this->__('Yes'), 0 => $this->__('No')],
-            'width' => '80px',
-        ]);
-
         $this->addColumn('approved_by', [
             'header' => $this->__('Approved By'),
             'index' => 'approved_by',
