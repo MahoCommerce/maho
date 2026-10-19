@@ -65,7 +65,7 @@ class Maho_Blog_Helper_Data extends Mage_Core_Helper_Abstract
         $blogPrefix = $this->getBlogUrlPrefix($storeId);
         $catPrefix = $this->getCategoryUrlPrefix();
         $path = $blogPrefix . '/' . $catPrefix . '/' . $this->getCategoryUrlPath($category, $urlKeys) . '/';
-        return Mage::getBaseUrl() . $path;
+        return Mage::helper('core/url')->addOrRemoveTrailingSlash(Mage::getBaseUrl() . $path);
     }
 
     /**
