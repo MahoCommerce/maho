@@ -14,12 +14,22 @@ use Maho\Storage\MountRegistry;
 
 uses(Tests\MahoBackendTestCase::class);
 
-/** A sitemap that writes one urlset file from the rows that the test gives. */
+/** A sitemap that writes only the files of the sitemap_urlset_generating_before listeners and the index. */
 final class SitemapTrailingSlashTestSitemap extends Mage_Sitemap_Model_Sitemap
 {
-    public function writePages(array $items, string $baseUrl): void
+    #[\Override]
+    protected function generateCategoriesSitemap(int $storeId, string $baseUrl, string $date, int $maxUrlsPerFile): void {}
+
+    #[\Override]
+    protected function generateProductsSitemap(int $storeId, string $baseUrl, string $date, int $maxUrlsPerFile): void {}
+
+    #[\Override]
+    protected function generatePagesSitemap(int $storeId, string $baseUrl, string $date, int $maxUrlsPerFile): void {}
+
+    #[\Override]
+    public function save(): static
     {
-        $this->writeSingleSitemapFile('pages', $items, $baseUrl, '', '', 0.0, 1, count($items), 100);
+        return $this;
     }
 }
 
@@ -31,7 +41,7 @@ beforeEach(function (): void {
     $this->store = Mage::app()->getDefaultStoreView();
     $this->adminStore = Mage::app()->getStore(Mage_Core_Model_App::ADMIN_STORE_ID);
     $this->previousConfig = [];
-    foreach (['web/url/trailing_slash_behavior', 'web/url/use_store', 'web/unsecure/base_url', 'web/unsecure/base_link_url'] as $path) {
+    foreach (['web/url/trailing_slash_behavior', 'web/url/use_store', 'web/unsecure/base_url', 'web/unsecure/base_link_url', 'blog/general/enable_categories'] as $path) {
         $this->previousConfig[$path] = $this->store->getConfig($path);
     }
     $this->previousAdminMode = $this->adminStore->getConfig('web/url/trailing_slash_behavior');
@@ -61,7 +71,7 @@ it('writes each URL in the trailing slash style of the sitemap store, and keeps 
         ->setSitemapPath('/')
         ->setSitemapFilename('sitemap.xml')
         ->setStoreId((int) $this->store->getId())
-        ->writePages($items, $this->store->getBaseUrl());
+        ->writeSingleSitemapFile('pages', $items, $this->store->getBaseUrl(), '', '', 0.0, 1, count($items), 100);
 
     preg_match_all('#<loc>([^<]+)</loc>#', $this->mount->read('sitemap-pages.xml'), $matches);
     expect($matches[1])->toBe($expected);
@@ -79,3 +89,41 @@ it('writes each URL in the trailing slash style of the sitemap store, and keeps 
         'https://example.com/shop/about.html',
     ]],
 ]);
+
+it('writes the blog URLs with the base URL and the trailing slash style of the sitemap store', function (): void {
+    $this->store->setConfig('web/url/trailing_slash_behavior', Trailingslash::REMOVE_TRAILING_SLASH);
+    $this->store->setConfig('blog/general/enable_categories', '1');
+    $this->adminStore->setConfig('web/url/trailing_slash_behavior', Trailingslash::ADD_TRAILING_SLASH);
+    $storeIds = [(int) $this->store->getId()];
+
+    $post = Mage::getModel('blog/post');
+    $post->setTitle('Sitemap Slash Post')->setContent('')->setUrlKey('sitemap-slash-post-' . uniqid())->setIsActive(true);
+    $post->setStores($storeIds);
+    $post->save();
+    $category = Mage::getModel('blog/category');
+    $category->setName('Sitemap Slash Category')->setUrlKey('sitemap-slash-category-' . uniqid())->setIsActive(true)->setParentId(0);
+    $category->setStores($storeIds);
+    $category->save();
+
+    $previousStoreId = (int) Mage::app()->getStore()->getId();
+    Mage::app()->setCurrentStore(Mage_Core_Model_App::ADMIN_STORE_ID);
+    try {
+        new SitemapTrailingSlashTestSitemap()
+            ->setSitemapPath('/')
+            ->setSitemapFilename('sitemap.xml')
+            ->setStoreId((int) $this->store->getId())
+            ->generateXml();
+    } finally {
+        Mage::app()->setCurrentStore($previousStoreId);
+        $post->delete();
+        $category->delete();
+    }
+
+    preg_match_all('#<loc>([^<]+)</loc>#', $this->mount->read('sitemap-blog.xml'), $matches);
+    expect($matches[1])
+        ->toContain('https://example.com/shop/blog')
+        ->toContain('https://example.com/shop/blog/' . $post->getUrlKey())
+        ->toContain('https://example.com/shop/blog/category/' . Mage::helper('blog')->getCategoryUrlPath($category))
+        ->each->toStartWith('https://example.com/shop/blog');
+    expect($matches[1])->each->not->toEndWith('/');
+});

@@ -262,7 +262,7 @@ class Mage_Core_Helper_Url extends Mage_Core_Helper_Abstract
     /**
      * Add or remove trailing slash from URL based on store config
      */
-    public function addOrRemoveTrailingSlash(string $url, bool|int|string|Mage_Core_Model_Store|null $store = null): string
+    public function addOrRemoveTrailingSlash(string $url, int|Mage_Core_Model_Store|null $store = null): string
     {
         if (!Mage::isInstalled()) {
             return $url;

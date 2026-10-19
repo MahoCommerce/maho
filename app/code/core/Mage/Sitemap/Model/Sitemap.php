@@ -179,14 +179,14 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
         // Generate CMS pages sitemap
         $this->generatePagesSitemap($storeId, $baseUrl, $date, $maxUrlsPerFile);
 
-        // Dispatch event for other modules (like blog) to add their sitemaps
-        Mage::dispatchEvent('sitemap_urlset_generating_before', [
+        // Dispatch event for other modules (like blog) to add their sitemaps, with Mage::getUrl() on the sitemap store
+        Mage::app()->withStore($storeId, fn() => Mage::dispatchEvent('sitemap_urlset_generating_before', [
             'sitemap' => $this,
             'base_url' => $baseUrl,
             'date' => $date,
             'store_id' => $storeId,
             'max_urls_per_file' => $maxUrlsPerFile,
-        ]);
+        ]));
 
         // Generate sitemap index
         $this->generateSitemapIndex($storeId, $baseUrl, $date);
@@ -383,7 +383,7 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
     /**
      * Write a single sitemap file for a collection page
      */
-    protected function writeSingleSitemapFile(string $type, array $items, string $baseUrl, string $lastmod, string $changefreq, float $priority, int $pageNumber, int $totalItems, int $maxUrlsPerFile): void
+    public function writeSingleSitemapFile(string $type, array $items, string $baseUrl, string $lastmod, string $changefreq, float $priority, int $pageNumber, int $totalItems, int $maxUrlsPerFile): void
     {
         if (empty($items)) {
             return;
@@ -401,8 +401,8 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
         $webBasePath = parse_url(Mage::app()->getStore($this->getStoreId())->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB, false), PHP_URL_PATH);
         foreach ($items as $item) {
             // Write URL to sitemap
-            $imageUrl = null;
-            $imageTitle = null;
+            $imageUrl = $item->getImageUrl();
+            $imageTitle = $item->getImageTitle();
 
             // Handle product images for sitemap (only if enabled in configuration)
             $storeId = $this->getStoreId();
