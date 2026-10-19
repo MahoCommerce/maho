@@ -121,7 +121,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
                     ->setCountryId($estimatedSessionAddressData['country_id'])
                     ->setCity($estimatedSessionAddressData['city'])
                     ->setPostcode($estimatedSessionAddressData['postcode'])
-                    ->setRegionId($estimatedSessionAddressData['region_id'])
+                    ->setRegionId((int) $estimatedSessionAddressData['region_id'] ?: null)
                     ->setRegion($estimatedSessionAddressData['region']);
                 $cart->getQuote()->setCouponCode($couponCode);
             }
@@ -581,7 +581,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
         $country    = (string) $this->getRequest()->getParam('country_id');
         $postcode   = (string) $this->getRequest()->getParam('estimate_postcode');
         $city       = (string) $this->getRequest()->getParam('estimate_city');
-        $regionId   = (string) $this->getRequest()->getParam('region_id');
+        $regionId   = (int) $this->getRequest()->getParam('region_id') ?: null;
         $region     = (string) $this->getRequest()->getParam('region');
         $isAjax     = (bool) $this->getRequest()->getParam('isAjax');
 

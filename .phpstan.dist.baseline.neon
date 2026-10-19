@@ -11965,6 +11965,7 @@ parameters:
 			path: app/code/core/Mage/Checkout/controllers/CartController.php
 
 		-
+<<<<<<< HEAD
 			rawMessage: 'Method Mage_Checkout_Model_Session::getNoCartRedirect() invoked with 1 parameter, 0 required.'
 			identifier: arguments.count
 			count: 2
@@ -12028,6 +12029,8 @@ parameters:
 			path: app/code/core/Mage/Checkout/controllers/OnepageController.php
 
 		-
+=======
+>>>>>>> 801c5ac8 (Fixed the shipping estimate of the cart failing for a country without regions (#1587))
 			rawMessage: 'Method Mage_Cms_Controller_Router::initControllerRouters() has no return type specified.'
 			identifier: missingType.return
 			count: 1
