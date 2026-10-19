@@ -48,7 +48,7 @@ class OrderService
         }
 
         // A cart assigned to a customer before its guest flag was cleared still carries it
-        $quote->setCustomerIsGuest(!$quote->getCustomerId());
+        $quote->setCustomerIsGuest((int) !$quote->getCustomerId());
         // The cart keeps the email the account had when the customer was set on it
         $accountEmail = $quote->getCustomerId() ? $quote->getCustomer()->getEmail() : null;
         if ($accountEmail) {
