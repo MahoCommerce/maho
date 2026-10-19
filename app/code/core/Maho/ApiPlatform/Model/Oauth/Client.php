@@ -126,7 +126,8 @@ class Maho_ApiPlatform_Model_Oauth_Client extends Mage_Core_Model_Abstract
 
     /**
      * A redirect URI must be HTTPS, or loopback on any port. Anything else lets
-     * an authorization code leave over the network in clear text.
+     * an authorization code leave over the network in clear text. When the store
+     * lists allowed redirect hosts, an HTTPS URI must use one of them.
      */
     public static function isAllowedRedirectUri(string $uri): bool
     {
@@ -140,12 +141,20 @@ class Maho_ApiPlatform_Model_Oauth_Client extends Mage_Core_Model_Abstract
             return false;
         }
 
-        $scheme = strtolower($parts['scheme']);
-        if ($scheme === 'https') {
-            return true;
+        $host = strtolower($parts['host']);
+        if (in_array($host, self::LOOPBACK_HOSTS, true)) {
+            return in_array(strtolower($parts['scheme']), ['http', 'https'], true);
         }
 
-        return $scheme === 'http' && in_array(strtolower($parts['host']), self::LOOPBACK_HOSTS, true);
+        if (strtolower($parts['scheme']) !== 'https') {
+            return false;
+        }
+
+        /** @var Maho_ApiPlatform_Helper_Data $helper */
+        $helper = Mage::helper('apiplatform');
+        $allowedHosts = $helper->getAllowedRedirectHosts();
+
+        return $allowedHosts === [] || in_array($host, $allowedHosts, true);
     }
 
     /**

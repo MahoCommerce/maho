@@ -167,6 +167,14 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_default>1</show_in_default>
                             <depends><authorization_enabled>1</authorization_enabled></depends>
                         </dynamic_registration_enabled>
+                        <allowed_redirect_hosts translate="label comment">
+                            <label>Allowed Redirect Hosts</label>
+                            <comment><![CDATA[Comma-separated host names, for example claude.ai, chatgpt.com. When this list is not empty, an application can connect only if it sends the approval to one of these hosts or to a loopback address, and the approval screen shows no warning for these hosts. Leave it empty to allow any https host.]]></comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>42</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <depends><authorization_enabled>1</authorization_enabled></depends>
+                        </allowed_redirect_hosts>
                         <mcp_require_auth translate="label comment">
                             <label>MCP Requires Authentication</label>
                             <comment><![CDATA[Off: an agent browses the public catalog tools without a token, and a client is challenged only when it reaches for a tool it may not use. On: /api/mcp challenges every unauthenticated caller. Turn it on if a client will not start the browser login on its own.]]></comment>

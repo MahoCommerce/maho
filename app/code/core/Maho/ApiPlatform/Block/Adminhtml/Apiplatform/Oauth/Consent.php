@@ -53,8 +53,14 @@ class Maho_ApiPlatform_Block_Adminhtml_Apiplatform_Oauth_Consent extends Mage_Ad
 
     public function isUnverified(): bool
     {
-        return $this->getClient()?->isTrusted() !== true
-            && !Maho_ApiPlatform_Model_Oauth_Client::isLoopbackRedirectUri($this->getRedirectUri());
+        if ($this->getClient()?->isTrusted() === true
+            || Maho_ApiPlatform_Model_Oauth_Client::isLoopbackRedirectUri($this->getRedirectUri())) {
+            return false;
+        }
+
+        /** @var Maho_ApiPlatform_Helper_Data $helper */
+        $helper = Mage::helper('apiplatform');
+        return !in_array(strtolower($this->getRedirectHost()), $helper->getAllowedRedirectHosts(), true);
     }
 
     /**

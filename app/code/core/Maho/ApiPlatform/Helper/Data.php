@@ -17,6 +17,7 @@ class Maho_ApiPlatform_Helper_Data extends Mage_Core_Helper_Abstract
     public const XML_PATH_DYNAMIC_REGISTRATION = 'apiplatform/oauth2/dynamic_registration_enabled';
     public const XML_PATH_CODE_LIFETIME = 'apiplatform/oauth2/authorization_code_lifetime';
     public const XML_PATH_MCP_REQUIRE_AUTH = 'apiplatform/oauth2/mcp_require_auth';
+    public const XML_PATH_ALLOWED_REDIRECT_HOSTS = 'apiplatform/oauth2/allowed_redirect_hosts';
     public const DEFAULT_TOKEN_LIFETIME = 3600;
     public const DEFAULT_REFRESH_TOKEN_LIFETIME = 86400;
     public const DEFAULT_CODE_LIFETIME = 60;
@@ -207,6 +208,17 @@ class Maho_ApiPlatform_Helper_Data extends Mage_Core_Helper_Abstract
     {
         $value = (int) Mage::getStoreConfig(self::XML_PATH_CODE_LIFETIME);
         return $value > 0 ? $value : self::DEFAULT_CODE_LIFETIME;
+    }
+
+    /**
+     * The hosts that an https redirect URI may use. An empty list allows any host.
+     *
+     * @return list<string>
+     */
+    public function getAllowedRedirectHosts(): array
+    {
+        $hosts = explode(',', strtolower((string) Mage::getStoreConfig(self::XML_PATH_ALLOWED_REDIRECT_HOSTS)));
+        return array_values(array_filter(array_map(trim(...), $hosts)));
     }
 
     /**

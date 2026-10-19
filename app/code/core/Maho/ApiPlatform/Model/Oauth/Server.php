@@ -342,7 +342,7 @@ class Maho_ApiPlatform_Model_Oauth_Server
             if (!is_string($uri) || !Maho_ApiPlatform_Model_Oauth_Client::isAllowedRedirectUri($uri)) {
                 throw $this->fail(
                     Maho_ApiPlatform_Model_Oauth_Exception::ERROR_INVALID_REDIRECT_URI,
-                    'Every redirect URI must use https, or http on loopback, and carry no fragment, no user part and no backslash',
+                    'Every redirect URI must use https on an allowed host, or http on loopback, and carry no fragment, no user part and no backslash',
                 );
             }
             $clean[] = $uri;

@@ -13,6 +13,7 @@ Active,Active
 All,All
 "All API protocols are <strong>disabled by default</strong>. Enable only the ones you actually use, anything off returns 404 at the entry point.","All API protocols are <strong>disabled by default</strong>. Enable only the ones you actually use, anything off returns 404 at the entry point."
 "Allow Applications to Register Themselves","Allow Applications to Register Themselves"
+"Allowed Redirect Hosts","Allowed Redirect Hosts"
 API,API
 "API Cache","API Cache"
 "API Key","API Key"
@@ -44,6 +45,7 @@ Approve,Approve
 "Client ID: %s","Client ID: %s"
 "Client Secret","Client Secret"
 "Client Secret: %s","Client Secret: %s"
+"Comma-separated host names, for example claude.ai, chatgpt.com. When this list is not empty, an application can connect only if it sends the approval to one of these hosts or to a loopback address, and the approval screen shows no warning for these hosts. Leave it empty to allow any https host.","Comma-separated host names, for example claude.ai, chatgpt.com. When this list is not empty, an application can connect only if it sends the approval to one of these hosts or to a loopback address, and the approval screen shows no warning for these hosts. Leave it empty to allow any https host."
 "Comma-separated list of allowed origins. Defaults to store base URL if empty.","Comma-separated list of allowed origins. Defaults to store base URL if empty."
 "Connect Applications","Connect Applications"
 "Connected","Connected"
