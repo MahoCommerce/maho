@@ -13,6 +13,7 @@ Active,Active
 All,All
 "All API protocols are <strong>disabled by default</strong>. Enable only the ones you actually use, anything off returns 404 at the entry point.","All API protocols are <strong>disabled by default</strong>. Enable only the ones you actually use, anything off returns 404 at the entry point."
 "Allow Applications to Register Themselves","Allow Applications to Register Themselves"
+"Allowed Redirect Hosts","Allowed Redirect Hosts"
 API,API
 "API Cache","API Cache"
 "API Key","API Key"
@@ -74,8 +75,10 @@ Email,Email
 "GraphQL, admin","GraphQL, admin"
 "GraphQL, public","GraphQL, public"
 "Hidden (stored hashed). Regenerate if needed.","Hidden (stored hashed). Regenerate if needed."
+"Host names, one per line, for example claude.ai. When this list is not empty, an application can connect only if it sends the approval to one of these hosts or to a loopback address, and the approval screen shows no warning for these hosts. Leave it empty to allow any https host.","Host names, one per line, for example claude.ai. When this list is not empty, an application can connect only if it sends the approval to one of these hosts or to a loopback address, and the approval screen shows no warning for these hosts. Leave it empty to allow any https host."
 "How long API responses are cached. Default: 300 (5 minutes). Set to 0 to disable caching.","How long API responses are cached. Default: 300 (5 minutes). Set to 0 to disable caching."
 ID,ID
+"If you approve, %s receives access to your store. Approve only if you started this connection yourself.","If you approve, %s receives access to your store. Approve only if you started this connection yourself."
 "If you approve, this application can:","If you approve, this application can:"
 Inactive,Inactive
 "In seconds (default: 60). A code is used once, seconds after it is issued.","In seconds (default: 60). A code is used once, seconds after it is issued."
@@ -151,7 +154,6 @@ System,System
 "These permissions control what API users (service accounts) can do. Grant only the operations each integration needs.","These permissions control what API users (service accounts) can do. Grant only the operations each integration needs."
 "These resources are publicly readable without authentication. Any visitor or app can access this data via GET requests.","These resources are publicly readable without authentication. Any visitor or app can access this data via GET requests."
 "This API user no longer exists.","This API user no longer exists."
-"This application registered itself and has not been verified. Approve it only if you started this connection yourself.","This application registered itself and has not been verified. Approve it only if you started this connection yourself."
 "This authorization request expired or is no longer valid. Start again from the application.","This authorization request expired or is no longer valid. Start again from the application."
 "This connection does not exist.","This connection does not exist."
 "This role no longer exists.","This role no longer exists."
@@ -159,7 +161,6 @@ System,System
 "User Info","User Info"
 Username,Username
 "User Role","User Role"
-Verified,Verified
 "You denied the connection.","You denied the connection."
 "Your account","Your account"
 "Your admin role may not approve API connections.","Your admin role may not approve API connections."
