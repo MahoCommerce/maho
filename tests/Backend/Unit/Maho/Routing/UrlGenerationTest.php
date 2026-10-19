@@ -111,3 +111,25 @@ describe('Mage::getUrl() home and fallback', function () {
         expect(urlPath('payflow/express/start'))->toBe('/payflow/express/start/');
     });
 });
+
+describe('Mage_Core_Model_Url::getUrl() for a store that is not the current store', function () {
+    it('applies the trailing slash style of the store of the URL model', function () {
+        $path = 'web/url/trailing_slash_behavior';
+        $store = Mage::app()->getDefaultStoreView();
+        $adminStore = Mage::app()->getStore(Mage_Core_Model_App::ADMIN_STORE_ID);
+        $previousStore = Mage::app()->getStore()->getCode();
+        $previous = [$store->getConfig($path), $adminStore->getConfig($path)];
+        $store->setConfig($path, Mage_Adminhtml_Model_System_Config_Source_Catalog_Trailingslash::REMOVE_TRAILING_SLASH);
+        $adminStore->setConfig($path, Mage_Adminhtml_Model_System_Config_Source_Catalog_Trailingslash::ADD_TRAILING_SLASH);
+        Mage::app()->setCurrentStore(Mage_Core_Model_Store::ADMIN_CODE);
+        try {
+            $url = Mage::getModel('core/url')->setStore($store)->getUrl('checkout/cart');
+        } finally {
+            Mage::app()->setCurrentStore($previousStore);
+            $store->setConfig($path, $previous[0]);
+            $adminStore->setConfig($path, $previous[1]);
+        }
+
+        expect($url)->toEndWith('/checkout/cart');
+    });
+});
