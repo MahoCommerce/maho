@@ -367,4 +367,27 @@ class Mage_CatalogInventory_Model_Indexer_Stock extends Mage_Index_Model_Indexer
         return $this->setData('website_id', $value);
     }
 
+    #[\Override]
+    public function supportsBatchEvents(): bool
+    {
+        return true;
+    }
+
+    #[\Override]
+    public function getBatchEntityIds(Mage_Index_Model_Event $event): ?array
+    {
+        $data = $event->getNewData();
+        if (!empty($data['cataloginventory_stock_reindex_all'])) {
+            return null;
+        }
+        if (!empty($data['cataloginventory_stock_skip_call_event_handler'])) {
+            return [];
+        }
+        return match ([$event->getEntity(), $event->getType()]) {
+            [Mage_CatalogInventory_Model_Stock_Item::ENTITY, Mage_Index_Model_Event::TYPE_SAVE] => empty($data['product_id']) ? [] : [(int) $data['product_id']],
+            [Mage_Catalog_Model_Product::ENTITY, Mage_Index_Model_Event::TYPE_SAVE] => [],
+            [Mage_Catalog_Model_Product::ENTITY, Mage_Index_Model_Event::TYPE_MASS_ACTION] => (array) ($data['reindex_stock_product_ids'] ?? []),
+            default => null,
+        };
+    }
 }

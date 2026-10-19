@@ -618,6 +618,11 @@ interface AdapterInterface
     public function getIfNullSql(string $expression, string|int $value = '0'): \Maho\Db\Expr;
 
     /**
+     * Returns an expression that is true when $left equals $right, and also when both are NULL
+     */
+    public function getNullSafeEqualsSql(string $left, string $right): \Maho\Db\Expr;
+
+    /**
      * Generate fragment of SQL for rounding a numeric value to specified precision.
      * Handles database-specific ROUND function requirements.
      */
@@ -857,6 +862,14 @@ interface AdapterInterface
      * Get adapter transaction level state. Return 0 if all transactions are complete
      */
     public function getTransactionLevel(): int;
+
+    /**
+     * Refresh the query planner statistics of $tables after a bulk write.
+     * With no tables, refresh the statistics that the engine marks as out of date.
+     *
+     * @param string[] $tables
+     */
+    public function optimizeStatistics(array $tables = []): void;
 
     /**
      * Convert date format to unix time

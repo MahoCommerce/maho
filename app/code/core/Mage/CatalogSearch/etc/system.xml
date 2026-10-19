@@ -158,6 +158,13 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_store>1</show_in_store>
                             <depends><enable_category_autosuggest>1</enable_category_autosuggest></depends>
                         </category_autosuggest_limit>
+                        <index_batch_size translate="label comment">
+                            <label>Products per Search Index Batch</label>
+                            <validate>required-entry validate-digits validate-greater-than-zero</validate>
+                            <sort_order>90</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <comment>The search indexer reads this number of products in each step. A higher number uses fewer queries and more memory.</comment>
+                        </index_batch_size>
                     </fields>
                 </search>
                 <advanced_search translate="label" module="catalogsearch">

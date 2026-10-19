@@ -446,19 +446,12 @@ class Mage_Catalog_Model_Url
     protected function _refreshCategoryProductRewrites(\Maho\DataObject $category)
     {
         $originalRewrites = $this->_rewrites;
-        $lastEntityId = 0;
-        $firstIteration = true;
-        while (true) {
-            $products = $this->getResource()->getProductsByCategory($category, $lastEntityId);
+        $hasProducts = false;
+        $productIds = array_map(intval(...), $this->getResource()->getProductIdsByCategory($category));
+        foreach (array_chunk($productIds, 250) as $chunkIds) {
+            $products = $this->getResource()->getProductsByIds($chunkIds, (int) $category->getStoreId());
             if (!$products) {
-                if ($firstIteration) {
-                    $this->getResource()->deleteCategoryProductStoreRewrites(
-                        $category->getId(),
-                        [],
-                        $category->getStoreId(),
-                    );
-                }
-                break;
+                continue;
             }
 
             // Prepare rewrites for generation
@@ -476,8 +469,11 @@ class Mage_Catalog_Model_Url
                 $this->_refreshProductRewrite($product, $category);
             }
             $this->_clearCategoryProductRewrites((int) $category->getStoreId(), array_keys($products));
-            $firstIteration = false;
+            $hasProducts = true;
             unset($products);
+        }
+        if (!$hasProducts) {
+            $this->getResource()->deleteCategoryProductStoreRewrites($category->getId(), [], $category->getStoreId());
         }
         $this->_rewrites = $originalRewrites;
         return $this;
@@ -531,42 +527,73 @@ class Mage_Catalog_Model_Url
      */
     public function refreshProductRewrite($productId, $storeId = null)
     {
-        if (is_null($storeId)) {
+        $this->refreshProductsRewrites([(int) $productId], $storeId === null ? null : (int) $storeId);
+        return $this;
+    }
+
+    /**
+     * Refresh the rewrites of the products in one store, or in each store when $storeId is null.
+     *
+     * @param int[] $productIds
+     */
+    public function refreshProductsRewrites(array $productIds, ?int $storeId = null): static
+    {
+        $productIds = array_values(array_unique(array_map(intval(...), $productIds)));
+        if ($productIds === []) {
+            return $this;
+        }
+
+        if ($storeId === null) {
             foreach ($this->getStores() as $store) {
-                $this->refreshProductRewrite($productId, $store->getId());
+                $this->refreshProductsRewrites($productIds, (int) $store->getId());
             }
             return $this;
         }
 
-        $product = $this->getResource()->getProduct($productId, $storeId);
-        if ($product) {
-            $store = $this->getStores($storeId);
-            $storeRootCategoryId = $store->getRootCategoryId();
+        $store = $this->getStores($storeId);
+        if (!$store instanceof Mage_Core_Model_Store) {
+            foreach ($productIds as $productId) {
+                $this->getResource()->clearProductRewrites($productId, $storeId, []);
+            }
+            return $this;
+        }
 
-            // List of categories the product is assigned to, filtered by being within the store's categories root
-            $categories = $this->getResource()->getCategories($product->getCategoryIds(), $storeId) ?: [];
-            $this->_rewrites = $this->getResource()->prepareRewrites($storeId, '', $productId);
+        $storeRootCategoryId = (int) $store->getRootCategoryId();
+        $rootCategory = null;
+        foreach (array_chunk($productIds, 250) as $chunkIds) {
+            $products = $this->getResource()->getProductsByIds($chunkIds, $storeId);
 
-            // Add rewrites for all needed categories
-            // If product is assigned to any of store's categories -
-            // we also should use store root category to create root product url rewrite
-            $categories[$storeRootCategoryId] ??= $this->getResource()->getCategory($storeRootCategoryId, $storeId);
+            $categoryIds = [];
+            foreach ($products as $product) {
+                foreach ($product->getCategoryIds() as $categoryId) {
+                    $categoryIds[$categoryId] = $categoryId;
+                }
+            }
+            $chunkCategories = $this->getResource()->getCategories(array_values($categoryIds), $storeId) ?: [];
+            if ($products && !isset($chunkCategories[$storeRootCategoryId])) {
+                $rootCategory ??= $this->getResource()->getCategory($storeRootCategoryId, $storeId);
+            }
+            $this->_rewrites = $products ? $this->getResource()->prepareRewrites($storeId, false, array_keys($products)) : [];
 
-            // Create product url rewrites
-            foreach ($categories as $category) {
-                $this->_refreshProductRewrite($product, $category);
+            foreach ($chunkIds as $productId) {
+                $product = $products[$productId] ?? null;
+                if ($product === null) {
+                    $this->getResource()->clearProductRewrites($productId, $storeId, []);
+                    continue;
+                }
+
+                $categories = array_intersect_key($chunkCategories, array_flip($product->getCategoryIds()));
+                $categories[$storeRootCategoryId] ??= $chunkCategories[$storeRootCategoryId] ?? $rootCategory;
+                foreach ($categories as $category) {
+                    $this->_refreshProductRewrite($product, $category);
+                }
+
+                $this->getResource()->clearProductRewrites($productId, $storeId, array_keys($categories));
+                $this->_clearCategoryProductRewrites($storeId, [$productId]);
             }
 
-            // Remove all other product rewrites created earlier for this store - they're invalid now
-            $excludeCategoryIds = array_keys($categories);
-            $this->getResource()->clearProductRewrites($productId, $storeId, $excludeCategoryIds);
-            $this->_clearCategoryProductRewrites((int) $storeId, [(int) $productId]);
-
-            unset($categories);
-            unset($product);
-        } else {
-            // Product doesn't belong to this store - clear all its url rewrites including root one
-            $this->getResource()->clearProductRewrites($productId, $storeId, []);
+            unset($products, $chunkCategories);
+            $this->_rewrites = [];
         }
 
         return $this;
@@ -1037,7 +1064,9 @@ class Mage_Catalog_Model_Url
      */
     protected function _saveRewriteHistory($rewriteData, $rewrite)
     {
-        if ($rewrite instanceof \Maho\DataObject && $rewrite->getId()) {
+        if ($rewrite instanceof \Maho\DataObject && $rewrite->getId()
+            && (string) $rewrite->getRequestPath() !== (string) $rewriteData['request_path']
+        ) {
             $rewriteData['target_path'] = $rewriteData['request_path'];
             $rewriteData['request_path'] = $rewrite->getRequestPath();
             $rewriteData['id_path'] = $this->generateUniqueIdPath();

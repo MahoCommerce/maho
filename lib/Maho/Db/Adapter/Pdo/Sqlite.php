@@ -541,6 +541,12 @@ class Sqlite extends AbstractPdoAdapter
         return new \Maho\Db\Expr($expression);
     }
 
+    #[\Override]
+    public function getNullSafeEqualsSql(string $left, string $right): \Maho\Db\Expr
+    {
+        return new \Maho\Db\Expr(sprintf('(%s IS %s)', $left, $right));
+    }
+
     /**
      * Returns valid COALESCE expression (SQLite supports COALESCE and IFNULL)
      */
@@ -1917,34 +1923,30 @@ class Sqlite extends AbstractPdoAdapter
             $actualTableName = $from[$table]['tableName'];
         }
 
-        // Get primary key column
         $pkColumns = $this->_getPrimaryKeyColumns($actualTableName);
-        if (!empty($pkColumns)) {
-            $pkColumn = $pkColumns[0];
-        } else {
+        if (empty($pkColumns)) {
             $tableColumns = array_keys($this->describeTable($actualTableName));
             if (in_array('entity_id', $tableColumns)) {
-                $pkColumn = 'entity_id';
+                $pkColumns = ['entity_id'];
             } elseif (in_array('id', $tableColumns)) {
-                $pkColumn = 'id';
+                $pkColumns = ['id'];
             } else {
-                $pkColumn = $tableColumns[0] ?? 'id';
+                $pkColumns = [$tableColumns[0] ?? 'id'];
             }
         }
 
-        // Clone select and reset columns
+        // All key columns, so that a composite key deletes only the rows that the select matches
         $subSelect = clone $select;
         $subSelect->reset(\Maho\Db\Select::COLUMNS);
-        $subSelect->columns([$table . '.' . $pkColumn]);
+        $subSelect->columns(array_map(fn(string $column): string => $table . '.' . $column, $pkColumns));
 
-        $query = sprintf(
+        $target = implode(', ', array_map($this->quoteIdentifier(...), $pkColumns));
+        return sprintf(
             'DELETE FROM %s WHERE %s IN (%s)',
             $this->quoteIdentifier($actualTableName),
-            $this->quoteIdentifier($pkColumn),
+            count($pkColumns) > 1 ? '(' . $target . ')' : $target,
             $subSelect->assemble(),
         );
-
-        return $query;
     }
 
     /**
@@ -1975,6 +1977,36 @@ class Sqlite extends AbstractPdoAdapter
     {
         $select->order(new \Maho\Db\Expr('RANDOM()'));
         return $this;
+    }
+
+    /**
+     * ANALYZE creates the sqlite_stat tables. They belong to the engine, not to a schema.
+     */
+    #[\Override]
+    public function listTables(?string $schemaName = null): array
+    {
+        return array_values(array_filter(
+            parent::listTables($schemaName),
+            fn(string $table): bool => !str_starts_with($table, 'sqlite_'),
+        ));
+    }
+
+    /**
+     * Without statistics, the SQLite planner picks the first usable index and can
+     * scan a join once for each row. analysis_limit keeps ANALYZE fast on large tables.
+     */
+    #[\Override]
+    public function optimizeStatistics(array $tables = []): void
+    {
+        $this->_connect();
+        $this->_connection->executeStatement('PRAGMA analysis_limit = 1000');
+        if ($tables === []) {
+            $this->_connection->executeStatement('PRAGMA optimize = 0x10002');
+            return;
+        }
+        foreach ($tables as $table) {
+            $this->_connection->executeStatement('ANALYZE ' . $this->quoteIdentifier($table));
+        }
     }
 
     /**

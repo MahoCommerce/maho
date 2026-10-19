@@ -303,4 +303,26 @@ class Mage_Catalog_Model_Category_Indexer_Product extends Mage_Index_Model_Index
         return $this->setData('visibility', $value);
     }
 
+    #[\Override]
+    public function supportsBatchEvents(): bool
+    {
+        return true;
+    }
+
+    #[\Override]
+    public function getBatchEntityIds(Mage_Index_Model_Event $event): ?array
+    {
+        $data = $event->getNewData();
+        if ($event->getEntity() !== Mage_Catalog_Model_Product::ENTITY || !empty($data['catalog_category_product_reindex_all'])) {
+            return null;
+        }
+        if (!empty($data['catalog_category_product_skip_call_event_handler'])) {
+            return [];
+        }
+        return match ($event->getType()) {
+            Mage_Index_Model_Event::TYPE_SAVE => isset($data['category_ids']) ? [(int) $event->getEntityPk()] : [],
+            Mage_Index_Model_Event::TYPE_MASS_ACTION => (array) ($data['product_ids'] ?? []),
+            default => null,
+        };
+    }
 }

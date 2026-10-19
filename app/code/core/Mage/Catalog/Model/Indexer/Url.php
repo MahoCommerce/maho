@@ -218,10 +218,7 @@ class Mage_Catalog_Model_Indexer_Url extends Mage_Index_Model_Indexer_Abstract
         }
 
         if (isset($data['rewrite_product_ids'])) {
-            $urlModel->clearStoreInvalidRewrites(); // Maybe some products were moved or removed from website
-            foreach (array_unique($data['rewrite_product_ids']) as $productId) {
-                $urlModel->refreshProductRewrite($productId);
-            }
+            $this->reindexEntity($data['rewrite_product_ids']);
         }
 
         if (isset($data['rewrite_category_ids'])) {
@@ -240,13 +237,24 @@ class Mage_Catalog_Model_Indexer_Url extends Mage_Index_Model_Indexer_Abstract
     {
         /** @var Mage_Catalog_Model_Resource_Url $resourceModel */
         $resourceModel = Mage::getResourceSingleton('catalog/url');
-        $resourceModel->beginTransaction();
-        try {
-            Mage::getSingleton('catalog/url')->refreshRewrites();
-            $resourceModel->commit();
-        } catch (Exception $e) {
-            $resourceModel->rollBack();
-            throw $e;
+        /** @var Mage_Catalog_Model_Url $urlModel */
+        $urlModel = Mage::getSingleton('catalog/url');
+
+        // SQLite writes faster in one transaction, other engines keep each transaction small
+        $storeIds = [null];
+        if (!$resourceModel->getReadConnection() instanceof Maho\Db\Adapter\Pdo\Sqlite) {
+            $storeIds = array_map(fn(Mage_Core_Model_Store $store): int => (int) $store->getId(), $urlModel->getStores());
+        }
+
+        foreach ($storeIds as $storeId) {
+            $resourceModel->beginTransaction();
+            try {
+                $urlModel->refreshRewrites($storeId);
+                $resourceModel->commit();
+            } catch (Exception $e) {
+                $resourceModel->rollBack();
+                throw $e;
+            }
         }
     }
 
@@ -257,14 +265,32 @@ class Mage_Catalog_Model_Indexer_Url extends Mage_Index_Model_Indexer_Abstract
             $entityIds = [$entityIds];
         }
 
+        $productIds = array_values(array_unique(array_map(intval(...), $entityIds)));
+
         /** @var Mage_Catalog_Model_Url $urlModel */
         $urlModel = Mage::getSingleton('catalog/url');
-
-        $urlModel->clearStoreInvalidRewrites();
-        foreach ($entityIds as $productId) {
-            $urlModel->refreshProductRewrite($productId);
-        }
+        $urlModel->refreshProductsRewrites($productIds);
 
         return $this;
+    }
+
+    #[\Override]
+    public function supportsBatchEvents(): bool
+    {
+        return true;
+    }
+
+    #[\Override]
+    public function getBatchEntityIds(Mage_Index_Model_Event $event): ?array
+    {
+        $data = $event->getNewData();
+        if ($event->getEntity() !== Mage_Catalog_Model_Product::ENTITY
+            || $event->getType() !== Mage_Index_Model_Event::TYPE_SAVE
+            || !empty($data['catalog_url_reindex_all'])
+            || isset($data['rewrite_category_ids'])
+        ) {
+            return null;
+        }
+        return (array) ($data['rewrite_product_ids'] ?? []);
     }
 }

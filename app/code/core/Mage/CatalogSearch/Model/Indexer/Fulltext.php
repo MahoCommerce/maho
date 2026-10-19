@@ -240,12 +240,14 @@ class Mage_CatalogSearch_Model_Indexer_Fulltext extends Mage_Index_Model_Indexer
                 $product = $event->getDataObject();
 
                 $event->addNewData('catalogsearch_update_product_id', $product->getId());
+                $event->addNewData('catalogsearch_product_type_id', $product->getTypeId());
                 break;
             case Mage_Index_Model_Event::TYPE_DELETE:
                 /** @var Mage_Catalog_Model_Product $product */
                 $product = $event->getDataObject();
 
                 $event->addNewData('catalogsearch_delete_product_id', $product->getId());
+                $event->addNewData('catalogsearch_product_type_id', $product->getTypeId());
                 break;
             case Mage_Index_Model_Event::TYPE_MASS_ACTION:
                 $actionObject = $event->getDataObject();
@@ -311,10 +313,30 @@ class Mage_CatalogSearch_Model_Indexer_Fulltext extends Mage_Index_Model_Indexer
         return $this->_searchableAttributes;
     }
 
-    protected function _isProductComposite(int $productId): bool
+    /**
+     * Load the product only when the caller does not know its type.
+     */
+    protected function _isProductComposite(int $productId, ?string $typeId = null): bool
     {
-        $product = Mage::getModel('catalog/product')->load($productId);
+        $product = Mage::getModel('catalog/product');
+        if ($typeId === null || $typeId === '') {
+            $product->load($productId);
+        } else {
+            $product->setTypeId($typeId);
+        }
         return $product->isComposite();
+    }
+
+    protected function _getEventProductTypeId(Mage_Index_Model_Event $event): ?string
+    {
+        $typeId = $event->getNewData()['catalogsearch_product_type_id'] ?? null;
+        if ($typeId === null) {
+            $dataObject = $event->getDataObject();
+            if ($dataObject instanceof Mage_Catalog_Model_Product) {
+                $typeId = $dataObject->getTypeId();
+            }
+        }
+        return $typeId === null ? null : (string) $typeId;
     }
 
     #[\Override]
@@ -325,9 +347,9 @@ class Mage_CatalogSearch_Model_Indexer_Fulltext extends Mage_Index_Model_Indexer
         if (!empty($data['catalogsearch_fulltext_reindex_all'])) {
             $this->reindexAll();
         } elseif (!empty($data['catalogsearch_delete_product_id'])) {
-            $productId = $data['catalogsearch_delete_product_id'];
+            $productId = (int) $data['catalogsearch_delete_product_id'];
 
-            if (!$this->_isProductComposite($productId)) {
+            if (!$this->_isProductComposite($productId, $this->_getEventProductTypeId($event))) {
                 $parentIds = $this->_getResource()->getRelationsByChild($productId);
                 if (!empty($parentIds)) {
                     $this->_getIndexer()->rebuildIndex(null, $parentIds);
@@ -337,10 +359,10 @@ class Mage_CatalogSearch_Model_Indexer_Fulltext extends Mage_Index_Model_Indexer
             $this->_getIndexer()->cleanIndex(null, $productId)
                 ->resetSearchResults();
         } elseif (!empty($data['catalogsearch_update_product_id'])) {
-            $productId = $data['catalogsearch_update_product_id'];
+            $productId = (int) $data['catalogsearch_update_product_id'];
             $productIds = [$productId];
 
-            if (!$this->_isProductComposite($productId)) {
+            if (!$this->_isProductComposite($productId, $this->_getEventProductTypeId($event))) {
                 $parentIds = $this->_getResource()->getRelationsByChild($productId);
                 if (!empty($parentIds)) {
                     $productIds = array_merge($productIds, $parentIds);
@@ -375,21 +397,17 @@ class Mage_CatalogSearch_Model_Indexer_Fulltext extends Mage_Index_Model_Indexer
                     }
                 }
             }
-            if (isset($data['catalogsearch_status'])) {
-                $status = $data['catalogsearch_status'];
-                if ($status == Mage_Catalog_Model_Product_Status::STATUS_ENABLED) {
-                    $this->_getIndexer()
-                        ->rebuildIndex(null, $productIds)
-                        ->resetSearchResults();
-                } else {
-                    $this->_getIndexer()
-                        ->cleanIndex(null, $productIds)
-                        ->resetSearchResults();
-                }
-            }
-            if (isset($data['catalogsearch_force_reindex'])) {
+            // A rebuild also cleans the disabled products, so one rebuild covers a status change and an attribute change.
+            if (isset($data['catalogsearch_force_reindex'])
+                || (isset($data['catalogsearch_status'])
+                    && $data['catalogsearch_status'] == Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
+            ) {
                 $this->_getIndexer()
                     ->rebuildIndex(null, $productIds)
+                    ->resetSearchResults();
+            } elseif (isset($data['catalogsearch_status'])) {
+                $this->_getIndexer()
+                    ->cleanIndex(null, $productIds)
                     ->resetSearchResults();
             }
         }
@@ -401,5 +419,38 @@ class Mage_CatalogSearch_Model_Indexer_Fulltext extends Mage_Index_Model_Indexer
         // No transaction here: the rebuild opens its own when it runs in place,
         // and the staged path swaps with DDL, which a transaction cannot hold.
         $this->_getIndexer()->rebuildIndex();
+    }
+
+    #[\Override]
+    public function supportsBatchEvents(): bool
+    {
+        return true;
+    }
+
+    /**
+     * A delete, a category change, a website change and a disable run alone: they clean the index.
+     */
+    #[\Override]
+    public function getBatchEntityIds(Mage_Index_Model_Event $event): ?array
+    {
+        $data = $event->getNewData();
+        if ($event->getEntity() !== Mage_Catalog_Model_Product::ENTITY || !empty($data['catalogsearch_fulltext_reindex_all'])) {
+            return null;
+        }
+        if ($event->getType() === Mage_Index_Model_Event::TYPE_SAVE) {
+            return empty($data['catalogsearch_update_product_id']) ? [] : [(int) $data['catalogsearch_update_product_id']];
+        }
+        if ($event->getType() !== Mage_Index_Model_Event::TYPE_MASS_ACTION || !empty($data['catalogsearch_website_ids'])) {
+            return null;
+        }
+        if (empty($data['catalogsearch_product_ids'])) {
+            return [];
+        }
+        if (isset($data['catalogsearch_force_reindex'])
+            || (isset($data['catalogsearch_status']) && $data['catalogsearch_status'] == Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
+        ) {
+            return (array) $data['catalogsearch_product_ids'];
+        }
+        return isset($data['catalogsearch_status']) ? null : [];
     }
 }

@@ -200,6 +200,42 @@ abstract class Mage_Index_Model_Indexer_Abstract extends Mage_Core_Model_Abstrac
         return $this->_usesTmpTables;
     }
 
+    /**
+     * Whether pending events of this indexer can be reindexed together with processBatch()
+     */
+    public function supportsBatchEvents(): bool
+    {
+        return false;
+    }
+
+    /**
+     * The largest number of events, and of entity ids, that one processBatch() call gets
+     */
+    public function getBatchSize(): int
+    {
+        return 500;
+    }
+
+    /**
+     * Return the entity ids that $event reindexes, [] when it has no work for this indexer,
+     * or null when it must be processed alone. Read only the new data of $event: its data
+     * object is not stored with a pending event.
+     */
+    public function getBatchEntityIds(Mage_Index_Model_Event $event): ?array
+    {
+        return null;
+    }
+
+    /**
+     * Reindex $entityIds as the events that getBatchEntityIds() accepted would do one by one
+     *
+     * @param list<int> $entityIds
+     */
+    public function processBatch(array $entityIds): void
+    {
+        $this->reindexEntity($entityIds);
+    }
+
     public function reindexEntity(int|array $entityIds): self
     {
         if (!is_array($entityIds)) {
@@ -256,6 +292,7 @@ abstract class Mage_Index_Model_Indexer_Abstract extends Mage_Core_Model_Abstrac
                 ->setType(Mage_Index_Model_Event::TYPE_MASS_ACTION)
                 ->setDataObject($actionObject);
 
+            $this->register($event);
             $this->processEvent($event);
             return $this;
         } else {

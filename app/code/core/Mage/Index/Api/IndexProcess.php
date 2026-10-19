@@ -128,7 +128,7 @@ class IndexProcess extends CrudResource
         $indexer = $model->getIndexer();
         $dto->name = $indexer->getName();
         $dto->description = $indexer->getDescription();
-        $dto->updateRequired = $model->getUnprocessedEventsCollection()->count() > 0;
+        $dto->updateRequired = \Mage::getResourceSingleton('index/event')->hasUnprocessedEvents($model);
         if ($model->isLocked()) {
             $dto->status = \Mage_Index_Model_Process::STATUS_RUNNING;
         }

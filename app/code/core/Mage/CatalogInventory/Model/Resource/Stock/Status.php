@@ -199,12 +199,12 @@ class Mage_CatalogInventory_Model_Resource_Stock_Status extends Mage_Core_Model_
      */
     public function prepareCatalogProductIndexSelect(\Maho\Db\Select $select, $entityField, $websiteField)
     {
-        $select->join(
-            ['ciss' => $this->getMainTable()],
-            "ciss.product_id = {$entityField} AND ciss.website_id = {$websiteField}",
-            [],
-        );
-        $select->where('ciss.stock_status = ?', Mage_CatalogInventory_Model_Stock_Status::STATUS_IN_STOCK);
+        $inStock = $this->_getReadAdapter()->select()
+            ->from(['ciss' => $this->getMainTable()], [new Maho\Db\Expr('1')])
+            ->where("ciss.product_id = {$entityField}")
+            ->where("ciss.website_id = {$websiteField}")
+            ->where('ciss.stock_status = ?', Mage_CatalogInventory_Model_Stock_Status::STATUS_IN_STOCK);
+        $select->where('EXISTS (' . $inStock . ')');
 
         return $this;
     }

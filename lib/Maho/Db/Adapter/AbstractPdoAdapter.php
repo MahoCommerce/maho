@@ -1279,6 +1279,12 @@ abstract class AbstractPdoAdapter implements AdapterInterface
     }
 
     /**
+     * MySQL needs no call: InnoDB refreshes its statistics after a bulk write.
+     */
+    #[\Override]
+    public function optimizeStatistics(array $tables = []): void {}
+
+    /**
      * Render SQL FOR UPDATE clause
      */
     #[\Override]

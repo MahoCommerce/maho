@@ -101,11 +101,79 @@ abstract class Mage_Index_Model_Resource_Abstract extends Mage_Core_Model_Resour
     }
 
     /**
-     * Synchronize data between index storage and original storage
+     * Make the main table equal to the index table. Only the rows that differ are written,
+     * so a full reindex of a catalog that did not change writes almost nothing.
      *
      * @return Mage_Index_Model_Resource_Abstract
      */
     public function syncData()
+    {
+        $adapter   = $this->_getWriteAdapter();
+        $mainTable = $this->getMainTable();
+        $idxTable  = $this->getIdxTable();
+
+        $idxColumns = $adapter->describeTable($idxTable);
+        $columns = [];
+        $keys = [];
+        foreach ($adapter->describeTable($mainTable) as $name => $column) {
+            if (isset($idxColumns[$name])) {
+                $columns[] = $name;
+            }
+            if ($column['PRIMARY']) {
+                $keys[(int) $column['PRIMARY_POSITION']] = $name;
+            }
+        }
+        ksort($keys);
+        $keys = array_values($keys);
+
+        if ($keys === [] || array_diff($keys, $columns) || $this->_getIndexAdapter() !== $adapter) {
+            return $this->_replaceData();
+        }
+
+        $match = fn(string $alias): string => implode(' AND ', array_map(
+            fn(string $key): string => sprintf('i.%1$s = %2$s.%1$s', $adapter->quoteIdentifier($key), $alias),
+            $keys,
+        ));
+        $values = array_values(array_diff($columns, $keys));
+        $changed = [sprintf('m.%s IS NULL', $adapter->quoteIdentifier($keys[0]))];
+        foreach ($values as $value) {
+            $quoted = $adapter->quoteIdentifier($value);
+            $changed[] = 'NOT ' . $adapter->getNullSafeEqualsSql("i.{$quoted}", "m.{$quoted}");
+        }
+
+        $stale = $adapter->select()
+            ->from(['i' => $idxTable], [new Maho\Db\Expr('1')])
+            ->where($match($adapter->quoteIdentifier($mainTable)));
+        $newOrChanged = $adapter->select()
+            ->from(['i' => $idxTable], $columns)
+            ->joinLeft(['m' => $mainTable], $match('m'), [])
+            ->where(implode(' OR ', $changed));
+
+        $this->beginTransaction();
+        try {
+            $adapter->delete($mainTable, 'NOT EXISTS (' . $stale . ')');
+            $adapter->query($adapter->insertFromSelect(
+                $newOrChanged,
+                $mainTable,
+                $columns,
+                $values === [] ? false : Maho\Db\Adapter\AdapterInterface::INSERT_ON_DUPLICATE,
+            ));
+            $this->commit();
+        } catch (Exception $e) {
+            $this->rollBack();
+            throw $e;
+        }
+        $adapter->optimizeStatistics([$mainTable]);
+
+        return $this;
+    }
+
+    /**
+     * Replace all rows of the main table with the rows of the index table
+     *
+     * @return Mage_Index_Model_Resource_Abstract
+     */
+    protected function _replaceData()
     {
         $this->beginTransaction();
         try {
@@ -223,7 +291,13 @@ abstract class Mage_Index_Model_Resource_Abstract extends Mage_Core_Model_Resour
      */
     public function clearTemporaryIndexTable()
     {
-        $this->_getWriteAdapter()->delete($this->getIdxTable());
+        $adapter = $this->_getWriteAdapter();
+        // TRUNCATE commits on MySQL, and costs more than a DELETE of the few rows of a partial reindex
+        if ($this->useIdxTable() && $adapter->getTransactionLevel() === 0 && !$adapter instanceof Maho\Db\Adapter\Pdo\Sqlite) {
+            $adapter->query('TRUNCATE TABLE ' . $adapter->quoteIdentifier($this->getIdxTable()));
+            return;
+        }
+        $adapter->delete($this->getIdxTable());
     }
 
     /**

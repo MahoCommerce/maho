@@ -447,6 +447,12 @@ class Pgsql extends AbstractPdoAdapter
         return new \Maho\Db\Expr($expression);
     }
 
+    #[\Override]
+    public function getNullSafeEqualsSql(string $left, string $right): \Maho\Db\Expr
+    {
+        return new \Maho\Db\Expr(sprintf('(%s IS NOT DISTINCT FROM %s)', $left, $right));
+    }
+
     /**
      * Returns valid COALESCE expression (PostgreSQL equivalent of IFNULL)
      */
@@ -2165,36 +2171,30 @@ class Pgsql extends AbstractPdoAdapter
             $actualTableName = $from[$table]['tableName'];
         }
 
-        // Get primary key column - try explicit PK first, then common column names
         $pkColumns = $this->_getPrimaryKeyColumns($actualTableName);
-        if (!empty($pkColumns)) {
-            $pkColumn = $pkColumns[0];
-        } else {
-            // No primary key found - check for common identifier columns
+        if (empty($pkColumns)) {
             $tableColumns = array_keys($this->describeTable($actualTableName));
             if (in_array('entity_id', $tableColumns)) {
-                $pkColumn = 'entity_id';
+                $pkColumns = ['entity_id'];
             } elseif (in_array('id', $tableColumns)) {
-                $pkColumn = 'id';
+                $pkColumns = ['id'];
             } else {
-                // Last resort: use first column
-                $pkColumn = $tableColumns[0] ?? 'id';
+                $pkColumns = [$tableColumns[0] ?? 'id'];
             }
         }
 
-        // Clone select and reset columns to only select the primary key
+        // All key columns, so that a composite key deletes only the rows that the select matches
         $subSelect = clone $select;
         $subSelect->reset(\Maho\Db\Select::COLUMNS);
-        $subSelect->columns([$tableAlias . '.' . $pkColumn]);
+        $subSelect->columns(array_map(fn(string $column): string => $tableAlias . '.' . $column, $pkColumns));
 
-        $query = sprintf(
+        $target = implode(', ', array_map($this->quoteIdentifier(...), $pkColumns));
+        return sprintf(
             'DELETE FROM %s WHERE %s IN (%s)',
             $this->quoteIdentifier($actualTableName),
-            $this->quoteIdentifier($pkColumn),
+            count($pkColumns) > 1 ? '(' . $target . ')' : $target,
             $subSelect->assemble(),
         );
-
-        return $query;
     }
 
     /**
@@ -2218,6 +2218,19 @@ class Pgsql extends AbstractPdoAdapter
         }
 
         return $result;
+    }
+
+    /**
+     * ANALYZE counts the rows that the current transaction wrote, so the planner
+     * sees a table that was filled in the same transaction.
+     */
+    #[\Override]
+    public function optimizeStatistics(array $tables = []): void
+    {
+        $this->_connect();
+        foreach ($tables as $table) {
+            $this->_connection->executeStatement('ANALYZE ' . $this->quoteIdentifier($table));
+        }
     }
 
     /**

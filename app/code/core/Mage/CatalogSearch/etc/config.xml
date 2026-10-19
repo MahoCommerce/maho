@@ -106,6 +106,7 @@ SPDX-License-Identifier: AFL-3.0
                 <log_rate_limit>30</log_rate_limit>
                 <log_clean_enabled>1</log_clean_enabled>
                 <log_clean_after_days>90</log_clean_after_days>
+                <index_batch_size>500</index_batch_size>
             </search>
             <advanced_search>
                 <enabled>1</enabled>

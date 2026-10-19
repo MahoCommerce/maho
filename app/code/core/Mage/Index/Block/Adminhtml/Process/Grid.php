@@ -71,7 +71,7 @@ class Mage_Index_Block_Adminhtml_Process_Grid extends Mage_Adminhtml_Block_Widge
             }
             $item->setName($item->getIndexer()->getName());
             $item->setDescription($item->getIndexer()->getDescription());
-            $item->setUpdateRequired($item->getUnprocessedEventsCollection()->count() > 0 ? 1 : 0);
+            $item->setUpdateRequired(Mage::getResourceSingleton('index/event')->hasUnprocessedEvents($item) ? 1 : 0);
             if ($item->isLocked()) {
                 $item->setStatus(Mage_Index_Model_Process::STATUS_RUNNING);
             }

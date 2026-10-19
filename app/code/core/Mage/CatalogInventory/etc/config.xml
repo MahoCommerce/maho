@@ -88,6 +88,11 @@ SPDX-License-Identifier: AFL-3.0
                         <cataloginventory_stock/>
                     </depends>
                 </catalog_product_price>
+                <catalogsearch_fulltext>
+                    <depends>
+                        <cataloginventory_stock/>
+                    </depends>
+                </catalogsearch_fulltext>
             </indexer>
         </index>
     </global>

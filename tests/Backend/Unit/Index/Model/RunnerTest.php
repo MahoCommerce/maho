@@ -145,3 +145,40 @@ it('skips an index that is already running', function () {
         // Otherwise a dependent step further down the queue would rebuild it unreported
         ->and($locked->getData('runed_reindexall'))->toBeTrue();
 });
+
+it('queues the objects that resolve dependencies, so a dependency runs once', function () {
+    $indexer = Mage::getSingleton('index/indexer');
+
+    foreach (Mage::getModel('index/runner')->buildQueue() as $process) {
+        expect($process)->toBe($indexer->getProcessByCode($process->getIndexerCode()));
+    }
+});
+
+it('reindexes the search index after the stock index', function () {
+    $codes = array_map(
+        fn(Mage_Index_Model_Process $process): string => $process->getIndexerCode(),
+        Mage::getModel('index/runner')->buildQueue(),
+    );
+
+    expect(array_search('cataloginventory_stock', $codes, true))
+        ->toBeLessThan(array_search('catalogsearch_fulltext', $codes, true));
+});
+
+it('puts the processes that depend on each other in one lane, in queue order', function () {
+    $stock = fakeProcess('stock')->setData('depends', []);
+    $price = fakeProcess('price')->setData('depends', ['stock']);
+    $url = fakeProcess('url')->setData('depends', []);
+    $search = fakeProcess('search')->setData('depends', ['stock', 'missing']);
+
+    $lanes = Mage::getModel('index/runner')->buildLanes([$stock, $price, $url, $search]);
+
+    expect($lanes)->toBe([[$stock, $price, $search], [$url]]);
+});
+
+it('joins two lanes when a process depends on both', function () {
+    $a = fakeProcess('a')->setData('depends', []);
+    $b = fakeProcess('b')->setData('depends', []);
+    $c = fakeProcess('c')->setData('depends', ['a', 'b']);
+
+    expect(Mage::getModel('index/runner')->buildLanes([$a, $b, $c]))->toBe([[$a, $b, $c]]);
+});

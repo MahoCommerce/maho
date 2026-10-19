@@ -19,19 +19,11 @@ abstract class Mage_Catalog_Model_Resource_Product_Indexer_Eav_Abstract extends 
     public function reindexAll()
     {
         $this->useIdxTable(true);
-        $this->beginTransaction();
-        try {
-            $this->clearTemporaryIndexTable();
-            $this->_prepareIndex();
-            $this->_prepareRelationIndex();
-            $this->_removeNotVisibleEntityFromIndex();
-
-            $this->syncData();
-            $this->commit();
-        } catch (Exception $e) {
-            $this->rollBack();
-            throw $e;
-        }
+        $this->clearTemporaryIndexTable();
+        $this->_prepareIndex();
+        $this->_prepareRelationIndex();
+        $this->_removeNotVisibleEntityFromIndex();
+        $this->syncData();
 
         return $this;
     }
@@ -159,6 +151,9 @@ abstract class Mage_Catalog_Model_Resource_Product_Indexer_Eav_Abstract extends 
     {
         $write      = $this->_getWriteAdapter();
         $idxTable   = $this->getIdxTable();
+        if ($parentIds === null) {
+            $write->optimizeStatistics([$idxTable]);
+        }
 
         $select = $write->select()
             ->from(['l' => $this->getTable('catalog/product_relation')], 'parent_id')
