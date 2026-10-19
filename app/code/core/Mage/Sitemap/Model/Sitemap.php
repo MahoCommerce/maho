@@ -397,6 +397,7 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
             'lastmod' => Mage::app()->getLocale()->todayUtc(),
         ];
 
+        $urlHelper = Mage::helper('core/url');
         foreach ($items as $item) {
             // Write URL to sitemap
             $imageUrl = null;
@@ -418,7 +419,9 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
                 $imageTitle = $item->getName();
             }
 
-            $xml = $this->getSitemapRow($baseUrl . $item->getUrl(), $lastmod, $changefreq, $priority, $imageUrl, $imageTitle);
+            // The base URL keeps its trailing slash, as Mage_Core_Model_Controller_Front_Observer::checkCanonicalUri() does
+            $url = $item->getUrl() === '' ? $baseUrl : $urlHelper->addOrRemoveTrailingSlash($baseUrl . $item->getUrl(), $storeId);
+            $xml = $this->getSitemapRow($url, $lastmod, $changefreq, $priority, $imageUrl, $imageTitle);
             $file->write($xml);
         }
 

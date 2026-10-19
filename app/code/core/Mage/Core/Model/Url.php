@@ -985,7 +985,7 @@ class Mage_Core_Model_Url extends \Maho\DataObject
             $url .= '#' . $this->getFragment();
         }
 
-        $url = Mage::helper('core/url')->addOrRemoveTrailingSlash($url);
+        $url = Mage::helper('core/url')->addOrRemoveTrailingSlash($url, $this->getStore());
 
         return $this->escape($url);
     }
