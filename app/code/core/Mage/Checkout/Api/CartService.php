@@ -1199,7 +1199,7 @@ class CartService
     public function assignCustomer(\Mage_Sales_Model_Quote $quote, \Mage_Customer_Model_Customer $customer): \Mage_Sales_Model_Quote
     {
         $quote->assignCustomer($customer);
-        $quote->setCustomerIsGuest(false);
+        $quote->setCustomerIsGuest(0);
         $this->collectAndSave($quote);
 
         return $quote;
@@ -1265,7 +1265,7 @@ class CartService
                     }
                 }
             }
-            $customerCart->setCustomerIsGuest(false);
+            $customerCart->setCustomerIsGuest(0);
             $this->collectAndSave($customerCart);
 
             return $customerCart;

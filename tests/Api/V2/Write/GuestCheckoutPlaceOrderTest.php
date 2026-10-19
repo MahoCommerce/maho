@@ -118,7 +118,7 @@ it('places a cart assigned to a customer while it still has the guest flag as a 
     expect($response['status'])->toBeIn([200, 201]);
     $order = Mage::getModel('sales/order')->loadByIncrementId((string) $response['json']['incrementId']);
     $this->orderIds[] = (int) $order->getId();
-    expect($order->getCustomerIsGuest())->toBeFalse()
+    expect((bool) $order->getCustomerIsGuest())->toBeFalse()
         ->and((int) $order->getCustomerId())->toBe($customerId)
         ->and($order->getData('guest_access_token'))->toBeEmpty()
         ->and($order->getCustomerEmail())->toBe(Mage::getModel('customer/customer')->load($customerId)->getEmail());
