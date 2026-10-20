@@ -45,6 +45,8 @@ function previewDispatch(string $draftId): array
         ->setParam('draft', $draftId)
         ->setDispatched(true);
     Mage::app()->setRequest($request);
+    // preDispatch() loads these on a real request, and the marker observer is a frontend one
+    Mage::app()->loadAreaPart(Mage_Core_Model_App_Area::AREA_FRONTEND, Mage_Core_Model_App_Area::PART_EVENTS);
     $response = new Mage_Core_Controller_Response_Http();
     // The domain policy observer sets this before the action runs
     $response->setHeader('X-Frame-Options', 'SAMEORIGIN');
