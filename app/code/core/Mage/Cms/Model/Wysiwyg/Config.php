@@ -126,20 +126,16 @@ class Mage_Cms_Model_Wysiwyg_Config extends \Maho\DataObject
     }
 
     /**
-     * The store view whose theme the editor previews: the first store view of the CMS page
-     * or block that the admin edits, else the default store view. Null when no store view exists.
+     * The store view whose theme the editor previews: the store view of the CMS page, block
+     * or blog post that the admin edits, else the default store view. Null when no store view exists.
      */
     public function getPreviewStoreId(): ?int
     {
-        foreach (['cms_page', 'cms_block'] as $key) {
+        foreach (['cms_page', 'cms_block', 'blog_post'] as $key) {
             $model = Mage::registry($key);
-            if (!$model instanceof Mage_Core_Model_Abstract) {
-                continue;
-            }
-            foreach ((array) $model->getStoreId() as $id) {
-                if ((int) $id > 0) {
-                    return (int) $id;
-                }
+            $storeId = $model instanceof Mage_Core_Model_Abstract ? Mage::helper('cms/preview')->getStoreId($model) : null;
+            if ($storeId !== null) {
+                return $storeId;
             }
         }
         $storeId = (int) Mage::app()->getDefaultStoreView()?->getId();
