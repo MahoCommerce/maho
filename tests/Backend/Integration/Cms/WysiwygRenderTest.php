@@ -139,6 +139,38 @@ describe('render', function () {
         expect(wysiwygRenderer()->render([$directive], $this->storeId)['html'][$directive])->toBe('');
     });
 
+    it('renders with the block cache off, so that no admin URL goes into a cached block', function () {
+        $cache = Mage::app()->getCache();
+        $before = (bool) Mage::app()->useCache(Mage_Core_Block_Abstract::CACHE_GROUP);
+        $cache->unbanUse(Mage_Core_Block_Abstract::CACHE_GROUP);
+        try {
+            $during = $cache->runWithout(
+                Mage_Core_Block_Abstract::CACHE_GROUP,
+                fn(): bool => (bool) Mage::app()->useCache(Mage_Core_Block_Abstract::CACHE_GROUP),
+            );
+            wysiwygRenderer()->render(['{{icon name="truck"}}'], $this->storeId);
+
+            expect($during)->toBeFalse()
+                ->and(Mage::app()->useCache(Mage_Core_Block_Abstract::CACHE_GROUP))->toBeTrue();
+        } finally {
+            if (!$before) {
+                $cache->banUse(Mage_Core_Block_Abstract::CACHE_GROUP);
+            }
+        }
+    });
+
+    it('keeps a cache type off after the render when it was off before', function () {
+        $cache = Mage::app()->getCache();
+        $cache->banUse(Mage_Core_Block_Abstract::CACHE_GROUP);
+        try {
+            wysiwygRenderer()->render(['{{icon name="truck"}}'], $this->storeId);
+
+            expect(Mage::app()->useCache(Mage_Core_Block_Abstract::CACHE_GROUP))->toBeFalse();
+        } finally {
+            $cache->unbanUse(Mage_Core_Block_Abstract::CACHE_GROUP);
+        }
+    });
+
     it('gives back the admin store and design after the render', function () {
         $storeId = Mage::app()->getStore()->getId();
         $area = Mage::getDesign()->getArea();

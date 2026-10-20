@@ -35,7 +35,13 @@ class Mage_Cms_PreviewController extends Mage_Core_Controller_Front_Action
             ->setHeader('Content-Security-Policy', "frame-ancestors 'self' " . $draft['admin_origin'], true);
 
         Mage::register(Mage_Cms_Model_Preview::REGISTRY_KEY, ['draft' => $draft, 'provider' => $provider]);
-        if (!$provider->render($this, $draft)) {
+        // A cached block can hold the saved content, and a block cached here holds draft content
+        // and links to this preview URL, such as the page links of a widget pager
+        $rendered = Mage::app()->getCache()->runWithout(
+            Mage_Core_Block_Abstract::CACHE_GROUP,
+            fn(): bool => $provider->render($this, $draft),
+        );
+        if (!$rendered) {
             $this->_forward('noRoute');
         }
     }

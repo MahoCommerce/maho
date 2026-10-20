@@ -317,6 +317,27 @@ class Mage_Core_Model_Cache
     }
 
     /**
+     * Run $callback with the cache type $typeCode off, so that the callback neither reads nor
+     * writes that type. After the callback, the type gets back its earlier state.
+     *
+     * @template T
+     * @param callable(): T $callback
+     * @return T
+     */
+    public function runWithout(string $typeCode, callable $callback): mixed
+    {
+        $allowed = (bool) $this->canUse($typeCode);
+        $this->banUse($typeCode);
+        try {
+            return $callback();
+        } finally {
+            if ($allowed) {
+                $this->unbanUse($typeCode);
+            }
+        }
+    }
+
+    /**
      * Get cache tags by cache type from configuration
      *
      * @param string $type

@@ -53,6 +53,20 @@ class Mage_Cms_Model_Wysiwyg_Render
      */
     public function render(array $directives, int $storeId): array
     {
+        // A block cached here holds links to the admin URL of this request, such as the page
+        // links of a widget pager, and the storefront would serve them
+        return Mage::app()->getCache()->runWithout(
+            Mage_Core_Block_Abstract::CACHE_GROUP,
+            fn(): array => $this->renderInStore($directives, $storeId),
+        );
+    }
+
+    /**
+     * @param list<string> $directives
+     * @return array{head: string, html: array<string, string>}
+     */
+    protected function renderInStore(array $directives, int $storeId): array
+    {
         $emulation = Mage::getSingleton('core/app_emulation');
         $environment = $emulation->startEnvironmentEmulation($storeId);
         try {
