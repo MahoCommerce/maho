@@ -472,6 +472,9 @@
        admin can see what the block is and double-click it to edit */
     div[data-type^="maho-"].is-rendered {
         display: block;
+        /* A frame adds no minimum width, so without this a grid column with a render
+           shrinks to nothing next to a column with text */
+        min-width: 15rem;
         padding: 0;
         border-color: transparent;
 
