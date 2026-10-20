@@ -1,0 +1,88 @@
+<?php
+
+/**
+ * Live preview of a CMS block, alone or on a page that shows it.
+ *
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Cms
+ */
+
+declare(strict_types=1);
+
+class Mage_Cms_Model_Preview_Provider_Block extends Mage_Cms_Model_Preview_Provider_Abstract
+{
+    public const FIELDS = ['title', 'identifier', 'content'];
+
+    /** @var array<int, string> */
+    private array $savedIdentifiers = [];
+
+    #[\Override]
+    public function prepare(array $post, int $storeId): array
+    {
+        $data = $this->pick($post, self::FIELDS);
+        $data = $this->sanitize($data, ['content'], Mage::helper('cms')->getBlockTemplateProcessor());
+
+        return ['data' => $data, 'warnings' => []];
+    }
+
+    /**
+     * Without a context page, the block shows alone in the store layout. With one, that
+     * saved page renders, and the observer puts the draft in place of the block.
+     */
+    #[\Override]
+    public function render(Mage_Core_Controller_Front_Action $action, array $draft): bool
+    {
+        if ($draft['context_page_id'] !== null) {
+            return Mage::helper('cms/page')->renderPage($action, (string) $draft['context_page_id']);
+        }
+
+        $action->loadLayout(['default', 'cms_preview_block']);
+        $layout = $action->getLayout();
+        $layout->getBlock('head')?->setTitle((string) ($draft['data']['title'] ?? ''));
+        // The observer fills this block with the draft, as it does on a context page
+        $layout->getBlock('content')?->append($layout->createBlock('core/text', 'cms_preview_block'));
+        $action->renderLayout();
+
+        return true;
+    }
+
+    /**
+     * A block matches by id or by identifier: a layout or a {{block}} directive can name
+     * it either way. The saved identifier counts too, since the draft can change it.
+     */
+    #[\Override]
+    public function isTarget(Mage_Core_Block_Abstract $block, array $draft): bool
+    {
+        if ($block->getNameInLayout() === 'cms_preview_block') {
+            return true;
+        }
+        if (!$block instanceof Mage_Cms_Block_Block && !$block instanceof Mage_Cms_Block_Widget_Block) {
+            return false;
+        }
+        $blockId = (string) $block->getBlockId();
+        if ($blockId === '') {
+            return false;
+        }
+
+        $names = [(string) ($draft['data']['identifier'] ?? '')];
+        if ($draft['entity_id'] !== null) {
+            $names[] = (string) $draft['entity_id'];
+            $names[] = $this->savedIdentifier($draft['entity_id']);
+        }
+
+        return in_array($blockId, array_filter($names, static fn(string $name): bool => $name !== ''), true);
+    }
+
+    #[\Override]
+    public function getTargetHtml(string $html, array $draft): string
+    {
+        return (string) Mage::helper('cms')->getBlockTemplateProcessor()
+            ->filter((string) ($draft['data']['content'] ?? ''));
+    }
+
+    private function savedIdentifier(int $blockId): string
+    {
+        return $this->savedIdentifiers[$blockId] ??= (string) Mage::getModel('cms/block')->load($blockId)->getIdentifier();
+    }
+}

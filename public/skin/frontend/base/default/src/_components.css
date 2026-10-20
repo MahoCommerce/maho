@@ -3331,6 +3331,108 @@
     }
 
     /* ============================================
+     * WYSIWYG content - accordion & tabs
+     * Structural contract of extensions/details.js. app.js builds the tab
+     * strip of a tabs group and sets data-tabs. Without JS the group stays
+     * an accordion. Ported from legacy styles.css, tokenized.
+     * ============================================ */
+
+    [data-type="maho-accordion"] {
+        margin: 1rem 0;
+    }
+
+    [data-type="maho-accordion"] > details {
+        border: 1px solid var(--color-line);
+        border-radius: var(--radius-box);
+        margin-bottom: 0.5rem;
+        background: var(--color-base-100);
+    }
+
+    [data-type="maho-accordion"] > details > summary {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        list-style: none;
+
+        &::-webkit-details-marker {
+            display: none;
+        }
+
+        /* Chevron, down when the panel is closed and up when it is open */
+        &::after {
+            content: '';
+            flex: 0 0 auto;
+            width: 0.5em;
+            height: 0.5em;
+            border-right: 2px solid currentColor;
+            border-bottom: 2px solid currentColor;
+            rotate: 45deg;
+            transition: rotate 0.2s;
+        }
+    }
+
+    [data-type="maho-accordion"] > details[open] > summary::after {
+        rotate: -135deg;
+    }
+
+    [data-type="maho-accordion"] > details > [data-type="detailsContent"] {
+        padding: 0 1rem 1rem;
+    }
+
+    [data-type="maho-accordion"][data-tabs] > details {
+        border: none;
+        border-radius: 0;
+        margin-bottom: 0;
+        background: none;
+
+        & > summary {
+            display: none;
+        }
+
+        & > [data-type="detailsContent"] {
+            padding: 1rem;
+            border: 1px solid var(--color-line);
+            border-top: none;
+            border-radius: 0 0 var(--radius-box) var(--radius-box);
+        }
+    }
+
+    .maho-tabs-strip {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.25rem;
+        border-bottom: 1px solid var(--color-line);
+
+        button {
+            padding: 0.6rem 1rem;
+            margin-bottom: -1px;
+            border: 1px solid transparent;
+            border-radius: var(--radius-box) var(--radius-box) 0 0;
+            background: none;
+            font: inherit;
+            font-weight: 600;
+            color: color-mix(in oklab, var(--color-base-content) 65%, transparent);
+            cursor: pointer;
+
+            &:hover {
+                color: var(--color-base-content);
+                background: var(--color-base-200);
+            }
+
+            &[aria-selected="true"] {
+                border-color: var(--color-line);
+                border-bottom-color: var(--color-base-100);
+                background: var(--color-base-100);
+                color: var(--color-base-content);
+            }
+        }
+    }
+
+    /* ============================================
      * AJAX loader overlay (injected by varien/js.js showLoader())
      * ============================================ */
 

@@ -13,6 +13,8 @@ import { MahoBentoGrid, MahoBentoCell, BENTO_PRESETS } from './extensions/bento.
 import { MahoAccordion, MahoDetails, DetailsSummary, DetailsContent, ACCORDION_STYLES } from './extensions/details.js';
 import { MahoSvgBlock, MahoSvgInline } from './extensions/svg.js';
 import { mountDirectiveRender, FRAMED_TYPES, INLINE_TYPES } from './extensions/widget-render.js';
+import { MahoBlockMove, STRUCTURAL_NODES } from './extensions/block-move.js';
+import { MahoButton } from './extensions/button.js';
 
 // prosemirror-tables has no parse rules for the table wrappers browsers (and TipTap itself) emit,
 // so with `enableContentCheck` on TipTap's catch-all rule flags them and falsely warns that valid
@@ -37,6 +39,7 @@ export {
     MahoBentoGrid, MahoBentoCell, BENTO_PRESETS,
     MahoAccordion, MahoDetails, DetailsSummary, DetailsContent, ACCORDION_STYLES,
     MahoSvgBlock, MahoSvgInline,
+    MahoBlockMove, STRUCTURAL_NODES, MahoButton,
 };
 
 const parseDirective = (directiveStr) => {
@@ -939,6 +942,7 @@ export const MahoFullscreen = Extension.create({
 
                 if (isFullscreen) {
                     // Exit fullscreen
+                    wysiwygSetup.closeWorkspace?.();
                     wrapper.classList.remove('tiptap-fullscreen');
                     document.body.style.overflow = '';
                     this.storage.isFullscreen = false;
@@ -947,6 +951,7 @@ export const MahoFullscreen = Extension.create({
                     wrapper.classList.add('tiptap-fullscreen');
                     document.body.style.overflow = 'hidden';
                     this.storage.isFullscreen = true;
+                    wysiwygSetup.openWorkspace?.();
                 }
 
                 // Update button state, icon, and title
@@ -970,6 +975,14 @@ export const MahoFullscreen = Extension.create({
 
                 return true;
             },
+        };
+    },
+
+    addKeyboardShortcuts() {
+        return {
+            // A dialog on top of the editor takes its own Escape
+            Escape: () => this.storage.isFullscreen && !document.querySelector('dialog[open]')
+                && this.editor.commands.toggleFullscreen(),
         };
     },
 });

@@ -106,7 +106,8 @@ class Mage_Cms_Helper_Wysiwyg_Images extends Mage_Core_Helper_Abstract
     public function convertIdToPath(string $id): ?string
     {
         $relative = $this->idDecode($id);
-        if ($relative === false) {
+        // Flysystem throws on a path that is not UTF-8 or has a control character, such as the decoded "root"
+        if ($relative === false || preg_match('#\p{C}#u', $relative) !== 0) {
             return null;
         }
         $relative = trim(str_replace('\\', '/', $relative), '/');

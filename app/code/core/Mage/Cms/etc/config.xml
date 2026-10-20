@@ -130,6 +130,21 @@ SPDX-License-Identifier: AFL-3.0
                 <http>http</http>
                 <https>https</https>
             </allowed_stream_wrappers>
+            <!-- The live preview of the content editor, one provider per type of content -->
+            <preview>
+                <providers>
+                    <page>
+                        <model>cms/preview_provider_page</model>
+                        <acl>cms/page</acl>
+                        <id_field>page_id</id_field>
+                    </page>
+                    <block>
+                        <model>cms/preview_provider_block</model>
+                        <acl>cms/block</acl>
+                        <id_field>block_id</id_field>
+                    </block>
+                </providers>
+            </preview>
         </cms>
     </global>
     <default>

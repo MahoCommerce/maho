@@ -5,4 +5,9 @@
             <block type="speculationrules/script" name="speculation_rules_script" template="speculationrules/script.phtml" />
         </reference>
     </default>
+
+    <!-- A preview of the content editor is not a visit -->
+    <cms_preview_view>
+        <remove name="speculation_rules_script"/>
+    </cms_preview_view>
 </layout>

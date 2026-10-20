@@ -1,0 +1,12 @@
+<?php
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package base_default
+ */
+
+/** @var Mage_Core_Block_Template $this */
+?>
+<div class="cms-preview-badge" role="status" style="position:fixed;inset-inline-start:1rem;inset-block-end:1rem;z-index:2147483647;padding:.375rem .75rem;border-radius:999px;background:#111827;color:#fff;font:600 12px/1.4 system-ui,sans-serif;box-shadow:0 2px 8px rgb(0 0 0 / .25);pointer-events:none">
+    <?= $this->escapeHtml(Mage::helper('cms')->__('Preview: unsaved changes')) ?>
+</div>
