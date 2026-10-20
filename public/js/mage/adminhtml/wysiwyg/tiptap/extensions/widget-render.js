@@ -102,8 +102,9 @@ const withoutScripts = (html) => {
 
 const frameDocument = (head, html) => `<!doctype html><html lang="${document.documentElement.lang || 'en'}"><head>`
     + `<meta charset="utf-8"><base target="_blank">${head}`
-    + '<style>html,body{margin:0;overflow:hidden;min-height:0}</style>'
-    + `</head><body><div class="std">${withoutScripts(html)}</div></body></html>`;
+    // flow-root keeps the margins of the first and last child inside the wrapper, so its height is all of the content
+    + '<style>html,body{margin:0;overflow:hidden;min-height:0}.maho-render{display:flow-root}</style>'
+    + `</head><body><div class="std maho-render">${withoutScripts(html)}</div></body></html>`;
 
 /**
  * Render the directive into the node view element `dom` when it comes into view. With
@@ -154,16 +155,18 @@ export const mountDirectiveRender = (setup, dom, directive, { inline = false } =
         frame.setAttribute('tabindex', '-1');
         frame.setAttribute('aria-hidden', 'true');
         frame.addEventListener('load', () => {
-            const root = frame.contentDocument?.documentElement;
-            if (!root) {
+            const content = frame.contentDocument?.querySelector('.maho-render');
+            if (!content) {
                 return;
             }
+            // The height of the document is never less than the frame, so a frame that was
+            // tall once would never shrink. The content wrapper has its own height
             const fit = () => {
-                frame.style.height = `${root.scrollHeight}px`;
+                frame.style.height = `${Math.ceil(content.getBoundingClientRect().bottom)}px`;
             };
             fit();
             resizeObserver = new ResizeObserver(fit);
-            resizeObserver.observe(frame.contentDocument.body);
+            resizeObserver.observe(content);
             dom.classList.add('is-rendered');
         }, { once: true });
         frame.srcdoc = frameDocument(result.head, result.html);
