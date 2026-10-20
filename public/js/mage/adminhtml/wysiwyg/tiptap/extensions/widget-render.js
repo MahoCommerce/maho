@@ -78,6 +78,10 @@ const rendererOf = (setup) => {
     return renderers.get(setup);
 };
 
+// The attributes that open a URL on a click or a submit. An image keeps a data: source
+const LINK_ATTRIBUTES = ['href', 'xlink:href', 'action', 'formaction'];
+const SCRIPT_SCHEME = /^\s*(javascript|vbscript|data):/i;
+
 // The sandbox blocks the scripts and the inline handlers anyway, but each one that it
 // blocks logs an error in the console
 const withoutScripts = (html) => {
@@ -88,7 +92,7 @@ const withoutScripts = (html) => {
     }
     for (const element of template.content.querySelectorAll('*')) {
         for (const { name, value } of [...element.attributes]) {
-            if (name.startsWith('on') || value.trim().toLowerCase().startsWith('javascript:')) {
+            if (name.startsWith('on') || (LINK_ATTRIBUTES.includes(name) && SCRIPT_SCHEME.test(value))) {
                 element.removeAttribute(name);
             }
         }
