@@ -22,11 +22,11 @@ class Mage_Cms_Model_Preview_Provider_Page extends Mage_Cms_Model_Preview_Provid
     ];
 
     #[\Override]
-    public function prepare(array $post, int $storeId): array
+    public function prepare(array $post): array
     {
         $warnings = [];
         $data = $this->pick($post, self::FIELDS);
-        $data = $this->filterDates($data, ['custom_theme_from', 'custom_theme_to']);
+        $data = Mage::helper('core')->filterDates($data, ['custom_theme_from', 'custom_theme_to']);
         $data = $this->validateLayoutUpdates($data, ['layout_update_xml', 'custom_layout_update_xml'], $warnings);
         $data = $this->sanitize($data, ['content'], Mage::helper('cms')->getPageTemplateProcessor());
 

@@ -47,7 +47,7 @@ class Mage_Cms_Model_Observer
 
         $transport->setHtml(
             Mage_Cms_Model_Preview::MARKER_START
-            . $preview['provider']->getTargetHtml((string) $transport->getHtml(), $preview['draft'])
+            . $preview['provider']->getTargetHtml($block, (string) $transport->getHtml(), $preview['draft'])
             . Mage_Cms_Model_Preview::MARKER_END,
         );
     }

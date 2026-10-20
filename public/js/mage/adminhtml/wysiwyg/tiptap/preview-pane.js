@@ -40,7 +40,7 @@ export class MahoPreviewPane {
         this.build();
         this.onChange = (event) => (event?.target && this.setup.wrapper.contains(event.target) ? null : this.schedule());
         this.onMessage = this.handleMessage.bind(this);
-        this.onVisibility = () => document.hidden || this.schedule();
+        this.onVisibility = () => document.hidden || !this.pending || this.schedule();
         this.onEditorScroll = this.handleEditorScroll.bind(this);
     }
 
@@ -277,9 +277,18 @@ export class MahoPreviewPane {
                 this.popout.location.replace(this.url);
             }
         } catch (error) {
-            this.inFlight = false;
-            this.reloadButton.classList.remove('is-busy');
             this.showStatus([error?.message || this.setup.translate('The preview could not be loaded.')], true);
+            this.finish();
+        }
+    }
+
+    /** End the request, and send the change that came while it ran. */
+    finish() {
+        this.inFlight = false;
+        this.reloadButton.classList.remove('is-busy');
+        if (this.pending) {
+            this.pending = false;
+            this.schedule();
         }
     }
 
@@ -304,12 +313,7 @@ export class MahoPreviewPane {
         }
         this.post(frame, { type: 'scrollTo', ratio: this.scrollRatio });
         this.lastDuration = performance.now() - this.started;
-        this.inFlight = false;
-        this.reloadButton.classList.remove('is-busy');
-        if (this.pending) {
-            this.pending = false;
-            this.schedule();
-        }
+        this.finish();
     }
 
     showStatus(messages, isError = false) {

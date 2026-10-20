@@ -286,6 +286,7 @@ class Mage_Core_Model_Resource_Helper_Sqlite extends Mage_Core_Model_Resource_He
     public function addLikeEscape($value, $options = [])
     {
         $value = $this->escapeLikeValue($value, $options);
-        return new Maho\Db\Expr($this->_getReadAdapter()->quote($value));
+        // SQLite has no default escape character, so name the backslash of escapeLikeValue()
+        return new Maho\Db\Expr($this->_getReadAdapter()->quote($value) . " ESCAPE '\\'");
     }
 }

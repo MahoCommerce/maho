@@ -30,8 +30,8 @@ class Mage_Adminhtml_Cms_PreviewController extends Mage_Adminhtml_Controller_Act
             return;
         }
 
-        $prepared = $provider->prepare($request->getPost(), (int) $store->getId());
-        $entityId = (int) $request->getPost($this->entityIdField($entity));
+        $prepared = $provider->prepare($request->getPost());
+        $entityId = (int) $request->getPost($preview->getIdField($entity));
         $contextId = (int) $request->getPost('preview_context');
         $draftId = $preview->saveDraft([
             'entity' => $entity,
@@ -45,21 +45,9 @@ class Mage_Adminhtml_Cms_PreviewController extends Mage_Adminhtml_Controller_Act
 
         $this->getResponse()->setBodyJson([
             'draft' => $draftId,
-            'url' => Mage::getModel('core/url')->setStore($store)->getUrl('cms/preview/view', [
-                'draft' => $draftId,
-                '_query' => ['___store' => $store->getCode()],
-            ]),
+            'url' => Mage::getModel('core/url')->setStore($store)->getUrl('cms/preview/view', ['draft' => $draftId]),
             'warnings' => $prepared['warnings'],
         ]);
-    }
-
-    /**
-     * Each editor posts the id of its record in its own field.
-     */
-    private function entityIdField(string $entity): string
-    {
-        $node = Mage::getConfig()->getNode(Mage_Cms_Model_Preview::XML_PATH_PROVIDERS . '/' . $entity . '/id_field');
-        return $node ? (string) $node : 'id';
     }
 
     /**

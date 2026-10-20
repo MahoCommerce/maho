@@ -35,8 +35,8 @@ class Mage_Adminhtml_Block_Page_Head extends Mage_Page_Block_Html_Head
     }
 
     /**
-     * The storefront palette for the WYSIWYG preview, for the first store view of the CMS
-     * page or block being edited, else the default store view.
+     * The storefront palette for the WYSIWYG preview, in the store view that
+     * Mage_Cms_Model_Wysiwyg_Config::getPreviewStoreId() picks.
      */
     public function getWysiwygPaletteCss(): string
     {

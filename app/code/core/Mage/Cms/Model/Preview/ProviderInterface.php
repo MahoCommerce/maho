@@ -12,7 +12,8 @@ declare(strict_types=1);
 
 /**
  * A module declares its provider under `global/cms/preview/providers/<entity>`, with the
- * model alias in `<model>` and the ACL resource of the editor in `<acl>`.
+ * model alias in `<model>`, the ACL resource of the editor in `<acl>`, and the form field
+ * that holds the record id in `<id_field>`.
  *
  * @phpstan-import-type Draft from Mage_Cms_Model_Preview
  */
@@ -26,7 +27,7 @@ interface Mage_Cms_Model_Preview_ProviderInterface
      * @param array<string, mixed> $post
      * @return array{data: array<string, mixed>, warnings: list<string>}
      */
-    public function prepare(array $post, int $storeId): array;
+    public function prepare(array $post): array;
 
     /**
      * Render the storefront page of $draft through $action. Return false when the page
@@ -45,9 +46,9 @@ interface Mage_Cms_Model_Preview_ProviderInterface
     public function isTarget(Mage_Core_Block_Abstract $block, array $draft): bool;
 
     /**
-     * The HTML that the preview shows for the target block, from the HTML it rendered.
+     * The HTML that the preview shows for the target $block, from the $html it rendered.
      *
      * @param Draft $draft
      */
-    public function getTargetHtml(string $html, array $draft): string;
+    public function getTargetHtml(Mage_Core_Block_Abstract $block, string $html, array $draft): string;
 }

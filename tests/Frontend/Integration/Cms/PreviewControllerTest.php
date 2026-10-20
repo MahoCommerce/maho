@@ -62,6 +62,7 @@ beforeEach(function () {
 afterEach(function () {
     Mage::unregister('_singleton/cms/page');
     Mage::unregister(Mage_Cms_Model_Preview::REGISTRY_KEY);
+    Mage::unregister('current_blog_post');
 });
 
 describe('page draft', function () {
@@ -169,6 +170,42 @@ describe('block draft', function () {
         expect($body)->toContain(Mage_Cms_Model_Preview::MARKER_START . '<p>Draft block</p>' . Mage_Cms_Model_Preview::MARKER_END);
     });
 
+    it('finds the block on a page by its saved identifier when the draft renames it', function () {
+        $body = previewDispatch(previewSaveDraft([
+            'entity' => 'block',
+            'entity_id' => (int) $this->block->getId(),
+            'context_page_id' => (int) $this->page->getId(),
+            'data' => ['identifier' => 'renamed-' . uniqid(), 'content' => '<p>Draft block</p>'],
+        ]))['response']->getBody();
+
+        expect($body)->toContain('<p>Draft block</p>')
+            ->not->toContain('<p>Saved block</p>');
+    });
+
+    it('keeps the wrapper of a static block widget that names the block by id', function () {
+        $page = Mage::getModel('cms/page')
+            ->setTitle('Shows the widget')
+            ->setIdentifier('preview-widget-' . uniqid())
+            ->setIsActive()
+            ->setRootTemplate('one_column')
+            ->setStores([0])
+            ->setContent('{{widget type="cms/widget_block" template="cms/widget/static_block/default.phtml" block_id="' . $this->block->getId() . '"}}')
+            ->save();
+        try {
+            $body = previewDispatch(previewSaveDraft([
+                'entity' => 'block',
+                'entity_id' => (int) $this->block->getId(),
+                'context_page_id' => (int) $page->getId(),
+                'data' => ['identifier' => $this->block->getIdentifier(), 'content' => '<p>Draft block</p>'],
+            ]))['response']->getBody();
+
+            expect($body)->toContain(Mage_Cms_Model_Preview::MARKER_START . '<div class="widget widget-static-block"><p>Draft block</p></div>')
+                ->not->toContain('<p>Saved block</p>');
+        } finally {
+            $page->delete();
+        }
+    });
+
     it('puts the draft in place of the block on a page that shows it', function () {
         $body = previewDispatch(previewSaveDraft([
             'entity' => 'block',
@@ -180,5 +217,21 @@ describe('block draft', function () {
         expect($body)->toContain('<p>Around</p>')
             ->toContain('<p>Draft block</p>')
             ->not->toContain('<p>Saved block</p>');
+    });
+});
+
+describe('blog post draft', function () {
+    it('renders a post that is not saved yet, with its title, body and robots', function () {
+        $result = previewDispatch(previewSaveDraft([
+            'entity' => 'blog_post',
+            'data' => ['title' => 'Draft post title', 'content' => '<p>Draft post body</p>', 'meta_robots' => 'NOINDEX,NOFOLLOW'],
+        ]));
+        $body = $result['response']->getBody();
+
+        expect($result['response']->getHttpResponseCode())->toBe(200)
+            ->and($body)->toContain('Draft post title')
+            ->toContain('<p>Draft post body</p>')
+            ->toContain(Mage_Cms_Model_Preview::MARKER_START)
+            ->and($result['controller']->getLayout()->getBlock('head')->getRobots())->toBe('NOINDEX,NOFOLLOW');
     });
 });

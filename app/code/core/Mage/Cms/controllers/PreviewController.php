@@ -13,6 +13,23 @@ declare(strict_types=1);
 class Mage_Cms_PreviewController extends Mage_Core_Controller_Front_Action
 {
     /**
+     * Run the request in the store view of the draft. The store view must be set before the
+     * session, the locale and the design load. A `___store` query would set the store cookie
+     * of the admin, and the storefront of the admin would then open that store view.
+     */
+    #[\Override]
+    public function preDispatch()
+    {
+        $draft = Mage::getSingleton('cms/preview')->loadDraft((string) $this->getRequest()->getParam('draft'));
+        $store = $draft !== null ? Mage::app()->getStores()[$draft['store_id']] ?? null : null;
+        if ($store?->getIsActive()) {
+            Mage::app()->setCurrentStore((int) $store->getId());
+        }
+
+        return parent::preDispatch();
+    }
+
+    /**
      * The draft id is the only key: it is random, and the admin gives it to the user who
      * wrote the draft. The page is never cached or indexed, and only the admin can frame it.
      */

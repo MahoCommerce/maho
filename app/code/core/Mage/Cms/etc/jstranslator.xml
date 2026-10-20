@@ -49,6 +49,18 @@ SPDX-License-Identifier: AFL-3.0
         <search-blocks translate="message">
             <message>Search blocks</message>
         </search-blocks>
+        <columns translate="message">
+            <message>Columns</message>
+        </columns>
+        <bento-grid translate="message">
+            <message>Bento Grid</message>
+        </bento-grid>
+        <accordion translate="message">
+            <message>Accordion</message>
+        </accordion>
+        <alignment translate="message">
+            <message>Alignment</message>
+        </alignment>
         <media translate="message">
             <message>Media</message>
         </media>

@@ -904,14 +904,7 @@ abstract class Mage_Core_Controller_Varien_Action
             return $array;
         }
 
-        $filter = new \Maho\Data\Form\Filter\Date(Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT));
-        foreach ($dateFields as $dateField) {
-            if (!empty($dateField) && isset($array[$dateField]) && $array[$dateField] !== '') {
-                $array[$dateField] = $filter->inputFilter($array[$dateField]);
-            }
-        }
-
-        return $array;
+        return Mage::helper('core')->filterDates($array, $dateFields);
     }
 
     /**

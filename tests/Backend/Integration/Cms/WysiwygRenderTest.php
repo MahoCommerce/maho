@@ -8,6 +8,7 @@
 declare(strict_types=1);
 
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
+use Tests\Helpers\AdminRoleFixture;
 
 uses(Tests\MahoBackendTestCase::class);
 
@@ -21,49 +22,6 @@ function wysiwygRenderer(): Mage_Cms_Model_Wysiwyg_Render
     /** @var Mage_Cms_Model_Wysiwyg_Render $renderer */
     $renderer = Mage::getSingleton('cms/wysiwyg_render');
     return $renderer;
-}
-
-/**
- * @param list<string> $resources
- */
-function wysiwygRenderAdmin(array $resources): Mage_Admin_Model_User
-{
-    $role = Mage::getModel('admin/role')->setData([
-        'role_name' => 'wysiwyg_render_' . uniqid(),
-        'role_type' => Mage_Admin_Model_Acl::ROLE_TYPE_GROUP,
-        'parent_id' => 0,
-    ])->save();
-    Mage::getModel('admin/rules')->setRoleId($role->getId())->setResources($resources)->saveRel();
-
-    $user = Mage::getModel('admin/user')->setData([
-        'username' => 'wysiwyg_render_' . uniqid(),
-        'firstname' => 'Pest',
-        'lastname' => 'Render',
-        'email' => uniqid('wysiwyg-render-') . '@example.test',
-        'password' => 'pest-render-password-1234',
-        'is_active' => 1,
-    ])->save();
-    Mage::getModel('admin/user')->setRoleId($role->getId())->setUserId($user->getId())->add();
-    $user = Mage::getModel('admin/user')->load($user->getId());
-
-    $session = Mage::getSingleton('admin/session');
-    $session->setUser($user);
-    $session->refreshAcl($user);
-    return $user;
-}
-
-function wysiwygRenderDeleteAdmin(Mage_Admin_Model_User $user): void
-{
-    // Log out first: the activity log cannot record the deletion of the admin who does it
-    $session = Mage::getSingleton('admin/session');
-    $session->setUser(null);
-    $session->setAcl(null);
-
-    $role = $user->getRole();
-    $user->delete();
-    if ($role->getId()) {
-        Mage::getModel('admin/role')->load($role->getId())->delete();
-    }
 }
 
 /**
@@ -143,14 +101,18 @@ describe('render', function () {
         $cache = Mage::app()->getCache();
         $before = (bool) Mage::app()->useCache(Mage_Core_Block_Abstract::CACHE_GROUP);
         $cache->unbanUse(Mage_Core_Block_Abstract::CACHE_GROUP);
+        $directive = '{{block id="' . $this->block->getIdentifier() . '"}}';
         try {
-            $during = $cache->runWithout(
-                Mage_Core_Block_Abstract::CACHE_GROUP,
-                fn(): bool => (bool) Mage::app()->useCache(Mage_Core_Block_Abstract::CACHE_GROUP),
+            wysiwygRenderer()->render([$directive], $this->storeId);
+            // A direct write cleans no cache tag, so a cached block would still show the old body
+            $resource = Mage::getSingleton('core/resource');
+            $resource->getConnection('core_write')->update(
+                $resource->getTableName('cms/block'),
+                ['content' => '<p>Changed body</p>'],
+                ['block_id = ?' => (int) $this->block->getId()],
             );
-            wysiwygRenderer()->render(['{{icon name="truck"}}'], $this->storeId);
 
-            expect($during)->toBeFalse()
+            expect(wysiwygRenderer()->render([$directive], $this->storeId)['html'][$directive])->toContain('Changed body')
                 ->and(Mage::app()->useCache(Mage_Core_Block_Abstract::CACHE_GROUP))->toBeTrue();
         } finally {
             if (!$before) {
@@ -183,7 +145,7 @@ describe('render', function () {
 
 describe('endpoint', function () {
     it('renders only the directives that the role of the admin can see', function () {
-        $user = wysiwygRenderAdmin(['admin/cms', 'admin/cms/block']);
+        $user = AdminRoleFixture::login(['admin/cms', 'admin/cms/block']);
         try {
             $block = '{{block id="' . $this->block->getIdentifier() . '"}}';
             $widget = '{{widget type="cms/widget_block" template="cms/widget/static_block/default.phtml" block_id="' . $this->block->getId() . '"}}';
@@ -192,19 +154,32 @@ describe('endpoint', function () {
 
             expect(array_keys($html))->toEqualCanonicalizing([$block, $icon]);
         } finally {
-            wysiwygRenderDeleteAdmin($user);
+            AdminRoleFixture::delete($user);
+        }
+    });
+
+    it('lets an admin with no CMS resource call it, for the editor of a product', function () {
+        $user = AdminRoleFixture::login(['admin/catalog', 'admin/catalog/products']);
+        try {
+            $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create('http://localhost/admin/cms_wysiwyg/renderDirectives', 'POST'));
+            $request->setActionName('renderDirectives');
+            $controller = new Mage_Adminhtml_Cms_WysiwygController($request, new Mage_Core_Controller_Response_Http());
+
+            expect((fn(): bool => $this->_isAllowed())->call($controller))->toBeTrue();
+        } finally {
+            AdminRoleFixture::delete($user);
         }
     });
 
     it('renders nothing for a store view that does not exist', function () {
-        $user = wysiwygRenderAdmin(['admin/cms', 'admin/cms/block']);
+        $user = AdminRoleFixture::login(['admin/cms', 'admin/cms/block']);
         try {
             $result = wysiwygRenderPost(['{{icon name="truck"}}'], 999999);
 
             expect($result['html'])->toBe([])
                 ->and($result['head'])->toBe('');
         } finally {
-            wysiwygRenderDeleteAdmin($user);
+            AdminRoleFixture::delete($user);
         }
     });
 });

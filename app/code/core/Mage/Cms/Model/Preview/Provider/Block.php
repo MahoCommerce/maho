@@ -18,7 +18,7 @@ class Mage_Cms_Model_Preview_Provider_Block extends Mage_Cms_Model_Preview_Provi
     private array $savedIdentifiers = [];
 
     #[\Override]
-    public function prepare(array $post, int $storeId): array
+    public function prepare(array $post): array
     {
         $data = $this->pick($post, self::FIELDS);
         $data = $this->sanitize($data, ['content'], Mage::helper('cms')->getBlockTemplateProcessor());
@@ -74,11 +74,18 @@ class Mage_Cms_Model_Preview_Provider_Block extends Mage_Cms_Model_Preview_Provi
         return in_array($blockId, array_filter($names, static fn(string $name): bool => $name !== ''), true);
     }
 
+    /**
+     * A static block widget keeps the wrapper of its template around the draft.
+     */
     #[\Override]
-    public function getTargetHtml(string $html, array $draft): string
+    public function getTargetHtml(Mage_Core_Block_Abstract $block, string $html, array $draft): string
     {
-        return (string) Mage::helper('cms')->getBlockTemplateProcessor()
+        $content = (string) Mage::helper('cms')->getBlockTemplateProcessor()
             ->filter((string) ($draft['data']['content'] ?? ''));
+
+        return $block instanceof Mage_Cms_Block_Widget_Block && $block->getTemplate()
+            ? $block->setText($content)->renderView()
+            : $content;
     }
 
     private function savedIdentifier(int $blockId): string

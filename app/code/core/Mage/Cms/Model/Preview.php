@@ -94,13 +94,6 @@ class Mage_Cms_Model_Preview
         ];
     }
 
-    public function deleteDraft(string $draftId): void
-    {
-        if (self::isValidId($draftId)) {
-            Mage::app()->removeCache($this->cacheId($draftId));
-        }
-    }
-
     public static function isValidId(string $draftId): bool
     {
         return preg_match('/^[0-9a-f]{32}$/', $draftId) === 1;
@@ -128,6 +121,16 @@ class Mage_Cms_Model_Preview
         $node = Mage::getConfig()->getNode(self::XML_PATH_PROVIDERS . '/' . $entity . '/acl');
 
         return $node ? (string) $node : null;
+    }
+
+    /**
+     * The field of the edit form that holds the id of the record of $entity.
+     */
+    public function getIdField(string $entity): string
+    {
+        $node = Mage::getConfig()->getNode(self::XML_PATH_PROVIDERS . '/' . $entity . '/id_field');
+
+        return $node ? (string) $node : 'id';
     }
 
     private function cacheId(string $draftId): string

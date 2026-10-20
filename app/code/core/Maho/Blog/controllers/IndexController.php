@@ -11,15 +11,16 @@ class Maho_Blog_IndexController extends Mage_Core_Controller_Front_Action
     #[Maho\Config\Route('/blog', methods: ['GET'])]
     public function indexAction(): void
     {
-        if (!Mage::helper('blog')->isEnabled()) {
+        $helper = Mage::helper('blog');
+        if (!$helper->isEnabled()) {
             $this->_forward('noRoute');
             return;
         }
 
         $this->loadLayout();
-        $this->_switchToSingleColumnIfNoSidebar();
-        $this->_initPageTitle(Mage::helper('blog')->__('Blog'));
-        $this->_initBreadcrumbs();
+        $helper->switchToSingleColumnIfNoSidebar($this->getLayout());
+        $helper->initPageTitle($this->getLayout(), $helper->__('Blog'));
+        $helper->initBreadcrumbs($this->getLayout());
         $this->renderLayout();
     }
 
@@ -49,10 +50,10 @@ class Maho_Blog_IndexController extends Mage_Core_Controller_Front_Action
 
         Mage::register('current_blog_category', $category);
         $this->loadLayout();
-        $this->_switchToSingleColumnIfNoSidebar();
-        $this->_initPageTitle($category->getName());
-        $this->_initMeta($category);
-        $this->_initBreadcrumbs($category);
+        $helper->switchToSingleColumnIfNoSidebar($this->getLayout());
+        $helper->initPageTitle($this->getLayout(), $category->getName());
+        $helper->initMeta($this->getLayout(), $category);
+        $helper->initBreadcrumbs($this->getLayout(), $category);
         $this->renderLayout();
     }
 
@@ -71,129 +72,6 @@ class Maho_Blog_IndexController extends Mage_Core_Controller_Front_Action
             return;
         }
 
-        Mage::register('current_blog_post', $post);
-        $this->loadLayout();
-        $this->_switchToSingleColumnIfNoSidebar();
-        $this->_initPageTitle($post->getTitle());
-        $this->_initMeta($post);
-        $this->_initBreadcrumbs(null, $post);
-        $this->renderLayout();
-    }
-
-    protected function _switchToSingleColumnIfNoSidebar(): void
-    {
-        $sidebar = $this->getLayout()->getBlock('blog.category.sidebar');
-        if (!$sidebar || !$sidebar->toHtml()) {
-            $root = $this->getLayout()->getBlock('root');
-            if ($root) {
-                $root->setTemplate('page/1column.phtml');
-            }
-        }
-    }
-
-    protected function _initPageTitle(string $title): void
-    {
-        $titleBlock = $this->getLayout()->getBlock('title');
-        if ($titleBlock) {
-            $titleBlock->setTitle($title);
-        }
-
-        $headBlock = $this->getLayout()->getBlock('head');
-        if ($headBlock) {
-            $headBlock->setTitle($title);
-        }
-    }
-
-    protected function _initMeta(\Maho\DataObject $entity): void
-    {
-        $headBlock = $this->getLayout()->getBlock('head');
-        if (!$headBlock) {
-            return;
-        }
-
-        if ($entity->getMetaTitle()) {
-            $headBlock->setTitle($entity->getMetaTitle());
-        }
-        if ($entity->getMetaDescription()) {
-            $headBlock->setDescription($entity->getMetaDescription());
-        }
-        if ($entity->getMetaKeywords()) {
-            $headBlock->setKeywords($entity->getMetaKeywords());
-        }
-        if ($entity->getMetaRobots()) {
-            $headBlock->setRobots($entity->getMetaRobots());
-        }
-    }
-
-    protected function _initBreadcrumbs(?Maho_Blog_Model_Category $category = null, ?Maho_Blog_Model_Post $post = null): void
-    {
-        $helper = Mage::helper('blog');
-        if (!$helper->areCategoriesEnabled()) {
-            return;
-        }
-
-        /** @var Mage_Page_Block_Html_Breadcrumbs|false $breadcrumbs */
-        $breadcrumbs = $this->getLayout()->getBlock('breadcrumbs');
-        if (!$breadcrumbs) {
-            return;
-        }
-
-        $breadcrumbs->addCrumb('home', [
-            'label' => $helper->__('Home'),
-            'title' => $helper->__('Home'),
-            'link'  => Mage::getBaseUrl(),
-        ]);
-
-        $blogUrl = Mage::getUrl($helper->getBlogUrlPrefix());
-        $isLast = !$category && !$post;
-
-        $breadcrumbs->addCrumb('blog', [
-            'label' => $helper->__('Blog'),
-            'title' => $helper->__('Blog'),
-            'link'  => $isLast ? null : $blogUrl,
-        ]);
-
-        if ($category) {
-            // Walk up the path to add all parent categories
-            $pathIds = explode('/', $category->getPath());
-            $rootId = Maho_Blog_Model_Category::ROOT_PARENT_ID;
-            $parentIds = array_filter($pathIds, fn($id) => (int) $id !== $rootId && (int) $id !== (int) $category->getId());
-
-            if (!empty($parentIds)) {
-                $parentCollection = Mage::getResourceModel('blog/category_collection')
-                    ->addFieldToFilter('entity_id', ['in' => $parentIds]);
-
-                $parentsById = [];
-                $urlKeys = [];
-                foreach ($parentCollection as $parent) {
-                    $parentsById[(int) $parent->getId()] = $parent;
-                    $urlKeys[(int) $parent->getId()] = $parent->getUrlKey();
-                }
-                $urlKeys[(int) $category->getId()] = $category->getUrlKey();
-
-                foreach ($parentIds as $parentId) {
-                    $parent = $parentsById[(int) $parentId] ?? null;
-                    if ($parent) {
-                        $breadcrumbs->addCrumb('category_' . $parent->getId(), [
-                            'label' => $parent->getName(),
-                            'title' => $parent->getName(),
-                            'link'  => $helper->getCategoryUrl($parent, null, $urlKeys),
-                        ]);
-                    }
-                }
-            }
-
-            $breadcrumbs->addCrumb('category_' . $category->getId(), [
-                'label' => $category->getName(),
-                'title' => $category->getName(),
-            ]);
-        }
-
-        if ($post) {
-            $breadcrumbs->addCrumb('post', [
-                'label' => $post->getTitle(),
-                'title' => $post->getTitle(),
-            ]);
-        }
+        Mage::helper('blog')->renderPost($this, $post);
     }
 }

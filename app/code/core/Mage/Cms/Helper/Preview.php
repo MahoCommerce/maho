@@ -103,15 +103,19 @@ class Mage_Cms_Helper_Preview extends Mage_Core_Helper_Abstract
             $usages[(int) $home->getId()] = ['id' => (int) $home->getId(), 'title' => (string) $home->getTitle()];
         }
 
-        $patterns = ['%block_id="' . $block->getId() . '"%'];
+        $texts = ['block_id="' . $block->getId() . '"'];
         $identifier = (string) $block->getIdentifier();
         if ($identifier !== '') {
-            $patterns[] = '%block_id="' . $identifier . '"%';
-            $patterns[] = '%id="' . $identifier . '"%';
+            $texts[] = 'block_id="' . $identifier . '"';
+            $texts[] = '{{block id="' . $identifier . '"';
         }
 
+        $helper = Mage::getResourceHelper('core');
         $pages = Mage::getResourceModel('cms/page_collection')
-            ->addFieldToFilter('content', array_map(static fn(string $pattern): array => ['like' => $pattern], $patterns))
+            ->addFieldToFilter('content', array_map(
+                static fn(string $text): array => ['like' => $helper->addLikeEscape($text, ['position' => 'any'])],
+                $texts,
+            ))
             ->setOrder('title', 'ASC')
             ->setPageSize(self::USAGE_LIMIT);
 

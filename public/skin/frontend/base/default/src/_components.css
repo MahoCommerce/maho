@@ -3083,10 +3083,9 @@
 
     /* ============================================
      * WYSIWYG content - grid layouts (columns & bento)
-     * Structural contract of the TipTap editor (extensions/bento.js and
-     * columns.js write these data attributes; presets add inline styles).
-     * Ported from base/default styles.css, tokenized: hairlines on
-     * --color-line, cards on the theme radius.
+     * These rules style the data attributes that extensions/bento.js and
+     * columns.js of the TipTap editor write. The presets add inline styles.
+     * Hairlines use --color-line, and cards use the theme radius.
      * ============================================ */
 
     [data-type="maho-columns"],
@@ -3332,9 +3331,9 @@
 
     /* ============================================
      * WYSIWYG content - accordion & tabs
-     * Structural contract of extensions/details.js. app.js builds the tab
-     * strip of a tabs group and sets data-tabs. Without JS the group stays
-     * an accordion. Ported from legacy styles.css, tokenized.
+     * These rules style the HTML that extensions/details.js writes. app.js
+     * builds the tab strip of a tabs group and sets data-tabs. Without JS
+     * the group stays an accordion.
      * ============================================ */
 
     [data-type="maho-accordion"] {

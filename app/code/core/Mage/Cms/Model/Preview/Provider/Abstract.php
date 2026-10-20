@@ -81,26 +81,8 @@ abstract class Mage_Cms_Model_Preview_Provider_Abstract implements Mage_Cms_Mode
         return $data;
     }
 
-    /**
-     * @param array<string, string> $data
-     * @param list<string> $fields
-     * @return array<string, string>
-     */
-    protected function filterDates(array $data, array $fields): array
-    {
-        $filter = new \Maho\Data\Form\Filter\Date(
-            Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT),
-        );
-        foreach ($fields as $field) {
-            if (($data[$field] ?? '') !== '') {
-                $data[$field] = (string) $filter->inputFilter($data[$field]);
-            }
-        }
-        return $data;
-    }
-
     #[\Override]
-    public function getTargetHtml(string $html, array $draft): string
+    public function getTargetHtml(Mage_Core_Block_Abstract $block, string $html, array $draft): string
     {
         return $html;
     }
