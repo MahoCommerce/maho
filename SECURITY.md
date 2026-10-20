@@ -19,14 +19,17 @@ Please include the following information to help us better understand and resolv
 ## Verifying a Release
 
 Each release from 26.11.0 has two assets: `maho-<version>.zip` and its CycloneDX SBOM,
-`maho-<version>.cdx.json`. The `release-build.yml` workflow builds them on a GitHub-hosted runner
-and signs the build provenance (SLSA v1) and the SBOM with GitHub artifact attestations.
+`maho-<version>.cdx.json`. A reusable workflow in
+[MahoCommerce/infrastructure](https://github.com/MahoCommerce/infrastructure) builds them on a
+GitHub-hosted runner and signs the build provenance (SLSA v1) and the SBOM with GitHub artifact
+attestations. The build steps cannot reach the signing identity, and a change in this repository
+cannot change the build (SLSA Build Level 3).
 
 Check the provenance of a downloaded package:
 
 ```bash
 gh attestation verify maho-26.11.0.zip --repo MahoCommerce/maho \
-  --signer-workflow MahoCommerce/maho/.github/workflows/release-build.yml \
+  --signer-workflow MahoCommerce/infrastructure/.github/workflows/release-build.yml \
   --source-ref refs/heads/main
 ```
 
