@@ -26,7 +26,7 @@ class Mage_Adminhtml_Cms_PreviewController extends Mage_Adminhtml_Controller_Act
         $provider = $preview->getProvider($entity);
         $store = Mage::app()->getStores()[(int) $request->getPost('preview_store')] ?? null;
         if ($provider === null || $store === null || !$store->getIsActive()) {
-            $this->respond(['error' => true, 'message' => $this->__('This content has no preview.')], 422);
+            $this->getResponse()->setHttpResponseCode(422)->setBodyJson(['error' => true, 'message' => $this->__('This content has no preview.')]);
             return;
         }
 
@@ -43,7 +43,7 @@ class Mage_Adminhtml_Cms_PreviewController extends Mage_Adminhtml_Controller_Act
             'data' => $prepared['data'],
         ], (string) $request->getPost('preview_draft') ?: null);
 
-        $this->respond([
+        $this->getResponse()->setBodyJson([
             'draft' => $draftId,
             'url' => Mage::getModel('core/url')->setStore($store)->getUrl('cms/preview/view', [
                 'draft' => $draftId,
@@ -60,17 +60,6 @@ class Mage_Adminhtml_Cms_PreviewController extends Mage_Adminhtml_Controller_Act
     {
         $node = Mage::getConfig()->getNode(Mage_Cms_Model_Preview::XML_PATH_PROVIDERS . '/' . $entity . '/id_field');
         return $node ? (string) $node : 'id';
-    }
-
-    /**
-     * @param array<string, mixed> $data
-     */
-    private function respond(array $data, int $status = 200): void
-    {
-        $this->getResponse()
-            ->setHttpResponseCode($status)
-            ->setHeader('Content-Type', 'application/json', true)
-            ->setBody(Mage::helper('core')->jsonEncode($data));
     }
 
     /**

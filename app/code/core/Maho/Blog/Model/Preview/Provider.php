@@ -43,6 +43,8 @@ class Maho_Blog_Model_Preview_Provider extends Mage_Cms_Model_Preview_Provider_A
         $post = Mage::getModel('blog/post');
         if ($draft['entity_id'] !== null) {
             $post->load($draft['entity_id']);
+        } else {
+            $post->setData('category_ids', []);
         }
         $post->addData($draft['data']);
         Mage::register('current_blog_post', $post);

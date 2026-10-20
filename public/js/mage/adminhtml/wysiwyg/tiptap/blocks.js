@@ -72,6 +72,12 @@ export const blockRegistry = (setup) => {
         .filter((section) => section.items.length > 0);
 };
 
+/** The items of the registry with these titles, in this order, as buttons of the main toolbar. */
+export const blockButtons = (setup, titles) => {
+    const items = blockRegistry(setup).flatMap((section) => section.items);
+    return titles.flatMap((title) => items.filter((item) => item.title === title)).map((item) => ({ type: 'button', ...item }));
+};
+
 /** A section of the registry as a dropdown of the main toolbar. */
 export const blockDropdown = (setup, id) => {
     const section = blockRegistry(setup).find((item) => item.id === id);

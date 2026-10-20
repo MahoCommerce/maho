@@ -135,7 +135,7 @@ SPDX-License-Identifier: AFL-3.0
                 <providers>
                     <page>
                         <model>cms/preview_provider_page</model>
-                        <acl>cms/page</acl>
+                        <acl>cms/page/save</acl>
                         <id_field>page_id</id_field>
                     </page>
                     <block>

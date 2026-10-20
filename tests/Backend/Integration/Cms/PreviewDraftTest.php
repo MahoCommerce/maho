@@ -74,7 +74,7 @@ describe('providers', function () {
         expect(previewDraftModel()->getProvider($entity))->toBeInstanceOf($class)
             ->and(previewDraftModel()->getAclResource($entity))->toBe($acl);
     })->with([
-        'page' => ['page', Mage_Cms_Model_Preview_Provider_Page::class, 'cms/page'],
+        'page' => ['page', Mage_Cms_Model_Preview_Provider_Page::class, 'cms/page/save'],
         'block' => ['block', Mage_Cms_Model_Preview_Provider_Block::class, 'cms/block'],
         'blog post' => ['blog_post', Maho_Blog_Model_Preview_Provider::class, 'cms/blog/posts'],
     ]);

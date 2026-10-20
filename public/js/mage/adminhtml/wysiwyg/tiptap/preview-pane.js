@@ -38,7 +38,7 @@ export class MahoPreviewPane {
         this.loads = 0;
 
         this.build();
-        this.onChange = () => this.schedule();
+        this.onChange = (event) => (event?.target && this.setup.wrapper.contains(event.target) ? null : this.schedule());
         this.onMessage = this.handleMessage.bind(this);
         this.onVisibility = () => document.hidden || this.schedule();
         this.onEditorScroll = this.handleEditorScroll.bind(this);

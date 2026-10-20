@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: AFL-3.0
 
 import * as TiptapModules from './extensions.js';
-import { blockDropdown } from './blocks.js';
+import { blockButtons, blockDropdown } from './blocks.js';
 import { html_beautify } from 'https://esm.sh/js-beautify@2.0.3/js/lib/beautify-html.js';
 
 class tiptapWysiwygSetup {
@@ -705,15 +705,11 @@ class tiptapWysiwygSetup {
             },
             { type: 'separator'},
             { type: 'button', title: 'Link', icon: 'link', onClick: this.linkHandler.bind(this) },
-            { type: 'button', title: 'Button', icon: 'button', command: 'openButtonDialog' },
-            { type: 'button', title: 'Insert Table', icon: 'table', command: 'insertTable', args: [{rows:3, cols:3, withHeaderRow:true}] },
+            ...blockButtons(this, ['Button', 'Insert Table']),
             blockDropdown(this, 'columns'),
             blockDropdown(this, 'bento'),
             blockDropdown(this, 'accordion'),
-            { type: 'button', title: 'Insert Image', icon: 'image', command: 'insertMahoImage', enabled: this.config.add_images },
-            { type: 'button', title: 'Insert Slideshow', icon: 'slideshow', command: 'insertMahoSlideshow', enabled: this.config.add_images && this.config.add_slideshows !== false },
-            { type: 'button', title: 'Insert Widget', icon: 'widget', command: 'insertMahoWidget', enabled: this.config.add_widgets },
-            { type: 'button', title: 'Insert Variable', icon: 'variable', command: 'insertMahoVariable', enabled: this.config.add_variables},
+            ...blockButtons(this, ['Insert Image', 'Insert Slideshow', 'Insert Widget', 'Insert Variable']),
             { type: 'spacer' },
             { type: 'button', title: 'Fullscreen', icon: 'fullscreen-maximize', command: 'toggleFullscreen', enabled: !this.textarea.closest('dialog') },
         ]);

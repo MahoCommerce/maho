@@ -22,7 +22,7 @@ class Mage_Cms_Helper_Preview extends Mage_Core_Helper_Abstract
      * The editor settings that turn on the Preview pane for $model, or an empty array when
      * the admin user cannot preview this content or no store view shows it.
      *
-     * @return array{preview?: array{url: string, entity: string, stores: list<array{id: int, name: string, website: string}>, storeId: int, usages: list<array{id: int, title: string}>}}
+     * @return array{render_store_id?: int, preview?: array{url: string, entity: string, stores: list<array{id: int, name: string, website: string}>, storeId: int, usages: list<array{id: int, title: string}>}}
      */
     public function getEditorConfig(string $entity, Mage_Core_Model_Abstract $model): array
     {
@@ -41,12 +41,13 @@ class Mage_Cms_Helper_Preview extends Mage_Core_Helper_Abstract
         }
         $defaultId = (int) Mage::app()->getDefaultStoreView()?->getId();
         $ids = array_column($stores, 'id');
+        $storeId = in_array($defaultId, $ids, true) ? $defaultId : $ids[0];
 
-        return ['preview' => [
+        return ['render_store_id' => $storeId, 'preview' => [
             'url' => Mage::helper('adminhtml')->getUrl('adminhtml/cms_preview/draft'),
             'entity' => $entity,
             'stores' => $stores,
-            'storeId' => in_array($defaultId, $ids, true) ? $defaultId : $ids[0],
+            'storeId' => $storeId,
             'usages' => $model instanceof Mage_Cms_Model_Block && $model->getId() ? $this->getBlockUsages($model) : [],
         ]];
     }
