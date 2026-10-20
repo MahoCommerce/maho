@@ -456,6 +456,63 @@
         display: table;
     }
 
+    /* A widget or block that shows its storefront render. The label stays on top, so the
+       admin can see what the block is and double-click it to edit */
+    div[data-type^="maho-"].is-rendered {
+        display: block;
+        padding: 0;
+        border-color: transparent;
+
+        .maho-widget-label {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            padding: 0.125rem 0.5rem 0.125rem 0.25rem;
+            border-radius: 0 0 var(--tt-radius-md) 0;
+            background: var(--tt-color-bg-subtle);
+            color: var(--tt-color-text-muted);
+            font-size: 0.75rem;
+            opacity: 0;
+            transition: opacity 0.15s;
+
+            svg {
+                width: 16px;
+            }
+        }
+
+        &:hover .maho-widget-label,
+        &.ProseMirror-selectednode .maho-widget-label {
+            opacity: 1;
+        }
+    }
+
+    [data-type^="maho-"].is-rendered-inline {
+        padding: 0;
+        border-color: transparent;
+
+        .maho-widget-label svg {
+            width: auto;
+            height: auto;
+            margin: 0;
+        }
+    }
+
+    .maho-widget-frame {
+        display: block;
+        width: 100%;
+        height: 0;
+        border: 0;
+        /* A click selects the node in the editor, and a link in the render does not open */
+        pointer-events: none;
+    }
+
+    .maho-widget-note {
+        margin-left: 0.5rem;
+        color: var(--tt-color-text-muted);
+        font-size: 0.875rem;
+    }
+
     /* Images */
     .image-container {
         display: inline-block;

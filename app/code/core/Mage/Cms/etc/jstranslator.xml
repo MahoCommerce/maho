@@ -22,6 +22,9 @@ SPDX-License-Identifier: AFL-3.0
         <invalid-content-more translate="message">
             <message>and %s more</message>
         </invalid-content-more>
+        <widget-render-empty translate="message">
+            <message>Nothing to show in this store view.</message>
+        </widget-render-empty>
         <invalid-slide-length translate="message">
             <message>Please add at least one image to the slideshow</message>
         </invalid-slide-length>

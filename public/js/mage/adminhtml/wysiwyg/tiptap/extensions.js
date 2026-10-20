@@ -12,6 +12,7 @@ import { MahoColumns, MahoColumn, COLUMN_PRESETS } from './extensions/columns.js
 import { MahoBentoGrid, MahoBentoCell, BENTO_PRESETS } from './extensions/bento.js';
 import { MahoAccordion, MahoDetails, DetailsSummary, DetailsContent, ACCORDION_STYLES } from './extensions/details.js';
 import { MahoSvgBlock, MahoSvgInline } from './extensions/svg.js';
+import { mountDirectiveRender, FRAMED_TYPES, INLINE_TYPES } from './extensions/widget-render.js';
 
 // prosemirror-tables has no parse rules for the table wrappers browsers (and TipTap itself) emit,
 // so with `enableContentCheck` on TipTap's catch-all rule flags them and falsely warns that valid
@@ -295,19 +296,35 @@ export const MahoWidgetBlock = Node.create({
             }
             else if (node.attrs.directiveObj.type === 'block') {
                 icon = 'block';
-                label = node.attrs.directiveObj.params.block_id;
+                label = node.attrs.directiveObj.params.block_id ?? node.attrs.directiveObj.params.id;
                 // TODO: Add double-click to manage blocks
             }
 
-            dom.innerHTML = editor.options.wysiwygSetup.getIcon(icon ?? 'widget')
-                + escapeHtml(label ?? renderDirective(node.attrs.directiveObj));
+            dom.innerHTML = '<span class="maho-widget-label">'
+                + editor.options.wysiwygSetup.getIcon(icon ?? 'widget')
+                + escapeHtml(label ?? renderDirective(node.attrs.directiveObj))
+                + '</span>';
 
             if (dblclick) {
                 dom.title = editor.options.wysiwygSetup.translate('Double-click to edit');
                 dom.addEventListener('dblclick', dblclick);
             }
 
-            return { dom };
+            const directive = renderDirective(node.attrs.directiveObj);
+            const type = node.attrs.directiveObj.type;
+            const inline = INLINE_TYPES.includes(type);
+            const stopRender = inline || (this.name === 'mahoWidgetBlock' && FRAMED_TYPES.includes(type))
+                ? mountDirectiveRender(editor.options.wysiwygSetup, dom, directive, { inline })
+                : () => {};
+
+            return {
+                dom,
+                // Keep the view, and its render, while the directive stays the same
+                update: (updated) => updated.type === node.type && renderDirective(updated.attrs.directiveObj) === directive,
+                destroy: stopRender,
+                // The render adds the frame to the node view, and the document does not change
+                ignoreMutation: () => true,
+            };
         };
     },
 

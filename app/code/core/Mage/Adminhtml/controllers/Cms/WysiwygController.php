@@ -122,13 +122,45 @@ class Mage_Adminhtml_Cms_WysiwygController extends Mage_Adminhtml_Controller_Act
     }
 
     /**
+     * Render the posted widget, block and icon directives as the storefront of a store view shows
+     * them. Each directive needs the ACL resource of its type, so the response holds only what
+     * the admin can already see. A directive that the admin cannot render is not in the response.
+     */
+    #[Maho\Config\Route('/admin/cms_wysiwyg/renderDirectives', methods: ['POST'])]
+    public function renderDirectivesAction(): void
+    {
+        /** @var Mage_Cms_Model_Wysiwyg_Render $renderer */
+        $renderer = Mage::getSingleton('cms/wysiwyg_render');
+        $session = Mage::getSingleton('admin/session');
+
+        $directives = [];
+        foreach ((array) $this->getRequest()->getPost('directives', []) as $directive) {
+            $type = is_string($directive) ? $renderer->getDirectiveType($directive) : null;
+            $resource = $type === null ? null : Mage_Cms_Model_Wysiwyg_Render::TYPES[$type];
+            if ($type !== null && ($resource === null || $session->isAllowed($resource))) {
+                $directives[$directive] = $directive;
+            }
+        }
+        $directives = array_slice(array_values($directives), 0, Mage_Cms_Model_Wysiwyg_Render::MAX_DIRECTIVES);
+
+        $store = Mage::app()->getStores()[(int) $this->getRequest()->getPost('store_id')] ?? null;
+        if (!$store instanceof Mage_Core_Model_Store || $directives === []) {
+            $this->getResponse()->setBodyJson(['head' => '', 'html' => new \stdClass()]);
+            return;
+        }
+
+        $this->getResponse()->setBodyJson($renderer->render($directives, (int) $store->getId()));
+    }
+
+    /**
      * The preview only reports on content that the caller posted. It reveals no other data.
      * The CMS resource would block an admin who edits products but not CMS pages.
+     * The render checks the resource of each directive itself.
      */
     #[\Override]
     protected function _isAllowed()
     {
-        if ($this->getRequest()->getActionName() === 'sanitizePreview') {
+        if (in_array($this->getRequest()->getActionName(), ['sanitizePreview', 'renderDirectives'], true)) {
             return Mage::getSingleton('admin/session')->isLoggedIn();
         }
         return parent::_isAllowed();
