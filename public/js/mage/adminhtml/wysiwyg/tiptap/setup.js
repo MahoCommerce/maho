@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: AFL-3.0
 
 import * as TiptapModules from './extensions.js';
+import { blockDropdown } from './blocks.js';
 import { html_beautify } from 'https://esm.sh/js-beautify@2.0.3/js/lib/beautify-html.js';
 
 class tiptapWysiwygSetup {
@@ -572,7 +573,15 @@ class tiptapWysiwygSetup {
                 // Generic div fallback: registered last so every specific div node rule is tried first
                 TiptapModules.MahoDiv,
                 TiptapModules.MahoFullscreen,
+                TiptapModules.MahoBlockMove,
+                TiptapModules.MahoButton,
                 TiptapModules.DragHandle.configure({
+                    nested: {
+                        rules: [{
+                            id: 'mahoStructure',
+                            evaluate: ({ node }) => TiptapModules.STRUCTURAL_NODES.includes(node.type.name) ? 1000 : 0,
+                        }],
+                    },
                     render: () => {
                         const el = document.createElement('div');
                         el.classList.add('tiptap-drag-handle');
@@ -602,7 +611,28 @@ class tiptapWysiwygSetup {
         varienGlobalEvents?.fireEvent('wysiwygEditorInitialized', this.editor);
     }
 
+    /**
+     * Fullscreen is the design workspace. Its panes load on the first use only, so a
+     * page with an editor that never goes fullscreen does not download them.
+     */
+    async openWorkspace() {
+        if (this.textarea.closest('dialog')) {
+            return;
+        }
+        const { MahoEditorWorkspace } = await import('./workspace.js');
+        this.workspace ??= new MahoEditorWorkspace(this);
+        if (this.wrapper.classList.contains('tiptap-fullscreen')) {
+            this.workspace.open();
+        }
+    }
+
+    closeWorkspace() {
+        this.workspace?.close();
+    }
+
     destroy() {
+        this.workspace?.destroy();
+        this.workspace = null;
         if (this.editor) {
             // Save content before destroying
             this.syncWysiwygToPlain();
@@ -660,59 +690,26 @@ class tiptapWysiwygSetup {
             { type: 'button', title: 'Bullet List', icon: 'bullet-list', command: 'toggleBulletList' },
             { type: 'button', title: 'Ordered List', icon: 'ordered-list', command: 'toggleOrderedList' },
             { type: 'separator'},
-            { type: 'button', title: 'Align Left', icon: 'align-left', command: 'setTextAlign', args: ['left'] },
-            { type: 'button', title: 'Align Center', icon: 'align-center', command: 'setTextAlign', args: ['center'] },
-            { type: 'button', title: 'Align Right', icon: 'align-right', command: 'setTextAlign', args: ['right'] },
+            {
+                type: 'dropdown',
+                title: 'Alignment',
+                icon: 'align-left',
+                showTitle: false,
+                showChevron: false,
+                showActive: true,
+                items: [
+                    { title: 'Align Left', icon: 'align-left', command: 'setTextAlign', args: ['left'] },
+                    { title: 'Align Center', icon: 'align-center', command: 'setTextAlign', args: ['center'] },
+                    { title: 'Align Right', icon: 'align-right', command: 'setTextAlign', args: ['right'] },
+                ],
+            },
             { type: 'separator'},
             { type: 'button', title: 'Link', icon: 'link', onClick: this.linkHandler.bind(this) },
+            { type: 'button', title: 'Button', icon: 'button', command: 'openButtonDialog' },
             { type: 'button', title: 'Insert Table', icon: 'table', command: 'insertTable', args: [{rows:3, cols:3, withHeaderRow:true}] },
-            {
-                type: 'dropdown',
-                title: 'Columns',
-                icon: 'columns-2',
-                showTitle: false,
-                showChevron: false,
-                items: [
-                    { title: '2 Columns', icon: 'columns-2', command: 'insertColumns', args: ['2-equal'] },
-                    { title: '3 Columns', icon: 'columns-3', command: 'insertColumns', args: ['3-equal'] },
-                    { title: '4 Columns', icon: 'columns-4', command: 'insertColumns', args: ['4-equal'] },
-                    { title: 'Sidebar Left', icon: 'columns-sidebar-left', command: 'insertColumns', args: ['sidebar-left'] },
-                    { title: 'Sidebar Right', icon: 'columns-sidebar-right', command: 'insertColumns', args: ['sidebar-right'] },
-                    { title: 'Wide Center', icon: 'columns-wide-center', command: 'insertColumns', args: ['wide-center'] },
-                ],
-            },
-            {
-                type: 'dropdown',
-                title: 'Bento Grid',
-                icon: 'bento-grid',
-                showTitle: false,
-                showChevron: false,
-                items: [
-                    { title: 'Hero + 2 Cards', icon: 'bento-hero-2', command: 'insertBentoGrid', args: ['hero-2'] },
-                    { title: 'Feature Left', icon: 'bento-feature-left', command: 'insertBentoGrid', args: ['feature-left'] },
-                    { title: 'Feature Right', icon: 'bento-feature-right', command: 'insertBentoGrid', args: ['feature-right'] },
-                    { title: 'Hero + 3 Cards', icon: 'bento-hero-3', command: 'insertBentoGrid', args: ['hero-3'] },
-                    { title: 'Dashboard', icon: 'bento-dashboard', command: 'insertBentoGrid', args: ['dashboard'] },
-                    { title: 'Magazine', icon: 'bento-magazine', command: 'insertBentoGrid', args: ['magazine'] },
-                    { title: 'Showcase', icon: 'bento-showcase', command: 'insertBentoGrid', args: ['showcase'] },
-                    { title: 'Mosaic', icon: 'bento-mosaic', command: 'insertBentoGrid', args: ['mosaic'] },
-                    { title: 'Hero + 4 Cards', icon: 'bento-hero-4', command: 'insertBentoGrid', args: ['hero-4'] },
-                    { title: 'Gallery', icon: 'bento-gallery', command: 'insertBentoGrid', args: ['gallery'] },
-                    { title: 'Editorial', icon: 'bento-editorial', command: 'insertBentoGrid', args: ['editorial'] },
-                    { title: 'Banner + Cards', icon: 'bento-banner-cards', command: 'insertBentoGrid', args: ['banner-cards'] },
-                ],
-            },
-            {
-                type: 'dropdown',
-                title: 'Accordion',
-                icon: 'accordion',
-                showTitle: false,
-                showChevron: false,
-                items: [
-                    { title: 'Accordion', icon: 'accordion', command: 'insertAccordion', args: ['accordion'] },
-                    { title: 'Tabs', icon: 'tabs', command: 'insertAccordion', args: ['tabs'] },
-                ],
-            },
+            blockDropdown(this, 'columns'),
+            blockDropdown(this, 'bento'),
+            blockDropdown(this, 'accordion'),
             { type: 'button', title: 'Insert Image', icon: 'image', command: 'insertMahoImage', enabled: this.config.add_images },
             { type: 'button', title: 'Insert Slideshow', icon: 'slideshow', command: 'insertMahoSlideshow', enabled: this.config.add_images && this.config.add_slideshows !== false },
             { type: 'button', title: 'Insert Widget', icon: 'widget', command: 'insertMahoWidget', enabled: this.config.add_widgets },
@@ -925,6 +922,9 @@ class tiptapWysiwygSetup {
                 const chevronHtml = item.showChevron !== false ? this.getIcon('chevron-down') : '';
                 toggle.innerHTML = this.getIcon(item.icon) + titleHtml + chevronHtml;
                 dropdown.append(toggle);
+                if (item.showActive) {
+                    dropdown.dataset.showActive = item.icon;
+                }
 
                 const menu = document.createElement('div');
                 menu.className = 'toolbar-dropdown-menu';
@@ -945,6 +945,11 @@ class tiptapWysiwygSetup {
                             this.editor.chain().focus()[menuItem.command](...args).run();
                             dropdown.classList.remove('is-open');
                         });
+                        if (item.showActive) {
+                            menuButton.dataset.command = menuItem.command;
+                            menuButton.dataset.args = JSON.stringify(args);
+                            menuButton.dataset.icon = menuItem.icon;
+                        }
                     }
                     menu.append(menuButton);
                 }
@@ -1032,6 +1037,18 @@ class tiptapWysiwygSetup {
             }
             button.classList.toggle('is-active', isActive);
         }
+
+        // A dropdown that shows the active state takes the icon of its active item
+        for (const dropdown of document.querySelectorAll(`#${this.id}_toolbar .toolbar-dropdown[data-show-active]`)) {
+            const active = dropdown.querySelector('.toolbar-dropdown-menu button.is-active');
+            const toggle = dropdown.querySelector('.toolbar-dropdown-toggle');
+            const icon = active?.dataset.icon ?? dropdown.dataset.showActive;
+            if (toggle.dataset.icon !== icon) {
+                toggle.dataset.icon = icon;
+                toggle.innerHTML = this.getIcon(icon);
+            }
+            toggle.classList.toggle('is-active', active !== null);
+        }
     }
 
     translate(string, ...args) {
@@ -1092,6 +1109,9 @@ class tiptapWysiwygSetup {
         'widget': '<path d="M18 16v.01"/><path d="M6 16v.01"/><path d="M12 5v.01"/><path d="M12 12v.01"/><path d="M12 1a4 4 0 0 1 2.001 7.464l.001 .072a3.998 3.998 0 0 1 1.987 3.758l.22 .128a3.978 3.978 0 0 1 1.591 -.417l.2 -.005a4 4 0 1 1 -3.994 3.77l-.28 -.16c-.522 .25 -1.108 .39 -1.726 .39c-.619 0 -1.205 -.14 -1.728 -.391l-.279 .16l.007 .231a4 4 0 1 1 -2.212 -3.579l.222 -.129a3.998 3.998 0 0 1 1.988 -3.756l.002 -.071a4 4 0 0 1 -1.995 -3.265l-.005 -.2a4 4 0 0 1 4 -4z"/>',
         'block': '<path d="M3 3m0 2a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2z"/><path d="M9 9h6v6h-6z"/><path d="M3 15h6m6 0h6m-18 -6h6m6 0h6"/>',
         'variable': '<path d="M5 4c-2.5 5 -2.5 10 0 16m14 -16c2.5 5 2.5 10 0 16m-10 -11h1c1 0 1 1 2.016 3.527c.984 2.473 .984 3.473 1.984 3.473h1"/><path d="M8 16c1.5 0 3 -2 4 -3.5s2.5 -3.5 4 -3.5"/>',
+        'button': '<path d="M3 12l3 0"/><path d="M12 3l0 3"/><path d="M7.8 7.8l-2.2 -2.2"/><path d="M16.2 7.8l2.2 -2.2"/><path d="M7.8 16.2l-2.2 2.2"/><path d="M12 12l9 3l-4 2l-2 4l-3 -9"/>',
+        'paragraph': '<path d="M13 4v16"/><path d="M17 4v16"/><path d="M19 4h-9.5a4.5 4.5 0 0 0 0 9h3.5"/>',
+        'heading': '<path d="M7 12h10"/><path d="M7 5v14"/><path d="M17 5v14"/><path d="M15 19h4"/><path d="M15 5h4"/><path d="M5 19h4"/><path d="M5 5h4"/>',
         'slideshow': '<path d="M15 6l.01 0"/><path d="M3 3m0 3a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v8a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3z"/><path d="M3 13l4 -4a3 5 0 0 1 3 0l4 4"/><path d="M13 12l2 -2a3 5 0 0 1 3 0l3 3"/><path d="M8 21l.01 0"/><path d="M12 21l.01 0"/><path d="M16 21l.01 0"/>',
 
         // Accordion icons
@@ -1117,6 +1137,17 @@ class tiptapWysiwygSetup {
         'fullscreen-maximize': '<path d="M16 4l4 0l0 4"/><path d="M14 10l6 -6"/><path d="M8 20l-4 0l0 -4"/><path d="M4 20l6 -6"/><path d="M16 20l4 0l0 -4"/><path d="M14 14l6 6"/><path d="M8 4l-4 0l0 4"/><path d="M4 4l6 6"/>',
         'fullscreen-minimize': '<path d="M5 9l4 0l0 -4"/><path d="M3 3l6 6"/><path d="M5 15l4 0l0 4"/><path d="M3 21l6 -6"/><path d="M19 9l-4 0l0 -4"/><path d="M15 9l6 -6"/><path d="M19 15l-4 0l0 4"/><path d="M15 15l6 6"/>',
         'drag-handle': '<path d="M9 5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M9 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M9 19m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M15 5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M15 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M15 19m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/>',
+
+        // Workspace icons
+        'blocks-pane': '<path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"/><path d="M9 4l0 16"/>',
+        'preview-pane': '<path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/><path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6"/>',
+        'search': '<path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/><path d="M21 21l-6 -6"/>',
+        'reload': '<path d="M20 11a8 8 0 1 0 -2.34 5.66"/><path d="M20 4v7h-7"/>',
+        'external-link': '<path d="M13 5h6v6"/><path d="M19 5l-8 8"/><path d="M18 14v4a2 2 0 0 1 -2 2h-9a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2h4"/>',
+        'scroll-sync': '<path d="M7 4v16"/><path d="M4 7l3 -3l3 3"/><path d="M4 17l3 3l3 -3"/><path d="M17 4v16"/><path d="M14 7l3 -3l3 3"/><path d="M14 17l3 3l3 -3"/>',
+        'device-mobile': '<rect x="7" y="2" width="10" height="20" rx="2"/><path d="M12 18v.01"/>',
+        'device-tablet': '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M12 17v.01"/>',
+        'device-desktop': '<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8"/><path d="M12 16v4"/>',
 
         // Dropdown icons
         'chevron-down': '<path d="M6 9l6 6l6 -6"/>',

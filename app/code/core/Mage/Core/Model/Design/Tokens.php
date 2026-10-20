@@ -81,10 +81,11 @@ class Mage_Core_Model_Design_Tokens
         return $css . $this->customCss($storeId);
     }
 
-    /** The variables the editor previews: the four backgrounds and their inks. */
+    /** The variables the editor previews: the backgrounds, the button colors and their inks. */
     public const PALETTE_VARS = [
         '--color-base-200', '--color-base-content',
         '--color-primary', '--color-primary-content',
+        '--color-secondary', '--color-secondary-content',
         '--color-neutral', '--color-neutral-content',
         '--color-accent', '--color-accent-content',
     ];

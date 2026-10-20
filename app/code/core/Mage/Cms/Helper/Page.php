@@ -55,6 +55,15 @@ class Mage_Cms_Helper_Page extends Mage_Core_Helper_Abstract
             return false;
         }
 
+        return $this->renderPageModel($action, $page, $renderLayout);
+    }
+
+    /**
+     * Render $page with its theme, layout and content. The page needs no id, so the
+     * preview of a page that is not saved yet uses the same steps.
+     */
+    public function renderPageModel(Mage_Core_Controller_Varien_Action $action, Mage_Cms_Model_Page $page, bool $renderLayout = true): bool
+    {
         $inRange = Mage::app()->getLocale()
             ->isStoreDateInInterval(null, $page->getCustomThemeFrom(), $page->getCustomThemeTo());
 
