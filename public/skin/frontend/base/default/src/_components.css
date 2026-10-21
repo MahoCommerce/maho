@@ -2245,10 +2245,12 @@
     }
 
     @media (min-width: 771px) {
-        /* The thumbnail column takes the height of the image row and scrolls inside it */
+        /* The thumbnail column is a share of the gallery width, as on Zalando. It takes the
+           height of the image row and scrolls inside it */
         .product-img-box:has(.more-views):has([data-gallery-layout="left"], [data-gallery-layout="right"]) {
             @apply grid items-start;
-            grid-template-columns: auto minmax(0, 1fr);
+            --gallery-thumbs-width: clamp(4.25rem, 15%, 7rem);
+            grid-template-columns: var(--gallery-thumbs-width) minmax(0, 1fr);
 
             .product-image {
                 @apply col-start-2 row-start-1;
@@ -2260,12 +2262,16 @@
             }
 
             .product-image-thumbs {
-                @apply flex-col flex-nowrap;
+                @apply flex-col flex-nowrap gap-3;
+
+                .thumb-link {
+                    @apply w-full;
+                }
             }
         }
 
         .product-img-box:has(.more-views):has([data-gallery-layout="right"]) {
-            grid-template-columns: minmax(0, 1fr) auto;
+            grid-template-columns: minmax(0, 1fr) var(--gallery-thumbs-width);
 
             .product-image {
                 @apply col-start-1;
