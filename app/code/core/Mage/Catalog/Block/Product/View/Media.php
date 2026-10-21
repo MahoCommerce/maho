@@ -17,9 +17,9 @@ declare(strict_types=1);
  */
 class Mage_Catalog_Block_Product_View_Media extends Mage_Catalog_Block_Product_View_Abstract
 {
-    public const XML_PATH_GALLERY_LAYOUT = 'catalog/frontend/gallery_layout';
-    public const XML_PATH_GALLERY_GRID_COLUMNS = 'catalog/frontend/gallery_grid_columns';
-    public const XML_PATH_GALLERY_PHONE_LAYOUT = 'catalog/frontend/gallery_phone_layout';
+    public const XML_PATH_GALLERY_LAYOUT = 'design/product_gallery/layout';
+    public const XML_PATH_GALLERY_GRID_COLUMNS = 'design/product_gallery/grid_columns';
+    public const XML_PATH_GALLERY_PHONE_LAYOUT = 'design/product_gallery/phone_layout';
 
     public const GALLERY_LAYOUT_BELOW = 'below';
     public const GALLERY_LAYOUT_LEFT = 'left';
