@@ -22,6 +22,9 @@ SPDX-License-Identifier: AFL-3.0
         <invalid-content-more translate="message">
             <message>and %s more</message>
         </invalid-content-more>
+        <widget-render-empty translate="message">
+            <message>Nothing to show in this store view.</message>
+        </widget-render-empty>
         <invalid-slide-length translate="message">
             <message>Please add at least one image to the slideshow</message>
         </invalid-slide-length>
@@ -34,5 +37,164 @@ SPDX-License-Identifier: AFL-3.0
         <insert-file translate="message">
             <message>Insert File...</message>
         </insert-file>
+        <button translate="message">
+            <message>Button</message>
+        </button>
+        <blocks translate="message">
+            <message>Blocks</message>
+        </blocks>
+        <preview translate="message">
+            <message>Preview</message>
+        </preview>
+        <search-blocks translate="message">
+            <message>Search blocks</message>
+        </search-blocks>
+        <columns translate="message">
+            <message>Columns</message>
+        </columns>
+        <bento-grid translate="message">
+            <message>Bento Grid</message>
+        </bento-grid>
+        <accordion translate="message">
+            <message>Accordion</message>
+        </accordion>
+        <alignment translate="message">
+            <message>Alignment</message>
+        </alignment>
+        <media translate="message">
+            <message>Media</message>
+        </media>
+        <dynamic translate="message">
+            <message>Dynamic</message>
+        </dynamic>
+        <text translate="message">
+            <message>Text</message>
+        </text>
+        <paragraph translate="message">
+            <message>Paragraph</message>
+        </paragraph>
+        <heading translate="message">
+            <message>Heading</message>
+        </heading>
+        <fullscreen-page-builder translate="message">
+            <message>Fullscreen Page Builder</message>
+        </fullscreen-page-builder>
+        <exit-fullscreen-page-builder translate="message">
+            <message>Exit Fullscreen Page Builder</message>
+        </exit-fullscreen-page-builder>
+        <double-click-to-edit translate="message">
+            <message>Double-click to edit</message>
+        </double-click-to-edit>
+        <resize-the-preview translate="message">
+            <message>Resize the preview</message>
+        </resize-the-preview>
+        <store-view translate="message">
+            <message>Store View</message>
+        </store-view>
+        <block-only translate="message">
+            <message>Block only</message>
+        </block-only>
+        <show-on translate="message">
+            <message>Show on</message>
+        </show-on>
+        <mobile translate="message">
+            <message>Mobile</message>
+        </mobile>
+        <tablet translate="message">
+            <message>Tablet</message>
+        </tablet>
+        <desktop translate="message">
+            <message>Desktop</message>
+        </desktop>
+        <sync-scroll translate="message">
+            <message>Sync scroll</message>
+        </sync-scroll>
+        <reload translate="message">
+            <message>Reload</message>
+        </reload>
+        <open-in-a-new-window translate="message">
+            <message>Open in a new window</message>
+        </open-in-a-new-window>
+        <the-preview-could-not-be-loaded translate="message">
+            <message>The preview could not be loaded.</message>
+        </the-preview-could-not-be-loaded>
+        <default translate="message">
+            <message>Default</message>
+        </default>
+        <primary translate="message">
+            <message>Primary</message>
+        </primary>
+        <secondary translate="message">
+            <message>Secondary</message>
+        </secondary>
+        <accent translate="message">
+            <message>Accent</message>
+        </accent>
+        <neutral translate="message">
+            <message>Neutral</message>
+        </neutral>
+        <solid translate="message">
+            <message>Solid</message>
+        </solid>
+        <outline translate="message">
+            <message>Outline</message>
+        </outline>
+        <soft translate="message">
+            <message>Soft</message>
+        </soft>
+        <ghost translate="message">
+            <message>Ghost</message>
+        </ghost>
+        <link translate="message">
+            <message>Link</message>
+        </link>
+        <small translate="message">
+            <message>Small</message>
+        </small>
+        <medium translate="message">
+            <message>Medium</message>
+        </medium>
+        <large translate="message">
+            <message>Large</message>
+        </large>
+        <extra-large translate="message">
+            <message>Extra Large</message>
+        </extra-large>
+        <label translate="message">
+            <message>Label</message>
+        </label>
+        <color translate="message">
+            <message>Color</message>
+        </color>
+        <style translate="message">
+            <message>Style</message>
+        </style>
+        <size translate="message">
+            <message>Size</message>
+        </size>
+        <wide translate="message">
+            <message>Wide</message>
+        </wide>
+        <full-width translate="message">
+            <message>Full width</message>
+        </full-width>
+        <open-in-a-new-tab translate="message">
+            <message>Open in a new tab</message>
+        </open-in-a-new-tab>
+        <edit-button translate="message">
+            <message>Edit Button</message>
+        </edit-button>
+        <insert-button translate="message">
+            <message>Insert Button</message>
+        </insert-button>
+        <update translate="message">
+            <message>Update</message>
+        </update>
+        <insert translate="message">
+            <message>Insert</message>
+        </insert>
+        <enter-a-label-and-a-link translate="message">
+            <message>Enter a label and a link.</message>
+        </enter-a-label-and-a-link>
     </script>
 </jstranslator>

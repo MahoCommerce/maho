@@ -112,6 +112,21 @@ describe('wysiwyg helper ids', function () {
         expect($this->helper->convertIdToPath($this->helper->idEncode('/../catalog')))->toBeNull();
     });
 
+    it('refuses an id that is not a path, such as the id of the tree root', function (string $id) {
+        expect($this->helper->convertIdToPath($id))->toBeNull();
+    })->with(['tree root' => ['root'], 'control character, "/a\x01b"' => ['L2EBYg--']]);
+
+    it('shows the storage root for the tree root node', function () {
+        Mage::app()->getRequest()->setParam('node', 'root');
+        $helper = new Mage_Cms_Helper_Wysiwyg_Images();
+
+        try {
+            expect($helper->getCurrentPath())->toBe($helper->getStorageRootPath());
+        } finally {
+            Mage::app()->getRequest()->setParam('node', null);
+        }
+    });
+
     it('removes the root name from a folder only as a whole segment', function () {
         expect($this->helper->resolveFolder('wysiwyg'))->toBe('wysiwyg')
             ->and($this->helper->resolveFolder('wysiwyg/banners'))->toBe('wysiwyg/banners')

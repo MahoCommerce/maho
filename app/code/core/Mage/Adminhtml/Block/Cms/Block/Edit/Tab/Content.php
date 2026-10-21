@@ -94,6 +94,7 @@ class Mage_Adminhtml_Block_Cms_Block_Edit_Tab_Content extends Mage_Adminhtml_Blo
             'required' => true,
             'config' => Mage::getSingleton('cms/wysiwyg_config')->getConfig([
                 'sanitize_preview_url' => Mage::helper('cms')->getSanitizePreviewUrl(),
+                ...Mage::helper('cms/preview')->getEditorConfig('block', $model),
             ]),
         ]);
 

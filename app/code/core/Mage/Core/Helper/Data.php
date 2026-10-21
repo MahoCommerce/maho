@@ -1150,6 +1150,26 @@ XML;
         return strip_tags((string) $value, $allowedTags);
     }
 
+    /**
+     * Convert each date of $fields in $data from the short date format of the locale to the
+     * internal format. An empty value stays as it is.
+     *
+     * @template T of array
+     * @param T $data
+     * @param array<array-key, string> $fields
+     * @return T
+     */
+    public function filterDates(array $data, array $fields): array
+    {
+        $filter = new \Maho\Data\Form\Filter\Date(Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT));
+        foreach ($fields as $field) {
+            if (!empty($field) && isset($data[$field]) && $data[$field] !== '') {
+                $data[$field] = $filter->inputFilter($data[$field]);
+            }
+        }
+        return $data;
+    }
+
 
     /**
      * Check if value is a valid IP address (IPv4 or IPv6)

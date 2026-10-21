@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <!--
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
 SPDX-FileCopyrightText: 2021-2022 The OpenMage Contributors <https://openmage.org>
 SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
 SPDX-License-Identifier: AFL-3.0
@@ -83,5 +84,21 @@ Default layout, loads most of the pages
             <block type="core/template" name="default_no_route" template="cms/default/no-route.phtml"/>
         </reference>
     </cms_index_defaultnoroute>
+
+    <!-- The live preview of the content editor, framed by the admin -->
+    <cms_preview_view>
+        <reference name="head">
+            <action method="addJs"><script>mage/cms/preview-frame.js</script></action>
+        </reference>
+        <reference name="before_body_end">
+            <block type="core/template" name="cms_preview_badge" template="cms/preview/badge.phtml"/>
+        </reference>
+    </cms_preview_view>
+
+    <cms_preview_block>
+        <reference name="root">
+            <action method="setTemplate"><template>page/1column.phtml</template></action>
+        </reference>
+    </cms_preview_block>
 
 </layout>

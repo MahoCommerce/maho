@@ -47,6 +47,7 @@ class Mage_Adminhtml_Block_Cms_Page_Edit_Tab_Content extends Mage_Adminhtml_Bloc
         $wysiwygConfig = Mage::getSingleton('cms/wysiwyg_config')->getConfig([
             'tab_id' => $this->getTabId(),
             'sanitize_preview_url' => Mage::helper('cms')->getSanitizePreviewUrl(),
+            ...Mage::helper('cms/preview')->getEditorConfig('page', $model),
         ]);
 
         $fieldset->addField('content_heading', 'text', [

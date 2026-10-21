@@ -203,25 +203,7 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
      */
     public function getCssJsHtml()
     {
-        // separate items by types
-        $items  = [];
-        foreach ($this->_data['items'] as $item) {
-            if (!is_null($item['cond']) && !$this->getData($item['cond']) || !isset($item['name'])) {
-                continue;
-            }
-            $params = empty($item['params']) ? '' : $item['params'];
-            switch ($item['type']) {
-                case 'js':        // js/*.js
-                case 'skin_js':   // skin/*/*.js
-                case 'js_css':    // js/*.css
-                case 'skin_css':  // skin/*/*.css
-                    $items[$item['type']][$params][$item['name']] = $item;
-                    break;
-                default:
-                    $this->_separateOtherHtmlHeadElements($items, $item['type'], $params, $item['name'], $item);
-                    break;
-            }
-        }
+        $items = $this->_groupItems();
 
         // prepare HTML
         // static and skin css
@@ -244,6 +226,52 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
             $html .= $this->_prepareOtherHtmlHeadElements($items['other']) . PHP_EOL;
         }
         return $html;
+    }
+
+    /**
+     * The stylesheets, the link elements (such as the web fonts) and the theme tokens of
+     * this head, without the scripts. The content editor of the admin shows storefront
+     * HTML with them.
+     */
+    public function getStylesheetHtml(): string
+    {
+        $items = $this->_groupItems();
+        $html = $this->_prepareStaticAndSkinElements(
+            '<link rel="stylesheet" href="%s"%s >' . PHP_EOL,
+            $items['js_css'] ?? [],
+            $items['skin_css'] ?? [],
+        );
+        if (!empty($items['other'])) {
+            $html .= $this->_prepareOtherHtmlHeadElements($items['other']) . PHP_EOL;
+        }
+        return $html . $this->getThemeTokensCss();
+    }
+
+    /**
+     * The items of this head whose condition is true, grouped by type and then by params.
+     * Types other than the CSS and JS files go to the 'other' group as HTML.
+     */
+    protected function _groupItems(): array
+    {
+        $items = [];
+        foreach ($this->_data['items'] as $item) {
+            if (!is_null($item['cond']) && !$this->getData($item['cond']) || !isset($item['name'])) {
+                continue;
+            }
+            $params = empty($item['params']) ? '' : $item['params'];
+            switch ($item['type']) {
+                case 'js':        // js/*.js
+                case 'skin_js':   // skin/*/*.js
+                case 'js_css':    // js/*.css
+                case 'skin_css':  // skin/*/*.css
+                    $items[$item['type']][$params][$item['name']] = $item;
+                    break;
+                default:
+                    $this->_separateOtherHtmlHeadElements($items, $item['type'], $params, $item['name'], $item);
+                    break;
+            }
+        }
+        return $items;
     }
 
     /**

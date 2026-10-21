@@ -64,6 +64,8 @@ class Mage_Cms_Model_Wysiwyg_Config extends \Maho\DataObject
             'width'                         => '100%',
             'plugins'                       => [],
             'svg_allowlist'                 => \Maho\Security\SvgAllowlist::forEditor(),
+            'render_directives_url'         => Mage::getSingleton('adminhtml/url')->getUrl('*/cms_wysiwyg/renderDirectives'),
+            'render_store_id'               => $this->getPreviewStoreId(),
         ]);
         $config->setData('directives_url_quoted', preg_quote($config->getData('directives_url')));
 
@@ -121,6 +123,25 @@ class Mage_Cms_Model_Wysiwyg_Config extends \Maho\DataObject
     public function setStoreId(int|string|null $value): static
     {
         return $this->setData('store_id', $value);
+    }
+
+    /**
+     * The store view whose theme the editor previews: the store view of the record that the admin
+     * edits, under the `registry` key of its preview provider, else the default store view. Null
+     * when no store view exists.
+     */
+    public function getPreviewStoreId(): ?int
+    {
+        $providers = Mage::getConfig()->getNode(Mage_Cms_Model_Preview::XML_PATH_PROVIDERS);
+        foreach ($providers ? $providers->children() : [] as $provider) {
+            $model = Mage::registry((string) $provider->registry);
+            $storeId = $model instanceof Mage_Core_Model_Abstract ? Mage::helper('cms/preview')->getStoreId($model) : null;
+            if ($storeId !== null) {
+                return $storeId;
+            }
+        }
+        $storeId = (int) Mage::app()->getDefaultStoreView()?->getId();
+        return $storeId > 0 ? $storeId : null;
     }
 
 }

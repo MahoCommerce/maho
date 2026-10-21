@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <!--
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
 SPDX-FileCopyrightText: 2022-2023 The OpenMage Contributors <https://openmage.org>
 SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
 SPDX-License-Identifier: AFL-3.0
@@ -18,4 +19,11 @@ Default layout, loads most of the pages
             <block type="googleanalytics/metapixel" name="meta_pixel" as="meta_pixel" template="googleanalytics/metapixel.phtml" />
         </reference>
     </default>
+
+    <!-- A preview of the content editor is not a visit -->
+    <cms_preview_view>
+        <remove name="google_tag_manager"/>
+        <remove name="google_analytics"/>
+        <remove name="meta_pixel"/>
+    </cms_preview_view>
 </layout>
