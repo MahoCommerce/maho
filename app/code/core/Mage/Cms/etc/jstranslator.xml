@@ -76,12 +76,12 @@ SPDX-License-Identifier: AFL-3.0
         <heading translate="message">
             <message>Heading</message>
         </heading>
-        <fullscreen translate="message">
-            <message>Fullscreen</message>
-        </fullscreen>
-        <exit-fullscreen translate="message">
-            <message>Exit Fullscreen</message>
-        </exit-fullscreen>
+        <fullscreen-page-builder translate="message">
+            <message>Fullscreen Page Builder</message>
+        </fullscreen-page-builder>
+        <exit-fullscreen-page-builder translate="message">
+            <message>Exit Fullscreen Page Builder</message>
+        </exit-fullscreen-page-builder>
         <double-click-to-edit translate="message">
             <message>Double-click to edit</message>
         </double-click-to-edit>

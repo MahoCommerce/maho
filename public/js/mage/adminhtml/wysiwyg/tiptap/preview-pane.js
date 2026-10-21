@@ -8,7 +8,7 @@ const MIN_DELAY = 500;
 const MESSAGE_SOURCE = 'maho-cms-preview';
 
 /**
- * The Preview pane of the workspace. It posts the edit form to the admin, which
+ * The Preview pane of the page builder. It posts the edit form to the admin, which
  * keeps a sanitized draft, then shows the storefront page of that draft.
  *
  * The next page loads in a hidden frame and replaces the visible one when it is
@@ -16,10 +16,10 @@ const MESSAGE_SOURCE = 'maho-cms-preview';
  * the latest content goes to the server.
  */
 export class MahoPreviewPane {
-    constructor(workspace) {
-        this.workspace = workspace;
-        this.setup = workspace.setup;
-        this.editor = workspace.editor;
+    constructor(pageBuilder) {
+        this.pageBuilder = pageBuilder;
+        this.setup = pageBuilder.setup;
+        this.editor = pageBuilder.editor;
         this.config = this.setup.config.preview;
         this.form = this.setup.textarea.form;
 
@@ -27,8 +27,8 @@ export class MahoPreviewPane {
         this.url = null;
         this.storeId = this.config.storeId;
         this.contextId = '';
-        this.device = workspace.state.device ?? 'device-desktop';
-        this.sync = workspace.state.sync ?? true;
+        this.device = pageBuilder.state.device ?? 'device-desktop';
+        this.sync = pageBuilder.state.sync ?? true;
         this.visible = false;
         this.inFlight = false;
         this.pending = false;
@@ -58,7 +58,7 @@ export class MahoPreviewPane {
         this.splitter.setAttribute('aria-label', t('Resize the preview'));
 
         this.pane = document.createElement('aside');
-        this.pane.className = 'tiptap-workspace-pane tiptap-preview-pane';
+        this.pane.className = 'tiptap-page-builder-pane tiptap-preview-pane';
         this.pane.setAttribute('aria-label', t('Preview'));
 
         const bar = document.createElement('div');
@@ -89,7 +89,7 @@ export class MahoPreviewPane {
         for (const [icon, label, width] of DEVICES) {
             const button = this.button(icon, `${t(label)} (${width}px)`, () => {
                 this.device = icon;
-                this.workspace.saveState({ device: icon });
+                this.pageBuilder.saveState({ device: icon });
                 this.layout();
             });
             this.deviceButtons.set(icon, button);
@@ -99,7 +99,7 @@ export class MahoPreviewPane {
 
         this.syncButton = this.button('scroll-sync', t('Sync scroll'), () => {
             this.sync = !this.sync;
-            this.workspace.saveState({ sync: this.sync });
+            this.pageBuilder.saveState({ sync: this.sync });
             this.paintButtons();
         });
         this.reloadButton = this.button('reload', t('Reload'), () => this.refresh());
@@ -190,9 +190,9 @@ export class MahoPreviewPane {
 
     paintButtons() {
         for (const [icon, button] of this.deviceButtons) {
-            this.workspace.setPressed(button, icon === this.device);
+            this.pageBuilder.setPressed(button, icon === this.device);
         }
-        this.workspace.setPressed(this.syncButton, this.sync);
+        this.pageBuilder.setPressed(this.syncButton, this.sync);
     }
 
     show() {
@@ -201,7 +201,7 @@ export class MahoPreviewPane {
         }
         this.visible = true;
         this.setup.wrapper.append(this.splitter, this.pane);
-        this.setup.wrapper.style.setProperty('--tt-preview-size', `${this.workspace.state.previewWidth ?? 45}%`);
+        this.setup.wrapper.style.setProperty('--tt-preview-size', `${this.pageBuilder.state.previewWidth ?? 45}%`);
         this.editor.on('update', this.onChange);
         this.form?.addEventListener('input', this.onChange);
         this.form?.addEventListener('change', this.onChange);
@@ -432,7 +432,7 @@ export class MahoPreviewPane {
         const setWidth = (percent) => {
             const width = Math.min(70, Math.max(20, percent));
             wrapper.style.setProperty('--tt-preview-size', `${width.toFixed(1)}%`);
-            this.workspace.saveState({ previewWidth: Number(width.toFixed(1)) });
+            this.pageBuilder.saveState({ previewWidth: Number(width.toFixed(1)) });
             this.layout();
         };
         let dragging = false;
@@ -461,7 +461,7 @@ export class MahoPreviewPane {
         this.splitter.addEventListener('keydown', (event) => {
             if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
                 event.preventDefault();
-                const current = this.workspace.state.previewWidth ?? 45;
+                const current = this.pageBuilder.state.previewWidth ?? 45;
                 setWidth(current + (event.key === 'ArrowLeft' ? 2 : -2));
             }
         });

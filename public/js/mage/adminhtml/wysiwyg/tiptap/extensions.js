@@ -942,7 +942,7 @@ export const MahoFullscreen = Extension.create({
 
                 if (isFullscreen) {
                     // Exit fullscreen
-                    wysiwygSetup.closeWorkspace?.();
+                    wysiwygSetup.closePageBuilder?.();
                     wrapper.classList.remove('tiptap-fullscreen');
                     document.body.style.overflow = '';
                     this.storage.isFullscreen = false;
@@ -951,7 +951,7 @@ export const MahoFullscreen = Extension.create({
                     wrapper.classList.add('tiptap-fullscreen');
                     document.body.style.overflow = 'hidden';
                     this.storage.isFullscreen = true;
-                    wysiwygSetup.openWorkspace?.();
+                    wysiwygSetup.openPageBuilder?.();
                 }
 
                 // Update button state, icon, and title
@@ -962,11 +962,11 @@ export const MahoFullscreen = Extension.create({
                     if (!isFullscreen) {
                         // Entering fullscreen - show minimize icon
                         button.innerHTML = wysiwygSetup.getIcon('fullscreen-minimize');
-                        button.title = wysiwygSetup.translate('Exit Fullscreen');
+                        button.title = wysiwygSetup.translate('Exit Fullscreen Page Builder');
                     } else {
                         // Exiting fullscreen - show maximize icon
                         button.innerHTML = wysiwygSetup.getIcon('fullscreen-maximize');
-                        button.title = wysiwygSetup.translate('Fullscreen');
+                        button.title = wysiwygSetup.translate('Fullscreen Page Builder');
                     }
                 }
 

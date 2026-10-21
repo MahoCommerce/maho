@@ -7,7 +7,7 @@ const columnIcon = (key) => key.endsWith('-equal') ? `columns-${COLUMN_PRESETS[k
 
 /**
  * The blocks that the editor inserts, in sections. The toolbar dropdowns and the
- * Blocks pane of the workspace both read this list, so a new preset shows in both.
+ * Blocks pane of the page builder both read this list, so a new preset shows in both.
  *
  * Each item has the shape of a toolbar dropdown item: `title`, `icon`, and either
  * `command` with `args` or `onClick`. An item with `enabled: false` is left out.

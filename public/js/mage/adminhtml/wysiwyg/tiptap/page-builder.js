@@ -3,7 +3,7 @@
 
 import { blockRegistry } from './blocks.js';
 
-const STORAGE_KEY = 'tiptap-workspace';
+const STORAGE_KEY = 'tiptap-page-builder';
 const CONTAINER_NODES = ['mahoColumn', 'mahoBentoCell', 'mahoColumns', 'mahoBentoGrid', 'detailsContent'];
 
 const readState = () => {
@@ -33,10 +33,10 @@ const textblockDepth = ($pos) => {
 };
 
 /**
- * The fullscreen editor as a design workspace: a Blocks pane on the left and, for
+ * The fullscreen editor as a page builder: a Blocks pane on the left and, for
  * content that the storefront can show, a Preview pane on the right.
  */
-export class MahoEditorWorkspace {
+export class MahoPageBuilder {
     constructor(setup) {
         this.setup = setup;
         this.editor = setup.editor;
@@ -68,7 +68,7 @@ export class MahoEditorWorkspace {
             return;
         }
         this.isOpen = true;
-        this.wrapper.classList.add('tiptap-workspace');
+        this.wrapper.classList.add('tiptap-page-builder');
         this.toggles.hidden = false;
         this.wrapper.append(this.blocksPane, this.line);
         for (const type of ['dragenter', 'dragover', 'drop']) {
@@ -94,7 +94,7 @@ export class MahoEditorWorkspace {
         this.blocksPane.remove();
         this.line.remove();
         this.toggles.hidden = true;
-        this.wrapper.classList.remove('tiptap-workspace', 'has-blocks', 'has-preview');
+        this.wrapper.classList.remove('tiptap-page-builder', 'has-blocks', 'has-preview');
     }
 
     destroy() {
@@ -155,7 +155,7 @@ export class MahoEditorWorkspace {
             { type: 'button', title: 'Preview', icon: 'preview-pane', onClick: () => this.toggle('preview'), enabled: this.hasPreview },
         ]);
         const group = holder.firstElementChild;
-        group.classList.add('tiptap-workspace-toggles');
+        group.classList.add('tiptap-page-builder-toggles');
         group.hidden = true;
         [this.blocksToggle, this.previewToggle = null] = group.querySelectorAll('button');
 
@@ -170,7 +170,7 @@ export class MahoEditorWorkspace {
 
     createBlocksPane() {
         const pane = document.createElement('aside');
-        pane.className = 'tiptap-workspace-pane tiptap-blocks-pane';
+        pane.className = 'tiptap-page-builder-pane tiptap-blocks-pane';
         pane.setAttribute('aria-label', this.setup.translate('Blocks'));
 
         const search = document.createElement('label');
@@ -275,7 +275,7 @@ export class MahoEditorWorkspace {
 
     /**
      * Only a drag that starts on a tile is handled here. The drop is claimed on the
-     * whole workspace, so a tile released outside the content never pastes its label.
+     * whole page builder, so a tile released outside the content never pastes its label.
      */
     handleDrag(event) {
         if (!this.drag) {

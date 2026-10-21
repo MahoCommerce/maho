@@ -626,27 +626,27 @@ class tiptapWysiwygSetup {
     }
 
     /**
-     * Fullscreen is the design workspace. Its panes load on the first use only, so a
+     * Fullscreen is the page builder. Its panes load on the first use only, so a
      * page with an editor that never goes fullscreen does not download them.
      */
-    async openWorkspace() {
+    async openPageBuilder() {
         if (this.textarea.closest('dialog')) {
             return;
         }
-        const { MahoEditorWorkspace } = await import('./workspace.js');
-        this.workspace ??= new MahoEditorWorkspace(this);
+        const { MahoPageBuilder } = await import('./page-builder.js');
+        this.pageBuilder ??= new MahoPageBuilder(this);
         if (this.wrapper.classList.contains('tiptap-fullscreen')) {
-            this.workspace.open();
+            this.pageBuilder.open();
         }
     }
 
-    closeWorkspace() {
-        this.workspace?.close();
+    closePageBuilder() {
+        this.pageBuilder?.close();
     }
 
     destroy() {
-        this.workspace?.destroy();
-        this.workspace = null;
+        this.pageBuilder?.destroy();
+        this.pageBuilder = null;
         if (this.editor) {
             // Save content before destroying
             this.syncWysiwygToPlain();
@@ -725,7 +725,7 @@ class tiptapWysiwygSetup {
             blockDropdown(this, 'accordion'),
             ...blockButtons(this, ['Insert Image', 'Insert Slideshow', 'Insert Widget', 'Insert Variable']),
             { type: 'spacer' },
-            { type: 'button', title: 'Fullscreen', icon: 'fullscreen-maximize', command: 'toggleFullscreen', enabled: !this.textarea.closest('dialog') },
+            { type: 'button', title: 'Fullscreen Page Builder', icon: 'fullscreen-maximize', command: 'toggleFullscreen', enabled: !this.textarea.closest('dialog') },
         ]);
 
         toolbar.id = `${this.id}_toolbar`;
@@ -1148,7 +1148,7 @@ class tiptapWysiwygSetup {
         'fullscreen-minimize': '<path d="M5 9l4 0l0 -4"/><path d="M3 3l6 6"/><path d="M5 15l4 0l0 4"/><path d="M3 21l6 -6"/><path d="M19 9l-4 0l0 -4"/><path d="M15 9l6 -6"/><path d="M19 15l-4 0l0 4"/><path d="M15 15l6 6"/>',
         'drag-handle': '<path d="M9 5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M9 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M9 19m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M15 5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M15 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M15 19m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/>',
 
-        // Workspace icons
+        // Page builder icons
         'blocks-pane': '<path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"/><path d="M9 4l0 16"/>',
         'preview-pane': '<path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/><path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6"/>',
         'search': '<path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/><path d="M21 21l-6 -6"/>',

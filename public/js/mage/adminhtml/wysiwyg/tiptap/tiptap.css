@@ -1026,10 +1026,10 @@
 }
 
 /* ========================================
-   WORKSPACE (FULLSCREEN PANES)
+   PAGE BUILDER (FULLSCREEN PANES)
    ======================================== */
 
-.tiptap-workspace {
+.tiptap-page-builder {
     --tt-blocks-width: 0px;
     --tt-preview-width: 0px;
 
@@ -1047,11 +1047,11 @@
     }
 }
 
-.tiptap-workspace-toggles[hidden] {
+.tiptap-page-builder-toggles[hidden] {
     display: none;
 }
 
-.tiptap-workspace-pane {
+.tiptap-page-builder-pane {
     position: absolute;
     top: var(--tt-toolbar-height, 0px);
     bottom: 0;
@@ -1070,7 +1070,7 @@
     box-sizing: border-box;
     gap: 1rem;
 
-    .tiptap-workspace:not(.has-blocks) & {
+    .tiptap-page-builder:not(.has-blocks) & {
         display: none;
     }
 }

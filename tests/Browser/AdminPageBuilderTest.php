@@ -12,22 +12,22 @@ use Tests\MahoBrowserTestCase;
 uses(MahoBrowserTestCase::class)->group('browser');
 
 /**
- * Fullscreen is the design workspace of the content editor: a Blocks pane inserts the
+ * Fullscreen is the page builder of the content editor: a Blocks pane inserts the
  * layouts, a Preview pane shows the draft on the storefront, and a Button dialog writes a
  * theme button. A block moves with the keyboard, also out of a column.
  */
 
-const WORKSPACE_ADMIN_USER = 'editor-workspace-admin';
-const WORKSPACE_ADMIN_PASSWORD = 'Password123!';
+const PAGE_BUILDER_ADMIN_USER = 'page-builder-admin';
+const PAGE_BUILDER_ADMIN_PASSWORD = 'Password123!';
 
 beforeEach(function () {
-    deleteWorkspaceAdmin();
+    deletePageBuilderAdmin();
     $user = Mage::getModel('admin/user')
-        ->setUsername(WORKSPACE_ADMIN_USER)
-        ->setFirstname('Editor')
-        ->setLastname('Workspace')
-        ->setEmail('editor-workspace@example.test')
-        ->setPassword(WORKSPACE_ADMIN_PASSWORD)
+        ->setUsername(PAGE_BUILDER_ADMIN_USER)
+        ->setFirstname('Page')
+        ->setLastname('Builder')
+        ->setEmail('page-builder@example.test')
+        ->setPassword(PAGE_BUILDER_ADMIN_PASSWORD)
         ->setIsActive()
         ->save();
     $roleId = Mage::getModel('admin/role')->getCollection()
@@ -38,8 +38,8 @@ beforeEach(function () {
     Mage::getModel('admin/user')->load($user->getId())->setRoleIds([$roleId])->saveRelations();
 
     $this->block = Mage::getModel('cms/block')
-        ->setTitle('Editor Workspace')
-        ->setIdentifier('editor-workspace-' . uniqid())
+        ->setTitle('Page Builder')
+        ->setIdentifier('page-builder-' . uniqid())
         ->setStores([0])
         ->setIsActive()
         ->setContent('<p>first</p><p>second</p>')
@@ -47,20 +47,20 @@ beforeEach(function () {
 });
 
 afterEach(function () {
-    deleteWorkspaceAdmin();
+    deletePageBuilderAdmin();
     $this->block->delete();
 });
 
-function deleteWorkspaceAdmin(): void
+function deletePageBuilderAdmin(): void
 {
-    $user = Mage::getModel('admin/user')->loadByUsername(WORKSPACE_ADMIN_USER);
+    $user = Mage::getModel('admin/user')->loadByUsername(PAGE_BUILDER_ADMIN_USER);
     if ($user->getId()) {
         $user->delete();
     }
 }
 
 /** Poll $script in the page until it returns 1. */
-function workspaceWaitFor(object $page, string $script, string $what, int $seconds = 15): void
+function pageBuilderWaitFor(object $page, string $script, string $what, int $seconds = 15): void
 {
     $deadline = microtime(true) + $seconds;
     while ($page->script($script) !== 1) {
@@ -71,27 +71,27 @@ function workspaceWaitFor(object $page, string $script, string $what, int $secon
     }
 }
 
-function visitWorkspaceBlock(Mage_Cms_Model_Block $block): object
+function visitPageBuilderBlock(Mage_Cms_Model_Block $block): object
 {
     $page = adminLoginAndVisit(
-        WORKSPACE_ADMIN_USER,
-        WORKSPACE_ADMIN_PASSWORD,
+        PAGE_BUILDER_ADMIN_USER,
+        PAGE_BUILDER_ADMIN_PASSWORD,
         '/admin/cms_block/edit/block_id/' . $block->getId(),
         '#block_content',
     );
-    workspaceWaitFor($page, 'window.tiptapEditors?.get("block_content")?.editor ? 1 : 0', 'editor');
+    pageBuilderWaitFor($page, 'window.tiptapEditors?.get("block_content")?.editor ? 1 : 0', 'editor');
     return $page;
 }
 
-function openWorkspace(object $page): void
+function openPageBuilder(object $page): void
 {
     $page->script('document.querySelector(\'#block_content_wrapper button[data-command="toggleFullscreen"]\').click()');
-    workspaceWaitFor($page, 'document.querySelector(".tiptap-blocks-pane") ? 1 : 0', 'blocks pane');
+    pageBuilderWaitFor($page, 'document.querySelector(".tiptap-blocks-pane") ? 1 : 0', 'blocks pane');
 }
 
 it('inserts a layout from the Blocks pane of the fullscreen editor', function () {
-    $page = visitWorkspaceBlock($this->block);
-    openWorkspace($page);
+    $page = visitPageBuilderBlock($this->block);
+    openPageBuilder($page);
 
     $page->script('window.tiptapEditors.get("block_content").editor.commands.focus("end")');
     $page->script('document.querySelector(\'.tiptap-blocks-tile[title="2 Columns"]\').click()');
@@ -105,42 +105,42 @@ it('inserts a layout from the Blocks pane of the fullscreen editor', function ()
 });
 
 it('shows the draft in the Preview pane before a save', function () {
-    $page = visitWorkspaceBlock($this->block);
-    openWorkspace($page);
-    workspaceWaitFor($page, 'document.querySelector(".tiptap-preview-frame.is-current[src]") ? 1 : 0', 'first preview', 30);
+    $page = visitPageBuilderBlock($this->block);
+    openPageBuilder($page);
+    pageBuilderWaitFor($page, 'document.querySelector(".tiptap-preview-frame.is-current[src]") ? 1 : 0', 'first preview', 30);
 
-    $page->script('(() => { const e = window.tiptapEditors.get("block_content").editor; e.commands.focus("start"); e.commands.insertContent("<p>WORKSPACEPROBE</p>"); })()');
-    workspaceWaitFor(
+    $page->script('(() => { const e = window.tiptapEditors.get("block_content").editor; e.commands.focus("start"); e.commands.insertContent("<p>PAGEBUILDERPROBE</p>"); })()');
+    pageBuilderWaitFor(
         $page,
-        'document.querySelector(".tiptap-preview-frame.is-current")?.contentDocument?.body?.innerText.includes("WORKSPACEPROBE") ? 1 : 0',
+        'document.querySelector(".tiptap-preview-frame.is-current")?.contentDocument?.body?.innerText.includes("PAGEBUILDERPROBE") ? 1 : 0',
         'draft in the preview',
         30,
     );
 
-    expect(Mage::getModel('cms/block')->load($this->block->getId())->getContent())->not->toContain('WORKSPACEPROBE');
+    expect(Mage::getModel('cms/block')->load($this->block->getId())->getContent())->not->toContain('PAGEBUILDERPROBE');
 });
 
 it('marks the content as changed after an edit only, not after Fullscreen opens and closes', function () {
-    $page = visitWorkspaceBlock($this->block);
-    $page->script('window.workspaceChanges = 0; document.querySelector("#block_content").addEventListener("change", () => window.workspaceChanges++)');
+    $page = visitPageBuilderBlock($this->block);
+    $page->script('window.pageBuilderChanges = 0; document.querySelector("#block_content").addEventListener("change", () => window.pageBuilderChanges++)');
 
-    openWorkspace($page);
-    workspaceWaitFor($page, 'document.querySelector(".tiptap-preview-frame.is-current[src]") ? 1 : 0', 'first preview', 30);
+    openPageBuilder($page);
+    pageBuilderWaitFor($page, 'document.querySelector(".tiptap-preview-frame.is-current[src]") ? 1 : 0', 'first preview', 30);
     $page->script('document.querySelector(\'#block_content_wrapper button[data-command="toggleFullscreen"]\').click()');
     // Each transaction syncs the textarea after 200 ms
     usleep(500_000);
 
-    expect($page->script('window.workspaceChanges'))->toBe(0)
+    expect($page->script('window.pageBuilderChanges'))->toBe(0)
         ->and($page->script('document.querySelector("#block_content").value'))->toBe('<p>first</p><p>second</p>');
 
     $page->script('window.tiptapEditors.get("block_content").editor.chain().focus("end").insertContent("<p>third</p>").run()');
-    workspaceWaitFor($page, 'document.querySelector("#block_content").value.includes("third") ? 1 : 0', 'synced edit');
+    pageBuilderWaitFor($page, 'document.querySelector("#block_content").value.includes("third") ? 1 : 0', 'synced edit');
 
-    expect($page->script('window.workspaceChanges'))->toBe(1);
+    expect($page->script('window.pageBuilderChanges'))->toBe(1);
 });
 
 it('moves a block with the keyboard command, also out of a column', function () {
-    $page = visitWorkspaceBlock($this->block);
+    $page = visitPageBuilderBlock($this->block);
     $html = $page->script('(() => {
         const editor = window.tiptapEditors.get("block_content").editor;
         editor.commands.setContent("<p>outside</p>");
@@ -155,9 +155,9 @@ it('moves a block with the keyboard command, also out of a column', function () 
 });
 
 it('writes a theme button and reads it back for editing', function () {
-    $page = visitWorkspaceBlock($this->block);
+    $page = visitPageBuilderBlock($this->block);
     $page->script('(() => { const e = window.tiptapEditors.get("block_content").editor; e.commands.focus("end"); e.commands.openButtonDialog(); })()');
-    workspaceWaitFor($page, 'document.querySelector("#tiptap-button-dialog[open]") ? 1 : 0', 'button dialog');
+    pageBuilderWaitFor($page, 'document.querySelector("#tiptap-button-dialog[open]") ? 1 : 0', 'button dialog');
 
     $page->script('document.querySelector("#tiptap-button-dialog-ok").click()');
     expect($page->script('document.querySelector(".tiptap-button-error").hidden ? 1 : 0'))->toBe(0);
@@ -170,13 +170,13 @@ it('writes a theme button and reads it back for editing', function () {
         document.querySelector("#tiptap-button-size").value = "lg";
         document.querySelector("#tiptap-button-dialog-ok").click();
     })()');
-    workspaceWaitFor($page, 'document.querySelector("#tiptap-button-dialog") ? 0 : 1', 'dialog closed');
+    pageBuilderWaitFor($page, 'document.querySelector("#tiptap-button-dialog") ? 0 : 1', 'dialog closed');
 
     expect($page->script('window.tiptapEditors.get("block_content").editor.getHTML()'))
         ->toContain('<a class="btn btn-accent btn-outline btn-lg" href="/sale">Shop now</a>');
 
     $page->script('document.querySelector("#block_content_wrapper .ProseMirror a.btn").click()');
-    workspaceWaitFor($page, 'document.querySelector("#tiptap-button-dialog[open]") ? 1 : 0', 'edit dialog');
+    pageBuilderWaitFor($page, 'document.querySelector("#tiptap-button-dialog[open]") ? 1 : 0', 'edit dialog');
     expect($page->script('[document.querySelector("#tiptap-button-label").value, document.querySelector("#tiptap-button-color").value, document.querySelector("#tiptap-button-style").value, document.querySelector("#tiptap-button-size").value].join("|")'))
         ->toBe('Shop now|accent|outline|lg');
 });
