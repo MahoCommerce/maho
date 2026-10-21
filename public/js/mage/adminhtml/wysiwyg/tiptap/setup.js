@@ -237,13 +237,33 @@ class tiptapWysiwygSetup {
         }
         this.editor.commands.setContent(this.convertFromPlain(this.textarea.value));
         this.invalidContent = this.findDroppedContent(this.textarea.value);
+        this.rememberPlainValue();
     }
 
+    /**
+     * Keep the markup that the editor writes for the textarea content, so a sync of unchanged
+     * content does nothing. When the editor drops some HTML, the next sync must write the
+     * cleaned content, so nothing is kept.
+     */
+    rememberPlainValue() {
+        this.plainValue = this.invalidContent === null ? this.convertToPlain(this.editor.getHTML()) : null;
+    }
+
+    /**
+     * Write the content of the editor to the textarea. Each transaction syncs, also one that only
+     * moves the selection or opens Fullscreen, so a sync of unchanged content leaves the textarea,
+     * and the change mark of its tab, as they are.
+     */
     syncWysiwygToPlain() {
         if (!this.textarea || !this.editor) {
             return;
         }
-        this.textarea.value = this.convertToPlain(this.editor.getHTML());
+        const value = this.convertToPlain(this.editor.getHTML());
+        if (value === this.plainValue) {
+            return;
+        }
+        this.plainValue = value;
+        this.textarea.value = value;
         this.textarea.dispatchEvent(new Event('change', { bubbles: false, cancelable: true }));
     }
 
@@ -601,6 +621,7 @@ class tiptapWysiwygSetup {
         });
 
         this.invalidContent = this.findDroppedContent(this.textarea.value);
+        this.rememberPlainValue();
 
         // Update toolbar state initially
         this.updateToolbarState();

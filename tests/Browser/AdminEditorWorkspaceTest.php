@@ -120,6 +120,25 @@ it('shows the draft in the Preview pane before a save', function () {
     expect(Mage::getModel('cms/block')->load($this->block->getId())->getContent())->not->toContain('WORKSPACEPROBE');
 });
 
+it('marks the content as changed after an edit only, not after Fullscreen opens and closes', function () {
+    $page = visitWorkspaceBlock($this->block);
+    $page->script('window.workspaceChanges = 0; document.querySelector("#block_content").addEventListener("change", () => window.workspaceChanges++)');
+
+    openWorkspace($page);
+    workspaceWaitFor($page, 'document.querySelector(".tiptap-preview-frame.is-current[src]") ? 1 : 0', 'first preview', 30);
+    $page->script('document.querySelector(\'#block_content_wrapper button[data-command="toggleFullscreen"]\').click()');
+    // Each transaction syncs the textarea after 200 ms
+    usleep(500_000);
+
+    expect($page->script('window.workspaceChanges'))->toBe(0)
+        ->and($page->script('document.querySelector("#block_content").value'))->toBe('<p>first</p><p>second</p>');
+
+    $page->script('window.tiptapEditors.get("block_content").editor.chain().focus("end").insertContent("<p>third</p>").run()');
+    workspaceWaitFor($page, 'document.querySelector("#block_content").value.includes("third") ? 1 : 0', 'synced edit');
+
+    expect($page->script('window.workspaceChanges'))->toBe(1);
+});
+
 it('moves a block with the keyboard command, also out of a column', function () {
     $page = visitWorkspaceBlock($this->block);
     $html = $page->script('(() => {
