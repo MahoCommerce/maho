@@ -38,14 +38,14 @@ class Mage_Adminhtml_Cms_PreviewController extends Mage_Adminhtml_Controller_Act
             'entity_id' => $entityId > 0 ? $entityId : null,
             'store_id' => (int) $store->getId(),
             'admin_user_id' => (int) Mage::getSingleton('admin/session')->getUser()->getId(),
-            'admin_origin' => $request->getScheme() . '://' . $request->getHttpHost(),
+            'admin_origin' => $request->getScheme() . '://' . $request->getHttpHost(false),
             'context_page_id' => $contextId > 0 ? $contextId : null,
             'data' => $prepared['data'],
         ], (string) $request->getPost('preview_draft') ?: null);
 
         $this->getResponse()->setBodyJson([
             'draft' => $draftId,
-            'url' => Mage::getModel('core/url')->setStore($store)->getUrl('cms/preview/view', ['draft' => $draftId]),
+            'url' => Mage::getModel('core/url')->setStore($store)->getUrl('cms/preview/view', ['draft' => $draftId, '_secure' => $request->isSecure()]),
             'warnings' => $prepared['warnings'],
         ]);
     }

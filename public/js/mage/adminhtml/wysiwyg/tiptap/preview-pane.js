@@ -294,6 +294,11 @@ export class MahoPreviewPane {
 
     formData() {
         const data = this.form ? new FormData(this.form) : new FormData();
+        for (const [name, value] of [...data]) {
+            if (value instanceof File) {
+                data.delete(name);
+            }
+        }
         data.set(this.setup.textarea.name, this.setup.convertToPlain(this.editor.getHTML()));
         data.set('preview_entity', this.config.entity);
         data.set('preview_store', String(this.storeId));
