@@ -110,6 +110,19 @@ it('shows one image and the thumbnails at its left in the left layout', function
         ))->toBeTrue();
 });
 
+it('marks the thumbnail of the visible image as the current one', function () {
+    setGalleryLayout('left');
+
+    $page = visit(MahoServer::baseUrl() . galleryProductUrl());
+    waitForPageLoad($page, '.product-image-thumbs');
+
+    $current = "[...document.querySelectorAll('.thumb-link')].map(l => l.getAttribute('aria-current') ?? '-').join(',')";
+    expect($page->script($current))->toBe('true,-,-,-');
+
+    $page->click('.thumb-link[data-image-index="2"]');
+    waitForGalleryScript($page, "{$current} === '-,-,true,-'");
+});
+
 it('shows the thumbnails at the right of the image in the right layout', function () {
     setGalleryLayout('right');
 

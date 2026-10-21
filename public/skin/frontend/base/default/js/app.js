@@ -795,6 +795,21 @@ var ProductMediaManager = {
         new MutationObserver(update).observe(gallery, { childList: true, subtree: true, attributeFilter: ['class'] });
     },
 
+    // The thumbnail of the visible image carries aria-current. The template marks the thumbnail
+    // of #image-main, and a swatch image has no thumbnail
+    initSelectedThumb: function(gallery) {
+        const links = [...document.querySelectorAll('.product-image-thumbs .thumb-link')];
+        const update = () => {
+            const visible = gallery.querySelector('.gallery-image.visible');
+            if (!links.length || visible?.id === 'image-main') return;
+            const index = visible?.id.match(/^image-(\d+)$/)?.[1];
+            links.forEach(link => link.dataset.imageIndex === index
+                ? link.setAttribute('aria-current', 'true')
+                : link.removeAttribute('aria-current'));
+        };
+        new MutationObserver(update).observe(gallery, { subtree: true, attributeFilter: ['class'] });
+    },
+
     init: function() {
         const gallery = document.querySelector('.product-image-gallery');
         if (!gallery) return;
@@ -810,6 +825,7 @@ var ProductMediaManager = {
         if (gallery.closest('[data-gallery-phone="carousel"]')) {
             this.initCounter(gallery);
         }
+        this.initSelectedThumb(gallery);
 
         document.querySelectorAll('.product-image-thumbs .thumb-link').forEach(link => {
             link.addEventListener('click', e => {
