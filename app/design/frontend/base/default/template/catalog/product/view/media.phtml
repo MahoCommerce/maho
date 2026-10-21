@@ -12,9 +12,11 @@
 <?php
 $_product = $this->getProduct();
 $mainImage = $this->helper('catalog/image')->init($_product, 'image');
+$aspectRatio = $mainImage->getAspectRatio('gallery');
 ?>
-    <div class="product-image" role="region" aria-label="<?= $this->__('Product Images') ?>">
-        <div class="product-image-gallery" style="aspect-ratio: <?= $mainImage->getAspectRatio('gallery') ?>">
+    <div class="product-image" role="region" aria-label="<?= $this->__('Product Images') ?>"
+         data-gallery-layout="<?= $this->getGalleryLayout() ?>" data-gallery-phone="<?= $this->getGalleryPhoneLayout() ?>" style="--gallery-columns: <?= $this->getGalleryGridColumns() ?>">
+        <div class="product-image-gallery" style="aspect-ratio: <?= $aspectRatio ?>; --gallery-ratio: <?= $aspectRatio ?>">
             <img id="image-main"
                 class="gallery-image visible"
                 <?= $mainImage->getImgAttributes('gallery') ?>

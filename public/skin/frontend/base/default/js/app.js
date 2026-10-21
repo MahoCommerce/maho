@@ -657,9 +657,16 @@ var ProductMediaManager = {
     overlay: null,
     handlers: {},
 
+    // The image set that the grid and the phone carousel show (see _components.css): the
+    // selected swatch image, then each #image-N, or #image-main when there is neither
     getGalleryImages: () => {
         const images = [...document.querySelectorAll('.product-image-gallery .gallery-image')];
-        return images.length > 1 ? images.slice(1) : images;
+        const own = images.filter(img => /^image-\d+$/.test(img.id));
+        const swatch = images.find(img => !img.id && img.classList.contains('visible'));
+        if (swatch) {
+            return [swatch, ...own];
+        }
+        return own.length ? own : images.filter(img => img.id === 'image-main');
     },
 
     openFullscreen: function(startIndex = 0) {
@@ -770,6 +777,24 @@ var ProductMediaManager = {
         g.style.maxHeight = Math.max(200, window.innerHeight - g.getBoundingClientRect().top - (t ? t.offsetHeight : 0) - 20) + 'px';
     },
 
+    // The phone carousel shows "2 / 5"; the CSS hides the counter on a desktop
+    initCounter: function(gallery) {
+        const counter = document.createElement('span');
+        counter.className = 'gallery-counter';
+        counter.setAttribute('aria-hidden', 'true');
+        gallery.after(counter);
+
+        const update = () => {
+            const total = this.getGalleryImages().length;
+            const current = Math.round(gallery.scrollLeft / (gallery.clientWidth || 1)) + 1;
+            counter.hidden = total < 2;
+            counter.textContent = `${Math.min(current, total)} / ${total}`;
+        };
+        update();
+        gallery.addEventListener('scroll', update, { passive: true });
+        new MutationObserver(update).observe(gallery, { childList: true, subtree: true, attributeFilter: ['class'] });
+    },
+
     init: function() {
         const gallery = document.querySelector('.product-image-gallery');
         if (!gallery) return;
@@ -777,10 +802,14 @@ var ProductMediaManager = {
         this.capHeight();
         window.addEventListener('resize', () => this.capHeight());
 
-        gallery.addEventListener('click', () => {
-            const match = gallery.querySelector('.gallery-image.visible')?.id?.match(/image-(\d+)/);
-            ProductMediaManager.openFullscreen(match ? parseInt(match[1]) : 0);
+        gallery.addEventListener('click', e => {
+            const index = this.getGalleryImages().indexOf(e.target.closest('.gallery-image'));
+            ProductMediaManager.openFullscreen(Math.max(0, index));
         });
+
+        if (gallery.closest('[data-gallery-phone="carousel"]')) {
+            this.initCounter(gallery);
+        }
 
         document.querySelectorAll('.product-image-thumbs .thumb-link').forEach(link => {
             link.addEventListener('click', e => {

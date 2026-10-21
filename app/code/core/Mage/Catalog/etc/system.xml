@@ -108,6 +108,38 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </list_allow_all>
+                        <gallery_layout translate="label comment">
+                            <label>Product Page Image Gallery</label>
+                            <comment>Where the thumbnails show next to the main image on a desktop, or a grid that shows all images at once. The legacy theme always shows the thumbnails below the image.</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_catalog_galleryLayout</source_model>
+                            <sort_order>7</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </gallery_layout>
+                        <gallery_grid_columns translate="label">
+                            <label>Image Grid Columns</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_catalog_galleryColumns</source_model>
+                            <sort_order>8</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends>
+                                <gallery_layout>grid</gallery_layout>
+                            </depends>
+                        </gallery_grid_columns>
+                        <gallery_phone_layout translate="label comment">
+                            <label>Product Page Image Gallery on Phones</label>
+                            <comment>Applies to every layout above. The legacy theme always shows the thumbnails below the image.</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_catalog_galleryPhoneLayout</source_model>
+                            <sort_order>9</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </gallery_phone_layout>
                         <parse_url_directives translate="label comment">
                             <label>Allow Dynamic Media URLs in Products and Categories</label>
                             <comment>E.g. {{media url="path/to/image.jpg"}} {{skin url="path/to/picture.gif"}}. Dynamic directives parsing impacts catalog performance.</comment>

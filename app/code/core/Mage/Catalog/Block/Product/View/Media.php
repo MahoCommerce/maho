@@ -17,6 +17,28 @@ declare(strict_types=1);
  */
 class Mage_Catalog_Block_Product_View_Media extends Mage_Catalog_Block_Product_View_Abstract
 {
+    public const XML_PATH_GALLERY_LAYOUT = 'catalog/frontend/gallery_layout';
+    public const XML_PATH_GALLERY_GRID_COLUMNS = 'catalog/frontend/gallery_grid_columns';
+    public const XML_PATH_GALLERY_PHONE_LAYOUT = 'catalog/frontend/gallery_phone_layout';
+
+    public const GALLERY_LAYOUT_BELOW = 'below';
+    public const GALLERY_LAYOUT_LEFT = 'left';
+    public const GALLERY_LAYOUT_RIGHT = 'right';
+    public const GALLERY_LAYOUT_GRID = 'grid';
+
+    public const GALLERY_LAYOUTS = [
+        self::GALLERY_LAYOUT_BELOW,
+        self::GALLERY_LAYOUT_LEFT,
+        self::GALLERY_LAYOUT_RIGHT,
+        self::GALLERY_LAYOUT_GRID,
+    ];
+
+    public const GALLERY_PHONE_LAYOUT_BELOW = 'below';
+    public const GALLERY_PHONE_LAYOUT_CAROUSEL = 'carousel';
+
+    public const GALLERY_GRID_COLUMNS_DEFAULT = 2;
+    public const GALLERY_GRID_COLUMNS_MAX = 3;
+
     /**
      * Flag, that defines whether gallery is disabled
      *
@@ -105,5 +127,37 @@ class Mage_Catalog_Block_Product_View_Media extends Mage_Catalog_Block_Product_V
     {
         $value = $this->getData('gallery_filter_method');
         return $value === null ? null : (string) $value;
+    }
+
+    /**
+     * Where the thumbnails show on a desktop screen, or "grid" to show all images at once.
+     * An unknown value gives "below".
+     */
+    public function getGalleryLayout(): string
+    {
+        $layout = (string) Mage::getStoreConfig(self::XML_PATH_GALLERY_LAYOUT);
+        return in_array($layout, self::GALLERY_LAYOUTS, true) ? $layout : self::GALLERY_LAYOUT_BELOW;
+    }
+
+    /**
+     * How a phone shows the images: a swipe carousel, or the main image with the thumbnails
+     * below it. An unknown value gives "carousel".
+     */
+    public function getGalleryPhoneLayout(): string
+    {
+        $layout = (string) Mage::getStoreConfig(self::XML_PATH_GALLERY_PHONE_LAYOUT);
+        return $layout === self::GALLERY_PHONE_LAYOUT_BELOW ? $layout : self::GALLERY_PHONE_LAYOUT_CAROUSEL;
+    }
+
+    /**
+     * The number of image columns in the "grid" layout, from 1 to GALLERY_GRID_COLUMNS_MAX.
+     */
+    public function getGalleryGridColumns(): int
+    {
+        $columns = (string) Mage::getStoreConfig(self::XML_PATH_GALLERY_GRID_COLUMNS);
+        if (!is_numeric($columns)) {
+            return self::GALLERY_GRID_COLUMNS_DEFAULT;
+        }
+        return max(1, min(self::GALLERY_GRID_COLUMNS_MAX, (int) $columns));
     }
 }

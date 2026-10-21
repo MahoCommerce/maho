@@ -1870,6 +1870,11 @@
                 grid-area: media;
                 position: sticky;
                 top: calc(var(--header-height) + 1rem);
+
+                /* A grid of all images is taller than the viewport, so it scrolls with the page */
+                &:has([data-gallery-layout="grid"]) {
+                    position: static;
+                }
             }
             > .product-breadcrumbs { grid-area: crumbs; }
             .product-shop { grid-area: shop; }
@@ -2197,6 +2202,111 @@
 
             img {
                 @apply block h-auto w-full;
+            }
+        }
+    }
+
+    /* Gallery layouts (data-gallery-layout and data-gallery-phone, from the store config).
+       A phone can show every layout as a swipe carousel, and a desktop shows the grid layout
+       as a grid. Both show the image set: the selected swatch image first, then each #image-N. #image-main shows
+       only when there is neither. ProductMediaManager.getGalleryImages() returns the same
+       list. */
+    .product-img-box .product-image {
+        @apply relative;
+    }
+
+    .gallery-counter {
+        @apply pointer-events-none absolute bottom-3 right-3 rounded-full bg-base-100/80 px-2.5 py-0.5 text-xs font-medium tabular-nums text-base-content nav:hidden;
+    }
+
+    @media (max-width: 770px) {
+        .product-image[data-gallery-phone="carousel"] .product-image-gallery {
+            @apply flex snap-x snap-mandatory overflow-x-auto;
+            scrollbar-width: none;
+
+            > img[id^="image-"]:not(#image-main),
+            > img.visible:not([id]),
+            &:not(:has(> img[id^="image-"]:not(#image-main), > img.visible:not([id]))) > #image-main {
+                @apply block h-full w-full flex-none snap-start object-contain;
+            }
+
+            > img.visible:not([id]) {
+                order: -1;
+            }
+
+            &:has(> img[id^="image-"]:not(#image-main), > img.visible:not([id])) > #image-main {
+                @apply hidden;
+            }
+        }
+
+        .product-img-box:has([data-gallery-phone="carousel"]) .more-views {
+            @apply hidden;
+        }
+    }
+
+    @media (min-width: 771px) {
+        /* The thumbnail column takes the height of the image row and scrolls inside it */
+        .product-img-box:has(.more-views):has([data-gallery-layout="left"], [data-gallery-layout="right"]) {
+            @apply grid items-start;
+            grid-template-columns: auto minmax(0, 1fr);
+
+            .product-image {
+                @apply col-start-2 row-start-1;
+            }
+
+            .more-views {
+                @apply col-start-1 row-start-1 h-0 min-h-full self-stretch overflow-y-auto;
+                scrollbar-width: thin;
+            }
+
+            .product-image-thumbs {
+                @apply flex-col flex-nowrap;
+            }
+        }
+
+        .product-img-box:has(.more-views):has([data-gallery-layout="right"]) {
+            grid-template-columns: minmax(0, 1fr) auto;
+
+            .product-image {
+                @apply col-start-1;
+            }
+
+            .more-views {
+                @apply col-start-2;
+            }
+        }
+
+        .product-img-box:has([data-gallery-layout="grid"]) .more-views {
+            @apply hidden;
+        }
+
+        /* The !important rules override the viewport cap of .product-image-gallery and
+           its inline aspect-ratio: the grid grows with the number of images */
+        .product-image[data-gallery-layout="grid"] .product-image-gallery {
+            @apply gap-2 bg-transparent;
+            grid-template-columns: repeat(var(--gallery-columns), minmax(0, 1fr));
+            max-height: none !important;
+            aspect-ratio: auto !important;
+
+            img {
+                grid-area: auto;
+                max-height: none;
+            }
+
+            > img[id^="image-"]:not(#image-main),
+            > img.visible:not([id]),
+            &:not(:has(> img[id^="image-"]:not(#image-main), > img.visible:not([id]))) > #image-main {
+                @apply block h-auto w-full rounded-box object-contain;
+                aspect-ratio: var(--gallery-ratio);
+                background: var(--product-tile-bg);
+            }
+
+            > img.visible:not([id]) {
+                order: -1;
+            }
+
+            &:has(> img[id^="image-"]:not(#image-main), > img.visible:not([id])) > #image-main {
+                @apply hidden;
             }
         }
     }
