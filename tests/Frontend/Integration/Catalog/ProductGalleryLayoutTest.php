@@ -75,6 +75,40 @@ describe('Product image gallery layout', function () {
         ['', 2],
     ]);
 
+    it('marks the gallery image that is the main image, so a swatch image can take its cell', function () {
+        Mage::unregister('product');
+        Mage::register('product', Mage::getModel('catalog/product')->setData([
+            'name' => 'Gallery Test',
+            'image' => '/m/a/main.png',
+            'media_gallery' => ['images' => [
+                ['value_id' => 11, 'file' => '/v/i/view.png', 'label' => '', 'position' => 1, 'disabled' => 0],
+                ['value_id' => 12, 'file' => '/m/a/main.png', 'label' => '', 'position' => 2, 'disabled' => 0],
+            ]],
+        ]));
+
+        $html = galleryLayoutBlock()->toHtml();
+
+        expect($html)->toContain('--gallery-main-order: 1')
+            ->and($html)->toMatch('/id="image-0"\s+class="gallery-image" loading="lazy" style="order: 0"\s/')
+            ->and($html)->toMatch('/id="image-1"\s+class="gallery-image" loading="lazy" style="order: 1" data-main\s/');
+    });
+
+    it('marks no gallery image when the main image is not in the gallery', function () {
+        Mage::unregister('product');
+        Mage::register('product', Mage::getModel('catalog/product')->setData([
+            'name' => 'Gallery Test',
+            'image' => '/m/a/main.png',
+            'media_gallery' => ['images' => [
+                ['value_id' => 11, 'file' => '/v/i/view.png', 'label' => '', 'position' => 1, 'disabled' => 0],
+            ]],
+        ]));
+
+        $html = galleryLayoutBlock()->toHtml();
+
+        expect($html)->not->toContain('data-main')
+            ->and($html)->not->toContain('--gallery-main-order');
+    });
+
     it('writes the layouts and the grid columns on the gallery', function () {
         $store = Mage::app()->getStore();
         $store->setConfig(Mage_Catalog_Block_Product_View_Media::XML_PATH_GALLERY_LAYOUT, 'grid');

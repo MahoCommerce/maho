@@ -2220,9 +2220,10 @@
 
     /* Gallery layouts (data-gallery-layout and data-gallery-phone, from the store config).
        A phone can show every layout as a swipe carousel, and a desktop shows the grid layout
-       as a grid. Both show the image set: the selected swatch image first, then each #image-N. #image-main shows
-       only when there is neither. ProductMediaManager.getGalleryImages() returns the same
-       list. */
+       as a grid. Both show the image set: #image-main first, then each #image-N in its order.
+       When an #image-N is the main image ([data-main]), #image-main is left out. A selected
+       swatch image takes the cell of the main image.
+       ProductMediaManager.getGalleryImages() returns the same list. */
     .product-img-box .product-image {
         @apply relative;
     }
@@ -2238,15 +2239,16 @@
 
             > img[id^="image-"]:not(#image-main),
             > img.visible:not([id]),
-            &:not(:has(> img[id^="image-"]:not(#image-main), > img.visible:not([id]))) > #image-main {
+            &:not(:has(> img[data-main])) > #image-main {
                 @apply block h-full w-full flex-none snap-start object-contain;
             }
 
             > img.visible:not([id]) {
-                order: -1;
+                order: var(--gallery-main-order, -1);
             }
 
-            &:has(> img[id^="image-"]:not(#image-main), > img.visible:not([id])) > #image-main {
+            &:has(> img[data-main]) > #image-main,
+            &:has(> img.visible:not([id])) > :is(img[data-main], #image-main) {
                 @apply hidden;
             }
         }
@@ -2312,17 +2314,18 @@
 
             > img[id^="image-"]:not(#image-main),
             > img.visible:not([id]),
-            &:not(:has(> img[id^="image-"]:not(#image-main), > img.visible:not([id]))) > #image-main {
+            &:not(:has(> img[data-main])) > #image-main {
                 @apply block h-auto w-full rounded-box object-contain;
                 aspect-ratio: var(--gallery-ratio);
                 background: var(--product-tile-bg);
             }
 
             > img.visible:not([id]) {
-                order: -1;
+                order: var(--gallery-main-order, -1);
             }
 
-            &:has(> img[id^="image-"]:not(#image-main), > img.visible:not([id])) > #image-main {
+            &:has(> img[data-main]) > #image-main,
+            &:has(> img.visible:not([id])) > :is(img[data-main], #image-main) {
                 @apply hidden;
             }
         }

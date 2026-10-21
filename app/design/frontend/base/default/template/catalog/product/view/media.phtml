@@ -13,10 +13,19 @@
 $_product = $this->getProduct();
 $mainImage = $this->helper('catalog/image')->init($_product, 'image');
 $aspectRatio = $mainImage->getAspectRatio('gallery');
+// The grid and the phone carousel show a swatch image in the cell of the main image
+$_mainOrder = null;
+$i = 0;
+foreach ($this->getGalleryImages() as $_image) {
+    if ($_mainOrder === null && $this->isGalleryImageVisible($_image) && $_image->getFile() === $_product->getImage()) {
+        $_mainOrder = $i;
+    }
+    $i++;
+}
 ?>
     <div class="product-image" role="region" aria-label="<?= $this->__('Product Images') ?>"
          data-gallery-layout="<?= $this->getGalleryLayout() ?>" data-gallery-phone="<?= $this->getGalleryPhoneLayout() ?>" style="--gallery-columns: <?= $this->getGalleryGridColumns() ?>">
-        <div class="product-image-gallery" style="aspect-ratio: <?= $aspectRatio ?>; --gallery-ratio: <?= $aspectRatio ?>">
+        <div class="product-image-gallery" style="aspect-ratio: <?= $aspectRatio ?>; --gallery-ratio: <?= $aspectRatio ?><?= $_mainOrder === null ? '' : "; --gallery-main-order: {$_mainOrder}" ?>">
             <img id="image-main"
                 class="gallery-image visible"
                 <?= $mainImage->getImgAttributes('gallery') ?>
@@ -31,7 +40,7 @@ $aspectRatio = $mainImage->getAspectRatio('gallery');
                         $galleryHelper = $this->helper('catalog/image')->init($_product, 'image', $_image->getFile());
                     ?>
                     <img id="image-<?= $i ?>"
-                         class="gallery-image" loading="lazy"
+                         class="gallery-image" loading="lazy" style="order: <?= $i ?>"<?= $i === $_mainOrder ? ' data-main' : '' ?>
                          <?= $galleryHelper->getImgAttributes('gallery') ?>
                          data-zoom-image="<?= $this->escapeUrl((string) $galleryHelper) ?>"
                          alt="<?= $this->escapeHtml($_image->getLabel() ?: $_product->getName() . ' - ' . $this->__('Image') . ' ' . ($i + 1)) ?>">

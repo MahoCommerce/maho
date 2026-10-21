@@ -158,9 +158,9 @@ var ConfigurableMediaImages = {
             // Move target image to correct place, in case it's necessary
             imageGallery.appendChild(targetImage);
 
-            // Reveal new image, which the phone carousel shows as the first slide
+            // Reveal new image, and scroll the phone carousel to its slide
             targetImage.classList.add('visible');
-            imageGallery.scrollTo({ left: 0 });
+            imageGallery.scrollTo({ left: targetImage.offsetLeft });
         } else { // Need to wait for image to load
             // Add spinner
             imageGallery.classList.add('loading');
@@ -181,7 +181,7 @@ var ConfigurableMediaImages = {
 
                 // Reveal new image
                 targetImage.classList.add('visible');
-                imageGallery.scrollTo({ left: 0 });
+                imageGallery.scrollTo({ left: targetImage.offsetLeft });
             });
         }
     },

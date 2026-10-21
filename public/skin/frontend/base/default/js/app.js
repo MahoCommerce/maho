@@ -657,16 +657,16 @@ var ProductMediaManager = {
     overlay: null,
     handlers: {},
 
-    // The image set that the grid and the phone carousel show (see _components.css): the
-    // selected swatch image, then each #image-N, or #image-main when there is neither
+    // The image set that the grid and the phone carousel show (see _components.css):
+    // #image-main, unless an #image-N is the main image, then each #image-N. A selected swatch
+    // image takes the cell of the main image
     getGalleryImages: () => {
         const images = [...document.querySelectorAll('.product-image-gallery .gallery-image')];
         const own = images.filter(img => /^image-\d+$/.test(img.id));
+        const main = own.find(img => 'main' in img.dataset) ?? images.find(img => img.id === 'image-main');
+        const set = main?.id === 'image-main' ? [main, ...own] : own;
         const swatch = images.find(img => !img.id && img.classList.contains('visible'));
-        if (swatch) {
-            return [swatch, ...own];
-        }
-        return own.length ? own : images.filter(img => img.id === 'image-main');
+        return swatch ? set.map(img => img === main ? swatch : img) : set;
     },
 
     openFullscreen: function(startIndex = 0) {
@@ -819,7 +819,10 @@ var ProductMediaManager = {
 
         // A click on the tile next to the image opens the visible image
         gallery.addEventListener('click', e => {
-            const target = e.target.closest('.gallery-image') ?? gallery.querySelector('.gallery-image.visible');
+            let target = e.target.closest('.gallery-image') ?? gallery.querySelector('.gallery-image.visible');
+            if (target?.id === 'image-main') {
+                target = gallery.querySelector('[data-main]') ?? target;
+            }
             const index = this.getGalleryImages().indexOf(target);
             ProductMediaManager.openFullscreen(Math.max(0, index));
         });
