@@ -121,8 +121,12 @@ class Maho_Blog_Helper_Data extends Mage_Core_Helper_Abstract
     public function renderPost(Mage_Core_Controller_Front_Action $action, Maho_Blog_Model_Post $post): void
     {
         Mage::register('current_blog_post', $post);
-        $action->loadLayout(['default', 'blog_index_view']);
         $layout = $action->getLayout();
+        // The preview runs another action, so add blog_index_view after the store and theme handles here
+        $layout->getUpdate()->addHandle('default');
+        $action->addActionLayoutHandles();
+        $layout->getUpdate()->addHandle('blog_index_view');
+        $action->loadLayout(false);
         $this->switchToSingleColumnIfNoSidebar($layout);
         $this->initPageTitle($layout, (string) $post->getTitle());
         $this->initMeta($layout, $post);
