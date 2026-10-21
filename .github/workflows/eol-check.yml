@@ -9,10 +9,15 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   check-eol:
     name: Check for EOL versions
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
 
     steps:
       - name: Check version lifecycle status
