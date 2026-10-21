@@ -102,7 +102,7 @@ export const openButtonDialog = (setup, anchor = null) => {
     }
     const link = editor.isActive('link') ? editor.getAttributes('link') : null;
     const editing = link !== null && String(link.class ?? '').split(/\s+/).includes('btn');
-    if (editing && editor.state.selection.empty) {
+    if (editing) {
         editor.chain().focus().extendMarkRange('link').run();
     }
     const { from, to } = editor.state.selection;
