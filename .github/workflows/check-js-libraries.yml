@@ -5,7 +5,7 @@ name: Check JS Libraries
 # matches its pinned version, and hands the fix to "Update JS Libraries".
 #
 # Dependabot pull requests get a read-only token, so this workflow cannot push.
-# It only records the patch.
+# It only records the changed files.
 
 on:
   pull_request
@@ -38,10 +38,14 @@ jobs:
             echo clean > "${{ runner.temp }}/js-libraries/status"
             echo "The committed JS libraries are up to date."
           else
-            echo drift > "${{ runner.temp }}/js-libraries/status"
-            git diff --cached -- public/js > "${{ runner.temp }}/js-libraries/public-js.patch"
+            out="${{ runner.temp }}/js-libraries"
+            echo drift > "$out/status"
+            git diff --cached --name-only --no-renames -z --diff-filter=d -- public/js > "$out/changed"
+            git diff --cached --name-only --no-renames -z --diff-filter=D -- public/js > "$out/deleted"
+            mkdir -p "$out/files"
+            xargs -0 -r cp --parents -t "$out/files" < "$out/changed"
             git diff --cached --stat -- public/js
-            echo "Recorded the patch. 'Update JS Libraries' will push it."
+            echo "Recorded the changed files. 'Update JS Libraries' will commit them."
           fi
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

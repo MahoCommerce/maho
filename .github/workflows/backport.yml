@@ -9,13 +9,15 @@ concurrency:
   cancel-in-progress: false
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 
 jobs:
   backport:
     name: Backport to maintenance branch
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     # Only act on a merged PR: either it was just merged carrying a backport
     # label, or a backport label was added to an already-merged PR (retroactive).
     if: >
