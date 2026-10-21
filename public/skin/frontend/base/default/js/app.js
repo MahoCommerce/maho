@@ -817,8 +817,10 @@ var ProductMediaManager = {
         this.capHeight();
         window.addEventListener('resize', () => this.capHeight());
 
+        // A click on the tile next to the image opens the visible image
         gallery.addEventListener('click', e => {
-            const index = this.getGalleryImages().indexOf(e.target.closest('.gallery-image'));
+            const target = e.target.closest('.gallery-image') ?? gallery.querySelector('.gallery-image.visible');
+            const index = this.getGalleryImages().indexOf(target);
             ProductMediaManager.openFullscreen(Math.max(0, index));
         });
 
