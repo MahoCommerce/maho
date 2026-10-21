@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
 // SPDX-License-Identifier: OSL-3.0
 
+import { setRenderStore } from './extensions/widget-render.js';
+
 const DEVICES = [['device-mobile', 'Mobile', 390], ['device-tablet', 'Tablet', 768], ['device-desktop', 'Desktop', 1280]];
 const MIN_DELAY = 500;
 const MESSAGE_SOURCE = 'maho-cms-preview';
@@ -36,6 +38,7 @@ export class MahoPreviewPane {
         this.syncLock = 0;
         this.popout = null;
         this.loads = 0;
+        this.keepAlive = null;
 
         this.build();
         this.onChange = (event) => (event?.target && this.setup.wrapper.contains(event.target) ? null : this.schedule());
@@ -64,18 +67,19 @@ export class MahoPreviewPane {
         this.storeSelect = this.select(t('Store View'), this.storeOptions(), String(this.storeId));
         this.storeSelect.addEventListener('change', () => {
             this.storeId = Number(this.storeSelect.value);
+            setRenderStore(this.setup, this.storeId);
+            this.fillContextSelect();
             this.refresh();
         });
         bar.append(this.storeSelect);
 
         if (this.config.entity === 'block') {
-            const options = [{ value: '', label: t('Block only') },
-                ...(this.config.usages ?? []).map((page) => ({ value: String(page.id), label: page.title }))];
-            this.contextSelect = this.select(t('Show on'), options, '');
+            this.contextSelect = this.select(t('Show on'), [], '');
             this.contextSelect.addEventListener('change', () => {
                 this.contextId = this.contextSelect.value;
                 this.refresh();
             });
+            this.fillContextSelect();
             bar.append(this.contextSelect);
         }
 
@@ -116,6 +120,21 @@ export class MahoPreviewPane {
         this.pane.append(bar, this.status, this.stage);
         this.bindSplitter();
         this.paintButtons();
+    }
+
+    /** The pages of the current store view that show the block. Another page falls back to the block only. */
+    fillContextSelect() {
+        if (!this.contextSelect) {
+            return;
+        }
+        const pages = (this.config.usages ?? []).filter((page) => page.stores.includes(this.storeId));
+        if (!pages.some((page) => String(page.id) === this.contextId)) {
+            this.contextId = '';
+        }
+        const options = [{ value: '', label: this.setup.translate('Block only') },
+            ...pages.map((page) => ({ value: String(page.id), label: page.title }))];
+        this.contextSelect.replaceChildren(...this.select('', options, this.contextId).children);
+        this.contextSelect.value = this.contextId;
     }
 
     storeOptions() {
@@ -189,6 +208,9 @@ export class MahoPreviewPane {
         window.addEventListener('message', this.onMessage);
         document.addEventListener('visibilitychange', this.onVisibility);
         this.scroller()?.addEventListener('scroll', this.onEditorScroll, { passive: true });
+        // The server forgets a draft after its lifetime, and the frame or the window of the
+        // preview would then show a 404 on a reload. A third of the lifetime leaves time for a retry
+        this.keepAlive = window.setInterval(() => this.send({ reload: false }), (this.config.lifetime ?? 1800) * 1000 / 3);
         this.layout();
         this.refresh();
     }
@@ -199,6 +221,8 @@ export class MahoPreviewPane {
         }
         this.visible = false;
         window.clearTimeout(this.timer);
+        window.clearInterval(this.keepAlive);
+        this.keepAlive = null;
         this.editor.off('update', this.onChange);
         this.form?.removeEventListener('input', this.onChange);
         this.form?.removeEventListener('change', this.onChange);
@@ -251,9 +275,10 @@ export class MahoPreviewPane {
         this.timer = window.setTimeout(() => this.send(), Math.max(MIN_DELAY, this.lastDuration));
     }
 
-    async send() {
+    /** With `reload` false, the frames reload only when the server gives a new draft. */
+    async send({ reload = true } = {}) {
         if (!this.visible || this.inFlight) {
-            this.pending = true;
+            this.pending ||= reload;
             return;
         }
         this.inFlight = true;
@@ -267,9 +292,14 @@ export class MahoPreviewPane {
                 body: this.formData(),
                 loaderArea: false,
             });
+            const sameDraft = result.url === this.url;
             this.draftId = result.draft;
             this.url = result.url;
             this.showStatus(result.warnings ?? []);
+            if (!reload && sameDraft) {
+                this.finish();
+                return;
+            }
             this.loads += 1;
             const next = this.frames.find((frame) => !frame.classList.contains('is-current'));
             next.src = `${this.url}${this.url.includes('?') ? '&' : '?'}_=${this.loads}`;

@@ -53,6 +53,12 @@ class Maho_Blog_Model_Preview_Provider extends Mage_Cms_Model_Preview_Provider_A
     }
 
     #[\Override]
+    public function getStorefrontAction(array $draft): ?string
+    {
+        return 'blog_index_view';
+    }
+
+    #[\Override]
     public function isTarget(Mage_Core_Block_Abstract $block, array $draft): bool
     {
         return $block instanceof Maho_Blog_Block_Post_View;

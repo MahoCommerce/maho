@@ -247,6 +247,12 @@ describe('store view of the editor', function () {
         expect(Mage::getSingleton('cms/wysiwyg_config')->getPreviewStoreId())->toBe((int) $this->second->getId());
     });
 
+    it('reads the store views of a blog post, not the store view that it loaded in', function () {
+        $post = Mage::getModel('blog/post')->setData(['store_id' => 0, 'stores' => [(int) $this->second->getId()]]);
+
+        expect(array_column(Mage::helper('cms/preview')->getStores($post), 'id'))->toBe([(int) $this->second->getId()]);
+    });
+
     it('uses the default store view when the content shows in it', function () {
         $defaultId = (int) Mage::app()->getDefaultStoreView()->getId();
         Mage::register('cms_page', Mage::getModel('cms/page')->setData('store_id', [(int) $this->second->getId(), $defaultId]));
@@ -323,6 +329,50 @@ describe('editor settings', function () {
                 $page->delete();
             }
             $block->delete();
+        }
+    });
+
+    it('lists a disabled page that shows the block, and marks it', function () {
+        $this->byId->setIsActive(false)->save();
+
+        $usage = array_column(Mage::helper('cms/preview')->getBlockUsages($this->block), null, 'id')[(int) $this->byId->getId()] ?? null;
+
+        expect($usage['title'] ?? null)->toBe('By id (Disabled)');
+    });
+
+    it('names the store views that show both the page and the block', function () {
+        $second = previewDraftSecondStore();
+        $this->byId->setStores([(int) $second->getId()])->save();
+        try {
+            $usages = array_column(Mage::helper('cms/preview')->getBlockUsages($this->block), 'stores', 'id');
+
+            expect($usages[(int) $this->byId->getId()])->toBe([(int) $second->getId()])
+                ->and($usages[(int) $this->byIdentifier->getId()])->toContain((int) $second->getId())
+                ->toContain((int) Mage::app()->getDefaultStoreView()->getId());
+        } finally {
+            $second->delete();
+            Mage::app()->reinitStores();
+        }
+    });
+
+    it('lists the home page of each store view, also when it is disabled', function () {
+        $second = previewDraftSecondStore();
+        $home = Mage::getModel('cms/page')
+            ->setTitle('Second home')
+            ->setIdentifier('preview-home-' . uniqid())
+            ->setIsActive(false)
+            ->setStores([(int) $second->getId()])
+            ->setContent('<p>Home</p>')
+            ->save();
+        $second->setConfig(Mage_Cms_Helper_Page::XML_PATH_HOME_PAGE, $home->getIdentifier());
+        try {
+            $usage = array_column(Mage::helper('cms/preview')->getBlockUsages($this->block), null, 'id')[(int) $home->getId()] ?? null;
+
+            expect($usage)->toBe(['id' => (int) $home->getId(), 'title' => 'Second home (Disabled)', 'stores' => [(int) $second->getId()]]);
+        } finally {
+            $home->delete();
+            $second->delete();
+            Mage::app()->reinitStores();
         }
     });
 

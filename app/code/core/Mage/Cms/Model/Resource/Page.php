@@ -405,7 +405,7 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
     /**
      * Get store ids to which specified item is assigned
      *
-     * @param string $pageId
+     * @param int|string $pageId
      * @return array
      */
     public function lookupStoreIds($pageId)

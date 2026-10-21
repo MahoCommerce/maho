@@ -28,13 +28,20 @@ class Mage_Cms_Model_Preview_Provider_Block extends Mage_Cms_Model_Preview_Provi
 
     /**
      * Without a context page, the block shows alone in the store layout. With one, that
-     * saved page renders, and the observer puts the draft in place of the block.
+     * saved page renders, and the observer puts the draft in place of the block. The context
+     * page can be disabled, but it must belong to the store view of the draft.
      */
     #[\Override]
     public function render(Mage_Core_Controller_Front_Action $action, array $draft): bool
     {
         if ($draft['context_page_id'] !== null) {
-            return Mage::helper('cms/page')->renderPage($action, (string) $draft['context_page_id']);
+            // A load without a store view does not filter by store view or by status
+            $page = Mage::getSingleton('cms/page')->load($draft['context_page_id']);
+            $stores = array_map(intval(...), (array) $page->getStoreId());
+            if (!$page->getId() || !array_intersect([Mage_Core_Model_App::ADMIN_STORE_ID, $draft['store_id']], $stores)) {
+                return false;
+            }
+            return Mage::helper('cms/page')->renderPageModel($action, $page);
         }
 
         $action->loadLayout(['default', 'cms_preview_block']);
@@ -45,6 +52,19 @@ class Mage_Cms_Model_Preview_Provider_Block extends Mage_Cms_Model_Preview_Provi
         $action->renderLayout();
 
         return true;
+    }
+
+    /**
+     * The action of the context page. A block alone has no storefront page.
+     */
+    #[\Override]
+    public function getStorefrontAction(array $draft): ?string
+    {
+        if ($draft['context_page_id'] === null) {
+            return null;
+        }
+        $identifier = (string) Mage::getModel('cms/page')->load($draft['context_page_id'])->getIdentifier();
+        return $this->getCmsPageAction($identifier, $draft['store_id']);
     }
 
     /**

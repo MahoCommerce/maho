@@ -49,6 +49,12 @@ class Mage_Cms_Model_Preview_Provider_Page extends Mage_Cms_Model_Preview_Provid
     }
 
     #[\Override]
+    public function getStorefrontAction(array $draft): ?string
+    {
+        return $this->getCmsPageAction((string) ($draft['data']['identifier'] ?? ''), $draft['store_id']);
+    }
+
+    #[\Override]
     public function isTarget(Mage_Core_Block_Abstract $block, array $draft): bool
     {
         return $block instanceof Mage_Cms_Block_Page && $block->getNameInLayout() === 'cms_page';

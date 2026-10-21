@@ -23,6 +23,18 @@ class DirectiveRenderer {
         this.results = new Map();
         this.queue = new Map();
         this.timer = null;
+        this.mounts = new Set();
+    }
+
+    /** Render every directive again in the store view $storeId. */
+    setStore(storeId) {
+        if (storeId === this.storeId) {
+            return;
+        }
+        this.storeId = storeId;
+        // A new map, so a request of the old store view cannot change the results of the new one
+        this.results = new Map();
+        this.mounts.forEach((refresh) => refresh());
     }
 
     /** A promise of { head, html }, or of null when the server does not render the directive. */
@@ -46,6 +58,7 @@ class DirectiveRenderer {
     }
 
     async send(batch) {
+        const results = this.results;
         const body = new FormData();
         body.set('store_id', this.storeId);
         for (const [directive] of batch) {
@@ -61,7 +74,7 @@ class DirectiveRenderer {
             const html = result?.html?.[directive];
             if (typeof html !== 'string') {
                 // Ask again the next time that the node shows
-                this.results.delete(directive);
+                results.delete(directive);
             }
             resolve(typeof html === 'string' ? { head: result.head ?? '', html } : null);
         }
@@ -76,6 +89,14 @@ const rendererOf = (setup) => {
         renderers.set(setup, new DirectiveRenderer(setup));
     }
     return renderers.get(setup);
+};
+
+/** Show the widgets and blocks of the editor of `setup` as store view $storeId shows them. */
+export const setRenderStore = (setup, storeId) => {
+    if (setup?.config?.render_store_id) {
+        setup.config.render_store_id = storeId;
+    }
+    rendererOf(setup)?.setStore(storeId);
 };
 
 // The attributes that open a URL on a click or a submit. An image keeps a data: source
@@ -119,6 +140,7 @@ export const mountDirectiveRender = (setup, dom, directive, { inline = false } =
 
     let resizeObserver = null;
     let stopped = false;
+    let ticket = 0;
 
     const showInline = (html) => {
         const template = document.createElement('template');
@@ -132,6 +154,13 @@ export const mountDirectiveRender = (setup, dom, directive, { inline = false } =
         dom.classList.add('is-rendered-inline');
     };
 
+    const clear = () => {
+        resizeObserver?.disconnect();
+        resizeObserver = null;
+        dom.querySelectorAll(':scope > .maho-widget-frame, :scope > .maho-widget-note').forEach((element) => element.remove());
+        dom.classList.remove('is-rendered', 'is-render-empty');
+    };
+
     const show = (result) => {
         if (stopped || !result) {
             return;
@@ -140,6 +169,7 @@ export const mountDirectiveRender = (setup, dom, directive, { inline = false } =
             showInline(result.html);
             return;
         }
+        clear();
         if (result.html.trim() === '') {
             dom.classList.add('is-render-empty');
             const note = document.createElement('span');
@@ -173,16 +203,27 @@ export const mountDirectiveRender = (setup, dom, directive, { inline = false } =
         dom.append(frame);
     };
 
+    // Only the latest request shows, so a slow answer for an earlier store view is dropped
+    const request = () => {
+        const current = ++ticket;
+        renderer.render(directive).then((result) => current === ticket && show(result));
+    };
+
+    // An icon comes from the icon library, which is the same in each store view
+    const refresh = () => ticket > 0 && !inline && request();
+    renderer.mounts.add(refresh);
+
     const intersectionObserver = new IntersectionObserver((entries) => {
         if (entries.some((entry) => entry.isIntersecting)) {
             intersectionObserver.disconnect();
-            renderer.render(directive).then(show);
+            request();
         }
     }, { rootMargin: '200px' });
     intersectionObserver.observe(dom);
 
     return () => {
         stopped = true;
+        renderer.mounts.delete(refresh);
         intersectionObserver.disconnect();
         resizeObserver?.disconnect();
     };

@@ -82,6 +82,22 @@ abstract class Mage_Cms_Model_Preview_Provider_Abstract implements Mage_Cms_Mode
     }
 
     #[\Override]
+    public function getStorefrontAction(array $draft): ?string
+    {
+        return null;
+    }
+
+    /**
+     * The full action name that shows the CMS page $identifier in store view $storeId: the home
+     * page action for the home page of that store view, else the page view action.
+     */
+    protected function getCmsPageAction(string $identifier, int $storeId): string
+    {
+        $home = Mage::helper('cms/page')->getConfigPageIdentifier(Mage_Cms_Helper_Page::XML_PATH_HOME_PAGE, $storeId);
+        return $identifier !== '' && $identifier === $home ? 'cms_index_index' : 'cms_page_view';
+    }
+
+    #[\Override]
     public function getTargetHtml(Mage_Core_Block_Abstract $block, string $html, array $draft): string
     {
         return $html;

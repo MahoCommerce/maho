@@ -34,7 +34,7 @@ function previewSaveDraft(array $draft): string
 /**
  * @return array{response: Mage_Core_Controller_Response_Http, request: Mage_Core_Controller_Request_Http, controller: Mage_Cms_PreviewController}
  */
-function previewDispatch(string $draftId): array
+function previewController(string $draftId): array
 {
     Mage::unregister('_singleton/cms/page');
     Mage::unregister(Mage_Cms_Model_Preview::REGISTRY_KEY);
@@ -50,9 +50,17 @@ function previewDispatch(string $draftId): array
     $response = new Mage_Core_Controller_Response_Http();
     // The domain policy observer sets this before the action runs
     $response->setHeader('X-Frame-Options', 'SAMEORIGIN');
-    $controller = new Mage_Cms_PreviewController($request, $response);
-    $controller->viewAction();
-    return ['response' => $response, 'request' => $request, 'controller' => $controller];
+    return ['response' => $response, 'request' => $request, 'controller' => new Mage_Cms_PreviewController($request, $response)];
+}
+
+/**
+ * @return array{response: Mage_Core_Controller_Response_Http, request: Mage_Core_Controller_Request_Http, controller: Mage_Cms_PreviewController}
+ */
+function previewDispatch(string $draftId): array
+{
+    $result = previewController($draftId);
+    $result['controller']->viewAction();
+    return $result;
 }
 
 beforeEach(function () {
@@ -104,6 +112,17 @@ describe('page draft', function () {
         }
     });
 
+    it('takes the body class and the layout handle of the storefront page, for the home page too', function (bool $home) {
+        $identifier = $home
+            ? Mage::helper('cms/page')->getConfigPageIdentifier(Mage_Cms_Helper_Page::XML_PATH_HOME_PAGE)
+            : 'preview-page-' . uniqid();
+        $action = $home ? 'cms_index_index' : 'cms_page_view';
+        $result = previewDispatch(previewSaveDraft(['data' => ['identifier' => $identifier, 'content' => '<p>x</p>', 'root_template' => 'one_column']]));
+
+        expect($result['response']->getBody())->toMatch('/<body class="[^"]*\\b' . str_replace('_', '-', $action) . '\\b/')
+            ->and($result['controller']->getLayout()->getUpdate()->getHandles())->toContain($action)->toContain('cms_preview_view');
+    })->with(['page' => [false], 'home page' => [true]]);
+
     it('lets only the admin frame the page, and keeps it out of caches and indexes', function () {
         $headers = previewDispatch(previewSaveDraft(['data' => ['content' => '<p>x</p>', 'root_template' => 'one_column']]))
             ['response']->getSymfonyResponse()->headers;
@@ -121,6 +140,13 @@ describe('page draft', function () {
         foreach (['google_tag_manager', 'google_analytics', 'meta_pixel', 'speculation_rules_script'] as $name) {
             expect($layout->getBlock($name))->toBeFalse();
         }
+    });
+
+    it('starts no session, so a frame of another site leaves no session behind', function () {
+        $controller = previewController(previewSaveDraft(['data' => ['content' => '<p>x</p>']]))['controller'];
+        $controller->preDispatch();
+
+        expect($controller->getFlag('', Mage_Core_Controller_Varien_Action::FLAG_NO_START_SESSION))->toBeTrue();
     });
 
     it('shows nothing for a draft that does not exist or that belongs to another store', function (bool $otherStore) {
@@ -218,6 +244,50 @@ describe('block draft', function () {
             ->toContain('<p>Draft block</p>')
             ->not->toContain('<p>Saved block</p>');
     });
+
+    it('shows a disabled block on a disabled page', function () {
+        $this->block->setIsActive(false)->save();
+        $this->page->setIsActive(false)->save();
+
+        $body = previewDispatch(previewSaveDraft([
+            'entity' => 'block',
+            'entity_id' => (int) $this->block->getId(),
+            'context_page_id' => (int) $this->page->getId(),
+            'data' => ['identifier' => $this->block->getIdentifier(), 'content' => '<p>Draft block</p>'],
+        ]))['response']->getBody();
+
+        expect($body)->toContain('<p>Around</p>')
+            ->toContain(Mage_Cms_Model_Preview::MARKER_START . '<p>Draft block</p>' . Mage_Cms_Model_Preview::MARKER_END);
+    });
+
+    it('shows nothing for a page of another store view', function () {
+        $default = Mage::app()->getDefaultStoreView();
+        $other = Mage::getModel('core/store')
+            ->setCode('preview_' . substr(uniqid(), -8))
+            ->setWebsiteId((int) $default->getWebsiteId())
+            ->setGroupId((int) $default->getGroupId())
+            ->setName('Preview other store')
+            ->setIsActive()
+            ->save();
+        Mage::app()->reinitStores();
+        Mage::app()->setCurrentStore($default);
+        $this->page->setStores([(int) $other->getId()])->save();
+
+        try {
+            $result = previewDispatch(previewSaveDraft([
+                'entity' => 'block',
+                'entity_id' => (int) $this->block->getId(),
+                'context_page_id' => (int) $this->page->getId(),
+                'data' => ['identifier' => $this->block->getIdentifier(), 'content' => '<p>Draft block</p>'],
+            ]));
+
+            expect($result['request']->getActionName())->toBe('noRoute');
+        } finally {
+            $this->page->setStores([0])->save();
+            $other->delete();
+            Mage::app()->reinitStores();
+        }
+    });
 });
 
 describe('blog post draft', function () {
@@ -232,6 +302,7 @@ describe('blog post draft', function () {
             ->and($body)->toContain('Draft post title')
             ->toContain('<p>Draft post body</p>')
             ->toContain(Mage_Cms_Model_Preview::MARKER_START)
+            ->toMatch('/<body class="[^"]*\\bblog-index-view\\b/')
             ->and($result['controller']->getLayout()->getBlock('head')->getRobots())->toBe('NOINDEX,NOFOLLOW');
     });
 });

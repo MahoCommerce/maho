@@ -38,6 +38,15 @@ interface Mage_Cms_Model_Preview_ProviderInterface
     public function render(Mage_Core_Controller_Front_Action $action, array $draft): bool;
 
     /**
+     * The full action name of the storefront page that shows $draft, such as `blog_index_view`,
+     * or null when no storefront page shows it alone. The preview adds the layout handle and the
+     * body class of that action, so the theme styles the draft as on that page.
+     *
+     * @param Draft $draft
+     */
+    public function getStorefrontAction(array $draft): ?string;
+
+    /**
      * Tell if $block renders the content of $draft. The preview marks the output of that
      * block, so the editor can keep the two panes on the same passage.
      *
