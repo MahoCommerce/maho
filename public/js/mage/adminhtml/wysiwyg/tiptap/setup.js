@@ -237,29 +237,20 @@ class tiptapWysiwygSetup {
         }
         this.editor.commands.setContent(this.convertFromPlain(this.textarea.value));
         this.invalidContent = this.findDroppedContent(this.textarea.value);
-        this.rememberPlainValue();
-    }
-
-    /**
-     * Keep the markup that the editor writes for the textarea content, so a sync of unchanged
-     * content does nothing. When the editor drops some HTML, the next sync must write the
-     * cleaned content, so nothing is kept.
-     */
-    rememberPlainValue() {
-        this.plainValue = this.invalidContent === null ? this.convertToPlain(this.editor.getHTML()) : null;
+        this.plainValue = this.convertToPlain(this.editor.getHTML());
     }
 
     /**
      * Write the content of the editor to the textarea. Each transaction syncs, also one that only
-     * moves the selection or opens Fullscreen, so a sync of unchanged content leaves the textarea,
-     * and the change mark of its tab, as they are.
+     * moves the selection or opens Fullscreen. Without $force, a sync of the value that the editor
+     * loaded or wrote last leaves the textarea, and the change mark of its tab, as they are.
      */
-    syncWysiwygToPlain() {
+    syncWysiwygToPlain(force = false) {
         if (!this.textarea || !this.editor) {
             return;
         }
         const value = this.convertToPlain(this.editor.getHTML());
-        if (value === this.plainValue) {
+        if (value === this.plainValue && !force) {
             return;
         }
         this.plainValue = value;
@@ -423,7 +414,9 @@ class tiptapWysiwygSetup {
         }
         this.updateContentNotice();
         // The editor cleaned the content. The old answer of the sanitizer is out of date.
-        this.syncHandler?.();
+        if (this.isTiptapActive()) {
+            this.syncWysiwygToPlain(true);
+        }
         this.sanitizePreview?.check();
         return enabled;
     }
@@ -621,7 +614,7 @@ class tiptapWysiwygSetup {
         });
 
         this.invalidContent = this.findDroppedContent(this.textarea.value);
-        this.rememberPlainValue();
+        this.plainValue = this.convertToPlain(this.editor.getHTML());
 
         // Update toolbar state initially
         this.updateToolbarState();

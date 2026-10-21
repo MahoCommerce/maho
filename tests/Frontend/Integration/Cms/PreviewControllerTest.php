@@ -284,7 +284,9 @@ describe('block draft', function () {
             expect($result['request']->getActionName())->toBe('noRoute');
         } finally {
             $this->page->setStores([0])->save();
+            Mage::register('isSecureArea', true, true);
             $other->delete();
+            Mage::unregister('isSecureArea');
             Mage::app()->reinitStores();
         }
     });
