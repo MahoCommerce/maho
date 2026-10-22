@@ -821,7 +821,7 @@ var ProductMediaManager = {
         this.capHeight();
         window.addEventListener('resize', () => this.capHeight());
 
-        // A click on the tile next to the image opens the visible image
+        // A click outside an image opens the visible image
         gallery.addEventListener('click', e => {
             let target = e.target.closest('.gallery-image') ?? gallery.querySelector('.gallery-image.visible');
             if (target?.id === 'image-main') {

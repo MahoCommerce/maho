@@ -66,20 +66,6 @@ function galleryProductUrl(): string
     return '/catalog/product/view/id/' . (int) $product->getId() . '/';
 }
 
-/**
- * Run $expression in the page until it returns true, for at most 5s.
- */
-function waitForGalleryScript(object $page, string $expression): void
-{
-    $deadline = microtime(true) + 5;
-    while ($page->script($expression) !== true) {
-        if (microtime(true) >= $deadline) {
-            throw new RuntimeException("[{$expression}] did not become true within 5s");
-        }
-        usleep(50_000);
-    }
-}
-
 const VISIBLE_GALLERY_IMAGES = "[...document.querySelectorAll('.product-image-gallery img')].filter(i => i.checkVisibility()).length";
 
 it('shows every gallery image in the grid layout', function () {
@@ -94,7 +80,7 @@ it('shows every gallery image in the grid layout', function () {
 
     $page->click('.product-image-gallery img:nth-of-type(3)')
         ->assertPresent('.fullscreen-gallery');
-    waitForGalleryScript($page, "document.querySelector('.fg-scroll').scrollLeft > 0");
+    waitForScript($page, "document.querySelector('.fg-scroll').scrollLeft > 0");
 });
 
 it('shows one image and the thumbnails at its left in the left layout', function () {
@@ -120,7 +106,7 @@ it('marks the thumbnail of the visible image as the current one', function () {
     expect($page->script($current))->toBe('true,-,-,-');
 
     $page->click('.thumb-link[data-image-index="2"]');
-    waitForGalleryScript($page, "{$current} === '-,-,true,-'");
+    waitForScript($page, "{$current} === '-,-,true,-'");
 });
 
 it('shows the thumbnails at the right of the image in the right layout', function () {
@@ -158,9 +144,9 @@ it('shows a swipe carousel with a counter on a phone', function (string $layout)
         ->and($page->text('.gallery-counter'))->toBe('1 / ' . GALLERY_IMAGE_COUNT);
 
     $page->script("{$gallery}.scrollTo({left: {$gallery}.clientWidth})");
-    waitForGalleryScript($page, "document.querySelector('.gallery-counter').textContent === '2 / " . GALLERY_IMAGE_COUNT . "'");
+    waitForScript($page, "document.querySelector('.gallery-counter').textContent === '2 / " . GALLERY_IMAGE_COUNT . "'");
 
     $page->click('.product-image-gallery img:nth-of-type(3)')
         ->assertPresent('.fullscreen-gallery');
-    waitForGalleryScript($page, "document.querySelector('.fg-scroll').scrollLeft > 0");
+    waitForScript($page, "document.querySelector('.fg-scroll').scrollLeft > 0");
 })->with(['below', 'grid']);
