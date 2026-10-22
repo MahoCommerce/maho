@@ -203,7 +203,7 @@
         @apply w-full border-collapse;
 
         thead th {
-            @apply whitespace-nowrap border-b border-line px-2 py-3 text-[0.6875rem] font-semibold uppercase tracking-[0.08em] text-base-content/65;
+            @apply whitespace-nowrap border-b border-line px-2 py-3 text-[0.6875rem] font-semibold uppercase tracking-[0.08em] text-base-content/80;
 
             &:first-child {
                 @apply w-full whitespace-normal;
@@ -211,7 +211,7 @@
         }
 
         tbody td {
-            @apply overflow-hidden text-ellipsis break-words border-b border-line px-2 py-3 align-top text-sm;
+            @apply overflow-hidden text-ellipsis break-words border-b border-line px-2 py-3 align-baseline text-sm;
 
             &:nth-child(2),
             &:nth-child(3),
@@ -226,6 +226,19 @@
             .product-name {
                 @apply block overflow-hidden text-ellipsis font-medium text-base-content;
             }
+
+            /* "Label: value", one option per row, as in the cart */
+            .item-options {
+                @apply mt-1 grid grid-cols-[auto_1fr] gap-x-1 text-13;
+
+                dt {
+                    @apply font-semibold after:content-[':'];
+                }
+
+                dd {
+                    @apply col-start-2 m-0 text-base-content/70;
+                }
+            }
         }
 
         tfoot {
@@ -233,11 +246,12 @@
                 @apply border-t border-line;
             }
 
+            /* DaisyUI's table sets tfoot at 60% ink, under 4.5:1 */
             td {
-                @apply whitespace-normal border-b-0 p-2 text-sm;
+                @apply whitespace-normal border-b-0 p-2 text-sm text-base-content/80;
 
                 &:last-child {
-                    @apply text-right font-semibold;
+                    @apply text-right font-semibold text-base-content;
                 }
             }
 
