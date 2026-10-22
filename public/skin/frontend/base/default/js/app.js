@@ -657,9 +657,20 @@ var ProductMediaManager = {
     overlay: null,
     handlers: {},
 
+    // The image set that the grid and the phone carousel show (see _components.css):
+    // #image-main, unless an #image-N is the main image, then each #image-N. A selected swatch
+    // image takes the cell of the main image
     getGalleryImages: () => {
         const images = [...document.querySelectorAll('.product-image-gallery .gallery-image')];
-        return images.length > 1 ? images.slice(1) : images;
+        // A theme copy of the old media.phtml writes no data-gallery-layout and no data-main
+        if (!document.querySelector('[data-gallery-layout]')) {
+            return images.length > 1 ? images.slice(1) : images;
+        }
+        const own = images.filter(img => /^image-\d+$/.test(img.id));
+        const main = own.find(img => 'main' in img.dataset) ?? images.find(img => img.id === 'image-main');
+        const set = main?.id === 'image-main' ? [main, ...own] : own;
+        const swatch = images.find(img => !img.id && img.classList.contains('visible'));
+        return swatch ? set.map(img => img === main ? swatch : img) : set;
     },
 
     openFullscreen: function(startIndex = 0) {
@@ -770,6 +781,39 @@ var ProductMediaManager = {
         g.style.maxHeight = Math.max(200, window.innerHeight - g.getBoundingClientRect().top - (t ? t.offsetHeight : 0) - 20) + 'px';
     },
 
+    // The phone carousel shows "2 / 5"; the CSS hides the counter on a desktop
+    initCounter: function(gallery) {
+        const counter = document.createElement('span');
+        counter.className = 'gallery-counter';
+        counter.setAttribute('aria-hidden', 'true');
+        gallery.after(counter);
+
+        const update = () => {
+            const total = this.getGalleryImages().length;
+            const current = Math.round(gallery.scrollLeft / (gallery.clientWidth || 1)) + 1;
+            counter.hidden = total < 2;
+            counter.textContent = `${Math.min(current, total)} / ${total}`;
+        };
+        update();
+        gallery.addEventListener('scroll', update, { passive: true });
+        new MutationObserver(update).observe(gallery, { childList: true, subtree: true, attributeFilter: ['class'] });
+    },
+
+    // The thumbnail of the visible image carries aria-current. The template marks the thumbnail
+    // of #image-main, and a swatch image has no thumbnail
+    initSelectedThumb: function(gallery) {
+        const links = [...document.querySelectorAll('.product-image-thumbs .thumb-link')];
+        const update = () => {
+            const visible = gallery.querySelector('.gallery-image.visible');
+            if (!links.length || visible?.id === 'image-main') return;
+            const index = visible?.id.match(/^image-(\d+)$/)?.[1];
+            links.forEach(link => link.dataset.imageIndex === index
+                ? link.setAttribute('aria-current', 'true')
+                : link.removeAttribute('aria-current'));
+        };
+        new MutationObserver(update).observe(gallery, { subtree: true, attributeFilter: ['class'] });
+    },
+
     init: function() {
         const gallery = document.querySelector('.product-image-gallery');
         if (!gallery) return;
@@ -777,10 +821,20 @@ var ProductMediaManager = {
         this.capHeight();
         window.addEventListener('resize', () => this.capHeight());
 
-        gallery.addEventListener('click', () => {
-            const match = gallery.querySelector('.gallery-image.visible')?.id?.match(/image-(\d+)/);
-            ProductMediaManager.openFullscreen(match ? parseInt(match[1]) : 0);
+        // A click outside an image opens the visible image
+        gallery.addEventListener('click', e => {
+            let target = e.target.closest('.gallery-image') ?? gallery.querySelector('.gallery-image.visible');
+            if (target?.id === 'image-main') {
+                target = gallery.querySelector('[data-main]') ?? target;
+            }
+            const index = this.getGalleryImages().indexOf(target);
+            ProductMediaManager.openFullscreen(Math.max(0, index));
         });
+
+        if (gallery.closest('[data-gallery-phone="carousel"]')) {
+            this.initCounter(gallery);
+        }
+        this.initSelectedThumb(gallery);
 
         document.querySelectorAll('.product-image-thumbs .thumb-link').forEach(link => {
             link.addEventListener('click', e => {

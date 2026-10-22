@@ -12,9 +12,23 @@
 <?php
 $_product = $this->getProduct();
 $mainImage = $this->helper('catalog/image')->init($_product, 'image');
+$aspectRatio = $mainImage->getAspectRatio('gallery');
+// The grid and the phone carousel show a swatch image in the cell of the main image.
+// A product with no base image uses its first gallery image in place of the placeholder.
+$_mainFile = $_product->getImage();
+$_hasMainFile = !in_array($_mainFile, [null, '', 'no_selection'], true);
+$_mainOrder = null;
+$i = 0;
+foreach ($this->getGalleryImages() as $_image) {
+    if ($_mainOrder === null && $this->isGalleryImageVisible($_image) && (!$_hasMainFile || $_image->getFile() === $_mainFile)) {
+        $_mainOrder = $i;
+    }
+    $i++;
+}
 ?>
-    <div class="product-image" role="region" aria-label="<?= $this->__('Product Images') ?>">
-        <div class="product-image-gallery" style="aspect-ratio: <?= $mainImage->getAspectRatio('gallery') ?>">
+    <div class="product-image" role="region" aria-label="<?= $this->__('Product Images') ?>"
+         data-gallery-layout="<?= $this->getGalleryLayout() ?>" data-gallery-phone="<?= $this->getGalleryPhoneLayout() ?>" style="--gallery-columns: <?= $this->getGalleryGridColumns() ?>">
+        <div class="product-image-gallery" style="aspect-ratio: <?= $aspectRatio ?>; --gallery-ratio: <?= $aspectRatio ?><?= $_mainOrder === null ? '' : "; --gallery-main-order: {$_mainOrder}" ?>">
             <img id="image-main"
                 class="gallery-image visible"
                 <?= $mainImage->getImgAttributes('gallery') ?>
@@ -29,7 +43,7 @@ $mainImage = $this->helper('catalog/image')->init($_product, 'image');
                         $galleryHelper = $this->helper('catalog/image')->init($_product, 'image', $_image->getFile());
                     ?>
                     <img id="image-<?= $i ?>"
-                         class="gallery-image" loading="lazy"
+                         class="gallery-image" loading="lazy" style="order: <?= $i ?>"<?= $i === $_mainOrder ? ' data-main' : '' ?>
                          <?= $galleryHelper->getImgAttributes('gallery') ?>
                          data-zoom-image="<?= $this->escapeUrl((string) $galleryHelper) ?>"
                          alt="<?= $this->escapeHtml($_image->getLabel() ?: $_product->getName() . ' - ' . $this->__('Image') . ' ' . ($i + 1)) ?>">
@@ -46,7 +60,7 @@ $mainImage = $this->helper('catalog/image')->init($_product, 'image');
             foreach ($this->getGalleryImages() as $_image): ?>
                 <?php if ($this->isGalleryImageVisible($_image)): ?>
                     <li>
-                        <a class="thumb-link" href="#" title="<?= $this->escapeHtml($_image->getLabel() ?: $_product->getName() . ' - ' . $this->__('Thumbnail') . ' ' . ($i + 1)) ?>" data-image-index="<?= $i ?>" role="button" aria-label="<?= $this->__('View image %s', $i + 1) ?>">
+                        <a class="thumb-link" href="#" title="<?= $this->escapeHtml($_image->getLabel() ?: $_product->getName() . ' - ' . $this->__('Thumbnail') . ' ' . ($i + 1)) ?>" data-image-index="<?= $i ?>" role="button" aria-label="<?= $this->__('View image %s', $i + 1) ?>"<?= $_image->getFile() === $_product->getImage() ? ' aria-current="true"' : '' ?>>
                             <img <?= $this->helper('catalog/image')->init($this->getProduct(), 'image', $_image->getFile())->getImgAttributes('thumbnail') ?> alt="<?= $this->escapeHtml($_image->getLabel() ?: $_product->getName() . ' - ' . $this->__('Thumbnail') . ' ' . ($i + 1)) ?>">
                         </a>
                     </li>

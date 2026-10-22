@@ -455,6 +455,47 @@ SPDX-License-Identifier: AFL-3.0
         </catalog>
         <design>
             <groups>
+                <product_gallery translate="label">
+                    <label>Product Page Gallery</label>
+                    <sort_order>4</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <layout translate="label comment">
+                            <label>Desktop Layout</label>
+                            <comment>Where the thumbnails show next to the main image, or a grid that shows all images at once. The legacy theme always shows the thumbnails below the image.</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_catalog_galleryLayout</source_model>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </layout>
+                        <grid_columns translate="label">
+                            <label>Grid Columns</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_catalog_galleryColumns</source_model>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends>
+                                <layout>grid</layout>
+                            </depends>
+                        </grid_columns>
+                        <phone_layout translate="label comment">
+                            <label>Phone Layout</label>
+                            <comment>Phones use this layout with every desktop layout. The legacy theme always shows the thumbnails below the image.</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_catalog_galleryPhoneLayout</source_model>
+                            <sort_order>30</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </phone_layout>
+                    </fields>
+                </product_gallery>
                 <watermark translate="label">
                     <label>Product Image Watermarks</label>
                     <clone_fields>1</clone_fields>

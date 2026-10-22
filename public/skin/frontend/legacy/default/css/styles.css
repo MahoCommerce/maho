@@ -4363,6 +4363,10 @@ p.product-name a:hover {
 .product-image-gallery .gallery-image.visible {
   display: block;
 }
+/* app.js adds a counter for the phone carousel. This skin has no carousel. */
+.gallery-counter {
+  display: none;
+}
 
 .product-image-thumbs li {
   display: inline-block;

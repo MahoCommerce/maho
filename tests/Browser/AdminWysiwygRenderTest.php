@@ -66,18 +66,6 @@ function deleteWysiwygRenderAdmin(): void
     }
 }
 
-/** Poll $script in the page until it returns 1. */
-function wysiwygRenderWaitFor(object $page, string $script, string $what, int $seconds = 20): void
-{
-    $deadline = microtime(true) + $seconds;
-    while ($page->script($script) !== 1) {
-        if (microtime(true) >= $deadline) {
-            throw new RuntimeException("Timed out: {$what}");
-        }
-        usleep(100_000);
-    }
-}
-
 it('shows a block as the storefront shows it and an icon as its SVG, and saves the directives', function () {
     $page = adminLoginAndVisit(
         WYSIWYG_RENDER_ADMIN_USER,
@@ -85,14 +73,14 @@ it('shows a block as the storefront shows it and an icon as its SVG, and saves t
         '/admin/cms_block/edit/block_id/' . $this->holder->getId(),
         '#block_content',
     );
-    wysiwygRenderWaitFor($page, 'window.tiptapEditors?.get("block_content")?.editor ? 1 : 0', 'editor');
+    waitForScript($page, '!!window.tiptapEditors?.get("block_content")?.editor', 20);
 
-    wysiwygRenderWaitFor(
+    waitForScript(
         $page,
-        'document.querySelector("#block_content_wrapper .maho-widget-frame")?.contentDocument?.body?.innerText.includes("WIDGETRENDERPROBE") ? 1 : 0',
-        'block render',
+        '!!document.querySelector("#block_content_wrapper .maho-widget-frame")?.contentDocument?.body?.innerText.includes("WIDGETRENDERPROBE")',
+        20,
     );
-    wysiwygRenderWaitFor($page, 'document.querySelector("#block_content_wrapper .is-rendered-inline svg") ? 1 : 0', 'icon render');
+    waitForScript($page, '!!document.querySelector("#block_content_wrapper .is-rendered-inline svg")', 20);
 
     expect($page->script('document.querySelector("#block_content_wrapper .maho-widget-frame").getAttribute("sandbox")'))->toBe('allow-same-origin')
         ->and($page->script('window.tiptapEditors.get("block_content").editor.getHTML()'))

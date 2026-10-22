@@ -675,6 +675,13 @@ SPDX-License-Identifier: AFL-3.0
         </category>
     </frontend>
     <default>
+        <design>
+            <product_gallery>
+                <layout>below</layout>
+                <grid_columns>2</grid_columns>
+                <phone_layout>carousel</phone_layout>
+            </product_gallery>
+        </design>
         <catalog>
             <navigation>
                 <max_depth>0</max_depth>
