@@ -446,6 +446,20 @@ function waitForPageLoad(object $page, string $selector): object
 }
 
 /**
+ * Run $script in the page until it returns true, for at most $seconds.
+ */
+function waitForScript(object $page, string $script, int $seconds = 5): void
+{
+    $deadline = microtime(true) + $seconds;
+    while ($page->script($script) !== true) {
+        if (microtime(true) >= $deadline) {
+            throw new RuntimeException("[{$script}] did not become true within {$seconds}s");
+        }
+        usleep(50_000);
+    }
+}
+
+/**
  * Turn an admin path into one carrying the secret key its GET validation expects.
  *
  * Admin urls always validate a per-action secret key derived from the session's form key,
