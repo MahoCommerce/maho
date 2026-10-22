@@ -26,16 +26,16 @@
         <thead>
             <tr>
                 <th rowspan="<?= $rowspan ?>"><?= $this->__('Product') ?></th>
-                <th colspan="<?= $colspan ?>" class="a-center"><?= $this->__('Price') ?></th>
+                <th colspan="<?= $colspan ?>" class="<?= $colspan > 1 ? 'a-center' : 'a-right' ?>"><?= $this->__('Price') ?></th>
                 <th rowspan="<?= $rowspan ?>" class="a-center"><?= $this->__('Qty') ?></th>
-                <th colspan="<?= $colspan ?>" class="a-center"><?= $this->__('Subtotal') ?></th>
+                <th colspan="<?= $colspan ?>" class="<?= $colspan > 1 ? 'a-center' : 'a-right' ?>"><?= $this->__('Subtotal') ?></th>
             </tr>
             <?php if ($this->helper('tax')->displayCartBothPrices()): ?>
                 <tr>
                     <th class="a-right"><?= $this->helper('tax')->getIncExcTaxLabel(false) ?></th>
-                    <th><?= $this->helper('tax')->getIncExcTaxLabel(true) ?></th>
+                    <th class="a-right"><?= $this->helper('tax')->getIncExcTaxLabel(true) ?></th>
                     <th class="a-right"><?= $this->helper('tax')->getIncExcTaxLabel(false) ?></th>
-                    <th><?= $this->helper('tax')->getIncExcTaxLabel(true) ?></th>
+                    <th class="a-right"><?= $this->helper('tax')->getIncExcTaxLabel(true) ?></th>
                 </tr>
             <?php endif ?>
         </thead>

@@ -89,7 +89,7 @@
     </td>
     <?php endif ?>
     <?php if ($this->helper('tax')->displayCartPriceInclTax() || $this->helper('tax')->displayCartBothPrices()): ?>
-    <td data-rwd-label="<?= $this->__('Price') ?>">
+    <td class="a-right" data-rwd-label="<?= $this->__('Price') ?>">
         <?php $_incl = $this->helper('checkout')->getPriceInclTax($_item); ?>
         <?php if (Mage::helper('weee')->typeOfDisplay($_item, [1, 4], 'sales') && $_item->getWeeeTaxAppliedAmount()): ?>
             <span class="cart-tax-total" onclick="taxToggle('unit-item-tax-details<?= $_item->getId() ?>', this, 'cart-tax-total-expanded');">
@@ -181,7 +181,7 @@
     </td>
     <?php endif ?>
     <?php if ($this->helper('tax')->displayCartPriceInclTax() || $this->helper('tax')->displayCartBothPrices()): ?>
-    <td data-rwd-label="<?= $this->__('Subtotal') ?>">
+    <td class="a-right" data-rwd-label="<?= $this->__('Subtotal') ?>">
         <?php $_incl = $this->helper('checkout')->getSubtotalInclTax($_item); ?>
         <?php if (Mage::helper('weee')->typeOfDisplay($_item, [1, 4], 'sales') && $_item->getWeeeTaxAppliedAmount()): ?>
             <span class="cart-tax-total" onclick="taxToggle('subtotal-item-tax-details<?= $_item->getId() ?>', this, 'cart-tax-total-expanded');">

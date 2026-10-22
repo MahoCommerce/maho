@@ -61,7 +61,7 @@ $_weeeAmount = $_item->getWeeeTaxAppliedAmount();
 
     <?php if ($this->helper('tax')->displayCartPriceInclTax() || $this->helper('tax')->displayCartBothPrices()): ?>
     <?php $_labelAppend = $this->helper('tax')->displayCartBothPrices() ? ' ' . $this->__('(Incl. Tax)') : ''; ?>
-    <td data-rwd-label="<?= $this->__('Price') . $_labelAppend ?>">
+    <td class="a-right" data-rwd-label="<?= $this->__('Price') . $_labelAppend ?>">
         <?php $_incl = $_checkoutHelper->getPriceInclTax($_item); ?>
         <span class="cart-price">
             <?php if ($_weeeHelper->typeOfDisplay($_item, [0, 1, 4], 'sales') && $_weeeAmount): ?>
@@ -101,7 +101,7 @@ $_weeeAmount = $_item->getWeeeTaxAppliedAmount();
 
     <?php if ($this->helper('tax')->displayCartPriceInclTax() || $this->helper('tax')->displayCartBothPrices()): ?>
     <?php $_labelAppend = $this->helper('tax')->displayCartBothPrices() ? ' ' . $this->__('(Incl. Tax)') : ''; ?>
-    <td data-rwd-label="<?= $this->__('Subtotal') . $_labelAppend ?>">
+    <td class="a-right" data-rwd-label="<?= $this->__('Subtotal') . $_labelAppend ?>">
         <?php $_inclSubtotal = $_checkoutHelper->getSubtotalInclTax($_item); ?>
         <span class="cart-price">
             <?php if ($_weeeHelper->typeOfDisplay($_item, [0, 1, 4], 'sales') && $_weeeAmount): ?>
