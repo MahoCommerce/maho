@@ -15,6 +15,9 @@ use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use Symfony\Component\Security\Core\Authorization\AccessDecisionManager;
+use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
+use Symfony\Component\Security\Core\Authorization\Voter\RoleVoter;
 
 uses(Tests\MahoBackendTestCase::class);
 
@@ -48,13 +51,15 @@ function wishlistDtoSecurity(int $customerId): Security
         #[\Override]
         public function get(string $id): mixed
         {
-            return $this->storage;
+            return $id === 'security.authorization_checker'
+                ? new AuthorizationChecker($this->storage, new AccessDecisionManager([new RoleVoter()]))
+                : $this->storage;
         }
 
         #[\Override]
         public function has(string $id): bool
         {
-            return $id === 'security.token_storage';
+            return in_array($id, ['security.token_storage', 'security.authorization_checker'], true);
         }
     };
 
@@ -169,4 +174,15 @@ it('dispatches the event for a single item read', function (): void {
 
     expect(WishlistDtoBuildProbe::$calls)->toBe(1)
         ->and($dto->extensions)->toBe(['probe' => true]);
+});
+
+it('does not dispatch the event for a single item read of another customer', function (): void {
+    $added = wishlistDtoCall(new WishlistProcessor($this->security), 'addToWishlist', (int) $this->product->getId());
+    WishlistDtoBuildProbe::$calls = 0;
+
+    $otherSecurity = wishlistDtoSecurity((int) $this->customer->getId() + 1);
+    $dto = wishlistDtoCall(new WishlistProvider($otherSecurity), 'getItem', $added->id);
+
+    expect(WishlistDtoBuildProbe::$calls)->toBe(0)
+        ->and($dto->extensions)->toBe([]);
 });

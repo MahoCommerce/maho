@@ -13,6 +13,7 @@ namespace Mage\Wishlist\Api;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\State\Pagination\TraversablePaginator;
+use Maho\ApiPlatform\Security\CustomerOwnership;
 use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -113,8 +114,8 @@ final class WishlistProvider extends \Maho\ApiPlatform\Provider
             $this->getCacheTtl(),
         );
 
-        // After the save, so the cache holds the base fields only: a hit rebuilds
-        // them and dispatches again, and an observer must not apply twice.
+        // Dispatch after the cache save. A cache hit dispatches the event again,
+        // so the cache must not keep the changes of an observer.
         foreach ($items as $dto) {
             \Mage::dispatchEvent('api_wishlist_item_dto_build', ['dto' => $dto]);
         }
@@ -144,7 +145,10 @@ final class WishlistProvider extends \Maho\ApiPlatform\Provider
 
         $dto = WishlistItem::fromModel($item);
         $dto->customerId = $wishlist->getCustomerId() ? (int) $wishlist->getCustomerId() : null;
-        \Mage::dispatchEvent('api_wishlist_item_dto_build', ['dto' => $dto]);
+        // The operation security refuses other callers after the read, so their observers must not run.
+        if (CustomerOwnership::isOwner($this->security?->getUser(), $dto, 'customerId') || $this->hasBackendAccess('wishlists')) {
+            \Mage::dispatchEvent('api_wishlist_item_dto_build', ['dto' => $dto]);
+        }
 
         return $dto;
     }
