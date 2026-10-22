@@ -236,7 +236,7 @@
                 }
 
                 dd {
-                    @apply m-0 text-base-content/70;
+                    @apply col-start-2 m-0 text-base-content/70;
                 }
             }
         }
