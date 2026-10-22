@@ -156,7 +156,7 @@ class Mage_Wishlist_Model_Resource_Item_Collection extends Mage_Core_Model_Resou
         foreach ($this as $item) {
             $productIds[] = (int) $item->getProductId();
         }
-        $this->_productIds = array_merge($this->_productIds, array_keys($productIds));
+        $this->_productIds = array_merge($this->_productIds, $productIds);
 
         $productCollection = Mage::getModel('catalog/product')->getCollection()
             ->setStoreId($this->getStoreId())
