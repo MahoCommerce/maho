@@ -69,22 +69,6 @@ function wishlistDtoCall(object $target, string $method, mixed ...$args): mixed
 beforeEach(function (): void {
     StoreContext::ensureStore();
 
-    // The Mage\<Module>\Api\ autoloader is only registered by the API kernel's
-    // boot(), which doesn't run in a plain backend test.
-    static $registered = false;
-    if (!$registered) {
-        spl_autoload_register(function (string $class): void {
-            if (!str_starts_with($class, 'Mage\\')) {
-                return;
-            }
-            $file = Mage::getBaseDir() . '/app/code/core/' . str_replace('\\', '/', $class) . '.php';
-            if (is_file($file)) {
-                require $file;
-            }
-        });
-        $registered = true;
-    }
-
     $this->product = Mage::getResourceModel('catalog/product_collection')
         ->addAttributeToFilter('type_id', 'simple')
         ->addAttributeToFilter('status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
