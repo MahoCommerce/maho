@@ -113,6 +113,12 @@ final class WishlistProvider extends \Maho\ApiPlatform\Provider
             $this->getCacheTtl(),
         );
 
+        // After the save, so the cache holds the base fields only: a hit rebuilds
+        // them and dispatches again, and an observer must not apply twice.
+        foreach ($items as $dto) {
+            \Mage::dispatchEvent('api_wishlist_item_dto_build', ['dto' => $dto]);
+        }
+
         return $items;
     }
 
@@ -138,6 +144,7 @@ final class WishlistProvider extends \Maho\ApiPlatform\Provider
 
         $dto = WishlistItem::fromModel($item);
         $dto->customerId = $wishlist->getCustomerId() ? (int) $wishlist->getCustomerId() : null;
+        \Mage::dispatchEvent('api_wishlist_item_dto_build', ['dto' => $dto]);
 
         return $dto;
     }
