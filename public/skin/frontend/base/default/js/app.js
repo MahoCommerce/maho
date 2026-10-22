@@ -662,6 +662,10 @@ var ProductMediaManager = {
     // image takes the cell of the main image
     getGalleryImages: () => {
         const images = [...document.querySelectorAll('.product-image-gallery .gallery-image')];
+        // A theme copy of the old media.phtml writes no data-gallery-layout and no data-main
+        if (!document.querySelector('[data-gallery-layout]')) {
+            return images.length > 1 ? images.slice(1) : images;
+        }
         const own = images.filter(img => /^image-\d+$/.test(img.id));
         const main = own.find(img => 'main' in img.dataset) ?? images.find(img => img.id === 'image-main');
         const set = main?.id === 'image-main' ? [main, ...own] : own;

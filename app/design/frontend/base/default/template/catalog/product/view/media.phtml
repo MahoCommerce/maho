@@ -13,11 +13,14 @@
 $_product = $this->getProduct();
 $mainImage = $this->helper('catalog/image')->init($_product, 'image');
 $aspectRatio = $mainImage->getAspectRatio('gallery');
-// The grid and the phone carousel show a swatch image in the cell of the main image
+// The grid and the phone carousel show a swatch image in the cell of the main image.
+// A product with no base image uses its first gallery image in place of the placeholder.
+$_mainFile = $_product->getImage();
+$_hasMainFile = !in_array($_mainFile, [null, '', 'no_selection'], true);
 $_mainOrder = null;
 $i = 0;
 foreach ($this->getGalleryImages() as $_image) {
-    if ($_mainOrder === null && $this->isGalleryImageVisible($_image) && $_image->getFile() === $_product->getImage()) {
+    if ($_mainOrder === null && $this->isGalleryImageVisible($_image) && (!$_hasMainFile || $_image->getFile() === $_mainFile)) {
         $_mainOrder = $i;
     }
     $i++;
