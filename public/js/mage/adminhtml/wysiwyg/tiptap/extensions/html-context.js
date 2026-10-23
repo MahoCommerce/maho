@@ -67,6 +67,20 @@ const isBlock = (element) => {
 /** True when no child of `element` is a block, so a text node can hold its content. */
 export const isTextContainer = (element) => ![...element.children].some(isBlock);
 
+const ATOM_SELECTOR = ['svg', ...RAW_TAGS].join(',');
+
+/** True when `parent` holds text that is not inside an <svg> or one of the RAW_TAGS. */
+const holdsText = (parent) => {
+    const walker = document.createTreeWalker(parent, NodeFilter.SHOW_TEXT);
+    while (walker.nextNode()) {
+        const atom = walker.currentNode.parentElement.closest(ATOM_SELECTOR);
+        if (walker.currentNode.nodeValue.trim() !== '' && !(atom && parent.contains(atom))) {
+            return true;
+        }
+    }
+    return false;
+};
+
 /**
  * True when the editor reads `element` as inline content: the closest block around it holds text.
  *
@@ -79,7 +93,9 @@ export const isInlineContext = (element) => {
             return true;
         }
         if (isBlock(parent)) {
-            return isTextContainer(parent);
+            // A schema node or a MahoDiv puts lone inline content in a new <p>
+            const ownsBlocks = SCHEMA_BLOCK_TAGS.includes(parent.localName) || hasOwnDivNode(parent);
+            return isTextContainer(parent) && (!ownsBlocks || holdsText(parent));
         }
     }
     return false;
