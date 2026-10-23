@@ -52,7 +52,7 @@ const OWNED_ATTRIBUTES = {
  */
 const EDITOR_ONLY_SKIP = ['inert', 'draggable', 'contenteditable'];
 
-/** An `id` or a `name` on these elements replaces a method of the admin form or of `document`. */
+/** A `name` on these elements replaces a method of the admin form or of `document`. */
 const FORM_NAMED_TAGS = ['button', 'fieldset', 'img', 'output'];
 
 /** A `data-*` name that a save keeps, as Mage_Core_Helper_Purifier::DATA_ATTRIBUTE_PATTERN reads it. */
@@ -89,7 +89,7 @@ const removeDuplicateIds = (state) => {
 
 /** Copy the attributes of `element` that `allowlist` keeps and `skip` does not name, or null. */
 const readAttributes = (element, allowlist, skip = []) => {
-    const skipped = FORM_NAMED_TAGS.includes(element.localName) ? [...skip, 'id', 'name'] : skip;
+    const skipped = FORM_NAMED_TAGS.includes(element.localName) ? [...skip, 'name'] : skip;
     const attributes = {};
     for (const { name, value } of element.attributes) {
         if (!skipped.includes(name) && (DATA_ATTRIBUTE.test(name) || allowlist.attributes.includes(name))) {
