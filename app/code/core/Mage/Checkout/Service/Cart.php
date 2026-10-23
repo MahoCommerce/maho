@@ -608,7 +608,8 @@ class Mage_Checkout_Service_Cart
 
         $appliedCodes = $quote->getGiftcardCodes();
         $appliedCodes = $appliedCodes ? \Mage::helper('core')->jsonDecode($appliedCodes, true) : [];
-        if (isset($appliedCodes[$giftcardCode])) {
+        // A cart saved before the code was stored in its own case can hold it as the customer typed it
+        if (array_find_key($appliedCodes, fn($amount, $code) => strcasecmp((string) $code, $giftcardCode) === 0) !== null) {
             throw new \Mage_Core_Exception_Conflict($helper->__('Gift card "%s" is already applied.', $giftcardCode));
         }
 
