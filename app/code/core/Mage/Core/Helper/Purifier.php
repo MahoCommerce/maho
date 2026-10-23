@@ -81,6 +81,12 @@ class Mage_Core_Helper_Purifier extends Mage_Core_Helper_Abstract
      */
     public const SVG_ELEMENT_NAME_COLLISIONS = ['image'];
 
+    /**
+     * Elements of the document around the content. allowSafeElements() allows them, but a content
+     * field never holds them, so forEditor() leaves them out.
+     */
+    public const DOCUMENT_ELEMENTS = ['html', 'head', 'body', 'title', 'meta', 'link'];
+
     public const ATTRIBUTE_SANITIZER_MODELS = [
         'core/input_filter_svgPaint',
         'core/input_filter_svgAnimation',
@@ -173,6 +179,36 @@ class Mage_Core_Helper_Purifier extends Mage_Core_Helper_Abstract
         }
 
         return $sanitizers;
+    }
+
+    /**
+     * The HTML allowlist for the content editor: each element that a save keeps, and the
+     * attributes that a save keeps on all of them.
+     *
+     * TipTap then keeps the same markup that a save keeps. If the editor removed more, the check in
+     * setup.js would warn about a loss that the save does not cause. If it kept more, a save would
+     * remove what the author saw.
+     *
+     * The list leaves out DOCUMENT_ELEMENTS and the SVG elements. SvgAllowlist::forEditor() gives
+     * the SVG elements with their own attributes. A `data-*` name cannot be listed, so the editor
+     * tests that prefix, as getSanitizer() does.
+     *
+     * @return array{elements: list<string>, attributes: list<string>}
+     */
+    public static function forEditor(): array
+    {
+        $allowed = self::buildConfig()->getAllowedElements();
+        $excluded = [...array_keys(array_change_key_case(SvgAllowlist::ELEMENTS)), ...self::DOCUMENT_ELEMENTS];
+        $elements = array_diff_key($allowed, array_flip($excluded));
+
+        // An attribute that only some elements allow stays out. The editor gives one list to every
+        // element, and it must not keep what a save removes.
+        $attributes = array_keys(array_intersect_key(...array_values($elements)));
+        sort($attributes);
+        $names = array_keys($elements);
+        sort($names);
+
+        return ['elements' => $names, 'attributes' => $attributes];
     }
 
     /**
