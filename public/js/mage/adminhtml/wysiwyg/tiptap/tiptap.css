@@ -17,6 +17,7 @@
     --tt-color-primary-dark: var(--maho-accent-strong, #1d4ed8);
     --tt-color-link: var(--maho-link, #2563eb);
     --tt-color-danger: var(--maho-error, #dc3545);
+    --tt-color-warning: var(--maho-warning, #b45309);
 
     /* Shadows */
     --tt-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
@@ -1420,6 +1421,19 @@
 .tiptap-button-error {
     margin: 0.5rem 0 0;
     color: var(--tt-color-danger);
+
+    &[hidden] {
+        display: none;
+    }
+}
+
+.tiptap-class-form input[type="text"] {
+    font-family: var(--tt-font-mono);
+}
+
+.tiptap-class-warning {
+    margin: 0.5rem 0 0;
+    color: var(--tt-color-warning);
 
     &[hidden] {
         display: none;

@@ -62,6 +62,36 @@ class Mage_Cms_Model_Wysiwyg_Render
     }
 
     /**
+     * The stylesheets of the store view $storeId, the URL of the css/styles.css among them, and the
+     * Tailwind browser build of its theme. `tailwind` is empty when no Tailwind theme compiles the
+     * stylesheet of the store view.
+     *
+     * @return array{head: string, styles: string, tailwind: string}
+     */
+    public function renderStyles(int $storeId): array
+    {
+        return Mage::app()->getCache()->runWithout(
+            Mage_Core_Block_Abstract::CACHE_GROUP,
+            function () use ($storeId): array {
+                $emulation = Mage::getSingleton('core/app_emulation');
+                $environment = $emulation->startEnvironmentEmulation($storeId);
+                try {
+                    $design = Mage::getDesign();
+                    $stylesFile = (string) $design->getFilename(Mage_Core_Model_Design_Content_Bundle::STYLES_FILE, ['_type' => 'skin']);
+                    return [
+                        'head' => $this->getHeadHtml(),
+                        'styles' => Mage::getSingleton('core/design_content_bundle')->getUrl($stylesFile)
+                            ?? $design->getSkinUrl(Mage_Core_Model_Design_Content_Bundle::STYLES_FILE),
+                        'tailwind' => Mage::app()->getLayout()->createBlock('cms/preview_tailwind')->toHtml(),
+                    ];
+                } finally {
+                    $emulation->stopEnvironmentEmulation($environment);
+                }
+            },
+        );
+    }
+
+    /**
      * @param list<string> $directives
      * @return array{head: string, html: array<string, string>}
      */

@@ -134,6 +134,13 @@ CLI (`npm install` in the Maho root):
 
 Without Node.js, a class outside the list does not exist in the compiled stylesheet.
 
+To change the classes of an element in the content editor, put the cursor in it
+and click **CSS Classes** in the toolbar. The dialog lists the element at the
+cursor and each element around it. With selected text, it can also wrap the
+text in a new `<span>`. The dialog warns about a class that neither the
+stylesheets of the store view nor Tailwind style. A DaisyUI class that the
+theme does not use also gets this warning, but the build compiles it.
+
 A module adds its own content to the build with `#[Maho\Config\TailwindSource]`
 on a method that returns the HTML strings. See the class docblock for the
 parameters, and `Mage_Cms_Model_Resource_Block::getTailwindContent()` for an

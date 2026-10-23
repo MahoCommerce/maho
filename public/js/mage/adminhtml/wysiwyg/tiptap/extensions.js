@@ -16,6 +16,7 @@ import { MahoHtml, EDITOR_ID_ATTRIBUTE, restoreIds } from './extensions/html.js'
 import { mountDirectiveRender, FRAMED_TYPES, INLINE_TYPES } from './extensions/widget-render.js';
 import { MahoBlockMove, STRUCTURAL_NODES } from './extensions/block-move.js';
 import { MahoButton } from './extensions/button.js';
+import { MahoCssClasses } from './extensions/css-classes.js';
 
 // prosemirror-tables has no parse rules for the table wrappers browsers (and TipTap itself) emit,
 // so with `enableContentCheck` on TipTap's catch-all rule flags them and falsely warns that valid
@@ -40,7 +41,7 @@ export {
     MahoBentoGrid, MahoBentoCell, BENTO_PRESETS,
     MahoAccordion, MahoDetails, DetailsSummary, DetailsContent, ACCORDION_STYLES,
     MahoSvgBlock, MahoSvgInline, MahoHtml, restoreIds,
-    MahoBlockMove, STRUCTURAL_NODES, MahoButton,
+    MahoBlockMove, STRUCTURAL_NODES, MahoButton, MahoCssClasses,
 };
 
 const parseDirective = (directiveStr) => {
@@ -815,8 +816,9 @@ export const MahoDiv = Node.create({
                 renderHTML: (attributes) => attributes.id ? { [EDITOR_ID_ATTRIBUTE]: attributes.id } : {},
             },
             classList: {
-                parseHTML: (element) => element.classList,
-                renderHTML: (attributes) => attributes.classList.length ? { class: attributes.classList } : {},
+                default: '',
+                parseHTML: (element) => element.getAttribute('class') ?? '',
+                renderHTML: (attributes) => attributes.classList ? { class: attributes.classList } : {},
             },
         };
     },
@@ -856,7 +858,7 @@ export const MahoDiv = Node.create({
             if (node.attrs.id) {
                 label += `#${node.attrs.id}`;
             }
-            for (const className of node.attrs.classList.values()) {
+            for (const className of node.attrs.classList.split(/\s+/).filter(Boolean)) {
                 label += `.${className}`;
             }
 

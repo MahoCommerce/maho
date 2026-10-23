@@ -67,6 +67,7 @@ class Mage_Cms_Model_Wysiwyg_Config extends \Maho\DataObject
             'html_allowlist'                => Mage_Core_Helper_Purifier::forEditor(),
             'render_directives_url'         => Mage::getSingleton('adminhtml/url')->getUrl('*/cms_wysiwyg/renderDirectives'),
             'render_store_id'               => $this->getPreviewStoreId(),
+            'class_check_url'               => Mage::getSingleton('adminhtml/url')->getUrl('*/cms_wysiwyg/classCheck'),
         ]);
         $config->setData('directives_url_quoted', preg_quote($config->getData('directives_url')));
 

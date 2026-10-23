@@ -196,6 +196,30 @@ SPDX-License-Identifier: AFL-3.0
         <insert translate="message">
             <message>Insert</message>
         </insert>
+        <css-classes translate="message">
+            <message>CSS Classes</message>
+        </css-classes>
+        <element translate="message">
+            <message>Element</message>
+        </element>
+        <new-span-around-the-selected-text translate="message">
+            <message>New span around the selected text</message>
+        </new-span-around-the-selected-text>
+        <column translate="message">
+            <message>Column</message>
+        </column>
+        <bento-cell translate="message">
+            <message>Bento Cell</message>
+        </bento-cell>
+        <accordion-content translate="message">
+            <message>Accordion Content</message>
+        </accordion-content>
+        <select-text-or-a-block-to-change-its-css-classes translate="message">
+            <message>Select text or a block to change its CSS classes.</message>
+        </select-text-or-a-block-to-change-its-css-classes>
+        <no-style-found-for-s-check-the-spelling-a-daisyui-class-that translate="message">
+            <message>No style found for: %s. Check the spelling. A daisyUI class that the theme does not use gets its style after the save.</message>
+        </no-style-found-for-s-check-the-spelling-a-daisyui-class-that>
         <enter-a-label-and-a-link translate="message">
             <message>Enter a label and a link.</message>
         </enter-a-label-and-a-link>
