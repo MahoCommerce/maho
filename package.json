@@ -7,7 +7,7 @@
         "copy:sortable": "cp node_modules/sortablejs/Sortable.min.js public/js/sortable.min.js",
         "copy:altcha": "{ echo '/*'; cat node_modules/altcha/LICENSE.txt; echo '*/'; cat node_modules/altcha/dist/main/altcha.i18n.min.js; } > public/js/altcha-i18n.min.js",
         "copy:deep-chat": "cp node_modules/deep-chat/dist/deepChat.bundle.js public/js/deep-chat.js",
-        "copy:tailwind-browser": "cp node_modules/@tailwindcss/browser/dist/index.global.js public/js/tailwindcss-browser.js"
+        "copy:tailwind-browser": "{ echo '/*'; cat node_modules/@tailwindcss/browser/LICENSE; echo '*/'; cat node_modules/@tailwindcss/browser/dist/index.global.js; } > public/js/tailwindcss-browser.js"
     },
     "devDependencies": {
         "@tailwindcss/browser": "^4.3.3",
