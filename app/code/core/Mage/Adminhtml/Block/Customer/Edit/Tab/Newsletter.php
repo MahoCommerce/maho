@@ -31,12 +31,23 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Newsletter extends Mage_Adminhtml_B
 
         $fieldset = $form->addFieldset('base_fieldset', ['legend' => Mage::helper('customer')->__('Newsletter Information')]);
 
+        // Posts 0 when the box is unchecked, so the save can tell "unchecked" from "tab not rendered"
+        $fieldset->addField(
+            'subscription_unchecked',
+            'hidden',
+            [
+                'name'  => 'subscription',
+                'value' => '0',
+            ],
+        );
+
         $fieldset->addField(
             'subscription',
             'checkbox',
             [
                 'label' => Mage::helper('customer')->__('Subscribed to Newsletter?'),
                 'name'  => 'subscription',
+                'value' => '1',
             ],
         );
 
