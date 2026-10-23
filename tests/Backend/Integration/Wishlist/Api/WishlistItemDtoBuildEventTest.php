@@ -68,7 +68,7 @@ function wishlistDtoSecurity(int $customerId): Security
 
 function wishlistDtoCall(object $target, string $method, mixed ...$args): mixed
 {
-    return new ReflectionMethod($target, $method)->invoke($target, ...$args);
+    return (new ReflectionMethod($target, $method))->invoke($target, ...$args);
 }
 
 beforeEach(function (): void {

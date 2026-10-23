@@ -170,6 +170,7 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
             if (!$giftcard->getId()) {
                 Mage::throwException($this->__('Gift card "%s" is not valid.', $code));
             }
+            $code = (string) $giftcard->getCode();
 
             // Check website validity
             $websiteId = (int) $quote->getStore()->getWebsiteId();
@@ -195,8 +196,8 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
                 $appliedCodes = [];
             }
 
-            // Check if already applied
-            if (isset($appliedCodes[$code])) {
+            // A cart saved before this release can hold the code as the customer typed it
+            if (array_find_key($appliedCodes, fn($amount, $applied) => strcasecmp((string) $applied, $code) === 0) !== null) {
                 Mage::throwException($this->__('Gift card "%s" is already applied.', $code));
             }
 
@@ -314,6 +315,7 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
                 $this->_sendJsonResponse($result);
                 return;
             }
+            $code = (string) $giftcard->getCode();
 
             // Check website validity
             $websiteId = (int) $quote->getStore()->getWebsiteId();
@@ -343,8 +345,8 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
                 $appliedCodes = [];
             }
 
-            // Check if already applied
-            if (isset($appliedCodes[$code])) {
+            // A cart saved before this release can hold the code as the customer typed it
+            if (array_find_key($appliedCodes, fn($amount, $applied) => strcasecmp((string) $applied, $code) === 0) !== null) {
                 $result['message'] = $this->__('Gift card "%s" is already applied.', $code);
                 $this->_sendJsonResponse($result);
                 return;

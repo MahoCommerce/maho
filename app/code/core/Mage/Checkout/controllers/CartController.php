@@ -850,6 +850,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
             if (!$giftcard->getId()) {
                 return ['success' => false, 'message' => ''];
             }
+            $code = (string) $giftcard->getCode();
 
             // Check website validity
             $websiteId = (int) $quote->getStore()->getWebsiteId();
@@ -880,8 +881,8 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
             $appliedCodes = $quote->getGiftcardCodes();
             $appliedCodes = $appliedCodes ? json_decode($appliedCodes, true) : [];
 
-            // Check if already applied
-            if (isset($appliedCodes[$code])) {
+            // A cart saved before this release can hold the code as the customer typed it
+            if (array_find_key($appliedCodes, fn($amount, $applied) => strcasecmp((string) $applied, $code) === 0) !== null) {
                 return [
                     'success' => false,
                     'message' => $this->__('Gift card "%s" is already applied.', $code),

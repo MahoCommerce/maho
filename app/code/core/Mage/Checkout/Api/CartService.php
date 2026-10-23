@@ -679,6 +679,7 @@ class CartService
         if (!$giftcard->getId()) {
             throw new BadRequestHttpException('Gift card "' . $giftcardCode . '" is not valid');
         }
+        $giftcardCode = (string) $giftcard->getCode();
 
         if (!$giftcard->isValid()) {
             $status = $giftcard->getStatus();
@@ -703,8 +704,8 @@ class CartService
         $appliedCodes = $quote->getGiftcardCodes();
         $appliedCodes = $appliedCodes ? \Mage::helper('core')->jsonDecode($appliedCodes, true) : [];
 
-        // Check if already applied
-        if (isset($appliedCodes[$giftcardCode])) {
+        // A cart saved before this release can hold the code as the customer typed it
+        if (array_find_key($appliedCodes, fn($amount, $applied) => strcasecmp((string) $applied, $giftcardCode) === 0) !== null) {
             throw new BadRequestHttpException('Gift card "' . $giftcardCode . '" is already applied');
         }
 
@@ -787,6 +788,8 @@ class CartService
         // Get currently applied codes
         $appliedCodes = $quote->getGiftcardCodes();
         $appliedCodes = $appliedCodes ? \Mage::helper('core')->jsonDecode($appliedCodes, true) : [];
+
+        $giftcardCode = (string) (array_find_key($appliedCodes, fn($amount, $code) => strcasecmp((string) $code, $giftcardCode) === 0) ?? $giftcardCode);
 
         // Check if gift card is applied
         if (!isset($appliedCodes[$giftcardCode])) {
