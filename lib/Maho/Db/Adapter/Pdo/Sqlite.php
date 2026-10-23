@@ -537,21 +537,6 @@ class Sqlite extends AbstractPdoAdapter
         return new \Maho\Db\Expr($expression);
     }
 
-<<<<<<< HEAD
-=======
-    #[\Override]
-    public function getNullSafeEqualsSql(string $left, string $right): \Maho\Db\Expr
-    {
-        return new \Maho\Db\Expr(sprintf('(%s IS %s)', $left, $right));
-    }
-
-    #[\Override]
-    public function getCaseInsensitiveEqualsSql(string $left, string $right): \Maho\Db\Expr
-    {
-        return new \Maho\Db\Expr(sprintf('(%s = %s COLLATE NOCASE)', $left, $right));
-    }
-
->>>>>>> 90a51735 (Fixed gift card balances on use, on partial invoices and on cancel, and logins, coupons and postcode rates that failed on PostgreSQL and SQLite when the letter case differed (#1606))
     /**
      * Returns valid COALESCE expression (SQLite supports COALESCE and IFNULL)
      */

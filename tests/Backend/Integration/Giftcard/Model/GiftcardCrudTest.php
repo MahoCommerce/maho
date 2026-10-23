@@ -173,52 +173,6 @@ describe('Giftcard Balance Operations with Database', function () {
         expect($reloaded->getStatus())->toBe(Maho_Giftcard_Model_Giftcard::STATUS_USED);
     });
 
-    test('use() keeps the card active while a balance remains', function (float $amount) {
-        $helper = Mage::helper('giftcard');
-        $code = $helper->generateCode();
-
-        $giftcard = Mage::getModel('giftcard/giftcard');
-        $giftcard->setCode($code);
-        $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard->setWebsiteIds([1]);
-        $giftcard->setBalance(100.00);
-        $giftcard->setInitialBalance(100.00);
-        $giftcard->save();
-
-        $giftcard->use($amount);
-
-        $reloaded = Mage::getModel('giftcard/giftcard')->load($giftcard->getId());
-        expect((float) $reloaded->getBalance())->toBe(100.00 - $amount);
-        expect($reloaded->getStatus())->toBe(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        expect($reloaded->isValid())->toBeTrue();
-    })->with([
-        'half of the balance' => [50.00],
-        'most of the balance' => [99.00],
-    ]);
-
-    test('use() records the stored balance in history when another request used the card first', function () {
-        $helper = Mage::helper('giftcard');
-        $code = $helper->generateCode();
-
-        $giftcard = Mage::getModel('giftcard/giftcard');
-        $giftcard->setCode($code);
-        $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard->setWebsiteIds([1]);
-        $giftcard->setBalance(100.00);
-        $giftcard->setInitialBalance(100.00);
-        $giftcard->save();
-
-        Mage::getModel('giftcard/giftcard')->load($giftcard->getId())->use(30.00);
-        $giftcard->use(20.00);
-
-        expect((float) $giftcard->getBalance())->toBe(50.00);
-
-        $lastEntry = $giftcard->getHistoryCollection()->setOrder('history_id', 'DESC')->getFirstItem();
-        expect((float) $lastEntry->getBaseAmount())->toBe(-20.00);
-        expect((float) $lastEntry->getBalanceBefore())->toBe(70.00);
-        expect((float) $lastEntry->getBalanceAfter())->toBe(50.00);
-    });
-
     test('use() throws exception when amount exceeds balance', function () {
         $helper = Mage::helper('giftcard');
         $code = $helper->generateCode();

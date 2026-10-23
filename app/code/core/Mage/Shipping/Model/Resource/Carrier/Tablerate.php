@@ -100,13 +100,12 @@ class Mage_Shipping_Model_Resource_Carrier_Tablerate extends Mage_Core_Model_Res
             ->order(['dest_country_id DESC', 'dest_region_id DESC', 'LENGTH(dest_zip) DESC', 'dest_zip DESC', 'condition_value DESC'])
             ->limit(1);
 
-        $zipEquals = fn(string $param): string => (string) $adapter->getCaseInsensitiveEqualsSql('dest_zip', $param);
         $conditions = [
-            'dest_country_id = :country_id AND dest_region_id = :region_id AND ' . $zipEquals(':postcode'),
+            'dest_country_id = :country_id AND dest_region_id = :region_id AND dest_zip = :postcode',
             "dest_country_id = :country_id AND dest_region_id = :region_id AND dest_zip = ''",
-            "dest_country_id = :country_id AND dest_region_id = '0' AND " . $zipEquals(':postcode'),
-            "dest_country_id = '0' AND dest_region_id = :region_id AND " . $zipEquals(':postcode'),
-            "dest_country_id = '0' AND dest_region_id = '0' AND " . $zipEquals(':postcode'),
+            "dest_country_id = :country_id AND dest_region_id = '0' AND dest_zip = :postcode",
+            "dest_country_id = '0' AND dest_region_id = :region_id AND dest_zip = :postcode",
+            "dest_country_id = '0' AND dest_region_id = '0' AND dest_zip = :postcode",
             "dest_country_id = :country_id AND dest_region_id = '0' AND dest_zip = ''",
         ];
 
@@ -122,11 +121,10 @@ class Mage_Shipping_Model_Resource_Carrier_Tablerate extends Mage_Core_Model_Res
             $i++;
             $postcode = substr($postcode, 0, -1);
             $bind[':wildcard_postcode_' . $i] = "{$postcode}*";
-            $wildcardEquals = $zipEquals(":wildcard_postcode_{$i}");
-            $conditions[] = "dest_country_id = :country_id AND dest_region_id = :region_id AND {$wildcardEquals}";
-            $conditions[] = "dest_country_id = :country_id AND dest_region_id = '0' AND {$wildcardEquals}";
-            $conditions[] = "dest_country_id = '0' AND dest_region_id = :region_id AND {$wildcardEquals}";
-            $conditions[] = "dest_country_id = '0' AND dest_region_id = '0' AND {$wildcardEquals}";
+            $conditions[] = "dest_country_id = :country_id AND dest_region_id = :region_id AND dest_zip = :wildcard_postcode_{$i}";
+            $conditions[] = "dest_country_id = :country_id AND dest_region_id = '0' AND dest_zip = :wildcard_postcode_{$i}";
+            $conditions[] = "dest_country_id = '0' AND dest_region_id = :region_id AND dest_zip = :wildcard_postcode_{$i}";
+            $conditions[] = "dest_country_id = '0' AND dest_region_id = '0' AND dest_zip = :wildcard_postcode_{$i}";
         }
 
         // Render destination condition

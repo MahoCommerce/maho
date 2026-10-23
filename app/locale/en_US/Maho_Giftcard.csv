@@ -76,6 +76,7 @@
 "Gift card ""%s"" is already applied.","Gift card ""%s"" is already applied."
 "Gift card ""%s"" is not active.","Gift card ""%s"" is not active."
 "Gift card ""%s"" is not valid.","Gift card ""%s"" is not valid."
+"Gift card ""%s"" is not valid for this website.","Gift card ""%s"" is not valid for this website."
 "Gift card ""%s"" was applied.","Gift card ""%s"" was applied."
 "Gift card amount cannot be less than %s","Gift card amount cannot be less than %s"
 "Gift card amount cannot be more than %s","Gift card amount cannot be more than %s"

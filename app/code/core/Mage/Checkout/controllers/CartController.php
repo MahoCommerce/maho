@@ -834,17 +834,69 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
         }
 
         try {
-            // A code that is not a gift card of this website gets the message of the promo code box
+            // Check if cart has gift card products
+            foreach ($quote->getAllItems() as $item) {
+                if ($item->getProductType() === 'giftcard') {
+                    return [
+                        'success' => false,
+                        'message' => $this->__('Gift cards cannot be used to purchase gift card products.'),
+                    ];
+                }
+            }
+
+            // Load gift card by code
             $giftcard = Mage::getModel('giftcard/giftcard')->loadByCode($code);
-            if (!$giftcard->getId() || !$giftcard->isAvailableOnWebsite((int) $quote->getStore()->getWebsiteId())) {
+
+            if (!$giftcard->getId()) {
+                return ['success' => false, 'message' => ''];
+            }
+            $code = (string) $giftcard->getCode();
+
+            // Check website validity
+            $websiteId = (int) $quote->getStore()->getWebsiteId();
+            if (!$giftcard->isAvailableOnWebsite($websiteId)) {
                 return ['success' => false, 'message' => ''];
             }
 
-            Mage::getService('checkout/cart')->applyGiftcard($quote, $code);
+            if (!$giftcard->isValid()) {
+                if ($giftcard->getStatus() === Maho_Giftcard_Model_Giftcard::STATUS_EXPIRED) {
+                    return [
+                        'success' => false,
+                        'message' => $this->__('Gift card "%s" has expired.', $code),
+                    ];
+                }
+                if ($giftcard->getStatus() === Maho_Giftcard_Model_Giftcard::STATUS_USED) {
+                    return [
+                        'success' => false,
+                        'message' => $this->__('Gift card "%s" has been fully used.', $code),
+                    ];
+                }
+                return [
+                    'success' => false,
+                    'message' => $this->__('Gift card "%s" is not active.', $code),
+                ];
+            }
+
+            // Get currently applied codes
+            $appliedCodes = $quote->getGiftcardCodes();
+            $appliedCodes = $appliedCodes ? json_decode($appliedCodes, true) : [];
+
+            // A cart saved before this release can hold the code as the customer typed it
+            if (array_find_key($appliedCodes, fn($amount, $applied) => strcasecmp((string) $applied, $code) === 0) !== null) {
+                return [
+                    'success' => false,
+                    'message' => $this->__('Gift card "%s" is already applied.', $code),
+                ];
+            }
+
+            // Apply the gift card
+            $quoteBaseCurrency = $quote->getBaseCurrencyCode();
+            $appliedCodes[$code] = $giftcard->getBalance($quoteBaseCurrency);
+
+            $quote->setGiftcardCodes(json_encode($appliedCodes));
+            $quote->collectTotals()->save();
 
             return ['success' => true, 'message' => ''];
-        } catch (Mage_Core_Exception $e) {
-            return ['success' => false, 'message' => $e->getMessage()];
         } catch (Exception $e) {
             Mage::logException($e);
             return ['success' => false, 'message' => ''];

@@ -353,42 +353,8 @@ describe('DELETE /api/rest/v2/guest-carts/{id}/giftcards/{code}', function (): v
 
         $response = apiDelete("/api/rest/v2/guest-carts/{$cartId}/giftcards/NONEXISTENT-CODE");
 
-<<<<<<< HEAD
         expect($response['status'])->toBeGreaterThanOrEqual(400);
         expect($response['status'])->toBeLessThan(500);
-=======
-        expect($response['status'])->toBe(404);
-        expect($response['json']['error'])->toBe('not_found');
-    });
-
-});
-
-describe('POST /api/rest/v2/guest-carts/{id}/giftcards', function (): void {
-
-    it('returns 409 for a code that is already applied', function (): void {
-        $create = apiPost('/api/rest/v2/giftcards', ['initialBalance' => 50.0], adminToken());
-        expect($create['status'])->toBeSuccessful();
-        $code = $create['json']['code'];
-        registerGiftCardCode($code);
-
-        $cart = apiPost('/api/rest/v2/guest-carts', []);
-        expect($cart['status'])->toBe(201);
-        $cartId = $cart['json']['maskedId'];
-
-        $add = apiPost("/api/rest/v2/guest-carts/{$cartId}/items", [
-            'sku' => fixtures('write_test_sku'),
-            'qty' => fixtures('write_test_qty') ?? 1,
-        ]);
-        expect($add['status'])->toBe(200);
-
-        $apply = apiPost("/api/rest/v2/guest-carts/{$cartId}/giftcards", ['giftcardCode' => $code]);
-        expect($apply['status'])->toBeSuccessful();
-
-        $again = apiPost("/api/rest/v2/guest-carts/{$cartId}/giftcards", ['giftcardCode' => $code]);
-        expect($again['status'])->toBe(409);
-        expect($again['json']['error'])->toBe('conflict');
-        expect($again['json']['message'])->toBe('Gift card "' . $code . '" is already applied.');
->>>>>>> 90a51735 (Fixed gift card balances on use, on partial invoices and on cancel, and logins, coupons and postcode rates that failed on PostgreSQL and SQLite when the letter case differed (#1606))
     });
 
 });

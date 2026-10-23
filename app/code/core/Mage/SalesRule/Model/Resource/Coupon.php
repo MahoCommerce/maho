@@ -102,20 +102,6 @@ class Mage_SalesRule_Model_Resource_Coupon extends Mage_Core_Model_Resource_Db_A
         );
     }
 
-    #[\Override]
-    protected function _getLoadSelect($field, $value, $object)
-    {
-        if ($field !== 'code') {
-            return parent::_getLoadSelect($field, $value, $object);
-        }
-
-        $adapter = $this->_getReadAdapter();
-        $column = $adapter->quoteIdentifier($this->getMainTable() . '.code');
-        return $adapter->select()
-            ->from($this->getMainTable())
-            ->where((string) $adapter->getCaseInsensitiveEqualsSql($column, '?'), (string) $value);
-    }
-
     /**
      * Check if code exists
      *
@@ -127,7 +113,7 @@ class Mage_SalesRule_Model_Resource_Coupon extends Mage_Core_Model_Resource_Db_A
         $read = $this->_getReadAdapter();
         $select = $read->select();
         $select->from($this->getMainTable(), 'code');
-        $select->where((string) $read->getCaseInsensitiveEqualsSql('code', ':code'));
+        $select->where('code = :code');
 
         if ($read->fetchOne($select, ['code' => $code]) === false) {
             return false;
