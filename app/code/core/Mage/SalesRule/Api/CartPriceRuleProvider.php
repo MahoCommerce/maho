@@ -140,7 +140,7 @@ final class CartPriceRuleProvider extends \Maho\ApiPlatform\Provider
 
         $code = $this->stringFilter($filters, 'code');
         if ($code !== null) {
-            $select->where('rule_coupons.code = ?', $code);
+            $select->where((string) $adapter->getCaseInsensitiveEqualsSql('rule_coupons.code', '?'), $code);
         }
 
         $attribute = $this->stringFilter($filters, 'usesAttribute');

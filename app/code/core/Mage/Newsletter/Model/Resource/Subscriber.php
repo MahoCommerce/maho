@@ -70,7 +70,7 @@ class Mage_Newsletter_Model_Resource_Subscriber extends Mage_Core_Model_Resource
     {
         $select = $this->_read->select()
             ->from($this->getMainTable())
-            ->where('subscriber_email=:subscriber_email');
+            ->where((string) $this->_read->getCaseInsensitiveEqualsSql('subscriber_email', ':subscriber_email'));
 
         $result = $this->_read->fetchRow($select, ['subscriber_email' => $subscriberEmail]);
 
@@ -100,7 +100,7 @@ class Mage_Newsletter_Model_Resource_Subscriber extends Mage_Core_Model_Resource
 
         $select = $this->_read->select()
             ->from($this->getMainTable())
-            ->where('subscriber_email=:subscriber_email')
+            ->where((string) $this->_read->getCaseInsensitiveEqualsSql('subscriber_email', ':subscriber_email'))
             ->where('store_id=:store_id');
 
         $result = $this->_read->fetchRow(

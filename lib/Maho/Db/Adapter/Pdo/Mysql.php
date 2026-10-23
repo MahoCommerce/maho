@@ -3094,6 +3094,13 @@ class Mysql extends AbstractPdoAdapter
         return new \Maho\Db\Expr(sprintf('(%s <=> %s)', $left, $right));
     }
 
+    #[\Override]
+    public function getCaseInsensitiveEqualsSql(string $left, string $right): \Maho\Db\Expr
+    {
+        // The default collation of every table already ignores case, and keeps the index
+        return new \Maho\Db\Expr(sprintf('(%s = %s)', $left, $right));
+    }
+
     /**
      * Returns valid IFNULL expression
      *

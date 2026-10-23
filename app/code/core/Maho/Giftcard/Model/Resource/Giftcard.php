@@ -26,7 +26,7 @@ class Maho_Giftcard_Model_Resource_Giftcard extends Mage_Core_Model_Resource_Db_
         $adapter = $this->_getReadAdapter();
         $select = $adapter->select()
             ->from($this->getMainTable())
-            ->where('code = ?', $code);
+            ->where((string) $adapter->getCaseInsensitiveEqualsSql('code', '?'), $code);
         $this->_addWebsiteIdsColumn($select);
 
         $data = $adapter->fetchRow($select);

@@ -803,6 +803,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
             if (!$giftcard->getId()) {
                 return ['success' => false, 'message' => ''];
             }
+            $code = (string) $giftcard->getCode();
 
             // Check website validity
             $websiteId = (int) $quote->getStore()->getWebsiteId();

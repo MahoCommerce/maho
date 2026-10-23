@@ -56,7 +56,7 @@ class Mage_Customer_Model_Resource_Customer extends Mage_Eav_Model_Entity_Abstra
 
         $select = $adapter->select()
             ->from($this->getEntityTable(), [$this->getEntityIdField()])
-            ->where('email = :email');
+            ->where((string) $adapter->getCaseInsensitiveEqualsSql('email', ':email'));
         if ($customer->getSharingConfig()->isWebsiteScope()) {
             $bind['website_id'] = (int) $customer->getWebsiteId();
             $select->where('website_id = :website_id');
@@ -188,7 +188,7 @@ class Mage_Customer_Model_Resource_Customer extends Mage_Eav_Model_Entity_Abstra
         $bind    = ['customer_email' => $email];
         $select  = $adapter->select()
             ->from($this->getEntityTable(), [$this->getEntityIdField()])
-            ->where('email = :customer_email');
+            ->where((string) $adapter->getCaseInsensitiveEqualsSql('email', ':customer_email'));
 
         if ($customer->getSharingConfig()->isWebsiteScope()) {
             if (!$customer->hasData('website_id')) {

@@ -829,6 +829,7 @@ class Maho_Giftcard_Model_Observer
                         Mage::helper('giftcard')->__('Gift card "%s" is not valid.', $code),
                     );
                 }
+                $code = (string) $giftcard->getCode();
 
                 // Check website validity
                 $websiteId = (int) $quote->getStore()->getWebsiteId();

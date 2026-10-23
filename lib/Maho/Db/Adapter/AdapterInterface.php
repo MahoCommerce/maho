@@ -623,6 +623,11 @@ interface AdapterInterface
     public function getNullSafeEqualsSql(string $left, string $right): \Maho\Db\Expr;
 
     /**
+     * Returns an expression that is true when $left equals $right, without regard to letter case
+     */
+    public function getCaseInsensitiveEqualsSql(string $left, string $right): \Maho\Db\Expr;
+
+    /**
      * Generate fragment of SQL for rounding a numeric value to specified precision.
      * Handles database-specific ROUND function requirements.
      */
