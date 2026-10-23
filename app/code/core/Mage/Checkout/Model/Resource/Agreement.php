@@ -113,4 +113,15 @@ class Mage_Checkout_Model_Resource_Agreement extends Mage_Core_Model_Resource_Db
         }
         return $select;
     }
+
+    /**
+     * The content of every terms and conditions agreement, for the Tailwind build.
+     *
+     * @return iterable<string>
+     */
+    #[Maho\Config\TailwindSource('checkout_agreement', model: Mage_Checkout_Model_Agreement::class, fields: ['content'])]
+    public function getTailwindContent(): iterable
+    {
+        return Mage::getResourceSingleton('core/design_content')->readColumns($this->getMainTable(), $this->getIdFieldName(), ['content']);
+    }
 }

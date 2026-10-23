@@ -126,4 +126,15 @@ class Mage_Core_Model_Resource_Variable extends Mage_Core_Model_Resource_Db_Abst
 
         return $this;
     }
+
+    /**
+     * The HTML value of every custom variable in every store, for the Tailwind build.
+     *
+     * @return iterable<string>
+     */
+    #[Maho\Config\TailwindSource('core_variable', model: Mage_Core_Model_Variable::class, fields: ['html_value'])]
+    public function getTailwindContent(): iterable
+    {
+        return Mage::getResourceSingleton('core/design_content')->readColumns($this->getTable('core/variable_value'), 'value_id', ['html_value']);
+    }
 }

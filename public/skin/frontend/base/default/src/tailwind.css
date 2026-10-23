@@ -26,8 +26,9 @@
 @source not "../../../../../../public/js/deep-chat.js";
 @source "../../../../../../public/skin/frontend/*/*/js/**/*.js";
 
-/* CMS pages, static blocks and widgets live in the database and cannot be scanned
-   at build time - keep the most useful DaisyUI components available for them */
+/* CMS pages, static blocks and widgets live in the database. theme:content:build
+   compiles their classes on a server with Node.js. Without it, content can use
+   these DaisyUI components only */
 @source inline("btn btn-{primary,secondary,accent,neutral,ghost,outline,link,soft,sm,lg,xl,wide,block}");
 @source inline("badge badge-{primary,secondary,accent,neutral,outline,soft,success,warning,error,info}");
 @source inline("alert alert-{success,warning,error,info} divider link link-{primary,hover}");

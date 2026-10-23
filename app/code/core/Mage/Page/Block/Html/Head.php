@@ -322,6 +322,15 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
         // lookup each file basing on current theme configuration
         foreach ($skinItems as $params => $rows) {
             foreach ($rows as $name => $itemData) {
+                if ($name === Mage_Core_Model_Design_Content_Bundle::STYLES_FILE) {
+                    $contentUrl = Mage::getSingleton('core/design_content_bundle')
+                        ->getUrl((string) $designPackage->getFilename($name, ['_type' => 'skin']));
+                    if ($contentUrl !== null) {
+                        $items[$params][] = $contentUrl;
+                        continue;
+                    }
+                }
+
                 $url = $skinUrl = $designPackage->getSkinUrl($name, []);
 
                 // Apply minification if needed

@@ -111,10 +111,33 @@ The swatches sit inside the real options through the customizable select API
 
 A homepage is CMS content: bento grids, columns, widgets and a handful of
 DaisyUI classes, all editable in the page editor. The sample data homepage is
-the reference: open it in the editor to see how the blocks nest. The DaisyUI
-classes available in content are listed in `default/src/tailwind.css` under
-`@source inline(...)`; a class outside that list does not exist in the
-compiled stylesheet.
+the reference: open it in the editor to see how the blocks nest.
+
+The committed `css/styles.css` has the classes of the templates, plus the
+DaisyUI classes that `default/src/tailwind.css` lists under `@source inline(...)`.
+Any other class in content works when the server has Node.js and the Tailwind
+CLI (`npm install` in the Maho root):
+
+- A save of a CMS page, a CMS block, a blog post, a widget, a custom variable,
+  a checkout agreement, a design footer field, or a WYSIWYG attribute of a
+  product or a category queues a build. The build runs one minute later in the
+  `slow` queue pool.
+- The build reads the `class` attributes of that content, compiles a copy of
+  `css/styles.css` with them, and writes it to `media/theme/`. The page head
+  then links the copy instead of the committed file.
+- If the committed `css/styles.css` changes, for example after an upgrade, the
+  store serves the committed file again. A cron job queues a new build within
+  15 minutes. A deploy script can run the build at once with
+  `./maho theme:content:build`.
+- An import that writes to the database with SQL does not queue a build. Run
+  the command after it.
+
+Without Node.js, a class outside the list does not exist in the compiled stylesheet.
+
+A module adds its own content to the build with `#[Maho\Config\TailwindSource]`
+on a method that returns the HTML strings. See the class docblock for the
+parameters, and `Mage_Cms_Model_Resource_Block::getTailwindContent()` for an
+example.
 
 For an icon in content, use the `{{icon}}` directive. The content sanitizer
 strips inline SVG, so pasted markup does not survive a save:

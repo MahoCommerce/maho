@@ -141,8 +141,8 @@ public function setIsActive(?bool $value = true): static
 
 ### Configuration via PHP attributes
 
-Observers, cron jobs, routes, message handlers, and API resources are declared with PHP
-attributes in `lib/Maho/Config/`, **not** in XML. They are compiled into
+Observers, cron jobs, routes, message handlers, Tailwind sources, and API resources are declared
+with PHP attributes in `lib/Maho/Config/`, **not** in XML. They are compiled into
 `vendor/composer/maho_*.php`, so **run `composer dump-autoload` after any change**. See each
 attribute class's docblock for the full parameter list.
 
@@ -158,6 +158,10 @@ public function runJob(Mage_Cron_Model_Schedule $schedule) {}
 
 #[Maho\Config\MessageHandler]
 public function __invoke(My_Module_Model_SomeMessage $message): void {}
+
+// Storefront HTML in the database, whose classes the Tailwind content build compiles
+#[Maho\Config\TailwindSource('my_entity', model: My_Module_Model_Entity::class, fields: ['content'])]
+public function getTailwindContent(): iterable {}
 ```
 
 - Prefer the global area (default, omit `area:`) unless the observer must be area-restricted
