@@ -385,4 +385,26 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
 
         return true;
     }
+
+    /**
+     * Return the gift card amount of the invoices of $order that are not canceled.
+     *
+     * The query bypasses the invoice collection that the order caches.
+     *
+     * @return array{base: float, amount: float}
+     */
+    public function getInvoicedAmounts(Mage_Sales_Model_Order $order): array
+    {
+        $invoices = Mage::getResourceModel('sales/order_invoice_collection')
+            ->setOrderFilter($order)
+            ->addFieldToFilter('state', ['neq' => Mage_Sales_Model_Order_Invoice::STATE_CANCELED]);
+
+        $amounts = ['base' => 0.0, 'amount' => 0.0];
+        foreach ($invoices as $invoice) {
+            $amounts['base'] += abs((float) $invoice->getBaseGiftcardAmount());
+            $amounts['amount'] += abs((float) $invoice->getGiftcardAmount());
+        }
+
+        return $amounts;
+    }
 }
