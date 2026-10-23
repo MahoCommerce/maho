@@ -16,7 +16,7 @@ import { MahoHtml, EDITOR_ID_ATTRIBUTE, restoreIds } from './extensions/html.js'
 import { mountDirectiveRender, FRAMED_TYPES, INLINE_TYPES } from './extensions/widget-render.js';
 import { MahoBlockMove, STRUCTURAL_NODES } from './extensions/block-move.js';
 import { MahoButton } from './extensions/button.js';
-import { MahoCssClasses } from './extensions/css-classes.js';
+import { MahoCssClasses, addClassRow } from './extensions/css-classes.js';
 
 // prosemirror-tables has no parse rules for the table wrappers browsers (and TipTap itself) emit,
 // so with `enableContentCheck` on TipTap's catch-all rule flags them and falsely warns that valid
@@ -41,7 +41,7 @@ export {
     MahoBentoGrid, MahoBentoCell, BENTO_PRESETS,
     MahoAccordion, MahoDetails, DetailsSummary, DetailsContent, ACCORDION_STYLES,
     MahoSvgBlock, MahoSvgInline, MahoHtml, restoreIds,
-    MahoBlockMove, STRUCTURAL_NODES, MahoButton, MahoCssClasses,
+    MahoBlockMove, STRUCTURAL_NODES, MahoButton, MahoCssClasses, addClassRow,
 };
 
 const parseDirective = (directiveStr) => {

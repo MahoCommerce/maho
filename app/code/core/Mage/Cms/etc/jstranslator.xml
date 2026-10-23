@@ -220,6 +220,9 @@ SPDX-License-Identifier: AFL-3.0
         <no-style-found-for-s-check-the-spelling-a-daisyui-class-that translate="message">
             <message>No style found for: %s. Check the spelling. A daisyUI class that the theme does not use gets its style after the save.</message>
         </no-style-found-for-s-check-the-spelling-a-daisyui-class-that>
+        <css-classes-colon translate="message">
+            <message>CSS Classes:</message>
+        </css-classes-colon>
         <enter-a-label-and-a-link translate="message">
             <message>Enter a label and a link.</message>
         </enter-a-label-and-a-link>

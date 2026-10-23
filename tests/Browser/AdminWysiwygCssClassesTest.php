@@ -13,7 +13,8 @@ uses(MahoBrowserTestCase::class)->group('browser');
 
 /**
  * The CSS Classes dialog of the content editor changes the classes of a block, a div, a link
- * or a generic inline element at the cursor, and wraps selected text in a new span. It warns
+ * or a generic inline element at the cursor, and wraps selected text in a new span. The popup
+ * menu of a table, a layout or a cell has a row with the classes of its element. Both warn
  * about a class that the storefront does not style.
  */
 
@@ -150,4 +151,45 @@ it('warns about a class that the storefront does not style', function () {
         ->not->toContain('mt-4')
         ->not->toContain('md:text-center')
         ->not->toContain(' card');
+});
+
+it('changes the classes of a table and of a column in the row of their popup menu', function () {
+    $this->block->setContent(
+        '<table><tbody><tr><td><p>Cell text</p></td></tr></tbody></table>'
+        . '<div data-type="maho-columns" data-preset="2-equal" data-gap="medium" data-style="none">'
+        . '<div data-type="maho-column"><p>Left</p></div>'
+        . '<div data-type="maho-column" class="card"><p>Right</p></div>'
+        . '</div>',
+    )->save();
+    $page = openCssClassesBlock($this);
+    $row = fn(string $menu): string => "document.querySelector('#block_content_{$menu}_bubble_menu .toolbar-class-row input')";
+
+    // The table menu has no badge: it shows for the table around the cursor
+    $page->script('classTest.editor().commands.focus(); classTest.select("Cell text")');
+    waitForScript($page, "document.querySelector('#block_content_table_bubble_menu').style.display === 'flex'");
+    $page->script(<<<JS
+        (() => {
+            const input = {$row('table')};
+            input.focus();
+            input.value = 'table  table-zebra';
+            input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+        })()
+        JS);
+
+    // A cell menu shows the cell of its badge, also when the cursor is in another element
+    $page->script("document.querySelectorAll('.ProseMirror [data-type=\"maho-columns\"] .cell-badge')[1].click()");
+    waitForScript($page, "document.querySelector('#block_content_cell_bubble_menu').style.display === 'flex'");
+    expect($page->script("{$row('cell')}.value"))->toBe('card');
+    $page->script(<<<JS
+        (() => {
+            const input = {$row('cell')};
+            input.value = 'card card-border';
+            input.dispatchEvent(new Event('change'));
+        })()
+        JS);
+
+    expect($page->script('classTest.html()'))
+        ->toContain('class="table table-zebra"')
+        ->toContain('class="card card-border"')
+        ->toContain('<div data-type="maho-column"><p>Left</p></div>');
 });

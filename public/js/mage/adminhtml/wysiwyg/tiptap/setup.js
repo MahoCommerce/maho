@@ -443,6 +443,9 @@ class tiptapWysiwygSetup {
         this.wrapper.id = `${this.id}_wrapper`;
         this.wrapper.className = 'tiptap-wrapper no-display';
 
+        // The class rows of the popup menus, each a function that shows the classes again
+        this.classRows = [];
+
         // Create main toolbar
         const toolbar = this.createMainToolbar();
         this.wrapper.appendChild(toolbar);
@@ -618,6 +621,7 @@ class tiptapWysiwygSetup {
                 if (editor.isInitialized) {
                     this.syncHandlerDebounced();
                     this.updateToolbarState();
+                    this.classRows.forEach((sync) => sync());
                 }
             },
         });
@@ -796,6 +800,7 @@ class tiptapWysiwygSetup {
         bubbleMenu.id = `${this.id}_table_bubble_menu`;
         bubbleMenu.className = 'tiptap-bubble-menu';
         bubbleMenu.style.display = 'none';
+        this.classRows.push(TiptapModules.addClassRow(this, bubbleMenu, ['table']));
         return bubbleMenu;
     }
 
@@ -825,6 +830,7 @@ class tiptapWysiwygSetup {
         bubbleMenu.id = `${this.id}_columns_bubble_menu`;
         bubbleMenu.className = 'tiptap-bubble-menu';
         bubbleMenu.style.display = 'none';
+        this.classRows.push(TiptapModules.addClassRow(this, bubbleMenu, ['mahoColumns']));
         return bubbleMenu;
     }
 
@@ -853,6 +859,7 @@ class tiptapWysiwygSetup {
         bubbleMenu.id = `${this.id}_bento_bubble_menu`;
         bubbleMenu.className = 'tiptap-bubble-menu';
         bubbleMenu.style.display = 'none';
+        this.classRows.push(TiptapModules.addClassRow(this, bubbleMenu, ['mahoBentoGrid']));
         return bubbleMenu;
     }
 
@@ -865,6 +872,7 @@ class tiptapWysiwygSetup {
         bubbleMenu.id = `${this.id}_cell_bubble_menu`;
         bubbleMenu.className = 'tiptap-bubble-menu';
         bubbleMenu.style.display = 'none';
+        this.classRows.push(TiptapModules.addClassRow(this, bubbleMenu, ['mahoColumn', 'mahoBentoCell']));
         return bubbleMenu;
     }
 
@@ -883,6 +891,7 @@ class tiptapWysiwygSetup {
         bubbleMenu.id = `${this.id}_accordion_bubble_menu`;
         bubbleMenu.className = 'tiptap-bubble-menu';
         bubbleMenu.style.display = 'none';
+        this.classRows.push(TiptapModules.addClassRow(this, bubbleMenu, ['mahoAccordion']));
         return bubbleMenu;
     }
 

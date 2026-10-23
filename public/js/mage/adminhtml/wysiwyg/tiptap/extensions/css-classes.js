@@ -150,6 +150,32 @@ const dialogHtml = (setup, targets) => {
     </div>`;
 };
 
+/**
+ * Show in `warning` the classes of `input` that the storefront does not style. Return the function
+ * that runs the check again.
+ */
+const watchClasses = (setup, input, warning) => {
+    let run = 0;
+    const check = async () => {
+        const current = ++run;
+        const unknown = await findUnknownClasses(setup, normalizeClasses(input.value).split(' ').filter(Boolean));
+        // Only the answer to the last change counts
+        if (current !== run) {
+            return;
+        }
+        warning.hidden = !unknown?.length;
+        warning.textContent = unknown?.length
+            ? setup.translate('No style found for: %s. Check the spelling. A daisyUI class that the theme does not use gets its style after the save.', unknown.join(' '))
+            : '';
+    };
+    let timer = null;
+    input.addEventListener('input', () => {
+        clearTimeout(timer);
+        timer = setTimeout(check, 300);
+    });
+    return check;
+};
+
 /** Open the dialog that changes the classes of the elements at the selection. */
 export const openClassDialog = (setup) => {
     const editor = setup.editor;
@@ -169,32 +195,15 @@ export const openClassDialog = (setup) => {
         onOpen: (dialog) => {
             const select = dialog.querySelector('#tiptap-class-target');
             const input = dialog.querySelector('#tiptap-class-value');
-            const warning = dialog.querySelector('.tiptap-class-warning');
+            const check = watchClasses(setup, input, dialog.querySelector('.tiptap-class-warning'));
             const current = () => targets[Number(select.value)];
-            let check = 0;
-            const showWarning = async () => {
-                const run = ++check;
-                const classes = normalizeClasses(input.value).split(' ').filter(Boolean);
-                const unknown = await findUnknownClasses(setup, classes);
-                // Only the answer to the last change counts
-                if (run !== check) {
-                    return;
-                }
-                warning.hidden = !unknown?.length;
-                warning.textContent = unknown?.length
-                    ? setup.translate('No style found for: %s. Check the spelling. A daisyUI class that the theme does not use gets its style after the save.', unknown.join(' '))
-                    : '';
-            };
-            let timer = null;
             const load = () => {
                 input.value = current().edited ?? current().value;
-                showWarning();
+                check();
             };
             select.addEventListener('change', load);
             input.addEventListener('input', () => {
                 current().edited = input.value;
-                clearTimeout(timer);
-                timer = setTimeout(showWarning, 300);
             });
             load();
             input.focus();
@@ -205,6 +214,81 @@ export const openClassDialog = (setup) => {
             return true;
         },
     });
+};
+
+/**
+ * Add a row to the popup menu `menu` with the classes of its element, the innermost node of a
+ * type in `types`. A menu that a badge opens names the node in `data-pos`. The table menu has
+ * no badge, so its node is around the cursor. Return the function that shows the classes again.
+ */
+export const addClassRow = (setup, menu, types) => {
+    const row = document.createElement('div');
+    row.className = 'toolbar-class-row';
+    const id = `${menu.id}_classes`;
+    row.innerHTML = `<label class="toolbar-label" for="${id}"></label>`
+        + `<input type="text" id="${id}" spellcheck="false" autocomplete="off" placeholder="mt-4 text-center">`
+        + '<p class="tiptap-class-warning" hidden></p>';
+    row.querySelector('label').textContent = setup.translate('CSS Classes:');
+    menu.append(row);
+
+    const input = row.querySelector('input');
+    const check = watchClasses(setup, input, row.querySelector('.tiptap-class-warning'));
+
+    const target = () => {
+        const { state } = setup.editor;
+        let pos = menu.dataset.pos === undefined ? null : Number(menu.dataset.pos);
+        if (pos === null) {
+            const { $from } = state.selection;
+            for (let depth = $from.depth; depth > 0 && pos === null; depth--) {
+                if (types.includes($from.node(depth).type.name)) {
+                    pos = $from.before(depth);
+                }
+            }
+        }
+        const node = pos === null ? null : state.doc.nodeAt(pos);
+        // An edit before the node moves it, and `data-pos` then names another node
+        return node && types.includes(node.type.name) ? { pos, node, accessor: accessorOf(node.type) } : null;
+    };
+
+    const sync = () => {
+        if (document.activeElement === input || menu.style.display === 'none') {
+            return;
+        }
+        const current = target();
+        input.disabled = current === null;
+        input.value = current ? current.accessor.get(current.node.attrs) : '';
+        check();
+    };
+
+    const apply = () => {
+        const current = target();
+        const value = normalizeClasses(input.value);
+        if (current && value !== normalizeClasses(current.accessor.get(current.node.attrs))) {
+            const { state, view } = setup.editor;
+            view.dispatch(state.tr.setNodeMarkup(current.pos, null, current.accessor.set(current.node.attrs, value)));
+        }
+    };
+    input.addEventListener('change', apply);
+    input.addEventListener('keydown', (event) => {
+        // Enter in a field of the admin form submits the form
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            apply();
+            // Back to the content: the table menu shows only while the editor has the focus
+            setup.editor.view.focus();
+        }
+    });
+
+    let shown = false;
+    new MutationObserver(() => {
+        const visible = menu.style.display !== 'none';
+        if (visible && !shown) {
+            sync();
+        }
+        shown = visible;
+    }).observe(menu, { attributes: true, attributeFilter: ['style'] });
+
+    return sync;
 };
 
 export const MahoCssClasses = Extension.create({

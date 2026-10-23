@@ -1853,6 +1853,33 @@
     flex: 0 0 auto;
 }
 
+/* The classes of the element of a popup menu, on a second row */
+.tiptap-bubble-menu .toolbar-class-row {
+    display: flex;
+    flex-wrap: wrap;
+    flex-basis: 100%;
+    align-items: center;
+    gap: 0.25rem 0.5rem;
+    margin-top: 4px;
+    padding-top: 6px;
+    border-top: 1px solid var(--tt-color-border);
+
+    input[type="text"] {
+        flex: 1;
+        min-width: 12rem;
+        font-family: var(--tt-font-mono);
+    }
+
+    .tiptap-class-warning {
+        flex-basis: 100%;
+        width: 0;
+        margin: 0;
+        padding: 0 0.5rem;
+        font-size: 0.75rem;
+        white-space: normal;
+    }
+}
+
 /* Toolbar label */
 .toolbar-label {
     font-size: 0.75rem;
