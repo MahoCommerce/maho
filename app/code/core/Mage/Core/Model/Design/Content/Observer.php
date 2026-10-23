@@ -51,8 +51,8 @@ class Mage_Core_Model_Design_Content_Observer
 
     /**
      * Build, then queue one more build when a request came after the start of this one, or when
-     * another build held the lock. The queue drops a dispatch with the dedupe key while this
-     * message runs, so the new message has no dedupe key.
+     * another build held the lock. The new message keeps the dedupe key, so a later save adds
+     * no second message, but it does not check the key, because this message still holds it.
      */
     #[Maho\Config\MessageHandler]
     public function build(Mage_Core_Model_Design_Content_BuildMessage $message): void
@@ -65,6 +65,7 @@ class Mage_Core_Model_Design_Content_Observer
                 new Mage_Core_Model_Design_Content_BuildMessage(),
                 delaySeconds: Mage_Core_Model_Design_Content_Bundle::BUILD_DELAY,
                 queue: Mage_Core_Model_Design_Content_Bundle::QUEUE_NAME,
+                stamps: [new \Maho\Queue\Stamp\DedupeKeyStamp(Mage_Core_Model_Design_Content_Bundle::QUEUE_NAME, enforce: false)],
             );
         }
     }

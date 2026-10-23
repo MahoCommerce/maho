@@ -18,6 +18,8 @@ class Mage_Catalog_Model_Design_TailwindSource
     /** @var array<string, array<int, string>> attribute code by attribute id, by entity type */
     protected array $attributes = [];
 
+    protected bool $updatesContent = false;
+
     /**
      * @return Generator<int, string>
      */
@@ -36,8 +38,8 @@ class Mage_Catalog_Model_Design_TailwindSource
         yield from $this->readValues(Mage_Catalog_Model_Category::ENTITY, 'catalog/category');
     }
 
-    #[Maho\Config\Observer('catalog_product_save_commit_after', id: 'tailwind_source_check_product')]
-    #[Maho\Config\Observer('catalog_category_save_commit_after', id: 'tailwind_source_check_category')]
+    #[Maho\Config\Observer('catalog_product_save_commit_after', type: 'singleton', id: 'tailwind_source_check_product')]
+    #[Maho\Config\Observer('catalog_category_save_commit_after', type: 'singleton', id: 'tailwind_source_check_category')]
     public function checkSavedEntity(\Maho\Event\Observer $observer): void
     {
         $object = $observer->getEvent()->getData('data_object');
@@ -57,13 +59,23 @@ class Mage_Catalog_Model_Design_TailwindSource
     }
 
     /**
-     * Queue a build when the admin "Update Attributes" action writes a WYSIWYG attribute.
+     * Record if the admin "Update Attributes" action writes a WYSIWYG attribute.
      */
-    #[Maho\Config\Observer('catalog_product_attribute_update_before', id: 'tailwind_source_check_product_mass')]
+    #[Maho\Config\Observer('catalog_product_attribute_update_before', type: 'singleton', id: 'tailwind_source_check_product_mass')]
     public function checkUpdatedAttributes(\Maho\Event\Observer $observer): void
     {
         $data = (array) $observer->getEvent()->getData('attributes_data');
-        if (array_intersect(array_keys($data), $this->getAttributes(Mage_Catalog_Model_Product::ENTITY)) !== []) {
+        $this->updatesContent = array_intersect(array_keys($data), $this->getAttributes(Mage_Catalog_Model_Product::ENTITY)) !== [];
+    }
+
+    /**
+     * Queue the build after the "Update Attributes" action wrote the values, so the build reads them.
+     */
+    #[Maho\Config\Observer('catalog_product_attribute_update_after', type: 'singleton', id: 'tailwind_source_queue_product_mass')]
+    public function queueUpdatedAttributes(): void
+    {
+        if ($this->updatesContent) {
+            $this->updatesContent = false;
             Mage::getSingleton('core/design_content_bundle')->queueBuild();
         }
     }

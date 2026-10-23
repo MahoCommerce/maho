@@ -40,7 +40,7 @@ class Mage_Core_Model_Resource_Design_Content extends Mage_Core_Model_Resource_D
                 ->order($idColumn . ' ASC')
                 ->limit(self::PAGE_SIZE);
             $conditions = array_map(
-                fn(string $column): string => $adapter->quoteInto($adapter->quoteIdentifier($column) . ' LIKE ?', '%class%'),
+                fn(string $column): string => $adapter->prepareSqlCondition($adapter->quoteIdentifier($column), ['like' => '%class%']),
                 $columns,
             );
             $select->where(implode(' OR ', $conditions));
