@@ -58,6 +58,35 @@ const FORM_NAMED_TAGS = ['button', 'fieldset', 'img', 'output'];
 /** A `data-*` name that a save keeps, as Mage_Core_Helper_Purifier::DATA_ATTRIBUTE_PATTERN reads it. */
 const DATA_ATTRIBUTE = /^data-[a-z][a-z0-9_-]*$/i;
 
+/** The node attributes that hold HTML attributes: HtmlAttributes, and the generic nodes. */
+const ATTRIBUTE_HOLDERS = ['htmlAttributes', 'attributes'];
+
+/**
+ * Remove each `id` that an earlier node already has, or return null. Enter in the middle of a
+ * block copies every attribute of the block to the second half.
+ */
+const removeDuplicateIds = (state) => {
+    const ids = new Set();
+    let tr = null;
+    state.doc.descendants((node, pos) => {
+        for (const holder of ATTRIBUTE_HOLDERS) {
+            const id = node.attrs[holder]?.id;
+            if (id === undefined) {
+                continue;
+            }
+            if (!ids.has(id)) {
+                ids.add(id);
+                continue;
+            }
+            const attributes = { ...node.attrs[holder] };
+            delete attributes.id;
+            tr ??= state.tr;
+            tr.setNodeAttribute(pos, holder, Object.keys(attributes).length > 0 ? attributes : null);
+        }
+    });
+    return tr;
+};
+
 /** Copy the attributes of `element` that `allowlist` keeps and `skip` does not name, or null. */
 const readAttributes = (element, allowlist, skip = []) => {
     const skipped = FORM_NAMED_TAGS.includes(element.localName) ? [...skip, 'id', 'name'] : skip;
@@ -388,5 +417,12 @@ export const MahoHtml = Extension.create({
             MahoHtmlRaw.configure({ allowlist, svgAllowlist: this.options.svgAllowlist }),
             MahoHtmlRawInline.configure({ allowlist, svgAllowlist: this.options.svgAllowlist }),
         ];
+    },
+
+    addProseMirrorPlugins() {
+        return [new Plugin({
+            appendTransaction: (transactions, oldState, newState) =>
+                transactions.some((transaction) => transaction.docChanged) ? removeDuplicateIds(newState) : null,
+        })];
     },
 });

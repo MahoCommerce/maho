@@ -360,6 +360,20 @@ it('keeps a list with an icon or a button at the start of an item as one list', 
         ->and($value)->toContain('<button type="button" class="btn">Buy</button>');
 });
 
+it('keeps an id on one paragraph when Enter splits it', function () {
+    $page = visitWysiwygLossBlock(createWysiwygLossBlock('<p id="intro" class="lead">Hello world</p>'));
+
+    expect($page->script('window.tiptapEditors.get("block_content").isTiptapActive() ? 1 : 0'))->toBe(1);
+
+    // Enter in the middle of a block copies every attribute of the block to the second half.
+    $page->script('window.tiptapEditors.get("block_content").editor.chain().focus().setTextSelection(6).splitBlock().run();');
+    $page->script('window.tiptapEditors.get("block_content").turnOff();');
+
+    $value = $page->script('document.getElementById("block_content").value');
+    expect(substr_count($value, 'id="intro"'))->toBe(1)
+        ->and(substr_count($value, 'class="lead"'))->toBe(2);
+});
+
 it('does not let a button or a label of the content act on the admin form', function () {
     $page = visitWysiwygLossBlock(createWysiwygLossBlock(WYSIWYG_LOSS_KEPT));
 
