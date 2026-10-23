@@ -394,7 +394,10 @@ class Mage_Tax_Model_Resource_Calculation extends Mage_Core_Model_Resource_Db_Ab
         $expr = $this->_getWriteAdapter()->getCheckSql(
             'zip_is_range is NULL',
             $this->_getPostcodeCondition($this->_createSearchPostCodeTemplates($postcode)),
-            $this->_getWriteAdapter()->quoteInto('? BETWEEN rate.zip_from AND rate.zip_to', $postcode),
+            // A postcode that is not a number is never in a numeric range
+            is_numeric($postcode)
+                ? $this->_getWriteAdapter()->quoteInto('? BETWEEN rate.zip_from AND rate.zip_to', $postcode)
+                : '1 = 0',
         );
         $select->where($expr);
         $select->order('tax_calculation_rate_id');

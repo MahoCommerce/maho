@@ -213,7 +213,7 @@ describe('Giftcard Balance Operations with Database', function () {
 
         expect((float) $giftcard->getBalance())->toBe(50.00);
 
-        $lastEntry = $giftcard->getHistoryCollection()->getFirstItem();
+        $lastEntry = $giftcard->getHistoryCollection()->setOrder('history_id', 'DESC')->getFirstItem();
         expect((float) $lastEntry->getBaseAmount())->toBe(-20.00);
         expect((float) $lastEntry->getBalanceBefore())->toBe(70.00);
         expect((float) $lastEntry->getBalanceAfter())->toBe(50.00);
