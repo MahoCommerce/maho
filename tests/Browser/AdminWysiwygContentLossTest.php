@@ -16,16 +16,22 @@ uses(MahoBrowserTestCase::class)->group('browser');
  * removed the rest without a message. The editor now compares the two documents. It stays
  * closed and reports what it cannot keep.
  *
- * The fixture uses <section> and <figure>. The report named <svg>, but the editor and the save
- * both keep an <svg> now, so it no longer shows a loss. An <iframe> takes its place where a test
- * needs markup that the save removes. A test of what the editor removes cannot use an <iframe>,
- * because xssFilter() strips one before the editor reads the content.
- * tests/Backend/Integration/Cms/ContentSanitizationNoticeTest.php covers that part.
+ * The fixture uses a table <caption>. The editor keeps every other element that a save keeps, so
+ * <section>, <figure> and <svg> no longer show a loss. A table holds only rows in the editor. An
+ * <iframe> takes its place where a test needs markup that the save removes. A test of what the
+ * editor removes cannot use an <iframe>, because xssFilter() strips one before the editor reads
+ * the content. tests/Backend/Integration/Cms/ContentSanitizationNoticeTest.php covers that part.
  */
 
 const WYSIWYG_LOSS_ADMIN_USER = 'wysiwyg-loss-admin';
 const WYSIWYG_LOSS_ADMIN_PASSWORD = 'Password123!';
-const WYSIWYG_LOSS_UNSUPPORTED = '<section class="hero"><figure><img src="/media/a.jpg" alt="A"><figcaption>Cap</figcaption></figure></section>';
+const WYSIWYG_LOSS_UNSUPPORTED = '<table class="sizes"><caption>Sizes</caption><tbody><tr><td>S</td></tr></tbody></table>';
+// Each element has no toolbar button, and a save keeps each one.
+const WYSIWYG_LOSS_KEPT = '<p><label for="email">Email</label> Prices <small>excl. VAT</small>, x<sup>2</sup>.</p>'
+    . '<section class="hero"><figure><img src="/media/a.jpg" alt="A"><figcaption>Cap</figcaption></figure></section>'
+    . '<h2 id="top" title="Top" data-anchor="top">Head</h2>'
+    . '<p>Watch <button type="submit" class="btn">Play</button></p>'
+    . '<video controls src="/media/v.mp4"></video>';
 // An author writes block tags on separate lines. textContent joins the elements together.
 // An earlier text comparison read this as a loss.
 const WYSIWYG_LOSS_RICH_TEXT = "<h2>The boring stuff, done right</h2>\n"
@@ -143,9 +149,9 @@ it('names the markup it cannot keep instead of dropping it in silence', function
 
     // The plain textarea stays in front. The field still holds the source.
     expect($page->script('window.tiptapEditors.get("block_content").isTiptapActive() ? 1 : 0'))->toBe(0)
-        ->and($page->script('document.getElementById("block_content").value'))->toContain('<section')
+        ->and($page->script('document.getElementById("block_content").value'))->toContain('<caption')
         ->and($page->script('document.querySelector(".tiptap-content-notice")?.textContent ?? ""'))
-        ->toContain('<section>');
+        ->toContain('<caption>');
 });
 
 it('warns before the save about the markup the sanitizer will remove', function () {
@@ -236,28 +242,28 @@ it('asks before the product popup editor drops what it cannot keep', function ()
     );
 
     // Not an <iframe> here. xssFilter() removes one before convertFromPlain() returns, so the
-    // editor compares two documents that never held it and reports no loss. <section> reaches
-    // the editor and the schema has no node for it.
+    // editor compares two documents that never held it and reports no loss. <caption> reaches
+    // the editor and a table in the schema holds only rows.
     // window.confirm blocks the page. Record the question and refuse it.
     $page->script('
         window.__confirmed = null;
         window.confirm = (message) => { window.__confirmed = message; return false; };
         const textarea = document.getElementById("description");
-        textarea.value = "<p>Promo</p><section class=\'hero\'><p>Free shipping</p></section>";
+        textarea.value = "<p>Promo</p><table><caption>Free shipping</caption><tbody><tr><td>x</td></tr></tbody></table>";
         document.querySelector("button.btn-wysiwyg").click();
     ');
 
     $deadline = microtime(true) + 15;
     while ($page->script('window.__confirmed ? 1 : 0') !== 1) {
         if (microtime(true) >= $deadline) {
-            throw new RuntimeException('The popup editor did not ask before dropping the section');
+            throw new RuntimeException('The popup editor did not ask before dropping the caption');
         }
         usleep(200_000);
     }
 
     // A refusal closes the popup. The field keeps its content.
-    expect($page->script('window.__confirmed'))->toContain('<section>')
-        ->and($page->script('document.getElementById("description").value'))->toContain('<section');
+    expect($page->script('window.__confirmed'))->toContain('<caption>')
+        ->and($page->script('document.getElementById("description").value'))->toContain('<caption');
 
     Mage::register('isSecureArea', true, true);
     $product->delete();
@@ -305,6 +311,50 @@ it('keeps unsupported markup through a save that changes nothing', function () {
 
     $saved = Mage::getModel('cms/block')->load($block->getId())->getContent();
 
-    expect($saved)->toContain('<section')
-        ->and($saved)->toContain('<figcaption');
+    expect($saved)->toContain('<caption');
+});
+
+it('keeps the HTML that a save keeps, also without a toolbar button', function () {
+    // An author pasted a <label>, and the editor removed it. The editor now reads the allowlist of
+    // the save, so it keeps every element and attribute that a save keeps.
+    $page = visitWysiwygLossBlock(createWysiwygLossBlock(WYSIWYG_LOSS_KEPT));
+
+    expect($page->script('window.tiptapEditors.get("block_content").isTiptapActive() ? 1 : 0'))->toBe(1)
+        ->and($page->script('document.querySelectorAll(".tiptap-content-notice").length'))->toBe(0);
+
+    // An edit makes the editor write the whole content again.
+    $page->script('window.tiptapEditors.get("block_content").editor.chain().focus("end").insertContent("<p>Tail</p>").run();');
+    $page->script('window.tiptapEditors.get("block_content").turnOff();');
+
+    expect($page->script('document.getElementById("block_content").value'))
+        ->toContain('<label for="email">Email</label>')
+        ->toContain('<small>excl. VAT</small>')
+        ->toContain('<sup>2</sup>')
+        ->toContain('<section class="hero">')
+        ->toContain('<figcaption>Cap</figcaption>')
+        ->toContain('id="top"')
+        ->toContain('data-anchor="top"')
+        ->toContain('<button type="submit" class="btn">Play</button>')
+        ->toContain('<video')
+        ->toContain('Tail');
+});
+
+it('does not let a button or a label of the content act on the admin form', function () {
+    $page = visitWysiwygLossBlock(createWysiwygLossBlock(WYSIWYG_LOSS_KEPT));
+
+    // A click on the button selects the node. A live submit button would send the admin form.
+    $page->click('.tiptap [data-html-raw=button]');
+    $page->wait(1);
+    expect($page->script('window.tiptapEditors.get("block_content").editor.state.selection.node?.type.name ?? ""'))
+        ->toBe('mahoHtmlRawInline');
+
+    // A click on <label for="email"> would move the focus to the admin field with that id.
+    $page->script('
+        const input = document.createElement("input");
+        input.id = "email";
+        document.body.append(input);
+        window.tiptapEditors.get("block_content").editor.commands.focus();
+        document.querySelector(".tiptap label").click();
+    ');
+    expect($page->script('document.activeElement?.id ?? ""'))->not->toBe('email');
 });

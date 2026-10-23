@@ -12,6 +12,7 @@ import { MahoColumns, MahoColumn, COLUMN_PRESETS } from './extensions/columns.js
 import { MahoBentoGrid, MahoBentoCell, BENTO_PRESETS } from './extensions/bento.js';
 import { MahoAccordion, MahoDetails, DetailsSummary, DetailsContent, ACCORDION_STYLES } from './extensions/details.js';
 import { MahoSvgBlock, MahoSvgInline } from './extensions/svg.js';
+import { MahoHtml } from './extensions/html.js';
 import { mountDirectiveRender, FRAMED_TYPES, INLINE_TYPES } from './extensions/widget-render.js';
 import { MahoBlockMove, STRUCTURAL_NODES } from './extensions/block-move.js';
 import { MahoButton } from './extensions/button.js';
@@ -38,7 +39,7 @@ export {
     MahoColumns, MahoColumn, COLUMN_PRESETS,
     MahoBentoGrid, MahoBentoCell, BENTO_PRESETS,
     MahoAccordion, MahoDetails, DetailsSummary, DetailsContent, ACCORDION_STYLES,
-    MahoSvgBlock, MahoSvgInline,
+    MahoSvgBlock, MahoSvgInline, MahoHtml,
     MahoBlockMove, STRUCTURAL_NODES, MahoButton,
 };
 

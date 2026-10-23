@@ -85,6 +85,9 @@ SPDX-License-Identifier: AFL-3.0
         <double-click-to-edit translate="message">
             <message>Double-click to edit</message>
         </double-click-to-edit>
+        <edit-this-element-in-the-plain-html-editor translate="message">
+            <message>Edit this element in the plain HTML editor.</message>
+        </edit-this-element-in-the-plain-html-editor>
         <resize-the-preview translate="message">
             <message>Resize the preview</message>
         </resize-the-preview>

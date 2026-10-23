@@ -77,6 +77,7 @@
 "Edit Image","Edit Image"
 "Edit Page","Edit Page"
 "Edit Page '%s'","Edit Page '%s'"
+"Edit this element in the plain HTML editor.","Edit this element in the plain HTML editor."
 "Embed a YouTube video using the privacy-friendly youtube-nocookie host. Rendered when the page is displayed, so the embed is not affected by content sanitization.","Embed a YouTube video using the privacy-friendly youtube-nocookie host. Rendered when the page is displayed, so the embed is not affected by content sanitization."
 "Enabled","Enabled"
 "Enabled by Default","Enabled by Default"
