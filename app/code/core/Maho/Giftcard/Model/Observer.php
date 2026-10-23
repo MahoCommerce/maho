@@ -409,12 +409,15 @@ class Maho_Giftcard_Model_Observer
 
         $order->save();
 
+<<<<<<< HEAD
         // Deduct balance from each gift card with row locking
         // Don't start a new transaction - use the order's transaction so rollback works
         $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
 
         $orderBaseCurrency = $order->getBaseCurrencyCode();
 
+=======
+>>>>>>> 90a51735 (Fixed gift card balances on use, on partial invoices and on cancel, and logins, coupons and postcode rates that failed on PostgreSQL and SQLite when the letter case differed (#1606))
         // Calculate proportional amounts if codes have full balances but order has capped amount
         $totalFromCodes = array_sum($codes);
         $actualAmounts = [];
@@ -438,59 +441,10 @@ class Maho_Giftcard_Model_Observer
         }
 
         foreach ($actualAmounts as $code => $usedAmount) {
-            // Load gift card with row lock to prevent race conditions
-            $giftcardTable = Mage::getSingleton('core/resource')->getTableName('giftcard/giftcard');
-            $select = $adapter->select()
-                ->from($giftcardTable)
-                ->where('code = ?', $code)
-                ->forUpdate();
-
-            $giftcardData = $adapter->fetchRow($select);
-
-            if (!$giftcardData || !isset($giftcardData['giftcard_id'])) {
-                continue;
+            $giftcard = Mage::getModel('giftcard/giftcard')->loadByCode((string) $code);
+            if ($giftcard->getId()) {
+                $giftcard->useUpTo((float) $usedAmount, (int) $order->getId(), "Used in order #{$order->getIncrementId()}");
             }
-
-            $baseBalanceBefore = (float) $giftcardData['balance'];
-
-            // Cap deduction to available balance (don't deduct more than what's available)
-            $amountToDeduct = min($usedAmount, $baseBalanceBefore);
-            if ($amountToDeduct <= 0) {
-                continue;
-            }
-
-            $newBalance = $baseBalanceBefore - $amountToDeduct;
-
-            // Prepare update data
-            $updateData = [
-                'balance' => $newBalance,
-                'updated_at' => Mage::app()->getLocale()->formatDateForDb('now'),
-            ];
-
-            // Update status if fully used
-            if ($newBalance <= 0) {
-                $updateData['status'] = Maho_Giftcard_Model_Giftcard::STATUS_USED;
-            }
-
-            // Update gift card balance directly with locked row
-            $adapter->update(
-                $giftcardTable,
-                $updateData,
-                ['giftcard_id = ?' => $giftcardData['giftcard_id']],
-            );
-
-            // Log the usage in history
-            $historyTable = Mage::getSingleton('core/resource')->getTableName('giftcard/history');
-            $adapter->insert($historyTable, [
-                'giftcard_id' => $giftcardData['giftcard_id'],
-                'action' => Maho_Giftcard_Model_Giftcard::ACTION_USED,
-                'base_amount' => -$amountToDeduct,
-                'balance_before' => $baseBalanceBefore,
-                'balance_after' => $newBalance,
-                'order_id' => $order->getId(),
-                'comment' => "Used in order #{$order->getIncrementId()}",
-                'created_at' => Mage::app()->getLocale()->formatDateForDb('now'),
-            ]);
         }
     }
 
@@ -663,98 +617,118 @@ class Maho_Giftcard_Model_Observer
             return;
         }
 
-        // Refund the full amount to each gift card
+        // The invoiced part stays spent: a credit memo gives it back
+        $baseRestoreAmount = $baseGiftcardAmount - Mage::helper('giftcard')->getInvoicedAmounts($order)['base'];
+        $applied = array_filter($codes, fn($amount) => $amount > 0);
+        if ($baseRestoreAmount <= 0 || $applied === []) {
+            return;
+        }
+
         $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
         $giftcardTable = Mage::getSingleton('core/resource')->getTableName('giftcard/giftcard');
         $historyTable = Mage::getSingleton('core/resource')->getTableName('giftcard/history');
 
-        foreach ($codes as $code => $appliedAmount) {
-            if ($appliedAmount <= 0) {
-                continue;
+        // A row lock holds only inside a transaction, and the cancel of an order runs outside one
+        $adapter->beginTransaction();
+        try {
+            // Lock every card first, so the share of a card that no longer exists goes to the other cards
+            $rows = [];
+            foreach (array_keys($applied) as $code) {
+                $row = $adapter->fetchRow(
+                    $adapter->select()->from($giftcardTable)->where('code = ?', (string) $code)->forUpdate(),
+                );
+                if ($row) {
+                    $rows[$code] = $row;
+                }
             }
+            $applied = array_intersect_key($applied, $rows);
+            $totalApplied = array_sum($applied);
 
-            // Load gift card with row lock to prevent race conditions
-            $select = $adapter->select()
-                ->from($giftcardTable)
-                ->where('code = ?', $code)
-                ->forUpdate();
+            $restoreLeft = $baseRestoreAmount;
+            $lastCode = array_key_last($applied);
+            foreach ($applied as $code => $appliedAmount) {
+                // The last card gets the rest, so the cards get back exactly $baseRestoreAmount
+                $restoreAmount = $code === $lastCode
+                    ? $restoreLeft
+                    : min($restoreLeft, round($appliedAmount / $totalApplied * $baseRestoreAmount, 2));
+                $restoreLeft -= $restoreAmount;
 
-            $giftcardData = $adapter->fetchRow($select);
+                $giftcardData = $rows[$code];
+                $balanceBefore = (float) $giftcardData['balance'];
+                $newBalance = $balanceBefore + $restoreAmount;
+                $currentStatus = $giftcardData['status'];
+                $currentExpiresAt = $giftcardData['expires_at'];
 
-            if (!$giftcardData || !isset($giftcardData['giftcard_id'])) {
-                continue;
+                // Determine new status and expiration
+                $newStatus = Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE;
+                $newExpiresAt = $currentExpiresAt;
+                $historyComment = "Refund for canceled order #{$order->getIncrementId()}";
+
+                // Check if card is expired or needs extension
+                $isExpired = $currentStatus === Maho_Giftcard_Model_Giftcard::STATUS_EXPIRED;
+                $extensionDays = (int) Mage::getStoreConfig('giftcard/general/refund_expiration_extension', $order->getStoreId());
+                $needsExtension = false;
+
+                if ($currentExpiresAt && $extensionDays > 0) {
+                    $now = Mage::app()->getLocale()->storeToUtc();
+                    $expiresAt = new DateTime($currentExpiresAt, new DateTimeZone('UTC'));
+
+                    // Calculate the minimum acceptable expiration (now + extension days)
+                    $minimumExpiration = (clone $now)->modify("+{$extensionDays} days");
+
+                    // Extend if card is expired OR will expire before the minimum
+                    $needsExtension = $expiresAt < $minimumExpiration;
+                } elseif ($isExpired && $extensionDays > 0) {
+                    // Card is expired but has no expiration date set (edge case)
+                    $needsExtension = true;
+                }
+
+                // Extend expiration if needed
+                if ($needsExtension && $extensionDays > 0) {
+                    $newExpiresAt = Mage::app()->getLocale()->storeToUtc()
+                        ->modify("+{$extensionDays} days")
+                        ->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
+                    $historyComment .= " (expiration extended to {$extensionDays} days from now)";
+                } elseif ($isExpired && $extensionDays === 0) {
+                    // If extension is 0 and card is expired, keep it expired but still add balance
+                    $newStatus = Maho_Giftcard_Model_Giftcard::STATUS_EXPIRED;
+                }
+
+                // Build update data
+                $updateData = [
+                    'balance' => $newBalance,
+                    'status' => $newStatus,
+                    'updated_at' => Mage::app()->getLocale()->formatDateForDb('now'),
+                ];
+
+                // Only update expires_at if we're extending it
+                if ($newExpiresAt !== $currentExpiresAt) {
+                    $updateData['expires_at'] = $newExpiresAt;
+                }
+
+                // Update gift card balance
+                $adapter->update(
+                    $giftcardTable,
+                    $updateData,
+                    ['giftcard_id = ?' => $giftcardData['giftcard_id']],
+                );
+
+                // Log the refund in history
+                $adapter->insert($historyTable, [
+                    'giftcard_id' => $giftcardData['giftcard_id'],
+                    'action' => Maho_Giftcard_Model_Giftcard::ACTION_REFUNDED,
+                    'base_amount' => $restoreAmount,
+                    'balance_before' => $balanceBefore,
+                    'balance_after' => $newBalance,
+                    'order_id' => $order->getId(),
+                    'comment' => $historyComment,
+                    'created_at' => Mage::app()->getLocale()->formatDateForDb('now'),
+                ]);
             }
-
-            $balanceBefore = (float) $giftcardData['balance'];
-            $newBalance = $balanceBefore + $appliedAmount;
-            $currentStatus = $giftcardData['status'];
-            $currentExpiresAt = $giftcardData['expires_at'];
-
-            // Determine new status and expiration
-            $newStatus = Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE;
-            $newExpiresAt = $currentExpiresAt;
-            $historyComment = "Refund for canceled order #{$order->getIncrementId()}";
-
-            // Check if card is expired or needs extension
-            $isExpired = $currentStatus === Maho_Giftcard_Model_Giftcard::STATUS_EXPIRED;
-            $extensionDays = (int) Mage::getStoreConfig('giftcard/general/refund_expiration_extension', $order->getStoreId());
-            $needsExtension = false;
-
-            if ($currentExpiresAt && $extensionDays > 0) {
-                $now = Mage::app()->getLocale()->storeToUtc();
-                $expiresAt = new DateTime($currentExpiresAt, new DateTimeZone('UTC'));
-
-                // Calculate the minimum acceptable expiration (now + extension days)
-                $minimumExpiration = (clone $now)->modify("+{$extensionDays} days");
-
-                // Extend if card is expired OR will expire before the minimum
-                $needsExtension = $expiresAt < $minimumExpiration;
-            } elseif ($isExpired && $extensionDays > 0) {
-                // Card is expired but has no expiration date set (edge case)
-                $needsExtension = true;
-            }
-
-            // Extend expiration if needed
-            if ($needsExtension && $extensionDays > 0) {
-                $newExpiresAt = Mage::app()->getLocale()->storeToUtc()
-                    ->modify("+{$extensionDays} days")
-                    ->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
-                $historyComment .= " (expiration extended to {$extensionDays} days from now)";
-            } elseif ($isExpired && $extensionDays === 0) {
-                // If extension is 0 and card is expired, keep it expired but still add balance
-                $newStatus = Maho_Giftcard_Model_Giftcard::STATUS_EXPIRED;
-            }
-
-            // Build update data
-            $updateData = [
-                'balance' => $newBalance,
-                'status' => $newStatus,
-                'updated_at' => Mage::app()->getLocale()->formatDateForDb('now'),
-            ];
-
-            // Only update expires_at if we're extending it
-            if ($newExpiresAt !== $currentExpiresAt) {
-                $updateData['expires_at'] = $newExpiresAt;
-            }
-
-            // Update gift card balance
-            $adapter->update(
-                $giftcardTable,
-                $updateData,
-                ['giftcard_id = ?' => $giftcardData['giftcard_id']],
-            );
-
-            // Log the refund in history
-            $adapter->insert($historyTable, [
-                'giftcard_id' => $giftcardData['giftcard_id'],
-                'action' => Maho_Giftcard_Model_Giftcard::ACTION_REFUNDED,
-                'base_amount' => $appliedAmount,
-                'balance_before' => $balanceBefore,
-                'balance_after' => $newBalance,
-                'order_id' => $order->getId(),
-                'comment' => $historyComment,
-                'created_at' => Mage::app()->getLocale()->formatDateForDb('now'),
-            ]);
+            $adapter->commit();
+        } catch (\Throwable $e) {
+            $adapter->rollBack();
+            throw $e;
         }
     }
 
@@ -814,54 +788,8 @@ class Maho_Giftcard_Model_Observer
         } else {
             // Apply gift card
             try {
-                // Check if cart has gift card products
-                foreach ($quote->getAllItems() as $item) {
-                    if ($item->getProductType() === 'giftcard') {
-                        throw new Mage_Core_Exception(
-                            Mage::helper('giftcard')->__('Gift cards cannot be used to purchase gift card products.'),
-                        );
-                    }
-                }
-
-                // Load gift card by code
-                $giftcard = Mage::getModel('giftcard/giftcard')->loadByCode($code);
-
-                if (!$giftcard->getId()) {
-                    throw new Mage_Core_Exception(
-                        Mage::helper('giftcard')->__('Gift card "%s" is not valid.', $code),
-                    );
-                }
-
-                // Check website validity
-                $websiteId = (int) $quote->getStore()->getWebsiteId();
-                if (!$giftcard->isAvailableOnWebsite($websiteId)) {
-                    throw new Mage_Core_Exception(
-                        Mage::helper('giftcard')->__('Gift card "%s" is not valid for this website.', $code),
-                    );
-                }
-
-                if (!$giftcard->isValid()) {
-                    if ($giftcard->getStatus() === Maho_Giftcard_Model_Giftcard::STATUS_EXPIRED) {
-                        throw new Mage_Core_Exception(
-                            Mage::helper('giftcard')->__('Gift card "%s" has expired.', $code),
-                        );
-                    }
-                    if ($giftcard->getStatus() === Maho_Giftcard_Model_Giftcard::STATUS_USED) {
-                        throw new Mage_Core_Exception(
-                            Mage::helper('giftcard')->__('Gift card "%s" has been fully used.', $code),
-                        );
-                    }
-                    throw new Mage_Core_Exception(
-                        Mage::helper('giftcard')->__('Gift card "%s" is not active.', $code),
-                    );
-                }
-
-                // Check if already applied
-                if (isset($appliedCodes[$code])) {
-                    throw new Mage_Core_Exception(
-                        Mage::helper('giftcard')->__('Gift card "%s" is already applied.', $code),
-                    );
-                }
+                $giftcard = Mage::getService('checkout/cart')->validateGiftcard($quote, $code);
+                $code = (string) $giftcard->getCode();
 
                 // Store gift card code with placeholder amount (collect will calculate actual amount)
                 $appliedCodes[$code] = 0;

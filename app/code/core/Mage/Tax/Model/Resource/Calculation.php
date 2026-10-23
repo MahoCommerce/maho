@@ -185,6 +185,38 @@ class Mage_Tax_Model_Resource_Calculation extends Mage_Core_Model_Resource_Db_Ab
     }
 
     /**
+     * Return a condition that is true when the rate has no postcode, the postcode '*', or one of $templates.
+     *
+     * The comparison with $templates ignores letter case.
+     *
+     * @param string[] $templates
+     */
+    protected function _getPostcodeCondition(array $templates): string
+    {
+        $adapter = $this->_getReadAdapter();
+        $conditions = ['rate.tax_postcode IS NULL', "rate.tax_postcode IN('*', '')"];
+        foreach ($templates as $template) {
+            $conditions[] = (string) $adapter->getCaseInsensitiveEqualsSql('rate.tax_postcode', $adapter->quote($template));
+        }
+
+        return '(' . implode(' OR ', $conditions) . ')';
+    }
+
+    /**
+     * Return the number that a numeric postcode range compares with $postcode, or null when $postcode is not a number.
+     *
+     * A ZIP+4 postcode such as 90210-1234 compares by its first part.
+     */
+    protected function _getRangePostcode(string $postcode): ?string
+    {
+        if (preg_match('/^(\d+)-\d{1,4}$/', $postcode, $matches)) {
+            return $matches[1];
+        }
+
+        return is_numeric($postcode) ? $postcode : null;
+    }
+
+    /**
      * Create search templates for postcode
      *
      * @param string $postcode
@@ -291,16 +323,13 @@ class Mage_Tax_Model_Resource_Calculation extends Mage_Core_Model_Resource_Db_Ab
                 )
                 ->where('rate.tax_country_id = ?', $countryId)
                 ->where('rate.tax_region_id IN(?)', [0, (int) $regionId]);
-            $postcodeIsNumeric = is_numeric($postcode);
+            $rangePostcode = $this->_getRangePostcode($postcode);
+            $postcodeIsNumeric = $rangePostcode !== null;
             $postcodeIsRange = false;
-            if (preg_match('/^(.+)-(.+)$/', $postcode, $matches)) {
-                if (is_numeric($matches[2]) && strlen($matches[2]) < 5) {
-                    $postcodeIsNumeric = true;
-                } else {
-                    $postcodeIsRange = true;
-                    $zipFrom = $matches[1];
-                    $zipTo = $matches[2];
-                }
+            if (!$postcodeIsNumeric && preg_match('/^(\d+)-(\d+)$/', $postcode, $matches)) {
+                $postcodeIsRange = true;
+                $zipFrom = $matches[1];
+                $zipTo = $matches[2];
             }
 
             if ($postcodeIsNumeric || $postcodeIsRange) {
@@ -312,12 +341,15 @@ class Mage_Tax_Model_Resource_Calculation extends Mage_Core_Model_Resource_Db_Ab
             if ($postcode != '*' || $postcodeIsRange) {
                 $select
                     ->where(
-                        "rate.tax_postcode IS NULL OR rate.tax_postcode IN('*', '', ?)",
-                        $postcodeIsRange ? $postcode : $this->_createSearchPostCodeTemplates($postcode),
+                        $this->_getPostcodeCondition(
+                            $postcodeIsRange ? [$postcode] : $this->_createSearchPostCodeTemplates($postcode),
+                        ),
+                        null,
+                        Maho\Db\Select::TYPE_CONDITION,
                     );
                 if (isset($selectClone) && $postcodeIsNumeric) {
                     $selectClone
-                        ->where('? BETWEEN rate.zip_from AND rate.zip_to', $postcode);
+                        ->where('? BETWEEN rate.zip_from AND rate.zip_to', $rangePostcode);
                 } elseif (isset($selectClone, $zipFrom, $zipTo) && $postcodeIsRange) {
                     $selectClone->where('rate.zip_from >= ?', $zipFrom)
                         ->where('rate.zip_to <= ?', $zipTo);
@@ -369,13 +401,13 @@ class Mage_Tax_Model_Resource_Calculation extends Mage_Core_Model_Resource_Db_Ab
             ->where('rate.tax_country_id = ?', $countryId)
             ->where('rate.tax_region_id IN(?)', [0, (int) $regionId]);
 
+        $rangePostcode = $this->_getRangePostcode((string) $postcode);
         $expr = $this->_getWriteAdapter()->getCheckSql(
             'zip_is_range is NULL',
-            $this->_getWriteAdapter()->quoteInto(
-                "rate.tax_postcode IS NULL OR rate.tax_postcode IN('*', '', ?)",
-                $this->_createSearchPostCodeTemplates($postcode),
-            ),
-            $this->_getWriteAdapter()->quoteInto('? BETWEEN rate.zip_from AND rate.zip_to', $postcode),
+            $this->_getPostcodeCondition($this->_createSearchPostCodeTemplates($postcode)),
+            $rangePostcode !== null
+                ? $this->_getWriteAdapter()->quoteInto('? BETWEEN rate.zip_from AND rate.zip_to', $rangePostcode)
+                : '1 = 0',
         );
         $select->where($expr);
         $select->order('tax_calculation_rate_id');

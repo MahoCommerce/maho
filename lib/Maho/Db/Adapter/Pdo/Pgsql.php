@@ -444,6 +444,21 @@ class Pgsql extends AbstractPdoAdapter
         return new \Maho\Db\Expr($expression);
     }
 
+<<<<<<< HEAD
+=======
+    #[\Override]
+    public function getNullSafeEqualsSql(string $left, string $right): \Maho\Db\Expr
+    {
+        return new \Maho\Db\Expr(sprintf('(%s IS NOT DISTINCT FROM %s)', $left, $right));
+    }
+
+    #[\Override]
+    public function getCaseInsensitiveEqualsSql(string $left, string $right): \Maho\Db\Expr
+    {
+        return new \Maho\Db\Expr(sprintf('(LOWER(%s) = LOWER(%s))', $left, $right));
+    }
+
+>>>>>>> 90a51735 (Fixed gift card balances on use, on partial invoices and on cancel, and logins, coupons and postcode rates that failed on PostgreSQL and SQLite when the letter case differed (#1606))
     /**
      * Returns valid COALESCE expression (PostgreSQL equivalent of IFNULL)
      */

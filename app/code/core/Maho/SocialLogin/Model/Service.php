@@ -120,30 +120,22 @@ class Maho_SocialLogin_Model_Service
     }
 
     /**
-     * Case-insensitive lookup: provider emails arrive lowercased, while stored
-     * customer emails keep their original case (case-sensitive on PostgreSQL).
+     * Provider emails arrive lowercased, while stored customer emails keep their original case.
      */
     protected function loadCustomerByEmail(#[\SensitiveParameter] string $email, ?int $websiteId): Mage_Customer_Model_Customer
     {
         $resource = Mage::getSingleton('core/resource');
         $adapter = $resource->getConnection('core_read');
 
-        // Exact match first so the (email, website_id) index is used; the
-        // LOWER() fallback (a scan) only runs for mixed-case stored emails
-        $customerId = 0;
-        foreach (['email = ?', 'LOWER(email) = ?'] as $condition) {
-            $select = $adapter->select()
-                ->from($resource->getTableName('customer/entity'), ['entity_id'])
-                ->where($condition, $email)
-                ->limit(1);
-            if ($websiteId !== null) {
-                $select->where('website_id = ?', $websiteId);
-            }
-            $customerId = (int) $adapter->fetchOne($select);
-            if ($customerId) {
-                break;
-            }
+        $select = $adapter->select()
+            ->from($resource->getTableName('customer/entity'), ['entity_id'])
+            ->where((string) $adapter->getCaseInsensitiveEqualsSql('email', '?'), $email)
+            ->order($adapter->getCheckSql($adapter->quoteInto('email = ?', $email), '0', '1'))
+            ->limit(1);
+        if ($websiteId !== null) {
+            $select->where('website_id = ?', $websiteId);
         }
+        $customerId = (int) $adapter->fetchOne($select);
 
         $customer = Mage::getModel('customer/customer');
         if ($customerId) {

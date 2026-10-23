@@ -618,6 +618,19 @@ interface AdapterInterface
     public function getIfNullSql(string $expression, string|int $value = '0'): \Maho\Db\Expr;
 
     /**
+<<<<<<< HEAD
+=======
+     * Returns an expression that is true when $left equals $right, and also when both are NULL
+     */
+    public function getNullSafeEqualsSql(string $left, string $right): \Maho\Db\Expr;
+
+    /**
+     * Returns an expression that is true when $left equals $right, without regard to letter case
+     */
+    public function getCaseInsensitiveEqualsSql(string $left, string $right): \Maho\Db\Expr;
+
+    /**
+>>>>>>> 90a51735 (Fixed gift card balances on use, on partial invoices and on cancel, and logins, coupons and postcode rates that failed on PostgreSQL and SQLite when the letter case differed (#1606))
      * Generate fragment of SQL for rounding a numeric value to specified precision.
      * Handles database-specific ROUND function requirements.
      */

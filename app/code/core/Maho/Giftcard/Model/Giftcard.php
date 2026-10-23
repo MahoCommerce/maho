@@ -304,18 +304,31 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
             throw new Mage_Core_Exception('Amount must be greater than zero.');
         }
 
-        // Optimistic pre-check so callers get a clear "exceeds balance"
-        // message when the model state is fresh. The atomic UPDATE below is
-        // still the source of truth and will reject concurrent
-        // double-decrements that race past this check.
-        if ($baseAmount > $this->getBalance()) {
-            throw new Mage_Core_Exception('Amount exceeds gift card balance.');
-        }
+        $this->_debit($baseAmount, false, $orderId, $comment);
 
+        return $this;
+    }
+
+    /**
+     * Take $baseAmount from the balance, or the whole balance when it is lower, and return the amount taken.
+     *
+     * A placed order calls this: the customer already got the discount, so the card gives what it has left.
+     */
+    public function useUpTo(float $baseAmount, ?int $orderId = null, ?string $comment = null): float
+    {
+        return $baseAmount > 0 ? $this->_debit($baseAmount, true, $orderId, $comment) : 0.0;
+    }
+
+    /**
+     * @throws Mage_Core_Exception when $baseAmount exceeds the balance and $upToBalance is false
+     */
+    protected function _debit(float $baseAmount, bool $upToBalance, ?int $orderId, ?string $comment): float
+    {
         $resource = $this->getResource();
         $write = Mage::getSingleton('core/resource')->getConnection('core_write');
         $table = $resource->getMainTable();
 
+<<<<<<< HEAD
         // Atomic decrement: WHERE balance >= ? guarantees no double-spend
         // when two carts try to consume the same card concurrently. Without
         // this, the read-modify-write sequence can pass `> 0` checks in two
@@ -335,27 +348,53 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
                 'balance >= ?' => $baseAmount,
             ],
         );
+=======
+        $resource->beginTransaction();
+        try {
+            // The row lock stops two requests from spending the same balance
+            $balanceBefore = (float) $write->fetchOne(
+                $write->select()
+                    ->from($table, ['balance'])
+                    ->where('giftcard_id = ?', $this->getId())
+                    ->forUpdate(),
+            );
+>>>>>>> 90a51735 (Fixed gift card balances on use, on partial invoices and on cancel, and logins, coupons and postcode rates that failed on PostgreSQL and SQLite when the letter case differed (#1606))
 
-        if ($rowsAffected === 0) {
-            throw new Mage_Core_Exception('Gift card balance changed concurrently or is insufficient.');
+            if (!$upToBalance && $baseAmount > $balanceBefore) {
+                throw new Mage_Core_Exception('Amount exceeds gift card balance.');
+            }
+
+            $amount = min($baseAmount, $balanceBefore);
+            if ($amount > 0) {
+                $balanceAfter = $balanceBefore - $amount;
+                $data = [
+                    'balance' => $balanceAfter,
+                    'updated_at' => Mage::app()->getLocale()->formatDateForDb('now'),
+                ];
+                if ($balanceAfter <= 0) {
+                    $data['status'] = self::STATUS_USED;
+                }
+                $write->update($table, $data, ['giftcard_id = ?' => $this->getId()]);
+
+                $this->_addHistory(self::ACTION_USED, -$amount, $balanceBefore, $balanceAfter, $orderId, $comment);
+            }
+
+            $resource->commit();
+        } catch (\Throwable $e) {
+            $resource->rollBack();
+            throw $e;
         }
 
+<<<<<<< HEAD
         // Refresh model state from the row we just mutated
         $balanceBefore = (float) $this->getBalance();
         $this->load((int) $this->getId());
         $balanceAfter = (float) $this->getBalance();
+=======
+        $this->load($this->getId());
+>>>>>>> 90a51735 (Fixed gift card balances on use, on partial invoices and on cancel, and logins, coupons and postcode rates that failed on PostgreSQL and SQLite when the letter case differed (#1606))
 
-        // Record history
-        $this->_addHistory(
-            self::ACTION_USED,
-            -$baseAmount,
-            $balanceBefore,
-            $balanceAfter,
-            $orderId,
-            $comment,
-        );
-
-        return $this;
+        return max(0.0, $amount);
     }
 
     /**
@@ -444,8 +483,9 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
         ?string $comment = null,
     ): void {
         $adminUserId = null;
-        $adminSession = Mage::getSingleton('admin/session');
-        if ($adminSession->isLoggedIn()) {
+        // Creating the admin session starts a PHP session, so read it only when the request already has it
+        $adminSession = Mage::registry('_singleton/admin/session');
+        if ($adminSession instanceof Mage_Admin_Model_Session && $adminSession->isLoggedIn()) {
             $adminUserId = $adminSession->getUser()->getId();
         }
 
