@@ -30,6 +30,7 @@ function customerSaveNewsletterCustomer(): Mage_Customer_Model_Customer
         ->setLastname('Newsletter')
         ->setEmail(uniqid('customer-save-newsletter-') . '@example.test')
         ->setPassword('pest-password-1234')
+        ->setForceConfirmed(true)
         ->setIsSubscribed(true);
     $customer->save();
 
@@ -75,6 +76,10 @@ function customerSaveNewsletterStatus(Mage_Customer_Model_Customer $customer): i
 }
 
 beforeEach(function () {
+    // No MTA on CI runners: each newsletter email would wait for the SMTP timeout
+    foreach ([0, 1] as $storeId) {
+        Mage::app()->getStore($storeId)->setConfig('system/smtp/enabled', '');
+    }
     $this->user = AdminRoleFixture::login(['admin/customer', 'admin/customer/manage', 'admin/newsletter', 'admin/newsletter/subscriber']);
     $this->customer = customerSaveNewsletterCustomer();
 });
@@ -108,6 +113,7 @@ it('keeps the subscription when the newsletter box is checked', function () {
 
 it('renders an unchecked value before the newsletter checkbox', function () {
     Mage::register('current_customer', $this->customer);
+    Mage::getDesign()->setArea('adminhtml')->setPackageName('default')->setTheme('default');
 
     $block = Mage::app()->getLayout()->createBlock('adminhtml/customer_edit_tab_newsletter');
     $html = $block->initForm()->getForm()->getHtml();
