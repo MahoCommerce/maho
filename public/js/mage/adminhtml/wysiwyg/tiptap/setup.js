@@ -725,7 +725,8 @@ class tiptapWysiwygSetup {
             blockDropdown(this, 'accordion'),
             ...blockButtons(this, ['Insert Image', 'Insert Slideshow', 'Insert Widget', 'Insert Variable']),
             { type: 'spacer' },
-            { type: 'button', title: 'Fullscreen Page Builder', icon: 'fullscreen-maximize', command: 'toggleFullscreen', enabled: !this.textarea.closest('dialog') },
+            // The command focuses the editor without a scroll. The focus() of a toolbar chain scrolls to the selection
+            { type: 'button', title: 'Fullscreen Page Builder', icon: 'fullscreen-maximize', onClick: () => this.editor.commands.toggleFullscreen(), data: { command: 'toggleFullscreen', args: '[]' }, enabled: !this.textarea.closest('dialog') },
         ]);
 
         toolbar.id = `${this.id}_toolbar`;
