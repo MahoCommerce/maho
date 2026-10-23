@@ -339,6 +339,27 @@ it('keeps the HTML that a save keeps, also without a toolbar button', function (
         ->toContain('Tail');
 });
 
+it('keeps a list with an icon or a button at the start of an item as one list', function () {
+    // A list item starts with a paragraph. A block node first in an item closed the list, and
+    // the rest of the list moved out of it without a notice.
+    $page = visitWysiwygLossBlock(createWysiwygLossBlock(
+        '<ul><li><svg viewBox="0 0 24 24"><path d="M4 4L20 20"></path></svg>Item<ul><li>Sub</li></ul></li>'
+        . '<li><button type="button" class="btn">Buy</button></li></ul>',
+    ));
+
+    expect($page->script('window.tiptapEditors.get("block_content").isTiptapActive() ? 1 : 0'))->toBe(1)
+        ->and($page->script('document.querySelectorAll(".tiptap-content-notice").length'))->toBe(0)
+        ->and($page->script('document.querySelectorAll(".ProseMirror > ul").length'))->toBe(1);
+
+    $page->script('window.tiptapEditors.get("block_content").editor.chain().focus("end").insertContent("<p>Tail</p>").run();');
+    $page->script('window.tiptapEditors.get("block_content").turnOff();');
+
+    $value = $page->script('document.getElementById("block_content").value');
+    expect(substr_count($value, '<ul'))->toBe(2)
+        ->and($value)->toContain('M4 4L20 20')
+        ->and($value)->toContain('<button type="button" class="btn">Buy</button>');
+});
+
 it('does not let a button or a label of the content act on the admin form', function () {
     $page = visitWysiwygLossBlock(createWysiwygLossBlock(WYSIWYG_LOSS_KEPT));
 

@@ -88,14 +88,17 @@ const holdsText = (parent) => {
  * rejects. Without that, an icon inside a sentence splits the paragraph in two.
  */
 export const isInlineContext = (element) => {
-    for (let parent = element.parentElement; parent && parent.localName !== 'body'; parent = parent.parentElement) {
+    for (let child = element, parent = element.parentElement; parent && parent.localName !== 'body'; child = parent, parent = parent.parentElement) {
         if (parent.matches(TEXT_BLOCK_SELECTOR)) {
             return true;
         }
+        if (parent.localName === 'li') {
+            // A list item starts with a <p> that holds the inline content before its first block
+            return ![...parent.children].slice(0, [...parent.children].indexOf(child)).some(isBlock);
+        }
         if (isBlock(parent)) {
-            // A schema node or a MahoDiv puts lone inline content in a new <p>. A list item starts
-            // with a <p> anyway, and a block as its first child splits the list.
-            const ownsBlocks = (SCHEMA_BLOCK_TAGS.includes(parent.localName) && parent.localName !== 'li') || hasOwnDivNode(parent);
+            // A schema node or a MahoDiv puts lone inline content in a new <p>
+            const ownsBlocks = SCHEMA_BLOCK_TAGS.includes(parent.localName) || hasOwnDivNode(parent);
             return isTextContainer(parent) && (!ownsBlocks || holdsText(parent));
         }
     }
