@@ -548,6 +548,7 @@ title and the opening of the body for the person who uses the change (a merchant
 an API client), in their words. Code terms go in `## How it works`.
 
 - Title: plain, past tense, with **no** conventional-commit prefix (`feat(...)`, `fix(...)`).
+  A bug fix starts with "Fixed", never with "Stopped", "Prevented" or "Made".
   It names the result for that user and where it shows: "Fixed the REST API returning a price of
   0 for every variant of a configurable product", "Added items that are not in the catalog to
   admin order creation, with a free name, price and tax class"

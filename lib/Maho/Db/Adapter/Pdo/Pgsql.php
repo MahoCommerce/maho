@@ -453,6 +453,12 @@ class Pgsql extends AbstractPdoAdapter
         return new \Maho\Db\Expr(sprintf('(%s IS NOT DISTINCT FROM %s)', $left, $right));
     }
 
+    #[\Override]
+    public function getCaseInsensitiveEqualsSql(string $left, string $right): \Maho\Db\Expr
+    {
+        return new \Maho\Db\Expr(sprintf('(LOWER(%s) = LOWER(%s))', $left, $right));
+    }
+
     /**
      * Returns valid COALESCE expression (PostgreSQL equivalent of IFNULL)
      */

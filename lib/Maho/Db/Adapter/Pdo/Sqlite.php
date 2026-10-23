@@ -547,6 +547,12 @@ class Sqlite extends AbstractPdoAdapter
         return new \Maho\Db\Expr(sprintf('(%s IS %s)', $left, $right));
     }
 
+    #[\Override]
+    public function getCaseInsensitiveEqualsSql(string $left, string $right): \Maho\Db\Expr
+    {
+        return new \Maho\Db\Expr(sprintf('(%s = %s COLLATE NOCASE)', $left, $right));
+    }
+
     /**
      * Returns valid COALESCE expression (SQLite supports COALESCE and IFNULL)
      */

@@ -971,8 +971,8 @@ export const MahoFullscreen = Extension.create({
                     }
                 }
 
-                // Focus back to editor
-                editor.commands.focus();
+                // setContent() leaves the selection at the end, so a scroll to it would open the content at its bottom
+                editor.commands.focus(null, { scrollIntoView: false });
 
                 return true;
             },

@@ -43,7 +43,7 @@ trait RuleFieldsTrait
         $adapter = $resource->getConnection('core_read');
         $select = $adapter->select()
             ->from($resource->getTableName('salesrule/coupon'), ['coupon_id'])
-            ->where('LOWER(code) = ?', strtolower($code))
+            ->where((string) $adapter->getCaseInsensitiveEqualsSql('code', '?'), $code)
             ->limit(1);
         if ($exceptCouponId !== null) {
             $select->where('coupon_id <> ?', $exceptCouponId);
