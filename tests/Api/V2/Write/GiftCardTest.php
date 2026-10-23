@@ -383,7 +383,7 @@ describe('POST /api/rest/v2/guest-carts/{id}/giftcards', function (): void {
         $again = apiPost("/api/rest/v2/guest-carts/{$cartId}/giftcards", ['giftcardCode' => $code]);
         expect($again['status'])->toBe(409);
         expect($again['json']['error'])->toBe('conflict');
-        expect($again['json']['message'])->toBe('Gift card "' . $code . '" is already applied');
+        expect($again['json']['message'])->toBe('Gift card "' . $code . '" is already applied.');
     });
 
 });

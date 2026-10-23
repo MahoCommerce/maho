@@ -32,14 +32,7 @@ class Maho_Giftcard_Model_Total_Invoice extends Mage_Sales_Model_Order_Invoice_T
             $baseAmount = $baseRemaining;
             $amount = $remaining;
         } else {
-            // The credit memo collector refunds the gift card with the same ratio
-            $baseOrderTotal = (float) $order->getBaseSubtotal()
-                + (float) $order->getBaseShippingAmount()
-                + (float) $order->getBaseTaxAmount();
-            $baseInvoiceTotal = (float) $invoice->getBaseSubtotal()
-                + (float) $invoice->getBaseShippingAmount()
-                + (float) $invoice->getBaseTaxAmount();
-            $ratio = $baseOrderTotal > 0 ? min(1.0, $baseInvoiceTotal / $baseOrderTotal) : 1.0;
+            $ratio = Mage::helper('giftcard')->getGiftcardShare($order, (float) $invoice->getBaseGrandTotal());
 
             $store = $order->getStore();
             $baseAmount = min($baseRemaining, $store->roundPrice($baseOrderAmount * $ratio));

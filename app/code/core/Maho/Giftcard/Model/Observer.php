@@ -409,10 +409,6 @@ class Maho_Giftcard_Model_Observer
 
         $order->save();
 
-        // Deduct balance from each gift card with row locking
-        // Don't start a new transaction - use the order's transaction so rollback works
-        $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
-
         // Calculate proportional amounts if codes have full balances but order has capped amount
         $totalFromCodes = array_sum($codes);
         $actualAmounts = [];
@@ -436,59 +432,10 @@ class Maho_Giftcard_Model_Observer
         }
 
         foreach ($actualAmounts as $code => $usedAmount) {
-            // Load gift card with row lock to prevent race conditions
-            $giftcardTable = Mage::getSingleton('core/resource')->getTableName('giftcard/giftcard');
-            $select = $adapter->select()
-                ->from($giftcardTable)
-                ->where('code = ?', $code)
-                ->forUpdate();
-
-            $giftcardData = $adapter->fetchRow($select);
-
-            if (!$giftcardData || !isset($giftcardData['giftcard_id'])) {
-                continue;
+            $giftcard = Mage::getModel('giftcard/giftcard')->loadByCode((string) $code);
+            if ($giftcard->getId()) {
+                $giftcard->useUpTo((float) $usedAmount, (int) $order->getId(), "Used in order #{$order->getIncrementId()}");
             }
-
-            $baseBalanceBefore = (float) $giftcardData['balance'];
-
-            // Cap deduction to available balance (don't deduct more than what's available)
-            $amountToDeduct = min($usedAmount, $baseBalanceBefore);
-            if ($amountToDeduct <= 0) {
-                continue;
-            }
-
-            $newBalance = $baseBalanceBefore - $amountToDeduct;
-
-            // Prepare update data
-            $updateData = [
-                'balance' => $newBalance,
-                'updated_at' => Mage::app()->getLocale()->formatDateForDb('now'),
-            ];
-
-            // Update status if fully used
-            if ($newBalance <= 0) {
-                $updateData['status'] = Maho_Giftcard_Model_Giftcard::STATUS_USED;
-            }
-
-            // Update gift card balance directly with locked row
-            $adapter->update(
-                $giftcardTable,
-                $updateData,
-                ['giftcard_id = ?' => $giftcardData['giftcard_id']],
-            );
-
-            // Log the usage in history
-            $historyTable = Mage::getSingleton('core/resource')->getTableName('giftcard/history');
-            $adapter->insert($historyTable, [
-                'giftcard_id' => $giftcardData['giftcard_id'],
-                'action' => Maho_Giftcard_Model_Giftcard::ACTION_USED,
-                'base_amount' => -$amountToDeduct,
-                'balance_before' => $baseBalanceBefore,
-                'balance_after' => $newBalance,
-                'order_id' => $order->getId(),
-                'comment' => "Used in order #{$order->getIncrementId()}",
-                'created_at' => Mage::app()->getLocale()->formatDateForDb('now'),
-            ]);
         }
     }
 
@@ -664,14 +611,29 @@ class Maho_Giftcard_Model_Observer
         // The invoiced part stays spent: a credit memo gives it back
         $baseRestoreAmount = $baseGiftcardAmount - Mage::helper('giftcard')->getInvoicedAmounts($order)['base'];
         $applied = array_filter($codes, fn($amount) => $amount > 0);
-        $totalApplied = array_sum($applied);
-        if ($baseRestoreAmount <= 0 || $totalApplied <= 0) {
+        if ($baseRestoreAmount <= 0 || $applied === []) {
             return;
         }
 
         $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
         $giftcardTable = Mage::getSingleton('core/resource')->getTableName('giftcard/giftcard');
         $historyTable = Mage::getSingleton('core/resource')->getTableName('giftcard/history');
+
+        // Lock every card first, so the share of a card that no longer exists goes to the other cards
+        $rows = [];
+        foreach (array_keys($applied) as $code) {
+            $row = $adapter->fetchRow(
+                $adapter->select()->from($giftcardTable)->where('code = ?', (string) $code)->forUpdate(),
+            );
+            if ($row) {
+                $rows[$code] = $row;
+            }
+        }
+        $applied = array_intersect_key($applied, $rows);
+        $totalApplied = array_sum($applied);
+        if ($totalApplied <= 0) {
+            return;
+        }
 
         $restoreLeft = $baseRestoreAmount;
         $lastCode = array_key_last($applied);
@@ -682,18 +644,7 @@ class Maho_Giftcard_Model_Observer
                 : min($restoreLeft, round($appliedAmount / $totalApplied * $baseRestoreAmount, 2));
             $restoreLeft -= $restoreAmount;
 
-            // Load gift card with row lock to prevent race conditions
-            $select = $adapter->select()
-                ->from($giftcardTable)
-                ->where('code = ?', $code)
-                ->forUpdate();
-
-            $giftcardData = $adapter->fetchRow($select);
-
-            if (!$giftcardData || !isset($giftcardData['giftcard_id'])) {
-                continue;
-            }
-
+            $giftcardData = $rows[$code];
             $balanceBefore = (float) $giftcardData['balance'];
             $newBalance = $balanceBefore + $restoreAmount;
             $currentStatus = $giftcardData['status'];
@@ -823,55 +774,8 @@ class Maho_Giftcard_Model_Observer
         } else {
             // Apply gift card
             try {
-                // Check if cart has gift card products
-                foreach ($quote->getAllItems() as $item) {
-                    if ($item->getProductType() === 'giftcard') {
-                        throw new Mage_Core_Exception(
-                            Mage::helper('giftcard')->__('Gift cards cannot be used to purchase gift card products.'),
-                        );
-                    }
-                }
-
-                // Load gift card by code
-                $giftcard = Mage::getModel('giftcard/giftcard')->loadByCode($code);
-
-                if (!$giftcard->getId()) {
-                    throw new Mage_Core_Exception(
-                        Mage::helper('giftcard')->__('Gift card "%s" is not valid.', $code),
-                    );
-                }
+                $giftcard = Mage::getService('checkout/cart')->validateGiftcard($quote, $code);
                 $code = (string) $giftcard->getCode();
-
-                // Check website validity
-                $websiteId = (int) $quote->getStore()->getWebsiteId();
-                if (!$giftcard->isAvailableOnWebsite($websiteId)) {
-                    throw new Mage_Core_Exception(
-                        Mage::helper('giftcard')->__('Gift card "%s" is not valid for this website.', $code),
-                    );
-                }
-
-                if (!$giftcard->isValid()) {
-                    if ($giftcard->getStatus() === Maho_Giftcard_Model_Giftcard::STATUS_EXPIRED) {
-                        throw new Mage_Core_Exception(
-                            Mage::helper('giftcard')->__('Gift card "%s" has expired.', $code),
-                        );
-                    }
-                    if ($giftcard->getStatus() === Maho_Giftcard_Model_Giftcard::STATUS_USED) {
-                        throw new Mage_Core_Exception(
-                            Mage::helper('giftcard')->__('Gift card "%s" has been fully used.', $code),
-                        );
-                    }
-                    throw new Mage_Core_Exception(
-                        Mage::helper('giftcard')->__('Gift card "%s" is not active.', $code),
-                    );
-                }
-
-                // Check if already applied
-                if (isset($appliedCodes[$code])) {
-                    throw new Mage_Core_Exception(
-                        Mage::helper('giftcard')->__('Gift card "%s" is already applied.', $code),
-                    );
-                }
 
                 // Store gift card code with placeholder amount (collect will calculate actual amount)
                 $appliedCodes[$code] = 0;

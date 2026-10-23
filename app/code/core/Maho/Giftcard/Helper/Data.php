@@ -407,4 +407,16 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
 
         return $amounts;
     }
+
+    /**
+     * Return the share of the gift card amount of $order that an invoice or a credit memo takes.
+     *
+     * $baseTotal is the total of that document after the discount and before the gift card.
+     */
+    public function getGiftcardShare(Mage_Sales_Model_Order $order, float $baseTotal): float
+    {
+        $baseOrderTotal = (float) $order->getBaseGrandTotal() + abs((float) $order->getBaseGiftcardAmount());
+
+        return $baseOrderTotal > 0 ? min(1.0, $baseTotal / $baseOrderTotal) : 1.0;
+    }
 }

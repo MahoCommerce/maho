@@ -304,6 +304,26 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
             throw new Mage_Core_Exception('Amount must be greater than zero.');
         }
 
+        $this->_debit($baseAmount, false, $orderId, $comment);
+
+        return $this;
+    }
+
+    /**
+     * Take $baseAmount from the balance, or the whole balance when it is lower, and return the amount taken.
+     *
+     * A placed order calls this: the customer already got the discount, so the card gives what it has left.
+     */
+    public function useUpTo(float $baseAmount, ?int $orderId = null, ?string $comment = null): float
+    {
+        return $baseAmount > 0 ? $this->_debit($baseAmount, true, $orderId, $comment) : 0.0;
+    }
+
+    /**
+     * @throws Mage_Core_Exception when $baseAmount exceeds the balance and $upToBalance is false
+     */
+    protected function _debit(float $baseAmount, bool $upToBalance, ?int $orderId, ?string $comment): float
+    {
         $resource = $this->getResource();
         $write = Mage::getSingleton('core/resource')->getConnection('core_write');
         $table = $resource->getMainTable();
@@ -318,28 +338,24 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
                     ->forUpdate(),
             );
 
-            if ($baseAmount > $balanceBefore) {
+            if (!$upToBalance && $baseAmount > $balanceBefore) {
                 throw new Mage_Core_Exception('Amount exceeds gift card balance.');
             }
 
-            $balanceAfter = $balanceBefore - $baseAmount;
-            $data = [
-                'balance' => $balanceAfter,
-                'updated_at' => Mage::app()->getLocale()->formatDateForDb('now'),
-            ];
-            if ($balanceAfter <= 0) {
-                $data['status'] = self::STATUS_USED;
-            }
-            $write->update($table, $data, ['giftcard_id = ?' => $this->getId()]);
+            $amount = min($baseAmount, $balanceBefore);
+            if ($amount > 0) {
+                $balanceAfter = $balanceBefore - $amount;
+                $data = [
+                    'balance' => $balanceAfter,
+                    'updated_at' => Mage::app()->getLocale()->formatDateForDb('now'),
+                ];
+                if ($balanceAfter <= 0) {
+                    $data['status'] = self::STATUS_USED;
+                }
+                $write->update($table, $data, ['giftcard_id = ?' => $this->getId()]);
 
-            $this->_addHistory(
-                self::ACTION_USED,
-                -$baseAmount,
-                $balanceBefore,
-                $balanceAfter,
-                $orderId,
-                $comment,
-            );
+                $this->_addHistory(self::ACTION_USED, -$amount, $balanceBefore, $balanceAfter, $orderId, $comment);
+            }
 
             $resource->commit();
         } catch (\Throwable $e) {
@@ -349,7 +365,7 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
 
         $this->load($this->getId());
 
-        return $this;
+        return max(0.0, $amount);
     }
 
     /**
@@ -438,8 +454,9 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
         ?string $comment = null,
     ): void {
         $adminUserId = null;
-        $adminSession = Mage::getSingleton('admin/session');
-        if ($adminSession->isLoggedIn()) {
+        // Creating the admin session starts a PHP session, so read it only when the request already has it
+        $adminSession = Mage::registry('_singleton/admin/session');
+        if ($adminSession instanceof Mage_Admin_Model_Session && $adminSession->isLoggedIn()) {
             $adminUserId = $adminSession->getUser()->getId();
         }
 
