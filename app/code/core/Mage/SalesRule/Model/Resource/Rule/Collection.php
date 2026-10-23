@@ -64,12 +64,13 @@ class Mage_SalesRule_Model_Resource_Rule_Collection extends Mage_Rule_Model_Reso
 
             $connection = $this->getConnection();
             if ($couponCode !== null && strlen($couponCode)) {
+                $codeCondition = (string) $connection->getCaseInsensitiveEqualsSql('rule_coupons.code', '?');
                 $select->joinLeft(
                     ['rule_coupons' => $this->getTable('salesrule/coupon')],
                     $connection->quoteInto(
                         'main_table.rule_id = rule_coupons.rule_id AND main_table.coupon_type != ?',
                         Mage_SalesRule_Model_Rule::COUPON_TYPE_NO_COUPON,
-                    ) . $connection->quoteInto(' AND rule_coupons.code = ?', $couponCode),
+                    ) . $connection->quoteInto(' AND ' . $codeCondition, $couponCode),
                     ['code'],
                 );
 
@@ -94,7 +95,7 @@ class Mage_SalesRule_Model_Resource_Rule_Collection extends Mage_Rule_Model_Reso
                 ];
                 $orWhereCondition = implode(' OR ', $orWhereConditions);
                 $select->where(
-                    $noCouponCondition . ' OR ((' . $orWhereCondition . ') AND rule_coupons.code = ?)',
+                    $noCouponCondition . ' OR ((' . $orWhereCondition . ') AND ' . $codeCondition . ')',
                     $couponCode,
                 );
             } else {

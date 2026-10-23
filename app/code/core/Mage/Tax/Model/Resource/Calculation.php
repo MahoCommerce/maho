@@ -186,6 +186,24 @@ class Mage_Tax_Model_Resource_Calculation extends Mage_Core_Model_Resource_Db_Ab
     }
 
     /**
+     * Return a condition that is true when the rate has no postcode, the postcode '*', or one of $templates.
+     *
+     * The comparison with $templates ignores letter case.
+     *
+     * @param string[] $templates
+     */
+    protected function _getPostcodeCondition(array $templates): string
+    {
+        $adapter = $this->_getReadAdapter();
+        $conditions = ['rate.tax_postcode IS NULL', "rate.tax_postcode IN('*', '')"];
+        foreach ($templates as $template) {
+            $conditions[] = (string) $adapter->getCaseInsensitiveEqualsSql('rate.tax_postcode', $adapter->quote($template));
+        }
+
+        return '(' . implode(' OR ', $conditions) . ')';
+    }
+
+    /**
      * Create search templates for postcode
      *
      * @param string $postcode
@@ -313,8 +331,11 @@ class Mage_Tax_Model_Resource_Calculation extends Mage_Core_Model_Resource_Db_Ab
             if ($postcode != '*' || $postcodeIsRange) {
                 $select
                     ->where(
-                        "rate.tax_postcode IS NULL OR rate.tax_postcode IN('*', '', ?)",
-                        $postcodeIsRange ? $postcode : $this->_createSearchPostCodeTemplates($postcode),
+                        $this->_getPostcodeCondition(
+                            $postcodeIsRange ? [$postcode] : $this->_createSearchPostCodeTemplates($postcode),
+                        ),
+                        null,
+                        Maho\Db\Select::TYPE_CONDITION,
                     );
                 if (isset($selectClone) && $postcodeIsNumeric) {
                     $selectClone
@@ -372,10 +393,7 @@ class Mage_Tax_Model_Resource_Calculation extends Mage_Core_Model_Resource_Db_Ab
 
         $expr = $this->_getWriteAdapter()->getCheckSql(
             'zip_is_range is NULL',
-            $this->_getWriteAdapter()->quoteInto(
-                "rate.tax_postcode IS NULL OR rate.tax_postcode IN('*', '', ?)",
-                $this->_createSearchPostCodeTemplates($postcode),
-            ),
+            $this->_getPostcodeCondition($this->_createSearchPostCodeTemplates($postcode)),
             $this->_getWriteAdapter()->quoteInto('? BETWEEN rate.zip_from AND rate.zip_to', $postcode),
         );
         $select->where($expr);

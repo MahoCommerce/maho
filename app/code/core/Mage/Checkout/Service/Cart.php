@@ -566,6 +566,7 @@ class Mage_Checkout_Service_Cart
         if (!$giftcard->getId()) {
             throw new \Mage_Core_Exception('Gift card "' . $giftcardCode . '" is not valid');
         }
+        $giftcardCode = (string) $giftcard->getCode();
 
         if (!$giftcard->isValid()) {
             $status = $giftcard->getStatus();

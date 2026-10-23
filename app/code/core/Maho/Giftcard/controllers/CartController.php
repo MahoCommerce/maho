@@ -129,6 +129,7 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
             if (!$giftcard->getId()) {
                 Mage::throwException($this->__('Gift card "%s" is not valid.', $code));
             }
+            $code = (string) $giftcard->getCode();
 
             // Check website validity
             $websiteId = (int) $quote->getStore()->getWebsiteId();
@@ -273,6 +274,7 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
                 $this->_sendJsonResponse($result);
                 return;
             }
+            $code = (string) $giftcard->getCode();
 
             // Check website validity
             $websiteId = (int) $quote->getStore()->getWebsiteId();
