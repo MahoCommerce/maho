@@ -52,11 +52,15 @@ const OWNED_ATTRIBUTES = {
  */
 const EDITOR_ONLY_SKIP = ['inert', 'draggable', 'contenteditable'];
 
+/** An `id` or a `name` on these elements replaces a method of the admin form or of `document`. */
+const FORM_NAMED_TAGS = ['button', 'fieldset', 'img', 'output'];
+
 /** Copy the attributes of `element` that `allowlist` keeps and `skip` does not name, or null. */
 const readAttributes = (element, allowlist, skip = []) => {
+    const skipped = FORM_NAMED_TAGS.includes(element.localName) ? [...skip, 'id', 'name'] : skip;
     const attributes = {};
     for (const { name, value } of element.attributes) {
-        if (!skip.includes(name) && (name.startsWith('data-') || allowlist.attributes.includes(name))) {
+        if (!skipped.includes(name) && (name.startsWith('data-') || allowlist.attributes.includes(name))) {
             attributes[name] = value;
         }
     }
@@ -115,6 +119,8 @@ export const HtmlAttributes = Extension.create({
             attributes: {
                 htmlAttributes: {
                     default: null,
+                    // Enter at the end of a block must not copy an `id` to the new paragraph
+                    keepOnSplit: false,
                     parseHTML: (element) => readAttributes(element, this.options.allowlist, owned),
                     renderHTML: (attributes) => attributes.htmlAttributes ?? {},
                 },
@@ -261,11 +267,6 @@ const parseRawTree = (element, allowlist, svgAllowlist) => {
     return { tag: element.localName, attrs: readAttributes(element, allowlist) ?? {}, children };
 };
 
-const renderRawTree = (tree) => tree.svg ? renderSvgTree(tree) : [
-    tree.tag, tree.attrs,
-    ...tree.children.map((child) => typeof child === 'string' ? child : renderRawTree(child)),
-];
-
 const buildRawElement = (tree) => {
     if (tree.svg) {
         return buildSvgElement(tree);
@@ -273,6 +274,10 @@ const buildRawElement = (tree) => {
     const element = document.createElement(tree.tag);
     for (const [name, value] of Object.entries(tree.attrs)) {
         element.setAttribute(name, value);
+    }
+    // Enter in a field of the admin form clicks the first submit button of the form
+    if (element instanceof HTMLButtonElement) {
+        element.type = 'button';
     }
     for (const child of tree.children) {
         element.append(typeof child === 'string' ? child : buildRawElement(child));
@@ -322,7 +327,7 @@ export const MahoHtmlRaw = Node.create({
     },
 
     renderHTML({ node }) {
-        return node.attrs.tree ? renderRawTree(node.attrs.tree) : ['span', {}];
+        return node.attrs.tree ? renderSvgTree(node.attrs.tree) : ['span', {}];
     },
 
     addNodeView() {

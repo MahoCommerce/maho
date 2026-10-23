@@ -57,7 +57,7 @@ export const rawTags = (allowlist) => RAW_TAGS.filter((tag) => allowlist.element
 
 /** A <div> that MahoDiv or a structured Maho node reads. */
 export const hasOwnDivNode = (element) => element.localName === 'div'
-    && (element.id !== '' || element.classList.length > 0 || element.hasAttribute('data-type'));
+    && (element.id !== '' || element.classList.length > 0 || element.dataset.type?.startsWith('maho-'));
 
 const isBlock = (element) => {
     const display = defaultDisplay(element.localName);
@@ -78,13 +78,9 @@ export const isInlineContext = (element) => {
         if (parent.matches(TEXT_BLOCK_SELECTOR)) {
             return true;
         }
-        if (!isBlock(parent)) {
-            continue;
-        }
-        if (!SCHEMA_BLOCK_TAGS.includes(parent.localName) && !hasOwnDivNode(parent)) {
+        if (isBlock(parent)) {
             return isTextContainer(parent);
         }
-        return false;
     }
     return false;
 };
