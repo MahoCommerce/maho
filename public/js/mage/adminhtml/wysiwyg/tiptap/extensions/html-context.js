@@ -93,8 +93,9 @@ export const isInlineContext = (element) => {
             return true;
         }
         if (isBlock(parent)) {
-            // A schema node or a MahoDiv puts lone inline content in a new <p>
-            const ownsBlocks = SCHEMA_BLOCK_TAGS.includes(parent.localName) || hasOwnDivNode(parent);
+            // A schema node or a MahoDiv puts lone inline content in a new <p>. A list item starts
+            // with a <p> anyway, and a block as its first child splits the list.
+            const ownsBlocks = (SCHEMA_BLOCK_TAGS.includes(parent.localName) && parent.localName !== 'li') || hasOwnDivNode(parent);
             return isTextContainer(parent) && (!ownsBlocks || holdsText(parent));
         }
     }
