@@ -679,7 +679,7 @@ class Maho_Giftcard_Model_Observer
             // The last card gets the rest, so the cards get back exactly $baseRestoreAmount
             $restoreAmount = $code === $lastCode
                 ? $restoreLeft
-                : min($restoreLeft, round($appliedAmount / $totalApplied * $baseRestoreAmount, 4));
+                : min($restoreLeft, round($appliedAmount / $totalApplied * $baseRestoreAmount, 2));
             $restoreLeft -= $restoreAmount;
 
             // Load gift card with row lock to prevent race conditions

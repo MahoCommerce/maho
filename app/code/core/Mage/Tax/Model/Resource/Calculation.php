@@ -391,12 +391,13 @@ class Mage_Tax_Model_Resource_Calculation extends Mage_Core_Model_Resource_Db_Ab
             ->where('rate.tax_country_id = ?', $countryId)
             ->where('rate.tax_region_id IN(?)', [0, (int) $regionId]);
 
+        // A ZIP+4 postcode is in a numeric range by its first part, and other text never is
+        $rangePostcode = preg_match('/^(\d+)-\d{1,4}$/', (string) $postcode, $matches) ? $matches[1] : $postcode;
         $expr = $this->_getWriteAdapter()->getCheckSql(
             'zip_is_range is NULL',
             $this->_getPostcodeCondition($this->_createSearchPostCodeTemplates($postcode)),
-            // A postcode that is not a number is never in a numeric range
-            is_numeric($postcode)
-                ? $this->_getWriteAdapter()->quoteInto('? BETWEEN rate.zip_from AND rate.zip_to', $postcode)
+            is_numeric($rangePostcode)
+                ? $this->_getWriteAdapter()->quoteInto('? BETWEEN rate.zip_from AND rate.zip_to', $rangePostcode)
                 : '1 = 0',
         );
         $select->where($expr);
