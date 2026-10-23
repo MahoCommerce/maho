@@ -64,6 +64,7 @@ class Mage_Cms_Model_Wysiwyg_Config extends \Maho\DataObject
             'width'                         => '100%',
             'plugins'                       => [],
             'svg_allowlist'                 => \Maho\Security\SvgAllowlist::forEditor(),
+            'html_allowlist'                => Mage_Core_Helper_Purifier::forEditor(),
             'render_directives_url'         => Mage::getSingleton('adminhtml/url')->getUrl('*/cms_wysiwyg/renderDirectives'),
             'render_store_id'               => $this->getPreviewStoreId(),
         ]);

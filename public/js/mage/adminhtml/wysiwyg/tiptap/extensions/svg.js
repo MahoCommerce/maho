@@ -2,12 +2,9 @@
 // SPDX-License-Identifier: AFL-3.0
 
 import { Node } from 'https://esm.sh/@tiptap/core@3.31.3';
+import { DATA_ATTRIBUTE, isInlineContext } from './html-context.js';
 
 const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
-
-const TEXT_BLOCK_SELECTOR = 'p,h1,h2,h3,h4,h5,h6';
-
-const isInTextBlock = (element) => Boolean(element.parentElement?.closest(TEXT_BLOCK_SELECTOR));
 
 /**
  * Copy an element into a plain tree. Keep only the names that `allowlist` contains.
@@ -20,7 +17,7 @@ const isInTextBlock = (element) => Boolean(element.parentElement?.closest(TEXT_B
  * SVG DOM, which reads a name letter by letter. renderHTML() then writes lower case markup again,
  * because ProseMirror builds an HTML element, and an HTML element lowers every name it receives.
  */
-const parseSvgTree = (element, allowlist) => {
+export const parseSvgTree = (element, allowlist) => {
     const tag = element.localName.toLowerCase();
     // Read an own property only. Otherwise a name such as `constructor` reaches Object.prototype.
     const entry = Object.hasOwn(allowlist, tag) ? allowlist[tag] : null;
@@ -37,7 +34,7 @@ const parseSvgTree = (element, allowlist) => {
         }
         const lower = name.toLowerCase();
         // The purifier reads a `data-*` name off the content, so no list can hold them.
-        if (lower.startsWith('data-')) {
+        if (DATA_ATTRIBUTE.test(lower)) {
             attrs[lower] = value;
         } else if (Object.hasOwn(entry.attributes, lower)) {
             attrs[entry.attributes[lower]] = value;
@@ -60,13 +57,13 @@ const parseSvgTree = (element, allowlist) => {
 };
 
 /** Convert a tree into a ProseMirror DOMOutputSpec. */
-const renderSvgTree = (tree) =>
+export const renderSvgTree = (tree) =>
     [tree.tag, tree.attrs, ...tree.children.map((child) =>
         typeof child === 'string' ? child : renderSvgTree(child),
     )];
 
 /** Convert a tree into real DOM elements for the node view. */
-const buildSvgElement = (tree) => {
+export const buildSvgElement = (tree) => {
     const element = document.createElementNS(SVG_NAMESPACE, tree.tag);
     for (const [name, value] of Object.entries(tree.attrs)) {
         element.setAttribute(name, value);
@@ -95,7 +92,7 @@ const svgParseRule = (extension, inline) => [{
         if (element.parentElement?.closest('svg')) {
             return false;
         }
-        return isInTextBlock(element) === inline ? null : false;
+        return isInlineContext(element) === inline ? null : false;
     },
 }];
 

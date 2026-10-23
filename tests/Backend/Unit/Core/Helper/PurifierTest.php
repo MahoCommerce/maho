@@ -385,3 +385,31 @@ describe('Mage_Core_Helper_Purifier inline SVG', function () {
         '<svg><textarea><path d="</textarea><img src=1 onerror=alert(1)>"></textarea></svg>',
     ]);
 });
+
+describe('Mage_Core_Helper_Purifier allowlist for the editor', function () {
+    it('lists the HTML elements that a save keeps, also those without a toolbar button', function () {
+        expect(Mage_Core_Helper_Purifier::forEditor()['elements'])
+            ->toContain('label', 'small', 'section', 'figure', 'video', 'button', 'p', 'a');
+    });
+
+    it('leaves out SVG, the document head and the elements that a save removes', function (string $element) {
+        expect(Mage_Core_Helper_Purifier::forEditor()['elements'])->not->toContain($element);
+    })->with(['svg', 'path', 'lineargradient', 'head', 'title', 'meta', 'html', 'body', 'script', 'style', 'iframe', 'form', 'input', 'image']);
+
+    it('lists no event handler attribute', function () {
+        expect(array_filter(Mage_Core_Helper_Purifier::forEditor()['attributes'], fn(string $name) => str_starts_with($name, 'on')))
+            ->toBe([]);
+    });
+
+    it('keeps each listed attribute on a save', function () {
+        // The editor keeps every attribute of the list. A save that removed one would remove what
+        // the author saw in the editor.
+        $removed = [];
+        foreach (Mage_Core_Helper_Purifier::forEditor()['attributes'] as $attribute) {
+            if (!str_contains($this->purifier->purify("<section {$attribute}=\"x\">t</section>"), "{$attribute}=")) {
+                $removed[] = $attribute;
+            }
+        }
+        expect($removed)->toBe([]);
+    });
+});

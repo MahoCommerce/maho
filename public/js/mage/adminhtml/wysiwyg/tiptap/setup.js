@@ -136,6 +136,7 @@ class tiptapWysiwygSetup {
         // so it doesn't leak into saved content. User-authored blank lines (a
         // second Enter beyond the cursor's home paragraph) survive.
         const doc = new DOMParser().parseFromString(content, 'text/html');
+        TiptapModules.restoreIds(doc.body);
         if (doc.body.lastElementChild?.tagName === 'P'
             && doc.body.lastElementChild.innerHTML.trim() === '') {
             doc.body.lastElementChild.remove();
@@ -170,7 +171,7 @@ class tiptapWysiwygSetup {
             content: '',
             extensions: [
                 TiptapModules.GlobalAttributes,
-                TiptapModules.StarterKit.configure({ heading: { levels: [1, 2, 3, 4, 5] } }),
+                TiptapModules.StarterKit.configure({ heading: { levels: [1, 2, 3, 4, 5, 6] } }),
                 TiptapModules.MahoImage.configure({ inline: true }),
                 TiptapModules.MahoWidgetBlock,
                 TiptapModules.MahoWidgetInline,
@@ -200,7 +201,7 @@ class tiptapWysiwygSetup {
         };
         const sections = [
             'The content editor of this admin is TipTap with Maho layouts. Page, block and template content is HTML; the layouts below are the exact HTML the editor writes, with the attributes it reads back. Use the same structure so the administrator can keep editing the layout in the editor. Any text block, image, widget or variable can go inside a cell or a section.',
-            '## Standard HTML the editor keeps\np, h1 to h5, ul, ol, li, blockquote, a href, strong, em, u, s, table/thead/tbody/tr/th/td, style="text-align: left|center|right" on headings, paragraphs and table cells, div with id and class, span with class.',
+            '## Standard HTML the editor keeps\np, h1 to h6, ul, ol, li, blockquote, a href, strong, em, u, s, table/thead/tbody/tr/th/td, style="text-align: left|center|right" on headings, paragraphs and table cells, div with id and class, span with class. Other HTML that a save keeps, such as section, figure, label, small or video, stays as written, but has no toolbar button.',
             [
                 '## Directives, as the plain HTML holds them',
                 '<p><img src="{{media url="wysiwyg/photo.jpg"}}" alt="A photo"></p>',
@@ -303,7 +304,7 @@ class tiptapWysiwygSetup {
         }
 
         const before = this.indexContent(this.convertFromPlain(rawValue));
-        const after = this.indexContent(this.editor.getHTML());
+        const after = this.indexContent(this.editor.getHTML(), true);
 
         const removedTags = new Set();
         for (const [tag, count] of before.tags) {
@@ -346,8 +347,11 @@ class tiptapWysiwygSetup {
         return false;
     }
 
-    indexContent(html) {
+    indexContent(html, fromEditor = false) {
         const body = new DOMParser().parseFromString(html, 'text/html').body;
+        if (fromEditor) {
+            TiptapModules.restoreIds(body);
+        }
         const tags = new Map();
         const attributes = new Map();
 
@@ -481,7 +485,7 @@ class tiptapWysiwygSetup {
                 TiptapModules.GlobalAttributes,
                 TiptapModules.StarterKit.configure({
                     heading: {
-                        levels: [1, 2, 3, 4, 5]
+                        levels: [1, 2, 3, 4, 5, 6]
                     },
                     link: {
                         openOnClick: false,
@@ -585,6 +589,10 @@ class tiptapWysiwygSetup {
                 TiptapModules.DetailsContent,
                 // Generic div fallback: registered last so every specific div node rule is tried first
                 TiptapModules.MahoDiv,
+                TiptapModules.MahoHtml.configure({
+                    allowlist: this.config.html_allowlist ?? null,
+                    svgAllowlist: this.config.svg_allowlist ?? {},
+                }),
                 TiptapModules.MahoFullscreen,
                 TiptapModules.MahoBlockMove,
                 TiptapModules.MahoButton,
@@ -693,7 +701,7 @@ class tiptapWysiwygSetup {
 
     createMainToolbar() {
         const toolbar = this.createToolbar([
-            { type: 'select', options: [['','Paragraph'], [1,'Heading 1'], [2,'Heading 2'], [3,'Heading 3'], [4,'Heading 4'], [5,'Heading 5']], onChange: this.headingHandler.bind(this) },
+            { type: 'select', options: [['','Paragraph'], [1,'Heading 1'], [2,'Heading 2'], [3,'Heading 3'], [4,'Heading 4'], [5,'Heading 5'], [6,'Heading 6']], onChange: this.headingHandler.bind(this) },
             { type: 'separator'},
             { type: 'button', title: 'Bold', icon: 'bold', command: 'toggleMark', args: ['bold'] },
             { type: 'button', title: 'Italic', icon: 'italic', command: 'toggleMark', args: ['italic'] },

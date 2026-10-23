@@ -656,8 +656,33 @@
         }
     }
 
-    /* MahoDiv */
-    div[data-div-info] {
+    /* A media element or a control that MahoHtmlRaw keeps */
+    [data-html-raw] {
+        display: inline-block;
+        max-width: 100%;
+        vertical-align: middle;
+        outline: 1px dashed var(--tt-color-primary);
+        outline-offset: 2px;
+        cursor: default;
+
+        > span > * {
+            max-width: 100%;
+        }
+
+        &:hover,
+        &.ProseMirror-selectednode {
+            outline: 2px solid var(--tt-color-primary);
+        }
+    }
+
+    div[data-html-raw] {
+        display: block;
+        width: fit-content;
+        margin: 8px 0;
+    }
+
+    /* MahoDiv, MahoHtmlBlock and MahoHtmlText */
+    [data-div-info] {
         position: relative;
         border: 2px dashed var(--tt-color-primary);
         border-radius: 4px;

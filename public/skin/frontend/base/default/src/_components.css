@@ -3704,6 +3704,11 @@
             @apply mb-3.5;
         }
 
+        /* The content editor writes <li><p>Item</p></li>: it must look like <li>Item</li> */
+        :is(li, td, th) > p:last-child:not(:is(.widget, .slideshow) *) {
+            @apply mb-0;
+        }
+
         ul:not([class]):not(:is(.widget, .slideshow) ul) { @apply list-disc pl-5; }
         ol:not([class]):not(:is(.widget, .slideshow) ol) { @apply list-decimal pl-5; }
 
