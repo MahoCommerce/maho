@@ -136,6 +136,7 @@ class tiptapWysiwygSetup {
         // so it doesn't leak into saved content. User-authored blank lines (a
         // second Enter beyond the cursor's home paragraph) survive.
         const doc = new DOMParser().parseFromString(content, 'text/html');
+        TiptapModules.restoreIds(doc.body);
         if (doc.body.lastElementChild?.tagName === 'P'
             && doc.body.lastElementChild.innerHTML.trim() === '') {
             doc.body.lastElementChild.remove();
@@ -303,7 +304,7 @@ class tiptapWysiwygSetup {
         }
 
         const before = this.indexContent(this.convertFromPlain(rawValue));
-        const after = this.indexContent(this.editor.getHTML());
+        const after = this.indexContent(this.editor.getHTML(), true);
 
         const removedTags = new Set();
         for (const [tag, count] of before.tags) {
@@ -346,8 +347,11 @@ class tiptapWysiwygSetup {
         return false;
     }
 
-    indexContent(html) {
+    indexContent(html, fromEditor = false) {
         const body = new DOMParser().parseFromString(html, 'text/html').body;
+        if (fromEditor) {
+            TiptapModules.restoreIds(body);
+        }
         const tags = new Map();
         const attributes = new Map();
 

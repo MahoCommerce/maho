@@ -320,7 +320,9 @@ it('keeps the HTML that a save keeps, also without a toolbar button', function (
     $page = visitWysiwygLossBlock(createWysiwygLossBlock(WYSIWYG_LOSS_KEPT));
 
     expect($page->script('window.tiptapEditors.get("block_content").isTiptapActive() ? 1 : 0'))->toBe(1)
-        ->and($page->script('document.querySelectorAll(".tiptap-content-notice").length'))->toBe(0);
+        ->and($page->script('document.querySelectorAll(".tiptap-content-notice").length'))->toBe(0)
+        // A content id in the admin page can match the id of an admin field
+        ->and($page->script('document.querySelectorAll(".ProseMirror [id]").length'))->toBe(0);
 
     // An edit makes the editor write the whole content again.
     $page->script('window.tiptapEditors.get("block_content").editor.chain().focus("end").insertContent("<p>Tail</p>").run();');

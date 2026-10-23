@@ -99,8 +99,32 @@ const readAttributes = (element, allowlist, skip = []) => {
     return Object.keys(attributes).length > 0 ? attributes : null;
 };
 
+/**
+ * The name of a content `id` in the editor. The editor is part of the admin page, where a content
+ * `id` can match the `id` of an admin field. restoreIds() gives the HTML of the editor its `id` back.
+ */
+export const EDITOR_ID_ATTRIBUTE = 'data-editor-id';
+
+/** Copy `attributes` with the `id` under EDITOR_ID_ATTRIBUTE. */
+const renameId = (attributes) => {
+    if (!attributes?.id) {
+        return attributes ?? {};
+    }
+    const { id, ...others } = attributes;
+    return { ...others, [EDITOR_ID_ATTRIBUTE]: id };
+};
+
+/** Move each EDITOR_ID_ATTRIBUTE under `root` back to `id`, and return `root`. */
+export const restoreIds = (root) => {
+    for (const element of root.querySelectorAll(`[${EDITOR_ID_ATTRIBUTE}]`)) {
+        element.id = element.getAttribute(EDITOR_ID_ATTRIBUTE);
+        element.removeAttribute(EDITOR_ID_ATTRIBUTE);
+    }
+    return root;
+};
+
 const applyAttributes = (dom, attributes) => {
-    for (const [name, value] of Object.entries(attributes ?? {})) {
+    for (const [name, value] of Object.entries(renameId(attributes))) {
         if (!EDITOR_ONLY_SKIP.includes(name)) {
             dom.setAttribute(name, value);
         }
@@ -154,7 +178,7 @@ export const HtmlAttributes = Extension.create({
                     // Enter at the end of a block must not copy an `id` to the new paragraph
                     keepOnSplit: false,
                     parseHTML: (element) => readAttributes(element, this.options.allowlist, owned),
-                    renderHTML: (attributes) => attributes.htmlAttributes ?? {},
+                    renderHTML: (attributes) => renameId(attributes.htmlAttributes),
                 },
             },
         }));
@@ -193,7 +217,7 @@ export const MahoHtmlMark = Mark.create({
     },
 
     renderHTML({ mark }) {
-        return [mark.attrs.tag, mark.attrs.attributes ?? {}, 0];
+        return [mark.attrs.tag, renameId(mark.attrs.attributes), 0];
     },
 
     addProseMirrorPlugins() {
@@ -248,7 +272,7 @@ export const MahoHtmlBlock = Node.create({
     },
 
     renderHTML({ node }) {
-        return [node.attrs.tag, node.attrs.attributes ?? {}, 0];
+        return [node.attrs.tag, renameId(node.attrs.attributes), 0];
     },
 
     addNodeView() {
@@ -304,7 +328,7 @@ const buildRawElement = (tree) => {
         return buildSvgElement(tree);
     }
     const element = document.createElement(tree.tag);
-    for (const [name, value] of Object.entries(tree.attrs)) {
+    for (const [name, value] of Object.entries(renameId(tree.attrs))) {
         element.setAttribute(name, value);
     }
     // Enter in a field of the admin form clicks the first submit button of the form
@@ -423,6 +447,10 @@ export const MahoHtml = Extension.create({
         return [new Plugin({
             appendTransaction: (transactions, oldState, newState) =>
                 transactions.some((transaction) => transaction.docChanged) ? removeDuplicateIds(newState) : null,
+            props: {
+                // HTML that the author copies from the editor holds EDITOR_ID_ATTRIBUTE
+                transformPastedHTML: (html) => restoreIds(new DOMParser().parseFromString(html, 'text/html').body).innerHTML,
+            },
         })];
     },
 });
