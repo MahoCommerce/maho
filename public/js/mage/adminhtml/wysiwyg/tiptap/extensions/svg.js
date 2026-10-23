@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: AFL-3.0
 
 import { Node } from 'https://esm.sh/@tiptap/core@3.31.3';
-import { isInlineContext } from './html-context.js';
+import { DATA_ATTRIBUTE, isInlineContext } from './html-context.js';
 
 const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
 
@@ -34,7 +34,7 @@ export const parseSvgTree = (element, allowlist) => {
         }
         const lower = name.toLowerCase();
         // The purifier reads a `data-*` name off the content, so no list can hold them.
-        if (lower.startsWith('data-')) {
+        if (DATA_ATTRIBUTE.test(lower)) {
             attrs[lower] = value;
         } else if (Object.hasOwn(entry.attributes, lower)) {
             attrs[entry.attributes[lower]] = value;

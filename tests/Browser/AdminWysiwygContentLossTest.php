@@ -357,7 +357,16 @@ it('keeps a list with an icon or a button at the start of an item as one list', 
     $page->script('window.tiptapEditors.get("block_content").turnOff();');
 
     $value = $page->script('document.getElementById("block_content").value');
-    expect(substr_count($value, '<ul'))->toBe(2)
+    $structure = $page->script('(() => {
+        const body = new DOMParser().parseFromString(document.getElementById("block_content").value, "text/html").body;
+        return [
+            body.querySelectorAll(":scope > ul").length,
+            body.querySelectorAll(":scope > ul > li > ul").length,
+            body.querySelectorAll(":scope > ul > li button").length,
+        ].join(",");
+    })()');
+    expect($structure)->toBe('1,1,1')
+        ->and(substr_count($value, '<ul'))->toBe(2)
         ->and($value)->toContain('M4 4L20 20')
         ->and($value)->toContain('<button type="button" class="btn">Buy</button>');
 });

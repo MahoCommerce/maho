@@ -3,7 +3,7 @@
 
 import { Extension, Mark, Node } from 'https://esm.sh/@tiptap/core@3.31.3';
 import { Plugin } from 'https://esm.sh/@tiptap/pm@3.31.3/state';
-import { groupingTags, hasOwnDivNode, inlineTags, isInlineContext, isTextContainer, rawTags } from './html-context.js';
+import { DATA_ATTRIBUTE, groupingTags, hasOwnDivNode, inlineTags, isInlineContext, isTextContainer, rawTags } from './html-context.js';
 import { buildSvgElement, parseSvgTree, renderSvgTree } from './svg.js';
 
 const EMPTY_ALLOWLIST = { elements: [], attributes: [] };
@@ -47,6 +47,12 @@ const OWNED_ATTRIBUTES = {
 };
 
 /**
+ * The marks of OWNED_ATTRIBUTES. A mark keeps no `id`: the editor writes a mark around bold text
+ * as several elements, and each one would get the `id`.
+ */
+const MARK_TYPES = ['mahoSpan', 'link', 'bold', 'italic', 'underline', 'strike', 'code'];
+
+/**
  * Attributes that change how the editor works, not how the content looks. The node views leave
  * them out of the editor, and the saved HTML keeps them.
  */
@@ -55,33 +61,42 @@ const EDITOR_ONLY_SKIP = ['inert', 'draggable', 'contenteditable'];
 /** A `name` on these elements replaces a method of the admin form or of `document`. */
 const FORM_NAMED_TAGS = ['button', 'fieldset', 'img', 'output'];
 
-/** A `data-*` name that a save keeps, as Mage_Core_Helper_Purifier::DATA_ATTRIBUTE_PATTERN reads it. */
-const DATA_ATTRIBUTE = /^data-[a-z][a-z0-9_-]*$/i;
-
 /** The node attributes that hold HTML attributes: HtmlAttributes, and the generic nodes. */
 const ATTRIBUTE_HOLDERS = ['htmlAttributes', 'attributes'];
 
+/** Copy `attributes` without its `id`, or null when nothing else is left. */
+const withoutId = (attributes) => {
+    const copy = { ...attributes };
+    delete copy.id;
+    return Object.keys(copy).length > 0 ? copy : null;
+};
+
 /**
  * Remove each `id` that an earlier node already has, or return null. Enter in the middle of a
- * block copies every attribute of the block to the second half.
+ * block copies every attribute of the block to the second half, and a paste can copy a node.
  */
 const removeDuplicateIds = (state) => {
     const ids = new Set();
+    const isDuplicate = (id) => {
+        if (ids.has(id)) {
+            return true;
+        }
+        ids.add(id);
+        return false;
+    };
     let tr = null;
     state.doc.descendants((node, pos) => {
         for (const holder of ATTRIBUTE_HOLDERS) {
             const id = node.attrs[holder]?.id;
-            if (id === undefined) {
-                continue;
+            if (id !== undefined && isDuplicate(id)) {
+                tr ??= state.tr;
+                tr.setNodeAttribute(pos, holder, withoutId(node.attrs[holder]));
             }
-            if (!ids.has(id)) {
-                ids.add(id);
-                continue;
-            }
-            const attributes = { ...node.attrs[holder] };
-            delete attributes.id;
+        }
+        const treeId = node.attrs.tree?.attrs?.id;
+        if (treeId !== undefined && isDuplicate(treeId)) {
             tr ??= state.tr;
-            tr.setNodeAttribute(pos, holder, Object.keys(attributes).length > 0 ? attributes : null);
+            tr.setNodeAttribute(pos, 'tree', { ...node.attrs.tree, attrs: withoutId(node.attrs.tree.attrs) ?? {} });
         }
     });
     return tr;
@@ -143,7 +158,7 @@ const describe = (tag, attributes) => {
     return label;
 };
 
-const tagAndAttributes = (extension, defaultTag) => ({
+const tagAndAttributes = (extension, defaultTag, skip = []) => ({
     tag: {
         default: defaultTag,
         parseHTML: (element) => element.localName,
@@ -151,7 +166,7 @@ const tagAndAttributes = (extension, defaultTag) => ({
     },
     attributes: {
         default: null,
-        parseHTML: (element) => readAttributes(element, extension.options.allowlist),
+        parseHTML: (element) => readAttributes(element, extension.options.allowlist, skip),
         rendered: false,
     },
 });
@@ -177,7 +192,7 @@ export const HtmlAttributes = Extension.create({
                     default: null,
                     // Enter at the end of a block must not copy an `id` to the new paragraph
                     keepOnSplit: false,
-                    parseHTML: (element) => readAttributes(element, this.options.allowlist, owned),
+                    parseHTML: (element) => readAttributes(element, this.options.allowlist, MARK_TYPES.includes(type) ? [...owned, 'id'] : owned),
                     renderHTML: (attributes) => renameId(attributes.htmlAttributes),
                 },
             },
@@ -202,7 +217,8 @@ export const MahoHtmlMark = Mark.create({
     },
 
     addAttributes() {
-        return tagAndAttributes(this, 'span');
+        // A mark keeps no `id`, as MARK_TYPES explains
+        return tagAndAttributes(this, 'span', ['id']);
     },
 
     parseHTML() {

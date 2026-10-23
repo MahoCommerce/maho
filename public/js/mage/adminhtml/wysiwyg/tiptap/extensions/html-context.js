@@ -8,6 +8,9 @@
  */
 export const RAW_TAGS = ['audio', 'button', 'canvas', 'map', 'meter', 'picture', 'progress', 'video', 'wbr'];
 
+/** A `data-*` name that a save keeps, as Mage_Core_Helper_Purifier::DATA_ATTRIBUTE_PATTERN reads it. */
+export const DATA_ATTRIBUTE = /^data-[a-z][a-z0-9_-]*$/i;
+
 /** Blocks that a node of the schema reads. MahoHtmlBlock and MahoHtmlText take the other blocks. */
 const SCHEMA_BLOCK_TAGS = [
     'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'table', 'tr', 'td', 'th',
