@@ -39,7 +39,7 @@ class Mage_Core_Model_Design_Content_Bundle
     public const STATUS_EMPTY = 'empty';
     public const STATUS_FAILED = 'failed';
 
-    /** @var array<string, array{file: ?string, tokens: string, styles: string}>|null */
+    /** @var array<string, array{file: ?string, tokens: string, styles: string, failed?: bool}>|null */
     protected ?array $manifest = null;
 
     /**
@@ -128,15 +128,16 @@ class Mage_Core_Model_Design_Content_Bundle
                 && $previous['tokens'] === $tokensHash && $previous['styles'] === $stylesHash
                 && Mage::getStorage(self::MOUNT)->fileExists($previous['file'])
             ) {
-                $built[$theme] = $previous;
+                $built[$theme] = ['file' => $previous['file'], 'tokens' => $tokensHash, 'styles' => $stylesHash];
                 $status[$theme] = self::STATUS_UNCHANGED;
                 continue;
             }
 
             $file = $this->compile($binary, $workDir, $theme, $paths['entry']);
             if ($file === null) {
+                // The store keeps the previous file, and the cron job tries again
                 if ($previous !== null) {
-                    $built[$theme] = $previous;
+                    $built[$theme] = ['failed' => true] + $previous;
                 }
                 $status[$theme] = self::STATUS_FAILED;
                 continue;
@@ -190,8 +191,8 @@ class Mage_Core_Model_Design_Content_Bundle
      * Delete the files that neither the new nor the previous manifest names. The previous file
      * stays for the pages that the full-page cache holds.
      *
-     * @param array<string, array{file: ?string, tokens: string, styles: string}> $previous
-     * @param array<string, array{file: ?string, tokens: string, styles: string}> $current
+     * @param array<string, array{file: ?string, tokens: string, styles: string, failed?: bool}> $previous
+     * @param array<string, array{file: ?string, tokens: string, styles: string, failed?: bool}> $current
      */
     protected function deleteOldFiles(array $previous, array $current): void
     {
@@ -232,7 +233,7 @@ class Mage_Core_Model_Design_Content_Bundle
 
     /**
      * The package/theme of each theme whose committed css/styles.css changed after its last
-     * build, that has no build, or whose built file is not on the mount.
+     * build, that has no build, whose last build failed, or whose built file is not on the mount.
      *
      * @return list<string>
      */
@@ -247,6 +248,7 @@ class Mage_Core_Model_Design_Content_Bundle
             }
             $file = $manifest[$theme]['file'] ?? null;
             if (($manifest[$theme]['styles'] ?? null) !== hash_file('xxh128', $paths['styles'])
+                || ($manifest[$theme]['failed'] ?? false)
                 || ($file !== null && !$mount->fileExists($file))
             ) {
                 $outdated[] = $theme;
@@ -290,7 +292,7 @@ class Mage_Core_Model_Design_Content_Bundle
      * out, so the head links the committed file. The check runs when the cache is filled,
      * not on each page.
      *
-     * @return array<string, array{file: ?string, tokens: string, styles: string}>
+     * @return array<string, array{file: ?string, tokens: string, styles: string, failed?: bool}>
      */
     public function getManifest(): array
     {
@@ -322,7 +324,7 @@ class Mage_Core_Model_Design_Content_Bundle
     }
 
     /**
-     * @return array<string, array{file: ?string, tokens: string, styles: string}>
+     * @return array<string, array{file: ?string, tokens: string, styles: string, failed?: bool}>
      */
     protected function loadManifest(): array
     {
@@ -331,7 +333,7 @@ class Mage_Core_Model_Design_Content_Bundle
     }
 
     /**
-     * @param array<string, array{file: ?string, tokens: string, styles: string}> $manifest
+     * @param array<string, array{file: ?string, tokens: string, styles: string, failed?: bool}> $manifest
      */
     protected function saveManifest(array $manifest): void
     {

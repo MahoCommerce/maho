@@ -196,6 +196,43 @@ describe('a manifest whose file is not on the mount', function () {
     });
 });
 
+describe('a build that fails', function () {
+    beforeEach(function (): void {
+        $this->styles = Mage::getBaseDir('skin') . '/frontend/base/default/css/styles.css';
+        $this->mount = Mage::getStorage(Mage_Core_Model_Design_Content_Bundle::MOUNT);
+        $this->mount->write('theme/base-default-previous.css', '.previous{}');
+        Mage::getModel('core/flag', ['flag_code' => Mage_Core_Model_Design_Content_Bundle::FLAG_MANIFEST])->loadSelf()
+            ->setFlagData(['base/default' => ['file' => 'theme/base-default-previous.css', 'tokens' => 'older tokens', 'styles' => hash_file('xxh128', $this->styles)]])
+            ->save();
+        Mage::app()->removeCache(Mage_Core_Model_Design_Content_Bundle::CACHE_ID);
+        $this->blocks[] = createContentBlock('<div class="rotate-47"></div>');
+    });
+
+    afterEach(function (): void {
+        $this->mount->delete('theme/base-default-previous.css');
+    });
+
+    it('keeps the previous file in the head, and makes the theme outdated', function (): void {
+        $bundle = new class extends Mage_Core_Model_Design_Content_Bundle {
+            #[\Override]
+            public function getTailwindBinary(): ?string
+            {
+                return PHP_BINARY;
+            }
+
+            #[\Override]
+            protected function compile(string $binary, string $workDir, string $theme, string $entry): ?string
+            {
+                return null;
+            }
+        };
+
+        expect($bundle->build())->toHaveKey('base/default', Mage_Core_Model_Design_Content_Bundle::STATUS_FAILED)
+            ->and($bundle->getUrl($this->styles))->toBe($this->mount->publicUrl('theme/base-default-previous.css'))
+            ->and($bundle->getOutdatedThemes())->toContain('base/default');
+    });
+});
+
 describe('the build', function () {
     beforeEach(function (): void {
         if (Mage::getModel('core/design_content_bundle')->getTailwindBinary() === null) {
