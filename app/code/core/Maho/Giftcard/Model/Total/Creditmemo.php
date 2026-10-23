@@ -57,24 +57,15 @@ class Maho_Giftcard_Model_Total_Creditmemo extends Mage_Sales_Model_Order_Credit
             // For partial gift card orders, calculate proportional refund
             // based on how much of the order total is being refunded
 
-            // Calculate ratio based on order total (before gift card)
-            $orderBaseTotal = abs((float) $order->getBaseSubtotal())
-                + abs((float) $order->getBaseShippingAmount())
-                + abs((float) $order->getBaseTaxAmount());
+            // An adjustment is not an item of the order, so it takes no share of the gift card
+            $refundRatio = Mage::helper('giftcard')->getGiftcardShare(
+                $order,
+                $baseGrandTotal - (float) $creditmemo->getBaseAdjustment(),
+            );
 
-            $creditmemoBaseTotal = abs((float) $creditmemo->getBaseSubtotal())
-                + abs((float) $creditmemo->getBaseShippingAmount())
-                + abs((float) $creditmemo->getBaseTaxAmount());
-
-            if ($orderBaseTotal > 0) {
-                $refundRatio = min(1.0, $creditmemoBaseTotal / $orderBaseTotal);
-            } else {
-                $refundRatio = 1.0;
-            }
-
-            // Calculate proportional gift card refund
-            $baseGiftcardToRefund = min($baseGiftcardRemaining, round($orderBaseGiftcardAmount * $refundRatio, 2));
-            $giftcardToRefund = min($giftcardRemaining, round($orderGiftcardAmount * $refundRatio, 2));
+            $store = $order->getStore();
+            $baseGiftcardToRefund = min($baseGiftcardRemaining, $store->roundPrice($orderBaseGiftcardAmount * $refundRatio));
+            $giftcardToRefund = min($giftcardRemaining, $store->roundPrice($orderGiftcardAmount * $refundRatio));
 
             // For full refunds, use remaining to avoid rounding issues
             if ($creditmemo->isLast() && $refundRatio >= 0.99) {

@@ -385,4 +385,38 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
 
         return true;
     }
+
+    /**
+     * Return the gift card amount of the invoices of $order that are not canceled.
+     *
+     * The query bypasses the invoice collection that the order caches.
+     *
+     * @return array{base: float, amount: float}
+     */
+    public function getInvoicedAmounts(Mage_Sales_Model_Order $order): array
+    {
+        $invoices = Mage::getResourceModel('sales/order_invoice_collection')
+            ->setOrderFilter($order)
+            ->addFieldToFilter('state', ['neq' => Mage_Sales_Model_Order_Invoice::STATE_CANCELED]);
+
+        $amounts = ['base' => 0.0, 'amount' => 0.0];
+        foreach ($invoices as $invoice) {
+            $amounts['base'] += abs((float) $invoice->getBaseGiftcardAmount());
+            $amounts['amount'] += abs((float) $invoice->getGiftcardAmount());
+        }
+
+        return $amounts;
+    }
+
+    /**
+     * Return the share of the gift card amount of $order that an invoice or a credit memo takes.
+     *
+     * $baseTotal is the total of that document after the discount and before the gift card.
+     */
+    public function getGiftcardShare(Mage_Sales_Model_Order $order, float $baseTotal): float
+    {
+        $baseOrderTotal = (float) $order->getBaseGrandTotal() + abs((float) $order->getBaseGiftcardAmount());
+
+        return $baseOrderTotal > 0 ? min(1.0, $baseTotal / $baseOrderTotal) : 1.0;
+    }
 }
