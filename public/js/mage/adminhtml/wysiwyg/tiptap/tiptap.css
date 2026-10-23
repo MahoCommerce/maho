@@ -354,7 +354,8 @@
         border-collapse: collapse;
         margin: 0;
         overflow: hidden;
-        table-layout: fixed;
+        /* The storefront uses the auto layout, so a cell with `width: 1%` grows to fit its content */
+        table-layout: auto;
         width: 100%;
     }
 
