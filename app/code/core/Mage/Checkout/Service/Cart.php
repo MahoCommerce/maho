@@ -675,6 +675,7 @@ class Mage_Checkout_Service_Cart
         // Get currently applied codes
         $appliedCodes = $quote->getGiftcardCodes();
         $appliedCodes = $appliedCodes ? \Mage::helper('core')->jsonDecode($appliedCodes, true) : [];
+        $giftcardCode = (string) (array_find_key($appliedCodes, fn($amount, $code) => strcasecmp((string) $code, $giftcardCode) === 0) ?? $giftcardCode);
 
         // Check if gift card is applied
         if (!isset($appliedCodes[$giftcardCode])) {

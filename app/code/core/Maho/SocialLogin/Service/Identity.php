@@ -130,6 +130,7 @@ class Maho_SocialLogin_Service_Identity
         $select = $adapter->select()
             ->from($resource->getTableName('customer/entity'), ['entity_id'])
             ->where((string) $adapter->getCaseInsensitiveEqualsSql('email', '?'), $email)
+            ->order($adapter->getCheckSql($adapter->quoteInto('email = ?', $email), '0', '1'))
             ->limit(1);
         if ($websiteId !== null) {
             $select->where('website_id = ?', $websiteId);

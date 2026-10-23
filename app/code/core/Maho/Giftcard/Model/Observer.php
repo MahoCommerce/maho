@@ -663,7 +663,8 @@ class Maho_Giftcard_Model_Observer
 
         // The invoiced part stays spent: a credit memo gives it back
         $baseRestoreAmount = $baseGiftcardAmount - Mage::helper('giftcard')->getInvoicedAmounts($order)['base'];
-        $totalApplied = array_sum(array_filter($codes, fn($amount) => $amount > 0));
+        $applied = array_filter($codes, fn($amount) => $amount > 0);
+        $totalApplied = array_sum($applied);
         if ($baseRestoreAmount <= 0 || $totalApplied <= 0) {
             return;
         }
@@ -673,15 +674,10 @@ class Maho_Giftcard_Model_Observer
         $historyTable = Mage::getSingleton('core/resource')->getTableName('giftcard/history');
 
         $restoreLeft = $baseRestoreAmount;
-        $appliedLeft = $totalApplied;
-        foreach ($codes as $code => $appliedAmount) {
-            if ($appliedAmount <= 0) {
-                continue;
-            }
-
+        $lastCode = array_key_last($applied);
+        foreach ($applied as $code => $appliedAmount) {
             // The last card gets the rest, so the cards get back exactly $baseRestoreAmount
-            $appliedLeft -= $appliedAmount;
-            $restoreAmount = $appliedLeft <= 0
+            $restoreAmount = $code === $lastCode
                 ? $restoreLeft
                 : min($restoreLeft, round($appliedAmount / $totalApplied * $baseRestoreAmount, 4));
             $restoreLeft -= $restoreAmount;
