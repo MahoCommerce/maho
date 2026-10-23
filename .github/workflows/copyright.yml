@@ -56,6 +56,7 @@ jobs:
           public/js/chart.min.js
           public/js/deep-chat.js
           public/js/sortable.min.js
+          public/js/tailwindcss-browser.js
           "
 
           # Build regex pattern with valid years

@@ -224,9 +224,7 @@ class Mage_Core_Model_Design_Content_Bundle
             return null;
         }
         $entry = $manifest[substr($stylesFile, strlen($skinDir), -strlen($suffix))] ?? null;
-        if ($entry === null || $entry['file'] === null || !is_file($stylesFile)
-            || hash_file('xxh128', $stylesFile) !== $entry['styles']
-        ) {
+        if ($entry === null || $entry['file'] === null) {
             return null;
         }
 
@@ -290,7 +288,8 @@ class Mage_Core_Model_Design_Content_Bundle
 
     /**
      * The manifest from the cache, or from the database when the cache has no entry. A file
-     * that the mount does not have, such as after a restore of the database alone, is left
+     * that comes from another version of the committed css/styles.css, such as after a deploy,
+     * or that the mount does not have, such as after a restore of the database alone, is left
      * out, so the head links the committed file. The check runs when the cache is filled,
      * not on each page.
      *
@@ -317,7 +316,11 @@ class Mage_Core_Model_Design_Content_Bundle
         $manifest = $this->loadManifest();
         $mount = Mage::getStorage(self::MOUNT);
         foreach ($manifest as $theme => $entry) {
-            if ($entry['file'] !== null && !$mount->fileExists($entry['file'])) {
+            $stylesFile = $this->getSkinDir() . "/{$theme}/" . self::STYLES_FILE;
+            if ($entry['file'] !== null && (!is_file($stylesFile)
+                || hash_file('xxh128', $stylesFile) !== $entry['styles']
+                || !$mount->fileExists($entry['file']))
+            ) {
                 $manifest[$theme]['file'] = null;
             }
         }

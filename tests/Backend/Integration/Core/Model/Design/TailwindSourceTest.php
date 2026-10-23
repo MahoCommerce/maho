@@ -139,16 +139,14 @@ describe('the stylesheet in the page head', function () {
         $this->design->setArea('frontend')->setPackageName('base')->setTheme('default');
         $this->styles = (string) $this->design->getFilename('css/styles.css', ['_type' => 'skin']);
 
-        $this->headHtml = function (string $stylesHash): string {
-            useContentBundle(new class ($stylesHash) extends Mage_Core_Model_Design_Content_Bundle {
-                public function __construct(private readonly string $stylesHash) {}
+        Mage::getStorage('media')->write('theme/test.css', '.test{}');
 
-                #[\Override]
-                public function getManifest(): array
-                {
-                    return ['base/default' => ['file' => 'theme/test.css', 'tokens' => 'x', 'styles' => $this->stylesHash]];
-                }
-            });
+        $this->headHtml = function (string $stylesHash): string {
+            Mage::getModel('core/flag', ['flag_code' => Mage_Core_Model_Design_Content_Bundle::FLAG_MANIFEST])->loadSelf()
+                ->setFlagData(['base/default' => ['file' => 'theme/test.css', 'tokens' => 'x', 'styles' => $stylesHash]])
+                ->save();
+            Mage::app()->removeCache(Mage_Core_Model_Design_Content_Bundle::CACHE_ID);
+            useContentBundle(new Mage_Core_Model_Design_Content_Bundle());
             $head = Mage::app()->getLayout()->createBlock('page/html_head');
             $head->addItem('skin_css', 'css/styles.css');
             $head->addItem('skin_css', 'css/theme.css');
@@ -159,6 +157,7 @@ describe('the stylesheet in the page head', function () {
     afterEach(function (): void {
         [$area, $package, $theme] = $this->previousDesign;
         $this->design->setArea($area)->setPackageName($package)->setTheme($theme);
+        Mage::getStorage('media')->delete('theme/test.css');
     });
 
     it('links the copy with the content classes when it comes from the current styles.css', function (): void {
