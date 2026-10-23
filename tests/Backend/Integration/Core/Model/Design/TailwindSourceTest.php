@@ -68,12 +68,12 @@ afterEach(function (): void {
 describe('the table sources', function () {
     it('reads the content of a CMS block that has a class attribute', function (): void {
         $this->blocks[] = createContentBlock('<div class="rotate-47">styled</div>');
-        $this->blocks[] = createContentBlock('<p>plain text, no class</p>');
+        $this->blocks[] = createContentBlock('<p>plain text only</p>');
 
         $content = iterator_to_array(Mage::getResourceSingleton('cms/block')->getTailwindContent(), false);
 
         expect($content)->toContain('<div class="rotate-47">styled</div>')
-            ->not->toContain('<p>plain text, no class</p>');
+            ->not->toContain('<p>plain text only</p>');
     });
 
     it('reads the text attributes of the catalog that have the WYSIWYG editor only', function (): void {
@@ -174,6 +174,25 @@ describe('the stylesheet in the page head', function () {
 
         expect($html)->toContain('skin/frontend/base/default/css/styles.css')
             ->not->toContain('theme/test.css');
+    });
+});
+
+describe('a manifest whose file is not on the mount', function () {
+    beforeEach(function (): void {
+        $styles = Mage::getBaseDir('skin') . '/frontend/base/default/css/styles.css';
+        Mage::getModel('core/flag', ['flag_code' => Mage_Core_Model_Design_Content_Bundle::FLAG_MANIFEST])->loadSelf()
+            ->setFlagData(['base/default' => ['file' => 'theme/missing-0000.css', 'tokens' => 'x', 'styles' => hash_file('xxh128', $styles)]])
+            ->save();
+        Mage::app()->removeCache(Mage_Core_Model_Design_Content_Bundle::CACHE_ID);
+        $this->styles = $styles;
+    });
+
+    it('links the committed styles.css', function (): void {
+        expect(Mage::getModel('core/design_content_bundle')->getUrl($this->styles))->toBeNull();
+    });
+
+    it('makes the theme outdated, so the cron job queues a build', function (): void {
+        expect(Mage::getModel('core/design_content_bundle')->getOutdatedThemes())->toContain('base/default');
     });
 });
 

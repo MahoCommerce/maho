@@ -16,6 +16,7 @@
 
 declare(strict_types=1);
 
+use Symfony\Component\Process\Exception\ProcessTimedOutException;
 use Symfony\Component\Process\Process;
 
 class Mage_Core_Model_Design_Content_Bundle
@@ -125,6 +126,7 @@ class Mage_Core_Model_Design_Content_Bundle
             }
             if ($previous !== null && $previous['file'] !== null
                 && $previous['tokens'] === $tokensHash && $previous['styles'] === $stylesHash
+                && Mage::getStorage(self::MOUNT)->fileExists($previous['file'])
             ) {
                 $built[$theme] = $previous;
                 $status[$theme] = self::STATUS_UNCHANGED;
@@ -162,7 +164,13 @@ class Mage_Core_Model_Design_Content_Bundle
         file_put_contents($input, '@import ' . json_encode($entry, JSON_UNESCAPED_SLASHES) . ";\n@source \"./content.txt\";\n");
 
         $process = new Process([$binary, '-i', $input, '-o', $output, '--minify'], Mage::getBaseDir(), null, null, self::BUILD_TIMEOUT);
-        $process->run();
+        try {
+            $process->run();
+        } catch (ProcessTimedOutException) {
+            @unlink($output);
+            Mage::log("The Tailwind build of the content for {$theme} took more than " . self::BUILD_TIMEOUT . ' seconds.', Mage::LOG_ERROR);
+            return null;
+        }
         $css = is_file($output) ? (string) file_get_contents($output) : '';
         @unlink($output);
         if (!$process->isSuccessful() || $css === '') {
@@ -224,17 +232,22 @@ class Mage_Core_Model_Design_Content_Bundle
 
     /**
      * The package/theme of each theme whose committed css/styles.css changed after its last
-     * build, or that has no build.
+     * build, that has no build, or whose built file is not on the mount.
      *
      * @return list<string>
      */
     public function getOutdatedThemes(): array
     {
         $manifest = $this->loadManifest();
+        $mount = Mage::getStorage(self::MOUNT);
         $outdated = [];
         foreach ($this->getThemes() as $theme => $paths) {
-            if (is_file($paths['styles'])
-                && ($manifest[$theme]['styles'] ?? null) !== hash_file('xxh128', $paths['styles'])
+            if (!is_file($paths['styles'])) {
+                continue;
+            }
+            $file = $manifest[$theme]['file'] ?? null;
+            if (($manifest[$theme]['styles'] ?? null) !== hash_file('xxh128', $paths['styles'])
+                || ($file !== null && !$mount->fileExists($file))
             ) {
                 $outdated[] = $theme;
             }
@@ -272,7 +285,10 @@ class Mage_Core_Model_Design_Content_Bundle
     }
 
     /**
-     * The manifest from the cache, or from the database when the cache has no entry.
+     * The manifest from the cache, or from the database when the cache has no entry. A file
+     * that the mount does not have, such as after a restore of the database alone, is left
+     * out, so the head links the committed file. The check runs when the cache is filled,
+     * not on each page.
      *
      * @return array<string, array{file: ?string, tokens: string, styles: string}>
      */
@@ -295,6 +311,12 @@ class Mage_Core_Model_Design_Content_Bundle
         }
 
         $manifest = $this->loadManifest();
+        $mount = Mage::getStorage(self::MOUNT);
+        foreach ($manifest as $theme => $entry) {
+            if ($entry['file'] !== null && !$mount->fileExists($entry['file'])) {
+                $manifest[$theme]['file'] = null;
+            }
+        }
         Mage::app()->saveCache(Mage::helper('core')->jsonEncode($manifest), self::CACHE_ID, [Mage_Core_Model_Config::CACHE_TAG]);
         return $this->manifest = $manifest;
     }
