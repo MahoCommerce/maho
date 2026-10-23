@@ -4,7 +4,7 @@
  * The HTML of the WYSIWYG text attributes of the products and the categories, for the Tailwind build.
  *
  * The codes of these attributes come from the database, so this class queues the build from
- * its own observers instead of from the model and fields of the attribute.
+ * its own observers. It does not set model: and fields: on #[Maho\Config\TailwindSource].
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0

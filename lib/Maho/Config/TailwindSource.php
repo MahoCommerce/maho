@@ -30,7 +30,7 @@ use Attribute;
 readonly class TailwindSource
 {
     /**
-     * @param string        $id     Source identifier (e.g. 'cms_block'). A source with the same id replaces it
+     * @param string        $id     Source identifier (e.g. 'cms_block'). A later source with the same id replaces the earlier one
      * @param ?class-string $model  Model class whose save can change the content
      * @param list<string>  $fields Fields of $model that hold the content. Empty means every save of $model
      */

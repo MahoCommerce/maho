@@ -51,7 +51,7 @@ class Mage_Core_Model_Design_Content_Collector
     {
         $compiled = \Maho::getCompiledAttributes();
         if (!isset($compiled['tailwindSources']) && !$this->recompileAttempted) {
-            // The compiled file is older than the tailwindSources key: recompile once, as HandlerRegistry does
+            // An older composer plugin wrote the compiled file without tailwindSources: recompile once, as HandlerRegistry does
             $this->recompileAttempted = true;
             \Maho::recompilePhpAttributes();
             $compiled = \Maho::getCompiledAttributes();

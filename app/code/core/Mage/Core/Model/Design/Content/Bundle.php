@@ -30,6 +30,8 @@ class Mage_Core_Model_Design_Content_Bundle
     public const FOLDER = 'theme';
     public const STYLES_FILE = 'css/styles.css';
     public const ENTRY_FILE = 'src/tailwind.css';
+    /** The Tailwind CLI, relative to the project root. */
+    public const TAILWIND_BINARY = 'node_modules/.bin/tailwindcss';
     /** Seconds before a queued build runs, so the saves of an import give one build. */
     public const BUILD_DELAY = 60;
     public const BUILD_TIMEOUT = 600;
@@ -47,7 +49,7 @@ class Mage_Core_Model_Design_Content_Bundle
      */
     public function getTailwindBinary(): ?string
     {
-        $binary = Mage::getBaseDir() . '/node_modules/.bin/tailwindcss';
+        $binary = Mage::getBaseDir() . '/' . self::TAILWIND_BINARY;
         return is_file($binary) ? $binary : null;
     }
 
