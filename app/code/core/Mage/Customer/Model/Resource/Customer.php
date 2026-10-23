@@ -189,7 +189,7 @@ class Mage_Customer_Model_Resource_Customer extends Mage_Eav_Model_Entity_Abstra
         $select  = $adapter->select()
             ->from($this->getEntityTable(), [$this->getEntityIdField()])
             ->where((string) $adapter->getCaseInsensitiveEqualsSql('email', ':customer_email'))
-            ->order($adapter->getCheckSql($adapter->quoteInto('email = ?', $email), '0', '1'));
+            ->order($adapter->getCheckSql('email = :customer_email', '0', '1'));
 
         if ($customer->getSharingConfig()->isWebsiteScope()) {
             if (!$customer->hasData('website_id')) {
