@@ -322,14 +322,7 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
         // requests and let both decrement off the same balance.
         $rowsAffected = $write->update(
             $table,
-            [
-                'balance' => new \Maho\Db\Expr('balance - ' . $write->quote($baseAmount)),
-                'status' => new \Maho\Db\Expr(
-                    'CASE WHEN balance - ' . $write->quote($baseAmount) . ' <= 0 '
-                    . 'THEN ' . $write->quote(self::STATUS_USED) . ' '
-                    . 'ELSE status END',
-                ),
-            ],
+            ['balance' => new \Maho\Db\Expr('balance - ' . $write->quote($baseAmount))],
             [
                 'giftcard_id = ?' => $this->getId(),
                 'balance >= ?' => $baseAmount,
@@ -339,6 +332,16 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
         if ($rowsAffected === 0) {
             throw new Mage_Core_Exception('Gift card balance changed concurrently or is insufficient.');
         }
+
+        // A separate statement, because MySQL evaluates the SET of one UPDATE from left to right
+        $write->update(
+            $table,
+            ['status' => self::STATUS_USED],
+            [
+                'giftcard_id = ?' => $this->getId(),
+                'balance <= ?' => 0,
+            ],
+        );
 
         // Refresh model state from the row we just mutated
         $balanceBefore = (float) $this->getBalance();
