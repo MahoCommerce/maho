@@ -297,10 +297,13 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
                 }
             }
 
-            if (Mage::getSingleton('admin/session')->isAllowed('newsletter/subscriber')
+            // The newsletter tab is not always rendered (module output disabled, admin website),
+            // and a missing field must not unsubscribe the customer
+            if (isset($data['subscription'])
+                && Mage::getSingleton('admin/session')->isAllowed('newsletter/subscriber')
                 && !$customer->getConfirmation()
             ) {
-                $customer->setIsSubscribed(isset($data['subscription']));
+                $customer->setIsSubscribed((bool) $data['subscription']);
             }
 
             if (isset($data['account']['sendemail_store_id'])) {
