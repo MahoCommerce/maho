@@ -889,9 +889,6 @@ class tiptapWysiwygSetup {
             { type: 'label', text: 'Width:' },
             { type: 'button', title: 'Boxed', icon: 'bleed-boxed', command: 'setColumnsBleed', args: ['boxed'], data: { bleed: 'boxed' } },
             { type: 'button', title: 'Full width', icon: 'bleed-full', command: 'setColumnsBleed', args: ['full'], data: { bleed: 'full' } },
-            { type: 'separator' },
-            { type: 'button', title: 'Edit HTML', icon: 'source', onClick: (event) => this.editElementSource(event.currentTarget.closest('.tiptap-bubble-menu'), ['mahoColumns']) },
-            { type: 'button', title: 'Delete Columns', icon: 'trash', command: 'deleteColumns' },
         ]);
 
         bubbleMenu.id = `${this.id}_columns_bubble_menu`;
@@ -918,9 +915,6 @@ class tiptapWysiwygSetup {
             { type: 'label', text: 'Width:' },
             { type: 'button', title: 'Boxed', icon: 'bleed-boxed', command: 'setBentoBleed', args: ['boxed'], data: { bleed: 'boxed' } },
             { type: 'button', title: 'Full width', icon: 'bleed-full', command: 'setBentoBleed', args: ['full'], data: { bleed: 'full' } },
-            { type: 'separator' },
-            { type: 'button', title: 'Edit HTML', icon: 'source', onClick: (event) => this.editElementSource(event.currentTarget.closest('.tiptap-bubble-menu'), ['mahoBentoGrid']) },
-            { type: 'button', title: 'Delete Bento Grid', icon: 'trash', command: 'deleteBentoGrid' },
         ]);
 
         bubbleMenu.id = `${this.id}_bento_bubble_menu`;
@@ -933,8 +927,6 @@ class tiptapWysiwygSetup {
         const bubbleMenu = this.createToolbar([
             { type: 'label', text: 'Background:' },
             { type: 'select', options: [['none', 'None'], ['muted', 'Muted'], ['primary', 'Primary'], ['neutral', 'Neutral'], ['accent', 'Accent']], data: { backgroundSelect: '' }, onChange: (e) => this.editor.chain().focus().setCellBackground(e.target.value).run() },
-            { type: 'separator' },
-            { type: 'button', title: 'Edit HTML', icon: 'source', onClick: (event) => this.editElementSource(event.currentTarget.closest('.tiptap-bubble-menu'), ['mahoColumn', 'mahoBentoCell']) },
         ]);
 
         bubbleMenu.id = `${this.id}_cell_bubble_menu`;
@@ -951,9 +943,6 @@ class tiptapWysiwygSetup {
             { type: 'separator' },
             { type: 'button', title: 'Add Item', icon: 'plus', command: 'addAccordionItem' },
             { type: 'button', title: 'Delete Item', icon: 'row-remove', command: 'deleteAccordionItem' },
-            { type: 'separator' },
-            { type: 'button', title: 'Edit HTML', icon: 'source', onClick: (event) => this.editElementSource(event.currentTarget.closest('.tiptap-bubble-menu'), ['mahoAccordion']) },
-            { type: 'button', title: 'Delete Accordion', icon: 'trash', command: 'deleteAccordion' },
         ]);
 
         bubbleMenu.id = `${this.id}_accordion_bubble_menu`;

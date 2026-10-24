@@ -163,7 +163,7 @@ it('shows the source inside the editor with the Source button, and reads it back
         ->and($page->script('window.tiptapEditors.get("block_content").editor.getHTML()'))->toContain('<h2>From the source</h2>');
 });
 
-it('edits the HTML of one cell from its popup menu, in one step that undo reverts', function () {
+it('edits the HTML of one cell from its badge, in one step that undo reverts', function () {
     $this->block->setContent(
         '<div data-type="maho-columns" data-preset="2-equal" data-gap="medium" data-style="none">'
         . '<div data-type="maho-column"><p>Left</p></div>'
@@ -178,8 +178,7 @@ it('edits the HTML of one cell from its popup menu, in one step that undo revert
     );
     waitForScript($page, '!!window.tiptapEditors?.get("block_content")?.codeEditor', 20);
 
-    $page->script('document.querySelectorAll(".ProseMirror [data-type=\\"maho-columns\\"] .cell-badge")[1].click()');
-    $page->script('document.querySelector("#block_content_cell_bubble_menu button[title=\\"Edit HTML\\"]").click()');
+    $page->script('document.querySelectorAll(".ProseMirror [data-type=\\"maho-columns\\"] .cell-badge")[1].querySelector("[data-action=\\"source\\"]").click()');
     waitForScript($page, '!!document.querySelector("#tiptap-element-source")?.codeView');
 
     expect($page->script('document.querySelector("#tiptap-element-source").codeView.state.doc.toString()'))

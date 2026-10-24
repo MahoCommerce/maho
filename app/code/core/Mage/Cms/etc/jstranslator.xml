@@ -205,6 +205,21 @@ SPDX-License-Identifier: AFL-3.0
         <edit-html translate="message">
             <message>Edit HTML</message>
         </edit-html>
+        <more translate="message">
+            <message>More</message>
+        </more>
+        <settings translate="message">
+            <message>Settings</message>
+        </settings>
+        <delete-columns translate="message">
+            <message>Delete Columns</message>
+        </delete-columns>
+        <delete-bento-grid translate="message">
+            <message>Delete Bento Grid</message>
+        </delete-bento-grid>
+        <delete-accordion translate="message">
+            <message>Delete Accordion</message>
+        </delete-accordion>
         <enter-a-label-and-a-link translate="message">
             <message>Enter a label and a link.</message>
         </enter-a-label-and-a-link>

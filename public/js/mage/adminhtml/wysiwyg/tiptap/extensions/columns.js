@@ -215,6 +215,7 @@ export const MahoColumns = Node.create({
             storageName: 'mahoColumns',
             dataType: 'maho-columns',
             badgeLabel: 'Columns',
+            deleteTitle: 'Delete Columns',
             layoutAttr: 'layout',
 
             setDataAttrs(dom, node) {

@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
 // SPDX-License-Identifier: AFL-3.0
 
+import { openElementSource } from '../element-source.js';
+
 /**
  * Gap size options shared across grid extensions
  */
@@ -127,8 +129,12 @@ export function findParentNodeOfType(nodeType) {
     };
 }
 
+const SOURCE_ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8l-4 4l4 4"/><path d="M17 8l4 4l-4 4"/><path d="M14 4l-4 16"/></svg>';
+const TRASH_ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7l16 0"/><path d="M10 11l0 6"/><path d="M14 11l0 6"/><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12"/><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3"/></svg>';
+
 /**
- * Badge button that opens an extension's bubble menu below itself
+ * The badge of a layout node: its label and the buttons Settings, Edit HTML and, with
+ * `deleteTitle`, Delete. Settings opens the bubble menu of the extension below the badge.
  *
  * @param {string} label - Text shown on the badge
  * @param {Object} editor - TipTap editor instance
@@ -136,21 +142,38 @@ export function findParentNodeOfType(nodeType) {
  * @param {Function} [onOpen] - (bubbleMenu) => sync the menu to the current node before showing it
  * @param {Function} [getPos] - The position of the node. The badge is clicked without moving the
  *     cursor, so the menu keeps it in `data-pos`
+ * @param {string|null} [deleteTitle] - The title of the Delete button, or null for no Delete
  */
-export function createBadge(label, editor, storageName, onOpen, getPos) {
-    const badge = document.createElement('button');
-    badge.type = 'button';
+export function createBadge(label, editor, storageName, onOpen, getPos, deleteTitle = null) {
+    const t = (text) => editor.options.wysiwygSetup?.translate(text) ?? text;
+    const badge = document.createElement('div');
     badge.className = 'grid-badge';
-    badge.innerHTML = `<span class="grid-badge-label"></span>${SETTINGS_ICON}`;
+    badge.contentEditable = 'false';
+    badge.innerHTML = '<span class="grid-badge-label"></span>';
     badge.querySelector('.grid-badge-label').textContent = label;
+
+    const action = (name, title, icon, run) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'grid-badge-action';
+        button.dataset.action = name;
+        button.title = t(title);
+        button.setAttribute('aria-label', button.title);
+        button.innerHTML = icon;
+        button.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            run();
+        });
+        badge.append(button);
+        return button;
+    };
 
     // A mousedown on the badge must not move focus out of the cell, or the
     // cell badge hides before its click lands
     badge.addEventListener('mousedown', (e) => e.preventDefault());
-    badge.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
 
+    const openMenu = () => {
         const bubbleMenu = editor.storage[storageName]?.bubbleMenu;
         if (!bubbleMenu) return;
 
@@ -173,13 +196,28 @@ export function createBadge(label, editor, storageName, onOpen, getPos) {
 
         // Close when clicking outside
         const closeMenu = (event) => {
-            if (!bubbleMenu.contains(event.target) && event.target !== badge) {
+            if (!bubbleMenu.contains(event.target) && !badge.contains(event.target)) {
                 bubbleMenu.style.display = 'none';
                 document.removeEventListener('click', closeMenu);
             }
         };
         setTimeout(() => document.addEventListener('click', closeMenu), 0);
-    });
+    };
+
+    badge.querySelector('.grid-badge-label').addEventListener('click', openMenu);
+    action('settings', 'Settings', SETTINGS_ICON, openMenu);
+    if (getPos) {
+        action('source', 'Edit HTML', SOURCE_ICON, () => openElementSource(editor.options.wysiwygSetup, getPos()));
+        if (deleteTitle) {
+            action('delete', deleteTitle, TRASH_ICON, () => {
+                const pos = getPos();
+                const node = editor.state.doc.nodeAt(pos);
+                if (node) {
+                    editor.chain().focus().deleteRange({ from: pos, to: pos + node.nodeSize }).run();
+                }
+            });
+        }
+    }
 
     return badge;
 }
@@ -202,6 +240,7 @@ export function setBadgeLabel(badge, label) {
  * @param {string} config.storageName - Key in editor.storage for bubble menu ref
  * @param {string} config.dataType - data-type attribute value (e.g. 'maho-columns')
  * @param {string} config.badgeLabel - Text shown on the badge button
+ * @param {string} config.deleteTitle - Title of the Delete button of the badge
  * @param {string} config.layoutAttr - Node attr storing column fr values ('layout' or 'columns')
  * @param {Function} config.setDataAttrs - (dom, node) => set data-* attributes on wrapper
  * @param {Function} config.updateGridStyles - (contentDOM, node, gap) => update grid CSS
@@ -230,7 +269,7 @@ export function createGridNodeView(config) {
 
             // Extension-specific bubble menu updates
             config.onBadgeClick?.(node, bubbleMenu, editor);
-        }, getPos);
+        }, getPos, config.deleteTitle);
 
         dom.appendChild(badge);
 

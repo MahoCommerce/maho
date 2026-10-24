@@ -136,7 +136,8 @@ Without Node.js, a class outside the list does not exist in the compiled stylesh
 
 To write classes, open the HTML in the code editor: click **Source** in the
 toolbar of the content editor, also in fullscreen. For one element, click
-**Edit HTML** in its popup menu or the label of a `div`. Inside a `class` attribute, the code editor completes the classes
+the code icon on its badge, **Edit HTML** in the popup menu of a table, or the
+label of a `div`. Inside a `class` attribute, the code editor completes the classes
 of the theme stylesheet and every Tailwind utility of the theme, with variants
 such as `md:`. It marks a class that neither styles. A DaisyUI class that the
 theme does not use also gets this mark, but the build compiles it.

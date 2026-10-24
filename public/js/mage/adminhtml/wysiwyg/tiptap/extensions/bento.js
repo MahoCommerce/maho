@@ -304,6 +304,7 @@ export const MahoBentoGrid = Node.create({
             storageName: 'mahoBentoGrid',
             dataType: 'maho-bento',
             badgeLabel: 'Bento',
+            deleteTitle: 'Delete Bento Grid',
             layoutAttr: 'columns',
 
             setDataAttrs(dom, node) {
