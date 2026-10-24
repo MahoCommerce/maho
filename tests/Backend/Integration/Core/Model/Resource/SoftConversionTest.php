@@ -16,8 +16,8 @@ uses(Tests\MahoBackendTestCase::class);
  * When a resource model loads a record with legacy PHP-serialized data,
  * _unserializeField in Resource_Abstract should silently rewrite it as JSON.
  *
- * IMPORTANT finding: All 4 Sales resource models (Order_Payment, Quote_Payment,
- * Order_Payment_Transaction, Recurring_Profile) OVERRIDE _unserializeField and
+ * IMPORTANT finding: All 3 Sales resource models (Order_Payment, Quote_Payment,
+ * Order_Payment_Transaction) OVERRIDE _unserializeField and
  * do NOT include the soft-conversion write-back. Those models rely entirely on
  * the migration script — no self-healing on load.
  */

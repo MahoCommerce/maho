@@ -34,16 +34,6 @@
     <p><?= $this->__('Your billing agreement # is: %s.', sprintf('<a href="%s">%s</a>', $this->escapeHtml($this->getAgreementUrl()), $this->escapeHtml($this->getAgreementRefId()))) ?></p>
 <?php endif ?>
 
-<?php if ($profiles = $this->getRecurringProfiles()): ?>
-<p><?= $this->__('Your recurring payment profiles:') ?></p>
-<ul class="disc">
-<?php foreach ($profiles as $profile): ?>
-<?php $profileIdHtml = ($this->getCanViewProfiles() ? sprintf('<a href="%s">%s</a>', $this->escapeHtml($this->getProfileUrl($profile)), $this->escapeHtml($this->getObjectData($profile, 'reference_id'))) : $this->escapeHtml($this->getObjectData($profile, 'reference_id'))); ?>
-    <li><?= $this->__('Payment profile # %s: "%s".', $profileIdHtml, $this->escapeHtml($this->getObjectData($profile, 'schedule_description'))) ?></li>
-<?php endforeach ?>
-</ul>
-<?php endif ?>
-
 <div class="buttons-set">
     <button type="button" class="button" title="<?= $this->quoteEscape($this->__('Continue Shopping')) ?>" onclick="window.location='<?= $this->getUrl() ?>'"><?= $this->__('Continue Shopping') ?></button>
 </div>

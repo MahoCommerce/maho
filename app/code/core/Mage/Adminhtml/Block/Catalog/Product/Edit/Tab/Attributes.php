@@ -45,10 +45,9 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Attributes extends Mage_Admi
             $this->_setFieldset($attributes, $fieldset, ['gallery']);
 
             $rendererBlocks = [
-                'url_key'           => 'adminhtml/catalog_form_renderer_attribute_urlkey',
-                'tier_price'        => 'adminhtml/catalog_product_edit_tab_price_tier',
-                'group_price'       => 'adminhtml/catalog_product_edit_tab_price_group',
-                'recurring_profile' => 'adminhtml/catalog_product_edit_tab_price_recurring',
+                'url_key'     => 'adminhtml/catalog_form_renderer_attribute_urlkey',
+                'tier_price'  => 'adminhtml/catalog_product_edit_tab_price_tier',
+                'group_price' => 'adminhtml/catalog_product_edit_tab_price_group',
             ];
 
             foreach ($rendererBlocks as $elementId => $rendererBlock) {

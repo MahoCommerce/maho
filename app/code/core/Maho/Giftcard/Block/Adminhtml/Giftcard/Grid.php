@@ -53,10 +53,10 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Grid extends Mage_Adminhtml_Block_W
             'index'   => 'status',
             'type'    => 'options',
             'options' => [
-                Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE => 'Active',
-                Maho_Giftcard_Model_Giftcard::STATUS_USED => 'Used',
-                Maho_Giftcard_Model_Giftcard::STATUS_EXPIRED => 'Expired',
-                Maho_Giftcard_Model_Giftcard::STATUS_DISABLED => 'Disabled',
+                Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE => Mage::helper('giftcard')->__('Active'),
+                Maho_Giftcard_Model_Giftcard::STATUS_USED => Mage::helper('giftcard')->__('Used'),
+                Maho_Giftcard_Model_Giftcard::STATUS_EXPIRED => Mage::helper('giftcard')->__('Expired'),
+                Maho_Giftcard_Model_Giftcard::STATUS_DISABLED => Mage::helper('giftcard')->__('Disabled'),
             ],
         ]);
 
@@ -154,8 +154,8 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Grid extends Mage_Adminhtml_Block_W
         ]);
 
         $statuses = [
-            Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE => 'Active',
-            Maho_Giftcard_Model_Giftcard::STATUS_DISABLED => 'Disabled',
+            Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE => Mage::helper('giftcard')->__('Active'),
+            Maho_Giftcard_Model_Giftcard::STATUS_DISABLED => Mage::helper('giftcard')->__('Disabled'),
         ];
 
         $this->getMassactionBlock()->addItem('status', [

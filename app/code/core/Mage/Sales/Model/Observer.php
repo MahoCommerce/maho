@@ -247,36 +247,6 @@ class Mage_Sales_Model_Observer
     }
 
     /**
-     * Add the recurring profile form when editing a product
-     *
-     * @param \Maho\Event\Observer $observer
-     */
-    #[Maho\Config\Observer('catalog_product_edit_form_render_recurring', area: 'adminhtml', id: 'payment')]
-    public function prepareProductEditFormRecurringProfile($observer)
-    {
-        // replace the element of recurring payment profile field with a form
-        $profileElement = $observer->getEvent()->getProductElement();
-        $block = Mage::app()->getLayout()->createBlock(
-            'sales/adminhtml_recurring_profile_edit_form',
-            'adminhtml_recurring_profile_edit_form',
-        )->setParentElement($profileElement)
-            ->setProductEntity($observer->getEvent()->getProduct());
-        $observer->getEvent()->getResult()->output = $block->toHtml();
-
-        // make the profile element dependent on is_recurring
-        /** @var Mage_Adminhtml_Block_Widget_Form_Element_Dependence $block */
-        $block = Mage::app()->getLayout()->createBlock(
-            'adminhtml/widget_form_element_dependence',
-            'adminhtml_recurring_profile_edit_form_dependence',
-        );
-        $dependencies = $block
-            ->addFieldMap('is_recurring', 'product[is_recurring]')
-            ->addFieldMap($profileElement->getHtmlId(), $profileElement->getName())
-            ->addFieldDependence($profileElement->getName(), 'product[is_recurring]', '1');
-        $observer->getEvent()->getResult()->output .= $dependencies->toHtml();
-    }
-
-    /**
      * Block admin ability to use customer billing agreements
      *
      * @param \Maho\Event\Observer $observer

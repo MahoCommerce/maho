@@ -276,8 +276,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
 
         $lastQuoteId = $session->getLastQuoteId();
         $lastOrderId = $session->getLastOrderId();
-        $lastRecurringProfiles = $session->getLastRecurringProfileIds();
-        if (!$lastQuoteId || (!$lastOrderId && empty($lastRecurringProfiles))) {
+        if (!$lastQuoteId || !$lastOrderId) {
             $this->_redirect('checkout/cart');
             return;
         }
