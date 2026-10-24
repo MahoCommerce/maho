@@ -45,7 +45,7 @@ class Mage_Payment_Model_Recurring_Profile extends Mage_Core_Model_Abstract
     protected $_errors = [];
 
     /**
-     * @var Mage_Payment_Model_Method_Abstract
+     * @var (Mage_Payment_Model_Method_Abstract&Mage_Payment_Model_Recurring_Profile_MethodInterface)|null
      */
     protected $_methodInstance = null;
 
@@ -516,7 +516,7 @@ class Mage_Payment_Model_Recurring_Profile extends Mage_Core_Model_Abstract
     /**
      * Return payment method instance
      *
-     * @return Mage_Payment_Model_Method_Abstract
+     * @return Mage_Payment_Model_Method_Abstract&Mage_Payment_Model_Recurring_Profile_MethodInterface
      */
     protected function getMethodInstance()
     {

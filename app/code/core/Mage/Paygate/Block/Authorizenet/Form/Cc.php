@@ -21,9 +21,9 @@ class Mage_Paygate_Block_Authorizenet_Form_Cc extends Mage_Payment_Block_Form
     }
 
     /**
-     * Retrieve payment method form html
+     * Retrieve payment method form block
      *
-     * @return string
+     * @return Mage_Payment_Block_Form_Cc
      */
     public function getMethodFormBlock()
     {
@@ -34,7 +34,7 @@ class Mage_Paygate_Block_Authorizenet_Form_Cc extends Mage_Payment_Block_Form
     /**
      * Cards info block
      *
-     * @return string
+     * @return Mage_Paygate_Block_Authorizenet_Info_Cc
      */
     public function getCardsBlock()
     {

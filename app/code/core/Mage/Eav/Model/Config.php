@@ -470,7 +470,7 @@ class Mage_Eav_Model_Config
      */
     public function getAttribute($entityType, $code, $storeId = null)
     {
-        if ($code instanceof Mage_Eav_Model_Entity_Attribute_Interface) {
+        if ($code instanceof Mage_Eav_Model_Entity_Attribute_Abstract) {
             return $code;
         }
 

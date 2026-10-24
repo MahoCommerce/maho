@@ -312,7 +312,7 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
     /**
      * Retrieve address items collection
      *
-     * @return Mage_Eav_Model_Entity_Collection_Abstract
+     * @return Mage_Sales_Model_Resource_Quote_Address_Item_Collection
      */
     public function getItemsCollection()
     {

@@ -22,7 +22,7 @@ class Mage_Sales_Block_Widget_Guest_Form extends Mage_Core_Block_Template implem
     /**
      * Select element for choosing registry type
      *
-     * @return array
+     * @return string
      */
     public function getTypeSelectHtml()
     {

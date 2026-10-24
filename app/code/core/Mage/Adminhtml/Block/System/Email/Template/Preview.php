@@ -39,7 +39,7 @@ class Mage_Adminhtml_Block_System_Email_Template_Preview extends Mage_Adminhtml_
         \Maho\Profiler::start('email_template_proccessing');
         $vars = [];
 
-        $templateProcessed = $template->getProcessedTemplate($vars, true);
+        $templateProcessed = $template->getProcessedTemplate($vars);
 
         if ($template->isPlain()) {
             $templateProcessed = '<pre>' . htmlspecialchars($templateProcessed) . '</pre>';

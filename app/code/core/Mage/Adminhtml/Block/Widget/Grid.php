@@ -1319,7 +1319,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
      *
      * @throws Exception
      */
-    public function getCsv(string $fileName = '', int $limit = 0): string
+    public function getCsv(string $fileName = '', int $limit = 0): string|array
     {
         $csv = '';
         $this->_isExport = true;
@@ -1492,7 +1492,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
      *
      * @throws Exception
      */
-    public function getExcel(string $fileName = '', int $limit = 0): string
+    public function getExcel(string $fileName = '', int $limit = 0): string|array
     {
         $this->_isExport = true;
         $this->_prepareGrid();
