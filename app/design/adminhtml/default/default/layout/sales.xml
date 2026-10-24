@@ -785,87 +785,9 @@ SPDX-License-Identifier: AFL-3.0
         </reference>
     </adminhtml_report_sales_bestsellers>
 
-    <adminhtml_sales_recurring_profile_index>
-        <reference name="content">
-            <block type="sales/adminhtml_recurring_profile" name="sales.recurring.profile.grid.container"/>
-        </reference>
-    </adminhtml_sales_recurring_profile_index>
-
-    <adminhtml_sales_recurring_profile_grid>
-        <remove name="root"/>
-        <block type="sales/adminhtml_recurring_profile_grid" name="sales.recurring.profile.grid" output="toHtml"/>
-    </adminhtml_sales_recurring_profile_grid>
-
-    <adminhtml_sales_recurring_profile_customergrid>
-        <block type="sales/adminhtml_customer_edit_tab_recurring_profile" name="customer.recurring.profile.grid" output="toHtml"></block>
-    </adminhtml_sales_recurring_profile_customergrid>
-
-    <adminhtml_sales_recurring_profile_view>
-        <reference name="content">
-            <block type="sales/adminhtml_recurring_profile_view" name="sales.recurring.profile.view" template="widget/view/container.phtml">
-                <action method="setDestElementId"><value>sales_recurring_profile_view</value></action>
-            </block>
-        </reference>
-        <reference name="left">
-            <block type="adminhtml/widget_tabs" name="sales.recurring.profile.view.tabs">
-                <action method="setDestElementId"><value>sales_recurring_profile_view</value></action>
-                <action method="setTitle" translate="value"><value>Recurring Profile View</value></action>
-                <action method="setId"><value>sales_recurring_profile_view_tabs</value></action>
-                <block type="sales/adminhtml_recurring_profile_view_tab_info" as="info_tab" name="sales.recurring.profile.tab.info" template="sales/recurring/profile/view.phtml">
-                    <block type="sales/recurring_profile_view" name="sales.recurring.profile.view.general" as="general" template="sales/recurring/profile/view/info.phtml">
-                        <action method="prepareReferenceInfo"/>
-                        <action method="addToParentGroup"><value>info_blocks_row_1</value></action>
-                        <action method="setViewColumn"><value>1</value></action>
-                        <action method="setViewLabel" translate="value"><value>Reference</value></action>
-                    </block>
-                    <block type="sales/recurring_profile_view" name="sales.recurring.profile.view.item" as="item" template="sales/recurring/profile/view/info.phtml">
-                        <action method="prepareItemInfo"/>
-                        <action method="addToParentGroup"><value>info_blocks_row_1</value></action>
-                        <action method="setViewColumn"><value>2</value></action>
-                        <action method="setViewLabel" translate="value"><value>Purchased Item</value></action>
-                    </block>
-                    <block type="sales/recurring_profile_view" name="sales.recurring.profile.view.schedule" as="profile" template="sales/recurring/profile/view/info.phtml">
-                        <action method="prepareScheduleInfo"/>
-                        <action method="addToParentGroup"><value>info_blocks_row_2</value></action>
-                        <action method="setViewColumn"><value>1</value></action>
-                        <action method="setViewLabel" translate="value"><value>Profile Schedule</value></action>
-                    </block>
-                    <block type="sales/recurring_profile_view" name="sales.recurring.profile.view.fees" as="fees" template="sales/recurring/profile/view/info.phtml">
-                        <action method="prepareFeesInfo"/>
-                        <action method="addToParentGroup"><value>info_blocks_row_2</value></action>
-                        <action method="setViewColumn"><value>2</value></action>
-                        <action method="setViewLabel" translate="value"><value>Profile Payments</value></action>
-                    </block>
-                    <block type="sales/recurring_profile_view" name="sales.recurring.profile.view.billing" as="billing_address" template="sales/recurring/profile/view/info.phtml">
-                        <action method="prepareAddressInfo"/>
-                        <action method="addToParentGroup"><value>info_blocks_row_3</value></action>
-                        <action method="setViewColumn"><value>1</value></action>
-                        <action method="setViewLabel" translate="value"><value>Billing Address</value></action>
-                    </block>
-                    <block type="sales/recurring_profile_view" name="sales.recurring.profile.view.shipping" as="shipping_address" template="sales/recurring/profile/view/info.phtml">
-                        <action method="setAddressType"><value>shipping</value></action>
-                        <action method="prepareAddressInfo"/>
-                        <action method="addToParentGroup"><value>info_blocks_row_3</value></action>
-                        <action method="setViewColumn"><value>2</value></action>
-                        <action method="setViewLabel" translate="value"><value>Shipping Address</value></action>
-                    </block>
-                </block>
-                <block type="sales/adminhtml_recurring_profile_view_tab_orders" as="orders_tab" name="sales.recurring.profile.tab.orders"/>
-                <action method="addTab"><name>recurring_profile_info</name><block>info_tab</block></action>
-                <action method="addTab"><name>recurring_profile_orders</name><block>orders_tab</block></action>
-            </block>
-        </reference>
-    </adminhtml_sales_recurring_profile_view>
-
-    <adminhtml_sales_recurring_profile_orders>
-        <remove name="root"/>
-        <block type="sales/adminhtml_recurring_profile_view_tab_orders" name="sales.recurring.profile.tab.orders" output="toHtml"/>
-    </adminhtml_sales_recurring_profile_orders>
-
     <adminhtml_customer_edit>
         <reference name="customer_edit_tabs">
             <action method="addTab"><name>customer_edit_tab_agreements</name><block>sales/adminhtml_customer_edit_tab_agreement</block></action>
-            <action method="addTab"><name>customer_edit_tab_recurring_profile</name><block>sales/adminhtml_customer_edit_tab_recurring_profile</block></action>
         </reference>
     </adminhtml_customer_edit>
 

@@ -275,8 +275,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
             ->setName($product->getName())
             ->setWeight($this->getProduct()->getWeight())
             ->setTaxClassId($product->getTaxClassId())
-            ->setBaseCost($product->getCost())
-            ->setIsRecurring((bool) $product->getIsRecurring());
+            ->setBaseCost($product->getCost());
 
         if ($product->getStockItem()) {
             $this->setIsQtyDecimal((bool) $product->getStockItem()->getIsQtyDecimal());
@@ -950,11 +949,6 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
     public function setIsQtyDecimal(?bool $value = true): static
     {
         return $this->setData('is_qty_decimal', $value);
-    }
-
-    public function setIsRecurring(?bool $value = true): static
-    {
-        return $this->setData('is_recurring', $value);
     }
 
     public function getItemId(): ?int

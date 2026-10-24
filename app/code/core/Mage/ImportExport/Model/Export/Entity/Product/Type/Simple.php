@@ -33,8 +33,6 @@ class Mage_ImportExport_Model_Export_Entity_Product_Type_Simple extends Mage_Imp
     #[\Override]
     protected $_disabledAttrs = [
         'old_id',
-        'recurring_profile',
-        'is_recurring',
         'tier_price',
         'group_price',
         'category_ids',

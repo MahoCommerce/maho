@@ -37,50 +37,6 @@ class Mage_Sales_DownloadController extends Mage_Core_Controller_Front_Action
     }
 
     /**
-     * Profile custom options download action
-     */
-    #[Maho\Config\Route('/sales/download/downloadProfileCustomOption', name: 'sales.download.downloadprofilecustomoption', methods: ['GET'])]
-    public function downloadProfileCustomOptionAction(): void
-    {
-        $recurringProfile = Mage::getModel('sales/recurring_profile')->load($this->getRequest()->getParam('id'));
-
-        if (!$recurringProfile->getId()) {
-            $this->_forward('noRoute');
-        }
-
-        $orderItemInfo = $recurringProfile->getData('order_item_info');
-        try {
-            $request = unserialize($orderItemInfo['info_buyRequest'], ['allowed_classes' => false]);
-
-            if ($request['product'] != $orderItemInfo['product_id']) {
-                $this->_forward('noRoute');
-                return;
-            }
-
-            $optionId = $this->getRequest()->getParam('option_id');
-            if (!isset($request['options'][$optionId])) {
-                $this->_forward('noRoute');
-                return;
-            }
-            // Check if the product exists
-            $product = Mage::getModel('catalog/product')->load($request['product']);
-            if (!$product || !$product->getId()) {
-                $this->_forward('noRoute');
-                return;
-            }
-            // Try to load the option
-            $option = $product->getOptionById($optionId);
-            if (!$option || !$option->getId() || $option->getType() != 'file') {
-                $this->_forward('noRoute');
-                return;
-            }
-            $this->_downloadFileAction($request['options'][$this->getRequest()->getParam('option_id')]);
-        } catch (Exception) {
-            $this->_forward('noRoute');
-        }
-    }
-
-    /**
      * Custom options download action
      */
     #[Maho\Config\Route('/sales/download/downloadCustomOption', name: 'sales.download.downloadcustomoption', methods: ['GET'])]

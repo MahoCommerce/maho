@@ -43,54 +43,6 @@ class Mage_Payment_Model_Observer
     }
 
     /**
-     * Collect buy request and set it as custom option
-     *
-     * Also sets the collected information and schedule as informational static options
-     *
-     * @param \Maho\Event\Observer $observer
-     */
-    #[Maho\Config\Observer('catalog_product_type_prepare_full_options', area: 'frontend')]
-    public function prepareProductRecurringProfileOptions($observer)
-    {
-        /** @var Mage_Catalog_Model_Product $product */
-        $product = $observer->getEvent()->getProduct();
-        $buyRequest = $observer->getEvent()->getBuyRequest();
-
-        if (!$product->isRecurring()) {
-            return;
-        }
-
-        $profile = Mage::getModel('payment/recurring_profile')
-            ->setLocale(Mage::app()->getLocale())
-            ->setStore(Mage::app()->getStore())
-            ->importBuyRequest($buyRequest)
-            ->importProduct($product);
-        if (!$profile) {
-            return;
-        }
-
-        // add the start datetime as product custom option
-        $product->addCustomOption(
-            Mage_Payment_Model_Recurring_Profile::PRODUCT_OPTIONS_KEY,
-            Mage::helper('core')->jsonEncode(['start_datetime' => $profile->getStartDatetime()]),
-        );
-
-        // duplicate as 'additional_options' to render with the product statically
-        $infoOptions = [[
-            'label' => $profile->getFieldLabel('start_datetime'),
-            'value' => $profile->exportStartDatetime(true),
-        ]];
-
-        foreach ($profile->exportScheduleInfo() as $info) {
-            $infoOptions[] = [
-                'label' => $info->getTitle(),
-                'value' => $info->getSchedule(),
-            ];
-        }
-        $product->addCustomOption('additional_options', Mage::helper('core')->jsonEncode($infoOptions));
-    }
-
-    /**
      * Sets current instructions for bank transfer account
      */
     #[Maho\Config\Observer('sales_order_payment_save_before')]

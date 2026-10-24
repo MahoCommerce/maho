@@ -111,9 +111,7 @@ class Mage_Checkout_Model_Cart_Payment_Api extends Mage_Checkout_Model_Api_Resou
         foreach ($methods as $method) {
             /** @var Mage_Payment_Model_Method_Abstract $method */
             if ($this->_canUsePaymentMethod($method, $quote)) {
-                $isRecurring = $quote->hasRecurringItems() && $method->canManageRecurringProfiles();
-
-                if ($total != 0 || $method->getCode() == 'free' || $isRecurring) {
+                if ($total != 0 || $method->getCode() == 'free') {
                     $methodsResult[] = [
                         'code' => $method->getCode(),
                         'title' => $method->getTitle(),
@@ -171,9 +169,7 @@ class Mage_Checkout_Model_Cart_Payment_Api extends Mage_Checkout_Model_Api_Resou
             if ($method->getCode() == $paymentData['method']) {
                 /** @var Mage_Payment_Model_Method_Abstract $method */
                 if (!($this->_canUsePaymentMethod($method, $quote)
-                    && ($total != 0
-                        || $method->getCode() == 'free'
-                        || ($quote->hasRecurringItems() && $method->canManageRecurringProfiles())))
+                    && ($total != 0 || $method->getCode() == 'free'))
                 ) {
                     $this->_fault('method_not_allowed');
                 }
