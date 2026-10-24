@@ -1154,9 +1154,8 @@ ul.tabs span.changed,ul.tabs span.error,ul.tabs-horiz span.changed,ul.tabs-horiz
 }
 
 ul.tabs a.changed span.changed,ul.tabs-horiz a.changed span.changed {
-    width: 12px;
-    height: 12px;
-    display: block;
+    display: flex;
+    flex: none;
     color: var(--maho-success) !important;
 }
 
@@ -1165,14 +1164,14 @@ ul.tabs-horiz a.active.changed span.changed {
 }
 
 ul.tabs a.error span.error,ul.tabs-horiz a.error span.error {
-    width: 12px;
-    height: 12px;
-    display: block;
+    display: flex;
+    flex: none;
     color: var(--maho-error-strong)
 }
 
-ul.tabs a.changed span.changed svg,ul.tabs a.error span.error svg {
-    width: 20px
+ul.tabs span.changed svg,ul.tabs span.error svg,ul.tabs-horiz span.changed svg,ul.tabs-horiz span.error svg {
+    width: 20px;
+    height: 20px
 }
 
 ul.tabs a.changed {
