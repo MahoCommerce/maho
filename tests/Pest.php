@@ -501,7 +501,7 @@ function adminLoginAndVisit(string $username, string $password, string $path, st
     $page = visit(MahoServer::baseUrl() . '/admin')
         ->fill('#username', $username)
         ->fill('#login', $password)
-        ->click('#step1 input[type="submit"]');
+        ->click('#step1 [type="submit"]');
 
     waitForPageLoad($page, '.nav-bar:visible');
     $page->navigate(MahoServer::baseUrl() . adminPathWithSecretKey($page, $path));

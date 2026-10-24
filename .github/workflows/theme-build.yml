@@ -32,15 +32,17 @@ jobs:
           npm ci
 
       - name: Rebuild the theme CSS
-        run: ./maho dev:frontend:theme:build
+        run: |
+          ./maho dev:frontend:theme:build
+          ./maho dev:admin:theme:build
 
       - name: Verify the compiled CSS is up to date
         run: |
           # The build overwrites the committed css/*.css bundles. If anything
           # changed, the theme source (src/*.css) was edited without recompiling.
-          if ! git diff --exit-code -- public/skin/frontend; then
+          if ! git diff --exit-code -- public/skin/frontend public/skin/adminhtml; then
             echo ""
-            echo "::error::Compiled theme CSS is out of date. You changed a theme source file (public/skin/frontend/*/*/src/*.css) but did not recompile. Run './maho dev:frontend:theme:build' and commit the updated css/*.css bundles."
+            echo "::error::Compiled theme CSS is out of date. You changed a theme source file (public/skin/*/*/*/src/*.css) but did not recompile. Run './maho dev:frontend:theme:build' or './maho dev:admin:theme:build' and commit the updated css/*.css bundles."
             exit 1
           fi
           echo "Compiled theme CSS is up to date."

@@ -1,0 +1,30 @@
+/*!
+ * Maho admin theme - Tailwind CSS 4 + DaisyUI 5 build entry.
+ *
+ * Compile with: ./maho dev:admin:theme:build
+ * Output: ../css/styles.css (committed to the repo, so nobody needs Node.js).
+ *
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ */
+
+/* Every rule is layered, so the unlayered legacy stylesheets (base.css, form.css,
+   menu.css) win wherever both style the same element. Preflight stays out until
+   the legacy reset in base.css is gone. */
+@import "./_theme.css";
+@import "./_base.css";
+@import "./_components.css";
+
+/* Six levels up is the project root in both layouts, since the composer plugin
+   copies public/ there. app/code is not scanned: PHP blocks write semantic
+   classes only, and PHP method names would become class candidates. */
+@source "../../../../../../app/design/adminhtml/**/*.{phtml,xml}";
+@source "../../../../../../vendor/*/*/app/design/adminhtml/**/*.{phtml,xml}";
+@source "../../../../../../vendor/mahocommerce/maho-modman-symlinks/*/*/app/design/adminhtml/**/*.{phtml,xml}";
+@source "../../../../../../public/js/mage/adminhtml/**/*.js";
+@source "../../../../../../public/js/maho-*.js";
+
+/* Admin classes that share a name with a Tailwind utility but mean something else:
+   a data grid (.grid), grid table borders (table.border), the grid filter row
+   (tr.filter), the scheme selector icons (.scheme-dark) and others. */
+@source not inline("grid border filter hidden inline table collapse scheme-dark scheme-light");
