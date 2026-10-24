@@ -447,21 +447,6 @@ export const MahoBentoGrid = Node.create({
 
                 return true;
             },
-
-            deleteBentoGrid: () => ({ editor, state, tr, dispatch }) => {
-                const bentoNode = findParentNodeOfType(state.schema.nodes.mahoBentoGrid)(state.selection);
-
-                if (!bentoNode) {
-                    return false;
-                }
-
-                if (dispatch) {
-                    tr.delete(bentoNode.pos, bentoNode.pos + bentoNode.node.nodeSize);
-                    dispatch(tr);
-                }
-
-                return true;
-            },
         };
     },
 });

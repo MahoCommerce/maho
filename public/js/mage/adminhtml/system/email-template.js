@@ -77,6 +77,7 @@ class EmailTemplateEditForm {
         // Store current value for returning to HTML version, then strip tags
         this.unconvertedText = this.elements.templateText.value;
         this.elements.templateText.value = stripTags(this.elements.templateText.value, true);
+        this.getEditorInstance()?.syncPlainToWysiwyg();
 
         return false;
     }

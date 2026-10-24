@@ -334,21 +334,6 @@ export const MahoColumns = Node.create({
 
                 return true;
             },
-
-            deleteColumns: () => ({ editor, state, tr, dispatch }) => {
-                const columnsNode = findParentNodeOfType(state.schema.nodes.mahoColumns)(state.selection);
-
-                if (!columnsNode) {
-                    return false;
-                }
-
-                if (dispatch) {
-                    tr.delete(columnsNode.pos, columnsNode.pos + columnsNode.node.nodeSize);
-                    dispatch(tr);
-                }
-
-                return true;
-            },
         };
     },
 });

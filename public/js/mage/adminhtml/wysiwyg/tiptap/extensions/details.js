@@ -274,21 +274,6 @@ export const MahoAccordion = Node.create({
 
                 return true;
             },
-
-            deleteAccordion: () => ({ editor, state, tr, dispatch }) => {
-                const accordion = findAccordion(editor, state);
-                if (!accordion) {
-                    return false;
-                }
-
-                if (dispatch) {
-                    editor.storage[this.name].activePos = null;
-                    tr.delete(accordion.pos, accordion.pos + accordion.node.nodeSize);
-                    dispatch(tr);
-                }
-
-                return true;
-            },
         };
     },
 });

@@ -239,6 +239,7 @@ class tiptapWysiwygSetup {
         this.editor.commands.setContent(this.convertFromPlain(this.textarea.value));
         this.invalidContent = this.findDroppedContent(this.textarea.value);
         this.plainValue = this.convertToPlain(this.editor.getHTML());
+        this.codeEditor?.load();
     }
 
     /**
