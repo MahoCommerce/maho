@@ -454,16 +454,10 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
     /**
      * Retrieve grid as CSV
      *
-     *  the original way (still working): $this->_prepareDownloadResponse($fileName, $grid->getCsv());
-     *      or (with right content type): $this->_prepareDownloadResponse($fileName, $grid->getCsv(), 'text/csv');
-     *                       the new way: $this->_prepareDownloadResponse(...$grid->getCsv($fileName, -1));
-     *
-     * @param string $fileName
-     * @param int $limit
      * @throws Exception
      */
     #[\Override]
-    public function getCsv($fileName = '', $limit = 0): string|array
+    public function getCsv(string $fileName = '', int $limit = 0): string
     {
         $csv = '';
         $count = 0;
@@ -521,20 +515,16 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
             $csv .= implode(',', $data) . "\n";
         }
 
-        return (!empty($fileName) && ($limit != 0)) ? [str_replace('.csv', '-' . $count . '-' . Mage::app()->getLocale()->utcToStore()->format('Ymd-His') . '.csv', $fileName), $csv, 'text/csv'] : $csv;
+        return $csv;
     }
 
     /**
      * Retrieve grid as Excel Xml
      *
-     *  the original way (still working): $this->_prepareDownloadResponse($fileName, $grid->getExcel($fileName));
-     *      or (with right content type): $this->_prepareDownloadResponse($fileName, $grid->getExcel($fileName), 'application/vnd.ms-excel');
-     *                       the new way: $this->_prepareDownloadResponse(...$grid->getExcel($fileName, -1));
-     *
      * @throws Exception
      */
     #[\Override]
-    public function getExcel(string $fileName = '', int $limit = 0): string|array
+    public function getExcel(string $fileName = '', int $limit = 0): string
     {
         $this->_prepareGrid();
 
@@ -591,7 +581,7 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
         $xmlObj->setData($data);
         $xmlObj->unparse();
 
-        return (!empty($fileName) && ($limit != 0)) ? [str_replace('.xml', '-' . $count . '-' . Mage::app()->getLocale()->utcToStore()->format('Ymd-His') . '.xml', $fileName), $xmlObj->getData(), 'application/vnd.ms-excel'] : $xmlObj->getData();
+        return $xmlObj->getData();
     }
 
     /**
