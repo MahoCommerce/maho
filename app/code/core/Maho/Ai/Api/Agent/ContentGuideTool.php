@@ -49,11 +49,11 @@ final class ContentGuideTool
 
     public function tool(): Tool
     {
-        return ToolDefinition::create(
+        return new Tool(
             new ExecutionReference(self::class, 'read'),
             self::NAME,
             'The HTML the content editor of this admin writes for its layouts: columns, bento grids, accordion, tabs, slideshow, table, images, widgets and variables. Read it before you write page, block or template content that has a layout or an image, and use the same HTML so the administrator can keep editing the layout in the editor.',
-            ['type' => 'object', 'properties' => new \stdClass(), 'additionalProperties' => false],
+            null,
             ['title' => self::TITLE, 'read_only' => true, 'destructive' => false, 'local' => true],
         );
     }

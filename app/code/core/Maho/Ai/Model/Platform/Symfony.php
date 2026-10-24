@@ -11,6 +11,7 @@ declare(strict_types=1);
 use Symfony\AI\Platform\Message\Message;
 use Symfony\AI\Platform\Message\MessageBag;
 use Symfony\AI\Platform\PlatformInterface;
+use Symfony\AI\Platform\PlatformOptions;
 use Symfony\AI\Platform\Result\DeferredResult;
 use Symfony\AI\Platform\TokenUsage\TokenUsage;
 
@@ -267,8 +268,8 @@ class Maho_Ai_Model_Platform_Symfony implements
     }
 
     /**
-     * Give each request to Anthropic max_tokens 32000 when the request has no max_tokens. The Anthropic API
-     * requires the field, and the bridge sends 1000. 32000 is the output maximum of the Claude model with the
+     * Give each request to Anthropic an output limit of 32000 tokens when the request has no limit. The Anthropic
+     * API requires the field, and the bridge sends 1000. 32000 is the output maximum of the Claude model with the
      * smallest one (Opus 4 and 4.1).
      */
     public static function anthropicEventDispatcher(): \Symfony\Component\EventDispatcher\EventDispatcher
@@ -276,7 +277,8 @@ class Maho_Ai_Model_Platform_Symfony implements
         $dispatcher = new \Symfony\Component\EventDispatcher\EventDispatcher();
         $dispatcher->addListener(
             \Symfony\AI\Platform\Event\InvocationEvent::class,
-            static fn(\Symfony\AI\Platform\Event\InvocationEvent $event) => $event->setOptions($event->getOptions() + ['max_tokens' => 32000]),
+            // In the bridge, a max_tokens wins over the canonical limit that mapChatOptions() sends.
+            static fn(\Symfony\AI\Platform\Event\InvocationEvent $event) => $event->setOptions($event->getOptions() + [PlatformOptions::MAX_OUTPUT_TOKENS => 32000]),
         );
         return $dispatcher;
     }
@@ -470,13 +472,7 @@ class Maho_Ai_Model_Platform_Symfony implements
             $out['temperature'] = $options['temperature'];
         }
         if (isset($options['max_tokens'])) {
-            // Every Symfony AI bridge except OpenAI Responses accepts
-            // max_tokens; Anthropic's strict-validation bridge rejects
-            // unknown keys, so max_output_tokens must only go to OpenAI.
-            $out['max_tokens'] = $options['max_tokens'];
-            if ($this->platformCode === Maho_Ai_Model_Platform::OPENAI) {
-                $out['max_output_tokens'] = $options['max_tokens'];
-            }
+            $out[PlatformOptions::MAX_OUTPUT_TOKENS] = $options['max_tokens'];
         }
         return $out;
     }

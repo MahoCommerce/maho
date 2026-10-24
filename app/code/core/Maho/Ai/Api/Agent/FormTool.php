@@ -51,7 +51,7 @@ final class FormTool
 
     public function readTool(): Tool
     {
-        return ToolDefinition::create(
+        return new Tool(
             new ExecutionReference(self::class, 'read'),
             self::READ_NAME,
             'Read the text fields of the form that the administrator has open, with the changes that are not saved. A get tool gives the saved record, which can be older. Use it before you check or correct the text of this form.',
@@ -64,6 +64,7 @@ final class FormTool
                         'items' => ['type' => 'string'],
                     ],
                 ],
+                'required' => [],
                 'additionalProperties' => false,
             ],
             ['title' => self::title(self::READ_NAME), 'read_only' => true, 'destructive' => false, 'local' => true],
@@ -72,7 +73,7 @@ final class FormTool
 
     public function editTool(): Tool
     {
-        return ToolDefinition::create(
+        return new Tool(
             new ExecutionReference(self::class, 'edit'),
             self::EDIT_NAME,
             'Correct text in the form that the administrator has open, after you answer. Each edit replaces one short piece of the current value of a field, as admin_read_form gives it, HTML included. The find text must occur exactly once in the field: add the words around it when it does not. The panel makes the corrections and does not save: the administrator checks the form and saves it.',

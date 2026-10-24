@@ -77,11 +77,11 @@
         "league/html-to-markdown": "^5.1",
         "mahocommerce/directory-data": "^1.0",
         "league/flysystem": "^3.36",
-        "symfony/ai-agent": "^0.14",
-        "symfony/ai-platform": "^0.14",
-        "symfony/mcp-bundle": "^0.14",
+        "symfony/ai-agent": "^0.15",
+        "symfony/ai-platform": "^0.15",
+        "symfony/mcp-bundle": "^0.15",
         "nyholm/psr7": "^1.8",
-        "symfony/ai-generic-platform": "^0.14"
+        "symfony/ai-generic-platform": "^0.15"
     },
     "replace": {
         "magento-hackathon/magento-composer-installer": "^99.99",

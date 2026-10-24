@@ -59,7 +59,7 @@ final class AdminPageTool
      */
     public function actionTool(): Tool
     {
-        return ToolDefinition::create(
+        return new Tool(
             new ExecutionReference(self::class, 'act'),
             self::ACTION_NAME,
             'Act on the admin page the administrator has open, after you answer: open a tab by its name, set a form field by its label or name, click a button by its label (for example "Save Page" when the administrator says "save"), or open a grid row by its number in the row list (target "3" for "the third one"). Use the buttons, tabs, fields and rows listed under what the administrator sees; never guess a label. Up to ' . self::MAX_STEPS . ' steps in order, in one call, and a click or an open_row must be the last step because the page may reload. The next message shows you the result.',
@@ -138,7 +138,7 @@ final class AdminPageTool
             $lines[] = sprintf('%s = %s', $path, $page['title']);
         }
 
-        return ToolDefinition::create(
+        return new Tool(
             new ExecutionReference(self::class, 'open'),
             self::NAME,
             'Open an admin page in the administrator\'s browser after you answer. Use it when the administrator asks to go somewhere, or wants to edit a record by hand. Pages (menu path = title): ' . implode('; ', $lines) . '.',
@@ -173,7 +173,7 @@ final class AdminPageTool
      */
     public function fillTool(): Tool
     {
-        return ToolDefinition::create(
+        return new Tool(
             new ExecutionReference(self::class, 'fill'),
             self::FILL_NAME,
             'Open an admin edit form in the administrator\'s browser with values filled in, so the administrator reviews and saves it. Prefer it over an update tool for a long text such as page content, a description or an email template, and for a record the administrator wants to adjust by hand. Use the same menu paths as admin_open_page. Without record_id it opens the form for a new record. The fields are the API field names of the resource.',
