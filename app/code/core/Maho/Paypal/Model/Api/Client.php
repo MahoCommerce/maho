@@ -15,9 +15,17 @@ use PaypalServerSdkLib\Environment;
 use PaypalServerSdkLib\Logging\LoggingConfigurationBuilder;
 use PaypalServerSdkLib\Logging\RequestLoggingConfigurationBuilder;
 use PaypalServerSdkLib\Logging\ResponseLoggingConfigurationBuilder;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
+use Symfony\Contracts\HttpClient\ResponseInterface;
 
 class Maho_Paypal_Model_Api_Client
 {
+    /** Seconds before a token request gives up. The token endpoint answers in less than one second. */
+    public const TOKEN_REQUEST_TIMEOUT = 8;
+
+    /** Seconds that a cached client token must still be valid when checkout receives it. */
+    public const CLIENT_TOKEN_MIN_LIFETIME = 600;
+
     protected ?PaypalServerSdkClient $_client = null;
     protected ?Maho_Paypal_Model_Config $_config = null;
     protected ?int $_storeId = null;
@@ -210,25 +218,22 @@ class Maho_Paypal_Model_Api_Client
 
     public function generateClientToken(): string
     {
-        $client = $this->_createHttpClient();
-
-        $response = $client->request('POST', $this->_getApiUrl('/v1/oauth2/token'), [
-            'auth_basic' => [$this->_getClientId(), $this->_getClientSecret()],
-            'body' => 'grant_type=client_credentials&response_type=client_token&intent=sdk_init',
-            'headers' => ['Content-Type' => 'application/x-www-form-urlencoded'],
-        ]);
-
-        $statusCode = $response->getStatusCode();
-        if ($statusCode !== 200) {
-            $body = $response->getContent(false);
-            throw new \RuntimeException("PayPal API returned HTTP {$statusCode}: {$body}");
+        $cacheId = 'PAYPAL_CLIENT_TOKEN_' . hash('sha256', (int) $this->_isSandbox() . '|' . $this->_getClientId());
+        $cached = Mage::app()->loadCache($cacheId);
+        if (is_string($cached) && $cached !== '') {
+            return $cached;
         }
 
-        $result = Mage::helper('core')->jsonDecode($response->getContent());
+        $result = $this->_requestToken('grant_type=client_credentials&response_type=client_token&intent=sdk_init');
         $clientToken = $result['access_token'] ?? '';
 
         if ($clientToken === '') {
             throw new \RuntimeException('Failed to generate PayPal client token');
+        }
+
+        $lifetime = (int) ($result['expires_in'] ?? 0) - self::CLIENT_TOKEN_MIN_LIFETIME;
+        if ($lifetime > 0) {
+            Mage::app()->saveCache($clientToken, $cacheId, [Mage_Core_Model_Config::CACHE_TAG], $lifetime);
         }
 
         return $clientToken;
@@ -327,20 +332,7 @@ class Maho_Paypal_Model_Api_Client
      */
     public function testConnection(): bool
     {
-        $client = $this->_createHttpClient();
-
-        $response = $client->request('POST', $this->_getApiUrl('/v1/oauth2/token'), [
-            'auth_basic' => [$this->_getClientId(), $this->_getClientSecret()],
-            'body' => 'grant_type=client_credentials',
-            'headers' => ['Content-Type' => 'application/x-www-form-urlencoded'],
-        ]);
-
-        $statusCode = $response->getStatusCode();
-        if ($statusCode !== 200) {
-            $body = $response->getContent(false);
-            throw new \RuntimeException("PayPal API returned HTTP {$statusCode}: {$body}");
-        }
-
+        $this->_requestToken('grant_type=client_credentials');
         return true;
     }
 
@@ -400,21 +392,7 @@ class Maho_Paypal_Model_Api_Client
             ];
         }
 
-        $client = $this->_createHttpClient();
-
-        $response = $client->request('POST', $this->_getApiUrl('/v1/oauth2/token'), [
-            'auth_basic' => [$this->_getClientId(), $this->_getClientSecret()],
-            'body' => 'grant_type=client_credentials',
-            'headers' => ['Content-Type' => 'application/x-www-form-urlencoded'],
-        ]);
-
-        $statusCode = $response->getStatusCode();
-        if ($statusCode !== 200) {
-            $body = $response->getContent(false);
-            throw new \RuntimeException("PayPal OAuth token request failed with HTTP {$statusCode}: {$body}");
-        }
-
-        $token = Mage::helper('core')->jsonDecode($response->getContent());
+        $token = $this->_requestToken('grant_type=client_credentials');
         $accessToken = $token['access_token'] ?? '';
 
         if ($accessToken === '') {
@@ -427,6 +405,44 @@ class Maho_Paypal_Model_Api_Client
             'Authorization' => 'Bearer ' . $this->_cachedAccessToken,
             'Content-Type' => 'application/json',
         ];
+    }
+
+    /**
+     * Request an OAuth token from PayPal. Send the request again once if it does not reach PayPal.
+     *
+     * @return array<string, mixed>
+     */
+    protected function _requestToken(string $body): array
+    {
+        try {
+            $response = $this->_sendTokenRequest($body);
+        } catch (TransportExceptionInterface) {
+            $response = $this->_sendTokenRequest($body);
+        }
+
+        $statusCode = $response->getStatusCode();
+        if ($statusCode !== 200) {
+            $content = $response->getContent(false);
+            throw new \RuntimeException("PayPal OAuth token request failed with HTTP {$statusCode}: {$content}");
+        }
+
+        return Mage::helper('core')->jsonDecode($response->getContent());
+    }
+
+    /**
+     * @throws TransportExceptionInterface When the request does not reach PayPal
+     */
+    protected function _sendTokenRequest(string $body): ResponseInterface
+    {
+        $response = $this->_createHttpClient()->request('POST', $this->_getApiUrl('/v1/oauth2/token'), [
+            'auth_basic' => [$this->_getClientId(), $this->_getClientSecret()],
+            'body' => $body,
+            'headers' => ['Content-Type' => 'application/x-www-form-urlencoded'],
+            'max_duration' => self::TOKEN_REQUEST_TIMEOUT,
+        ]);
+        // The response is lazy: read the status here, so that a transport error throws inside the retry
+        $response->getStatusCode();
+        return $response;
     }
 
     protected function _createHttpClient(): \Symfony\Contracts\HttpClient\HttpClientInterface
