@@ -17,163 +17,155 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#121212">
     <title><?= Mage::helper('adminhtml')->__('Log into Maho Admin Page') ?></title>
-    <link type="text/css" rel="stylesheet" href="<?= $this->getSkinUrl('login.css') ?>" media="all">
+    <link type="text/css" rel="stylesheet" href="<?= $this->getSkinUrl('css/login.css') ?>" media="all">
     <?= Mage::helper('page')->getFaviconHtml() ?>
     <script src="<?= $this->getJsUrl('validation.js') ?>"></script>
     <script src="<?= $this->getJsUrl('maho-passkey-tools.js') ?>"></script>
 </head>
-<body id="page-login">
-    <div class="login-container">
-        <div class="login-box">
-            <form method="post" action="<?= $this->getUrl('adminhtml') ?>" id="loginForm">
-                <div class="login-form">
-                    <input name="form_key" type="hidden" value="<?= $this->getFormKey() ?>">
-                    <h2><?= Mage::helper('adminhtml')->__('Log in to Admin Panel') ?></h2>
-                    <div id="messages">
-                        <?= $this->getMessagesBlock()->toHtml() ?>
+<body id="page-login" class="login-page">
+    <main class="login-box">
+        <div class="login-card">
+            <form method="post" action="<?= $this->getUrl('adminhtml') ?>" id="loginForm" class="login-form d-card-body">
+                <input name="form_key" type="hidden" value="<?= $this->getFormKey() ?>">
+                <img src="<?= $this->getSkinUrl('images/logo.svg') ?>" alt="Maho" width="170" height="46" class="login-logo">
+                <h1 class="login-title"><?= Mage::helper('adminhtml')->__('Log in to Admin Panel') ?></h1>
+                <div id="messages"><?= $this->getMessagesBlock()->toHtml() ?></div>
+                <div id="step1" class="login-actions gap-5">
+                    <div class="login-field">
+                        <label for="username"><?= Mage::helper('adminhtml')->__('User Name:') ?></label>
+                        <input type="text" id="username" name="login[username]" value="" class="required-entry d-input w-full" autofocus="autofocus" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="next">
                     </div>
-                    <div id="step1">
-                        <div class="input-box input-left">
-                            <label for="username"><?= Mage::helper('adminhtml')->__('User Name:') ?></label><br>
-                            <input type="text" id="username" name="login[username]" value="" class="required-entry input-text" autofocus="autofocus" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="next">
-                        </div>
-                        <div class="input-box input-right">
-                            <label for="login"><?= Mage::helper('adminhtml')->__('Password:') ?></label><br>
-                            <input type="password" id="login" name="login[password]" value="" class="required-entry input-text" autocomplete="current-password" enterkeyhint="go">
-                        </div>
-                        <?= $this->getChildHtml('form.additional.info') ?>
-                        <div class="clear"></div>
-                        <div class="form-buttons">
-                            <a href="<?= Mage::helper('adminhtml')->getUrl('adminhtml/index/forgotpassword', ['_nosecret' => true]) ?>"><?= Mage::helper('adminhtml')->__('Forgot your password?') ?></a>
-                            <input type="submit" class="form-button" value="<?= $this->quoteEscape(Mage::helper('adminhtml')->__('Login')) ?>" title="<?= $this->quoteEscape(Mage::helper('adminhtml')->__('Login')) ?>">
-
-                            <button type="button" id="passkey-login-button" class="form-button">
-                                <?= $this->__('Login with Passkey') ?>
-                            </button>
-                        </div>
+                    <div class="login-field">
+                        <label for="login"><?= Mage::helper('adminhtml')->__('Password:') ?></label>
+                        <input type="password" id="login" name="login[password]" value="" class="required-entry d-input w-full" autocomplete="current-password" enterkeyhint="go">
                     </div>
-                    <div id="step2" class="no-display">
-                        <div class="input-box input-left">
-                            <label for="twofa_verification_code"><?= Mage::helper('adminhtml')->__('2FA verification code:') ?></label><br>
-                            <input type="text" id="twofa_verification_code" name="login[twofa_verification_code]" value="" class="required-entry input-text validate-number" autocomplete="one-time-code" inputmode="numeric" enterkeyhint="go" disabled>
-                        </div>
-                        <div class="clear"></div>
-                        <div class="form-buttons">
-                            <a id="back-button" href="#"><?= Mage::helper('adminhtml')->__('Back') ?></a>
-                            <input type="submit" class="form-button" value="<?= $this->quoteEscape(Mage::helper('adminhtml')->__('Login')) ?>" title="<?= $this->quoteEscape(Mage::helper('adminhtml')->__('Login')) ?>">
-                        </div>
+                    <?= $this->getChildHtml('form.additional.info') ?>
+                    <div class="login-actions">
+                        <button type="submit" class="d-btn d-btn-accent d-btn-block"><?= Mage::helper('adminhtml')->__('Login') ?></button>
+                        <button type="button" id="passkey-login-button" class="d-btn d-btn-block">
+                            <?= $this->getIconSvg('fingerprint') ?>
+                            <?= $this->__('Login with Passkey') ?>
+                        </button>
                     </div>
+                    <a class="login-link" href="<?= Mage::helper('adminhtml')->getUrl('adminhtml/index/forgotpassword', ['_nosecret' => true]) ?>"><?= Mage::helper('adminhtml')->__('Forgot your password?') ?></a>
                 </div>
-                <p class="legal">Powered by Maho</p>
+                <div id="step2" class="login-actions gap-5 no-display">
+                    <div class="login-field">
+                        <label for="twofa_verification_code"><?= Mage::helper('adminhtml')->__('2FA verification code:') ?></label>
+                        <input type="text" id="twofa_verification_code" name="login[twofa_verification_code]" value="" class="required-entry validate-number d-input w-full" autocomplete="one-time-code" inputmode="numeric" enterkeyhint="go" disabled>
+                    </div>
+                    <button type="submit" class="d-btn d-btn-accent d-btn-block"><?= Mage::helper('adminhtml')->__('Login') ?></button>
+                    <a id="back-button" class="login-link" href="#">&laquo; <?= Mage::helper('adminhtml')->__('Back') ?></a>
+                </div>
             </form>
-            <div class="bottom"></div>
-            <script type="module">
-                history.replaceState(null, null, window.location.href);
-                const formEl = document.getElementById('loginForm');
-                const validator = new Validation(formEl);
-                const messagesEl = document.getElementById('messages');
+        </div>
+        <p class="login-legal">Powered by Maho</p>
+        <script type="module">
+            history.replaceState(null, null, window.location.href);
+            const formEl = document.getElementById('loginForm');
+            const validator = new Validation(formEl);
+            const messagesEl = document.getElementById('messages');
 
-                formEl.addEventListener('submit', (event) => {
-                    event.preventDefault();
-                    messagesEl.textContent = '';
-                    if (!validator.validate()) {
-                        return;
-                    }
-                    if (document.getElementById('step1').classList.contains('no-display')) {
-                        formEl.submit();
-                    } else {
-                        gotoStep(2);
-                    }
-                });
-
-                document.getElementById('back-button').addEventListener('click', (event) => {
-                    event.preventDefault();
-                    messagesEl.textContent = '';
-                    gotoStep(1);
-                });
-
-                document.getElementById('passkey-login-button').addEventListener('click', (event) => {
-                    validator.reset();
-                    messagesEl.textContent = '';
-                    if (!Validation.validate(document.getElementById('username'))) {
-                        return;
-                    }
-                    startPasskeyAuthentication();
-                });
-
-                async function mahoFetch(url, options) {
-                    const ajaxUrl = new URL(url);
-                    ajaxUrl.searchParams.set('isAjax', true);
-
-                    const response = await fetch(ajaxUrl, options);
-                    const result = await response.json();
-
-                    if (result.redirect) {
-                        window.location = result.redirect;
-                        await new Promise((resolve) => {});
-                    } else if (result.error) {
-                        throw new Error(result.message);
-                    }
-                    if (!response.ok) {
-                        throw new Error(
-                            "<?= Mage::helper('adminhtml')->__('Network Error. Please refresh the page.') ?>"
-                        );
-                    }
-                    return result;
+            formEl.addEventListener('submit', (event) => {
+                event.preventDefault();
+                messagesEl.textContent = '';
+                if (!validator.validate()) {
+                    return;
                 }
-
-                async function gotoStep(step) {
-                    if (step === 1) {
-                        document.getElementById('step1').classList.remove('no-display');
-                        document.getElementById('step2').classList.add('no-display');
-                        document.getElementById('twofa_verification_code').value = '';
-                        document.getElementById('twofa_verification_code').disabled = true;
-                    } else if (step === 2) {
-                        try {
-                            const result = await mahoFetch("<?= $this->getUrl('adminhtml/index/prelogin') ?>", {
-                                method: 'POST',
-                                body: new FormData(formEl),
-                            });
-
-                            if (result.require_twofa) {
-                                document.getElementById('step1').classList.add('no-display');
-                                document.getElementById('step2').classList.remove('no-display');
-                                document.getElementById('twofa_verification_code').disabled = false;
-                                document.getElementById('twofa_verification_code').focus();
-                            } else {
-                                formEl.submit();
-                            }
-                        } catch (error) {
-                            messagesEl.textContent = error.message;
-                        }
-                    }
+                if (document.getElementById('step1').classList.contains('no-display')) {
+                    formEl.submit();
+                } else {
+                    gotoStep(2);
                 }
+            });
 
-                async function startPasskeyAuthentication() {
+            document.getElementById('back-button').addEventListener('click', (event) => {
+                event.preventDefault();
+                messagesEl.textContent = '';
+                gotoStep(1);
+            });
+
+            document.getElementById('passkey-login-button').addEventListener('click', (event) => {
+                validator.reset();
+                messagesEl.textContent = '';
+                if (!Validation.validate(document.getElementById('username'))) {
+                    return;
+                }
+                startPasskeyAuthentication();
+            });
+
+            async function mahoFetch(url, options) {
+                const ajaxUrl = new URL(url);
+                ajaxUrl.searchParams.set('isAjax', true);
+
+                const response = await fetch(ajaxUrl, options);
+                const result = await response.json();
+
+                if (result.redirect) {
+                    window.location = result.redirect;
+                    await new Promise((resolve) => {});
+                } else if (result.error) {
+                    throw new Error(result.message);
+                }
+                if (!response.ok) {
+                    throw new Error(
+                        "<?= Mage::helper('adminhtml')->__('Network Error. Please refresh the page.') ?>"
+                    );
+                }
+                return result;
+            }
+
+            async function gotoStep(step) {
+                if (step === 1) {
+                    document.getElementById('step1').classList.remove('no-display');
+                    document.getElementById('step2').classList.add('no-display');
+                    document.getElementById('twofa_verification_code').value = '';
+                    document.getElementById('twofa_verification_code').disabled = true;
+                } else if (step === 2) {
                     try {
-                        const result = await mahoFetch("<?= $this->getUrl('adminhtml/index/passkeyloginstart') ?>", {
+                        const result = await mahoFetch("<?= $this->getUrl('adminhtml/index/prelogin') ?>", {
                             method: 'POST',
                             body: new FormData(formEl),
                         });
 
-                        recursiveBase64StrToArrayBuffer(result);
-
-                        const cred = await navigator.credentials.get(result);
-                        const passkeyData = {
-                            id: cred.rawId ? arrayBufferToBase64(cred.rawId) : null,
+                        if (result.require_twofa) {
+                            document.getElementById('step1').classList.add('no-display');
+                            document.getElementById('step2').classList.remove('no-display');
+                            document.getElementById('twofa_verification_code').disabled = false;
+                            document.getElementById('twofa_verification_code').focus();
+                        } else {
+                            formEl.submit();
                         }
-                        for (const [ key, val ] of Object.entries(cred.response)) {
-                            passkeyData[key] = val ? arrayBufferToBase64(val) : null;
-                        }
-
-                        document.getElementById('login').value = JSON.stringify(passkeyData);
-                        gotoStep(2);
                     } catch (error) {
                         messagesEl.textContent = error.message;
                     }
                 }
-            </script>
-        </div>
-    </div>
+            }
+
+            async function startPasskeyAuthentication() {
+                try {
+                    const result = await mahoFetch("<?= $this->getUrl('adminhtml/index/passkeyloginstart') ?>", {
+                        method: 'POST',
+                        body: new FormData(formEl),
+                    });
+
+                    recursiveBase64StrToArrayBuffer(result);
+
+                    const cred = await navigator.credentials.get(result);
+                    const passkeyData = {
+                        id: cred.rawId ? arrayBufferToBase64(cred.rawId) : null,
+                    }
+                    for (const [ key, val ] of Object.entries(cred.response)) {
+                        passkeyData[key] = val ? arrayBufferToBase64(val) : null;
+                    }
+
+                    document.getElementById('login').value = JSON.stringify(passkeyData);
+                    gotoStep(2);
+                } catch (error) {
+                    messagesEl.textContent = error.message;
+                }
+            }
+        </script>
+    </main>
 </body>
 </html>
