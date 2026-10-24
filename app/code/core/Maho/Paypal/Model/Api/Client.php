@@ -443,8 +443,8 @@ class Maho_Paypal_Model_Api_Client
             'headers' => ['Content-Type' => 'application/x-www-form-urlencoded'],
             'max_duration' => self::TOKEN_REQUEST_TIMEOUT,
         ]);
-        // The response is lazy: read the status here, so that a transport error throws inside the retry
-        $response->getStatusCode();
+        // The response is lazy: read the body here, so that a transport error throws inside the retry
+        $response->getContent(false);
         return $response;
     }
 
