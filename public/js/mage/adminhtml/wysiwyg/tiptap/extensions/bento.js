@@ -304,6 +304,7 @@ export const MahoBentoGrid = Node.create({
             storageName: 'mahoBentoGrid',
             dataType: 'maho-bento',
             badgeLabel: 'Bento',
+            deleteTitle: 'Delete Bento Grid',
             layoutAttr: 'columns',
 
             setDataAttrs(dom, node) {
@@ -441,21 +442,6 @@ export const MahoBentoGrid = Node.create({
                         ...bentoNode.node.attrs,
                         gridStyle: style,
                     });
-                    dispatch(tr);
-                }
-
-                return true;
-            },
-
-            deleteBentoGrid: () => ({ editor, state, tr, dispatch }) => {
-                const bentoNode = findParentNodeOfType(state.schema.nodes.mahoBentoGrid)(state.selection);
-
-                if (!bentoNode) {
-                    return false;
-                }
-
-                if (dispatch) {
-                    tr.delete(bentoNode.pos, bentoNode.pos + bentoNode.node.nodeSize);
                     dispatch(tr);
                 }
 

@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace MahoCLI\Commands;
 
+use Mage_Core_Model_Design_Content_Bundle;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
@@ -215,7 +216,7 @@ class FrontendThemeCreate extends BaseMahoCommand
      */
     private function compile(string $packageName, string $themeName, SymfonyStyle $io): void
     {
-        $binary = MAHO_ROOT_DIR . '/node_modules/.bin/tailwindcss';
+        $binary = MAHO_ROOT_DIR . '/' . Mage_Core_Model_Design_Content_Bundle::TAILWIND_BINARY;
         $entry = self::BASE_SKIN_PATH . "/{$packageName}/{$themeName}/src/tailwind.css";
         $bundle = self::BASE_SKIN_PATH . "/{$packageName}/{$themeName}/css/styles.css";
 

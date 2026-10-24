@@ -215,6 +215,7 @@ export const MahoColumns = Node.create({
             storageName: 'mahoColumns',
             dataType: 'maho-columns',
             badgeLabel: 'Columns',
+            deleteTitle: 'Delete Columns',
             layoutAttr: 'layout',
 
             setDataAttrs(dom, node) {
@@ -328,21 +329,6 @@ export const MahoColumns = Node.create({
                         ...columnsNode.node.attrs,
                         gridStyle: style,
                     });
-                    dispatch(tr);
-                }
-
-                return true;
-            },
-
-            deleteColumns: () => ({ editor, state, tr, dispatch }) => {
-                const columnsNode = findParentNodeOfType(state.schema.nodes.mahoColumns)(state.selection);
-
-                if (!columnsNode) {
-                    return false;
-                }
-
-                if (dispatch) {
-                    tr.delete(columnsNode.pos, columnsNode.pos + columnsNode.node.nodeSize);
                     dispatch(tr);
                 }
 

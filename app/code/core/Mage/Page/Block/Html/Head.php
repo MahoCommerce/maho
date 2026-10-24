@@ -322,7 +322,10 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
         // lookup each file basing on current theme configuration
         foreach ($skinItems as $params => $rows) {
             foreach ($rows as $name => $itemData) {
-                $url = $skinUrl = $designPackage->getSkinUrl($name, []);
+                $contentUrl = $name === Mage_Core_Model_Design_Content_Bundle::STYLES_FILE
+                    ? Mage::getSingleton('core/design_content_bundle')->getUrl((string) $designPackage->getFilename($name, ['_type' => 'skin']))
+                    : null;
+                $url = $skinUrl = $contentUrl ?? $designPackage->getSkinUrl($name, []);
 
                 // Apply minification if needed
                 if (is_array($itemData) && !empty($itemData['should_minify'])) {
@@ -333,7 +336,7 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
                         $url = $minifyHelper->minifyJs($url);
                     }
                 }
-                if ($url === $skinUrl) {
+                if ($url === $skinUrl && $contentUrl === null) {
                     $url = $this->_versionedUrl($url, (string) $designPackage->getFilename($name, ['_type' => 'skin']));
                 }
 

@@ -153,14 +153,31 @@ class Mage_Adminhtml_Cms_WysiwygController extends Mage_Adminhtml_Controller_Act
     }
 
     /**
+     * Send the stylesheets and the Tailwind source of the theme of a store view. The plain HTML
+     * editor reads them to complete class names and to find the classes that nothing styles.
+     */
+    #[Maho\Config\Route('/admin/cms_wysiwyg/classCheck', methods: ['POST'])]
+    public function classCheckAction(): void
+    {
+        $store = Mage::app()->getStores()[(int) $this->getRequest()->getPost('store_id')] ?? null;
+        if (!$store instanceof Mage_Core_Model_Store) {
+            $this->getResponse()->setBodyJson(['head' => '', 'styles' => '', 'css' => '']);
+            return;
+        }
+
+        $this->getResponse()->setBodyJson(Mage::getSingleton('cms/wysiwyg_render')->renderStyles((int) $store->getId()));
+    }
+
+    /**
      * The preview only reports on content that the caller posted. It reveals no other data.
      * The CMS resource would block an admin who edits products but not CMS pages.
-     * The render checks the resource of each directive itself.
+     * The render checks the resource of each directive itself. The class check sends only
+     * the public stylesheets of the storefront.
      */
     #[\Override]
     protected function _isAllowed()
     {
-        if (in_array($this->getRequest()->getActionName(), ['sanitizePreview', 'renderDirectives'], true)) {
+        if (in_array($this->getRequest()->getActionName(), ['sanitizePreview', 'renderDirectives', 'classCheck'], true)) {
             return Mage::getSingleton('admin/session')->isLoggedIn();
         }
         return parent::_isAllowed();

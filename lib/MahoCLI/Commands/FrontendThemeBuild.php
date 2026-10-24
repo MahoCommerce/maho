@@ -12,6 +12,7 @@ declare(strict_types=1);
 
 namespace MahoCLI\Commands;
 
+use Mage_Core_Model_Design_Content_Bundle;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
@@ -131,7 +132,7 @@ class FrontendThemeBuild extends BaseMahoCommand
      */
     private function resolveTailwindBinary(SymfonyStyle $io): ?string
     {
-        $binary = MAHO_ROOT_DIR . '/node_modules/.bin/tailwindcss';
+        $binary = MAHO_ROOT_DIR . '/' . Mage_Core_Model_Design_Content_Bundle::TAILWIND_BINARY;
         if (is_file($binary)) {
             return $binary;
         }

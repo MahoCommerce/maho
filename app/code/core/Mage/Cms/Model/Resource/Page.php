@@ -440,4 +440,15 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
     {
         return Mage::app()->getStore($this->_store);
     }
+
+    /**
+     * The content of every CMS page, for the Tailwind build.
+     *
+     * @return iterable<string>
+     */
+    #[Maho\Config\TailwindSource('cms_page', model: Mage_Cms_Model_Page::class, fields: ['content'])]
+    public function getTailwindContent(): iterable
+    {
+        return Mage::getResourceSingleton('core/design_content')->readColumns($this->getMainTable(), $this->getIdFieldName(), ['content']);
+    }
 }
