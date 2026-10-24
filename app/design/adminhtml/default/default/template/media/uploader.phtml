@@ -25,6 +25,6 @@
 </div>
 <script type="module">
     const uploader = new Uploader(<?= $this->getJsonConfig() ?>);
-    varienGlobalEvents?.attachEventHandler('tabChangeBefore', uploader.onContainerHideBefore);
+    window.varienGlobalEvents?.attachEventHandler('tabChangeBefore', uploader.onContainerHideBefore);
 </script>
 <?= $this->getChildHtml('additional_scripts') ?>

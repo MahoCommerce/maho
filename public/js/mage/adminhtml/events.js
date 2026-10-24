@@ -119,5 +119,5 @@ class varienEvents {
     }
 }
 
-const varienGlobalEvents = new varienEvents();
+window.varienGlobalEvents = new varienEvents();
 
