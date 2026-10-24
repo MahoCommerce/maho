@@ -427,30 +427,6 @@ abstract class Mage_Sales_Model_Quote_Item_Abstract extends Mage_Core_Model_Abst
     }
 
     /**
-     * Get whether the item is nominal
-     *
-     * @return bool
-     */
-    public function isNominal()
-    {
-        if (!$this->hasData('is_nominal')) {
-            $this->setData('is_nominal', $this->getProduct() ? $this->getProduct()->getIsRecurring() == '1' : false);
-        }
-        return $this->_getData('is_nominal');
-    }
-
-    /**
-     * Data getter for 'is_nominal'
-     * Used for converting item to order item
-     *
-     * @return int
-     */
-    public function getIsNominal()
-    {
-        return (int) $this->isNominal();
-    }
-
-    /**
      * Get original price (retrieved from product) for item.
      * Original price value is in quote selected currency
      *
@@ -1023,17 +999,6 @@ abstract class Mage_Sales_Model_Quote_Item_Abstract extends Mage_Core_Model_Abst
     {
         $value = $this->getData('no_discount');
         return $value === null ? null : (bool) $value;
-    }
-
-    public function getNominalRowTotal(): ?float
-    {
-        $value = $this->getData('nominal_row_total');
-        return $value === null ? null : (float) $value;
-    }
-
-    public function getNominalTotalDetails(): ?array
-    {
-        return $this->getData('nominal_total_details');
     }
 
     public function getOriginalCustomPrice(): ?float

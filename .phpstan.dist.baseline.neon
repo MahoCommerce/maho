@@ -7567,12 +7567,6 @@ parameters:
 			path: app/code/core/Mage/Checkout/Block/Onepage/Success.php
 
 		-
-			rawMessage: 'Method Mage_Checkout_Block_Onepage_Success::_prepareLastRecurringProfiles() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Checkout/Block/Onepage/Success.php
-
-		-
 			rawMessage: Property Mage_Checkout_Helper_Data::$_agreements has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -11889,60 +11883,6 @@ parameters:
 			path: app/code/core/Mage/Payment/Model/Observer.php
 
 		-
-			rawMessage: 'Method Mage_Payment_Model_Observer::prepareProductRecurringProfileOptions() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Payment/Model/Observer.php
-
-		-
-			rawMessage: 'Method Mage_Payment_Model_Recurring_Profile::_ensureLocaleAndStore() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Payment/Model/Recurring/Profile.php
-
-		-
-			rawMessage: 'Method Mage_Payment_Model_Recurring_Profile::_validateBeforeSave() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Payment/Model/Recurring/Profile.php
-
-		-
-			rawMessage: 'Parameter #1 $message of static method Mage::throwException() expects string, array given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Payment/Model/Recurring/Profile.php
-
-		-
-			rawMessage: 'Method Mage_Payment_Model_Recurring_Profile_MethodInterface::getRecurringProfileDetails() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Payment/Model/Recurring/Profile/MethodInterface.php
-
-		-
-			rawMessage: 'Method Mage_Payment_Model_Recurring_Profile_MethodInterface::submitRecurringProfile() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Payment/Model/Recurring/Profile/MethodInterface.php
-
-		-
-			rawMessage: 'Method Mage_Payment_Model_Recurring_Profile_MethodInterface::updateRecurringProfile() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Payment/Model/Recurring/Profile/MethodInterface.php
-
-		-
-			rawMessage: 'Method Mage_Payment_Model_Recurring_Profile_MethodInterface::updateRecurringProfileStatus() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Payment/Model/Recurring/Profile/MethodInterface.php
-
-		-
-			rawMessage: 'Method Mage_Payment_Model_Recurring_Profile_MethodInterface::validateRecurringProfile() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Payment/Model/Recurring/Profile/MethodInterface.php
-
-		-
 			rawMessage: 'Method Mage_ProductAlert_Block_Email_Abstract::addProduct() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -12555,78 +12495,6 @@ parameters:
 			path: app/code/core/Mage/Sales/Block/Order/Totals.php
 
 		-
-			rawMessage: 'Method Mage_Sales_Block_Recurring_Profile_View::_addInfo() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Block/Recurring/Profile/View.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Block_Recurring_Profile_View::_prepareRelatedOrders() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Block/Recurring/Profile/View.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Block_Recurring_Profile_View::prepareAddressInfo() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Block/Recurring/Profile/View.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Block_Recurring_Profile_View::prepareFeesInfo() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Block/Recurring/Profile/View.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Block_Recurring_Profile_View::prepareItemInfo() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Block/Recurring/Profile/View.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Block_Recurring_Profile_View::prepareReferenceInfo() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Block/Recurring/Profile/View.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Block_Recurring_Profile_View::prepareRelatedOrdersFrontendGrid() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Block/Recurring/Profile/View.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Block_Recurring_Profile_View::prepareScheduleInfo() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Block/Recurring/Profile/View.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Block_Recurring_Profile_View::prepareViewData() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Block/Recurring/Profile/View.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Block_Recurring_Profiles::_prepareProfiles() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Block/Recurring/Profiles.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Block_Recurring_Profiles::prepareProfilesGrid() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Block/Recurring/Profiles.php
-
-		-
-			rawMessage: 'Property Mage_Sales_Block_Recurring_Profiles::$_profiles (Mage_Sales_Model_Resource_Recurring_Profile_Collection) does not accept Mage_Core_Model_Resource_Db_Collection_Abstract.'
-			identifier: assign.propertyType
-			count: 1
-			path: app/code/core/Mage/Sales/Block/Recurring/Profiles.php
-
-		-
 			rawMessage: 'Method Mage_Sales_Block_Widget_Guest_Form::getTypeSelectHtml() should return array but returns string.'
 			identifier: return.type
 			count: 1
@@ -12676,12 +12544,6 @@ parameters:
 
 		-
 			rawMessage: 'Method Mage_Sales_Model_Observer::changeQuoteCustomerGroupId() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Observer.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Observer::prepareProductEditFormRecurringProfile() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Observer.php
@@ -13012,24 +12874,6 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Quote/Address/Total/Collector.php
 
 		-
-			rawMessage: 'Method Mage_Sales_Model_Quote_Address_Total_Nominal_Recurring_Trial::_afterCollectSuccess() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Quote/Address/Total/Nominal/Recurring/Trial.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Quote_Address_Total_Nominal_RecurringAbstract::_afterCollectSuccess() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Quote/Address/Total/Nominal/RecurringAbstract.php
-
-		-
-			rawMessage: Property Mage_Sales_Model_Quote_Address_Total_Nominal_Shipping::$_canSetAddressAmount has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Quote/Address/Total/Nominal/Shipping.php
-
-		-
 			rawMessage: 'Method Mage_Sales_Model_Quote_Config::getTotalModels() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -13058,72 +12902,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Quote/Payment.php
-
-		-
-			rawMessage: 'Call to an undefined method Mage_Payment_Model_Method_Abstract::canGetRecurringProfileDetails().'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Recurring/Profile.php
-
-		-
-			rawMessage: 'Call to an undefined method Mage_Payment_Model_Method_Abstract::submitRecurringProfile().'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Recurring/Profile.php
-
-		-
-			rawMessage: 'Call to an undefined method Mage_Payment_Model_Method_Abstract::updateRecurringProfileStatus().'
-			identifier: method.notFound
-			count: 3
-			path: app/code/core/Mage/Sales/Model/Recurring/Profile.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Recurring_Profile::_addAdditionalOptionToItem() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Recurring/Profile.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Recurring_Profile::_initWorkflow() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Recurring/Profile.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Recurring_Profile::activate() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Recurring/Profile.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Recurring_Profile::cancel() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Recurring/Profile.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Recurring_Profile::fetchUpdate() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Recurring/Profile.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Recurring_Profile::submit() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Recurring/Profile.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Recurring_Profile::suspend() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Recurring/Profile.php
-
-		-
-			rawMessage: 'Method Maho\DataObject::getRecurringProfileDetails() invoked with 2 parameters, 0-1 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Recurring/Profile.php
 
 		-
 			rawMessage: 'Method Mage_Sales_Model_Resource_Billing_Agreement::_construct() has no return type specified.'
@@ -13342,18 +13120,6 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Resource/Quote/Payment.php
 
 		-
-			rawMessage: 'Method Mage_Sales_Model_Resource_Recurring_Profile::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Resource/Recurring/Profile.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Resource_Recurring_Profile::_unserializeField() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Resource/Recurring/Profile.php
-
-		-
 			rawMessage: 'Method Mage_Sales_Model_Resource_Report::_construct() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -13408,38 +13174,8 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Service/Order.php
 
 		-
-			rawMessage: 'Call to an undefined method Mage_Payment_Model_Recurring_Profile::submit().'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Service/Quote.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Service_Quote::_deleteNominalItems() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Service/Quote.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Service_Quote::_submitRecurringPaymentProfiles() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Service/Quote.php
-
-		-
 			rawMessage: 'Method Mage_Sales_Model_Service_Quote::submitAll() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Service/Quote.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Service_Quote::submitNominalItems() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Service/Quote.php
-
-		-
-			rawMessage: 'Parameter #1 $message of static method Mage::throwException() expects string, array given.'
-			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Service/Quote.php
 

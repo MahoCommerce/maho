@@ -1483,17 +1483,6 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
         return $this->setData('base_hidden_tax_refunded', $value);
     }
 
-    public function getIsNominal(): ?bool
-    {
-        $value = $this->getData('is_nominal');
-        return $value === null ? null : (bool) $value;
-    }
-
-    public function setIsNominal(?bool $value = true): static
-    {
-        return $this->setData('is_nominal', $value);
-    }
-
     public function getTaxCanceled(): ?float
     {
         $value = $this->getData('tax_canceled');

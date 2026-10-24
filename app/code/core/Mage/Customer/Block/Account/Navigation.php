@@ -104,17 +104,6 @@ class Mage_Customer_Block_Account_Navigation extends Mage_Core_Block_Template
     }
 
     /**
-     * Add recurring profiles link only if customer has any profiles
-     */
-    public function addRecurringProfilesLink(): self
-    {
-        if (Mage::helper('sales')->customerHasRecurringProfiles()) {
-            $this->addLink('recurring_profiles', 'sales/recurring_profile/', Mage::helper('sales')->__('Recurring Profiles'));
-        }
-        return $this;
-    }
-
-    /**
      * Add downloadable products link only if customer has any purchased downloads
      */
     public function addDownloadableProductsLink(): self

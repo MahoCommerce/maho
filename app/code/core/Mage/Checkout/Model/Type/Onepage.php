@@ -719,21 +719,9 @@ class Mage_Checkout_Model_Type_Onepage
             }
         }
 
-        // add recurring profiles information to the session
-        $profiles = $service->getRecurringPaymentProfiles();
-        if ($profiles) {
-            $ids = [];
-            /** @var Mage_Sales_Model_Recurring_Profile $profile */
-            foreach ($profiles as $profile) {
-                $ids[] = $profile->getId();
-            }
-            $this->_checkoutSession->setLastRecurringProfileIds($ids);
-            // TODO: send recurring profile emails
-        }
-
         Mage::dispatchEvent(
             'checkout_submit_all_after',
-            ['order' => $order, 'quote' => $this->getQuote(), 'recurring_profiles' => $profiles],
+            ['order' => $order, 'quote' => $this->getQuote()],
         );
 
         return $this;

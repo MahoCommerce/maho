@@ -487,7 +487,6 @@
         "Tests\\Frontend\\Integration\\Revocation\\BlocksTest": 0.0737,
         "Tests\\Frontend\\Integration\\Sales\\BillingAgreementFormKeyTest": 0.8794,
         "Tests\\Frontend\\Integration\\Sales\\GuestOrderLookupRateLimitTest": 0.1026,
-        "Tests\\Frontend\\Integration\\Sales\\RecurringProfileFormKeyTest": 1.2861,
         "Tests\\Frontend\\Integration\\Sales\\ReorderTest": 0.8565,
         "Tests\\Frontend\\Integration\\Sitemap\\LlmsTest": 1.814,
         "Tests\\Frontend\\Integration\\Sitemap\\RobotsTest": 0.2906,

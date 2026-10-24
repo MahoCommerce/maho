@@ -155,21 +155,6 @@ class Mage_Sales_Helper_Data extends Mage_Core_Helper_Data
     }
 
     /**
-     * Check if current customer has any recurring profiles
-     */
-    public function customerHasRecurringProfiles(): bool
-    {
-        $customer = Mage::getSingleton('customer/session')->getCustomer();
-        if (!$customer || !$customer->getId()) {
-            return false;
-        }
-
-        return Mage::getResourceModel('sales/recurring_profile_collection')
-            ->addFieldToFilter('customer_id', $customer->getId())
-            ->getSize() > 0;
-    }
-
-    /**
      * Check if current customer has any billing agreements
      */
     public function customerHasBillingAgreements(): bool

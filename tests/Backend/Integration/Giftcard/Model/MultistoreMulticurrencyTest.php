@@ -30,8 +30,6 @@ function createTestQuoteItem(array $data): Maho\DataObject
 function setQuoteAddressItems(Mage_Sales_Model_Quote_Address $address, array $items): void
 {
     $address->setData('cached_items_all', $items);
-    $address->setData('cached_items_nonnominal', $items);
-    $address->setData('cached_items_nominal', []);
 }
 
 describe('Multistore Gift Card Isolation', function () {

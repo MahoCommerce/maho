@@ -30,8 +30,6 @@ function stateChangingMatcher(string $method): \Symfony\Component\Routing\Matche
 }
 
 dataset('post only routes', [
-    'recurring profile state' => ['/sales/recurring_profile/updateState', 'updateStateAction'],
-    'recurring profile update' => ['/sales/recurring_profile/updateProfile', 'updateProfileAction'],
     'billing agreement cancel' => ['/sales/billing_agreement/cancel', 'cancelAction'],
     'customer reorder' => ['/sales/order/reorder', 'reorderAction'],
     'guest reorder' => ['/sales/guest/reorder', 'reorderAction'],
@@ -45,11 +43,6 @@ dataset('post only routes', [
 ]);
 
 dataset('state changing templates', [
-    'recurring profile view' => [
-        'sales/recurring/profile/view.phtml',
-        ['method="post"', "getBlockHtml('formkey')"],
-        '/window\.location/',
-    ],
     'billing agreement view' => [
         'sales/billing/agreement/view.phtml',
         ['method="post"', "getBlockHtml('formkey')"],

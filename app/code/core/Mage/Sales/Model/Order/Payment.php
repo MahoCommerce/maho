@@ -347,12 +347,8 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
                 $invoice->setIsPaid();
                 $this->_updateTotals(['base_amount_paid_online' => $amountToCapture]);
             }
-            if ($order->isNominal()) {
-                $message = $this->_prependMessage(Mage::helper('sales')->__('Nominal order registered.'));
-            } else {
-                $message = $this->_prependMessage($message);
-                $message = $this->_appendTransactionToMessage($transaction, $message);
-            }
+            $message = $this->_prependMessage($message);
+            $message = $this->_appendTransactionToMessage($transaction, $message);
             $order->setState($state, $status, $message);
             $this->getMethodInstance()->processInvoice($invoice, $this); // should be deprecated
             return $this;
@@ -1019,12 +1015,8 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
 
         // update transactions, order state and add comments
         $transaction = $this->_addTransaction(Mage_Sales_Model_Order_Payment_Transaction::TYPE_AUTH);
-        if ($order->isNominal()) {
-            $message = $this->_prependMessage(Mage::helper('sales')->__('Nominal order registered.'));
-        } else {
-            $message = $this->_prependMessage($message);
-            $message = $this->_appendTransactionToMessage($transaction, $message);
-        }
+        $message = $this->_prependMessage($message);
+        $message = $this->_appendTransactionToMessage($transaction, $message);
         $order->setState($state, $status, $message);
 
         return $this;
