@@ -80,13 +80,31 @@
         padding-inline-start: 0.75rem;
     }
 
-    /* The DaisyUI list box is roomy: an admin multiselect shows ten options or more */
     select:is([multiple], [size]) {
-        padding: var(--maho-space-1);
+        padding: var(--maho-space-2);
 
         & option {
-            padding: var(--maho-space-1) var(--maho-space-2);
+            padding: var(--maho-space-2) var(--maho-space-3);
+            border-radius: 0;
         }
+
+        /* A background image, because the browser paints its own color over the background color of a selected option */
+        & option:checked {
+            background-image: linear-gradient(color-mix(in srgb, var(--maho-accent) 30%, var(--maho-control-bg)), color-mix(in srgb, var(--maho-accent) 30%, var(--maho-control-bg)));
+            color: var(--maho-control-ink);
+            font-weight: 600;
+        }
+
+        & optgroup {
+            padding: var(--maho-space-2) 0 0 var(--maho-space-2);
+            font-weight: 600;
+            font-style: normal;
+            color: var(--maho-ink-muted);
+        }
+    }
+
+    select.multiselect option {
+        border-bottom: 1px solid var(--maho-border-soft);
     }
 
     textarea {
