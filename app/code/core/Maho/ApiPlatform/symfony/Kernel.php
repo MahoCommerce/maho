@@ -631,12 +631,10 @@ class Kernel extends BaseKernel
     {
         $origins = [];
         foreach ($this->storeBaseUrls() as $url) {
-            $parts = parse_url($url);
-            if (!isset($parts['scheme'], $parts['host']) || $parts['host'] === '') {
-                continue;
+            $origin = Security\SameOriginGuard::originOf($url);
+            if ($origin !== null) {
+                $origins[$origin] = true;
             }
-            $origin = strtolower($parts['scheme'] . '://' . $parts['host']) . (isset($parts['port']) ? ':' . $parts['port'] : '');
-            $origins[$origin] = true;
         }
 
         return array_keys($origins);
