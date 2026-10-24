@@ -1970,6 +1970,11 @@
     }
 }
 
+/* The editor buttons sit on top of the wrapper as tabs */
+.buttons-set + textarea + .tiptap-wrapper {
+    border-start-start-radius: 0;
+}
+
 .tiptap-content-notice,
 .sanitize-preview-notice {
     margin-bottom: var(--maho-space-2);

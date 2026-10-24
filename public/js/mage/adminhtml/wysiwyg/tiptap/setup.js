@@ -397,7 +397,7 @@ class tiptapWysiwygSetup {
             'The rich text editor cannot keep this HTML: %s. Maho keeps the plain HTML editor open so that nothing is lost.',
             this.describeDroppedContent(),
         );
-        this.textarea.before(this.notice);
+        (document.getElementById('buttons' + this.textarea.id) ?? this.textarea).before(this.notice);
     }
 
     toggle() {

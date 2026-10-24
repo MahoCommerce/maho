@@ -1322,8 +1322,7 @@ button.icon-btn span {
 .buttons-set:has(+ textarea) {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--maho-space-2);
-    margin: 0 0 var(--maho-space-2)
+    margin: 0
 }
 
 .buttons-set:has(+ textarea) button {
