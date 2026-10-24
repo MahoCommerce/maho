@@ -120,9 +120,8 @@
     }
 
     /*
-     * The buttons of an editor field are a toolbar on top of it. The editor writes its
-     * .buttons-set before the field, and the attribute helper after the textarea, so that
-     * cell puts it first.
+     * The buttons of a catalog editor field are a toolbar on top of it. The helper writes
+     * them after the textarea, so the cell puts them first.
      */
     /* One column, so the toolbar takes the width of the textarea */
     td.value:has(> textarea + .buttons-set) {
@@ -147,7 +146,7 @@
         }
     }
 
-    .buttons-set:has(+ textarea), textarea + .buttons-set {
+    textarea + .buttons-set {
         gap: var(--maho-space-1);
         padding: var(--maho-space-1);
         /* The shade of the TipTap toolbar */
@@ -167,7 +166,7 @@
         }
     }
 
-    td.value > textarea:has(+ .buttons-set), .buttons-set + textarea {
+    td.value > textarea:has(+ .buttons-set) {
         border-start-start-radius: 0;
         border-start-end-radius: 0;
 

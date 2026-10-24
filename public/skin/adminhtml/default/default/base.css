@@ -1320,7 +1320,14 @@ button.icon-btn span {
     margin-right: var(--maho-space-2)
 }
 
-.buttons-set:has(+ textarea),textarea + .buttons-set {
+.buttons-set:has(+ textarea) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--maho-space-2);
+    margin: 0 0 var(--maho-space-2)
+}
+
+textarea + .buttons-set {
     display: flex;
     flex-wrap: wrap;
     margin: 0
