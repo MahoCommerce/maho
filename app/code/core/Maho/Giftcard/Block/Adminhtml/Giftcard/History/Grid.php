@@ -84,11 +84,11 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_History_Grid extends Mage_Adminhtml
             'index'   => 'action',
             'type'    => 'options',
             'options' => [
-                Maho_Giftcard_Model_Giftcard::ACTION_CREATED => 'Created',
-                Maho_Giftcard_Model_Giftcard::ACTION_USED => 'Used',
-                Maho_Giftcard_Model_Giftcard::ACTION_ADJUSTED => 'Adjusted',
-                Maho_Giftcard_Model_Giftcard::ACTION_REFUNDED => 'Refunded',
-                Maho_Giftcard_Model_Giftcard::ACTION_EXPIRED => 'Expired',
+                Maho_Giftcard_Model_Giftcard::ACTION_CREATED => Mage::helper('giftcard')->__('Created'),
+                Maho_Giftcard_Model_Giftcard::ACTION_USED => Mage::helper('giftcard')->__('Used'),
+                Maho_Giftcard_Model_Giftcard::ACTION_ADJUSTED => Mage::helper('giftcard')->__('Adjusted'),
+                Maho_Giftcard_Model_Giftcard::ACTION_REFUNDED => Mage::helper('giftcard')->__('Refunded'),
+                Maho_Giftcard_Model_Giftcard::ACTION_EXPIRED => Mage::helper('giftcard')->__('Expired'),
             ],
         ]);
 
