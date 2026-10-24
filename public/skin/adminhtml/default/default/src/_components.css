@@ -142,7 +142,8 @@
     .buttons-set:has(+ textarea), textarea + .buttons-set {
         gap: var(--maho-space-1);
         padding: var(--maho-space-1);
-        background-color: var(--color-base-200);
+        /* The shade of the TipTap toolbar */
+        background-color: color-mix(in oklab, var(--color-base-200) 40%, var(--color-base-100));
         border: var(--border) solid var(--color-base-300);
         border-bottom: 0;
         border-radius: var(--radius-field) var(--radius-field) 0 0;
