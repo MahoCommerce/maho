@@ -179,13 +179,11 @@ abstract class Mage_Sales_Model_Quote_Address_Total_Abstract
     }
 
     /**
-     * Get all items except nominals
-     *
      * @return Mage_Sales_Model_Quote_Address_Item[]
      */
     protected function _getAddressItems(Mage_Sales_Model_Quote_Address $address)
     {
-        return $address->getAllNonNominalItems();
+        return $address->getAllItems();
     }
 
     /**

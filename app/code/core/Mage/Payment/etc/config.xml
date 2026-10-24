@@ -90,13 +90,6 @@ SPDX-License-Identifier: AFL-3.0
                 </Mage_Payment>
             </modules>
         </translate>
-        <layout>
-            <updates>
-                <payment module="Mage_Payment">
-                    <file>payment.xml</file>
-                </payment>
-            </updates>
-        </layout>
     </frontend>
     <adminhtml>
         <translate>

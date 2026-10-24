@@ -25,8 +25,6 @@ declare(strict_types=1);
  * @method bool hasCustomerGroupId()
  * @method bool hasCrossSellProducts()
  * @method bool hasCrossSellProductIds()
- * @method bool hasIsRecurring()
- * @method $this unsRecurringProfile()
  * @method bool hasMediaAttributes()
  * @method $this hasMsrpEnabled()
  * @method bool hasOptionsValidationFail()
@@ -1437,16 +1435,6 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     }
 
     /**
-     * Whether the product is a recurring payment
-     *
-     * @return bool
-     */
-    public function isRecurring()
-    {
-        return $this->getIsRecurring() == '1';
-    }
-
-    /**
      * Alias for isSalable()
      *
      * @return bool
@@ -2587,12 +2575,6 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
         return $this->setData('is_massupdate', $value);
     }
 
-    public function getIsRecurring(): ?int
-    {
-        $value = $this->getData('is_recurring');
-        return $value === null ? null : (int) $value;
-    }
-
     public function setIsSalable(?bool $value = true): static
     {
         return $this->setData('is_salable', $value);
@@ -2874,11 +2856,6 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     public function setRelatedLinkData(?array $value): static
     {
         return $this->setData('related_link_data', $value);
-    }
-
-    public function getRecurringProfile(): ?array
-    {
-        return $this->getData('recurring_profile');
     }
 
     public function getRelatedLinkData(): ?array

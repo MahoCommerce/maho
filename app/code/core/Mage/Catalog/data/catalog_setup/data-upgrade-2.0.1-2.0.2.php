@@ -10,7 +10,8 @@ declare(strict_types=1);
 
 /** @var Mage_Catalog_Model_Resource_Setup $this */
 $installer = $this;
-$installer->startSetup();
+
+// No startSetup(): it turns off the foreign keys, and the rows of the removed attributes must cascade
 
 $adapter = $installer->getConnection();
 $table = $installer->getTable(['catalog/product', 'varchar']);
@@ -144,5 +145,3 @@ foreach (['small_image', 'thumbnail'] as $role) {
     }
 }
 $adapter->delete($configTable, ['path IN (?)' => $paths]);
-
-$installer->endSetup();

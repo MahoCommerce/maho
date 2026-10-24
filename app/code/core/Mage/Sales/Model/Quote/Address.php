@@ -95,13 +95,6 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
     protected $_baseTotalAmounts = [];
 
     /**
-     * Whether to segregate by nominal items only
-     *
-     * @var bool|null
-     */
-    protected $_nominalOnly = null;
-
-    /**
      * Initialize resource
      */
     #[\Override]
@@ -336,21 +329,8 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
      */
     public function getAllItems()
     {
-        // We calculate item list once and cache it in three arrays - all items, nominal, non-nominal
-        $cachedItems = $this->_nominalOnly ? 'nominal' : ($this->_nominalOnly === false ? 'nonnominal' : 'all');
-        $key = 'cached_items_' . $cachedItems;
-        if (!$this->hasData($key)) {
-            // For compatibility  we will use $this->_filterNominal to divide nominal items from non-nominal
-            // (because it can be overloaded)
-            // So keep current flag $this->_nominalOnly and restore it after cycle
-            $wasNominal = $this->_nominalOnly;
-            $this->_nominalOnly = true; // Now $this->_filterNominal() will return positive values for nominal items
-
-            $quoteItems = $this->getQuote()->getItemsCollection();
-
+        if (!$this->hasData('cached_items_all')) {
             $items = [];
-            $nominalItems = [];
-            $nonNominalItems = [];
             /*
             * For virtual quote we assign items only to billing address, otherwise - only to shipping address
             */
@@ -360,73 +340,26 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
                 : ($addressType == self::TYPE_SHIPPING);
 
             if ($canAddItems) {
-                foreach ($quoteItems as $qItem) {
-                    if ($qItem->isDeleted()) {
-                        continue;
-                    }
-                    $items[] = $qItem;
-                    if ($this->_filterNominal($qItem)) {
-                        $nominalItems[] = $qItem;
-                    } else {
-                        $nonNominalItems[] = $qItem;
+                foreach ($this->getQuote()->getItemsCollection() as $qItem) {
+                    if (!$qItem->isDeleted()) {
+                        $items[] = $qItem;
                     }
                 }
             }
-
-            // Cache calculated lists
             $this->setData('cached_items_all', $items);
-            $this->setData('cached_items_nominal', $nominalItems);
-            $this->setData('cached_items_nonnominal', $nonNominalItems);
-
-            $this->_nominalOnly = $wasNominal; // Restore original value before we changed it
         }
 
-        $items = $this->getData($key);
-        return $items;
+        return $this->getData('cached_items_all');
     }
 
     /**
-     * Getter for all non-nominal items
-     *
-     * @return array
-     */
-    public function getAllNonNominalItems()
-    {
-        $this->_nominalOnly = false;
-        $result = $this->getAllItems();
-        $this->_nominalOnly = null;
-        return $result;
-    }
-
-    /**
-     * Getter for all nominal items
+     * @deprecated since 26.11 there are no nominal items, use getAllItems()
      *
      * @return Mage_Sales_Model_Quote_Address_Item[]
      */
-    public function getAllNominalItems()
+    public function getAllNonNominalItems()
     {
-        $this->_nominalOnly = true;
-        $result = $this->getAllItems();
-        $this->_nominalOnly = null;
-        return $result;
-    }
-
-    /**
-     * Segregate by nominal criteria
-     *
-     * true: get nominals only
-     * false: get non-nominals only
-     * null: get all
-     *
-     * @param Mage_Sales_Model_Quote_Item_Abstract $item
-     * @return Mage_Sales_Model_Quote_Item_Abstract|false
-     */
-    protected function _filterNominal($item)
-    {
-        return ($this->_nominalOnly === null)
-            || (($this->_nominalOnly === false) && !$item->isNominal())
-            || (($this->_nominalOnly === true) && $item->isNominal())
-            ? $item : false;
+        return $this->getAllItems();
     }
 
     /**
@@ -594,9 +527,6 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
         if (is_null($this->_rates)) {
             $this->_rates = Mage::getModel('sales/quote_address_rate')->getCollection()
                 ->setAddressFilter($this->getId());
-            if ($this->getQuote()->hasNominalItems(false)) {
-                $this->_rates->setFixedOnlyFilter(true);
-            }
             if ($this->getId()) {
                 foreach ($this->_rates as $rate) {
                     $rate->setAddress($this);
