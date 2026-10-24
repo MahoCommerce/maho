@@ -135,9 +135,8 @@ CLI (`npm install` in the Maho root):
 Without Node.js, a class outside the list does not exist in the compiled stylesheet.
 
 To write classes, open the HTML in the code editor: click **Source** in the
-toolbar of the content editor (also in fullscreen) or **Show / Hide Editor**
-under the field. For one element, click **Edit HTML** in its popup menu or the
-label of a `div`. Inside a `class` attribute, the code editor completes the classes
+toolbar of the content editor, also in fullscreen. For one element, click
+**Edit HTML** in its popup menu or the label of a `div`. Inside a `class` attribute, the code editor completes the classes
 of the theme stylesheet and every Tailwind utility of the theme, with variants
 such as `md:`. It marks a class that neither styles. A DaisyUI class that the
 theme does not use also gets this mark, but the build compiles it.

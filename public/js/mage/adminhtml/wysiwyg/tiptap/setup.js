@@ -30,12 +30,13 @@ class tiptapWysiwygSetup {
 
         this.setup();
 
-        if (!config.hidden) {
-            if (this.invalidContent === null) {
-                this.turnOn();
-            } else {
-                this.codeEditor.show(true);
-            }
+        // The field opens in the source view when the setting hides the editor, or when the
+        // rich text editor cannot keep the content
+        this.placeSource(true);
+        if (config.hidden || this.invalidContent !== null) {
+            this.showPluginButtons(true);
+        } else {
+            this.showRichText();
         }
         this.updateContentNotice();
 
@@ -46,10 +47,6 @@ class tiptapWysiwygSetup {
     }
 
     bindEventListeners() {
-        this.getToggleButton()?.addEventListener('click', () => {
-            this.toggle();
-        });
-
         this.syncHandler = () => {
             if (this.isTiptapActive()) {
                 this.syncWysiwygToPlain();
@@ -262,9 +259,9 @@ class tiptapWysiwygSetup {
         this.textarea.dispatchEvent(new Event('change', { bubbles: false, cancelable: true }));
     }
 
-    /** False in the source view: the textarea then holds the content, as in the plain view. */
+    /** False in the source view: the textarea then holds the content. */
     isTiptapActive() {
-        return !this.sourceMode && (this.wrapper?.checkVisibility() ?? false);
+        return !this.sourceMode && this.editor !== null;
     }
 
     /**
@@ -404,75 +401,59 @@ class tiptapWysiwygSetup {
         this.textarea.before(this.notice);
     }
 
-    toggle() {
-        if (this.sourceMode) {
-            // From the source view to the plain view under the field. The rich text editor does
-            // not read the content on the way, so nothing that it cannot keep is lost.
-            this.placeSource(false);
-            this.codeEditor.show(true);
-            toggleVis(this.wrapper, false);
-            for (const button of this.getPluginButtons()) {
-                toggleVis(button, true);
-            }
-            this.updateContentNotice();
-            this.sanitizePreview?.check();
-            return false;
-        }
-        const enabled = !this.isTiptapActive();
-        if (enabled) {
-            this.syncPlainToWysiwyg();
-            if (!this.confirmContentLoss()) {
-                this.updateContentNotice();
-                return false;
-            }
-        } else {
-            this.syncWysiwygToPlain();
-        }
-        this.codeEditor.show(!enabled);
-        toggleVis(this.wrapper, enabled);
-        for (const button of this.getPluginButtons()) {
-            toggleVis(button, !enabled);
-        }
-        this.updateContentNotice();
-        // The editor cleaned the content. The old answer of the sanitizer is out of date.
-        if (this.isTiptapActive()) {
-            this.syncWysiwygToPlain(true);
-        }
-        this.sanitizePreview?.check();
-        return enabled;
-    }
-
     /**
      * Switch between the rich text editor and the source view, which shows the code editor in
-     * its place, also in fullscreen. The way back asks before it removes HTML that the rich text
-     * editor cannot keep.
+     * its place, also in fullscreen. Return true when the rich text editor is on.
      */
-    toggleSource() {
-        if (!this.sourceMode) {
-            this.syncWysiwygToPlain();
-            this.placeSource(true);
-            this.codeEditor.view.focus();
-            return;
-        }
-        this.syncPlainToWysiwyg();
-        if (!this.confirmContentLoss()) {
-            return;
-        }
-        this.placeSource(false);
-        this.syncWysiwygToPlain(true);
-        this.sanitizePreview?.check();
+    toggle() {
+        return this.sourceMode ? this.showRichText() : this.showSource();
     }
 
-    /** Put the code editor in place of the content of the rich text editor, or back under the field. */
+    showSource() {
+        this.syncWysiwygToPlain();
+        this.placeSource(true);
+        this.showPluginButtons(true);
+        this.updateContentNotice();
+        this.sanitizePreview?.check();
+        return false;
+    }
+
+    /** The way back asks before it removes HTML that the rich text editor cannot keep. */
+    showRichText() {
+        this.syncPlainToWysiwyg();
+        if (!this.confirmContentLoss()) {
+            this.updateContentNotice();
+            return false;
+        }
+        this.placeSource(false);
+        this.showPluginButtons(false);
+        this.updateContentNotice();
+        // The editor cleaned the content. The old answer of the sanitizer is out of date.
+        this.syncWysiwygToPlain(true);
+        this.sanitizePreview?.check();
+        return true;
+    }
+
+    /** The insert and Validate HTML buttons under the field write into the source view. */
+    showPluginButtons(visible) {
+        for (const button of this.getPluginButtons()) {
+            toggleVis(button, visible);
+        }
+    }
+
+    /** Hide the Source button, so a field that takes plain text only stays in the source view. */
+    lockSource(locked) {
+        const button = document.getElementById(`${this.id}_toolbar`)?.querySelector('button[data-source]');
+        if (button) {
+            toggleVis(button, !locked);
+        }
+    }
+
+    /** Show the code editor in place of the content of the rich text editor, or the other way. */
     placeSource(on) {
         this.sourceMode = on;
         this.wrapper.classList.toggle('is-source', on);
         const content = this.wrapper.querySelector('.tiptap-content');
-        if (on) {
-            content.before(this.codeEditor.dom);
-        } else {
-            this.textarea.after(this.codeEditor.dom);
-        }
         this.codeEditor.show(on);
         toggleVis(content, !on);
         // The controls before the spacer change the rich text, so they wait for the way back
@@ -508,14 +489,14 @@ class tiptapWysiwygSetup {
     }
 
     turnOn() {
-        if (!this.isTiptapActive()) {
-            this.toggle();
+        if (this.sourceMode) {
+            this.showRichText();
         }
     }
 
     turnOff() {
-        if (this.isTiptapActive()) {
-            this.toggle();
+        if (!this.sourceMode) {
+            this.showSource();
         }
     }
 
@@ -523,7 +504,7 @@ class tiptapWysiwygSetup {
         // Create wrapper for Tiptap editor
         this.wrapper = document.createElement('div');
         this.wrapper.id = `${this.id}_wrapper`;
-        this.wrapper.className = 'tiptap-wrapper no-display';
+        this.wrapper.className = 'tiptap-wrapper';
 
         // Create main toolbar
         const toolbar = this.createMainToolbar();
@@ -558,8 +539,8 @@ class tiptapWysiwygSetup {
         // Insert wrapper after textarea
         this.textarea.after(this.wrapper);
 
-        // The plain HTML editor takes the place of the textarea
-        this.codeEditor = new MahoCodeEditor(this);
+        // The source view takes the place of the content, inside the editor
+        this.codeEditor = new MahoCodeEditor(this, container);
 
         // Initialize Tiptap
         this.editor = new TiptapModules.Editor({
@@ -821,7 +802,7 @@ class tiptapWysiwygSetup {
             blockDropdown(this, 'accordion'),
             ...blockButtons(this, ['Insert Image', 'Insert Slideshow', 'Insert Widget', 'Insert Variable']),
             { type: 'spacer' },
-            { type: 'button', title: 'Source', icon: 'source', onClick: () => this.toggleSource(), data: { source: '' } },
+            { type: 'button', title: 'Source', icon: 'source', onClick: () => this.toggle() || this.codeEditor.view.focus(), data: { source: '' } },
             // Fullscreen has a group of its own: CSS pins that group to the end of the first row
             { type: 'group' },
             // The command focuses the editor without a scroll. The focus() of a toolbar chain scrolls to the selection
@@ -1172,10 +1153,6 @@ class tiptapWysiwygSetup {
 
     translate(string, ...args) {
         return typeof Translator !== 'undefined' ? Translator.translate(string, ...args) : string;
-    }
-
-    getToggleButton() {
-        return document.getElementById(`toggle${this.id}`);
     }
 
     getPluginButtons() {

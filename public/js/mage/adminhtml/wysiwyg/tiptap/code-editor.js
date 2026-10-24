@@ -131,12 +131,12 @@ export const createCodeView = (setup, parent, doc, extensions = []) => new Edito
 });
 
 /**
- * The plain HTML editor of a content field: CodeMirror in place of the textarea. The textarea
- * stays the form field. Each change writes it and fires `input`, so the form, the sanitizer and
- * the assistant read it as before.
+ * The source view of a content field: CodeMirror before `content`, the content of the rich text
+ * editor. The textarea stays the form field, and it stays hidden. Each change writes it and fires
+ * `input`, so the form, the sanitizer and the assistant read it as before.
  */
 export class MahoCodeEditor {
-    constructor(setup) {
+    constructor(setup, content) {
         this.setup = setup;
         this.textarea = setup.textarea;
         this.writing = false;
@@ -156,7 +156,7 @@ export class MahoCodeEditor {
                 }
             }),
         ]);
-        this.textarea.after(this.dom);
+        content.before(this.dom);
         toggleVis(this.textarea, false);
         this.textarea.mahoCodeEditor = this;
 

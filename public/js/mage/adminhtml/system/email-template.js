@@ -16,7 +16,6 @@ class EmailTemplateEditForm {
         this.elements = {
             convertButton: document.getElementById('convert_button'),
             convertButtonBack: document.getElementById('convert_button_back'),
-            editorToggle: document.getElementById(`toggle${config.elements.templateText}`),
         };
 
         for (const [ key, id ] of Object.entries(config.elements)) {
@@ -51,18 +50,14 @@ class EmailTemplateEditForm {
                 toggleVis(this.elements.convertButtonBack, false);
             }
         }
-        if (this.elements.editorToggle) {
-            if (mode === 'plainonly') {
-                this.getEditorInstance()?.turnOff();
-                toggleVis(this.elements.editorToggle, false);
-            } else if (mode === 'plain') {
-                this.getEditorInstance()?.turnOff();
-                toggleVis(this.elements.editorToggle, true);
-            } else if (mode === 'html') {
-                this.getEditorInstance()?.turnOn();
-                toggleVis(this.elements.editorToggle, true);
-            }
+        // A plain text template stays in the source view, with no way to the rich text editor
+        const editor = this.getEditorInstance();
+        if (mode === 'html') {
+            editor?.turnOn();
+        } else {
+            editor?.turnOff();
         }
+        editor?.lockSource(mode === 'plainonly');
 
         const templateStylesRow = this.elements.templateStyles?.closest('tr');
         if (templateStylesRow) {

@@ -91,29 +91,14 @@ class Editor extends Textarea
     {
         $buttonsHtml = '<div id="buttons' . $this->getHtmlId() . '" class="buttons-set">';
         if ($this->isEnabled()) {
-            $buttonsHtml .= $this->_getToggleButtonHtml() . $this->_getPluginButtonsHtml($this->isHidden());
+            // The editor shows them in its source view, which opens first when the editor is hidden
+            $buttonsHtml .= $this->_getPluginButtonsHtml($this->isHidden());
         } else {
             $buttonsHtml .= $this->_getPluginButtonsHtml(true);
         }
         $buttonsHtml .= '</div>';
 
         return $buttonsHtml;
-    }
-
-    /**
-     * Return HTML button to toggling WYSIWYG
-     *
-     * @param bool $visible
-     * @return string
-     */
-    protected function _getToggleButtonHtml($visible = true)
-    {
-        $html = $this->_getButtonHtml([
-            'title'     => $this->translate('Show / Hide Editor'),
-            'class'     => 'show-hide' . ($visible ? '' : ' no-display'),
-            'id'        => 'toggle' . $this->getHtmlId(),
-        ]);
-        return $html;
     }
 
     /**
