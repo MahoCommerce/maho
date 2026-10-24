@@ -5,149 +5,6 @@ SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
 SPDX-License-Identifier: AFL-3.0
 */
 
-* {
-    margin: 0;
-    padding: 0
-}
-
-body {
-    background: var(--maho-surface-page);
-    color: var(--maho-ink);
-    font: var(--maho-text-md)/1.5 var(--maho-font-sans)
-}
-
-a {
-    color: var(--maho-link);
-    text-decoration: underline
-}
-
-a:hover {
-    color: var(--maho-link);
-    text-decoration: underline
-}
-
-a img {
-    border: 0
-}
-
-:focus {
-    outline: 0
-}
-
-:focus-visible {
-    outline: 2px solid var(--maho-focus-ring);
-    outline-offset: 1px
-}
-
-h1,h2,h3,h4 {
-    margin-bottom: .5em;
-    line-height: 1.4em
-}
-
-h2 {
-    font-size: var(--maho-text-4xl)
-}
-
-h3 {
-    margin-bottom: .5em;
-    color: var(--maho-ink-soft);
-    font-size: var(--maho-text-xl)
-}
-
-h4 {
-    margin-bottom: .6em;
-    color: var(--maho-ink-soft);
-    font-size: var(--maho-text-lg)
-}
-
-h5 {
-    font-size: var(--maho-text-lg)
-}
-
-h6 {
-    font-size: var(--maho-text-md)
-}
-
-h1 a,h1 a:hover,h2 a,h2 a:hover,h3 a,h3 a:hover,h4 a,h4 a:hover {
-    font-weight: 400
-}
-
-th {
-    padding: 0;
-    text-align: left;
-    vertical-align: top
-}
-
-td {
-    padding: 0;
-    vertical-align: top
-}
-
-p,address {
-    margin-bottom: .5em
-}
-
-address {
-    font-style: normal
-}
-
-cite {
-    font-style: normal;
-    font-size: var(--maho-text-xs)
-}
-
-q:before,q:after {
-    content: ""
-}
-
-form {
-    display: inline
-}
-
-fieldset {
-    border: 0
-}
-
-legend {
-    display: none;
-    display: block!important;
-    height: 0;
-    line-height: 0;
-    margin: 0;
-    overflow: hidden;
-    padding: 0;
-    width: 0;
-    visibility: hidden
-}
-
-label {
-    color: var(--maho-ink-soft)
-}
-
-input,select {
-    vertical-align: middle
-}
-
-textarea {
-    overflow: auto
-}
-
-ul,ol {
-    list-style: none
-}
-
-dt {
-    display: block
-}
-
-small {
-    font-size: var(--maho-text-sm)
-}
-
-big {
-    font-size: var(--maho-text-xl)
-}
-
 /* Same artwork as images/loading.svg, inlined so it renders on themes that don't ship the file */
 .maho-spinner {
     display: inline-block;
@@ -1424,22 +1281,6 @@ label.inline {
     min-width: 310px
 }
 
-input.input-text,input.input-color,textarea,select {
-    border-width: 1px;
-    border-style: solid;
-    border-color: var(--maho-border-strong) var(--maho-control-border) var(--maho-control-border) var(--maho-border-strong);
-    background: var(--maho-surface);
-    font-size: var(--maho-text-sm)
-}
-
-select {
-    min-height: 17px
-}
-
-input.input-text,textarea {
-    padding: var(--maho-space-1)
-}
-
 input.input-color {
     padding: var(--maho-space-1);
     width: 222px!important
@@ -1460,27 +1301,6 @@ input.item-qty {
 input.price {
     width: 50px!important;
     text-align: right
-}
-
-input[type=text].disabled {
-    background: var(--maho-surface-page)
-}
-
-select optgroup {
-    font-style: normal
-}
-
-select optgroup option {
-    padding-left: var(--maho-space-3)
-}
-
-select optgroup option.even {
-    background: var(--maho-surface-sunken)
-}
-
-select.multiselect option {
-    padding: var(--maho-space-1) var(--maho-space-2);
-    border-bottom: 1px solid var(--maho-border-soft)
 }
 
 .checkboxes li {
@@ -4814,21 +4634,6 @@ ul.super-product-attributes {
     overflow: hidden
 }
 
-input[type=date],input[type=time],input[type=datetime-local] {
-    font-family: "Lucida Grande",Verdana,Arial,Helvetica,sans-serif;
-    font-size: var(--maho-text-xs);
-    padding: var(--maho-space-1) var(--maho-space-2);
-    border: 1px solid var(--maho-border-strong);
-    border-radius: 2px;
-    background: var(--maho-surface)
-}
-
-input[type=date]:focus,input[type=time]:focus,input[type=datetime-local]:focus {
-    border-color: var(--maho-link);
-    outline: 0;
-    box-shadow: 0 0 2px color-mix(in srgb, var(--maho-focus-ring) 30%, transparent)
-}
-
 .middle {
     padding-top: var(--maho-space-3)
 }
@@ -4998,81 +4803,8 @@ dl.accordion dt.open a:after,div.collapseable a.open:after {
     box-shadow: none
 }
 
-h1 {
-    color: var(--maho-ink);
-    font-weight: 400
-}
-
-h2 {
-    color: var(--maho-ink);
-    font-weight: 400
-}
-
-h3 {
-    color: var(--maho-ink);
-    font-weight: 400
-}
-
-h4 {
-    color: var(--maho-ink);
-    font-weight: 400
-}
-
-h5 {
-    color: var(--maho-ink);
-    font-weight: 400
-}
-
-h6 {
-    color: var(--maho-ink);
-    font-weight: 400
-}
-
-label {
-    color: var(--maho-ink);
-    font-weight: 400
-}
-
-a {
-    display: inline;
-    color: var(--maho-accent);
-    text-decoration: none
-}
-
-a:visited {
-    color: var(--maho-accent)
-}
-
-a:focus {
-    color: var(--maho-accent-strong);
-    text-decoration: none
-}
-
-a:hover {
-    color: var(--maho-accent-strong);
-    text-decoration: none
-}
-
-a:active {
-    color: var(--maho-accent-strong);
-    text-decoration: none
-}
-
 a.error span {
     color: var(--maho-error)!important
-}
-
-strong {
-    font-weight: 600
-}
-
-b {
-    font-weight: 600
-}
-
-small {
-    font-size: var(--maho-text-sm);
-    color: var(--maho-ink)
 }
 
 .wrapper {

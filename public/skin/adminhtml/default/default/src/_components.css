@@ -1,0 +1,269 @@
+/*
+ * Maho admin theme - semantic layer.
+ *
+ * Maps the class contract of the admin markup (templates, PHP blocks, JS) onto
+ * Tailwind utilities and DaisyUI components with @apply, so no template changes.
+ *
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ */
+
+@layer components {
+    /*
+     * Buttons. Every <button> is a button: Mage_Adminhtml_Block_Widget_Button writes
+     * <button class="scalable save">, and extensions write plain <button> elements.
+     * @apply puts the DaisyUI declarations in sub-layers, so a plain declaration of
+     * the base rule wins over a modifier such as d-btn-primary: variants set the
+     * --d-btn-* variables themselves.
+     */
+    button, .form-button {
+        @apply d-btn;
+        box-sizing: border-box;
+        --d-size: 1.75rem;
+        --d-btn-p: var(--maho-space-4);
+        /* The legacy skin never set a button font, so buttons keep the browser default */
+        --d-fontsize: 13.3333px;
+        --d-btn-color: var(--maho-btn2-bg);
+        --d-btn-fg: var(--maho-btn2-ink);
+        --d-btn-border: var(--maho-btn2-border);
+        gap: 0.25em;
+        font-weight: 500;
+        line-height: 26px;
+        border-radius: var(--maho-radius-sm);
+        outline-color: var(--maho-focus-ring);
+        outline-offset: 1px;
+
+        &:hover {
+            --d-btn-bg: var(--maho-btn2-bg-hover);
+            --d-btn-border: var(--maho-border-strong);
+            background-color: var(--d-btn-bg);
+        }
+
+        &:active {
+            translate: none;
+        }
+
+        & span {
+            padding: 0;
+            background: none;
+        }
+    }
+
+    button.save, button.ok_button, button.add, .form-button.ok_button {
+        --d-btn-color: var(--color-primary);
+        --d-btn-fg: var(--color-primary-content);
+        --d-btn-border: transparent;
+        font-weight: 600;
+
+        &:hover, &:active {
+            --d-btn-bg: var(--maho-btn-bg-hover);
+            --d-btn-fg: var(--maho-btn-ink-hover);
+            --d-btn-border: transparent;
+        }
+    }
+
+    button.cancel, button.delete, button.fail, button.cancel_button {
+        --d-btn-fg: var(--color-error);
+        --d-btn-border: color-mix(in srgb, var(--color-error) 55%, transparent);
+
+        &:hover {
+            --d-btn-bg: var(--maho-error-bg);
+            --d-btn-border: var(--color-error);
+        }
+    }
+
+    button.back {
+        --d-btn-color: transparent;
+        --d-btn-border: transparent;
+        gap: var(--maho-space-2);
+
+        &::before {
+            content: "«";
+        }
+    }
+
+    button.icon-btn {
+        width: auto !important;
+
+        & span {
+            text-indent: 0;
+            width: auto;
+            display: inline;
+        }
+    }
+
+    button.large, .form-button.large {
+        --d-size: auto;
+        --d-btn-p: var(--maho-space-5);
+        --d-fontsize: var(--maho-text-2xl);
+        padding-block: var(--maho-space-3);
+        font-weight: 600;
+        line-height: 1.2;
+        border-radius: var(--maho-radius-md);
+    }
+
+    button.disabled, .form-button.disabled, button[disabled], .form-button[disabled], fieldset[disabled] button {
+        @apply d-btn-disabled;
+        background-color: var(--d-btn-bg);
+        color: var(--d-btn-fg);
+        opacity: 0.5;
+    }
+
+    /*
+     * Form controls. The DaisyUI width (20rem) and flex box do not fit the dense admin
+     * layout, so a control keeps its natural width unless a layout rule sets one.
+     */
+    input[type=date], input[type=time], input[type=datetime-local] {
+        font-family: "Lucida Grande", Verdana, Arial, Helvetica, sans-serif;
+        font-size: var(--maho-text-xs);
+        padding: var(--maho-space-1) var(--maho-space-2);
+        border: 1px solid var(--maho-border-strong);
+        border-radius: 2px;
+        background: var(--maho-surface);
+
+        &:focus {
+            border-color: var(--maho-link);
+            outline: 0;
+            box-shadow: 0 0 2px color-mix(in srgb, var(--maho-focus-ring) 30%, transparent);
+        }
+    }
+
+    input.input-text {
+        @apply d-input;
+    }
+
+    textarea {
+        @apply d-textarea;
+    }
+
+    select {
+        @apply d-select;
+    }
+
+    input.input-text, textarea, select {
+        --d-size: 1.75rem;
+        --d-input-color: var(--maho-control-border);
+        box-sizing: border-box;
+        display: inline-block;
+        width: auto;
+        min-height: 0;
+        height: var(--d-size);
+        margin: 0;
+        padding: var(--maho-space-1) var(--maho-space-2);
+        font: 400 var(--maho-text-md)/1.33 var(--maho-font-sans);
+        background-color: var(--maho-control-bg);
+        color: var(--maho-control-ink);
+        border: 1px solid var(--d-input-color);
+        border-radius: var(--maho-radius-sm);
+        box-shadow: none;
+        white-space: normal;
+        vertical-align: middle;
+        transition: border-color var(--maho-duration-fast) var(--maho-ease), box-shadow var(--maho-duration-fast) var(--maho-ease);
+
+        &:focus {
+            --d-input-color: var(--maho-focus-ring);
+            outline: 0;
+            box-shadow: 0 0 0 2px color-mix(in srgb, var(--maho-focus-ring) 25%, transparent);
+        }
+
+        &::placeholder {
+            color: var(--maho-control-placeholder);
+            opacity: 1;
+        }
+
+        &::-webkit-calendar-picker-indicator {
+            position: static;
+        }
+
+        &:disabled, &.disabled {
+            border-color: var(--d-input-color);
+            background: var(--maho-surface-sunken);
+            color: var(--maho-control-ink);
+        }
+    }
+
+    textarea {
+        height: auto;
+        overflow: auto;
+        appearance: auto;
+        vertical-align: baseline;
+    }
+
+    /* A custom chevron, so single-line selects honor height and padding and line up with text inputs */
+    select {
+        appearance: none;
+        text-transform: none;
+        white-space: pre;
+
+        & option {
+            border-radius: 0;
+            white-space: nowrap;
+        }
+
+        & optgroup option:first-child {
+            margin-top: 0;
+        }
+
+        &.multiselect option {
+            padding: var(--maho-space-1) var(--maho-space-2);
+            border-bottom: 1px solid var(--maho-border-soft);
+        }
+
+        &:not([multiple]):not([size]) {
+            padding-right: var(--maho-space-5);
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10' fill='none' stroke='%23888888' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 3.5 5 6.5 8 3.5'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right var(--maho-space-2) center;
+            background-size: 10px;
+        }
+
+        &:is([multiple], [size]) {
+            height: auto;
+            white-space: nowrap;
+            padding: var(--maho-space-2);
+            background-image: none;
+
+            & option {
+                padding: var(--maho-space-2) var(--maho-space-3);
+            }
+
+            & option:checked {
+                background: linear-gradient(color-mix(in srgb, var(--maho-accent) 30%, var(--maho-control-bg)), color-mix(in srgb, var(--maho-accent) 30%, var(--maho-control-bg)));
+                color: var(--maho-control-ink);
+                font-weight: 600;
+            }
+
+            & optgroup {
+                padding: var(--maho-space-2) 0 0 var(--maho-space-2);
+                font-weight: 600;
+                font-style: normal;
+                color: var(--maho-ink-muted);
+            }
+        }
+
+        & optgroup {
+            font-style: normal;
+            font-weight: 600;
+        }
+
+        & optgroup option {
+            padding-left: var(--maho-space-3);
+        }
+
+        & optgroup option.even {
+            background: var(--maho-surface-sunken);
+        }
+    }
+
+    input.input-color {
+        border-width: 1px;
+        border-style: solid;
+        border-color: var(--maho-border-strong) var(--maho-control-border) var(--maho-control-border) var(--maho-border-strong);
+        background: var(--maho-surface);
+        font-size: var(--maho-text-sm);
+    }
+
+    input[type=checkbox], input[type=radio] {
+        accent-color: var(--maho-accent);
+    }
+}

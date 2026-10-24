@@ -21,6 +21,7 @@ composer test:pgsql                # Same, against PostgreSQL (also: test:sqlite
 ./maho db:query "QUERY"            # One-shot SQL query
 
 ./maho dev:frontend:theme:build    # Compile the Tailwind skins (--theme, --watch)
+./maho dev:admin:theme:build       # Compile the Tailwind admin skin (--watch)
 ./maho dev:frontend:theme:create   # Scaffold a new theme
 ./maho dev:frontend:theme:export   # Write the admin theme settings out as a theme.css
 npm install                        # Build toolchain, also copies the pinned JS libs into public/js
