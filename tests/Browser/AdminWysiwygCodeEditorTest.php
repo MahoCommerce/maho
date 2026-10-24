@@ -14,7 +14,8 @@ uses(MahoBrowserTestCase::class)->group('browser');
 /**
  * The plain HTML view of the content editor is CodeMirror. It writes the textarea that the form
  * saves, it completes the Tailwind classes of the theme inside a `class` attribute, and it marks
- * a class that the storefront does not style.
+ * a class that the storefront does not style. The Source button shows it inside the editor, also
+ * in fullscreen, and Edit HTML opens the HTML of one element in a dialog.
  */
 
 const CODE_EDITOR_ADMIN_USER = 'wysiwyg-code-admin';
@@ -131,4 +132,77 @@ it('marks a class that the storefront does not style', function () {
 
     expect($page->script('[...document.querySelectorAll(".cm-lintRange-warning")].map((range) => range.textContent)'))
         ->toBe(['txet-center']);
+});
+
+it('shows the source inside the editor with the Source button, and reads it back', function () {
+    $page = adminLoginAndVisit(
+        CODE_EDITOR_ADMIN_USER,
+        CODE_EDITOR_ADMIN_PASSWORD,
+        '/admin/cms_block/edit/block_id/' . $this->block->getId(),
+        '#block_content',
+    );
+    waitForScript($page, '!!window.tiptapEditors?.get("block_content")?.codeEditor', 20);
+
+    $page->script('document.querySelector("#block_content_toolbar button[data-source]").click()');
+    expect($page->script('window.tiptapEditors.get("block_content").wrapper.contains(window.tiptapEditors.get("block_content").codeEditor.dom)'))->toBeTrue()
+        ->and($page->script('window.tiptapEditors.get("block_content").isTiptapActive()'))->toBeFalse()
+        ->and($page->script('[...document.querySelectorAll("#block_content_toolbar button:not(:disabled)")].map((button) => button.title)'))
+        ->toContain('Source')
+        ->not->toContain('Bold');
+
+    $page->script(<<<'JS'
+        (() => {
+            const view = window.tiptapEditors.get('block_content').codeEditor.view;
+            view.dispatch({ changes: { from: 0, insert: '<h2>From the source</h2>' } });
+        })()
+        JS);
+    expect($page->script('document.getElementById("block_content").value'))->toContain('<h2>From the source</h2>');
+
+    $page->script('document.querySelector("#block_content_toolbar button[data-source]").click()');
+    expect($page->script('window.tiptapEditors.get("block_content").isTiptapActive()'))->toBeTrue()
+        ->and($page->script('window.tiptapEditors.get("block_content").editor.getHTML()'))->toContain('<h2>From the source</h2>');
+});
+
+it('edits the HTML of one cell from its popup menu, in one step that undo reverts', function () {
+    $this->block->setContent(
+        '<div data-type="maho-columns" data-preset="2-equal" data-gap="medium" data-style="none">'
+        . '<div data-type="maho-column"><p>Left</p></div>'
+        . '<div data-type="maho-column" class="card"><p>Right</p></div>'
+        . '</div>',
+    )->save();
+    $page = adminLoginAndVisit(
+        CODE_EDITOR_ADMIN_USER,
+        CODE_EDITOR_ADMIN_PASSWORD,
+        '/admin/cms_block/edit/block_id/' . $this->block->getId(),
+        '#block_content',
+    );
+    waitForScript($page, '!!window.tiptapEditors?.get("block_content")?.codeEditor', 20);
+
+    $page->script('document.querySelectorAll(".ProseMirror [data-type=\\"maho-columns\\"] .cell-badge")[1].click()');
+    $page->script('document.querySelector("#block_content_cell_bubble_menu button[title=\\"Edit HTML\\"]").click()');
+    waitForScript($page, '!!document.querySelector("#tiptap-element-source")?.codeView');
+
+    expect($page->script('document.querySelector("#tiptap-element-source").codeView.state.doc.toString()'))
+        ->toContain('class="card"')
+        ->toContain('<p>Right</p>')
+        ->not->toContain('Left');
+
+    $page->script(<<<'JS'
+        (() => {
+            const view = document.querySelector('#tiptap-element-source').codeView;
+            view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: '<div data-type="maho-column" class="card card-border"><p>Right side</p></div>' } });
+            [...document.querySelectorAll('#tiptap-element-source button')].find((button) => button.textContent.trim() === 'Update').click();
+        })()
+        JS);
+    waitForScript($page, '!document.querySelector("#tiptap-element-source")');
+
+    expect($page->script('window.tiptapEditors.get("block_content").editor.getHTML()'))
+        ->toContain('class="card card-border"')
+        ->toContain('<p>Right side</p>')
+        ->toContain('<p>Left</p>');
+
+    $page->script('window.tiptapEditors.get("block_content").editor.commands.undo()');
+    expect($page->script('window.tiptapEditors.get("block_content").editor.getHTML()'))
+        ->toContain('<p>Right</p>')
+        ->not->toContain('Right side');
 });

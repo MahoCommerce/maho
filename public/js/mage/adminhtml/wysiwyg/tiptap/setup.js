@@ -4,6 +4,7 @@
 import * as TiptapModules from './extensions.js';
 import { blockButtons, blockDropdown } from './blocks.js';
 import { MahoCodeEditor } from './code-editor.js';
+import { MahoElementSource, openElementSource } from './element-source.js';
 import { html_beautify } from 'https://esm.sh/js-beautify@2.0.3/js/lib/beautify-html.js';
 
 class tiptapWysiwygSetup {
@@ -20,6 +21,7 @@ class tiptapWysiwygSetup {
         this.textarea = document.getElementById(this.id);
         this.storeId = config.store_id ?? 0;
         this.invalidContent = null;
+        this.sourceMode = false;
         this.notice = null;
         this.sanitizePreview = null;
 
@@ -260,8 +262,9 @@ class tiptapWysiwygSetup {
         this.textarea.dispatchEvent(new Event('change', { bubbles: false, cancelable: true }));
     }
 
+    /** False in the source view: the textarea then holds the content, as in the plain view. */
     isTiptapActive() {
-        return this.wrapper?.checkVisibility() ?? false;
+        return !this.sourceMode && (this.wrapper?.checkVisibility() ?? false);
     }
 
     /**
@@ -294,18 +297,19 @@ class tiptapWysiwygSetup {
     ];
 
     /**
-     * List what the editor removes from `rawValue`, or null.
+     * List what the editor removes from `rawValue`, or null. `html` is what the editor made of
+     * it, by default the content of the editor.
      *
      * TipTap `enableContentCheck` finds the missing elements but not the missing attributes.
      * This compares the two documents instead. TipTap also adds markup, which is not a loss.
      */
-    findDroppedContent(rawValue) {
+    findDroppedContent(rawValue, html = null) {
         if (!this.editor) {
             return null;
         }
 
         const before = this.indexContent(this.convertFromPlain(rawValue));
-        const after = this.indexContent(this.editor.getHTML(), true);
+        const after = this.indexContent(html ?? this.editor.getHTML(), true);
 
         const removedTags = new Set();
         for (const [tag, count] of before.tags) {
@@ -372,8 +376,7 @@ class tiptapWysiwygSetup {
         return tiptapWysiwygSetup.tagAliases[element.localName] ?? element.localName;
     }
 
-    describeDroppedContent(limit = 6) {
-        const dropped = this.invalidContent ?? [];
+    describeDroppedContent(limit = 6, dropped = this.invalidContent ?? []) {
         if (dropped.length <= limit) {
             return dropped.join(', ');
         }
@@ -402,6 +405,19 @@ class tiptapWysiwygSetup {
     }
 
     toggle() {
+        if (this.sourceMode) {
+            // From the source view to the plain view under the field. The rich text editor does
+            // not read the content on the way, so nothing that it cannot keep is lost.
+            this.placeSource(false);
+            this.codeEditor.show(true);
+            toggleVis(this.wrapper, false);
+            for (const button of this.getPluginButtons()) {
+                toggleVis(button, true);
+            }
+            this.updateContentNotice();
+            this.sanitizePreview?.check();
+            return false;
+        }
         const enabled = !this.isTiptapActive();
         if (enabled) {
             this.syncPlainToWysiwyg();
@@ -424,6 +440,71 @@ class tiptapWysiwygSetup {
         }
         this.sanitizePreview?.check();
         return enabled;
+    }
+
+    /**
+     * Switch between the rich text editor and the source view, which shows the code editor in
+     * its place, also in fullscreen. The way back asks before it removes HTML that the rich text
+     * editor cannot keep.
+     */
+    toggleSource() {
+        if (!this.sourceMode) {
+            this.syncWysiwygToPlain();
+            this.placeSource(true);
+            this.codeEditor.view.focus();
+            return;
+        }
+        this.syncPlainToWysiwyg();
+        if (!this.confirmContentLoss()) {
+            return;
+        }
+        this.placeSource(false);
+        this.syncWysiwygToPlain(true);
+        this.sanitizePreview?.check();
+    }
+
+    /** Put the code editor in place of the content of the rich text editor, or back under the field. */
+    placeSource(on) {
+        this.sourceMode = on;
+        this.wrapper.classList.toggle('is-source', on);
+        const content = this.wrapper.querySelector('.tiptap-content');
+        if (on) {
+            content.before(this.codeEditor.dom);
+        } else {
+            this.textarea.after(this.codeEditor.dom);
+        }
+        this.codeEditor.show(on);
+        toggleVis(content, !on);
+        // The controls before the spacer change the rich text, so they wait for the way back
+        const toolbar = document.getElementById(`${this.id}_toolbar`);
+        for (const control of toolbar.querySelectorAll('button, select')) {
+            if (!control.closest('.toolbar-spacer ~ .toolbar-group')) {
+                control.disabled = on;
+            }
+        }
+        toolbar.querySelector('button[data-source]')?.classList.toggle('is-active', on);
+    }
+
+    /**
+     * Open the HTML of the element of the popup menu `menu`: the node that its badge names in
+     * `data-pos`, else the innermost node of a type in `types` around the cursor.
+     */
+    editElementSource(menu, types) {
+        const { state } = this.editor;
+        let pos = menu?.dataset.pos === undefined ? null : Number(menu.dataset.pos);
+        if (pos === null || !types.includes(state.doc.nodeAt(pos)?.type.name)) {
+            pos = null;
+            const { $from } = state.selection;
+            for (let depth = $from.depth; depth > 0 && pos === null; depth--) {
+                if (types.includes($from.node(depth).type.name)) {
+                    pos = $from.before(depth);
+                }
+            }
+        }
+        if (pos !== null) {
+            menu?.style.setProperty('display', 'none');
+            openElementSource(this, pos);
+        }
     }
 
     turnOn() {
@@ -600,6 +681,7 @@ class tiptapWysiwygSetup {
                 TiptapModules.MahoFullscreen,
                 TiptapModules.MahoBlockMove,
                 TiptapModules.MahoButton,
+                MahoElementSource,
                 TiptapModules.DragHandle.configure({
                     nested: {
                         rules: [{
@@ -739,6 +821,9 @@ class tiptapWysiwygSetup {
             blockDropdown(this, 'accordion'),
             ...blockButtons(this, ['Insert Image', 'Insert Slideshow', 'Insert Widget', 'Insert Variable']),
             { type: 'spacer' },
+            { type: 'button', title: 'Source', icon: 'source', onClick: () => this.toggleSource(), data: { source: '' } },
+            // Fullscreen has a group of its own: CSS pins that group to the end of the first row
+            { type: 'group' },
             // The command focuses the editor without a scroll. The focus() of a toolbar chain scrolls to the selection
             { type: 'button', title: 'Fullscreen Page Builder', icon: 'fullscreen-maximize', onClick: () => this.editor.commands.toggleFullscreen(), data: { command: 'toggleFullscreen', args: '[]' }, enabled: !this.textarea.closest('dialog') },
         ]);
@@ -794,6 +879,7 @@ class tiptapWysiwygSetup {
                     { title: 'Toggle Header Row', command: 'toggleHeaderRow', icon: 'table-row' },
                 ],
             },
+            { type: 'button', title: 'Edit HTML', icon: 'source', onClick: (event) => this.editElementSource(event.currentTarget.closest('.tiptap-bubble-menu'), ['table']) },
             { type: 'button', title: 'Delete Table', command: 'deleteTable', icon: 'trash' },
         ]);
 
@@ -823,6 +909,7 @@ class tiptapWysiwygSetup {
             { type: 'button', title: 'Boxed', icon: 'bleed-boxed', command: 'setColumnsBleed', args: ['boxed'], data: { bleed: 'boxed' } },
             { type: 'button', title: 'Full width', icon: 'bleed-full', command: 'setColumnsBleed', args: ['full'], data: { bleed: 'full' } },
             { type: 'separator' },
+            { type: 'button', title: 'Edit HTML', icon: 'source', onClick: (event) => this.editElementSource(event.currentTarget.closest('.tiptap-bubble-menu'), ['mahoColumns']) },
             { type: 'button', title: 'Delete Columns', icon: 'trash', command: 'deleteColumns' },
         ]);
 
@@ -851,6 +938,7 @@ class tiptapWysiwygSetup {
             { type: 'button', title: 'Boxed', icon: 'bleed-boxed', command: 'setBentoBleed', args: ['boxed'], data: { bleed: 'boxed' } },
             { type: 'button', title: 'Full width', icon: 'bleed-full', command: 'setBentoBleed', args: ['full'], data: { bleed: 'full' } },
             { type: 'separator' },
+            { type: 'button', title: 'Edit HTML', icon: 'source', onClick: (event) => this.editElementSource(event.currentTarget.closest('.tiptap-bubble-menu'), ['mahoBentoGrid']) },
             { type: 'button', title: 'Delete Bento Grid', icon: 'trash', command: 'deleteBentoGrid' },
         ]);
 
@@ -864,6 +952,8 @@ class tiptapWysiwygSetup {
         const bubbleMenu = this.createToolbar([
             { type: 'label', text: 'Background:' },
             { type: 'select', options: [['none', 'None'], ['muted', 'Muted'], ['primary', 'Primary'], ['neutral', 'Neutral'], ['accent', 'Accent']], data: { backgroundSelect: '' }, onChange: (e) => this.editor.chain().focus().setCellBackground(e.target.value).run() },
+            { type: 'separator' },
+            { type: 'button', title: 'Edit HTML', icon: 'source', onClick: (event) => this.editElementSource(event.currentTarget.closest('.tiptap-bubble-menu'), ['mahoColumn', 'mahoBentoCell']) },
         ]);
 
         bubbleMenu.id = `${this.id}_cell_bubble_menu`;
@@ -881,6 +971,7 @@ class tiptapWysiwygSetup {
             { type: 'button', title: 'Add Item', icon: 'plus', command: 'addAccordionItem' },
             { type: 'button', title: 'Delete Item', icon: 'row-remove', command: 'deleteAccordionItem' },
             { type: 'separator' },
+            { type: 'button', title: 'Edit HTML', icon: 'source', onClick: (event) => this.editElementSource(event.currentTarget.closest('.tiptap-bubble-menu'), ['mahoAccordion']) },
             { type: 'button', title: 'Delete Accordion', icon: 'trash', command: 'deleteAccordion' },
         ]);
 
@@ -906,6 +997,9 @@ class tiptapWysiwygSetup {
                 const separator = document.createElement('div');
                 separator.className = 'toolbar-separator';
                 toolbar.append(separator);
+                group = addGroup();
+            }
+            else if (item.type === 'group') {
                 group = addGroup();
             }
             else if (item.type === 'spacer') {
@@ -1128,6 +1222,7 @@ class tiptapWysiwygSetup {
         'valign-bottom': '<path d="M4 20h16"/><path d="M12 4v12"/><path d="M8 12l4 4l4 -4"/>',
 
         // Insert icons
+        'source': '<path d="M7 8l-4 4l4 4"/><path d="M17 8l4 4l-4 4"/><path d="M14 4l-4 16"/>',
         'link': '<path d="M9 15l6 -6"/><path d="M11 6l.463 -.536a5 5 0 0 1 7.071 7.072l-.534 .464"/><path d="M13 18l-.397 .534a5.068 5.068 0 0 1 -7.127 0a4.972 4.972 0 0 1 0 -7.071l.524 -.463"/>',
         'image': '<path d="M15 8h.01"/><path d="M3 6a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v12a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3v-12z"/><path d="M3 16l5 -5c.928 -.893 2.072 -.893 3 0l5 5"/><path d="M14 14l1 -1c.928 -.893 2.072 -.893 3 0l3 3"/>',
         'table': '<path d="M3 5a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-14z"/><path d="M3 10h18"/><path d="M10 3v18"/>',

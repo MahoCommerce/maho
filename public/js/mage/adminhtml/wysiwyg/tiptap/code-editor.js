@@ -46,13 +46,94 @@ const isClassValue = (state, node) => {
     return name !== null && name !== undefined && state.sliceDoc(name.from, name.to).toLowerCase() === 'class';
 };
 
+/** The completion options of each class list, so a list builds them once. */
+const optionsOf = new WeakMap();
+
+const completeClass = async (setup, context) => {
+    const word = context.matchBefore(CLASS_NAME);
+    if (word === null || (word.from === word.to && !context.explicit)) {
+        return null;
+    }
+    const names = await listClasses(setup);
+    if (!names) {
+        return null;
+    }
+    if (!optionsOf.has(names)) {
+        optionsOf.set(names, [
+            ...names.variants.map((label) => ({ label, type: 'keyword', boost: -1 })),
+            ...names.classes.map((label) => ({ label, type: 'class' })),
+        ]);
+    }
+    // After a variant such as `md:`, the completion starts again with the next part
+    return {
+        from: word.from + word.text.lastIndexOf(':') + 1,
+        options: optionsOf.get(names),
+        validFor: /^[^\s"'{}:]*$/,
+    };
+};
+
+const lintClasses = async (setup, view) => {
+    const { state } = view;
+    const found = [];
+    syntaxTree(state).iterate({
+        enter: (node) => {
+            if (!isClassValue(state, node.node)) {
+                return;
+            }
+            for (const match of state.sliceDoc(node.from, node.to).matchAll(/[^\s"']+/g)) {
+                if (!/[{}]/.test(match[0])) {
+                    found.push({ from: node.from + match.index, to: node.from + match.index + match[0].length, name: match[0] });
+                }
+            }
+        },
+    });
+    const unknown = new Set(await findUnknownClasses(setup, [...new Set(found.map((item) => item.name))]) ?? []);
+    // An edit during the check moved the positions. The linter runs again for that edit.
+    if (unknown.size === 0 || view.state.doc !== state.doc) {
+        return [];
+    }
+    return found.filter((item) => unknown.has(item.name)).map((item) => ({
+        from: item.from,
+        to: item.to,
+        severity: 'warning',
+        message: setup.translate('No style found for the class "%s". Check the spelling. A daisyUI class that the theme does not use gets its style after the save.', item.name),
+    }));
+};
+
+/**
+ * A CodeMirror view for the HTML of the editor of `setup`, in `parent`. Inside a `class`
+ * attribute, the completion offers the classes of the store view, and the linter marks a class
+ * that the storefront does not style.
+ */
+export const createCodeView = (setup, parent, doc, extensions = []) => new EditorView({
+    parent,
+    doc,
+    extensions: [
+        basicSetup,
+        // html() of lang-html, with one completion source. Its own source also answers in a
+        // `class` value, with no options, and the list then opens at the start of the value.
+        new LanguageSupport(htmlLanguage, [
+            htmlLanguage.data.of({
+                autocomplete: (context) => (isClassValue(context.state, syntaxTree(context.state).resolveInner(context.pos, -1))
+                    ? completeClass(setup, context)
+                    : htmlCompletionSource(context)),
+            }),
+            autoCloseTags,
+            javascript().support,
+            css().support,
+        ]),
+        syntaxHighlighting(HIGHLIGHT),
+        THEME,
+        EditorView.lineWrapping,
+        linter((view) => lintClasses(setup, view), { delay: 750 }),
+        ...extensions,
+    ],
+});
+
 /**
  * The plain HTML editor of a content field: CodeMirror in place of the textarea. The textarea
  * stays the form field. Each change writes it and fires `input`, so the form, the sanitizer and
  * the assistant read it as before.
- *
- * Inside a `class` attribute, the completion offers the classes of the store view, and the linter
- * marks a class that the storefront does not style.
  */
 export class MahoCodeEditor {
     constructor(setup) {
@@ -63,35 +144,18 @@ export class MahoCodeEditor {
         // CodeMirror gives its root `display: flex !important`, so the wrapper is what hides
         this.dom = document.createElement('div');
         this.dom.className = 'maho-code-editor';
-        this.view = new EditorView({
-            parent: this.dom,
-            doc: this.textarea.value,
-            extensions: [
-                basicSetup,
-                // html() of lang-html, with one completion source. Its own source also answers in a
-                // `class` value, with no options, and the list then opens at the start of the value.
-                new LanguageSupport(htmlLanguage, [
-                    htmlLanguage.data.of({ autocomplete: (context) => this.complete(context) }),
-                    autoCloseTags,
-                    javascript().support,
-                    css().support,
-                ]),
-                syntaxHighlighting(HIGHLIGHT),
-                THEME,
-                EditorView.lineWrapping,
-                linter((view) => this.lintClasses(view), { delay: 750 }),
-                EditorView.updateListener.of((update) => {
-                    if (update.docChanged) {
-                        this.write();
-                    }
-                    // A textarea fires `change` when it loses the focus after an edit
-                    if (update.focusChanged && !update.view.hasFocus && this.changed) {
-                        this.changed = false;
-                        this.notify('change');
-                    }
-                }),
-            ],
-        });
+        this.view = createCodeView(setup, this.dom, this.textarea.value, [
+            EditorView.updateListener.of((update) => {
+                if (update.docChanged) {
+                    this.write();
+                }
+                // A textarea fires `change` when it loses the focus after an edit
+                if (update.focusChanged && !update.view.hasFocus && this.changed) {
+                    this.changed = false;
+                    this.notify('change');
+                }
+            }),
+        ]);
         this.textarea.after(this.dom);
         toggleVis(this.textarea, false);
         this.textarea.mahoCodeEditor = this;
@@ -153,65 +217,6 @@ export class MahoCodeEditor {
 
     contains(element) {
         return this.dom.contains(element);
-    }
-
-    complete(context) {
-        return isClassValue(context.state, syntaxTree(context.state).resolveInner(context.pos, -1))
-            ? this.completeClass(context)
-            : htmlCompletionSource(context);
-    }
-
-    async completeClass(context) {
-        const word = context.matchBefore(CLASS_NAME);
-        if (word === null || (word.from === word.to && !context.explicit)) {
-            return null;
-        }
-        const names = await listClasses(this.setup);
-        if (!names) {
-            return null;
-        }
-        // The names change with the store view of the preview
-        if (this.optionsOf !== names) {
-            this.optionsOf = names;
-            this.options = [
-                ...names.variants.map((label) => ({ label, type: 'keyword', boost: -1 })),
-                ...names.classes.map((label) => ({ label, type: 'class' })),
-            ];
-        }
-        // After a variant such as `md:`, the completion starts again with the next part
-        return {
-            from: word.from + word.text.lastIndexOf(':') + 1,
-            options: this.options,
-            validFor: /^[^\s"'{}:]*$/,
-        };
-    }
-
-    async lintClasses(view) {
-        const { state } = view;
-        const found = [];
-        syntaxTree(state).iterate({
-            enter: (node) => {
-                if (!isClassValue(state, node.node)) {
-                    return;
-                }
-                for (const match of state.sliceDoc(node.from, node.to).matchAll(/[^\s"']+/g)) {
-                    if (!/[{}]/.test(match[0])) {
-                        found.push({ from: node.from + match.index, to: node.from + match.index + match[0].length, name: match[0] });
-                    }
-                }
-            },
-        });
-        const unknown = new Set(await findUnknownClasses(this.setup, [...new Set(found.map((item) => item.name))]) ?? []);
-        // An edit during the check moved the positions. The linter runs again for that edit.
-        if (unknown.size === 0 || view.state.doc !== state.doc) {
-            return [];
-        }
-        return found.filter((item) => unknown.has(item.name)).map((item) => ({
-            from: item.from,
-            to: item.to,
-            severity: 'warning',
-            message: this.setup.translate('No style found for the class "%s". Check the spelling. A daisyUI class that the theme does not use gets its style after the save.', item.name),
-        }));
     }
 
     destroy() {

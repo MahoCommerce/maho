@@ -329,7 +329,8 @@ export class MahoPreviewPane {
                 data.delete(name);
             }
         }
-        data.set(this.setup.textarea.name, this.setup.convertToPlain(this.editor.getHTML()));
+        // In the source view, the textarea holds the content
+        data.set(this.setup.textarea.name, this.setup.isTiptapActive() ? this.setup.convertToPlain(this.editor.getHTML()) : this.setup.textarea.value);
         data.set('preview_entity', this.config.entity);
         data.set('preview_store', String(this.storeId));
         data.set('preview_context', this.contextId);

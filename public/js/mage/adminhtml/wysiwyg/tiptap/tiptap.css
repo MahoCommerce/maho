@@ -691,8 +691,10 @@
         padding: 8px;
         background: none !important;
 
+        /* A click on the label opens the HTML of the element */
         &::before {
             content: attr(data-div-info);
+            cursor: pointer;
             position: absolute;
             top: -10px;
             left: 8px;
@@ -1003,6 +1005,29 @@
 @keyframes dropdownFadeInUp {
     from { opacity: 0; transform: translateY(4px); }
     to { opacity: 1; transform: translateY(0); }
+}
+
+/* The source view: the code editor in place of the content */
+.tiptap-wrapper.is-source .maho-code-editor {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+
+    .cm-editor {
+        flex: 1;
+        border: none;
+        border-radius: 0;
+    }
+
+    .cm-scroller {
+        min-height: 0;
+        max-height: none;
+    }
+}
+
+.tiptap-wrapper.is-source.tiptap-page-builder .maho-code-editor {
+    margin-left: var(--tt-blocks-width);
+    margin-right: var(--tt-preview-width);
 }
 
 /* ========================================
