@@ -167,7 +167,7 @@ abstract class Mage_Dataflow_Model_Convert_Action_Abstract implements Mage_Dataf
             $container = $this->getProfile()->getContainer((string) $actionNode['use']);
         } else {
             $this->setParam('class', $this->getClassNameByType((string) $actionNode['type']));
-            $container = $action->getContainer();
+            $container = $this->getContainer();
         }
         $this->setContainer($container);
         if ($this->getParam('name')) {

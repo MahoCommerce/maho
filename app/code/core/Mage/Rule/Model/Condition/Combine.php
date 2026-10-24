@@ -252,7 +252,11 @@ class Mage_Rule_Model_Condition_Combine extends Mage_Rule_Model_Condition_Abstra
                     $cond = $this->_getNewConditionModelInstance($condArr['type']);
                     if ($cond) {
                         $this->addCondition($cond);
-                        $cond->loadArray($condArr, $key);
+                        if ($cond instanceof self) {
+                            $cond->loadArray($condArr, $key);
+                        } else {
+                            $cond->loadArray($condArr);
+                        }
                     }
                 } catch (Exception $e) {
                     Mage::logException($e);

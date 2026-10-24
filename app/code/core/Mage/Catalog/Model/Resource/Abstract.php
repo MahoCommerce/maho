@@ -239,7 +239,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
             /**
              * Update attribute value for website
              */
-            $storeIds = Mage::app()->getStore($storeId)->getWebsite()->getStoreIds(true);
+            $storeIds = Mage::app()->getStore($storeId)->getWebsite()->getStoreIds();
             foreach ($storeIds as $storeId) {
                 $bind['store_id'] = (int) $storeId;
                 $this->_attributeValuesToSave[$table][] = $bind;

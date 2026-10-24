@@ -373,7 +373,7 @@ class Config
 
     /**
      * @param string $id
-     * @return bool
+     * @return string|false
      */
     protected function _loadCache($id)
     {
@@ -432,7 +432,7 @@ class Config
         }
 
         $fileData = $this->processFileData($fileData);
-        $success = $this->loadString($fileData, $this->_elementClass);
+        $success = $this->loadString($fileData);
 
         if ($success === false) {
             \Mage::throwException('Cannot parse XML file at ' . $filePath);

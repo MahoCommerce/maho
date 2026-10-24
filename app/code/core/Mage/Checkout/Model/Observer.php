@@ -37,7 +37,7 @@ class Mage_Checkout_Model_Observer
         $quote = $observer->getEvent()->getQuote();
         /** @var Mage_Sales_Model_Quote $quote */
         if ($quote->getIsCheckoutCart()) {
-            Mage::getSingleton('checkout/session')->getQuoteId($quote->getId());
+            Mage::getSingleton('checkout/session')->setQuoteId((int) $quote->getId());
         }
     }
 

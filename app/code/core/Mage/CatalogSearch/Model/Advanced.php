@@ -273,11 +273,9 @@ class Mage_CatalogSearch_Model_Advanced extends Mage_Core_Model_Abstract
     public function getProductCollection()
     {
         if (is_null($this->_productCollection)) {
+            /** @var Mage_CatalogSearch_Model_Resource_Advanced_Collection $collection */
             $collection = $this->_engine->getAdvancedResultCollection();
             $this->prepareProductCollection($collection);
-            if (!$collection) {
-                return $collection;
-            }
             $this->_productCollection = $collection;
         }
 
