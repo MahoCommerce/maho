@@ -58,8 +58,8 @@ class Maho_Blog_Block_Adminhtml_Post_Edit extends Mage_Adminhtml_Block_Widget_Fo
             $tabsBlockJsObject = $tabsBlock->getJsObjectName();
             $tabsBlockPrefix   = $tabsBlock->getId() . '_';
         } else {
-            $tabsBlockJsObject = 'blog_post_tabsJsTabs';
-            $tabsBlockPrefix   = 'blog_post_tabs_';
+            $tabsBlockJsObject = 'post_tabsJsTabs';
+            $tabsBlockPrefix   = 'post_tabs_';
         }
 
         $this->_formScripts[] = '
