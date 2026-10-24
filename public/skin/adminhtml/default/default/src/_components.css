@@ -134,6 +134,16 @@
         border-start-end-radius: 0;
     }
 
+    /* A head can have a grid as its body: in the same .entry-edit, or after it, as on the order view */
+    :is(.entry-edit .entry-edit-head, .entry-edit:has(> .entry-edit-head:only-child)) + :is(.grid, :has(> .grid)) {
+        margin-bottom: 1rem;
+        overflow: hidden;
+        background-color: var(--color-base-100);
+        border: var(--border) solid var(--color-base-300);
+        border-top: 0;
+        border-radius: 0 0 var(--radius-box) var(--radius-box);
+    }
+
     /*
      * Side tabs: widget/tabs.phtml writes <ul class="tabs"><li><a class="tab-item-link">,
      * and tabs.js moves the active class from link to link.
