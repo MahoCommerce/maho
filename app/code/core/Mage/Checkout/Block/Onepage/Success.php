@@ -38,16 +38,6 @@ class Mage_Checkout_Block_Onepage_Success extends Mage_Core_Block_Template
     }
 
     /**
-     * Getter for recurring profile view page
-     *
-     * @return string
-     */
-    public function getProfileUrl(\Maho\DataObject $profile)
-    {
-        return $this->getUrl('sales/recurring_profile/view', ['profile' => $profile->getId()]);
-    }
-
-    /**
      * Initialize data and prepare it for output
      */
     #[\Override]
@@ -55,7 +45,6 @@ class Mage_Checkout_Block_Onepage_Success extends Mage_Core_Block_Template
     {
         $this->_prepareLastOrder();
         $this->_prepareLastBillingAgreement();
-        $this->_prepareLastRecurringProfiles();
         return parent::_beforeToHtml();
     }
 
@@ -105,39 +94,6 @@ class Mage_Checkout_Block_Onepage_Success extends Mage_Core_Block_Template
                 ]);
             }
         }
-    }
-
-    /**
-     * Prepare recurring payment profiles from the session
-     */
-    protected function _prepareLastRecurringProfiles()
-    {
-        $profileIds = Mage::getSingleton('checkout/session')->getLastRecurringProfileIds();
-        if ($profileIds && is_array($profileIds)) {
-            $collection = Mage::getModel('sales/recurring_profile')->getCollection()
-                ->addFieldToFilter('profile_id', ['in' => $profileIds])
-            ;
-            $profiles = [];
-            foreach ($collection as $profile) {
-                $profiles[] = $profile;
-            }
-            if ($profiles) {
-                $this->setRecurringProfiles($profiles);
-                if (Mage::getSingleton('customer/session')->isLoggedIn()) {
-                    $this->setCanViewProfiles();
-                }
-            }
-        }
-    }
-
-    public function setCanViewProfiles(?bool $value = true): static
-    {
-        return $this->setData('can_view_profiles', $value);
-    }
-
-    public function setRecurringProfiles(?array $value): static
-    {
-        return $this->setData('recurring_profiles', $value);
     }
 
     public function getOrderId(): ?string

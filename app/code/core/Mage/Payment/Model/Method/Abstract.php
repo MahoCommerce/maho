@@ -14,7 +14,6 @@ declare(strict_types=1);
  * @method $this initBillingAgreementToken(Mage_Sales_Model_Billing_Agreement $value)
  * @method $this placeBillingAgreement(Mage_Sales_Model_Billing_Agreement $value)
  * @method $this updateBillingAgreementStatus(Mage_Sales_Model_Billing_Agreement $value)
- * @method $this validateRecurringProfile(Mage_Payment_Model_Recurring_Profile $value)
  */
 abstract class Mage_Payment_Model_Method_Abstract extends \Maho\DataObject
 {
@@ -39,7 +38,6 @@ abstract class Mage_Payment_Model_Method_Abstract extends \Maho\DataObject
 
     public const CHECK_USE_INTERNAL          = 16;
     public const CHECK_ORDER_TOTAL_MIN_MAX   = 32;
-    public const CHECK_RECURRING_PROFILES    = 64;
     public const CHECK_ZERO_TOTAL            = 128;
 
     /** Standard applicability checks for storefront checkout flows */
@@ -125,8 +123,6 @@ abstract class Mage_Payment_Model_Method_Abstract extends \Maho\DataObject
     /** @var bool */
     protected $_canCreateBillingAgreement   = false;
 
-    /** @var bool */
-    protected $_canManageRecurringProfiles  = true;
     /**
      * TODO: whether a captured transaction may be voided by this gateway
      * This may happen when amount is captured, but not settled
@@ -344,17 +340,6 @@ abstract class Mage_Payment_Model_Method_Abstract extends \Maho\DataObject
     public function canManageBillingAgreements()
     {
         return ($this instanceof Mage_Payment_Model_Billing_Agreement_MethodInterface);
-    }
-
-    /**
-     * Whether can manage recurring profiles
-     *
-     * @return bool
-     */
-    public function canManageRecurringProfiles()
-    {
-        return $this->_canManageRecurringProfiles
-               && ($this instanceof Mage_Payment_Model_Recurring_Profile_MethodInterface);
     }
 
     /**
@@ -688,10 +673,6 @@ abstract class Mage_Payment_Model_Method_Abstract extends \Maho\DataObject
             'quote'           => $quote,
         ]);
 
-        if ($checkResult->isAvailable && $quote) {
-            $checkResult->isAvailable = $this->isApplicableToQuote($quote, self::CHECK_RECURRING_PROFILES);
-        }
-
         return $checkResult->isAvailable;
     }
 
@@ -733,16 +714,9 @@ abstract class Mage_Payment_Model_Method_Abstract extends \Maho\DataObject
                 return false;
             }
         }
-        if ($checksBitMask & self::CHECK_RECURRING_PROFILES) {
-            if (!$this->canManageRecurringProfiles() && $quote->hasRecurringItems()) {
-                return false;
-            }
-        }
         if ($checksBitMask & self::CHECK_ZERO_TOTAL) {
             $total = $quote->getBaseSubtotal() + $quote->getShippingAddress()->getBaseShippingAmount();
-            if ($total < 0.0001 && $this->getCode() != 'free'
-                && !($this->canManageRecurringProfiles() && $quote->hasRecurringItems())
-            ) {
+            if ($total < 0.0001 && $this->getCode() != 'free') {
                 return false;
             }
         }

@@ -7535,60 +7535,6 @@ div.paypal-logo span > img {
   }
 }
 /* ============================================ *
- * Recurring Profiles
- * ============================================ */
-#recurring_profile_list_view th {
-  white-space: normal;
-}
-#recurring_profile_list_view th span {
-  white-space: inherit;
-}
-@media only screen and (max-width: 479px) {
-  #recurring_profile_list_view {
-    font-size: 0.75rem;
-  }
-  #recurring_profile_list_view a {
-    font-size: inherit;
-  }
-  #recurring_profile_list_view th,
-  #recurring_profile_list_view td {
-    padding: 2px;
-  }
-}
-
-.recurring-profiles-title {
-  float: left;
-}
-.recurring-profiles-title h1 {
-  margin-bottom: 7px;
-}
-
-body.customer-account .my-account .title-buttons.recurring-profiles-title-buttons {
-  float: right;
-  text-align: right;
-  margin-bottom: 30px;
-}
-@media only screen and (max-width: 479px) {
-  body.customer-account .my-account .title-buttons.recurring-profiles-title-buttons {
-    text-align: center;
-    float: none;
-  }
-}
-body.customer-account .my-account .title-buttons.recurring-profiles-title-buttons .button {
-  position: static;
-}
-
-.recurring-profiles-messages:after {
-  content: '';
-  display: table;
-  clear: both;
-}
-
-#recurring_start_date_trig {
-  display: inline;
-}
-
-/* ============================================ *
  * Billing Agreements
  * ============================================ */
 .billing-agreements .info-box {

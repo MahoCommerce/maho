@@ -402,7 +402,6 @@ class Mage_Checkout_Model_Session extends Mage_Core_Model_Session_Abstract
             ->setRedirectUrl(null)
             ->setLastOrderId(null)
             ->setLastRealOrderId(null)
-            ->setLastRecurringProfileIds(null)
             ->setAdditionalMessages(null)
         ;
     }
@@ -600,16 +599,6 @@ class Mage_Checkout_Model_Session extends Mage_Core_Model_Session_Abstract
     public function setLastRealOrderId(?string $value): static
     {
         return $this->setData('last_real_order_id', $value);
-    }
-
-    public function getLastRecurringProfileIds(bool $clear = false): ?array
-    {
-        return $this->getData('last_recurring_profile_ids', $clear ?: null);
-    }
-
-    public function setLastRecurringProfileIds(?array $value): static
-    {
-        return $this->setData('last_recurring_profile_ids', $value);
     }
 
     public function getLastSuccessQuoteId(bool $clear = false): ?int

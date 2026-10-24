@@ -141,15 +141,6 @@ SPDX-License-Identifier: AFL-3.0
                 </checkout_payment_failed_template>
             </email>
         </template>
-        <sales>
-            <quote>
-                <totals>
-                    <nominal>
-                        <renderer>checkout/total_nominal</renderer>
-                    </nominal>
-                </totals>
-            </quote>
-        </sales>
     </global>
     <frontend>
         <secure_url>

@@ -10,13 +10,6 @@
 
 class Mage_Sales_Model_Resource_Quote_Address_Rate_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract
 {
-    /**
-     * Whether to load fixed items only
-     *
-     * @var bool
-     */
-    protected $_allowFixedOnly   = false;
-
     #[\Override]
     protected function _construct()
     {
@@ -38,30 +31,5 @@ class Mage_Sales_Model_Resource_Quote_Address_Rate_Collection extends Mage_Core_
             $this->_setIsLoaded(true);
         }
         return $this;
-    }
-
-    /**
-     * Setter for loading fixed items only
-     *
-     * @param bool $value
-     * @return $this
-     */
-    public function setFixedOnlyFilter($value)
-    {
-        $this->_allowFixedOnly = (bool) $value;
-        return $this;
-    }
-
-    /**
-     * Don't add item to the collection if only fixed are allowed and its carrier is not fixed
-     * @throws Exception
-     */
-    #[\Override]
-    public function addItem(\Maho\DataObject $rate)
-    {
-        if ($this->_allowFixedOnly && (!$rate->getCarrierInstance() || !$rate->getCarrierInstance()->isFixed())) {
-            return $this;
-        }
-        return parent::addItem($rate);
     }
 }

@@ -112,8 +112,6 @@ it('types the keys whose annotation named the wrong type', function () {
 
 it('keeps a serialized key readable as an array before the resource writes it', function () {
     $config = Mage::getModel('core/config_data')->setValue(['one' => 1]);
-    $profile = Mage::getModel('sales/recurring_profile')->setOrderInfo(['store_id' => 1]);
 
-    expect($config->getValue())->toBe(['one' => 1])
-        ->and($profile->getOrderInfo())->toBe(['store_id' => 1]);
+    expect($config->getValue())->toBe(['one' => 1]);
 });

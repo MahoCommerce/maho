@@ -109,8 +109,6 @@ function createWeeeQuoteItem(array $data = []): DataObject
 function setWeeeAddressItems(Mage_Sales_Model_Quote_Address $address, array $items): void
 {
     $address->setData('cached_items_all', $items);
-    $address->setData('cached_items_nonnominal', $items);
-    $address->setData('cached_items_nominal', []);
 }
 
 describe('Weee Total Collector Instantiation', function () {

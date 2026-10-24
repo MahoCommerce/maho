@@ -32,13 +32,6 @@ class Mage_Sales_Model_Service_Quote
     protected $_orderData = [];
 
     /**
-     * List of recurring payment profiles that may have been generated before placing the order
-     *
-     * @var array
-     */
-    protected $_recurringPaymentProfiles = [];
-
-    /**
      * Order that may be created during submission
      *
      * @var Mage_Sales_Model_Order
@@ -46,7 +39,7 @@ class Mage_Sales_Model_Service_Quote
     protected $_order = null;
 
     /**
-     * If it is true, quote will be inactivated after submitting order or nominal items
+     * If it is true, quote will be inactivated after submitting the order
      *
      * @var bool
      */
@@ -100,7 +93,6 @@ class Mage_Sales_Model_Service_Quote
      */
     public function submitOrder()
     {
-        $this->_deleteNominalItems();
         $this->_validate();
         $quote = $this->_quote;
         $isVirtual = $quote->isVirtual();
@@ -182,48 +174,16 @@ class Mage_Sales_Model_Service_Quote
     }
 
     /**
-     * Submit nominal items
-     */
-    public function submitNominalItems()
-    {
-        $this->_validate();
-        $this->_submitRecurringPaymentProfiles();
-        $this->_inactivateQuote();
-        $this->_deleteNominalItems();
-    }
-
-    /**
-     * Submit all available items
-     * All created items will be set to the object
+     * Submit the quote, and create the order when the quote has items
      */
     public function submitAll()
     {
-        // don't allow submitNominalItems() to deactivate quote
-        $shouldInactivateQuoteOld = $this->_shouldInactivateQuote;
-        $this->_shouldInactivateQuote = false;
-        try {
-            $this->submitNominalItems();
-            $this->_shouldInactivateQuote = $shouldInactivateQuoteOld;
-        } catch (Exception $e) {
-            $this->_shouldInactivateQuote = $shouldInactivateQuoteOld;
-            throw $e;
-        }
-        // no need to submit the order if there are no normal items remained
         if (!$this->_quote->getAllVisibleItems()) {
+            $this->_validate();
             $this->_inactivateQuote();
             return;
         }
         $this->submitOrder();
-    }
-
-    /**
-     * Return recurring payment profiles
-     *
-     * @return array
-     */
-    public function getRecurringPaymentProfiles()
-    {
-        return $this->_recurringPaymentProfiles;
     }
 
     /**
@@ -293,32 +253,5 @@ class Mage_Sales_Model_Service_Quote
         }
 
         return $this;
-    }
-
-    /**
-     * Submit recurring payment profiles
-     */
-    protected function _submitRecurringPaymentProfiles()
-    {
-        $profiles = $this->_quote->prepareRecurringPaymentProfiles();
-        foreach ($profiles as $profile) {
-            if (!$profile->isValid()) {
-                Mage::throwException($profile->getValidationErrors(true, true));
-            }
-            $profile->submit();
-        }
-        $this->_recurringPaymentProfiles = $profiles;
-    }
-
-    /**
-     * Get rid of all nominal items
-     */
-    protected function _deleteNominalItems()
-    {
-        foreach ($this->_quote->getAllVisibleItems() as $item) {
-            if ($item->isNominal()) {
-                $item->isDeleted(true);
-            }
-        }
     }
 }

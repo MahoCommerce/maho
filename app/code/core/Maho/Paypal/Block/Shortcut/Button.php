@@ -42,9 +42,7 @@ class Maho_Paypal_Block_Shortcut_Button extends Mage_Core_Block_Template
             }
         }
 
-        if ($quote !== null && (!$quote->validateMinimumAmount()
-            || (!$quote->getGrandTotal() && !$quote->hasNominalItems()))
-        ) {
+        if ($quote !== null && (!$quote->validateMinimumAmount() || !$quote->getGrandTotal())) {
             $this->_shouldRender = false;
             return $result;
         }

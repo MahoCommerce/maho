@@ -47,8 +47,6 @@ class Mage_Payment_Model_Method_Unavailable extends Mage_Payment_Model_Method_Ab
     protected $_canReviewPayment = false;
     #[\Override]
     protected $_canCreateBillingAgreement = false;
-    #[\Override]
-    protected $_canManageRecurringProfiles = false;
 
     protected string $_originalCode = '';
 

@@ -313,8 +313,8 @@ class Mage_Sales_Model_Resource_Quote extends Mage_Sales_Model_Resource_Abstract
     }
 
     /**
-     * Deletes the uploaded option files of quotes that no quote item, wishlist item or recurring
-     * profile names, and returns how many it deleted
+     * Deletes the uploaded option files of quotes that no quote item or wishlist item names, and
+     * returns how many it deleted
      *
      * The file name is the hash of the file content, so a merged cart, a cart with the same upload or
      * a wishlist item can name the file of another cart. A file younger than $minAge seconds is kept,
@@ -358,7 +358,6 @@ class Mage_Sales_Model_Resource_Quote extends Mage_Sales_Model_Resource_Abstract
         $sources = [
             'sales/quote_item_option' => ['option_id', 'value'],
             'wishlist/item_option' => ['option_id', 'value'],
-            'sales/recurring_profile' => ['profile_id', 'order_item_info'],
         ];
         foreach ($sources as $tableAlias => [$idColumn, $valueColumn]) {
             try {
@@ -391,8 +390,7 @@ class Mage_Sales_Model_Resource_Quote extends Mage_Sales_Model_Resource_Abstract
     }
 
     /**
-     * Mount paths of the quote copies that an option value names, at any depth, since a recurring
-     * profile keeps the option values inside its buy request
+     * Mount paths of the quote copies that an option value names, at any depth
      *
      * @return list<string>
      */

@@ -1292,8 +1292,6 @@ class Mage_Checkout_Service_Cart
         // was called before the item was added (e.g. during cart creation), the cache is stale.
         foreach ($quote->getAllAddresses() as $address) {
             $address->unsetData('cached_items_all');
-            $address->unsetData('cached_items_nominal');
-            $address->unsetData('cached_items_nonnominal');
         }
 
         $quote->setTotalsCollectedFlag(false);

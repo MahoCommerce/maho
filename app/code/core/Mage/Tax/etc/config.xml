@@ -98,7 +98,7 @@ SPDX-License-Identifier: AFL-3.0
                 <totals>
                     <tax_subtotal>
                         <class>tax/sales_total_quote_subtotal</class>
-                        <after>subtotal,nominal,freeshipping</after>
+                        <after>subtotal,freeshipping</after>
                         <before>tax,discount</before>
                     </tax_subtotal>
                     <tax_shipping>
@@ -130,16 +130,6 @@ SPDX-License-Identifier: AFL-3.0
                         <admin_renderer>adminhtml/sales_order_create_totals_grandtotal</admin_renderer>
                     </grand_total>
                 </totals>
-                <nominal_totals>
-                    <nominal_tax_subtotal>
-                        <class>tax/sales_total_quote_nominal_subtotal</class>
-                        <sort_order>500</sort_order>
-                    </nominal_tax_subtotal>
-                    <nominal_tax>
-                        <class>tax/sales_total_quote_nominal_tax</class>
-                        <sort_order>750</sort_order>
-                    </nominal_tax>
-                </nominal_totals>
             </quote>
         </sales>
         <pdf>
