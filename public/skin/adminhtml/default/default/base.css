@@ -877,6 +877,10 @@ ul.tabs a.error span.error,ul.tabs-horiz a.error span.error {
     color: var(--maho-error-strong)
 }
 
+ul.tabs a.changed span.changed + span.error,ul.tabs-horiz a.changed span.changed + span.error {
+    margin-left: var(--maho-space-1)
+}
+
 ul.tabs span.changed svg,ul.tabs span.error svg,ul.tabs-horiz span.changed svg,ul.tabs-horiz span.error svg {
     width: 20px;
     height: 20px
