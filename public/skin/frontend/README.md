@@ -122,6 +122,12 @@ CLI (`npm install` in the Maho root):
   a checkout agreement, a design footer field, or a WYSIWYG attribute of a
   product or a category queues a build. The build runs one minute later in the
   `slow` queue pool.
+- A queue worker must run the build. Cron starts one, or supervisord or systemd
+  keeps `./maho queue:work` running. Without a worker, the build stays in the
+  queue, and a cache flush does not start it. The Preview pane of the editor
+  still shows the new classes, because it compiles them in the browser, but
+  the storefront does not. On a development store with no cron, run
+  `./maho theme:content:build` after the save.
 - The build reads the `class` attributes of that content, compiles a copy of
   `css/styles.css` with them, and writes it to `media/theme/`. The page head
   then links the copy instead of the committed file.
