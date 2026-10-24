@@ -25,6 +25,8 @@
 @source not "../../../../../../public/js/mage/adminhtml/**/*.js";
 @source not "../../../../../../public/js/deep-chat.js";
 @source not "../../../../../../public/js/tailwindcss-browser.js";
+@source not "../../../../../../public/js/tailwindcss-design.js";
+@source not "../../../../../../public/js/codemirror.js";
 @source "../../../../../../public/skin/frontend/*/*/js/**/*.js";
 
 /* CMS pages, static blocks and widgets live in the database. theme:content:build

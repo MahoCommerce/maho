@@ -36,7 +36,7 @@ class tiptapWysiwygSetup {
         if (config.hidden || this.invalidContent !== null) {
             this.showPluginButtons(true);
         } else {
-            this.showRichText();
+            this.showRichText(false);
         }
         this.updateContentNotice();
 
@@ -418,8 +418,11 @@ class tiptapWysiwygSetup {
         return false;
     }
 
-    /** The way back asks before it removes HTML that the rich text editor cannot keep. */
-    showRichText() {
+    /**
+     * The way back asks before it removes HTML that the rich text editor cannot keep. With `write`,
+     * the textarea gets the HTML that the editor cleaned. The page load leaves the textarea as it is.
+     */
+    showRichText(write = true) {
         this.syncPlainToWysiwyg();
         if (!this.confirmContentLoss()) {
             this.updateContentNotice();
@@ -428,8 +431,10 @@ class tiptapWysiwygSetup {
         this.placeSource(false);
         this.showPluginButtons(false);
         this.updateContentNotice();
-        // The editor cleaned the content. The old answer of the sanitizer is out of date.
-        this.syncWysiwygToPlain(true);
+        if (write) {
+            // The editor cleaned the content. The old answer of the sanitizer is out of date.
+            this.syncWysiwygToPlain(true);
+        }
         this.sanitizePreview?.check();
         return true;
     }
