@@ -3,7 +3,7 @@
 
 import * as TiptapModules from './extensions.js';
 import { blockButtons, blockDropdown } from './blocks.js';
-import { MahoCodeEditor } from './code-editor.js';
+import { MahoCodeEditor, createHtmlView } from './code-editor.js';
 import { MahoElementSource, openElementSource } from './element-source.js';
 import { html_beautify } from 'https://esm.sh/js-beautify@2.0.3/js/lib/beautify-html.js';
 
@@ -546,7 +546,7 @@ class tiptapWysiwygSetup {
         this.textarea.after(this.wrapper);
 
         // The source view takes the place of the content, inside the editor
-        this.codeEditor = new MahoCodeEditor(this, container);
+        this.codeEditor = new MahoCodeEditor(this.textarea, container, (parent, doc, extensions) => createHtmlView(this, parent, doc, extensions));
 
         // Initialize Tiptap
         this.editor = new TiptapModules.Editor({

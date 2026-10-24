@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: OSL-3.0
 
 import {
-    EditorView, basicSetup, htmlLanguage, htmlCompletionSource, autoCloseTags, css, javascript,
+    EditorView, basicSetup, htmlLanguage, htmlCompletionSource, autoCloseTags, css, javascript, xml,
     HighlightStyle, LanguageSupport, syntaxHighlighting, syntaxTree, tags, linter,
+    Decoration, MatchDecorator, ViewPlugin,
 } from '../../../../codemirror.js';
 import { findUnknownClasses, listClasses } from './class-check.js';
 
@@ -28,7 +29,7 @@ const THEME = EditorView.theme({
         fontSize: '13px',
     },
     '&.cm-focused': { outline: '2px solid var(--maho-focus-ring, #647004)', outlineOffset: '-1px' },
-    '.cm-scroller': { fontFamily: 'Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace', minHeight: '20rem', maxHeight: '70vh' },
+    '.cm-scroller': { fontFamily: 'Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace', maxHeight: '70vh' },
     '.cm-gutters': { backgroundColor: 'var(--maho-surface-sunken, #f1f1f1)', color: 'var(--maho-ink-muted, #666)', borderRight: '1px solid var(--maho-border-soft, #ddd)' },
     '.cm-activeLine, .cm-activeLineGutter': { backgroundColor: 'light-dark(rgba(0, 0, 0, .04), rgba(255, 255, 255, .05))' },
     '.cm-cursor': { borderLeftColor: 'var(--maho-ink, #1c1c1c)' },
@@ -105,7 +106,7 @@ const lintClasses = async (setup, view) => {
  * attribute, the completion offers the classes of the store view, and the linter marks a class
  * that the storefront does not style.
  */
-export const createCodeView = (setup, parent, doc, extensions = []) => new EditorView({
+export const createHtmlView = (setup, parent, doc, extensions = []) => new EditorView({
     parent,
     doc,
     extensions: [
@@ -124,8 +125,38 @@ export const createCodeView = (setup, parent, doc, extensions = []) => new Edito
         ]),
         syntaxHighlighting(HIGHLIGHT),
         THEME,
+        EditorView.theme({ '.cm-scroller': { minHeight: '20rem' } }),
         EditorView.lineWrapping,
         linter((view) => lintClasses(setup, view), { delay: 750 }),
+        ...extensions,
+    ],
+});
+
+const VARIABLE = new MatchDecorator({
+    regexp: /\{\{[^{}]+\}\}/g,
+    decoration: Decoration.mark({ class: 'cm-variable' }),
+});
+
+/** Colors a variable such as {{store_name}}, which the XML parser reads as plain text. */
+const VARIABLES = ViewPlugin.define((view) => ({
+    decorations: VARIABLE.createDeco(view),
+    update(update) {
+        this.decorations = VARIABLE.updateDeco(update, this.decorations);
+    },
+}), { decorations: (plugin) => plugin.decorations });
+
+/** A CodeMirror view for XML with {{...}} variables, such as the header of a product feed. */
+export const createXmlView = (parent, doc, extensions = []) => new EditorView({
+    parent,
+    doc,
+    extensions: [
+        basicSetup,
+        xml(),
+        VARIABLES,
+        syntaxHighlighting(HIGHLIGHT),
+        THEME,
+        EditorView.theme({ '.cm-variable': { color: 'light-dark(#8250df, #d2a8ff)' } }),
+        EditorView.lineWrapping,
         ...extensions,
     ],
 });
@@ -136,15 +167,15 @@ export const createCodeView = (setup, parent, doc, extensions = []) => new Edito
  * `input`, so the form, the sanitizer and the assistant read it as before.
  */
 export class MahoCodeEditor {
-    constructor(setup, content) {
-        this.setup = setup;
-        this.textarea = setup.textarea;
+    /** `createView(parent, doc, extensions)` makes the view, such as createXmlView(). */
+    constructor(textarea, content, createView) {
+        this.textarea = textarea;
         this.writing = false;
         this.changed = false;
         // CodeMirror gives its root `display: flex !important`, so the wrapper is what hides
         this.dom = document.createElement('div');
         this.dom.className = 'maho-code-editor';
-        this.view = createCodeView(setup, this.dom, this.textarea.value, [
+        this.view = createView(this.dom, this.textarea.value, [
             EditorView.updateListener.of((update) => {
                 if (update.docChanged) {
                     this.write();
