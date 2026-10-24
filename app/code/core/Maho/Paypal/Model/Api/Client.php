@@ -218,7 +218,10 @@ class Maho_Paypal_Model_Api_Client
 
     public function generateClientToken(): string
     {
-        $cacheId = 'PAYPAL_CLIENT_TOKEN_' . hash('sha256', (int) $this->_isSandbox() . '|' . $this->_getClientId());
+        $cacheId = 'PAYPAL_CLIENT_TOKEN_' . hash(
+            'sha256',
+            implode('|', [(int) $this->_isSandbox(), $this->_getClientId(), $this->_getClientSecret()]),
+        );
         $cached = Mage::app()->loadCache($cacheId);
         if (is_string($cached) && $cached !== '') {
             return $cached;
