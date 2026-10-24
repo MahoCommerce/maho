@@ -15,6 +15,12 @@
 @source "../../../../../../vendor/*/*/app/design/adminhtml/*/*/template/apiplatform/oauth/consent.phtml";
 
 @layer base {
+    /* These pages are not dense: they keep the DaisyUI default sizes */
+    :root {
+        --size-field: 0.25rem;
+        --size-selector: 0.25rem;
+    }
+
     body {
         font-family: var(--font-sans);
         -webkit-text-size-adjust: 100%;

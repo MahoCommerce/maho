@@ -53,10 +53,11 @@
     --color-error-content: light-dark(#faece6, #2e1b15);
 
     --radius-selector: 4px;
-    --radius-field: 6px;
+    --radius-field: 4px;
     --radius-box: 10px;
-    --size-selector: 0.25rem;
-    --size-field: 0.25rem;
+    /* The admin is dense: the md size of a button or a control is 1.75rem, of a checkbox 1.05rem */
+    --size-selector: 0.175rem;
+    --size-field: 0.175rem;
     --border: 1px;
     --depth: 0;
     --noise: 0;
@@ -143,7 +144,7 @@
         --maho-space-9: 3.125rem;   /* 50px */
 
         --maho-radius-sm: var(--radius-selector);
-        --maho-radius-md: var(--radius-field);
+        --maho-radius-md: 6px;
         --maho-radius-lg: var(--radius-box);
         --maho-radius-pill: 999px;
 

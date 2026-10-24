@@ -133,6 +133,14 @@
         vertical-align: middle
     }
 
+    /* From Preflight, which stays out until the legacy reset is gone */
+    button,input,select,optgroup,textarea {
+        box-sizing: border-box;
+        font: inherit;
+        letter-spacing: inherit;
+        color: inherit
+    }
+
     textarea {
         overflow: auto
     }

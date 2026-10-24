@@ -3,6 +3,7 @@
  *
  * Maps the class contract of the admin markup (templates, PHP blocks, JS) onto
  * Tailwind utilities and DaisyUI components with @apply, so no template changes.
+ * The DaisyUI defaults apply: the theme variables set the admin density.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -12,123 +13,51 @@
     /*
      * Buttons. Every <button> is a button: Mage_Adminhtml_Block_Widget_Button writes
      * <button class="scalable save">, and extensions write plain <button> elements.
-     * @apply puts the DaisyUI declarations in sub-layers, so a plain declaration of
-     * the base rule wins over a modifier such as d-btn-primary: variants set the
-     * --d-btn-* variables themselves.
+     * A plain declaration here wins over the @apply sub-layers, so keep it out.
      */
     button, .form-button {
         @apply d-btn;
-        box-sizing: border-box;
-        --d-size: 1.75rem;
-        --d-btn-p: var(--maho-space-4);
-        /* The legacy skin never set a button font, so buttons keep the browser default */
-        --d-fontsize: 13.3333px;
-        --d-btn-color: var(--maho-btn2-bg);
-        --d-btn-fg: var(--maho-btn2-ink);
-        --d-btn-border: var(--maho-btn2-border);
-        gap: 0.25em;
-        font-weight: 500;
-        line-height: 26px;
-        border-radius: var(--maho-radius-sm);
-        outline-color: var(--maho-focus-ring);
-        outline-offset: 1px;
+    }
+
+    /* The default DaisyUI button has the color of the page, so a button without a variant is white with a border */
+    :is(button, .form-button):not(.save, .ok_button, .add, .cancel, .delete, .fail, .cancel_button, .back, .disabled, [disabled]) {
+        --d-btn-bg: var(--color-base-100);
+        --d-btn-border: var(--color-base-300);
 
         &:hover {
-            --d-btn-bg: var(--maho-btn2-bg-hover);
-            --d-btn-border: var(--maho-border-strong);
-            background-color: var(--d-btn-bg);
-        }
-
-        &:active {
-            translate: none;
-        }
-
-        & span {
-            padding: 0;
-            background: none;
+            --d-btn-bg: var(--color-base-200);
         }
     }
 
     button.save, button.ok_button, button.add, .form-button.ok_button {
-        --d-btn-color: var(--color-primary);
-        --d-btn-fg: var(--color-primary-content);
-        --d-btn-border: transparent;
-        font-weight: 600;
-
-        &:hover, &:active {
-            --d-btn-bg: var(--maho-btn-bg-hover);
-            --d-btn-fg: var(--maho-btn-ink-hover);
-            --d-btn-border: transparent;
-        }
+        @apply d-btn-primary;
     }
 
     button.cancel, button.delete, button.fail, button.cancel_button {
-        --d-btn-fg: var(--color-error);
-        --d-btn-border: color-mix(in srgb, var(--color-error) 55%, transparent);
-
-        &:hover {
-            --d-btn-bg: var(--maho-error-bg);
-            --d-btn-border: var(--color-error);
-        }
+        @apply d-btn-error d-btn-outline;
     }
 
     button.back {
-        --d-btn-color: transparent;
-        --d-btn-border: transparent;
-        gap: var(--maho-space-2);
+        @apply d-btn-ghost;
 
         &::before {
             content: "«";
         }
     }
 
-    button.icon-btn {
-        width: auto !important;
-
-        & span {
-            text-indent: 0;
-            width: auto;
-            display: inline;
-        }
-    }
-
     button.large, .form-button.large {
-        --d-size: auto;
-        --d-btn-p: var(--maho-space-5);
-        --d-fontsize: var(--maho-text-2xl);
-        padding-block: var(--maho-space-3);
-        font-weight: 600;
-        line-height: 1.2;
-        border-radius: var(--maho-radius-md);
+        @apply d-btn-lg;
     }
 
-    button.disabled, .form-button.disabled, button[disabled], .form-button[disabled], fieldset[disabled] button {
+    button.disabled, .form-button.disabled, button[disabled], .form-button[disabled] {
         @apply d-btn-disabled;
-        background-color: var(--d-btn-bg);
-        color: var(--d-btn-fg);
-        opacity: 0.5;
     }
 
     /*
-     * Form controls. The DaisyUI width (20rem) and flex box do not fit the dense admin
-     * layout, so a control keeps its natural width unless a layout rule sets one.
+     * Form controls. The DaisyUI width (20rem) does not fit the dense admin layout,
+     * so a control keeps its natural width unless a layout rule sets one.
      */
-    input[type=date], input[type=time], input[type=datetime-local] {
-        font-family: "Lucida Grande", Verdana, Arial, Helvetica, sans-serif;
-        font-size: var(--maho-text-xs);
-        padding: var(--maho-space-1) var(--maho-space-2);
-        border: 1px solid var(--maho-border-strong);
-        border-radius: 2px;
-        background: var(--maho-surface);
-
-        &:focus {
-            border-color: var(--maho-link);
-            outline: 0;
-            box-shadow: 0 0 2px color-mix(in srgb, var(--maho-focus-ring) 30%, transparent);
-        }
-    }
-
-    input.input-text {
+    input.input-text, input:is([type=date], [type=time], [type=datetime-local]) {
         @apply d-input;
     }
 
@@ -136,134 +65,264 @@
         @apply d-textarea;
     }
 
+    /* A base-select takes the width of the selected option, so the layout would move on each change */
     select {
         @apply d-select;
+        appearance: none;
     }
 
-    input.input-text, textarea, select {
-        --d-size: 1.75rem;
-        --d-input-color: var(--maho-control-border);
-        box-sizing: border-box;
-        display: inline-block;
+    input.input-text, input:is([type=date], [type=time], [type=datetime-local]), textarea, select {
         width: auto;
-        min-height: 0;
-        height: var(--d-size);
-        margin: 0;
-        padding: var(--maho-space-1) var(--maho-space-2);
-        font: 400 var(--maho-text-md)/1.33 var(--maho-font-sans);
-        background-color: var(--maho-control-bg);
-        color: var(--maho-control-ink);
-        border: 1px solid var(--d-input-color);
-        border-radius: var(--maho-radius-sm);
-        box-shadow: none;
-        white-space: normal;
-        vertical-align: middle;
-        transition: border-color var(--maho-duration-fast) var(--maho-ease), box-shadow var(--maho-duration-fast) var(--maho-ease);
+    }
 
-        &:focus {
-            --d-input-color: var(--maho-focus-ring);
-            outline: 0;
-            box-shadow: 0 0 0 2px color-mix(in srgb, var(--maho-focus-ring) 25%, transparent);
-        }
+    /* The price helper writes <strong>[EUR]</strong> after the field: align it with the field text */
+    .form-list td.value input.input-text + strong {
+        padding-inline-start: 0.75rem;
+    }
 
-        &::placeholder {
-            color: var(--maho-control-placeholder);
-            opacity: 1;
-        }
+    /* The DaisyUI list box is roomy: an admin multiselect shows ten options or more */
+    select:is([multiple], [size]) {
+        padding: var(--maho-space-1);
 
-        &::-webkit-calendar-picker-indicator {
-            position: static;
-        }
-
-        &:disabled, &.disabled {
-            border-color: var(--d-input-color);
-            background: var(--maho-surface-sunken);
-            color: var(--maho-control-ink);
+        & option {
+            padding: var(--maho-space-1) var(--maho-space-2);
         }
     }
 
     textarea {
-        height: auto;
-        overflow: auto;
-        appearance: auto;
-        vertical-align: baseline;
+        min-height: 0;
     }
 
-    /* A custom chevron, so single-line selects honor height and padding and line up with text inputs */
-    select {
-        appearance: none;
-        text-transform: none;
-        white-space: pre;
+    input[type=checkbox] {
+        @apply d-checkbox;
+    }
 
-        & option {
-            border-radius: 0;
-            white-space: nowrap;
+    input[type=radio] {
+        @apply d-radio;
+    }
+
+    /*
+     * Boxes. A .entry-edit holds one or more pairs of .entry-edit-head and .fieldset,
+     * and each pair is one card: the head is its top, the fieldset its body. The
+     * values are the ones of a d-card-sm with d-card-border.
+     */
+    .entry-edit .entry-edit-head, .entry-edit :is(fieldset, .fieldset), .box {
+        background-color: var(--color-base-100);
+        border: var(--border) solid var(--color-base-300);
+    }
+
+    .entry-edit .entry-edit-head {
+        padding: 1rem 1rem 0;
+        border-bottom: 0;
+        border-radius: var(--radius-box) var(--radius-box) 0 0;
+
+        & h4 {
+            @apply d-card-title;
+            --d-cardtitle-fs: 1rem;
+        }
+    }
+
+    .entry-edit :is(fieldset, .fieldset), .box {
+        margin-bottom: 1rem;
+        padding: 1rem;
+        border-radius: var(--radius-box);
+    }
+
+    .entry-edit .entry-edit-head + :is(fieldset, .fieldset) {
+        border-top: 0;
+        border-start-start-radius: 0;
+        border-start-end-radius: 0;
+    }
+
+    /*
+     * Side tabs: widget/tabs.phtml writes <ul class="tabs"><li><a class="tab-item-link">,
+     * and tabs.js moves the active class from link to link.
+     */
+    /* The active tab is a card with a bar on its start side */
+    ul.tabs:not(.config-tabs) {
+        @apply d-menu;
+        --d-menu-active-bg: var(--color-base-100);
+        --d-menu-active-fg: var(--color-base-content);
+        width: 100%;
+
+        & a:not(.active) {
+            color: inherit;
         }
 
-        & optgroup option:first-child {
-            margin-top: 0;
-        }
+        /* The changed and error icons sit at the end of the label span */
+        & a {
+            display: flex;
 
-        &.multiselect option {
-            padding: var(--maho-space-1) var(--maho-space-2);
-            border-bottom: 1px solid var(--maho-border-soft);
-        }
-
-        &:not([multiple]):not([size]) {
-            padding-right: var(--maho-space-5);
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10' fill='none' stroke='%23888888' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 3.5 5 6.5 8 3.5'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right var(--maho-space-2) center;
-            background-size: 10px;
-        }
-
-        &:is([multiple], [size]) {
-            height: auto;
-            white-space: nowrap;
-            padding: var(--maho-space-2);
-            background-image: none;
-
-            & option {
-                padding: var(--maho-space-2) var(--maho-space-3);
+            & > span {
+                flex: 1;
             }
-
-            & option:checked {
-                background: linear-gradient(color-mix(in srgb, var(--maho-accent) 30%, var(--maho-control-bg)), color-mix(in srgb, var(--maho-accent) 30%, var(--maho-control-bg)));
-                color: var(--maho-control-ink);
-                font-weight: 600;
-            }
-
-            & optgroup {
-                padding: var(--maho-space-2) 0 0 var(--maho-space-2);
-                font-weight: 600;
-                font-style: normal;
-                color: var(--maho-ink-muted);
-            }
         }
 
-        & optgroup {
-            font-style: normal;
+        & a.active {
+            @apply d-menu-active;
             font-weight: 600;
-        }
-
-        & optgroup option {
-            padding-left: var(--maho-space-3);
-        }
-
-        & optgroup option.even {
-            background: var(--maho-surface-sunken);
+            box-shadow: inset 3px 0 0 var(--color-secondary);
         }
     }
 
-    input.input-color {
-        border-width: 1px;
-        border-style: solid;
-        border-color: var(--maho-border-strong) var(--maho-control-border) var(--maho-control-border) var(--maho-border-strong);
-        background: var(--maho-surface);
+    /* The config sidebar groups its links as <li><dl><dt>Group</dt><dd><a>, which d-menu does not read */
+    ul.config-tabs {
+        & dl {
+            margin-bottom: 1rem;
+            padding: 0.5rem;
+            background-color: var(--color-base-100);
+            border: var(--border) solid var(--color-base-300);
+            border-radius: var(--radius-box);
+        }
+
+        & dd > a {
+            display: block;
+            padding: 0.375rem 0.75rem;
+            border-radius: var(--radius-field);
+            color: inherit;
+            font-size: 0.875rem;
+
+            &:hover {
+                background-color: color-mix(in oklab, var(--color-base-content) 10%, transparent);
+            }
+
+            &.active {
+                background-color: var(--color-base-200);
+                font-weight: 600;
+                box-shadow: inset 3px 0 0 var(--color-secondary);
+            }
+        }
+    }
+
+    /*
+     * Data grids: Mage_Adminhtml_Block_Widget_Grid writes <div class="grid"> around
+     * the table, and a form field such as the tier price writes <td class="grid">.
+     * A grid cell can hold a table of its own, which stays plain.
+     */
+    .grid table:not(.grid td table) {
+        @apply d-table d-table-sm d-table-zebra;
+    }
+
+    .grid table.border {
+        border: var(--border) solid var(--color-base-300);
+    }
+
+    .grid tr.filter :is(input.input-text, input[type=date]), .pager input.page {
+        @apply d-input-sm;
+    }
+
+    .grid tr.filter select, .pager select {
+        @apply d-select-sm;
+    }
+
+    .pager input.page {
+        width: 3rem;
+        text-align: center;
+    }
+
+    .pager select {
+        margin: 0 var(--maho-space-2);
+    }
+
+    .grid tr.headings {
+        background-color: var(--color-base-200);
+    }
+
+    .grid tr.headings th {
+        font-size: 0.6875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+
+        /* The sort arrow sits at the end of the link */
+        & a {
+            display: block;
+            color: inherit;
+        }
+
+        & span.sort-title {
+            display: block;
+            padding-inline-end: 1rem;
+        }
+    }
+
+    /*
+     * Messages. Mage_Core_Block_Messages writes one <li class="error-msg"> for each
+     * type, with one inner <li> for each message, and the frontend shares that markup.
+     */
+    .messages {
+        display: flex;
+        flex-direction: column;
+        gap: var(--maho-space-2);
+        margin-bottom: var(--maho-space-4);
+    }
+
+    .messages > li {
+        @apply d-alert d-alert-soft;
+
+        &::before {
+            content: "";
+            width: 1.25rem;
+            height: 1.25rem;
+            background: currentColor;
+            mask: var(--message-icon) center / contain no-repeat;
+        }
+
+        & a {
+            color: inherit;
+            text-decoration: underline;
+        }
+    }
+
+    .error-msg {
+        @apply d-alert-error;
+        --message-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 8v4M12 16h.01'/%3E%3C/svg%3E");
+    }
+
+    .warning-msg {
+        @apply d-alert-warning;
+        --message-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01'/%3E%3C/svg%3E");
+    }
+
+    .notice-msg {
+        @apply d-alert-info;
+        --message-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 16v-4M12 8h.01'/%3E%3C/svg%3E");
+    }
+
+    /* Grid status cells: PHP renderers write <span class="grid-severity-notice"><span>Label</span></span> */
+    :is(.grid-severity-notice, .grid-severity-minor, .grid-severity-major, .grid-severity-critical) > span {
+        @apply d-badge d-badge-soft;
+        white-space: nowrap;
+    }
+
+    .grid-severity-notice > span {
+        @apply d-badge-success;
+    }
+
+    :is(.grid-severity-minor, .grid-severity-major) > span {
+        @apply d-badge-warning;
+    }
+
+    .grid-severity-critical > span {
+        @apply d-badge-error;
+    }
+
+    /* The form validator writes this hint below a field that failed */
+    .validation-advice {
+        clear: both;
+        margin-top: var(--maho-space-1);
         font-size: var(--maho-text-sm);
+        color: var(--color-error);
     }
 
-    input[type=checkbox], input[type=radio] {
-        accent-color: var(--maho-accent);
+    .success-msg {
+        @apply d-alert-success;
+        --message-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='m8 12 3 3 5-6'/%3E%3C/svg%3E");
+    }
+}
+
+/* Scripts add these classes, so they must win over the component rules */
+@layer utilities {
+    .validation-failed {
+        --d-input-color: var(--color-error);
     }
 }

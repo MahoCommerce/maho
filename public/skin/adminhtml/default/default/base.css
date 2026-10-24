@@ -350,24 +350,6 @@ SPDX-License-Identifier: AFL-3.0
     --maho-grid-range-label: 1.25rem
 }
 
-.grid table {
-    width: 100%;
-    border: 1px solid var(--maho-border-soft);
-    border-bottom: none
-}
-
-.grid table.border {
-    border: 1px solid var(--maho-border-soft)
-}
-
-.grid tbody {
-    background: var(--maho-surface)
-}
-
-.grid tr.even,.grid tr.even tr {
-    background: var(--maho-zebra)
-}
-
 .grid tr.on-mouse {
     background: var(--maho-warning-bg);
     cursor: pointer
@@ -375,10 +357,6 @@ SPDX-License-Identifier: AFL-3.0
 
 .grid tr.invalid {
     background-color: var(--maho-error-border)
-}
-
-.grid th,.grid td {
-    padding: var(--maho-space-1) var(--maho-space-2) var(--maho-space-1) var(--maho-space-2)
 }
 
 .grid th {
@@ -417,20 +395,6 @@ SPDX-License-Identifier: AFL-3.0
 
 .grid td input.input-inactive {
     background: var(--maho-surface-page)
-}
-
-.grid table td {
-    border-width: 0 1px 1px 0;
-    border-color: var(--maho-border-soft);
-    border-style: solid
-}
-
-.grid table.border td {
-    background: var(--maho-surface)!important
-}
-
-.grid table td.first,.grid table td.last {
-    border-right: 0
 }
 
 .grid table td.product {
@@ -609,59 +573,6 @@ table.actions td {
     vertical-align: top
 }
 
-.pager select {
-    width: 4em!important;
-    margin: 0 var(--maho-space-2)
-}
-
-.pager input.page {
-    width: 2em!important
-}
-
-
-.grid tr.headings th {
-    border: 0;
-    padding-top: var(--maho-space-1);
-    padding-bottom: 0;
-    font-size: var(--maho-text-sm);
-    white-space: nowrap
-}
-
-.grid tr.headings th.last {
-    border-right: 0
-}
-
-.grid tr.headings th.no-link {
-    padding-top: var(--maho-space-1);
-    padding-bottom: var(--maho-space-1);
-    color: var(--maho-ink-soft)
-}
-
-.grid tr.headings th a {
-    display: block;
-    padding: var(--maho-space-1) var(--maho-space-2) var(--maho-space-1) 0;
-    color: var(--maho-ink-soft);
-    text-decoration: none
-}
-
-.grid tr.headings th a:hover {
-    color: var(--maho-warning);
-    text-decoration: none
-}
-
-.grid tr.headings th a.sort-arrow-desc,.grid tr.headings th a.sort-arrow-asc {
-    padding-bottom: var(--maho-space-1)
-}
-
-.grid tr.headings th span.sort-title {
-    display: block;
-    padding: var(--maho-space-1) var(--maho-space-3) var(--maho-space-2) 0;
-    line-height: 1
-}
-
-.grid tr.headings th a.sort-arrow-desc span.sort-title,.grid tr.headings th a.sort-arrow-asc span.sort-title {
-    padding: var(--maho-space-1) var(--maho-space-3) var(--maho-space-2) 0
-}
 
 .massaction {
     width: 100%;
@@ -683,11 +594,6 @@ table.actions td {
     width: auto;
     display: inline;
     margin: 0 var(--maho-space-2)
-}
-
-.massaction .entry-edit fieldset select.validation-failed {
-    border: 1px dashed var(--maho-error)!important;
-    background: var(--maho-error-bg)!important
 }
 
 .massaction .entry-edit fieldset {
@@ -821,21 +727,6 @@ table.actions td {
     width: 278px
 }
 
-.grid table tfoot tr {
-    background: var(--maho-surface-sunken)
-}
-
-.grid table tfoot tr td {
-    border-top: 2px solid var(--maho-border-strong);
-    background: var(--maho-surface-sunken);
-    font-weight: 600;
-    line-height: 1.7em
-}
-
-.grid table.border tfoot tr td {
-    background: var(--maho-surface-sunken)!important
-}
-
 .dynamic-grid th {
     padding: var(--maho-space-1);
     width: 100px
@@ -886,7 +777,7 @@ dl.accordion .grid {
     margin-bottom: 0
 }
 
-dl.accordion dt,.entry-edit .entry-edit-head {
+dl.accordion dt {
     padding: var(--maho-space-1) var(--maho-space-3)
 }
 
@@ -949,41 +840,6 @@ img.accordion-btn {
     margin-right: var(--maho-space-2)
 }
 
-ul.tabs {
-    border-top: 1px solid var(--maho-border-strong);
-    background-color: var(--maho-surface-sunken)
-}
-
-ul.tabs a,ul.tabs span {
-    display: block
-}
-
-ul.tabs a,ul.tabs a:hover {
-    text-decoration: none
-}
-
-ul.tabs a,ul.tabs a:hover {
-    color: var(--maho-ink)
-}
-
-ul.tabs a:hover {
-    background-color: var(--maho-surface-sunken)
-}
-
-ul.tabs a.active {
-    padding: 0;
-    border-bottom: 1px solid var(--maho-border-strong);
-    background: 0 0
-}
-
-ul.tabs a:hover.active {
-    padding: 0
-}
-
-ul.tabs span {
-    cursor: pointer
-}
-
 ul.tabs a > span,ul.tabs-horiz a > span {
     display: flex;
     align-items: center
@@ -992,11 +848,6 @@ ul.tabs a > span,ul.tabs-horiz a > span {
 ul.tabs span em {
     order: 1;
     margin-left: auto
-}
-
-ul.tabs a.active span,ul.tabs a:hover.active span {
-    background: var(--maho-surface);
-    font-weight: 700
 }
 
 ul.tabs a.subitem {
@@ -1086,7 +937,7 @@ ul.tabs-horiz li a.active {
     text-decoration: none
 }
 
-.error,a.error span,.required,.validation-advice {
+.error,a.error span,.required {
     color: var(--maho-error-strong)!important;
     font-weight: 700!important
 }
@@ -1095,82 +946,8 @@ ul.tabs-horiz li a.active {
     color: var(--maho-link)
 }
 
-.messages ul {
-    border: 0!important
-}
-
-.messages li {
-    margin-bottom: var(--maho-space-3)!important;
-    padding: var(--maho-space-3) var(--maho-space-6) var(--maho-space-3) var(--maho-space-7)!important;
-    font-size: var(--maho-text-sm)!important;
-    border-radius: var(--maho-radius-md)
-}
-
-.messages ul li {
-    margin: 0!important;
-    border: 0!important;
-    padding: 0!important
-}
-
 .import-start {
     margin-top: var(--maho-space-3)
-}
-
-.error-msg {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23c8401e' d='M13 13h-2V7h2m0 10h-2v-2h2M12 2A10 10 0 0 0 2 12a10 10 0 0 0 10 10 10 10 0 0 0 10-10A10 10 0 0 0 12 2z'/%3E%3C/svg%3E")!important;
-    background-repeat: no-repeat!important;
-    background-size: 16px 16px!important;
-    background-color: var(--maho-error-bg)!important;
-    background-position: 10px center!important;
-    border: 1px solid var(--maho-error-border)!important;
-    color: var(--maho-error-strong)!important
-}
-
-.success-msg {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' style='width:24px;height:24px' viewBox='0 0 24 24'%3E%3Cpath fill='%232e7d43' d='M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z' /%3E%3C/svg%3E")!important;
-    background-repeat: no-repeat!important;
-    background-size: 16px 16px!important;
-    background-color: var(--maho-success-bg)!important;
-    background-position: 10px center!important;
-    border: 1px solid var(--maho-success-border)!important;
-    color: var(--maho-success)!important
-}
-
-.notice-msg {
-    background-image: url(images/information-variant.svg)!important;
-    background-repeat: no-repeat!important;
-    background-size: 23px 23px!important;
-    background-color: var(--maho-warning-bg)!important;
-    background-position: 8px center!important;
-    border: 1px solid var(--maho-warning-border)!important;
-    color: var(--maho-ink)!important
-}
-
-.warning-msg {
-    background-image: url(images/information-variant.svg)!important;
-    background-repeat: no-repeat!important;
-    background-size: 23px 23px!important;
-    background-color: var(--maho-warning-bg)!important;
-    background-position: 8px center!important;
-    border: 1px solid var(--maho-warning-border)!important;
-    color: var(--maho-ink)!important
-}
-
-.validation-advice {
-    clear: both;
-    min-height: 15px;
-    margin-top: var(--maho-space-1);
-    padding-left: var(--maho-space-5);
-    font-size: var(--maho-text-sm);
-    font-weight: 700;
-    line-height: 1.25em;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23eb5202' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 5l0 14'/%3E%3Cpath d='M18 11l-6 -6'/%3E%3Cpath d='M6 11l6 -6'/%3E%3C/svg%3E") no-repeat 0 1px;
-    background-size: 16px 16px
-}
-
-input.validation-failed,textarea.validation-failed {
-    background: var(--maho-error-bg);
-    border: 1px dashed var(--maho-error-strong)
 }
 
 .demo-notice {
@@ -1189,21 +966,6 @@ select.countries option {
 
 table.form-edit {
     width: 100%
-}
-
-.box,.entry-edit fieldset,.entry-edit .fieldset {
-    padding: var(--maho-space-3) var(--maho-space-4);
-    margin-bottom: var(--maho-space-4)
-}
-
-.entry-edit .entry-edit-head h4 {
-    padding: 0;
-    background: 0 0;
-    margin: 0;
-    color: var(--maho-surface);
-    font-size: var(--maho-text-md);
-    line-height: 18px;
-    min-height: 0
 }
 
 .entry-edit .entry-edit-head .tools {
@@ -1732,11 +1494,6 @@ div:has(> .box-left) > :not(.box-left):not(.box-right) {
 td.divider {
     font-size: 1px;
     line-height: 0
-}
-
-.box,.entry-edit fieldset,.entry-edit .fieldset {
-    border: 1px solid var(--maho-border);
-    background: var(--maho-surface-raised)
 }
 
 .auto-scroll {
@@ -2650,18 +2407,7 @@ ul.item-options li {
 
 .product-options dd input[type=date],.product-options dd input[type=time],.product-options dd input[type=datetime-local],.product-options dd input.datetime-picker {
     width: auto;
-    min-width: 150px;
-    padding: var(--maho-space-1) var(--maho-space-2);
-    border: 1px solid var(--maho-border-strong);
-    border-radius: 2px;
-    font-family: inherit;
-    font-size: var(--maho-text-xs)
-}
-
-.product-options dd input[type=date]:focus,.product-options dd input[type=time]:focus,.product-options dd input[type=datetime-local]:focus {
-    border-color: var(--maho-link);
-    outline: 0;
-    box-shadow: 0 0 2px color-mix(in srgb, var(--maho-focus-ring) 30%, transparent)
+    min-width: 150px
 }
 
 .product-options dd .time-picker {
@@ -3759,10 +3505,6 @@ img.attribute-global {
     vertical-align: middle
 }
 
-ul.config-tabs {
-    border-top: none
-}
-
 ul.config-tabs dt {
     border-top: 1px solid var(--maho-border);
     background: var(--maho-surface-sunken);
@@ -4652,20 +4394,13 @@ ul.super-product-attributes {
     letter-spacing: -.01em
 }
 
-dl.accordion dt,.entry-edit .entry-edit-head {
+dl.accordion dt {
     background: var(--maho-surface);
     color: var(--maho-ink);
     padding: var(--maho-space-3) var(--maho-space-4) 0;
     border: 1px solid var(--maho-border-soft);
     border-bottom: 0;
     border-radius: var(--maho-radius-md) var(--maho-radius-md) 0 0
-}
-
-.box,.entry-edit .fieldset,.entry-edit fieldset {
-    border: 1px solid var(--maho-border-soft);
-    background: var(--maho-surface);
-    border-top: 0;
-    border-radius: 0 0 var(--maho-radius-md) var(--maho-radius-md)
 }
 
 #dashboard_diagram_totals {
@@ -4727,12 +4462,6 @@ dl.accordion dt,.entry-edit .entry-edit-head {
     border-style: solid
 }
 
-ul.tabs a:hover,ul.tabs a.active {
-    background: var(--maho-hairline);
-    color: var(--maho-ink);
-    transition: background var(--maho-duration-slow) var(--maho-ease)-in-out
-}
-
 dl.accordion dt.open a,dl.accordion dt a:hover,dl.accordion dt a,div.collapseable a.open,div.collapseable a:hover,div.collapseable a,.entry-edit .entry-edit-head a,.entry-edit .entry-edit-head strong {
     color: var(--maho-ink);
     font-weight: 300;
@@ -4764,32 +4493,6 @@ dl.accordion dt.open a:after,div.collapseable a.open:after {
     border-style: solid;
     border-width: 0 6px 8px 6px;
     border-color: transparent transparent var(--maho-control-placeholder) transparent
-}
-
-.warning-msg,.success-msg,.error-msg,.notice-msg {
-    border-radius: 5px;
-    margin: var(--maho-space-5) 0;
-    padding: var(--maho-space-3) var(--maho-space-6) var(--maho-space-3) var(--maho-space-7);
-    position: relative;
-    text-shadow: none
-}
-
-.grid-severity-minor,.grid-severity-major,.grid-severity-critical,.grid-severity-notice {
-    background: 0 0;
-    padding: 0;
-    height: auto
-}
-
-.grid-severity-minor span,.grid-severity-major span,.grid-severity-critical span,.grid-severity-notice span {
-    font: 400 var(--maho-text-sm)/1.33 var(--maho-font-sans);
-    padding: var(--maho-space-1) var(--maho-space-3);
-    white-space: nowrap
-}
-
-.grid-severity-minor span,.grid-severity-major span {
-    border: 0;
-    background: var(--maho-warning);
-    color: var(--maho-surface)
 }
 
 .header-right fieldset input.input-text:hover {
@@ -4897,13 +4600,6 @@ a.error span {
     margin-top: var(--maho-space-3)
 }
 
-.entry-edit .entry-edit-head h4 {
-    color: var(--maho-ink);
-    line-height: 32px;
-    font-size: var(--maho-text-lg);
-    font-weight: 600
-}
-
 .entry-edit .entry-edit-head .tools {
     line-height: 32px
 }
@@ -4917,33 +4613,6 @@ a.error span {
     height: 16px;
     margin: var(--maho-space-3) 0 0 var(--maho-space-2);
     filter: revert
-}
-
-.grid table {
-    border: 1px solid var(--maho-border-soft);
-    border-collapse: collapse;
-    font-variant-numeric: tabular-nums
-}
-
-.grid table.border {
-    border: 1px solid var(--maho-border-soft)
-}
-
-.grid table.border tfoot tr td {
-    background: var(--maho-surface)!important
-}
-
-.grid table td {
-    border: 0;
-    border-bottom: 1px solid var(--maho-hairline);
-    background: var(--maho-surface);
-    padding: var(--maho-space-3)
-}
-
-.grid table tfoot tr td {
-    border: 0;
-    border-top: 2px solid var(--maho-border-strong);
-    background: var(--maho-surface-sunken)
 }
 
 .grid table tbody tr.selected td {
@@ -5016,35 +4685,6 @@ a.error span {
     margin-top: var(--maho-space-2)
 }
 
-.grid tr.headings {
-    background: var(--maho-surface-sunken);
-    border: 0;
-    border-bottom: 2px solid var(--maho-border-strong)
-}
-
-.grid tr.headings th {
-    padding: var(--maho-space-3);
-    font-size: var(--maho-text-xs);
-    vertical-align: middle;
-    color: var(--maho-ink-soft);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: .04em
-}
-
-.grid tr.headings th a {
-    color: var(--maho-ink-soft);
-    font-weight: 600
-}
-
-.grid tr.headings th a:hover {
-    color: var(--maho-ink)
-}
-
-.grid tr.headings th a.sort-arrow-desc,.grid tr.headings th a.sort-arrow-asc {
-    color: var(--maho-ink)
-}
-
 .grid tr.headings th a.sort-arrow-desc span.sort-title {
     background: 0 0
 }
@@ -5061,19 +4701,6 @@ a.error span {
 .grid tr.headings th a.sort-arrow-asc span.sort-title:after {
     border-width: 0 4px 5px 4px;
     border-color: transparent transparent var(--maho-chartreuse-deep) transparent
-}
-
-.grid tr.headings th.no-link {
-    color: var(--maho-ink-soft);
-    padding: var(--maho-space-3)
-}
-
-.grid tr.even td {
-    background: var(--maho-zebra)
-}
-
-.grid tr.even tr td {
-    background: var(--maho-zebra)
 }
 
 .grid tbody.even tr td {
@@ -5227,60 +4854,6 @@ ul.tabs-horiz li a.active {
     box-shadow: inset 0 -2px 0 var(--maho-chartreuse-deep)
 }
 
-ul.tabs {
-    background: 0 0;
-    color: var(--maho-ink);
-    border-top: 0
-}
-
-ul.tabs dl {
-    background: var(--maho-surface);
-    border: 1px solid var(--maho-border-soft)
-}
-
-ul.tabs a {
-    background: 0 0;
-    color: var(--maho-ink-soft);
-    padding: var(--maho-space-3) var(--maho-space-4);
-    border: 0;
-    border-left: 3px solid transparent;
-    border-radius: 0 var(--maho-radius-sm) var(--maho-radius-sm) 0
-}
-
-ul.tabs a:hover {
-    background: color-mix(in srgb, var(--maho-ink) 5%, transparent);
-    color: var(--maho-ink)
-}
-
-ul.tabs a.active {
-    border-left: 3px solid var(--maho-chartreuse-deep);
-    background: var(--maho-surface);
-    color: var(--maho-ink);
-    padding: var(--maho-space-3) var(--maho-space-4);
-    font-weight: 600
-}
-
-ul.tabs a.active span {
-    padding: 0;
-    background: 0 0;
-    font-weight: 400
-}
-
-ul.tabs a:hover.active {
-    padding: var(--maho-space-3) var(--maho-space-5)
-}
-
-ul.tabs a:hover.active span {
-    background: 0 0;
-    font-weight: 400
-}
-
-ul.tabs span {
-    background: 0 0;
-    padding: 0;
-    font-weight: 400
-}
-
 ul.config-tabs dt {
     border: 0;
     font-weight: 600;
@@ -5415,12 +4988,6 @@ div.collapseable a.open {
     color: var(--maho-error)!important
 }
 
-.validation-advice {
-    color: var(--maho-error)!important;
-    font-size: var(--maho-text-sm);
-    font-weight: 600!important
-}
-
 .order-totals {
     background: var(--maho-surface);
     border: 1px solid var(--maho-border-soft)!important;
@@ -5495,18 +5062,6 @@ div.collapseable a.open {
 
 #payment_settings_ec_advanced-head {
     margin-bottom: var(--maho-space-3)
-}
-
-.grid-severity-notice span {
-    border: 0;
-    background: var(--maho-success);
-    color: var(--maho-surface)
-}
-
-.grid-severity-critical span {
-    border: 0;
-    background: var(--maho-error);
-    color: var(--maho-surface)
 }
 
 .custom-options .box {
