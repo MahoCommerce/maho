@@ -130,6 +130,36 @@ describe('the queue of a build', function () {
 
         expect(contentBuildRows())->toBe([]);
     });
+
+    it('queues one build after an import, which writes with no save', function (): void {
+        $csv = tempnam(sys_get_temp_dir(), 'import');
+        file_put_contents($csv, "sku\nA\n");
+        try {
+            (new class extends \Maho\Import\AbstractImporter {
+                #[\Override]
+                protected function requiredColumns(): array
+                {
+                    return [];
+                }
+
+                #[\Override]
+                protected function prepare(\Maho\Import\CsvFile $file, array $options): array
+                {
+                    return [];
+                }
+
+                #[\Override]
+                protected function write(\Maho\Import\CsvFile $file, array $rows, array $options, \Maho\Import\Reporter $reporter): \Maho\Import\Result
+                {
+                    return new \Maho\Import\Result();
+                }
+            })->import($csv);
+        } finally {
+            unlink($csv);
+        }
+
+        expect(contentBuildRows())->toHaveCount(1);
+    });
 });
 
 describe('the stylesheet in the page head', function () {

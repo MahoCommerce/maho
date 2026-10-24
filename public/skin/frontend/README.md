@@ -135,8 +135,9 @@ CLI (`npm install` in the Maho root):
   store serves the committed file again. A cron job queues a new build within
   15 minutes. A deploy script can run the build at once with
   `./maho theme:content:build`.
-- An import that writes to the database with SQL does not queue a build. Run
-  the command after it.
+- An import, from the admin or with `./maho import:*`, queues a build when it
+  ends. A script of your own that writes content with SQL does not. Run the
+  command after it.
 
 Without Node.js, a class outside the list does not exist in the compiled stylesheet.
 

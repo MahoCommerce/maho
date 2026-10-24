@@ -78,10 +78,12 @@ class Mage_Cms_Model_Wysiwyg_Render
                 try {
                     $design = Mage::getDesign();
                     $stylesFile = (string) $design->getFilename(Mage_Core_Model_Design_Content_Bundle::STYLES_FILE, ['_type' => 'skin']);
+                    // The admin cannot read the rules of a copy on another domain, such as a media mount on S3
+                    $contentUrl = Mage::getSingleton('core/design_content_bundle')->getUrl($stylesFile);
+                    $skinUrl = $design->getSkinUrl(Mage_Core_Model_Design_Content_Bundle::STYLES_FILE);
                     return [
-                        'head' => $this->getHeadHtml(),
-                        'styles' => Mage::getSingleton('core/design_content_bundle')->getUrl($stylesFile)
-                            ?? $design->getSkinUrl(Mage_Core_Model_Design_Content_Bundle::STYLES_FILE),
+                        'head' => $contentUrl === null ? $this->getHeadHtml() : str_replace($contentUrl, $skinUrl, $this->getHeadHtml()),
+                        'styles' => $skinUrl,
                         'css' => Mage::getModel('core/design_content_previewCss')->getCss($stylesFile) ?? '',
                     ];
                 } finally {
