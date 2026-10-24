@@ -144,6 +144,16 @@
         border-radius: 0 0 var(--radius-box) var(--radius-box);
     }
 
+    /* The side column stays in view while the main column scrolls, and a long side column scrolls on its own */
+    .columns > .side-col {
+        position: sticky;
+        top: var(--maho-space-4);
+        box-sizing: border-box;
+        max-height: calc(100dvh - 2 * var(--maho-space-4));
+        overflow-y: auto;
+        scrollbar-width: thin;
+    }
+
     /*
      * Side tabs: widget/tabs.phtml writes <ul class="tabs"><li><a class="tab-item-link">,
      * and tabs.js moves the active class from link to link.
@@ -153,6 +163,7 @@
         @apply d-menu;
         --d-menu-active-bg: var(--color-base-100);
         --d-menu-active-fg: var(--color-base-content);
+        box-sizing: border-box;
         width: 100%;
 
         & a:not(.active) {
