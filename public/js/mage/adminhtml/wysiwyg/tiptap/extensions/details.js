@@ -170,7 +170,7 @@ export const MahoAccordion = Node.create({
                 for (const button of bubbleMenu.querySelectorAll('[data-accordion-style]')) {
                     button.classList.toggle('is-active', button.dataset.accordionStyle === node.attrs.accordionStyle);
                 }
-            }, getPos);
+            });
             dom.append(badge);
 
             const contentDOM = document.createElement('div');

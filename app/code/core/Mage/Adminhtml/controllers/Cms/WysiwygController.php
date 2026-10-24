@@ -153,15 +153,15 @@ class Mage_Adminhtml_Cms_WysiwygController extends Mage_Adminhtml_Controller_Act
     }
 
     /**
-     * Send the stylesheets and the Tailwind browser build of the theme of a store view. The
-     * editor loads them in a hidden frame to find the classes that the storefront does not style.
+     * Send the stylesheets and the Tailwind source of the theme of a store view. The plain HTML
+     * editor reads them to complete class names and to find the classes that nothing styles.
      */
     #[Maho\Config\Route('/admin/cms_wysiwyg/classCheck', methods: ['POST'])]
     public function classCheckAction(): void
     {
         $store = Mage::app()->getStores()[(int) $this->getRequest()->getPost('store_id')] ?? null;
         if (!$store instanceof Mage_Core_Model_Store) {
-            $this->getResponse()->setBodyJson(['head' => '', 'styles' => '', 'tailwind' => '']);
+            $this->getResponse()->setBodyJson(['head' => '', 'styles' => '', 'css' => '']);
             return;
         }
 

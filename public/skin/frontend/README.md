@@ -134,14 +134,11 @@ CLI (`npm install` in the Maho root):
 
 Without Node.js, a class outside the list does not exist in the compiled stylesheet.
 
-In the content editor, the popup menu of a table, a layout (columns, bento grid,
-accordion) or a cell has a **CSS Classes** field for that element. For text, a
-link or a span, put the cursor in it and click **CSS Classes** in the toolbar.
-The dialog lists the element at the cursor and each element around it. With
-selected text, it can also wrap the text in a new `<span>`. The field and the
-dialog warn about a class that neither the stylesheets of the store view nor
-Tailwind style. A DaisyUI class that the theme does not use also gets this
-warning, but the build compiles it.
+To write classes, click **Show / Hide Editor** under a content field. The plain
+HTML view is a code editor. Inside a `class` attribute, it completes the classes
+of the theme stylesheet and every Tailwind utility of the theme, with variants
+such as `md:`. It marks a class that neither styles. A DaisyUI class that the
+theme does not use also gets this mark, but the build compiles it.
 
 A module adds its own content to the build with `#[Maho\Config\TailwindSource]`
 on a method that returns the HTML strings. See the class docblock for the

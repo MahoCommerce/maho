@@ -3,6 +3,7 @@
 
 import * as TiptapModules from './extensions.js';
 import { blockButtons, blockDropdown } from './blocks.js';
+import { MahoCodeEditor } from './code-editor.js';
 import { html_beautify } from 'https://esm.sh/js-beautify@2.0.3/js/lib/beautify-html.js';
 
 class tiptapWysiwygSetup {
@@ -31,7 +32,7 @@ class tiptapWysiwygSetup {
             if (this.invalidContent === null) {
                 this.turnOn();
             } else {
-                toggleVis(this.textarea, true);
+                this.codeEditor.show(true);
             }
         }
         this.updateContentNotice();
@@ -411,7 +412,7 @@ class tiptapWysiwygSetup {
         } else {
             this.syncWysiwygToPlain();
         }
-        toggleVis(this.textarea, !enabled);
+        this.codeEditor.show(!enabled);
         toggleVis(this.wrapper, enabled);
         for (const button of this.getPluginButtons()) {
             toggleVis(button, !enabled);
@@ -442,9 +443,6 @@ class tiptapWysiwygSetup {
         this.wrapper = document.createElement('div');
         this.wrapper.id = `${this.id}_wrapper`;
         this.wrapper.className = 'tiptap-wrapper no-display';
-
-        // The class rows of the popup menus, each a function that shows the classes again
-        this.classRows = [];
 
         // Create main toolbar
         const toolbar = this.createMainToolbar();
@@ -478,6 +476,9 @@ class tiptapWysiwygSetup {
 
         // Insert wrapper after textarea
         this.textarea.after(this.wrapper);
+
+        // The plain HTML editor takes the place of the textarea
+        this.codeEditor = new MahoCodeEditor(this);
 
         // Initialize Tiptap
         this.editor = new TiptapModules.Editor({
@@ -599,7 +600,6 @@ class tiptapWysiwygSetup {
                 TiptapModules.MahoFullscreen,
                 TiptapModules.MahoBlockMove,
                 TiptapModules.MahoButton,
-                TiptapModules.MahoCssClasses,
                 TiptapModules.DragHandle.configure({
                     nested: {
                         rules: [{
@@ -621,7 +621,6 @@ class tiptapWysiwygSetup {
                 if (editor.isInitialized) {
                     this.syncHandlerDebounced();
                     this.updateToolbarState();
-                    this.classRows.forEach((sync) => sync());
                 }
             },
         });
@@ -675,6 +674,8 @@ class tiptapWysiwygSetup {
         this.notice = null;
         this.sanitizePreview?.destroy();
         this.sanitizePreview = null;
+        this.codeEditor?.destroy();
+        this.codeEditor = null;
 
         this.unbindEventListeners();
     }
@@ -732,7 +733,6 @@ class tiptapWysiwygSetup {
             },
             { type: 'separator'},
             { type: 'button', title: 'Link', icon: 'link', onClick: this.linkHandler.bind(this) },
-            { type: 'button', title: 'CSS Classes', icon: 'css-classes', onClick: () => this.editor.commands.openClassDialog() },
             ...blockButtons(this, ['Button', 'Insert Table']),
             blockDropdown(this, 'columns'),
             blockDropdown(this, 'bento'),
@@ -800,7 +800,6 @@ class tiptapWysiwygSetup {
         bubbleMenu.id = `${this.id}_table_bubble_menu`;
         bubbleMenu.className = 'tiptap-bubble-menu';
         bubbleMenu.style.display = 'none';
-        this.classRows.push(TiptapModules.addClassRow(this, bubbleMenu, ['table']));
         return bubbleMenu;
     }
 
@@ -830,7 +829,6 @@ class tiptapWysiwygSetup {
         bubbleMenu.id = `${this.id}_columns_bubble_menu`;
         bubbleMenu.className = 'tiptap-bubble-menu';
         bubbleMenu.style.display = 'none';
-        this.classRows.push(TiptapModules.addClassRow(this, bubbleMenu, ['mahoColumns']));
         return bubbleMenu;
     }
 
@@ -859,7 +857,6 @@ class tiptapWysiwygSetup {
         bubbleMenu.id = `${this.id}_bento_bubble_menu`;
         bubbleMenu.className = 'tiptap-bubble-menu';
         bubbleMenu.style.display = 'none';
-        this.classRows.push(TiptapModules.addClassRow(this, bubbleMenu, ['mahoBentoGrid']));
         return bubbleMenu;
     }
 
@@ -872,7 +869,6 @@ class tiptapWysiwygSetup {
         bubbleMenu.id = `${this.id}_cell_bubble_menu`;
         bubbleMenu.className = 'tiptap-bubble-menu';
         bubbleMenu.style.display = 'none';
-        this.classRows.push(TiptapModules.addClassRow(this, bubbleMenu, ['mahoColumn', 'mahoBentoCell']));
         return bubbleMenu;
     }
 
@@ -891,7 +887,6 @@ class tiptapWysiwygSetup {
         bubbleMenu.id = `${this.id}_accordion_bubble_menu`;
         bubbleMenu.className = 'tiptap-bubble-menu';
         bubbleMenu.style.display = 'none';
-        this.classRows.push(TiptapModules.addClassRow(this, bubbleMenu, ['mahoAccordion']));
         return bubbleMenu;
     }
 
@@ -1133,7 +1128,6 @@ class tiptapWysiwygSetup {
         'valign-bottom': '<path d="M4 20h16"/><path d="M12 4v12"/><path d="M8 12l4 4l4 -4"/>',
 
         // Insert icons
-        'css-classes': '<path d="M7 4a2 2 0 0 0 -2 2v3a2 3 0 0 1 -2 3a2 3 0 0 1 2 3v3a2 2 0 0 0 2 2"/><path d="M17 4a2 2 0 0 1 2 2v3a2 3 0 0 0 2 3a2 3 0 0 0 -2 3v3a2 2 0 0 1 -2 2"/>',
         'link': '<path d="M9 15l6 -6"/><path d="M11 6l.463 -.536a5 5 0 0 1 7.071 7.072l-.534 .464"/><path d="M13 18l-.397 .534a5.068 5.068 0 0 1 -7.127 0a4.972 4.972 0 0 1 0 -7.071l.524 -.463"/>',
         'image': '<path d="M15 8h.01"/><path d="M3 6a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v12a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3v-12z"/><path d="M3 16l5 -5c.928 -.893 2.072 -.893 3 0l5 5"/><path d="M14 14l1 -1c.928 -.893 2.072 -.893 3 0l3 3"/>',
         'table': '<path d="M3 5a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-14z"/><path d="M3 10h18"/><path d="M10 3v18"/>',

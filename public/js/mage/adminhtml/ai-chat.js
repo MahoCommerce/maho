@@ -832,7 +832,7 @@ class MahoAiAssistant {
             const element = event.target;
             const field = ['INPUT', 'TEXTAREA', 'SELECT'].includes(element.tagName)
                 ? element
-                : [...(window.tiptapEditors?.values() ?? [])].find((editor) => editor.wrapper?.contains(element))?.textarea;
+                : [...(window.tiptapEditors?.values() ?? [])].find((editor) => editor.wrapper?.contains(element) || editor.codeEditor?.contains(element))?.textarea;
             if (field?.id && !field.closest('#ai-chat-panel')) {
                 this.changedFields.add(field.id);
             }

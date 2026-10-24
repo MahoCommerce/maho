@@ -185,13 +185,13 @@ describe('endpoint', function () {
 });
 
 describe('class check', function () {
-    it('sends the stylesheets of the store view and the Tailwind browser build of its theme', function () {
+    it('sends the stylesheets of the store view and the Tailwind source of its theme', function () {
         $result = wysiwygRenderer()->renderStyles($this->storeId);
 
         expect($result['styles'])->toContain('styles.css')
             ->and($result['head'])->toContain(strtok($result['styles'], '?'))
-            ->and($result['tailwind'])->toContain(Mage_Core_Model_Design_Content_PreviewCss::SCRIPT)
-            ->and($result['tailwind'])->toContain('<style type="text/tailwindcss">');
+            ->and($result['css'])->toContain('@theme reference {')
+            ->and($result['css'])->toContain('@import "tailwindcss/utilities.css"');
     });
 
     it('lets an admin with no CMS resource call it, for the editor of a product', function () {
@@ -216,6 +216,6 @@ describe('class check', function () {
         $response = new Mage_Core_Controller_Response_Http();
         (new Mage_Adminhtml_Cms_WysiwygController($request, $response))->classCheckAction();
 
-        expect(Mage::helper('core')->jsonDecode($response->getBody()))->toBe(['head' => '', 'styles' => '', 'tailwind' => '']);
+        expect(Mage::helper('core')->jsonDecode($response->getBody()))->toBe(['head' => '', 'styles' => '', 'css' => '']);
     });
 });

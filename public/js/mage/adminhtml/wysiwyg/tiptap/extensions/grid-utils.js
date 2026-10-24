@@ -134,10 +134,8 @@ export function findParentNodeOfType(nodeType) {
  * @param {Object} editor - TipTap editor instance
  * @param {string} storageName - Key in editor.storage holding the bubble menu ref
  * @param {Function} [onOpen] - (bubbleMenu) => sync the menu to the current node before showing it
- * @param {Function} [getPos] - The position of the node. The badge is clicked without moving the
- *     cursor, so the menu keeps it in `data-pos`
  */
-export function createBadge(label, editor, storageName, onOpen, getPos) {
+export function createBadge(label, editor, storageName, onOpen) {
     const badge = document.createElement('button');
     badge.type = 'button';
     badge.className = 'grid-badge';
@@ -154,9 +152,6 @@ export function createBadge(label, editor, storageName, onOpen, getPos) {
         const bubbleMenu = editor.storage[storageName]?.bubbleMenu;
         if (!bubbleMenu) return;
 
-        if (getPos) {
-            bubbleMenu.dataset.pos = getPos();
-        }
         onOpen?.(bubbleMenu);
 
         // Position below the badge, and pull the menu back when it would
@@ -230,7 +225,7 @@ export function createGridNodeView(config) {
 
             // Extension-specific bubble menu updates
             config.onBadgeClick?.(node, bubbleMenu, editor);
-        }, getPos);
+        });
 
         dom.appendChild(badge);
 
@@ -412,8 +407,11 @@ export function createCellNodeView(config) {
         config.setDataAttrs(dom, node);
 
         const badge = createBadge(config.badgeLabel, editor, config.storageName, (bubbleMenu) => {
+            // The badge is clicked without moving the cursor, so the menu
+            // remembers which cell it was opened for
+            bubbleMenu.dataset.pos = getPos();
             config.onBadgeClick?.(node, bubbleMenu);
-        }, getPos);
+        });
         badge.classList.add('cell-badge');
         dom.appendChild(badge);
 
