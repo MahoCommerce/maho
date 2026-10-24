@@ -202,23 +202,4 @@ class Mage_Sales_Model_Resource_Order_Collection extends Mage_Sales_Model_Resour
             ->where('sbao.agreement_id IN(?)', $agreements);
         return $this;
     }
-
-    /**
-     * Add filter by specified recurring profile id(s)
-     *
-     * @param array|int $ids
-     * @return $this
-     */
-    public function addRecurringProfilesFilter($ids)
-    {
-        $ids = (is_array($ids)) ? $ids : [$ids];
-        $this->getSelect()
-            ->joinInner(
-                ['srpo' => $this->getTable('sales/recurring_profile_order')],
-                'main_table.entity_id = srpo.order_id',
-                [],
-            )
-            ->where('srpo.profile_id IN(?)', $ids);
-        return $this;
-    }
 }

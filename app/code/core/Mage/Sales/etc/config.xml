@@ -7,7 +7,7 @@ SPDX-License-Identifier: AFL-3.0
 <config>
     <modules>
         <Mage_Sales>
-            <version>2.0.2</version>
+            <version>2.0.3</version>
         </Mage_Sales>
     </modules>
     <global>
@@ -476,12 +476,6 @@ SPDX-License-Identifier: AFL-3.0
                 <base_hidden_tax_amount>
                     <to_order_item>*</to_order_item>
                 </base_hidden_tax_amount>
-                <is_recurring>
-                    <to_order_item>*</to_order_item>
-                </is_recurring>
-                <is_nominal>
-                    <to_order_item>*</to_order_item>
-                </is_nominal>
             </sales_convert_quote_item>
             <sales_convert_order>
                 <customer_id>
@@ -971,12 +965,6 @@ SPDX-License-Identifier: AFL-3.0
                     <creditmemo_comment>
                         <table>sales_flat_creditmemo_comment</table>
                     </creditmemo_comment>
-                    <recurring_profile>
-                        <table>sales_recurring_profile</table>
-                    </recurring_profile>
-                    <recurring_profile_order>
-                        <table>sales_recurring_profile_order</table>
-                    </recurring_profile_order>
                     <order_tax>
                         <table>sales_order_tax</table>
                     </order_tax>
@@ -1136,13 +1124,8 @@ SPDX-License-Identifier: AFL-3.0
         <sales>
             <quote>
                 <totals>
-                    <nominal>
-                        <class>sales/quote_address_total_nominal</class>
-                        <before>subtotal</before>
-                    </nominal>
                     <subtotal>
                         <class>sales/quote_address_total_subtotal</class>
-                        <after>nominal</after>
                         <before>grand_total</before>
                     </subtotal>
                     <shipping>
@@ -1159,24 +1142,6 @@ SPDX-License-Identifier: AFL-3.0
                         <before>grand_total</before>
                     </msrp>
                 </totals>
-                <nominal_totals>
-                    <recurring_initial_fee>
-                        <class>sales/quote_address_total_nominal_recurring_initial</class>
-                        <sort_order>10</sort_order>
-                    </recurring_initial_fee>
-                    <recurring_trial_payment>
-                        <class>sales/quote_address_total_nominal_recurring_trial</class>
-                        <sort_order>50</sort_order>
-                    </recurring_trial_payment>
-                    <nominal_subtotal>
-                        <class>sales/quote_address_total_nominal_subtotal</class>
-                        <sort_order>250</sort_order>
-                    </nominal_subtotal>
-                    <nominal_shipping>
-                        <class>sales/quote_address_total_nominal_shipping</class>
-                        <sort_order>1250</sort_order>
-                    </nominal_shipping>
-                </nominal_totals>
                 <item>
                     <product_attributes>
                         <sku/>
@@ -1194,8 +1159,6 @@ SPDX-License-Identifier: AFL-3.0
                         <special_to_date/>
                         <special_price/>
                         <cost/>
-                        <is_recurring/>
-                        <recurring_profile/>
                         <gift_message_available/>
                         <msrp_enabled/>
                         <msrp/>
@@ -1453,9 +1416,6 @@ SPDX-License-Identifier: AFL-3.0
                 <sales_billing_agreement module="Mage_Sales">
                     <file>sales/billing_agreement.xml</file>
                 </sales_billing_agreement>
-                <sales_recurring_profile module="Mage_Sales">
-                    <file>sales/recurring_profile.xml</file>
-                </sales_recurring_profile>
             </updates>
         </layout>
     </frontend>

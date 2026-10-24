@@ -1506,21 +1506,6 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
         return $this;
     }
 
-    /**
-     * Whether the order has nominal items only
-     *
-     * @return bool
-     */
-    public function isNominal()
-    {
-        foreach ($this->getAllVisibleItems() as $item) {
-            if ($item->getIsNominal() == '0') {
-                return false;
-            }
-        }
-        return true;
-    }
-
     /*********************** PAYMENTS ***************************/
 
     /**
