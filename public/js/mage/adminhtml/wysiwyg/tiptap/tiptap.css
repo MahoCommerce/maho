@@ -1970,9 +1970,10 @@
     }
 }
 
-/* The editor buttons sit on top of the wrapper as tabs */
+/* The editor buttons are a toolbar on top of the wrapper */
 .buttons-set + textarea + .tiptap-wrapper {
     border-start-start-radius: 0;
+    border-start-end-radius: 0;
 }
 
 .tiptap-content-notice,
