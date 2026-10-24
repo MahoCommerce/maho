@@ -116,9 +116,10 @@
      * .buttons-set before the field, and the attribute helper after the textarea, so that
      * cell puts it first.
      */
+    /* One column, so the toolbar takes the width of the textarea */
     td.value:has(> textarea + .buttons-set) {
-        display: flex;
-        flex-direction: column;
+        display: grid;
+        grid-template-columns: min-content;
 
         & > .buttons-set {
             order: -1;
@@ -126,6 +127,15 @@
 
         & > .sanitize-preview-notice {
             order: -2;
+        }
+    }
+
+    /* A wide fieldset gives its controls 98% of the cell */
+    .fieldset-wide td.value:has(> textarea + .buttons-set) {
+        grid-template-columns: 98%;
+
+        & > textarea {
+            width: 100% !important;
         }
     }
 
@@ -139,6 +149,12 @@
 
         & > button {
             @apply d-btn-sm;
+
+            /* The default hover color is the color of the toolbar */
+            &:not([disabled]):hover {
+                --d-btn-bg: var(--color-base-100);
+                --d-btn-border: color-mix(in oklab, var(--color-base-content) 30%, transparent);
+            }
         }
     }
 
