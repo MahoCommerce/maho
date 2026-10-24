@@ -50,6 +50,7 @@ const linkedClasses = (doc, stylesUrl) => {
 const readStylesheets = async (head, stylesUrl) => {
     const frame = document.createElement('iframe');
     frame.hidden = true;
+    frame.setAttribute('sandbox', 'allow-same-origin');
     frame.srcdoc = `<!doctype html><html><head><meta charset="utf-8">${head}</head><body></body></html>`;
     const loaded = new Promise((resolve) => frame.addEventListener('load', resolve, { once: true }));
     document.body.append(frame);

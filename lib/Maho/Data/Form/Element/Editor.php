@@ -91,7 +91,7 @@ class Editor extends Textarea
     {
         $buttonsHtml = '<div id="buttons' . $this->getHtmlId() . '" class="buttons-set">';
         if ($this->isEnabled()) {
-            // The editor shows them in its source view, which opens first when the editor is hidden
+            // The source view shows the plugin buttons, and it opens first when the editor is hidden
             $buttonsHtml .= $this->_getPluginButtonsHtml($this->isHidden());
         } else {
             $buttonsHtml .= $this->_getPluginButtonsHtml(true);

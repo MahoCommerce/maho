@@ -20,8 +20,8 @@ class Mage_Core_Model_Design_Content_PreviewCss
     public const SCRIPT = 'tailwindcss-browser.js';
 
     /**
-     * The text/tailwindcss source for the theme of $stylesFile, the absolute path of a resolved
-     * css/styles.css, or null when no Tailwind theme compiles that file.
+     * The text/tailwindcss source for the theme of $stylesFile, or null when no Tailwind theme
+     * compiles that file. $stylesFile is the absolute path of a resolved css/styles.css.
      */
     public function getCss(string $stylesFile): ?string
     {

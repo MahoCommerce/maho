@@ -208,8 +208,8 @@ class Mage_Core_Model_Design_Content_Bundle
     }
 
     /**
-     * The URL of the copy that replaces $stylesFile, the absolute path of a resolved
-     * css/styles.css, or null when the store serves the committed file.
+     * The URL of the copy that replaces $stylesFile, or null when the store serves the
+     * committed file. $stylesFile is the absolute path of a resolved css/styles.css.
      */
     public function getUrl(string $stylesFile): ?string
     {
