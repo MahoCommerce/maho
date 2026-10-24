@@ -228,7 +228,9 @@
         background-color: var(--color-base-200);
     }
 
+    /* d-table writes the header at 60% opacity, which is too light at 11px */
     .grid tr.headings th {
+        color: var(--color-base-content);
         font-size: 0.6875rem;
         text-transform: uppercase;
         letter-spacing: 0.04em;
