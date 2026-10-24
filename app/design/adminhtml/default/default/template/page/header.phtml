@@ -62,6 +62,10 @@
 
                     function render(html) {
                         box.innerHTML = html;
+                        if (!options().length) {
+                            close();
+                            return;
+                        }
                         box.style.display = 'block';
                         input.setAttribute('aria-expanded', 'true');
                         input.removeAttribute('aria-activedescendant');
