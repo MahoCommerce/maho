@@ -26,7 +26,7 @@ describe('report export actions', function () {
 
         $headers = array_column($response->getHeaders(), 'value', 'name');
         expect($headers['Content-Disposition'])->toBe('attachment; filename="' . $fileName . '"')
-            ->and($headers['Content-type'])->toBe($contentType)
+            ->and($headers['Content-Type'])->toBe($contentType)
             ->and($response->getBody())->not->toBe('');
     })->with([
         'report grid CSV' => [Mage_Adminhtml_Report_CustomerController::class, 'exportAccountsCsv', 'new_accounts.csv', 'text/csv'],
