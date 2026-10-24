@@ -711,6 +711,7 @@ class Mage_Core_Model_App
     {
         $this->_stores   = [];
         $this->_groups   = [];
+        $this->_store    = null;
         $this->_website  = null;
         $this->_websites = [];
 
