@@ -45,7 +45,7 @@ final class NotifyTool
 
     public function tool(): Tool
     {
-        return ToolDefinition::create(
+        return new Tool(
             new ExecutionReference(self::class, 'notify'),
             self::NAME,
             'Put a message in the admin notification inbox, for a result that needs the attention of the administrators. The message links to this conversation. In a scheduled run, the final answer goes to the inbox anyway: call this only for a problem that needs a higher severity, and the final answer is then not sent. The text must stand on its own: the facts, the records and the numbers.',

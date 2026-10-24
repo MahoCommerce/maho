@@ -74,10 +74,11 @@ final class McpToolCatalog
                 continue;
             }
 
-            $tools[] = ToolDefinition::create(
+            $tools[] = new Tool(
                 new ExecutionReference(McpToolbox::class, 'execute'),
                 $this->alias($name),
                 $this->describe($mcp),
+                // @phpstan-ignore argument.type (API Platform builds the schema at runtime, so PHPStan cannot know its shape)
                 self::stringEnums($this->parameters($mcp)),
                 [
                     'mcp_name' => $name,

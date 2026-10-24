@@ -294,6 +294,7 @@ class Kernel extends BaseKernel
                             // Under /api so the `^/api` firewall gives it bearer auth for free.
                             'path' => '/api/mcp',
                             'allowed_hosts' => $this->mcpAllowedHosts(),
+                            'allowed_origins' => $this->mcpAllowedOrigins(),
                         ],
                         'session' => ['store' => 'cache'],
                         'registry' => '*',
@@ -609,18 +610,51 @@ class Kernel extends BaseKernel
     private function mcpAllowedHosts(): ?array
     {
         $hosts = [];
-        foreach (\Mage::app()->getStores(true) as $store) {
-            foreach ([\Mage_Core_Model_Store::URL_TYPE_WEB, \Mage_Core_Model_Store::URL_TYPE_LINK] as $urlType) {
-                foreach ([true, false] as $secure) {
-                    $host = parse_url($store->getBaseUrl($urlType, $secure), PHP_URL_HOST);
-                    if (is_string($host) && $host !== '') {
-                        $hosts[$host] = true;
-                    }
-                }
+        foreach ($this->storeBaseUrls() as $url) {
+            $host = parse_url($url, PHP_URL_HOST);
+            if (is_string($host) && $host !== '') {
+                $hosts[$host] = true;
             }
         }
 
         return $hosts === [] ? null : array_keys($hosts);
+    }
+
+    /**
+     * The DNS-rebinding protection accepts a request with an Origin header only when it is
+     * same-origin or its origin is in this list. List the origin of each store base URL, so
+     * a page of one store can call the MCP endpoint of another store.
+     *
+     * @return list<string>
+     */
+    private function mcpAllowedOrigins(): array
+    {
+        $origins = [];
+        foreach ($this->storeBaseUrls() as $url) {
+            $parts = parse_url($url);
+            if (!isset($parts['scheme'], $parts['host']) || $parts['host'] === '') {
+                continue;
+            }
+            $origin = strtolower($parts['scheme'] . '://' . $parts['host']) . (isset($parts['port']) ? ':' . $parts['port'] : '');
+            $origins[$origin] = true;
+        }
+
+        return array_keys($origins);
+    }
+
+    /** @return list<string> */
+    private function storeBaseUrls(): array
+    {
+        $urls = [];
+        foreach (\Mage::app()->getStores(true) as $store) {
+            foreach ([\Mage_Core_Model_Store::URL_TYPE_WEB, \Mage_Core_Model_Store::URL_TYPE_LINK] as $urlType) {
+                foreach ([true, false] as $secure) {
+                    $urls[] = $store->getBaseUrl($urlType, $secure);
+                }
+            }
+        }
+
+        return array_values(array_unique($urls));
     }
 
     protected function configureRoutes(RoutingConfigurator $routes): void
