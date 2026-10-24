@@ -496,6 +496,7 @@ SPDX-License-Identifier: AFL-3.0
 
     .grid-icon-filter::picker-icon {
         content: "";
+        display: block;
         width: 9px;
         height: 9px;
         margin: 0;
