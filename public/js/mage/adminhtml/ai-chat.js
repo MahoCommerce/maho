@@ -601,7 +601,7 @@ class MahoAiAssistant {
             case 'replace':
                 if (state.textIndex !== null) {
                     state.text = data.text ?? '';
-                    this.chat.updateMessage({ text: state.text }, state.textIndex);
+                    this.updateStreamed({ text: state.text }, state.textIndex);
                 }
                 break;
             case 'tool_call': {
@@ -615,7 +615,7 @@ class MahoAiAssistant {
                 const step = state.steps.get(data.id);
                 if (step) {
                     const status = data.denied ? 'denied' : (data.ok ? 'done' : 'error');
-                    this.chat.updateMessage({ html: this.renderStep(step.call, { status, preview: data.preview, undo: data.undo ?? null, recordUrl: data.record_url ?? null }) }, step.index);
+                    this.updateStreamed({ html: this.renderStep(step.call, { status, preview: data.preview, undo: data.undo ?? null, recordUrl: data.record_url ?? null }) }, step.index);
                 } else if (data.denied) {
                     this.chat.addMessage({ html: this.renderStep({ id: data.id, name: '', title: '', arguments: {} }, { status: 'denied' }), role: 'ai' });
                 }
@@ -679,7 +679,17 @@ class MahoAiAssistant {
             this.chat.addMessage({ text: state.text, role: 'ai' });
             state.textIndex = this.lastIndex();
         } else {
-            this.chat.updateMessage({ text: state.text }, state.textIndex);
+            this.updateStreamed({ text: state.text }, state.textIndex);
+        }
+    }
+
+    /** deep-chat does not scroll on updateMessage(), so the panel follows the answer while the administrator is at the bottom. */
+    updateStreamed(message, index) {
+        const messages = this.chat.shadowRoot?.querySelector('#messages');
+        const atBottom = messages && messages.scrollHeight - messages.clientHeight - messages.scrollTop < 80;
+        this.chat.updateMessage(message, index);
+        if (atBottom) {
+            messages.scrollTop = messages.scrollHeight;
         }
     }
 
