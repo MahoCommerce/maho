@@ -1315,7 +1315,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
      *
      * @throws Exception
      */
-    public function getCsv(string $fileName = '', int $limit = 0): string
+    public function getCsv(int $limit = 0): string
     {
         $csv = '';
         $this->_isExport = true;

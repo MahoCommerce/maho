@@ -9073,12 +9073,6 @@ parameters:
 			path: app/code/core/Mage/Dataflow/Model/Convert.php
 
 		-
-			rawMessage: 'Call to an undefined method Mage_Dataflow_Model_Convert_Action_Abstract::getClassNameByType().'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Action/Abstract.php
-
-		-
 			rawMessage: 'Call to an undefined method Mage_Dataflow_Model_Convert_Container_Interface::setAction().'
 			identifier: method.notFound
 			count: 1

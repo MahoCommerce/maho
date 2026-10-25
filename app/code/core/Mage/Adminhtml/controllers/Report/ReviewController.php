@@ -40,7 +40,7 @@ class Mage_Adminhtml_Report_ReviewController extends Mage_Adminhtml_Controller_A
     public function exportCustomerCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_review_customer_grid');
-        $this->_prepareDownloadResponse('review_customer.csv', $grid->getCsv(), 'text/csv');
+        $this->_prepareDownloadResponse(...$grid->getCsvFile('review_customer.csv', -1));
     }
 
     /**
@@ -50,7 +50,7 @@ class Mage_Adminhtml_Report_ReviewController extends Mage_Adminhtml_Controller_A
     public function exportCustomerExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_review_customer_grid');
-        $this->_prepareDownloadResponse('review_customer.xml', $grid->getExcel('review_customer.xml'), 'application/vnd.ms-excel');
+        $this->_prepareDownloadResponse(...$grid->getExcelFile('review_customer.xml', -1));
     }
 
     #[Maho\Config\Route('/admin/report_review/product')]
@@ -74,7 +74,7 @@ class Mage_Adminhtml_Report_ReviewController extends Mage_Adminhtml_Controller_A
     public function exportProductCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_review_product_grid');
-        $this->_prepareDownloadResponse('review_product.csv', $grid->getCsv(), 'text/csv');
+        $this->_prepareDownloadResponse(...$grid->getCsvFile('review_product.csv', -1));
     }
 
     /**
@@ -84,7 +84,7 @@ class Mage_Adminhtml_Report_ReviewController extends Mage_Adminhtml_Controller_A
     public function exportProductExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_review_product_grid');
-        $this->_prepareDownloadResponse('review_product.xml', $grid->getExcel('review_product.xml'), 'application/vnd.ms-excel');
+        $this->_prepareDownloadResponse(...$grid->getExcelFile('review_product.xml', -1));
     }
 
     #[Maho\Config\Route('/admin/report_review/productDetail')]
@@ -110,7 +110,7 @@ class Mage_Adminhtml_Report_ReviewController extends Mage_Adminhtml_Controller_A
     public function exportProductDetailCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_review_detail_grid');
-        $this->_prepareDownloadResponse('review_product_detail.csv', $grid->getCsv(), 'text/csv');
+        $this->_prepareDownloadResponse(...$grid->getCsvFile('review_product_detail.csv', -1));
     }
 
     /**
@@ -120,7 +120,7 @@ class Mage_Adminhtml_Report_ReviewController extends Mage_Adminhtml_Controller_A
     public function exportProductDetailExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_review_detail_grid');
-        $this->_prepareDownloadResponse('review_product_detail.xml', $grid->getExcel('review_product_detail.xml'), 'application/vnd.ms-excel');
+        $this->_prepareDownloadResponse(...$grid->getExcelFile('review_product_detail.xml', -1));
     }
 
     #[\Override]

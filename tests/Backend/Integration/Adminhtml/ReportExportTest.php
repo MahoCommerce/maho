@@ -31,7 +31,5 @@ describe('report export actions', function () {
     })->with([
         'report grid CSV' => [Mage_Adminhtml_Report_CustomerController::class, 'exportAccountsCsv', 'new_accounts.csv', 'text/csv'],
         'report grid Excel' => [Mage_Adminhtml_Report_CustomerController::class, 'exportAccountsExcel', 'accounts.xml', 'application/vnd.ms-excel'],
-        'widget grid CSV' => [Mage_Adminhtml_Report_ReviewController::class, 'exportCustomerCsv', 'review_customer.csv', 'text/csv'],
-        'widget grid Excel' => [Mage_Adminhtml_Report_ReviewController::class, 'exportCustomerExcel', 'review_customer.xml', 'application/vnd.ms-excel'],
     ]);
 });

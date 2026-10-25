@@ -457,7 +457,7 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
      * @throws Exception
      */
     #[\Override]
-    public function getCsv(string $fileName = '', int $limit = 0): string
+    public function getCsv(int $limit = 0): string
     {
         $csv = '';
         $count = 0;

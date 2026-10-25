@@ -132,7 +132,7 @@ class Mage_Adminhtml_Report_ProductController extends Mage_Adminhtml_Controller_
     public function exportLowstockCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_product_lowstock_grid');
-        $this->_prepareDownloadResponse('products_lowstock.csv', $grid->getCsv(), 'text/csv');
+        $this->_prepareDownloadResponse(...$grid->getCsvFile('products_lowstock.csv', -1));
     }
 
     /**
@@ -142,7 +142,7 @@ class Mage_Adminhtml_Report_ProductController extends Mage_Adminhtml_Controller_
     public function exportLowstockExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_product_lowstock_grid');
-        $this->_prepareDownloadResponse('products_lowstock.xml', $grid->getExcel('products_lowstock.xml'), 'application/vnd.ms-excel');
+        $this->_prepareDownloadResponse(...$grid->getExcelFile('products_lowstock.xml', -1));
     }
 
     /**
@@ -169,7 +169,7 @@ class Mage_Adminhtml_Report_ProductController extends Mage_Adminhtml_Controller_
     public function exportDownloadsCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_product_downloads_grid');
-        $this->_prepareDownloadResponse('products_downloads.csv', $grid->getCsv(), 'text/csv');
+        $this->_prepareDownloadResponse(...$grid->getCsvFile('products_downloads.csv', -1));
     }
 
     /**
@@ -179,7 +179,7 @@ class Mage_Adminhtml_Report_ProductController extends Mage_Adminhtml_Controller_
     public function exportDownloadsExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_product_downloads_grid');
-        $this->_prepareDownloadResponse('products_downloads.xml', $grid->getExcel('products_downloads.xml'), 'application/vnd.ms-excel');
+        $this->_prepareDownloadResponse(...$grid->getExcelFile('products_downloads.xml', -1));
     }
 
     #[\Override]
