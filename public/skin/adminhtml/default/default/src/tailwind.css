@@ -24,6 +24,9 @@
 @source "../../../../../../public/js/mage/adminhtml/**/*.js";
 @source "../../../../../../public/js/maho-*.js";
 
+/* Mage_Adminhtml_Block_Page_Menu writes the main menu, and Tailwind does not scan app/code */
+@source inline("d-menu d-menu-horizontal");
+
 /* Admin classes that share a name with a Tailwind utility but mean something else:
    a data grid (.grid), grid table borders (table.border), the grid filter row
    (tr.filter), the scheme selector icons (.scheme-dark) and others. */

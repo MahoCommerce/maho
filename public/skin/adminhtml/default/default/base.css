@@ -4287,7 +4287,7 @@ ul.super-product-attributes {
     padding-top: var(--maho-space-3)
 }
 
-.footer-content,.middle,#nav,.header-top {
+.footer-content,.middle,.header-top {
     padding-inline: var(--maho-space-3);
     box-sizing: border-box;
     width: 100%
@@ -4727,10 +4727,6 @@ a.error span {
 
 #grid_tab_content {
     background: var(--maho-surface)
-}
-
-.nav-bar {
-    border: 0
 }
 
 div.collapseable {

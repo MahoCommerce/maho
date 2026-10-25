@@ -268,7 +268,7 @@ class Mage_Adminhtml_Block_Page_Menu extends Mage_Adminhtml_Block_Template
      */
     public function getMenuLevel($menu, $level = 0)
     {
-        $html = '<ul ' . ($level ? '' : 'id="nav"') . '>' . PHP_EOL;
+        $html = '<ul ' . ($level ? 'class="d-menu"' : 'id="nav" class="d-menu d-menu-horizontal"') . '>' . PHP_EOL;
         foreach ($menu as $item) {
             if ((empty($item['url']) || ($item['url'] == '#')) && empty($item['children'])) {
                 continue; // for example hide System/Tools when empty

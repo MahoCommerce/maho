@@ -818,4 +818,146 @@
             opacity: 0.4;
         }
     }
+
+    /* The main menu: a dark bar, and a dropdown that opens on hover or keyboard focus */
+    .nav-bar {
+        padding: 0 10rem 0 3.4375rem;
+        background: var(--maho-night);
+    }
+
+    #nav.d-menu {
+        --d-menu-active-bg: var(--color-base-200);
+        --d-menu-active-fg: var(--color-base-content);
+        /* d-menu-horizontal is inline-flex, so the bar would center it as text */
+        display: flex;
+        align-items: stretch;
+        padding: 0;
+        font-size: inherit;
+
+        & > li > a {
+            align-content: center;
+            height: 44px;
+            padding-block: 0;
+            padding-inline: var(--maho-space-3);
+            border-radius: 0;
+            color: rgb(255 255 255 / 0.8);
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        /* The bar is dark in both color schemes */
+        & > li > a:is(:hover, :active, :focus-visible), & > li:focus-within > a {
+            background-color: rgb(255 255 255 / 0.07);
+            color: #fff;
+        }
+
+        & > li.active > a {
+            color: #fff;
+            font-weight: 600;
+            box-shadow: inset 0 -3px 0 var(--maho-chartreuse);
+        }
+
+        & ul.d-menu {
+            position: absolute;
+            top: 100%;
+            left: -10000px;
+            z-index: 999;
+            min-width: 220px;
+            margin: 0;
+            padding: var(--maho-space-2);
+            font-size: inherit;
+            /* Lighter than the page in the dark scheme */
+            background-color: var(--maho-surface-overlay);
+            border: var(--border) solid var(--maho-border-soft);
+            border-radius: var(--radius-box);
+            box-shadow: var(--maho-shadow-float);
+
+            /* daisyUI draws a line next to a nested list */
+            &::before {
+                display: none;
+            }
+
+            & a {
+                padding-block: var(--maho-space-3);
+                padding-inline: var(--maho-space-3) var(--maho-space-6);
+                color: var(--color-base-content);
+                line-height: 1.35;
+                text-decoration: none;
+            }
+
+            & a.active {
+                background-color: var(--color-base-200);
+                font-weight: 600;
+            }
+
+            & li.parent > a::after {
+                content: "";
+                position: absolute;
+                top: 50%;
+                right: 10px;
+                margin-top: -0.25rem;
+                border: 4px solid transparent;
+                border-right: 0;
+                border-left-color: color-mix(in oklab, var(--color-base-content) 60%, transparent);
+            }
+        }
+
+        & li:is(:hover, :focus-within) > ul {
+            left: 0;
+        }
+
+        & ul ul.d-menu {
+            top: -7px;
+        }
+
+        & ul li:is(:hover, :focus-within) > ul {
+            left: calc(100% - 4px);
+        }
+    }
+
+    .user-menu-icons {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--maho-space-1);
+        vertical-align: middle;
+        margin-inline: var(--maho-space-1);
+    }
+
+    :is(.user-menu-icons a, #scheme-toggle) {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        padding: 0;
+        border: 0;
+        border-radius: var(--maho-radius-md);
+        background: none;
+        color: #fff;
+        cursor: pointer;
+        opacity: 0.8;
+        transition: opacity var(--maho-duration-fast) var(--maho-ease), background-color var(--maho-duration-fast) var(--maho-ease);
+
+        &:is(:hover, :focus-visible) {
+            opacity: 1;
+            background-color: rgb(255 255 255 / 0.12);
+        }
+
+        & svg {
+            width: 22px;
+            height: 22px;
+            stroke: #fff;
+        }
+    }
+
+    #scheme-toggle span {
+        display: none;
+        line-height: 0;
+    }
+
+    :root:not([data-scheme]) #scheme-toggle .scheme-system,
+    :root[data-scheme="dark"] #scheme-toggle .scheme-dark,
+    :root[data-scheme="light"] #scheme-toggle .scheme-light {
+        display: block;
+    }
 }
