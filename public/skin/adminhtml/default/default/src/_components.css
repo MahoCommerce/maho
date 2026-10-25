@@ -357,10 +357,15 @@
      */
     .grid table:not(.grid td table) {
         @apply d-table d-table-sm d-table-zebra;
+        /* d-table has round corners, but a table does not clip the backgrounds of its rows */
+        clip-path: inset(0 round var(--radius-box));
     }
 
+    /* A table paints its border under its rows, so the first row covers the round corners. An outline is painted on top */
     .grid table.border {
-        border: var(--border) solid var(--color-base-300);
+        border: 0;
+        outline: var(--border) solid var(--color-base-300);
+        outline-offset: calc(var(--border) * -1);
     }
 
     .pager input.page {
