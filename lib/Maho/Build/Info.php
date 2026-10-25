@@ -28,7 +28,7 @@ final class Info
 
     public static function get(): self
     {
-        return self::$instance ??= new self(self::readGitCommit(self::packageRoot()) ?? self::readComposerInstalledCommit());
+        return self::$instance ??= new self(self::readGitCommit(self::packageRoot()) ?? self::readComposerCommit());
     }
 
     /**
@@ -47,7 +47,7 @@ final class Info
     /**
      * The short commit, or "unknown" when the installation keeps no trace of it.
      */
-    public function describe(): string
+    public function getBuild(): string
     {
         return $this->getShortCommit() ?? 'unknown';
     }
@@ -142,9 +142,9 @@ final class Info
         return null;
     }
 
-    private static function readComposerInstalledCommit(): ?string
+    private static function readComposerCommit(): ?string
     {
-        if (!\Composer\InstalledVersions::isInstalled(self::PACKAGE_NAME) || self::isPathInstall()) {
+        if (!\Composer\InstalledVersions::isInstalled(self::PACKAGE_NAME) || self::isInstalledFromPathRepository()) {
             return null;
         }
 
@@ -156,7 +156,7 @@ final class Info
     /**
      * Composer records a hash of the folder for a path repository, not a commit.
      */
-    private static function isPathInstall(): bool
+    private static function isInstalledFromPathRepository(): bool
     {
         /** @var array{packages?: list<array{name?: string, dist?: array{type?: string}}>}|null $installed */
         $installed = json_decode(self::readFile(\Maho::getBasePath() . '/vendor/composer/installed.json') ?? '', true);

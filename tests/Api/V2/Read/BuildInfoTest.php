@@ -31,7 +31,7 @@ describe('Build info', function (): void {
 
         expect($response['status'])->toBe(200)
             ->and($response['json']['version'])->toBe(Mage::getVersion())
-            ->and($response['json']['build'])->toBe(\Maho\Build\Info::get()->describe());
+            ->and($response['json']['build'])->toBe(\Maho\Build\Info::get()->getBuild());
     });
 
     it('applies the admin ACL of the health check', function (): void {

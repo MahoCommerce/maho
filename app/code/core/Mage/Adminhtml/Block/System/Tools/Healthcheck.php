@@ -17,7 +17,7 @@ class Mage_Adminhtml_Block_System_Tools_Healthcheck extends Mage_Adminhtml_Block
 
     public function getMahoBuild(): string
     {
-        return \Maho\Build\Info::get()->describe();
+        return \Maho\Build\Info::get()->getBuild();
     }
 
     public function getMahoBuildCommit(): ?string

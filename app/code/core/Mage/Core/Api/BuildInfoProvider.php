@@ -21,7 +21,7 @@ final class BuildInfoProvider extends \Maho\ApiPlatform\Provider
 
         $dto = new BuildInfo();
         $dto->version = \Mage::getVersion();
-        $dto->build = \Maho\Build\Info::get()->describe();
+        $dto->build = \Maho\Build\Info::get()->getBuild();
 
         return $dto;
     }
