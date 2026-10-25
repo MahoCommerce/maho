@@ -40,4 +40,18 @@ class Mage_Adminhtml_Model_Uploader_Config_Misc extends Mage_Adminhtml_Model_Upl
     {
         return $this->setData('replace_browse_with_remove', $value);
     }
+
+    /**
+     * Upload the files as soon as the person chooses or drops them, from one drop zone.
+     */
+    public function setAutoUpload(?bool $value = true): static
+    {
+        return $this->setData('auto_upload', $value);
+    }
+
+    public function getAutoUpload(): ?bool
+    {
+        $value = $this->getData('auto_upload');
+        return $value === null ? null : (bool) $value;
+    }
 }

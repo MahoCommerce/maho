@@ -124,8 +124,8 @@
                 <tfoot>
                 <tr>
                     <td colspan="100" class="last" style="padding:8px">
-                        <?= Mage::helper('catalog')->__('Maximum width and height dimension for upload image is %s.', Mage::getStoreConfig(Mage_Catalog_Helper_Image::XML_NODE_PRODUCT_MAX_DIMENSION)) ?>
                         <?= $this->getUploaderHtml() ?>
+                        <p class="note"><?= Mage::helper('catalog')->__('Maximum width and height dimension for upload image is %s.', Mage::getStoreConfig(Mage_Catalog_Helper_Image::XML_NODE_PRODUCT_MAX_DIMENSION)) ?></p>
                     </td>
                 </tr>
                 </tfoot>

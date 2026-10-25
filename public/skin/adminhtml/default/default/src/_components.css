@@ -205,6 +205,39 @@
         }
     }
 
+    /* The drop zone of an uploader that uploads at once, such as the product images. A click opens the file dialog */
+    button.uploader-dropzone {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: var(--maho-space-2);
+        width: 100%;
+        height: auto;
+        padding: var(--maho-space-6);
+        border: var(--border) dashed color-mix(in oklab, var(--color-base-content) 25%, transparent);
+        border-radius: var(--radius-box);
+        background-color: var(--color-base-200);
+        color: color-mix(in oklab, var(--color-base-content) 70%, transparent);
+        font-weight: 400;
+        box-shadow: none;
+
+        & svg {
+            width: 1.75rem;
+            height: 1.75rem;
+        }
+
+        &:hover, &.is-dragover {
+            border-color: var(--maho-accent);
+            background-color: color-mix(in oklab, var(--maho-accent) 15%, var(--color-base-100));
+            color: var(--color-base-content);
+        }
+    }
+
+    .uploader:has(> .uploader-dropzone) + .note {
+        margin-top: var(--maho-space-2);
+    }
+
     /* Image fields: the preview spans both rows, next to the file input and the delete checkbox */
     .image-field:has(> a > .small-image-preview) {
         display: grid;

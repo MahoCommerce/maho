@@ -38,6 +38,8 @@ class Mage_Adminhtml_Block_Catalog_Product_Helper_Form_Gallery_Content extends M
                 ['_query' => false],
             ));
 
+        $this->getUploader()->getMiscConfig()->setAutoUpload();
+
         $browseConfig = $this->getUploader()->getButtonConfig();
         $browseConfig
             ->setAttributes([

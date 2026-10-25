@@ -10,10 +10,17 @@
 /** @var Mage_Adminhtml_Block_Uploader_Multiple|Mage_Adminhtml_Block_Uploader_Single $this */
 ?>
 <div id="<?= $this->getHtmlId() ?>" class="uploader">
+<?php if ($this->getMiscConfig()->getAutoUpload()): ?>
+    <button type="button" id="<?= $this->getElementId(Mage_Adminhtml_Block_Uploader_Abstract::DROP_ZONE_ID_SUFFIX) ?>" class="uploader-dropzone">
+        <?= $this->getIconSvg('upload') ?>
+        <span><?= $this->__('Drop files here, or click to choose them') ?></span>
+    </button>
+<?php else: ?>
     <div class="buttons a-right">
         <?= $this->getBrowseButtonHtml() ?>
         <?= $this->getUploadButtonHtml() ?>
     </div>
+<?php endif ?>
 </div>
 <div class="no-display" id="<?= $this->getElementId('template') ?>">
     <div id="{{id}}-container" class="file-row">
