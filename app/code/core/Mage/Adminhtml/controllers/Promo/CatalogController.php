@@ -39,8 +39,7 @@ class Mage_Adminhtml_Promo_CatalogController extends Mage_Adminhtml_Controller_A
     {
         $this->_title($this->__('Promotions'))->_title($this->__('Catalog Price Rules'));
 
-        $dirtyRules = Mage::getModel('catalogrule/flag')->loadSelf();
-        if ($dirtyRules->getState()) {
+        if (Mage::getModel('catalogrule/flag')->loadSelf()->hasChangesToApply()) {
             Mage::getSingleton('adminhtml/session')->addNotice($this->getDirtyRulesNoticeMessage());
         }
 
