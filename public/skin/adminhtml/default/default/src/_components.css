@@ -72,8 +72,12 @@
     }
 
     /* The chevron of the grid icon filters, so that every select has the same arrow */
+    :root {
+        --maho-select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10' fill='none' stroke='%23888888' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 3.5 5 6.5 8 3.5'/%3E%3C/svg%3E");
+    }
+
     select:not([multiple], [size]) {
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10' fill='none' stroke='%23888888' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 3.5 5 6.5 8 3.5'/%3E%3C/svg%3E");
+        background-image: var(--maho-select-chevron);
         background-position: right var(--maho-space-2) center;
         background-size: 10px;
         background-repeat: no-repeat;
@@ -820,10 +824,10 @@
     }
 
     /*
-     * A store scope switcher. The top margin keeps the focus outline of the select below the
-     * sticky page header, which would cover it.
+     * A store scope switcher: a daisyUI select with a store icon inside the box. The top margin keeps
+     * the focus outline below the sticky page header, which would cover it.
      */
-    .switcher:has(> .switcher-label) {
+    .switcher:has(> .switcher-select) {
         display: flex;
         flex-wrap: wrap;
         align-items: center;
@@ -837,17 +841,56 @@
         }
     }
 
-    /* The side column is narrow, so the label takes its own line. It scrolls, so it would cut the focus outline of the select */
-    .side-col .switcher:has(> .switcher-label) {
-        padding-inline: 4px;
+    .switcher-select {
+        gap: 0;
+        width: auto;
+        max-width: 100%;
+        padding-inline: var(--maho-space-2) 1.75rem;
+        background-image: var(--maho-select-chevron);
+        background-position: right var(--maho-space-2) center;
+        background-size: 10px;
 
-        & > .switcher-label {
-            flex-basis: 100%;
+        &:focus-within {
+            outline: 2px solid var(--color-base-content);
+            outline-offset: 2px;
         }
 
+        & > .d-label {
+            margin-inline: 0 var(--maho-space-2);
+            padding-inline: 0 var(--maho-space-2);
+            color: color-mix(in oklab, var(--color-base-content) 60%, transparent);
+
+            & svg {
+                width: 1.125rem;
+                height: 1.125rem;
+            }
+        }
+
+        /* The box draws the border, so the select inside has none */
         & > select {
             flex: 1;
             min-width: 0;
+            height: 100%;
+            margin: 0;
+            padding-inline: 0;
+            border: 0;
+            background: none;
+            box-shadow: none;
+            outline: 0;
+
+            /* The list takes the background of the select, which has none here */
+            &::picker(select) {
+                background-color: var(--color-base-100);
+            }
+        }
+    }
+
+    /* The side column scrolls, so it would cut the focus outline of a full-width select */
+    .side-col .switcher:has(> .switcher-select) {
+        padding-inline: 4px;
+
+        & > .switcher-select {
+            width: 100%;
         }
     }
 

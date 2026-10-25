@@ -351,7 +351,6 @@ SPDX-License-Identifier: AFL-3.0
 }
 
 .grid tr.on-mouse {
-    background: var(--maho-warning-bg);
     cursor: pointer
 }
 
@@ -1279,10 +1278,6 @@ button.icon-btn span {
     margin-bottom: var(--maho-space-3);
     border: 1px solid var(--maho-border-soft);
     background: var(--maho-surface-sunken);
-}
-
-.side-col .switcher select {
-    width: 100%
 }
 
 .store-scope .tree-store-scope {
@@ -4947,10 +4942,6 @@ div.collapseable a.open {
 
 .no-display {
     display: none!important
-}
-
-.side-col .switcher select {
-    margin: var(--maho-space-2) 0
 }
 
 dl.accordion dt {

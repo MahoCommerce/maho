@@ -9,8 +9,8 @@
 
 /** @var Mage_Adminhtml_Block_Store_Switcher $this */
 ?>
-<p class="switcher"><label for="store_switcher" class="switcher-label"><?= $this->__('View Statistics For:') ?></label>
-<select name="store_switcher" id="store_switcher" class="left-col-block" onchange="return switchStore(this);">
+<p class="switcher"><label class="d-select switcher-select"><span class="d-label" title="<?= $this->quoteEscape(rtrim($this->__('View Statistics For:'), ' :')) ?>"><?= $this->getIconSvg('building-store') ?></span>
+<select name="store_switcher" id="store_switcher" class="left-col-block" onchange="return switchStore(this);" aria-label="<?= $this->quoteEscape(rtrim($this->__('View Statistics For:'), ' :')) ?>">
     <option value=""><?= $this->__('All Websites') ?></option>
     <?php foreach ($this->getWebsiteCollection() as $_website): ?>
         <?php $showWebsite = false; ?>
@@ -33,7 +33,7 @@
             <?php endif ?>
         <?php endforeach ?>
     <?php endforeach ?>
-</select>
+</select></label>
 </p>
 <script>
 //<![CDATA[
