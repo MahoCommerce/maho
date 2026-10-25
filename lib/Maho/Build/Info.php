@@ -25,7 +25,7 @@ namespace Maho\Build;
  *   runtime and the caller must not guess.
  *
  * The repository the commit belongs to comes from the git remote, or from the
- * source URL of the lock file: an installation of a fork must link to that fork,
+ * lock file: an installation of a fork must link to that fork,
  * not to upstream.
  *
  * None of the sources spawns a process: `git` is read from the files of the
