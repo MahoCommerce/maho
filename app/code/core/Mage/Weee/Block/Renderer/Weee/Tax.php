@@ -200,7 +200,7 @@ class Mage_Weee_Block_Renderer_Weee_Tax extends Mage_Adminhtml_Block_Widget impl
             'add_button',
             $this->getLayout()->createBlock('adminhtml/widget_button')
                 ->setData(['id' => 'add_tax_' . $this->getElement()->getHtmlId(),
-                    'label' => Mage::helper('catalog')->__('Add Tax'),
+                    'label' => Mage::helper('catalog')->__('Add'),
                     'onclick' => "weeeTaxControl.addItem('" . $this->getElement()->getHtmlId() . "')",
                     'class' => 'add',
                 ]),

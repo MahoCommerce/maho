@@ -48,7 +48,7 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Sa
     {
         $addButton = $this->getLayout()->createBlock('adminhtml/widget_button')
             ->setData([
-                'label' => Mage::helper('downloadable')->__('Add New Row'),
+                'label' => Mage::helper('downloadable')->__('Add'),
                 'id' => 'add_sample_item',
                 'class' => 'add',
             ]);
