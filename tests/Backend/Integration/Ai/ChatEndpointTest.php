@@ -10,13 +10,14 @@ declare(strict_types=1);
 use Maho\Ai\Api\Agent\McpToolbox;
 use Maho\ApiPlatform\Kernel;
 use Maho\ApiPlatform\Security\SameOriginGuard;
-use Symfony\AI\Platform\Model;
+use Symfony\AI\Platform\Event\InvocationEvent;
 use Symfony\AI\Platform\Result\ResultInterface;
 use Symfony\AI\Platform\Result\TextResult;
 use Symfony\AI\Platform\Result\ToolCall;
 use Symfony\AI\Platform\Result\ToolCallResult;
-use Symfony\AI\Platform\Test\InMemoryPlatform;
+use Symfony\AI\Platform\Test\MockPlatformFactory;
 use Symfony\AI\Platform\Tool\Tool;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\Request;
 use Tests\MahoBackendTestCase;
 
@@ -58,20 +59,29 @@ final class AiChatScript
     /** The messages of the last model call. */
     public static mixed $lastInput = null;
 
-    public static function answer(Model $model, array|string|object $input, array $options): ResultInterface
+    /** Record the MessageBag and the Tool objects. The model client gets them only in normalized form. */
+    public static function record(InvocationEvent $event): void
     {
         if (self::$throw !== null) {
-            $throw = self::$throw;
-            self::$throw = null;
-            throw $throw;
+            return;
         }
-        self::$lastInput = $input;
+        $options = $event->getOptions();
+        self::$lastInput = $event->getInput();
         self::$offeredTools[] = array_map(static fn(Tool $tool): string => $tool->getName(), $options['tools'] ?? []);
         $schemas = [];
         foreach ($options['tools'] ?? [] as $tool) {
             $schemas[$tool->getName()] = $tool->getParameters() ?? [];
         }
         self::$offeredSchemas[] = $schemas;
+    }
+
+    public static function answer(): ResultInterface
+    {
+        if (self::$throw !== null) {
+            $throw = self::$throw;
+            self::$throw = null;
+            throw $throw;
+        }
 
         return array_shift(self::$queue) ?? new TextResult('No scripted answer left.');
     }
@@ -82,8 +92,11 @@ final class AiChatTestProviderFactory implements Maho_Ai_Model_Platform_Provider
     #[\Override]
     public function create(?int $storeId = null): Maho_Ai_Model_Platform_ProviderInterface
     {
+        $dispatcher = new EventDispatcher();
+        $dispatcher->addListener(InvocationEvent::class, AiChatScript::record(...));
+
         return new Maho_Ai_Model_Platform_Symfony(
-            new InMemoryPlatform(AiChatScript::answer(...)),
+            MockPlatformFactory::createPlatform(AiChatScript::answer(...), eventDispatcher: $dispatcher),
             'pest',
             'pest-model',
         );
