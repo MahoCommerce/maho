@@ -54,7 +54,7 @@ class Image extends AbstractElement
         $html .= parent::getElementHtml();
         $html .= $this->_getDeleteCheckbox();
 
-        return $html;
+        return '<div class="image-field">' . $html . '</div>';
     }
 
     /**

@@ -706,4 +706,13 @@ function setPostcodeOptional(zipElement, country) {
 
 window.varienGlobalEvents?.attachEventHandler("address_country_changed", onAddressCountryChanged);
 
+// Highlight a file input while a file is dragged over it. The browser itself takes the dropped file.
+for (const type of ['dragenter', 'dragleave', 'drop']) {
+    document.addEventListener(type, (event) => {
+        if (event.target instanceof HTMLInputElement && event.target.type === 'file') {
+            event.target.classList.toggle('is-dragover', type === 'dragenter');
+        }
+    });
+}
+
 // Classes are now global by default with lowercase naming matching original prototypejs

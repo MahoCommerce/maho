@@ -1242,7 +1242,7 @@ input.price {
     margin-bottom: var(--maho-space-2)
 }
 
-span.delete-image,span.delete-file {
+span.delete-image:not(.image-field > *),span.delete-file {
     display: block;
     white-space: nowrap;
     padding-left: var(--maho-space-6)

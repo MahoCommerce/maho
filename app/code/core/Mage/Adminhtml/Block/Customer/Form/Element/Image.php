@@ -10,6 +10,12 @@
 
 class Mage_Adminhtml_Block_Customer_Form_Element_Image extends Mage_Adminhtml_Block_Customer_Form_Element_File
 {
+    #[\Override]
+    public function getElementHtml()
+    {
+        return '<div class="image-field">' . parent::getElementHtml() . '</div>';
+    }
+
     /**
      * Return Delete CheckBox Label
      * @return string

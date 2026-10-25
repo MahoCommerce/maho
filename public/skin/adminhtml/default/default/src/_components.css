@@ -184,6 +184,58 @@
         @apply d-radio;
     }
 
+    /* A file input is its own drop zone: the browser takes a file that is dropped on it */
+    input[type=file]:not([hidden]) {
+        @apply d-file-input;
+        height: auto;
+        padding: var(--maho-space-2);
+        border-style: dashed;
+        background-color: var(--color-base-200);
+
+        &::file-selector-button {
+            --d-btn-color: var(--color-base-100);
+            height: var(--d-size);
+            margin: 0 var(--maho-space-3) 0 0;
+            border-radius: var(--radius-field);
+        }
+
+        &.is-dragover {
+            border-color: var(--maho-accent);
+            background-color: color-mix(in oklab, var(--maho-accent) 15%, var(--color-base-100));
+        }
+    }
+
+    /* Image fields: the preview spans both rows, next to the file input and the delete checkbox */
+    .image-field {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        align-items: center;
+        column-gap: var(--maho-space-3);
+        row-gap: var(--maho-space-2);
+
+        & > a:has(> .small-image-preview) {
+            grid-row: span 2;
+            align-self: start;
+        }
+
+        & .small-image-preview {
+            width: 4rem;
+            height: 4rem;
+            object-fit: cover;
+            border: var(--border) solid var(--color-base-300);
+            border-radius: var(--radius-field);
+        }
+
+        & > input[type=file] {
+            grid-column: 2;
+        }
+
+        & > .delete-image {
+            grid-column: 2;
+            padding: 0;
+        }
+    }
+
     /*
      * Boxes. A .entry-edit holds one or more pairs of .entry-edit-head and .fieldset,
      * and each pair is one card: the head is its top, the fieldset its body. The
