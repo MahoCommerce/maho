@@ -762,8 +762,16 @@ class MahoAiAssistant {
         }
 
         const fields = [];
+        let fieldCount = 0;
         for (const element of scope.querySelectorAll('input, select, textarea')) {
-            if (fields.length >= 40 || !visible(element) || ['hidden', 'password', 'submit', 'button', 'file'].includes(element.type) || element.closest('.grid, #ai-chat-panel')) {
+            if (!visible(element) || ['hidden', 'password', 'submit', 'button', 'file'].includes(element.type) || element.closest('.grid, #ai-chat-panel')) {
+                continue;
+            }
+            if (element.type === 'radio' && !element.checked) {
+                continue;
+            }
+            fieldCount++;
+            if (fields.length >= 40) {
                 continue;
             }
             const label = this.fieldLabel(element);
@@ -774,9 +782,6 @@ class MahoAiAssistant {
                 // An unchecked box is listed too: the model needs its label to check it.
                 value = element.checked ? 'checked' : 'not checked';
             } else if (element.type === 'radio') {
-                if (!element.checked) {
-                    continue;
-                }
                 value = 'checked';
             } else {
                 value = element.value;
@@ -785,7 +790,8 @@ class MahoAiAssistant {
             fields.push(`${clip(label, 40)} = ${clip(String(value ?? ''), editor ? 400 : 80)}${editor ? ' (rich text editor)' : ''}`);
         }
         if (fields.length > 0) {
-            lines.push('Fields: ' + fields.join('; '));
+            const cut = fieldCount > fields.length ? ` (the first ${fields.length} of ${fieldCount}, the others are not listed)` : '';
+            lines.push(`Fields${cut}: ` + fields.join('; '));
         }
         const changed = [...this.changedFields].map((id) => document.getElementById(id)).filter(Boolean).map((element) => this.fieldLabel(element));
         if (changed.length > 0) {
@@ -834,7 +840,9 @@ class MahoAiAssistant {
 
     fieldLabel(element) {
         const text = (node) => (node?.textContent ?? '').replace(/\s+/g, ' ').trim().replace(/\s*\*$/, '');
-        return text(element.id ? document.querySelector(`label[for="${CSS.escape(element.id)}"]`) : null) || text(element.closest('tr')?.querySelector('td.label, th')) || element.name || element.id;
+        const cell = element.closest('td');
+        const header = cell?.closest('table')?.tHead?.rows[0]?.cells[cell.cellIndex];
+        return text(element.id ? document.querySelector(`label[for="${CSS.escape(element.id)}"]`) : null) || text(element.closest('tr')?.querySelector('td.label, th')) || text(header) || element.name || element.id;
     }
 
     // --- form text --------------------------------------------------------------------
