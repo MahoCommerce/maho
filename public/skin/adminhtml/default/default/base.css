@@ -2792,6 +2792,7 @@ ul.item-options li {
 }
 
 .categories-side-col .content-header {
+    margin-right: var(--maho-space-5);
     padding: 0
 }
 
@@ -2800,6 +2801,7 @@ ul.item-options li {
 }
 
 .categories-side-col .content-header button {
+    width: 100%;
     margin: var(--maho-space-2) 0 0
 }
 

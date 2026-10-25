@@ -279,6 +279,9 @@
         max-height: calc(100dvh - 2 * var(--maho-space-4));
         overflow-y: auto;
         scrollbar-width: thin;
+        /* A scroll box cuts what overflows it, so 4px on each side leave room for the focus outlines */
+        margin-inline: -4px;
+        padding-inline: 4px;
     }
 
     /*
@@ -891,13 +894,8 @@
         }
     }
 
-    /* The side column scrolls, so it would cut the focus outline of a full-width select */
-    .side-col .switcher:has(> .switcher-select) {
-        padding-inline: 4px;
-
-        & > .switcher-select {
-            width: 100%;
-        }
+    .side-col .switcher-select {
+        width: 100%;
     }
 
     /* The main menu: a dark bar, and a dropdown that opens on hover or keyboard focus */
