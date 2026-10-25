@@ -234,14 +234,180 @@
         }
     }
 
-    .cell-image img {
-        display: block;
-        width: 4rem;
-        height: 4rem;
-        object-fit: contain;
-        background-color: var(--color-base-100);
-        border: var(--border) solid var(--color-base-300);
-        border-radius: var(--radius-field);
+    /* Product images: one card for each image, in the sort order. The handle drags a card */
+    .product-gallery {
+        & .gallery-toolbar, & .gallery-no-selection, & .gallery-use-default {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: var(--maho-space-2) var(--maho-space-4);
+        }
+
+        & .gallery-toolbar {
+            justify-content: space-between;
+            margin-bottom: var(--maho-space-3);
+        }
+
+        & label {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--maho-space-1);
+        }
+
+        & .gallery-scope {
+            color: color-mix(in oklab, var(--color-base-content) 60%, transparent);
+            font-size: var(--maho-text-xs);
+        }
+    }
+
+    .gallery-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+        gap: var(--maho-space-3);
+        margin: 0;
+        padding: 0;
+        list-style: none;
+
+        & > .preview {
+            display: flex;
+            flex-direction: column;
+            gap: var(--maho-space-2);
+            padding: var(--maho-space-2);
+            background-color: var(--color-base-100);
+            border: var(--border) solid var(--color-base-300);
+            border-radius: var(--radius-box);
+        }
+
+        & .cell-image {
+            position: relative;
+
+            & img {
+                display: block;
+                width: 100%;
+                aspect-ratio: 1;
+                object-fit: contain;
+                border-radius: var(--radius-field);
+            }
+        }
+
+        & .gallery-handle {
+            @apply d-btn-sm d-btn-square;
+            position: absolute;
+            top: var(--maho-space-1);
+            inset-inline-start: var(--maho-space-1);
+            cursor: grab;
+
+            & svg {
+                width: 1rem;
+                height: 1rem;
+            }
+        }
+
+        &.is-locked .gallery-handle {
+            display: none;
+        }
+
+        & .cell-label input {
+            width: 100% !important;
+        }
+
+        & .gallery-card-options {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: var(--maho-space-1) var(--maho-space-3);
+            font-size: var(--maho-text-sm);
+        }
+
+        /* Exclude and Remove: a checkbox that shows as an icon, at the end of the line */
+        & .gallery-toggle {
+            justify-content: center;
+            width: 1.75rem;
+            height: 1.75rem;
+            border-radius: var(--radius-field);
+            color: color-mix(in oklab, var(--color-base-content) 50%, transparent);
+            cursor: pointer;
+
+            & svg {
+                width: 1.125rem;
+                height: 1.125rem;
+            }
+
+            &:hover {
+                background-color: var(--color-base-200);
+                color: var(--color-base-content);
+            }
+
+            &:has(input:focus-visible) {
+                outline: 2px solid var(--color-base-content);
+                outline-offset: 1px;
+            }
+        }
+
+        & .cell-disable {
+            margin-inline-start: auto;
+
+            &:has(input:checked) {
+                background-color: var(--color-base-content);
+                color: var(--color-base-100);
+            }
+        }
+
+        & .cell-remove {
+            margin-inline-start: calc(var(--maho-space-3) * -1 + var(--maho-space-1));
+
+            &:has(input:checked) {
+                background-color: var(--color-error);
+                color: var(--color-error-content);
+            }
+        }
+
+        & .preview:has(.cell-disable input:checked) img {
+            opacity: 0.5;
+        }
+
+        & .gallery-removed-note {
+            display: none;
+            margin: 0;
+            color: var(--color-error);
+            font-size: var(--maho-text-sm);
+        }
+
+        & .preview:has(.cell-remove input:checked) {
+            border-style: dashed;
+
+            & :is(img, .cell-label) {
+                opacity: 0.3;
+            }
+
+            & .cell-label {
+                display: none;
+            }
+
+            & .gallery-removed-note {
+                display: block;
+            }
+        }
+
+        & .sortable-ghost {
+            opacity: 0.4;
+        }
+
+        & > .gallery-card-upload {
+            display: flex;
+            flex-direction: column;
+
+            & .uploader {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+            }
+
+            & .uploader-dropzone {
+                flex: 1;
+                min-height: 11rem;
+            }
+        }
     }
 
     .uploader:has(> .uploader-dropzone) {

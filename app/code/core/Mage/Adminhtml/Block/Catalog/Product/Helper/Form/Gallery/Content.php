@@ -139,9 +139,12 @@ class Mage_Adminhtml_Block_Catalog_Product_Helper_Form_Gallery_Content extends M
         $imageTypes = [];
         foreach ($this->getMediaAttributes() as $attribute) {
             /** @var Mage_Eav_Model_Entity_Attribute $attribute */
+            $name = (string) $attribute->getFrontend()->getLabel();
+            $scope = Mage::helper('catalog')->__($this->getElement()->getScopeLabel($attribute));
             $imageTypes[$attribute->getAttributeCode()] = [
-                'label' => $attribute->getFrontend()->getLabel() . ' '
-                         . Mage::helper('catalog')->__($this->getElement()->getScopeLabel($attribute)),
+                'label' => $name . ' ' . $scope,
+                'name'  => $name,
+                'scope' => trim(strip_tags($scope)),
                 'field' => $this->getElement()->getAttributeFieldName($attribute),
             ];
         }
