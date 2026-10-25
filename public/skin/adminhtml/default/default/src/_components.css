@@ -290,67 +290,6 @@
     }
 
     /*
-     * Side tabs: widget/tabs.phtml writes <ul class="tabs"><li><a class="tab-item-link">,
-     * and tabs.js moves the active class from link to link.
-     */
-    /* The active tab is a card with a bar on its start side */
-    ul.tabs:not(.config-tabs) {
-        @apply d-menu;
-        --d-menu-active-bg: var(--color-base-100);
-        --d-menu-active-fg: var(--color-base-content);
-        box-sizing: border-box;
-        width: 100%;
-
-        & a:not(.active) {
-            color: inherit;
-        }
-
-        /* The changed and error icons sit at the end of the label span */
-        & a {
-            display: flex;
-
-            & > span {
-                flex: 1;
-            }
-        }
-
-        & a.active {
-            @apply d-menu-active;
-            font-weight: 600;
-            box-shadow: inset 3px 0 0 var(--color-secondary);
-        }
-    }
-
-    /* The config sidebar groups its links as <li><dl><dt>Group</dt><dd><a>, which d-menu does not read */
-    ul.config-tabs {
-        & dl {
-            margin-bottom: 1rem;
-            padding: 0.5rem;
-            background-color: var(--color-base-100);
-            border: var(--border) solid var(--color-base-300);
-            border-radius: var(--radius-box);
-        }
-
-        & dd > a {
-            display: block;
-            padding: 0.375rem 0.75rem;
-            border-radius: var(--radius-field);
-            color: inherit;
-            font-size: 0.875rem;
-
-            &:hover {
-                background-color: color-mix(in oklab, var(--color-base-content) 10%, transparent);
-            }
-
-            &.active {
-                background-color: var(--color-base-200);
-                font-weight: 600;
-                box-shadow: inset 3px 0 0 var(--color-secondary);
-            }
-        }
-    }
-
-    /*
      * Data grids: Mage_Adminhtml_Block_Widget_Grid writes <div class="grid"> around
      * the table, and a form field such as the tier price writes <td class="grid">.
      * A grid cell can hold a table of its own, which stays plain.
@@ -531,6 +470,132 @@
  * classes in the utilities layer, so the rules that adjust them are here too.
  */
 @layer utilities {
+    /* A tab link of widget/tabs.phtml (d-menu) or widget/tabshoriz.phtml (d-tabs), with its changed and error icons */
+    a.tab-item-link {
+        & > span {
+            display: flex;
+            flex: 1;
+            align-items: center;
+        }
+
+        & span em {
+            order: 1;
+            margin-inline-start: auto;
+        }
+
+        & span:is(.changed, .error) {
+            display: none;
+            margin-inline-start: auto;
+        }
+
+        & span:is(.changed, .error) svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        &.changed {
+            font-style: italic;
+        }
+
+        &.changed span.changed {
+            display: flex;
+            color: var(--color-success);
+        }
+
+        &.error span.error {
+            display: flex;
+            color: var(--color-error);
+        }
+
+        &.changed span.changed + span.error {
+            margin-inline-start: var(--maho-space-1);
+        }
+
+        &.subitem {
+            padding-inline-start: 2.2em;
+        }
+    }
+
+    /* Side tabs and the config sidebar (d-menu). The active link is a card with a bar on its start side */
+    :is(ul.tabs, .config-tabs ul).d-menu {
+        /* daisyUI colors a link that is pressed with these, which are near black by default */
+        --d-menu-active-bg: var(--color-base-200);
+        --d-menu-active-fg: var(--color-base-content);
+        box-sizing: border-box;
+        width: 100%;
+
+        & a:not(.active) {
+            color: inherit;
+        }
+
+        & a.active {
+            background-color: var(--color-base-100);
+            color: var(--color-base-content);
+            font-weight: 600;
+            box-shadow: inset 3px 0 0 var(--color-secondary);
+        }
+    }
+
+    ul.tabs.d-menu a {
+        display: flex;
+    }
+
+    /* The config sidebar: one card for each group of sections */
+    .config-tabs ul.d-menu {
+        margin-bottom: 1rem;
+        background-color: var(--color-base-100);
+        border: var(--border) solid var(--color-base-300);
+        border-radius: var(--radius-box);
+
+        & a.active {
+            background-color: var(--color-base-200);
+        }
+    }
+
+    .config-tabs .d-menu-title {
+        color: color-mix(in oklab, var(--color-base-content) 70%, transparent);
+        font-size: var(--maho-text-xs);
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+    }
+
+    /* Horizontal tabs (d-tabs). tabs.js sets aria-selected, which daisyUI reads as the active tab */
+    .tabs-horiz.d-tabs {
+        flex-wrap: wrap;
+        border-bottom: var(--border) solid var(--color-base-300);
+
+        /* A tab is a link, so it would take the link color of the base layer */
+        & .d-tab {
+            --d-tab-p: var(--maho-space-4);
+            --d-tab-height: 2.75rem;
+            color: color-mix(in oklab, var(--color-base-content) 65%, transparent);
+            font-size: var(--maho-text-md);
+            font-weight: 500;
+
+            &:hover, &[aria-selected=true] {
+                color: var(--color-base-content);
+            }
+
+            &[aria-selected=true] {
+                font-weight: 600;
+
+                /* daisyUI draws the line under the text only, with a border in the text color on top */
+                &::before {
+                    left: 0;
+                    width: 100%;
+                    height: 2px;
+                    border: 0;
+                    border-radius: 0;
+                    background-color: var(--color-secondary);
+                }
+            }
+        }
+    }
+
+    :is(.dashboard-diagrams-box, .dashboard-grids-box) .tabs-horiz {
+        padding: var(--maho-space-1) var(--maho-space-1) 0;
+    }
+
     /* The drop zone of an uploader that uploads at once, such as the product images. A click opens the file dialog */
     .uploader-dropzone {
         align-items: center;
@@ -548,6 +613,11 @@
         & svg {
             width: 1.75rem;
             height: 1.75rem;
+        }
+
+        & .uploader-dropzone-note {
+            margin-top: calc(var(--maho-space-1) * -1);
+            font-size: var(--maho-text-sm);
         }
 
         &:hover, &.is-dragover {
@@ -610,27 +680,23 @@
 
     /* Product images: one card for each image, in the sort order. The handle drags a card */
     .product-gallery {
-        & .gallery-toolbar, & .gallery-no-selection, & .gallery-use-default {
+        & .gallery-use-default {
             display: flex;
             flex-wrap: wrap;
             align-items: center;
             gap: var(--maho-space-2) var(--maho-space-4);
-        }
-
-        & .gallery-toolbar {
-            justify-content: space-between;
             margin-bottom: var(--maho-space-3);
+
+            & label {
+                display: inline-flex;
+                align-items: center;
+                gap: var(--maho-space-1);
+            }
         }
 
-        & .gallery-toolbar label {
-            display: inline-flex;
-            align-items: center;
-            gap: var(--maho-space-1);
-        }
-
-        & .gallery-scope {
-            color: color-mix(in oklab, var(--color-base-content) 60%, transparent);
-            font-size: var(--maho-text-xs);
+        /* The drop zone takes the full width below the cards, so its place does not depend on the image count */
+        & .gallery-upload {
+            margin-top: var(--maho-space-4);
         }
     }
 
@@ -642,7 +708,7 @@
         padding: 0;
         list-style: none;
 
-        & .cell-image {
+        & .gallery-image {
             position: relative;
 
             & img {
@@ -672,25 +738,43 @@
             width: 100% !important;
         }
 
+        /* One toggle for each role, so a store with more roles gets more lines */
         & .gallery-card-options {
             display: flex;
             flex-wrap: wrap;
-            align-items: center;
-            gap: var(--maho-space-1) var(--maho-space-3);
-            font-size: var(--maho-text-sm);
+            gap: var(--maho-space-1);
+        }
 
-            & label:not(.d-btn) {
-                display: inline-flex;
-                align-items: center;
-                gap: var(--maho-space-1);
+        /* A role (Main Image) is a radio that shows as a toggle button: a click on the checked one clears the role */
+        & .gallery-role {
+            & svg {
+                width: 1rem;
+                height: 1rem;
+            }
+
+            &:has(input:checked) {
+                --d-btn-bg: var(--color-primary);
+                --d-btn-fg: var(--color-primary-content);
+                --d-btn-border: var(--color-primary);
+
+                & svg {
+                    fill: currentColor;
+                }
+            }
+
+            &:has(input:focus-visible) {
+                outline: 2px solid var(--color-base-content);
+                outline-offset: 1px;
             }
         }
 
-        /* Exclude and Remove: a checkbox that shows as an icon button, at the end of the line */
+        /* Exclude and Remove: a checkbox that shows as an icon button, in the corner opposite the handle */
         & .gallery-toggles {
+            position: absolute;
+            top: var(--maho-space-1);
+            inset-inline-end: var(--maho-space-1);
             display: flex;
             gap: var(--maho-space-1);
-            margin-inline-start: auto;
 
             & svg {
                 width: 1.125rem;
@@ -703,16 +787,15 @@
             }
         }
 
-        /* d-btn-ghost takes its text color from --d-btn-rest-fg */
         & .cell-disable:has(input:checked) {
             --d-btn-bg: var(--color-base-content);
-            --d-btn-rest-fg: var(--color-base-100);
+            --d-btn-fg: var(--color-base-100);
             --d-btn-border: var(--color-base-content);
         }
 
         & .cell-remove:has(input:checked) {
             --d-btn-bg: var(--color-error);
-            --d-btn-rest-fg: var(--color-error-content);
+            --d-btn-fg: var(--color-error-content);
             --d-btn-border: var(--color-error);
         }
 
@@ -745,22 +828,6 @@
 
         & .sortable-ghost {
             opacity: 0.4;
-        }
-
-        & > .gallery-card-upload {
-            display: flex;
-            flex-direction: column;
-
-            & .uploader {
-                flex: 1;
-                display: flex;
-                flex-direction: column;
-            }
-
-            & .uploader-dropzone {
-                flex: 1;
-                min-height: 11rem;
-            }
         }
     }
 }

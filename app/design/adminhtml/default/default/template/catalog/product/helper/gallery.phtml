@@ -12,76 +12,74 @@ $_element = $this->getElement();
 $_readonly = $_element->getReadonly();
 ?>
 <div id="<?= $this->getHtmlId() ?>" class="product-gallery">
-    <ul class="messages">
-        <li class="notice-msg">
-            <ul>
-                <li>
-                    <?= Mage::helper('catalog')->__('Image type and information need to be specified for each store view.') ?>
-                </li>
-            </ul>
-        </li>
-    </ul>
-
-    <div class="gallery-toolbar">
-        <div id="<?= $this->getHtmlId() ?>-image-0" class="gallery-no-selection">
-            <?php foreach ($this->getImageTypes() as $typeId => $type): ?>
-                <label class="cell-<?= $typeId ?>">
-                    <input type="radio" name="<?= $type['field'] ?>" value="no_selection"
-                        <?php if ($_element->getAttributeReadonly($typeId)): ?> disabled="disabled"<?php endif ?>
-                           onclick="<?= $this->getJsObjectName() ?>.setProductImages('no_selection')">
-                    <span><?= $this->escapeHtml($type['name']) ?>: <?= Mage::helper('catalog')->__('No image') ?></span>
-                    <span class="gallery-scope"><?= $this->escapeHtml($type['scope']) ?></span>
-                </label>
-            <?php endforeach ?>
-        </div>
-        <?php if ($this->hasUseDefault()): ?>
-            <div id="<?= $this->getHtmlId() ?>_default" class="gallery-use-default">
-                <span><?= Mage::helper('catalog')->__('Use Default Value') ?>:</span>
-                <label>
-                    <input id="use_default_label" class="default-checkbox" name="use_default[]" type="checkbox" value="label"
-                        <?php if ($_element->getAttributeReadonly('label')): ?> disabled="disabled"<?php endif ?>
-                        <?php if ($_element->usedDefault('label')): ?> checked<?php endif ?>
-                           onclick="<?= $this->getJsObjectName() ?>.updateUseDefault(this)">
-                    <?= Mage::helper('catalog')->__('Label') ?>
-                </label>
-                <label>
-                    <input id="use_default_position" class="default-checkbox" name="use_default[]" type="checkbox" value="position"
-                        <?php if ($_element->getAttributeReadonly('position')): ?> disabled="disabled"<?php endif ?>
-                        <?php if ($_element->usedDefault('position')): ?> checked<?php endif ?>
-                           onclick="<?= $this->getJsObjectName() ?>.updateUseDefault(this)">
-                    <?= Mage::helper('catalog')->__('Sort Order') ?>
-                </label>
-                <?php foreach ($this->getMediaAttributes() as $_attribute): ?>
-                    <?php if ($_element->canDisplayUseDefault($_attribute)): ?>
-                        <label>
-                            <input class="default-checkbox" name="use_default[]" type="checkbox" value="<?= $_attribute->getAttributeCode() ?>"
-                                <?php if ($_element->getAttributeReadonly($_attribute->getAttributeCode())): ?> disabled="disabled"<?php endif ?>
-                                <?php if ($_element->usedDefault($_attribute)): ?> checked<?php endif ?>
-                                   onclick="<?= $this->getJsObjectName() ?>.updateUseDefault()">
-                            <?= $this->escapeHtml($_attribute->getFrontend()->getLabel()) ?>
-                        </label>
-                    <?php endif ?>
-                <?php endforeach ?>
-            </div>
-        <?php endif ?>
+    <?php /* Checked when no image has the role. A click on the checked role of a card checks it. */ ?>
+    <div id="<?= $this->getHtmlId() ?>-image-0" hidden>
+        <?php foreach ($this->getImageTypes() as $typeId => $type): ?>
+            <label class="cell-<?= $typeId ?>">
+                <input type="radio" name="<?= $type['field'] ?>" value="no_selection"
+                    <?php if ($_element->getAttributeReadonly($typeId)): ?> disabled="disabled"<?php endif ?>>
+            </label>
+        <?php endforeach ?>
     </div>
 
-    <ul id="<?= $this->getHtmlId() ?>_list" class="gallery-cards"<?php if ($_readonly): ?> data-readonly="1"<?php endif ?>>
-        <?php if (!$_readonly): ?>
-            <li class="gallery-card-upload">
-                <?= $this->getUploaderHtml() ?>
-                <p class="note"><?= Mage::helper('catalog')->__('Maximum width and height dimension for upload image is %s.', Mage::getStoreConfig(Mage_Catalog_Helper_Image::XML_NODE_PRODUCT_MAX_DIMENSION)) ?></p>
-            </li>
-        <?php endif ?>
-    </ul>
+    <?php if ($this->hasUseDefault()): ?>
+        <div id="<?= $this->getHtmlId() ?>_default" class="gallery-use-default">
+            <span><?= Mage::helper('catalog')->__('Use Default Value') ?>:</span>
+            <label>
+                <input id="use_default_label" class="default-checkbox" name="use_default[]" type="checkbox" value="label"
+                    <?php if ($_element->getAttributeReadonly('label')): ?> disabled="disabled"<?php endif ?>
+                    <?php if ($_element->usedDefault('label')): ?> checked<?php endif ?>
+                       onclick="<?= $this->getJsObjectName() ?>.updateUseDefault(this)">
+                <?= Mage::helper('catalog')->__('Label') ?>
+            </label>
+            <label>
+                <input id="use_default_position" class="default-checkbox" name="use_default[]" type="checkbox" value="position"
+                    <?php if ($_element->getAttributeReadonly('position')): ?> disabled="disabled"<?php endif ?>
+                    <?php if ($_element->usedDefault('position')): ?> checked<?php endif ?>
+                       onclick="<?= $this->getJsObjectName() ?>.updateUseDefault(this)">
+                <?= Mage::helper('catalog')->__('Sort Order') ?>
+            </label>
+            <?php foreach ($this->getMediaAttributes() as $_attribute): ?>
+                <?php if ($_element->canDisplayUseDefault($_attribute)): ?>
+                    <label>
+                        <input class="default-checkbox" name="use_default[]" type="checkbox" value="<?= $_attribute->getAttributeCode() ?>"
+                            <?php if ($_element->getAttributeReadonly($_attribute->getAttributeCode())): ?> disabled="disabled"<?php endif ?>
+                            <?php if ($_element->usedDefault($_attribute)): ?> checked<?php endif ?>
+                               onclick="<?= $this->getJsObjectName() ?>.updateUseDefault()">
+                        <?= $this->escapeHtml($_attribute->getFrontend()->getLabel()) ?>
+                    </label>
+                <?php endif ?>
+            <?php endforeach ?>
+        </div>
+    <?php endif ?>
+
+    <ul id="<?= $this->getHtmlId() ?>_list" class="gallery-cards"<?php if ($_readonly): ?> data-readonly="1"<?php endif ?>></ul>
+
+    <?php if (!$_readonly): ?>
+        <div class="gallery-upload"><?= $this->getUploaderHtml() ?></div>
+    <?php endif ?>
 
     <template id="<?= $this->getHtmlId() ?>_template">
-        <figure class="cell-image">
+        <figure class="gallery-image">
             <img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="">
             <?php if (!$_readonly): ?>
                 <button type="button" class="gallery-handle d-btn d-btn-sm d-btn-square" title="<?= $this->quoteEscape(Mage::helper('adminhtml')->__('Drag to reorder')) ?>"
                         aria-label="<?= $this->quoteEscape(Mage::helper('adminhtml')->__('Drag to reorder')) ?>"><?= $this->getIconSvg('grip-vertical') ?></button>
             <?php endif ?>
+            <span class="gallery-toggles">
+                <label class="cell-disable d-btn d-btn-sm d-btn-square" title="<?= $this->quoteEscape(Mage::helper('catalog')->__('Exclude')) ?>">
+                    <input type="checkbox" class="sr-only"<?php if ($_readonly): ?> disabled="disabled"<?php endif ?>
+                           onclick="<?= $this->getJsObjectName() ?>.updateImage('__file__')">
+                    <?= $this->getIconSvg('eye-off') ?>
+                    <span class="sr-only"><?= Mage::helper('catalog')->__('Exclude') ?></span>
+                </label>
+                <label class="cell-remove d-btn d-btn-sm d-btn-square" title="<?= $this->quoteEscape(Mage::helper('catalog')->__('Remove')) ?>">
+                    <input type="checkbox" class="sr-only"<?php if ($_readonly): ?> disabled="disabled"<?php endif ?>
+                           onclick="<?= $this->getJsObjectName() ?>.updateImage('__file__')">
+                    <?= $this->getIconSvg('trash') ?>
+                    <span class="sr-only"><?= Mage::helper('catalog')->__('Remove') ?></span>
+                </label>
+            </span>
         </figure>
         <div class="d-card-body">
             <div class="cell-label">
@@ -95,27 +93,14 @@ $_readonly = $_element->getReadonly();
             <p class="gallery-removed-note"><?= Mage::helper('catalog')->__('Removed when you save') ?></p>
             <div class="gallery-card-options">
                 <?php foreach ($this->getImageTypes() as $typeId => $type): ?>
-                    <label class="cell-<?= $typeId ?>">
-                        <input type="radio" name="<?= $type['field'] ?>" value="__file__"
+                    <label class="cell-<?= $typeId ?> gallery-role d-btn d-btn-sm" title="<?= $this->quoteEscape(trim($type['name'] . ' ' . $type['scope'])) ?>">
+                        <input type="radio" class="sr-only" name="<?= $type['field'] ?>" value="__file__"
                             <?php if ($_element->getAttributeReadonly($typeId)): ?> disabled="disabled"<?php endif ?>
-                               onclick="<?= $this->getJsObjectName() ?>.setProductImages('__file__')">
+                               onclick="<?= $this->getJsObjectName() ?>.toggleProductImage('__file__', '<?= $typeId ?>')">
+                        <?= $this->getIconSvg('star') ?>
                         <?= $this->escapeHtml($type['name']) ?>
                     </label>
                 <?php endforeach ?>
-                <span class="gallery-toggles">
-                    <label class="cell-disable d-btn d-btn-ghost d-btn-sm d-btn-square" title="<?= $this->quoteEscape(Mage::helper('catalog')->__('Exclude')) ?>">
-                        <input type="checkbox" class="sr-only"<?php if ($_readonly): ?> disabled="disabled"<?php endif ?>
-                               onclick="<?= $this->getJsObjectName() ?>.updateImage('__file__')">
-                        <?= $this->getIconSvg('eye-off') ?>
-                        <span class="sr-only"><?= Mage::helper('catalog')->__('Exclude') ?></span>
-                    </label>
-                    <label class="cell-remove d-btn d-btn-ghost d-btn-sm d-btn-square" title="<?= $this->quoteEscape(Mage::helper('catalog')->__('Remove')) ?>">
-                        <input type="checkbox" class="sr-only"<?php if ($_readonly): ?> disabled="disabled"<?php endif ?>
-                               onclick="<?= $this->getJsObjectName() ?>.updateImage('__file__')">
-                        <?= $this->getIconSvg('trash') ?>
-                        <span class="sr-only"><?= Mage::helper('catalog')->__('Remove') ?></span>
-                    </label>
-                </span>
             </div>
         </div>
     </template>

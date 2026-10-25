@@ -36,6 +36,13 @@ Product.Gallery = class {
         this.fixParentTable();
         this.updateImages();
         this.initSorting();
+        this.getElement('list').addEventListener('keydown', (event) => {
+            // The Space key on a checked radio fires no click, so it cannot clear the role without this
+            if (event.key === ' ' && event.target.matches('.gallery-role input:checked')) {
+                event.preventDefault();
+                event.target.click();
+            }
+        });
         varienGlobalEvents.attachEventHandler('moveTab', this.onImageTabMove.bind(this));
     }
     /** A card moves by drag and drop on its handle, or by the arrow keys while its handle has the focus */
@@ -162,12 +169,7 @@ Product.Gallery = class {
         var vars = Object.assign({}, image);
         vars.id = this.prepareId(image.file);
         var html = this.template(vars);
-        const upload = this.getElement('list').querySelector('.gallery-card-upload');
-        if (upload) {
-            upload.insertAdjacentHTML('beforebegin', html);
-        } else {
-            this.getElement('list').insertAdjacentHTML('beforeend', html);
-        }
+        this.getElement('list').insertAdjacentHTML('beforeend', html);
 
         document.getElementById(vars.id).querySelectorAll('input[type="radio"]').forEach(function (radio) {
             radio.addEventListener('change', this.onChangeRadio);
@@ -221,8 +223,15 @@ Product.Gallery = class {
         // An upload that is not saved yet has no thumbnail
         const url = new URL(image.thumbnail_url ?? image.url, document.baseURI);
         if (url.protocol === 'https:' || url.protocol === 'http:') {
-            this.getFileElement(file, 'cell-image img').src = url.href;
+            this.getFileElement(file, 'gallery-image img').src = url.href;
         }
+    }
+    toggleProductImage(file, type) {
+        if (this.imagesValues[type] === file) {
+            this.getFileElement('no_selection', 'cell-' + type + ' input').checked = true;
+            file = 'no_selection';
+        }
+        this.setProductImages(file);
     }
     setProductImages(file) {
         Object.entries(this.imageTypes)

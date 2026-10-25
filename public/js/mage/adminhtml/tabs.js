@@ -11,7 +11,8 @@ class varienTabs {
 
         this.tabOnClick = this.tabMouseClick.bind(this);
 
-        this.tabs = document.querySelectorAll(`#${this.containerId} li a.tab-item-link`);
+        // Side tabs wrap each link in a list item, horizontal tabs (d-tabs) do not
+        this.tabs = document.querySelectorAll(`#${this.containerId} li a.tab-item-link, #${this.containerId} > a.tab-item-link`);
 
         this.hideAllTabsContent();
 
@@ -109,6 +110,7 @@ class varienTabs {
         if (tabContentElement) {
             tabContentElement.style.display = '';
             tab.classList.add('active');
+            tab.setAttribute('aria-selected', 'true');
 
             // load shadow tabs, if any
             if (tab.shadowTabs && tab.shadowTabs.length) {
@@ -244,6 +246,7 @@ class varienTabs {
         if (destElement && tabContentElement) {
             tabContentElement.style.display = 'none';
             tab.classList.remove('active');
+            tab.setAttribute('aria-selected', 'false');
         }
         window.varienGlobalEvents?.fireEvent('hideTab', { tab: tab });
     }

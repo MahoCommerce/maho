@@ -38,7 +38,10 @@ class Mage_Adminhtml_Block_Catalog_Product_Helper_Form_Gallery_Content extends M
                 ['_query' => false],
             ));
 
-        $this->getUploader()->getMiscConfig()->setAutoUpload();
+        $maxDimension = Mage::getStoreConfig(Mage_Catalog_Helper_Image::XML_NODE_PRODUCT_MAX_DIMENSION);
+        $this->getUploader()->getMiscConfig()
+            ->setAutoUpload()
+            ->setDropZoneNote(Mage::helper('catalog')->__('Max %s x %s pixels', $maxDimension, $maxDimension));
 
         $browseConfig = $this->getUploader()->getButtonConfig();
         $browseConfig

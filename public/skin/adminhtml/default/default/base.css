@@ -574,7 +574,6 @@ table.actions td {
     vertical-align: top
 }
 
-
 .massaction {
     width: 100%;
     height: 30px;
@@ -841,79 +840,6 @@ img.accordion-btn {
     margin-right: var(--maho-space-2)
 }
 
-ul.tabs a > span,ul.tabs-horiz a > span {
-    display: flex;
-    align-items: center
-}
-
-ul.tabs span em {
-    order: 1;
-    margin-left: auto
-}
-
-ul.tabs a.subitem {
-    padding-left: 2.2em
-}
-
-ul.tabs span.changed,ul.tabs span.error,ul.tabs-horiz span.changed,ul.tabs-horiz span.error {
-    background: 0;
-    padding: 0;
-    display: none;
-    margin-left: auto
-}
-
-ul.tabs a.changed span.changed,ul.tabs-horiz a.changed span.changed {
-    display: flex;
-    flex: none;
-    color: var(--maho-success) !important;
-}
-
-ul.tabs-horiz a.active.changed span.changed {
-    color: var(--maho-surface) !important;
-}
-
-ul.tabs a.error span.error,ul.tabs-horiz a.error span.error {
-    display: flex;
-    flex: none;
-    color: var(--maho-error-strong)
-}
-
-ul.tabs a.changed span.changed + span.error,ul.tabs-horiz a.changed span.changed + span.error {
-    margin-left: var(--maho-space-1)
-}
-
-ul.tabs span.changed svg,ul.tabs span.error svg,ul.tabs-horiz span.changed svg,ul.tabs-horiz span.error svg {
-    width: 20px;
-    height: 20px
-}
-
-ul.tabs a.changed {
-    font-style: italic
-}
-
-ul.tabs-horiz {
-    margin: 0 0 var(--maho-space-5) 0;
-    padding: var(--maho-space-3) 0 0 var(--maho-space-2)
-}
-
-ul.tabs-horiz li {
-    margin: 0 var(--maho-space-2)
-}
-
-ul.tabs-horiz li a {
-    display: block;
-    background: var(--maho-hairline);
-    border: 1px solid var(--maho-border);
-    padding: var(--maho-space-1) var(--maho-space-3);
-    color: var(--maho-ink-soft)!important;
-    text-decoration: none!important
-}
-
-ul.tabs-horiz li a.active {
-    border-bottom: 1px solid var(--maho-surface);
-    background: var(--maho-surface)
-}
-
 .notification-global {
     padding: var(--maho-space-2) var(--maho-space-6) var(--maho-space-2) var(--maho-space-9);
     background: var(--maho-warning-bg);
@@ -963,6 +889,12 @@ ul.tabs-horiz li a.active {
     font-weight: 500;
     line-height: 1em;
     text-align: center
+}
+
+.demo-notice a {
+    color: inherit;
+    font-weight: 600;
+    text-decoration: underline
 }
 
 select.countries option {
@@ -1990,13 +1922,6 @@ div.autocomplete ul li {
     border: 1px solid var(--maho-border-soft);
     border-radius: var(--maho-radius-md);
     overflow: hidden;
-}
-
-.dashboard-diagrams-box ul.tabs-horiz,.dashboard-grids-box ul.tabs-horiz {
-    display: flex;
-    flex-wrap: wrap;
-    padding: var(--maho-space-1) var(--maho-space-1) 0;
-    border-bottom: 1px solid var(--maho-hairline);
 }
 
 #grid_tab_content .grid table,#diagram_tab_content .grid table {
@@ -3516,23 +3441,6 @@ img.attribute-global {
     vertical-align: middle
 }
 
-ul.config-tabs dt {
-    border-top: 1px solid var(--maho-border);
-    background: var(--maho-surface-sunken);
-    padding: var(--maho-space-1) 0 var(--maho-space-1) 1.5em;
-    font-weight: 700;
-    text-transform: uppercase;
-    color: var(--maho-ink-soft)
-}
-
-ul.config-tabs dl {
-    margin-bottom: var(--maho-space-4)
-}
-
-ul.config-tabs a.last span {
-    background-image: none
-}
-
 .inline-table {
     border: 0!important
 }
@@ -4815,53 +4723,6 @@ a.error span {
     justify-content: center;
     align-items: center;
     gap: .5em
-}
-
-ul.tabs-horiz {
-    display: flex;
-    flex-wrap: wrap;
-    background: 0 0;
-    margin: 0;
-    padding: 0
-}
-
-ul.tabs-horiz li {
-    border: 0;
-    margin: 0 var(--maho-space-1) 0 0
-}
-
-ul.tabs-horiz li a {
-    background: 0 0;
-    color: var(--maho-ink-muted)!important;
-    font-size: var(--maho-text-md);
-    font-weight: 500;
-    padding: var(--maho-space-3) var(--maho-space-4);
-    border: 0;
-    box-shadow: inset 0 -2px 0 transparent;
-    transition: color var(--maho-duration-fast) var(--maho-ease), box-shadow var(--maho-duration-fast) var(--maho-ease)
-}
-
-ul.tabs-horiz li a:hover {
-    color: var(--maho-ink)!important
-}
-
-ul.tabs-horiz li a.active {
-    border: 0;
-    background: 0 0;
-    color: var(--maho-ink)!important;
-    font-weight: 600;
-    box-shadow: inset 0 -2px 0 var(--maho-chartreuse-deep)
-}
-
-ul.config-tabs dt {
-    border: 0;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: .05em;
-    padding: var(--maho-space-4) var(--maho-space-3) var(--maho-space-2);
-    font-size: var(--maho-text-xs);
-    background: 0 0;
-    color: var(--maho-ink-muted)
 }
 
 #grid_tab_content {

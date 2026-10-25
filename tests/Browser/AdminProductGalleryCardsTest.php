@@ -13,7 +13,7 @@ uses(MahoBrowserTestCase::class)->group('browser');
 
 /**
  * The product images tab shows one card for each image. The order of the cards is the sort
- * order, and each card sets the main image, Exclude and Remove. The cards write the same
+ * order, and each card sets its roles (Main Image), Exclude and Remove. The cards write the same
  * hidden JSON fields as the old table, so a save must store what the cards show.
  */
 
@@ -150,7 +150,7 @@ it('stores the order, the main image, Exclude and Remove that the cards show', f
     $page->keys(galleryCard($third) . ' .gallery-handle', ['ArrowLeft', 'ArrowLeft']);
     expect($page->script($order))->toBe("{$third},{$first},{$second}");
 
-    $page->click(galleryCard($third) . ' .gallery-card-options .cell-image input')
+    $page->click(galleryCard($third) . ' .gallery-card-options .cell-image')
         ->click(galleryCard($first) . ' .cell-disable')
         ->click(galleryCard($second) . ' .cell-remove')
         ->click('button[title="Save"]');
@@ -166,4 +166,30 @@ it('stores the order, the main image, Exclude and Remove that the cards show', f
         ->and((int) $images[$first]['position'])->toBe(2)
         ->and((int) $images[$first]['disabled'])->toBe(1)
         ->and((int) $images[$third]['disabled'])->toBe(0);
+});
+
+it('clears the main image when the user clicks the Main Image of the main card again', function () {
+    ['id' => $id, 'files' => [$first]] = createGalleryCardsProduct();
+    createGalleryCardsAdminUser();
+
+    $page = adminLoginAndVisit(
+        GALLERY_CARDS_ADMIN_USERNAME,
+        GALLERY_CARDS_ADMIN_PASSWORD,
+        '/admin/catalog_product/edit/id/' . $id,
+        'ul.tabs a[title="Images"]',
+    );
+    $page->click('ul.tabs a[title="Images"]');
+    $page->text('.gallery-cards .preview:visible');
+
+    $checked = "document.querySelector('" . galleryCard($first) . " .cell-image input').checked";
+    expect($page->script($checked))->toBeTrue();
+
+    $page->click(galleryCard($first) . ' .gallery-card-options .cell-image');
+    expect($page->script($checked))->toBeFalse();
+
+    $page->click('button[title="Save"]');
+    $page->text('.success-msg');
+
+    $product = Mage::getModel('catalog/product')->setStoreId(0)->load($id);
+    expect($product->getImage())->toBeIn([null, '', 'no_selection']);
 });

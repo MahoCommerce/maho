@@ -54,4 +54,18 @@ class Mage_Adminhtml_Model_Uploader_Config_Misc extends Mage_Adminhtml_Model_Upl
         $value = $this->getData('auto_upload');
         return $value === null ? null : (bool) $value;
     }
+
+    /**
+     * A limit of the files, such as their size. The drop zone shows it below its text.
+     */
+    public function setDropZoneNote(?string $value): static
+    {
+        return $this->setData('drop_zone_note', $value);
+    }
+
+    public function getDropZoneNote(): ?string
+    {
+        $value = $this->getData('drop_zone_note');
+        return $value === null ? null : (string) $value;
+    }
 }
