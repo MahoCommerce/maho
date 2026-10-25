@@ -27,7 +27,7 @@ it('stores the passkey of an RS256 authenticator with the longest credential ID'
         ->setLastname('Storage')
         ->setEmail("passkey_{$suffix}@example.com")
         ->setPassword('Pk-P4ssword-1')
-        ->setIsActive()
+        ->setIsActive(1)
         ->setPasskeyCredentialIdHash($credentialId)
         ->setPasskeyPublicKey($publicKey);
     $this->user->save();

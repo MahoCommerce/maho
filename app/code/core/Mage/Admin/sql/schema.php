@@ -59,7 +59,6 @@ return function (Schema $schema): void {
     );
     $rule->setComment('Admin Rule Table');
 
-<<<<<<< HEAD
     $user = $schema->createTable('admin_user');
     $user->addColumn('user_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $user->addColumn('firstname', Types::STRING, ['length' => 32, 'notnull' => false]);
@@ -79,41 +78,11 @@ return function (Schema $schema): void {
     $user->addColumn('backend_locale', Types::STRING, ['length' => 8, 'notnull' => false]);
     $user->addColumn('twofa_enabled', Types::SMALLINT, ['default' => 0]);
     $user->addColumn('twofa_secret', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $user->addColumn('passkey_credential_id_hash', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $user->addColumn('passkey_public_key', Types::STRING, ['length' => 255, 'notnull' => false]);
+    $user->addColumn('passkey_credential_id_hash', Types::STRING, ['length' => 1364, 'notnull' => false]);
+    $user->addColumn('passkey_public_key', Types::TEXT, ['length' => 65535, 'notnull' => false]);
     $user->addColumn('password_enabled', Types::SMALLINT, ['default' => 1]);
     $user->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('user_id')->create(),
-=======
-    $schema->addTable(
-        Table::editor()
-            ->setUnquotedName('admin_user')
-            ->addColumn(Schema::column('user_id', Types::INTEGER, unsigned: true, autoincrement: true))
-            ->addColumn(Schema::column('firstname', Types::STRING, length: 32, notNull: false))
-            ->addColumn(Schema::column('lastname', Types::STRING, length: 32, notNull: false))
-            ->addColumn(Schema::column('email', Types::STRING, length: 128, notNull: false))
-            ->addColumn(Schema::column('username', Types::STRING, length: 40, notNull: false))
-            ->addColumn(Schema::column('password', Types::STRING, length: 255, notNull: false))
-            ->addColumn(Schema::column('created', Types::DATETIME_MUTABLE, default: new CurrentTimestamp()))
-            ->addColumn(Schema::column('modified', Types::DATETIME_MUTABLE, notNull: false))
-            ->addColumn(Schema::column('logdate', Types::DATETIME_MUTABLE, notNull: false))
-            ->addColumn(Schema::column('lognum', Types::SMALLINT, unsigned: true, default: 0))
-            ->addColumn(Schema::column('reload_acl_flag', Types::SMALLINT, default: 0))
-            ->addColumn(Schema::column('is_active', Types::SMALLINT, default: 1))
-            ->addColumn(Schema::column('extra', Types::TEXT, length: 65535, notNull: false))
-            ->addColumn(Schema::column('rp_token', Types::STRING, length: 255, notNull: false))
-            ->addColumn(Schema::column('rp_token_created_at', Types::DATETIME_MUTABLE, notNull: false))
-            ->addColumn(Schema::column('backend_locale', Types::STRING, length: 8, notNull: false))
-            ->addColumn(Schema::column('twofa_enabled', Types::SMALLINT, default: 0))
-            ->addColumn(Schema::column('twofa_secret', Types::STRING, length: 255, notNull: false))
-            ->addColumn(Schema::column('passkey_credential_id_hash', Types::STRING, length: 1364, notNull: false))
-            ->addColumn(Schema::column('passkey_public_key', Types::TEXT, length: 65535, notNull: false))
-            ->addColumn(Schema::column('password_enabled', Types::SMALLINT, default: 1))
-            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('user_id')->create())
-            ->addIndex(Index::editor()->setType(IndexType::UNIQUE)->setUnquotedColumnNames('username'))
-            ->setComment('Admin User Table')
-            ->create(),
->>>>>>> 7f003b91 (Fixed the admin passkey registration failing with Windows Hello and other authenticators that use an RSA key (#1633))
     );
     $user->addUniqueIndex(['username']);
     $user->setComment('Admin User Table');
