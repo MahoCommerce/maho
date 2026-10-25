@@ -15,6 +15,16 @@ class Mage_Adminhtml_Block_System_Tools_Healthcheck extends Mage_Adminhtml_Block
         return Mage::getVersion();
     }
 
+    public function getMahoBuild(): string
+    {
+        return \Maho\Build\Info::get()->getBuild();
+    }
+
+    public function getMahoBuildCommit(): ?string
+    {
+        return \Maho\Build\Info::get()->getCommit();
+    }
+
     public function getPhpVersion(): string
     {
         return PHP_VERSION;
