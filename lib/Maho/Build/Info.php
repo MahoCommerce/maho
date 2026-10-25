@@ -20,14 +20,12 @@ namespace Maho\Build;
  *   made with git);
  * - `composer`: `vendor/composer/installed.php`, written by Composer when it
  *   installs the package, so it describes what Composer put on disk;
- * - `composer.lock`: the lock file of the project, for an install from a VCS or
- *   a dist archive where the installed metadata is unavailable;
  * - `unknown`: nothing to read. This is the case of a package extracted from the
- *   release archive, which has neither `.git` nor `composer.lock`, so the commit
- *   is not knowable at runtime and the caller must not guess.
+ *   release archive, which has no `.git`, so the commit is not knowable at
+ *   runtime and the caller must not guess.
  *
  * The repository the commit belongs to comes from the git remote, or from the
- * dist URL of the lock file: an installation of a fork must link to that fork,
+ * source URL of the lock file: an installation of a fork must link to that fork,
  * not to upstream.
  *
  * None of the sources spawns a process: `git` is read from the files of the
@@ -37,7 +35,6 @@ final class Info
 {
     public const SOURCE_GIT = 'git';
     public const SOURCE_COMPOSER = 'composer';
-    public const SOURCE_LOCK = 'composer.lock';
     public const SOURCE_UNKNOWN = 'unknown';
 
     private const PACKAGE_NAME = 'mahocommerce/maho';
@@ -134,11 +131,6 @@ final class Info
         $commit = self::readComposerInstalledCommit();
         if ($commit !== null) {
             return [$commit, self::SOURCE_COMPOSER, self::readLockRepositoryUrl($projectRoot)];
-        }
-
-        $commit = self::readComposerLockCommit($projectRoot);
-        if ($commit !== null) {
-            return [$commit, self::SOURCE_LOCK, self::readLockRepositoryUrl($projectRoot)];
         }
 
         return [null, self::SOURCE_UNKNOWN, null];
@@ -261,14 +253,14 @@ final class Info
                 return sprintf('https://github.com/%s/%s', $matches[1], $matches[2]);
             }
 
-            return self::normalizeRepositoryUrl($distUrl);
+            return null;
         }
 
         return null;
     }
 
     /**
-     * Turn a git remote or a dist URL into the web URL of the repository, or
+     * Turn a git remote or a source URL into the web URL of the repository, or
      * null when it does not point at a remote repository.
      */
     private static function normalizeRepositoryUrl(string $url): ?string
@@ -348,9 +340,7 @@ final class Info
 
     private static function readComposerInstalledCommit(): ?string
     {
-        if (!class_exists(\Composer\InstalledVersions::class)
-            || !\Composer\InstalledVersions::isInstalled(self::PACKAGE_NAME)
-        ) {
+        if (!\Composer\InstalledVersions::isInstalled(self::PACKAGE_NAME)) {
             return null;
         }
 
@@ -359,36 +349,9 @@ final class Info
         return $reference !== null && self::isCommitHash($reference) ? strtolower($reference) : null;
     }
 
-    private static function readComposerLockCommit(string $root): ?string
-    {
-        $lockFile = $root . '/composer.lock';
-        if (!is_readable($lockFile)) {
-            return null;
-        }
-
-        /** @var array{packages?: list<array{name?: string, dist?: array{reference?: string}, source?: array{reference?: string}}>, packages-dev?: list<array{name?: string, dist?: array{reference?: string}, source?: array{reference?: string}}>}|null $lock */
-        $lock = json_decode(self::readFile($lockFile) ?? '', true);
-        if (!is_array($lock)) {
-            return null;
-        }
-
-        $packages = array_merge($lock['packages'] ?? [], $lock['packages-dev'] ?? []);
-        foreach ($packages as $package) {
-            if (($package['name'] ?? null) !== self::PACKAGE_NAME) {
-                continue;
-            }
-
-            $reference = $package['dist']['reference'] ?? $package['source']['reference'] ?? null;
-
-            return $reference !== null && self::isCommitHash($reference) ? strtolower($reference) : null;
-        }
-
-        return null;
-    }
-
     private static function isCommitHash(string $value): bool
     {
-        // SHA-1 and SHA-256 repositories, plus the abbreviated hashes of a lock file.
+        // SHA-1 and SHA-256 repositories, plus abbreviated hashes.
         return (bool) preg_match('/^[0-9a-f]{7,64}$/i', $value);
     }
 
