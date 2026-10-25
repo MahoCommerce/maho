@@ -76,43 +76,47 @@ $_readonly = $_element->getReadonly();
     </ul>
 
     <template id="<?= $this->getHtmlId() ?>_template">
-        <div class="cell-image">
+        <figure class="cell-image">
             <img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="">
             <?php if (!$_readonly): ?>
-                <button type="button" class="gallery-handle" title="<?= $this->quoteEscape(Mage::helper('adminhtml')->__('Drag to reorder')) ?>"
+                <button type="button" class="gallery-handle d-btn d-btn-sm d-btn-square" title="<?= $this->quoteEscape(Mage::helper('adminhtml')->__('Drag to reorder')) ?>"
                         aria-label="<?= $this->quoteEscape(Mage::helper('adminhtml')->__('Drag to reorder')) ?>"><?= $this->getIconSvg('grip-vertical') ?></button>
             <?php endif ?>
-        </div>
-        <div class="cell-label">
-            <input type="text" class="input-text" placeholder="<?= $this->quoteEscape(Mage::helper('catalog')->__('Label')) ?>"
-                   aria-label="<?= $this->quoteEscape(Mage::helper('catalog')->__('Label')) ?>"
-                <?php if ($_readonly): ?> disabled="disabled"<?php endif ?>
-                   onkeyup="<?= $this->getJsObjectName() ?>.updateImage('__file__')"
-                   onchange="<?= $this->getJsObjectName() ?>.updateImage('__file__')">
-        </div>
-        <div class="cell-position"><input type="hidden"></div>
-        <p class="gallery-removed-note"><?= Mage::helper('catalog')->__('Removed when you save') ?></p>
-        <div class="gallery-card-options">
-            <?php foreach ($this->getImageTypes() as $typeId => $type): ?>
-                <label class="cell-<?= $typeId ?>">
-                    <input type="radio" name="<?= $type['field'] ?>" value="__file__"
-                        <?php if ($_element->getAttributeReadonly($typeId)): ?> disabled="disabled"<?php endif ?>
-                           onclick="<?= $this->getJsObjectName() ?>.setProductImages('__file__')">
-                    <?= $this->escapeHtml($type['name']) ?>
-                </label>
-            <?php endforeach ?>
-            <label class="cell-disable gallery-toggle" title="<?= $this->quoteEscape(Mage::helper('catalog')->__('Exclude')) ?>">
-                <input type="checkbox" class="sr-only"<?php if ($_readonly): ?> disabled="disabled"<?php endif ?>
-                       onclick="<?= $this->getJsObjectName() ?>.updateImage('__file__')">
-                <?= $this->getIconSvg('eye-off') ?>
-                <span class="sr-only"><?= Mage::helper('catalog')->__('Exclude') ?></span>
-            </label>
-            <label class="cell-remove gallery-toggle" title="<?= $this->quoteEscape(Mage::helper('catalog')->__('Remove')) ?>">
-                <input type="checkbox" class="sr-only"<?php if ($_readonly): ?> disabled="disabled"<?php endif ?>
-                       onclick="<?= $this->getJsObjectName() ?>.updateImage('__file__')">
-                <?= $this->getIconSvg('trash') ?>
-                <span class="sr-only"><?= Mage::helper('catalog')->__('Remove') ?></span>
-            </label>
+        </figure>
+        <div class="d-card-body">
+            <div class="cell-label">
+                <input type="text" class="input-text" placeholder="<?= $this->quoteEscape(Mage::helper('catalog')->__('Label')) ?>"
+                       aria-label="<?= $this->quoteEscape(Mage::helper('catalog')->__('Label')) ?>"
+                    <?php if ($_readonly): ?> disabled="disabled"<?php endif ?>
+                       onkeyup="<?= $this->getJsObjectName() ?>.updateImage('__file__')"
+                       onchange="<?= $this->getJsObjectName() ?>.updateImage('__file__')">
+            </div>
+            <div class="cell-position"><input type="hidden"></div>
+            <p class="gallery-removed-note"><?= Mage::helper('catalog')->__('Removed when you save') ?></p>
+            <div class="gallery-card-options">
+                <?php foreach ($this->getImageTypes() as $typeId => $type): ?>
+                    <label class="cell-<?= $typeId ?>">
+                        <input type="radio" name="<?= $type['field'] ?>" value="__file__"
+                            <?php if ($_element->getAttributeReadonly($typeId)): ?> disabled="disabled"<?php endif ?>
+                               onclick="<?= $this->getJsObjectName() ?>.setProductImages('__file__')">
+                        <?= $this->escapeHtml($type['name']) ?>
+                    </label>
+                <?php endforeach ?>
+                <span class="gallery-toggles">
+                    <label class="cell-disable d-btn d-btn-ghost d-btn-sm d-btn-square" title="<?= $this->quoteEscape(Mage::helper('catalog')->__('Exclude')) ?>">
+                        <input type="checkbox" class="sr-only"<?php if ($_readonly): ?> disabled="disabled"<?php endif ?>
+                               onclick="<?= $this->getJsObjectName() ?>.updateImage('__file__')">
+                        <?= $this->getIconSvg('eye-off') ?>
+                        <span class="sr-only"><?= Mage::helper('catalog')->__('Exclude') ?></span>
+                    </label>
+                    <label class="cell-remove d-btn d-btn-ghost d-btn-sm d-btn-square" title="<?= $this->quoteEscape(Mage::helper('catalog')->__('Remove')) ?>">
+                        <input type="checkbox" class="sr-only"<?php if ($_readonly): ?> disabled="disabled"<?php endif ?>
+                               onclick="<?= $this->getJsObjectName() ?>.updateImage('__file__')">
+                        <?= $this->getIconSvg('trash') ?>
+                        <span class="sr-only"><?= Mage::helper('catalog')->__('Remove') ?></span>
+                    </label>
+                </span>
+            </div>
         </div>
     </template>
 </div>

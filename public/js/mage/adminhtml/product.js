@@ -26,7 +26,7 @@ Product.Gallery = class {
         this.images = JSON.parse(this.getElement('save').value);
         this.imagesValues = JSON.parse(this.getElement('save_image').value);
         this.template = (vars) => {
-            let html = '<li id="' + vars.id + '" class="preview" data-file="' + escapeHtml(vars.file, true) + '">' + this.getElement('template').innerHTML + '</li>';
+            let html = '<li id="' + vars.id + '" class="preview d-card d-card-border d-card-sm bg-base-100" data-file="' + escapeHtml(vars.file, true) + '">' + this.getElement('template').innerHTML + '</li>';
             Object.entries(vars).forEach(([key, value]) => {
                 const regex = new RegExp('__' + key + '__', 'g');
                 html = html.replace(regex, value);

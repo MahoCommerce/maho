@@ -25,8 +25,9 @@
     <?php endif ?>
     <ul class="product-websites">
         <?php foreach ($this->getWebsiteCollection() as $_website): ?>
-            <li class="product-website">
-                <label class="product-website-name" for="product_website_<?= $_website->getId() ?>">
+            <li class="d-card d-card-border d-card-sm bg-base-100">
+                <div class="d-card-body">
+                <label class="d-card-title" for="product_website_<?= $_website->getId() ?>">
                     <input name="product[website_ids][]" value="<?= $_website->getId() ?>" <?php if ($this->isReadonly()): ?> disabled="disabled"<?php endif ?> class="checkbox website-checkbox" id="product_website_<?= $_website->getId() ?>" type="checkbox"<?php if ($this->hasWebsite($_website->getId())): ?> checked="checked"<?php endif ?>>
                     <?= $this->escapeHtml($_website->getName()) ?>
                 </label>
@@ -37,7 +38,7 @@
                             <ul class="product-website-stores">
                                 <?php foreach ($this->getStoreCollection($_group) as $_store): ?>
                                     <li>
-                                        <span class="product-website-store"><?= $this->escapeHtml($_store->getName()) ?></span>
+                                        <span class="d-badge d-badge-sm"><?= $this->escapeHtml($_store->getName()) ?></span>
                                         <?php if ($this->getWebsites() && !$this->hasWebsite($_website->getId())): ?>
                                             <span class="website-<?= $_website->getId() ?>-select" style="display:none">
                                                 <?= Mage::helper('catalog')->__('(Copy data from: %s)', $this->getChooseFromStoreHtml($_store)) ?>
@@ -48,6 +49,7 @@
                             </ul>
                         </div>
                     <?php endforeach ?>
+                </div>
                 </div>
             </li>
         <?php endforeach ?>

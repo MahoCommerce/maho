@@ -205,278 +205,6 @@
         }
     }
 
-    /* The drop zone of an uploader that uploads at once, such as the product images. A click opens the file dialog */
-    button.uploader-dropzone {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: var(--maho-space-2);
-        width: 100%;
-        height: auto;
-        padding: var(--maho-space-6);
-        border: var(--border) dashed color-mix(in oklab, var(--color-base-content) 25%, transparent);
-        border-radius: var(--radius-box);
-        background-color: var(--color-base-200);
-        color: color-mix(in oklab, var(--color-base-content) 70%, transparent);
-        font-weight: 400;
-        box-shadow: none;
-
-        & svg {
-            width: 1.75rem;
-            height: 1.75rem;
-        }
-
-        &:hover, &.is-dragover {
-            border-color: var(--maho-accent);
-            background-color: color-mix(in oklab, var(--maho-accent) 15%, var(--color-base-100));
-            color: var(--color-base-content);
-        }
-    }
-
-    /* Product websites: one card for each website, with its stores and their store views */
-    .product-websites {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
-        gap: var(--maho-space-3);
-        margin: 0;
-        padding: 0;
-        list-style: none;
-
-        & .product-website {
-            padding: var(--maho-space-3) var(--maho-space-4);
-            background-color: var(--color-base-100);
-            border: var(--border) solid var(--color-base-300);
-            border-radius: var(--radius-box);
-
-            &:has(.website-checkbox:checked) {
-                border-color: var(--maho-accent);
-                background-color: color-mix(in oklab, var(--maho-accent) 8%, var(--color-base-100));
-            }
-        }
-
-        & .product-website-name {
-            display: flex;
-            align-items: center;
-            gap: var(--maho-space-2);
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        & .product-website-groups {
-            display: flex;
-            flex-direction: column;
-            gap: var(--maho-space-2);
-            margin-top: var(--maho-space-2);
-            padding-inline-start: calc(var(--d-size, 1.25rem) + var(--maho-space-2));
-        }
-
-        & .product-website-group-name {
-            color: color-mix(in oklab, var(--color-base-content) 60%, transparent);
-            font-size: var(--maho-text-xs);
-        }
-
-        & .product-website-stores {
-            display: flex;
-            flex-wrap: wrap;
-            gap: var(--maho-space-1);
-            margin: var(--maho-space-1) 0 0;
-            padding: 0;
-            list-style: none;
-
-            & li {
-                display: flex;
-                flex-wrap: wrap;
-                align-items: center;
-                gap: var(--maho-space-1);
-            }
-        }
-
-        & .product-website-store {
-            @apply d-badge d-badge-sm;
-        }
-    }
-
-    /* Product images: one card for each image, in the sort order. The handle drags a card */
-    .product-gallery {
-        & .gallery-toolbar, & .gallery-no-selection, & .gallery-use-default {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: var(--maho-space-2) var(--maho-space-4);
-        }
-
-        & .gallery-toolbar {
-            justify-content: space-between;
-            margin-bottom: var(--maho-space-3);
-        }
-
-        & label {
-            display: inline-flex;
-            align-items: center;
-            gap: var(--maho-space-1);
-        }
-
-        & .gallery-scope {
-            color: color-mix(in oklab, var(--color-base-content) 60%, transparent);
-            font-size: var(--maho-text-xs);
-        }
-    }
-
-    .gallery-cards {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
-        gap: var(--maho-space-3);
-        margin: 0;
-        padding: 0;
-        list-style: none;
-
-        & > .preview {
-            display: flex;
-            flex-direction: column;
-            gap: var(--maho-space-2);
-            padding: var(--maho-space-2);
-            background-color: var(--color-base-100);
-            border: var(--border) solid var(--color-base-300);
-            border-radius: var(--radius-box);
-        }
-
-        & .cell-image {
-            position: relative;
-
-            & img {
-                display: block;
-                width: 100%;
-                aspect-ratio: 1;
-                object-fit: contain;
-                border-radius: var(--radius-field);
-            }
-        }
-
-        & .gallery-handle {
-            @apply d-btn-sm d-btn-square;
-            position: absolute;
-            top: var(--maho-space-1);
-            inset-inline-start: var(--maho-space-1);
-            cursor: grab;
-
-            & svg {
-                width: 1rem;
-                height: 1rem;
-            }
-        }
-
-        &.is-locked .gallery-handle {
-            display: none;
-        }
-
-        & .cell-label input {
-            width: 100% !important;
-        }
-
-        & .gallery-card-options {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: var(--maho-space-1) var(--maho-space-3);
-            font-size: var(--maho-text-sm);
-        }
-
-        /* Exclude and Remove: a checkbox that shows as an icon, at the end of the line */
-        & .gallery-toggle {
-            justify-content: center;
-            width: 1.75rem;
-            height: 1.75rem;
-            border-radius: var(--radius-field);
-            color: color-mix(in oklab, var(--color-base-content) 50%, transparent);
-            cursor: pointer;
-
-            & svg {
-                width: 1.125rem;
-                height: 1.125rem;
-            }
-
-            &:hover {
-                background-color: var(--color-base-200);
-                color: var(--color-base-content);
-            }
-
-            &:has(input:focus-visible) {
-                outline: 2px solid var(--color-base-content);
-                outline-offset: 1px;
-            }
-        }
-
-        & .cell-disable {
-            margin-inline-start: auto;
-
-            &:has(input:checked) {
-                background-color: var(--color-base-content);
-                color: var(--color-base-100);
-            }
-        }
-
-        & .cell-remove {
-            margin-inline-start: calc(var(--maho-space-3) * -1 + var(--maho-space-1));
-
-            &:has(input:checked) {
-                background-color: var(--color-error);
-                color: var(--color-error-content);
-            }
-        }
-
-        & .preview:has(.cell-disable input:checked) img {
-            opacity: 0.5;
-        }
-
-        & .gallery-removed-note {
-            display: none;
-            margin: 0;
-            color: var(--color-error);
-            font-size: var(--maho-text-sm);
-        }
-
-        & .preview:has(.cell-remove input:checked) {
-            border-style: dashed;
-
-            & :is(img, .cell-label) {
-                opacity: 0.3;
-            }
-
-            & .cell-label {
-                display: none;
-            }
-
-            & .gallery-removed-note {
-                display: block;
-            }
-        }
-
-        & .sortable-ghost {
-            opacity: 0.4;
-        }
-
-        & > .gallery-card-upload {
-            display: flex;
-            flex-direction: column;
-
-            & .uploader {
-                flex: 1;
-                display: flex;
-                flex-direction: column;
-            }
-
-            & .uploader-dropzone {
-                flex: 1;
-                min-height: 11rem;
-            }
-        }
-    }
-
-    .uploader:has(> .uploader-dropzone) {
-        margin-bottom: var(--maho-space-2);
-    }
-
     /* Image fields: the preview spans both rows, next to the file input and the delete checkbox */
     .image-field:has(> a > .small-image-preview) {
         display: grid;
@@ -795,5 +523,248 @@
 @layer utilities {
     .validation-failed {
         --d-input-color: var(--color-error);
+    }
+}
+
+/*
+ * The templates of this theme that use daisyUI classes directly. daisyUI puts those
+ * classes in the utilities layer, so the rules that adjust them are here too.
+ */
+@layer utilities {
+    /* The drop zone of an uploader that uploads at once, such as the product images. A click opens the file dialog */
+    .uploader-dropzone {
+        align-items: center;
+        justify-content: center;
+        gap: var(--maho-space-2);
+        width: 100%;
+        height: auto;
+        padding: var(--maho-space-6);
+        border-color: color-mix(in oklab, var(--color-base-content) 25%, transparent);
+        background-color: var(--color-base-200);
+        color: color-mix(in oklab, var(--color-base-content) 70%, transparent);
+        font-weight: 400;
+        box-shadow: none;
+
+        & svg {
+            width: 1.75rem;
+            height: 1.75rem;
+        }
+
+        &:hover, &.is-dragover {
+            border-color: var(--maho-accent);
+            background-color: color-mix(in oklab, var(--maho-accent) 15%, var(--color-base-100));
+            color: var(--color-base-content);
+        }
+    }
+
+    .uploader:has(> .uploader-dropzone) {
+        margin-bottom: var(--maho-space-2);
+    }
+
+    /* Product websites: one card for each website, with its stores and their store views */
+    .product-websites {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+        gap: var(--maho-space-3);
+        margin: 0;
+        padding: 0;
+        list-style: none;
+
+        & > .d-card:has(.website-checkbox:checked) {
+            border-color: var(--maho-accent);
+            background-color: color-mix(in oklab, var(--maho-accent) 8%, var(--color-base-100));
+        }
+
+        & .d-card-title {
+            cursor: pointer;
+        }
+
+        & .product-website-groups {
+            display: flex;
+            flex-direction: column;
+            gap: var(--maho-space-2);
+            padding-inline-start: calc(var(--d-size, 1.25rem) + var(--maho-space-2));
+        }
+
+        & .product-website-group-name {
+            color: color-mix(in oklab, var(--color-base-content) 80%, transparent);
+            font-size: var(--maho-text-sm);
+        }
+
+        & .product-website-stores {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--maho-space-1);
+            margin: var(--maho-space-1) 0 0;
+            padding: 0;
+            list-style: none;
+
+            & li {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: var(--maho-space-1);
+            }
+        }
+    }
+
+    /* Product images: one card for each image, in the sort order. The handle drags a card */
+    .product-gallery {
+        & .gallery-toolbar, & .gallery-no-selection, & .gallery-use-default {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: var(--maho-space-2) var(--maho-space-4);
+        }
+
+        & .gallery-toolbar {
+            justify-content: space-between;
+            margin-bottom: var(--maho-space-3);
+        }
+
+        & .gallery-toolbar label {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--maho-space-1);
+        }
+
+        & .gallery-scope {
+            color: color-mix(in oklab, var(--color-base-content) 60%, transparent);
+            font-size: var(--maho-text-xs);
+        }
+    }
+
+    .gallery-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+        gap: var(--maho-space-3);
+        margin: 0;
+        padding: 0;
+        list-style: none;
+
+        & .cell-image {
+            position: relative;
+
+            & img {
+                width: 100%;
+                aspect-ratio: 1;
+                object-fit: contain;
+            }
+        }
+
+        & .gallery-handle {
+            position: absolute;
+            top: var(--maho-space-1);
+            inset-inline-start: var(--maho-space-1);
+            cursor: grab;
+
+            & svg {
+                width: 1rem;
+                height: 1rem;
+            }
+        }
+
+        &.is-locked .gallery-handle {
+            display: none;
+        }
+
+        & .cell-label input {
+            width: 100% !important;
+        }
+
+        & .gallery-card-options {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: var(--maho-space-1) var(--maho-space-3);
+            font-size: var(--maho-text-sm);
+
+            & label:not(.d-btn) {
+                display: inline-flex;
+                align-items: center;
+                gap: var(--maho-space-1);
+            }
+        }
+
+        /* Exclude and Remove: a checkbox that shows as an icon button, at the end of the line */
+        & .gallery-toggles {
+            display: flex;
+            gap: var(--maho-space-1);
+            margin-inline-start: auto;
+
+            & svg {
+                width: 1.125rem;
+                height: 1.125rem;
+            }
+
+            /* The legacy label color in base.css is unlayered, so only !important lets the button color through */
+            & label {
+                color: var(--d-btn-fg) !important;
+            }
+
+            & label:has(input:focus-visible) {
+                outline: 2px solid var(--color-base-content);
+                outline-offset: 1px;
+            }
+        }
+
+        & .cell-disable:has(input:checked) {
+            --d-btn-bg: var(--color-base-content);
+            --d-btn-fg: var(--color-base-100);
+            --d-btn-border: var(--color-base-content);
+        }
+
+        & .cell-remove:has(input:checked) {
+            --d-btn-bg: var(--color-error);
+            --d-btn-fg: var(--color-error-content);
+            --d-btn-border: var(--color-error);
+        }
+
+        & .gallery-removed-note {
+            display: none;
+            margin: 0;
+            color: var(--color-error);
+            font-size: var(--maho-text-sm);
+        }
+
+        & .preview:has(.cell-disable input:checked) img {
+            opacity: 0.5;
+        }
+
+        & .preview:has(.cell-remove input:checked) {
+            border-style: dashed;
+
+            & img {
+                opacity: 0.3;
+            }
+
+            & .cell-label {
+                display: none;
+            }
+
+            & .gallery-removed-note {
+                display: block;
+            }
+        }
+
+        & .sortable-ghost {
+            opacity: 0.4;
+        }
+
+        & > .gallery-card-upload {
+            display: flex;
+            flex-direction: column;
+
+            & .uploader {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+            }
+
+            & .uploader-dropzone {
+                flex: 1;
+                min-height: 11rem;
+            }
+        }
     }
 }

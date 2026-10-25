@@ -11,7 +11,7 @@
 ?>
 <div id="<?= $this->getHtmlId() ?>" class="uploader">
 <?php if ($this->getMiscConfig()->getAutoUpload()): ?>
-    <button type="button" id="<?= $this->getElementId(Mage_Adminhtml_Block_Uploader_Abstract::DROP_ZONE_ID_SUFFIX) ?>" class="uploader-dropzone">
+    <button type="button" id="<?= $this->getElementId(Mage_Adminhtml_Block_Uploader_Abstract::DROP_ZONE_ID_SUFFIX) ?>" class="uploader-dropzone d-card d-card-dash">
         <?= $this->getIconSvg('upload') ?>
         <span><?= $this->__('Drop files here, or click to choose them') ?></span>
     </button>
