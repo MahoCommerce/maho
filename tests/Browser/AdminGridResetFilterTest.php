@@ -85,8 +85,9 @@ function createGridResetFixtures(): void
 /** Run $script on the grid object, then wait for the page that it opens. */
 function runOnNotificationGrid(object $page, string $script): object
 {
-    $page->script("(() => { const grid = window.notificationGridJsObject; {$script} })()");
-    $page->wait(2);
+    // The old page also holds #notificationGrid, so the marker tells the two pages apart
+    $page->script("(() => { window.gridReloadPending = true; const grid = window.notificationGridJsObject; {$script} })()");
+    waitForScript($page, '!window.gridReloadPending');
 
     return waitForPageLoad($page, '#notificationGrid');
 }
