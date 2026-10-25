@@ -78,8 +78,8 @@ return function (Schema $schema): void {
     $user->addColumn('backend_locale', Types::STRING, ['length' => 8, 'notnull' => false]);
     $user->addColumn('twofa_enabled', Types::SMALLINT, ['default' => 0]);
     $user->addColumn('twofa_secret', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $user->addColumn('passkey_credential_id_hash', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $user->addColumn('passkey_public_key', Types::STRING, ['length' => 255, 'notnull' => false]);
+    $user->addColumn('passkey_credential_id_hash', Types::STRING, ['length' => 1364, 'notnull' => false]);
+    $user->addColumn('passkey_public_key', Types::TEXT, ['length' => 65535, 'notnull' => false]);
     $user->addColumn('password_enabled', Types::SMALLINT, ['default' => 1]);
     $user->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('user_id')->create(),
