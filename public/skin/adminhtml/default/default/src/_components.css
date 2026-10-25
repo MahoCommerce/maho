@@ -921,12 +921,12 @@
             box-shadow: none;
         }
 
+        /* base.css sets the radius and the margin outside the layers */
         & + script + div > .grid-widget:first-child,
         & + script + table.actions {
-            border-start-start-radius: 0;
+            border-start-start-radius: 0 !important;
         }
 
-        /* base.css sets this margin outside the layers */
         & + script + table.actions {
             margin-top: 0 !important;
         }
