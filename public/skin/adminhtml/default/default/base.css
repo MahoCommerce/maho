@@ -5131,7 +5131,8 @@ img.rule-param-add {
 }
 
 .hor-scroll .maho-tree {
-    white-space: nowrap
+    white-space: nowrap;
+    padding-right: 3px
 }
 
 .maho-tree li {
