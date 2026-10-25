@@ -2792,7 +2792,7 @@ ul.item-options li {
 }
 
 .categories-side-col .content-header {
-    margin-right: var(--maho-space-5);
+    margin-right: 0;
     padding: 0
 }
 
@@ -2806,12 +2806,12 @@ ul.item-options li {
 }
 
 .categories-side-col .switcher {
-    margin: var(--maho-space-3) var(--maho-space-5) 0 0
+    margin: var(--maho-space-3) 0 0
 }
 
 .categories-side-col .tree-actions {
     text-align: center;
-    margin: var(--maho-space-3) var(--maho-space-5) var(--maho-space-3) 0;
+    margin: var(--maho-space-3) 0;
     display: flex;
     justify-content: center;
     gap: var(--maho-space-4)

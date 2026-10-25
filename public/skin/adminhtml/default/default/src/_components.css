@@ -847,6 +847,8 @@
     /* The select covers the whole box, so a click on the icon or the chevron opens it too */
     .switcher-select {
         --switcher-icon-width: 2.25rem;
+        /* A label is content-box without Preflight, so the border would add to the height of the control */
+        box-sizing: border-box;
         gap: 0;
         width: auto;
         max-width: 100%;
