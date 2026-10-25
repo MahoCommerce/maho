@@ -119,26 +119,24 @@
         min-height: 0;
     }
 
-    /*
-     * The buttons of a catalog editor field are a toolbar on top of it. The helper writes
-     * them after the textarea, so the cell puts them first.
-     */
-    /* One column, so the toolbar takes the width of the textarea */
-    td.value:has(> textarea + .buttons-set) {
+    /* A catalog editor field: a toolbar on top of the textarea, in one column that takes the width of the textarea */
+    .textarea-toolbar-field {
         display: grid;
         grid-template-columns: min-content;
 
-        & > .buttons-set {
-            order: -1;
-        }
+        & > textarea {
+            border-start-start-radius: 0;
+            border-start-end-radius: 0;
 
-        & > .sanitize-preview-notice {
-            order: -2;
+            /* The outline sits on the border, so it does not cover the toolbar */
+            &:focus {
+                outline-offset: 0;
+            }
         }
     }
 
     /* A wide fieldset gives its controls 98% of the cell */
-    .fieldset-wide td.value:has(> textarea + .buttons-set) {
+    .fieldset-wide .textarea-toolbar-field {
         grid-template-columns: 98%;
 
         & > textarea {
@@ -146,7 +144,7 @@
         }
     }
 
-    textarea + .buttons-set {
+    .textarea-toolbar {
         gap: var(--maho-space-1);
         padding: var(--maho-space-1);
         /* The shade of the TipTap toolbar */
@@ -163,16 +161,6 @@
                 --d-btn-bg: var(--color-base-100);
                 --d-btn-border: color-mix(in oklab, var(--color-base-content) 30%, transparent);
             }
-        }
-    }
-
-    td.value > textarea:has(+ .buttons-set) {
-        border-start-start-radius: 0;
-        border-start-end-radius: 0;
-
-        /* The outline sits on the border, so it does not cover the toolbar */
-        &:focus {
-            outline-offset: 0;
         }
     }
 

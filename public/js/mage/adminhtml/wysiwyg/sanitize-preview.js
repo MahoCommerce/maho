@@ -78,7 +78,7 @@ class mahoSanitizePreview {
             'Saving removes this HTML: %s. A content field allows only standard HTML elements.',
             this.describe(this.removed),
         );
-        this.textarea.before(this.notice);
+        (document.getElementById('buttons' + this.textarea.id) ?? this.textarea).before(this.notice);
     }
 
     describe(removed, limit = 6) {

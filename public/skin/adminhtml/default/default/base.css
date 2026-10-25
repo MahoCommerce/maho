@@ -1252,24 +1252,24 @@ button.icon-btn span {
     margin-right: var(--maho-space-2)
 }
 
-.buttons-set:has(+ textarea) {
+.buttons-set:not(.textarea-toolbar):has(+ textarea) {
     display: flex;
     flex-wrap: wrap;
     gap: var(--maho-space-2);
     margin: 0 0 var(--maho-space-2)
 }
 
-textarea + .buttons-set {
+.textarea-toolbar {
     display: flex;
     flex-wrap: wrap;
     margin: 0
 }
 
-.buttons-set:has(+ textarea) button,textarea + .buttons-set button {
+.buttons-set:has(+ textarea) button {
     margin-right: 0
 }
 
-.buttons-set + textarea {
+.buttons-set:not(.textarea-toolbar) + textarea {
     margin-top: 0;
     width: 100%!important;
     box-sizing: border-box

@@ -11,14 +11,31 @@
 class Mage_Adminhtml_Block_Catalog_Helper_Form_Wysiwyg extends \Maho\Data\Form\Element\Textarea
 {
     /**
-     * Retrieve additional html and put it at the end of element html
-     *
-     * @return string
+     * The buttons are a toolbar on top of the textarea, in one container with it.
      */
+    #[\Override]
+    public function getElementHtml()
+    {
+        $buttons = $this->_getButtonsHtml();
+        if ($buttons === '') {
+            return parent::getElementHtml();
+        }
+        return '<div class="textarea-toolbar-field">' . $buttons . parent::getElementHtml() . '</div>';
+    }
+
     #[\Override]
     public function getAfterElementHtml()
     {
         $html = parent::getAfterElementHtml();
+        if ($this->getEntityAttribute()->getIsWysiwygEnabled()) {
+            // The editor opens in a popup. This field never runs the WYSIWYG setup.
+            $html .= Mage::helper('cms')->getSanitizePreviewHtml($this->getHtmlId(), 'catalog');
+        }
+        return $html;
+    }
+
+    protected function _getButtonsHtml(): string
+    {
         $buttons = '';
         if ($this->getIsWysiwygEnabled()) {
             $wysiwygUrl = Mage::helper('adminhtml')->getUrl('*/*/wysiwyg', [
@@ -43,14 +60,10 @@ class Mage_Adminhtml_Block_Catalog_Helper_Form_Wysiwyg extends \Maho\Data\Form\E
                     'onclick'  => "validateHtmlContent('{$this->getHtmlId()}', '$validateUrl');",
                 ])->toHtml();
         }
-        if ($buttons !== '') {
-            $html .= '<div class="buttons-set">' . $buttons . '</div>';
+        if ($buttons === '') {
+            return '';
         }
-        if ($this->getEntityAttribute()->getIsWysiwygEnabled()) {
-            // The editor opens in a popup. This field never runs the WYSIWYG setup.
-            $html .= Mage::helper('cms')->getSanitizePreviewHtml($this->getHtmlId(), 'catalog');
-        }
-        return $html;
+        return '<div id="buttons' . $this->getHtmlId() . '" class="buttons-set textarea-toolbar">' . $buttons . '</div>';
     }
 
     /**
