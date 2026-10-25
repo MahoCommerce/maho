@@ -13,26 +13,20 @@
     <h3><?= $this->getTitle() ?></h3>
 <?php endif ?>
 <?php if ($this->getTabs()): ?>
-<ul id="<?= $this->getId() ?>" class="tabs config-tabs">
+<div id="<?= $this->getId() ?>" class="config-tabs">
 <?php foreach ($this->getTabs() as $_tab): ?>
     <?php if ($_tab->getSections()): ?>
-    <li <?php if ($_tab->getClass()): ?>class="<?= $_tab->getClass() ?>"<?php endif ?>>
-        <dl>
-        <dt class="label" style=""><?= $_tab->getLabel() ?></dt>
-        <?php $_iterator = 1; ?>
+    <ul class="d-menu<?php if ($_tab->getClass()): ?> <?= $_tab->getClass() ?><?php endif ?>">
+        <li class="d-menu-title"><?= $_tab->getLabel() ?></li>
         <?php foreach ($_tab->getSections() as $_section): ?>
-            <dd>
-                <a href="<?= $_section->getUrl() ?>" id="section-<?= $_section->getId() ?>" class="<?= $_section->getClass() ?><?php if ($_section->getId() == $this->getActiveSection()): ?> active<?php endif ?> <?= $_section->getIsLast() ? 'last' : '' ?>">
-                    <span <?php if ($_tab->getId() == $this->getActiveTab()): ?>class="active"<?php endif ?>>
-                        <?= $_section->getLabel() ?>
-                    </span>
+            <li>
+                <a href="<?= $_section->getUrl() ?>" id="section-<?= $_section->getId() ?>" class="<?= $_section->getClass() ?><?php if ($_section->getId() == $this->getActiveSection()): ?> active<?php endif ?>"<?php if ($_section->getId() == $this->getActiveSection()): ?> aria-current="page"<?php endif ?>>
+                    <?= $_section->getLabel() ?>
                 </a>
-            </dd>
-            <?php $_iterator++ ; ?>
+            </li>
         <?php endforeach ?>
-        </dl>
-    </li>
+    </ul>
     <?php endif ?>
 <?php endforeach ?>
-</ul>
+</div>
 <?php endif ?>

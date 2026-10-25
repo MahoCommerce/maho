@@ -11,7 +11,8 @@ class varienTabs {
 
         this.tabOnClick = this.tabMouseClick.bind(this);
 
-        this.tabs = document.querySelectorAll(`#${this.containerId} li a.tab-item-link`);
+        // Side tabs wrap each link in a list item, horizontal tabs (d-tabs) do not
+        this.tabs = document.querySelectorAll(`#${this.containerId} li a.tab-item-link, #${this.containerId} > a.tab-item-link`);
 
         this.hideAllTabsContent();
 
@@ -32,7 +33,7 @@ class varienTabs {
                     tab.show = function() {
                         this.container.showTabContent(this);
                     };
-                    varienGlobalEvents?.fireEvent('moveTab', { tab: tab });
+                    window.varienGlobalEvents?.fireEvent('moveTab', { tab: tab });
                 }
             }
 
@@ -64,7 +65,7 @@ class varienTabs {
                     tab.show = function() {
                         this.container.showTabContent(this);
                     };
-                    varienGlobalEvents?.fireEvent('moveTab', { tab: tab });
+                    window.varienGlobalEvents?.fireEvent('moveTab', { tab: tab });
                 }
             }
         });
@@ -109,6 +110,7 @@ class varienTabs {
         if (tabContentElement) {
             tabContentElement.style.display = '';
             tab.classList.add('active');
+            tab.setAttribute('aria-selected', 'true');
 
             // load shadow tabs, if any
             if (tab.shadowTabs && tab.shadowTabs.length) {
@@ -123,7 +125,7 @@ class varienTabs {
 
             this.activeTab = tab;
         }
-        varienGlobalEvents?.fireEvent('showTab', { tab: tab });
+        window.varienGlobalEvents?.fireEvent('showTab', { tab: tab });
     }
 
     // the lazy show tab method
@@ -133,7 +135,7 @@ class varienTabs {
             if (this.activeTab !== tab) {
                 const activeTabContentId = this.activeTab ? this.getTabContentElementId(this.activeTab) : null;
                 const activeTabContent = activeTabContentId ? document.getElementById(activeTabContentId) : null;
-                const result = varienGlobalEvents?.fireEvent('tabChangeBefore', activeTabContent);
+                const result = window.varienGlobalEvents?.fireEvent('tabChangeBefore', activeTabContent);
                 if (result && result.indexOf('cannotchange') !== -1) {
                     return;
                 }
@@ -244,7 +246,8 @@ class varienTabs {
         if (destElement && tabContentElement) {
             tabContentElement.style.display = 'none';
             tab.classList.remove('active');
+            tab.setAttribute('aria-selected', 'false');
         }
-        varienGlobalEvents?.fireEvent('hideTab', { tab: tab });
+        window.varienGlobalEvents?.fireEvent('hideTab', { tab: tab });
     }
 }

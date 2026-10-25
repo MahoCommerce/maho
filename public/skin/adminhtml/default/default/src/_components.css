@@ -1,0 +1,1081 @@
+/*
+ * Maho admin theme - semantic layer.
+ *
+ * Maps the class contract of the admin markup (templates, PHP blocks, JS) onto
+ * Tailwind utilities and DaisyUI components with @apply, so no template changes.
+ * The DaisyUI defaults apply: the theme variables set the admin density.
+ *
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ */
+
+@layer components {
+    /*
+     * Buttons. Every <button> is a button: Mage_Adminhtml_Block_Widget_Button writes
+     * <button class="scalable save">, and extensions write plain <button> elements.
+     * A plain declaration here wins over the @apply sub-layers, so keep it out.
+     */
+    button, .form-button {
+        @apply d-btn;
+    }
+
+    /* The default DaisyUI button has the color of the page, so a button without a variant is white with a border */
+    :is(button, .form-button):not(.save, .ok_button, .add, .cancel, .delete, .fail, .cancel_button, .back, .disabled, [disabled]) {
+        --d-btn-bg: var(--color-base-100);
+        --d-btn-border: var(--color-base-300);
+
+        &:hover {
+            --d-btn-bg: var(--color-base-200);
+        }
+    }
+
+    button.save, button.ok_button, button.add, .form-button.ok_button {
+        @apply d-btn-primary;
+    }
+
+    button.cancel, button.delete, button.fail, button.cancel_button {
+        @apply d-btn-error d-btn-outline;
+    }
+
+    button.back {
+        @apply d-btn-ghost;
+
+        &::before {
+            content: "«";
+        }
+    }
+
+    button.large, .form-button.large {
+        @apply d-btn-lg;
+    }
+
+    button.disabled, .form-button.disabled, button[disabled], .form-button[disabled] {
+        @apply d-btn-disabled;
+    }
+
+    /*
+     * Form controls. The DaisyUI width (20rem) does not fit the dense admin layout,
+     * so a control keeps its natural width unless a layout rule sets one.
+     */
+    input.input-text, input:is([type=date], [type=time], [type=datetime-local]) {
+        @apply d-input;
+    }
+
+    textarea {
+        @apply d-textarea;
+    }
+
+    /* A base-select takes the width of the selected option, so the layout would move on each change */
+    select {
+        @apply d-select;
+        appearance: none;
+    }
+
+    /* The chevron of the grid icon filters, so that every select has the same arrow */
+    :root {
+        --maho-select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10' fill='none' stroke='%23888888' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 3.5 5 6.5 8 3.5'/%3E%3C/svg%3E");
+    }
+
+    select:not([multiple], [size]) {
+        background-image: var(--maho-select-chevron);
+        background-position: right var(--maho-space-2) center;
+        background-size: 10px;
+        background-repeat: no-repeat;
+    }
+
+    input.input-text, input:is([type=date], [type=time], [type=datetime-local]), textarea, select {
+        width: auto;
+    }
+
+    /* The price helper writes <strong>[EUR]</strong> after the field: align it with the field text */
+    .form-list td.value input.input-text + strong {
+        padding-inline-start: 0.75rem;
+    }
+
+    select:is([multiple], [size]) {
+        padding: var(--maho-space-2);
+
+        & option {
+            padding: var(--maho-space-2) var(--maho-space-3);
+            border-radius: 0;
+        }
+
+        /* A background image, because the browser paints its own color over the background color of a selected option */
+        & option:checked {
+            background-image: linear-gradient(color-mix(in srgb, var(--maho-accent) 30%, var(--maho-control-bg)), color-mix(in srgb, var(--maho-accent) 30%, var(--maho-control-bg)));
+            color: var(--maho-control-ink);
+            font-weight: 600;
+        }
+
+        & optgroup {
+            padding: var(--maho-space-2) 0 0 var(--maho-space-2);
+            font-weight: 600;
+            font-style: normal;
+            color: var(--maho-ink-muted);
+        }
+    }
+
+    select.multiselect option {
+        border-bottom: 1px solid var(--maho-border-soft);
+    }
+
+    textarea {
+        min-height: 0;
+    }
+
+    /* A catalog editor field: a toolbar on top of the textarea, in one column that takes the width of the textarea */
+    .textarea-toolbar-field {
+        display: grid;
+        grid-template-columns: min-content;
+
+        & > textarea {
+            border-start-start-radius: 0;
+            border-start-end-radius: 0;
+
+            /* The outline sits on the border, so it does not cover the toolbar */
+            &:focus {
+                outline-offset: 0;
+            }
+        }
+    }
+
+    /* A wide fieldset gives its controls 98% of the cell */
+    .fieldset-wide .textarea-toolbar-field {
+        grid-template-columns: 98%;
+
+        & > textarea {
+            width: 100% !important;
+        }
+    }
+
+    .textarea-toolbar {
+        gap: var(--maho-space-1);
+        padding: var(--maho-space-1);
+        /* The shade of the TipTap toolbar */
+        background-color: color-mix(in oklab, var(--color-base-200) 40%, var(--color-base-100));
+        border: var(--border) solid var(--color-base-300);
+        border-bottom: 0;
+        border-radius: var(--radius-field) var(--radius-field) 0 0;
+
+        & > button {
+            @apply d-btn-sm;
+
+            /* The default hover color is the color of the toolbar */
+            &:not([disabled]):hover {
+                --d-btn-bg: var(--color-base-100);
+                --d-btn-border: color-mix(in oklab, var(--color-base-content) 30%, transparent);
+            }
+        }
+    }
+
+    input[type=checkbox] {
+        @apply d-checkbox;
+    }
+
+    input[type=radio] {
+        @apply d-radio;
+    }
+
+    /* A file input is its own drop zone: the browser takes a file that is dropped on it */
+    input[type=file]:not([hidden]) {
+        @apply d-file-input;
+        height: auto;
+        padding: var(--maho-space-2);
+        border-style: dashed;
+        background-color: var(--color-base-200);
+
+        &::file-selector-button {
+            --d-btn-color: var(--color-base-100);
+            height: var(--d-size);
+            margin: 0 var(--maho-space-3) 0 0;
+            border-radius: var(--radius-field);
+        }
+
+        &.is-dragover {
+            border-color: var(--maho-accent);
+            background-color: color-mix(in oklab, var(--maho-accent) 15%, var(--color-base-100));
+        }
+    }
+
+    /* Image fields: the preview spans both rows, next to the file input and the delete checkbox */
+    .image-field:has(> a > .small-image-preview) {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        align-items: center;
+        column-gap: var(--maho-space-3);
+        row-gap: var(--maho-space-2);
+
+        & > a:has(> .small-image-preview) {
+            grid-row: span 2;
+            align-self: start;
+        }
+
+        & .small-image-preview {
+            width: 4rem;
+            height: 4rem;
+            object-fit: cover;
+            border: var(--border) solid var(--color-base-300);
+            border-radius: var(--radius-field);
+        }
+
+        & > input[type=file] {
+            grid-column: 2;
+        }
+
+        & > .delete-image {
+            grid-column: 2;
+            padding: 0;
+        }
+    }
+
+    /*
+     * Boxes. A .entry-edit holds one or more pairs of .entry-edit-head and .fieldset,
+     * and each pair is one card: the head is its top, the fieldset its body. The
+     * values are the ones of a d-card-sm with d-card-border.
+     */
+    .entry-edit .entry-edit-head, .entry-edit :is(fieldset, .fieldset), .box {
+        background-color: var(--color-base-100);
+        border: var(--border) solid var(--color-base-300);
+    }
+
+    .entry-edit .entry-edit-head {
+        padding: 1rem 1rem 0;
+        border-bottom: 0;
+        border-radius: var(--radius-box) var(--radius-box) 0 0;
+
+        & h4 {
+            @apply d-card-title;
+            --d-cardtitle-fs: 1rem;
+        }
+    }
+
+    .entry-edit :is(fieldset, .fieldset), .box {
+        margin-bottom: 1rem;
+        padding: 1rem;
+        border-radius: var(--radius-box);
+    }
+
+    .entry-edit .entry-edit-head + :is(fieldset, .fieldset) {
+        border-top: 0;
+        border-start-start-radius: 0;
+        border-start-end-radius: 0;
+    }
+
+    /* A head can have a grid as its body: in the same .entry-edit, or after it, as on the order view */
+    :is(.entry-edit .entry-edit-head, .entry-edit:has(> .entry-edit-head:only-child)) + :is(.grid, :has(> .grid)) {
+        margin-bottom: 1rem;
+        overflow: hidden;
+        background-color: var(--color-base-100);
+        border: var(--border) solid var(--color-base-300);
+        border-top: 0;
+        border-radius: 0 0 var(--radius-box) var(--radius-box);
+    }
+
+    /* The side column stays in view while the main column scrolls, and a long side column scrolls on its own */
+    .columns > .side-col {
+        position: sticky;
+        top: var(--maho-space-4);
+        /* The padding below adds to the width, so the content keeps its 220px */
+        box-sizing: content-box;
+        max-height: calc(100dvh - 2 * var(--maho-space-4));
+        overflow-y: auto;
+        scrollbar-width: thin;
+        /* A scroll box cuts what overflows it, so 4px on each side leave room for the focus outlines */
+        margin-inline: -4px;
+        padding-inline: 4px;
+    }
+
+    /*
+     * Data grids: Mage_Adminhtml_Block_Widget_Grid writes <div class="grid"> around
+     * the table, and a form field such as the tier price writes <td class="grid">.
+     * A grid cell can hold a table of its own, which stays plain.
+     */
+    .grid table:not(.grid td table) {
+        @apply d-table d-table-sm d-table-zebra;
+    }
+
+    /*
+     * A table with its own border, such as the tier price. A table does not clip the backgrounds of
+     * its rows, and it paints its border under them, so the corners need a clip-path and an outline.
+     * A data grid table sits inside its card, with square corners.
+     */
+    .grid table.border {
+        clip-path: inset(0 round var(--radius-box));
+        border: 0;
+        outline: var(--border) solid var(--color-base-300);
+        outline-offset: calc(var(--border) * -1);
+    }
+
+    .pager input.page {
+        @apply d-input-sm;
+    }
+
+    .pager select {
+        @apply d-select-sm;
+    }
+
+    /* Filter columns are narrow, so the controls keep the md height with less padding */
+    .grid tr.filter {
+        & th {
+            vertical-align: top;
+        }
+
+        & :is(input, select) {
+            font-weight: 400;
+        }
+
+        & :is(input.input-text, input[type=date]) {
+            padding-inline: var(--maho-space-2);
+        }
+
+        & select {
+            padding-inline: var(--maho-space-2) 1.25rem;
+        }
+    }
+
+    .pager input.page {
+        width: 3rem;
+        text-align: center;
+    }
+
+    .pager select {
+        margin: 0 var(--maho-space-2);
+    }
+
+    .grid tr.headings {
+        background-color: var(--color-base-200);
+    }
+
+    /* d-table writes the header at 60% opacity, which is too light at 11px */
+    .grid tr.headings th {
+        color: var(--color-base-content);
+        font-size: 0.6875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+
+        /* The sort arrow sits at the end of the link */
+        & a {
+            display: block;
+            color: inherit;
+        }
+
+        & span.sort-title {
+            display: block;
+            padding-inline-end: 1rem;
+        }
+    }
+
+    /*
+     * Messages. Mage_Core_Block_Messages writes one <li class="error-msg"> for each
+     * type, with one inner <li> for each message, and the frontend shares that markup.
+     */
+    .messages {
+        display: flex;
+        flex-direction: column;
+        gap: var(--maho-space-2);
+        margin-bottom: var(--maho-space-4);
+    }
+
+    .messages > li, :is(.error-msg, .warning-msg, .notice-msg, .success-msg) {
+        @apply d-alert d-alert-soft;
+
+        &::before {
+            content: "";
+            width: 1.25rem;
+            height: 1.25rem;
+            background: currentColor;
+            mask: var(--message-icon) center / contain no-repeat;
+        }
+
+        & a {
+            color: inherit;
+            text-decoration: underline;
+        }
+    }
+
+    /* A message outside .messages holds mixed content, which the d-alert grid would split into columns */
+    :is(.error-msg, .warning-msg, .notice-msg, .success-msg):not(.messages > li) {
+        display: block;
+        position: relative;
+        margin-bottom: var(--maho-space-4);
+        padding-inline-start: 2.75rem;
+
+        &::before {
+            position: absolute;
+            inset-inline-start: 1rem;
+            top: 0.75rem;
+        }
+    }
+
+    .error-msg {
+        @apply d-alert-error;
+        --message-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 8v4M12 16h.01'/%3E%3C/svg%3E");
+    }
+
+    .warning-msg {
+        @apply d-alert-warning;
+        --message-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01'/%3E%3C/svg%3E");
+    }
+
+    .notice-msg {
+        @apply d-alert-info;
+        --message-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 16v-4M12 8h.01'/%3E%3C/svg%3E");
+    }
+
+    /* Grid status cells: PHP renderers write <span class="grid-severity-notice"><span>Label</span></span> */
+    :is(.grid-severity-notice, .grid-severity-minor, .grid-severity-major, .grid-severity-critical) > span {
+        @apply d-badge d-badge-soft;
+        white-space: nowrap;
+    }
+
+    .grid-severity-notice > span {
+        @apply d-badge-success;
+    }
+
+    :is(.grid-severity-minor, .grid-severity-major) > span {
+        @apply d-badge-warning;
+    }
+
+    .grid-severity-critical > span {
+        @apply d-badge-error;
+    }
+
+    /* The form validator writes this hint below a field that failed */
+    .validation-advice {
+        clear: both;
+        margin-top: var(--maho-space-1);
+        font-size: var(--maho-text-sm);
+        color: var(--color-error);
+    }
+
+    .success-msg {
+        @apply d-alert-success;
+        --message-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='m8 12 3 3 5-6'/%3E%3C/svg%3E");
+    }
+}
+
+/* Scripts add these classes, so they must win over the component rules */
+@layer utilities {
+    .validation-failed {
+        --d-input-color: var(--color-error);
+    }
+}
+
+/*
+ * The templates of this theme that use daisyUI classes directly. daisyUI puts those
+ * classes in the utilities layer, so the rules that adjust them are here too.
+ */
+@layer utilities {
+    /* A tab link of widget/tabs.phtml (d-menu) or widget/tabshoriz.phtml (d-tabs), with its changed and error icons */
+    a.tab-item-link {
+        & > span {
+            display: flex;
+            flex: 1;
+            align-items: center;
+        }
+
+        & span em {
+            order: 1;
+            margin-inline-start: auto;
+        }
+
+        & span:is(.changed, .error) {
+            display: none;
+            margin-inline-start: auto;
+        }
+
+        & span:is(.changed, .error) svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        &.changed {
+            font-style: italic;
+        }
+
+        &.changed span.changed {
+            display: flex;
+            color: var(--color-success);
+        }
+
+        &.error span.error {
+            display: flex;
+            color: var(--color-error);
+        }
+
+        &.changed span.changed + span.error {
+            margin-inline-start: var(--maho-space-1);
+        }
+
+        &.subitem {
+            padding-inline-start: 2.2em;
+        }
+    }
+
+    /* Side tabs and the config sidebar (d-menu). The active link is a card with a bar on its start side */
+    :is(ul.tabs, .config-tabs ul).d-menu {
+        /* daisyUI colors a link that is pressed with these, which are near black by default */
+        --d-menu-active-bg: var(--color-base-200);
+        --d-menu-active-fg: var(--color-base-content);
+        box-sizing: border-box;
+        width: 100%;
+
+        & a:not(.active) {
+            color: inherit;
+        }
+
+        /* A stroke in place of a bolder weight, which is wider and would wrap the label only when it is active */
+        & a.active {
+            background-color: var(--color-base-100);
+            color: var(--color-base-content);
+            -webkit-text-stroke: 0.03em currentColor;
+            box-shadow: inset 3px 0 0 var(--color-secondary);
+        }
+    }
+
+    ul.tabs.d-menu a {
+        display: flex;
+    }
+
+    /* The config sidebar: one card for each group of sections */
+    .config-tabs ul.d-menu {
+        margin-bottom: 1rem;
+        background-color: var(--color-base-100);
+        border: var(--border) solid var(--color-base-300);
+        border-radius: var(--radius-box);
+
+        & a.active {
+            background-color: var(--color-base-200);
+        }
+    }
+
+    .config-tabs .d-menu-title {
+        color: color-mix(in oklab, var(--color-base-content) 70%, transparent);
+        font-size: var(--maho-text-xs);
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+    }
+
+    /* Horizontal tabs (d-tabs). tabs.js sets aria-selected, which daisyUI reads as the active tab */
+    .tabs-horiz.d-tabs {
+        flex-wrap: wrap;
+        border-bottom: var(--border) solid var(--color-base-300);
+
+        /* A tab is a link, so it would take the link color of the base layer */
+        & .d-tab {
+            --d-tab-p: var(--maho-space-4);
+            --d-tab-height: 2.75rem;
+            color: color-mix(in oklab, var(--color-base-content) 65%, transparent);
+            font-size: var(--maho-text-md);
+            font-weight: 500;
+
+            &:hover, &[aria-selected=true] {
+                color: var(--color-base-content);
+            }
+
+            &[aria-selected=true] {
+                font-weight: 600;
+
+                /* daisyUI draws the line under the text only, with a border in the text color on top */
+                &::before {
+                    left: 0;
+                    width: 100%;
+                    height: 2px;
+                    border: 0;
+                    border-radius: 0;
+                    background-color: var(--color-secondary);
+                }
+            }
+        }
+    }
+
+    :is(.dashboard-diagrams-box, .dashboard-grids-box) .tabs-horiz {
+        padding: var(--maho-space-1) var(--maho-space-1) 0;
+    }
+
+    /* The drop zone of an uploader that uploads at once, such as the product images. A click opens the file dialog */
+    .uploader-dropzone {
+        align-items: center;
+        justify-content: center;
+        gap: var(--maho-space-2);
+        width: 100%;
+        height: auto;
+        padding: var(--maho-space-6);
+        border-color: color-mix(in oklab, var(--color-base-content) 25%, transparent);
+        background-color: var(--color-base-200);
+        color: color-mix(in oklab, var(--color-base-content) 70%, transparent);
+        font-weight: 400;
+        box-shadow: none;
+
+        & svg {
+            width: 1.75rem;
+            height: 1.75rem;
+        }
+
+        & .uploader-dropzone-note {
+            margin-top: calc(var(--maho-space-1) * -1);
+            font-size: var(--maho-text-sm);
+        }
+
+        &:hover, &.is-dragover {
+            border-color: var(--maho-accent);
+            background-color: color-mix(in oklab, var(--maho-accent) 15%, var(--color-base-100));
+            color: var(--color-base-content);
+        }
+    }
+
+    .uploader:has(> .uploader-dropzone) {
+        margin-bottom: var(--maho-space-2);
+    }
+
+    /* Product websites: one card for each website, with its stores and their store views */
+    .product-websites {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+        gap: var(--maho-space-3);
+        margin: 0;
+        padding: 0;
+        list-style: none;
+
+        & > .d-card:has(.website-checkbox:checked) {
+            border-color: var(--maho-accent);
+            background-color: color-mix(in oklab, var(--maho-accent) 8%, var(--color-base-100));
+        }
+
+        & .d-card-title {
+            cursor: pointer;
+        }
+
+        & .product-website-groups {
+            display: flex;
+            flex-direction: column;
+            gap: var(--maho-space-2);
+            padding-inline-start: calc(var(--d-size, 1.25rem) + var(--maho-space-2));
+        }
+
+        & .product-website-group-name {
+            color: color-mix(in oklab, var(--color-base-content) 80%, transparent);
+            font-size: var(--maho-text-sm);
+        }
+
+        & .product-website-stores {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--maho-space-1);
+            margin: var(--maho-space-1) 0 0;
+            padding: 0;
+            list-style: none;
+
+            & li {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: var(--maho-space-1);
+            }
+        }
+    }
+
+    /* Product images: one card for each image, in the sort order. The handle drags a card */
+    .product-gallery {
+        & .gallery-use-default {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: var(--maho-space-2) var(--maho-space-4);
+            margin-bottom: var(--maho-space-3);
+
+            & label {
+                display: inline-flex;
+                align-items: center;
+                gap: var(--maho-space-1);
+            }
+        }
+
+        /* The drop zone takes the full width below the cards, so its place does not depend on the image count */
+        & .gallery-upload {
+            margin-top: var(--maho-space-4);
+        }
+    }
+
+    .gallery-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+        gap: var(--maho-space-3);
+        margin: 0;
+        padding: 0;
+        list-style: none;
+
+        & .gallery-image {
+            position: relative;
+
+            & img {
+                width: 100%;
+                aspect-ratio: 1;
+                object-fit: contain;
+            }
+        }
+
+        & .gallery-handle {
+            position: absolute;
+            top: var(--maho-space-1);
+            inset-inline-start: var(--maho-space-1);
+            cursor: grab;
+
+            & svg {
+                width: 1rem;
+                height: 1rem;
+            }
+        }
+
+        &.is-locked .gallery-handle {
+            display: none;
+        }
+
+        & .cell-label input {
+            width: 100% !important;
+        }
+
+        /* One toggle for each role, so a store with more roles gets more lines */
+        & .gallery-card-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--maho-space-1);
+        }
+
+        /* A role (Main Image) is a radio that shows as a toggle button: a click on the checked one clears the role */
+        & .gallery-role {
+            & svg {
+                width: 1rem;
+                height: 1rem;
+            }
+
+            &:has(input:checked) {
+                --d-btn-bg: var(--color-primary);
+                --d-btn-fg: var(--color-primary-content);
+                --d-btn-border: var(--color-primary);
+
+                & svg {
+                    fill: currentColor;
+                }
+            }
+
+            &:has(input:focus-visible) {
+                outline: 2px solid var(--color-base-content);
+                outline-offset: 1px;
+            }
+        }
+
+        /* Exclude and Remove: a checkbox that shows as an icon button, in the corner opposite the handle */
+        & .gallery-toggles {
+            position: absolute;
+            top: var(--maho-space-1);
+            inset-inline-end: var(--maho-space-1);
+            display: flex;
+            gap: var(--maho-space-1);
+
+            & svg {
+                width: 1.125rem;
+                height: 1.125rem;
+            }
+
+            & label:has(input:focus-visible) {
+                outline: 2px solid var(--color-base-content);
+                outline-offset: 1px;
+            }
+        }
+
+        & .cell-disable:has(input:checked) {
+            --d-btn-bg: var(--color-base-content);
+            --d-btn-fg: var(--color-base-100);
+            --d-btn-border: var(--color-base-content);
+        }
+
+        & .cell-remove:has(input:checked) {
+            --d-btn-bg: var(--color-error);
+            --d-btn-fg: var(--color-error-content);
+            --d-btn-border: var(--color-error);
+        }
+
+        & .gallery-removed-note {
+            display: none;
+            margin: 0;
+            color: var(--color-error);
+            font-size: var(--maho-text-sm);
+        }
+
+        & .preview:has(.cell-disable input:checked) img {
+            opacity: 0.5;
+        }
+
+        & .preview:has(.cell-remove input:checked) {
+            border-style: dashed;
+
+            & img {
+                opacity: 0.3;
+            }
+
+            & .cell-label {
+                display: none;
+            }
+
+            & .gallery-removed-note {
+                display: block;
+            }
+        }
+
+        & .sortable-ghost {
+            opacity: 0.4;
+        }
+    }
+
+    /*
+     * A store scope switcher: a daisyUI select with a store icon inside the box. The top margin keeps
+     * the focus outline below the sticky page header, which would cover it.
+     */
+    .switcher {
+        margin-bottom: var(--maho-space-3);
+    }
+
+    .switcher:has(> .switcher-select) {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--maho-space-2);
+        margin-top: var(--maho-space-2);
+
+        /* The Manage Stores link of the config switcher */
+        & > p {
+            flex-basis: 100%;
+            margin: 0;
+        }
+    }
+
+    /* The select covers the whole box, so a click on the icon or the chevron opens it too */
+    .switcher-select {
+        --switcher-icon-width: 2.25rem;
+        /* A label is content-box without Preflight, so the border would add to the height of the control */
+        box-sizing: border-box;
+        gap: 0;
+        width: auto;
+        max-width: 100%;
+        padding-inline: 0;
+        background-image: none;
+
+        &:focus-within {
+            outline: 2px solid var(--color-base-content);
+            outline-offset: 2px;
+        }
+
+        & > .d-label {
+            position: relative;
+            z-index: 1;
+            justify-content: center;
+            width: var(--switcher-icon-width);
+            margin-inline: 0;
+            padding-inline: 0;
+            color: color-mix(in oklab, var(--color-base-content) 60%, transparent);
+            pointer-events: none;
+
+            & svg {
+                width: 1.125rem;
+                height: 1.125rem;
+            }
+        }
+
+        /* The box draws the border, so the select inside has none */
+        & > select {
+            flex: 1;
+            min-width: 0;
+            height: 100%;
+            margin: 0 0 0 calc(var(--switcher-icon-width) * -1);
+            padding-inline: calc(var(--switcher-icon-width) + var(--maho-space-2)) 1.75rem;
+            border: 0;
+            background: transparent var(--maho-select-chevron) no-repeat right var(--maho-space-2) center / 10px;
+            box-shadow: none;
+            outline: 0;
+            cursor: pointer;
+
+            /* The list takes the background of the select, which is transparent here */
+            &::picker(select) {
+                background-color: var(--color-base-100);
+            }
+        }
+    }
+
+    .side-col .switcher-select {
+        width: 100%;
+    }
+
+    /*
+     * A switcher above a grid is a tab of the grid card. The grid is the next element after the
+     * script of the switcher: a grid widget in a wrapper (catalog), or the actions table of a report.
+     */
+    .switcher:has(> .switcher-select):is(:has(+ script + div > .grid-widget:first-child), :has(+ script + table.actions)) {
+        position: relative;
+        z-index: 1;
+        margin-bottom: calc(var(--border) * -1);
+
+        /* No bottom border: the corner where two borders meet is diagonal, and it would notch the side border */
+        & > .switcher-select {
+            border-color: var(--maho-border-soft);
+            border-bottom-width: 0;
+            border-end-start-radius: 0;
+            border-end-end-radius: 0;
+            /* The border and the background of the grid card */
+            background-color: var(--maho-surface);
+            box-shadow: none;
+        }
+
+        /* base.css sets the radius and the margin outside the layers */
+        & + script + div > .grid-widget:first-child,
+        & + script + table.actions {
+            border-start-start-radius: 0 !important;
+        }
+
+        & + script + table.actions {
+            margin-top: 0 !important;
+        }
+    }
+
+    /* The main menu: a dark bar, and a dropdown that opens on hover or keyboard focus */
+    .nav-bar {
+        padding: 0 10rem 0 3.4375rem;
+        background: var(--maho-night);
+    }
+
+    #nav.d-menu {
+        --d-menu-active-bg: var(--color-base-200);
+        --d-menu-active-fg: var(--color-base-content);
+        /* d-menu-horizontal is inline-flex, so the bar would center it as text */
+        display: flex;
+        align-items: stretch;
+        padding: 0;
+        font-size: inherit;
+
+        & > li > a {
+            align-content: center;
+            height: 44px;
+            padding-block: 0;
+            padding-inline: var(--maho-space-3);
+            border-radius: 0;
+            color: rgb(255 255 255 / 0.8);
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        /* The bar is dark in both color schemes */
+        & > li > a:is(:hover, :active, :focus-visible), & > li:focus-within > a {
+            background-color: rgb(255 255 255 / 0.07);
+            color: #fff;
+        }
+
+        & > li.active > a {
+            color: #fff;
+            font-weight: 600;
+            box-shadow: inset 0 -3px 0 var(--maho-chartreuse);
+        }
+
+        & ul.d-menu {
+            position: absolute;
+            top: 100%;
+            left: -10000px;
+            z-index: 999;
+            min-width: 220px;
+            margin: 0;
+            padding: var(--maho-space-2);
+            font-size: inherit;
+            /* Lighter than the page in the dark scheme */
+            background-color: var(--maho-surface-overlay);
+            border: var(--border) solid var(--maho-border-soft);
+            border-radius: var(--radius-box);
+            box-shadow: var(--maho-shadow-float);
+
+            /* daisyUI draws a line next to a nested list */
+            &::before {
+                display: none;
+            }
+
+            & a {
+                padding-block: var(--maho-space-3);
+                padding-inline: var(--maho-space-3) var(--maho-space-6);
+                color: var(--color-base-content);
+                line-height: 1.35;
+                text-decoration: none;
+            }
+
+            & a.active {
+                background-color: var(--color-base-200);
+                font-weight: 600;
+            }
+
+            & li.parent > a::after {
+                content: "";
+                position: absolute;
+                top: 50%;
+                right: 10px;
+                margin-top: -0.25rem;
+                border: 4px solid transparent;
+                border-right: 0;
+                border-left-color: color-mix(in oklab, var(--color-base-content) 60%, transparent);
+            }
+        }
+
+        & li:is(:hover, :focus-within) > ul {
+            left: 0;
+        }
+
+        & ul ul.d-menu {
+            top: -7px;
+        }
+
+        & ul li:is(:hover, :focus-within) > ul {
+            left: calc(100% - 4px);
+        }
+    }
+
+    .user-menu-icons {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--maho-space-1);
+        vertical-align: middle;
+        margin-inline: var(--maho-space-1);
+    }
+
+    :is(.user-menu-icons a, #scheme-toggle) {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        padding: 0;
+        border: 0;
+        border-radius: var(--maho-radius-md);
+        background: none;
+        color: #fff;
+        cursor: pointer;
+        opacity: 0.8;
+        transition: opacity var(--maho-duration-fast) var(--maho-ease), background-color var(--maho-duration-fast) var(--maho-ease);
+
+        &:is(:hover, :focus-visible) {
+            opacity: 1;
+            background-color: rgb(255 255 255 / 0.12);
+        }
+
+        & svg {
+            width: 22px;
+            height: 22px;
+            stroke: #fff;
+        }
+    }
+
+    #scheme-toggle span {
+        display: none;
+        line-height: 0;
+    }
+
+    :root:not([data-scheme]) #scheme-toggle .scheme-system,
+    :root[data-scheme="dark"] #scheme-toggle .scheme-dark,
+    :root[data-scheme="light"] #scheme-toggle .scheme-light {
+        display: block;
+    }
+}

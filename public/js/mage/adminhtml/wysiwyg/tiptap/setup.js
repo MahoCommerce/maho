@@ -54,8 +54,8 @@ class tiptapWysiwygSetup {
         }
         this.syncHandlerDebounced = debounce(this.syncHandler, 200);
 
-        varienGlobalEvents?.attachEventHandler('formValidate', this.syncHandler.bind(this));
-        varienGlobalEvents?.attachEventHandler('formSubmit', this.syncHandler.bind(this));
+        window.varienGlobalEvents?.attachEventHandler('formValidate', this.syncHandler.bind(this));
+        window.varienGlobalEvents?.attachEventHandler('formSubmit', this.syncHandler.bind(this));
 
         const formEl = this.textarea.closest('form');
         formEl?.addEventListener('formdata', this.syncHandler.bind(this));
@@ -63,8 +63,8 @@ class tiptapWysiwygSetup {
     }
 
     unbindEventListeners() {
-        varienGlobalEvents?.removeEventHandler('formValidate', this.syncHandler.bind(this));
-        varienGlobalEvents?.removeEventHandler('formSubmit', this.syncHandler.bind(this));
+        window.varienGlobalEvents?.removeEventHandler('formValidate', this.syncHandler.bind(this));
+        window.varienGlobalEvents?.removeEventHandler('formSubmit', this.syncHandler.bind(this));
 
         const formEl = this.textarea.closest('form');
         formEl?.removeEventListener('formdata', this.syncHandler.bind(this));
@@ -399,7 +399,7 @@ class tiptapWysiwygSetup {
             'The rich text editor cannot keep this HTML: %s. Maho keeps the plain HTML editor open so that nothing is lost.',
             this.describeDroppedContent(),
         );
-        this.textarea.before(this.notice);
+        (document.getElementById('buttons' + this.textarea.id) ?? this.textarea).before(this.notice);
     }
 
     /**
@@ -703,7 +703,7 @@ class tiptapWysiwygSetup {
         this.bindEventListeners();
 
         // Fire initialization event
-        varienGlobalEvents?.fireEvent('wysiwygEditorInitialized', this.editor);
+        window.varienGlobalEvents?.fireEvent('wysiwygEditorInitialized', this.editor);
     }
 
     /**

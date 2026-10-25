@@ -12,20 +12,17 @@
  * @var Mage_Adminhtml_Block_Widget_Tabs $this
  */
 ?>
-<!-- <?php if ($this->getTitle()): ?>
-    <h3><?= $this->getTitle() ?></h3>
-<?php endif ?> -->
 <?php if (!empty($tabs)): ?>
-<ul id="<?= $this->getId() ?>" class="tabs-horiz">
+<div id="<?= $this->getId() ?>" class="tabs-horiz d-tabs d-tabs-border" role="tablist">
 <?php foreach ($tabs as $_tab): ?>
-    <li>
-        <a href="<?= $this->getTabUrl($_tab) ?>" id="<?= $this->getTabId($_tab) ?>" name="<?= $this->getTabId($_tab, false) ?>" title="<?= $this->getTabTitle($_tab) ?>" class="tab-item-link <?= $this->getTabClass($_tab) ?><?php if (preg_match('/\s?ajax\s?/', $this->getTabClass($_tab))) {?> notloaded<?php }?>">
-            <span><?= $this->getTabLabel($_tab) ?><span class="changed" title="<?= $this->quoteEscape($this->__('The information in this tab has been changed.')) ?>"><?= $this->getIconSvg('device-floppy') ?></span><span class="error" title="<?= $this->quoteEscape($this->__('This tab contains invalid data. Please solve the problem before saving.')) ?>"><?= $this->getIconSvg('alert-triangle') ?></span></span>
-        </a>
-        <div id="<?= $this->getTabId($_tab) ?>_content" style="display:none"><?= $this->getTabContent($_tab) ?></div>
-    </li>
+    <a href="<?= $this->getTabUrl($_tab) ?>" id="<?= $this->getTabId($_tab) ?>" name="<?= $this->getTabId($_tab, false) ?>" title="<?= $this->getTabTitle($_tab) ?>" role="tab" aria-selected="false" class="tab-item-link d-tab <?= $this->getTabClass($_tab) ?><?php if (preg_match('/\s?ajax\s?/', $this->getTabClass($_tab))) {?> notloaded<?php }?>">
+        <span><?= $this->getTabLabel($_tab) ?><span class="changed" title="<?= $this->quoteEscape($this->__('The information in this tab has been changed.')) ?>"><?= $this->getIconSvg('device-floppy') ?></span><span class="error" title="<?= $this->quoteEscape($this->__('This tab contains invalid data. Please solve the problem before saving.')) ?>"><?= $this->getIconSvg('alert-triangle') ?></span></span>
+    </a>
 <?php endforeach ?>
-</ul>
+</div>
+<?php foreach ($tabs as $_tab): ?>
+<div id="<?= $this->getTabId($_tab) ?>_content" style="display:none"><?= $this->getTabContent($_tab) ?></div>
+<?php endforeach ?>
 <script>
 
     <?= $this->getId() ?>JsTabs = new varienTabs('<?= $this->getId() ?>', '<?= $this->getDestElementId() ?>', '<?= $this->getActiveTabId() ?>', <?= $this->getAllShadowTabs() ?>);

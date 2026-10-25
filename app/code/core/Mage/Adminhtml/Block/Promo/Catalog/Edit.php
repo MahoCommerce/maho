@@ -31,7 +31,7 @@ class Mage_Adminhtml_Block_Promo_Catalog_Edit extends Mage_Adminhtml_Block_Widge
 
         $this->_addButton('save_and_continue_edit', [
             'class'   => 'save',
-            'label'   => Mage::helper('catalogrule')->__('Save and Continue Edit'),
+            'label'   => Mage::helper('catalogrule')->__('Save and Continue'),
             'onclick' => 'editForm.submit(document.getElementById(\'edit_form\').action + \'back/edit/\')',
         ], 10);
     }

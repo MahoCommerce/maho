@@ -15,6 +15,9 @@ use Maho\Data\Form\Element\AbstractElement;
 
 class Image extends AbstractElement
 {
+    /** The preview shows at 4rem, so 128 pixels cover a screen with a pixel ratio of 2 */
+    public const PREVIEW_WIDTH = 128;
+
     /**
      * Constructor
      *
@@ -46,7 +49,7 @@ class Image extends AbstractElement
 
             $html = '<a href="' . $url . '"'
                 . ' onclick="imagePreview(\'' . $this->getHtmlId() . '_image\'); return false;">'
-                . '<img src="' . $url . '" id="' . $this->getHtmlId() . '_image" title="' . $value . '"'
+                . '<img src="' . ($this->_getPreviewUrl() ?? $url) . '" id="' . $this->getHtmlId() . '_image" title="' . $value . '"'
                 . ' alt="' . $value . '" height="22" width="22" class="small-image-preview v-middle" />'
                 . '</a> ';
         }
@@ -54,7 +57,7 @@ class Image extends AbstractElement
         $html .= parent::getElementHtml();
         $html .= $this->_getDeleteCheckbox();
 
-        return $html;
+        return '<div class="image-field">' . $html . '</div>';
     }
 
     /**
@@ -108,6 +111,21 @@ class Image extends AbstractElement
             return $baseUrl . $value;
         }
         return $value;
+    }
+
+    /**
+     * The URL of the smallest stored size of the image, or null when the field sets no
+     * image_entity. The admin store has no sizes, so the sizes of the default store view apply.
+     */
+    protected function _getPreviewUrl(): ?string
+    {
+        $entity = $this->getData('image_entity');
+        $value = $this->getValue();
+        if (!is_string($entity) || !is_string($value)) {
+            return null;
+        }
+        $storeId = (int) \Mage::app()->getDefaultStoreView()?->getId();
+        return \Mage::helper('core/image')->init($entity, $value, $storeId)?->getUrl(self::PREVIEW_WIDTH);
     }
 
     /**

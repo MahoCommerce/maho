@@ -56,6 +56,7 @@ class Maho_Blog_Block_Adminhtml_Post_Edit_Tab_Content extends Mage_Adminhtml_Blo
             'name' => 'image',
             'required' => false,
             'base_url' => Mage::getBaseUrl('media') . 'blog/',
+            'image_entity' => Maho_Blog_Model_Post_Image::ENTITY,
         ]);
 
         if (!Mage::app()->isSingleStoreMode()) {

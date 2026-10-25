@@ -5,149 +5,6 @@ SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
 SPDX-License-Identifier: AFL-3.0
 */
 
-* {
-    margin: 0;
-    padding: 0
-}
-
-body {
-    background: var(--maho-surface-page);
-    color: var(--maho-ink);
-    font: var(--maho-text-md)/1.5 var(--maho-font-sans)
-}
-
-a {
-    color: var(--maho-link);
-    text-decoration: underline
-}
-
-a:hover {
-    color: var(--maho-link);
-    text-decoration: underline
-}
-
-a img {
-    border: 0
-}
-
-:focus {
-    outline: 0
-}
-
-:focus-visible {
-    outline: 2px solid var(--maho-focus-ring);
-    outline-offset: 1px
-}
-
-h1,h2,h3,h4 {
-    margin-bottom: .5em;
-    line-height: 1.4em
-}
-
-h2 {
-    font-size: var(--maho-text-4xl)
-}
-
-h3 {
-    margin-bottom: .5em;
-    color: var(--maho-ink-soft);
-    font-size: var(--maho-text-xl)
-}
-
-h4 {
-    margin-bottom: .6em;
-    color: var(--maho-ink-soft);
-    font-size: var(--maho-text-lg)
-}
-
-h5 {
-    font-size: var(--maho-text-lg)
-}
-
-h6 {
-    font-size: var(--maho-text-md)
-}
-
-h1 a,h1 a:hover,h2 a,h2 a:hover,h3 a,h3 a:hover,h4 a,h4 a:hover {
-    font-weight: 400
-}
-
-th {
-    padding: 0;
-    text-align: left;
-    vertical-align: top
-}
-
-td {
-    padding: 0;
-    vertical-align: top
-}
-
-p,address {
-    margin-bottom: .5em
-}
-
-address {
-    font-style: normal
-}
-
-cite {
-    font-style: normal;
-    font-size: var(--maho-text-xs)
-}
-
-q:before,q:after {
-    content: ""
-}
-
-form {
-    display: inline
-}
-
-fieldset {
-    border: 0
-}
-
-legend {
-    display: none;
-    display: block!important;
-    height: 0;
-    line-height: 0;
-    margin: 0;
-    overflow: hidden;
-    padding: 0;
-    width: 0;
-    visibility: hidden
-}
-
-label {
-    color: var(--maho-ink-soft)
-}
-
-input,select {
-    vertical-align: middle
-}
-
-textarea {
-    overflow: auto
-}
-
-ul,ol {
-    list-style: none
-}
-
-dt {
-    display: block
-}
-
-small {
-    font-size: var(--maho-text-sm)
-}
-
-big {
-    font-size: var(--maho-text-xl)
-}
-
 /* Same artwork as images/loading.svg, inlined so it renders on themes that don't ship the file */
 .maho-spinner {
     display: inline-block;
@@ -493,35 +350,12 @@ big {
     --maho-grid-range-label: 1.25rem
 }
 
-.grid table {
-    width: 100%;
-    border: 1px solid var(--maho-border-soft);
-    border-bottom: none
-}
-
-.grid table.border {
-    border: 1px solid var(--maho-border-soft)
-}
-
-.grid tbody {
-    background: var(--maho-surface)
-}
-
-.grid tr.even,.grid tr.even tr {
-    background: var(--maho-zebra)
-}
-
 .grid tr.on-mouse {
-    background: var(--maho-warning-bg);
     cursor: pointer
 }
 
 .grid tr.invalid {
     background-color: var(--maho-error-border)
-}
-
-.grid th,.grid td {
-    padding: var(--maho-space-1) var(--maho-space-2) var(--maho-space-1) var(--maho-space-2)
 }
 
 .grid th {
@@ -560,20 +394,6 @@ big {
 
 .grid td input.input-inactive {
     background: var(--maho-surface-page)
-}
-
-.grid table td {
-    border-width: 0 1px 1px 0;
-    border-color: var(--maho-border-soft);
-    border-style: solid
-}
-
-.grid table.border td {
-    background: var(--maho-surface)!important
-}
-
-.grid table td.first,.grid table td.last {
-    border-right: 0
 }
 
 .grid table td.product {
@@ -675,6 +495,7 @@ big {
 
     .grid-icon-filter::picker-icon {
         content: "";
+        display: block;
         width: 9px;
         height: 9px;
         margin: 0;
@@ -752,60 +573,6 @@ table.actions td {
     vertical-align: top
 }
 
-.pager select {
-    width: 4em!important;
-    margin: 0 var(--maho-space-2)
-}
-
-.pager input.page {
-    width: 2em!important
-}
-
-
-.grid tr.headings th {
-    border: 0;
-    padding-top: var(--maho-space-1);
-    padding-bottom: 0;
-    font-size: var(--maho-text-sm);
-    white-space: nowrap
-}
-
-.grid tr.headings th.last {
-    border-right: 0
-}
-
-.grid tr.headings th.no-link {
-    padding-top: var(--maho-space-1);
-    padding-bottom: var(--maho-space-1);
-    color: var(--maho-ink-soft)
-}
-
-.grid tr.headings th a {
-    display: block;
-    padding: var(--maho-space-1) var(--maho-space-2) var(--maho-space-1) 0;
-    color: var(--maho-ink-soft);
-    text-decoration: none
-}
-
-.grid tr.headings th a:hover {
-    color: var(--maho-warning);
-    text-decoration: none
-}
-
-.grid tr.headings th a.sort-arrow-desc,.grid tr.headings th a.sort-arrow-asc {
-    padding-bottom: var(--maho-space-1)
-}
-
-.grid tr.headings th span.sort-title {
-    display: block;
-    padding: var(--maho-space-1) var(--maho-space-3) var(--maho-space-2) 0;
-    line-height: 1
-}
-
-.grid tr.headings th a.sort-arrow-desc span.sort-title,.grid tr.headings th a.sort-arrow-asc span.sort-title {
-    padding: var(--maho-space-1) var(--maho-space-3) var(--maho-space-2) 0
-}
-
 .massaction {
     width: 100%;
     height: 30px;
@@ -826,11 +593,6 @@ table.actions td {
     width: auto;
     display: inline;
     margin: 0 var(--maho-space-2)
-}
-
-.massaction .entry-edit fieldset select.validation-failed {
-    border: 1px dashed var(--maho-error)!important;
-    background: var(--maho-error-bg)!important
 }
 
 .massaction .entry-edit fieldset {
@@ -964,21 +726,6 @@ table.actions td {
     width: 278px
 }
 
-.grid table tfoot tr {
-    background: var(--maho-surface-sunken)
-}
-
-.grid table tfoot tr td {
-    border-top: 2px solid var(--maho-border-strong);
-    background: var(--maho-surface-sunken);
-    font-weight: 600;
-    line-height: 1.7em
-}
-
-.grid table.border tfoot tr td {
-    background: var(--maho-surface-sunken)!important
-}
-
 .dynamic-grid th {
     padding: var(--maho-space-1);
     width: 100px
@@ -1029,7 +776,7 @@ dl.accordion .grid {
     margin-bottom: 0
 }
 
-dl.accordion dt,.entry-edit .entry-edit-head {
+dl.accordion dt {
     padding: var(--maho-space-1) var(--maho-space-3)
 }
 
@@ -1092,116 +839,6 @@ img.accordion-btn {
     margin-right: var(--maho-space-2)
 }
 
-ul.tabs {
-    border-top: 1px solid var(--maho-border-strong);
-    background-color: var(--maho-surface-sunken)
-}
-
-ul.tabs a,ul.tabs span {
-    display: block
-}
-
-ul.tabs a,ul.tabs a:hover {
-    text-decoration: none
-}
-
-ul.tabs a,ul.tabs a:hover {
-    color: var(--maho-ink)
-}
-
-ul.tabs a:hover {
-    background-color: var(--maho-surface-sunken)
-}
-
-ul.tabs a.active {
-    padding: 0;
-    border-bottom: 1px solid var(--maho-border-strong);
-    background: 0 0
-}
-
-ul.tabs a:hover.active {
-    padding: 0
-}
-
-ul.tabs span {
-    cursor: pointer
-}
-
-ul.tabs a > span,ul.tabs-horiz a > span {
-    display: flex;
-    align-items: center
-}
-
-ul.tabs span em {
-    order: 1;
-    margin-left: auto
-}
-
-ul.tabs a.active span,ul.tabs a:hover.active span {
-    background: var(--maho-surface);
-    font-weight: 700
-}
-
-ul.tabs a.subitem {
-    padding-left: 2.2em
-}
-
-ul.tabs span.changed,ul.tabs span.error,ul.tabs-horiz span.changed,ul.tabs-horiz span.error {
-    background: 0;
-    padding: 0;
-    display: none;
-    margin-left: auto
-}
-
-ul.tabs a.changed span.changed,ul.tabs-horiz a.changed span.changed {
-    width: 12px;
-    height: 12px;
-    display: block;
-    color: var(--maho-success) !important;
-}
-
-ul.tabs-horiz a.active.changed span.changed {
-    color: var(--maho-surface) !important;
-}
-
-ul.tabs a.error span.error,ul.tabs-horiz a.error span.error {
-    width: 12px;
-    height: 12px;
-    display: block;
-    color: var(--maho-error-strong)
-}
-
-ul.tabs a.changed span.changed svg,ul.tabs a.error span.error svg {
-    width: 20px
-}
-
-ul.tabs a.changed {
-    font-style: italic
-}
-
-ul.tabs-horiz {
-    margin: 0 0 var(--maho-space-5) 0;
-    padding: var(--maho-space-3) 0 0 var(--maho-space-2)
-}
-
-ul.tabs-horiz li {
-    margin: 0 var(--maho-space-2)
-}
-
-ul.tabs-horiz li a {
-    display: block;
-    background: var(--maho-hairline);
-    border: 1px solid var(--maho-border);
-    padding: var(--maho-space-1) var(--maho-space-3);
-    color: var(--maho-ink-soft)!important;
-    text-decoration: none!important
-}
-
-ul.tabs-horiz li a.active {
-    border-bottom: 1px solid var(--maho-surface);
-    background: var(--maho-surface)
-}
-
 .notification-global {
     padding: var(--maho-space-2) var(--maho-space-6) var(--maho-space-2) var(--maho-space-9);
     background: var(--maho-warning-bg);
@@ -1230,7 +867,7 @@ ul.tabs-horiz li a.active {
     text-decoration: none
 }
 
-.error,a.error span,.required,.validation-advice {
+.error,a.error span,.required {
     color: var(--maho-error-strong)!important;
     font-weight: 700!important
 }
@@ -1239,82 +876,8 @@ ul.tabs-horiz li a.active {
     color: var(--maho-link)
 }
 
-.messages ul {
-    border: 0!important
-}
-
-.messages li {
-    margin-bottom: var(--maho-space-3)!important;
-    padding: var(--maho-space-3) var(--maho-space-6) var(--maho-space-3) var(--maho-space-7)!important;
-    font-size: var(--maho-text-sm)!important;
-    border-radius: var(--maho-radius-md)
-}
-
-.messages ul li {
-    margin: 0!important;
-    border: 0!important;
-    padding: 0!important
-}
-
 .import-start {
     margin-top: var(--maho-space-3)
-}
-
-.error-msg {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23c8401e' d='M13 13h-2V7h2m0 10h-2v-2h2M12 2A10 10 0 0 0 2 12a10 10 0 0 0 10 10 10 10 0 0 0 10-10A10 10 0 0 0 12 2z'/%3E%3C/svg%3E")!important;
-    background-repeat: no-repeat!important;
-    background-size: 16px 16px!important;
-    background-color: var(--maho-error-bg)!important;
-    background-position: 10px center!important;
-    border: 1px solid var(--maho-error-border)!important;
-    color: var(--maho-error-strong)!important
-}
-
-.success-msg {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' style='width:24px;height:24px' viewBox='0 0 24 24'%3E%3Cpath fill='%232e7d43' d='M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z' /%3E%3C/svg%3E")!important;
-    background-repeat: no-repeat!important;
-    background-size: 16px 16px!important;
-    background-color: var(--maho-success-bg)!important;
-    background-position: 10px center!important;
-    border: 1px solid var(--maho-success-border)!important;
-    color: var(--maho-success)!important
-}
-
-.notice-msg {
-    background-image: url(images/information-variant.svg)!important;
-    background-repeat: no-repeat!important;
-    background-size: 23px 23px!important;
-    background-color: var(--maho-warning-bg)!important;
-    background-position: 8px center!important;
-    border: 1px solid var(--maho-warning-border)!important;
-    color: var(--maho-ink)!important
-}
-
-.warning-msg {
-    background-image: url(images/information-variant.svg)!important;
-    background-repeat: no-repeat!important;
-    background-size: 23px 23px!important;
-    background-color: var(--maho-warning-bg)!important;
-    background-position: 8px center!important;
-    border: 1px solid var(--maho-warning-border)!important;
-    color: var(--maho-ink)!important
-}
-
-.validation-advice {
-    clear: both;
-    min-height: 15px;
-    margin-top: var(--maho-space-1);
-    padding-left: var(--maho-space-5);
-    font-size: var(--maho-text-sm);
-    font-weight: 700;
-    line-height: 1.25em;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23eb5202' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 5l0 14'/%3E%3Cpath d='M18 11l-6 -6'/%3E%3Cpath d='M6 11l6 -6'/%3E%3C/svg%3E") no-repeat 0 1px;
-    background-size: 16px 16px
-}
-
-input.validation-failed,textarea.validation-failed {
-    background: var(--maho-error-bg);
-    border: 1px dashed var(--maho-error-strong)
 }
 
 .demo-notice {
@@ -1327,27 +890,18 @@ input.validation-failed,textarea.validation-failed {
     text-align: center
 }
 
+.demo-notice a {
+    color: inherit;
+    font-weight: 600;
+    text-decoration: underline
+}
+
 select.countries option {
     background-repeat: no-repeat
 }
 
 table.form-edit {
     width: 100%
-}
-
-.box,.entry-edit fieldset,.entry-edit .fieldset {
-    padding: var(--maho-space-3) var(--maho-space-4);
-    margin-bottom: var(--maho-space-4)
-}
-
-.entry-edit .entry-edit-head h4 {
-    padding: 0;
-    background: 0 0;
-    margin: 0;
-    color: var(--maho-surface);
-    font-size: var(--maho-text-md);
-    line-height: 18px;
-    min-height: 0
 }
 
 .entry-edit .entry-edit-head .tools {
@@ -1425,22 +979,6 @@ label.inline {
     min-width: 310px
 }
 
-input.input-text,input.input-color,textarea,select {
-    border-width: 1px;
-    border-style: solid;
-    border-color: var(--maho-border-strong) var(--maho-control-border) var(--maho-control-border) var(--maho-border-strong);
-    background: var(--maho-surface);
-    font-size: var(--maho-text-sm)
-}
-
-select {
-    min-height: 17px
-}
-
-input.input-text,textarea {
-    padding: var(--maho-space-1)
-}
-
 input.input-color {
     padding: var(--maho-space-1);
     width: 222px!important
@@ -1461,27 +999,6 @@ input.item-qty {
 input.price {
     width: 50px!important;
     text-align: right
-}
-
-input[type=text].disabled {
-    background: var(--maho-surface-page)
-}
-
-select optgroup {
-    font-style: normal
-}
-
-select optgroup option {
-    padding-left: var(--maho-space-3)
-}
-
-select optgroup option.even {
-    background: var(--maho-surface-sunken)
-}
-
-select.multiselect option {
-    padding: var(--maho-space-1) var(--maho-space-2);
-    border-bottom: 1px solid var(--maho-border-soft)
 }
 
 .checkboxes li {
@@ -1656,7 +1173,7 @@ select.multiselect option {
     margin-bottom: var(--maho-space-2)
 }
 
-span.delete-image,span.delete-file {
+span.delete-image:not(.image-field > *),span.delete-file {
     display: block;
     white-space: nowrap;
     padding-left: var(--maho-space-6)
@@ -1734,39 +1251,32 @@ button.icon-btn span {
     margin-right: var(--maho-space-2)
 }
 
-.buttons-set:has(+ textarea) {
+.buttons-set:not(.textarea-toolbar):has(+ textarea) {
     display: flex;
     flex-wrap: wrap;
     gap: var(--maho-space-2);
     margin: 0 0 var(--maho-space-2)
 }
 
+.textarea-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0
+}
+
 .buttons-set:has(+ textarea) button {
     margin-right: 0
 }
 
-.buttons-set + textarea {
+.buttons-set:not(.textarea-toolbar) + textarea {
     margin-top: 0;
     width: 100%!important;
     box-sizing: border-box
 }
 
 .switcher {
-    margin-bottom: var(--maho-space-3);
     border: 1px solid var(--maho-border-soft);
     background: var(--maho-surface-sunken);
-}
-
-.side-col .switcher {
-    padding-right: var(--maho-space-6)
-}
-
-.side-col .switcher label {
-    display: block
-}
-
-.side-col .switcher select {
-    width: 100%
 }
 
 .store-scope .tree-store-scope {
@@ -1913,11 +1423,6 @@ div:has(> .box-left) > :not(.box-left):not(.box-right) {
 td.divider {
     font-size: 1px;
     line-height: 0
-}
-
-.box,.entry-edit fieldset,.entry-edit .fieldset {
-    border: 1px solid var(--maho-border);
-    background: var(--maho-surface-raised)
 }
 
 .auto-scroll {
@@ -2405,13 +1910,6 @@ div.autocomplete ul li {
     overflow: hidden;
 }
 
-.dashboard-diagrams-box ul.tabs-horiz,.dashboard-grids-box ul.tabs-horiz {
-    display: flex;
-    flex-wrap: wrap;
-    padding: var(--maho-space-1) var(--maho-space-1) 0;
-    border-bottom: 1px solid var(--maho-hairline);
-}
-
 #grid_tab_content .grid table,#diagram_tab_content .grid table {
     border: 0;
 }
@@ -2831,18 +2329,7 @@ ul.item-options li {
 
 .product-options dd input[type=date],.product-options dd input[type=time],.product-options dd input[type=datetime-local],.product-options dd input.datetime-picker {
     width: auto;
-    min-width: 150px;
-    padding: var(--maho-space-1) var(--maho-space-2);
-    border: 1px solid var(--maho-border-strong);
-    border-radius: 2px;
-    font-family: inherit;
-    font-size: var(--maho-text-xs)
-}
-
-.product-options dd input[type=date]:focus,.product-options dd input[type=time]:focus,.product-options dd input[type=datetime-local]:focus {
-    border-color: var(--maho-link);
-    outline: 0;
-    box-shadow: 0 0 2px color-mix(in srgb, var(--maho-focus-ring) 30%, transparent)
+    min-width: 150px
 }
 
 .product-options dd .time-picker {
@@ -3304,6 +2791,7 @@ ul.item-options li {
 }
 
 .categories-side-col .content-header {
+    margin-right: 0;
     padding: 0
 }
 
@@ -3312,16 +2800,17 @@ ul.item-options li {
 }
 
 .categories-side-col .content-header button {
+    width: 100%;
     margin: var(--maho-space-2) 0 0
 }
 
 .categories-side-col .switcher {
-    margin: var(--maho-space-3) var(--maho-space-5) 0 0
+    margin: var(--maho-space-3) 0 0
 }
 
 .categories-side-col .tree-actions {
     text-align: center;
-    margin: var(--maho-space-3) var(--maho-space-5) var(--maho-space-3) 0;
+    margin: var(--maho-space-3) 0;
     display: flex;
     justify-content: center;
     gap: var(--maho-space-4)
@@ -3940,27 +3429,6 @@ img.attribute-global {
     vertical-align: middle
 }
 
-ul.config-tabs {
-    border-top: none
-}
-
-ul.config-tabs dt {
-    border-top: 1px solid var(--maho-border);
-    background: var(--maho-surface-sunken);
-    padding: var(--maho-space-1) 0 var(--maho-space-1) 1.5em;
-    font-weight: 700;
-    text-transform: uppercase;
-    color: var(--maho-ink-soft)
-}
-
-ul.config-tabs dl {
-    margin-bottom: var(--maho-space-4)
-}
-
-ul.config-tabs a.last span {
-    background-image: none
-}
-
 .inline-table {
     border: 0!important
 }
@@ -4401,18 +3869,6 @@ ul.super-product-attributes {
     width: 110px!important
 }
 
-.preview .cell-image .place-holder {
-    border: 1px solid var(--maho-border-strong);
-    width: 100px;
-    height: 100px;
-    text-align: center
-}
-
-.preview .cell-image .place-holder span {
-    margin-top: var(--maho-space-7);
-    display: block
-}
-
 .preview .cell-position input.input-text {
     width: 90%!important
 }
@@ -4815,26 +4271,11 @@ ul.super-product-attributes {
     overflow: hidden
 }
 
-input[type=date],input[type=time],input[type=datetime-local] {
-    font-family: "Lucida Grande",Verdana,Arial,Helvetica,sans-serif;
-    font-size: var(--maho-text-xs);
-    padding: var(--maho-space-1) var(--maho-space-2);
-    border: 1px solid var(--maho-border-strong);
-    border-radius: 2px;
-    background: var(--maho-surface)
-}
-
-input[type=date]:focus,input[type=time]:focus,input[type=datetime-local]:focus {
-    border-color: var(--maho-link);
-    outline: 0;
-    box-shadow: 0 0 2px color-mix(in srgb, var(--maho-focus-ring) 30%, transparent)
-}
-
 .middle {
     padding-top: var(--maho-space-3)
 }
 
-.footer-content,.middle,#nav,.header-top {
+.footer-content,.middle,.header-top {
     padding-inline: var(--maho-space-3);
     box-sizing: border-box;
     width: 100%
@@ -4848,20 +4289,13 @@ input[type=date]:focus,input[type=time]:focus,input[type=datetime-local]:focus {
     letter-spacing: -.01em
 }
 
-dl.accordion dt,.entry-edit .entry-edit-head {
+dl.accordion dt {
     background: var(--maho-surface);
     color: var(--maho-ink);
     padding: var(--maho-space-3) var(--maho-space-4) 0;
     border: 1px solid var(--maho-border-soft);
     border-bottom: 0;
     border-radius: var(--maho-radius-md) var(--maho-radius-md) 0 0
-}
-
-.box,.entry-edit .fieldset,.entry-edit fieldset {
-    border: 1px solid var(--maho-border-soft);
-    background: var(--maho-surface);
-    border-top: 0;
-    border-radius: 0 0 var(--maho-radius-md) var(--maho-radius-md)
 }
 
 #dashboard_diagram_totals {
@@ -4923,12 +4357,6 @@ dl.accordion dt,.entry-edit .entry-edit-head {
     border-style: solid
 }
 
-ul.tabs a:hover,ul.tabs a.active {
-    background: var(--maho-hairline);
-    color: var(--maho-ink);
-    transition: background var(--maho-duration-slow) var(--maho-ease)-in-out
-}
-
 dl.accordion dt.open a,dl.accordion dt a:hover,dl.accordion dt a,div.collapseable a.open,div.collapseable a:hover,div.collapseable a,.entry-edit .entry-edit-head a,.entry-edit .entry-edit-head strong {
     color: var(--maho-ink);
     font-weight: 300;
@@ -4962,32 +4390,6 @@ dl.accordion dt.open a:after,div.collapseable a.open:after {
     border-color: transparent transparent var(--maho-control-placeholder) transparent
 }
 
-.warning-msg,.success-msg,.error-msg,.notice-msg {
-    border-radius: 5px;
-    margin: var(--maho-space-5) 0;
-    padding: var(--maho-space-3) var(--maho-space-6) var(--maho-space-3) var(--maho-space-7);
-    position: relative;
-    text-shadow: none
-}
-
-.grid-severity-minor,.grid-severity-major,.grid-severity-critical,.grid-severity-notice {
-    background: 0 0;
-    padding: 0;
-    height: auto
-}
-
-.grid-severity-minor span,.grid-severity-major span,.grid-severity-critical span,.grid-severity-notice span {
-    font: 400 var(--maho-text-sm)/1.33 var(--maho-font-sans);
-    padding: var(--maho-space-1) var(--maho-space-3);
-    white-space: nowrap
-}
-
-.grid-severity-minor span,.grid-severity-major span {
-    border: 0;
-    background: var(--maho-warning);
-    color: var(--maho-surface)
-}
-
 .header-right fieldset input.input-text:hover {
     background-color: rgba(255, 255, 255, .13)
 }
@@ -4999,81 +4401,8 @@ dl.accordion dt.open a:after,div.collapseable a.open:after {
     box-shadow: none
 }
 
-h1 {
-    color: var(--maho-ink);
-    font-weight: 400
-}
-
-h2 {
-    color: var(--maho-ink);
-    font-weight: 400
-}
-
-h3 {
-    color: var(--maho-ink);
-    font-weight: 400
-}
-
-h4 {
-    color: var(--maho-ink);
-    font-weight: 400
-}
-
-h5 {
-    color: var(--maho-ink);
-    font-weight: 400
-}
-
-h6 {
-    color: var(--maho-ink);
-    font-weight: 400
-}
-
-label {
-    color: var(--maho-ink);
-    font-weight: 400
-}
-
-a {
-    display: inline;
-    color: var(--maho-accent);
-    text-decoration: none
-}
-
-a:visited {
-    color: var(--maho-accent)
-}
-
-a:focus {
-    color: var(--maho-accent-strong);
-    text-decoration: none
-}
-
-a:hover {
-    color: var(--maho-accent-strong);
-    text-decoration: none
-}
-
-a:active {
-    color: var(--maho-accent-strong);
-    text-decoration: none
-}
-
 a.error span {
     color: var(--maho-error)!important
-}
-
-strong {
-    font-weight: 600
-}
-
-b {
-    font-weight: 600
-}
-
-small {
-    font-size: var(--maho-text-sm);
-    color: var(--maho-ink)
 }
 
 .wrapper {
@@ -5166,13 +4495,6 @@ small {
     margin-top: var(--maho-space-3)
 }
 
-.entry-edit .entry-edit-head h4 {
-    color: var(--maho-ink);
-    line-height: 32px;
-    font-size: var(--maho-text-lg);
-    font-weight: 600
-}
-
 .entry-edit .entry-edit-head .tools {
     line-height: 32px
 }
@@ -5186,33 +4508,6 @@ small {
     height: 16px;
     margin: var(--maho-space-3) 0 0 var(--maho-space-2);
     filter: revert
-}
-
-.grid table {
-    border: 1px solid var(--maho-border-soft);
-    border-collapse: collapse;
-    font-variant-numeric: tabular-nums
-}
-
-.grid table.border {
-    border: 1px solid var(--maho-border-soft)
-}
-
-.grid table.border tfoot tr td {
-    background: var(--maho-surface)!important
-}
-
-.grid table td {
-    border: 0;
-    border-bottom: 1px solid var(--maho-hairline);
-    background: var(--maho-surface);
-    padding: var(--maho-space-3)
-}
-
-.grid table tfoot tr td {
-    border: 0;
-    border-top: 2px solid var(--maho-border-strong);
-    background: var(--maho-surface-sunken)
 }
 
 .grid table tbody tr.selected td {
@@ -5285,35 +4580,6 @@ small {
     margin-top: var(--maho-space-2)
 }
 
-.grid tr.headings {
-    background: var(--maho-surface-sunken);
-    border: 0;
-    border-bottom: 2px solid var(--maho-border-strong)
-}
-
-.grid tr.headings th {
-    padding: var(--maho-space-3);
-    font-size: var(--maho-text-xs);
-    vertical-align: middle;
-    color: var(--maho-ink-soft);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: .04em
-}
-
-.grid tr.headings th a {
-    color: var(--maho-ink-soft);
-    font-weight: 600
-}
-
-.grid tr.headings th a:hover {
-    color: var(--maho-ink)
-}
-
-.grid tr.headings th a.sort-arrow-desc,.grid tr.headings th a.sort-arrow-asc {
-    color: var(--maho-ink)
-}
-
 .grid tr.headings th a.sort-arrow-desc span.sort-title {
     background: 0 0
 }
@@ -5330,19 +4596,6 @@ small {
 .grid tr.headings th a.sort-arrow-asc span.sort-title:after {
     border-width: 0 4px 5px 4px;
     border-color: transparent transparent var(--maho-chartreuse-deep) transparent
-}
-
-.grid tr.headings th.no-link {
-    color: var(--maho-ink-soft);
-    padding: var(--maho-space-3)
-}
-
-.grid tr.even td {
-    background: var(--maho-zebra)
-}
-
-.grid tr.even tr td {
-    background: var(--maho-zebra)
 }
 
 .grid tbody.even tr td {
@@ -5460,113 +4713,8 @@ small {
     gap: .5em
 }
 
-ul.tabs-horiz {
-    display: flex;
-    flex-wrap: wrap;
-    background: 0 0;
-    margin: 0;
-    padding: 0
-}
-
-ul.tabs-horiz li {
-    border: 0;
-    margin: 0 var(--maho-space-1) 0 0
-}
-
-ul.tabs-horiz li a {
-    background: 0 0;
-    color: var(--maho-ink-muted)!important;
-    font-size: var(--maho-text-md);
-    font-weight: 500;
-    padding: var(--maho-space-3) var(--maho-space-4);
-    border: 0;
-    box-shadow: inset 0 -2px 0 transparent;
-    transition: color var(--maho-duration-fast) var(--maho-ease), box-shadow var(--maho-duration-fast) var(--maho-ease)
-}
-
-ul.tabs-horiz li a:hover {
-    color: var(--maho-ink)!important
-}
-
-ul.tabs-horiz li a.active {
-    border: 0;
-    background: 0 0;
-    color: var(--maho-ink)!important;
-    font-weight: 600;
-    box-shadow: inset 0 -2px 0 var(--maho-chartreuse-deep)
-}
-
-ul.tabs {
-    background: 0 0;
-    color: var(--maho-ink);
-    border-top: 0
-}
-
-ul.tabs dl {
-    background: var(--maho-surface);
-    border: 1px solid var(--maho-border-soft)
-}
-
-ul.tabs a {
-    background: 0 0;
-    color: var(--maho-ink-soft);
-    padding: var(--maho-space-3) var(--maho-space-4);
-    border: 0;
-    border-left: 3px solid transparent;
-    border-radius: 0 var(--maho-radius-sm) var(--maho-radius-sm) 0
-}
-
-ul.tabs a:hover {
-    background: color-mix(in srgb, var(--maho-ink) 5%, transparent);
-    color: var(--maho-ink)
-}
-
-ul.tabs a.active {
-    border-left: 3px solid var(--maho-chartreuse-deep);
-    background: var(--maho-surface);
-    color: var(--maho-ink);
-    padding: var(--maho-space-3) var(--maho-space-4);
-    font-weight: 600
-}
-
-ul.tabs a.active span {
-    padding: 0;
-    background: 0 0;
-    font-weight: 400
-}
-
-ul.tabs a:hover.active {
-    padding: var(--maho-space-3) var(--maho-space-5)
-}
-
-ul.tabs a:hover.active span {
-    background: 0 0;
-    font-weight: 400
-}
-
-ul.tabs span {
-    background: 0 0;
-    padding: 0;
-    font-weight: 400
-}
-
-ul.config-tabs dt {
-    border: 0;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: .05em;
-    padding: var(--maho-space-4) var(--maho-space-3) var(--maho-space-2);
-    font-size: var(--maho-text-xs);
-    background: 0 0;
-    color: var(--maho-ink-muted)
-}
-
 #grid_tab_content {
     background: var(--maho-surface)
-}
-
-.nav-bar {
-    border: 0
 }
 
 div.collapseable {
@@ -5684,12 +4832,6 @@ div.collapseable a.open {
     color: var(--maho-error)!important
 }
 
-.validation-advice {
-    color: var(--maho-error)!important;
-    font-size: var(--maho-text-sm);
-    font-weight: 600!important
-}
-
 .order-totals {
     background: var(--maho-surface);
     border: 1px solid var(--maho-border-soft)!important;
@@ -5766,18 +4908,6 @@ div.collapseable a.open {
     margin-bottom: var(--maho-space-3)
 }
 
-.grid-severity-notice span {
-    border: 0;
-    background: var(--maho-success);
-    color: var(--maho-surface)
-}
-
-.grid-severity-critical span {
-    border: 0;
-    background: var(--maho-error);
-    color: var(--maho-surface)
-}
-
 .custom-options .box {
     overflow: auto
 }
@@ -5813,10 +4943,6 @@ div.collapseable a.open {
 
 .no-display {
     display: none!important
-}
-
-.side-col .switcher select {
-    margin: var(--maho-space-2) 0
 }
 
 dl.accordion dt {
@@ -6090,8 +5216,8 @@ img.rule-param-add {
 }
 
 .maho-tree.hide-checkbox {
-    padding-right: var(--maho-space-1);
-    padding-bottom: var(--maho-space-1)
+    padding-right: 4px;
+    padding-bottom: 4px
 }
 
 .maho-tree.hide-checkbox .label:has(input:is([type=checkbox],[type=radio])) {

@@ -16,7 +16,7 @@
     <h3><?= $this->getTitle() ?></h3>
 <?php endif ?>
 <?php if (!empty($tabs)): ?>
-<ul id="<?= $this->getId() ?>" class="tabs">
+<ul id="<?= $this->getId() ?>" class="tabs d-menu">
 <?php foreach ($tabs as $_tab): ?>
 <?php if (!$this->canShowTab($_tab)): continue;  endif; ?>
     <li <?php if ($this->getTabIsHidden($_tab)): ?> style="display:none"<?php endif ?>>

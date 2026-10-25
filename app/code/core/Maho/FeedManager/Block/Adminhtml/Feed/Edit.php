@@ -23,11 +23,8 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit extends Mage_Adminhtml_Block_Wi
 
         parent::__construct();
 
-        $this->_updateButton('save', 'label', $this->__('Save Feed'));
-        $this->_updateButton('delete', 'label', $this->__('Delete Feed'));
-
         $this->_addButton('saveandcontinue', [
-            'label' => $this->__('Save and Continue Edit'),
+            'label' => $this->__('Save and Continue'),
             'onclick' => 'saveAndContinueEdit()',
             'class' => 'save',
         ], -100);

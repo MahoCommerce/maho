@@ -36,7 +36,6 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Sequence_Edit extends Ma
 
         // Update delete button with segment_id parameter (right side)
         if ($sequence && $sequence->getId()) {
-            $this->_updateButton('delete', 'label', Mage::helper('customersegmentation')->__('Delete Step'));
             $this->_updateButton('delete', 'onclick', "deleteConfirm('"
                 . Mage::helper('customersegmentation')->__('Are you sure you want to delete this sequence step?')
                 . "', '"

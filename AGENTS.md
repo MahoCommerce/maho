@@ -21,6 +21,7 @@ composer test:pgsql                # Same, against PostgreSQL (also: test:sqlite
 ./maho db:query "QUERY"            # One-shot SQL query
 
 ./maho dev:frontend:theme:build    # Compile the Tailwind skins (--theme, --watch)
+./maho dev:admin:theme:build       # Compile the Tailwind admin skin (--watch)
 ./maho dev:frontend:theme:create   # Scaffold a new theme
 ./maho dev:frontend:theme:export   # Write the admin theme settings out as a theme.css
 npm install                        # Build toolchain, also copies the pinned JS libs into public/js
@@ -39,6 +40,8 @@ npm install                        # Build toolchain, also copies the pinned JS 
 - `lib/MahoCLI/Commands/`: `./maho` CLI commands
 - `public/skin/frontend/`: Tailwind theme sources under `base/default/src/`, compiled bundles
   committed next to them; see the README in that folder
+- `public/skin/adminhtml/default/default/src/`: Tailwind and daisyUI sources of the admin skin; see
+  Admin theme below
 
 ### Database access (Doctrine DBAL)
 
@@ -342,6 +345,25 @@ All Zend Framework and Varien components have been deleted:
   need one, declare it in `app/etc/modules/`
 - Before committing, ensure new translatable strings (`$this->__()`,
   `Mage::helper()->__()`) exist in `app/locale/en_US/`
+
+### Admin theme (Tailwind 4 + daisyUI 5)
+
+- `./maho dev:admin:theme:build` compiles `src/` into `css/styles.css`, which is committed. Rebuild
+  after you change a source or a template.
+- daisyUI classes carry the `d-` prefix (`d-btn`, `d-select`), because the admin markup already
+  uses `.grid`, `.label`, `.tabs` and other Tailwind names.
+- New admin markup uses daisyUI classes directly. Older markup keeps its classes, which
+  `_components.css` maps onto daisyUI with `@apply`.
+- daisyUI puts the classes that markup uses in the utilities layer. A rule that adjusts them goes in
+  the `@layer utilities` block at the end of `_components.css`.
+- `base.css` and `form.css` are outside the cascade layers, so they win over every layered rule.
+  Delete or narrow the legacy rule when you restyle an element. Use a layered `!important` only
+  when the legacy rule must stay for other pages, with a comment that says so.
+- Tailwind scans the admin templates, layouts and scripts, not `app/code`. A class that only PHP
+  writes needs `@source inline()` in `tailwind.css`.
+- Button labels are short and generic: "Save", "Delete", "Add", "Submit", "Save and Continue".
+  Keep the noun only when one page has two buttons with the same verb. Give a button whose label
+  repeats on the page an `aria_labelledby` that names its field.
 
 ### File headers (SPDX)
 

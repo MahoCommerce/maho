@@ -11,42 +11,59 @@
 class Mage_Adminhtml_Block_Catalog_Helper_Form_Wysiwyg extends \Maho\Data\Form\Element\Textarea
 {
     /**
-     * Retrieve additional html and put it at the end of element html
-     *
-     * @return string
+     * The buttons are a toolbar on top of the textarea, in one container with it.
      */
+    #[\Override]
+    public function getElementHtml()
+    {
+        $buttons = $this->_getButtonsHtml();
+        if ($buttons === '') {
+            return parent::getElementHtml();
+        }
+        return '<div class="textarea-toolbar-field">' . $buttons . parent::getElementHtml() . '</div>';
+    }
+
     #[\Override]
     public function getAfterElementHtml()
     {
         $html = parent::getAfterElementHtml();
+        if ($this->getEntityAttribute()->getIsWysiwygEnabled()) {
+            // The editor opens in a popup. This field never runs the WYSIWYG setup.
+            $html .= Mage::helper('cms')->getSanitizePreviewHtml($this->getHtmlId(), 'catalog');
+        }
+        return $html;
+    }
+
+    protected function _getButtonsHtml(): string
+    {
+        $buttons = '';
         if ($this->getIsWysiwygEnabled()) {
             $wysiwygUrl = Mage::helper('adminhtml')->getUrl('*/*/wysiwyg', [
                 'store_id' => Mage::getSingleton('cms/wysiwyg_config')->getStoreId(),
             ]);
-            $html .= Mage::getSingleton('core/layout')
+            $buttons .= Mage::getSingleton('core/layout')
                 ->createBlock('adminhtml/widget_button', '', [
                     'label'    => Mage::helper('catalog')->__('WYSIWYG Editor'),
                     'type'     => 'button',
                     'disabled' => $this->getDisabled() || $this->getReadonly(),
                     'class'    => 'btn-wysiwyg',
-                    'style'    => 'margin-right: 4px;',
                     'onclick'  => "catalogWysiwygEditor.open('$wysiwygUrl', '{$this->getHtmlId()}')",
                 ])->toHtml();
         }
         if ($this->getEntityAttribute()->getIsWysiwygEnabled()) {
             $validateUrl = Mage::getSingleton('adminhtml/url')->getUrl('*/cms_wysiwyg/validateHtml');
-            $html .= Mage::getSingleton('core/layout')
+            $buttons .= Mage::getSingleton('core/layout')
                 ->createBlock('adminhtml/widget_button', '', [
                     'label'    => Mage::helper('cms')->__('Validate HTML'),
                     'type'     => 'button',
                     'class'    => 'validate-html',
                     'onclick'  => "validateHtmlContent('{$this->getHtmlId()}', '$validateUrl');",
                 ])->toHtml();
-
-            // The editor opens in a popup. This field never runs the WYSIWYG setup.
-            $html .= Mage::helper('cms')->getSanitizePreviewHtml($this->getHtmlId(), 'catalog');
         }
-        return $html;
+        if ($buttons === '') {
+            return '';
+        }
+        return '<div id="buttons' . $this->getHtmlId() . '" class="buttons-set textarea-toolbar">' . $buttons . '</div>';
     }
 
     /**
