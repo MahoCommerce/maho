@@ -837,9 +837,14 @@
         }
     }
 
-    .side-col .switcher > select {
-        flex: 1;
-        min-width: 0;
+    /* The side column scrolls, so it would cut the focus outline of a full-width select */
+    .side-col .switcher:has(> .switcher-label) {
+        padding-inline-end: 4px;
+
+        & > select {
+            flex: 1;
+            min-width: 0;
+        }
     }
 
     .switcher-label {
