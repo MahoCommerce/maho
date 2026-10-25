@@ -234,8 +234,8 @@
         }
     }
 
-    .uploader:has(> .uploader-dropzone) + .note {
-        margin-top: var(--maho-space-2);
+    .uploader:has(> .uploader-dropzone) {
+        margin-bottom: var(--maho-space-2);
     }
 
     /* Image fields: the preview spans both rows, next to the file input and the delete checkbox */
