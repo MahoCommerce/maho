@@ -913,11 +913,14 @@
         z-index: 1;
         margin-bottom: calc(var(--border) * -1);
 
+        /* No bottom border: the corner where two borders meet is diagonal, and it would notch the side border */
         & > .switcher-select {
-            border-bottom-color: var(--color-base-100);
+            border-color: var(--maho-border-soft);
+            border-bottom-width: 0;
             border-end-start-radius: 0;
             border-end-end-radius: 0;
-            background-color: var(--color-base-100);
+            /* The border and the background of the grid card */
+            background-color: var(--maho-surface);
             box-shadow: none;
         }
 
