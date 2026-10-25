@@ -141,7 +141,7 @@ it('stores the order, the main image, Exclude and Remove that the cards show', f
         'ul.tabs a[title="Images"]',
     );
     $page->click('ul.tabs a[title="Images"]');
-    $page->text('.gallery-cards .preview:visible');
+    $page->text('.gallery-cards .preview:first-child');
 
     $order = "[...document.querySelectorAll('.gallery-cards .preview')].map((c) => c.dataset.file).join(',')";
     expect($page->script($order))->toBe("{$first},{$second},{$third}");
@@ -153,8 +153,8 @@ it('stores the order, the main image, Exclude and Remove that the cards show', f
     $page->click(galleryCard($third) . ' .gallery-card-options .cell-image')
         ->click(galleryCard($first) . ' .cell-disable')
         ->click(galleryCard($second) . ' .cell-remove')
-        ->click('button[title="Save"]');
-    $page->text('.success-msg');
+        ->click('button[title="Save"]')->wait(2);
+    waitForPageLoad($page, '#productGrid');
 
     $product = Mage::getModel('catalog/product')->setStoreId(0)->load($id);
     $images = array_column($product->getMediaGallery()['images'] ?? [], null, 'file');
@@ -179,7 +179,7 @@ it('clears the main image when the user clicks the Main Image of the main card a
         'ul.tabs a[title="Images"]',
     );
     $page->click('ul.tabs a[title="Images"]');
-    $page->text('.gallery-cards .preview:visible');
+    $page->text('.gallery-cards .preview:first-child');
 
     $checked = "document.querySelector('" . galleryCard($first) . " .cell-image input').checked";
     expect($page->script($checked))->toBeTrue();
@@ -187,8 +187,8 @@ it('clears the main image when the user clicks the Main Image of the main card a
     $page->click(galleryCard($first) . ' .gallery-card-options .cell-image');
     expect($page->script($checked))->toBeFalse();
 
-    $page->click('button[title="Save"]');
-    $page->text('.success-msg');
+    $page->click('button[title="Save"]')->wait(2);
+    waitForPageLoad($page, '#productGrid');
 
     $product = Mage::getModel('catalog/product')->setStoreId(0)->load($id);
     expect($product->getImage())->toBeIn([null, '', 'no_selection']);
