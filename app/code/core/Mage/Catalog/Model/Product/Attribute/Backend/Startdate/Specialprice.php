@@ -25,7 +25,8 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Startdate_Specialprice extend
             return false;
         }
         if ($startDate == '' && $object->getSpecialPrice()) {
-            $startDate = Mage::app()->getLocale()->utcToStore();
+            // A day, not a time: a store time in the hour that a DST change repeats reads back as a later time
+            $startDate = Mage::app()->getLocale()->utcToStore()->format(Mage_Core_Model_Locale::DATE_FORMAT);
         }
 
         return $startDate;
