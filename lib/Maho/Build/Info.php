@@ -94,25 +94,20 @@ final class Info
     }
 
     /**
-     * The commit page of the repository the installation came from, when both
-     * the commit and the repository are known.
+     * The GitHub commit page of the repository the installation came from, when
+     * both the commit and the repository are known.
      */
     public function getCommitUrl(): ?string
     {
         if ($this->commit === null
             || $this->repositoryUrl === null
+            || parse_url($this->repositoryUrl, PHP_URL_HOST) !== 'github.com'
             || !preg_match('/^([0-9a-f]{40}|[0-9a-f]{64})$/', $this->commit)
         ) {
             return null;
         }
 
-        $host = (string) parse_url($this->repositoryUrl, PHP_URL_HOST);
-
-        return match (true) {
-            $host === 'github.com' => $this->repositoryUrl . '/commit/' . $this->commit,
-            str_contains($host, 'gitlab') => $this->repositoryUrl . '/-/commit/' . $this->commit,
-            default => null,
-        };
+        return $this->repositoryUrl . '/commit/' . $this->commit;
     }
 
     /**
@@ -239,8 +234,6 @@ final class Info
             }
 
             // The source URL is the plain git URL, so it needs no per-host unwrapping.
-            // A dist URL of a host other than GitHub is an API URL (GitLab serves it
-            // from /api/v4/projects/.../archive.zip) and would produce a broken link.
             $sourceUrl = self::normalizeRepositoryUrl((string) ($package['source']['url'] ?? ''));
             if ($sourceUrl !== null) {
                 return $sourceUrl;
