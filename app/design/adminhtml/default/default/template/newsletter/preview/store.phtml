@@ -11,7 +11,7 @@
 ?>
 
 <?php if ($websites = $this->getWebsites()): ?>
-<label for="store_switcher" class="switcher-label" title="<?= $this->quoteEscape(rtrim($this->__('Choose Store View:'), ' :')) ?>"><?= $this->getIconSvg('building-store') ?><span class="sr-only"><?= $this->__('Choose Store View:') ?></span></label>
+<label for="store_switcher" class="switcher-label"><?= $this->__('Choose Store View:') ?></label>
 <select name="store_switcher" id="store_switcher">
     <?php foreach ($websites as $website): ?>
         <?php $showWebsite = false; ?>

@@ -9,7 +9,7 @@
 
 /** @var Mage_Adminhtml_Block_Store_Switcher $this */
 ?>
-<p class="switcher"><label for="store_switcher" class="switcher-label" title="<?= $this->quoteEscape(rtrim($this->__('View Statistics For:'), ' :')) ?>"><?= $this->getIconSvg('building-store') ?><span class="sr-only"><?= $this->__('View Statistics For:') ?></span></label>
+<p class="switcher"><label for="store_switcher" class="switcher-label"><?= $this->__('View Statistics For:') ?></label>
 <select name="store_switcher" id="store_switcher" class="left-col-block" onchange="return switchStore(this);">
     <option value=""><?= $this->__('All Websites') ?></option>
     <?php foreach ($this->getWebsiteCollection() as $_website): ?>

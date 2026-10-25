@@ -820,8 +820,8 @@
     }
 
     /*
-     * A store scope switcher: the building-store icon labels the select. The top margin keeps the
-     * focus outline of the select below the sticky page header, which would cover it.
+     * A store scope switcher. The top margin keeps the focus outline of the select below the
+     * sticky page header, which would cover it.
      */
     .switcher:has(> .switcher-label) {
         display: flex;
@@ -837,23 +837,17 @@
         }
     }
 
-    /* The side column scrolls, so it would cut the focus outline of a full-width select */
+    /* The side column is narrow, so the label takes its own line. It scrolls, so it would cut the focus outline of the select */
     .side-col .switcher:has(> .switcher-label) {
-        padding-inline-end: 4px;
+        padding-inline: 4px;
+
+        & > .switcher-label {
+            flex-basis: 100%;
+        }
 
         & > select {
             flex: 1;
             min-width: 0;
-        }
-    }
-
-    .switcher-label {
-        display: inline-flex;
-        color: var(--color-base-content);
-
-        & svg {
-            width: 1.25rem;
-            height: 1.25rem;
         }
     }
 
