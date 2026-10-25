@@ -5131,8 +5131,7 @@ img.rule-param-add {
 }
 
 .hor-scroll .maho-tree {
-    white-space: nowrap;
-    padding-right: 3px
+    white-space: nowrap
 }
 
 .maho-tree li {
@@ -5218,8 +5217,8 @@ img.rule-param-add {
 }
 
 .maho-tree.hide-checkbox {
-    padding-right: var(--maho-space-1);
-    padding-bottom: var(--maho-space-1)
+    padding-right: 4px;
+    padding-bottom: 4px
 }
 
 .maho-tree.hide-checkbox .label:has(input:is([type=checkbox],[type=radio])) {
