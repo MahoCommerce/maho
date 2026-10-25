@@ -234,6 +234,69 @@
         }
     }
 
+    /* Product websites: one card for each website, with its stores and their store views */
+    .product-websites {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+        gap: var(--maho-space-3);
+        margin: 0;
+        padding: 0;
+        list-style: none;
+
+        & .product-website {
+            padding: var(--maho-space-3) var(--maho-space-4);
+            background-color: var(--color-base-100);
+            border: var(--border) solid var(--color-base-300);
+            border-radius: var(--radius-box);
+
+            &:has(.website-checkbox:checked) {
+                border-color: var(--maho-accent);
+                background-color: color-mix(in oklab, var(--maho-accent) 8%, var(--color-base-100));
+            }
+        }
+
+        & .product-website-name {
+            display: flex;
+            align-items: center;
+            gap: var(--maho-space-2);
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        & .product-website-groups {
+            display: flex;
+            flex-direction: column;
+            gap: var(--maho-space-2);
+            margin-top: var(--maho-space-2);
+            padding-inline-start: calc(var(--d-size, 1.25rem) + var(--maho-space-2));
+        }
+
+        & .product-website-group-name {
+            color: color-mix(in oklab, var(--color-base-content) 60%, transparent);
+            font-size: var(--maho-text-xs);
+        }
+
+        & .product-website-stores {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--maho-space-1);
+            margin: var(--maho-space-1) 0 0;
+            padding: 0;
+            list-style: none;
+
+            & li {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: var(--maho-space-1);
+            }
+        }
+
+        & .product-website-store {
+            @apply d-badge d-badge-sm;
+        }
+    }
+
     /* Product images: one card for each image, in the sort order. The handle drags a card */
     .product-gallery {
         & .gallery-toolbar, & .gallery-no-selection, & .gallery-use-default {
