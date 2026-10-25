@@ -26,7 +26,7 @@ class Mage_Adminhtml_Block_System_Config_Form_Field extends Mage_Adminhtml_Block
     {
         $id = $element->getHtmlId();
 
-        $html = '<td class="label"><label for="' . $id . '">' . $element->getLabel() . '</label></td>';
+        $html = '<td class="label"><label for="' . $id . '" id="' . $id . '-label">' . $element->getLabel() . '</label></td>';
 
         //$isDefault = !$this->getRequest()->getParam('website') && !$this->getRequest()->getParam('store');
         $isMultiple = $element->getExtType() === 'multiple';

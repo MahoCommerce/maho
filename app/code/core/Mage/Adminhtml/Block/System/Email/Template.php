@@ -27,7 +27,7 @@ class Mage_Adminhtml_Block_System_Email_Template extends Mage_Adminhtml_Block_Te
             'add_button',
             $this->getLayout()->createBlock('adminhtml/widget_button')
                 ->setData([
-                    'label'     => Mage::helper('adminhtml')->__('Add New Template'),
+                    'label'     => Mage::helper('adminhtml')->__('Add'),
                     'onclick'   => "window.location='" . $this->getCreateUrl() . "'",
                     'class'     => 'add',
                 ]),

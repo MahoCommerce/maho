@@ -62,13 +62,13 @@ final class AdminPageTool
         return ToolDefinition::create(
             new ExecutionReference(self::class, 'act'),
             self::ACTION_NAME,
-            'Act on the admin page the administrator has open, after you answer: open a tab by its name, set a form field by its label or name, click a button by its label (for example "Save Page" when the administrator says "save"), or open a grid row by its number in the row list (target "3" for "the third one"). Use the buttons, tabs, fields and rows listed under what the administrator sees; never guess a label. Up to ' . self::MAX_STEPS . ' steps in order, in one call, and a click or an open_row must be the last step because the page may reload. The next message shows you the result.',
+            'Act on the admin page the administrator has open, after you answer: open a tab by its name, set a form field by its label or name, click a button by its label (for example "Save" when the administrator says "save"), or open a grid row by its number in the row list (target "3" for "the third one"). Use the buttons, tabs, fields and rows listed under what the administrator sees; never guess a label. Up to ' . self::MAX_STEPS . ' steps in order, in one call, and a click or an open_row must be the last step because the page may reload. The next message shows you the result.',
             [
                 'type' => 'object',
                 'properties' => [
                     'steps' => [
                         'type' => 'array',
-                        'description' => 'The steps, in order. Example: set the Comment field, then click Submit Comment.',
+                        'description' => 'The steps, in order. Example: set the Comment field, then click Submit.',
                         'minItems' => 1,
                         'maxItems' => self::MAX_STEPS,
                         'items' => [

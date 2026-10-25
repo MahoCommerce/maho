@@ -20,9 +20,6 @@ class Maho_Ai_Block_Adminhtml_Schedule_Edit extends Mage_Adminhtml_Block_Widget_
         $this->_blockGroup = 'ai';
         $this->_controller = 'adminhtml_schedule';
 
-        $this->_updateButton('save', 'label', Mage::helper('ai')->__('Save Scheduled Task'));
-        $this->_updateButton('delete', 'label', Mage::helper('ai')->__('Delete Scheduled Task'));
-
         $schedule = Mage::registry('ai_task_schedule');
         if ($schedule instanceof Maho_Ai_Model_Task_Schedule && $schedule->getId()) {
             $this->_addButton('run', [

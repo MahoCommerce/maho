@@ -18,11 +18,8 @@ class Maho_Blog_Block_Adminhtml_Category_Edit extends Mage_Adminhtml_Block_Widge
         $this->_blockGroup = 'blog';
         $this->_controller = 'adminhtml_category';
 
-        $this->_updateButton('save', 'label', Mage::helper('blog')->__('Save Category'));
-        $this->_updateButton('delete', 'label', Mage::helper('blog')->__('Delete Category'));
-
         $this->_addButton('saveandcontinue', [
-            'label'     => Mage::helper('adminhtml')->__('Save and Continue Edit'),
+            'label'     => Mage::helper('adminhtml')->__('Save and Continue'),
             'onclick'   => 'saveAndContinueEdit()',
             'class'     => 'save',
         ], -100);

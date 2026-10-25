@@ -18,6 +18,5 @@ class Maho_Ai_Block_Adminhtml_Schedule extends Mage_Adminhtml_Block_Widget_Grid_
         $this->_controller = 'adminhtml_schedule';
         $this->_headerText = Mage::helper('ai')->__('Scheduled Tasks');
         parent::__construct();
-        $this->_updateButton('add', 'label', Mage::helper('ai')->__('Add Scheduled Task'));
     }
 }

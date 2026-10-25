@@ -13,6 +13,7 @@ declare(strict_types=1);
 abstract class Mage_Adminhtml_Block_Uploader_Abstract extends Mage_Adminhtml_Block_Widget
 {
     public const DEFAULT_BROWSE_BUTTON_ID_SUFFIX = 'browse';
+    public const DROP_ZONE_ID_SUFFIX = 'dropzone';
 
     #[\Override]
     protected $_template = 'media/uploader.phtml';
@@ -90,7 +91,8 @@ abstract class Mage_Adminhtml_Block_Uploader_Abstract extends Mage_Adminhtml_Blo
         $this->_addElementIdsMapping([
             'container'         => $this->getHtmlId(),
             'templateFile'      => $this->getElementId('template'),
-            'browse'            => $this->_prepareElementsIds([self::DEFAULT_BROWSE_BUTTON_ID_SUFFIX]),
+            'browse'            => $this->_prepareElementsIds([self::DEFAULT_BROWSE_BUTTON_ID_SUFFIX, self::DROP_ZONE_ID_SUFFIX]),
+            'dropzone'          => $this->getElementId(self::DROP_ZONE_ID_SUFFIX),
         ]);
 
         return parent::_prepareLayout();

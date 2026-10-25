@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -13,7 +14,6 @@ class Mage_Adminhtml_Block_Permissions_Role extends Mage_Adminhtml_Block_Widget_
     {
         $this->_controller = 'permissions_role';
         $this->_headerText = Mage::helper('adminhtml')->__('Roles');
-        $this->_addButtonLabel = Mage::helper('adminhtml')->__('Add New Role');
         parent::__construct();
     }
 }

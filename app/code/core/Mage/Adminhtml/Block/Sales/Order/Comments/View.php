@@ -29,7 +29,7 @@ class Mage_Adminhtml_Block_Sales_Order_Comments_View extends Mage_Adminhtml_Bloc
         $button = $this->getLayout()->createBlock('adminhtml/widget_button')
             ->setData([
                 'id'      => 'submit_comment_button',
-                'label'   => Mage::helper('sales')->__('Submit Comment'),
+                'label'   => Mage::helper('sales')->__('Submit'),
                 'class'   => 'save',
             ]);
         $this->setChild('submit_button', $button);

@@ -56,9 +56,7 @@ Created,Created
 Custom,Custom
 "Customer Session Operations","Customer Session Operations"
 "Delete","Delete"
-"Delete API User","Delete API User"
 "Deleted %d application(s).","Deleted %d application(s)."
-"Delete Role","Delete Role"
 "Delete the selected applications? The delete keeps an application that an admin approved. Revoke its access first.","Delete the selected applications? The delete keeps an application that an admin approved. Revoke its access first."
 Deny,Deny
 "Disconnect","Disconnect"
@@ -137,9 +135,7 @@ Role,Role
 "Role Information","Role Information"
 "Role Name","Role Name"
 "Role name is required.","Role name is required."
-"Save and Continue Edit","Save and Continue Edit"
-"Save API User","Save API User"
-"Save Role","Save Role"
+"Save and Continue","Save and Continue"
 "Save these credentials now. The secret cannot be retrieved later.","Save these credentials now. The secret cannot be retrieved later."
 "Sends you back to","Sends you back to"
 "Service Account Permissions","Service Account Permissions"

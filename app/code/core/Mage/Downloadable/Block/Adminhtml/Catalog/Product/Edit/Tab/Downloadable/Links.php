@@ -91,8 +91,9 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Li
     {
         $addButton = $this->getLayout()->createBlock('adminhtml/widget_button')
             ->setData([
-                'label' => Mage::helper('downloadable')->__('Add New Row'),
+                'label' => Mage::helper('downloadable')->__('Add'),
                 'id'    => 'add_link_item',
+                'aria_labelledby' => 'dt-links',
                 'class' => 'add',
             ]);
         return $addButton->toHtml();

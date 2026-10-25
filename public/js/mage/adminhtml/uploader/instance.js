@@ -166,6 +166,20 @@ class Uploader extends EventTarget {
         }
 
         this.elements.delete?.addEventListener('click', this.onDeleteClick.bind(this));
+
+        const dropzone = this.elements.dropzone;
+        if (dropzone) {
+            dropzone.addEventListener('dragover', (event) => {
+                event.preventDefault();
+                dropzone.classList.add('is-dragover');
+            });
+            dropzone.addEventListener('dragleave', () => dropzone.classList.remove('is-dragover'));
+            dropzone.addEventListener('drop', (event) => {
+                event.preventDefault();
+                dropzone.classList.remove('is-dragover');
+                this.onFilesAdded(event.dataTransfer.files);
+            });
+        }
     }
 
     /**
@@ -215,6 +229,9 @@ class Uploader extends EventTarget {
         }
         if (filesSubmitted.length) {
             this._fireEvent('filesSubmitted', { files: filesSubmitted });
+            if (this.miscConfig.auto_upload) {
+                this.upload(filesSubmitted);
+            }
         }
     }
 
@@ -311,14 +328,17 @@ class Uploader extends EventTarget {
     }
 
     /**
-     * Upload all files in queue one at a time
+     * Upload files one at a time: all files in the queue, or only the given ones
+     *
+     * @param {File[]} [files]
      */
-    async upload() {
-        this._fireEvent('beforeUpload', { files: this.files });
-        this.onUploadStart();
+    async upload(files = this.files) {
+        files = [...files];
+        this._fireEvent('beforeUpload', { files });
+        this.onUploadStart(files);
 
         const detail = { filesSuccess: [], filesError: [] };
-        for (const file of this.files) {
+        for (const file of files) {
             await this.uploadFile(file)
                 ? detail.filesSuccess.push(file)
                 : detail.filesError.push(file);
@@ -328,14 +348,16 @@ class Uploader extends EventTarget {
             this._fireEvent('success', { files: detail.filesSuccess });
         }
         this._fireEvent('complete', detail);
-        this.files = [];
+        this.files = this.files.filter((file) => !files.includes(file));
     }
 
     /**
      * Upload button is being pressed
+     *
+     * @param {File[]} [files]
      */
-    onUploadStart() {
-        for (const file of this.files) {
+    onUploadStart(files = this.files) {
+        for (const file of files) {
             const id = file.uniqueIdentifier;
             this._getFileContainerById(id).classList.remove('new', 'error');
             this._getFileContainerById(id).classList.add('progress');

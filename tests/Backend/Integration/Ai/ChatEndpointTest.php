@@ -1578,7 +1578,7 @@ it('hands a page action to the browser', function (): void {
         aiChatLogin($admin);
         AiChatScript::reset(
             new ToolCallResult([
-                new ToolCall('call_a1', 'admin_page_action', ['steps' => [['action' => 'set_field', 'target' => 'Comment', 'value' => 'pippo'], ['action' => 'click', 'target' => 'Submit Comment']]]),
+                new ToolCall('call_a1', 'admin_page_action', ['steps' => [['action' => 'set_field', 'target' => 'Comment', 'value' => 'pippo'], ['action' => 'click', 'target' => 'Submit']]]),
                 new ToolCall('call_a2', 'admin_page_action', ['steps' => [['action' => 'click', 'target' => 'Save'], ['action' => 'set_field', 'target' => 'Page Title', 'value' => 'x']]]),
             ]),
             new TextResult('Saving.'),
@@ -1594,7 +1594,7 @@ it('hands a page action to the browser', function (): void {
         expect($actions)->toHaveCount(1);
         expect($actions[0]['steps'])->toBe([
             ['action' => 'set_field', 'target' => 'Comment', 'value' => 'pippo'],
-            ['action' => 'click', 'target' => 'Submit Comment', 'value' => null],
+            ['action' => 'click', 'target' => 'Submit', 'value' => null],
         ]);
         expect($results[1]['preview'])->toContain('a click or an open_row must be the last step');
         expect(aiChatEvents($result['events'], 'done')[0]['state'])->toBe('complete');
@@ -1612,7 +1612,7 @@ it('fills a comment form and submits it in one page action', function (): void {
             ['action' => 'set_field', 'target' => 'Comment Text', 'value' => 'ciao come stai'],
             ['action' => 'set_field', 'target' => 'Notify Customer by Email', 'value' => 'true'],
             ['action' => 'set_field', 'target' => 'Visible on Frontend', 'value' => 'true'],
-            ['action' => 'click', 'target' => 'Submit Comment', 'value' => null],
+            ['action' => 'click', 'target' => 'Submit', 'value' => null],
         ];
         AiChatScript::reset(new ToolCallResult([new ToolCall('call_c1', 'admin_page_action', ['steps' => $steps])]), new TextResult('Adding the comment.'));
 

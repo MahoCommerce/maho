@@ -20,7 +20,7 @@ class Maho_Blog_Block_Adminhtml_Category extends Mage_Adminhtml_Block_Widget_Con
     protected function _prepareLayout()
     {
         $this->_addButton('add_new', [
-            'label'   => Mage::helper('blog')->__('Add Category'),
+            'label'   => Mage::helper('blog')->__('Add'),
             'onclick' => Mage::helper('core/js')->getSetLocationJs($this->getUrl('*/*/new')),
             'class'   => 'add',
         ]);

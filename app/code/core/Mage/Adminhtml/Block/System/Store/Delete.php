@@ -58,7 +58,6 @@ class Mage_Adminhtml_Block_System_Store_Delete extends Mage_Adminhtml_Block_Widg
      */
     public function setStoreTypeTitle($title)
     {
-        $this->_updateButton('delete', 'label', Mage::helper('adminhtml')->__('Delete %s', $title));
         return $this->setData('store_type_title', $title);
     }
 

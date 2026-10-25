@@ -26,7 +26,7 @@ use Symfony\Component\Process\Process;
 )]
 class FrontendThemeBuild extends BaseMahoCommand
 {
-    private const SKIN_PATH = 'public/skin/frontend';
+    protected const SKIN_PATH = 'public/skin/frontend';
     private const NPM_PACKAGES = ['tailwindcss', '@tailwindcss/cli', 'daisyui'];
 
     /** Supported package managers in preference order, with the arguments that add a dev dependency. */
@@ -61,13 +61,13 @@ class FrontendThemeBuild extends BaseMahoCommand
             if ($themeFilter !== null) {
                 $io->error([
                     "No buildable sources found for theme '{$themeFilter}'.",
-                    'A buildable theme has ' . self::SKIN_PATH . "/{$themeFilter}/src/*.css files",
+                    'A buildable theme has ' . static::SKIN_PATH . "/{$themeFilter}/src/*.css files",
                     'whose names do not start with an underscore.',
                 ]);
                 return Command::FAILURE;
             }
             $io->warning([
-                'Nothing to build: no theme sources found under ' . self::SKIN_PATH . '/*/*/src/.',
+                'Nothing to build: no theme sources found under ' . static::SKIN_PATH . '/*/*/src/.',
                 'Themes without a src/ directory need no build - their css/ files (theme.css, ...) are served as-is.',
             ]);
             return Command::SUCCESS;
@@ -92,7 +92,7 @@ class FrontendThemeBuild extends BaseMahoCommand
      */
     private function discoverEntries(?string $themeFilter): array
     {
-        $skinDir = MAHO_ROOT_DIR . '/' . self::SKIN_PATH;
+        $skinDir = MAHO_ROOT_DIR . '/' . static::SKIN_PATH;
         $entries = [];
 
         foreach (glob("{$skinDir}/*/*/src/*.css") ?: [] as $srcFile) {
@@ -260,7 +260,7 @@ class FrontendThemeBuild extends BaseMahoCommand
         $themes = array_unique(array_column($entries, 'theme'));
         $io->text([
             'Watching ' . count($entries) . ' source(s) of ' . implode(', ', $themes) . ' - press Ctrl+C to stop.',
-            '<comment>Watch output is unminified: run dev:frontend:theme:build (without --watch) before committing.</comment>',
+            '<comment>Watch output is unminified: run ' . $this->getName() . ' (without --watch) before committing.</comment>',
             $sourceMap
                 ? '<comment>Source maps are inline: devtools list the src/ partials. Rebuild without --map before committing.</comment>'
                 : '<comment>Add --map to have devtools list the src/ partials instead of the bundle.</comment>',
