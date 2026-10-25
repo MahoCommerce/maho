@@ -841,14 +841,14 @@
         }
     }
 
+    /* The select covers the whole box, so a click on the icon or the chevron opens it too */
     .switcher-select {
+        --switcher-icon-width: 2.25rem;
         gap: 0;
         width: auto;
         max-width: 100%;
-        padding-inline: var(--maho-space-2) 1.75rem;
-        background-image: var(--maho-select-chevron);
-        background-position: right var(--maho-space-2) center;
-        background-size: 10px;
+        padding-inline: 0;
+        background-image: none;
 
         &:focus-within {
             outline: 2px solid var(--color-base-content);
@@ -856,9 +856,14 @@
         }
 
         & > .d-label {
-            margin-inline: 0 var(--maho-space-2);
-            padding-inline: 0 var(--maho-space-2);
+            position: relative;
+            z-index: 1;
+            justify-content: center;
+            width: var(--switcher-icon-width);
+            margin-inline: 0;
+            padding-inline: 0;
             color: color-mix(in oklab, var(--color-base-content) 60%, transparent);
+            pointer-events: none;
 
             & svg {
                 width: 1.125rem;
@@ -871,14 +876,15 @@
             flex: 1;
             min-width: 0;
             height: 100%;
-            margin: 0;
-            padding-inline: 0;
+            margin: 0 0 0 calc(var(--switcher-icon-width) * -1);
+            padding-inline: calc(var(--switcher-icon-width) + var(--maho-space-2)) 1.75rem;
             border: 0;
-            background: none;
+            background: transparent var(--maho-select-chevron) no-repeat right var(--maho-space-2) center / 10px;
             box-shadow: none;
             outline: 0;
+            cursor: pointer;
 
-            /* The list takes the background of the select, which has none here */
+            /* The list takes the background of the select, which is transparent here */
             &::picker(select) {
                 background-color: var(--color-base-100);
             }
