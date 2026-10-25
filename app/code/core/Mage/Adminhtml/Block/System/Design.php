@@ -20,7 +20,7 @@ class Mage_Adminhtml_Block_System_Design extends Mage_Adminhtml_Block_Template
             'add_new_button',
             $this->getLayout()->createBlock('adminhtml/widget_button')
                 ->setData([
-                    'label'     => Mage::helper('catalog')->__('Add New'),
+                    'label'     => Mage::helper('catalog')->__('Add'),
                     'onclick'   => Mage::helper('core/js')->getSetLocationJs($this->getUrl('*/*/new')),
                     'class'     => 'add',
                 ]),

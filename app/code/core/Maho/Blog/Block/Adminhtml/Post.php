@@ -18,7 +18,7 @@ class Maho_Blog_Block_Adminhtml_Post extends Mage_Adminhtml_Block_Widget_Contain
     protected function _prepareLayout()
     {
         $this->_addButton('add_new', [
-            'label'   => Mage::helper('blog')->__('Add New'),
+            'label'   => Mage::helper('blog')->__('Add'),
             'onclick' => Mage::helper('core/js')->getSetLocationJs($this->getUrl('*/*/new')),
             'class'   => 'add',
         ]);

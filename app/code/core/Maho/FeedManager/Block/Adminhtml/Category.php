@@ -20,7 +20,7 @@ class Maho_FeedManager_Block_Adminhtml_Category extends Mage_Adminhtml_Block_Wid
         $this->removeButton('add');
 
         $this->_addButton('add_mapping', [
-            'label' => $this->__('Add New'),
+            'label' => $this->__('Add'),
             'onclick' => 'CategoryPlatformPicker.toggle()',
             'class' => 'add',
             'id' => 'fm-add-mapping-btn',

@@ -23,7 +23,7 @@ class Mage_Adminhtml_Block_Tax_Rate_Toolbar_Add extends Mage_Adminhtml_Block_Tem
             'addButton',
             $this->getLayout()->createBlock('adminhtml/widget_button')
                 ->setData([
-                    'label' => Mage::helper('tax')->__('Add New'),
+                    'label' => Mage::helper('tax')->__('Add'),
                     'onclick' => 'window.location.href=\'' . $this->getUrl('*/tax_rate/add') . '\'',
                     'class' => 'add',
                 ]),

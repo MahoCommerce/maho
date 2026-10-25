@@ -133,7 +133,7 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tab_EmailSequencesE
                 'add_sequence_button',
                 $this->getLayout()->createBlock('adminhtml/widget_button')
                     ->setData([
-                        'label'   => Mage::helper('customersegmentation')->__('Add New'),
+                        'label'   => Mage::helper('customersegmentation')->__('Add'),
                         'onclick' => "setLocation('" . $this->getUrl('*/*/newSequence', ['segment_id' => $segment->getId(), 'trigger_event' => 'enter']) . "')",
                         'class'   => 'add',
                     ]),
