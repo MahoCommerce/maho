@@ -102,6 +102,7 @@ Product.Gallery = class {
         this.images.forEach(function (row) {
             if (!document.getElementById(this.prepareId(row.file))) {
                 this.createImageRow(row);
+                this.loadImage(row.file);
             }
             this.updateVisualisation(row.file);
         }.bind(this));
@@ -166,9 +167,8 @@ Product.Gallery = class {
     }
     loadImage(file) {
         var image = this.getImageByFile(file);
-        this.getFileElement(file, 'cell-image img').src = image.url;
-        this.getFileElement(file, 'cell-image img').style.display = '';
-        this.getFileElement(file, 'cell-image .place-holder').style.display = 'none';
+        // An upload that is not saved yet has no thumbnail
+        this.getFileElement(file, 'cell-image img').src = image.thumbnail_url ?? image.url;
     }
     setProductImages(file) {
         Object.entries(this.imageTypes)

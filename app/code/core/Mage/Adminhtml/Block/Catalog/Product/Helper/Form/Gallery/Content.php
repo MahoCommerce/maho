@@ -100,9 +100,16 @@ class Mage_Adminhtml_Block_Catalog_Product_Helper_Form_Gallery_Content extends M
         if (is_array($this->getElement()->getValue())) {
             $value = $this->getElement()->getValue();
             if (count($value['images']) > 0) {
+                // The admin store has no resized files, so the thumbnail comes from a store view
+                $product = $this->getElement()->getDataObject();
+                $storeId = (int) ($product?->getStoreId() ?: Mage::app()->getDefaultStoreView()?->getId());
                 foreach ($value['images'] as &$image) {
                     $image['url'] = Mage::getSingleton('catalog/product_media_config')
                                         ->getMediaUrl($image['file']);
+                    // The smallest stored width for 64px at a scale factor of 2
+                    $image['thumbnail_url'] = Mage::helper('core/image')
+                        ->init(Mage_Catalog_Model_Product_Image_Provider::ENTITY, $image['file'], $storeId)
+                        ?->getUrl(128);
                 }
                 return Mage::helper('core')->jsonEncode($value['images']);
             }

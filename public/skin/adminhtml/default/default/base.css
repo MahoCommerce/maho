@@ -3973,18 +3973,6 @@ ul.super-product-attributes {
     width: 110px!important
 }
 
-.preview .cell-image .place-holder {
-    border: 1px solid var(--maho-border-strong);
-    width: 100px;
-    height: 100px;
-    text-align: center
-}
-
-.preview .cell-image .place-holder span {
-    margin-top: var(--maho-space-7);
-    display: block
-}
-
 .preview .cell-position input.input-text {
     width: 90%!important
 }

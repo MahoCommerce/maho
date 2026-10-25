@@ -234,6 +234,16 @@
         }
     }
 
+    .cell-image img {
+        display: block;
+        width: 4rem;
+        height: 4rem;
+        object-fit: contain;
+        background-color: var(--color-base-100);
+        border: var(--border) solid var(--color-base-300);
+        border-radius: var(--radius-field);
+    }
+
     .uploader:has(> .uploader-dropzone) {
         margin-bottom: var(--maho-space-2);
     }
@@ -390,12 +400,15 @@
      */
     .grid table:not(.grid td table) {
         @apply d-table d-table-sm d-table-zebra;
-        /* d-table has round corners, but a table does not clip the backgrounds of its rows */
-        clip-path: inset(0 round var(--radius-box));
     }
 
-    /* A table paints its border under its rows, so the first row covers the round corners. An outline is painted on top */
+    /*
+     * A table with its own border, such as the tier price. A table does not clip the backgrounds of
+     * its rows, and it paints its border under them, so the corners need a clip-path and an outline.
+     * A data grid table sits inside its card, with square corners.
+     */
     .grid table.border {
+        clip-path: inset(0 round var(--radius-box));
         border: 0;
         outline: var(--border) solid var(--color-base-300);
         outline-offset: calc(var(--border) * -1);
