@@ -26,6 +26,7 @@ class Mage_Core_Model_Maho_Api extends Mage_Api_Model_Resource_Abstract
     {
         $result = [];
         $result['maho_version'] = Mage::getVersion();
+        $result['maho_build'] = \Maho\Build\Info::get()->describe();
 
         return $result;
     }
