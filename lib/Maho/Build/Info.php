@@ -28,7 +28,7 @@ final class Info
 
     public static function get(): self
     {
-        return self::$instance ??= new self(self::readGitCommit(self::packageRoot()) ?? self::readComposerCommit());
+        return self::$instance ??= new self(self::readGitCommit(self::packageRoot()) ?? self::readComposerInstalledCommit());
     }
 
     /**
@@ -142,7 +142,7 @@ final class Info
         return null;
     }
 
-    private static function readComposerCommit(): ?string
+    private static function readComposerInstalledCommit(): ?string
     {
         if (!\Composer\InstalledVersions::isInstalled(self::PACKAGE_NAME) || self::isInstalledFromPathRepository()) {
             return null;
