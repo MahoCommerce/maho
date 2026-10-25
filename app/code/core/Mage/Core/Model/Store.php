@@ -230,8 +230,8 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     protected function _getSession()
     {
         if (!$this->_session) {
-            $this->_session = Mage::getModel('core/session')
-                ->init('store_' . $this->getCode());
+            $this->_session = Mage::getModel('core/session');
+            $this->_session->init('store_' . $this->getCode());
         }
         return $this->_session;
     }

@@ -600,7 +600,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      * Load cached data by identifier
      *
      * @param   string $id
-     * @return  string
+     * @return  string|false
      */
     #[\Override]
     protected function _loadCache($id)
@@ -615,12 +615,13 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      * @param   string $id
      * @param   array $tags
      * @param   false|int $lifetime
-     * @return  Mage_Core_Model_App
+     * @return  bool
      */
     #[\Override]
     protected function _saveCache($data, $id, $tags = [], $lifetime = false)
     {
-        return Mage::app()->saveCache($data, $id, $tags, $lifetime);
+        Mage::app()->saveCache($data, $id, $tags, $lifetime);
+        return true;
     }
 
     /**

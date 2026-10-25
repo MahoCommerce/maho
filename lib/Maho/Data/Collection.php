@@ -208,7 +208,7 @@ class Collection implements IteratorAggregate, Countable
             return 1;
         }
         if ($this->_pageSize) {
-            return ceil($collectionSize / $this->_pageSize);
+            return (int) ceil($collectionSize / $this->_pageSize);
         }
         return 1;
     }

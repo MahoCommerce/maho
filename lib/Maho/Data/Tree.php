@@ -36,8 +36,9 @@ class Tree
 
     /**
      * @param Node $parentNode
+     * @param int $recursionLevel
      */
-    public function load($parentNode = null) {}
+    public function load($parentNode = null, $recursionLevel = 0) {}
 
     /**
      * @param int $nodeId
@@ -45,22 +46,19 @@ class Tree
     public function loadNode($nodeId) {}
 
     /**
-     * @param array|Node $data
      * @param Node $parentNode
      * @param Node $prevNode
      * @return Node
      */
-    public function appendChild($data, $parentNode, $prevNode = null)
+    public function appendChild(array|Node $data, $parentNode, $prevNode = null)
     {
         if (is_array($data)) {
-            $node = $this->addNode(
+            return $this->addNode(
                 new Node($data, $parentNode->getIdField(), $this),
                 $parentNode,
             );
-        } elseif ($data instanceof Node) {
-            $node = $this->addNode($data, $parentNode);
         }
-        return $node;
+        return $this->addNode($data, $parentNode);
     }
 
     /**

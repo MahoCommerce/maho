@@ -60,7 +60,7 @@ class Mage_Weee_Model_Tax extends Mage_Core_Model_Abstract
     #[\Override]
     protected function _construct()
     {
-        $this->_init('weee/tax', 'weee/tax');
+        $this->_init('weee/tax');
     }
 
     /**

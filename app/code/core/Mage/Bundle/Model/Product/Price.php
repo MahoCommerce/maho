@@ -421,7 +421,7 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
      * Get Options with attached Selections collection
      *
      * @param Mage_Catalog_Model_Product $product
-     * @return Mage_Bundle_Model_Resource_Option_Collection
+     * @return Mage_Bundle_Model_Option[]
      */
     public function getOptions($product)
     {
@@ -828,7 +828,7 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
         $customOptions = Mage::getResourceSingleton('catalog/product_option_collection')->reset();
         $customOptions->addFieldToFilter('is_require', '1')
             ->addProductToFilter($productId)
-            ->addPriceToResult($store, 'price')
+            ->addPriceToResult($store)
             ->addValuesToResult();
 
         foreach ($customOptions as $customOption) {
