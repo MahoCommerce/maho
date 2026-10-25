@@ -29,7 +29,7 @@ abstract class Mage_Core_Model_Email_Template_Abstract extends Mage_Core_Model_T
     public function getTemplateByConfigPath($configPath, array $variables)
     {
         $template = Mage::getModel('core/email_template');
-        $template->loadByConfigPath($configPath, $variables);
+        $template->loadByConfigPath($configPath);
 
         return $template->getProcessedTemplate($variables);
     }

@@ -68,9 +68,7 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
      */
     public function setFilter($attrFilterArray, $attrToDb = null, $bind = null, $joinType = null)
     {
-        if (is_null($bind)) {
-            $defBind = 'entity_id';
-        }
+        $defBind = $bind ?? 'entity_id';
         $joinType ??= 'LEFT';
 
         $this->_attrToDb = $attrToDb;
@@ -250,6 +248,7 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
         ) {
             $this->addException(Mage::helper('eav')->__('Invalid entity specified'), \Maho\Convert\Exception::FATAL);
         }
+        $entityIds = [];
         try {
             $collection = $this->_getCollectionForLoad($entityType);
 
@@ -312,7 +311,7 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
      * Retrieve collection for load
      *
      * @param string $entityType
-     * @return Mage_Eav_Model_Entity_Collection|false
+     * @return Mage_Eav_Model_Entity_Collection_Abstract|false
      */
     protected function _getCollectionForLoad($entityType)
     {

@@ -476,7 +476,7 @@ class Mage_Core_Model_Resource
      * @param string $tableName
      * @param array|string $fields
      * @param string $indexType
-     * @return Maho\Db\Adapter\AdapterInterface|false
+     * @return string
      */
     public function getIdxName($tableName, $fields, $indexType = Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_INDEX)
     {

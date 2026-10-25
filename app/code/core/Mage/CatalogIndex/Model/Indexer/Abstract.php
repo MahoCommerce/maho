@@ -142,7 +142,7 @@ abstract class Mage_CatalogIndex_Model_Indexer_Abstract extends Mage_Core_Model_
     }
 
     /**
-     * @return array
+     * @return array|string
      */
     protected function _getIndexableAttributeConditions()
     {
