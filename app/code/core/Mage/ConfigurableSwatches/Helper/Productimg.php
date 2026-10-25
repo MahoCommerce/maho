@@ -335,7 +335,7 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
     /**
      * The hex color of the swatch of $value, with a leading #, or null when the option has no color.
      */
-    public function getSwatchColor(string $value): ?string
+    protected function getSwatchColor(string $value): ?string
     {
         if ($this->swatchColors === null) {
             $resource = Mage::getSingleton('core/resource');

@@ -93,4 +93,32 @@ describe('the swatches of the layered filters API', function (): void {
             ->and($black['swatch']['value'])->toStartWith($this->mount->publicUrl('wysiwyg/swatches/'))
             ->and($other['swatch'])->toBe(['type' => 'color', 'value' => $color]);
     });
+
+    it('returns no swatch when Configurable Swatches is disabled', function (): void {
+        $store = Mage::app()->getStore(1);
+        $enabled = $store->getConfig(Mage_ConfigurableSwatches_Helper_Data::CONFIG_PATH_ENABLED);
+        $store->setConfig(Mage_ConfigurableSwatches_Helper_Data::CONFIG_PATH_ENABLED, '0');
+        Mage::unregister('_helper/configurableswatches');
+
+        try {
+            expect(array_column(layeredColorOptions(), 'swatch'))->each->toBeNull();
+        } finally {
+            $store->setConfig(Mage_ConfigurableSwatches_Helper_Data::CONFIG_PATH_ENABLED, $enabled);
+            Mage::unregister('_helper/configurableswatches');
+        }
+    });
+
+    it('uses the admin label of the option when its store label has no swatch', function (): void {
+        $attribute = Mage::getSingleton('eav/config')->getAttribute(Mage_Catalog_Model_Product::ENTITY, 'color');
+        $optionId = layeredColorOptions()['Black']['value'];
+        $adminLabel = array_column($attribute->getSource()->getAllOptions(false, true), 'label', 'value')[$optionId];
+        $item = Mage::getModel('catalog/layer_filter_item')
+            ->setFilter(Mage::getModel('catalog/layer_filter_attribute')->setAttributeModel($attribute))
+            ->setValue($optionId);
+        $helper = Mage::helper('configurableswatches/productimg');
+
+        expect($helper->getGlobalSwatch($item, 'No Such Label', 24, 24))
+            ->not->toBeNull()
+            ->toBe($helper->getGlobalSwatch(null, (string) $adminLabel, 24, 24));
+    });
 });
