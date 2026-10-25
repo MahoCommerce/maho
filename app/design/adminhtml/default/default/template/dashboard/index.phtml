@@ -143,6 +143,12 @@ mahoOnReady(() => loadChartJs().then(() => initDashboardCharts(document)));
                 <?= $this->getChildHtml('grids') ?>
                 <div id="grid_tab_content"></div>
             </div>
+            <?php if ($this->getChild('visitors')): ?>
+                <div class="entry-edit dashboard-grids-box">
+                    <?= $this->getChildHtml('visitors') ?>
+                    <div id="visitor_tab_content"></div>
+                </div>
+            <?php endif ?>
             <?= $this->getChildHtml('widgets_right') ?>
         </div>
     </div>
