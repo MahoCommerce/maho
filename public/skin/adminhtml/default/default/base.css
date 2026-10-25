@@ -1281,10 +1281,6 @@ button.icon-btn span {
     background: var(--maho-surface-sunken);
 }
 
-.side-col .switcher {
-    padding-right: var(--maho-space-6)
-}
-
 .side-col .switcher select {
     width: 100%
 }
