@@ -1275,7 +1275,6 @@ button.icon-btn span {
 }
 
 .switcher {
-    margin-bottom: var(--maho-space-3);
     border: 1px solid var(--maho-border-soft);
     background: var(--maho-surface-sunken);
 }

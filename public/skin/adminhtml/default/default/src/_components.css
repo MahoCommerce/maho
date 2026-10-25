@@ -830,6 +830,10 @@
      * A store scope switcher: a daisyUI select with a store icon inside the box. The top margin keeps
      * the focus outline below the sticky page header, which would cover it.
      */
+    .switcher {
+        margin-bottom: var(--maho-space-3);
+    }
+
     .switcher:has(> .switcher-select) {
         display: flex;
         flex-wrap: wrap;
@@ -898,6 +902,34 @@
 
     .side-col .switcher-select {
         width: 100%;
+    }
+
+    /*
+     * A switcher above a grid is a tab of the grid card. The grid is the next element after the
+     * script of the switcher: a grid widget in a wrapper (catalog), or the actions table of a report.
+     */
+    .switcher:has(> .switcher-select):is(:has(+ script + div > .grid-widget:first-child), :has(+ script + table.actions)) {
+        position: relative;
+        z-index: 1;
+        margin-bottom: calc(var(--border) * -1);
+
+        & > .switcher-select {
+            border-bottom-color: var(--color-base-100);
+            border-end-start-radius: 0;
+            border-end-end-radius: 0;
+            background-color: var(--color-base-100);
+            box-shadow: none;
+        }
+
+        & + script + div > .grid-widget:first-child,
+        & + script + table.actions {
+            border-start-start-radius: 0;
+        }
+
+        /* base.css sets this margin outside the layers */
+        & + script + table.actions {
+            margin-top: 0 !important;
+        }
     }
 
     /* The main menu: a dark bar, and a dropdown that opens on hover or keyboard focus */
