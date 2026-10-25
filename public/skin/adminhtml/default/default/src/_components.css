@@ -206,7 +206,7 @@
     }
 
     /* Image fields: the preview spans both rows, next to the file input and the delete checkbox */
-    .image-field {
+    .image-field:has(> a > .small-image-preview) {
         display: grid;
         grid-template-columns: auto minmax(0, 1fr);
         align-items: center;
