@@ -86,7 +86,7 @@ describe('the swatch image entity', function () {
 
         expect($helper->getGlobalSwatchUrl(null, 'Blue', 24, 24))
             ->toBe('data:image/svg+xml,' . rawurlencode("<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24'><rect width='100%' height='100%' fill='#0000ff'/></svg>"))
-            ->and($helper->getColorSwatchUrl('Bad', 24, 24))->toBeNull()
+            ->and($helper->getSwatchColor('Bad'))->toBeNull()
             ->and($this->mount->listFiles('catalog/swatches')->toArray())->toBe([]);
     });
 });
