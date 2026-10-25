@@ -35,10 +35,10 @@
                 <th><?= Mage::helper('catalog')->__('Label') ?></th>
                 <th><?= Mage::helper('catalog')->__('Sort Order') ?></th>
                 <?php foreach ($this->getImageTypes() as $typeId => $type): ?>
-                    <th><?= $this->escapeHtml($type['label'], ['br']) ?></th>
+                    <th class="a-center"><?= $this->escapeHtml($type['label'], ['br']) ?></th>
                 <?php endforeach ?>
-                <th><?= Mage::helper('catalog')->__('Exclude') ?></th>
-                <th class="last"><?= Mage::helper('catalog')->__('Remove') ?></th>
+                <th class="a-center"><?= Mage::helper('catalog')->__('Exclude') ?></th>
+                <th class="a-center last"><?= Mage::helper('catalog')->__('Remove') ?></th>
             </tr>
             </thead>
             <tbody id="<?= $this->getHtmlId() ?>_list">
