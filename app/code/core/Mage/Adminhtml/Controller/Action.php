@@ -72,7 +72,7 @@ class Mage_Adminhtml_Controller_Action extends Mage_Core_Controller_Varien_Actio
     /**
      * Retrieve adminhtml session model object
      *
-     * @return Mage_Adminhtml_Model_Session
+     * @return Mage_Core_Model_Session_Abstract
      */
     protected function _getSession()
     {
@@ -82,7 +82,7 @@ class Mage_Adminhtml_Controller_Action extends Mage_Core_Controller_Varien_Actio
     /**
      * Retrieve base admihtml helper
      *
-     * @return Mage_Adminhtml_Helper_Data
+     * @return Mage_Core_Helper_Abstract
      */
     protected function _getHelper()
     {

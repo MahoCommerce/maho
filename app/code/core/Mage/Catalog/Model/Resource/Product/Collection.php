@@ -335,7 +335,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
         $this->_setPriceScopeOnItems();
 
         if ($this->_addUrlRewrite) {
-            $this->_addUrlRewrite($this->_urlRewriteCategory);
+            $this->_addUrlRewrite();
         }
 
         if (count($this) > 0) {
@@ -1626,9 +1626,8 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
 
         /** @var Mage_Catalog_Model_Resource_Eav_Attribute $attribute */
         $attribute = $this->getAttribute('tier_price');
-        if ($attribute->isScopeGlobal()) {
-            $websiteId = 0;
-        } elseif ($this->getStoreId()) {
+        $websiteId = 0;
+        if (!$attribute->isScopeGlobal() && $this->getStoreId()) {
             $websiteId = Mage::app()->getStore($this->getStoreId())->getWebsiteId();
         }
 

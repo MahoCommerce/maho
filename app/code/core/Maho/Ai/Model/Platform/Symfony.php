@@ -213,8 +213,11 @@ class Maho_Ai_Model_Platform_Symfony implements
         }
         if ($imageModel !== '') {
             $additional[$imageModel] = [
-                'class' => \Symfony\AI\Platform\Bridge\OpenAi\DallE::class,
-                'capabilities' => [\Symfony\AI\Platform\Capability::OUTPUT_IMAGE],
+                'class' => \Symfony\AI\Platform\Bridge\OpenAi\Image::class,
+                'capabilities' => [
+                    \Symfony\AI\Platform\Capability::INPUT_TEXT,
+                    \Symfony\AI\Platform\Capability::OUTPUT_IMAGE,
+                ],
             ];
         }
         $catalog = new \Symfony\AI\Platform\Bridge\OpenAi\ModelCatalog($additional);

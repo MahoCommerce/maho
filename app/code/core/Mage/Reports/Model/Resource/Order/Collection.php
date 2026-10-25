@@ -64,7 +64,7 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
         if ($this->_isLive) {
             $this->_prepareSummaryLive($range, $customStart, $customEnd, $isFilter);
         } else {
-            $this->_prepareSummaryAggregated($range, $customStart, $customEnd, $isFilter);
+            $this->_prepareSummaryAggregated($range, $customStart, $customEnd);
         }
 
         return $this;

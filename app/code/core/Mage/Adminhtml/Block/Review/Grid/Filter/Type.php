@@ -25,11 +25,14 @@ class Mage_Adminhtml_Block_Review_Grid_Filter_Type extends Mage_Adminhtml_Block_
     }
 
     /**
-     * @return int
+     * @return int|null
      */
     #[\Override]
     public function getCondition()
     {
+        if (is_null($this->getValue())) {
+            return null;
+        }
         if ($this->getValue() == 1) {
             return 1;
         }

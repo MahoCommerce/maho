@@ -209,7 +209,7 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Retrieve customer groups collection
      *
-     * @return Mage_Customer_Model_Entity_Group_Collection
+     * @return Mage_Customer_Model_Resource_Group_Collection
      */
     public function getGroups()
     {

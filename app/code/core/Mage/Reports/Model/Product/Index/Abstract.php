@@ -196,7 +196,7 @@ abstract class Mage_Reports_Model_Product_Index_Abstract extends Mage_Core_Model
      */
     public function clean()
     {
-        $this->_getResource()->clean($this);
+        $this->_getResource()->clean();
         return $this;
     }
 

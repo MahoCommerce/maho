@@ -31,7 +31,7 @@ class Mage_Payment_Model_Config
             if (Mage::getStoreConfigFlag('payment/' . $code . '/active', $store)) {
                 if (array_key_exists('model', $methodConfig)) {
                     $methodModel = Mage::getModel($methodConfig['model']);
-                    if ($methodModel && $methodModel->getConfigData('active', $store)) {
+                    if ($methodModel instanceof Mage_Payment_Model_Method_Abstract && $methodModel->getConfigData('active', $store)) {
                         $methods[$code] = $this->_getMethod($code, $methodConfig);
                     }
                 }
@@ -75,7 +75,7 @@ class Mage_Payment_Model_Config
         }
         $modelName = $config['model'];
         $method = Mage::getModel($modelName);
-        if (!$method) {
+        if (!$method instanceof Mage_Payment_Model_Method_Abstract) {
             return false;
         }
         $method->setId($code)->setStore($store);
