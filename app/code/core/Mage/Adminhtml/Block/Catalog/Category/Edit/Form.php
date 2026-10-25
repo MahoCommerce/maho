@@ -40,7 +40,7 @@ class Mage_Adminhtml_Block_Catalog_Category_Edit_Form extends Mage_Adminhtml_Blo
                 'save_button',
                 $this->getLayout()->createBlock('adminhtml/widget_button')
                     ->setData([
-                        'label'     => Mage::helper('catalog')->__('Save Category'),
+                        'label'     => Mage::helper('catalog')->__('Save'),
                         'onclick'   => "categorySubmit('{$this->getSaveUrl()}')",
                         'class' => 'save',
                     ]),
@@ -53,7 +53,7 @@ class Mage_Adminhtml_Block_Catalog_Category_Edit_Form extends Mage_Adminhtml_Blo
                 'delete_button',
                 $this->getLayout()->createBlock('adminhtml/widget_button')
                     ->setData([
-                        'label'     => Mage::helper('catalog')->__('Delete Category'),
+                        'label'     => Mage::helper('catalog')->__('Delete'),
                         'onclick'   => "categoryDelete('{$this->getDeleteUrl()}')",
                         'class' => 'delete',
                     ]),

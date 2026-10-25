@@ -20,7 +20,6 @@ class Mage_Adminhtml_Block_System_Config_Form_Field_Regexceptions extends Mage_A
             'style' => 'width:120px',
         ]);
         $this->_addAfter = false;
-        $this->_addButtonLabel = Mage::helper('adminhtml')->__('Add Exception');
         parent::__construct();
     }
 }

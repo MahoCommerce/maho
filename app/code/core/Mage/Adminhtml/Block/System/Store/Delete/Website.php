@@ -21,7 +21,7 @@ class Mage_Adminhtml_Block_System_Store_Delete_Website extends Mage_Adminhtml_Bl
             'confirm_deletion_button',
             $this->getLayout()->createBlock('adminhtml/widget_button')
                 ->setData([
-                    'label'     => Mage::helper('core')->__('Delete Website'),
+                    'label'     => Mage::helper('core')->__('Delete'),
                     'onclick'   => 'deleteForm.submit()',
                     'class'     => 'cancel',
                 ]),

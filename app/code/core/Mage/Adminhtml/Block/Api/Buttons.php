@@ -45,7 +45,7 @@ class Mage_Adminhtml_Block_Api_Buttons extends Mage_Adminhtml_Block_Template
             'saveButton',
             $this->getLayout()->createBlock('adminhtml/widget_button')
                 ->setData([
-                    'label'     => Mage::helper('adminhtml')->__('Save Role'),
+                    'label'     => Mage::helper('adminhtml')->__('Save'),
                     'onclick'   => 'roleForm.submit();return false;',
                     'class' => 'save',
                 ]),
@@ -55,7 +55,7 @@ class Mage_Adminhtml_Block_Api_Buttons extends Mage_Adminhtml_Block_Template
             'deleteButton',
             $this->getLayout()->createBlock('adminhtml/widget_button')
                 ->setData([
-                    'label'     => Mage::helper('adminhtml')->__('Delete Role'),
+                    'label'     => Mage::helper('adminhtml')->__('Delete'),
                     'onclick'   => 'if(confirm(\'' . Mage::helper('core')->jsQuoteEscape(
                         Mage::helper('adminhtml')->__('Are you sure you want to do this?'),
                     ) . '\')) roleForm.submit(\'' . $this->getUrl('*/*/delete') . '\'); return false;',

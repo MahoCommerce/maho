@@ -17,11 +17,8 @@ class Mage_Adminhtml_Block_Cms_Block_Edit extends Mage_Adminhtml_Block_Widget_Fo
 
         parent::__construct();
 
-        $this->_updateButton('save', 'label', Mage::helper('cms')->__('Save Block'));
-        $this->_updateButton('delete', 'label', Mage::helper('cms')->__('Delete Block'));
-
         $this->_addButton('saveandcontinue', [
-            'label'     => Mage::helper('adminhtml')->__('Save and Continue Edit'),
+            'label'     => Mage::helper('adminhtml')->__('Save and Continue'),
             'onclick'   => 'saveAndContinueEdit()',
             'class'     => 'save',
         ], -100);

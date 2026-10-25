@@ -16,9 +16,7 @@ class Mage_Adminhtml_Block_Cms_Page extends Mage_Adminhtml_Block_Widget_Grid_Con
 
         parent::__construct();
 
-        if ($this->_isAllowedAction('save')) {
-            $this->_updateButton('add', 'label', Mage::helper('cms')->__('Add New Page'));
-        } else {
+        if (!$this->_isAllowedAction('save')) {
             $this->_removeButton('add');
         }
     }

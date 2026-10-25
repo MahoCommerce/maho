@@ -37,12 +37,12 @@ class Mage_Api2_Block_Adminhtml_Roles_Buttons extends Mage_Adminhtml_Block_Templ
                 'onclick'   => 'window.location.reload()',
             ],
             'saveButton'    => [
-                'label'     => Mage::helper('adminhtml')->__('Save Role'),
+                'label'     => Mage::helper('adminhtml')->__('Save'),
                 'onclick'   => 'roleForm.submit(); return false;',
                 'class'     => 'save',
             ],
             'deleteButton'  => [
-                'label'     => Mage::helper('adminhtml')->__('Delete Role'),
+                'label'     => Mage::helper('adminhtml')->__('Delete'),
                 'onclick'   => '',  //roleId is not set at this moment, so we set script later
                 'class'     => 'delete',
             ],

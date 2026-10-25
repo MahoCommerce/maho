@@ -15,7 +15,6 @@ class Mage_Adminhtml_Block_Sales_Order_Status_Assign extends Mage_Adminhtml_Bloc
         $this->_controller = 'sales_order_status';
         $this->_mode       = 'assign';
         parent::__construct();
-        $this->_updateButton('save', 'label', Mage::helper('sales')->__('Save Status Assignment'));
         $this->_removeButton('delete');
     }
 

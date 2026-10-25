@@ -23,7 +23,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Attribute_Set_Toolbar_Main extends Ma
             'addButton',
             $this->getLayout()->createBlock('adminhtml/widget_button')
                 ->setData([
-                    'label'     => Mage::helper('catalog')->__('Add New Set'),
+                    'label'     => Mage::helper('catalog')->__('Add New'),
                     'onclick'   => Mage::helper('core/js')->getSetLocationJs($this->getUrl('*/*/add')),
                     'class'     => 'add',
                 ]),

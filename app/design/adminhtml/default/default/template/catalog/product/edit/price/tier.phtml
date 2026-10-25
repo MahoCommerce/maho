@@ -63,7 +63,7 @@ var tierPriceRowTemplate = '<tr>'
     + ' <small class="nobr"><?= $this->jsQuoteEscape(Mage::helper('catalog')->__('and above')) ?></small></td>'
     + '<td><input class="<?= $_htmlClass ?> required-entry <?= $_priceValueValidation ?>" type="text" name="<?= $_htmlName ?>[{{index}}][price]" value="{{price}}" id="tier_price_row_{{index}}_price"></td>'
     + '<td class="last"><input type="hidden" name="<?= $_htmlName ?>[{{index}}][delete]" class="delete" value="" id="tier_price_row_{{index}}_delete">'
-    + '<button title="<?= $this->jsQuoteEscape(Mage::helper('catalog')->__('Delete Tier')) ?>" type="button" class="scalable delete icon-btn delete-product-option" id="tier_price_row_{{index}}_delete_button" onclick="return tierPriceControl.deleteItem(event);">'
+    + '<button title="<?= $this->jsQuoteEscape(Mage::helper('catalog')->__('Delete')) ?>" type="button" class="scalable delete icon-btn delete-product-option" id="tier_price_row_{{index}}_delete_button" onclick="return tierPriceControl.deleteItem(event);">'
     + '<?= $this->jsQuoteEscape(Mage::helper('catalog')->__('Delete')) ?></button></td>'
     + '</tr>';
 
