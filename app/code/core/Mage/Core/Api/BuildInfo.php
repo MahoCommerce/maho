@@ -17,25 +17,25 @@ use ApiPlatform\Metadata\Get;
 use Maho\Config\ApiResource;
 
 #[ApiResource(
-    mahoId: 'system-info',
-    mahoLabel: 'System Information',
+    mahoId: 'build-info',
+    mahoLabel: 'Build Information',
     mahoSection: 'System',
     mahoOperations: ['read' => 'View'],
-    security: "is_granted('ROLE_ADMIN') or is_granted('system-info/read')",
-    shortName: 'SystemInfo',
+    security: "is_granted('ROLE_ADMIN') or is_granted('build-info/read')",
+    shortName: 'BuildInfo',
     description: 'Version and build of the installation',
-    provider: SystemInfoProvider::class,
+    provider: BuildInfoProvider::class,
     operations: [
         new Get(
-            uriTemplate: '/system-info',
-            security: "is_granted('ROLE_ADMIN') or is_granted('system-info/read')",
+            uriTemplate: '/build-info',
+            security: "is_granted('ROLE_ADMIN') or is_granted('build-info/read')",
             description: 'Get the version and the build of the installation. version is the version of the next release, so two builds can have the same version. '
                 . 'build is the short commit of the code on disk, or unknown when the installation keeps no trace of it.',
         ),
     ],
     graphQlOperations: [],
 )]
-class SystemInfo extends \Maho\ApiPlatform\Resource
+class BuildInfo extends \Maho\ApiPlatform\Resource
 {
     public const ADMIN_RESOURCE = \Mage_Adminhtml_System_Tools_HealthcheckController::ADMIN_RESOURCE;
 

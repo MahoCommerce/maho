@@ -15,11 +15,6 @@ class Mage_Adminhtml_Block_System_Tools_Healthcheck extends Mage_Adminhtml_Block
         return Mage::getVersion();
     }
 
-    /**
-     * The commit of the code on disk, or "unknown" when the installation keeps
-     * no trace of it: `getVersion()` holds the version of the next release, so
-     * two different builds of the same train report the same string.
-     */
     public function getMahoBuild(): string
     {
         return \Maho\Build\Info::get()->describe();

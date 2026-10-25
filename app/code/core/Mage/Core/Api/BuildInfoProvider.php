@@ -12,14 +12,14 @@ namespace Mage\Core\Api;
 
 use ApiPlatform\Metadata\Operation;
 
-final class SystemInfoProvider extends \Maho\ApiPlatform\Provider
+final class BuildInfoProvider extends \Maho\ApiPlatform\Provider
 {
     #[\Override]
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): SystemInfo
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): BuildInfo
     {
         $this->requireUser();
 
-        $dto = new SystemInfo();
+        $dto = new BuildInfo();
         $dto->version = \Mage::getVersion();
         $dto->build = \Maho\Build\Info::get()->describe();
 
