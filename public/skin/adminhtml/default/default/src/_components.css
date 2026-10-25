@@ -844,7 +844,7 @@
 
     .switcher-label {
         display: inline-flex;
-        color: color-mix(in oklab, var(--color-base-content) 70%, transparent);
+        color: var(--color-base-content);
 
         & svg {
             width: 1.25rem;
