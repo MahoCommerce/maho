@@ -85,16 +85,7 @@ $checks = $this->getHealthChecks();
             </tr>
             <tr>
                 <td>Build</td>
-                <td>
-                    <?php $buildCommit = $this->getMahoBuildCommit() ?>
-                    <?php $buildUrl = $this->getMahoBuildUrl() ?>
-                    <?php if ($buildUrl): ?>
-                        <a href="<?= $this->escapeHtml($buildUrl) ?>" target="_blank" rel="noopener"
-                           title="<?= $this->escapeHtml((string) $buildCommit) ?>"><?= $this->escapeHtml($this->getMahoBuild()) ?></a>
-                    <?php else: ?>
-                        <span title="<?= $this->escapeHtml((string) $buildCommit) ?>"><?= $this->escapeHtml($this->getMahoBuild()) ?></span>
-                    <?php endif ?>
-                </td>
+                <td><span title="<?= $this->escapeHtml((string) $this->getMahoBuildCommit()) ?>"><?= $this->escapeHtml($this->getMahoBuild()) ?></span></td>
             </tr>
             <tr>
                 <td>Cache Backend</td>

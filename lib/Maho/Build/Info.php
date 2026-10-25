@@ -24,10 +24,6 @@ namespace Maho\Build;
  *   release archive, which has no `.git`, so the commit is not knowable at
  *   runtime and the caller must not guess.
  *
- * The repository the commit belongs to comes from the git remote, or from the
- * lock file: an installation of a fork must link to that fork,
- * not to upstream.
- *
  * None of the sources spawns a process: `git` is read from the files of the
  * repository, not from `git rev-parse`.
  */
@@ -45,7 +41,6 @@ final class Info
     private function __construct(
         private readonly ?string $commit,
         private readonly string $source,
-        private readonly ?string $repositoryUrl,
     ) {}
 
     public static function get(): self
@@ -75,15 +70,6 @@ final class Info
     }
 
     /**
-     * The repository the commit lives in, when the installation says which one
-     * it is. A fork reports its own repository.
-     */
-    public function getRepositoryUrl(): ?string
-    {
-        return $this->repositoryUrl;
-    }
-
-    /**
      * A single line for a UI or a log: the short commit, or "unknown" when there
      * is nothing to show. The source stays available through getSource() for
      * diagnostics, it is not part of the label.
@@ -94,41 +80,21 @@ final class Info
     }
 
     /**
-     * The GitHub commit page of the repository the installation came from, when
-     * both the commit and the repository are known.
-     */
-    public function getCommitUrl(): ?string
-    {
-        if ($this->commit === null
-            || $this->repositoryUrl === null
-            || parse_url($this->repositoryUrl, PHP_URL_HOST) !== 'github.com'
-            || !preg_match('/^([0-9a-f]{40}|[0-9a-f]{64})$/', $this->commit)
-        ) {
-            return null;
-        }
-
-        return $this->repositoryUrl . '/commit/' . $this->commit;
-    }
-
-    /**
-     * @return array{0: ?string, 1: string, 2: ?string}
+     * @return array{0: ?string, 1: string}
      */
     private static function resolve(): array
     {
-        $packageRoot = self::packageRoot();
-        $projectRoot = self::projectRoot();
-
-        $commit = self::readGitCommit($packageRoot);
+        $commit = self::readGitCommit(self::packageRoot());
         if ($commit !== null) {
-            return [$commit, self::SOURCE_GIT, self::readGitRemoteUrl($packageRoot)];
+            return [$commit, self::SOURCE_GIT];
         }
 
         $commit = self::readComposerInstalledCommit();
         if ($commit !== null) {
-            return [$commit, self::SOURCE_COMPOSER, self::readLockRepositoryUrl($projectRoot)];
+            return [$commit, self::SOURCE_COMPOSER];
         }
 
-        return [null, self::SOURCE_UNKNOWN, null];
+        return [null, self::SOURCE_UNKNOWN];
     }
 
     /**
@@ -137,11 +103,6 @@ final class Info
     private static function packageRoot(): string
     {
         return dirname(__DIR__, 3);
-    }
-
-    private static function projectRoot(): string
-    {
-        return defined('MAHO_ROOT_DIR') ? MAHO_ROOT_DIR : self::packageRoot();
     }
 
     private static function readGitCommit(string $root): ?string
@@ -175,111 +136,6 @@ final class Info
         }
 
         return self::readPackedRef($refsBase . '/packed-refs', $ref);
-    }
-
-    private static function readGitRemoteUrl(string $root): ?string
-    {
-        $gitDir = self::findGitDir($root);
-        if ($gitDir === null) {
-            return null;
-        }
-
-        $config = self::readFile(self::resolveCommonDir($gitDir) . '/config');
-        if ($config === null) {
-            return null;
-        }
-
-        $remotes = [];
-        $section = '';
-        foreach (explode("\n", $config) as $line) {
-            $line = trim($line);
-            if ($line === '' || $line[0] === '#' || $line[0] === ';') {
-                continue;
-            }
-
-            if ($line[0] === '[') {
-                $section = trim($line, '[]');
-                continue;
-            }
-
-            if (!str_starts_with($section, 'remote ') || !preg_match('/^url\s*=\s*(.+)$/i', $line, $matches)) {
-                continue;
-            }
-
-            $name = trim(substr($section, strlen('remote ')), '"');
-            $remotes[$name] = trim($matches[1]);
-        }
-
-        $url = $remotes['origin'] ?? ($remotes === [] ? null : reset($remotes));
-
-        return $url === null ? null : self::normalizeRepositoryUrl($url);
-    }
-
-    private static function readLockRepositoryUrl(string $root): ?string
-    {
-        $lockFile = $root . '/composer.lock';
-        if (!is_readable($lockFile)) {
-            return null;
-        }
-
-        /** @var array{packages?: list<array{name?: string, dist?: array{url?: string}, source?: array{url?: string}}>, packages-dev?: list<array{name?: string, dist?: array{url?: string}, source?: array{url?: string}}>}|null $lock */
-        $lock = json_decode(self::readFile($lockFile) ?? '', true);
-        if (!is_array($lock)) {
-            return null;
-        }
-
-        foreach (array_merge($lock['packages'] ?? [], $lock['packages-dev'] ?? []) as $package) {
-            if (($package['name'] ?? null) !== self::PACKAGE_NAME) {
-                continue;
-            }
-
-            // The source URL is the plain git URL, so it needs no per-host unwrapping.
-            $sourceUrl = self::normalizeRepositoryUrl((string) ($package['source']['url'] ?? ''));
-            if ($sourceUrl !== null) {
-                return $sourceUrl;
-            }
-
-            $distUrl = (string) ($package['dist']['url'] ?? '');
-
-            // GitHub dist URLs come from api.github.com/repos/<owner>/<repo>/zipball/<ref>.
-            if (preg_match('#^https?://api\.github\.com/repos/([^/]+)/([^/]+)/#', $distUrl, $matches)) {
-                return sprintf('https://github.com/%s/%s', $matches[1], $matches[2]);
-            }
-
-            return null;
-        }
-
-        return null;
-    }
-
-    /**
-     * Turn a git remote or a source URL into the web URL of the repository, or
-     * null when it does not point at a remote repository.
-     */
-    private static function normalizeRepositoryUrl(string $url): ?string
-    {
-        $url = trim($url);
-        if ($url === '') {
-            return null;
-        }
-
-        // scp-like syntax: git@github.com:owner/repo.git
-        if (preg_match('#^(?:[^@/]+@)?([^:/]+):(?!//)(.+)$#', $url, $matches)) {
-            $url = sprintf('https://%s/%s', $matches[1], $matches[2]);
-        }
-
-        $parts = parse_url($url);
-        if ($parts === false || !isset($parts['host']) || !in_array(strtolower($parts['scheme'] ?? ''), ['http', 'https'], true)) {
-            return null;
-        }
-
-        $path = trim($parts['path'] ?? '', '/');
-        $path = (string) preg_replace('/\.git$/', '', $path);
-        if ($path === '' || substr_count($path, '/') < 1) {
-            return null;
-        }
-
-        return sprintf('https://%s/%s', $parts['host'], $path);
     }
 
     private static function findGitDir(string $root): ?string
