@@ -10,7 +10,7 @@
 /** @var Mage_Adminhtml_Block_System_Config_Switcher $this */
 ?>
 <div class="switcher">
-    <label for="store_switcher"><?= $this->__('Current Configuration Scope:') ?></label>
+    <label for="store_switcher" class="switcher-label" title="<?= $this->quoteEscape(rtrim($this->__('Current Configuration Scope:'), ' :')) ?>"><?= $this->getIconSvg('building-store') ?><span class="sr-only"><?= $this->__('Current Configuration Scope:') ?></span></label>
     <select id="store_switcher" class="system-config-store-switcher" onchange="location.href=this.options[this.selectedIndex].getAttribute('url')">
     <?php foreach ($this->getStoreSelectOptions() as $_value => $_option): ?>
     <?php if (isset($_option['is_group'])): ?>
@@ -27,7 +27,7 @@
     <?php endforeach ?>
     </select>
     <?php if (Mage::getSingleton('admin/session')->isAllowed('system/store')): ?>
-    <p style="margin:10px 0 0;">
+    <p>
         <a href="<?= $this->getUrl('*/system_store') ?>"><?= $this->__('Manage Stores') ?></a>
     </p>
     <?php endif ?>

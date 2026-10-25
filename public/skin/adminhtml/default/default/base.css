@@ -1285,10 +1285,6 @@ button.icon-btn span {
     padding-right: var(--maho-space-6)
 }
 
-.side-col .switcher label {
-    display: block
-}
-
 .side-col .switcher select {
     width: 100%
 }

@@ -9,7 +9,7 @@
 ?>
 <?php /** @var Mage_Core_Block_Template $this */ ?>
 <?php if ($websites = $this->getWebsites()): ?>
-<p class="switcher"><label for="store_switcher"><?= $this->__('Choose Store View:') ?></label>
+<p class="switcher"><label for="store_switcher" class="switcher-label" title="<?= $this->quoteEscape(rtrim($this->__('Choose Store View:'), ' :')) ?>"><?= $this->getIconSvg('building-store') ?><span class="sr-only"><?= $this->__('Choose Store View:') ?></span></label>
 <select name="store_switcher" id="store_switcher" onchange="return switchStore(this);">
 <?php if ($this->hasDefaultOption()): ?>
     <option value=""><?= $this->escapeHtml($this->getDefaultStoreName()) ?></option>

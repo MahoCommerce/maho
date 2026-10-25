@@ -10,7 +10,7 @@
 /** @var Mage_Adminhtml_Block_Store_Switcher $this */
 ?>
 <?php if ($this->isShow()): ?>
-<p class="switcher"><label for="store_switcher"><?= $this->__('Show Report For:') ?></label>
+<p class="switcher"><label for="store_switcher" class="switcher-label" title="<?= $this->quoteEscape(rtrim($this->__('Show Report For:'), ' :')) ?>"><?= $this->getIconSvg('building-store') ?><span class="sr-only"><?= $this->__('Show Report For:') ?></span></label>
 <select name="store_switcher" id="store_switcher" onchange="return switchStore(this);">
     <option value=""><?= $this->__('All Websites') ?></option>
     <?php foreach ($this->getWebsiteCollection() as $_website): ?>

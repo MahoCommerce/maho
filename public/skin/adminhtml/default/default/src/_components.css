@@ -819,6 +819,39 @@
         }
     }
 
+    /*
+     * A store scope switcher: the building-store icon labels the select. The top margin keeps the
+     * focus outline of the select below the sticky page header, which would cover it.
+     */
+    .switcher:has(> .switcher-label) {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--maho-space-2);
+        margin-top: var(--maho-space-2);
+
+        /* The Manage Stores link of the config switcher */
+        & > p {
+            flex-basis: 100%;
+            margin: 0;
+        }
+    }
+
+    .side-col .switcher > select {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .switcher-label {
+        display: inline-flex;
+        color: color-mix(in oklab, var(--color-base-content) 70%, transparent);
+
+        & svg {
+            width: 1.25rem;
+            height: 1.25rem;
+        }
+    }
+
     /* The main menu: a dark bar, and a dropdown that opens on hover or keyboard focus */
     .nav-bar {
         padding: 0 10rem 0 3.4375rem;

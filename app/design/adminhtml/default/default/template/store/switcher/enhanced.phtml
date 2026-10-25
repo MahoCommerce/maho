@@ -12,7 +12,7 @@
 <?php $_websiteCollection = $this->getWebsiteCollection() ?>
 <?php if ($_websiteCollection->getSize()): ?>
 <div id="store_switcher_container">
-<p class="switcher"><label for="store_switcher"><?= $this->__('Choose Store View:') ?></label>
+<p class="switcher"><label for="store_switcher" class="switcher-label" title="<?= $this->quoteEscape(rtrim($this->__('Choose Store View:'), ' :')) ?>"><?= $this->getIconSvg('building-store') ?><span class="sr-only"><?= $this->__('Choose Store View:') ?></span></label>
 <select name="store_switcher" id="store_switcher" class="left-col-block">
     <option value=""><?= $this->escapeHtml($this->getDefaultStoreName()) ?></option>
     <?php foreach ($_websiteCollection as $_website): ?>
