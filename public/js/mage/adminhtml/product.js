@@ -219,7 +219,10 @@ Product.Gallery = class {
     loadImage(file) {
         var image = this.getImageByFile(file);
         // An upload that is not saved yet has no thumbnail
-        this.getFileElement(file, 'cell-image img').src = image.thumbnail_url ?? image.url;
+        const url = new URL(image.thumbnail_url ?? image.url, document.baseURI);
+        if (url.protocol === 'https:' || url.protocol === 'http:') {
+            this.getFileElement(file, 'cell-image img').src = url.href;
+        }
     }
     setProductImages(file) {
         Object.entries(this.imageTypes)

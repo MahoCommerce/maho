@@ -697,26 +697,22 @@
                 height: 1.125rem;
             }
 
-            /* The legacy label color in base.css is unlayered, so only !important lets the button color through */
-            & label {
-                color: var(--d-btn-fg) !important;
-            }
-
             & label:has(input:focus-visible) {
                 outline: 2px solid var(--color-base-content);
                 outline-offset: 1px;
             }
         }
 
+        /* d-btn-ghost takes its text color from --d-btn-rest-fg */
         & .cell-disable:has(input:checked) {
             --d-btn-bg: var(--color-base-content);
-            --d-btn-fg: var(--color-base-100);
+            --d-btn-rest-fg: var(--color-base-100);
             --d-btn-border: var(--color-base-content);
         }
 
         & .cell-remove:has(input:checked) {
             --d-btn-bg: var(--color-error);
-            --d-btn-fg: var(--color-error-content);
+            --d-btn-rest-fg: var(--color-error-content);
             --d-btn-border: var(--color-error);
         }
 
