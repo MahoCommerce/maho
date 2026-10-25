@@ -44,6 +44,11 @@
         outline-offset: 1px
     }
 
+    /* A dialog focuses its content so that the Tab key starts inside it. The content is not a control */
+    [tabindex="-1"]:focus-visible {
+        outline: 0
+    }
+
     h1,h2,h3,h4 {
         margin-bottom: .5em;
         line-height: 1.4em
