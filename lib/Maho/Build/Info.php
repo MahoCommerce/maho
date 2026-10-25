@@ -235,7 +235,7 @@ final class Info
             return null;
         }
 
-        /** @var array{packages?: list<array{name?: string, dist?: array{url?: string}}>, packages-dev?: list<array{name?: string, dist?: array{url?: string}}>}|null $lock */
+        /** @var array{packages?: list<array{name?: string, dist?: array{url?: string}, source?: array{url?: string}}>, packages-dev?: list<array{name?: string, dist?: array{url?: string}, source?: array{url?: string}}>}|null $lock */
         $lock = json_decode(self::readFile($lockFile) ?? '', true);
         if (!is_array($lock)) {
             return null;
@@ -246,7 +246,15 @@ final class Info
                 continue;
             }
 
-            $distUrl = $package['dist']['url'] ?? '';
+            // The source URL is the plain git URL, so it needs no per-host unwrapping.
+            // A dist URL of a host other than GitHub is an API URL (GitLab serves it
+            // from /api/v4/projects/.../archive.zip) and would produce a broken link.
+            $sourceUrl = self::normalizeRepositoryUrl((string) ($package['source']['url'] ?? ''));
+            if ($sourceUrl !== null) {
+                return $sourceUrl;
+            }
+
+            $distUrl = (string) ($package['dist']['url'] ?? '');
 
             // GitHub dist URLs come from api.github.com/repos/<owner>/<repo>/zipball/<ref>.
             if (preg_match('#^https?://api\.github\.com/repos/([^/]+)/([^/]+)/#', $distUrl, $matches)) {
