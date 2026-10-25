@@ -275,7 +275,8 @@
     .columns > .side-col {
         position: sticky;
         top: var(--maho-space-4);
-        box-sizing: border-box;
+        /* The padding below adds to the width, so the content keeps its 220px */
+        box-sizing: content-box;
         max-height: calc(100dvh - 2 * var(--maho-space-4));
         overflow-y: auto;
         scrollbar-width: thin;
@@ -523,10 +524,11 @@
             color: inherit;
         }
 
+        /* A stroke in place of a bolder weight, which is wider and would wrap the label only when it is active */
         & a.active {
             background-color: var(--color-base-100);
             color: var(--color-base-content);
-            font-weight: 600;
+            -webkit-text-stroke: 0.03em currentColor;
             box-shadow: inset 3px 0 0 var(--color-secondary);
         }
     }
