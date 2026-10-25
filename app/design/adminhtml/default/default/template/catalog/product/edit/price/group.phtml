@@ -18,7 +18,7 @@ $_priceValueValidation = $this->getPriceValidation('validate-zero-or-greater');
 $_showWebsite = $this->isMultiWebsites();
 ?>
 <tr>
-    <td class="label"><?= $this->getElement()->getLabel() ?></td>
+    <td class="label" id="<?= $_htmlId ?>-label"><?= $this->getElement()->getLabel() ?></td>
     <td colspan="10" class="grid tier">
     <table cellspacing="0" class="data border" id="group_prices_table">
         <?php if ($_showWebsite): ?>

@@ -31,6 +31,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Type_Select extends 
                     'label' => Mage::helper('catalog')->__('Add'),
                     'class' => 'add add-select-row',
                     'id'    => 'add_select_row_button_{{option_id}}',
+                    'aria_labelledby' => 'product_option_{{option_id}}_title',
                 ]),
         );
 

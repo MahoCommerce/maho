@@ -40,6 +40,7 @@ class Mage_Adminhtml_Block_Widget_Button extends Mage_Adminhtml_Block_Widget
             . ' style="' . $helper->quoteEscape($this->getStyle()) . '"'
             . ($this->getValue() ? ' value="' . $helper->quoteEscape($this->getValue()) . '"' : '')
             . ($this->getDisabled() ? ' disabled="disabled"' : '')
+            . ($this->getData('aria_labelledby') ? ' aria-labelledby="' . $helper->quoteEscape($this->getId() . ' ' . $this->getData('aria_labelledby')) . '"' : '')
             . '>' . $this->getLabel() . '</button>' . $this->getAfterHtml();
     }
 }

@@ -214,6 +214,7 @@ class Mage_Weee_Block_Renderer_Weee_Tax extends Mage_Adminhtml_Block_Widget impl
      */
     public function getAddButtonHtml()
     {
+        $this->getChild('add_button')->setData('aria_labelledby', $this->getElement()->getHtmlId() . '-label');
         return $this->getChildHtml('add_button');
     }
 }

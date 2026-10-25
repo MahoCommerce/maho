@@ -789,7 +789,7 @@ class MahoAiAssistant {
 
         const buttons = [...document.querySelectorAll('button, a.button, input[type="submit"]')]
             .filter((b) => visible(b) && !b.closest('.tiptap-toolbar, .grid, #ai-chat-panel'))
-            .map((b) => text(b) || b.title || b.value).filter(Boolean);
+            .map((b) => this.buttonName(b)).filter(Boolean);
         if (buttons.length > 0) {
             lines.push('Page buttons: ' + [...new Set(buttons)].slice(0, 40).join(', '));
         }
@@ -812,6 +812,14 @@ class MahoAiAssistant {
         }
 
         return clip(lines.join('\n'), 6000);
+    }
+
+    /** The name that a screen reader reads: the elements in aria-labelledby, else the text, title or value of the button. */
+    buttonName(button) {
+        const parts = (button.getAttribute('aria-labelledby') ?? '').split(/\s+/).map((id) => document.getElementById(id)).filter(Boolean)
+            .map((node) => (node.matches('input, textarea, select') ? node.value : node.textContent));
+        const name = parts.length > 0 ? parts.join(' ') : (button.textContent || button.title || button.value);
+        return String(name ?? '').replace(/\s+/g, ' ').trim();
     }
 
     fieldLabel(element) {
@@ -952,7 +960,7 @@ class MahoAiAssistant {
         };
         if (action.action === 'click') {
             const buttons = [...document.querySelectorAll('button, a.button, input[type="submit"], .tiptap-toolbar button[title]')].filter(visible);
-            const button = matches(buttons, (b) => b.textContent || b.title || b.value);
+            const button = matches(buttons, (b) => this.buttonName(b));
             return button ? { ok: true, click: button } : { ok: false };
         }
         if (action.action === 'open_row') {

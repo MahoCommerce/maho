@@ -50,6 +50,7 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Sa
             ->setData([
                 'label' => Mage::helper('downloadable')->__('Add'),
                 'id' => 'add_sample_item',
+                'aria_labelledby' => 'dt-samples',
                 'class' => 'add',
             ]);
         return $addButton->toHtml();
