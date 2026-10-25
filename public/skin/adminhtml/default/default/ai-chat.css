@@ -40,6 +40,8 @@
     display: inline-flex;
     align-items: center;
     gap: 9px;
+    /* The admin theme gives every button the fixed height of d-btn, which hides this padding. */
+    height: auto;
     padding: 10px 16px 10px 12px;
     border: 1px solid light-dark(transparent, rgba(255, 255, 255, .12));
     border-radius: var(--maho-radius-pill);
