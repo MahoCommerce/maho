@@ -19,10 +19,12 @@ uses(Tests\MahoBackendTestCase::class);
 
 /**
  * The options of the color filter of the first category that lists Black and one more color, by label.
+ * When $accept is set, the options must also pass it.
  *
+ * @param (Closure(array<string, array<string, mixed>>): bool)|null $accept
  * @return array<string, array{value: string, label: string, count: int, swatch: array{type: string, value: string}|null}>
  */
-function layeredColorOptions(): array
+function layeredColorOptions(?Closure $accept = null): array
 {
     $provider = new LayeredFilterProvider();
     $categories = Mage::getResourceModel('catalog/category_collection')
@@ -33,7 +35,7 @@ function layeredColorOptions(): array
         $filters = $provider->provide(new GetCollection(), [], ['filters' => ['categoryId' => $category->getId()]]);
         foreach ($filters as $filter) {
             $options = array_column($filter->options, null, 'label');
-            if ($filter->code === 'color' && isset($options['Black']) && count($options) > 1) {
+            if ($filter->code === 'color' && isset($options['Black']) && count($options) > 1 && ($accept === null || $accept($options))) {
                 return $options;
             }
         }
@@ -75,23 +77,23 @@ describe('the swatches of the layered filters API', function (): void {
     });
 
     it('returns the image in wysiwyg/swatches, and otherwise the color of the option', function (): void {
-        $options = layeredColorOptions();
+        $isColor = fn(array $option): bool => ($option['swatch']['type'] ?? null) === 'color';
+        $options = layeredColorOptions(fn(array $options): bool => array_find($options, $isColor) !== null);
         $black = $options['Black'];
-        unset($options['Black']);
+        $other = array_find($options, $isColor);
 
         $resource = Mage::getSingleton('core/resource');
-        $colors = $resource->getConnection('core_read')->fetchPairs(
-            $resource->getConnection('core_read')->select()
-                ->from($resource->getTableName('eav/attribute_option_swatch'), ['option_id', 'value'])
-                ->where('option_id IN (?)', array_map(intval(...), array_column($options, 'value'))),
+        $adapter = $resource->getConnection('core_read');
+        $color = (string) $adapter->fetchOne(
+            $adapter->select()
+                ->from($resource->getTableName('eav/attribute_option_swatch'), ['value'])
+                ->where('option_id = ?', (int) $other['value']),
         );
-        $other = array_find($options, fn(array $option): bool => !empty($colors[$option['value']]));
-        $color = $colors[$other['value'] ?? ''] ?? null;
 
         expect($color)->not->toBeEmpty()
             ->and($black['swatch']['type'] ?? null)->toBe('image')
             ->and($black['swatch']['value'])->toStartWith($this->mount->publicUrl('wysiwyg/swatches/'))
-            ->and($other['swatch'])->toBe(['type' => 'color', 'value' => $color]);
+            ->and($other['swatch']['value'])->toBe('#' . ltrim($color, '#'));
     });
 
     it('returns no swatch when Configurable Swatches is disabled', function (): void {
