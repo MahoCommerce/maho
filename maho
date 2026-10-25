@@ -19,7 +19,11 @@ $application = new class ('Maho', Mage::getVersion()) extends Application {
     #[\Override]
     public function getLongVersion(): string
     {
-        return $this->getVersion();
+        $commit = \Maho\Build\Info::get()->getShortCommit();
+
+        return $commit === null
+            ? $this->getVersion()
+            : sprintf('%s (%s)', $this->getVersion(), $commit);
     }
 };
 

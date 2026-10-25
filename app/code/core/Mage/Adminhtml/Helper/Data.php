@@ -8,7 +8,7 @@
  * @package Mage_Adminhtml
  */
 
-class Mage_Adminhtml_Helper_Data extends Mage_Adminhtml_Helper_Help_Mapping
+class Mage_Adminhtml_Helper_Data extends Mage_Core_Helper_Abstract
 {
     public const XML_PATH_ADMINHTML_ROUTER_FRONTNAME   = 'admin/base_path';
     public const XML_PATH_USE_CUSTOM_ADMIN_URL         = 'default/admin/url/use_custom';

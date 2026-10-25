@@ -1880,6 +1880,9 @@ class HealthCheck extends BaseMahoCommand
     ): int {
         $hasErrors = false;
 
+        $output->writeln(sprintf('<info>Maho %s</info>, build %s', Mage::getVersion(), \Maho\Build\Info::get()->getBuild()));
+        $output->writeln('');
+
         // Check for use-include-path in composer.json
         $output->write('Checking composer.json... ');
         if (self::isComposerAutoloaderOptimized()) {

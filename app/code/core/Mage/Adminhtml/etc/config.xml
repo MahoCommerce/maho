@@ -132,9 +132,6 @@ SPDX-License-Identifier: AFL-3.0
                 </input_types>
             </validator_data>
         </general>
-        <help>
-            <target_version>ce</target_version>
-        </help>
         <admin>
             <dashboard>
                 <enable_charts>1</enable_charts>
