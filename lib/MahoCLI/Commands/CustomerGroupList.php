@@ -16,7 +16,7 @@ use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
-    name: 'customer-group:list',
+    name: 'customer:group:list',
     description: 'List all customer groups',
 )]
 class CustomerGroupList extends BaseMahoCommand
@@ -30,11 +30,12 @@ class CustomerGroupList extends BaseMahoCommand
             ->setOrder('customer_group_id', 'ASC');
 
         $table = new Table($output);
-        $table->setHeaders(['id', 'code', 'tax_class']);
+        $table->setHeaders(['id', 'code', 'tax_class_id', 'tax_class']);
         foreach ($groups as $group) {
             $table->addRow([
                 $group->getId(),
                 $group->getCode(),
+                $group->getData('tax_class_id'),
                 $group->getData('class_name'),
             ]);
         }

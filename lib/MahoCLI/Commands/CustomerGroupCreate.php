@@ -12,49 +12,44 @@ namespace MahoCLI\Commands;
 use Mage;
 use Mage_Core_Exception;
 use Mage_Tax_Model_Class;
+use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Helper\QuestionHelper;
-use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Question\ChoiceQuestion;
-use Symfony\Component\Console\Question\Question;
 
 #[AsCommand(
-    name: 'customer-group:create',
+    name: 'customer:group:create',
     description: 'Create a customer group',
 )]
 class CustomerGroupCreate extends BaseMahoCommand
 {
-    public function __invoke(InputInterface $input, OutputInterface $output): int
-    {
+    public function __invoke(
+        OutputInterface $output,
+        #[Argument(description: 'The code of the customer group', name: 'code')]
+        string $code,
+        #[Option(description: 'The ID of the customer tax class (default: the tax class of the default group)', name: 'tax-class')]
+        ?int $taxClassId = null,
+    ): int {
         $this->initMaho();
 
-        /** @var QuestionHelper $questionHelper */
-        $questionHelper = $this->getHelper('question');
-
-        $question = new Question('Code: ', '');
-        $code = $questionHelper->ask($input, $output, $question);
         $code = trim($code);
         if (!strlen($code)) {
             $output->writeln('<error>Code cannot be empty</error>');
             return Command::INVALID;
         }
 
-        $taxClasses = Mage::getResourceModel('tax/class_collection')
-            ->setClassTypeFilter(Mage_Tax_Model_Class::TAX_CLASS_TYPE_CUSTOMER)
-            ->toOptionHash();
-        if (!$taxClasses) {
-            $output->writeln('<error>No customer tax class found</error>');
-            return Command::FAILURE;
+        $taxClassId ??= (int) Mage::getModel('customer/group')->getTaxClassId(Mage::helper('customer')->getDefaultCustomerGroupId());
+        $taxClass = Mage::getModel('tax/class')->load($taxClassId);
+        if ($taxClass->getId() === null || $taxClass->getClassType() !== Mage_Tax_Model_Class::TAX_CLASS_TYPE_CUSTOMER) {
+            $output->writeln("<error>Customer tax class not found with ID: $taxClassId</error>");
+            return Command::INVALID;
         }
-        $question = new ChoiceQuestion('Tax class: ', $taxClasses);
-        $taxClass = $questionHelper->ask($input, $output, $question);
 
         try {
             $group = Mage::getModel('customer/group')
                 ->setCode($code)
-                ->setTaxClassId((int) array_search($taxClass, $taxClasses, true))
+                ->setTaxClassId($taxClassId)
                 ->save();
         } catch (Mage_Core_Exception $e) {
             $output->writeln('<error>' . $e->getMessage() . '</error>');
