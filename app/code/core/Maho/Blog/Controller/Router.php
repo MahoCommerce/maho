@@ -19,8 +19,7 @@ class Maho_Blog_Controller_Router extends Mage_Core_Controller_Varien_Router_Abs
     #[\Override]
     public function match(Mage_Core_Controller_Request_Http $request): bool
     {
-        // A forwarded request keeps the path of the post, and a new match of that path undoes the forward
-        if (!Mage::isInstalled() || !Mage::helper('blog')->isEnabled() || $request->getBeforeForwardInfo()) {
+        if (!Mage::isInstalled() || !Mage::helper('blog')->isEnabled()) {
             return false;
         }
 

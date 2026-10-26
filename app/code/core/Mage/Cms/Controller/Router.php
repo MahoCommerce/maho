@@ -44,11 +44,6 @@ class Mage_Cms_Controller_Router extends Mage_Core_Controller_Varien_Router_Abst
             exit;
         }
 
-        // A forwarded request keeps the path of the page, and a new match of that path undoes the forward
-        if ($request->getBeforeForwardInfo()) {
-            return false;
-        }
-
         $identifier = trim($request->getPathInfo(), '/');
 
         $condition = new \Maho\DataObject([

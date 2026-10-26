@@ -188,6 +188,11 @@ class Mage_Core_Controller_Varien_Front extends \Maho\DataObject
                         self::MAX_FORWARD_ITERATIONS,
                     ));
                 }
+                // A forwarded request keeps its path, and a router that matches the path again undoes the forward
+                if ($request->getBeforeForwardInfo()) {
+                    $this->_routers['default']->match($request);
+                    continue;
+                }
                 foreach ($this->_routers as $router) {
                     /** @var Mage_Core_Controller_Varien_Router_Abstract $router */
                     if ($router->match($request)) {
