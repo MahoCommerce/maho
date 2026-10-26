@@ -15,7 +15,7 @@ namespace Maho\Docs;
 final readonly class Source
 {
     /**
-     * @param string $name "core", or the module that declares the folder, such as "Acme_GiftWrap"
+     * @param string $name "core/" and the folder for a folder at the root of the Maho package, such as "core/user-guide", or the module that declares the folder, such as "Acme_GiftWrap"
      * @param string $audience one of Library::AUDIENCES
      */
     public function __construct(

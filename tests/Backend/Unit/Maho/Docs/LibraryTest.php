@@ -57,6 +57,17 @@ it('returns only the pages of the audiences asked for', function (): void {
     expect($library->page('core/b.md', [Library::AUDIENCE_DEVELOPER])?->title)->toBe('Developer page');
 });
 
+it('skips a symbolic link to a file outside the folder', function (): void {
+    $dir = docsLibraryFolder(['a.md' => '# A']);
+    $outside = tempnam(sys_get_temp_dir(), 'maho_docs_outside');
+    file_put_contents($outside, '# Secret');
+    symlink($outside, "$dir/secret.md");
+
+    $ids = array_map(static fn($page) => $page->id, new Library([new Source('core', Library::AUDIENCE_USER, $dir)])->pages([Library::AUDIENCE_USER]));
+
+    expect($ids)->toBe(['core/a.md']);
+});
+
 it('takes the title from the first "#" line outside a code block', function (): void {
     $dir = docsLibraryFolder(['a.md' => "Intro.\n\n```bash\n# Clone the repository\n```\n\n# Real title\n"]);
 
@@ -88,7 +99,7 @@ it('reads the folders that the enabled modules declare in config.xml', function 
 it('reads the docs folder at the root of the Maho package', function (): void {
     $library = new Library();
 
-    expect($library->page('core/scope.md', [Library::AUDIENCE_USER])?->title)->toBe('Scope: Default, Website and Store View Values');
-    expect($library->page('core/cron.md', [Library::AUDIENCE_SYSADMIN])?->title)->toBe('Cron jobs');
+    expect($library->page('core/user-guide/scope.md', [Library::AUDIENCE_USER])?->title)->toBe('Scope: Default, Website and Store View Values');
+    expect($library->page('core/hosting/cron.md', [Library::AUDIENCE_SYSADMIN])?->title)->toBe('Cron jobs');
     expect($library->page('Maho_Giftcard/gift-cards.md', [Library::AUDIENCE_USER])?->title)->toBe('Gift Cards v26.1+');
 });

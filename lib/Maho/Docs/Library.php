@@ -117,7 +117,7 @@ final class Library
         foreach (self::CORE_FOLDERS as $folder => $audience) {
             $dir = realpath("$root/docs/$folder");
             if ($dir !== false && is_dir($dir)) {
-                $sources[] = new Source(self::CORE_SOURCE, $audience, $dir);
+                $sources[] = new Source(self::CORE_SOURCE . '/' . $folder, $audience, $dir);
             }
         }
 
@@ -135,7 +135,7 @@ final class Library
         }
         $sources = [];
         foreach ($docs->children() as $module => $folders) {
-            $moduleDir = \Maho::findFile(\Mage::getConfig()->getModuleDir('', $module));
+            $moduleDir = realpath((string) \Maho::findFile(\Mage::getConfig()->getModuleDir('', $module)));
             if ($moduleDir === false) {
                 continue;
             }
@@ -158,9 +158,11 @@ final class Library
     private static function markdownFiles(string $dir): array
     {
         $files = [];
+        $root = realpath($dir) ?: $dir;
         $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS));
         foreach ($iterator as $file) {
-            if ($file->isFile() && $file->getExtension() === 'md' && !str_starts_with($file->getFilename(), '.')) {
+            // A symbolic link must not lead the tool to a file outside the folder.
+            if ($file->isFile() && $file->getExtension() === 'md' && !str_starts_with($file->getFilename(), '.') && str_starts_with((string) $file->getRealPath(), $root . '/')) {
                 $files[] = substr($file->getPathname(), strlen($dir) + 1);
             }
         }
