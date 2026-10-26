@@ -89,10 +89,10 @@ The rule puts each admin user in one of these states:
 If a user loses the device with their authenticator, remove their 2FA from the command line:
 
 ```bash
-./maho admin:user:twofa-reset
+./maho admin:user:twofa-reset <username>
 ```
 
-The command asks for the username. It clears the 2FA flag and the secret. The user must then enroll again
+If you leave out the username, the command asks for it. It clears the 2FA flag and the secret. The user must then enroll again
 from **System > My Account**.
 
 If the mandatory rule locks out every administrator, turn it off from the command line:

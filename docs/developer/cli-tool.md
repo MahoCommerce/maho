@@ -145,6 +145,30 @@ within our GitHub repository.
 
 All commands should be self-explanatory, also thanks to the inline descriptions.
 
+## Give the input on the command line
+
+Each command takes its input as arguments and options. Run `./maho help <command>` to see them. If you
+leave out a required argument, the command asks for it in the terminal:
+
+```bash
+./maho customer:group:create Wholesale 3   # asks nothing
+./maho customer:group:create               # asks for the code and the tax class
+```
+
+A command that asks for a confirmation before it changes data skips the question with `--force` (`-f`).
+
+## Run a command from a script
+
+Add `-n` (`--no-interaction`) to each command in a script, a cron job or a CI pipeline. With `-n`, a command
+asks nothing:
+
+- An optional argument that you leave out gets its default value.
+- A required argument that you leave out stops the command with the error "Not enough arguments".
+- A confirmation gets the answer "no", unless you add `--force`.
+
+Without `-n`, a command that needs an answer waits for input. If the script sends no more input, the command
+stops with an error.
+
 ## Add your custom commands
 
 ### Using the built-in command generator
@@ -155,10 +179,12 @@ The easiest way to create a new command is to run:
 $ ./maho dev:create-command
 ```
 
-The generator will prompt you for:
+The generator asks for:
 
 1. Command name (e.g., `my-custom-command` or `cache:clean`)
 2. Command description
+
+You can also give both on the command line: `./maho dev:create-command cache:clean "Clean the cache"`.
 
 It will automatically:
 

@@ -22,10 +22,10 @@ uses(Tests\MahoBackendTestCase::class, ConsoleAssertionsTrait::class);
 const CUSTOMER_GROUP_CODE = 'CLI Group';
 const CUSTOMER_GROUP_EMAIL = 'cli-group@example.com';
 
-function customerGroupRun(Command $command, array $input = []): ExecutionResult
+function customerGroupRun(Command $command, array $input = [], array $answers = []): ExecutionResult
 {
     new Application()->addCommand($command);
-    return new CommandTester($command)->run($input);
+    return new CommandTester($command)->run($input, $answers, interactive: $answers !== []);
 }
 
 function customerGroupLoad(): Mage_Customer_Model_Group
@@ -80,7 +80,7 @@ afterEach(function (): void {
 it('saves a customer group with the code and the tax class that the user gives', function (bool $withTaxClass): void {
     $input = ['code' => CUSTOMER_GROUP_CODE];
     if ($withTaxClass) {
-        $input['--tax-class'] = (string) $this->taxClass->getId();
+        $input['tax_class_id'] = (string) $this->taxClass->getId();
     }
 
     $result = customerGroupRun(new CustomerGroupCreate('customer:group:create'), $input);
@@ -91,9 +91,16 @@ it('saves a customer group with the code and the tax class that the user gives',
         : (int) Mage::getModel('customer/group')->load(Mage::helper('customer')->getDefaultCustomerGroupId())->getData('tax_class_id');
     expect((int) customerGroupLoad()->getData('tax_class_id'))->toBe($expectedTaxClassId);
 })->with([
-    'with --tax-class' => [true],
-    'without --tax-class, the tax class of the default group' => [false],
+    'with a tax class' => [true],
+    'without a tax class, the tax class of the default group' => [false],
 ]);
+
+it('asks for the code and the tax class in the terminal', function (): void {
+    $result = customerGroupRun(new CustomerGroupCreate('customer:group:create'), [], [CUSTOMER_GROUP_CODE, (string) $this->taxClass->getId()]);
+
+    $this->assertCommandIsSuccessful($result);
+    expect((int) customerGroupLoad()->getData('tax_class_id'))->toBe((int) $this->taxClass->getId());
+});
 
 it('fails to create a customer group with a tax class that is not a customer tax class', function (): void {
     $productTaxClassId = (int) Mage::getResourceModel('tax/class_collection')
@@ -101,7 +108,7 @@ it('fails to create a customer group with a tax class that is not a customer tax
         ->getFirstItem()
         ->getId();
 
-    $result = customerGroupRun(new CustomerGroupCreate('customer:group:create'), ['code' => CUSTOMER_GROUP_CODE, '--tax-class' => (string) $productTaxClassId]);
+    $result = customerGroupRun(new CustomerGroupCreate('customer:group:create'), ['code' => CUSTOMER_GROUP_CODE, 'tax_class_id' => (string) $productTaxClassId]);
 
     expect($result->statusCode)->toBe(Command::INVALID);
     expect($result->getDisplay())->toContain("Customer tax class not found with ID: $productTaxClassId");
@@ -157,6 +164,17 @@ it('deletes a customer group and moves its customers to the default group with -
 
     $this->assertCommandIsSuccessful($result);
     expect($result->getDisplay())->toContain('Customers moved to the default group: 1.');
+    expect(customerGroupLoad()->getId())->toBeNull();
+    expect(customerGroupOfCustomer($customer))->toBe(Mage::helper('customer')->getDefaultCustomerGroupId(Mage::app()->getStore(1)));
+});
+
+it('asks for the group and for moving its customers in the terminal', function (): void {
+    $group = customerGroupSave((int) $this->taxClass->getId());
+    $customer = customerGroupCustomer($group);
+
+    $result = customerGroupRun(new CustomerGroupDelete('customer:group:delete'), [], [(string) $group->getId(), 'yes']);
+
+    $this->assertCommandIsSuccessful($result);
     expect(customerGroupLoad()->getId())->toBeNull();
     expect(customerGroupOfCustomer($customer))->toBe(Mage::helper('customer')->getDefaultCustomerGroupId(Mage::app()->getStore(1)));
 });

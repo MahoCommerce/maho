@@ -10,8 +10,12 @@ declare(strict_types=1);
 namespace MahoCLI\Commands;
 
 use Mage;
+use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\Ask;
+use Symfony\Component\Console\Attribute\Interact;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
@@ -20,34 +24,20 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 class CreateCommand extends BaseMahoCommand
 {
-    public function __invoke(SymfonyStyle $io): int
-    {
-        // Interactive command name input
-        $commandName = $io->ask(
-            'What is the name of your command? (e.g., cache:clean)',
-            null,
-            function ($name) {
-                if (empty($name)) {
-                    throw new \RuntimeException('The command name cannot be empty');
-                }
-                if (!preg_match('/^[a-z][a-z0-9]*(:?[a-z0-9]+)*$/', $name)) {
-                    throw new \RuntimeException('The command name should be in lowercase with optional colons (e.g., cache:clean)');
-                }
-                return $name;
-            },
-        );
+    public function __invoke(
+        SymfonyStyle $io,
+        #[Argument(description: 'The name of the command, in lowercase with optional colons (e.g., cache:clean)', name: 'name')]
+        #[Ask('What is the name of your command? (e.g., cache:clean)')]
+        string $commandName,
+        #[Argument(description: 'The description of the command')]
+        ?string $description = null,
+    ): int {
+        if (!preg_match('/^[a-z][a-z0-9]*(:?[a-z0-9]+)*$/', $commandName)) {
+            $io->error('The command name should be in lowercase with optional colons (e.g., cache:clean)');
+            return Command::INVALID;
+        }
 
-        // Interactive description input
-        $description = $io->ask(
-            'Provide a description for your command',
-            'A new Maho CLI command',
-            function ($desc) {
-                if (empty($desc)) {
-                    throw new \RuntimeException('The command description cannot be empty');
-                }
-                return $desc;
-            },
-        );
+        $description = trim((string) $description) ?: 'A new Maho CLI command';
 
         // Convert command name to class name (e.g., cache:clean -> CacheCleanCommand)
         $className = $this->generateClassName($commandName);
@@ -94,6 +84,14 @@ class CreateCommand extends BaseMahoCommand
         return Command::SUCCESS;
     }
 
+    #[Interact]
+    public function askDescription(InputInterface $input, SymfonyStyle $io): void
+    {
+        if ($input->getArgument('description') === null) {
+            $input->setArgument('description', $io->ask('Provide a description for your command', 'A new Maho CLI command'));
+        }
+    }
+
     private function generateClassName(string $commandName): string
     {
         return str_replace([':','-'], '', ucwords($commandName, ':-')) . 'Command';
@@ -117,8 +115,12 @@ declare(strict_types=1);
 namespace MahoCLI\Commands;
 
 use Mage;
+use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\Ask;
+use Symfony\Component\Console\Attribute\Interact;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
