@@ -199,6 +199,15 @@ SPDX-License-Identifier: AFL-3.0
         <no-style-found-for-the-class translate="message">
             <message>No style found for the class &quot;%s&quot;. Check the spelling. A daisyUI class that the theme does not use gets its style after the save.</message>
         </no-style-found-for-the-class>
+        <the-short-form-of-this-class translate="message">
+            <message>The short form of this class is &quot;%s&quot;.</message>
+        </the-short-form-of-this-class>
+        <replace translate="message">
+            <message>Replace</message>
+        </replace>
+        <sort-the-classes translate="message">
+            <message>Sort the classes</message>
+        </sort-the-classes>
         <source translate="message">
             <message>Source</message>
         </source>

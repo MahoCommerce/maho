@@ -70,6 +70,85 @@ const loadDesignSystem = async (css) => {
     return load(css);
 };
 
+/**
+ * `value` with each `var(--name, fallback)` replaced by its fallback, or null when a variable has
+ * no fallback. The design system writes the value of the theme as the fallback.
+ */
+const withoutVariables = (value) => {
+    let result = value;
+    for (let start = result.lastIndexOf('var('); start !== -1; start = result.lastIndexOf('var(')) {
+        let depth = 0;
+        let comma = -1;
+        let end = -1;
+        for (let index = start + 4; index < result.length && end === -1; index++) {
+            const char = result[index];
+            if (char === '(') {
+                depth++;
+            } else if (char === ')') {
+                if (depth === 0) {
+                    end = index;
+                }
+                depth--;
+            } else if (char === ',' && depth === 0 && comma === -1) {
+                comma = index;
+            }
+        }
+        if (end === -1 || comma === -1) {
+            return null;
+        }
+        result = result.slice(0, start) + result.slice(comma + 1, end).trim() + result.slice(end + 1);
+    }
+    return result;
+};
+
+/** A property whose value is the color of a color utility, such as `bg-primary` or `ring-red-500`. */
+const COLOR_PROPERTY = /^(?:.*color|fill|stroke|--tw-gradient-(?:from|via|to))$/;
+const DECLARATION = /(?:^|[{;\s])(-*[a-z][\w-]*)\s*:\s*([^;{}]+);/g;
+
+/** The color that `css` gives, or null when it gives no color or more than one. */
+const colorOf = (css) => {
+    const colors = new Set();
+    for (const [, property, value] of css.matchAll(DECLARATION)) {
+        const color = COLOR_PROPERTY.test(property) ? withoutVariables(value.trim()) : null;
+        if (color !== null && CSS.supports('color', color) && !/^(?:currentcolor|inherit|initial|unset|revert)$/i.test(color)) {
+            colors.add(color);
+        }
+    }
+    return colors.size === 1 ? [...colors][0] : null;
+};
+
+/** The CSS of the class itself: the design system also writes the `@property` rules of its variables. */
+const withoutProperties = (css) => css.replace(/@property [^{]+\{[^}]*\}\n?/g, '').trim();
+
+/** A function that gives { css, color } for a class name, or null for a class that `designSystem` does not generate. */
+const detailsOf = (designSystem) => {
+    const cache = new Map();
+    return (name) => {
+        if (!cache.has(name)) {
+            const css = designSystem.candidatesToCss([name])[0];
+            cache.set(name, css === null ? null : { css: withoutProperties(css), color: colorOf(css) });
+        }
+        return cache.get(name);
+    };
+};
+
+/**
+ * `classes` in the order of the Tailwind build, as the Prettier plugin of Tailwind sorts them. A
+ * class that the design system does not know, such as a daisyUI component, comes first.
+ */
+const sortedClasses = (designSystem, classes) => designSystem.getClassOrder(classes)
+    .map(([name, order], index) => ({ name, order, index }))
+    .sort((a, b) => {
+        if (a.order === b.order) {
+            return a.index - b.index;
+        }
+        if (a.order === null || b.order === null) {
+            return a.order === null ? -1 : 1;
+        }
+        return a.order < b.order ? -1 : 1;
+    })
+    .map(({ name }) => name);
+
 /** The names that complete a variant, such as `md:` or `aria-checked:`. */
 const variantNames = (designSystem) => designSystem.getVariants().flatMap((variant) => [
     ...(variant.isArbitrary && variant.values.length > 0 ? [] : [`${variant.name}:`]),
@@ -119,6 +198,11 @@ class ClassCheck {
         return rest.filter((name, index) => css[index] === null);
     }
 
+    /** The design system of the theme, or null. */
+    async designSystem() {
+        return (await this.load())?.designSystem ?? null;
+    }
+
     async listClasses() {
         const sources = await this.load();
         if (!sources) {
@@ -162,3 +246,44 @@ export const findUnknownClasses = async (setup, classes) => {
  * and the Tailwind variants such as `md:`, or of null.
  */
 export const listClasses = async (setup) => checkOf(setup)?.listClasses() ?? null;
+
+/**
+ * A promise of a function that gives { css, color } for a class name: the CSS that Tailwind makes
+ * for it, and its color when it is a color utility. The function gives null for a class that the
+ * design system does not generate, such as a daisyUI component. The promise gives null when the
+ * editor cannot read the classes.
+ */
+export const classDetails = async (setup) => {
+    const check = checkOf(setup);
+    const designSystem = await check?.designSystem();
+    if (!designSystem) {
+        return null;
+    }
+    check.details ??= new WeakMap();
+    if (!check.details.has(designSystem)) {
+        check.details.set(designSystem, detailsOf(designSystem));
+    }
+    return check.details.get(designSystem);
+};
+
+/** A promise of `classes` in the order of the Tailwind build, or of null. */
+export const sortClasses = async (setup, classes) => {
+    const designSystem = await checkOf(setup)?.designSystem();
+    return designSystem ? sortedClasses(designSystem, classes) : null;
+};
+
+/** A promise of a map from each class of `classes` that has a shorter form, such as `h-[100%]`, to that form. */
+export const shortClasses = async (setup, classes) => {
+    const designSystem = await checkOf(setup)?.designSystem();
+    const short = new Map();
+    if (!designSystem || classes.length === 0) {
+        return short;
+    }
+    for (const name of classes) {
+        const [canonical] = designSystem.canonicalizeCandidates([name]);
+        if (canonical !== undefined && canonical !== name) {
+            short.set(name, canonical);
+        }
+    }
+    return short;
+};

@@ -135,6 +135,44 @@ it('marks a class that the storefront does not style', function () {
         ->toBe(['txet-center']);
 });
 
+it('shows the color and the CSS of a class, suggests its short form, and sorts the classes', function () {
+    $page = openCodeEditor($this);
+    $page->script(<<<'JS'
+        (() => {
+            const view = window.tiptapEditors.get('block_content').codeEditor.view;
+            view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: '<div class="p-4 flex bg-primary h-[100%]">x</div>' } });
+        })()
+        JS);
+
+    waitForScript($page, 'document.querySelectorAll(".cm-content .cm-tw-swatch").length === 1', 20);
+    waitForScript($page, '!!document.querySelector(".cm-lintRange-info")', 20);
+    expect($page->script('[...document.querySelectorAll(".cm-lintRange-info")].map((range) => range.textContent)'))->toBe(['h-[100%]']);
+
+    // A move of the pointer over p-4 opens its tooltip
+    $page->script(<<<'JS'
+        (() => {
+            const view = window.tiptapEditors.get('block_content').codeEditor.view;
+            const coords = view.coordsAtPos(view.state.doc.toString().indexOf('p-4') + 1);
+            view.contentDOM.dispatchEvent(new MouseEvent('mousemove', { clientX: coords.left + 2, clientY: (coords.top + coords.bottom) / 2, bubbles: true }));
+        })()
+        JS);
+    waitForScript($page, '!!document.querySelector(".cm-tooltip-hover .cm-tw-css")', 20);
+    expect($page->script('document.querySelector(".cm-tooltip-hover .cm-tw-css").textContent'))->toContain('padding');
+
+    $page->script('document.querySelector(".cm-tooltip-hover .cm-tw-sort").click()');
+    expect($page->script('document.getElementById("block_content").value'))->toContain('class="flex h-[100%] bg-primary p-4"');
+
+    $page->script(<<<'JS'
+        (() => {
+            const view = window.tiptapEditors.get('block_content').codeEditor.view;
+            view.dispatch({ selection: { anchor: view.state.doc.toString().indexOf('p-4"') + 3 } });
+        })()
+        JS);
+    $page->script('codeEditorType(" bg-primar")');
+    waitForScript($page, '!!document.querySelector(".cm-completionInfo .cm-tw-css")', 20);
+    expect($page->script('document.querySelector(".cm-completionInfo").textContent'))->toContain('background-color');
+});
+
 it('loads CodeMirror only when the source view opens', function () {
     $page = adminLoginAndVisit(
         CODE_EDITOR_ADMIN_USER,
