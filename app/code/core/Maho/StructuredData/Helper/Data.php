@@ -230,9 +230,7 @@ class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Per-attribute option price deltas ([attribute_code][value_index] => delta). Checkout charges
-     * the parent price plus these deltas, never the child's own price.
-     *
+     * @deprecated since 26.11 use Mage_Catalog_Model_Product_Type_Configurable_Price::getVariantPriceDeltas()
      * @param array<int, array<string, mixed>> $attributesInfo from getConfigurableAttributesAsArray()
      * @return array<string, array<string, float>>
      */
@@ -240,17 +238,7 @@ class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
     {
         /** @var Mage_Catalog_Model_Product_Type_Configurable_Price $priceModel */
         $priceModel = Mage_Catalog_Model_Product_Type::priceFactory(Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE);
-        $deltas = [];
-        foreach ($attributesInfo as $attribute) {
-            $code = (string) $attribute['attribute_code'];
-            foreach ($attribute['values'] ?? [] as $value) {
-                if ((float) ($value['pricing_value'] ?? 0) == 0.0) {
-                    continue;
-                }
-                $deltas[$code][(string) $value['value_index']] = $priceModel->calcSelectionPrice($value, $basePrice);
-            }
-        }
-        return $deltas;
+        return $priceModel->getVariantPriceDeltas($attributesInfo, $basePrice);
     }
 
     public function getConditionAttribute(int|string|null $store = null): string
