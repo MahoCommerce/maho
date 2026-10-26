@@ -58,6 +58,8 @@ Available commands:
   customer:create               Create a customer
   customer:delete               Delete customers
   customer:group:create         Create a customer group
+  customer:group:delete         Delete a customer group
+  customer:group:list           List all customer groups
   customer:list                 List all customers
  db
   db:connect                    Opens the database command-line interface using credentials from your local.xml file

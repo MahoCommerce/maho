@@ -48,6 +48,8 @@ $application->addCommand(new \MahoCLI\Commands\CustomerChangepassword());
 $application->addCommand(new \MahoCLI\Commands\CustomerDelete());
 $application->addCommand(new \MahoCLI\Commands\CustomerList());
 $application->addCommand(new \MahoCLI\Commands\CustomerGroupCreate());
+$application->addCommand(new \MahoCLI\Commands\CustomerGroupDelete());
+$application->addCommand(new \MahoCLI\Commands\CustomerGroupList());
 
 $application->addCommand(new \MahoCLI\Commands\DBConnect());
 $application->addCommand(new \MahoCLI\Commands\DBOptimize());
