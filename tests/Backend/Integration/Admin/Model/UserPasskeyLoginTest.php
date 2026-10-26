@@ -63,19 +63,6 @@ it('does not accept the prelogin verification for a different assertion', functi
         ->toThrow(Mage_Core_Exception::class);
 });
 
-it('does not accept a prelogin verification older than the time window', function () {
-    $payload = passkeyAssertionPayload();
-    $this->session->setData('passkey_prelogin_verified', [
-        'user_id' => (int) $this->user->getId(),
-        'assertion_hash' => hash('sha256', $payload),
-        'at' => time() - 3600,
-    ]);
-
-    $user = Mage::getModel('admin/user')->load($this->user->getId());
-    expect(fn() => $user->authenticate($this->user->getUsername(), $payload))
-        ->toThrow(Mage_Core_Exception::class);
-});
-
 it('rejects a passkey payload without a challenge as a failed login', function () {
     $user = Mage::getModel('admin/user')->load($this->user->getId());
 

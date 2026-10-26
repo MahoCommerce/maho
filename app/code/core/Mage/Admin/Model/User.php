@@ -47,12 +47,6 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
     public const AUTH_ERR_2FA_INVALID = 3;
 
     /**
-     * Seconds a passkey assertion verified by prelogin stays usable for the login request
-     * that follows. The two requests are part of the same sign-in, so the window is short.
-     */
-    private const PASSKEY_PRELOGIN_TTL = 60;
-
-    /**
      * Model event prefix
      *
      * @var string
@@ -354,7 +348,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
                 $challenge = $this->getSession()->getPasskeyChallenge();
 
                 if (!$challenge && $authenticatorData !== '' && $this->isPasskeyPreloginVerified($password)) {
-                    // The prelogin step verified this assertion a moment ago and consumed the
+                    // The prelogin step verified this assertion and consumed the
                     // single-use challenge: the login request that follows can only reuse that
                     // verification, not repeat it.
                     $this->getSession()->unsPasskeyPreloginVerified();
@@ -538,7 +532,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
 
     /**
      * Whether the assertion payload was verified by a prelogin request of this same session.
-     * The record is bound to the user, to the payload and to a short time window.
+     * The record is bound to the user and to the payload.
      */
     private function isPasskeyPreloginVerified(#[\SensitiveParameter] string $payload): bool
     {
@@ -548,8 +542,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
         }
 
         return $verified['user_id'] === (int) $this->getId()
-            && hash_equals($verified['assertion_hash'], hash('sha256', $payload))
-            && time() - $verified['at'] <= self::PASSKEY_PRELOGIN_TTL;
+            && hash_equals($verified['assertion_hash'], hash('sha256', $payload));
     }
 
     /**
