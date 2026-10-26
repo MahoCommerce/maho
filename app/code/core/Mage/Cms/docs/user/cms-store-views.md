@@ -77,6 +77,10 @@ If no enabled page with that URL key is assigned to the store view or to **All S
 home page shows the text "There was no Home CMS page configured or found." with a "404 Not Found"
 status.
 
+The **CMS No Route Page** has no URL of its own. Its URL key, for example `no-route`, shows the
+page with a "404 Not Found" status, as any other URL that does not exist. The XML sitemap does not
+list it.
+
 The admin keeps a page that a **CMS Home Page** or **CMS No Route Page** setting uses. You cannot
 delete it, and when you disable it, the store keeps it enabled and shows a warning.
 

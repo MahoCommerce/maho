@@ -104,7 +104,7 @@ final class UrlResolverProvider extends \Maho\ApiPlatform\Provider
 
         if ($pageId) {
             $cmsPage->load($pageId);
-            if ($cmsPage->getIsActive()) {
+            if ($cmsPage->getIsActive() && !\Mage::helper('cms/page')->isNoRoutePage($cmsPage)) {
                 $result->type = 'cms_page';
                 $result->id = (int) $cmsPage->getId();
                 $result->identifier = $cmsPage->getIdentifier();
