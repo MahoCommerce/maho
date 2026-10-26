@@ -57,4 +57,15 @@ describe('CMS No Route Page URL', function () {
         'setting holds the identifier' => [false],
         'setting holds the identifier and the page id' => [true],
     ]);
+
+    it('does not resolve the identifier of the no-route page in the URL resolver API', function () {
+        $resolve = fn(): string => new Mage\Core\Api\UrlResolverProvider()
+            ->provide(new ApiPlatform\Metadata\Get(), [], ['filters' => ['path' => $this->page->getIdentifier()]])
+            ->type;
+        expect($resolve())->toBe('cms_page');
+
+        $this->store->setConfig(Mage_Cms_Helper_Page::XML_PATH_NO_ROUTE_PAGE, $this->page->getIdentifier() . '|' . $this->page->getId());
+
+        expect($resolve())->toBe('not_found');
+    });
 });
