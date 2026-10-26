@@ -18,7 +18,7 @@ uses(Tests\MahoBackendTestCase::class);
  */
 function docsNavPages(string $folder): array
 {
-    $siteFolders = ['user' => 'user-guide', 'developer' => 'developer', 'sysadmin' => 'hosting'];
+    $siteFolders = ['user' => 'user-guide', 'developer' => 'developer', 'sysadmin' => 'hosting', 'api' => 'api'];
     $dirs = [dirname(__DIR__, 4) . "/docs/$folder"];
     foreach (Mage::getConfig()->getNode('global/docs')->children() as $module => $audiences) {
         foreach ($audiences->children() as $audience => $path) {
