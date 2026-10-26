@@ -78,3 +78,11 @@ it('reads the folders that the enabled modules declare in config.xml', function 
     expect($page?->title)->toBe('Configurable Swatches');
     expect($page?->body())->toContain('-swatch');
 });
+
+it('reads the docs folder at the root of the Maho package', function (): void {
+    $library = new Library();
+
+    expect($library->page('core/scope.md', [Library::AUDIENCE_USER])?->title)->toBe('Scope: Default, Website and Store View Values');
+    expect($library->page('core/cron.md', [Library::AUDIENCE_SYSADMIN])?->title)->toBe('Cron jobs');
+    expect($library->page('Maho_Giftcard/gift-cards.md', [Library::AUDIENCE_USER])?->title)->toBe('Gift Cards v26.1+');
+});

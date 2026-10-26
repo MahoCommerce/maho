@@ -7,6 +7,10 @@
     </modules>
 
     <global>
+        <docs>
+            <user>docs/user</user>
+            <developer>docs/developer</developer>
+        </docs>
         <sales>
             <quote>
                 <totals>

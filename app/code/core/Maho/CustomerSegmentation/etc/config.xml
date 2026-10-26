@@ -10,6 +10,10 @@ SPDX-License-Identifier: AFL-3.0
         </Maho_CustomerSegmentation>
     </modules>
     <global>
+        <docs>
+            <user>docs/user</user>
+            <developer>docs/developer</developer>
+        </docs>
         <models>
             <customersegmentation>
                 <class>Maho_CustomerSegmentation_Model</class>

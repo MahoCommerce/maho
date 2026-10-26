@@ -10,6 +10,9 @@ SPDX-License-Identifier: AFL-3.0
         </Maho_Captcha>
     </modules>
     <global>
+        <docs>
+            <user>docs/user</user>
+        </docs>
         <models>
             <captcha>
                 <class>Maho_Captcha_Model</class>

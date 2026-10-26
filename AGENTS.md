@@ -312,7 +312,13 @@ class My_Module_Checkout_CartController extends Mage_Checkout_CartController { /
   title, in the format of mahocommerce.com. The admin assistant reads the `user` and `sysadmin`
   pages through `docs_read`, so a page gives the rules, the order in which the store picks a value,
   and the labels of the admin. A change to a documented feature updates its page in the same pull
-  request. `Maho\Docs\Library` lists the pages
+  request. `Maho\Docs\Library` lists the pages. A page that no single module owns goes in
+  `docs/user-guide`, `docs/developer`, `docs/api` or `docs/hosting`. mahocommerce.com builds these
+  folders and the module folders from `main`: it puts a `user` page in `user-guide/`, a `developer`
+  page in `developer/` and a `sysadmin` page in `hosting/`. So write each link as a path on the
+  site, list each new page in the `.nav.yml` of its site folder, and put an image in an `images/`
+  folder next to the page. The Docs workflow builds the site with `--strict`, so a broken link or
+  a page that is not in a `.nav.yml` fails the check
 - **Errors**: `Mage::throwException()` for user-facing errors (`Mage_Core_Exception`),
   `Mage::log()` / `Mage::logException()` for logging
 
