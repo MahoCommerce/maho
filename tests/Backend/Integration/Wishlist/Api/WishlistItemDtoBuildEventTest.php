@@ -7,6 +7,7 @@
 
 declare(strict_types=1);
 
+use Mage\Checkout\Api\CartService;
 use Mage\Wishlist\Api\WishlistItem;
 use Mage\Wishlist\Api\WishlistProcessor;
 use Mage\Wishlist\Api\WishlistProvider;
@@ -120,7 +121,7 @@ afterEach(function (): void {
 });
 
 it('dispatches the event for the item returned by an add', function (): void {
-    $processor = new WishlistProcessor($this->security);
+    $processor = new WishlistProcessor($this->security, new CartService());
     $dto = wishlistDtoCall($processor, 'addToWishlist', (int) $this->product->getId());
 
     expect(WishlistDtoBuildProbe::$calls)->toBe(1)
@@ -129,7 +130,7 @@ it('dispatches the event for the item returned by an add', function (): void {
 
 it('dispatches the event once per item on a cache miss and on a cache hit', function (): void {
     $customerId = (int) $this->customer->getId();
-    wishlistDtoCall(new WishlistProcessor($this->security), 'addToWishlist', (int) $this->product->getId());
+    wishlistDtoCall(new WishlistProcessor($this->security, new CartService()), 'addToWishlist', (int) $this->product->getId());
     WishlistProvider::invalidateCache($customerId);
 
     $provider = new WishlistProvider($this->security);
@@ -149,7 +150,7 @@ it('dispatches the event once per item on a cache miss and on a cache hit', func
 
 it('caches the item as built from the database, before observers run', function (): void {
     $customerId = (int) $this->customer->getId();
-    wishlistDtoCall(new WishlistProcessor($this->security), 'addToWishlist', (int) $this->product->getId());
+    wishlistDtoCall(new WishlistProcessor($this->security, new CartService()), 'addToWishlist', (int) $this->product->getId());
     WishlistProvider::invalidateCache($customerId);
 
     wishlistDtoCall(new WishlistProvider($this->security), 'getWishlistItems');
@@ -167,7 +168,7 @@ it('caches the item as built from the database, before observers run', function 
 });
 
 it('dispatches the event for a single item read', function (): void {
-    $added = wishlistDtoCall(new WishlistProcessor($this->security), 'addToWishlist', (int) $this->product->getId());
+    $added = wishlistDtoCall(new WishlistProcessor($this->security, new CartService()), 'addToWishlist', (int) $this->product->getId());
     WishlistDtoBuildProbe::$calls = 0;
 
     $dto = wishlistDtoCall(new WishlistProvider($this->security), 'getItem', $added->id);
@@ -177,7 +178,7 @@ it('dispatches the event for a single item read', function (): void {
 });
 
 it('does not dispatch the event for a single item read of another customer', function (): void {
-    $added = wishlistDtoCall(new WishlistProcessor($this->security), 'addToWishlist', (int) $this->product->getId());
+    $added = wishlistDtoCall(new WishlistProcessor($this->security, new CartService()), 'addToWishlist', (int) $this->product->getId());
     WishlistDtoBuildProbe::$calls = 0;
 
     $otherSecurity = wishlistDtoSecurity((int) $this->customer->getId() + 1);
