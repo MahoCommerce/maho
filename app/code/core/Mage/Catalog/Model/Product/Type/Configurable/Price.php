@@ -102,11 +102,12 @@ class Mage_Catalog_Model_Product_Type_Configurable_Price extends Mage_Catalog_Mo
     /**
      * The option price of each configurable value, as [attribute_code][value_index] => price.
      * Checkout charges the parent price plus the option prices of the selected values, never the child price.
+     * Give the parent as $product to apply its catalog price rules to each option price, as checkout does.
      *
      * @param array<int, array<string, mixed>> $attributesInfo from getConfigurableAttributesAsArray()
      * @return array<string, array<string, float>>
      */
-    public function getVariantPriceDeltas(array $attributesInfo, float $basePrice): array
+    public function getVariantPriceDeltas(array $attributesInfo, float $basePrice, ?Mage_Catalog_Model_Product $product = null): array
     {
         $deltas = [];
         foreach ($attributesInfo as $attribute) {
@@ -115,7 +116,13 @@ class Mage_Catalog_Model_Product_Type_Configurable_Price extends Mage_Catalog_Mo
                 if ((float) ($value['pricing_value'] ?? 0) == 0.0) {
                     continue;
                 }
-                $deltas[$code][(string) $value['value_index']] = $this->calcSelectionPrice($value, $basePrice);
+                $price = $this->calcSelectionPrice($value, $basePrice);
+                if ($product !== null) {
+                    $product->setParentId(true)->setConfigurablePrice($price);
+                    Mage::dispatchEvent('catalog_product_type_configurable_price', ['product' => $product]);
+                    $price = (float) $product->getConfigurablePrice();
+                }
+                $deltas[$code][(string) $value['value_index']] = $price;
             }
         }
         return $deltas;

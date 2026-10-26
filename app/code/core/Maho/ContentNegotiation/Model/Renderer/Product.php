@@ -202,7 +202,7 @@ class Maho_ContentNegotiation_Model_Renderer_Product extends Maho_ContentNegotia
         $parentPrice = (float) $product->getFinalPrice();
         /** @var Mage_Catalog_Model_Product_Type_Configurable_Price $priceModel */
         $priceModel = Mage_Catalog_Model_Product_Type::priceFactory(Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE);
-        $deltas = $priceModel->getVariantPriceDeltas($attributes, $parentPrice);
+        $deltas = $priceModel->getVariantPriceDeltas($attributes, $parentPrice, $product);
         $headers = [];
         foreach ($attributes as $attribute) {
             $headers[] = $this->cell((string) ($attribute['label'] ?: $attribute['attribute_code']));

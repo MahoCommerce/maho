@@ -201,7 +201,7 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
         $basePrice = (float) $product->getFinalPrice();
         /** @var Mage_Catalog_Model_Product_Type_Configurable_Price $priceModel */
         $priceModel = Mage_Catalog_Model_Product_Type::priceFactory(Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE);
-        $priceDeltas = $priceModel->getVariantPriceDeltas($attributesInfo, $basePrice);
+        $priceDeltas = $priceModel->getVariantPriceDeltas($attributesInfo, $basePrice, $product);
 
         $sharedOffer = $this->_getSharedOfferFields($product, $currency);
         // The children's own special prices never reach the buyer either, so the validity of the
