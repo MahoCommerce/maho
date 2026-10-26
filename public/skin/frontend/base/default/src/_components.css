@@ -4244,6 +4244,12 @@ th.label {
     color: inherit;
 }
 
+/* Unlayered: the DaisyUI label is inline-flex, so a th.label stops being a
+   table cell and its bottom border ends above a value with many lines */
+th.label {
+    display: table-cell;
+}
+
 /* Unlayered: the 2FA enable form lays out QR left / fields right on desktop.
    div.fieldset picks up the DaisyUI fieldset component whose grid + gap would
    override a components-layer rule, so the layout lives here. The first track
