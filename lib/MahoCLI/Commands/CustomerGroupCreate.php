@@ -21,7 +21,7 @@ use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Question\Question;
 
 #[AsCommand(
-    name: 'customer:group:create',
+    name: 'customer-group:create',
     description: 'Create a customer group',
 )]
 class CustomerGroupCreate extends BaseMahoCommand

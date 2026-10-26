@@ -57,10 +57,11 @@ Available commands:
   customer:change-password      Change password of a customers
   customer:create               Create a customer
   customer:delete               Delete customers
-  customer:group:create         Create a customer group
-  customer:group:delete         Delete a customer group
-  customer:group:list           List all customer groups
   customer:list                 List all customers
+ customer-group
+  customer-group:create         Create a customer group
+  customer-group:delete         Delete a customer group
+  customer-group:list           List all customer groups
  db
   db:connect                    Opens the database command-line interface using credentials from your local.xml file
   db:optimize                   Rebuild bloated tables to return their free space to the filesystem

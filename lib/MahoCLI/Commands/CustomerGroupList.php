@@ -16,7 +16,7 @@ use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
-    name: 'customer:group:list',
+    name: 'customer-group:list',
     description: 'List all customer groups',
 )]
 class CustomerGroupList extends BaseMahoCommand
