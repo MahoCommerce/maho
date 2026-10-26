@@ -51,7 +51,7 @@ class Mage_Cms_Model_Adminhtml_Template_Filter extends Mage_Cms_Model_Template_F
             ? Mage::getStorage('media')->read(substr($path, strlen(self::MEDIA_PREFIX)))
             : (string) file_get_contents($path);
 
-        return (new \Maho\Security\SvgDocumentSanitizer())->sanitize($content);
+        return new \Maho\Security\SvgDocumentSanitizer()->sanitize($content);
     }
 
     /**
