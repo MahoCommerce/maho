@@ -110,3 +110,11 @@ it('reads the docs folder at the root of the Maho package', function (): void {
     expect($library->page('core/hosting/cron.md', [Library::AUDIENCE_SYSADMIN])?->title)->toBe('Cron jobs');
     expect($library->page('Maho_Giftcard/gift-cards.md', [Library::AUDIENCE_USER])?->title)->toBe('Gift Cards');
 });
+
+it('reads the api pages of the core and of the modules', function (): void {
+    $library = new Library();
+
+    expect($library->page('core/api/code-reference.md', [Library::AUDIENCE_API])?->title)->toBe('phpDoc Code Reference');
+    expect($library->page('Mage_Api/soap.md', [Library::AUDIENCE_API])?->title)->toBe('SOAP API');
+    expect($library->page('Maho_ApiPlatform/v2/index.md', [Library::AUDIENCE_DEVELOPER]))->toBeNull();
+});

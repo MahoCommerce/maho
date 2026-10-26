@@ -29,7 +29,8 @@ final class Library
     public const AUDIENCE_USER = 'user';
     public const AUDIENCE_DEVELOPER = 'developer';
     public const AUDIENCE_SYSADMIN = 'sysadmin';
-    public const AUDIENCES = [self::AUDIENCE_USER, self::AUDIENCE_DEVELOPER, self::AUDIENCE_SYSADMIN];
+    public const AUDIENCE_API = 'api';
+    public const AUDIENCES = [self::AUDIENCE_USER, self::AUDIENCE_DEVELOPER, self::AUDIENCE_SYSADMIN, self::AUDIENCE_API];
 
     public const XML_PATH_DOCS = 'global/docs';
     public const CORE_SOURCE = 'core';
@@ -47,7 +48,7 @@ final class Library
         'user-guide' => self::AUDIENCE_USER,
         'hosting' => self::AUDIENCE_SYSADMIN,
         'developer' => self::AUDIENCE_DEVELOPER,
-        'api' => self::AUDIENCE_DEVELOPER,
+        'api' => self::AUDIENCE_API,
     ];
 
     /** @var array<string, list<Page>> */

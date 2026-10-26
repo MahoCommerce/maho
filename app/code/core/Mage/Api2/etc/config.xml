@@ -11,6 +11,9 @@ SPDX-License-Identifier: AFL-3.0
         </Mage_Api2>
     </modules>
     <global>
+        <docs>
+            <api>docs/api</api>
+        </docs>
         <cache>
             <types>
                 <config_api2 translate="label,description" module="api2">
