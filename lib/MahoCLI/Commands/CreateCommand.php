@@ -107,6 +107,8 @@ class CreateCommand extends BaseMahoCommand
         string $commandName,
         string $description,
     ): string {
+        $description = var_export($description, true);
+
         return <<<FILECONTENT
 <?php
 
@@ -115,17 +117,13 @@ declare(strict_types=1);
 namespace MahoCLI\Commands;
 
 use Mage;
-use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
-use Symfony\Component\Console\Attribute\Ask;
-use Symfony\Component\Console\Attribute\Interact;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
     name: '$commandName',
-    description: '$description'
+    description: $description
 )]
 class $className extends BaseMahoCommand
 {
