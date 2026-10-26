@@ -77,23 +77,27 @@ afterEach(function (): void {
     customerGroupCleanup();
 });
 
-it('saves a customer group with the code and the tax class that the user gives', function (bool $withTaxClass): void {
-    $input = ['code' => CUSTOMER_GROUP_CODE];
-    if ($withTaxClass) {
-        $input['tax_class_id'] = (string) $this->taxClass->getId();
-    }
-
-    $result = customerGroupRun(new CustomerGroupCreate('customer:group:create'), $input);
+it('saves a customer group with the code and the tax class of the arguments', function (): void {
+    $result = customerGroupRun(new CustomerGroupCreate('customer:group:create'), ['code' => CUSTOMER_GROUP_CODE, 'tax_class_id' => (string) $this->taxClass->getId()]);
 
     $this->assertCommandIsSuccessful($result);
-    $expectedTaxClassId = $withTaxClass
-        ? (int) $this->taxClass->getId()
-        : (int) Mage::getModel('customer/group')->load(Mage::helper('customer')->getDefaultCustomerGroupId())->getData('tax_class_id');
-    expect((int) customerGroupLoad()->getData('tax_class_id'))->toBe($expectedTaxClassId);
-})->with([
-    'with a tax class' => [true],
-    'without a tax class, the tax class of the default group' => [false],
-]);
+    expect((int) customerGroupLoad()->getData('tax_class_id'))->toBe((int) $this->taxClass->getId());
+});
+
+it('fails without asking when the tax class is missing', function (): void {
+    expect(fn() => customerGroupRun(new CustomerGroupCreate('customer:group:create'), ['code' => CUSTOMER_GROUP_CODE]))
+        ->toThrow(Symfony\Component\Console\Exception\RuntimeException::class, 'Not enough arguments (missing: "tax_class_id")');
+});
+
+it('fails to create a customer group with a code longer than the model saves', function (): void {
+    $code = str_repeat('x', Mage_Customer_Model_Group::GROUP_CODE_MAX_LENGTH + 1);
+
+    $result = customerGroupRun(new CustomerGroupCreate('customer:group:create'), ['code' => $code, 'tax_class_id' => (string) $this->taxClass->getId()]);
+
+    expect($result->statusCode)->toBe(Command::INVALID);
+    expect($result->getDisplay())->toContain('Code cannot be longer than 32 bytes');
+    expect(Mage::getModel('customer/group')->load(substr($code, 0, Mage_Customer_Model_Group::GROUP_CODE_MAX_LENGTH), 'customer_group_code')->getId())->toBeNull();
+});
 
 it('asks for the code and the tax class in the terminal', function (): void {
     $result = customerGroupRun(new CustomerGroupCreate('customer:group:create'), [], [CUSTOMER_GROUP_CODE, (string) $this->taxClass->getId()]);
@@ -116,9 +120,10 @@ it('fails to create a customer group with a tax class that is not a customer tax
 });
 
 it('fails when a customer group with the same code exists', function (): void {
-    $this->assertCommandIsSuccessful(customerGroupRun(new CustomerGroupCreate('customer:group:create'), ['code' => CUSTOMER_GROUP_CODE]));
+    $input = ['code' => CUSTOMER_GROUP_CODE, 'tax_class_id' => (string) $this->taxClass->getId()];
+    $this->assertCommandIsSuccessful(customerGroupRun(new CustomerGroupCreate('customer:group:create'), $input));
 
-    $result = customerGroupRun(new CustomerGroupCreate('customer:group:create'), ['code' => CUSTOMER_GROUP_CODE]);
+    $result = customerGroupRun(new CustomerGroupCreate('customer:group:create'), $input);
 
     $this->assertCommandFailed($result);
     expect($result->getDisplay())->toContain('Customer Group already exists');

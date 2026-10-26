@@ -11,6 +11,7 @@ namespace MahoCLI\Commands;
 
 use Mage;
 use Mage_Core_Exception;
+use Mage_Customer_Model_Group;
 use Mage_Tax_Model_Class;
 use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -32,8 +33,8 @@ class CustomerGroupCreate extends BaseMahoCommand
         #[Argument(description: 'The code of the customer group')]
         #[Ask('Code:')]
         string $code,
-        #[Argument(description: 'The ID of the customer tax class (default: the tax class of the default group)', name: 'tax_class_id')]
-        ?int $taxClassId = null,
+        #[Argument(description: 'The ID of the customer tax class', name: 'tax_class_id')]
+        int $taxClassId,
     ): int {
         $this->initMaho();
 
@@ -42,8 +43,11 @@ class CustomerGroupCreate extends BaseMahoCommand
             $output->writeln('<error>Code cannot be empty</error>');
             return Command::INVALID;
         }
+        if (strlen($code) > Mage_Customer_Model_Group::GROUP_CODE_MAX_LENGTH) {
+            $output->writeln('<error>Code cannot be longer than ' . Mage_Customer_Model_Group::GROUP_CODE_MAX_LENGTH . ' bytes</error>');
+            return Command::INVALID;
+        }
 
-        $taxClassId ??= $this->getDefaultTaxClassId();
         if (!array_key_exists($taxClassId, $this->getTaxClasses())) {
             $output->writeln("<error>Customer tax class not found with ID: $taxClassId</error>");
             return Command::INVALID;
@@ -72,13 +76,8 @@ class CustomerGroupCreate extends BaseMahoCommand
 
         $this->initMaho();
         $taxClasses = $this->getTaxClasses();
-        $answer = $io->choice('Tax class:', $taxClasses, $this->getDefaultTaxClassId());
+        $answer = $io->choice('Tax class:', $taxClasses);
         $input->setArgument('tax_class_id', (string) array_search($answer, $taxClasses, true));
-    }
-
-    private function getDefaultTaxClassId(): int
-    {
-        return (int) Mage::getModel('customer/group')->getTaxClassId(Mage::helper('customer')->getDefaultCustomerGroupId());
     }
 
     /**
