@@ -181,7 +181,7 @@ final class Library
         }
         // A "#" line inside a code block is a comment, not the title.
         $title = preg_match('/^#\s+(.+)$/m', (string) preg_replace('/^(```|~~~).*?^\1/ms', '', self::stripFrontMatter($text)), $match)
-            ? trim(strip_tags($match[1]))
+            ? trim(strip_tags((string) preg_replace('#<span class="version-badge">.*?</span>#', '', $match[1])))
             : basename($path, '.md');
 
         return new Page($source->name . '/' . $path, $title, $description, $source, $file);

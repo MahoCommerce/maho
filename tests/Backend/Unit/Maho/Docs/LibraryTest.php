@@ -101,5 +101,5 @@ it('reads the docs folder at the root of the Maho package', function (): void {
 
     expect($library->page('core/user-guide/scope.md', [Library::AUDIENCE_USER])?->title)->toBe('Scope: Default, Website and Store View Values');
     expect($library->page('core/hosting/cron.md', [Library::AUDIENCE_SYSADMIN])?->title)->toBe('Cron jobs');
-    expect($library->page('Maho_Giftcard/gift-cards.md', [Library::AUDIENCE_USER])?->title)->toBe('Gift Cards v26.1+');
+    expect($library->page('Maho_Giftcard/gift-cards.md', [Library::AUDIENCE_USER])?->title)->toBe('Gift Cards');
 });
