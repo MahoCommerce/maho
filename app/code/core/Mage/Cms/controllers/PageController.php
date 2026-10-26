@@ -18,11 +18,12 @@ class Mage_Cms_PageController extends Mage_Core_Controller_Front_Action
         $page = Mage::getSingleton('cms/page')
             ->setStoreId(Mage::app()->getStore()->getId())
             ->load($pageId);
-        if ($page->getId() && Mage::helper('cms/page')->isHomePage($page)) {
+        $helper = Mage::helper('cms/page');
+        if ($page->getId() && $helper->isHomePage($page)) {
             $this->getResponse()->setRedirect(Mage::getUrl('', ['_query' => $this->getRequest()->getQuery()]), 301);
             return;
         }
-        if (!Mage::helper('cms/page')->renderPage($this, $page->getId())) {
+        if ($helper->isNoRoutePage($page) || !$helper->renderPage($this, $page->getId())) {
             return $this->_forward('noRoute');
         }
     }
