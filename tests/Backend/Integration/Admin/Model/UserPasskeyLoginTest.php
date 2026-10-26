@@ -73,12 +73,23 @@ it('asks for the 2FA code at prelogin and signs in with the code afterwards', fu
     $secret = Mage::helper('core/security')->generateTotpSecret();
     $this->user->setTwofaSecret($secret)->setTwofaEnabled(true)->save();
     $payload = signedPasskeyAssertion($this->key);
+    $this->session->unsRequireTwofa();
 
     $this->session->prelogin($this->user->getUsername(), $payload);
     expect($this->session->getRequireTwofa())->toBeTrue();
 
     $code = \OTPHP\TOTP::createFromSecret($secret)->now();
     expect(Mage::getModel('admin/user')->authenticate($this->user->getUsername(), $payload, $code))->toBeTrue();
+});
+
+// The flag 0x05 says that the authenticator verified the user, so the passkey replaces the 2FA code.
+it('signs in with no 2FA code when the authenticator verified the user', function () {
+    $this->user->setTwofaSecret(Mage::helper('core/security')->generateTotpSecret())->setTwofaEnabled(true)->save();
+    $payload = signedPasskeyAssertion($this->key, 0x05);
+
+    $this->session->prelogin($this->user->getUsername(), $payload);
+
+    expect(Mage::getModel('admin/user')->authenticate($this->user->getUsername(), $payload))->toBeTrue();
 });
 
 it('rejects a passkey payload without a challenge as a failed login', function () {
