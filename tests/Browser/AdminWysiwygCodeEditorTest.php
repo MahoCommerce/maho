@@ -82,9 +82,10 @@ function openCodeEditor(object $test): object
         '/admin/cms_block/edit/block_id/' . $test->block->getId(),
         '#block_content',
     );
-    waitForScript($page, '!!window.tiptapEditors?.get("block_content")?.codeEditor', 20);
+    waitForScript($page, '!!window.tiptapEditors?.get("block_content")?.editor', 20);
     $page->script(CODE_EDITOR_TYPE);
     $page->script('window.tiptapEditors.get("block_content").turnOff()');
+    waitForScript($page, '!!window.tiptapEditors.get("block_content").codeEditor', 20);
     $page->script(<<<'JS'
         (() => {
             const view = window.tiptapEditors.get('block_content').codeEditor.view;
@@ -134,6 +135,26 @@ it('marks a class that the storefront does not style', function () {
         ->toBe(['txet-center']);
 });
 
+it('loads CodeMirror only when the source view opens', function () {
+    $page = adminLoginAndVisit(
+        CODE_EDITOR_ADMIN_USER,
+        CODE_EDITOR_ADMIN_PASSWORD,
+        '/admin/cms_block/edit/block_id/' . $this->block->getId(),
+        '#block_content',
+    );
+    waitForScript($page, '!!window.tiptapEditors?.get("block_content")?.editor', 20);
+    $loaded = 'performance.getEntriesByType("resource").some((entry) => entry.name.includes("/js/codemirror.js"))';
+
+    expect($page->script($loaded))->toBeFalse()
+        ->and($page->script('window.tiptapEditors.get("block_content").codeEditor'))->toBeNull();
+
+    $page->script('document.querySelector("#block_content_toolbar button[data-source]").click()');
+    waitForScript($page, '!!window.tiptapEditors.get("block_content").codeEditor', 20);
+
+    expect($page->script($loaded))->toBeTrue()
+        ->and($page->script('window.tiptapEditors.get("block_content").codeEditor.isVisible()'))->toBeTrue();
+});
+
 it('shows the source inside the editor with the Source button, and reads it back', function () {
     $page = adminLoginAndVisit(
         CODE_EDITOR_ADMIN_USER,
@@ -141,9 +162,10 @@ it('shows the source inside the editor with the Source button, and reads it back
         '/admin/cms_block/edit/block_id/' . $this->block->getId(),
         '#block_content',
     );
-    waitForScript($page, '!!window.tiptapEditors?.get("block_content")?.codeEditor', 20);
+    waitForScript($page, '!!window.tiptapEditors?.get("block_content")?.editor', 20);
 
     $page->script('document.querySelector("#block_content_toolbar button[data-source]").click()');
+    waitForScript($page, '!!window.tiptapEditors.get("block_content").codeEditor', 20);
     expect($page->script('window.tiptapEditors.get("block_content").wrapper.contains(window.tiptapEditors.get("block_content").codeEditor.dom)'))->toBeTrue()
         ->and($page->script('window.tiptapEditors.get("block_content").isTiptapActive()'))->toBeFalse()
         ->and($page->script('[...document.querySelectorAll("#block_content_toolbar button:not(:disabled)")].map((button) => button.title)'))
@@ -176,7 +198,7 @@ it('edits the HTML of one cell from its badge, in one step that undo reverts', f
         '/admin/cms_block/edit/block_id/' . $this->block->getId(),
         '#block_content',
     );
-    waitForScript($page, '!!window.tiptapEditors?.get("block_content")?.codeEditor', 20);
+    waitForScript($page, '!!window.tiptapEditors?.get("block_content")?.editor', 20);
 
     $page->script('document.querySelectorAll(".ProseMirror [data-type=\\"maho-columns\\"] .cell-badge")[1].querySelector("[data-action=\\"source\\"]").click()');
     waitForScript($page, '!!document.querySelector("#tiptap-element-source")?.codeView');

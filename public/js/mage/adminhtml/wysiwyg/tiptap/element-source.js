@@ -4,7 +4,6 @@
 import { Extension, createNodeFromContent, getHTMLFromFragment } from 'https://esm.sh/@tiptap/core@3.31.3';
 import { Plugin } from 'https://esm.sh/@tiptap/pm@3.31.3/state';
 import { Fragment } from 'https://esm.sh/@tiptap/pm@3.31.3/model';
-import { createHtmlView } from './code-editor.js';
 
 /** The HTML of `node`, as the plain HTML editor shows it. */
 const nodeHtml = (setup, node) => setup.convertToPlain(getHTMLFromFragment(Fragment.from(node), node.type.schema)).trim();
@@ -13,7 +12,9 @@ const nodeHtml = (setup, node) => setup.convertToPlain(getHTMLFromFragment(Fragm
  * Open a dialog with the HTML of the node at `pos` in a code editor. Update replaces the node,
  * in one step that Undo reverts. HTML that the rich text editor cannot keep needs a confirmation.
  */
-export const openElementSource = (setup, pos) => {
+export const openElementSource = async (setup, pos) => {
+    // CodeMirror is large, so it loads at the first use
+    const { createHtmlView } = await import('./code-editor.js');
     const editor = setup.editor;
     const node = editor.state.doc.nodeAt(pos);
     if (!node) {

@@ -3,7 +3,6 @@
 
 import * as TiptapModules from './extensions.js';
 import { blockButtons, blockDropdown } from './blocks.js';
-import { MahoCodeEditor, createHtmlView } from './code-editor.js';
 import { MahoElementSource, openElementSource } from './element-source.js';
 import { html_beautify } from 'https://esm.sh/js-beautify@2.0.3/js/lib/beautify-html.js';
 
@@ -22,6 +21,8 @@ class tiptapWysiwygSetup {
         this.storeId = config.store_id ?? 0;
         this.invalidContent = null;
         this.sourceMode = false;
+        this.codeEditor = null;
+        this.codeEditorLoad = null;
         this.notice = null;
         this.sanitizePreview = null;
 
@@ -32,8 +33,8 @@ class tiptapWysiwygSetup {
 
         // The field opens in the source view when the setting hides the editor, or when the
         // rich text editor cannot keep the content
-        this.placeSource(true);
         if (config.hidden || this.invalidContent !== null) {
+            this.placeSource(true);
             this.showPluginButtons(true);
         } else {
             this.showRichText(false);
@@ -460,7 +461,11 @@ class tiptapWysiwygSetup {
         this.sourceMode = on;
         this.wrapper.classList.toggle('is-source', on);
         const content = this.wrapper.querySelector('.tiptap-content');
-        this.codeEditor.show(on);
+        if (this.codeEditor) {
+            this.codeEditor.show(on);
+        } else if (on) {
+            this.loadCodeEditor();
+        }
         toggleVis(content, !on);
         // The controls before the spacer change the rich text, so they wait for the way back
         const toolbar = document.getElementById(`${this.id}_toolbar`);
@@ -470,6 +475,26 @@ class tiptapWysiwygSetup {
             }
         }
         toolbar.querySelector('button[data-source]')?.classList.toggle('is-active', on);
+    }
+
+    /**
+     * Load the code editor of the source view at its first use, because CodeMirror is large.
+     * Resolve with the code editor, or with null when the field is gone.
+     */
+    loadCodeEditor() {
+        this.codeEditorLoad ??= import('./code-editor.js').then(({ MahoCodeEditor, createHtmlView }) => {
+            if (!this.wrapper.isConnected) {
+                return null;
+            }
+            const content = this.wrapper.querySelector('.tiptap-content');
+            this.codeEditor = new MahoCodeEditor(this.textarea, content, (parent, doc, extensions) => createHtmlView(this, parent, doc, extensions));
+            this.codeEditor.show(this.sourceMode);
+            return this.codeEditor;
+        }, (error) => {
+            this.codeEditorLoad = null;
+            throw error;
+        });
+        return this.codeEditorLoad;
     }
 
     /**
@@ -545,8 +570,8 @@ class tiptapWysiwygSetup {
         // Insert wrapper after textarea
         this.textarea.after(this.wrapper);
 
-        // The source view takes the place of the content, inside the editor
-        this.codeEditor = new MahoCodeEditor(this.textarea, container, (parent, doc, extensions) => createHtmlView(this, parent, doc, extensions));
+        // The source view takes the place of the content, inside the editor. placeSource() loads it.
+        toggleVis(this.textarea, false);
 
         // Initialize Tiptap
         this.editor = new TiptapModules.Editor({
@@ -743,7 +768,11 @@ class tiptapWysiwygSetup {
         this.notice = null;
         this.sanitizePreview?.destroy();
         this.sanitizePreview = null;
-        this.codeEditor?.destroy();
+        if (this.codeEditor) {
+            this.codeEditor.destroy();
+        } else {
+            toggleVis(this.textarea, this.sourceMode);
+        }
         this.codeEditor = null;
 
         this.unbindEventListeners();
@@ -808,7 +837,7 @@ class tiptapWysiwygSetup {
             blockDropdown(this, 'accordion'),
             ...blockButtons(this, ['Insert Image', 'Insert Slideshow', 'Insert Widget', 'Insert Variable']),
             { type: 'spacer' },
-            { type: 'button', title: 'Source', icon: 'source', onClick: () => this.toggle() || this.codeEditor.view.focus(), data: { source: '' } },
+            { type: 'button', title: 'Source', icon: 'source', onClick: () => this.toggle() || this.loadCodeEditor().then((codeEditor) => codeEditor?.view.focus()), data: { source: '' } },
             // Fullscreen has a group of its own: CSS pins that group to the end of the first row
             { type: 'group' },
             // The command focuses the editor without a scroll. The focus() of a toolbar chain scrolls to the selection
