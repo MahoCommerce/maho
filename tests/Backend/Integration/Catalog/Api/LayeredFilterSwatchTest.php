@@ -45,21 +45,24 @@ describe('the swatches of the layered filters API', function (): void {
         StoreContext::ensureStore(1);
         Mage::app()->getCache()->clean(['API_LAYERED_FILTERS']);
 
-        $this->blackSwatch = Mage::getBaseDir('media') . '/' . Mage_ConfigurableSwatches_Helper_Productimg::SWATCH_FALLBACK_MEDIA_DIR
-            . '/black' . Mage_ConfigurableSwatches_Helper_Productimg::getSwatchFileExt();
-        $this->hadBlackSwatch = is_file($this->blackSwatch);
-        if (!$this->hadBlackSwatch) {
-            @mkdir(dirname($this->blackSwatch), 0777, true);
-            Maho::encodeImage(Maho::getImageManager()->createImage(80, 40)->fill('111111'))->save($this->blackSwatch);
+        // The sample data has an image for each color, so the tests see only their own black image
+        $this->swatchDir = Mage::getBaseDir('media') . '/' . Mage_ConfigurableSwatches_Helper_Productimg::SWATCH_FALLBACK_MEDIA_DIR;
+        $this->savedSwatchDir = $this->swatchDir . '_' . uniqid();
+        if (is_dir($this->swatchDir)) {
+            rename($this->swatchDir, $this->savedSwatchDir);
         }
+        mkdir($this->swatchDir, 0777, true);
+        Maho::encodeImage(Maho::getImageManager()->createImage(80, 40)->fill('111111'))
+            ->save($this->swatchDir . '/black' . Mage_ConfigurableSwatches_Helper_Productimg::getSwatchFileExt());
         Mage::helper('configurableswatches/productimg')->clearSwatchesCache();
     });
 
     afterEach(function (): void {
         Mage::app()->getCache()->clean(['API_LAYERED_FILTERS']);
         Mage::helper('configurableswatches/productimg')->clearSwatchesCache();
-        if (!$this->hadBlackSwatch) {
-            unlink($this->blackSwatch);
+        (new \Maho\Io\File())->rmdir($this->swatchDir, true);
+        if (is_dir($this->savedSwatchDir)) {
+            rename($this->savedSwatchDir, $this->swatchDir);
         }
     });
 
