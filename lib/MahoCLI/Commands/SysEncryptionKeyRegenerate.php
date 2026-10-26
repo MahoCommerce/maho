@@ -11,6 +11,7 @@ namespace MahoCLI\Commands;
 
 use Mage;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Helper\Table;
@@ -28,8 +29,12 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
     private string $newEncryptionKey;
     private bool $isOldEncryptionKeyM1 = false;
 
-    public function __invoke(InputInterface $input, OutputInterface $output): int
-    {
+    public function __invoke(
+        InputInterface $input,
+        OutputInterface $output,
+        #[Option(description: 'Skip the confirmation prompts', shortcut: 'f')]
+        bool $force = false,
+    ): int {
         $output->writeln('<error>WARNING: This command will replace your encryption key in local.xml</error>');
         $output->writeln('<error>All encrypted data will need to be re-encrypted with the new key.</error>');
         $output->writeln('<error>A backup of local.xml will be created, but please ensure you have a full backup of your database before proceeding.</error>');
@@ -39,7 +44,7 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
         /** @var QuestionHelper $questionHelper */
         $questionHelper = $this->getHelper('question');
         $question = new ConfirmationQuestion('Are you sure you want to continue? (y/N) ', false);
-        if (!$questionHelper->ask($input, $output, $question)) {
+        if (!$force && !$questionHelper->ask($input, $output, $question)) {
             $output->writeln('<info>Operation cancelled.</info>');
             return Command::SUCCESS;
         }
@@ -69,7 +74,7 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
 
             $output->writeln('');
             $question = new ConfirmationQuestion('Are you sure you want to continue? (y/N) ', false);
-            if (!$questionHelper->ask($input, $output, $question)) {
+            if (!$force && !$questionHelper->ask($input, $output, $question)) {
                 $output->writeln('<info>Operation cancelled.</info>');
                 return Command::SUCCESS;
             }

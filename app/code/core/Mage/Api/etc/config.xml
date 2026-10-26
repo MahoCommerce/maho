@@ -12,6 +12,9 @@ SPDX-License-Identifier: AFL-3.0
         </Mage_Api>
     </modules>
     <global>
+        <docs>
+            <api>docs/api</api>
+        </docs>
         <ignoredModules>
             <entities>
                 <api/>

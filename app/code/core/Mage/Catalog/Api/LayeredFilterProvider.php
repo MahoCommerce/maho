@@ -85,14 +85,15 @@ final class LayeredFilterProvider extends \Maho\ApiPlatform\Provider
         $layer = \Mage::getModel('catalog/layer');
         $layer->setCurrentCategory($category);
 
-        $filterableAttributes = $layer->getFilterableAttributes();
-
-        // Pre-load all swatch data in one query for all filterable select/multiselect attributes
-        $swatchMap = $this->loadSwatchMap($filterableAttributes);
+        $swatchHelper = \Mage::helper('configurableswatches');
+        $swatchImageHelper = \Mage::helper('configurableswatches/productimg');
+        $dimensionHelper = \Mage::helper('configurableswatches/swatchdimensions');
+        $swatchWidth = (int) $dimensionHelper->getInnerWidth(\Mage_ConfigurableSwatches_Helper_Swatchdimensions::AREA_LAYER);
+        $swatchHeight = (int) $dimensionHelper->getInnerHeight(\Mage_ConfigurableSwatches_Helper_Swatchdimensions::AREA_LAYER);
 
         $filters = [];
 
-        foreach ($filterableAttributes as $attribute) {
+        foreach ($layer->getFilterableAttributes() as $attribute) {
             /** @var \Mage_Catalog_Model_Layer_Filter_Attribute $filterModel */
             $filterModel = \Mage::getModel('catalog/layer_filter_attribute');
             $filterModel->setLayer($layer);
@@ -104,6 +105,7 @@ final class LayeredFilterProvider extends \Maho\ApiPlatform\Provider
             $dto->type = $attribute->getFrontendInput();
             $dto->position = (int) $attribute->getPosition();
             $dto->multiple = (bool) $attribute->getIsFilterableMultiple();
+            $isSwatch = $swatchHelper->isEnabled() && $swatchHelper->attrIsSwatchType($attribute);
 
             $items = $filterModel->getItems();
             foreach ($items as $item) {
@@ -112,22 +114,14 @@ final class LayeredFilterProvider extends \Maho\ApiPlatform\Provider
                 // so GraphQL exposes it as Iterable scalar instead of wrapping
                 // in a broken CursorConnection (FilterOption is a non-ApiResource
                 // DTO with no Read operation for edge resolution).
-                $optionId = (int) $item->getValue();
-                $option = [
+                $dto->options[] = [
                     'value' => (string) $item->getValue(),
                     'label' => (string) $item->getLabel(),
                     'count' => (int) $item->getCount(),
-                    'swatch' => null,
+                    'swatch' => $isSwatch
+                        ? $swatchImageHelper->getGlobalSwatch($item, (string) $item->getLabel(), $swatchWidth, $swatchHeight)
+                        : null,
                 ];
-
-                if (isset($swatchMap[$optionId])) {
-                    $option['swatch'] = [
-                        'type'  => $swatchMap[$optionId]->type,
-                        'value' => $swatchMap[$optionId]->value,
-                    ];
-                }
-
-                $dto->options[] = $option;
             }
 
             if (!empty($dto->options)) {
@@ -138,66 +132,6 @@ final class LayeredFilterProvider extends \Maho\ApiPlatform\Provider
         usort($filters, fn(LayeredFilter $a, LayeredFilter $b) => $a->position <=> $b->position);
 
         return $filters;
-    }
-
-    /**
-     * Load swatch data for all option IDs across filterable attributes.
-     * Returns a map of option_id => FilterOptionSwatch.
-     *
-     * @param iterable<\Mage_Eav_Model_Entity_Attribute_Abstract> $filterableAttributes
-     * @return array<int, FilterOptionSwatch>
-     */
-    private function loadSwatchMap(iterable $filterableAttributes): array
-    {
-        $attributeIds = [];
-        foreach ($filterableAttributes as $attribute) {
-            if (in_array($attribute->getFrontendInput(), ['select', 'multiselect'], true)) {
-                $attributeIds[] = (int) $attribute->getId();
-            }
-        }
-
-        if (empty($attributeIds)) {
-            return [];
-        }
-
-        $resource = \Mage::getSingleton('core/resource');
-        $read = $resource->getConnection('core_read');
-        $swatchTable = $resource->getTableName('eav/attribute_option_swatch');
-        $optionTable = $resource->getTableName('eav/attribute_option');
-
-        $select = $read->select()
-            ->from(['s' => $swatchTable], ['option_id', 'value', 'filename'])
-            ->join(
-                ['o' => $optionTable],
-                's.option_id = o.option_id',
-                [],
-            )
-            ->where('o.attribute_id IN (?)', $attributeIds)
-            ->where('(s.value IS NOT NULL AND s.value != "") OR (s.filename IS NOT NULL AND s.filename != "")');
-
-        $rows = $read->fetchAll($select);
-        $map = [];
-
-        $mediaBaseUrl = rtrim(\Mage::getBaseUrl('media'), '/');
-
-        foreach ($rows as $row) {
-            $optionId = (int) $row['option_id'];
-            if (!empty($row['filename'])) {
-                $map[$optionId] = new FilterOptionSwatch(
-                    type: 'image',
-                    value: $mediaBaseUrl . '/attribute/swatch/' . ltrim($row['filename'], '/'),
-                );
-            } elseif (!empty($row['value'])) {
-                // Detect hex color (#RGB, #RRGGBB, #RRGGBBAA) vs text swatch
-                $isHex = preg_match('/^#([0-9a-fA-F]{3,8})$/', $row['value']);
-                $map[$optionId] = new FilterOptionSwatch(
-                    type: $isHex ? 'color' : 'text',
-                    value: $row['value'],
-                );
-            }
-        }
-
-        return $map;
     }
 
     /**

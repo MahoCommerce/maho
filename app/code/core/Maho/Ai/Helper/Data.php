@@ -476,6 +476,7 @@ class Maho_Ai_Helper_Data extends Mage_Core_Helper_Abstract
             'admin_read_form' => $this->__('Read the form'),
             'admin_edit_text' => $this->__('Correct text in the form'),
             'admin_content_guide' => $this->__('Content editor guide'),
+            'docs_read' => $this->__('Read the user guide'),
             'enable_tools' => $this->__('Load tools'),
             'remember' => $this->__('Remember a note'),
             'forget' => $this->__('Forget a note'),

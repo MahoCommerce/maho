@@ -255,7 +255,7 @@
         border-radius: var(--radius-box);
     }
 
-    .entry-edit .entry-edit-head + :is(fieldset, .fieldset) {
+    .entry-edit .entry-edit-head + :is(fieldset, .fieldset, .box) {
         border-top: 0;
         border-start-start-radius: 0;
         border-start-end-radius: 0;

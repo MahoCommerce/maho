@@ -1,0 +1,78 @@
+name: Docs
+
+# mahocommerce.com builds its user guide, developer docs, API docs and hosting docs from this
+# repository. This workflow builds the site with the docs of the pull request. After a push to main,
+# or when you run it by hand on main, it starts a deploy of the site.
+
+on:
+  pull_request:
+    paths: &docs_paths
+      - 'docs/**'
+      - 'app/code/core/*/*/docs/**'
+      - 'app/code/core/*/*/etc/config.xml'
+      - '.github/workflows/docs.yml'
+  push:
+    branches:
+      - main
+    paths: *docs_paths
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build mahocommerce.com
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: maho
+          persist-credentials: false
+
+      - name: Checkout the website
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: MahoCommerce/mahocommerce.com
+          path: site
+          persist-credentials: false
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: site/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r site/requirements.txt
+
+      # A broken link, a broken anchor or a page that is missing from a .nav.yml fails the build.
+      - name: Build
+        working-directory: site
+        env:
+          MAHO_DOCS_SOURCE: ${{ github.workspace }}/maho
+          DISABLE_MKDOCS_2_WARNING: 'true'
+        run: mkdocs build --strict
+
+  deploy:
+    name: Deploy mahocommerce.com
+    needs: build
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Call the deploy hook
+        env:
+          DEPLOY_HOOK: ${{ secrets.DOCS_DEPLOY_HOOK }}
+        run: |
+          if [ -z "$DEPLOY_HOOK" ]; then
+            echo "The DOCS_DEPLOY_HOOK secret is not set, so the site updates on its next deploy."
+            exit 0
+          fi
+          curl --fail --silent --show-error --request POST "$DEPLOY_HOOK" > /dev/null

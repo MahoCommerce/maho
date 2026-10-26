@@ -10,14 +10,14 @@ declare(strict_types=1);
 namespace MahoCLI\Commands;
 
 use Mage;
+use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\Ask;
+use Symfony\Component\Console\Attribute\Interact;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Helper\QuestionHelper;
-use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Question\ChoiceQuestion;
-use Symfony\Component\Console\Question\Question;
+use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
     name: 'customer:create',
@@ -25,56 +25,62 @@ use Symfony\Component\Console\Question\Question;
 )]
 class CustomerCreate extends BaseMahoCommand
 {
-    public function __invoke(InputInterface $input, OutputInterface $output): int
-    {
+    public function __invoke(
+        OutputInterface $output,
+        #[Argument(description: 'The email of the customer')]
+        #[Ask('Email:')]
+        #[\SensitiveParameter]
+        string $email,
+        #[Argument(description: 'The password of the customer')]
+        #[Ask('Password:', hidden: true)]
+        #[\SensitiveParameter]
+        string $password,
+        #[Argument(description: 'The first name of the customer')]
+        #[Ask('Firstname:')]
+        string $firstname,
+        #[Argument(description: 'The last name of the customer')]
+        #[Ask('Lastname:')]
+        string $lastname,
+        #[Argument(description: 'The code of the website (default: the default website)')]
+        ?string $website = null,
+        #[Argument(description: 'The ID of the customer group (default: the default group of the website)')]
+        ?int $group = null,
+    ): int {
         $this->initMaho();
 
-        /** @var QuestionHelper $questionHelper */
-        $questionHelper = $this->getHelper('question');
-
-        $question = new Question('Email: ', '');
-        $email = $questionHelper->ask($input, $output, $question);
         $email = trim($email);
         if (!strlen($email)) {
             $output->writeln('<error>Email cannot be empty</error>');
             return Command::INVALID;
         }
 
-        $question = new Question('Password: ', '');
-        $password = $questionHelper->ask($input, $output, $question);
         $password = trim($password);
         if (!strlen($password)) {
             $output->writeln('<error>Password cannot be empty</error>');
             return Command::INVALID;
         }
 
-        $question = new Question('Firstname: ', '');
-        $firstname = $questionHelper->ask($input, $output, $question);
         $firstname = trim($firstname);
         if (!strlen($firstname)) {
             $output->writeln('<error>Firstname cannot be empty</error>');
             return Command::INVALID;
         }
 
-        $question = new Question('Lastname: ', '');
-        $lastname = $questionHelper->ask($input, $output, $question);
         $lastname = trim($lastname);
         if (!strlen($lastname)) {
             $output->writeln('<error>Lastname cannot be empty</error>');
             return Command::INVALID;
         }
 
-        $websites = [];
-        $websitesCollection = Mage::getResourceModel('core/website_collection');
-        foreach ($websitesCollection as $website) {
-            $websites[$website->getId()] = "{$website->getCode()} - {$website->getName()}";
-        }
-        $question = new ChoiceQuestion('Website: ', $websites);
-        $website = $questionHelper->ask($input, $output, $question);
-        $website = explode(' - ', $website)[0];
-        $website = Mage::getModel('core/website')->load($website, 'code');
-        if (!$website->getId()) {
+        $websiteModel = Mage::getModel('core/website')->load($website ?? $this->getDefaultWebsiteCode(), 'code');
+        if (!$websiteModel->getId()) {
             $output->writeln('<error>Website not found</error>');
+            return Command::INVALID;
+        }
+
+        $group ??= $this->getDefaultGroupId($websiteModel->getCode());
+        if (!array_key_exists($group, $this->getGroups())) {
+            $output->writeln("<error>Customer group not found with ID: $group</error>");
             return Command::INVALID;
         }
 
@@ -83,7 +89,8 @@ class CustomerCreate extends BaseMahoCommand
             ->setPassword($password)
             ->setFirstname($firstname)
             ->setLastname($lastname)
-            ->setWebsiteId($website->getId())
+            ->setWebsiteId((int) $websiteModel->getId())
+            ->setGroupId($group)
             ->save();
 
         if (!$customer->getId()) {
@@ -91,7 +98,46 @@ class CustomerCreate extends BaseMahoCommand
             return Command::FAILURE;
         }
 
-        $output->writeln("<info>Customer $email create successfully.</info>");
+        $output->writeln("<info>Customer $email created successfully.</info>");
         return Command::SUCCESS;
+    }
+
+    #[Interact]
+    public function askWebsiteAndGroup(InputInterface $input, SymfonyStyle $io): void
+    {
+        $this->initMaho();
+
+        if ($input->getArgument('website') === null) {
+            $websites = [];
+            foreach (Mage::getResourceModel('core/website_collection') as $website) {
+                $websites[$website->getCode()] = $website->getName();
+            }
+            $input->setArgument('website', (string) $io->choice('Website:', $websites, $this->getDefaultWebsiteCode()));
+        }
+
+        if ($input->getArgument('group') === null) {
+            $groups = $this->getGroups();
+            $answer = $io->choice('Customer group:', $groups, $this->getDefaultGroupId((string) $input->getArgument('website')));
+            $input->setArgument('group', (string) array_search($answer, $groups, true));
+        }
+    }
+
+    private function getDefaultWebsiteCode(): string
+    {
+        return (string) Mage::app()->getDefaultStoreView()->getWebsite()->getCode();
+    }
+
+    private function getDefaultGroupId(string $websiteCode): int
+    {
+        $website = Mage::getModel('core/website')->load($websiteCode, 'code');
+        return Mage::helper('customer')->getDefaultCustomerGroupId($website->getDefaultStore());
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function getGroups(): array
+    {
+        return Mage::getResourceModel('customer/group_collection')->setRealGroupsFilter()->toOptionHash();
     }
 }

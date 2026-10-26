@@ -110,6 +110,8 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
      */
     public function prelogin(#[\SensitiveParameter] string $username, #[\SensitiveParameter] string $password, ?Mage_Core_Controller_Request_Http $request = null): void
     {
+        // authenticate() uses up the passkey challenge, and the login request that follows needs it
+        $passkeyChallenge = $this->getPasskeyChallenge();
         try {
             if (!empty($username) && !empty($password)) {
                 /** @var Mage_Admin_Model_User $user */
@@ -122,6 +124,8 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
             }
         } catch (Exception $e) {
             Mage::logException($e);
+        } finally {
+            $this->setPasskeyChallenge($passkeyChallenge);
         }
     }
 
