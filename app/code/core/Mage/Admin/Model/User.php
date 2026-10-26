@@ -394,13 +394,19 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
 
                 $publicKey = $this->getPasskeyPublicKey();
                 $challenge = $this->getSession()->getPasskeyChallenge();
+<<<<<<< HEAD
                 $this->getSession()->unsPasskeyChallange();
+=======
+                if ($challenge) {
+                    $this->getSession()->unsPasskeyChallenge();
+>>>>>>> f310b422 (Fixed the admin login with a passkey always failing after the authenticator confirms the user (#1640))
 
-                $webAuthn = Mage::helper('admin/auth')->getWebAuthn();
-                $usedPasskey = $webAuthn->processGet($clientDataJSON, $authenticatorData, $signature, $publicKey, $challenge);
+                    $webAuthn = Mage::helper('admin/auth')->getWebAuthn();
+                    $usedPasskey = $webAuthn->processGet($clientDataJSON, $authenticatorData, $signature, $publicKey, $challenge);
 
-                $authenticatorObj = Mage::helper('admin/auth')->getWebAuthnAttestationAuthenticatorData($authenticatorData);
-                $needsTwofa = !$authenticatorObj->getUserVerified();
+                    $authenticatorObj = Mage::helper('admin/auth')->getWebAuthnAttestationAuthenticatorData($authenticatorData);
+                    $needsTwofa = !$authenticatorObj->getUserVerified();
+                }
             }
 
             if (!$usedPasskey) {
