@@ -249,7 +249,9 @@ it('edits the HTML of one cell from its badge, in one step that undo reverts', f
     $page->script(<<<'JS'
         (() => {
             const view = document.querySelector('#tiptap-element-source').codeView;
-            view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: '<div data-type="maho-column" class="card card-border"><p>Right side</p></div>' } });
+            // Indented HTML, as the dialog shows it: the line breaks between the tags are not content
+            const html = '<div data-type="maho-column" class="card card-border">\n    <div class="card-body">\n        <p>Right side</p>\n        <p>Second line</p>\n    </div>\n</div>';
+            view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: html } });
             [...document.querySelectorAll('#tiptap-element-source button')].find((button) => button.textContent.trim() === 'Update').click();
         })()
         JS);
@@ -257,7 +259,7 @@ it('edits the HTML of one cell from its badge, in one step that undo reverts', f
 
     expect($page->script('window.tiptapEditors.get("block_content").editor.getHTML()'))
         ->toContain('class="card card-border"')
-        ->toContain('<p>Right side</p>')
+        ->toContain('<div class="card-body"><p>Right side</p><p>Second line</p></div>')
         ->toContain('<p>Left</p>');
 
     $page->script('window.tiptapEditors.get("block_content").editor.commands.undo()');

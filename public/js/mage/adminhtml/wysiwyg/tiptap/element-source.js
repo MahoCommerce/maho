@@ -41,7 +41,8 @@ export const openElementSource = async (setup, pos) => {
             if (dropped && !confirm(setup.translate('The rich text editor cannot keep this HTML: %s. Continue and remove it?', setup.describeDroppedContent(6, dropped)))) {
                 return false;
             }
-            editor.chain().focus().insertContentAt({ from: pos, to: pos + node.nodeSize }, html).run();
+            // insertContentAt() keeps whitespace by default, so the indentation between tags became paragraphs
+            editor.chain().focus().insertContentAt({ from: pos, to: pos + node.nodeSize }, html, { parseOptions: { preserveWhitespace: false } }).run();
             return true;
         },
         onClose: () => view?.destroy(),
