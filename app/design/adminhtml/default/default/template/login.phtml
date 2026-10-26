@@ -157,11 +157,15 @@
                         recursiveBase64StrToArrayBuffer(result);
 
                         const cred = await navigator.credentials.get(result);
+                        // The assertion fields are prototype getters, so Object.entries() on the
+                        // response returns nothing: read them explicitly.
+                        const response = cred.response;
                         const passkeyData = {
                             id: cred.rawId ? arrayBufferToBase64(cred.rawId) : null,
-                        }
-                        for (const [ key, val ] of Object.entries(cred.response)) {
-                            passkeyData[key] = val ? arrayBufferToBase64(val) : null;
+                            clientDataJSON: response.clientDataJSON ? arrayBufferToBase64(response.clientDataJSON) : null,
+                            authenticatorData: response.authenticatorData ? arrayBufferToBase64(response.authenticatorData) : null,
+                            signature: response.signature ? arrayBufferToBase64(response.signature) : null,
+                            userHandle: response.userHandle ? arrayBufferToBase64(response.userHandle) : null,
                         }
 
                         document.getElementById('login').value = JSON.stringify(passkeyData);
@@ -170,42 +174,8 @@
                         messagesEl.textContent = error.message;
                     }
                 }
-<<<<<<< HEAD
             </script>
         </div>
     </div>
-=======
-            }
-
-            async function startPasskeyAuthentication() {
-                try {
-                    const result = await mahoFetch("<?= $this->getUrl('adminhtml/index/passkeyloginstart') ?>", {
-                        method: 'POST',
-                        body: new FormData(formEl),
-                    });
-
-                    recursiveBase64StrToArrayBuffer(result);
-
-                    const cred = await navigator.credentials.get(result);
-                    // The assertion fields are prototype getters, so Object.entries() on the
-                    // response returns nothing: read them explicitly.
-                    const response = cred.response;
-                    const passkeyData = {
-                        id: cred.rawId ? arrayBufferToBase64(cred.rawId) : null,
-                        clientDataJSON: response.clientDataJSON ? arrayBufferToBase64(response.clientDataJSON) : null,
-                        authenticatorData: response.authenticatorData ? arrayBufferToBase64(response.authenticatorData) : null,
-                        signature: response.signature ? arrayBufferToBase64(response.signature) : null,
-                        userHandle: response.userHandle ? arrayBufferToBase64(response.userHandle) : null,
-                    }
-
-                    document.getElementById('login').value = JSON.stringify(passkeyData);
-                    gotoStep(2);
-                } catch (error) {
-                    messagesEl.textContent = error.message;
-                }
-            }
-        </script>
-    </main>
->>>>>>> f310b422 (Fixed the admin login with a passkey always failing after the authenticator confirms the user (#1640))
 </body>
 </html>
