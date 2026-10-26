@@ -252,10 +252,7 @@ it('loads the monthly and yearly coupon report collections without strict GROUP 
 // _applyRulesFilter() adds quoteInto('rule_name = ?', $name) WHERE conditions
 // on the bare column. WHERE is evaluated before grouping, so it must remain
 // valid alongside the MAX(rule_name) SELECT. The filter is exercised at the
-// SQL level (same shape _applyRulesFilter emits) rather than via
-// addRuleFilter(), because getUniqRulesNamesList() contains a double-quoted
-// empty-string literal ('rule_name <> ""') that PostgreSQL rejects as an
-// identifier — a pre-existing issue unrelated to the GROUP BY fix.
+// SQL level (same shape _applyRulesFilter emits).
 
 it('keeps the rule_name WHERE filter valid alongside the aggregated SELECT under strict GROUP BY', function () {
     salesRuleInsertAggregateFixture('salesrule/coupon_aggregated');

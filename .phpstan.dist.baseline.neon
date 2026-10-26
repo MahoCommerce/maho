@@ -12094,12 +12094,6 @@ parameters:
 			path: app/code/core/Mage/ConfigurableSwatches/Block/Catalog/Layer/State/Swatch.php
 
 		-
-			rawMessage: 'Parameter #1 $attr of method Mage_ConfigurableSwatches_Helper_Data::attrIsSwatchType() expects int|Mage_Eav_Model_Attribute, Mage_Catalog_Model_Resource_Eav_Attribute given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/ConfigurableSwatches/Block/Catalog/Layer/State/Swatch.php
-
-		-
 			rawMessage: Property Mage_ConfigurableSwatches_Block_Catalog_Layer_State_Swatch::$_initDone has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -12108,12 +12102,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_ConfigurableSwatches_Block_Catalog_Product_View_Type_Configurable_Swatches::_init() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/ConfigurableSwatches/Block/Catalog/Product/View/Type/Configurable/Swatches.php
-
-		-
-			rawMessage: 'Parameter #1 $attr of method Mage_ConfigurableSwatches_Helper_Data::attrIsSwatchType() expects int|Mage_Eav_Model_Attribute, Mage_Catalog_Model_Resource_Eav_Attribute given.'
-			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/ConfigurableSwatches/Block/Catalog/Product/View/Type/Configurable/Swatches.php
 
@@ -12192,12 +12180,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_ConfigurableSwatches_Helper_Productlist::convertLayerBlock() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/ConfigurableSwatches/Helper/Productlist.php
-
-		-
-			rawMessage: 'Parameter #1 $attr of method Mage_ConfigurableSwatches_Helper_Data::attrIsSwatchType() expects int|Mage_Eav_Model_Attribute, Mage_Catalog_Model_Resource_Eav_Attribute given.'
-			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/ConfigurableSwatches/Helper/Productlist.php
 
@@ -15872,12 +15854,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Eav/Block/Adminhtml/Attribute/Edit/Main/Abstract.php
-
-		-
-			rawMessage: 'Parameter #1 $attr of method Mage_ConfigurableSwatches_Helper_Data::attrIsSwatchType() expects int|Mage_Eav_Model_Attribute, Mage_Eav_Model_Entity_Attribute_Abstract given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Eav/Block/Adminhtml/Attribute/Edit/Options/Abstract.php
 
 		-
 			rawMessage: Property Mage_Eav_Helper_Data::$_attributesLockedFields has no type specified.
