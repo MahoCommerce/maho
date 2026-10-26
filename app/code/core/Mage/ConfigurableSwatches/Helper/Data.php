@@ -84,7 +84,7 @@ class Mage_ConfigurableSwatches_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Determine if an attribute should be a swatch
      *
-     * @param int|Mage_Eav_Model_Attribute $attr
+     * @param int|Mage_Eav_Model_Entity_Attribute_Abstract|null $attr
      * @return bool
      */
     public function attrIsSwatchType($attr)
