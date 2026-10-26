@@ -345,35 +345,15 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
                 $clientDataJSON = base64_decode($passkeyData->clientDataJSON ?? '');
                 $authenticatorData = base64_decode($passkeyData->authenticatorData ?? '');
                 $signature = base64_decode($passkeyData->signature ?? '');
-                $challenge = $this->getSession()->getPasskeyChallenge();
 
-                if (!$challenge && $this->isPasskeyPreloginVerified($password)) {
-                    // The prelogin step verified this assertion and consumed the
-                    // single-use challenge: the login request that follows can only reuse that
-                    // verification, not repeat it.
-                    $this->getSession()->unsPasskeyPreloginVerified();
-                    $usedPasskey = true;
-                } elseif ($challenge) {
+                $publicKey = $this->getPasskeyPublicKey();
+                $challenge = $this->getSession()->getPasskeyChallenge();
+                if ($challenge) {
                     $this->getSession()->unsPasskeyChallenge();
 
                     $webAuthn = Mage::helper('admin/auth')->getWebAuthn();
-                    $usedPasskey = $webAuthn->processGet(
-                        $clientDataJSON,
-                        $authenticatorData,
-                        $signature,
-                        $this->getPasskeyPublicKey(),
-                        $challenge,
-                    );
+                    $usedPasskey = $webAuthn->processGet($clientDataJSON, $authenticatorData, $signature, $publicKey, $challenge);
 
-                    if ($usedPasskey) {
-                        $this->getSession()->setPasskeyPreloginVerified(
-                            (int) $this->getId(),
-                            hash('sha256', $password),
-                        );
-                    }
-                }
-
-                if ($usedPasskey) {
                     $authenticatorObj = Mage::helper('admin/auth')->getWebAuthnAttestationAuthenticatorData($authenticatorData);
                     $needsTwofa = !$authenticatorObj->getUserVerified();
                 }
@@ -480,7 +460,6 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
         $webAuthn = Mage::helper('admin/auth')->getWebAuthn();
         $getArgs = $webAuthn->getGetArgs([ base64_decode($this->getPasskeyCredentialIdHash()) ]);
         $this->getSession()->setPasskeyChallenge($webAuthn->getChallenge()->getBinaryString());
-        $this->getSession()->unsPasskeyPreloginVerified();
 
         return $getArgs;
     }
@@ -528,21 +507,6 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
     public function isPasskeyEnabled(): bool
     {
         return $this->getPasskeyCredentialIdHash() && $this->getPasskeyPublicKey();
-    }
-
-    /**
-     * Whether the assertion payload was verified by a prelogin request of this same session.
-     * The record is bound to the user and to the payload.
-     */
-    private function isPasskeyPreloginVerified(#[\SensitiveParameter] string $payload): bool
-    {
-        $verified = $this->getSession()->getPasskeyPreloginVerified();
-        if (!is_array($verified)) {
-            return false;
-        }
-
-        return $verified['user_id'] === (int) $this->getId()
-            && hash_equals($verified['assertion_hash'], hash('sha256', $payload));
     }
 
     /**

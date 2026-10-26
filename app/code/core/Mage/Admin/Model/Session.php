@@ -13,7 +13,6 @@ declare(strict_types=1);
 /**
  * @method $this unsActiveTabId()
  * @method $this unsPasskeyChallenge()
- * @method $this unsPasskeyPreloginVerified()
  * @method bool hasSyncProcessStopWatch()
  */
 class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
@@ -111,6 +110,8 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
      */
     public function prelogin(#[\SensitiveParameter] string $username, #[\SensitiveParameter] string $password, ?Mage_Core_Controller_Request_Http $request = null): void
     {
+        // authenticate() uses up the passkey challenge, and the login request that follows needs it
+        $passkeyChallenge = $this->getPasskeyChallenge();
         try {
             if (!empty($username) && !empty($password)) {
                 /** @var Mage_Admin_Model_User $user */
@@ -123,6 +124,8 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
             }
         } catch (Exception $e) {
             Mage::logException($e);
+        } finally {
+            $this->setPasskeyChallenge($passkeyChallenge);
         }
     }
 
@@ -356,33 +359,6 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
     public function setPasskeyChallenge(?string $value): static
     {
         return $this->setData('passkey_challenge', $value);
-    }
-
-    /**
-     * Passkey assertion verified during prelogin and kept for the login request that follows.
-     * A challenge is single use, so the same assertion cannot be verified twice.
-     *
-     * @return array{user_id: int, assertion_hash: string}|null
-     */
-    public function getPasskeyPreloginVerified(): ?array
-    {
-        $value = $this->getData('passkey_prelogin_verified');
-        if (!is_array($value) || !isset($value['user_id'], $value['assertion_hash'])) {
-            return null;
-        }
-
-        return [
-            'user_id' => (int) $value['user_id'],
-            'assertion_hash' => (string) $value['assertion_hash'],
-        ];
-    }
-
-    public function setPasskeyPreloginVerified(int $userId, string $assertionHash): static
-    {
-        return $this->setData('passkey_prelogin_verified', [
-            'user_id' => $userId,
-            'assertion_hash' => $assertionHash,
-        ]);
     }
 
     public function getShowTwofaVerificationCode(bool $clear = false): ?bool
