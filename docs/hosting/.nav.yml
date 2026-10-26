@@ -1,0 +1,16 @@
+# The menu of the hosting docs on mahocommerce.com. The site puts the docs/sysadmin folder of each
+# module in this folder, so list a module page by its file name.
+nav:
+- Web server configuration: web-server.md
+- Redis (cache & sessions): redis.md
+- Shared storage (S3): storage.md
+- Edge caching integration: edge-caching.md
+- FrankenPHP: frankenphp.md
+- Cron jobs: cron.md
+- Maintenance mode: maintenance-mode.md
+- Health check & DB maintenance: health-check.md
+- Logging: logging.md
+- OpenTelemetry: opentelemetry.md
+- Email sending (SMTP): email-sending-configuration.md
+- Robots.txt: robotstxt.md
+- SVG uploads: svg-support.md

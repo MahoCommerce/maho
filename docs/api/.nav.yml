@@ -1,0 +1,70 @@
+# The API sections of the developer docs on mahocommerce.com.
+nav:
+- REST & GraphQL API (beta):
+  - Overview: v2/index.md
+  - Authentication: v2/authentication.md
+  - Conventions: v2/conventions.md
+  - REST endpoints: v2/endpoints.md
+  - GraphQL: v2/graphql.md
+  - MCP (AI agents): v2/mcp.md
+  - Errors: v2/errors.md
+  - CAPTCHA: v2/captcha.md
+  - Architecture: v2/architecture.md
+  - OpenAPI & Swagger UI: v2/openapi.md
+  - Extending & deployment: v2/extending.md
+- Legacy API:
+  - Legacy API protocols: legacy-protocols.md
+  - REST API:
+    - Introduction: rest/introduction.md
+    - Common HTTP status codes: rest/common_http_status_codes.md
+    - HTTP methods: rest/http_methods.md
+    - GET Filters: rest/get_filters.md
+    - Response formats: rest/response_formats.md
+    - Testing: rest/testing_rest_resources.md
+    - Authentication:
+      - OAuth authentication: rest/authentication/oauth_authentication.md
+      - OAuth configuration: rest/authentication/oauth_configuration.md
+    - Permission settings:
+      - Introduction: rest/permission_settings/introduction.md
+      - Roles configuration: rest/permission_settings/roles_configuration.md
+      - Attributes configuration: rest/permission_settings/attributes_configuration.md
+      - Attributes description: rest/permission_settings/attributes_description.md
+    - Extending REST API: rest/extending.md
+  - SOAP API:
+    - Introduction: soap.md
+    - Catalog Category: soap/catalog-category.md
+    - Catalog Category Attribute: soap/catalog-category-attribute.md
+    - Catalog Product:
+      - Product: soap/catalog-product.md
+      - Product Attribute: soap/catalog-product-attribute.md
+      - Product Attribute Media: soap/catalog-product-attribute-media.md
+      - Product Attribute Set: soap/catalog-product-attribute-set.md
+      - Product Custom Option: soap/catalog-product-custom-option.md
+      - Product Custom Option Value: soap/catalog-product-custom-option-value.md
+      - Product Downloadable Link: soap/catalog-product-downloadable-link.md
+      - Product Link: soap/catalog-product-link.md
+      - Product Tag: soap/catalog-product-tag.md
+      - Product Tier Price: soap/catalog-product-tier-price.md
+      - Product Types: soap/catalog-product-types.md
+    - Catalog Inventory: soap/catalog-inventory.md
+    - Checkout Cart:
+      - Checkout Cart: soap/checkout-cart.md
+      - Checkout Cart Coupon: soap/checkout-cart-coupon.md
+      - Checkout Cart Customer: soap/checkout-cart-customer.md
+      - Checkout Cart Payment: soap/checkout-cart-payment.md
+      - Checkout Cart Product: soap/checkout-cart-product.md
+      - Checkout Cart Shipping: soap/checkout-cart-shipping.md
+    - Customer:
+      - Customer: soap/customer.md
+      - Customer Group: soap/customer-group.md
+      - Customer Address: soap/customer-address.md
+    - Directory: soap/directory.md
+    - Store: soap/store.md
+    - Sales Order:
+      - Order: soap/sales-order.md
+      - Credit Memo: soap/sales-order-credit-memo.md
+      - Invoice: soap/sales-order-invoice.md
+      - Shipment: soap/sales-order-shipment.md
+- Code Reference:
+  - phpDoc code reference: code-reference.md
+  - DeepWiki AI docs: deepwiki.md

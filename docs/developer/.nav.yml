@@ -1,0 +1,40 @@
+# The menu of the developer guide on mahocommerce.com. The site puts the docs/developer folder of
+# each module in this folder, so list a module page by its path in that folder.
+nav:
+- Tutorial:
+  - Introduction: guide/introduction.md
+  - Controller dispatch: guide/controller-dispatch.md
+  - The Maho config: guide/config.md
+  - Layouts, blocks and templates: guide/layout-blocks-templates.md
+  - Models and ORM basics: guide/models-and-orm.md
+  - Setup resources: guide/setup-resources.md
+  - Advanced ORM: guide/advanced-orm.md
+  - Data collections: guide/data-collections.md
+- Feature guides:
+  - JavaScript deferral: guide/javascript-defer.md
+  - Customer Segments: guide/customer-segments.md
+  - Email Automation: guide/email-automation.md
+  - Gift Cards: guide/gift-cards.md
+  - Markdown renderers: markdown-renderers.md
+- Core & architecture:
+  - Routing: routing.md
+  - Event observers: observers.md
+  - Override configs: override-configurations.md
+  - Rate limiting & honeypot: rate-limiting-honeypot.md
+  - Message queue: message-queue.md
+- Database:
+  - Database layer: database-layer.md
+  - Declarative DB schema: declarative-database-schema.md
+- Frontend & theming:
+  - Theme development: theme-development.md
+  - Theme commands: theme-commands.md
+  - Admin theme: admin-theme.md
+  - Template directives: template-directives.md
+  - Icons library: icons-library.md
+- Utilities & tooling:
+  - CLI tool: cli-tool.md
+  - Composer plugin: composer-plugin.md
+  - Artificial Intelligence: ai.md
+  - Date & time handling: date-handling.md
+  - Language packs: language-packs.md
+  - Array Import Adapter: array-import-adapter.md

@@ -182,6 +182,7 @@ class Maho_Ai_Model_Chat_SystemPrompt
             '2. Choose the action:',
             '   - A question: read, then answer from the result.',
             '   - Attachments: read a text or CSV file with attachment_read, by its id, before you use it; an image comes with the message. A CSV of records is data to act on through the tools, with one confirmation for the batch.',
+            '   - "How does it work", "why does the store …", "which value wins": read the page of the user guide with ' . \Maho\Ai\Api\Agent\DocsTool::NAME . ' first, when it has one, and answer from it. A page of this store wins over what you know of Magento or of other platforms.',
             '   - "How do I", "where is the setting": the configuration settings list tool, with search set to a word of the question (it matches paths, labels and help texts). Answer with the section, the group and the help text, and offer to open the section with admin_open_page.',
             '   - A short change, such as a price, a status or a title, to one record or many: the update tools. A write waits for the confirmation of the administrator, one for the batch; say in one sentence what changes before you call it.',
             '   - A long text, such as page content, a description or an email template: admin_fill_form. It opens the edit form with your values, for the administrator to save. To add to a field you did not read in full, pass {"prepend": …} or {"append": …}. Content with a layout or an image uses the HTML of admin_content_guide, so the editor keeps it editable.',

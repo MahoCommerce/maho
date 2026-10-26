@@ -1,0 +1,34 @@
+# The menu of the user guide on mahocommerce.com. The site puts the docs/user folder of each
+# module in this folder, so list a module page by its file name.
+nav:
+- Start here: index.md
+- Catalog:
+  - Product types: product-types.md
+  - Configurable swatches: configurable-swatches.md
+  - Product relationship rules: product-relationship-rules.md
+  - Category import/export: category-import-export.md
+  - Configurable product prices: configurable-product-prices.md
+  - Stock status: stock-status.md
+  - URL rewrites: url-rewrites.md
+- Store views & content:
+  - 'Scope: default, website and store view': scope.md
+  - CMS pages and blocks in store views: cms-store-views.md
+- Marketing:
+  - Customer segments: customer-segments.md
+  - Email automation: email-automation.md
+  - Gift cards: gift-cards.md
+  - Feed manager: feed-manager.md
+- Customer accounts:
+  - Magic link authentication: magic-link-authentication.md
+  - Social login: social-login.md
+  - Two-factor authentication: two-factor-authentication.md
+- Search engines & AI:
+  - SEO: seo.md
+  - Structured data: structured-data.md
+  - AI crawlers & llms.txt: ai-and-crawlers.md
+- Checkout & compliance:
+  - Accessibility scan: accessibility-scan.md
+  - Captcha: captcha.md
+  - Revocation button: revocation-button.md
+  - Shipping bridge: shipping-bridge.md
+  - Tax in the cart and in the order: tax-calculation.md
