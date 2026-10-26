@@ -13,6 +13,9 @@
     </modules>
 
     <global>
+        <docs>
+            <developer>docs/developer</developer>
+        </docs>
         <models>
             <queue>
                 <class>Maho_Queue_Model</class>

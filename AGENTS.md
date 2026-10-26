@@ -306,8 +306,8 @@ class My_Module_Checkout_CartController extends Mage_Checkout_CartController { /
   layout
 - **Docs**: a module keeps the pages about its feature in its own folder and declares them in its
   `config.xml`, one folder for each audience: `<global><docs><user>docs/user</user></docs></global>`.
-  `user` is the person who works in the admin, `developer` writes code, and `sysadmin` runs the
-  server. Maho stores the declaration under the module name when it loads the module, so a disabled
+  `user` is the person who works in the admin, `developer` writes code, `sysadmin` runs the
+  server, and `api` calls the API of the store. Maho stores the declaration under the module name when it loads the module, so a disabled
   module has no pages. A page is a `.md` file with a `description:` in its front matter and one `#`
   title, in the format of mahocommerce.com. The admin assistant reads the `user` and `sysadmin`
   pages through `docs_read`, so a page gives the rules, the order in which the store picks a value,
@@ -315,7 +315,7 @@ class My_Module_Checkout_CartController extends Mage_Checkout_CartController { /
   request. `Maho\Docs\Library` lists the pages. A page that no single module owns goes in
   `docs/user-guide`, `docs/developer`, `docs/api` or `docs/hosting`. mahocommerce.com builds these
   folders and the module folders from `main`: it puts a `user` page in `user-guide/`, a `developer`
-  page in `developer/` and a `sysadmin` page in `hosting/`. So write each link as a path on the
+  page in `developer/`, a `sysadmin` page in `hosting/` and an `api` page in `api/`. So write each link as a path on the
   site, list each new page in the `.nav.yml` of its site folder, and put an image in an `images/`
   folder next to the page. The Docs workflow builds the site with `--strict`, so a broken link or
   a page that is not in a `.nav.yml` fails the check
