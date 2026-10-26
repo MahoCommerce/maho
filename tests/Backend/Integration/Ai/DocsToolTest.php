@@ -29,12 +29,12 @@ function docsToolLibrary(): Library
     ]);
 }
 
-it('lists the pages for the admin in its description and in its index, without the developer pages', function (): void {
+it('lists the pages for the admin by module in its index, without the developer pages', function (): void {
     $tool = new DocsTool(docsToolLibrary());
 
     expect($tool->hasPages())->toBeTrue();
-    expect($tool->tool()->getDescription())->toContain('Acme_Swatches/swatches.md (Swatches)')->not->toContain('Observers');
-    expect($tool->read([])['text'])->toBe('- Acme_Swatches/swatches.md: Swatches. Show colors instead of dropdowns.');
+    expect($tool->tool()->getDescription())->not->toContain('swatches.md');
+    expect($tool->read([])['text'])->toBe("- Acme_Swatches (user)\n  - Acme_Swatches/swatches.md: Swatches. Show colors instead of dropdowns.");
 });
 
 it('reads a page by the id that the index gives', function (): void {

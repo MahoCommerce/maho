@@ -27,9 +27,6 @@ final class DocsTool
     public const TITLE = 'Read the user guide';
     public const AUDIENCES = [Library::AUDIENCE_USER, Library::AUDIENCE_SYSADMIN];
 
-    /** Above this count, the tool description stops listing the pages, and the model asks for the list. */
-    private const MAX_LISTED = 80;
-
     public function __construct(private ?Library $library = null) {}
 
     public function hasPages(): bool
@@ -39,15 +36,10 @@ final class DocsTool
 
     public function tool(): Tool
     {
-        $pages = $this->pages();
-        $list = count($pages) <= self::MAX_LISTED
-            ? ' Pages: ' . implode('; ', array_map(static fn(Page $page): string => "{$page->id} ({$page->title})", $pages)) . '.'
-            : '';
-
         return ToolDefinition::create(
             new ExecutionReference(self::class, 'read'),
             self::NAME,
-            'The user guide of this store, for the people who work in the admin and run the server: how a feature works, the order in which the store picks a value, and the steps in the admin. Before you answer a question about how a feature works, read its page, and answer from it. Without a page, it returns the list of pages with a description of each.' . $list,
+            'The user guide of this store, for the people who work in the admin and run the server: how a feature works, the order in which the store picks a value, and the steps in the admin. Before you answer a question about how a feature works, call it without a page: it returns the pages of each module, with a description of each. Then read the page of the feature, and answer from it.',
             [
                 'type' => 'object',
                 'properties' => [
@@ -80,11 +72,22 @@ final class DocsTool
         return ['ok' => true, 'text' => sprintf("Page %s, from %s:\n\n%s", $page->id, $page->source->name, $page->body())];
     }
 
+    /**
+     * The pages grouped by module, in the order of the sources. "core" holds the pages that no
+     * single module owns.
+     */
     private function index(): string
     {
+        $groups = [];
+        foreach ($this->pages() as $page) {
+            $groups["{$page->source->name} ({$page->source->audience})"][] = "  - {$page->id}: {$page->title}"
+                . ($page->description !== '' ? ". {$page->description}" : '');
+        }
+
         return implode("\n", array_map(
-            static fn(Page $page): string => "- {$page->id}: {$page->title}" . ($page->description !== '' ? ". {$page->description}" : ''),
-            $this->pages(),
+            static fn(string $group, array $lines): string => "- $group\n" . implode("\n", $lines),
+            array_keys($groups),
+            $groups,
         ));
     }
 
