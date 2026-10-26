@@ -58,6 +58,19 @@ describe('CMS No Route Page URL', function () {
         'setting holds the identifier and the page id' => [true],
     ]);
 
+    it('leaves the forward to the no-route action to the default router', function () {
+        $request = new Mage_Core_Controller_Request_Http(
+            SymfonyRequest::create('http://localhost/' . $this->page->getIdentifier()),
+        );
+        $request->setModuleName('cms')->setControllerName('page')->setActionName('view')->initForward();
+        $request->setActionName('noRoute')->setDispatched(false);
+
+        expect(new Mage_Cms_Controller_Router()->match($request))->toBeFalse()
+            ->and($request->getControllerName())->toBe('page')
+            ->and($request->getActionName())->toBe('noRoute')
+            ->and($request->isDispatched())->toBeFalse();
+    });
+
     it('does not resolve the identifier of the no-route page in the URL resolver API', function () {
         $resolve = fn(): string => new Mage\Core\Api\UrlResolverProvider()
             ->provide(new ApiPlatform\Metadata\Get(), [], ['filters' => ['path' => $this->page->getIdentifier()]])
