@@ -1476,7 +1476,7 @@ it('loads tool sections on demand and keeps them for the conversation', function
 
         expect($result['status'])->toBe(200);
         // The dashboard loads no section and the message names none: only the local tools are offered at first.
-        expect(AiChatScript::$offeredTools[0])->toBe(['enable_tools', 'remember', 'forget', 'attachment_read', 'admin_open_page', 'admin_fill_form', 'admin_page_action', 'run_in_background']);
+        expect(AiChatScript::$offeredTools[0])->toBe(['enable_tools', 'remember', 'forget', 'attachment_read', 'admin_open_page', 'admin_fill_form', 'admin_page_action', 'run_in_background', 'docs_read']);
         $results = aiChatEvents($result['events'], 'tool_result');
         expect($results[0]['ok'])->toBeFalse();
         expect($results[0]['preview'])->toContain('nope');
