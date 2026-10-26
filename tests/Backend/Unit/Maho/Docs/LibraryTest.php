@@ -107,8 +107,9 @@ it('reads the docs folder at the root of the Maho package', function (): void {
     $library = new Library();
 
     expect($library->page('core/user-guide/scope.md', [Library::AUDIENCE_USER])?->title)->toBe('Scope: Default, Website and Store View Values');
-    expect($library->page('core/hosting/cron.md', [Library::AUDIENCE_SYSADMIN])?->title)->toBe('Cron jobs');
+    expect($library->page('core/hosting/redis.md', [Library::AUDIENCE_SYSADMIN])?->title)->toBe('Redis (cache & sessions)');
     expect($library->page('Maho_Giftcard/gift-cards.md', [Library::AUDIENCE_USER])?->title)->toBe('Gift Cards');
+    expect($library->page('Mage_Cron/cron.md', [Library::AUDIENCE_SYSADMIN])?->title)->toBe('Cron jobs');
 });
 
 it('reads the api pages of the core and of the modules', function (): void {
