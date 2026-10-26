@@ -57,6 +57,7 @@ Available commands:
   customer:change-password      Change password of a customers
   customer:create               Create a customer
   customer:delete               Delete customers
+  customer:group:create         Create a customer group
   customer:list                 List all customers
  db
   db:connect                    Opens the database command-line interface using credentials from your local.xml file

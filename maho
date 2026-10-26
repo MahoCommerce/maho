@@ -47,6 +47,7 @@ $application->addCommand(new \MahoCLI\Commands\CustomerCreate());
 $application->addCommand(new \MahoCLI\Commands\CustomerChangepassword());
 $application->addCommand(new \MahoCLI\Commands\CustomerDelete());
 $application->addCommand(new \MahoCLI\Commands\CustomerList());
+$application->addCommand(new \MahoCLI\Commands\CustomerGroupCreate());
 
 $application->addCommand(new \MahoCLI\Commands\DBConnect());
 $application->addCommand(new \MahoCLI\Commands\DBOptimize());

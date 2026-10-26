@@ -78,12 +78,19 @@ class CustomerCreate extends BaseMahoCommand
             return Command::INVALID;
         }
 
+        $groups = Mage::helper('customer')->getGroups()->toOptionHash();
+        $defaultGroupId = Mage::helper('customer')->getDefaultCustomerGroupId($website->getDefaultStore());
+        $question = new ChoiceQuestion('Customer group: ', $groups, $defaultGroupId);
+        $group = $questionHelper->ask($input, $output, $question);
+        $groupId = (int) array_search($group, $groups, true);
+
         $customer = Mage::getModel('customer/customer')
             ->setEmail($email)
             ->setPassword($password)
             ->setFirstname($firstname)
             ->setLastname($lastname)
             ->setWebsiteId($website->getId())
+            ->setGroupId($groupId)
             ->save();
 
         if (!$customer->getId()) {
