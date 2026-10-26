@@ -39,7 +39,12 @@ class CustomerGroupDelete extends BaseMahoCommand
     ): int {
         $this->initMaho();
 
-        $group = Mage::getModel('customer/group')->load($groupId);
+        // A lookup in PHP: PostgreSQL refuses a query with an ID that is out of range for the column.
+        $groupIds = array_keys(Mage::getResourceModel('customer/group_collection')->toOptionHash());
+        $group = Mage::getModel('customer/group');
+        if (in_array($groupId, $groupIds, true)) {
+            $group->load($groupId);
+        }
         if ($group->getId() === null) {
             $io->writeln("<error>Customer group not found with ID: $groupId</error>");
             return Command::FAILURE;
