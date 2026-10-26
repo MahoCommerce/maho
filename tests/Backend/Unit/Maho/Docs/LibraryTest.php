@@ -82,6 +82,13 @@ it('gives the body of a page without its front matter, cut to the limit', functi
     expect($page?->body(20))->toEndWith('[The page is cut here.]');
 });
 
+it('gives the body of a page without the badges of the release that added a feature', function (): void {
+    $dir = docsLibraryFolder(['a.md' => "# Feeds <span class=\"version-badge\">v26.3+</span>\n\n!!! note\n    <span class=\"version-badge\">v26.9+</span> New way.\n    <span class=\"version-badge\">&lt;v26.9</span> Old way.\n"]);
+    $page = new Library([new Source('core', Library::AUDIENCE_USER, $dir)])->page('core/a.md', [Library::AUDIENCE_USER]);
+
+    expect($page?->body())->toBe("# Feeds\n\n!!! note\n    New way.\n    <span class=\"version-badge\">&lt;v26.9</span> Old way.\n");
+});
+
 it('finds no page outside the index', function (): void {
     $library = new Library([new Source('core', Library::AUDIENCE_USER, docsLibraryFolder(['a.md' => '# A']))]);
 

@@ -25,10 +25,10 @@ final readonly class Page
         public string $file,
     ) {}
 
-    /** The text of the page without its front matter, cut to $maxChars. */
+    /** The text of the page without its front matter and its version badges, cut to $maxChars. */
     public function body(int $maxChars = Library::MAX_PAGE_CHARS): string
     {
-        $body = Library::stripFrontMatter((string) file_get_contents($this->file));
+        $body = (string) preg_replace(Library::VERSION_BADGE_PATTERN, '', Library::stripFrontMatter((string) file_get_contents($this->file)));
 
         return mb_strlen($body) > $maxChars ? mb_substr($body, 0, $maxChars) . "\n\n[The page is cut here.]" : $body;
     }

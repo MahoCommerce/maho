@@ -36,6 +36,12 @@ final class Library
     public const CORE_PACKAGE = 'mahocommerce/maho';
     public const MAX_PAGE_CHARS = 40000;
 
+    /**
+     * The badge of the release that added a feature, such as "v26.5+". A store reads the docs of its own release, so the
+     * assistant does not need it. Other badges, such as "<v26.9" or "beta", stay: they change the meaning of the text.
+     */
+    public const VERSION_BADGE_PATTERN = '#(?<=\S)[ \t]+<span class="version-badge">v[\d.]+\+</span>|<span class="version-badge">v[\d.]+\+</span>[ \t]?#';
+
     /** The folders of the core, under docs/ in the Maho package, with their audience. */
     private const CORE_FOLDERS = [
         'user-guide' => self::AUDIENCE_USER,
@@ -181,7 +187,7 @@ final class Library
         }
         // A "#" line inside a code block is a comment, not the title.
         $title = preg_match('/^#\s+(.+)$/m', (string) preg_replace('/^(```|~~~).*?^\1/ms', '', self::stripFrontMatter($text)), $match)
-            ? trim(strip_tags((string) preg_replace('#<span class="version-badge">.*?</span>#', '', $match[1])))
+            ? trim(strip_tags((string) preg_replace(self::VERSION_BADGE_PATTERN, '', $match[1])))
             : basename($path, '.md');
 
         return new Page($source->name . '/' . $path, $title, $description, $source, $file);
