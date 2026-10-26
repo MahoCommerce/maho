@@ -223,6 +223,28 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
         $height = self::SWATCH_DEFAULT_HEIGHT,
         $fileExt = null,
     ) {
+        $swatch = $this->getGlobalSwatch($object, (string) $value, (int) $width, (int) $height, $fileExt);
+        return match ($swatch['type'] ?? null) {
+            'image' => $swatch['value'],
+            'color' => $this->getColorSwatchUrl($swatch['value'], (int) $width, (int) $height),
+            default => '',
+        };
+    }
+
+    /**
+     * The swatch of $value: the URL of its image in wysiwyg/swatches, or else its hex color.
+     * When $value has neither, the admin label of the option is tried. Null when no swatch exists.
+     *
+     * @return array{type: 'image'|'color', value: string}|null
+     * @throws Mage_Core_Exception
+     */
+    public function getGlobalSwatch(
+        Mage_Catalog_Model_Product|Mage_Catalog_Model_Layer_Filter_Item|null $object,
+        string $value,
+        int $width = self::SWATCH_DEFAULT_WIDTH,
+        int $height = self::SWATCH_DEFAULT_HEIGHT,
+        ?string $fileExt = null,
+    ): ?array {
         $fileExt ??= self::getSwatchFileExt();
 
         // normalize to all lower case so that value can be used as array key below
@@ -239,10 +261,11 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
         } elseif ($object instanceof Mage_Catalog_Model_Product) {  // fallback for swatches loaded for product view
             $mapping = $object->getChildAttributeLabelMapping();
             if (isset($mapping[$value]['default_label'])) {
-                $defaultValue = $mapping[$value]['default_label'];
+                $defaultValue = (string) $mapping[$value]['default_label'];
             }
         }
 
+<<<<<<< HEAD
         do {
             $filename = Mage::helper('configurableswatches')->getHyphenatedString($value) . $fileExt;
             $swatchImage = $this->_resizeSwatchImage($filename, 'media', $width, $height);
@@ -255,15 +278,66 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
                 $value = $defaultValue; // fallback to default value
             } else {
                 break;  // we found an image
+=======
+        foreach (array_unique([$value, $defaultValue]) as $label) {
+            $filename = Mage::helper('configurableswatches')->getHyphenatedString($label) . $fileExt;
+            $url = $this->getSwatchImageUrl($filename, $width, $height);
+            if ($url !== null) {
+                return ['type' => 'image', 'value' => $url];
+>>>>>>> 21c2ddb1 (Fixed the API layered navigation filters reporting each color swatch as an image with a broken URL (#1637))
             }
-        } while (true);
+            $color = $this->getSwatchColor($label);
+            if ($color !== null) {
+                return ['type' => 'color', 'value' => $color];
+            }
+        }
 
+<<<<<<< HEAD
         return Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA) . $swatchImage;
+=======
+        return null;
+    }
+
+    /**
+     * $color as an SVG data URL of $width x $height.
+     */
+    protected function getColorSwatchUrl(string $color, int $width, int $height): string
+    {
+        $svg = "<svg xmlns='http://www.w3.org/2000/svg' width='{$width}' height='{$height}'><rect width='100%' height='100%' fill='{$color}'/></svg>";
+        return 'data:image/svg+xml,' . rawurlencode($svg);
+    }
+
+    /**
+     * The hex color of the swatch of $value, with a leading #, or null when the option has no color.
+     */
+    protected function getSwatchColor(string $value): ?string
+    {
+        if ($this->swatchColors === null) {
+            $resource = Mage::getSingleton('core/resource');
+            $adapter = $resource->getConnection('core_read');
+            $this->swatchColors = [];
+            foreach ($adapter->fetchAll($adapter->select()
+                ->from($resource->getTableName('eav/attribute_option_swatch'), ['filename', 'value'])
+                ->where('value IS NOT NULL')) as $row) {
+                $this->swatchColors[pathinfo((string) $row['filename'], PATHINFO_FILENAME)] ??= (string) $row['value'];
+            }
+        }
+
+        $color = $this->swatchColors[Mage::helper('configurableswatches')->getHyphenatedString($value)] ?? '';
+        if (!preg_match('/^#?([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i', $color, $match)) {
+            return null;
+        }
+        return '#' . $match[1];
+>>>>>>> 21c2ddb1 (Fixed the API layered navigation filters reporting each color swatch as an image with a broken URL (#1637))
     }
 
     /**
      * Create a swatch image for the given filename
      *
+<<<<<<< HEAD
+=======
+     * @deprecated since 26.11 a color swatch is an SVG data URL, see getGlobalSwatchUrl()
+>>>>>>> 21c2ddb1 (Fixed the API layered navigation filters reporting each color swatch as an image with a broken URL (#1637))
      * @param string $value
      * @param int $width
      * @param int $height
