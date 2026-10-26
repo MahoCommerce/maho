@@ -19,10 +19,11 @@ uses(Tests\MahoBackendTestCase::class);
 function signedPasskeyAssertion(OpenSSLAsymmetricKey $key, int $flags = 0x01): string
 {
     $host = (string) parse_url(Mage::getBaseUrl(), PHP_URL_HOST);
-    $challenge = (string) Mage::getSingleton('admin/session')->getPasskeyChallenge();
+    /** @var \lbuchs\WebAuthn\Binary\ByteBuffer $challenge */
+    $challenge = Mage::getSingleton('admin/session')->getPasskeyChallenge();
     $clientDataJSON = (string) json_encode([
         'type' => 'webauthn.get',
-        'challenge' => rtrim(strtr(base64_encode($challenge), '+/', '-_'), '='),
+        'challenge' => rtrim(strtr(base64_encode($challenge->getBinaryString()), '+/', '-_'), '='),
         'origin' => 'https://' . $host,
     ]);
     $authenticatorData = hash('sha256', $host, true) . chr($flags) . pack('N', 1);
