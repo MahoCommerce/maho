@@ -269,9 +269,51 @@ That single import carries the whole configuration: the daisyUI plugin, the sema
 The build writes `css/styles.css`, which the skin fallback serves instead of Maho's bundle. Two things follow:
 
 - The `css/theme.css` slot stays free, so a parent identity such as `base/fashion` still loads on top of your bundle.
-- **You own the engine.** Maho's `styles.css` no longer reaches your store, so rebuild after every Maho upgrade. Commit the compiled CSS: production never needs Node.js.
+- **You own the engine.** Maho's `styles.css` no longer reaches your store, so rebuild after every Maho upgrade. Commit the compiled CSS: production needs no Node.js for the classes of your templates.
 
 Add `--watch` to rebuild while you work, and run a plain build before you commit. The command installs the toolchain on first run. See the [theme commands reference](theme-commands.md#devfrontendthemebuild).
+
+## Classes in CMS and catalog content
+
+The template scan does not read the database. So the committed `css/styles.css` has no class of the
+CMS pages, static blocks, blog posts, widgets or catalog descriptions, except the daisyUI classes
+that `src/tailwind.css` lists under `@source inline(...)`.
+
+On a server with the Tailwind CLI, the content build fills that gap. It reads the `class`
+attributes of the content, compiles a copy of `css/styles.css` for each theme that has a
+`src/tailwind.css`, and the page head links the copy. A theme with its own Tailwind build gets the
+same, from its own `src/tailwind.css`. The [Tailwind build of the content](../hosting/tailwind-content-build.md)
+describes the requirements, the queue and the deploy step. The [user guide](../user-guide/content-html-and-classes.md)
+describes the source view of the editor, with its class completion.
+
+### Add the content of a module
+
+A module adds the HTML of its own table with `#[Maho\Config\TailwindSource]`, on a method that
+returns HTML strings:
+
+```php
+class Acme_Banner_Model_Resource_Banner extends Mage_Core_Model_Resource_Db_Abstract
+{
+    #[Maho\Config\TailwindSource('acme_banner', model: Acme_Banner_Model_Banner::class, fields: ['content'])]
+    public function getTailwindContent(): iterable
+    {
+        return Mage::getResourceSingleton('core/design_content')
+            ->readColumns($this->getMainTable(), $this->getIdFieldName(), ['content']);
+    }
+}
+```
+
+- The first argument names the source. A later source with the same name replaces the earlier one.
+- With `model:` and `fields:`, a save of that model that changes one of the fields queues a build.
+  Without `fields:`, every save of the model queues one. A source with another rule leaves out
+  `model:` and calls `Mage::getSingleton('core/design_content_bundle')->queueBuild()` from its own
+  observer, as `Mage_Catalog_Model_Design_TailwindSource` does for the WYSIWYG attributes.
+- `readColumns()` reads the table in pages of 1000 rows, and only the rows that contain `class`.
+- The build reads the value of each `class` attribute. A directive parameter with the same form,
+  such as `{{icon class="text-primary"}}`, counts too.
+
+Run `composer dump-autoload` after you add the attribute. `./maho theme:content:build` lists the
+sources that it reads.
 
 ## Creating Sub-themes
 

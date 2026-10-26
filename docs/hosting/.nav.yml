@@ -14,3 +14,4 @@ nav:
 - Email sending (SMTP): email-sending-configuration.md
 - Robots.txt: robotstxt.md
 - SVG uploads: svg-support.md
+- Tailwind build of the content: tailwind-content-build.md

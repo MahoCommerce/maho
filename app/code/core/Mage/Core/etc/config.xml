@@ -12,6 +12,9 @@ SPDX-License-Identifier: AFL-3.0
         </Mage_Core>
     </modules>
     <global>
+        <docs>
+            <sysadmin>docs/sysadmin</sysadmin>
+        </docs>
         <!-- Named lock backend: "file" or "db" (see local.xml.template) -->
         <lock>
             <backend>file</backend>

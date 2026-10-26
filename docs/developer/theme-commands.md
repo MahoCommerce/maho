@@ -11,6 +11,7 @@ Three commands cover the life of a storefront theme:
 | `dev:frontend:theme:create` | Scaffolds a new theme, as plain CSS or with its own Tailwind build | Every theme author |
 | `dev:frontend:theme:build` | Compiles the CSS sources of a theme into its deployable bundles | Themes with a `src/` directory, and Maho contributors |
 | `dev:frontend:theme:export` | Writes the Theme Settings of a store into a `theme.css` file | Developers who move admin settings into git |
+| `theme:content:build` | Compiles the classes of the CMS, blog and catalog content into a copy of `css/styles.css` | Deploy scripts of stores that use classes in content |
 
 All three run from the project root with `./maho`. The [Theme Development Guide](theme-development.md) explains the theme system the commands work on. This page is the reference for the commands themselves.
 
@@ -145,7 +146,7 @@ This works the same when Maho is a Composer dependency of your project. The proj
 
 ### Commit the output
 
-The compiled `css/` files are meant to be committed. Production never needs Node.js. Maho's own repository runs the same command in CI and fails when the committed bundles do not match the sources.
+The compiled `css/` files are meant to be committed, so production needs no Node.js for the classes of the templates. Maho's own repository runs the same command in CI and fails when the committed bundles do not match the sources. The classes of the content in the database need the [content build](#themecontentbuild), which runs on the server.
 
 ### Exit status
 
@@ -196,6 +197,18 @@ After the export, commit the file and clear the fields in Theme Settings. The st
 
 A setting a module of yours adds to Theme Settings is exported too. See the [Theme Development Guide](theme-development.md#adding-your-own-setting).
 
+## theme:content:build
+
+Compiles the Tailwind classes of the CMS, blog and catalog content into a copy of the `css/styles.css` of each theme, and writes it to the media mount. The page head then links the copy.
+
+```bash
+./maho theme:content:build
+```
+
+A save of the content queues the same build, so a store with a queue worker needs the command only in its deploy script and after a script that writes content with SQL. It takes no options. It lists the sources of the content, then one row for each theme: `built`, `unchanged`, `empty` or `failed`. It fails when the Tailwind CLI is missing from `node_modules/.bin/`, when another build runs, or when a theme fails to compile.
+
+See [Tailwind build of the content](../hosting/tailwind-content-build.md) for the requirements on the server, and [Classes in CMS and catalog content](theme-development.md#classes-in-cms-and-catalog-content) for the content of your own module.
+
 ## Which command when
 
 | You want to | Run |
@@ -206,3 +219,4 @@ A setting a module of yours adds to Theme Settings is exported too. See the [The
 | Keep admin settings in git | `dev:frontend:theme:export` |
 | Upgrade Maho with a Tailwind theme | `dev:frontend:theme:build` |
 | Work on Maho's own base theme | `dev:frontend:theme:build --watch` |
+| Serve the classes of the content at once after a deploy | `theme:content:build` |
