@@ -11,12 +11,13 @@ namespace MahoCLI\Commands;
 
 use Mage;
 use Mage_Core_Exception;
-use Mage_Customer_Model_Group;
+use Mage_Customer_Model_Resource_Group;
 use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Interact;
 use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
@@ -33,6 +34,8 @@ class CustomerGroupDelete extends BaseMahoCommand
         int $groupId,
         #[Option(description: 'Move the customers of the group to the default group', name: 'move-customers')]
         bool $moveCustomers = false,
+        #[Option(description: 'Skip the confirmation for the rows that refer to the group', shortcut: 'f')]
+        bool $force = false,
     ): int {
         $this->initMaho();
 
@@ -42,12 +45,12 @@ class CustomerGroupDelete extends BaseMahoCommand
             return Command::FAILURE;
         }
         $code = $group->getCode();
-        if ($groupId === Mage_Customer_Model_Group::NOT_LOGGED_IN_ID) {
-            $io->writeln("<error>Cannot delete customer group $code, because the store uses it for guests.</error>");
-            return Command::FAILURE;
-        }
-        if ($group->usesAsDefault()) {
-            $io->writeln("<error>Cannot delete customer group $code, because it is the Default Group of a scope.</error>");
+        /** @var Mage_Customer_Model_Resource_Group $resource */
+        $resource = Mage::getResourceSingleton('customer/group');
+        try {
+            $resource->validateDelete($group);
+        } catch (Mage_Core_Exception $e) {
+            $io->writeln('<error>' . $e->getMessage() . '</error>');
             return Command::FAILURE;
         }
 
@@ -60,6 +63,19 @@ class CustomerGroupDelete extends BaseMahoCommand
         if ($customers && !$moveCustomers) {
             $io->writeln("<error>Cannot delete customer group $code, because it has customers: $customers. Use --move-customers to move them to the default group.</error>");
             return Command::FAILURE;
+        }
+
+        $rows = $resource->getReferencingRows($groupId);
+        if ($rows) {
+            $io->writeln("Deleting customer group $code also changes these rows, by the ON DELETE rule of their foreign key:");
+            new Table($io)->setHeaders(['table', 'column', 'on_delete', 'rows'])->setRows($rows)->render();
+            if (!$force && $input->isInteractive()) {
+                $force = $io->confirm('Delete the group and change these rows?', false);
+            }
+            if (!$force) {
+                $io->writeln("<error>Cannot delete customer group $code, because other rows refer to it. Use --force to delete it.</error>");
+                return Command::FAILURE;
+            }
         }
 
         try {

@@ -56,8 +56,32 @@ function customerGroupOfCustomer(Mage_Customer_Model_Customer $customer): int
     return (int) Mage::getModel('customer/customer')->load($customer->getId())->getData('group_id');
 }
 
+function customerGroupRule(Mage_Customer_Model_Group $group): Mage_SalesRule_Model_Rule
+{
+    return Mage::getModel('salesrule/rule')->addData([
+        'name' => CUSTOMER_GROUP_CODE,
+        'is_active' => 1,
+        'website_ids' => [(int) Mage::app()->getStore(1)->getWebsiteId()],
+        'customer_group_ids' => [(int) $group->getId()],
+        'coupon_type' => Mage_SalesRule_Model_Rule::COUPON_TYPE_NO_COUPON,
+        'simple_action' => Mage_SalesRule_Model_Rule::BY_PERCENT_ACTION,
+        'discount_amount' => 10,
+    ])->save();
+}
+
+function customerGroupRuleLinks(Mage_SalesRule_Model_Rule $rule): int
+{
+    $adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
+    return (int) $adapter->fetchOne($adapter->select()
+        ->from(Mage::getSingleton('core/resource')->getTableName('salesrule/customer_group'), [new Maho\Db\Expr('COUNT(*)')])
+        ->where('rule_id = ?', (int) $rule->getId()));
+}
+
 function customerGroupCleanup(): void
 {
+    foreach (Mage::getResourceModel('salesrule/rule_collection')->addFieldToFilter('name', CUSTOMER_GROUP_CODE) as $rule) {
+        $rule->delete();
+    }
     foreach (Mage::getResourceModel('customer/customer_collection')->addFieldToFilter('email', CUSTOMER_GROUP_EMAIL) as $customer) {
         $customer->delete();
     }
@@ -195,7 +219,34 @@ it('fails to delete a customer group that the store needs or that does not exist
         expect(Mage::getModel('customer/group')->load($groupId)->getId())->not->toBeNull();
     }
 })->with([
-    'the default group' => [fn(): int => Mage::helper('customer')->getDefaultCustomerGroupId(Mage_Core_Model_App::ADMIN_STORE_ID), 'because it is the Default Group of a scope'],
-    'NOT LOGGED IN' => [fn(): int => Mage_Customer_Model_Group::NOT_LOGGED_IN_ID, 'because the store uses it for guests'],
+    'the default group' => [fn(): int => Mage::helper('customer')->getDefaultCustomerGroupId(Mage_Core_Model_App::ADMIN_STORE_ID), 'cannot be deleted'],
+    'NOT LOGGED IN' => [fn(): int => Mage_Customer_Model_Group::NOT_LOGGED_IN_ID, 'The group "NOT LOGGED IN" cannot be deleted'],
     'an unknown ID' => [fn(): int => 999999, 'Customer group not found with ID: 999999'],
+]);
+
+it('fails to delete a customer group that other rows refer to without --force', function (): void {
+    $group = customerGroupSave((int) $this->taxClass->getId());
+    $rule = customerGroupRule($group);
+
+    $result = customerGroupRun(new CustomerGroupDelete('customer:group:delete'), ['group_id' => (string) $group->getId()]);
+
+    $this->assertCommandFailed($result);
+    expect($result->getDisplay())->toContain('salesrule_customer_group')
+        ->toContain('because other rows refer to it. Use --force');
+    expect(customerGroupLoad()->getId())->not->toBeNull();
+    expect(customerGroupRuleLinks($rule))->toBe(1);
+});
+
+it('deletes a customer group and the rows that refer to it with --force or a confirmation', function (array $input, array $answers): void {
+    $group = customerGroupSave((int) $this->taxClass->getId());
+    $rule = customerGroupRule($group);
+
+    $result = customerGroupRun(new CustomerGroupDelete('customer:group:delete'), [...$input, 'group_id' => (string) $group->getId()], $answers);
+
+    $this->assertCommandIsSuccessful($result);
+    expect(customerGroupLoad()->getId())->toBeNull();
+    expect(customerGroupRuleLinks($rule))->toBe(0);
+})->with([
+    '--force' => [['--force' => true], []],
+    'confirmation' => [[], ['yes']],
 ]);
