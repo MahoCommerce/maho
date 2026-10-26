@@ -16,7 +16,6 @@ namespace Mage\Catalog\Api;
  * Types:
  *   "color", value is a hex color code (e.g. "#FF0000")
  *   "image", value is a full image URL
- *   "text" , value is a short text label (e.g. "S", "M", "XL")
  */
 class FilterOptionSwatch extends \Maho\ApiPlatform\Resource
 {

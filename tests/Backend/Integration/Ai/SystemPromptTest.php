@@ -111,6 +111,13 @@ it('keeps its sections', function (): void {
     expect($prompt)->toContain('How a task runs:', 'Maho in short:', 'Example of a good turn', 'How to answer:');
 });
 
+it('names a field only when the model saw it, and never concludes that a field does not exist', function (): void {
+    $prompt = new Maho_Ai_Model_Chat_SystemPrompt()->build(aiPromptAdmin());
+
+    expect($prompt)->toContain('Name a field, a tab, a button or a type of value only when you saw it');
+    expect($prompt)->toContain('A field that you did not see can still exist');
+});
+
 it('answers for every website, or asks for the scope, only on an installation with several store views', function (): void {
     $prompt = new Maho_Ai_Model_Chat_SystemPrompt()->build(aiPromptAdmin());
     $rule = 'a table with one row for each website';
