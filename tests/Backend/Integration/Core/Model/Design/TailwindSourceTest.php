@@ -40,6 +40,26 @@ function deleteContentFlags(): void
     Mage::app()->removeCache(Mage_Core_Model_Design_Content_Bundle::CACHE_ID);
 }
 
+/**
+ * A bundle whose Tailwind build always fails.
+ */
+function failingContentBundle(): Mage_Core_Model_Design_Content_Bundle
+{
+    return new class extends Mage_Core_Model_Design_Content_Bundle {
+        #[\Override]
+        public function getTailwindBinary(): ?string
+        {
+            return PHP_BINARY;
+        }
+
+        #[\Override]
+        protected function compile(string $binary, string $workDir, string $theme, string $entry): ?string
+        {
+            return null;
+        }
+    };
+}
+
 function createContentBlock(string $content): Mage_Cms_Model_Block
 {
     return Mage::getModel('cms/block')
@@ -241,7 +261,42 @@ describe('a build that fails', function () {
         $this->mount->delete('theme/base-default-previous.css');
     });
 
-    it('keeps the previous file in the head, and makes the theme outdated', function (): void {
+    it('keeps the previous file in the head', function (): void {
+        $bundle = failingContentBundle();
+
+        expect($bundle->build())->toHaveKey('base/default', Mage_Core_Model_Design_Content_Bundle::STATUS_FAILED)
+            ->and($bundle->getUrl($this->styles))->toBe($this->mount->publicUrl('theme/base-default-previous.css'));
+    });
+
+    it('does not make the theme outdated, so the cron job does not repeat the build', function (): void {
+        $bundle = failingContentBundle();
+        $bundle->build();
+
+        expect($bundle->getOutdatedThemes())->not->toContain('base/default');
+    });
+
+    it('does not make a theme without a previous build outdated', function (): void {
+        Mage::getModel('core/flag', ['flag_code' => Mage_Core_Model_Design_Content_Bundle::FLAG_MANIFEST])->loadSelf()->delete();
+        $bundle = failingContentBundle();
+        $bundle->build();
+
+        expect($bundle->getOutdatedThemes())->not->toContain('base/default')
+            ->and($bundle->getUrl($this->styles))->toBeNull();
+    });
+
+    it('makes the theme outdated again when the committed styles.css changes', function (): void {
+        $bundle = failingContentBundle();
+        $bundle->build();
+        $flag = Mage::getModel('core/flag', ['flag_code' => Mage_Core_Model_Design_Content_Bundle::FLAG_MANIFEST])->loadSelf();
+        $manifest = $flag->getFlagData();
+        $manifest['base/default']['failed'] = 'an older styles.css';
+        $flag->setFlagData($manifest)->save();
+
+        expect($bundle->getOutdatedThemes())->toContain('base/default');
+    });
+
+    it('builds again on the next request, and writes the new file', function (): void {
+        failingContentBundle()->build();
         $bundle = new class extends Mage_Core_Model_Design_Content_Bundle {
             #[\Override]
             public function getTailwindBinary(): ?string
@@ -252,13 +307,14 @@ describe('a build that fails', function () {
             #[\Override]
             protected function compile(string $binary, string $workDir, string $theme, string $entry): ?string
             {
-                return null;
+                Mage::getStorage(self::MOUNT)->write('theme/base-default-next.css', '.next{}');
+                return 'theme/base-default-next.css';
             }
         };
 
-        expect($bundle->build())->toHaveKey('base/default', Mage_Core_Model_Design_Content_Bundle::STATUS_FAILED)
-            ->and($bundle->getUrl($this->styles))->toBe($this->mount->publicUrl('theme/base-default-previous.css'))
-            ->and($bundle->getOutdatedThemes())->toContain('base/default');
+        expect($bundle->build())->toHaveKey('base/default', Mage_Core_Model_Design_Content_Bundle::STATUS_BUILT)
+            ->and($bundle->getManifest()['base/default'])->not->toHaveKey('failed');
+        $this->mount->delete('theme/base-default-next.css');
     });
 });
 

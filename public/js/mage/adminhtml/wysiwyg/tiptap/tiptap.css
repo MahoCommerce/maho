@@ -1013,10 +1013,13 @@
     min-height: 0;
     display: flex;
 
-    .cm-editor {
+    /* The wrapper frames the field, as in the rich text view */
+    .cm-editor,
+    .cm-editor.cm-focused {
         flex: 1;
         border: none;
         border-radius: 0;
+        outline: none;
     }
 
     .cm-scroller {
