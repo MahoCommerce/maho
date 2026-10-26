@@ -8,12 +8,8 @@
 declare(strict_types=1);
 
 use ApiPlatform\Metadata\GetCollection;
-use League\Flysystem\Local\LocalFilesystemAdapter;
 use Mage\Catalog\Api\LayeredFilterProvider;
 use Maho\ApiPlatform\Service\StoreContext;
-use Maho\Storage\Mount;
-use Maho\Storage\MountRegistry;
-use Maho\Storage\Url\StoreBaseUrlGenerator;
 
 uses(Tests\MahoBackendTestCase::class);
 
@@ -49,31 +45,22 @@ describe('the swatches of the layered filters API', function (): void {
         StoreContext::ensureStore(1);
         Mage::app()->getCache()->clean(['API_LAYERED_FILTERS']);
 
-        $this->root = sys_get_temp_dir() . '/maho_layered_swatch_' . uniqid();
-        mkdir($this->root, 0777, true);
-        $this->mount = new Mount('media', new LocalFilesystemAdapter($this->root), $this->root, new StoreBaseUrlGenerator('media'));
-        MountRegistry::register($this->mount);
-        Mage::getResourceSingleton('core/image_size')->deleteFolder('media', 'wysiwyg/swatches');
-        Mage::unregister('_singleton/core/image_size');
-
-        $png = Maho::getImageManager()->createImage(80, 40)->fill('111111')
-            ->encodeUsingFormat(\Intervention\Image\Format::PNG)->toString();
-        $this->mount->write('wysiwyg/swatches/black' . Mage_ConfigurableSwatches_Helper_Productimg::getSwatchFileExt(), $png);
+        $this->blackSwatch = Mage::getBaseDir('media') . '/' . Mage_ConfigurableSwatches_Helper_Productimg::SWATCH_FALLBACK_MEDIA_DIR
+            . '/black' . Mage_ConfigurableSwatches_Helper_Productimg::getSwatchFileExt();
+        $this->hadBlackSwatch = is_file($this->blackSwatch);
+        if (!$this->hadBlackSwatch) {
+            @mkdir(dirname($this->blackSwatch), 0777, true);
+            Maho::encodeImage(Maho::getImageManager()->createImage(80, 40)->fill('111111'))->save($this->blackSwatch);
+        }
+        Mage::helper('configurableswatches/productimg')->clearSwatchesCache();
     });
 
     afterEach(function (): void {
         Mage::app()->getCache()->clean(['API_LAYERED_FILTERS']);
-        Mage::getResourceSingleton('core/image_size')->deleteFolder('media', 'wysiwyg/swatches');
-        Mage::unregister('_singleton/core/image_size');
-        MountRegistry::reset();
-        $items = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($this->root, FilesystemIterator::SKIP_DOTS),
-            RecursiveIteratorIterator::CHILD_FIRST,
-        );
-        foreach ($items as $item) {
-            $item->isDir() ? rmdir($item->getPathname()) : unlink($item->getPathname());
+        Mage::helper('configurableswatches/productimg')->clearSwatchesCache();
+        if (!$this->hadBlackSwatch) {
+            unlink($this->blackSwatch);
         }
-        rmdir($this->root);
     });
 
     it('returns the image in wysiwyg/swatches, and otherwise the color of the option', function (): void {
@@ -92,8 +79,18 @@ describe('the swatches of the layered filters API', function (): void {
 
         expect($color)->not->toBeEmpty()
             ->and($black['swatch']['type'] ?? null)->toBe('image')
-            ->and($black['swatch']['value'])->toStartWith($this->mount->publicUrl('wysiwyg/swatches/'))
+            ->and($black['swatch']['value'])->toStartWith(Mage::getBaseUrl('media') . Mage_ConfigurableSwatches_Helper_Productimg::SWATCH_CACHE_DIR . '/')
             ->and($other['swatch']['value'])->toBe('#' . ltrim($color, '#'));
+    });
+
+    it('returns the color of an option after the storefront cached its swatch image', function (): void {
+        $helper = Mage::helper('configurableswatches/productimg');
+        $isColor = fn(array $option): bool => ($helper->getGlobalSwatch(null, $option['label'], 24, 24)['type'] ?? null) === 'color';
+        $other = array_find(layeredColorOptions(fn(array $options): bool => array_find($options, $isColor) !== null), $isColor);
+        $swatch = $helper->getGlobalSwatch(null, $other['label'], 24, 24);
+
+        expect($helper->getGlobalSwatchUrl(null, $other['label'], 24, 24))->not->toBe('')
+            ->and($helper->getGlobalSwatch(null, $other['label'], 24, 24))->toBe($swatch);
     });
 
     it('returns no swatch when Configurable Swatches is disabled', function (): void {

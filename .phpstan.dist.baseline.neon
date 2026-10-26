@@ -12106,15 +12106,6 @@ parameters:
 			path: app/code/core/Mage/ConfigurableSwatches/Block/Catalog/Product/View/Type/Configurable/Swatches.php
 
 		-
-<<<<<<< HEAD
-			rawMessage: 'Parameter #1 $attr of method Mage_ConfigurableSwatches_Helper_Data::attrIsSwatchType() expects int|Mage_Eav_Model_Attribute, Mage_Catalog_Model_Resource_Eav_Attribute given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/ConfigurableSwatches/Block/Catalog/Product/View/Type/Configurable/Swatches.php
-
-		-
-=======
->>>>>>> 21c2ddb1 (Fixed the API layered navigation filters reporting each color swatch as an image with a broken URL (#1637))
 			rawMessage: Property Mage_ConfigurableSwatches_Block_Catalog_Product_View_Type_Configurable_Swatches::$_initDone has no type specified.
 			identifier: missingType.property
 			count: 1

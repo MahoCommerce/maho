@@ -28,6 +28,9 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
      */
     protected $_productImageFilters = [];
 
+    /** @var array<string, string>|null the color of each swatch, by the file name without its extension */
+    protected ?array $swatchColors = null;
+
     public const SWATCH_LABEL_SUFFIX = '-swatch';
     public const SWATCH_FALLBACK_MEDIA_DIR = 'wysiwyg/swatches';
     public const SWATCH_CACHE_DIR = 'catalog/swatches';
@@ -223,12 +226,27 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
         $height = self::SWATCH_DEFAULT_HEIGHT,
         $fileExt = null,
     ) {
-        $swatch = $this->getGlobalSwatch($object, (string) $value, (int) $width, (int) $height, $fileExt);
-        return match ($swatch['type'] ?? null) {
-            'image' => $swatch['value'],
-            'color' => $this->getColorSwatchUrl($swatch['value'], (int) $width, (int) $height),
-            default => '',
-        };
+        $fileExt ??= self::getSwatchFileExt();
+
+        $value = Mage_ConfigurableSwatches_Helper_Data::normalizeKey($value);
+        $defaultValue = $this->getSwatchDefaultValue($object, $value);
+
+        do {
+            $filename = Mage::helper('configurableswatches')->getHyphenatedString($value) . $fileExt;
+            $swatchImage = $this->_resizeSwatchImage($filename, 'media', $width, $height);
+            if (!$swatchImage) {
+                $swatchImage = $this->createSwatchImage($value, $width, $height);
+            }
+            if (!$swatchImage && $defaultValue == $value) {
+                return '';  // no image found and no further fallback
+            } elseif (!$swatchImage) {
+                $value = $defaultValue; // fallback to default value
+            } else {
+                break;  // we found an image
+            }
+        } while (true);
+
+        return Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA) . $swatchImage;
     }
 
     /**
@@ -247,44 +265,14 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
     ): ?array {
         $fileExt ??= self::getSwatchFileExt();
 
-        // normalize to all lower case so that value can be used as array key below
         $value = Mage_ConfigurableSwatches_Helper_Data::normalizeKey($value);
-        $defaultValue = $value; // default to no fallback value
-        if ($object instanceof Mage_Catalog_Model_Layer_Filter_Item) { // fallback for swatches loaded for nav filters
-            $source = $object->getFilter()->getAttributeModel()->getFrontend()->getAttribute()->getSource();
-            foreach ($source->getAllOptions(false, true) as $option) {
-                if ($option['value'] == $object->getValue()) {
-                    $defaultValue = Mage_ConfigurableSwatches_Helper_Data::normalizeKey($option['label']);
-                    break;
-                }
-            }
-        } elseif ($object instanceof Mage_Catalog_Model_Product) {  // fallback for swatches loaded for product view
-            $mapping = $object->getChildAttributeLabelMapping();
-            if (isset($mapping[$value]['default_label'])) {
-                $defaultValue = (string) $mapping[$value]['default_label'];
-            }
-        }
+        $defaultValue = $this->getSwatchDefaultValue($object, $value);
 
-<<<<<<< HEAD
-        do {
-            $filename = Mage::helper('configurableswatches')->getHyphenatedString($value) . $fileExt;
-            $swatchImage = $this->_resizeSwatchImage($filename, 'media', $width, $height);
-            if (!$swatchImage) {
-                $swatchImage = $this->createSwatchImage($value, $width, $height);
-            }
-            if (!$swatchImage && $defaultValue == $value) {
-                return '';  // no image found and no further fallback
-            } elseif (!$swatchImage) {
-                $value = $defaultValue; // fallback to default value
-            } else {
-                break;  // we found an image
-=======
         foreach (array_unique([$value, $defaultValue]) as $label) {
             $filename = Mage::helper('configurableswatches')->getHyphenatedString($label) . $fileExt;
             $url = $this->getSwatchImageUrl($filename, $width, $height);
             if ($url !== null) {
                 return ['type' => 'image', 'value' => $url];
->>>>>>> 21c2ddb1 (Fixed the API layered navigation filters reporting each color swatch as an image with a broken URL (#1637))
             }
             $color = $this->getSwatchColor($label);
             if ($color !== null) {
@@ -292,19 +280,43 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
             }
         }
 
-<<<<<<< HEAD
-        return Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA) . $swatchImage;
-=======
         return null;
     }
 
     /**
-     * $color as an SVG data URL of $width x $height.
+     * The normalized admin label of the option of $value, or $value when $object has no other label.
      */
-    protected function getColorSwatchUrl(string $color, int $width, int $height): string
+    protected function getSwatchDefaultValue(
+        Mage_Catalog_Model_Product|Mage_Catalog_Model_Layer_Filter_Item|null $object,
+        string $value,
+    ): string {
+        if ($object instanceof Mage_Catalog_Model_Layer_Filter_Item) { // fallback for swatches loaded for nav filters
+            $source = $object->getFilter()->getAttributeModel()->getFrontend()->getAttribute()->getSource();
+            foreach ($source->getAllOptions(false, true) as $option) {
+                if ($option['value'] == $object->getValue()) {
+                    return Mage_ConfigurableSwatches_Helper_Data::normalizeKey($option['label']);
+                }
+            }
+        } elseif ($object instanceof Mage_Catalog_Model_Product) {  // fallback for swatches loaded for product view
+            $mapping = $object->getChildAttributeLabelMapping();
+            if (isset($mapping[$value]['default_label'])) {
+                return (string) $mapping[$value]['default_label'];
+            }
+        }
+        return $value;
+    }
+
+    /**
+     * The URL of the resized copy of the image $filename in wysiwyg/swatches, or null when it does not exist.
+     */
+    protected function getSwatchImageUrl(string $filename, int $width, int $height): ?string
     {
-        $svg = "<svg xmlns='http://www.w3.org/2000/svg' width='{$width}' height='{$height}'><rect width='100%' height='100%' fill='{$color}'/></svg>";
-        return 'data:image/svg+xml,' . rawurlencode($svg);
+        // createSwatchImage() writes a color to the cache path that _resizeSwatchImage() reads, so check the source
+        if (!is_file(Mage::getBaseDir(Mage_Core_Model_Store::URL_TYPE_MEDIA) . '/' . self::SWATCH_FALLBACK_MEDIA_DIR . '/' . $filename)) {
+            return null;
+        }
+        $path = $this->_resizeSwatchImage($filename, 'media', $width, $height);
+        return $path ? Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA) . $path : null;
     }
 
     /**
@@ -328,16 +340,11 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
             return null;
         }
         return '#' . $match[1];
->>>>>>> 21c2ddb1 (Fixed the API layered navigation filters reporting each color swatch as an image with a broken URL (#1637))
     }
 
     /**
      * Create a swatch image for the given filename
      *
-<<<<<<< HEAD
-=======
-     * @deprecated since 26.11 a color swatch is an SVG data URL, see getGlobalSwatchUrl()
->>>>>>> 21c2ddb1 (Fixed the API layered navigation filters reporting each color swatch as an image with a broken URL (#1637))
      * @param string $value
      * @param int $width
      * @param int $height
