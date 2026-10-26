@@ -1,8 +1,8 @@
 name: Docs
 
 # mahocommerce.com builds its user guide, developer docs, API docs and hosting docs from this
-# repository. This workflow builds the site with the docs of the pull request, and after a push to
-# main it starts a deploy of the site.
+# repository. This workflow builds the site with the docs of the pull request. After a push to main,
+# or when you run it by hand on main, it starts a deploy of the site.
 
 on:
   pull_request:
@@ -63,7 +63,7 @@ jobs:
   deploy:
     name: Deploy mahocommerce.com
     needs: build
-    if: github.event_name == 'push'
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
     steps:
