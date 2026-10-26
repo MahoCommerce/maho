@@ -251,6 +251,12 @@ class My_Module_Checkout_CartController extends Mage_Checkout_CartController { /
       #[Option(description: 'Unlock every schedule', name: 'all')] bool $unlockAll = false,
   ): int {
   ```
+
+  Every input of a command is an argument or an option, so that a script runs it in one line with `-n`. A
+  person in a terminal gets a question for each required argument that is missing: put `#[Ask]` on a typed
+  value (`hidden: true` for a password), and ask a choice from the store in an `#[Interact]` method that
+  calls `initMaho()` first. `__invoke()` asks only a question that depends on the data it loaded, and only
+  when `$input->isInteractive()`. A confirmation before a change takes `--force` (`-f`).
 - **Async queue**: `\Maho\Queue\QueueManager::dispatch($messageDto)` queues a flat DTO for a
   `#[Maho\Config\MessageHandler]` method (message class inferred from the first parameter type);
   cron keeps a detached `queue:work` worker alive per pool, with retries/backoff and an admin
