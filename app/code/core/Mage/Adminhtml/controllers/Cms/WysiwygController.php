@@ -190,14 +190,19 @@ class Mage_Adminhtml_Cms_WysiwygController extends Mage_Adminhtml_Controller_Act
     public function directiveAction(): void
     {
         try {
-            $directive = $this->getRequest()->getParam('___directive');
-            $image = Mage::getModel('cms/adminhtml_template_filter')
-                ->encodeDirectiveImage(Mage::helper('core')->urlDecode((string) $directive));
+            $directive = Mage::helper('core')->urlDecode((string) $this->getRequest()->getParam('___directive'));
+            $filter = Mage::getModel('cms/adminhtml_template_filter');
+            $image = $filter->readDirectiveSvg($directive) ?? $filter->encodeDirectiveImage($directive);
 
-            $this->getResponse()
-                ->setHttpResponseCode(200)
-                ->setHeader('Content-type', $image->mediaType(), true);
-
+            $this->getResponse()->setHttpResponseCode(200);
+            if (is_string($image)) {
+                // A script that the sanitizer missed cannot run when someone opens the URL itself
+                $this->getResponse()
+                    ->setHeader('Content-type', 'image/svg+xml', true)
+                    ->setHeader('Content-Security-Policy', "default-src 'none'; style-src 'unsafe-inline'; sandbox", true);
+            } else {
+                $this->getResponse()->setHeader('Content-type', $image->mediaType(), true);
+            }
         } catch (Exception $e) {
             Mage::logException($e);
             $this->getResponse()

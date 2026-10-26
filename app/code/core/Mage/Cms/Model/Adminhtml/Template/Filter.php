@@ -33,6 +33,28 @@ class Mage_Cms_Model_Adminhtml_Template_Filter extends Mage_Cms_Model_Template_F
     }
 
     /**
+     * Read the SVG file that the one {{media}} or {{skin}} directive of the editor preview names,
+     * and remove its scripts. Return null when the file is not an SVG. GD cannot decode an SVG,
+     * so encodeDirectiveImage() cannot send one.
+     *
+     * @throws Mage_Core_Exception
+     * @throws RuntimeException when the file is not SVG that the sanitizer can make safe
+     */
+    public function readDirectiveSvg(string $directive): ?string
+    {
+        $path = $this->filter($directive);
+        if (strtolower(pathinfo($path, PATHINFO_EXTENSION)) !== 'svg') {
+            return null;
+        }
+
+        $content = str_starts_with($path, self::MEDIA_PREFIX)
+            ? Mage::getStorage('media')->read(substr($path, strlen(self::MEDIA_PREFIX)))
+            : (string) file_get_contents($path);
+
+        return (new \Maho\Security\SvgDocumentSanitizer())->sanitize($content);
+    }
+
+    /**
      * Resolve the one image directive the editor preview may carry: a path on the media mount
      * with MEDIA_PREFIX for {{media}}, a local file path for {{skin}}.
      *

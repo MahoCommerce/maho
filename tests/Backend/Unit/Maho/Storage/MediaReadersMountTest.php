@@ -106,6 +106,21 @@ describe('code that reads uploaded files from the media mount', function () {
             ->toThrow(Mage_Core_Exception::class);
     });
 
+    it('reads the SVG of a media directive without decoding it, and removes its scripts', function (): void {
+        $this->mount->write('wysiwyg/icon.svg', '<svg xmlns="http://www.w3.org/2000/svg" onload="alert(1)"><script>alert(2)</script><circle r="5"/></svg>');
+        $this->mount->write('wysiwyg/blue.png', $this->png);
+        $filter = Mage::getModel('cms/adminhtml_template_filter');
+
+        $svg = $filter->readDirectiveSvg('{{media url="wysiwyg/icon.svg"}}');
+
+        expect($svg)->toContain('<circle')
+            ->not->toContain('script')
+            ->not->toContain('onload')
+            ->and($filter->readDirectiveSvg('{{media url="wysiwyg/blue.png"}}'))->toBeNull()
+            ->and(fn() => $filter->readDirectiveSvg('{{media url="../../app/etc/local.svg"}}'))
+            ->toThrow(Mage_Core_Exception::class);
+    });
+
     it('takes the email logo from the mount, and the skin logo when the file is missing', function (): void {
         $template = new class extends Mage_Core_Model_Email_Template {
             public function logoUrl(): string

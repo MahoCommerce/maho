@@ -46,7 +46,11 @@ const linkedClasses = (doc, stylesUrl) => {
     return new Set([...found].map(unescapeClass));
 };
 
-/** A hidden frame parses the stylesheets of `head`, so they do not change the admin page. */
+/**
+ * A hidden frame parses the stylesheets of `head`, so they do not change the admin page. The
+ * caller removes the frame. Until then, the frame gives the values of the CSS variables of the
+ * store view, such as the colors that css/theme.css sets.
+ */
 const readStylesheets = async (head, stylesUrl) => {
     const frame = document.createElement('iframe');
     frame.hidden = true;
@@ -56,9 +60,10 @@ const readStylesheets = async (head, stylesUrl) => {
     document.body.append(frame);
     try {
         await loaded;
-        return linkedClasses(frame.contentDocument, stylesUrl);
-    } finally {
+        return { styled: linkedClasses(frame.contentDocument, stylesUrl), frame };
+    } catch (error) {
         frame.remove();
+        throw error;
     }
 };
 
@@ -71,45 +76,57 @@ const loadDesignSystem = async (css) => {
 };
 
 /**
- * `value` with each `var(--name, fallback)` replaced by its fallback, or null when a variable has
- * no fallback. The design system writes the value of the theme as the fallback.
+ * `value` with each `var(--name, fallback)` replaced by `replace(name, fallback)`. The variables
+ * in the fallback are replaced first. `fallback` is null when the variable has none. Return
+ * null when `value` is not valid, or when `replace()` returns null.
  */
-const withoutVariables = (value) => {
-    let result = value;
-    for (let start = result.lastIndexOf('var('); start !== -1; start = result.lastIndexOf('var(')) {
+const mapVariables = (value, replace) => {
+    let result = '';
+    let index = 0;
+    for (let start = value.indexOf('var(', index); start !== -1; start = value.indexOf('var(', index)) {
         let depth = 0;
         let comma = -1;
         let end = -1;
-        for (let index = start + 4; index < result.length && end === -1; index++) {
-            const char = result[index];
+        for (let position = start + 4; position < value.length && end === -1; position++) {
+            const char = value[position];
             if (char === '(') {
                 depth++;
             } else if (char === ')') {
                 if (depth === 0) {
-                    end = index;
+                    end = position;
                 }
                 depth--;
             } else if (char === ',' && depth === 0 && comma === -1) {
-                comma = index;
+                comma = position;
             }
         }
-        if (end === -1 || comma === -1) {
+        if (end === -1) {
             return null;
         }
-        result = result.slice(0, start) + result.slice(comma + 1, end).trim() + result.slice(end + 1);
+        const name = value.slice(start + 4, comma === -1 ? end : comma).trim();
+        const fallback = comma === -1 ? null : mapVariables(value.slice(comma + 1, end).trim(), replace);
+        const replaced = replace(name, fallback);
+        if (replaced === null) {
+            return null;
+        }
+        result += value.slice(index, start) + replaced;
+        index = end + 1;
     }
-    return result;
+    return result + value.slice(index);
 };
 
 /** A property whose value is the color of a color utility, such as `bg-primary` or `ring-red-500`. */
 const COLOR_PROPERTY = /^(?:.*color|fill|stroke|--tw-gradient-(?:from|via|to))$/;
 const DECLARATION = /(?:^|[{;\s])(-*[a-z][\w-]*)\s*:\s*([^;{}]+);/g;
 
-/** The color that `css` gives, or null when it gives no color or more than one. */
-const colorOf = (css) => {
+/**
+ * The color that `css` gives in the store view, or null when it gives no color or more than one.
+ * `variable(name)` gives the value of a variable in the store view, or an empty string.
+ */
+const colorOf = (css, variable) => {
     const colors = new Set();
     for (const [, property, value] of css.matchAll(DECLARATION)) {
-        const color = COLOR_PROPERTY.test(property) ? withoutVariables(value.trim()) : null;
+        const color = COLOR_PROPERTY.test(property) ? mapVariables(value.trim(), (name, fallback) => variable(name) || fallback) : null;
         if (color !== null && CSS.supports('color', color) && !/^(?:currentcolor|inherit|initial|unset|revert)$/i.test(color)) {
             colors.add(color);
         }
@@ -120,13 +137,25 @@ const colorOf = (css) => {
 /** The CSS of the class itself: the design system also writes the `@property` rules of its variables. */
 const withoutProperties = (css) => css.replace(/@property [^{]+\{[^}]*\}\n?/g, '').trim();
 
-/** A function that gives { css, color } for a class name, or null for a class that `designSystem` does not generate. */
-const detailsOf = (designSystem) => {
+/**
+ * `css` with the value of each variable in the store view as its fallback. The design system
+ * writes the value of the theme source, which css/theme.css or the theme settings can change.
+ */
+const withStoreValues = (css, variable) => mapVariables(css, (name, fallback) => {
+    const value = variable(name) || fallback;
+    return value === null ? `var(${name})` : `var(${name}, ${value})`;
+}) ?? css;
+
+/**
+ * A function that gives { css, color } for a class name, or null for a class that `designSystem`
+ * does not generate. `variable(name)` gives the value of a variable in the store view.
+ */
+const detailsOf = (designSystem, variable) => {
     const cache = new Map();
     return (name) => {
         if (!cache.has(name)) {
             const css = designSystem.candidatesToCss([name])[0];
-            cache.set(name, css === null ? null : { css: withoutProperties(css), color: colorOf(css) });
+            cache.set(name, css === null ? null : { css: withStoreValues(withoutProperties(css), variable), color: colorOf(css, variable) });
         }
         return cache.get(name);
     };
@@ -177,11 +206,18 @@ class ClassCheck {
             const body = new FormData();
             body.set('store_id', storeId);
             const styles = await mahoFetch(this.setup.config.class_check_url, { method: 'POST', body, loaderArea: false });
-            const [styled, designSystem] = await Promise.all([
+            const [{ styled, frame }, designSystem] = await Promise.all([
                 readStylesheets(styles.head ?? '', styles.styles ?? ''),
                 loadDesignSystem(styles.css ?? ''),
             ]);
-            return styled ? { styled, designSystem } : null;
+            if (storeId !== this.storeId || !styled) {
+                frame.remove();
+                return styled && { styled, designSystem, variable: () => '' };
+            }
+            this.frame?.remove();
+            this.frame = frame;
+            const style = getComputedStyle(frame.contentDocument.documentElement);
+            return { styled, designSystem, variable: (name) => style.getPropertyValue(name).trim() };
         } catch (error) {
             console.error('Cannot read the classes of the store view:', error);
             return null;
@@ -201,6 +237,11 @@ class ClassCheck {
     /** The design system of the theme, or null. */
     async designSystem() {
         return (await this.load())?.designSystem ?? null;
+    }
+
+    /** A function that gives the value of a CSS variable in the store view, or an empty string. */
+    async variables() {
+        return (await this.load())?.variable ?? (() => '');
     }
 
     async listClasses() {
@@ -261,7 +302,7 @@ export const classDetails = async (setup) => {
     }
     check.details ??= new WeakMap();
     if (!check.details.has(designSystem)) {
-        check.details.set(designSystem, detailsOf(designSystem));
+        check.details.set(designSystem, detailsOf(designSystem, await check.variables()));
     }
     return check.details.get(designSystem);
 };
