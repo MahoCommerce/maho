@@ -14,8 +14,8 @@
 /phpunit.xml export-ignore
 /README.md export-ignore
 /SECURITY.md export-ignore
-/docs/*/images export-ignore
-/app/code/core/*/*/docs/*/images export-ignore
+/docs/*/images/** export-ignore
+/app/code/core/*/*/docs/*/images/** export-ignore
 
 # Enforce checkout with linux lf
 *.html text eol=lf
