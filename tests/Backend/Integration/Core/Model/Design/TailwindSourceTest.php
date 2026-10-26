@@ -289,7 +289,9 @@ describe('a build that fails', function () {
         $bundle->build();
         $flag = Mage::getModel('core/flag', ['flag_code' => Mage_Core_Model_Design_Content_Bundle::FLAG_MANIFEST])->loadSelf();
         $manifest = $flag->getFlagData();
+        // A deploy changed styles.css after the failed build and after the build of the previous file
         $manifest['base/default']['failed'] = 'an older styles.css';
+        $manifest['base/default']['styles'] = 'an older styles.css';
         $flag->setFlagData($manifest)->save();
 
         expect($bundle->getOutdatedThemes())->toContain('base/default');

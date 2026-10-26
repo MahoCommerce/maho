@@ -174,7 +174,8 @@ const swatches = (setup) => ViewPlugin.fromClass(class {
 
 /**
  * A tooltip on a class with the CSS that Tailwind makes for it, and a button that sorts the
- * classes of the attribute when they are not in the order of the Tailwind build.
+ * classes of the attribute when they are not in the order of the Tailwind build. A class without
+ * CSS gets no tooltip, so the warning of the linter stays alone.
  */
 const classTooltip = (setup) => hoverTooltip(async (view, pos) => {
     const { state } = view;
@@ -187,19 +188,17 @@ const classTooltip = (setup) => hoverTooltip(async (view, pos) => {
     const sortable = names.length > 1 && !/[{}]/.test(state.sliceDoc(token.value.from, token.value.to));
     const [details, sorted] = await Promise.all([classDetails(setup), sortable ? sortClasses(setup, names) : null]);
     const css = details?.(token.name) ?? null;
-    const unsorted = sorted !== null && sorted.some((name, index) => name !== names[index]);
-    if ((css === null && !unsorted) || view.state.doc !== state.doc) {
+    if (css === null || view.state.doc !== state.doc) {
         return null;
     }
+    const unsorted = sorted !== null && sorted.some((name, index) => name !== names[index]);
     return {
         pos: token.from,
         end: token.to,
         above: true,
         create: () => {
             const dom = document.createElement('div');
-            if (css !== null) {
-                dom.append(cssNode(css));
-            }
+            dom.append(cssNode(css));
             if (unsorted) {
                 const button = document.createElement('button');
                 button.type = 'button';
