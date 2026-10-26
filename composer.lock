@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b67666de68a85d3df732e51a74247ce8",
+    "content-hash": "4d8157284a0d90f770864178bdd4b9e9",
     "packages": [
         {
             "name": "altcha-org/altcha",
@@ -3581,16 +3581,16 @@
         },
         {
             "name": "phpstan/phpdoc-parser",
-            "version": "2.3.6",
+            "version": "2.3.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpdoc-parser.git",
-                "reference": "1427af4647235b4a73b13940b1f1258d3584f36e"
+                "reference": "3fcdcf021e840f1ec9383152e3603fc790c7c15b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpdoc-parser/zipball/1427af4647235b4a73b13940b1f1258d3584f36e",
-                "reference": "1427af4647235b4a73b13940b1f1258d3584f36e",
+                "url": "https://api.github.com/repos/phpstan/phpdoc-parser/zipball/3fcdcf021e840f1ec9383152e3603fc790c7c15b",
+                "reference": "3fcdcf021e840f1ec9383152e3603fc790c7c15b",
                 "shasum": ""
             },
             "require": {
@@ -3622,9 +3622,9 @@
             "description": "PHPDoc parser with support for nullable, intersection and generic types",
             "support": {
                 "issues": "https://github.com/phpstan/phpdoc-parser/issues",
-                "source": "https://github.com/phpstan/phpdoc-parser/tree/2.3.6"
+                "source": "https://github.com/phpstan/phpdoc-parser/tree/2.3.7"
             },
-            "time": "2026-09-27T20:07:45+00:00"
+            "time": "2026-10-26T17:24:37+00:00"
         },
         {
             "name": "psr/cache",
@@ -4355,16 +4355,16 @@
         },
         {
             "name": "symfony/ai-agent",
-            "version": "v0.15.0",
+            "version": "v1.0.0-BETA1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/ai-agent.git",
-                "reference": "c47e2dc323c93b3db6b4bc7b8e71b9092706fde4"
+                "reference": "eb39f8c9c42397977f4196271e15cb8a1346df3a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/ai-agent/zipball/c47e2dc323c93b3db6b4bc7b8e71b9092706fde4",
-                "reference": "c47e2dc323c93b3db6b4bc7b8e71b9092706fde4",
+                "url": "https://api.github.com/repos/symfony/ai-agent/zipball/eb39f8c9c42397977f4196271e15cb8a1346df3a",
+                "reference": "eb39f8c9c42397977f4196271e15cb8a1346df3a",
                 "shasum": ""
             },
             "require": {
@@ -4373,14 +4373,15 @@
                 "phpdocumentor/reflection-docblock": "^5.4|^6.0",
                 "phpstan/phpdoc-parser": "^2.1",
                 "psr/log": "^3.0",
-                "symfony/ai-platform": "^0.15",
+                "symfony/ai-platform": "^1.0",
                 "symfony/clock": "^7.3|^8.0",
                 "symfony/http-client": "^7.3|^8.0",
                 "symfony/polyfill-php85": "^1.33",
                 "symfony/property-access": "^7.3|^8.0",
                 "symfony/property-info": "^7.3|^8.0",
                 "symfony/serializer": "^7.3|^8.0",
-                "symfony/type-info": "^7.3|^8.0"
+                "symfony/type-info": "^7.3|^8.0",
+                "symfony/uid": "^7.3|^8.0"
             },
             "conflict": {
                 "phpstan/phpstan": "2.2.x-dev || 2.3.x-dev"
@@ -4390,7 +4391,9 @@
                 "phpstan/phpstan-phpunit": "^2.0",
                 "phpstan/phpstan-strict-rules": "^2.0",
                 "phpunit/phpunit": "^11.5.53",
-                "symfony/ai-store": "^0.15",
+                "symfony/ai-store": "^1.0",
+                "symfony/console": "^7.3|^8.0",
+                "symfony/dependency-injection": "^7.3|^8.0",
                 "symfony/event-dispatcher": "^7.3|^8.0",
                 "symfony/stopwatch": "^7.3|^8.0",
                 "symfony/translation": "^7.3|^8.0",
@@ -4434,7 +4437,7 @@
                 "llm"
             ],
             "support": {
-                "source": "https://github.com/symfony/ai-agent/tree/v0.15.0"
+                "source": "https://github.com/symfony/ai-agent/tree/v1.0.0-BETA1"
             },
             "funding": [
                 {
@@ -4454,25 +4457,25 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-10-22T23:44:24+00:00"
+            "time": "2026-10-26T14:03:07+00:00"
         },
         {
             "name": "symfony/ai-generic-platform",
-            "version": "v0.15.0",
+            "version": "v1.0.0-BETA1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/ai-generic-platform.git",
-                "reference": "30bb656d5122c09c03ad1685e33a87e8a0802f37"
+                "reference": "28f4bcdafe815e5bb108c1d62d345dbc7b6780c4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/ai-generic-platform/zipball/30bb656d5122c09c03ad1685e33a87e8a0802f37",
-                "reference": "30bb656d5122c09c03ad1685e33a87e8a0802f37",
+                "url": "https://api.github.com/repos/symfony/ai-generic-platform/zipball/28f4bcdafe815e5bb108c1d62d345dbc7b6780c4",
+                "reference": "28f4bcdafe815e5bb108c1d62d345dbc7b6780c4",
                 "shasum": ""
             },
             "require": {
                 "php": ">=8.2",
-                "symfony/ai-platform": "^0.15",
+                "symfony/ai-platform": "^1.0",
                 "symfony/http-client": "^7.3|^8.0"
             },
             "require-dev": {
@@ -4519,7 +4522,7 @@
                 "platform"
             ],
             "support": {
-                "source": "https://github.com/symfony/ai-generic-platform/tree/v0.15.0"
+                "source": "https://github.com/symfony/ai-generic-platform/tree/v1.0.0-BETA1"
             },
             "funding": [
                 {
@@ -4539,20 +4542,20 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-10-22T23:44:24+00:00"
+            "time": "2026-10-26T14:03:07+00:00"
         },
         {
             "name": "symfony/ai-platform",
-            "version": "v0.15.0",
+            "version": "v1.0.0-BETA1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/ai-platform.git",
-                "reference": "fa3bcc147286c0eb87ff0b192cfd4fa5230033a3"
+                "reference": "4ac262078d1f00c03805be2ab4042ae39fe3bc85"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/ai-platform/zipball/fa3bcc147286c0eb87ff0b192cfd4fa5230033a3",
-                "reference": "fa3bcc147286c0eb87ff0b192cfd4fa5230033a3",
+                "url": "https://api.github.com/repos/symfony/ai-platform/zipball/4ac262078d1f00c03805be2ab4042ae39fe3bc85",
+                "reference": "4ac262078d1f00c03805be2ab4042ae39fe3bc85",
                 "shasum": ""
             },
             "require": {
@@ -4564,6 +4567,7 @@
                 "psr/log": "^3.0",
                 "symfony/clock": "^7.3|^8.0",
                 "symfony/event-dispatcher": "^7.3|^8.0",
+                "symfony/polyfill-php85": "^1.33",
                 "symfony/property-access": "^7.3|^8.0",
                 "symfony/property-info": "^7.3|^8.0",
                 "symfony/serializer": "^7.3|^8.0",
@@ -4658,7 +4662,7 @@
                 "voyage"
             ],
             "support": {
-                "source": "https://github.com/symfony/ai-platform/tree/v0.15.0"
+                "source": "https://github.com/symfony/ai-platform/tree/v1.0.0-BETA1"
             },
             "funding": [
                 {
@@ -4678,7 +4682,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-10-22T23:08:39+00:00"
+            "time": "2026-10-26T14:03:07+00:00"
         },
         {
             "name": "symfony/asset",
@@ -6525,7 +6529,7 @@
         },
         {
             "name": "symfony/mcp-bundle",
-            "version": "v0.15.0",
+            "version": "v1.0.0-BETA1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/mcp-bundle.git",
@@ -6591,7 +6595,7 @@
             ],
             "description": "Symfony integration bundle for Model Context Protocol (via official mcp/sdk)",
             "support": {
-                "source": "https://github.com/symfony/mcp-bundle/tree/v0.15.0"
+                "source": "https://github.com/symfony/mcp-bundle/tree/v1.0.0-BETA1"
             },
             "funding": [
                 {

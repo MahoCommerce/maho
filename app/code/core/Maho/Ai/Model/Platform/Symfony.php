@@ -455,7 +455,7 @@ class Maho_Ai_Model_Platform_Symfony implements
         foreach ($messages as $m) {
             $role = (string) ($m['role'] ?? 'user');
             $content = (string) ($m['content'] ?? '');
-            $bag->add(match ($role) {
+            $bag = $bag->with(match ($role) {
                 'system'    => Message::forSystem($content),
                 'assistant' => Message::ofAssistant($content),
                 default     => Message::ofUser($content),
