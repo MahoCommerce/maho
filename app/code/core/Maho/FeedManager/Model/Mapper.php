@@ -104,7 +104,7 @@ class Maho_FeedManager_Model_Mapper
     /** @var array<int, array|null> Cache of parent product data by parent ID */
     protected array $_parentDataCache = [];
 
-    /** @var array<int, array<string, array{0: float, 1: array<string, array<string, float>>}|null>> */
+    /** @var array<int, array<string, array{0: float, 1: array<string, array<string, float>>}|null>> Cache of the prices and option prices of a configurable parent by parent ID */
     protected array $_variantPriceBasesCache = [];
 
     /** @var array<int, array<int|string>> Cache of parent product ID => its category IDs */
@@ -546,7 +546,8 @@ class Maho_FeedManager_Model_Mapper
         }
 
         $isVariant = $this->_applyVariantPrices($data, $product);
-        $this->_applyTaxMode($data, $product);
+        // Checkout taxes a variant with the tax class of the parent
+        $this->_applyTaxMode($data, $isVariant ? $this->getParentProduct($product) : $product);
 
         // Currency from store
         $data['currency'] = Mage::app()->getStore($this->_storeId)->getCurrentCurrencyCode();
