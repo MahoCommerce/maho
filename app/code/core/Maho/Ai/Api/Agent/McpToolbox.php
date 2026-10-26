@@ -61,6 +61,7 @@ final class McpToolbox implements ToolboxInterface
         private readonly McpToolDispatcher $dispatcher,
         private readonly AdminPageTool $adminPageTool,
         private readonly ContentGuideTool $contentGuideTool,
+        private readonly DocsTool $docsTool,
         private readonly FormTool $formTool,
         private readonly MemoryTool $memoryTool,
         private readonly BackgroundTaskTool $backgroundTaskTool,
@@ -127,6 +128,9 @@ final class McpToolbox implements ToolboxInterface
         }
         if ($this->contentGuideTool->hasGuide()) {
             $tools[] = $this->contentGuideTool->tool();
+        }
+        if ($this->docsTool->hasPages()) {
+            $tools[] = $this->docsTool->tool();
         }
         // The most recently enabled section wins the budget: it is the one the model asked for last.
         foreach (array_reverse($this->enabledSections) as $section) {
@@ -232,7 +236,7 @@ final class McpToolbox implements ToolboxInterface
     /** A tool that runs in this process, outside the MCP catalog. */
     public static function isLocal(string $name): bool
     {
-        return in_array($name, [self::ENABLE_NAME, ContentGuideTool::NAME, BackgroundTaskTool::NAME, AttachmentTool::NAME, ImageTool::NAME, NotifyTool::NAME], true)
+        return in_array($name, [self::ENABLE_NAME, ContentGuideTool::NAME, DocsTool::NAME, BackgroundTaskTool::NAME, AttachmentTool::NAME, ImageTool::NAME, NotifyTool::NAME], true)
             || in_array($name, AdminPageTool::NAMES, true) || in_array($name, MemoryTool::NAMES, true) || in_array($name, FormTool::NAMES, true);
     }
 
@@ -243,6 +247,8 @@ final class McpToolbox implements ToolboxInterface
             $outcome = $this->enable($toolCall->getArguments());
         } elseif ($toolCall->getName() === ContentGuideTool::NAME) {
             $outcome = $this->contentGuideTool->read();
+        } elseif ($toolCall->getName() === DocsTool::NAME) {
+            $outcome = $this->docsTool->read($toolCall->getArguments());
         } elseif ($toolCall->getName() === BackgroundTaskTool::NAME) {
             $outcome = $this->backgroundTaskTool->start($toolCall->getArguments());
         } elseif ($toolCall->getName() === NotifyTool::NAME) {
@@ -566,6 +572,7 @@ final class McpToolbox implements ToolboxInterface
         return match (true) {
             $name === self::ENABLE_NAME => 'Load tools',
             $name === ContentGuideTool::NAME => ContentGuideTool::TITLE,
+            $name === DocsTool::NAME => DocsTool::TITLE,
             in_array($name, MemoryTool::NAMES, true) => MemoryTool::title($name),
             $name === BackgroundTaskTool::NAME => BackgroundTaskTool::TITLE,
             $name === NotifyTool::NAME => 'Send a notification',
