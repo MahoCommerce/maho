@@ -841,8 +841,27 @@ class MahoAiAssistant {
     fieldLabel(element) {
         const text = (node) => (node?.textContent ?? '').replace(/\s+/g, ' ').trim().replace(/\s*\*$/, '');
         const cell = element.closest('td');
-        const header = cell?.closest('table')?.tHead?.rows[0]?.cells[cell.cellIndex];
-        return text(element.id ? document.querySelector(`label[for="${CSS.escape(element.id)}"]`) : null) || text(element.closest('tr')?.querySelector('td.label, th')) || text(header) || element.name || element.id;
+        return text(element.id ? document.querySelector(`label[for="${CSS.escape(element.id)}"]`) : null) || text(element.closest('tr')?.querySelector('td.label, th')) || text(cell ? this.columnHeader(cell) : null) || element.name || element.id;
+    }
+
+    /** The header cell above a table cell. Columns count by colspan, so a wide cell before it does not shift the match. */
+    columnHeader(cell) {
+        const headers = cell.closest('table')?.tHead?.rows[0]?.cells ?? [];
+        let column = 0;
+        for (const previous of cell.parentElement.cells) {
+            if (previous === cell) {
+                break;
+            }
+            column += previous.colSpan;
+        }
+        let start = 0;
+        for (const header of headers) {
+            start += header.colSpan;
+            if (column < start) {
+                return header;
+            }
+        }
+        return null;
     }
 
     // --- form text --------------------------------------------------------------------
