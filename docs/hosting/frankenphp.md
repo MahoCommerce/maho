@@ -2,6 +2,8 @@
 description: Run Maho on FrankenPHP, the modern Caddy-based PHP server, using Maho's official Docker images for automatic SSL, HTTP/3 and high performance.
 ---
 
+# FrankenPHP
+
 [FrankenPHP](https://frankenphp.dev/){target=_blank} is a modern application server for PHP built on top
 of the [Caddy](https://caddyserver.com/){target=_blank} web server.
 

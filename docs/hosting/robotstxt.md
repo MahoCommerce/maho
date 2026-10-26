@@ -2,6 +2,8 @@
 description: Learn why robots.txt matters for e-commerce and how to configure crawler directives in Maho to guide search engines and protect private pages.
 ---
 
+# Robots.txt
+
 `robots.txt` is a text file that admins create to instruct web robots (typically search engine crawlers) 
 how to crawl pages on their website. The file uses the
 [Robots Exclusion Protocol](https://en.wikipedia.org/wiki/Robots.txt){:target="_blank"},

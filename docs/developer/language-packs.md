@@ -2,6 +2,8 @@
 description: Install and contribute to Maho language packs via Composer to localize your ecommerce store, using the official translation platform for fixes and new phrasings.
 ---
 
+# Language packs
+
 ## Introduction
 
 Maho natively provides many language packs to allow you to create a great

@@ -177,7 +177,8 @@ final class Library
         if (preg_match('/\A---\R(.*?)\R---\R/s', $text, $frontMatter) && preg_match('/^description:\s*(.+)$/m', $frontMatter[1], $match)) {
             $description = trim($match[1], " \t\"'");
         }
-        $title = preg_match('/^#\s+(.+)$/m', self::stripFrontMatter($text), $match)
+        // A "#" line inside a code block is a comment, not the title.
+        $title = preg_match('/^#\s+(.+)$/m', (string) preg_replace('/^(```|~~~).*?^\1/ms', '', self::stripFrontMatter($text)), $match)
             ? trim(strip_tags($match[1]))
             : basename($path, '.md');
 

@@ -57,6 +57,12 @@ it('returns only the pages of the audiences asked for', function (): void {
     expect($library->page('core/b.md', [Library::AUDIENCE_DEVELOPER])?->title)->toBe('Developer page');
 });
 
+it('takes the title from the first "#" line outside a code block', function (): void {
+    $dir = docsLibraryFolder(['a.md' => "Intro.\n\n```bash\n# Clone the repository\n```\n\n# Real title\n"]);
+
+    expect(new Library([new Source('core', Library::AUDIENCE_USER, $dir)])->page('core/a.md', [Library::AUDIENCE_USER])?->title)->toBe('Real title');
+});
+
 it('gives the body of a page without its front matter, cut to the limit', function (): void {
     $dir = docsLibraryFolder(['a.md' => "---\ndescription: Short.\n---\n# Title\n\n" . str_repeat('x', 100)]);
     $page = new Library([new Source('core', Library::AUDIENCE_USER, $dir)])->page('core/a.md', [Library::AUDIENCE_USER]);
