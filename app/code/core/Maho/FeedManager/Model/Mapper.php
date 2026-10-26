@@ -54,6 +54,17 @@ class Maho_FeedManager_Model_Mapper
         'cost',
     ];
 
+    /** Fields of the row of a configurable child that come from the parent, as checkout charges them. */
+    protected const VARIANT_PRICE_FIELDS = [
+        'price',
+        'final_price',
+        'regular_price',
+        'special_price',
+        'special_from_date',
+        'special_to_date',
+        'sale_price_effective_date',
+    ];
+
     /** Image fields that use the feed placeholder URL when no value resolves. */
     protected const IMAGE_FIELDS = [
         'image',
@@ -92,6 +103,9 @@ class Maho_FeedManager_Model_Mapper
 
     /** @var array<int, array|null> Cache of parent product data by parent ID */
     protected array $_parentDataCache = [];
+
+    /** @var array<int, array<string, array{0: float, 1: array<string, array<string, float>>}|null>> Cache of the prices and option prices of a configurable parent by parent ID */
+    protected array $_variantPriceBasesCache = [];
 
     /** @var array<int, array<int|string>> Cache of parent product ID => its category IDs */
     protected array $_parentCategoryIdsCache = [];
@@ -531,7 +545,9 @@ class Maho_FeedManager_Model_Mapper
             }
         }
 
-        $this->_applyTaxMode($data, $product);
+        $isVariant = $this->_applyVariantPrices($data, $product);
+        // Checkout taxes a variant with the tax class of the parent
+        $this->_applyTaxMode($data, $isVariant ? $this->getParentProduct($product) : $product);
 
         // Currency from store
         $data['currency'] = Mage::app()->getStore($this->_storeId)->getCurrentCurrencyCode();
@@ -542,6 +558,12 @@ class Maho_FeedManager_Model_Mapper
             if ($parentData) {
                 foreach ($parentData as $key => $value) {
                     $data['parent_' . $key] = $value;
+                }
+                if ($isVariant) {
+                    // The parent price of this row is the price of the parent with the values of this child
+                    foreach (self::VARIANT_PRICE_FIELDS as $field) {
+                        $data['parent_' . $field] = $data[$field];
+                    }
                 }
             }
         }
@@ -596,36 +618,14 @@ class Maho_FeedManager_Model_Mapper
      */
     protected function _extractParentProductData(Mage_Catalog_Model_Product $product): ?array
     {
-        $childId = (int) $product->getId();
-
-        // Get parent ID - use cached mapping if available
-        if (array_key_exists($childId, $this->_childParentMap)) {
-            $parentId = $this->_childParentMap[$childId];
-        } else {
-            // Fall back to individual lookup if not preloaded
-            $parentIds = Mage::getModel('catalog/product_type_configurable')
-                ->getParentIdsByChild($childId);
-            $parentId = empty($parentIds) ? null : (int) $parentIds[0];
-            $this->_childParentMap[$childId] = $parentId;
-        }
-
-        if ($parentId === null) {
+        $parent = $this->getParentProduct($product);
+        if ($parent === null) {
             return null;
         }
 
-        // Return cached parent data if available
+        $parentId = (int) $parent->getId();
         if (array_key_exists($parentId, $this->_parentDataCache)) {
             return $this->_parentDataCache[$parentId];
-        }
-
-        // Load and cache parent product data
-        $parent = Mage::getModel('catalog/product')
-            ->setStoreId($this->_storeId)
-            ->load($parentId);
-
-        if (!$parent->getId()) {
-            $this->_parentDataCache[$parentId] = null;
-            return null;
         }
 
         // Extract parent data (subset of key attributes for fallback)
@@ -690,6 +690,113 @@ class Maho_FeedManager_Model_Mapper
     }
 
     /**
+     * Write the prices that checkout charges for the child of a configurable product into its row.
+     *
+     * @param array<string, mixed> $data
+     * @return bool false when the product is not the child of a configurable product
+     */
+    protected function _applyVariantPrices(array &$data, Mage_Catalog_Model_Product $product): bool
+    {
+        $prices = $this->_getVariantPrices($product);
+        if ($prices === null) {
+            return false;
+        }
+
+        $data = array_replace($data, $prices);
+        return true;
+    }
+
+    /**
+     * The prices that checkout charges for the child of a configurable product, before the tax mode.
+     *
+     * Each price field is the same field of the parent plus the option prices of the values of the
+     * child. Checkout ignores the price and the special price of the child.
+     *
+     * @return array<string, mixed>|null null when the product is not the child of a configurable product
+     */
+    protected function _getVariantPrices(Mage_Catalog_Model_Product $product): ?array
+    {
+        $parent = $this->getParentProduct($product);
+        if ($parent === null || !$parent->isConfigurable()) {
+            return null;
+        }
+
+        $prices = [];
+        foreach ($this->_getVariantPriceBases($parent) as $field => $base) {
+            if ($base === null) {
+                $prices[$field] = null;
+                continue;
+            }
+            [$price, $deltas] = $base;
+            foreach ($deltas as $code => $deltaByValue) {
+                $price += $deltaByValue[(string) $product->getData($code)] ?? 0.0;
+            }
+            $prices[$field] = max(0.0, $price);
+        }
+        $prices['price'] = $prices['final_price'];
+        $prices['special_from_date'] = $parent->getSpecialFromDate();
+        $prices['special_to_date'] = $parent->getSpecialToDate();
+        $prices['sale_price_effective_date'] = Mage::helper('feedmanager/date')->toIso8601Range(
+            $prices['special_from_date'],
+            $prices['special_to_date'],
+        );
+
+        return $prices;
+    }
+
+    /**
+     * A copy of $model with the prices that checkout charges for $child, for a dynamic rule.
+     * A dynamic rule reads the product model, not the row. $model is unchanged when $child has no configurable parent.
+     */
+    protected function _withVariantPrices(Mage_Catalog_Model_Product $model, Mage_Catalog_Model_Product $child): Mage_Catalog_Model_Product
+    {
+        $prices = $this->_getVariantPrices($child);
+        if ($prices === null) {
+            return $model;
+        }
+
+        return (clone $model)->addData([
+            'price' => $prices['regular_price'],
+            'final_price' => $prices['final_price'],
+            'special_price' => $prices['special_price'],
+            'special_from_date' => $prices['special_from_date'],
+            'special_to_date' => $prices['special_to_date'],
+        ]);
+    }
+
+    /**
+     * The prices of a configurable parent, each with the option prices that it gives.
+     * The special price is null when the parent has none.
+     *
+     * @return array<string, array{0: float, 1: array<string, array<string, float>>}|null>
+     */
+    protected function _getVariantPriceBases(Mage_Catalog_Model_Product $parent): array
+    {
+        $parentId = (int) $parent->getId();
+        if (isset($this->_variantPriceBasesCache[$parentId])) {
+            return $this->_variantPriceBasesCache[$parentId];
+        }
+
+        /** @var Mage_Catalog_Model_Product_Type_Configurable $type */
+        $type = $parent->getTypeInstance(true);
+        $attributes = $type->getConfigurableAttributesAsArray($parent);
+        /** @var Mage_Catalog_Model_Product_Type_Configurable_Price $priceModel */
+        $priceModel = Mage_Catalog_Model_Product_Type::priceFactory(Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE);
+        $finalPrice = (float) $parent->getFinalPrice();
+        $regularPrice = (float) $parent->getPrice();
+        $specialPrice = $parent->getSpecialPrice();
+
+        return $this->_variantPriceBasesCache[$parentId] = [
+            // Only the final price takes the catalog price rules, as at checkout
+            'final_price' => [$finalPrice, $priceModel->getVariantPriceDeltas($attributes, $finalPrice, $parent)],
+            'regular_price' => [$regularPrice, $priceModel->getVariantPriceDeltas($attributes, $regularPrice)],
+            'special_price' => is_numeric($specialPrice)
+                ? [(float) $specialPrice, $priceModel->getVariantPriceDeltas($attributes, (float) $specialPrice)]
+                : null,
+        ];
+    }
+
+    /**
      * Convert the prices in a product row to the tax mode of the feed.
      *
      * This runs before the transformers, so a transformer receives a correct price.
@@ -742,16 +849,16 @@ class Maho_FeedManager_Model_Mapper
                 // the answer, even when empty. Configurable storefront pricing
                 // ignores child specials entirely, so falling back to the
                 // child here would advertise sales the customer never gets.
-                return $this->_evaluateRule($ruleCode, $rawData, $parent);
+                return $this->_evaluateRule($ruleCode, $rawData, $this->_withVariantPrices($parent, $product));
             }
             return $this->_evaluateRule($ruleCode, $rawData, $product);
         }
 
-        $value = $this->_evaluateRule($ruleCode, $rawData, $product);
+        $value = $this->_evaluateRule($ruleCode, $rawData, $this->_withVariantPrices($product, $product));
         if ($useParentMode === 'if_empty' && ($value === null || $value === '')) {
             $parent = $this->getParentProduct($product);
             if ($parent !== null) {
-                return $this->_evaluateRule($ruleCode, $rawData, $parent);
+                return $this->_evaluateRule($ruleCode, $rawData, $this->_withVariantPrices($parent, $product));
             }
         }
         return $value;
@@ -780,6 +887,8 @@ class Maho_FeedManager_Model_Mapper
         }
         if (!array_key_exists($parentId, $this->_parentModelCache)) {
             $parent = Mage::getModel('catalog/product')->setStoreId($this->_storeId)->load($parentId);
+            // The feed collection reads its prices for this customer group, so the parent gets the same catalog price rules
+            $parent->setCustomerGroupId(Mage::helper('customer')->getCurrentGroupId());
             $this->_parentModelCache[$parentId] = $parent->getId() ? $parent : null;
         }
         return $this->_parentModelCache[$parentId];
