@@ -357,6 +357,40 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
         return $this->setData('passkey_challenge', $value);
     }
 
+    /**
+     * Passkey assertion verified during prelogin and kept for the login request that follows.
+     * A challenge is single use, so the same assertion cannot be verified twice.
+     *
+     * @return array{user_id: int, assertion_hash: string, at: int}|null
+     */
+    public function getPasskeyPreloginVerified(): ?array
+    {
+        $value = $this->getData('passkey_prelogin_verified');
+        if (!is_array($value) || !isset($value['user_id'], $value['assertion_hash'], $value['at'])) {
+            return null;
+        }
+
+        return [
+            'user_id' => (int) $value['user_id'],
+            'assertion_hash' => (string) $value['assertion_hash'],
+            'at' => (int) $value['at'],
+        ];
+    }
+
+    public function setPasskeyPreloginVerified(int $userId, string $assertionHash): static
+    {
+        return $this->setData('passkey_prelogin_verified', [
+            'user_id' => $userId,
+            'assertion_hash' => $assertionHash,
+            'at' => time(),
+        ]);
+    }
+
+    public function unsPasskeyPreloginVerified(): static
+    {
+        return $this->unsetData('passkey_prelogin_verified');
+    }
+
     public function getShowTwofaVerificationCode(bool $clear = false): ?bool
     {
         $value = $this->getData('show_twofa_verification_code', $clear ?: null);

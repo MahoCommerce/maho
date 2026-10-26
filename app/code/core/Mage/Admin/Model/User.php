@@ -47,6 +47,12 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
     public const AUTH_ERR_2FA_INVALID = 3;
 
     /**
+     * Seconds a passkey assertion verified by prelogin stays usable for the login request
+     * that follows. The two requests are part of the same sign-in, so the window is short.
+     */
+    private const PASSKEY_PRELOGIN_TTL = 60;
+
+    /**
      * Model event prefix
      *
      * @var string
@@ -345,16 +351,38 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
                 $clientDataJSON = base64_decode($passkeyData->clientDataJSON ?? '');
                 $authenticatorData = base64_decode($passkeyData->authenticatorData ?? '');
                 $signature = base64_decode($passkeyData->signature ?? '');
-
-                $publicKey = $this->getPasskeyPublicKey();
                 $challenge = $this->getSession()->getPasskeyChallenge();
-                $this->getSession()->unsPasskeyChallenge();
 
-                $webAuthn = Mage::helper('admin/auth')->getWebAuthn();
-                $usedPasskey = $webAuthn->processGet($clientDataJSON, $authenticatorData, $signature, $publicKey, $challenge);
+                if (!$challenge && $authenticatorData !== '' && $this->isPasskeyPreloginVerified($password)) {
+                    // The prelogin step verified this assertion a moment ago and consumed the
+                    // single-use challenge: the login request that follows can only reuse that
+                    // verification, not repeat it.
+                    $this->getSession()->unsPasskeyPreloginVerified();
+                    $usedPasskey = true;
+                } elseif ($challenge) {
+                    $this->getSession()->unsPasskeyChallenge();
 
-                $authenticatorObj = Mage::helper('admin/auth')->getWebAuthnAttestationAuthenticatorData($authenticatorData);
-                $needsTwofa = !$authenticatorObj->getUserVerified();
+                    $webAuthn = Mage::helper('admin/auth')->getWebAuthn();
+                    $usedPasskey = $webAuthn->processGet(
+                        $clientDataJSON,
+                        $authenticatorData,
+                        $signature,
+                        $this->getPasskeyPublicKey(),
+                        $challenge,
+                    );
+
+                    if ($usedPasskey) {
+                        $this->getSession()->setPasskeyPreloginVerified(
+                            (int) $this->getId(),
+                            hash('sha256', $password),
+                        );
+                    }
+                }
+
+                if ($usedPasskey) {
+                    $authenticatorObj = Mage::helper('admin/auth')->getWebAuthnAttestationAuthenticatorData($authenticatorData);
+                    $needsTwofa = !$authenticatorObj->getUserVerified();
+                }
             }
 
             if (!$usedPasskey) {
@@ -458,6 +486,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
         $webAuthn = Mage::helper('admin/auth')->getWebAuthn();
         $getArgs = $webAuthn->getGetArgs([ base64_decode($this->getPasskeyCredentialIdHash()) ]);
         $this->getSession()->setPasskeyChallenge($webAuthn->getChallenge()->getBinaryString());
+        $this->getSession()->unsPasskeyPreloginVerified();
 
         return $getArgs;
     }
@@ -505,6 +534,22 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
     public function isPasskeyEnabled(): bool
     {
         return $this->getPasskeyCredentialIdHash() && $this->getPasskeyPublicKey();
+    }
+
+    /**
+     * Whether the assertion payload was verified by a prelogin request of this same session.
+     * The record is bound to the user, to the payload and to a short time window.
+     */
+    private function isPasskeyPreloginVerified(#[\SensitiveParameter] string $payload): bool
+    {
+        $verified = $this->getSession()->getPasskeyPreloginVerified();
+        if (!is_array($verified)) {
+            return false;
+        }
+
+        return $verified['user_id'] === (int) $this->getId()
+            && hash_equals($verified['assertion_hash'], hash('sha256', $payload))
+            && time() - $verified['at'] <= self::PASSKEY_PRELOGIN_TTL;
     }
 
     /**
