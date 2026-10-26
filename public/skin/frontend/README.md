@@ -111,10 +111,48 @@ The swatches sit inside the real options through the customizable select API
 
 A homepage is CMS content: bento grids, columns, widgets and a handful of
 DaisyUI classes, all editable in the page editor. The sample data homepage is
-the reference: open it in the editor to see how the blocks nest. The DaisyUI
-classes available in content are listed in `default/src/tailwind.css` under
-`@source inline(...)`; a class outside that list does not exist in the
-compiled stylesheet.
+the reference: open it in the editor to see how the blocks nest.
+
+The committed `css/styles.css` has the classes of the templates, plus the
+DaisyUI classes that `default/src/tailwind.css` lists under `@source inline(...)`.
+Any other class in content works when the server has Node.js and the Tailwind
+CLI (`npm install` in the Maho root):
+
+- A save of a CMS page, a CMS block, a blog post, a widget, a custom variable,
+  a checkout agreement, a design footer field, or a WYSIWYG attribute of a
+  product or a category queues a build. The build runs one minute later in the
+  `slow` queue pool.
+- A queue worker must run the build. Cron starts one, or supervisord or systemd
+  keeps `./maho queue:work` running. Without a worker, the build stays in the
+  queue, and a cache flush does not start it. The Preview pane of the editor
+  still shows the new classes, because it compiles them in the browser, but
+  the storefront does not. On a development store with no cron, run
+  `./maho theme:content:build` after the save.
+- The build reads the `class` attributes of that content, compiles a copy of
+  `css/styles.css` with them, and writes it to `media/theme/`. The page head
+  then links the copy instead of the committed file.
+- If the committed `css/styles.css` changes, for example after an upgrade, the
+  store serves the committed file again. A cron job queues a new build within
+  15 minutes. A deploy script can run the build at once with
+  `./maho theme:content:build`.
+- An import, from the admin or with `./maho import:*`, queues a build when it
+  ends. A script of your own that writes content with SQL does not. Run the
+  command after it.
+
+Without Node.js, a class outside the list does not exist in the compiled stylesheet.
+
+To write classes, open the HTML in the code editor: click **Source** in the
+toolbar of the content editor, also in fullscreen. For one element, click
+the code icon on its badge, **Edit HTML** in the popup menu of a table, or the
+label of a `div`. Inside a `class` attribute, the code editor completes the classes
+of the theme stylesheet and every Tailwind utility of the theme, with variants
+such as `md:`. It marks a class that neither styles. A DaisyUI class that the
+theme does not use also gets this mark, but the build compiles it.
+
+A module adds its own content to the build with `#[Maho\Config\TailwindSource]`
+on a method that returns the HTML strings. See the class docblock for the
+parameters, and `Mage_Cms_Model_Resource_Block::getTailwindContent()` for an
+example.
 
 For an icon in content, use the `{{icon}}` directive. The content sanitizer
 strips inline SVG, so pasted markup does not survive a save:

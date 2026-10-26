@@ -85,9 +85,9 @@ SPDX-License-Identifier: AFL-3.0
         <double-click-to-edit translate="message">
             <message>Double-click to edit</message>
         </double-click-to-edit>
-        <edit-this-element-in-the-plain-html-editor translate="message">
-            <message>Edit this element in the plain HTML editor.</message>
-        </edit-this-element-in-the-plain-html-editor>
+        <double-click-to-edit-the-html-of-this-element translate="message">
+            <message>Double-click to edit the HTML of this element.</message>
+        </double-click-to-edit-the-html-of-this-element>
         <resize-the-preview translate="message">
             <message>Resize the preview</message>
         </resize-the-preview>
@@ -196,6 +196,39 @@ SPDX-License-Identifier: AFL-3.0
         <insert translate="message">
             <message>Insert</message>
         </insert>
+        <no-style-found-for-the-class translate="message">
+            <message>No style found for the class &quot;%s&quot;. Check the spelling. A daisyUI class that the theme does not use gets its style after the save.</message>
+        </no-style-found-for-the-class>
+        <the-short-form-of-this-class translate="message">
+            <message>The short form of this class is &quot;%s&quot;.</message>
+        </the-short-form-of-this-class>
+        <replace translate="message">
+            <message>Replace</message>
+        </replace>
+        <sort-the-classes translate="message">
+            <message>Sort the classes</message>
+        </sort-the-classes>
+        <source translate="message">
+            <message>Source</message>
+        </source>
+        <edit-html translate="message">
+            <message>Edit HTML</message>
+        </edit-html>
+        <more translate="message">
+            <message>More</message>
+        </more>
+        <settings translate="message">
+            <message>Settings</message>
+        </settings>
+        <delete-columns translate="message">
+            <message>Delete Columns</message>
+        </delete-columns>
+        <delete-bento-grid translate="message">
+            <message>Delete Bento Grid</message>
+        </delete-bento-grid>
+        <delete-accordion translate="message">
+            <message>Delete Accordion</message>
+        </delete-accordion>
         <enter-a-label-and-a-link translate="message">
             <message>Enter a label and a link.</message>
         </enter-a-label-and-a-link>

@@ -183,3 +183,39 @@ describe('endpoint', function () {
         }
     });
 });
+
+describe('class check', function () {
+    it('sends the stylesheets of the store view and the Tailwind source of its theme', function () {
+        $result = wysiwygRenderer()->renderStyles($this->storeId);
+
+        expect($result['styles'])->toContain('styles.css')
+            ->and($result['head'])->toContain(strtok($result['styles'], '?'))
+            ->and($result['css'])->toContain('@theme reference {')
+            ->and($result['css'])->toContain('@import "tailwindcss/utilities.css"');
+    });
+
+    it('lets an admin with no CMS resource call it, for the editor of a product', function () {
+        $user = AdminRoleFixture::login(['admin/catalog', 'admin/catalog/products']);
+        try {
+            $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create('http://localhost/admin/cms_wysiwyg/classCheck', 'POST'));
+            $request->setActionName('classCheck');
+            $controller = new Mage_Adminhtml_Cms_WysiwygController($request, new Mage_Core_Controller_Response_Http());
+
+            expect((fn(): bool => $this->_isAllowed())->call($controller))->toBeTrue();
+        } finally {
+            AdminRoleFixture::delete($user);
+        }
+    });
+
+    it('sends nothing for a store view that does not exist', function () {
+        $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create(
+            'http://localhost/admin/cms_wysiwyg/classCheck',
+            'POST',
+            ['store_id' => '999999'],
+        ));
+        $response = new Mage_Core_Controller_Response_Http();
+        (new Mage_Adminhtml_Cms_WysiwygController($request, $response))->classCheckAction();
+
+        expect(Mage::helper('core')->jsonDecode($response->getBody()))->toBe(['head' => '', 'styles' => '', 'css' => '']);
+    });
+});

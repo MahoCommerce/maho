@@ -203,7 +203,9 @@ function syncOnchangeValue(baseElem, distElem){
 
 // Insert some content to the cursor position of input element
 function updateElementAtCursor(el, value) {
-    if (el.selectionStart !== null) {
+    if (el.mahoCodeEditor) {
+        el.mahoCodeEditor.insert(value);
+    } else if (el.selectionStart !== null) {
         el.setRangeText(value, el.selectionStart, el.selectionEnd);
     } else {
         el.value += value;

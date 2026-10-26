@@ -153,14 +153,31 @@ class Mage_Adminhtml_Cms_WysiwygController extends Mage_Adminhtml_Controller_Act
     }
 
     /**
+     * Send the stylesheets and the Tailwind source of the theme of a store view. The plain HTML
+     * editor reads them to complete class names and to find the classes that nothing styles.
+     */
+    #[Maho\Config\Route('/admin/cms_wysiwyg/classCheck', methods: ['POST'])]
+    public function classCheckAction(): void
+    {
+        $store = Mage::app()->getStores()[(int) $this->getRequest()->getPost('store_id')] ?? null;
+        if (!$store instanceof Mage_Core_Model_Store) {
+            $this->getResponse()->setBodyJson(['head' => '', 'styles' => '', 'css' => '']);
+            return;
+        }
+
+        $this->getResponse()->setBodyJson(Mage::getSingleton('cms/wysiwyg_render')->renderStyles((int) $store->getId()));
+    }
+
+    /**
      * The preview only reports on content that the caller posted. It reveals no other data.
      * The CMS resource would block an admin who edits products but not CMS pages.
-     * The render checks the resource of each directive itself.
+     * The render checks the resource of each directive itself. The class check sends only
+     * the public stylesheets of the storefront.
      */
     #[\Override]
     protected function _isAllowed()
     {
-        if (in_array($this->getRequest()->getActionName(), ['sanitizePreview', 'renderDirectives'], true)) {
+        if (in_array($this->getRequest()->getActionName(), ['sanitizePreview', 'renderDirectives', 'classCheck'], true)) {
             return Mage::getSingleton('admin/session')->isLoggedIn();
         }
         return parent::_isAllowed();
@@ -173,14 +190,19 @@ class Mage_Adminhtml_Cms_WysiwygController extends Mage_Adminhtml_Controller_Act
     public function directiveAction(): void
     {
         try {
-            $directive = $this->getRequest()->getParam('___directive');
-            $image = Mage::getModel('cms/adminhtml_template_filter')
-                ->encodeDirectiveImage(Mage::helper('core')->urlDecode((string) $directive));
+            $directive = Mage::helper('core')->urlDecode((string) $this->getRequest()->getParam('___directive'));
+            $filter = Mage::getModel('cms/adminhtml_template_filter');
+            $image = $filter->readDirectiveSvg($directive) ?? $filter->encodeDirectiveImage($directive);
 
-            $this->getResponse()
-                ->setHttpResponseCode(200)
-                ->setHeader('Content-type', $image->mediaType(), true);
-
+            $this->getResponse()->setHttpResponseCode(200);
+            if (is_string($image)) {
+                // A script that the sanitizer missed cannot run when someone opens the URL itself
+                $this->getResponse()
+                    ->setHeader('Content-type', 'image/svg+xml', true)
+                    ->setHeader('Content-Security-Policy', "default-src 'none'; style-src 'unsafe-inline'; sandbox", true);
+            } else {
+                $this->getResponse()->setHeader('Content-type', $image->mediaType(), true);
+            }
         } catch (Exception $e) {
             Mage::logException($e);
             $this->getResponse()

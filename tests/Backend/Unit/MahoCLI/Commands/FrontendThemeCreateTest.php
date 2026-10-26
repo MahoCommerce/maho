@@ -119,7 +119,7 @@ it('imports nothing for a base/default parent, whose theme.css declares nothing'
 });
 
 it('compiles the scaffolded entry into a bundle that replaces the shipped one', function () {
-    $binary = MAHO_ROOT_DIR . '/node_modules/.bin/tailwindcss';
+    $binary = MAHO_ROOT_DIR . '/' . Mage_Core_Model_Design_Content_Bundle::TAILWIND_BINARY;
     if (!is_file($binary)) {
         test()->markTestSkipped('the Tailwind toolchain is not installed');
     }

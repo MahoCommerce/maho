@@ -407,7 +407,7 @@ export const MahoHtmlRaw = Node.create({
             const dom = document.createElement(this.name === 'mahoHtmlRaw' ? 'div' : 'span');
             dom.contentEditable = 'false';
             dom.dataset.htmlRaw = node.attrs.tree?.tag ?? '';
-            dom.title = editor.options.wysiwygSetup?.translate('Edit this element in the plain HTML editor.') ?? '';
+            dom.title = editor.options.wysiwygSetup?.translate('Double-click to edit the HTML of this element.') ?? '';
             if (node.attrs.tree) {
                 // A <button> inside the admin form would submit it, and a player would take the
                 // click that selects the node. An inert preview does neither.

@@ -88,3 +88,30 @@ it('shows a block as the storefront shows it and an icon as its SVG, and saves t
         ->not->toContain('maho-widget-frame')
         ->not->toContain('<svg');
 });
+
+it('makes a table cell with width 1% as wide as the icon in it, as the storefront does', function () {
+    $this->holder->setContent(
+        '<table><tbody><tr>'
+        . '<td style="width: 1%; padding-right: 0.75rem;"><p>{{icon name="truck" size="32"}}</p></td>'
+        . '<td><p><strong>Free shipping</strong><br>On every order</p></td>'
+        . '</tr></tbody></table>',
+    )->save();
+
+    $page = adminLoginAndVisit(
+        WYSIWYG_RENDER_ADMIN_USER,
+        WYSIWYG_RENDER_ADMIN_PASSWORD,
+        '/admin/cms_block/edit/block_id/' . $this->holder->getId(),
+        '#block_content',
+    );
+    waitForScript($page, '!!document.querySelector("#block_content_wrapper td .is-rendered-inline svg")', 20);
+
+    $overflow = $page->script(<<<'JS'
+        (() => {
+            const cell = document.querySelector('#block_content_wrapper td');
+            const icon = cell.querySelector('.is-rendered-inline');
+            return icon.getBoundingClientRect().right - cell.getBoundingClientRect().right;
+        })()
+        JS);
+
+    expect($overflow)->toBeLessThanOrEqual(0);
+});

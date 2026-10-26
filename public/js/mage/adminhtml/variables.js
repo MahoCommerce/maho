@@ -128,7 +128,7 @@ const Variables = {
         }
 
         const textareaElm = document.getElementById(this.textareaElementId);
-        if (textareaElm?.checkVisibility()) {
+        if (textareaElm?.mahoCodeEditor?.isVisible() ?? textareaElm?.checkVisibility()) {
             updateElementAtCursor(textareaElm, directive);
         }
     },

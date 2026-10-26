@@ -170,7 +170,7 @@ export const MahoAccordion = Node.create({
                 for (const button of bubbleMenu.querySelectorAll('[data-accordion-style]')) {
                     button.classList.toggle('is-active', button.dataset.accordionStyle === node.attrs.accordionStyle);
                 }
-            });
+            }, getPos, 'Delete Accordion');
             dom.append(badge);
 
             const contentDOM = document.createElement('div');
@@ -269,21 +269,6 @@ export const MahoAccordion = Node.create({
                         editor.storage[this.name].activePos = null;
                     }
                     tr.delete(target.pos, target.pos + target.node.nodeSize);
-                    dispatch(tr);
-                }
-
-                return true;
-            },
-
-            deleteAccordion: () => ({ editor, state, tr, dispatch }) => {
-                const accordion = findAccordion(editor, state);
-                if (!accordion) {
-                    return false;
-                }
-
-                if (dispatch) {
-                    editor.storage[this.name].activePos = null;
-                    tr.delete(accordion.pos, accordion.pos + accordion.node.nodeSize);
                     dispatch(tr);
                 }
 

@@ -121,6 +121,8 @@ Available commands:
   sys:encryptionkey:regenerate  Generate a new encryption key and save it to local.xml
   sys:locales                   Get all available locales
   sys:timezones                 Get all available timezones
+ theme
+  theme:content:build           Compile the Tailwind classes of the CMS, blog and catalog content into a copy of the css/styles.css of each theme
 ```
 
 !!! note

@@ -312,6 +312,8 @@ class Mage_ImportExport_Model_Import extends Mage_ImportExport_Model_Abstract
         ]);
         $this->addLogComment(Mage::helper('importexport')->__('Begin import of "%s" with "%s" behavior', $this->getEntity(), $this->getBehavior()));
         $result = $this->_getEntityAdapter()->importData();
+        // The import writes with SQL, so no save queues the build of the content classes
+        Mage::getSingleton('core/design_content_bundle')->queueBuild();
         $this->addLogComment([
             Mage::helper('importexport')->__('Checked rows: %d, checked entities: %d, invalid rows: %d, total errors: %d', $this->getProcessedRowsCount(), $this->getProcessedEntitiesCount(), $this->getInvalidRowsCount(), $this->getErrorsCount()),
             Mage::helper('importexport')->__('Import has been done successfuly.'),

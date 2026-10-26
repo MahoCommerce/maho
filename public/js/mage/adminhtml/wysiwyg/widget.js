@@ -227,7 +227,7 @@ WysiwygWidget.Widget = class {
             }
 
             const textareaElm = document.getElementById(this.widgetTargetId);
-            if (textareaElm?.checkVisibility()) {
+            if (textareaElm?.mahoCodeEditor?.isVisible() ?? textareaElm?.checkVisibility()) {
                 updateElementAtCursor(textareaElm, directive);
             }
 

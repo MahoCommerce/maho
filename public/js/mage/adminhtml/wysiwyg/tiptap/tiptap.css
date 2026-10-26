@@ -354,7 +354,8 @@
         border-collapse: collapse;
         margin: 0;
         overflow: hidden;
-        table-layout: fixed;
+        /* The storefront uses the auto layout, so a cell with `width: 1%` grows to fit its content */
+        table-layout: auto;
         width: 100%;
     }
 
@@ -690,8 +691,10 @@
         padding: 8px;
         background: none !important;
 
+        /* A click on the label opens the HTML of the element */
         &::before {
             content: attr(data-div-info);
+            cursor: pointer;
             position: absolute;
             top: -10px;
             left: 8px;
@@ -1004,6 +1007,31 @@
     to { opacity: 1; transform: translateY(0); }
 }
 
+/* The source view: the code editor in place of the content */
+.tiptap-wrapper.is-source .maho-code-editor {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+
+    /* The wrapper frames the field, as in the rich text view */
+    .cm-editor,
+    .cm-editor.cm-focused {
+        flex: 1;
+        border: none;
+        border-radius: 0;
+        outline: none;
+    }
+
+    .cm-scroller {
+        max-height: none;
+    }
+}
+
+.tiptap-wrapper.is-source.tiptap-page-builder .maho-code-editor {
+    margin-left: var(--tt-blocks-width);
+    margin-right: var(--tt-preview-width);
+}
+
 /* ========================================
    FULLSCREEN MODE
    ======================================== */
@@ -1235,17 +1263,52 @@
 
 .tiptap-preview-bar {
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
     gap: 0.375rem;
     padding: 0.375rem 0.5rem;
     border-bottom: 1px solid var(--tt-color-border);
     background: var(--tt-color-bg);
 
+    /* A narrower select cuts the name of the store view, so the tools move into the menu first */
     select {
         max-width: 11rem;
-        min-width: 0;
+        min-width: 8rem;
     }
+
+    /* A tool keeps its size. One that does not fit moves into the menu. */
+    > :not(select) {
+        flex-shrink: 0;
+    }
+}
+
+/* The tools that do not fit in the preview bar */
+.tiptap-preview-more {
+    position: relative;
+    margin-left: auto;
+
+    &[hidden] {
+        display: none;
+    }
+
+    &:is(:hover, .is-open) > .tiptap-preview-more-menu {
+        display: flex;
+    }
+}
+
+.tiptap-preview-more-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    z-index: 10;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem;
+    border: 1px solid var(--tt-color-border);
+    border-radius: var(--tt-radius-md);
+    background: var(--tt-color-bg);
+    box-shadow: var(--tt-shadow-md);
+    white-space: nowrap;
 }
 
 .tiptap-preview-devices {
@@ -1593,26 +1656,48 @@
     left: 8px;
     background: var(--accent);
     color: white;
-    padding: 3px 8px;
+    padding: 1px 3px 1px 9px;
     font-size: 10px;
     font-weight: 500;
     line-height: 1;
     border-radius: 3px;
-    border: none;
-    cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 2px;
     opacity: 0;
-    transition: opacity 0.15s, background 0.15s;
+    transition: opacity 0.15s;
     z-index: 1;
+    user-select: none;
 
-    svg {
-        opacity: 0.8;
+    .grid-badge-label {
+        padding: 3px 2px 3px 0;
+        cursor: pointer;
     }
 
-    &:hover {
-        background: var(--accent-hover);
+    .grid-badge-action {
+        display: flex;
+        align-items: center;
+        padding: 2px 3px;
+        border: none;
+        border-radius: 2px;
+        background: none;
+        color: inherit;
+        cursor: pointer;
+
+        svg {
+            width: 12px;
+            height: 12px;
+            margin: 0;
+            opacity: 0.8;
+        }
+
+        &:hover {
+            background: var(--accent-hover);
+
+            svg {
+                opacity: 1;
+            }
+        }
     }
 }
 
