@@ -13,6 +13,7 @@ declare(strict_types=1);
 /**
  * @method $this unsActiveTabId()
  * @method $this unsPasskeyChallenge()
+ * @method $this unsPasskeyPreloginVerified()
  * @method bool hasSyncProcessStopWatch()
  */
 class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
@@ -382,11 +383,6 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
             'user_id' => $userId,
             'assertion_hash' => $assertionHash,
         ]);
-    }
-
-    public function unsPasskeyPreloginVerified(): static
-    {
-        return $this->unsetData('passkey_prelogin_verified');
     }
 
     public function getShowTwofaVerificationCode(bool $clear = false): ?bool

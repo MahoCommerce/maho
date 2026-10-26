@@ -347,7 +347,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
                 $signature = base64_decode($passkeyData->signature ?? '');
                 $challenge = $this->getSession()->getPasskeyChallenge();
 
-                if (!$challenge && $authenticatorData !== '' && $this->isPasskeyPreloginVerified($password)) {
+                if (!$challenge && $this->isPasskeyPreloginVerified($password)) {
                     // The prelogin step verified this assertion and consumed the
                     // single-use challenge: the login request that follows can only reuse that
                     // verification, not repeat it.
