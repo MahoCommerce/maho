@@ -28,7 +28,7 @@ use Maho_Ai_Model_Chat_ToolExecutor;
 use Maho_Ai_Model_Chat_ToolsetChanged;
 use Maho_Ai_Model_Conversation;
 use Maho_Ai_Model_Conversation_Message as Message;
-use Maho_Ai_Model_Platform;
+use Maho_Ai_Model_Platform_Symfony;
 use Symfony\AI\Agent\Agent;
 use Symfony\AI\Agent\Exception\MaxIterationsExceededException;
 use Symfony\AI\Agent\Execution\Execution;
@@ -712,10 +712,6 @@ final class Assistant
     }
 
     /**
-     * The input and output tokens of a turn. Anthropic counts the cached input apart from
-     * input_tokens, so its cache reads and writes are added. The other providers already
-     * count their cached tokens in the prompt tokens.
-     *
      * @param array<string, mixed> $metadata
      * @return array{int, int}
      */
@@ -723,12 +719,7 @@ final class Assistant
     {
         foreach ($metadata as $value) {
             if ($value instanceof TokenUsageInterface) {
-                $in = (int) ($value->getPromptTokens() ?? 0);
-                if ($platformCode === Maho_Ai_Model_Platform::ANTHROPIC) {
-                    $in += (int) ($value->getCacheCreationTokens() ?? 0) + (int) ($value->getCacheReadTokens() ?? 0);
-                }
-
-                return [$in, (int) ($value->getCompletionTokens() ?? 0)];
+                return [Maho_Ai_Model_Platform_Symfony::inputTokens($value, $platformCode), (int) ($value->getCompletionTokens() ?? 0)];
             }
         }
 

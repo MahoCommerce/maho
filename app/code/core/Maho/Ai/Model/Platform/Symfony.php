@@ -13,6 +13,7 @@ use Symfony\AI\Platform\Message\MessageBag;
 use Symfony\AI\Platform\PlatformInterface;
 use Symfony\AI\Platform\Result\DeferredResult;
 use Symfony\AI\Platform\TokenUsage\TokenUsage;
+use Symfony\AI\Platform\TokenUsage\TokenUsageInterface;
 
 /**
  * Adapter that wraps a Symfony AI PlatformInterface and presents it as a
@@ -536,10 +537,24 @@ class Maho_Ai_Model_Platform_Symfony implements
         $tu = $this->extractTokenUsage($deferred);
         if ($tu) {
             $this->lastTokenUsage = [
-                'input'  => (int) ($tu->getPromptTokens() ?? 0),
+                'input'  => self::inputTokens($tu, $this->platformCode),
                 'output' => (int) ($tu->getCompletionTokens() ?? 0),
             ];
         }
+    }
+
+    /**
+     * The input tokens of a call. Anthropic counts the cached input apart from input_tokens, so its
+     * cache reads and writes are added. The other providers count them in the prompt tokens.
+     */
+    public static function inputTokens(TokenUsageInterface $usage, string $platformCode): int
+    {
+        $tokens = (int) ($usage->getPromptTokens() ?? 0);
+        if ($platformCode === Maho_Ai_Model_Platform::ANTHROPIC) {
+            $tokens += (int) ($usage->getCacheCreationTokens() ?? 0) + (int) ($usage->getCacheReadTokens() ?? 0);
+        }
+
+        return $tokens;
     }
 
     protected function extractTokenUsage(DeferredResult $deferred): ?TokenUsage
