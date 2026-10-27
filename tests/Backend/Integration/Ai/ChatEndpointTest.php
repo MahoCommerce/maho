@@ -8,6 +8,7 @@
 declare(strict_types=1);
 
 use Maho\Ai\Api\Agent\McpToolbox;
+use Maho\Ai\Api\Agent\NotifyTool;
 use Maho\ApiPlatform\Kernel;
 use Maho\ApiPlatform\Security\SameOriginGuard;
 use Symfony\AI\Platform\Model;
@@ -662,6 +663,36 @@ it('creates a scheduled task through its API tool, and a scheduled run proposes 
         $connection->delete($inbox, ['url LIKE ?' => '%/ai_chat/open/id/%']);
         Mage::getModel('cms/page')->load($pageId)->delete();
         aiChatLogin($admin);
+        aiChatDeleteConversations((int) $admin->getId());
+        aiChatDeleteAdmin($admin);
+    }
+});
+
+it('writes the UTC times of a notification in store time', function (): void {
+    $admin = aiChatAdmin('ai_chat_notify_time', ['all']);
+    $store = Mage::app()->getStore(Mage_Core_Model_App::ADMIN_STORE_ID);
+    $oldZone = $store->getConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE);
+    $store->setConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE, 'Europe/London');
+    $resource = Mage::getSingleton('core/resource');
+    $connection = $resource->getConnection('core_write');
+    $inbox = $resource->getTableName('adminnotification/inbox');
+    $conversationId = 0;
+    try {
+        $conversation = Mage::getModel('ai/conversation')->setData(['admin_user_id' => (int) $admin->getId(), 'store_id' => 0, 'title' => 'Pest notify time']);
+        $conversation->save();
+        $conversationId = (int) $conversation->getId();
+        $tool = new NotifyTool();
+        $tool->setRun($conversation);
+
+        expect($tool->notify(['title' => 'Late order', 'text' => 'Placed on 2026-10-19 06:21 UTC.', 'severity' => 'notice'])['ok'])->toBeTrue();
+
+        $description = $connection->fetchOne($connection->select()->from($inbox, ['description'])->where('url LIKE ?', '%/ai_chat/open/id/' . $conversationId . '/%'));
+        expect($description)->toBe('Placed on 2026-10-19 07:21.');
+    } finally {
+        $store->setConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE, $oldZone);
+        if ($conversationId > 0) {
+            $connection->delete($inbox, ['url LIKE ?' => '%/ai_chat/open/id/' . $conversationId . '/%']);
+        }
         aiChatDeleteConversations((int) $admin->getId());
         aiChatDeleteAdmin($admin);
     }

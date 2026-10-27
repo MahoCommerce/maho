@@ -25,6 +25,7 @@ class MahoAiAssistant {
         this.conversationId = null;
         this.abortController = null;
         this.pendingCard = null;
+        this.pageCallIds = new Set();
         this.changedFields = new Set();
         this.setupChat();
         this.trackChanges();
@@ -285,8 +286,8 @@ class MahoAiAssistant {
                 history.push({ role: 'ai', html: this.renderWorking(data.conversation.queued ? this.labels.queued : this.labels.running) });
             }
             this.chat.history = history;
-            // The steps of a page action are for the page where the model wrote them, which is no longer open.
-            if (!this.abortController && pending.some((call) => call.name === 'admin_page_action')) {
+            // The steps of a page action are for the page where the model wrote them: deny them on any other page.
+            if (!this.abortController && pending.some((call) => call.name === 'admin_page_action' && !this.pageCallIds.has(call.id))) {
                 this.onDeny();
             }
             setTimeout(() => this.updateIntro(history.length > 0), 100);
@@ -1328,6 +1329,7 @@ class MahoAiAssistant {
     }
 
     showConfirmCard(calls) {
+        calls.forEach((call) => this.pageCallIds.add(call.id));
         this.chat.addMessage({ html: this.renderConfirmCard(calls), role: 'ai' });
         this.pendingCard = { index: this.lastIndex(), calls };
         setTimeout(() => this.chat.scrollToBottom(), 50);
