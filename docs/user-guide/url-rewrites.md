@@ -43,6 +43,13 @@ The settings are in **System > Configuration > Catalog > Catalog > Search Engine
 
 ## Why a URL is not the one you chose
 
+A product URL can differ from the URL key for three reasons, each explained below:
+
+- The URL is already in use in the store view, so the store adds a number.
+- The customer came from a category page, and **Use Categories Path for Product URLs** is Yes, so
+  the URL starts with the category path.
+- The product has no rewrite in the store view, so the URL is the technical address.
+
 The URL of a product must be unique in its store view. When the URL that the store builds is
 already in use, by another product, a category or a custom rewrite, the store picks another one:
 
@@ -72,6 +79,10 @@ value. It starts selected when **Create Permanent Redirect for URLs if URL Key C
 |----------|-----------------------------|
 | Selected | The store keeps the old URL as a custom rewrite that redirects to the new URL with a permanent (301) redirect. Old links and search engine results keep working |
 | Cleared | The store removes the old URL. Old links give a "page not found" error |
+
+The store makes the redirect in each store view where the URL changes. A change in the default scope
+changes the URL, and makes the redirect, in every store view that uses the default URL key. A change
+in one store view makes the redirect in that store view only.
 
 When the URL key of a category changes, the store also changes the URLs of its subcategories and of
 the products under it, with the same redirect choice.

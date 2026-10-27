@@ -148,11 +148,12 @@ class Maho_Ai_Model_Chat_SystemPrompt
                 : sprintf('- The page shows %s with ID %s: "%s". "This" or "it" without a name means that record.', $type, (string) $id, $label);
         }
         $docs = array_map(
-            static fn(\Maho\Docs\Page $page): string => sprintf('%s (%s)', $page->id, $page->title),
+            static fn(\Maho\Docs\Page $page): string => sprintf('  - %s (%s)%s', $page->id, $page->title, $page->description === '' ? '' : ': ' . $page->description),
             new \Maho\Docs\Library()->pagesFor($route, \Maho\Ai\Api\Agent\DocsTool::AUDIENCES),
         );
         if ($docs !== []) {
-            $lines[] = sprintf('- The user guide explains this admin page in: %s. For a question about why the store does something or how a feature works, read the page that fits with %s before you read the record.', implode('; ', $docs), \Maho\Ai\Api\Agent\DocsTool::NAME);
+            // The description of a page uses the words of the questions that it answers, so the model finds the page.
+            $lines[] = sprintf("- The user guide explains this admin page, in these pages:\n%s\n  For a question about why the store does something or how a feature works, call %s first with the page whose description fits, before any other tool. Then read the record to apply the rule of the page to it.", implode("\n", $docs), \Maho\Ai\Api\Agent\DocsTool::NAME);
         }
         $previous = $context['previous_page'] ?? null;
         if (is_array($previous) && (string) ($previous['route'] ?? '') !== '') {

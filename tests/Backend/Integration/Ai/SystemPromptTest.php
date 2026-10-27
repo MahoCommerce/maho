@@ -177,8 +177,8 @@ it('builds the prompt through the model factory, so a module can override it', f
 it('names the pages of the user guide that explain the open admin page', function (): void {
     $prompt = new Maho_Ai_Model_Chat_SystemPrompt()->build(aiPromptAdmin(), ['route' => 'catalog_product/edit', 'entity_type' => 'product', 'entity_id' => 3]);
 
-    expect($prompt)->toContain('The user guide explains this admin page in:', 'core/user-guide/configurable-product-prices.md (Configurable Product Prices)');
-    expect($prompt)->toContain('read the page that fits with docs_read before you read the record');
+    expect($prompt)->toContain('The user guide explains this admin page, in these pages:', '  - core/user-guide/configurable-product-prices.md (Configurable Product Prices): ');
+    expect($prompt)->toContain('call docs_read first with the page whose description fits, before any other tool');
     expect(new Maho_Ai_Model_Chat_SystemPrompt()->build(aiPromptAdmin(), ['route' => 'dashboard/index']))->not->toContain('The user guide explains this admin page');
 });
 

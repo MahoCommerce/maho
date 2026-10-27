@@ -88,8 +88,9 @@ A product image is a picture on one configurable product that serves as the swat
 Use it when the swatch belongs to a single product, for example a print that only exists on one
 shirt.
 
-1. Open the **configurable** product. A child variant has an **Images** tab too, but the store
-   does not use its images for swatches.
+1. Open the **configurable** product: the store uses only its images for swatches. Every product
+   has the **Images** tab with an upload, a child variant and a product that is not saved yet too.
+   So the product type is never the reason for a missing upload.
 2. In the **Images** tab upload the picture, or pick an existing one.
 3. In its **Label** field write the option name, then `-swatch`, for example `Bianco-swatch`. Write
    it in the language of the store view where it has to appear; the default language is the
@@ -157,7 +158,7 @@ safe choice for a texture.
 | Symptom | What to check |
 |---------|---------------|
 | Swatches show as text | The value has no color, no catalog image and no product image |
-| There is no field to upload a swatch image | The attribute form has none. Upload a catalog image in **CMS > Media Library**, or add a product image with the option name as its label on the configurable product. Every product has the **Images** tab, a child variant too, but the store uses only the images of the configurable product for swatches |
+| There is no field to upload a swatch image | The attribute form has none. Upload a catalog image in **CMS > Media Library**, or add a product image with the option name as its label on the configurable product. Every product has the **Images** tab with an upload, a child variant and a product that is not saved yet too, so neither is the reason for a missing upload. The store uses only the images of the configurable product for swatches |
 | No swatch and no dropdown | Configurable Swatches is disabled, or the listing attribute is empty |
 | No color picker in the attribute | The attribute is not listed in **Product Attributes to Show as Swatches in Product Detail** |
 | A catalog image is ignored | The file name (lower case, hyphens, exact name) or the extension. On most servers file names are case sensitive, so `Blue-Light.webp` does not match `blue-light.webp` |
