@@ -283,6 +283,22 @@ it('uses the route of the override before the route of the parent', function () 
     expect(sfkIsFormKeyRequired($controller))->toBeTrue();
 });
 
+it('reads the methods of a route in any case', function () {
+    $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create('/vendor/cart/add', 'GET'));
+    $request->setModuleName('vendor')->setControllerName('cart')->setActionName('add')->setDispatched(true);
+    Mage::app()->setRequest($request);
+    $controller = new class ($request, new Mage_Core_Controller_Response_Http()) extends Mage_Checkout_CartController {
+        #[\Override]
+        #[Maho\Config\Route('/vendor/cart/add', methods: ['get'])]
+        public function addAction(): void
+        {
+            parent::addAction();
+        }
+    };
+
+    expect(sfkIsFormKeyRequired($controller))->toBeFalse();
+});
+
 /** What the system log gained while $work ran, with logging switched on for the duration. */
 function sfkLogOutput(callable $work): string
 {

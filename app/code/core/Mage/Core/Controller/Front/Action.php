@@ -118,7 +118,7 @@ class Mage_Core_Controller_Front_Action extends Mage_Core_Controller_Varien_Acti
         }
 
         foreach ($attributes as $attribute) {
-            $methods = $attribute->newInstance()->methods;
+            $methods = array_map(strtoupper(...), $attribute->newInstance()->methods);
             if ($methods === [] || in_array('GET', $methods, true)) {
                 return true;
             }
