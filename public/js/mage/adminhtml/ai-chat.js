@@ -174,6 +174,10 @@ class MahoAiAssistant {
     }
 
     rememberConversation(id) {
+        // Held page steps belong to the conversation that holds the confirmation.
+        if (id !== this.conversationId) {
+            this.heldPageAction = null;
+        }
         this.conversationId = id;
         this.deleteButton.hidden = !id;
         try {
@@ -502,10 +506,8 @@ class MahoAiAssistant {
      * Native fetch on purpose: mahoFetch reads the whole body, and this one is a stream.
      */
     async streamTurn(url, payload) {
-        // Page steps of the turn before, which waited for the click that this turn confirms.
-        const heldPageAction = this.heldPageAction;
-        this.heldPageAction = null;
-        const state = { textIndex: null, text: '', steps: new Map(), error: null, done: false, navigateTo: null, pageAction: heldPageAction, textEdits: [], changedRecords: [], thinkingIndex: null, newConversation: !this.conversationId };
+        // Page steps of the turn before, which waited for the click that this turn confirms. They stay held until this turn ends.
+        const state = { textIndex: null, text: '', steps: new Map(), error: null, done: false, navigateTo: null, pageAction: this.heldPageAction, textEdits: [], changedRecords: [], thinkingIndex: null, newConversation: !this.conversationId };
         let response;
         try {
             response = await fetch(url, {
@@ -657,9 +659,7 @@ class MahoAiAssistant {
                     this.rememberConversation(data.conversation_id);
                 }
                 // A click waits for the confirmation: the steps before it run with it, in order.
-                if (state.pageAction && data.state === 'awaiting_confirmation') {
-                    this.heldPageAction = state.pageAction;
-                }
+                this.heldPageAction = data.state === 'awaiting_confirmation' ? state.pageAction : null;
                 if (state.textEdits.length > 0 && data.state === 'complete') {
                     const edits = state.textEdits;
                     setTimeout(() => this.applyTextEdits(edits), 800);

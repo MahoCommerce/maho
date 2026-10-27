@@ -18,6 +18,7 @@ SK=$(cd "$(dirname "$0")" && pwd)
 OUT=$(mkdir -p "$1" && cd "$1" && pwd)
 shift
 ONLY=" $* "
+FAILED=0
 USER_NAME=$(sed -n 1p "$CREDS")
 PASSWORD=$(sed -n 2p "$CREDS")
 q() { (cd "$STORE" && ./maho db:query "$1" | tail -n +3); }
@@ -37,7 +38,8 @@ run() {
     input=$(mktemp)
     python3 -c "import json,sys; print(json.dumps({'admin':sys.argv[1],'user':sys.argv[2],'password':sys.argv[3],'steps':json.loads(sys.argv[4])}))" "$ADMIN" "$USER_NAME" "$PASSWORD" "$steps" > "$input"
     before=$(q "SELECT COALESCE(MAX(conversation_id), 0) FROM ai_conversation WHERE admin_user_id = $BENCH_ID" | tr -d ' ')
-    (cd "$STORE" && node "$SK/run.mjs" "$input" > "$OUT/$name.run.json")
+    # run.mjs writes an error result and exits with 1: keep the result, and fail the pass at the end.
+    (cd "$STORE" && node "$SK/run.mjs" "$input" > "$OUT/$name.run.json") || FAILED=1
     rm -f "$input"
     id=$(python3 -c "import json,sys; print(json.load(open(sys.argv[1])).get('conversation_id', 0))" "$OUT/$name.run.json" 2>/dev/null || echo 0)
     # Without an ID from the runner, take only a conversation that this case started.
@@ -152,4 +154,8 @@ write write-approve-undo "[$D,$(say "Change the title of the CMS page with ID $C
 write examples-order-comment "[$ORDER,$(say "Add a comment to this order: the parcel left today"),{\"approve\":true}]"
 write examples-schedule "[$D,$(say "Every Monday at 8, give me a summary of the orders of last week"),{\"approve\":true}]"
 write examples-coupon "[$D,$(say "Create the coupon XMAS10: 10% off orders over 100, on every website, for all customers, until Sunday"),{\"approve\":true}]"
+if [ $FAILED -ne 0 ]; then
+    echo "PASS-FAILED $OUT: a case stopped with an error, read the error of its run.json" >&2
+    exit 1
+fi
 echo "PASS-DONE $OUT"

@@ -1,5 +1,5 @@
 ---
-description: The state and the status of an order, how an order moves from Pending to Complete, and which orders still need a shipment.
+description: The state and the status of an order, how an order moves from New to Complete, and which orders still need a shipment.
 admin_pages: [sales_order, sales_order_shipment, sales_order_invoice]
 ---
 
@@ -26,8 +26,9 @@ to find the orders of one step, look at the state, not at the status.
 
 ## How an order moves
 
-1. A new order is Pending, unless the payment method sends the customer to a payment provider.
-2. An invoice or a shipment moves a Pending order to Processing.
+1. A new order is in the state New, with the status Pending, unless the payment method sends the
+   customer to a payment provider.
+2. An invoice or a shipment moves a New order to Processing.
 3. When nothing is left to invoice and nothing is left to ship, the order becomes Complete.
 4. A credit memo for the full amount makes the order Closed.
 
@@ -37,10 +38,10 @@ The **Ship** button shows on an order that has items left to ship. The order mus
 on hold or in payment review, and it must have items that need a shipment: a virtual or a
 downloadable item needs none.
 
-So the orders that wait for a shipment are in the state Pending, Pending Payment or Processing. A
-Pending order has no invoice yet: the store lets you ship it, but the payment is not recorded. A
-Pending Payment order waits for the payment provider: the store lets you ship it too, but the
-payment is not confirmed. Check the payment before you ship either of them.
+So the orders that wait for a shipment are in the state New, Pending Payment or Processing. A New
+order, with the status Pending, has no invoice yet: the store lets you ship it, but the payment is
+not recorded. A Pending Payment order waits for the payment provider: the store lets you ship it
+too, but the payment is not confirmed. Check the payment before you ship either of them.
 
 To see them, go to **Sales > Orders** and filter the **Status** column. A Processing order can
 already have a shipment for some items: open it and check the **Shipments** tab.
