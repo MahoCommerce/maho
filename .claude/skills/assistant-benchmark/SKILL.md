@@ -124,9 +124,7 @@ CATEGORY_ID=13 CMS_ID=3 ORDER_ID=300 CUSTOMER_ID=47 \
 
 If `run.json` holds an `error`, or a `conversation_id` of 0, report it, and run that case again
 once. The `last` field of each step holds the start of the last message of the panel, so it shows
-an error that never reached the database. A first message that fails before the conversation
-exists, such as with a lock on SQLite, is sent again once, and its step gets `"retried": true`.
-Any other step whose `last` holds an error has no answer: run that case again once. When a write fails and the model retries it with a new
+an error that never reached the database. When a write fails and the model retries it with a new
 card, the approve step approves that card too, twice at most.
 
 ## 5. Grade each answer

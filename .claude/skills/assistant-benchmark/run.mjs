@@ -129,8 +129,7 @@ try {
             let result = await say();
             // On SQLite, a first message can fail with a lock before the conversation exists: send it again once.
             const conversation = () => page.evaluate(() => Number(sessionStorage.getItem('maho_ai_chat_conversation') ?? 0)).catch(() => 0);
-            const failed = ['An internal error occurred', 'The assistant could not answer'].some((text) => result.last.includes(text));
-            if (failed && await conversation() === 0) {
+            if (result.last.includes('An internal error occurred') && await conversation() === 0) {
                 log.push({ step: 'say', text: step.say, ...result, retried: true });
                 await page.waitForTimeout(3000);
                 result = await say();
