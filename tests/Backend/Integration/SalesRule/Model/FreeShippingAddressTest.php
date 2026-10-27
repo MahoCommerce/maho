@@ -124,7 +124,7 @@ describe('Free shipping of a cart rule on a quote with billing and shipping addr
             expect($address->getFreeShipping())->toBeTrue();
         }
     })->with([
-        'discount' => [10, 0],
+        'a discount does not reuse a rule check made with the old weight' => [10, 0],
         'free shipping for the shipment' => [0, Mage_SalesRule_Model_Rule::FREE_SHIPPING_ADDRESS],
     ]);
 });

@@ -651,28 +651,18 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
 
     public function collectWeight(): static
     {
-        $this->setWeight(0);
-        $this->setFreeMethodWeight(0);
-        $items = $this->getAllItems();
-
         $freeAddress = $this->getFreeShipping();
 
-        $addressWeight      = $this->getWeight();
-        $freeMethodWeight   = $this->getFreeMethodWeight();
-
+        $addressWeight = 0;
+        $freeMethodWeight = 0;
         $addressQty = 0;
 
-        foreach ($items as $item) {
-            /**
-             * Skip if this item is virtual
-             */
+        foreach ($this->getAllItems() as $item) {
             if ($item->getProduct()->isVirtual()) {
                 continue;
             }
 
-            /**
-             * Children weight we calculate for parent
-             */
+            // The parent item adds the weight of its children.
             if ($item->getParentItem()) {
                 continue;
             }
