@@ -25,7 +25,6 @@ class MahoAiAssistant {
         this.conversationId = null;
         this.abortController = null;
         this.pendingCard = null;
-        this.heldPageAction = null;
         this.changedFields = new Set();
         this.setupChat();
         this.trackChanges();
@@ -174,10 +173,6 @@ class MahoAiAssistant {
     }
 
     rememberConversation(id) {
-        // Held page steps belong to the conversation that holds the confirmation.
-        if (id !== this.conversationId) {
-            this.heldPageAction = null;
-        }
         this.conversationId = id;
         this.deleteButton.hidden = !id;
         try {
@@ -506,8 +501,7 @@ class MahoAiAssistant {
      * Native fetch on purpose: mahoFetch reads the whole body, and this one is a stream.
      */
     async streamTurn(url, payload) {
-        // Page steps of the turn before, which waited for the click that this turn confirms. They stay held until this turn ends.
-        const state = { textIndex: null, text: '', steps: new Map(), error: null, done: false, navigateTo: null, pageAction: this.heldPageAction, textEdits: [], changedRecords: [], thinkingIndex: null, newConversation: !this.conversationId };
+        const state = { textIndex: null, text: '', steps: new Map(), error: null, done: false, navigateTo: null, pageAction: null, textEdits: [], changedRecords: [], thinkingIndex: null, newConversation: !this.conversationId };
         let response;
         try {
             response = await fetch(url, {
@@ -658,8 +652,6 @@ class MahoAiAssistant {
                 if (data.conversation_id) {
                     this.rememberConversation(data.conversation_id);
                 }
-                // A click waits for the confirmation: the steps before it run with it, in order.
-                this.heldPageAction = data.state === 'awaiting_confirmation' ? state.pageAction : null;
                 if (state.textEdits.length > 0 && data.state === 'complete') {
                     const edits = state.textEdits;
                     setTimeout(() => this.applyTextEdits(edits), 800);
@@ -667,7 +659,8 @@ class MahoAiAssistant {
                 if (state.navigateTo && data.state === 'complete') {
                     const { url, fields } = state.navigateTo;
                     setTimeout(() => this.navigate(url, fields), 800);
-                } else if (state.pageAction && data.state === 'complete') {
+                } else if (state.pageAction && (data.state === 'complete' || data.state === 'awaiting_confirmation')) {
+                    // A turn that waits for a click applies the steps that already ran: the click comes after the approval.
                     const steps = state.pageAction;
                     setTimeout(() => this.performPageActions(steps), 800);
                 } else if (data.state === 'complete' && state.changedRecords.some((url) => this.samePage(url, window.location.href))) {

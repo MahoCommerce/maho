@@ -9,6 +9,7 @@
 declare(strict_types=1);
 
 use Maho\Ai\Api\Chat\Assistant;
+use Symfony\AI\Platform\Exception\ModelNotFoundException;
 use Symfony\AI\Platform\TokenUsage\TokenUsage;
 
 uses(Tests\MahoBackendTestCase::class);
@@ -53,7 +54,7 @@ it('leaves the model of the assistant out of the catalog of another provider', f
 
     $catalog = Maho_Ai_Model_Platform_Symfony::createForAnthropic(null)->getPlatform()->getModelCatalog();
 
-    expect(fn() => $catalog->getModel('claude-future-assistant'))->toThrow(Throwable::class);
+    expect(fn() => $catalog->getModel('claude-future-assistant'))->toThrow(ModelNotFoundException::class);
 });
 
 it('counts the cached input tokens of Anthropic, and leaves the other providers as they report', function (): void {
