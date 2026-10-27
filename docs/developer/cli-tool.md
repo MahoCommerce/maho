@@ -54,6 +54,9 @@ Available commands:
   cron:list                     List cron jobs configured in the XML files
   cron:run                      Run a group of cron processes (default/always) or a single job_code (eg: newsletter_send_all)
  customer
+  customer:address:create       Create an address for a customer
+  customer:address:delete       Delete an address of a customer
+  customer:address:list         List the addresses of a customer
   customer:change-password      Change password of a customers
   customer:create               Create a customer
   customer:delete               Delete customers
@@ -170,6 +173,31 @@ asks nothing:
 
 Without `-n`, a command that needs an answer waits for input. If the script sends no more input, the command
 stops with an error.
+
+## Create customers and addresses
+
+`customer:create` and `customer:address:create` check the data with the same rules as the admin customer
+form. A store can make an attribute required, such as the middle name or a custom attribute. Give its value
+with `--attribute code=value`, once for each attribute. An attribute that the command takes as an argument or
+an option, such as the city, cannot go in `--attribute`. Without `-n`, the command asks for each required
+attribute that you leave out. With `-n`, a missing required attribute stops the command with an error.
+
+```bash
+./maho customer:create jane@example.com 'Secret123!' Jane Doe base 1 --attribute middlename=Q
+./maho customer:address:create jane@example.com '10 Market Street' 'San Francisco' 94105 US 555-0100 --region CA
+```
+
+The first address of a customer becomes the default billing and shipping address, as on the storefront.
+Add `--default-billing` or `--default-shipping` to make a later address a default address.
+
+`customer:address:list` shows the addresses of a customer, with their IDs. `customer:address:delete` takes the
+ID of the address. Without the ID, the command asks for the email of the customer, then for the address. When you
+delete a default address, the customer has no default address of that type until you set one.
+
+```bash
+./maho customer:address:list jane@example.com
+./maho customer:address:delete 12
+```
 
 ## Add your custom commands
 
