@@ -110,6 +110,16 @@ describe('the swatches of the layered filters API', function (): void {
         }
     });
 
+    it('returns no swatch when the Configurable Swatches module is disabled', function (): void {
+        Mage::getConfig()->setNode('modules/Mage_ConfigurableSwatches/active', 'false');
+        foreach (['configurableswatches', 'configurableswatches/productimg', 'configurableswatches/swatchdimensions'] as $alias) {
+            Mage::unregister("_helper/{$alias}");
+            Mage::register("_helper/{$alias}", false);
+        }
+
+        expect(array_column(layeredColorOptions(), 'swatch'))->each->toBeNull();
+    });
+
     it('uses the admin label of the option when its store label has no swatch', function (): void {
         $attribute = Mage::getSingleton('eav/config')->getAttribute(Mage_Catalog_Model_Product::ENTITY, 'color');
         $optionId = layeredColorOptions()['Black']['value'];
