@@ -32,11 +32,6 @@ class CustomerAddressCreate extends BaseMahoCommand
     private const FORM_CODE = 'adminhtml_customer_address';
 
     /**
-     * The attributes that the arguments and the options of the command give.
-     */
-    private const KNOWN_ATTRIBUTES = ['firstname', 'lastname', 'company', 'street', 'city', 'postcode', 'country_id', 'region', 'region_id', 'telephone'];
-
-    /**
      * @param list<string> $attribute
      */
     public function __invoke(
@@ -139,7 +134,7 @@ class CustomerAddressCreate extends BaseMahoCommand
         }
 
         // The storefront checks an address with its form, then with validate(), and shows both lists.
-        $errors = $this->validateAndCompactData($form, $data);
+        $errors = $this->validateAndCompactData($form, $this->askMissingAttributes($input, $io, $form, $data));
         $modelErrors = $address->validate();
         if (is_array($modelErrors)) {
             $errors = array_values(array_unique([...$errors, ...$modelErrors]));
@@ -163,7 +158,7 @@ class CustomerAddressCreate extends BaseMahoCommand
     }
 
     #[Interact]
-    public function askCountryAndAttributes(InputInterface $input, SymfonyStyle $io): void
+    public function askCountryAndRegion(InputInterface $input, SymfonyStyle $io): void
     {
         $this->initMaho();
 
@@ -182,7 +177,6 @@ class CustomerAddressCreate extends BaseMahoCommand
             }
         }
 
-        $this->askRequiredAttributes($input, $io, $this->getCustomerForm(self::FORM_CODE, Mage::getModel('customer/address')), self::KNOWN_ATTRIBUTES);
     }
 
     /**

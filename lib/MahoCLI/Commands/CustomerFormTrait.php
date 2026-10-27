@@ -58,22 +58,19 @@ trait CustomerFormTrait
     }
 
     /**
-     * Ask for each required attribute of $form that is not in $known, and add the answers to the
-     * --attribute option.
+     * In an interactive terminal, ask for each required attribute of $form that $data does not hold.
      *
-     * @param list<string> $known
+     * @param array<string, mixed> $data
+     * @return array<string, mixed>
      */
-    private function askRequiredAttributes(InputInterface $input, SymfonyStyle $io, Mage_Customer_Model_Form $form, array $known): void
+    private function askMissingAttributes(InputInterface $input, SymfonyStyle $io, Mage_Customer_Model_Form $form, array $data): array
     {
-        $values = $input->getOption('attribute');
-        try {
-            $known = [...$known, ...array_keys($this->parseAttributeValues($values, $form))];
-        } catch (\InvalidArgumentException) {
-            return;
+        if (!$input->isInteractive()) {
+            return $data;
         }
 
         foreach ($form->getAttributes() as $code => $attribute) {
-            if (!$attribute->getIsRequired() || in_array($code, $known, true)) {
+            if (!$attribute->getIsRequired() || array_key_exists($code, $data)) {
                 continue;
             }
 
@@ -87,14 +84,13 @@ trait CustomerFormTrait
                 }
                 $multiSelect = $attribute->getFrontendInput() === 'multiselect';
                 $answers = (array) $io->choice($label, array_values($options), multiSelect: $multiSelect);
-                $value = implode(',', array_map(fn($answer) => array_search($answer, $options, true), $answers));
+                $data[$code] = implode(',', array_map(fn($answer) => array_search($answer, $options, true), $answers));
             } else {
-                $value = (string) $io->ask($label);
+                $data[$code] = (string) $io->ask($label);
             }
-            $values[] = "$code=$value";
         }
 
-        $input->setOption('attribute', $values);
+        return $data;
     }
 
     /**
