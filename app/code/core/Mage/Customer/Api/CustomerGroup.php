@@ -34,10 +34,12 @@ use Maho\ApiPlatform\CrudResource;
         new Get(
             uriTemplate: '/customer-groups/{id}',
             security: "is_granted('ROLE_ADMIN') or is_granted('customer-groups/read')",
+            description: 'Get a customer group by ID, with its tax class. The group of a customer decides the group prices, the price rules and the customer tax class that apply. Group 0 is NOT LOGGED IN: the group of the guests',
         ),
         new GetCollection(
             uriTemplate: '/customer-groups',
             security: "is_granted('ROLE_ADMIN') or is_granted('customer-groups/read')",
+            description: 'Get the customer groups, with their tax classes. Group 0 is NOT LOGGED IN: the group of the guests',
         ),
         new Post(
             uriTemplate: '/customer-groups',
@@ -61,12 +63,12 @@ use Maho\ApiPlatform\CrudResource;
     graphQlOperations: [
         new Query(
             name: 'item_query',
-            description: 'Get a customer group by ID',
+            description: 'Get a customer group by ID, with its tax class. The group of a customer decides the group prices, the price rules and the customer tax class that apply. Group 0 is NOT LOGGED IN: the group of the guests',
             security: "is_granted('ROLE_ADMIN') or is_granted('customer-groups/read')",
         ),
         new QueryCollection(
             name: 'collection_query',
-            description: 'Get customer groups',
+            description: 'Get the customer groups, with their tax classes. Group 0 is NOT LOGGED IN: the group of the guests',
             // Customer groups are a small, fixed enumerable set — expose them as
             // a plain GraphQL list rather than a paginated cursor connection.
             paginationEnabled: false,

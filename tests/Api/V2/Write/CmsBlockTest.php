@@ -221,3 +221,29 @@ describe('CMS Block via GraphQL (read)', function (): void {
     });
 
 });
+
+describe('CMS block list by identifier', function (): void {
+
+    it('matches the identifier exactly in REST, as GraphQL does', function (): void {
+        $create = apiPost('/api/rest/v2/cms-blocks', [
+            'identifier' => 'test-pest-exact-block',
+            'title' => 'Test Exact Block',
+            'content' => '<p>Exact identifier</p>',
+            'isActive' => true,
+            'stores' => ['all'],
+        ], serviceToken(['cms-blocks/write']));
+        expect($create['status'])->toBeIn([200, 201]);
+        trackCreated('cms_block', $create['json']['id']);
+
+        $members = fn(array $response): array => $response['json']['member'] ?? $response['json']['hydra:member'] ?? [];
+
+        $exact = apiGet('/api/rest/v2/cms-blocks?identifier=test-pest-exact-block');
+        expect($exact['status'])->toBe(200);
+        expect(array_column($members($exact), 'identifier'))->toBe(['test-pest-exact-block']);
+
+        $prefix = apiGet('/api/rest/v2/cms-blocks?identifier=test-pest-exact');
+        expect($prefix['status'])->toBe(200);
+        expect($members($prefix))->toBe([]);
+    });
+
+});
