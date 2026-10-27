@@ -90,8 +90,9 @@ Look up the IDs that `pass.sh` reads from the environment:
 | `ORDER_ID` | `SELECT entity_id FROM sales_flat_order ORDER BY entity_id DESC LIMIT 1` |
 | `CUSTOMER_ID` | `SELECT customer_id FROM sales_flat_order WHERE customer_id IS NOT NULL GROUP BY customer_id ORDER BY COUNT(*) DESC LIMIT 1` |
 
-If a query gives no row, skip the cases that need it, and say so in the report. `examples-rule`
-needs a cart price rule, and `pass.sh` does not run it.
+If a query gives no row, leave its variable out. `pass.sh` skips the cases that need it and writes
+"Skipped" in their transcript file: say so in the report. `examples-rule` needs a cart price rule,
+and `pass.sh` does not run it.
 
 ## 4. Run the cases
 

@@ -17,7 +17,11 @@ const groups = process.argv.slice(2).map((argument) => {
     const [label, folders] = argument.split('=');
     const rows = folders.split(',').flatMap((folder) => {
         const file = join(folder, 'grades.json');
-        return existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : [];
+        if (!existsSync(file)) {
+            console.error(`No grades for this run: ${file}`);
+            process.exit(1);
+        }
+        return JSON.parse(readFileSync(file, 'utf8'));
     });
     return { label, runs: folders.split(',').length, rows };
 });
