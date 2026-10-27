@@ -111,6 +111,20 @@ it('saves the customer only with the attributes that the store makes required', 
     'a value' => [['--attribute' => ['middlename=Q']], Symfony\Component\Console\Command\Command::SUCCESS, 'Q'],
 ]);
 
+it('refuses an attribute that an argument of the command gives', function (string $code): void {
+    $result = customerCreateRun([
+        'email' => CUSTOMER_CREATE_EMAIL,
+        'password' => 'Password123!',
+        'firstname' => 'Cli',
+        'lastname' => 'Create',
+        'website' => $this->website->getCode(),
+        '--attribute' => ["$code=other"],
+    ]);
+
+    expect($result->statusCode)->toBe(Symfony\Component\Console\Command\Command::INVALID)
+        ->and($result->getDisplay())->toContain("Give $code with its argument or option, not with --attribute");
+})->with(['email', 'firstname', 'lastname', 'website_id', 'group_id']);
+
 it('asks for the attributes that the store makes required in the terminal', function (): void {
     $attribute = Mage::getModel('customer/attribute')->loadByCode('customer', 'middlename');
     $wasRequired = (int) $attribute->getIsRequired();
