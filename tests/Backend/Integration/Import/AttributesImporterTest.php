@@ -68,6 +68,7 @@ it('creates a set, attributes with options and swatches, assigns them, and rerun
     ]);
     $result = (new Attributes())->import($attributes, [Attributes::OPTION_OPTIONS_CSV => $options]);
     expect($result->created)->toBe(4);
+    expect($result->notices)->toBe([]);
 
     $finish = Mage::getModel('catalog/resource_eav_attribute')->loadByCode('catalog_product', 'imp_finish');
     expect($finish->getFrontendInput())->toBe('select');
