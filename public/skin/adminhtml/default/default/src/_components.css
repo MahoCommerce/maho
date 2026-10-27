@@ -978,7 +978,8 @@
         & ul.d-menu {
             position: absolute;
             top: 100%;
-            left: -10000px;
+            left: 0;
+            visibility: hidden;
             z-index: 999;
             min-width: 220px;
             margin: 0;
@@ -1021,7 +1022,7 @@
         }
 
         & li:is(:hover, :focus-within) > ul {
-            left: 0;
+            visibility: visible;
         }
 
         & ul ul.d-menu {
