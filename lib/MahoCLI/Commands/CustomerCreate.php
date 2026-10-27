@@ -14,9 +14,9 @@ use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Ask;
 use Symfony\Component\Console\Attribute\Interact;
+use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
@@ -25,8 +25,16 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 class CustomerCreate extends BaseMahoCommand
 {
+    use CustomerFormTrait;
+
+    private const FORM_CODE = 'adminhtml_customer';
+
+    /**
+     * @param list<string> $attribute
+     */
     public function __invoke(
-        OutputInterface $output,
+        InputInterface $input,
+        SymfonyStyle $io,
         #[Argument(description: 'The email of the customer')]
         #[Ask('Email:')]
         #[\SensitiveParameter]
@@ -45,60 +53,79 @@ class CustomerCreate extends BaseMahoCommand
         ?string $website = null,
         #[Argument(description: 'The ID of the customer group (default: the default group of the website)')]
         ?int $group = null,
+        #[Option(description: 'The value of another customer attribute, as code=value. Give the option once for each attribute')]
+        array $attribute = [],
     ): int {
         $this->initMaho();
 
         $email = trim($email);
         if (!strlen($email)) {
-            $output->writeln('<error>Email cannot be empty</error>');
+            $io->writeln('<error>Email cannot be empty</error>');
             return Command::INVALID;
         }
 
         $password = trim($password);
         if (!strlen($password)) {
-            $output->writeln('<error>Password cannot be empty</error>');
+            $io->writeln('<error>Password cannot be empty</error>');
             return Command::INVALID;
         }
 
         $firstname = trim($firstname);
         if (!strlen($firstname)) {
-            $output->writeln('<error>Firstname cannot be empty</error>');
+            $io->writeln('<error>Firstname cannot be empty</error>');
             return Command::INVALID;
         }
 
         $lastname = trim($lastname);
         if (!strlen($lastname)) {
-            $output->writeln('<error>Lastname cannot be empty</error>');
+            $io->writeln('<error>Lastname cannot be empty</error>');
             return Command::INVALID;
         }
 
         $websiteModel = Mage::getModel('core/website')->load($website ?? $this->getDefaultWebsiteCode(), 'code');
         if (!$websiteModel->getId()) {
-            $output->writeln('<error>Website not found</error>');
+            $io->writeln('<error>Website not found</error>');
             return Command::INVALID;
         }
 
         $group ??= $this->getDefaultGroupId($websiteModel->getCode());
         if (!array_key_exists($group, $this->getGroups())) {
-            $output->writeln("<error>Customer group not found with ID: $group</error>");
+            $io->writeln("<error>Customer group not found with ID: $group</error>");
             return Command::INVALID;
         }
 
-        $customer = Mage::getModel('customer/customer')
-            ->setEmail($email)
-            ->setPassword($password)
-            ->setFirstname($firstname)
-            ->setLastname($lastname)
-            ->setWebsiteId((int) $websiteModel->getId())
-            ->setGroupId($group)
-            ->save();
+        $customer = Mage::getModel('customer/customer');
+        $form = $this->getCustomerForm(self::FORM_CODE, $customer);
+        try {
+            $data = $this->parseAttributeValues($attribute, $form, ['email', 'firstname', 'lastname', 'website_id', 'group_id']);
+        } catch (\InvalidArgumentException $e) {
+            $io->writeln("<error>{$e->getMessage()}</error>");
+            return Command::INVALID;
+        }
+
+        $errors = $this->validateAndCompactData($form, $this->askMissingAttributes($input, $io, $form, [
+            ...$data,
+            'email' => $email,
+            'firstname' => $firstname,
+            'lastname' => $lastname,
+            'website_id' => (int) $websiteModel->getId(),
+            'group_id' => $group,
+        ]));
+        if ($errors) {
+            foreach ($errors as $error) {
+                $io->writeln("<error>$error</error>");
+            }
+            return Command::INVALID;
+        }
+
+        $customer->setPassword($password)->save();
 
         if (!$customer->getId()) {
-            $output->writeln('<error>Unable to create customer</error>');
+            $io->writeln('<error>Unable to create customer</error>');
             return Command::FAILURE;
         }
 
-        $output->writeln("<info>Customer $email created successfully.</info>");
+        $io->writeln("<info>Customer $email created successfully.</info>");
         return Command::SUCCESS;
     }
 
