@@ -201,13 +201,13 @@ function customerAddressCommandRun(string $class, string $name, array $input, ar
 
 it('lists the addresses of a customer, with the default addresses', function (): void {
     $this->assertCommandIsSuccessful(customerAddressRun(customerAddressArguments()));
-    $this->assertCommandIsSuccessful(customerAddressRun(customerAddressArguments(['street' => '20 Mission Street'])));
+    $this->assertCommandIsSuccessful(customerAddressRun(customerAddressArguments(['street' => '20 Mission Street', '--default-shipping' => true])));
 
     $result = customerAddressCommandRun(CustomerAddressList::class, 'customer:address:list', ['email' => CUSTOMER_ADDRESS_EMAIL]);
 
     $this->assertCommandIsSuccessful($result);
-    expect($result->getDisplay())->toMatch('/10 Market Street.*\byes\s*\|\s*yes\b/')
-        ->and($result->getDisplay())->toMatch('/20 Mission Street.*\bno\s*\|\s*no\b/');
+    expect($result->getDisplay())->toMatch('/10 Market Street.*\byes\s*\|\s*no\b/')
+        ->and($result->getDisplay())->toMatch('/20 Mission Street.*\bno\s*\|\s*yes\b/');
 });
 
 it('lists no addresses for a customer without addresses', function (): void {
@@ -230,6 +230,34 @@ it('deletes the address that the arguments name, and removes it from the default
         ->and($customer->getData('default_billing'))->toBeNull()
         ->and($customer->getData('default_shipping'))->toBeNull();
 });
+
+it('keeps the default address of the other type when it deletes a default address', function (): void {
+    $this->assertCommandIsSuccessful(customerAddressRun(customerAddressArguments()));
+    $first = (int) customerAddressCustomer()->getData('default_billing');
+    $this->assertCommandIsSuccessful(customerAddressRun(customerAddressArguments(['street' => '20 Mission Street', '--default-shipping' => true])));
+    $second = (int) customerAddressCustomer()->getData('default_shipping');
+
+    $result = customerAddressCommandRun(CustomerAddressDelete::class, 'customer:address:delete', ['address_id' => (string) $second]);
+
+    $this->assertCommandIsSuccessful($result);
+    $customer = customerAddressCustomer();
+    expect((int) $customer->getData('default_billing'))->toBe($first)
+        ->and($customer->getData('default_shipping'))->toBeNull();
+});
+
+it('says why it cannot ask for the address to delete in the terminal', function (bool $knownEmail, string $message): void {
+    $command = new CustomerAddressDelete('customer:address:delete');
+    new Application()->addCommand($command);
+    $tester = new CommandTester($command);
+    $tester->setInputs([$knownEmail ? CUSTOMER_ADDRESS_EMAIL : 'nobody@example.com']);
+
+    expect(fn() => $tester->execute([], ['interactive' => true]))
+        ->toThrow(Symfony\Component\Console\Exception\RuntimeException::class, 'Not enough arguments (missing: "address_id")')
+        ->and($tester->getDisplay())->toContain($message);
+})->with([
+    'unknown email' => [false, 'Customer not found.'],
+    'customer without addresses' => [true, 'No addresses found.'],
+]);
 
 it('deletes no address with an unknown ID', function (string $addressId): void {
     $result = customerAddressCommandRun(CustomerAddressDelete::class, 'customer:address:delete', ['address_id' => $addressId]);

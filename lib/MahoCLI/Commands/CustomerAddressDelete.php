@@ -66,6 +66,7 @@ class CustomerAddressDelete extends BaseMahoCommand
         $customers = $this->findCustomersByEmail(trim((string) $io->ask('Email:')), null);
         $customer = $customers ? $this->pickCustomers($input, $io, $customers)[0] ?? null : null;
         if ($customer === null) {
+            $io->writeln('<error>Customer not found.</error>');
             return;
         }
 
@@ -73,9 +74,12 @@ class CustomerAddressDelete extends BaseMahoCommand
         foreach ($customer->getAddresses() as $address) {
             $addresses[$address->getId()] = "{$address->getId()}: {$address->format('oneline')}";
         }
-        if ($addresses) {
-            $answer = $io->choice('Address:', $addresses);
-            $input->setArgument('address_id', (string) array_search($answer, $addresses, true));
+        if (!$addresses) {
+            $io->writeln('No addresses found.');
+            return;
         }
+
+        $answer = $io->choice('Address:', $addresses);
+        $input->setArgument('address_id', (string) array_search($answer, $addresses, true));
     }
 }
