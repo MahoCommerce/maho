@@ -127,6 +127,22 @@ it('asks for the attributes that the store makes required in the terminal', func
     expect($customer->getMiddlename())->toBe('Q');
 });
 
+it('saves the option that the user picks for a required attribute with options', function (): void {
+    $attribute = Mage::getModel('customer/attribute')->loadByCode('customer', 'gender');
+    $wasRequired = (int) $attribute->getIsRequired();
+    $attribute->setIsRequired(1)->save();
+
+    try {
+        $result = customerCreateRun([], [CUSTOMER_CREATE_EMAIL, 'Password123!', 'Cli', 'Create', $this->website->getCode(), '2', 'Female']);
+    } finally {
+        $attribute->setIsRequired($wasRequired)->save();
+    }
+
+    $this->assertCommandIsSuccessful($result);
+    $customer = Mage::getModel('customer/customer')->setWebsiteId((int) $this->website->getId())->loadByEmail(CUSTOMER_CREATE_EMAIL);
+    expect($customer->getAttribute('gender')->getSource()->getOptionText($customer->getGender()))->toBe('Female');
+});
+
 it('fails without asking when a required argument is missing', function (): void {
     $command = new CustomerCreate('customer:create');
     new Application()->addCommand($command);

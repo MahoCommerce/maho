@@ -18,9 +18,7 @@ class Mage_Eav_Model_Attribute_Data_Date extends Mage_Eav_Model_Attribute_Data_A
     #[\Override]
     public function extractValue(Mage_Core_Controller_Request_Http $request)
     {
-        $value = $this->_getRequestValue($request);
-        // An empty field clears the date, and false means that the request does not hold the field
-        return $value === '' ? '' : $this->_applyInputFilter($value);
+        return $this->_applyInputFilter($this->_getRequestValue($request));
     }
 
     /**

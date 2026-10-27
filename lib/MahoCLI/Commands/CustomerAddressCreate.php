@@ -89,7 +89,9 @@ class CustomerAddressCreate extends BaseMahoCommand
         $address = Mage::getModel('customer/address');
         $form = $this->getCustomerForm(self::FORM_CODE, $address);
         try {
-            $data = $this->parseAttributeValues($attribute, $form);
+            $data = $this->parseAttributeValues($attribute, $form, [
+                'firstname', 'lastname', 'company', 'street', 'city', 'region', 'region_id', 'postcode', 'country_id', 'telephone',
+            ]);
         } catch (\InvalidArgumentException $e) {
             $io->writeln("<error>{$e->getMessage()}</error>");
             return Command::INVALID;

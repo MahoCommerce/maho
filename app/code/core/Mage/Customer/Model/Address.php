@@ -152,9 +152,6 @@ class Mage_Customer_Model_Address extends Mage_Customer_Model_Address_Abstract
         return $value ? (int) $value : null;
     }
 
-    /**
-     * Set the region ID as an integer. An empty value becomes 0.
-     */
     public function setRegionId(int|string|null $value): static
     {
         return $this->setData('region_id', (int) $value);

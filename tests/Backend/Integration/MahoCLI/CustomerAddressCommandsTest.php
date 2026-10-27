@@ -135,7 +135,24 @@ it('saves no address that the store cannot accept', function (array $more, strin
     'unknown country' => [['country' => 'XX'], 'Country not found with code: XX'],
     'state/province of another country' => [['--region' => 'Lombardia'], 'State/province not found in country US: Lombardia'],
     'no state/province where the country requires one' => [['--region' => null], 'Please enter the state/province.'],
+    'unknown attribute' => [['--attribute' => ['nosuch=1']], 'Attribute not found: nosuch'],
+    'attribute without a value' => [['--attribute' => ['middlename']], 'Give the attribute as code=value: middlename'],
+    'attribute with its own argument' => [['--attribute' => ['city=Oakland']], 'Give city with its argument or option, not with --attribute'],
 ]);
+
+it('saves the state/province as text for a country without a list of states/provinces', function (): void {
+    $countriesWithRegions = Mage::getResourceModel('directory/region_collection')->getColumnValues('country_id');
+    $country = array_find(
+        array_keys(Mage::getResourceModel('directory/country_collection')->loadByStore()->toOptionHash()),
+        fn(string $code): bool => !in_array($code, $countriesWithRegions, true)
+            && Mage::helper('customer/address')->getPostcodeFormatError($code, '94105') === null,
+    );
+
+    $result = customerAddressRun(customerAddressArguments(['country' => $country, '--region' => 'Some County']));
+
+    $this->assertCommandIsSuccessful($result);
+    expect(customerAddressCustomer()->getDefaultBillingAddress()->getRegion())->toBe('Some County');
+});
 
 it('saves the address only with the attributes that the store makes required', function (array $more, int $status, ?string $middlename): void {
     $attribute = Mage::getModel('customer/attribute')->loadByCode('customer_address', 'middlename');

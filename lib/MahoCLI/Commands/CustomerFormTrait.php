@@ -34,25 +34,30 @@ trait CustomerFormTrait
 
     /**
      * Turn the values of the --attribute option, each one as code=value, into an array keyed by the code.
+     * Refuse a code in $reserved: the command gives that attribute with its own argument or option.
      *
-     * @param list<string> $values
+     * @param list<string> $pairs
+     * @param list<string> $reserved
      * @return array<string, string>
      * @throws \InvalidArgumentException
      */
-    private function parseAttributeValues(array $values, Mage_Customer_Model_Form $form): array
+    private function parseAttributeValues(array $pairs, Mage_Customer_Model_Form $form, array $reserved): array
     {
         $attributes = $form->getAttributes();
         $result = [];
-        foreach ($values as $value) {
-            [$code, $data] = array_pad(explode('=', $value, 2), 2, null);
+        foreach ($pairs as $pair) {
+            [$code, $value] = array_pad(explode('=', $pair, 2), 2, null);
             $code = trim($code);
-            if ($data === null || $code === '') {
-                throw new \InvalidArgumentException("Give the attribute as code=value: $value");
+            if ($value === null || $code === '') {
+                throw new \InvalidArgumentException("Give the attribute as code=value: $pair");
             }
             if (!isset($attributes[$code])) {
                 throw new \InvalidArgumentException("Attribute not found: $code");
             }
-            $result[$code] = $data;
+            if (in_array($code, $reserved, true)) {
+                throw new \InvalidArgumentException("Give $code with its argument or option, not with --attribute");
+            }
+            $result[$code] = $value;
         }
         return $result;
     }

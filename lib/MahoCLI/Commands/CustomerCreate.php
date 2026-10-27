@@ -97,7 +97,7 @@ class CustomerCreate extends BaseMahoCommand
         $customer = Mage::getModel('customer/customer');
         $form = $this->getCustomerForm(self::FORM_CODE, $customer);
         try {
-            $data = $this->parseAttributeValues($attribute, $form);
+            $data = $this->parseAttributeValues($attribute, $form, ['email', 'firstname', 'lastname', 'website_id', 'group_id']);
         } catch (\InvalidArgumentException $e) {
             $io->writeln("<error>{$e->getMessage()}</error>");
             return Command::INVALID;
