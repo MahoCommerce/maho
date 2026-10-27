@@ -1025,7 +1025,8 @@
             visibility: visible;
         }
 
-        & li:not(:hover) > a:focus:not(:focus-visible) + ul.d-menu {
+        /* A click focuses a link: close its menu when the pointer leaves */
+        & li:not(:hover):has(a:focus:not(:focus-visible)) > ul.d-menu {
             visibility: hidden;
         }
 
