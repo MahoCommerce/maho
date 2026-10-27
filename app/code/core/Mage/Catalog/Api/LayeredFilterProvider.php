@@ -85,11 +85,15 @@ final class LayeredFilterProvider extends \Maho\ApiPlatform\Provider
         $layer = \Mage::getModel('catalog/layer');
         $layer->setCurrentCategory($category);
 
-        $swatchHelper = \Mage::helper('configurableswatches');
-        $swatchImageHelper = \Mage::helper('configurableswatches/productimg');
-        $dimensionHelper = \Mage::helper('configurableswatches/swatchdimensions');
-        $swatchWidth = (int) $dimensionHelper->getInnerWidth(\Mage_ConfigurableSwatches_Helper_Swatchdimensions::AREA_LAYER);
-        $swatchHeight = (int) $dimensionHelper->getInnerHeight(\Mage_ConfigurableSwatches_Helper_Swatchdimensions::AREA_LAYER);
+        $swatchesEnabled = \Mage::helper('core')->isModuleEnabled('Mage_ConfigurableSwatches')
+            && \Mage::helper('configurableswatches')->isEnabled();
+        if ($swatchesEnabled) {
+            $swatchHelper = \Mage::helper('configurableswatches');
+            $swatchImageHelper = \Mage::helper('configurableswatches/productimg');
+            $dimensionHelper = \Mage::helper('configurableswatches/swatchdimensions');
+            $swatchWidth = (int) $dimensionHelper->getInnerWidth(\Mage_ConfigurableSwatches_Helper_Swatchdimensions::AREA_LAYER);
+            $swatchHeight = (int) $dimensionHelper->getInnerHeight(\Mage_ConfigurableSwatches_Helper_Swatchdimensions::AREA_LAYER);
+        }
 
         $filters = [];
 
@@ -105,7 +109,7 @@ final class LayeredFilterProvider extends \Maho\ApiPlatform\Provider
             $dto->type = $attribute->getFrontendInput();
             $dto->position = (int) $attribute->getPosition();
             $dto->multiple = (bool) $attribute->getIsFilterableMultiple();
-            $isSwatch = $swatchHelper->isEnabled() && $swatchHelper->attrIsSwatchType($attribute);
+            $isSwatch = $swatchesEnabled && $swatchHelper->attrIsSwatchType($attribute);
 
             $items = $filterModel->getItems();
             foreach ($items as $item) {
