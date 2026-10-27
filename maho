@@ -48,6 +48,8 @@ $application->addCommand(new \MahoCLI\Commands\CustomerChangepassword());
 $application->addCommand(new \MahoCLI\Commands\CustomerDelete());
 $application->addCommand(new \MahoCLI\Commands\CustomerList());
 $application->addCommand(new \MahoCLI\Commands\CustomerAddressCreate());
+$application->addCommand(new \MahoCLI\Commands\CustomerAddressDelete());
+$application->addCommand(new \MahoCLI\Commands\CustomerAddressList());
 $application->addCommand(new \MahoCLI\Commands\CustomerGroupCreate());
 $application->addCommand(new \MahoCLI\Commands\CustomerGroupDelete());
 $application->addCommand(new \MahoCLI\Commands\CustomerGroupList());
