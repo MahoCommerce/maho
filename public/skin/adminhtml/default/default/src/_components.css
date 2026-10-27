@@ -1025,6 +1025,10 @@
             visibility: visible;
         }
 
+        & li:not(:hover) > a:focus:not(:focus-visible) + ul.d-menu {
+            visibility: hidden;
+        }
+
         & ul ul.d-menu {
             top: -7px;
         }
