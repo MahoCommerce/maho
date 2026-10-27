@@ -80,10 +80,10 @@ it('hides a closed submenu, and opens it on hover and on keyboard focus but not 
     expect($products->isVisible())->toBeFalse()
         ->and($manageAttributes->isVisible())->toBeFalse();
 
-    // Focus from the keyboard, so that the browser treats it as keyboard focus and not as a click
+    // Shift+Tab from the next entry gives Catalog keyboard focus, which a click does not give
     $footer->hover();
-    $catalog->focus();
-    $catalog->press('Shift+Tab');
-    $pw->locator(':focus')->press('Tab');
+    $customer = $pw->locator('#nav-admin-customer');
+    $customer->focus();
+    $customer->press('Shift+Tab');
     expect($products->isVisible())->toBeTrue();
 });
