@@ -37,7 +37,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
         new Get(
             uriTemplate: '/categories/{id}',
             security: 'true',
-            description: 'Get a category by ID. Admin and API tokens with category access also get inactive categories',
+            description: 'Get a category by ID. A guest or a customer gets an active category of the tree of the store view. Admin and API tokens with category access also get inactive categories, and the categories of every root tree of their store views',
             normalizationContext: ['groups' => ['category:read', 'category:detail']],
         ),
         new GetCollection(
@@ -115,7 +115,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
     graphQlOperations: [
         new Query(
             name: 'item_query',
-            description: 'Get a category by ID',
+            description: 'Get a category by ID. A guest or a customer gets an active category of the tree of the store view. Admin and API tokens with category access also get inactive categories, and the categories of every root tree of their store views',
             security: 'true',
             normalizationContext: ['groups' => ['category:read', 'category:detail']],
         ),
