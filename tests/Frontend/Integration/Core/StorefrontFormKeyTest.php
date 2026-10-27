@@ -231,7 +231,7 @@ it('refuses a GET to a POST-only action when the path carries no form key', func
     expect($controller->getFlag('', Mage_Core_Controller_Varien_Action::FLAG_NO_DISPATCH))->toBeTrue();
 });
 
-it('asks no form key of a GET to a controller that is not the class of the route', function () {
+it('asks no form key of a GET to an action that the controller does not have', function () {
     $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create('/checkout/cart/delete/id/5', 'GET'));
     $request->setModuleName('checkout')->setControllerName('cart')->setActionName('delete')->setDispatched(true);
     Mage::app()->setRequest($request);
@@ -240,7 +240,16 @@ it('asks no form key of a GET to a controller that is not the class of the route
     expect(sfkIsFormKeyRequired($controller))->toBeFalse();
 });
 
-it('asks the form key of a GET to a POST-only action of an override, whatever the request names', function (string $module, string $controllerName) {
+it('asks no form key of a GET to an action that has no route', function () {
+    $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create('/sales/order/view/order_id/1', 'GET'));
+    $request->setModuleName('sales')->setControllerName('order')->setActionName('view')->setDispatched(true);
+    Mage::app()->setRequest($request);
+    $controller = new Mage_Sales_OrderController($request, new Mage_Core_Controller_Response_Http());
+
+    expect(sfkIsFormKeyRequired($controller))->toBeFalse();
+});
+
+it('asks the form key of a GET to a POST-only action of an override, for each module and controller name', function (string $module, string $controllerName) {
     $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create("/{$module}/{$controllerName}/add/product/1", 'GET'));
     $request->setModuleName($module)->setControllerName($controllerName)->setActionName('add')->setDispatched(true);
     Mage::app()->setRequest($request);
@@ -257,6 +266,22 @@ it('asks the form key of a GET to a POST-only action of an override, whatever th
     'legacy <modules> chain' => ['checkout', 'checkout_cart'],
     'subclass under its own front name' => ['vendor', 'cart'],
 ]);
+
+it('uses the route of the override before the route of the parent', function () {
+    $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create('/vendor/cart', 'GET'));
+    $request->setModuleName('vendor')->setControllerName('cart')->setActionName('index')->setDispatched(true);
+    Mage::app()->setRequest($request);
+    $controller = new class ($request, new Mage_Core_Controller_Response_Http()) extends Mage_Checkout_CartController {
+        #[\Override]
+        #[Maho\Config\Route('/vendor/cart', methods: ['POST'])]
+        public function indexAction(): void
+        {
+            parent::indexAction();
+        }
+    };
+
+    expect(sfkIsFormKeyRequired($controller))->toBeTrue();
+});
 
 /** What the system log gained while $work ran, with logging switched on for the duration. */
 function sfkLogOutput(callable $work): string
