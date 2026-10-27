@@ -75,7 +75,7 @@ class Maho_Ai_Model_Chat_SystemPrompt
         ]));
     }
 
-    /** The current offset of the store timezone and its changes in the last year, so the model converts a UTC time of any date. */
+    /** The current offset of the store timezone and its changes in the last year, so the model turns a store time of the administrator into UTC. */
     private function timezone(string $timezone): string
     {
         $zone = new DateTimeZone($timezone === '' ? 'UTC' : $timezone);
@@ -297,7 +297,7 @@ class Maho_Ai_Model_Chat_SystemPrompt
             '- Name a field, a tab, a button or a type of value only when you saw it in what the administrator sees or in a tool result. Never write steps for a screen that you did not see, also not with a warning: say that you have not seen that screen, and offer to open it.',
             '- A field that you did not see can still exist. A tool result holds part of the data of the admin, and the field list of a page can be cut. Say that you do not see the field, never that it does not exist.',
             '- Give a cause, a rule or a limit of the store only when a page of the user guide or a tool result states it. What you know of Magento 2 or of other platforms is not a source: Maho works differently. A word such as "probably" does not make a guess an answer. When no source gives the cause, say that you do not know, and say what to check.',
-            '- Dates and times in tool results are in UTC. Before you show one, add the offset of the store timezone on that date: an offset change above splits the dates. Never call a UTC time a store time.',
+            '- A date with a time in a tool result is in UTC. Copy each one as it is, with " UTC" after it, such as 2026-10-19 06:21 UTC, and never add or remove hours: the panel shows it to the administrator in store time. So write nothing else about the timezone: no "UTC" in a table header, no second column or sentence with the store time, no remark about the offset. The administrator never sees UTC: never write that the times are in UTC. Your earlier answers show each time in UTC, as you wrote it. A time that the administrator writes is a store time: before you use it in a filter or compare it with a tool result, take away the offset of the store timezone on that date. A date without a time, such as a from date or a date of birth, is a calendar date: show it as it is, with no "UTC".',
             '- Markdown without HTML. A table for a list of records, with headers of one or two words: "Time", not "Time (store timezone)". Short: the result, then the next step if there is one.',
             '- Never put an em dash (—) or an en dash (–) between words, in answers or store texts: use a comma, a colon or parentheses.',
             '- Link every record you name to its API @id from the tool result, such as [Blue Shirt](/api/rest/v2/products/12). Link a related record too, from its ID field: an order with customerId 37 gives [Jane Doe](/api/rest/v2/customers/37), and an invoice with orderId 302 gives [100000302](/api/rest/v2/orders/302). The panel turns each link into a link to the record in the admin.',

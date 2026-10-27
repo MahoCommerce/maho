@@ -159,6 +159,10 @@ Rules:
   - It acted on the open form or page without a click: the prompt asks for this on the page of the
     record. Check the result in the database.
   - It wrote through an API tool without a confirmation: the case fails.
+- The transcript shows the text of the model, which the model also reads in its history. The
+  administrator saw each `YYYY-MM-DD HH:MM UTC` in store time, and each API link as a link to the
+  admin page of the record. A time in that form is correct when it equals the value in the tool
+  result. A sentence that calls the shown times UTC is wrong: the administrator never sees UTC.
 - Check the model in the header of each transcript. A run on the wrong model is not valid.
 
 Write the grades of each run to `grades.json` in its folder:

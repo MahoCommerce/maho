@@ -124,6 +124,24 @@ Steps: `{"open": "dashboard/index"}`.
 
 Check each cause in `app/code/core/Mage/ConfigurableSwatches/` before you grade.
 
+## times
+
+Times in tool results are UTC, and the administrator reads store times. The second and the third
+message refer to the times that the administrator saw on the screen. **Source**: the
+`created_at` of `sales_flat_order` (UTC) and `./maho config:get general/locale/timezone`.
+
+Steps: `{"open": "dashboard/index"}`.
+
+| Message | Must say | Must not say |
+|---------|----------|--------------|
+| Show me the 8 most recent orders, with the time each one was placed. | The 8 orders with the latest `created_at`, each with its time in store time: `created_at` plus the offset of the store timezone on that date. A time that the answer marks as UTC is also correct | a UTC time shown as a store time, a time with no timezone that is neither the store time nor marked as UTC |
+| Which of them came in between 22:00 and midnight on 18 October? | The orders of the list whose store time is from 22:00 to 24:00 on 18 October | an order outside that window in store time, such as one that is in the window only in UTC |
+| Who placed the order at 07:21 on 19 October? | The customer of the order whose store time is 07:21 on 19 October | "no order at that time", the customer of the order at 07:21 UTC |
+
+Compute the store times before you grade:
+`./maho db:query "SELECT increment_id, created_at, customer_firstname, customer_lastname FROM sales_flat_order ORDER BY created_at DESC LIMIT 8"`.
+If the store has no order at 07:21 store time on 19 October, change the messages to match the data.
+
 ## write-approve-undo
 
 From #1505. The confirmation, the change and the undo of a write.
@@ -306,6 +324,7 @@ and no store view in that language: the admin stays in English, and only the mes
 | `examples-guest-checkout` | Come faccio a permettere ai clienti di fare il checkout senza un account? |
 | `examples-order-summary` | Riassumi questo ordine |
 | `examples-to-ship` | Quali ordini sono in attesa di spedizione? |
+| `times` | 1. Mostrami gli 8 ordini più recenti, con l'ora di ciascuno.<br>2. Quali sono arrivati tra le 22:00 e mezzanotte del 18 ottobre?<br>3. Chi ha fatto l'ordine delle 07:21 del 19 ottobre? |
 
 ### lang-content
 

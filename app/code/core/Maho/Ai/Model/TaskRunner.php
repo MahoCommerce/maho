@@ -360,7 +360,7 @@ class Maho_Ai_Model_TaskRunner
             $input += (int) $message->getData('input_tokens');
             $output += (int) $message->getData('output_tokens');
             if ($message->getToolStatus() === null) {
-                $answer = (string) $message->getContent();
+                $answer = (string) $message->getDisplayContent();
             }
         }
 

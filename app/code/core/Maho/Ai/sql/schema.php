@@ -182,6 +182,7 @@ return function (SchemaEditor $schema): void {
             ->addColumn(Schema::column('conversation_id', Types::INTEGER, unsigned: true))
             ->addColumn(Schema::column('role', Types::STRING, length: 16))
             ->addColumn(Schema::column('content', Types::TEXT, length: 16777215, notNull: false))
+            ->addColumn(Schema::column('display_content', Types::TEXT, length: 16777215, notNull: false))
             ->addColumn(Schema::column('tool_calls', Types::TEXT, length: 16777215, notNull: false))
             ->addColumn(Schema::column('tool_call_id', Types::STRING, length: 64, notNull: false))
             ->addColumn(Schema::column('tool_name', Types::STRING, length: 128, notNull: false))

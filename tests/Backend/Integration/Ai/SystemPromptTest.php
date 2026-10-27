@@ -182,13 +182,13 @@ it('names the pages of the user guide that explain the open admin page', functio
     expect(new Maho_Ai_Model_Chat_SystemPrompt()->build(aiPromptAdmin(), ['route' => 'dashboard/index']))->not->toContain('The user guide explains this admin page');
 });
 
-it('asks for a source for a cause, keeps the labels of the admin, and converts dates', function (): void {
+it('asks for a source for a cause, keeps the labels of the admin, and copies UTC times', function (): void {
     $prompt = new Maho_Ai_Model_Chat_SystemPrompt()->build(aiPromptAdmin());
 
     expect($prompt)->toContain('Give a cause, a rule or a limit of the store only when a page of the user guide or a tool result states it');
     expect($prompt)->toContain('What you know of Magento 2 or of other platforms is not a source');
     expect($prompt)->toContain('Write each menu, tab, field, button and value label exactly as the admin shows it');
     expect($prompt)->toContain('Never translate store data');
-    expect($prompt)->toContain('Dates and times in tool results are in UTC');
+    expect($prompt)->toContain('A date with a time in a tool result is in UTC');
     expect($prompt)->toContain('A call with a click waits for the confirmation of the administrator');
 });

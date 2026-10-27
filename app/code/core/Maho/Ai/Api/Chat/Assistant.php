@@ -23,6 +23,7 @@ use Maho_Ai_Model_Chat_ConfirmationRequired;
 use Maho_Ai_Model_Chat_MessageBagBuilder;
 use Maho_Ai_Model_Chat_SseWriter;
 use Maho_Ai_Model_Chat_SystemPrompt;
+use Maho_Ai_Model_Chat_StoreTime;
 use Maho_Ai_Model_Chat_ToolExecutor;
 use Maho_Ai_Model_Chat_ToolsetChanged;
 use Maho_Ai_Model_Conversation;
@@ -335,14 +336,16 @@ final class Assistant
             $metadata = [];
             $streamed = $text;
             $text = Maho_Ai_Model_Chat_RepeatedDraft::remove($text);
-            $clean = $this->toolbox->linkRecords(\Mage::getSingleton('ai/safety_outputSanitizer')->sanitize($text, false, $metadata));
-            if ($clean !== $streamed) {
-                $sse->event('replace', ['text' => $clean]);
+            $clean = \Mage::getSingleton('ai/safety_outputSanitizer')->sanitize($text, false, $metadata);
+            $shown = $this->display($clean, $storeId);
+            if ($shown !== $streamed) {
+                $sse->event('replace', ['text' => $shown]);
             }
             [$in, $out] = self::tokenUsage($execution->getMetadata()->all(), $this->agentFactory->platformCode($storeId));
             $conversation->addMessage([
                 'role' => Message::ROLE_ASSISTANT,
                 'content' => $clean,
+                'display_content' => $shown,
                 'input_tokens' => $in,
                 'output_tokens' => $out,
             ]);
@@ -354,7 +357,7 @@ final class Assistant
         } catch (Maho_Ai_Model_Chat_ClientGone) {
             // The administrator stopped the turn. Keep the text that was already streamed.
             if ($roundText !== '') {
-                $conversation->addMessage(['role' => Message::ROLE_ASSISTANT, 'content' => $roundText]);
+                $conversation->addMessage(['role' => Message::ROLE_ASSISTANT, 'content' => $roundText, 'display_content' => $this->display($roundText, $storeId)]);
             }
             $this->stopped($conversation);
         } catch (Maho_Ai_Model_Chat_ConfirmationRequired $e) {
@@ -410,6 +413,15 @@ final class Assistant
     private function notice(Maho_Ai_Model_Conversation $conversation, string $text, string $status): void
     {
         $conversation->addMessage(['role' => Message::ROLE_ASSISTANT, 'content' => $text, 'tool_status' => $status]);
+    }
+
+    /**
+     * The answer as the administrator sees it: each API link becomes a link to the admin page of the
+     * record, and each UTC time a store time. The model keeps reading its own text in the history.
+     */
+    private function display(string $text, ?int $storeId): string
+    {
+        return $this->toolbox->linkRecords(Maho_Ai_Model_Chat_StoreTime::toStore($text, $storeId));
     }
 
     /** Send the page change that the last local tool asked for: a page to open, text edits or page steps. */
@@ -619,6 +631,7 @@ final class Assistant
         $conversation->addMessage([
             'role' => Message::ROLE_ASSISTANT,
             'content' => $text,
+            'display_content' => $this->display($text, $conversation->getStoreId()),
             'tool_calls' => \Mage::helper('core')->jsonEncode($calls),
         ]);
 

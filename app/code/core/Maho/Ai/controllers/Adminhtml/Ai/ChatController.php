@@ -119,7 +119,7 @@ class Maho_Ai_Adminhtml_Ai_ChatController extends Mage_Adminhtml_Controller_Acti
             $row = [
                 'id' => (int) $message->getId(),
                 'role' => $message->getRole(),
-                'content' => (string) $message->getContent(),
+                'content' => (string) $message->getDisplayContent(),
                 'created_at' => $message->getCreatedAt(),
             ];
             if ($message->getRole() === Maho_Ai_Model_Conversation_Message::ROLE_ASSISTANT && $message->getToolStatus() !== null) {

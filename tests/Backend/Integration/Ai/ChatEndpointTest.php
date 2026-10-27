@@ -269,11 +269,11 @@ it('refuses an admin whose role does not grant the assistant', function (): void
     }
 });
 
-it('turns the API links of an answer into admin page links', function (): void {
+it('shows the administrator admin page links and store times, and keeps the text of the model for the model', function (): void {
     $admin = aiChatAdmin('ai_chat_linker', ['all']);
     try {
         aiChatLogin($admin);
-        AiChatScript::reset(new TextResult('See [Blue Shirt](/api/rest/v2/products/12), [the page](/api/rest/v2/cms-pages/2), [Giulia](/api/rest/v2/customers/52), [her order](/api/rest/v2/customers/52/orders/302), [her review](/api/rest/v2/reviews/7), [her address](/api/rest/v2/addresses/52), [a coupon](/api/rest/v2/coupons/3) and [a store](/api/rest/v2/stores/1).'));
+        AiChatScript::reset(new TextResult('See [Blue Shirt](/api/rest/v2/products/12), [the page](/api/rest/v2/cms-pages/2), [Giulia](/api/rest/v2/customers/52), [her order](/api/rest/v2/customers/52/orders/302), [her review](/api/rest/v2/reviews/7), [her address](/api/rest/v2/addresses/52), [a coupon](/api/rest/v2/coupons/3) and [a store](/api/rest/v2/stores/1). Placed on 2026-07-01 10:00 UTC.'));
 
         $result = aiChatRequest('/api/admin/ai/chat', ['message' => 'Find the blue shirt']);
 
@@ -286,8 +286,11 @@ it('turns the API links of an answer into admin page links', function (): void {
         expect($replace[0]['text'])->toMatch('~\[her order\]\(http://[^)]+/sales_order/view/order_id/302/[^)]*\)~');
         expect($replace[0]['text'])->toMatch('~\[her review\]\(http://[^)]+/catalog_product_review/edit/id/7/[^)]*\)~');
         expect($replace[0]['text'])->toContain(', her address, a coupon and a store.');
+        expect($replace[0]['text'])->toContain('Placed on ' . Maho_Ai_Model_Chat_StoreTime::toStore('2026-07-01 10:00 UTC', null) . '.');
+        /** @var Maho_Ai_Model_Conversation_Message $stored */
         $stored = Mage::getModel('ai/conversation_message')->getCollection()->addFieldToFilter('role', 'assistant')->setOrder('message_id', 'DESC')->getFirstItem();
-        expect((string) $stored->getContent())->toContain('/catalog_product/edit/id/12/');
+        expect($stored->getDisplayContent())->toBe($replace[0]['text']);
+        expect((string) $stored->getContent())->toContain('[Blue Shirt](/api/rest/v2/products/12)')->toContain('Placed on 2026-07-01 10:00 UTC.');
     } finally {
         aiChatDeleteConversations((int) $admin->getId());
         aiChatDeleteAdmin($admin);
