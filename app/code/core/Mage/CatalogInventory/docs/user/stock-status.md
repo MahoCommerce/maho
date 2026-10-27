@@ -1,5 +1,6 @@
 ---
 description: Why a product with a quantity can still show as out of stock - quantity and stock availability, Manage Stock, backorders, the out-of-stock threshold, configurable products and the Stock Status index.
+admin_pages: [catalog_product/edit, process]
 ---
 
 # Stock Status

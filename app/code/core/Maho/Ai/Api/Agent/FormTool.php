@@ -54,7 +54,7 @@ final class FormTool
         return ToolDefinition::create(
             new ExecutionReference(self::class, 'read'),
             self::READ_NAME,
-            'Read the text fields of the form that the administrator has open, with the changes that are not saved. A get tool gives the saved record, which can be older. Use it before you check or correct the text of this form.',
+            'Read the text fields that are not empty in the form that the administrator has open, with the changes that are not saved. It does not read dropdowns or checkboxes. A get tool gives the saved record, which can be older. Use it before you check or correct the text of this form.',
             [
                 'type' => 'object',
                 'properties' => [
@@ -113,7 +113,7 @@ final class FormTool
         foreach ($names as $name) {
             $index = $this->find($name);
             if ($index === null) {
-                return ['ok' => false, 'text' => sprintf('No field "%s" in the form. Fields: %s.', $name, $this->fieldList())];
+                return ['ok' => false, 'text' => sprintf('No text field "%s" in the form. Text fields that are not empty: %s. A dropdown, a checkbox or an empty field is not readable here: read the saved record with a get tool, or the screen of the page.', $name, $this->fieldList())];
             }
             $indexes[$index] = true;
         }

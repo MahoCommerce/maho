@@ -189,7 +189,7 @@ class Product extends CrudResource
     public ?string $visibility = null;
 
     #[Groups(['product:read'])]
-    #[ApiProperty(description: 'Stock status: in_stock or out_of_stock', writable: false, extraProperties: [EnumSource::KEY => ['in_stock', 'out_of_stock'], 'computed' => true])]
+    #[ApiProperty(description: 'Stock status: in_stock or out_of_stock. Stock is global: the same in every store view and website', writable: false, extraProperties: [EnumSource::KEY => ['in_stock', 'out_of_stock'], 'computed' => true])]
     public string $stockStatus = 'in_stock';
 
     #[Groups(['product:read'])]
@@ -249,7 +249,7 @@ class Product extends CrudResource
     public array $tierPrices = [];
 
     #[Groups(['product:read'])]
-    #[ApiProperty(description: 'Available stock quantity. Admin and API tokens with product access get the exact quantity. Other callers get it only when it is at or below the "Only X Left" threshold of the store, and null otherwise')]
+    #[ApiProperty(description: 'Available stock quantity, the same in every store view and website. Admin and API tokens with product access get the exact quantity. Other callers get it only when it is at or below the "Only X Left" threshold of the store, and null otherwise')]
     public ?float $stockQty = null;
 
     #[Groups(['product:read'])]
@@ -507,7 +507,7 @@ class Product extends CrudResource
 
     /** @var array<string, mixed>|null Full inventory settings keyed by cataloginventory_stock_item column */
     #[Groups(['product:detail'])]
-    #[ApiProperty(description: 'Inventory settings keyed by stock item column (round-trips with stockData); backend columns (min_qty, notify_stock_qty, backorders, manage_stock, use_config_*) are only returned to admin and API tokens', writable: false, extraProperties: ['computed' => true])]
+    #[ApiProperty(description: 'Inventory settings keyed by stock item column (round-trips with stockData), the same in every store view and website; backend columns (min_qty, notify_stock_qty, backorders, manage_stock, use_config_*) are only returned to admin and API tokens', writable: false, extraProperties: ['computed' => true])]
     public ?array $stockItem = null;
 
     #[Groups(['product:read'])]

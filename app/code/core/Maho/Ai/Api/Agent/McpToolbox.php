@@ -554,6 +554,20 @@ final class McpToolbox implements ToolboxInterface
         return $name !== BackgroundTaskTool::NAME && $name !== ImageTool::NAME && (self::isLocal($name) || $this->catalog->isReadOnly($name));
     }
 
+    /**
+     * A call that waits for the administrator: every write, and a page action that clicks a
+     * button, because the panel cannot tell a Save or a Submit from a button that only reads.
+     */
+    public function needsConfirmation(ToolCall $toolCall): bool
+    {
+        $name = $toolCall->getName();
+        if ($name === AdminPageTool::ACTION_NAME) {
+            return AdminPageTool::clicks($toolCall->getArguments());
+        }
+
+        return !$this->isReadOnly($name);
+    }
+
     public function isDestructive(string $name): bool
     {
         return !self::isLocal($name) && $this->catalog->isDestructive($name);

@@ -1,5 +1,6 @@
 ---
 description: Show color, image and text swatches instead of dropdowns - the settings that turn them on, the three ways to give a value an appearance, and what changes in listings and filters.
+admin_pages: [catalog_product_attribute/edit, catalog_product/edit]
 ---
 
 # Configurable Swatches
@@ -75,9 +76,11 @@ is how a fabric or a material is shown consistently across a catalog.
 A square image of about 100 x 100 pixels is enough. The store generates the sizes it needs.
 
 When the option name is translated in a store view, the store looks for the file named after the
-name in the default language, so one file serves all the translations of that value. That fallback
-needs the value to have at least one variant visible in the store view: a color that is out of
-stock and hidden falls back to the option name as text.
+name in the default language, so one file serves all the translations of that value. The color of
+the option uses the same fallback. On the product page, that fallback needs the value to have at
+least one variant visible in the store view: a value that is out of stock and hidden shows the
+option name as text. The layered navigation filters find the default name through the option
+itself, so they still show the color or the image.
 
 ## Using a product image
 
@@ -85,7 +88,10 @@ A product image is a picture on one configurable product that serves as the swat
 Use it when the swatch belongs to a single product, for example a print that only exists on one
 shirt.
 
-1. Open the **configurable** product, not a child variant.
+1. Open the **configurable** product: the store uses only its images for swatches. Every product
+   has the **Images** tab with an upload, a child variant and a product that is not saved yet too.
+   The upload has no permission of its own: a role that can edit products can upload images. So
+   neither the product type nor the role is the reason for a missing upload.
 2. In the **Images** tab upload the picture, or pick an existing one.
 3. In its **Label** field write the option name, then `-swatch`, for example `Bianco-swatch`. Write
    it in the language of the store view where it has to appear; the default language is the
@@ -99,8 +105,12 @@ The label decides the relationship between the swatch and the photo of that opti
 | `Bianco-swatch` | shows this image | stays the photo of the variant |
 | `Bianco` | shows this image only when there is no color and no catalog image for the value | becomes this image |
 
-So a label without the suffix is the way to have one picture that is both the swatch and the photo
-of that color. The suffix is the way to show a texture as a swatch and keep the garment photo.
+A label without the suffix always makes the image the photo of that option. It makes the image the
+swatch too, but only when the value has no color and no catalog image. On a color attribute, most
+values have a color: then the image is the photo, and the color stays the swatch. To show the photo
+as the swatch of such a value, use the suffix.
+
+The suffix is also the way to show a texture as a swatch and keep the garment photo.
 
 In both cases the image is hidden from the product gallery, so it does not appear twice.
 
@@ -149,11 +159,13 @@ safe choice for a texture.
 | Symptom | What to check |
 |---------|---------------|
 | Swatches show as text | The value has no color, no catalog image and no product image |
+| There is no field to upload a swatch image | The attribute form has none. Upload a catalog image in **CMS > Media Library**, or add a product image with the option name as its label on the configurable product. Every product has the **Images** tab with an upload, a child variant and a product that is not saved yet too, and a role that can edit products can upload images. So the product type and the role are not the reason for a missing upload. The store uses only the images of the configurable product for swatches |
 | No swatch and no dropdown | Configurable Swatches is disabled, or the listing attribute is empty |
 | No color picker in the attribute | The attribute is not listed in **Product Attributes to Show as Swatches in Product Detail** |
 | A catalog image is ignored | The file name (lower case, hyphens, exact name) or the extension. On most servers file names are case sensitive, so `Blue-Light.webp` does not match `blue-light.webp` |
 | A product image does not appear | A catalog image with that name exists and wins, or the image is on a child variant instead of the configurable product |
 | Text in one store view, image in another | The value has no variant visible in that store view, for example out of stock and hidden, so the translated name cannot be connected to the file |
+| The filter shows a color or an image, but the product page shows the option name as text | The same cause, in a store view where the option name is translated: the filter finds the swatch through the option, the product page only through a visible variant. Make a variant with that value visible in the store view. A new color or catalog image does not help, because the product page finds both through the variant |
 | The previous swatch is still visible | The new file was saved with a suffix, such as `blue-light_1.webp`. Delete both files, then upload the new one again |
 
 ## Related

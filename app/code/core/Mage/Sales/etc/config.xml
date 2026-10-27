@@ -11,6 +11,9 @@ SPDX-License-Identifier: AFL-3.0
         </Mage_Sales>
     </modules>
     <global>
+        <docs>
+            <user>docs/user</user>
+        </docs>
         <fieldsets>
             <sales_copy_order>
                 <customer_email>

@@ -32,8 +32,8 @@ use Maho\ApiPlatform\CrudResource;
     provider: CmsPageProvider::class,
     processor: CmsPageProcessor::class,
     operations: [
-        new Get(uriTemplate: '/cms-pages/{id}', security: 'true'),
-        new GetCollection(uriTemplate: '/cms-pages', security: 'true'),
+        new Get(uriTemplate: '/cms-pages/{id}', security: 'true', description: 'Get a CMS page by ID. A guest or a customer gets an enabled page of the store view. Admin and API tokens with CMS page access also get disabled pages and the pages of other store views'),
+        new GetCollection(uriTemplate: '/cms-pages', security: 'true', description: 'Get CMS pages. A guest or a customer gets the enabled pages of the store view. With identifier, it returns the page that the store view shows. With scope "all", admin and API tokens get the pages of every store view, the disabled ones too'),
         new Post(
             uriTemplate: '/cms-pages',
             processor: CmsPageProcessor::class,
@@ -54,17 +54,17 @@ use Maho\ApiPlatform\CrudResource;
         ),
     ],
     graphQlOperations: [
-        new Query(name: 'item_query', description: 'Get a CMS page by ID', security: 'true'),
+        new Query(name: 'item_query', description: 'Get a CMS page by ID. A guest or a customer gets an enabled page of the store view. Admin and API tokens with CMS page access also get disabled pages and the pages of other store views', security: 'true'),
         new QueryCollection(
             name: 'collection_query',
-            description: 'Get CMS pages',
+            description: 'Get CMS pages. A guest or a customer gets the enabled pages of the store view. With identifier, it returns the page that the store view shows. With scope "all", admin and API tokens get the pages of every store view, the disabled ones too',
             security: 'true',
             extraArgs: [
                 'createdFrom' => ['type' => 'String', 'description' => 'Created at or after this UTC date or datetime; a bare date means from 00:00:00'],
                 'createdTo' => ['type' => 'String', 'description' => 'Created at or before this UTC date or datetime; a bare date includes the whole day'],
                 'updatedSince' => ['type' => 'String', 'description' => 'Updated at or after this UTC date or datetime'],
-                'identifier' => ['type' => 'String', 'description' => 'Exact identifier lookup (returns 0 or 1 page)'],
-                'search' => ['type' => 'String', 'description' => 'Partial match on the page title or identifier, minimum 3 characters'],
+                'identifier' => ['type' => 'String', 'description' => 'Exact identifier lookup. Returns one page: for a guest or a customer, the enabled page that the store view shows. A backend caller also gets a disabled page, and the page of another store view when the store view has none. With scope "all", returns every page with this identifier, with its store views'],
+                'search' => ['type' => 'String', 'description' => 'Partial match on the page title, content or identifier, minimum 3 characters'],
                 'scope' => ['type' => 'String', 'description' => 'Give "all" to list the records of every store view, the disabled and unpublished ones too, as the admin grid does. It needs backend access. Without it, the list holds only the published records of the current store view'],
             ],
         ),

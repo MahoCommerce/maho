@@ -1,5 +1,6 @@
 ---
 description: Which value wins between the default, the website and the store view - the scope switcher in the configuration and on products, the Use Default and Use Website checkboxes, global, website and store view attributes, and the Catalog Price Scope.
+admin_pages: [system_config/edit, catalog_product/edit, catalog_category/edit, system_store]
 ---
 
 # Scope: Default, Website and Store View Values

@@ -25,10 +25,22 @@ it('describes the store and the administrator', function (): void {
 
     expect($prompt)->toContain('Maho admin assistant');
     expect($prompt)->toContain('prompt_admin');
-    expect($prompt)->toContain('Store views, as "code = name (website)"');
+    expect($prompt)->toContain('Store views, as "code = name (website, locale)"');
+    expect($prompt)->toContain(' (' . Mage::app()->getDefaultStoreView()->getWebsite()->getName() . ', ' . Mage::getStoreConfig('general/locale/code', Mage::app()->getDefaultStoreView()->getId()) . ')');
     expect($prompt)->toContain(Mage::app()->getDefaultStoreView()->getCode() . ' = ');
     expect($prompt)->toContain('Without that field, it is in ' . Mage::app()->getDefaultStoreView()->getBaseCurrencyCode());
     expect($prompt)->not->toContain('api_key');
+});
+
+it('gives the offset of the store timezone and its changes in the last year', function (): void {
+    $zone = new DateTimeZone((string) Mage::getStoreConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE) ?: 'UTC');
+    $now = new DateTimeImmutable('now', new DateTimeZone('UTC'));
+    $changes = count($zone->getTransitions($now->modify('-1 year')->getTimestamp(), $now->getTimestamp())) - 1;
+
+    $prompt = new Maho_Ai_Model_Chat_SystemPrompt()->build(aiPromptAdmin());
+
+    expect($prompt)->toMatch('/- Store timezone: ' . preg_quote($zone->getName(), '/') . ', now UTC[+-]\\d{2}:\\d{2}\\. Current time: [\\d-]+ [\\d:]+ UTC, ' . $now->setTimezone($zone)->format('Y-m-d') . ' [\\d:]+ in the store\\./');
+    expect(substr_count($prompt, ' UTC to UTC'))->toBe($changes);
 });
 
 it('names the record the admin page shows', function (): void {
@@ -160,4 +172,23 @@ it('leaves the custom instructions out when the store owner wrote none', functio
 
 it('builds the prompt through the model factory, so a module can override it', function (): void {
     expect(Mage::getModel('ai/chat_systemPrompt'))->toBeInstanceOf(Maho_Ai_Model_Chat_SystemPrompt::class);
+});
+
+it('names the pages of the user guide that explain the open admin page', function (): void {
+    $prompt = new Maho_Ai_Model_Chat_SystemPrompt()->build(aiPromptAdmin(), ['route' => 'catalog_product/edit', 'entity_type' => 'product', 'entity_id' => 3]);
+
+    expect($prompt)->toContain('The user guide explains this admin page, in these pages:', '  - core/user-guide/configurable-product-prices.md (Configurable Product Prices): ');
+    expect($prompt)->toContain('call docs_read first with the page whose description fits, before any other tool');
+    expect(new Maho_Ai_Model_Chat_SystemPrompt()->build(aiPromptAdmin(), ['route' => 'dashboard/index']))->not->toContain('The user guide explains this admin page');
+});
+
+it('asks for a source for a cause, keeps the labels of the admin, and copies UTC times', function (): void {
+    $prompt = new Maho_Ai_Model_Chat_SystemPrompt()->build(aiPromptAdmin());
+
+    expect($prompt)->toContain('Give a cause, a rule or a limit of the store only when a page of the user guide or a tool result states it');
+    expect($prompt)->toContain('What you know of Magento 2 or of other platforms is not a source');
+    expect($prompt)->toContain('Write each menu, tab, field, button and value label exactly as the admin shows it');
+    expect($prompt)->toContain('Never translate store data');
+    expect($prompt)->toContain('A date with a time in a tool result is in UTC');
+    expect($prompt)->toContain('A call with a click waits for the confirmation of the administrator');
 });

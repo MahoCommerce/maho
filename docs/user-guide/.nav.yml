@@ -10,6 +10,7 @@ nav:
   - Configurable product prices: configurable-product-prices.md
   - Stock status: stock-status.md
   - URL rewrites: url-rewrites.md
+  - The order of products in a category: category-product-order.md
 - Store views & content:
   - 'Scope: default, website and store view': scope.md
   - CMS pages and blocks in store views: cms-store-views.md
@@ -27,9 +28,12 @@ nav:
   - SEO: seo.md
   - Structured data: structured-data.md
   - AI crawlers & llms.txt: ai-and-crawlers.md
+- Sales:
+  - Order states: order-states.md
 - Checkout & compliance:
   - Accessibility scan: accessibility-scan.md
   - Captcha: captcha.md
+  - Guest checkout: guest-checkout.md
   - Revocation button: revocation-button.md
   - Shipping bridge: shipping-bridge.md
   - Tax in the cart and in the order: tax-calculation.md

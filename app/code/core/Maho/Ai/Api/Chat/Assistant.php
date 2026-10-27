@@ -23,10 +23,12 @@ use Maho_Ai_Model_Chat_ConfirmationRequired;
 use Maho_Ai_Model_Chat_MessageBagBuilder;
 use Maho_Ai_Model_Chat_SseWriter;
 use Maho_Ai_Model_Chat_SystemPrompt;
+use Maho_Ai_Model_Chat_StoreTime;
 use Maho_Ai_Model_Chat_ToolExecutor;
 use Maho_Ai_Model_Chat_ToolsetChanged;
 use Maho_Ai_Model_Conversation;
 use Maho_Ai_Model_Conversation_Message as Message;
+use Maho_Ai_Model_Platform_Symfony;
 use Symfony\AI\Agent\Agent;
 use Symfony\AI\Agent\Exception\MaxIterationsExceededException;
 use Symfony\AI\Agent\Execution\Execution;
@@ -37,8 +39,7 @@ use Symfony\AI\Agent\Toolbox\ToolResult;
 use Symfony\AI\Platform\Exception\ExceptionInterface as PlatformException;
 use Symfony\AI\Platform\Result\Stream\Delta\TextDelta;
 use Symfony\AI\Platform\Result\ToolCall;
-use Symfony\AI\Platform\TokenUsage\TokenUsage;
-use Symfony\AI\Platform\TokenUsage\TokenUsageAggregation;
+use Symfony\AI\Platform\TokenUsage\TokenUsageInterface;
 
 /**
  * Events, in the order a client sees them: `delta` (answer text), `tool_call`,
@@ -156,6 +157,7 @@ final class Assistant
                 $result['record_url'] = $url;
             }
             $sse->event('tool_result', $result);
+            $this->sendNavigation($sse);
         }
 
         $this->run($conversation, $admin, $pageContext, $sse);
@@ -334,14 +336,16 @@ final class Assistant
             $metadata = [];
             $streamed = $text;
             $text = Maho_Ai_Model_Chat_RepeatedDraft::remove($text);
-            $clean = $this->toolbox->linkRecords(\Mage::getSingleton('ai/safety_outputSanitizer')->sanitize($text, false, $metadata));
-            if ($clean !== $streamed) {
-                $sse->event('replace', ['text' => $clean]);
+            $clean = \Mage::getSingleton('ai/safety_outputSanitizer')->sanitize($text, false, $metadata);
+            $shown = $this->display($clean, $storeId);
+            if ($shown !== $streamed) {
+                $sse->event('replace', ['text' => $shown]);
             }
-            [$in, $out] = $this->tokenUsage($execution->getMetadata()->all());
+            [$in, $out] = self::tokenUsage($execution->getMetadata()->all(), $this->agentFactory->platformCode($storeId));
             $conversation->addMessage([
                 'role' => Message::ROLE_ASSISTANT,
                 'content' => $clean,
+                'display_content' => $shown,
                 'input_tokens' => $in,
                 'output_tokens' => $out,
             ]);
@@ -353,7 +357,7 @@ final class Assistant
         } catch (Maho_Ai_Model_Chat_ClientGone) {
             // The administrator stopped the turn. Keep the text that was already streamed.
             if ($roundText !== '') {
-                $conversation->addMessage(['role' => Message::ROLE_ASSISTANT, 'content' => $roundText]);
+                $conversation->addMessage(['role' => Message::ROLE_ASSISTANT, 'content' => $roundText, 'display_content' => $this->display($roundText, $storeId)]);
             }
             $this->stopped($conversation);
         } catch (Maho_Ai_Model_Chat_ConfirmationRequired $e) {
@@ -411,6 +415,29 @@ final class Assistant
         $conversation->addMessage(['role' => Message::ROLE_ASSISTANT, 'content' => $text, 'tool_status' => $status]);
     }
 
+    /**
+     * The answer as the administrator sees it: each API link becomes a link to the admin page of the
+     * record, and each UTC time a store time. The model keeps reading its own text in the history.
+     */
+    private function display(string $text, ?int $storeId): string
+    {
+        return $this->toolbox->linkRecords(Maho_Ai_Model_Chat_StoreTime::toStore($text, $storeId));
+    }
+
+    /** Send the page change that the last local tool asked for: a page to open, text edits or page steps. */
+    private function sendNavigation(Maho_Ai_Model_Chat_SseWriter $sse): void
+    {
+        $navigation = $this->toolbox->takeNavigation();
+        if ($navigation === null) {
+            return;
+        }
+        $sse->event(match (true) {
+            isset($navigation['edits']) => 'text_edits',
+            isset($navigation['steps']) => 'page_action',
+            default => 'navigate',
+        }, $navigation);
+    }
+
     /** Run the agent once and forward its progress as SSE events. */
     private function stream(Agent $agent, MessageBag $bag, Maho_Ai_Model_Chat_SseWriter $sse, string &$roundText): Execution
     {
@@ -459,14 +486,7 @@ final class Assistant
                             'ok' => !McpToolbox::isErrorText($text),
                             'preview' => $this->preview($text),
                         ]);
-                        $navigation = $this->toolbox->takeNavigation();
-                        if ($navigation !== null) {
-                            $sse->event(match (true) {
-                                isset($navigation['edits']) => 'text_edits',
-                                isset($navigation['steps']) => 'page_action',
-                                default => 'navigate',
-                            }, $navigation);
-                        }
+                        $this->sendNavigation($sse);
                     }
                     break;
             }
@@ -611,6 +631,7 @@ final class Assistant
         $conversation->addMessage([
             'role' => Message::ROLE_ASSISTANT,
             'content' => $text,
+            'display_content' => $this->display($text, $conversation->getStoreId()),
             'tool_calls' => \Mage::helper('core')->jsonEncode($calls),
         ]);
 
@@ -694,11 +715,11 @@ final class Assistant
      * @param array<string, mixed> $metadata
      * @return array{int, int}
      */
-    private function tokenUsage(array $metadata): array
+    public static function tokenUsage(array $metadata, string $platformCode): array
     {
         foreach ($metadata as $value) {
-            if ($value instanceof TokenUsage || $value instanceof TokenUsageAggregation) {
-                return [(int) ($value->getPromptTokens() ?? 0), (int) ($value->getCompletionTokens() ?? 0)];
+            if ($value instanceof TokenUsageInterface) {
+                return [Maho_Ai_Model_Platform_Symfony::inputTokens($value, $platformCode), (int) ($value->getCompletionTokens() ?? 0)];
             }
         }
 

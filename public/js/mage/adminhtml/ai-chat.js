@@ -25,6 +25,7 @@ class MahoAiAssistant {
         this.conversationId = null;
         this.abortController = null;
         this.pendingCard = null;
+        this.pageCallIds = new Set();
         this.changedFields = new Set();
         this.setupChat();
         this.trackChanges();
@@ -285,6 +286,10 @@ class MahoAiAssistant {
                 history.push({ role: 'ai', html: this.renderWorking(data.conversation.queued ? this.labels.queued : this.labels.running) });
             }
             this.chat.history = history;
+            // The steps of a page action are for the page where the model wrote them: deny them on any other page.
+            if (!this.abortController && pending.some((call) => call.name === 'admin_page_action' && !this.pageCallIds.has(call.id))) {
+                this.onDeny();
+            }
             setTimeout(() => this.updateIntro(history.length > 0), 100);
             setTimeout(() => this.chat.scrollToBottom(), 50);
             this.watchBackground(data.conversation.running ? id : null);
@@ -652,14 +657,15 @@ class MahoAiAssistant {
                 if (data.conversation_id) {
                     this.rememberConversation(data.conversation_id);
                 }
-                if (state.textEdits.length > 0 && data.state === 'complete') {
+                if (state.textEdits.length > 0 && (data.state === 'complete' || data.state === 'awaiting_confirmation')) {
                     const edits = state.textEdits;
                     setTimeout(() => this.applyTextEdits(edits), 800);
                 }
                 if (state.navigateTo && data.state === 'complete') {
                     const { url, fields } = state.navigateTo;
                     setTimeout(() => this.navigate(url, fields), 800);
-                } else if (state.pageAction && data.state === 'complete') {
+                } else if (state.pageAction && (data.state === 'complete' || data.state === 'awaiting_confirmation')) {
+                    // A turn that waits for a click applies the steps that already ran: the click comes after the approval.
                     const steps = state.pageAction;
                     setTimeout(() => this.performPageActions(steps), 800);
                 } else if (data.state === 'complete' && state.changedRecords.some((url) => this.samePage(url, window.location.href))) {
@@ -740,6 +746,14 @@ class MahoAiAssistant {
         return guide;
     }
 
+    /** The header links of the configuration groups that are closed. */
+    closedGroups() {
+        return [...document.querySelectorAll('.entry-edit-head.collapseable a[id$="-head"]')].filter((link) => {
+            const group = document.getElementById(link.id.slice(0, -'-head'.length));
+            return !!group && group.getClientRects().length === 0;
+        });
+    }
+
     screenDigest() {
         const lines = [];
         const text = (node) => (node?.textContent ?? '').replace(/\s+/g, ' ').trim();
@@ -759,6 +773,11 @@ class MahoAiAssistant {
             const active = tabs.find((t) => t.classList.contains('active'));
             lines.push('Tabs: ' + tabs.map((t) => (t === active ? '[' + text(t) + ']' : text(t))).join(', ') + (active ? ' (the one in brackets is open)' : ''));
             scope = (active && document.getElementById(active.id + '_content')) || document;
+        }
+
+        const closed = this.closedGroups().filter(visible).map((link) => text(link));
+        if (closed.length > 0) {
+            lines.push('Closed groups, whose fields are not listed (open one with open_tab): ' + closed.join(', '));
         }
 
         const fields = [];
@@ -1009,7 +1028,8 @@ class MahoAiAssistant {
             return cell ? { ok: true, click: cell } : { ok: false };
         }
         if (action.action === 'open_tab') {
-            const tabs = [...document.querySelectorAll('a.tab-item-link')].filter(visible);
+            // A tab, or a closed group of a configuration page: the screen digest lists both.
+            const tabs = [...document.querySelectorAll('a.tab-item-link'), ...this.closedGroups()].filter(visible);
             const tab = matches(tabs, (t) => t.textContent);
             if (tab) {
                 tab.click();
@@ -1309,6 +1329,7 @@ class MahoAiAssistant {
     }
 
     showConfirmCard(calls) {
+        calls.forEach((call) => this.pageCallIds.add(call.id));
         this.chat.addMessage({ html: this.renderConfirmCard(calls), role: 'ai' });
         this.pendingCard = { index: this.lastIndex(), calls };
         setTimeout(() => this.chat.scrollToBottom(), 50);

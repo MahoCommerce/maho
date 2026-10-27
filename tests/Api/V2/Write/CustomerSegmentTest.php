@@ -8,6 +8,12 @@
 
 declare(strict_types=1);
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Operations;
+use ApiPlatform\Metadata\Resource\Factory\ResourceMetadataCollectionFactoryInterface;
+use ApiPlatform\Metadata\Resource\ResourceMetadataCollection;
+use Maho\ApiPlatform\Metadata\OperationDescriptionResourceMetadataCollectionFactory;
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
@@ -538,8 +544,17 @@ describe('Customer segment OpenAPI document', function (): void {
     });
 
     it('keeps the generated text for an operation that has only the description of its resource', function (): void {
-        $operation = apiGet('/api/docs.json')['json']['paths']['/api/rest/v2/cms-pages']['get'];
+        $decorated = new class implements ResourceMetadataCollectionFactoryInterface {
+            #[\Override]
+            public function create(string $resourceClass): ResourceMetadataCollection
+            {
+                $list = new GetCollection(class: $resourceClass, name: 'list', description: 'Things');
+                return new ResourceMetadataCollection($resourceClass, [new ApiResource(class: $resourceClass, description: 'Things')->withOperations(new Operations(['list' => $list]))]);
+            }
+        };
 
-        expect($operation['description'])->toBe($operation['summary']);
+        $operation = new OperationDescriptionResourceMetadataCollectionFactory($decorated)->create('Thing')->getOperation('list');
+
+        expect($operation->getOpenapi())->toBeNull();
     });
 });

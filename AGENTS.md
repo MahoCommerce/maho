@@ -42,6 +42,8 @@ npm install                        # Build toolchain, also copies the pinned JS 
   committed next to them; see the README in that folder
 - `public/skin/adminhtml/default/default/src/`: Tailwind and daisyUI sources of the admin skin; see
   Admin theme below
+- `.claude/skills/`: project skills, such as `assistant-benchmark`, which measures the answers of the
+  admin assistant before and after a change to its prompt, its tools or the docs
 
 ### Database access (Doctrine DBAL)
 
@@ -319,7 +321,9 @@ class My_Module_Checkout_CartController extends Mage_Checkout_CartController { /
   `user` is the person who works in the admin, `developer` writes code, `sysadmin` runs the
   server, and `api` calls the API of the store. Maho stores the declaration under the module name when it loads the module, so a disabled
   module has no pages. A page is a `.md` file with a `description:` in its front matter and one `#`
-  title, in the format of mahocommerce.com. The admin assistant reads the `user` and `sysadmin`
+  title, in the format of mahocommerce.com. An `admin_pages: [catalog_product/edit, cms_page]` line in
+  the front matter names the admin pages that the page explains, as `controller/action` or as a
+  controller for all its actions: on those pages, the admin assistant names the page to the model. The admin assistant reads the `user` and `sysadmin`
   pages through `docs_read`, so a page gives the rules, the order in which the store picks a value,
   and the labels of the admin. A change to a documented feature updates its page in the same pull
   request. `Maho\Docs\Library` lists the pages. A page that no single module owns goes in

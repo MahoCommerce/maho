@@ -13,6 +13,7 @@ use Symfony\AI\Platform\Message\MessageBag;
 use Symfony\AI\Platform\PlatformInterface;
 use Symfony\AI\Platform\Result\DeferredResult;
 use Symfony\AI\Platform\TokenUsage\TokenUsage;
+use Symfony\AI\Platform\TokenUsage\TokenUsageInterface;
 
 /**
  * Adapter that wraps a Symfony AI PlatformInterface and presents it as a
@@ -170,6 +171,25 @@ class Maho_Ai_Model_Platform_Symfony implements
         return $this->lastImageModel;
     }
 
+    /**
+     * The chat models to register in the catalog of a provider: its general model, and the
+     * model of the assistant when the assistant uses this provider. Symfony AI refuses a
+     * model that is not in the catalog.
+     *
+     * @return list<string>
+     */
+    private static function chatModels(string $platformCode, string $generalModel, ?int $storeId): array
+    {
+        $models = [$generalModel];
+        $assistantPlatform = (string) Mage::getStoreConfig('ai/chat/platform', $storeId)
+            ?: Mage::getSingleton('ai/platform_factory')->getDefaultPlatform($storeId);
+        if ($assistantPlatform === $platformCode) {
+            $models[] = (string) Mage::getStoreConfig('ai/chat/model', $storeId);
+        }
+
+        return array_values(array_unique(array_filter($models, static fn(string $model): bool => $model !== '')));
+    }
+
     public static function createForOpenAi(?int $storeId): self
     {
         $apiKey = (string) Mage::helper('core')->decrypt(
@@ -192,8 +212,8 @@ class Maho_Ai_Model_Platform_Symfony implements
         // capability checks (tool calling, vision) shouldn't be misled into
         // thinking a dated variant is less capable than its base model.
         $additional = [];
-        if ($chatModel !== '') {
-            $additional[$chatModel] = [
+        foreach (self::chatModels(Maho_Ai_Model_Platform::OPENAI, $chatModel, $storeId) as $model) {
+            $additional[$model] = [
                 'class' => \Symfony\AI\Platform\Bridge\OpenAi\Gpt::class,
                 'capabilities' => [
                     \Symfony\AI\Platform\Capability::INPUT_MESSAGES,
@@ -243,8 +263,8 @@ class Maho_Ai_Model_Platform_Symfony implements
 
         // Capabilities mirror the Claude bridge family — see note in createForOpenAi().
         $additional = [];
-        if ($chatModel !== '') {
-            $additional[$chatModel] = [
+        foreach (self::chatModels(Maho_Ai_Model_Platform::ANTHROPIC, $chatModel, $storeId) as $model) {
+            $additional[$model] = [
                 'class' => \Symfony\AI\Platform\Bridge\Anthropic\Claude::class,
                 'capabilities' => [
                     \Symfony\AI\Platform\Capability::INPUT_MESSAGES,
@@ -310,8 +330,8 @@ class Maho_Ai_Model_Platform_Symfony implements
 
         // Capabilities mirror the Gemini bridge family — see note in createForOpenAi().
         $additional = [];
-        if ($chatModel !== '') {
-            $additional[$chatModel] = [
+        foreach (self::chatModels(Maho_Ai_Model_Platform::GOOGLE, $chatModel, $storeId) as $model) {
+            $additional[$model] = [
                 'class' => \Symfony\AI\Platform\Bridge\Gemini\Gemini::class,
                 'capabilities' => [
                     \Symfony\AI\Platform\Capability::INPUT_MESSAGES,
@@ -352,8 +372,8 @@ class Maho_Ai_Model_Platform_Symfony implements
 
         // Capabilities mirror the Mistral bridge family — see note in createForOpenAi().
         $additional = [];
-        if ($chatModel !== '') {
-            $additional[$chatModel] = [
+        foreach (self::chatModels(Maho_Ai_Model_Platform::MISTRAL, $chatModel, $storeId) as $model) {
+            $additional[$model] = [
                 'class' => \Symfony\AI\Platform\Bridge\Mistral\Mistral::class,
                 'capabilities' => [
                     \Symfony\AI\Platform\Capability::INPUT_MESSAGES,
@@ -407,8 +427,8 @@ class Maho_Ai_Model_Platform_Symfony implements
         // id on top so a newer model still resolves, with the capabilities every
         // OpenRouter chat model offers.
         $additional = [];
-        if ($chatModel !== '') {
-            $additional[$chatModel] = [
+        foreach (self::chatModels(Maho_Ai_Model_Platform::OPENROUTER, $chatModel, $storeId) as $model) {
+            $additional[$model] = [
                 'class' => \Symfony\AI\Platform\Bridge\Generic\CompletionsModel::class,
                 'capabilities' => [
                     \Symfony\AI\Platform\Capability::INPUT_MESSAGES,
@@ -517,10 +537,24 @@ class Maho_Ai_Model_Platform_Symfony implements
         $tu = $this->extractTokenUsage($deferred);
         if ($tu) {
             $this->lastTokenUsage = [
-                'input'  => (int) ($tu->getPromptTokens() ?? 0),
+                'input'  => self::inputTokens($tu, $this->platformCode),
                 'output' => (int) ($tu->getCompletionTokens() ?? 0),
             ];
         }
+    }
+
+    /**
+     * The input tokens of a call. Anthropic counts the cached input apart from input_tokens, so its
+     * cache reads and writes are added. The other providers count them in the prompt tokens.
+     */
+    public static function inputTokens(TokenUsageInterface $usage, string $platformCode): int
+    {
+        $tokens = (int) ($usage->getPromptTokens() ?? 0);
+        if ($platformCode === Maho_Ai_Model_Platform::ANTHROPIC) {
+            $tokens += (int) ($usage->getCacheCreationTokens() ?? 0) + (int) ($usage->getCacheReadTokens() ?? 0);
+        }
+
+        return $tokens;
     }
 
     protected function extractTokenUsage(DeferredResult $deferred): ?TokenUsage

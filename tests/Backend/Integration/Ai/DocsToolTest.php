@@ -55,3 +55,17 @@ it('is a local tool with a label', function (): void {
     expect(Maho\Ai\Api\Agent\McpToolbox::isLocal(DocsTool::NAME))->toBeTrue();
     expect(Mage::helper('ai')->toolLabel(DocsTool::NAME))->toBe('Read the user guide');
 });
+
+it('finds the pages that explain an admin page from their admin_pages front matter', function (): void {
+    $dir = sys_get_temp_dir() . '/maho_docs_pages_' . uniqid();
+    @mkdir($dir, 0777, true);
+    file_put_contents("$dir/prices.md", "---\ndescription: Prices.\nadmin_pages: [catalog_product/edit, promo_catalog]\n---\n# Prices");
+    file_put_contents("$dir/stock.md", "---\ndescription: Stock.\n---\n# Stock");
+    $library = new Library([new Source('Acme_Catalog', Library::AUDIENCE_USER, $dir)]);
+    $ids = static fn(string $route): array => array_map(static fn(Maho\Docs\Page $page): string => $page->id, $library->pagesFor($route, [Library::AUDIENCE_USER]));
+
+    expect($ids('catalog_product/edit'))->toBe(['Acme_Catalog/prices.md']);
+    expect($ids('promo_catalog/index'))->toBe(['Acme_Catalog/prices.md']);
+    expect($ids('catalog_product/index'))->toBe([]);
+    expect($library->page('Acme_Catalog/stock.md', [Library::AUDIENCE_USER])?->adminPages)->toBe([]);
+});

@@ -43,6 +43,16 @@ final class AdminPageTool
     /** Enough for a comment form: the text, two checkboxes and the submit button. */
     public const MAX_STEPS = 5;
 
+    /**
+     * Whether the steps of a page action click a button. Opening a tab or a grid row and setting a field save nothing.
+     *
+     * @param array<string, mixed> $arguments
+     */
+    public static function clicks(array $arguments): bool
+    {
+        return array_any((array) ($arguments['steps'] ?? []), fn($step) => is_array($step) && ($step['action'] ?? null) === 'click');
+    }
+
     public static function title(string $name): string
     {
         return match ($name) {
@@ -62,7 +72,7 @@ final class AdminPageTool
         return ToolDefinition::create(
             new ExecutionReference(self::class, 'act'),
             self::ACTION_NAME,
-            'Act on the admin page the administrator has open, after you answer: open a tab by its name, set a form field by its label or name, click a button by its label (for example "Save" when the administrator says "save"), or open a grid row by its number in the row list (target "3" for "the third one"). Use the buttons, tabs, fields and rows listed under what the administrator sees; never guess a label. Up to ' . self::MAX_STEPS . ' steps in order, in one call, and a click or an open_row must be the last step because the page may reload. The next message shows you the result.',
+            'Act on the admin page the administrator has open, after you answer: open a tab or a closed group of a configuration page by its name, set a form field by its label or name, click a button by its label (for example "Save" when the administrator says "save"), or open a grid row by its number in the row list (target "3" for "the third one"). Use the buttons, tabs, fields and rows listed under what the administrator sees; never guess a label. Up to ' . self::MAX_STEPS . ' steps in order, in one call, and a click or an open_row must be the last step because the page may reload. A call with a click waits for the confirmation of the administrator, like a write: say in one sentence what the click does before you call it. The next message shows you the result.',
             [
                 'type' => 'object',
                 'properties' => [

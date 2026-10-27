@@ -8,6 +8,7 @@
 declare(strict_types=1);
 
 use Maho\Ai\Api\Agent\McpToolbox;
+use Maho\Ai\Api\Agent\NotifyTool;
 use Maho\ApiPlatform\Kernel;
 use Maho\ApiPlatform\Security\SameOriginGuard;
 use Symfony\AI\Platform\Model;
@@ -269,11 +270,11 @@ it('refuses an admin whose role does not grant the assistant', function (): void
     }
 });
 
-it('turns the API links of an answer into admin page links', function (): void {
+it('shows the administrator admin page links and store times, and keeps the text of the model for the model', function (): void {
     $admin = aiChatAdmin('ai_chat_linker', ['all']);
     try {
         aiChatLogin($admin);
-        AiChatScript::reset(new TextResult('See [Blue Shirt](/api/rest/v2/products/12), [the page](/api/rest/v2/cms-pages/2), [Giulia](/api/rest/v2/customers/52), [her order](/api/rest/v2/customers/52/orders/302), [her review](/api/rest/v2/reviews/7), [her address](/api/rest/v2/addresses/52), [a coupon](/api/rest/v2/coupons/3) and [a store](/api/rest/v2/stores/1).'));
+        AiChatScript::reset(new TextResult('See [Blue Shirt](/api/rest/v2/products/12), [the page](/api/rest/v2/cms-pages/2), [Giulia](/api/rest/v2/customers/52), [her order](/api/rest/v2/customers/52/orders/302), [her review](/api/rest/v2/reviews/7), [her address](/api/rest/v2/addresses/52), [a coupon](/api/rest/v2/coupons/3) and [a store](/api/rest/v2/stores/1). Placed on 2026-07-01 10:00 UTC.'));
 
         $result = aiChatRequest('/api/admin/ai/chat', ['message' => 'Find the blue shirt']);
 
@@ -286,8 +287,33 @@ it('turns the API links of an answer into admin page links', function (): void {
         expect($replace[0]['text'])->toMatch('~\[her order\]\(http://[^)]+/sales_order/view/order_id/302/[^)]*\)~');
         expect($replace[0]['text'])->toMatch('~\[her review\]\(http://[^)]+/catalog_product_review/edit/id/7/[^)]*\)~');
         expect($replace[0]['text'])->toContain(', her address, a coupon and a store.');
+        expect($replace[0]['text'])->toContain('Placed on ' . Maho_Ai_Model_Chat_StoreTime::toStore('2026-07-01 10:00 UTC', null) . '.');
+        /** @var Maho_Ai_Model_Conversation_Message $stored */
         $stored = Mage::getModel('ai/conversation_message')->getCollection()->addFieldToFilter('role', 'assistant')->setOrder('message_id', 'DESC')->getFirstItem();
-        expect((string) $stored->getContent())->toContain('/catalog_product/edit/id/12/');
+        expect($stored->getDisplayContent())->toBe($replace[0]['text']);
+        expect((string) $stored->getContent())->toContain('[Blue Shirt](/api/rest/v2/products/12)')->toContain('Placed on 2026-07-01 10:00 UTC.');
+    } finally {
+        aiChatDeleteConversations((int) $admin->getId());
+        aiChatDeleteAdmin($admin);
+    }
+});
+
+it('shows the history with the text of the panel, and the stored text of a message that has none', function (): void {
+    $admin = aiChatAdmin('ai_chat_history', ['all']);
+    try {
+        aiChatLogin($admin);
+        $conversation = Mage::getModel('ai/conversation')->setData(['admin_user_id' => (int) $admin->getId(), 'store_id' => 0, 'title' => 'Pest history']);
+        $conversation->save();
+        $conversation->addMessage(['role' => 'assistant', 'content' => 'See [it](/api/rest/v2/products/12) at 2026-07-01 10:00 UTC.', 'display_content' => 'See it at 2026-07-01 12:00.']);
+        $conversation->addMessage(['role' => 'assistant', 'content' => 'An answer from before the upgrade.']);
+
+        $request = new Mage_Core_Controller_Request_Http(Request::create('/admin/ai_chat/messages', 'GET', ['id' => (int) $conversation->getId()]));
+        Mage::app()->setRequest($request);
+        $controller = new Maho_Ai_Adminhtml_Ai_ChatController($request, new Mage_Core_Controller_Response_Http());
+        $controller->messagesAction();
+
+        $body = Mage::helper('core')->jsonDecode((string) $controller->getResponse()->getBody());
+        expect(array_column($body['messages'], 'content'))->toBe(['See it at 2026-07-01 12:00.', 'An answer from before the upgrade.']);
     } finally {
         aiChatDeleteConversations((int) $admin->getId());
         aiChatDeleteAdmin($admin);
@@ -488,7 +514,7 @@ it('starts a background job after confirmation and runs it in a worker with its 
         // The worker: the handler runs the job with the scripted model; the update needs no confirmation.
         AiChatScript::reset(
             new ToolCallResult([new ToolCall('call_w', 'content_cms_pages_update', ['id' => (string) $pageId, 'title' => 'New'])]),
-            new TextResult('Renamed one page.'),
+            new TextResult('Renamed [the page](/api/rest/v2/cms-pages/' . $pageId . ').'),
         );
         new Maho_Ai_Model_TaskRunner()->processTask((int) $task->getId());
 
@@ -503,13 +529,13 @@ it('starts a background job after confirmation and runs it in a worker with its 
         }
         expect($rows[0])->toBe(['user', null, false, 'Rename the page ' . $pageId . ' to New.']);
         expect(array_filter($rows, static fn(array $r): bool => $r[0] === 'tool'))->toHaveCount(1);
-        $toolRow = array_values(array_filter($rows, static fn(array $r): bool => $r[0] === 'tool'))[0];
+        $toolRow = array_first(array_filter($rows, static fn(array $r): bool => $r[0] === 'tool'));
         expect($toolRow[1])->toBe('done');
         expect($toolRow[2])->toBeTrue();
-        expect(end($rows)[3])->toBe('Renamed one page.');
+        expect(end($rows)[3])->toBe('Renamed [the page](/api/rest/v2/cms-pages/' . $pageId . ').');
         $task = Mage::getModel('ai/task')->load((int) $task->getId());
         expect($task->getData('status'))->toBe(Maho_Ai_Model_Task::STATUS_COMPLETE, (string) $task->getData('error_message'));
-        expect((string) $task->getData('response'))->toBe('Renamed one page.');
+        expect((string) $task->getData('response'))->toMatch('~\[the page\]\(http://[^)]+/cms_page/edit/page_id/' . $pageId . '/~');
 
         // A second runner finds the task taken and leaves it alone.
         new Maho_Ai_Model_TaskRunner()->processTask((int) $task->getId());
@@ -637,6 +663,36 @@ it('creates a scheduled task through its API tool, and a scheduled run proposes 
         $connection->delete($inbox, ['url LIKE ?' => '%/ai_chat/open/id/%']);
         Mage::getModel('cms/page')->load($pageId)->delete();
         aiChatLogin($admin);
+        aiChatDeleteConversations((int) $admin->getId());
+        aiChatDeleteAdmin($admin);
+    }
+});
+
+it('writes the UTC times of a notification in store time', function (): void {
+    $admin = aiChatAdmin('ai_chat_notify_time', ['all']);
+    $store = Mage::app()->getStore(Mage_Core_Model_App::ADMIN_STORE_ID);
+    $oldZone = $store->getConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE);
+    $store->setConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE, 'Europe/London');
+    $resource = Mage::getSingleton('core/resource');
+    $connection = $resource->getConnection('core_write');
+    $inbox = $resource->getTableName('adminnotification/inbox');
+    $conversationId = 0;
+    try {
+        $conversation = Mage::getModel('ai/conversation')->setData(['admin_user_id' => (int) $admin->getId(), 'store_id' => 0, 'title' => 'Pest notify time']);
+        $conversation->save();
+        $conversationId = (int) $conversation->getId();
+        $tool = new NotifyTool();
+        $tool->setRun($conversation);
+
+        expect($tool->notify(['title' => 'Late order', 'text' => 'Placed on 2026-10-19 06:21 UTC.', 'severity' => 'notice'])['ok'])->toBeTrue();
+
+        $description = $connection->fetchOne($connection->select()->from($inbox, ['description'])->where('url LIKE ?', '%/ai_chat/open/id/' . $conversationId . '/%'));
+        expect($description)->toBe('Placed on 2026-10-19 07:21.');
+    } finally {
+        $store->setConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE, $oldZone);
+        if ($conversationId > 0) {
+            $connection->delete($inbox, ['url LIKE ?' => '%/ai_chat/open/id/' . $conversationId . '/%']);
+        }
         aiChatDeleteConversations((int) $admin->getId());
         aiChatDeleteAdmin($admin);
     }
@@ -1572,7 +1628,7 @@ it('resolves a reused page identifier to the store view\'s own page', function (
     }
 });
 
-it('hands a page action to the browser', function (): void {
+it('hands a page action to the browser after the administrator confirmed its click', function (): void {
     $admin = aiChatAdmin('ai_chat_action', ['all']);
     try {
         aiChatLogin($admin);
@@ -1581,30 +1637,73 @@ it('hands a page action to the browser', function (): void {
                 new ToolCall('call_a1', 'admin_page_action', ['steps' => [['action' => 'set_field', 'target' => 'Comment', 'value' => 'pippo'], ['action' => 'click', 'target' => 'Submit']]]),
                 new ToolCall('call_a2', 'admin_page_action', ['steps' => [['action' => 'click', 'target' => 'Save'], ['action' => 'set_field', 'target' => 'Page Title', 'value' => 'x']]]),
             ]),
-            new TextResult('Saving.'),
         );
 
-        $result = aiChatRequest('/api/admin/ai/chat', ['message' => 'save it please', 'context' => ['route' => 'cms_page/edit']]);
+        $first = aiChatRequest('/api/admin/ai/chat', ['message' => 'save it please', 'context' => ['route' => 'cms_page/edit']]);
 
         expect(AiChatScript::$offeredTools[0])->toContain('admin_page_action');
-        $results = aiChatEvents($result['events'], 'tool_result');
-        expect($results[0]['ok'])->toBeTrue($result['raw']);
+        $confirm = aiChatEvents($first['events'], 'confirm');
+        expect(array_column($confirm[0]['calls'] ?? [], 'id'))->toBe(['call_a1', 'call_a2'], $first['raw']);
+        expect(aiChatEvents($first['events'], 'page_action'))->toBe([]);
+        expect(aiChatEvents($first['events'], 'done')[0]['state'])->toBe('awaiting_confirmation');
+
+        AiChatScript::reset(new TextResult('Saving.'));
+        $approved = aiChatRequest('/api/admin/ai/chat/confirm', [
+            'conversation_id' => (int) $confirm[0]['conversation_id'],
+            'decisions' => ['call_a1' => true, 'call_a2' => true],
+            'context' => ['route' => 'cms_page/edit'],
+        ]);
+
+        $results = aiChatEvents($approved['events'], 'tool_result');
+        expect($results[0]['ok'])->toBeTrue($approved['raw']);
         expect($results[1]['ok'])->toBeFalse();
-        $actions = aiChatEvents($result['events'], 'page_action');
+        expect($results[1]['preview'])->toContain('a click or an open_row must be the last step');
+        $actions = aiChatEvents($approved['events'], 'page_action');
         expect($actions)->toHaveCount(1);
         expect($actions[0]['steps'])->toBe([
             ['action' => 'set_field', 'target' => 'Comment', 'value' => 'pippo'],
             ['action' => 'click', 'target' => 'Submit', 'value' => null],
         ]);
-        expect($results[1]['preview'])->toContain('a click or an open_row must be the last step');
-        expect(aiChatEvents($result['events'], 'done')[0]['state'])->toBe('complete');
+        expect(aiChatEvents($approved['events'], 'done')[0]['state'])->toBe('complete');
     } finally {
         aiChatDeleteConversations((int) $admin->getId());
         aiChatDeleteAdmin($admin);
     }
 });
 
-it('fills a comment form and submits it in one page action', function (): void {
+it('runs a page action without a click at once, and holds a denied click', function (): void {
+    $admin = aiChatAdmin('ai_chat_action_noclick', ['all']);
+    try {
+        aiChatLogin($admin);
+        $steps = [['action' => 'open_tab', 'target' => 'Meta Information'], ['action' => 'set_field', 'target' => 'Meta Title', 'value' => 'Blue Shirt']];
+        AiChatScript::reset(new ToolCallResult([new ToolCall('call_n1', 'admin_page_action', ['steps' => $steps])]), new TextResult('Filled in.'));
+
+        $result = aiChatRequest('/api/admin/ai/chat', ['message' => 'write a meta title', 'context' => ['route' => 'catalog_product/edit']]);
+
+        expect(aiChatEvents($result['events'], 'confirm'))->toBe([]);
+        expect(aiChatEvents($result['events'], 'page_action')[0]['steps'] ?? null)->toBe([
+            ['action' => 'open_tab', 'target' => 'Meta Information', 'value' => null],
+            ['action' => 'set_field', 'target' => 'Meta Title', 'value' => 'Blue Shirt'],
+        ], $result['raw']);
+
+        AiChatScript::reset(new ToolCallResult([new ToolCall('call_n2', 'admin_page_action', ['steps' => [['action' => 'click', 'target' => 'Save']]])]));
+        $second = aiChatRequest('/api/admin/ai/chat', ['conversation_id' => (int) aiChatEvents($result['events'], 'done')[0]['conversation_id'], 'message' => 'save it']);
+        expect(aiChatEvents($second['events'], 'done')[0]['state'])->toBe('awaiting_confirmation');
+
+        AiChatScript::reset(new TextResult('Not saved.'));
+        $denied = aiChatRequest('/api/admin/ai/chat/confirm', [
+            'conversation_id' => (int) aiChatEvents($second['events'], 'done')[0]['conversation_id'],
+            'decisions' => ['call_n2' => false],
+        ]);
+        expect(aiChatEvents($denied['events'], 'tool_result')[0]['denied'])->toBeTrue();
+        expect(aiChatEvents($denied['events'], 'page_action'))->toBe([]);
+    } finally {
+        aiChatDeleteConversations((int) $admin->getId());
+        aiChatDeleteAdmin($admin);
+    }
+});
+
+it('fills a comment form and submits it in one page action after the confirmation', function (): void {
     $admin = aiChatAdmin('ai_chat_comment', ['all']);
     try {
         aiChatLogin($admin);
@@ -1614,12 +1713,20 @@ it('fills a comment form and submits it in one page action', function (): void {
             ['action' => 'set_field', 'target' => 'Visible on Frontend', 'value' => 'true'],
             ['action' => 'click', 'target' => 'Submit', 'value' => null],
         ];
-        AiChatScript::reset(new ToolCallResult([new ToolCall('call_c1', 'admin_page_action', ['steps' => $steps])]), new TextResult('Adding the comment.'));
+        AiChatScript::reset(new ToolCallResult([new ToolCall('call_c1', 'admin_page_action', ['steps' => $steps])]));
 
         $result = aiChatRequest('/api/admin/ai/chat', ['message' => 'add a comment to this invoice', 'context' => ['route' => 'sales_order_invoice/view']]);
+        $confirm = aiChatEvents($result['events'], 'confirm');
+        expect($confirm[0]['calls'][0]['id'] ?? null)->toBe('call_c1', $result['raw']);
 
-        expect(aiChatEvents($result['events'], 'tool_result')[0]['ok'])->toBeTrue($result['raw']);
-        expect(aiChatEvents($result['events'], 'page_action')[0]['steps'])->toBe($steps);
+        AiChatScript::reset(new TextResult('Adding the comment.'));
+        $approved = aiChatRequest('/api/admin/ai/chat/confirm', [
+            'conversation_id' => (int) $confirm[0]['conversation_id'],
+            'decisions' => ['call_c1' => true],
+        ]);
+
+        expect(aiChatEvents($approved['events'], 'tool_result')[0]['ok'])->toBeTrue($approved['raw']);
+        expect(aiChatEvents($approved['events'], 'page_action')[0]['steps'])->toBe($steps);
     } finally {
         aiChatDeleteConversations((int) $admin->getId());
         aiChatDeleteAdmin($admin);

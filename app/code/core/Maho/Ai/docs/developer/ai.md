@@ -225,7 +225,7 @@ Both guardrails are **on by default** and apply to both sync and async entry poi
 
 Runs before each `invoke()`, `submitTask()`, sync `generateImage()`, and `submitImageTask()`. Checks user-role content against:
 
-- **15 known prompt-injection patterns** (e.g. "ignore previous instructions", "DAN mode", role-rewrite attempts)
+- **Known prompt-injection patterns** (e.g. "ignore previous instructions", "DAN mode", role-rewrite attempts). "Ignore previous instructions" is also checked in about 30 other languages, such as Italian, German, Russian, Arabic, Chinese and Japanese
 - **Configurable regex blocklist** - admin-set patterns in `ai/safety/blocked_patterns` (one per line)
 - **Base64-payload heuristic** - flags long base64-like strings that may hide encoded instructions
 

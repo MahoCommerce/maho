@@ -1,4 +1,5 @@
 # Make packagist / composer download smaller
+/.claude export-ignore
 /.editorconfig export-ignore
 /.env.testing.dist export-ignore
 /.github export-ignore
