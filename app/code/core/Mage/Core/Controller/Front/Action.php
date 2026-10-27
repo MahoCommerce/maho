@@ -77,17 +77,10 @@ class Mage_Core_Controller_Front_Action extends Mage_Core_Controller_Varien_Acti
     {
         // A safe method needs no form key, unless the route of the action refuses GET
         $request = $this->getRequest();
-        if (in_array($request->getMethod(), ['GET', 'HEAD', 'OPTIONS'], true)) {
-            $route = \Maho\Routing\RouteCollectionBuilder::resolveRoute(
-                (string) $request->getModuleName(),
-                (string) $request->getControllerName(),
-                (string) $request->getActionName(),
-            );
-            if ($route === null || $route['methods'] === [] || !$this instanceof $route['class']
-                || in_array('GET', $route['methods'], true)
-            ) {
-                return false;
-            }
+        if (in_array($request->getMethod(), ['GET', 'HEAD', 'OPTIONS'], true)
+            && $this->_isGetAllowed((string) $request->getActionName())
+        ) {
+            return false;
         }
 
         // Without a session there is no form key to compare with
@@ -96,6 +89,40 @@ class Mage_Core_Controller_Front_Action extends Mage_Core_Controller_Varien_Acti
         }
 
         return !in_array($this->getRequest()->getActionName(), $this->_publicActions, true);
+    }
+
+    /**
+     * Tell if a route of the action accepts GET.
+     *
+     * The routes come from the #[Maho\Config\Route] attributes of the action method. An override
+     * without its own attribute uses the routes of the parent method. An action without a route
+     * accepts GET.
+     */
+    protected function _isGetAllowed(string $action): bool
+    {
+        $methodName = $this->getActionMethodName($action);
+        if (!method_exists($this, $methodName)) {
+            return true;
+        }
+
+        $method = new ReflectionMethod($this, $methodName);
+        $attributes = $method->getAttributes(\Maho\Config\Route::class);
+        while ($attributes === []) {
+            $parent = $method->getDeclaringClass()->getParentClass();
+            if ($parent === false || !$parent->hasMethod($methodName)) {
+                return true;
+            }
+            $method = $parent->getMethod($methodName);
+            $attributes = $method->getAttributes(\Maho\Config\Route::class);
+        }
+
+        foreach ($attributes as $attribute) {
+            $methods = $attribute->newInstance()->methods;
+            if ($methods === [] || in_array('GET', $methods, true)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

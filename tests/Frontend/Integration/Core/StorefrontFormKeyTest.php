@@ -240,6 +240,24 @@ it('asks no form key of a GET to a controller that is not the class of the route
     expect(sfkIsFormKeyRequired($controller))->toBeFalse();
 });
 
+it('asks the form key of a GET to a POST-only action of an override, whatever the request names', function (string $module, string $controllerName) {
+    $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create("/{$module}/{$controllerName}/add/product/1", 'GET'));
+    $request->setModuleName($module)->setControllerName($controllerName)->setActionName('add')->setDispatched(true);
+    Mage::app()->setRequest($request);
+    $controller = new class ($request, new Mage_Core_Controller_Response_Http()) extends Mage_Checkout_CartController {
+        #[\Override]
+        public function addAction(): void
+        {
+            parent::addAction();
+        }
+    };
+
+    expect(sfkIsFormKeyRequired($controller))->toBeTrue();
+})->with([
+    'controller in a subfolder' => ['checkout', 'checkout_cart'],
+    'own front name' => ['vendor', 'cart'],
+]);
+
 /** What the system log gained while $work ran, with logging switched on for the duration. */
 function sfkLogOutput(callable $work): string
 {
