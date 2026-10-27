@@ -649,6 +649,107 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
         return $this;
     }
 
+    public function collectWeight(): static
+    {
+        $this->setWeight(0);
+        $this->setFreeMethodWeight(0);
+        $items = $this->getAllItems();
+
+        $freeAddress = $this->getFreeShipping();
+
+        $addressWeight      = $this->getWeight();
+        $freeMethodWeight   = $this->getFreeMethodWeight();
+
+        $addressQty = 0;
+
+        foreach ($items as $item) {
+            /**
+             * Skip if this item is virtual
+             */
+            if ($item->getProduct()->isVirtual()) {
+                continue;
+            }
+
+            /**
+             * Children weight we calculate for parent
+             */
+            if ($item->getParentItem()) {
+                continue;
+            }
+
+            if ($item->getHasChildren() && $item->isShipSeparately()) {
+                foreach ($item->getChildren() as $child) {
+                    if ($child->getProduct()->isVirtual()) {
+                        continue;
+                    }
+                    $addressQty += $child->getTotalQty();
+
+                    if (!$item->getProduct()->getWeightType()) {
+                        $itemWeight = $child->getWeight();
+                        $itemQty    = $child->getTotalQty();
+                        $rowWeight  = $itemWeight * $itemQty;
+                        $addressWeight += $rowWeight;
+                        if ($freeAddress || $child->getFreeShipping() === true) {
+                            $rowWeight = 0;
+                        } elseif (is_numeric($child->getFreeShipping())) {
+                            $freeQty = $child->getFreeShipping();
+                            if ($itemQty > $freeQty) {
+                                $rowWeight = $itemWeight * ($itemQty - $freeQty);
+                            } else {
+                                $rowWeight = 0;
+                            }
+                        }
+                        $freeMethodWeight += $rowWeight;
+                        $item->setRowWeight($rowWeight);
+                    }
+                }
+                if ($item->getProduct()->getWeightType()) {
+                    $itemWeight = $item->getWeight();
+                    $rowWeight  = $itemWeight * $item->getQty();
+                    $addressWeight += $rowWeight;
+                    if ($freeAddress || $item->getFreeShipping() === true) {
+                        $rowWeight = 0;
+                    } elseif (is_numeric($item->getFreeShipping())) {
+                        $freeQty = $item->getFreeShipping();
+                        if ($item->getQty() > $freeQty) {
+                            $rowWeight = $itemWeight * ($item->getQty() - $freeQty);
+                        } else {
+                            $rowWeight = 0;
+                        }
+                    }
+                    $freeMethodWeight += $rowWeight;
+                    $item->setRowWeight($rowWeight);
+                }
+            } else {
+                $addressQty += $item->getQty();
+                $itemWeight = $item->getWeight();
+                $rowWeight  = $itemWeight * $item->getQty();
+                $addressWeight += $rowWeight;
+                if ($freeAddress || $item->getFreeShipping() === true) {
+                    $rowWeight = 0;
+                } elseif (is_numeric($item->getFreeShipping())) {
+                    $freeQty = $item->getFreeShipping();
+                    if ($item->getQty() > $freeQty) {
+                        $rowWeight = $itemWeight * ($item->getQty() - $freeQty);
+                    } else {
+                        $rowWeight = 0;
+                    }
+                }
+                $freeMethodWeight += $rowWeight;
+                $item->setRowWeight($rowWeight);
+            }
+        }
+
+        if ($addressQty) {
+            $this->setItemQty($addressQty);
+        }
+
+        $this->setWeight($addressWeight);
+        $this->setFreeMethodWeight($freeMethodWeight);
+
+        return $this;
+    }
+
     /**
      * Collecting shipping rates by address
      *
