@@ -649,6 +649,97 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
         return $this;
     }
 
+    public function collectWeight(): static
+    {
+        $freeAddress = $this->getFreeShipping();
+
+        $addressWeight = 0;
+        $freeMethodWeight = 0;
+        $addressQty = 0;
+
+        foreach ($this->getAllItems() as $item) {
+            if ($item->getProduct()->isVirtual()) {
+                continue;
+            }
+
+            // The parent item adds the weight of its children.
+            if ($item->getParentItem()) {
+                continue;
+            }
+
+            if ($item->getHasChildren() && $item->isShipSeparately()) {
+                foreach ($item->getChildren() as $child) {
+                    if ($child->getProduct()->isVirtual()) {
+                        continue;
+                    }
+                    $addressQty += $child->getTotalQty();
+
+                    if (!$item->getProduct()->getWeightType()) {
+                        $itemWeight = $child->getWeight();
+                        $itemQty    = $child->getTotalQty();
+                        $rowWeight  = $itemWeight * $itemQty;
+                        $addressWeight += $rowWeight;
+                        if ($freeAddress || $child->getFreeShipping() === true) {
+                            $rowWeight = 0;
+                        } elseif (is_numeric($child->getFreeShipping())) {
+                            $freeQty = $child->getFreeShipping();
+                            if ($itemQty > $freeQty) {
+                                $rowWeight = $itemWeight * ($itemQty - $freeQty);
+                            } else {
+                                $rowWeight = 0;
+                            }
+                        }
+                        $freeMethodWeight += $rowWeight;
+                        $item->setRowWeight($rowWeight);
+                    }
+                }
+                if ($item->getProduct()->getWeightType()) {
+                    $itemWeight = $item->getWeight();
+                    $rowWeight  = $itemWeight * $item->getQty();
+                    $addressWeight += $rowWeight;
+                    if ($freeAddress || $item->getFreeShipping() === true) {
+                        $rowWeight = 0;
+                    } elseif (is_numeric($item->getFreeShipping())) {
+                        $freeQty = $item->getFreeShipping();
+                        if ($item->getQty() > $freeQty) {
+                            $rowWeight = $itemWeight * ($item->getQty() - $freeQty);
+                        } else {
+                            $rowWeight = 0;
+                        }
+                    }
+                    $freeMethodWeight += $rowWeight;
+                    $item->setRowWeight($rowWeight);
+                }
+            } else {
+                $addressQty += $item->getQty();
+                $itemWeight = $item->getWeight();
+                $rowWeight  = $itemWeight * $item->getQty();
+                $addressWeight += $rowWeight;
+                if ($freeAddress || $item->getFreeShipping() === true) {
+                    $rowWeight = 0;
+                } elseif (is_numeric($item->getFreeShipping())) {
+                    $freeQty = $item->getFreeShipping();
+                    if ($item->getQty() > $freeQty) {
+                        $rowWeight = $itemWeight * ($item->getQty() - $freeQty);
+                    } else {
+                        $rowWeight = 0;
+                    }
+                }
+                $freeMethodWeight += $rowWeight;
+                $item->setRowWeight($rowWeight);
+            }
+        }
+
+        if ($addressQty) {
+            $this->setItemQty($addressQty);
+        }
+
+        $this->setWeight($addressWeight);
+        $this->setFreeMethodWeight($freeMethodWeight);
+
+        return $this;
+    }
+
     /**
      * Collecting shipping rates by address
      *
