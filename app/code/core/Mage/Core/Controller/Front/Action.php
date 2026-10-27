@@ -75,7 +75,8 @@ class Mage_Core_Controller_Front_Action extends Mage_Core_Controller_Varien_Acti
      */
     protected function _isFormKeyRequired(): bool
     {
-        // A safe method needs no form key, unless the route of the action refuses GET
+        // A safe method needs no form key, unless the route of the action refuses GET. The matcher
+        // answers 405 to such a GET, so it comes only from ControllerDispatcher::dispatchLegacyPath() or dispatchForward()
         $request = $this->getRequest();
         if (in_array($request->getMethod(), ['GET', 'HEAD', 'OPTIONS'], true)
             && $this->_isGetAllowed((string) $request->getActionName())
