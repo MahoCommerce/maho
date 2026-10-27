@@ -285,6 +285,10 @@ class MahoAiAssistant {
                 history.push({ role: 'ai', html: this.renderWorking(data.conversation.queued ? this.labels.queued : this.labels.running) });
             }
             this.chat.history = history;
+            // The steps of a page action are for the page where the model wrote them, which is no longer open.
+            if (!this.abortController && pending.some((call) => call.name === 'admin_page_action')) {
+                this.onDeny();
+            }
             setTimeout(() => this.updateIntro(history.length > 0), 100);
             setTimeout(() => this.chat.scrollToBottom(), 50);
             this.watchBackground(data.conversation.running ? id : null);
@@ -652,7 +656,7 @@ class MahoAiAssistant {
                 if (data.conversation_id) {
                     this.rememberConversation(data.conversation_id);
                 }
-                if (state.textEdits.length > 0 && data.state === 'complete') {
+                if (state.textEdits.length > 0 && (data.state === 'complete' || data.state === 'awaiting_confirmation')) {
                     const edits = state.textEdits;
                     setTimeout(() => this.applyTextEdits(edits), 800);
                 }

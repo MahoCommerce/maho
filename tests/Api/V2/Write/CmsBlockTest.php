@@ -246,4 +246,25 @@ describe('CMS block list by identifier', function (): void {
         expect($members($prefix))->toBe([]);
     });
 
+    it('lists every block of one identifier when a backend caller gives scope all', function (): void {
+        $token = adminToken();
+        $storeId = (int) Mage::app()->getDefaultStoreView()->getId();
+        foreach ([['all'], [$storeId]] as $i => $stores) {
+            $create = apiPost('/api/rest/v2/cms-blocks', [
+                'identifier' => 'test-pest-shared-block',
+                'title' => "Test Shared Block {$i}",
+                'content' => '<p>shared</p>',
+                'isActive' => true,
+                'stores' => $stores,
+            ], $token);
+            expect($create['status'])->toBeIn([200, 201]);
+            trackCreated('cms_block', $create['json']['id']);
+        }
+
+        $members = fn(array $response): array => $response['json']['member'] ?? $response['json']['hydra:member'] ?? [];
+
+        expect($members(apiGet('/api/rest/v2/cms-blocks?identifier=test-pest-shared-block', $token)))->toHaveCount(1);
+        expect($members(apiGet('/api/rest/v2/cms-blocks?identifier=test-pest-shared-block&scope=all', $token)))->toHaveCount(2);
+    });
+
 });

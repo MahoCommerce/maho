@@ -62,7 +62,7 @@ use Maho\ApiPlatform\CrudResource;
                 'createdFrom' => ['type' => 'String', 'description' => 'Created at or after this UTC date or datetime; a bare date means from 00:00:00'],
                 'createdTo' => ['type' => 'String', 'description' => 'Created at or before this UTC date or datetime; a bare date includes the whole day'],
                 'updatedSince' => ['type' => 'String', 'description' => 'Updated at or after this UTC date or datetime'],
-                'identifier' => ['type' => 'String', 'description' => 'Exact identifier lookup (returns 0 or 1 block)'],
+                'identifier' => ['type' => 'String', 'description' => 'Exact identifier lookup. Returns one block, or with scope "all", every block with this identifier'],
                 'search' => ['type' => 'String', 'description' => 'Partial match on the block title, content or identifier'],
                 'scope' => ['type' => 'String', 'description' => 'Give "all" to list the records of every store view, the disabled and unpublished ones too, as the admin grid does. It needs backend access. Without it, the list holds only the published records of the current store view'],
             ],

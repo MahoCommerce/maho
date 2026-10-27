@@ -297,6 +297,28 @@ it('shows the administrator admin page links and store times, and keeps the text
     }
 });
 
+it('shows the history with the text of the panel, and the stored text of a message that has none', function (): void {
+    $admin = aiChatAdmin('ai_chat_history', ['all']);
+    try {
+        aiChatLogin($admin);
+        $conversation = Mage::getModel('ai/conversation')->setData(['admin_user_id' => (int) $admin->getId(), 'store_id' => 0, 'title' => 'Pest history']);
+        $conversation->save();
+        $conversation->addMessage(['role' => 'assistant', 'content' => 'See [it](/api/rest/v2/products/12) at 2026-07-01 10:00 UTC.', 'display_content' => 'See it at 2026-07-01 12:00.']);
+        $conversation->addMessage(['role' => 'assistant', 'content' => 'An answer from before the upgrade.']);
+
+        $request = new Mage_Core_Controller_Request_Http(Request::create('/admin/ai_chat/messages', 'GET', ['id' => (int) $conversation->getId()]));
+        Mage::app()->setRequest($request);
+        $controller = new Maho_Ai_Adminhtml_Ai_ChatController($request, new Mage_Core_Controller_Response_Http());
+        $controller->messagesAction();
+
+        $body = Mage::helper('core')->jsonDecode((string) $controller->getResponse()->getBody());
+        expect(array_column($body['messages'], 'content'))->toBe(['See it at 2026-07-01 12:00.', 'An answer from before the upgrade.']);
+    } finally {
+        aiChatDeleteConversations((int) $admin->getId());
+        aiChatDeleteAdmin($admin);
+    }
+});
+
 it('gives each record of a tool result its API @id', function (): void {
     $admin = aiChatAdmin('ai_chat_record_ids', ['all']);
     $page = Mage::getModel('cms/page')->setData(['identifier' => 'ai-chat-record-id', 'title' => 'Record id', 'content' => '<p>x</p>', 'is_active' => 1, 'stores' => [0], 'root_template' => 'one_column']);
@@ -491,7 +513,7 @@ it('starts a background job after confirmation and runs it in a worker with its 
         // The worker: the handler runs the job with the scripted model; the update needs no confirmation.
         AiChatScript::reset(
             new ToolCallResult([new ToolCall('call_w', 'content_cms_pages_update', ['id' => (string) $pageId, 'title' => 'New'])]),
-            new TextResult('Renamed one page.'),
+            new TextResult('Renamed [the page](/api/rest/v2/cms-pages/' . $pageId . ').'),
         );
         new Maho_Ai_Model_TaskRunner()->processTask((int) $task->getId());
 
@@ -506,13 +528,13 @@ it('starts a background job after confirmation and runs it in a worker with its 
         }
         expect($rows[0])->toBe(['user', null, false, 'Rename the page ' . $pageId . ' to New.']);
         expect(array_filter($rows, static fn(array $r): bool => $r[0] === 'tool'))->toHaveCount(1);
-        $toolRow = array_values(array_filter($rows, static fn(array $r): bool => $r[0] === 'tool'))[0];
+        $toolRow = array_first(array_filter($rows, static fn(array $r): bool => $r[0] === 'tool'));
         expect($toolRow[1])->toBe('done');
         expect($toolRow[2])->toBeTrue();
-        expect(end($rows)[3])->toBe('Renamed one page.');
+        expect(end($rows)[3])->toBe('Renamed [the page](/api/rest/v2/cms-pages/' . $pageId . ').');
         $task = Mage::getModel('ai/task')->load((int) $task->getId());
         expect($task->getData('status'))->toBe(Maho_Ai_Model_Task::STATUS_COMPLETE, (string) $task->getData('error_message'));
-        expect((string) $task->getData('response'))->toBe('Renamed one page.');
+        expect((string) $task->getData('response'))->toMatch('~\[the page\]\(http://[^)]+/cms_page/edit/page_id/' . $pageId . '/~');
 
         // A second runner finds the task taken and leaves it alone.
         new Maho_Ai_Model_TaskRunner()->processTask((int) $task->getId());

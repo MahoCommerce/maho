@@ -71,7 +71,8 @@ final class CmsBlockProvider extends CrudProvider
     }
 
     /**
-     * The identifier filter is an exact-match lookup returning 0 or 1 block, in REST, GraphQL and MCP.
+     * The identifier filter is an exact-match lookup returning 0 or 1 block, in REST, GraphQL and MCP,
+     * unless the caller asks for scope=all.
      *
      * @return TraversablePaginator<CmsBlock>
      */
@@ -79,8 +80,11 @@ final class CmsBlockProvider extends CrudProvider
     protected function provideCollection(array $context): TraversablePaginator
     {
         $identifier = $context['args']['identifier'] ?? $context['filters']['identifier'] ?? null;
-        if ($identifier) {
+        if ($identifier && !$this->isScopeAll(['scope' => $context['args']['scope'] ?? $context['filters']['scope'] ?? null])) {
             return $this->singleItemPaginator($this->getByIdentifier((string) $identifier));
+        }
+        if ($identifier) {
+            $context['filters']['identifier'] = $identifier;
         }
 
         /** @var TraversablePaginator<CmsBlock> $paginator */
