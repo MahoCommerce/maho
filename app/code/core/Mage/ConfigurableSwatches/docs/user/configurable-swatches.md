@@ -104,12 +104,12 @@ The label decides the relationship between the swatch and the photo of that opti
 | `Bianco-swatch` | shows this image | stays the photo of the variant |
 | `Bianco` | shows this image only when there is no color and no catalog image for the value | becomes this image |
 
-So a label without the suffix is the way to have one picture that is both the swatch and the photo
-of that color. The suffix is the way to show a texture as a swatch and keep the garment photo.
+A label without the suffix always makes the image the photo of that option. It makes the image the
+swatch too, but only when the value has no color and no catalog image. On a color attribute, most
+values have a color: then the image is the photo, and the color stays the swatch. To show the photo
+as the swatch of such a value, use the suffix.
 
-A label without the suffix changes the swatch only when the value has no color and no catalog
-image. On a color attribute, most values have a color, so the color stays the swatch. To show the
-photo as the swatch of such a value, use the suffix.
+The suffix is also the way to show a texture as a swatch and keep the garment photo.
 
 In both cases the image is hidden from the product gallery, so it does not appear twice.
 
