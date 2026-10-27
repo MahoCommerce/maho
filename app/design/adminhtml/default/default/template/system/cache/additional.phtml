@@ -24,6 +24,7 @@
             <?= Mage::helper('adminhtml')->__('Pregenerated product images files.') ?>
         </td>
     </tr>
+    <?php if ($this->isModuleEnabled('Mage_ConfigurableSwatches')): ?>
     <tr>
         <td class="scope-label">
             <button onclick="setLocation('<?= $this->getCleanSwatchesUrl() ?>')" type="button" class="scalable"><span><?= Mage::helper('adminhtml')->__('Flush Swatch Images Cache') ?></span></button>
@@ -32,6 +33,7 @@
             <?= Mage::helper('adminhtml')->__('Pregenerated configurable swatches image files.') ?>
         </td>
     </tr>
+    <?php endif ?>
     <tr>
         <td class="scope-label">
             <button onclick="setLocation('<?= $this->getCleanMinifiedFilesUrl() ?>')" type="button" class="scalable"><span><?= Mage::helper('adminhtml')->__('Flush Minified CSS/JS Cache') ?></span></button>
