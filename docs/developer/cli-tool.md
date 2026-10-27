@@ -54,6 +54,7 @@ Available commands:
   cron:list                     List cron jobs configured in the XML files
   cron:run                      Run a group of cron processes (default/always) or a single job_code (eg: newsletter_send_all)
  customer
+  customer:address:create       Create an address for a customer
   customer:change-password      Change password of a customers
   customer:create               Create a customer
   customer:delete               Delete customers
@@ -170,6 +171,21 @@ asks nothing:
 
 Without `-n`, a command that needs an answer waits for input. If the script sends no more input, the command
 stops with an error.
+
+## Create customers and addresses
+
+`customer:create` and `customer:address:create` check the data with the same rules as the admin customer
+form. An attribute that the store makes required, such as the middle name or a custom attribute, stops the
+command with an error. Give its value with `--attribute code=value`, once for each attribute. Without `-n`,
+the command asks for each required attribute that you leave out.
+
+```bash
+./maho customer:create jane@example.com 'Secret123!' Jane Doe base 1 --attribute middlename=Q
+./maho customer:address:create jane@example.com '10 Market Street' 'San Francisco' 94105 US 555-0100 --region CA
+```
+
+The first address of a customer becomes the default billing and shipping address, as on the storefront.
+Add `--default-billing` or `--default-shipping` to make a later address a default address.
 
 ## Add your custom commands
 

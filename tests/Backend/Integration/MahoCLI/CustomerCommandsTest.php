@@ -82,6 +82,51 @@ it('saves the customer in the customer group of the arguments without asking', f
     'no group, default group of the website' => [[], 3],
 ]);
 
+it('saves the customer only with the attributes that the store makes required', function (array $more, int $status, ?string $middlename): void {
+    $attribute = Mage::getModel('customer/attribute')->loadByCode('customer', 'middlename');
+    $wasRequired = (int) $attribute->getIsRequired();
+    $attribute->setIsRequired(1)->save();
+
+    try {
+        $result = customerCreateRun([
+            'email' => CUSTOMER_CREATE_EMAIL,
+            'password' => 'Password123!',
+            'firstname' => 'Cli',
+            'lastname' => 'Create',
+            'website' => $this->website->getCode(),
+            ...$more,
+        ]);
+    } finally {
+        $attribute->setIsRequired($wasRequired)->save();
+    }
+
+    $customer = Mage::getModel('customer/customer')->setWebsiteId((int) $this->website->getId())->loadByEmail(CUSTOMER_CREATE_EMAIL);
+    expect($result->statusCode)->toBe($status)
+        ->and($customer->getMiddlename())->toBe($middlename);
+    if ($status === Symfony\Component\Console\Command\Command::INVALID) {
+        expect($result->getDisplay())->toContain('is a required value.');
+    }
+})->with([
+    'no value' => [[], Symfony\Component\Console\Command\Command::INVALID, null],
+    'a value' => [['--attribute' => ['middlename=Q']], Symfony\Component\Console\Command\Command::SUCCESS, 'Q'],
+]);
+
+it('asks for the attributes that the store makes required in the terminal', function (): void {
+    $attribute = Mage::getModel('customer/attribute')->loadByCode('customer', 'middlename');
+    $wasRequired = (int) $attribute->getIsRequired();
+    $attribute->setIsRequired(1)->save();
+
+    try {
+        $result = customerCreateRun([], [CUSTOMER_CREATE_EMAIL, 'Password123!', 'Cli', 'Create', $this->website->getCode(), '2', 'Q']);
+    } finally {
+        $attribute->setIsRequired($wasRequired)->save();
+    }
+
+    $this->assertCommandIsSuccessful($result);
+    $customer = Mage::getModel('customer/customer')->setWebsiteId((int) $this->website->getId())->loadByEmail(CUSTOMER_CREATE_EMAIL);
+    expect($customer->getMiddlename())->toBe('Q');
+});
+
 it('fails without asking when a required argument is missing', function (): void {
     $command = new CustomerCreate('customer:create');
     new Application()->addCommand($command);

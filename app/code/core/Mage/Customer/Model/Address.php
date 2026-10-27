@@ -145,25 +145,19 @@ class Mage_Customer_Model_Address extends Mage_Customer_Model_Address_Abstract
         return $entityTypeId;
     }
 
-    /**
-     * Return Region ID
-     */
     #[\Override]
     public function getRegionId(): ?int
     {
-        return (int) $this->getData('region_id');
+        $value = $this->getData('region_id');
+        return $value ? (int) $value : null;
     }
 
     /**
-     * Set Region ID. $regionId is automatically converted to integer
-     *
-     * @param int $regionId
-     * @return $this
+     * Set the region ID as an integer. An empty value becomes 0.
      */
-    public function setRegionId($regionId)
+    public function setRegionId(int|string|null $value): static
     {
-        $this->setData('region_id', (int) $regionId);
-        return $this;
+        return $this->setData('region_id', (int) $value);
     }
 
     public function getEmail(): ?string

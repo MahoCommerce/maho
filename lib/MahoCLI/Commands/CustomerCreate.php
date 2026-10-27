@@ -14,6 +14,7 @@ use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Ask;
 use Symfony\Component\Console\Attribute\Interact;
+use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -25,6 +26,18 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 class CustomerCreate extends BaseMahoCommand
 {
+    use CustomerFormTrait;
+
+    private const FORM_CODE = 'adminhtml_customer';
+
+    /**
+     * The attributes that the arguments of the command give.
+     */
+    private const KNOWN_ATTRIBUTES = ['email', 'firstname', 'lastname', 'website_id', 'group_id'];
+
+    /**
+     * @param list<string> $attribute
+     */
     public function __invoke(
         OutputInterface $output,
         #[Argument(description: 'The email of the customer')]
@@ -45,6 +58,8 @@ class CustomerCreate extends BaseMahoCommand
         ?string $website = null,
         #[Argument(description: 'The ID of the customer group (default: the default group of the website)')]
         ?int $group = null,
+        #[Option(description: 'The value of another customer attribute, as code=value. Give the option once for each attribute')]
+        array $attribute = [],
     ): int {
         $this->initMaho();
 
@@ -84,14 +99,31 @@ class CustomerCreate extends BaseMahoCommand
             return Command::INVALID;
         }
 
-        $customer = Mage::getModel('customer/customer')
-            ->setEmail($email)
-            ->setPassword($password)
-            ->setFirstname($firstname)
-            ->setLastname($lastname)
-            ->setWebsiteId((int) $websiteModel->getId())
-            ->setGroupId($group)
-            ->save();
+        $customer = Mage::getModel('customer/customer');
+        $form = $this->getCustomerForm(self::FORM_CODE, $customer);
+        try {
+            $data = $this->parseAttributeValues($attribute, $form);
+        } catch (\InvalidArgumentException $e) {
+            $output->writeln("<error>{$e->getMessage()}</error>");
+            return Command::INVALID;
+        }
+
+        $errors = $this->validateAndCompactData($form, [
+            ...$data,
+            'email' => $email,
+            'firstname' => $firstname,
+            'lastname' => $lastname,
+            'website_id' => (int) $websiteModel->getId(),
+            'group_id' => $group,
+        ]);
+        if ($errors) {
+            foreach ($errors as $error) {
+                $output->writeln("<error>$error</error>");
+            }
+            return Command::INVALID;
+        }
+
+        $customer->setPassword($password)->save();
 
         if (!$customer->getId()) {
             $output->writeln('<error>Unable to create customer</error>');
@@ -120,6 +152,13 @@ class CustomerCreate extends BaseMahoCommand
             $answer = $io->choice('Customer group:', $groups, $this->getDefaultGroupId((string) $input->getArgument('website')));
             $input->setArgument('group', (string) array_search($answer, $groups, true));
         }
+    }
+
+    #[Interact]
+    public function askAttributes(InputInterface $input, SymfonyStyle $io): void
+    {
+        $this->initMaho();
+        $this->askRequiredAttributes($input, $io, $this->getCustomerForm(self::FORM_CODE, Mage::getModel('customer/customer')), self::KNOWN_ATTRIBUTES);
     }
 
     private function getDefaultWebsiteCode(): string
