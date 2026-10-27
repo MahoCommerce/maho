@@ -254,8 +254,8 @@ it('asks the form key of a GET to a POST-only action of an override, whatever th
 
     expect(sfkIsFormKeyRequired($controller))->toBeTrue();
 })->with([
-    'controller in a subfolder' => ['checkout', 'checkout_cart'],
-    'own front name' => ['vendor', 'cart'],
+    'legacy <modules> chain' => ['checkout', 'checkout_cart'],
+    'subclass under its own front name' => ['vendor', 'cart'],
 ]);
 
 /** What the system log gained while $work ran, with logging switched on for the duration. */
