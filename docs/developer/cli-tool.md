@@ -55,6 +55,8 @@ Available commands:
   cron:run                      Run a group of cron processes (default/always) or a single job_code (eg: newsletter_send_all)
  customer
   customer:address:create       Create an address for a customer
+  customer:address:delete       Delete an address of a customer
+  customer:address:list         List the addresses of a customer
   customer:change-password      Change password of a customers
   customer:create               Create a customer
   customer:delete               Delete customers
@@ -187,6 +189,15 @@ attribute that you leave out. With `-n`, a missing required attribute stops the 
 
 The first address of a customer becomes the default billing and shipping address, as on the storefront.
 Add `--default-billing` or `--default-shipping` to make a later address a default address.
+
+`customer:address:list` shows the addresses of a customer, with their IDs. `customer:address:delete` takes the
+email and the ID of the address. Without the ID, the command asks for the address. When you delete a default
+address, the customer has no default address of that type until you set one.
+
+```bash
+./maho customer:address:list jane@example.com
+./maho customer:address:delete jane@example.com 12
+```
 
 ## Add your custom commands
 

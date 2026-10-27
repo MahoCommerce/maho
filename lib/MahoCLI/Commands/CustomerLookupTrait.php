@@ -26,7 +26,7 @@ trait CustomerLookupTrait
         string $email, ?string $websiteCode): array
     {
         $customers = Mage::getResourceModel('customer/customer_collection')
-            ->addAttributeToSelect(['firstname', 'lastname'])
+            ->addAttributeToSelect(['firstname', 'lastname', 'default_billing', 'default_shipping'])
             ->addAttributeToFilter('email', ['eq' => $email]);
         if ($websiteCode !== null) {
             $website = Mage::getModel('core/website')->load($websiteCode, 'code');

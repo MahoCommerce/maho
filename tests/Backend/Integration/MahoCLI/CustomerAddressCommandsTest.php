@@ -9,6 +9,8 @@
 declare(strict_types=1);
 
 use MahoCLI\Commands\CustomerAddressCreate;
+use MahoCLI\Commands\CustomerAddressDelete;
+use MahoCLI\Commands\CustomerAddressList;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
@@ -188,4 +190,78 @@ it('asks for the attributes that the store makes required in the terminal', func
 
     $this->assertCommandIsSuccessful($result);
     expect(customerAddressCustomer()->getDefaultBillingAddress()->getMiddlename())->toBe('Q');
+});
+
+function customerAddressCommandRun(string $class, string $name, array $input, array $answers = []): ExecutionResult
+{
+    $command = new $class($name);
+    new Application()->addCommand($command);
+    return new CommandTester($command)->run($input, $answers, interactive: $answers !== []);
+}
+
+it('lists the addresses of a customer, with the default addresses', function (): void {
+    $this->assertCommandIsSuccessful(customerAddressRun(customerAddressArguments()));
+    $this->assertCommandIsSuccessful(customerAddressRun(customerAddressArguments(['street' => '20 Mission Street'])));
+
+    $result = customerAddressCommandRun(CustomerAddressList::class, 'customer:address:list', ['email' => CUSTOMER_ADDRESS_EMAIL]);
+
+    $this->assertCommandIsSuccessful($result);
+    expect($result->getDisplay())->toMatch('/10 Market Street.*\byes\s*\|\s*yes\b/')
+        ->and($result->getDisplay())->toMatch('/20 Mission Street.*\bno\s*\|\s*no\b/');
+});
+
+it('lists no addresses for a customer without addresses', function (): void {
+    $result = customerAddressCommandRun(CustomerAddressList::class, 'customer:address:list', ['email' => CUSTOMER_ADDRESS_EMAIL]);
+
+    $this->assertCommandIsSuccessful($result);
+    expect($result->getDisplay())->toContain('No addresses found.');
+});
+
+it('deletes the address that the arguments name, and removes it from the default addresses', function (): void {
+    $this->assertCommandIsSuccessful(customerAddressRun(customerAddressArguments()));
+    $this->assertCommandIsSuccessful(customerAddressRun(customerAddressArguments(['street' => '20 Mission Street'])));
+    $default = (int) customerAddressCustomer()->getData('default_billing');
+
+    $result = customerAddressCommandRun(CustomerAddressDelete::class, 'customer:address:delete', ['email' => CUSTOMER_ADDRESS_EMAIL, 'address_id' => (string) $default]);
+
+    $this->assertCommandIsSuccessful($result);
+    $customer = customerAddressCustomer();
+    expect(array_map(fn($address) => $address->getStreetFull(), array_values($customer->getAddresses())))->toBe(['20 Mission Street'])
+        ->and($customer->getData('default_billing'))->toBeNull()
+        ->and($customer->getData('default_shipping'))->toBeNull();
+});
+
+it('deletes no address that the customer does not have', function (): void {
+    $this->assertCommandIsSuccessful(customerAddressRun(customerAddressArguments()));
+    $other = Mage::getModel('customer/customer')
+        ->setWebsiteId((int) Mage::app()->getStore(1)->getWebsiteId())
+        ->setEmail('cli-address-other@example.com')
+        ->setFirstname('Other')
+        ->setLastname('Customer')
+        ->save();
+    $address = Mage::getModel('customer/address')
+        ->setData(['firstname' => 'Other', 'lastname' => 'Customer', 'street' => '30 Howard Street', 'city' => 'San Francisco', 'postcode' => '94105', 'country_id' => 'US', 'region_id' => $this->california, 'telephone' => '555-0100'])
+        ->setCustomerId($other->getId())
+        ->save();
+
+    try {
+        $result = customerAddressCommandRun(CustomerAddressDelete::class, 'customer:address:delete', ['email' => CUSTOMER_ADDRESS_EMAIL, 'address_id' => (string) $address->getId()]);
+        $isKept = (bool) Mage::getModel('customer/address')->load($address->getId())->getId();
+    } finally {
+        $other->delete();
+    }
+
+    expect($result->statusCode)->toBe(Command::FAILURE)
+        ->and($result->getDisplay())->toContain('Customer ' . CUSTOMER_ADDRESS_EMAIL . ' has no address with ID: ' . $address->getId())
+        ->and($isKept)->toBeTrue();
+});
+
+it('asks for the address to delete in the terminal', function (): void {
+    $this->assertCommandIsSuccessful(customerAddressRun(customerAddressArguments()));
+    $addressId = (int) customerAddressCustomer()->getData('default_billing');
+
+    $result = customerAddressCommandRun(CustomerAddressDelete::class, 'customer:address:delete', [], [CUSTOMER_ADDRESS_EMAIL, (string) $addressId]);
+
+    $this->assertCommandIsSuccessful($result);
+    expect(customerAddressCustomer()->getAddresses())->toBe([]);
 });
