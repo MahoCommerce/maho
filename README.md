@@ -8,7 +8,7 @@
   <img src="https://github.com/MahoCommerce/maho/actions/workflows/security-php.yml/badge.svg" alt="Security" />
   <img src="https://github.com/MahoCommerce/maho/actions/workflows/codeql-analysis.yml/badge.svg" alt="CodeQL" />
   <a href="https://crowdin.com/project/maho" target="_blank"><img src="https://img.shields.io/badge/Localize-98%25-32c754" alt="Localization" /></a>
-  <a href="https://deepwiki.com/MahoCommerce/maho" target="_blank"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki" /></a>
+  <a href="https://deepwiki.com/MahoCommerce/maho" target="_blank"><img src="https://img.shields.io/badge/Ask-DeepWiki-blue" alt="Ask DeepWiki" /></a>
 </p>
 <p align="center">
   <a href="https://github.com/MahoCommerce/phpstorm" target="_blank"><img src="https://img.shields.io/badge/PHPStorm-Plugin-000000?logo=phpstorm&logoColor=white" alt="PHPStorm Plugin" /></a>
