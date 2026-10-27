@@ -322,6 +322,39 @@ describe('MCP tool dispatch', function (): void {
         expect($count(['search' => 'test-mcp-scope-all-page', 'scope' => 'all']))->toBe(1);
     });
 
+    it('lists every page of one identifier when a backend caller gives scope all', function (): void {
+        $token = adminToken();
+        $storeId = (int) Mage::app()->getDefaultStoreView()->getId();
+        foreach ([['all'], [$storeId]] as $i => $stores) {
+            $create = apiPost('/api/rest/v2/cms-pages', [
+                'identifier' => 'test-mcp-shared-identifier',
+                'title' => "MCP Shared Identifier {$i}",
+                'content' => '<p>shared</p>',
+                'stores' => $stores,
+            ], $token);
+            expect($create['status'])->toBeIn([200, 201]);
+            trackCreated('cms_page', $create['json']['id']);
+        }
+
+        $session = mcpSession($token);
+        $count = fn(array $arguments): ?int => json_decode(mcpTool('content_cms_pages_list', $arguments, $token, $session)['json']['result']['content'][0]['text'] ?? '[]', true)['totalItems'] ?? null;
+
+        expect($count(['identifier' => 'test-mcp-shared-identifier']))->toBe(1);
+        expect($count(['identifier' => 'test-mcp-shared-identifier', 'scope' => 'all']))->toBe(2);
+    });
+
+    it('returns the body of a provider that answers with a response object', function (): void {
+        $token = adminToken();
+        $response = mcpTool('sales_cart_price_rules_condition_metadata_get', [], $token, mcpSession($token));
+
+        $result = $response['json']['result'] ?? [];
+        expect($result['isError'] ?? false)->toBeFalse();
+
+        $payload = json_decode($result['content'][0]['text'] ?? '[]', true);
+        expect($payload)->toHaveKeys(['version', 'roots', 'types']);
+        expect($payload)->not->toHaveKey('statusCode');
+    });
+
     it('passes list arguments through as pagination', function (): void {
         $session = mcpSession();
         $response = mcpTool('catalog_products_list', ['itemsPerPage' => 2], null, $session);

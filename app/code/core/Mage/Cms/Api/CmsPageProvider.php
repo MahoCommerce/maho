@@ -34,7 +34,7 @@ final class CmsPageProvider extends CrudProvider
 
     /**
      * Override provide() to handle identifier-based collection filtering
-     * that returns a single-item paginator.
+     * that returns a single-item paginator, unless the caller asks for scope=all.
      */
     #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): object|array|null
@@ -48,7 +48,7 @@ final class CmsPageProvider extends CrudProvider
 
         if ($operation instanceof CollectionOperationInterface) {
             $identifier = $context['args']['identifier'] ?? $context['filters']['identifier'] ?? null;
-            if ($identifier) {
+            if ($identifier && !$this->isScopeAll(['scope' => $context['args']['scope'] ?? $context['filters']['scope'] ?? null])) {
                 return $this->singleItemPaginator($this->getPageByIdentifier($identifier));
             }
         }

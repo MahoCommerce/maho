@@ -162,7 +162,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
                 'createdFrom' => ['type' => 'String', 'description' => 'Created at or after this UTC date or datetime; a bare date means from 00:00:00'],
                 'createdTo' => ['type' => 'String', 'description' => 'Created at or before this UTC date or datetime; a bare date includes the whole day'],
                 'updatedSince' => ['type' => 'String', 'description' => 'Updated at or after this UTC date or datetime'],
-                'state' => ['type' => 'String', 'description' => 'Filter by order state (new, processing, complete, closed, canceled, holded)'],
+                'state' => ['type' => 'String', 'description' => 'Filter by order state (new, pending_payment, processing, complete, closed, canceled, holded, payment_review). An order that waits for a shipment is in the state new (status Pending: no invoice yet) or processing'],
                 'storeId' => ['type' => 'Int', 'description' => 'Filter by store view ID'],
                 'customerId' => ['type' => 'Int', 'description' => 'All orders belonging to one customer'],
                 'status' => ['type' => 'String', 'description' => 'Filter by order status (pending, processing, complete, …)'],

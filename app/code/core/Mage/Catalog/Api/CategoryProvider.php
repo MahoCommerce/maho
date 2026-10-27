@@ -129,15 +129,14 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
             return false;
         }
 
-        $rootCategoryId = (int) StoreContext::getRootCategoryId();
-        if ($rootCategoryId <= 0) {
-            return true;
-        }
+        // A backend caller reads the trees that scope=all gives it, as the admin category
+        // tree shows them; a guest or a customer reads the tree of the current store only.
+        $rootIds = $this->backendCategoriesAccess() ? $this->readableRootIds() : [(int) StoreContext::getRootCategoryId()];
 
         // The store root and every descendant carry the root id in their path
         // ("1/<root>/..."). Anchoring with slashes prevents substring matches.
         $pathIds = array_map(intval(...), explode('/', (string) $category->getPath()));
-        return in_array($rootCategoryId, $pathIds, true);
+        return array_intersect($rootIds, $pathIds) !== [];
     }
 
     /**
