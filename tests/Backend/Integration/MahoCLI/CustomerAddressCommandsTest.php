@@ -222,7 +222,7 @@ it('deletes the address that the arguments name, and removes it from the default
     $this->assertCommandIsSuccessful(customerAddressRun(customerAddressArguments(['street' => '20 Mission Street'])));
     $default = (int) customerAddressCustomer()->getData('default_billing');
 
-    $result = customerAddressCommandRun(CustomerAddressDelete::class, 'customer:address:delete', ['email' => CUSTOMER_ADDRESS_EMAIL, 'address_id' => (string) $default]);
+    $result = customerAddressCommandRun(CustomerAddressDelete::class, 'customer:address:delete', ['address_id' => (string) $default]);
 
     $this->assertCommandIsSuccessful($result);
     $customer = customerAddressCustomer();
@@ -231,30 +231,16 @@ it('deletes the address that the arguments name, and removes it from the default
         ->and($customer->getData('default_shipping'))->toBeNull();
 });
 
-it('deletes no address that the customer does not have', function (): void {
-    $this->assertCommandIsSuccessful(customerAddressRun(customerAddressArguments()));
-    $other = Mage::getModel('customer/customer')
-        ->setWebsiteId((int) Mage::app()->getStore(1)->getWebsiteId())
-        ->setEmail('cli-address-other@example.com')
-        ->setFirstname('Other')
-        ->setLastname('Customer')
-        ->save();
-    $address = Mage::getModel('customer/address')
-        ->setData(['firstname' => 'Other', 'lastname' => 'Customer', 'street' => '30 Howard Street', 'city' => 'San Francisco', 'postcode' => '94105', 'country_id' => 'US', 'region_id' => $this->california, 'telephone' => '555-0100'])
-        ->setCustomerId($other->getId())
-        ->save();
-
-    try {
-        $result = customerAddressCommandRun(CustomerAddressDelete::class, 'customer:address:delete', ['email' => CUSTOMER_ADDRESS_EMAIL, 'address_id' => (string) $address->getId()]);
-        $isKept = (bool) Mage::getModel('customer/address')->load($address->getId())->getId();
-    } finally {
-        $other->delete();
-    }
+it('deletes no address with an unknown ID', function (string $addressId): void {
+    $result = customerAddressCommandRun(CustomerAddressDelete::class, 'customer:address:delete', ['address_id' => $addressId]);
 
     expect($result->statusCode)->toBe(Command::FAILURE)
-        ->and($result->getDisplay())->toContain('Customer ' . CUSTOMER_ADDRESS_EMAIL . ' has no address with ID: ' . $address->getId())
-        ->and($isKept)->toBeTrue();
-});
+        ->and($result->getDisplay())->toContain("Address not found with ID: $addressId");
+})->with([
+    'zero' => ['0'],
+    'no address' => ['2147483647'],
+    'above the largest INTEGER' => ['99999999999'],
+]);
 
 it('asks for the address to delete in the terminal', function (): void {
     $this->assertCommandIsSuccessful(customerAddressRun(customerAddressArguments()));

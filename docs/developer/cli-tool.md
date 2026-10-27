@@ -191,12 +191,12 @@ The first address of a customer becomes the default billing and shipping address
 Add `--default-billing` or `--default-shipping` to make a later address a default address.
 
 `customer:address:list` shows the addresses of a customer, with their IDs. `customer:address:delete` takes the
-email and the ID of the address. Without the ID, the command asks for the address. When you delete a default
-address, the customer has no default address of that type until you set one.
+ID of the address. Without the ID, the command asks for the email of the customer, then for the address. When you
+delete a default address, the customer has no default address of that type until you set one.
 
 ```bash
 ./maho customer:address:list jane@example.com
-./maho customer:address:delete jane@example.com 12
+./maho customer:address:delete 12
 ```
 
 ## Add your custom commands
