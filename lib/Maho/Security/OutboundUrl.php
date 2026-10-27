@@ -11,6 +11,8 @@ declare(strict_types=1);
 
 namespace Maho\Security;
 
+use Uri\Rfc3986\Uri;
+
 final class OutboundUrl
 {
     public const SCHEMES = ['http', 'https'];
@@ -35,21 +37,21 @@ final class OutboundUrl
      */
     public function validate(string $url, array $allowedPrefixes = []): OutboundTarget
     {
-        $parts = parse_url($url);
-        if ($parts === false) {
+        $uri = Uri::parse($url);
+        if ($uri === null || $uri->getPort() > 65535) {
             throw new OutboundUrlException('The URL is malformed.');
         }
-        $scheme = strtolower($parts['scheme'] ?? '');
+        $scheme = $uri->getScheme() ?? '';
         if (!in_array($scheme, self::SCHEMES, true)) {
             throw new OutboundUrlException('The URL must use the http or https scheme.');
         }
-        $host = trim($parts['host'] ?? '', '[]');
+        $host = trim($uri->getHost() ?? '', '[]');
         if ($host === '') {
             throw new OutboundUrlException('The URL has no host.');
         }
-        $port = $parts['port'] ?? ($scheme === 'https' ? 443 : 80);
-        $path = ($parts['path'] ?? '') === '' ? '/' : $parts['path'];
-        $query = $parts['query'] ?? null;
+        $port = $uri->getPort() ?? ($scheme === 'https' ? 443 : 80);
+        $path = $uri->getRawPath() === '' ? '/' : $uri->getRawPath();
+        $query = $uri->getRawQuery();
 
         if (self::matchesPrefix($scheme, $host, $port, $path, $allowedPrefixes)) {
             return new OutboundTarget($url, $scheme, $host, $port, $path, $query, null);
@@ -99,15 +101,16 @@ final class OutboundUrl
     private static function matchesPrefix(string $scheme, string $host, int $port, string $path, array $prefixes): bool
     {
         foreach ($prefixes as $prefix) {
-            $parts = parse_url(trim($prefix));
-            if ($parts === false || !isset($parts['scheme'], $parts['host'])) {
+            $uri = Uri::parse(trim($prefix));
+            $prefixScheme = $uri?->getScheme();
+            $prefixHost = trim($uri?->getHost() ?? '', '[]');
+            if ($prefixScheme === null || $prefixHost === '') {
                 continue;
             }
-            $prefixScheme = strtolower($parts['scheme']);
-            $prefixPort = $parts['port'] ?? ($prefixScheme === 'https' ? 443 : 80);
-            $prefixPath = ($parts['path'] ?? '') === '' ? '/' : $parts['path'];
+            $prefixPort = $uri->getPort() ?? ($prefixScheme === 'https' ? 443 : 80);
+            $prefixPath = $uri->getRawPath() === '' ? '/' : $uri->getRawPath();
             if ($prefixScheme === $scheme
-                && strtolower(trim($parts['host'], '[]')) === strtolower($host)
+                && $prefixHost === $host
                 && $prefixPort === $port
                 && str_starts_with($path, $prefixPath)
             ) {

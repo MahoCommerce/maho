@@ -98,8 +98,7 @@ class CronRun extends BaseMahoCommand
         }
 
         try {
-            $callback = [$model, $run[2]];
-            call_user_func($callback, $schedule);
+            $model->{$run[2]}($schedule);
         } catch (\Exception $e) {
             if ($hasPersistentSchedule) {
                 $schedule

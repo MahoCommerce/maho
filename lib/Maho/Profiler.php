@@ -15,7 +15,6 @@ class Profiler
 {
     private static array $_timers = [];
     private static bool $_enabled = false;
-    private static bool $_memory_get_usage = false;
 
     /**
      * Stacks of active OpenTelemetry spans indexed by timer name.
@@ -50,7 +49,6 @@ class Profiler
     public static function enable(): void
     {
         self::$_enabled = true;
-        self::$_memory_get_usage = function_exists('memory_get_usage');
     }
 
     public static function disable(): void
@@ -78,10 +76,8 @@ class Profiler
         if (empty(self::$_timers[$timerName])) {
             self::reset($timerName);
         }
-        if (self::$_memory_get_usage) {
-            self::$_timers[$timerName]['realmem_start'] = memory_get_usage(true);
-            self::$_timers[$timerName]['emalloc_start'] = memory_get_usage();
-        }
+        self::$_timers[$timerName]['realmem_start'] = memory_get_usage(true);
+        self::$_timers[$timerName]['emalloc_start'] = memory_get_usage();
         self::$_timers[$timerName]['start'] = microtime(true);
         self::$_timers[$timerName]['count']++;
     }
@@ -135,10 +131,8 @@ class Profiler
         if (false !== self::$_timers[$timerName]['start']) {
             self::$_timers[$timerName]['sum'] += $time - self::$_timers[$timerName]['start'];
             self::$_timers[$timerName]['start'] = false;
-            if (self::$_memory_get_usage) {
-                self::$_timers[$timerName]['realmem'] += memory_get_usage(true) - self::$_timers[$timerName]['realmem_start'];
-                self::$_timers[$timerName]['emalloc'] += memory_get_usage() - self::$_timers[$timerName]['emalloc_start'];
-            }
+            self::$_timers[$timerName]['realmem'] += memory_get_usage(true) - self::$_timers[$timerName]['realmem_start'];
+            self::$_timers[$timerName]['emalloc'] += memory_get_usage() - self::$_timers[$timerName]['emalloc_start'];
         }
     }
 

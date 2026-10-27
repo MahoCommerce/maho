@@ -55,6 +55,22 @@ describe('OutboundUrl', function (): void {
         expect(fn() => outboundUrl()->validate('http:///path'))->toThrow(OutboundUrlException::class);
     });
 
+    it('rejects a URL that is not valid RFC 3986', function (string $url): void {
+        expect(fn() => outboundUrl(['good.example' => ['93.184.216.34']])->validate($url))
+            ->toThrow(OutboundUrlException::class, 'malformed');
+    })->with([
+        'http://evil.example\\@good.example/',
+        'http://good.example/a b',
+        "http://good.example/a\r\nX-Injected: 1",
+        'http://good.example:99999/',
+    ]);
+
+    it('lowercases the host and keeps the path and query as sent', function (): void {
+        $target = outboundUrl(['cdn.example' => ['93.184.216.34']])->validate('HTTPS://CDN.Example/a%20b.jpg?x=%2F');
+        expect($target->host)->toBe('cdn.example')
+            ->and($target->pinnedUrl())->toBe('https://93.184.216.34/a%20b.jpg?x=%2F');
+    });
+
     it('accepts a public host and pins the resolved address', function (): void {
         $target = outboundUrl(['cdn.example' => ['93.184.216.34']])->validate('https://cdn.example/files/a.zip?v=1');
         expect($target->host)->toBe('cdn.example')

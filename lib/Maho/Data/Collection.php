@@ -244,12 +244,7 @@ class Collection implements IteratorAggregate, Countable
     {
         $this->load();
 
-        if (count($this->_items)) {
-            reset($this->_items);
-            return current($this->_items);
-        }
-
-        return new $this->_itemObjectClass();
+        return array_first($this->_items) ?? new $this->_itemObjectClass();
     }
 
     /**
@@ -261,11 +256,7 @@ class Collection implements IteratorAggregate, Countable
     {
         $this->load();
 
-        if (count($this->_items)) {
-            return end($this->_items);
-        }
-
-        return new $this->_itemObjectClass();
+        return array_last($this->_items) ?? new $this->_itemObjectClass();
     }
 
     /**
@@ -431,13 +422,7 @@ class Collection implements IteratorAggregate, Countable
         $results = [];
         $useItemCallback = is_string($callback) && !str_contains($callback, '::');
         foreach ($this->getItems() as $id => $item) {
-            if ($useItemCallback) {
-                $cb = [$item, $callback];
-            } else {
-                $cb = $callback;
-                array_unshift($args, $item);
-            }
-            $results[$id] = call_user_func_array($cb, $args);
+            $results[$id] = $useItemCallback ? $item->$callback(...$args) : $callback($item, ...$args);
         }
         return $results;
     }
@@ -449,7 +434,7 @@ class Collection implements IteratorAggregate, Countable
     public function each($obj_method, $args = []): void
     {
         foreach ($args->_items as $k => $item) {
-            $args->_items[$k] = call_user_func($obj_method, $item);
+            $args->_items[$k] = $obj_method($item);
         }
     }
 
