@@ -510,8 +510,10 @@ describe('Category read by ID in another root tree', function (): void {
 
     it('gives a store-restricted token only the trees of its store views', function () use ($childId): void {
         $id = $childId();
-        $own = serviceToken(['categories/write'], [catRestrictStoreId()]);
-        $other = serviceToken(['categories/write'], [(int) Mage::app()->getDefaultStoreView()->getId()]);
+        $defaultStoreId = (int) Mage::app()->getDefaultStoreView()->getId();
+        // The request runs in the default store view, so each token must allow it.
+        $own = serviceToken(['categories/write'], [$defaultStoreId, catRestrictStoreId()]);
+        $other = serviceToken(['categories/write'], [$defaultStoreId]);
 
         expect(apiGet('/api/rest/v2/categories/' . $id, $own)['status'])->toBe(200);
         expect(apiGet('/api/rest/v2/categories/' . $id, $other)['status'])->toBe(404);
