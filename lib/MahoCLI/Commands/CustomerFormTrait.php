@@ -84,7 +84,11 @@ trait CustomerFormTrait
                 $options = [];
                 foreach ($attribute->getSource()->getAllOptions() as $option) {
                     if ($option['value'] !== '' && $option['value'] !== null) {
-                        $options[(string) $option['value']] = (string) $option['label'];
+                        $text = (string) $option['label'];
+                        while (in_array($text, $options, true)) {
+                            $text .= " ({$option['value']})";
+                        }
+                        $options[(string) $option['value']] = $text;
                     }
                 }
                 $multiSelect = $attribute->getFrontendInput() === 'multiselect';
