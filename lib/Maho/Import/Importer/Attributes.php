@@ -334,6 +334,9 @@ class Attributes extends AbstractImporter
                     $payload['swatch'][$key] = strtolower($row['swatch']);
                 }
             }
+            if ($payload['swatch'] !== [] && !Mage::helper('core')->isModuleEnabled('Mage_ConfigurableSwatches')) {
+                $result->notices[] = "$code: the Configurable Swatches module is disabled, its swatches were skipped";
+            }
             $attribute->setOption($payload)->save();
             $kept = array_intersect($defaults, array_map(strval(...), $existing));
             if ($kept !== [] && (string) $attribute->getDefaultValue() === '') {

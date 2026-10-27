@@ -130,7 +130,7 @@ it('orders the options without a sort_order as in the file, after the options al
     unlink($second);
 });
 
-it('imports the options of an attribute when Configurable Swatches is disabled', function (array $options): void {
+it('imports the options of an attribute when Configurable Swatches is disabled', function (array $options, array $notices): void {
     Mage::getConfig()->setNode('modules/Mage_ConfigurableSwatches/active', 'false');
     foreach (['configurableswatches', 'configurableswatches/productimg'] as $alias) {
         Mage::unregister("_helper/{$alias}");
@@ -139,16 +139,20 @@ it('imports the options of an attribute when Configurable Swatches is disabled',
     $attributes = attributesCsv([['code', 'label', 'input'], ['imp_finish', 'Finish', 'select']]);
     $optionsCsv = attributesCsv($options);
 
-    (new Attributes())->import($attributes, [Attributes::OPTION_OPTIONS_CSV => $optionsCsv]);
+    $result = (new Attributes())->import($attributes, [Attributes::OPTION_OPTIONS_CSV => $optionsCsv]);
 
     $finish = Mage::getModel('catalog/resource_eav_attribute')->loadByCode('catalog_product', 'imp_finish');
     expect(array_column($finish->getSource()->getAllOptions(false), 'label'))->toBe(['Matte', 'Gloss']);
+    expect($result->notices)->toBe($notices);
 
     unlink($attributes);
     unlink($optionsCsv);
 })->with([
-    'without swatches' => [[['attribute_code', 'label'], ['imp_finish', 'Matte'], ['imp_finish', 'Gloss']]],
-    'with swatches' => [[['attribute_code', 'label', 'swatch'], ['imp_finish', 'Matte', '#333333'], ['imp_finish', 'Gloss', '']]],
+    'without swatches' => [[['attribute_code', 'label'], ['imp_finish', 'Matte'], ['imp_finish', 'Gloss']], []],
+    'with swatches' => [
+        [['attribute_code', 'label', 'swatch'], ['imp_finish', 'Matte', '#333333'], ['imp_finish', 'Gloss', '']],
+        ['imp_finish: the Configurable Swatches module is disabled, its swatches were skipped'],
+    ],
 ]);
 
 it('rejects unknown inputs, sets and bad swatches before writing', function (): void {
