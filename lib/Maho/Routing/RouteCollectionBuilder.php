@@ -47,7 +47,7 @@ class RouteCollectionBuilder
     /**
      * Resolve route metadata for URL generation from frontName/controller/action.
      *
-     * @return array{name: string, path: string, pathVariables: string[], area: string, class: string, methods: string[]}|null
+     * @return array{name: string, path: string, pathVariables: string[], area: string, class: string}|null
      */
     public static function resolveRoute(string $frontName, string $controllerName, string $actionName): ?array
     {
@@ -69,7 +69,6 @@ class RouteCollectionBuilder
             'pathVariables' => $route['pathVariables'],
             'area' => $route['area'],
             'class' => $route['class'],
-            'methods' => $route['methods'] ?? [],
         ];
     }
 
