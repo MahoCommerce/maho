@@ -309,6 +309,7 @@ class Attributes extends AbstractImporter
             $defaults = array_filter(explode(',', (string) $attribute->getDefaultValue()));
             $attribute->setDefault($defaults);
             $next = 0;
+            $lastOrder = max([0, ...$payload['order']]);
             $keys = [];
             foreach ($rows as $row) {
                 $adminLabel = ($row['store_code'] ?? '') !== '' ? $row['label_admin'] : $row['label'];
@@ -327,6 +328,8 @@ class Attributes extends AbstractImporter
                 if (($row['sort_order'] ?? '') !== '') {
                     $payload['order'][$key] = (int) $row['sort_order'];
                 }
+                $payload['order'][$key] ??= $lastOrder + 1;
+                $lastOrder = max($lastOrder, $payload['order'][$key]);
                 if (($row['swatch'] ?? '') !== '') {
                     $payload['swatch'][$key] = strtolower($row['swatch']);
                 }
