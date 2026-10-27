@@ -175,10 +175,10 @@ stops with an error.
 ## Create customers and addresses
 
 `customer:create` and `customer:address:create` check the data with the same rules as the admin customer
-form. Give the value of an attribute that the store makes required, such as the middle name or a custom
-attribute, with `--attribute code=value`, once for each attribute. An attribute that the command takes as an
-argument or an option, such as the city, cannot go in `--attribute`. Without `-n`, the command asks for each
-required attribute that you leave out. With `-n`, a missing required attribute stops the command with an error.
+form. A store can make an attribute required, such as the middle name or a custom attribute. Give its value
+with `--attribute code=value`, once for each attribute. An attribute that the command takes as an argument or
+an option, such as the city, cannot go in `--attribute`. Without `-n`, the command asks for each required
+attribute that you leave out. With `-n`, a missing required attribute stops the command with an error.
 
 ```bash
 ./maho customer:create jane@example.com 'Secret123!' Jane Doe base 1 --attribute middlename=Q

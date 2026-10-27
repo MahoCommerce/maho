@@ -111,6 +111,30 @@ it('saves the customer only with the attributes that the store makes required', 
     'a value' => [['--attribute' => ['middlename=Q']], Symfony\Component\Console\Command\Command::SUCCESS, 'Q'],
 ]);
 
+it('saves the option that the user picks when two options have the same label', function (): void {
+    $attribute = Mage::getModel('customer/attribute')->loadByCode('customer', 'gender');
+    $wasRequired = (int) $attribute->getIsRequired();
+    $resource = Mage::getSingleton('core/resource');
+    $adapter = $resource->getConnection('core_write');
+    $optionTable = $resource->getTableName('eav/attribute_option');
+    $adapter->insert($optionTable, ['attribute_id' => (int) $attribute->getId(), 'sort_order' => 99]);
+    $optionId = (int) $adapter->lastInsertId($optionTable);
+    $adapter->insert($resource->getTableName('eav/attribute_option_value'), ['option_id' => $optionId, 'store_id' => 0, 'value' => 'Female']);
+    $attribute->setIsRequired(1)->save();
+
+    try {
+        $result = customerCreateRun([], [CUSTOMER_CREATE_EMAIL, 'Password123!', 'Cli', 'Create', $this->website->getCode(), '2', "Female ($optionId)"]);
+    } finally {
+        $adapter->delete($resource->getTableName('eav/attribute_option_value'), ['option_id = ?' => $optionId]);
+        $adapter->delete($optionTable, ['option_id = ?' => $optionId]);
+        $attribute->setIsRequired($wasRequired)->save();
+    }
+
+    $this->assertCommandIsSuccessful($result);
+    $customer = Mage::getModel('customer/customer')->setWebsiteId((int) $this->website->getId())->loadByEmail(CUSTOMER_CREATE_EMAIL);
+    expect((int) $customer->getGender())->toBe($optionId);
+});
+
 it('refuses an attribute that an argument of the command gives', function (string $code): void {
     $result = customerCreateRun([
         'email' => CUSTOMER_CREATE_EMAIL,
