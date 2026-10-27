@@ -54,7 +54,7 @@ Yes in the same scope.
 |--------------|-----|------------|
 | The checkout asks for an account, but Allow Guest Checkout is Yes | The cart holds a downloadable product, and **Disable Guest Checkout if Cart Contains Downloadable Items** is Yes | Set that setting to No, and make the links Shareable |
 | Guest checkout works in one store view and not in another | The other store view, or its website, has its own value of **Allow Guest Checkout** | Select that scope in **Current Configuration Scope** and check the value |
-| A guest cannot download a file that they bought | The link is not Shareable | Set the link to Shareable on the **Downloadable Information** tab of the product |
+| A guest cannot download a file that they bought | The link was not Shareable when the guest bought it. The order keeps the Shareable value that the link had at the purchase | For the next orders, set the link to Shareable on the **Downloadable Information** tab of the product. This does not change an order that is already placed. A link with the value Use config reads **Shareable** in **System > Configuration > Catalog > Catalog**, group **Downloadable Product Options**, at each download. For any other link, send the file to the customer another way |
 
 ## Related
 

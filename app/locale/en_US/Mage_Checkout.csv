@@ -241,7 +241,7 @@
 "Terms and Conditions Information","Terms and Conditions Information"
 "Text","Text"
 "Thank you for your purchase!","Thank you for your purchase!"
-"The checkout of the store, on one page. When No, customers cannot check out: the cart shows ""The onepage checkout is disabled.""","The checkout of the store, on one page. When No, customers cannot check out: the cart shows ""The onepage checkout is disabled."""
+"The checkout of the store, on one page. When No, customers cannot check out: the cart has no Proceed to Checkout button, and the checkout page sends the customer back to the cart with ""The onepage checkout is disabled.""","The checkout of the store, on one page. When No, customers cannot check out: the cart has no Proceed to Checkout button, and the checkout page sends the customer back to the cart with ""The onepage checkout is disabled."""
 "The condition has been deleted","The condition has been deleted"
 "The condition has been saved.","The condition has been saved."
 "The onepage checkout is disabled.","The onepage checkout is disabled."

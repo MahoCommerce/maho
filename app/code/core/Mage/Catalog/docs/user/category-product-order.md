@@ -14,7 +14,7 @@ hide your positions.
 
 Go to **Catalog > Categories**, select the category, and open the **Category Products**
 tab. The **Position** column holds the position of each product in this category. A lower number
-comes first. Save the category.
+comes first when the direction is ascending, which is the default. Save the category.
 
 The position belongs to the product in this category. The same product can have another position
 in another category.
@@ -35,6 +35,10 @@ The category page takes the first sort order that applies, in this order:
 
 So your positions show only when the result is **Position**.
 
+The direction counts too. The arrow next to the **Sort By** list changes it, and the store
+remembers the direction that the customer picked in the same way as the sort order. With the
+descending direction, the highest position comes first.
+
 ## The sort settings of a category
 
 On the **Display Settings** tab of the category:
@@ -51,10 +55,13 @@ the category, the store uses the configuration value instead.
 ## Anchor categories
 
 When **Is Anchor** is Yes, the category page also shows the products of its subcategories. The
-products of the category itself come first, by their positions. Then come the products of the
-subcategories, in the order of the subcategories, each by its position in its own subcategory.
-To move a product of a subcategory to the top, assign the product to the anchor category too, and
-give it a position there.
+products of the category itself come first, by their positions. The products of the subcategories
+come after them. For each of these products, the store calculates a sort number from the position
+and the level of its subcategory, and from the position of the product in that subcategory. With
+positions below 10000, the products of one subcategory stay together, and among the subcategories
+of one level, a lower position comes first. A subcategory on a deeper level can come before a
+subcategory on a higher level. To move a product of a subcategory to the top, assign the product to
+the anchor category too, and give it a position there.
 
 ## Equal positions
 
@@ -78,6 +85,7 @@ Search results do not use the positions of a category. They sort by **Relevance*
 |--------------|-----|------------|
 | The category ignores your positions | **Default Product Listing Sort By** of the category, or **Product Listing Sort by** in the configuration, is Name or Price | Set the category, or the configuration, to Position |
 | You see another order than your customers | You picked a sort order in the **Sort By** list before, and the store remembers it for your session | Pick the default sort order again, or open the page in a private window |
+| The products show in the reverse order | The direction is descending: someone clicked the arrow next to **Sort By**, and the store remembers it for that session | Click the arrow again, or open the page in a private window |
 | One store view shows another order | That store view has its own value of the sort settings of the category | Select the store view and check **Use Config Settings** and the value |
 | The products of a subcategory are always at the end | The category is an anchor category, and those products are not in the category itself | Assign the products to the category and give them a position |
 | The new positions do not show | The **Category Products** index is in **Manual Update** mode, or needs a reindex | Reindex in **System > Index Management** |
