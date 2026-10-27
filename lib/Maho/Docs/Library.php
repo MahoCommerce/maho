@@ -22,7 +22,9 @@ use Composer\InstalledVersions;
  *
  * Mage_Core_Model_Config moves each declaration under the name of its module when it loads the
  * module, so a disabled module has no pages. A page is a .md file: an optional front matter with a
- * description line, then a "#" title.
+ * description line, then a "#" title. An admin_pages line in the front matter names the admin
+ * pages that the page explains, such as [catalog_product/edit, cms_page], so the admin assistant
+ * can name the page to the model on those admin pages.
  */
 final class Library
 {
@@ -106,6 +108,17 @@ final class Library
         return null;
     }
 
+    /**
+     * The pages that explain the admin page of $route, given as "controller/action".
+     *
+     * @param list<string> $audiences
+     * @return list<Page>
+     */
+    public function pagesFor(string $route, array $audiences): array
+    {
+        return array_values(array_filter($this->pages($audiences), static fn(Page $page): bool => $page->explains($route)));
+    }
+
     public static function stripFrontMatter(string $text): string
     {
         return preg_replace('/\A---\R.*?\R---\R/s', '', $text, 1) ?? $text;
@@ -183,14 +196,20 @@ final class Library
         $file = $source->dir . '/' . $path;
         $text = (string) file_get_contents($file);
         $description = '';
-        if (preg_match('/\A---\R(.*?)\R---\R/s', $text, $frontMatter) && preg_match('/^description:\s*(.+)$/m', $frontMatter[1], $match)) {
-            $description = trim($match[1], " \t\"'");
+        $adminPages = [];
+        if (preg_match('/\A---\R(.*?)\R---\R/s', $text, $frontMatter)) {
+            if (preg_match('/^description:\s*(.+)$/m', $frontMatter[1], $match)) {
+                $description = trim($match[1], " \t\"'");
+            }
+            if (preg_match('/^admin_pages:\s*\[(.*)\]\s*$/m', $frontMatter[1], $match)) {
+                $adminPages = array_values(array_filter(array_map(static fn(string $route): string => trim($route, " \t\"'"), explode(',', $match[1]))));
+            }
         }
         // A "#" line inside a code block is a comment, not the title.
         $title = preg_match('/^#\s+(.+)$/m', (string) preg_replace('/^(```|~~~).*?^\1/ms', '', self::stripFrontMatter($text)), $match)
             ? trim(strip_tags((string) preg_replace(self::VERSION_BADGE_PATTERN, '', $match[1])))
             : basename($path, '.md');
 
-        return new Page($source->name . '/' . $path, $title, $description, $source, $file);
+        return new Page($source->name . '/' . $path, $title, $description, $source, $file, $adminPages);
     }
 }

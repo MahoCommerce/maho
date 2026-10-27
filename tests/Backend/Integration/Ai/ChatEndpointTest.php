@@ -1572,7 +1572,7 @@ it('resolves a reused page identifier to the store view\'s own page', function (
     }
 });
 
-it('hands a page action to the browser', function (): void {
+it('hands a page action to the browser after the administrator confirmed its click', function (): void {
     $admin = aiChatAdmin('ai_chat_action', ['all']);
     try {
         aiChatLogin($admin);
@@ -1581,30 +1581,73 @@ it('hands a page action to the browser', function (): void {
                 new ToolCall('call_a1', 'admin_page_action', ['steps' => [['action' => 'set_field', 'target' => 'Comment', 'value' => 'pippo'], ['action' => 'click', 'target' => 'Submit']]]),
                 new ToolCall('call_a2', 'admin_page_action', ['steps' => [['action' => 'click', 'target' => 'Save'], ['action' => 'set_field', 'target' => 'Page Title', 'value' => 'x']]]),
             ]),
-            new TextResult('Saving.'),
         );
 
-        $result = aiChatRequest('/api/admin/ai/chat', ['message' => 'save it please', 'context' => ['route' => 'cms_page/edit']]);
+        $first = aiChatRequest('/api/admin/ai/chat', ['message' => 'save it please', 'context' => ['route' => 'cms_page/edit']]);
 
         expect(AiChatScript::$offeredTools[0])->toContain('admin_page_action');
-        $results = aiChatEvents($result['events'], 'tool_result');
-        expect($results[0]['ok'])->toBeTrue($result['raw']);
+        $confirm = aiChatEvents($first['events'], 'confirm');
+        expect(array_column($confirm[0]['calls'] ?? [], 'id'))->toBe(['call_a1', 'call_a2'], $first['raw']);
+        expect(aiChatEvents($first['events'], 'page_action'))->toBe([]);
+        expect(aiChatEvents($first['events'], 'done')[0]['state'])->toBe('awaiting_confirmation');
+
+        AiChatScript::reset(new TextResult('Saving.'));
+        $approved = aiChatRequest('/api/admin/ai/chat/confirm', [
+            'conversation_id' => (int) $confirm[0]['conversation_id'],
+            'decisions' => ['call_a1' => true, 'call_a2' => true],
+            'context' => ['route' => 'cms_page/edit'],
+        ]);
+
+        $results = aiChatEvents($approved['events'], 'tool_result');
+        expect($results[0]['ok'])->toBeTrue($approved['raw']);
         expect($results[1]['ok'])->toBeFalse();
-        $actions = aiChatEvents($result['events'], 'page_action');
+        expect($results[1]['preview'])->toContain('a click or an open_row must be the last step');
+        $actions = aiChatEvents($approved['events'], 'page_action');
         expect($actions)->toHaveCount(1);
         expect($actions[0]['steps'])->toBe([
             ['action' => 'set_field', 'target' => 'Comment', 'value' => 'pippo'],
             ['action' => 'click', 'target' => 'Submit', 'value' => null],
         ]);
-        expect($results[1]['preview'])->toContain('a click or an open_row must be the last step');
-        expect(aiChatEvents($result['events'], 'done')[0]['state'])->toBe('complete');
+        expect(aiChatEvents($approved['events'], 'done')[0]['state'])->toBe('complete');
     } finally {
         aiChatDeleteConversations((int) $admin->getId());
         aiChatDeleteAdmin($admin);
     }
 });
 
-it('fills a comment form and submits it in one page action', function (): void {
+it('runs a page action without a click at once, and holds a denied click', function (): void {
+    $admin = aiChatAdmin('ai_chat_action_noclick', ['all']);
+    try {
+        aiChatLogin($admin);
+        $steps = [['action' => 'open_tab', 'target' => 'Meta Information'], ['action' => 'set_field', 'target' => 'Meta Title', 'value' => 'Blue Shirt']];
+        AiChatScript::reset(new ToolCallResult([new ToolCall('call_n1', 'admin_page_action', ['steps' => $steps])]), new TextResult('Filled in.'));
+
+        $result = aiChatRequest('/api/admin/ai/chat', ['message' => 'write a meta title', 'context' => ['route' => 'catalog_product/edit']]);
+
+        expect(aiChatEvents($result['events'], 'confirm'))->toBe([]);
+        expect(aiChatEvents($result['events'], 'page_action')[0]['steps'] ?? null)->toBe([
+            ['action' => 'open_tab', 'target' => 'Meta Information', 'value' => null],
+            ['action' => 'set_field', 'target' => 'Meta Title', 'value' => 'Blue Shirt'],
+        ], $result['raw']);
+
+        AiChatScript::reset(new ToolCallResult([new ToolCall('call_n2', 'admin_page_action', ['steps' => [['action' => 'click', 'target' => 'Save']]])]));
+        $second = aiChatRequest('/api/admin/ai/chat', ['conversation_id' => (int) aiChatEvents($result['events'], 'done')[0]['conversation_id'], 'message' => 'save it']);
+        expect(aiChatEvents($second['events'], 'done')[0]['state'])->toBe('awaiting_confirmation');
+
+        AiChatScript::reset(new TextResult('Not saved.'));
+        $denied = aiChatRequest('/api/admin/ai/chat/confirm', [
+            'conversation_id' => (int) aiChatEvents($second['events'], 'done')[0]['conversation_id'],
+            'decisions' => ['call_n2' => false],
+        ]);
+        expect(aiChatEvents($denied['events'], 'tool_result')[0]['denied'])->toBeTrue();
+        expect(aiChatEvents($denied['events'], 'page_action'))->toBe([]);
+    } finally {
+        aiChatDeleteConversations((int) $admin->getId());
+        aiChatDeleteAdmin($admin);
+    }
+});
+
+it('fills a comment form and submits it in one page action after the confirmation', function (): void {
     $admin = aiChatAdmin('ai_chat_comment', ['all']);
     try {
         aiChatLogin($admin);
@@ -1614,12 +1657,20 @@ it('fills a comment form and submits it in one page action', function (): void {
             ['action' => 'set_field', 'target' => 'Visible on Frontend', 'value' => 'true'],
             ['action' => 'click', 'target' => 'Submit', 'value' => null],
         ];
-        AiChatScript::reset(new ToolCallResult([new ToolCall('call_c1', 'admin_page_action', ['steps' => $steps])]), new TextResult('Adding the comment.'));
+        AiChatScript::reset(new ToolCallResult([new ToolCall('call_c1', 'admin_page_action', ['steps' => $steps])]));
 
         $result = aiChatRequest('/api/admin/ai/chat', ['message' => 'add a comment to this invoice', 'context' => ['route' => 'sales_order_invoice/view']]);
+        $confirm = aiChatEvents($result['events'], 'confirm');
+        expect($confirm[0]['calls'][0]['id'] ?? null)->toBe('call_c1', $result['raw']);
 
-        expect(aiChatEvents($result['events'], 'tool_result')[0]['ok'])->toBeTrue($result['raw']);
-        expect(aiChatEvents($result['events'], 'page_action')[0]['steps'])->toBe($steps);
+        AiChatScript::reset(new TextResult('Adding the comment.'));
+        $approved = aiChatRequest('/api/admin/ai/chat/confirm', [
+            'conversation_id' => (int) $confirm[0]['conversation_id'],
+            'decisions' => ['call_c1' => true],
+        ]);
+
+        expect(aiChatEvents($approved['events'], 'tool_result')[0]['ok'])->toBeTrue($approved['raw']);
+        expect(aiChatEvents($approved['events'], 'page_action')[0]['steps'])->toBe($steps);
     } finally {
         aiChatDeleteConversations((int) $admin->getId());
         aiChatDeleteAdmin($admin);

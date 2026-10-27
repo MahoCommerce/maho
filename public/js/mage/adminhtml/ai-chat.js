@@ -740,6 +740,14 @@ class MahoAiAssistant {
         return guide;
     }
 
+    /** The header links of the configuration groups that are closed. */
+    closedGroups() {
+        return [...document.querySelectorAll('.entry-edit-head.collapseable a[id$="-head"]')].filter((link) => {
+            const group = document.getElementById(link.id.slice(0, -'-head'.length));
+            return !!group && group.getClientRects().length === 0;
+        });
+    }
+
     screenDigest() {
         const lines = [];
         const text = (node) => (node?.textContent ?? '').replace(/\s+/g, ' ').trim();
@@ -759,6 +767,11 @@ class MahoAiAssistant {
             const active = tabs.find((t) => t.classList.contains('active'));
             lines.push('Tabs: ' + tabs.map((t) => (t === active ? '[' + text(t) + ']' : text(t))).join(', ') + (active ? ' (the one in brackets is open)' : ''));
             scope = (active && document.getElementById(active.id + '_content')) || document;
+        }
+
+        const closed = this.closedGroups().filter(visible).map((link) => text(link));
+        if (closed.length > 0) {
+            lines.push('Closed groups, whose fields are not listed (open one with open_tab): ' + closed.join(', '));
         }
 
         const fields = [];
@@ -1009,7 +1022,8 @@ class MahoAiAssistant {
             return cell ? { ok: true, click: cell } : { ok: false };
         }
         if (action.action === 'open_tab') {
-            const tabs = [...document.querySelectorAll('a.tab-item-link')].filter(visible);
+            // A tab, or a closed group of a configuration page: the screen digest lists both.
+            const tabs = [...document.querySelectorAll('a.tab-item-link'), ...this.closedGroups()].filter(visible);
             const tab = matches(tabs, (t) => t.textContent);
             if (tab) {
                 tab.click();

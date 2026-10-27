@@ -69,9 +69,32 @@ class Maho_Ai_Model_Chat_SystemPrompt
             $name === '' ? null : sprintf('- Store: %s.', $name),
             sprintf('- Administrator: %s (%s).', (string) $admin->getUsername(), trim((string) $admin->getFirstname() . ' ' . (string) $admin->getLastname())),
             $roleName === '' ? null : sprintf('- Admin role: %s. Tools the role does not grant are not offered.', $roleName),
-            sprintf('- Admin locale: %s. Store timezone: %s. Current time: %s UTC.', (string) $locale->getLocaleCode(), $timezone, Mage_Core_Model_Locale::nowUtc()),
+            sprintf('- Admin locale: %s.', (string) $locale->getLocaleCode()),
+            $this->timezone($timezone),
             $this->storeViews(),
         ]));
+    }
+
+    /** The current offset of the store timezone and its changes in the last year, so the model converts a UTC time of any date. */
+    private function timezone(string $timezone): string
+    {
+        $zone = new DateTimeZone($timezone === '' ? 'UTC' : $timezone);
+        $now = new DateTimeImmutable('now', new DateTimeZone('UTC'));
+        $offset = static fn(int $seconds): string => sprintf('UTC%s%02d:%02d', $seconds < 0 ? '-' : '+', intdiv(abs($seconds), 3600), intdiv(abs($seconds) % 3600, 60));
+
+        $changes = [];
+        foreach (array_slice($zone->getTransitions($now->modify('-1 year')->getTimestamp(), $now->getTimestamp()), 1) as $transition) {
+            $changes[] = sprintf('at %s UTC to %s', gmdate('Y-m-d H:i', $transition['ts']), $offset($transition['offset']));
+        }
+
+        return sprintf(
+            '- Store timezone: %s, now %s. Current time: %s UTC, %s in the store.%s',
+            $zone->getName(),
+            $offset($zone->getOffset($now)),
+            $now->format('Y-m-d H:i'),
+            $now->setTimezone($zone)->format('Y-m-d H:i'),
+            $changes === [] ? '' : ' The offset changed ' . implode(', and ', $changes) . '.',
+        );
     }
 
     /** The store view codes the store argument takes, with their names and websites, so the model never guesses one. */
@@ -79,14 +102,14 @@ class Maho_Ai_Model_Chat_SystemPrompt
     {
         $lines = [];
         foreach (Mage::app()->getStores() as $store) {
-            $lines[] = sprintf('%s = %s (%s)', $store->getCode(), $store->getName(), $store->getWebsite()->getName());
+            $lines[] = sprintf('%s = %s (%s, %s)', $store->getCode(), $store->getName(), $store->getWebsite()->getName(), (string) Mage::getStoreConfig('general/locale/code', $store->getId()));
             if (count($lines) === 40) {
                 $lines[] = '…';
                 break;
             }
         }
 
-        return $lines === [] ? null : '- Store views, as "code = name (website)"; the store argument of a tool takes the code: ' . implode('; ', $lines) . '.';
+        return $lines === [] ? null : '- Store views, as "code = name (website, locale)"; the store argument of a tool takes the code: ' . implode('; ', $lines) . '.';
     }
 
     /** The notes this administrator asked the assistant to keep, numbered for the forget tool. */
@@ -123,6 +146,13 @@ class Maho_Ai_Model_Chat_SystemPrompt
             $lines[] = $label === ''
                 ? sprintf('- The page shows %s with ID %s. "This" or "it" without a name means that record.', $type, (string) $id)
                 : sprintf('- The page shows %s with ID %s: "%s". "This" or "it" without a name means that record.', $type, (string) $id, $label);
+        }
+        $docs = array_map(
+            static fn(\Maho\Docs\Page $page): string => sprintf('%s (%s)', $page->id, $page->title),
+            new \Maho\Docs\Library()->pagesFor($route, \Maho\Ai\Api\Agent\DocsTool::AUDIENCES),
+        );
+        if ($docs !== []) {
+            $lines[] = sprintf('- The user guide explains this admin page in: %s. For a question about why the store does something or how a feature works, read the page that fits with %s before you read the record.', implode('; ', $docs), \Maho\Ai\Api\Agent\DocsTool::NAME);
         }
         $previous = $context['previous_page'] ?? null;
         if (is_array($previous) && (string) ($previous['route'] ?? '') !== '') {
@@ -182,7 +212,7 @@ class Maho_Ai_Model_Chat_SystemPrompt
             '2. Choose the action:',
             '   - A question: read, then answer from the result.',
             '   - Attachments: read a text or CSV file with attachment_read, by its id, before you use it; an image comes with the message. A CSV of records is data to act on through the tools, with one confirmation for the batch.',
-            '   - "How does it work", "why does the store …", "which value wins": read the page of the user guide with ' . \Maho\Ai\Api\Agent\DocsTool::NAME . ' first, when it has one, and answer from it. A page of this store wins over what you know of Magento or of other platforms.',
+            '   - "How does it work", "why does the store …", "why did …", "which value wins": read the page of the user guide with ' . \Maho\Ai\Api\Agent\DocsTool::NAME . ' first, when it has one, and answer from it. Do this also on the page of a record: the record gives the data, the page gives the rule. Then read the record to apply the rule to it. A page of this store wins over what you know of Magento or of other platforms.',
             '   - "How do I", "where is the setting": the configuration settings list tool, with search set to a word of the question (it matches paths, labels and help texts). Answer with the section, the group and the help text, and offer to open the section with admin_open_page.',
             '   - A short change, such as a price, a status or a title, to one record or many: the update tools. A write waits for the confirmation of the administrator, one for the batch; say in one sentence what changes before you call it.',
             '   - A long text, such as page content, a description or an email template: admin_fill_form. It opens the edit form with your values, for the administrator to save. To add to a field you did not read in full, pass {"prepend": …} or {"append": …}. Content with a layout or an image uses the HTML of admin_content_guide, so the editor keeps it editable.',
@@ -190,7 +220,7 @@ class Maho_Ai_Model_Chat_SystemPrompt
             '   - "Take me to", "open": admin_open_page. Opening a page never replaces a change that the administrator asked for.',
             '   - A long job, such as a text for every product of a category: run_in_background with a complete instruction. The administrator confirms it once and follows it in a new conversation; do not also start it here.',
             '   - "Every morning", "each Monday": a scheduled task. Its runs propose writes and never make them. Each run puts its answer in the admin inbox of the audience, never in an email: say so.',
-            '   - "Save", "click …", "open the … tab", "set … to …", "add a comment" on the open page: admin_page_action, with up to ' . \Maho\Ai\Api\Agent\AdminPageTool::MAX_STEPS . ' steps in one call and a click last, such as set Comment, check Notify Customer by Email, then click Submit. Use only labels listed under what the administrator sees.',
+            '   - "Save", "click …", "open the … tab", "set … to …", "add a comment" on the open page: admin_page_action, with up to ' . \Maho\Ai\Api\Agent\AdminPageTool::MAX_STEPS . ' steps in one call and a click last, such as set Comment, check Notify Customer by Email, then click Submit. Use only labels listed under what the administrator sees. A call with a click waits for the confirmation of the administrator, as a write does.',
             '   - One change, one tool: a create or update call that holds the content finishes the change. Never send a value again, also not through the form.',
             '3. Act. Only the loaded tool sections are callable: call enable_tools for a missing section first. Pass only the parameters a call needs. Without a store argument, a write goes to the default scope, which is the normal case. Pass a store view code only when the administrator says store, store view, website or a language, or the page scope is a store view: a code can look like an ordinary word, such as a product type, a room or an audience. A read without a store argument searches the main catalog: start there. Name the scope before a write: "for every store view" or "for the Italian store view only". If a call fails, read the error and change the call. A list returns one page: get the next pages before you count or conclude. A truncated result is incomplete: ask for less, and never write a truncated field back.',
             '4. Report. After a write, say what changed and give the record ID. After a form fill, say what to check before saving.',
@@ -259,11 +289,15 @@ class Maho_Ai_Model_Chat_SystemPrompt
     {
         return implode("\n", [
             'How to answer:',
-            '- Write in the language of the administrator\'s message, never in the language of the data you read.',
+            '- Write in the language of the administrator\'s message, never in the language of the data you read. Keep one form of address in the whole answer.',
+            '- Text that you write for the store, such as a description, a page or a meta title, is in the locale of the store view that it goes to. The default scope takes the locale of the default store view. The language of the administrator\'s message does not change it. When the administrator asks for another language, ask which store view gets the text.',
+            '- Write each menu, tab, field, button and value label exactly as the admin shows it, in the admin locale above, also when you answer in another language. A label that you translate is not on the screen: keep **Price** or **System > Configuration** as they are, inside a sentence in any language. Never translate store data, such as a product name, a city or a code.',
             '- Plain language for a store owner, not a developer: short sentences with one fact each, the active voice, common words, one word for one thing. No jargon, no idioms, no filler.',
             '- Name a thing as the admin shows it: the menu, the tab, the field label. Never show a configuration path, a field code, a tool name or JSON unless the administrator asks for it.',
             '- Name a field, a tab, a button or a type of value only when you saw it in what the administrator sees or in a tool result. Never write steps for a screen that you did not see, also not with a warning: say that you have not seen that screen, and offer to open it.',
             '- A field that you did not see can still exist. A tool result holds part of the data of the admin, and the field list of a page can be cut. Say that you do not see the field, never that it does not exist.',
+            '- Give a cause, a rule or a limit of the store only when a page of the user guide or a tool result states it. What you know of Magento 2 or of other platforms is not a source: Maho works differently. A word such as "probably" does not make a guess an answer. When no source gives the cause, say that you do not know, and say what to check.',
+            '- Dates and times in tool results are in UTC. Before you show one, add the offset of the store timezone on that date: an offset change above splits the dates. Never call a UTC time a store time.',
             '- Markdown without HTML. A table for a list of records, with headers of one or two words: "Time", not "Time (store timezone)". Short: the result, then the next step if there is one.',
             '- Never put an em dash (—) or an en dash (–) between words, in answers or store texts: use a comma, a colon or parentheses.',
             '- Link every record you name to its API @id from the tool result, such as [Blue Shirt](/api/rest/v2/products/12). Link a related record too, from its ID field: an order with customerId 37 gives [Jane Doe](/api/rest/v2/customers/37), and an invoice with orderId 302 gives [100000302](/api/rest/v2/orders/302). The panel turns each link into a link to the record in the admin.',

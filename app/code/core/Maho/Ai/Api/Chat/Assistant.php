@@ -27,6 +27,7 @@ use Maho_Ai_Model_Chat_ToolExecutor;
 use Maho_Ai_Model_Chat_ToolsetChanged;
 use Maho_Ai_Model_Conversation;
 use Maho_Ai_Model_Conversation_Message as Message;
+use Maho_Ai_Model_Platform;
 use Symfony\AI\Agent\Agent;
 use Symfony\AI\Agent\Exception\MaxIterationsExceededException;
 use Symfony\AI\Agent\Execution\Execution;
@@ -37,8 +38,7 @@ use Symfony\AI\Agent\Toolbox\ToolResult;
 use Symfony\AI\Platform\Exception\ExceptionInterface as PlatformException;
 use Symfony\AI\Platform\Result\Stream\Delta\TextDelta;
 use Symfony\AI\Platform\Result\ToolCall;
-use Symfony\AI\Platform\TokenUsage\TokenUsage;
-use Symfony\AI\Platform\TokenUsage\TokenUsageAggregation;
+use Symfony\AI\Platform\TokenUsage\TokenUsageInterface;
 
 /**
  * Events, in the order a client sees them: `delta` (answer text), `tool_call`,
@@ -156,6 +156,7 @@ final class Assistant
                 $result['record_url'] = $url;
             }
             $sse->event('tool_result', $result);
+            $this->sendNavigation($sse);
         }
 
         $this->run($conversation, $admin, $pageContext, $sse);
@@ -338,7 +339,7 @@ final class Assistant
             if ($clean !== $streamed) {
                 $sse->event('replace', ['text' => $clean]);
             }
-            [$in, $out] = $this->tokenUsage($execution->getMetadata()->all());
+            [$in, $out] = self::tokenUsage($execution->getMetadata()->all(), $this->agentFactory->platformCode($storeId));
             $conversation->addMessage([
                 'role' => Message::ROLE_ASSISTANT,
                 'content' => $clean,
@@ -411,6 +412,20 @@ final class Assistant
         $conversation->addMessage(['role' => Message::ROLE_ASSISTANT, 'content' => $text, 'tool_status' => $status]);
     }
 
+    /** Send the page change that the last local tool asked for: a page to open, text edits or page steps. */
+    private function sendNavigation(Maho_Ai_Model_Chat_SseWriter $sse): void
+    {
+        $navigation = $this->toolbox->takeNavigation();
+        if ($navigation === null) {
+            return;
+        }
+        $sse->event(match (true) {
+            isset($navigation['edits']) => 'text_edits',
+            isset($navigation['steps']) => 'page_action',
+            default => 'navigate',
+        }, $navigation);
+    }
+
     /** Run the agent once and forward its progress as SSE events. */
     private function stream(Agent $agent, MessageBag $bag, Maho_Ai_Model_Chat_SseWriter $sse, string &$roundText): Execution
     {
@@ -459,14 +474,7 @@ final class Assistant
                             'ok' => !McpToolbox::isErrorText($text),
                             'preview' => $this->preview($text),
                         ]);
-                        $navigation = $this->toolbox->takeNavigation();
-                        if ($navigation !== null) {
-                            $sse->event(match (true) {
-                                isset($navigation['edits']) => 'text_edits',
-                                isset($navigation['steps']) => 'page_action',
-                                default => 'navigate',
-                            }, $navigation);
-                        }
+                        $this->sendNavigation($sse);
                     }
                     break;
             }
@@ -691,14 +699,23 @@ final class Assistant
     }
 
     /**
+     * The input and output tokens of a turn. Anthropic counts the cached input apart from
+     * input_tokens, so its cache reads and writes are added. The other providers already
+     * count their cached tokens in the prompt tokens.
+     *
      * @param array<string, mixed> $metadata
      * @return array{int, int}
      */
-    private function tokenUsage(array $metadata): array
+    public static function tokenUsage(array $metadata, string $platformCode): array
     {
         foreach ($metadata as $value) {
-            if ($value instanceof TokenUsage || $value instanceof TokenUsageAggregation) {
-                return [(int) ($value->getPromptTokens() ?? 0), (int) ($value->getCompletionTokens() ?? 0)];
+            if ($value instanceof TokenUsageInterface) {
+                $in = (int) ($value->getPromptTokens() ?? 0);
+                if ($platformCode === Maho_Ai_Model_Platform::ANTHROPIC) {
+                    $in += (int) ($value->getCacheCreationTokens() ?? 0) + (int) ($value->getCacheReadTokens() ?? 0);
+                }
+
+                return [$in, (int) ($value->getCompletionTokens() ?? 0)];
             }
         }
 
