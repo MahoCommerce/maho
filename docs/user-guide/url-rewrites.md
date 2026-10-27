@@ -1,5 +1,6 @@
 ---
 description: How Maho builds product and category URLs from the URL key, why a URL can get a number at the end, what happens to old links when a URL key changes, custom rewrites, and URL keys per store view.
+admin_pages: [catalog_product/edit, catalog_category/edit, urlrewrite]
 ---
 
 # URL Rewrites

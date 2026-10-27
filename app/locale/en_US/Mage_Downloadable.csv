@@ -33,7 +33,6 @@
 "From:","From:"
 "Gift Message","Gift Message"
 "Go to <a href=""%s"">My Downloadable Products</a>","Go to <a href=""%s"">My Downloadable Products</a>"
-"Guest checkout will only work with shareable.","Guest checkout will only work with shareable."
 "Incl. Tax","Incl. Tax"
 "inline","inline"
 "In stock","In stock"
@@ -99,4 +98,5 @@
 "Use Default Value","Use Default Value"
 "View Order","View Order"
 "What's this?","What's this?"
+"When Yes, a cart with a downloadable product needs a customer account. When No, a guest can buy it, but can download only the links that are Shareable.","When Yes, a cart with a downloadable product needs a customer account. When No, a guest can buy it, but can download only the links that are Shareable."
 "You have not purchased any downloadable products yet.","You have not purchased any downloadable products yet."

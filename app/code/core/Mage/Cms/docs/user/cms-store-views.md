@@ -1,5 +1,6 @@
 ---
 description: Why a CMS page or static block does not show in a store view - the Store View field, All Store Views, two pages with the same URL key, the status, and the home page setting per store view.
+admin_pages: [cms_page, cms_block]
 ---
 
 # CMS Pages and Blocks in Store Views
@@ -37,6 +38,10 @@ the page in this order:
 So you can have one page for **All Store Views** and a second page with the same URL key for one
 store view. The second page replaces the first one in that store view only. If you disable the
 second page, the store view shows the **All Store Views** page again.
+
+So before you change a page that does not show in a store view, look for the other pages with the
+same URL key: in **CMS > Pages**, filter the **URL Key** column. A page of that store view hides the
+page that you opened, also when you enable it.
 
 The same order applies to static blocks with the same identifier.
 
@@ -100,6 +105,7 @@ stays empty. The store shows no error.
 
 | What you see | Why | What to do |
 |--------------|-----|------------|
+| The page is invisible in the Italian store view, and another page with the same URL key is assigned to the Italian store view | That page wins in the Italian store view | Edit that page, or remove the Italian store view from it |
 | The page is invisible in the Italian store view | The **Store View** field does not contain the Italian store view or **All Store Views** | Add the Italian store view to the field, or select **All Store Views** |
 | The page is invisible in every store view | The **Status** is Disabled | Set **Status** to Enabled |
 | The Italian store view shows the English page | The Italian page is disabled, or is not assigned to the Italian store view, so the **All Store Views** page shows | Enable the Italian page and check its **Store View** field |

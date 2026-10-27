@@ -1,5 +1,6 @@
 ---
 description: Why the tax in the cart can differ from the tax in the order - which address Maho uses for the tax and when, the default tax destination, prices including or excluding tax, and the calculation settings.
+admin_pages: [tax_rule, tax_rate, tax_class_customer, tax_class_product, sales_order/view]
 ---
 
 # Tax in the Cart and in the Order

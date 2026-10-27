@@ -1,5 +1,6 @@
 ---
 description: Edit the HTML of a CMS page, a static block, a blog post or a product description in the source view, use Tailwind and daisyUI classes with completion and a color preview, and see when a new class shows on the storefront.
+admin_pages: [cms_page/edit, cms_block/edit]
 ---
 
 # HTML and Tailwind Classes in Content

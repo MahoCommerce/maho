@@ -1,5 +1,6 @@
 ---
 description: Compare Maho's seven product types - simple, configurable, grouped, virtual, bundle, downloadable and gift card - to model your catalog correctly.
+admin_pages: [catalog_product/new, catalog_product/edit]
 ---
 
 # Product Types

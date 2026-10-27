@@ -1,5 +1,6 @@
 ---
 description: Which price a configurable product shows, why the price changes when a customer picks an option, what the option prices on the Associated Products tab do, and what the Dynamic Price Change swatch setting does.
+admin_pages: [catalog_product/edit, promo_catalog]
 ---
 
 # Configurable Product Prices
