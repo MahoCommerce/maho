@@ -51,6 +51,10 @@ final class CmsPageProvider extends CrudProvider
             if ($identifier && !$this->isScopeAll(['scope' => $context['args']['scope'] ?? $context['filters']['scope'] ?? null])) {
                 return $this->singleItemPaginator($this->getPageByIdentifier($identifier));
             }
+            if ($identifier) {
+                // GraphQL gives the identifier in args, and applyCollectionFilters() reads the filters.
+                $context['filters']['identifier'] = $identifier;
+            }
         }
 
         return parent::provide($operation, $uriVariables, $context);

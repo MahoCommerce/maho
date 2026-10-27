@@ -63,7 +63,7 @@ use Maho\ApiPlatform\CrudResource;
                 'createdFrom' => ['type' => 'String', 'description' => 'Created at or after this UTC date or datetime; a bare date means from 00:00:00'],
                 'createdTo' => ['type' => 'String', 'description' => 'Created at or before this UTC date or datetime; a bare date includes the whole day'],
                 'updatedSince' => ['type' => 'String', 'description' => 'Updated at or after this UTC date or datetime'],
-                'identifier' => ['type' => 'String', 'description' => 'Exact identifier lookup. Returns the one page that the store view shows. With scope "all", returns every page with this identifier, with its store views'],
+                'identifier' => ['type' => 'String', 'description' => 'Exact identifier lookup. Returns one page: for a guest or a customer, the enabled page that the store view shows. A backend caller also gets a disabled page, and the page of another store view when the store view has none. With scope "all", returns every page with this identifier, with its store views'],
                 'search' => ['type' => 'String', 'description' => 'Partial match on the page title or identifier, minimum 3 characters'],
                 'scope' => ['type' => 'String', 'description' => 'Give "all" to list the records of every store view, the disabled and unpublished ones too, as the admin grid does. It needs backend access. Without it, the list holds only the published records of the current store view'],
             ],

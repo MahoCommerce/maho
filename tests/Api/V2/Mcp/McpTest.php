@@ -341,6 +341,10 @@ describe('MCP tool dispatch', function (): void {
 
         expect($count(['identifier' => 'test-mcp-shared-identifier']))->toBe(1);
         expect($count(['identifier' => 'test-mcp-shared-identifier', 'scope' => 'all']))->toBe(2);
+
+        $graphql = gqlQuery('{ cmsPages(identifier: "test-mcp-shared-identifier", scope: "all") { edges { node { identifier } } } }', [], $token);
+        $identifiers = array_map(fn(array $edge): string => $edge['node']['identifier'], $graphql['json']['data']['cmsPages']['edges'] ?? []);
+        expect($identifiers)->toBe(['test-mcp-shared-identifier', 'test-mcp-shared-identifier']);
     });
 
     it('returns the body of a provider that answers with a response object', function (): void {

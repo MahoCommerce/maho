@@ -37,9 +37,10 @@ The **Ship** button shows on an order that has items left to ship. The order mus
 on hold or in payment review, and it must have items that need a shipment: a virtual or a
 downloadable item needs none.
 
-So the orders that wait for a shipment are in the state Pending or Processing. A Pending order has
-no invoice yet: the store lets you ship it, but the payment is not recorded. Check the payment
-before you ship it.
+So the orders that wait for a shipment are in the state Pending, Pending Payment or Processing. A
+Pending order has no invoice yet: the store lets you ship it, but the payment is not recorded. A
+Pending Payment order waits for the payment provider: the store lets you ship it too, but the
+payment is not confirmed. Check the payment before you ship either of them.
 
 To see them, go to **Sales > Orders** and filter the **Status** column. A Processing order can
 already have a shipment for some items: open it and check the **Shipments** tab.
