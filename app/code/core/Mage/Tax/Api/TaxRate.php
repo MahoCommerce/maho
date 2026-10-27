@@ -33,10 +33,12 @@ use Maho\ApiPlatform\CrudResource;
         new Get(
             uriTemplate: '/tax-rates/{id}',
             security: "is_granted('ROLE_ADMIN') or is_granted('tax-rates/read')",
+            description: 'Get a tax rate by ID: a percentage for a country, a region and a postcode or a postcode range. A rate applies only through a tax rule that lists it',
         ),
         new GetCollection(
             uriTemplate: '/tax-rates',
             security: "is_granted('ROLE_ADMIN') or is_granted('tax-rates/read')",
+            description: 'Get the tax rates. Give taxCountryId to get the rates of one country',
         ),
         new Post(
             uriTemplate: '/tax-rates',
@@ -60,12 +62,12 @@ use Maho\ApiPlatform\CrudResource;
     graphQlOperations: [
         new Query(
             name: 'item_query',
-            description: 'Get a tax rate by ID',
+            description: 'Get a tax rate by ID: a percentage for a country, a region and a postcode or a postcode range. A rate applies only through a tax rule that lists it',
             security: "is_granted('ROLE_ADMIN') or is_granted('tax-rates/read')",
         ),
         new QueryCollection(
             name: 'collection_query',
-            description: 'Get tax rates',
+            description: 'Get the tax rates. Give taxCountryId to get the rates of one country',
             security: "is_granted('ROLE_ADMIN') or is_granted('tax-rates/read')",
             extraArgs: [
                 'search' => ['type' => 'String', 'description' => 'Partial match on the rate code'],
