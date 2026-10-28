@@ -139,9 +139,15 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
      */
     public function getCustomAttributes(): array
     {
+        try {
+            $all = Mage::getSingleton('eav/config')->getAttributes(Mage_Cms_Model_Page::ENTITY);
+        } catch (Mage_Core_Exception) {
+            // The install saves pages before the cms_setup upgrade adds the entity type
+            return [];
+        }
         $columns = $this->_getReadAdapter()->describeTable($this->getMainTable());
         $attributes = [];
-        foreach (Mage::getSingleton('eav/config')->getAttributes(Mage_Cms_Model_Page::ENTITY) as $attribute) {
+        foreach ($all as $attribute) {
             $code = (string) $attribute->getAttributeCode();
             if ($attribute->getIsUserDefined() && isset($columns[$code])) {
                 $attributes[$code] = $attribute;
