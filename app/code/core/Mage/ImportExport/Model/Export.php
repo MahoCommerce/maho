@@ -356,6 +356,7 @@ class Mage_ImportExport_Model_Export extends Mage_ImportExport_Model_Abstract
     /**
      * Delete the export files that are older than FILE_LIFETIME_DAYS.
      */
+    #[Maho\Config\CronJob('importexport_delete_expired_exports', schedule: '45 3 * * *')]
     public function deleteExpiredFiles(): void
     {
         $mount = $this->getStorage();

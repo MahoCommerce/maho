@@ -35,8 +35,7 @@ class Mage_ImportExport_Model_MessageHandler
     }
 
     /**
-     * Write the export file to the export mount, and send a link to the file. The link holds the
-     * name of the file, which the job knows only at the end, so this handler sends its own messages.
+     * Write the export file to the export mount, and send a link to the file.
      *
      * @throws Throwable when the export failed for a reason other than the data, so the queue tries
      *                   the message again
@@ -45,39 +44,22 @@ class Mage_ImportExport_Model_MessageHandler
     public function export(Mage_ImportExport_Model_ExportMessage $message): void
     {
         $helper = Mage::helper('importexport');
-        $notifier = Mage::helper('adminnotification');
-        $aclResource = $message->adminUserId === null ? 'system/convert/export' : null;
-
-        try {
-            /** @var Mage_ImportExport_Model_Export $export */
-            $export = Mage::getModel('importexport/export');
-            $export->deleteExpiredFiles();
-            $fileName = $export->setData($message->parameters)->exportToStorage();
-        } catch (Throwable $e) {
-            Mage::logException($e);
-            $notifier->notifyAdmin(
-                Mage_AdminNotification_Model_Inbox::SEVERITY_MAJOR,
-                $helper->__('The export failed'),
-                $notifier->getFailureText($e),
-                'adminhtml/export/index',
-                [],
-                $message->adminUserId,
-                $aclResource,
-            );
-            if ($e instanceof Mage_Core_Exception) {
-                return;
-            }
-            throw $e;
-        }
-
-        $notifier->notifyAdmin(
-            Mage_AdminNotification_Model_Inbox::SEVERITY_NOTICE,
+        $doneParams = [];
+        Mage::helper('adminnotification')->runAndNotify(
+            function () use ($helper, $message, &$doneParams): string {
+                /** @var Mage_ImportExport_Model_Export $export */
+                $export = Mage::getModel('importexport/export');
+                $fileName = $export->setData($message->parameters)->exportToStorage();
+                $doneParams = ['file' => $fileName];
+                return $helper->__('Open this message to download the file %s. The file stays for at least %d days.', $fileName, Mage_ImportExport_Model_Export::FILE_LIFETIME_DAYS);
+            },
             $helper->__('The export file is ready'),
-            $helper->__('Open this message to download the file %s. The file stays for at least %d days.', $fileName, Mage_ImportExport_Model_Export::FILE_LIFETIME_DAYS),
-            'adminhtml/export/download',
-            ['file' => $fileName],
+            $helper->__('The export failed'),
+            'adminhtml/export/index',
             $message->adminUserId,
-            $aclResource,
+            'system/convert/export',
+            'adminhtml/export/download',
+            $doneParams,
         );
     }
 }

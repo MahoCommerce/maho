@@ -19,7 +19,7 @@ function qajAdminUserId(): int
 }
 
 /**
- * @return list<array{severity: string, title: string, description: string, admin_user_id: ?string, acl_resource: ?string}>
+ * @return list<array{severity: string, title: string, description: string, url: string, admin_user_id: ?string, acl_resource: ?string}>
  */
 function qajTakeNotices(string $titlePrefix): array
 {
@@ -29,7 +29,7 @@ function qajTakeNotices(string $titlePrefix): array
 
     $notices = $adapter->fetchAll(
         $adapter->select()
-            ->from($table, ['severity', 'title', 'description', 'admin_user_id', 'acl_resource'])
+            ->from($table, ['severity', 'title', 'description', 'url', 'admin_user_id', 'acl_resource'])
             ->where('title LIKE ?', $titlePrefix . '%'),
     );
     $adapter->delete($table, ['title LIKE ?' => $titlePrefix . '%']);
@@ -116,8 +116,19 @@ describe('runAndNotify()', function () {
     });
 
     test('the link of a message has no secret key', function () {
-        expect(Mage::helper('adminnotification')->getAdminUrl('adminhtml/promo_catalog/index'))
-            ->not->toContain('/key/');
+        $title = 'qaj-link-' . uniqid();
+
+        Mage::helper('adminnotification')->notifyAdmin(
+            Mage_AdminNotification_Model_Inbox::SEVERITY_NOTICE,
+            $title,
+            'qaj-text',
+            'adminhtml/promo_catalog/index',
+        );
+        $notices = qajTakeNotices($title);
+
+        expect($notices)->toHaveCount(1)
+            ->and($notices[0]['url'])->toContain('promo_catalog')
+            ->and($notices[0]['url'])->not->toContain('/key/');
     });
 });
 
@@ -133,6 +144,19 @@ describe('Admin actions that run in the queue', function () {
         expect($messages)->toHaveCount(1)
             ->and($messages[0]['queue'])->toBe(Mage_CatalogRule_Model_ApplyAllMessage::QUEUE_NAME)
             ->and($messages[0]['message_class'])->toBe(Mage_CatalogRule_Model_ApplyAllMessage::class);
+    });
+
+    test('the apply handler clears the "rules not applied" flag and sends a notice', function () {
+        Mage::getModel('catalogrule/flag')->loadSelf()->setState(1)->save();
+
+        (new Mage_CatalogRule_Model_ApplyAllMessageHandler())
+            ->applyAll(new Mage_CatalogRule_Model_ApplyAllMessage(qajAdminUserId()));
+        $state = (int) Mage::getModel('catalogrule/flag')->loadSelf()->getState();
+        $notices = qajTakeNotices('The catalog price rules have been applied');
+
+        expect($state)->toBe(0)
+            ->and($notices)->toHaveCount(1)
+            ->and((int) $notices[0]['severity'])->toBe(Mage_AdminNotification_Model_Inbox::SEVERITY_NOTICE);
     });
 
     test('Generate of a sitemap queues one run for each sitemap', function () {
@@ -198,6 +222,22 @@ describe('Admin actions that run in the queue', function () {
             ->__invoke(new Mage_Reports_Model_Queue_RefreshStatistics('qaj-unknown', qajAdminUserId()));
 
         expect(qajTakeNotices('The lifetime statistics'))->toBe([]);
+    });
+
+    test('a lifetime refresh tells the administrator who clicked, and an API refresh tells nobody', function () {
+        $handler = new Mage_Reports_Model_Queue_RefreshStatisticsHandler();
+        $adminUserId = qajAdminUserId();
+
+        qajTakeNotices('The lifetime statistics');
+        $handler->__invoke(new Mage_Reports_Model_Queue_RefreshStatistics('tax', $adminUserId));
+        $byAdmin = qajTakeNotices('The lifetime statistics');
+        $handler->__invoke(new Mage_Reports_Model_Queue_RefreshStatistics('tax'));
+        $byApi = qajTakeNotices('The lifetime statistics');
+
+        expect($byAdmin)->toHaveCount(1)
+            ->and((int) $byAdmin[0]['severity'])->toBe(Mage_AdminNotification_Model_Inbox::SEVERITY_NOTICE)
+            ->and((int) $byAdmin[0]['admin_user_id'])->toBe($adminUserId)
+            ->and($byApi)->toBe([]);
     });
 
     test('a queue worker has a handler for each admin message', function () {

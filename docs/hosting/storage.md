@@ -24,7 +24,7 @@ Each node then reads and writes the same files, and a node can start with an emp
 | `imports`          | `var/import`                    | Dataflow import files and profile uploads               |
 | `feeds`            | `var/feedmanager`               | Work files of a feed that the admin generates in batches: a state file and one part file for each batch. The finished feed goes to `media`. |
 | `sitemaps`         | `public`                        | The sitemap files                                       |
-| `importexport_exports` | `var/importexport/export`   | Files of System > Import/Export > Export. Each export deletes the files that are older than 7 days |
+| `importexport_exports` | `var/importexport/export`   | Files of System > Import/Export > Export. A daily cron job deletes the files that are older than 7 days |
 
 The cache, the sessions, the logs, `var/tmp` and the locks are not on a mount. Put the cache and
 the sessions on [Redis](redis.md). Each node keeps its own logs and temporary files. System >
@@ -121,7 +121,9 @@ other mounts in a bucket that allows no public read.
 ## Private files
 
 The `custom_options`, `downloadable`, `customer`, `customer_address` and `importexport_exports`
-mounts hold files that only Maho can serve. Their local folders are below `public/media`, and the web server denies them.
+mounts hold files that only Maho can serve. The local folders of the first four mounts are below
+`public/media`, and the web server denies them. The local folder of `importexport_exports` is
+`var/importexport/export`, outside the web root.
 
 A private mount does not follow the `media` mount. When you move `media` to a bucket, move each
 private mount too, or its files stay on the disk of the node that received them. Put the private

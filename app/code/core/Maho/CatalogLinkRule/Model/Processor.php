@@ -102,9 +102,18 @@ class Maho_CatalogLinkRule_Model_Processor
             $rulesByType[$rule->getLinkTypeId()][] = $rule;
         }
 
-        // Process each link type separately
-        foreach ($rulesByType as $linkTypeId => $typeRules) {
-            $this->processLinkType((int) $linkTypeId, $typeRules);
+        // The cron job and the queue worker write the same links, so only one run writes at a time
+        $lock = Mage::getSingleton('core/lock');
+        if (!$lock->acquire('cataloglinkrule_apply')) {
+            throw new RuntimeException(Mage::helper('cataloglinkrule')->__('Another run of the product relationship rules is in progress.'));
+        }
+        try {
+            // Process each link type separately
+            foreach ($rulesByType as $linkTypeId => $typeRules) {
+                $this->processLinkType((int) $linkTypeId, $typeRules);
+            }
+        } finally {
+            $lock->release('cataloglinkrule_apply');
         }
     }
 

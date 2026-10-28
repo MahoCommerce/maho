@@ -17,11 +17,11 @@ class Mage_ImportExport_Adminhtml_ExportController extends Mage_Adminhtml_Contro
     public const ADMIN_RESOURCE = 'system/convert/export';
 
     /**
-     * The download link in the notification has no secret key. The download only reads a file
-     * with a random name, and the ACL check above still applies.
+     * The links in the notifications have no secret key. These actions only read: the download reads
+     * a file with a random name. The ACL check above still applies.
      */
     #[\Override]
-    protected $_publicActions = ['download'];
+    protected $_publicActions = ['download', 'index'];
 
     /**
      * Custom constructor.
@@ -88,7 +88,7 @@ class Mage_ImportExport_Adminhtml_ExportController extends Mage_Adminhtml_Contro
         $mount = $model->getStorage();
         if ($path === null || !$mount->fileExists($path)) {
             $this->_getSession()->addError(
-                $this->__('The export file does not exist. Each export deletes the export files that are older than %d days.', Mage_ImportExport_Model_Export::FILE_LIFETIME_DAYS),
+                $this->__('The export file does not exist. A daily cron job deletes the export files that are older than %d days.', Mage_ImportExport_Model_Export::FILE_LIFETIME_DAYS),
             );
             $this->_redirect('*/*/index');
             return;

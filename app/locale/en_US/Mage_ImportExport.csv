@@ -99,7 +99,7 @@
 "Source must be a string file path or array","Source must be a string file path or array"
 "Status","Status"
 "The export failed","The export failed"
-"The export file does not exist. Each export deletes the export files that are older than %d days.","The export file does not exist. Each export deletes the export files that are older than %d days."
+"The export file does not exist. A daily cron job deletes the export files that are older than %d days.","The export file does not exist. A daily cron job deletes the export files that are older than %d days."
 "The export file is ready","The export file is ready"
 "The export will run in the background. A message in the notifications tells you when the file is ready.","The export will run in the background. A message in the notifications tells you when the file is ready."
 "The import failed","The import failed"

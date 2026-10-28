@@ -74,6 +74,7 @@ class Mage_AdminNotification_Helper_Data extends Mage_Core_Helper_Abstract
      *
      * When $adminUserId is set, only that administrator sees the message. When $aclResource is set,
      * only the administrators allowed that resource see it. With both null, every administrator does.
+     * The link has no secret key, because the key of the sender is not valid in the session of the reader.
      */
     public function notifyAdmin(
         int $severity,
@@ -88,7 +89,7 @@ class Mage_AdminNotification_Helper_Data extends Mage_Core_Helper_Abstract
             $severity,
             mb_substr(trim($title), 0, 255),
             trim($text),
-            $route === '' ? '' : $this->getAdminUrl($route, $routeParams),
+            $route === '' ? '' : $this->getAdminUrl($route, $routeParams + ['_nosecret' => true]),
             true,
             $adminUserId,
             $aclResource,
@@ -97,13 +98,14 @@ class Mage_AdminNotification_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Run $job in a queue handler and tell the administrator the result. $job returns the text of
-     * the notice. When $job fails, the administrator gets a major message with the error. A
-     * Mage_Core_Exception is an error in the data, which a retry does not fix, so it stops there.
-     * Any other exception goes on, so the queue tries the message again. Without $adminUserId, the
-     * administrators allowed $aclResource get the messages.
+     * the notice. When $job fails, the administrator gets a major message with the error.
+     * A Mage_Core_Exception is an error in the data. A retry does not fix it, so this method does not
+     * throw it again. This method throws every other error again, so the queue tries the message again.
+     * Without $adminUserId, the administrators allowed $aclResource get the messages.
+     * $doneRoute and $doneParams set the link of the notice when $job ends. $job can fill $doneParams.
      *
      * @param callable(): string $job
-     * @throws Throwable the exception of $job, unless it is a Mage_Core_Exception
+     * @throws Throwable the error of $job, unless it is a Mage_Core_Exception
      */
     public function runAndNotify(
         callable $job,
@@ -112,7 +114,11 @@ class Mage_AdminNotification_Helper_Data extends Mage_Core_Helper_Abstract
         string $route,
         ?int $adminUserId,
         ?string $aclResource = null,
+        ?string $doneRoute = null,
+        array &$doneParams = [],
     ): void {
+        // The admin request ran the observers of the adminhtml area, so the worker runs them too
+        Mage::app()->loadAreaPart(Mage_Core_Model_App_Area::AREA_ADMINHTML, Mage_Core_Model_App_Area::PART_EVENTS);
         try {
             $text = $job();
         } catch (Throwable $e) {
@@ -136,8 +142,8 @@ class Mage_AdminNotification_Helper_Data extends Mage_Core_Helper_Abstract
             Mage_AdminNotification_Model_Inbox::SEVERITY_NOTICE,
             $doneTitle,
             $text,
-            $route,
-            [],
+            $doneRoute ?? $route,
+            $doneParams,
             $adminUserId,
             $adminUserId === null ? $aclResource : null,
         );
@@ -146,7 +152,7 @@ class Mage_AdminNotification_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * The text of the major message about the failed job of a queue handler.
      */
-    public function getFailureText(Throwable $e): string
+    protected function getFailureText(Throwable $e): string
     {
         return $e instanceof Mage_Core_Exception
             ? $this->__('%s Correct the data, then start the action again.', $e->getMessage())
@@ -154,15 +160,17 @@ class Mage_AdminNotification_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * A queue worker runs outside the admin area, so build the URL from the admin store. The link
-     * has no secret key, because the key of the worker is not valid in the session of the reader.
+     * An admin URL without a store code. The API and the queue workers run in a frontend store,
+     * whose code would end up in the path, so the URL is built in the admin store.
+     *
+     * @param array<string, mixed> $params
      */
     public function getAdminUrl(string $route, array $params = []): string
     {
         $storeCode = Mage::app()->getStore()->getCode();
         Mage::app()->setCurrentStore(Mage_Core_Model_Store::ADMIN_CODE);
         try {
-            return Mage::helper('adminhtml')->getUrl($route, $params + ['_nosecret' => true]);
+            return Mage::helper('adminhtml')->getUrl($route, $params);
         } finally {
             Mage::app()->setCurrentStore($storeCode);
         }

@@ -392,10 +392,11 @@ public function rebuild(My_Module_Model_RebuildMessage $message): void
 }
 ```
 
-After the major message, `runAndNotify()` throws the exception of the job again, so the queue retries
-the message, and each failed attempt sends one message. A `Mage_Core_Exception` is the exception: it
-is an error in the data, which a retry does not fix, so the job stops after one message. Without an administrator, for example when cron
-queued the job, the administrators allowed the ACL resource get the messages.
+After the major message, `runAndNotify()` throws the error of the job again. The queue then retries
+the message, and each failed attempt sends one message. A `Mage_Core_Exception` is an error in the
+data. A retry does not fix it, so `runAndNotify()` does not throw it again, and the job stops after
+one message. Without an administrator, for example when cron queued the job, the administrators
+allowed the ACL resource get the messages.
 
 The link in the message has no secret key, because a worker cannot make a key that is valid in the
 session of the reader. So the action of the link must be in the `$_publicActions` of its controller,

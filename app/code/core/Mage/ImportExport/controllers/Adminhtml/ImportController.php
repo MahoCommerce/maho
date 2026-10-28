@@ -16,6 +16,10 @@ class Mage_ImportExport_Adminhtml_ImportController extends Mage_Adminhtml_Contro
      */
     public const ADMIN_RESOURCE = 'system/convert/import';
 
+    /** The link of a notice from the message queue has no secret key: the page only reads. */
+    #[\Override]
+    protected $_publicActions = ['index'];
+
     /**
      * Custom constructor.
      */
@@ -109,13 +113,6 @@ class Mage_ImportExport_Adminhtml_ImportController extends Mage_Adminhtml_Contro
                 ->addAction('clear', [
                     Mage_ImportExport_Model_Import::FIELD_NAME_SOURCE_FILE,
                     Mage_ImportExport_Model_Import::FIELD_NAME_IMG_ARCHIVE_FILE]);
-
-            // The validation replaces the rows that a queued import still reads
-            if (Mage_ImportExport_Model_Import::isImportInProgress()) {
-                $resultBlock->addError($this->__('An import waits or runs. Start a new import when it is done.'));
-                $this->renderLayout();
-                return;
-            }
 
             try {
                 /** @var Mage_ImportExport_Model_Import $import */

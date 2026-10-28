@@ -94,6 +94,61 @@ describe('Import/Export in the queue', function () {
             ->and(Mage_ImportExport_Model_Import::isImportInProgress())->toBeFalse();
     });
 
+    test('a validation is refused while a queued import waits, so it cannot replace the rows of that import', function () {
+        qieTakeMessages(Mage_ImportExport_Model_ImportMessage::class);
+        Mage::getModel('importexport/import')->queueImportSource();
+
+        try {
+            expect(fn() => Mage::getModel('importexport/import')->validateSource([]))
+                ->toThrow(Mage_Core_Exception::class, 'An import waits or runs');
+        } finally {
+            qieTakeMessages(Mage_ImportExport_Model_ImportMessage::class);
+        }
+    });
+
+    test('an import with no checked rows sends one major notice and stops, because a retry does not fix it', function () {
+        $resource = Mage::getSingleton('core/resource');
+        $resource->getConnection('core_write')->delete($resource->getTableName('importexport/importdata'));
+        $adminUserId = qieAdminUserId();
+        qieTakeNotices($adminUserId);
+
+        Mage::getModel('importexport/messageHandler')->import(new Mage_ImportExport_Model_ImportMessage($adminUserId));
+
+        $notices = qieTakeNotices($adminUserId);
+        expect($notices)->toHaveCount(1)
+            ->and((int) $notices[0]['severity'])->toBe(Mage_AdminNotification_Model_Inbox::SEVERITY_MAJOR)
+            ->and($notices[0]['title'])->toBe('The import failed')
+            ->and($notices[0]['description'])->not->toContain('tries again');
+    });
+
+    test('a customer export copies the temporary file to the mount and deletes the temporary file', function () {
+        $customer = Mage::getModel('customer/customer');
+        $customer->setWebsiteId(1)
+            ->setEmail('qie-' . uniqid() . '@example.com')
+            ->setFirstname('Qie')
+            ->setLastname('Export')
+            ->save();
+        $pattern = sys_get_temp_dir() . '/importexport_*';
+        $before = glob($pattern) ?: [];
+
+        try {
+            $export = Mage::getModel('importexport/export')->setData([
+                'entity' => 'customer',
+                'file_format' => 'csv',
+                Mage_ImportExport_Model_Export::FILTER_ELEMENT_GROUP => [],
+            ]);
+            $fileName = $export->exportToStorage();
+            $content = $export->getStorage()->read($fileName);
+            $export->getStorage()->delete($fileName);
+            $after = glob($pattern) ?: [];
+        } finally {
+            $customer->delete();
+        }
+
+        expect($content)->toContain($customer->getEmail())
+            ->and(array_values(array_diff($after, $before)))->toBe([]);
+    });
+
     test('a finished export writes the file to the mount and sends a link to it', function () {
         $adminUserId = qieAdminUserId();
         qieTakeNotices($adminUserId);
@@ -145,7 +200,7 @@ describe('Import/Export in the queue', function () {
         }
     });
 
-    test('an export deletes the export files that are older than the lifetime', function () {
+    test('the daily cleanup deletes the export files that are older than the lifetime', function () {
         $export = Mage::getModel('importexport/export');
         $mount = $export->getStorage();
         $old = 'qie_old_' . uniqid() . '.csv';

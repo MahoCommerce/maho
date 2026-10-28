@@ -34,9 +34,9 @@ so the page does not wait. A queue worker runs the job, and you get a message in
 **System > Notifications** when it is done:
 
 - After an import, the message tells you that the import is done, or gives the error.
-- After an export, the message has a link to the file. Each export deletes the export files that are older than 7 days.
+- After an export, the message has a link to the file. A daily cron job deletes the export files that are older than 7 days.
 
-The queue workers start from cron, so cron must run on the server. **System > Message Queue** shows
+The queue workers start from cron, so cron must run on the server. **System > Tools > Message Queue** shows
 the jobs, in the queue `importexport`.
 
 While an import waits or runs, Maho does not check a new file and does not start a new import. The
