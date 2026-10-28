@@ -53,8 +53,6 @@ abstract class Mage_ImportExport_Model_Import_Adapter_Abstract implements Seekab
      */
     final public function __construct($source)
     {
-        register_shutdown_function([$this, 'destruct']);
-
         // Allow arrays for array adapter
         if (is_array($source)) {
             $this->_source = 'array(' . count($source) . ' rows)';
@@ -83,8 +81,13 @@ abstract class Mage_ImportExport_Model_Import_Adapter_Abstract implements Seekab
         }
     }
 
+    public function __destruct()
+    {
+        $this->destruct();
+    }
+
     /**
-     * Destruct method on shutdown
+     * Called when the adapter is freed
      */
     public function destruct() {}
 

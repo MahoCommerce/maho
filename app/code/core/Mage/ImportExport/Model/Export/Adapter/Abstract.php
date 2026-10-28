@@ -59,8 +59,6 @@ abstract class Mage_ImportExport_Model_Export_Adapter_Abstract
      */
     final public function __construct($destination = null)
     {
-        register_shutdown_function([$this, 'destruct']);
-
         if (!$destination) {
             $destination = tempnam(sys_get_temp_dir(), 'importexport_');
         }
@@ -80,8 +78,13 @@ abstract class Mage_ImportExport_Model_Export_Adapter_Abstract
         $this->_init();
     }
 
+    public function __destruct()
+    {
+        $this->destruct();
+    }
+
     /**
-     * Destruct method on shutdown
+     * Called when the adapter is freed
      */
     public function destruct() {}
 
