@@ -8,6 +8,8 @@
  * @package Mage_Downloadable
  */
 
+declare(strict_types=1);
+
 /** @var Mage_Catalog_Model_Resource_Setup $this */
 $installer = $this;
 $connection = $installer->getConnection();
@@ -20,7 +22,7 @@ $encode = static function (string $url): ?string {
     // The host stays as it is, so a URL with a broken host stays refused
     $pathStart = $authorityStart + 3 + strcspn($url, '/?#', $authorityStart + 3);
     $tail = preg_replace_callback(
-        "/[^A-Za-z0-9\\-._~!$&'()*+,;=:@\\/?#%]/",
+        "/%(?![0-9A-Fa-f]{2})|[^A-Za-z0-9\\-._~!$&'()*+,;=:@\\/?#%]/",
         fn(array $match): string => rawurlencode($match[0]),
         substr($url, $pathStart),
     );
@@ -34,19 +36,27 @@ $columns = [
     ['downloadable/sample', 'sample_id', 'sample_url', 'sample_type'],
     ['downloadable/link_purchased_item', 'item_id', 'link_url', 'link_type'],
 ];
+$batchSize = 1000;
 foreach ($columns as [$alias, $idColumn, $urlColumn, $typeColumn]) {
     $table = $installer->getTable($alias);
-    $select = $connection->select()
-        ->from($table, [$idColumn, $urlColumn])
-        ->where($typeColumn . ' = ?', Mage_Downloadable_Helper_Download::LINK_TYPE_URL)
-        ->where($urlColumn . ' IS NOT NULL');
-    foreach ($connection->fetchPairs($select) as $id => $url) {
-        if (Uri\Rfc3986\Uri::parse((string) $url) !== null) {
-            continue;
+    $lastId = 0;
+    do {
+        $rows = $connection->fetchPairs($connection->select()
+            ->from($table, [$idColumn, $urlColumn])
+            ->where($typeColumn . ' = ?', Mage_Downloadable_Helper_Download::LINK_TYPE_URL)
+            ->where($urlColumn . ' IS NOT NULL')
+            ->where($idColumn . ' > ?', $lastId)
+            ->order($idColumn)
+            ->limit($batchSize));
+        foreach ($rows as $id => $url) {
+            $lastId = (int) $id;
+            if (Uri\Rfc3986\Uri::parse((string) $url) !== null) {
+                continue;
+            }
+            $fixed = $encode((string) $url);
+            if ($fixed !== null) {
+                $connection->update($table, [$urlColumn => $fixed], [$idColumn . ' = ?' => $id]);
+            }
         }
-        $fixed = $encode((string) $url);
-        if ($fixed !== null) {
-            $connection->update($table, [$urlColumn => $fixed], [$idColumn . ' = ?' => $id]);
-        }
-    }
+    } while (count($rows) === $batchSize);
 }

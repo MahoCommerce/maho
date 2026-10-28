@@ -42,6 +42,7 @@ describe('Downloadable data upgrade 2.0.1', function (): void {
     })->with([
         ['https://files.example/guía.pdf', 'https://files.example/gu%C3%ADa.pdf'],
         ['https://files.example/a b.jpg?crop[x]=1', 'https://files.example/a%20b.jpg?crop%5Bx%5D=1'],
+        ['https://files.example/50%sale.pdf', 'https://files.example/50%25sale.pdf'],
         ['https://files.example/ok%20already.pdf', 'https://files.example/ok%20already.pdf'],
         ['http://evil.example\\@good.example/', 'http://evil.example\\@good.example/'],
     ]);

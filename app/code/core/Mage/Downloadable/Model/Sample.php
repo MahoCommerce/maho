@@ -44,7 +44,7 @@ class Mage_Downloadable_Model_Sample extends Mage_Core_Model_Abstract
     }
 
     #[\Override]
-    protected function _beforeSave()
+    protected function _beforeSave(): static
     {
         if ($this->getSampleType() === Mage_Downloadable_Helper_Download::LINK_TYPE_URL) {
             Mage_Downloadable_Helper_Download::checkUrl($this->getSampleUrl());
