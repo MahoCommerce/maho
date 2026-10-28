@@ -106,6 +106,42 @@ describe('Import/Export in the queue', function () {
         }
     });
 
+    test('the validate action refuses a new file while a queued import waits', function () {
+        qieTakeMessages(Mage_ImportExport_Model_ImportMessage::class);
+        Mage::getModel('importexport/import')->queueImportSource();
+
+        $previousArea = Mage::getDesign()->getArea();
+        Mage::getDesign()->setArea('adminhtml')->setPackageName('default')->setTheme('default');
+        Mage::app()->getLayout()->setArea('adminhtml');
+
+        $request = new Mage_Core_Controller_Request_Http(
+            Symfony\Component\HttpFoundation\Request::create(
+                '/index.php/admin/import/validate',
+                'POST',
+                ['entity' => 'catalog_product', 'behavior' => 'append'],
+            ),
+        );
+        $request->setRouteName('adminhtml')->setControllerName('import')->setActionName('validate')->setDispatched(true);
+        Mage::app()->setRequest($request);
+
+        try {
+            $controller = new Mage_ImportExport_Adminhtml_ImportController($request, new Mage_Core_Controller_Response_Http());
+            try {
+                $controller->validateAction();
+            } catch (Throwable) {
+                // The render step can need an admin URL. The action adds the message before it renders.
+            }
+            $block = Mage::app()->getLayout()->getBlock('import.frame.result');
+
+            expect($block)->toBeInstanceOf(Mage_ImportExport_Block_Adminhtml_Import_Frame_Result::class)
+                ->and($block->getMessages()['error'])
+                ->toBe(['An import waits or runs. Start a new import when it is done.']);
+        } finally {
+            qieTakeMessages(Mage_ImportExport_Model_ImportMessage::class);
+            Mage::getDesign()->setArea($previousArea);
+        }
+    });
+
     test('an import with no checked rows sends one major notice and stops, because a retry does not fix it', function () {
         $resource = Mage::getSingleton('core/resource');
         $resource->getConnection('core_write')->delete($resource->getTableName('importexport/importdata'));

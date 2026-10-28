@@ -109,23 +109,38 @@ describe('CatalogLinkRule apply from the admin', function () {
             ->and($notices[0]['description'])->toContain('clq-failure');
     });
 
-    test('a run of the rules fails when it cannot take the lock, and a run releases the lock at its end', function () {
+    test('a run of the rules releases the lock at its end', function () {
         $lock = Mage::getSingleton('core/lock');
-        $processor = Mage::getModel('cataloglinkrule/processor');
 
-        expect($lock->acquire('cataloglinkrule_apply'))->toBeTrue();
-        try {
-            expect(fn() => $processor->applyRules(999999))
-                ->toThrow(RuntimeException::class, 'Another run of the product relationship rules is in progress.');
-        } finally {
-            $lock->release('cataloglinkrule_apply');
-        }
-
-        $processor->applyRules(999999);
+        Mage::getModel('cataloglinkrule/processor')->applyRules(999999);
         $free = $lock->acquire('cataloglinkrule_apply');
         $lock->release('cataloglinkrule_apply');
 
         expect($free)->toBeTrue();
+    });
+
+    test('a second run of the rules waits for the run that holds the lock', function () {
+        if ((string) Mage::getConfig()->getNode(Mage_Core_Model_Lock::XML_PATH_BACKEND) === 'db') {
+            $this->markTestSkipped('This test needs the file lock backend.');
+        }
+
+        $path = Mage::getConfig()->getVarDir('locks') . DS . 'cataloglinkrule_apply.lock';
+        $child = proc_open(
+            [PHP_BINARY, '-r', '$h = fopen($argv[1], "c"); flock($h, LOCK_EX); echo "locked\n"; sleep(2);', $path],
+            [1 => ['pipe', 'w']],
+            $pipes,
+        );
+        expect(trim((string) fgets($pipes[1])))->toBe('locked');
+        $startedAt = microtime(true);
+        try {
+            expect(fn() => Mage::getModel('cataloglinkrule/processor')->applyRules(999999))
+                ->not->toThrow(RuntimeException::class);
+        } finally {
+            fclose($pipes[1]);
+            proc_close($child);
+        }
+
+        expect(microtime(true) - $startedAt)->toBeGreaterThan(1.0);
     });
 
     test('a queue worker has a handler for the apply message', function () {
