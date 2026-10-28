@@ -47,5 +47,8 @@ describe('Downloadable link URL guard', function (): void {
         $url = 'https://example.com/file.zip';
         $validator->validateUrl($url);
         expect($url)->toBe('https://example.com/file.zip');
+        $url = 'https://files.example/gu%C3%ADa.pdf';
+        $validator->validateUrl($url);
+        expect($url)->toBe('https://files.example/gu%C3%ADa.pdf');
     });
 });
