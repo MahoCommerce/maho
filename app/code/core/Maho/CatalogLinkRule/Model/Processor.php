@@ -22,6 +22,8 @@ class Maho_CatalogLinkRule_Model_Processor
 
     public const CONFIG_MERGE_MODE = 'catalog/linkrule/merge_mode';
 
+    public const QUEUE_NAME = 'cataloglinkrule';
+
     /**
      * Resolve the configured merge mode (how rule results combine with existing links)
      */
@@ -39,6 +41,77 @@ class Maho_CatalogLinkRule_Model_Processor
     public function processRules(): void
     {
         $this->applyRules();
+    }
+
+    /**
+     * Queue applyRules() for $linkTypeId. A second request for the same link type is dropped
+     * while the first one waits or runs. The result goes to the inbox of $adminUserId, or of every
+     * administrator who can manage the rules when it is null.
+     */
+    public function queueApplyRules(?int $linkTypeId = null, ?int $adminUserId = null): void
+    {
+        \Maho\Queue\QueueManager::dispatch(
+            new Maho_CatalogLinkRule_Model_ApplyRulesMessage($linkTypeId, $adminUserId),
+            queue: self::QUEUE_NAME,
+            dedupeKey: 'cataloglinkrule_apply_' . ($linkTypeId ?? 'all'),
+        );
+    }
+
+    /**
+     * @throws Throwable when a rule could not be applied, so the queue tries the message again
+     */
+    #[Maho\Config\MessageHandler]
+    public function handleApplyRules(Maho_CatalogLinkRule_Model_ApplyRulesMessage $message): void
+    {
+        $helper = Mage::helper('cataloglinkrule');
+        $linkTypes = $message->linkTypeId === null
+            ? $helper->__('all link types')
+            : $helper->getLinkTypes()[$message->linkTypeId] ?? (string) $message->linkTypeId;
+
+        try {
+            $this->applyRules($message->linkTypeId);
+        } catch (Throwable $e) {
+            $this->notifyAdmin(
+                $message,
+                Mage_AdminNotification_Model_Inbox::SEVERITY_MAJOR,
+                $helper->__('The product relationship rules could not be applied'),
+                $helper->__('The rules of %s failed: %s. The message queue tries again.', $linkTypes, $e->getMessage()),
+            );
+            throw $e;
+        }
+
+        $this->notifyAdmin(
+            $message,
+            Mage_AdminNotification_Model_Inbox::SEVERITY_NOTICE,
+            $helper->__('The product relationship rules have been applied'),
+            $helper->__('The product links of %s are up to date.', $linkTypes),
+        );
+    }
+
+    protected function notifyAdmin(
+        Maho_CatalogLinkRule_Model_ApplyRulesMessage $message,
+        int $severity,
+        string $title,
+        string $text,
+    ): void {
+        // A worker runs outside the admin area, so build the link from the admin store
+        $storeCode = Mage::app()->getStore()->getCode();
+        Mage::app()->setCurrentStore(Mage_Core_Model_Store::ADMIN_CODE);
+        try {
+            $url = Mage::helper('adminhtml')->getUrl('adminhtml/cataloglinkrule_rule/index', ['_nosecret' => true]);
+        } finally {
+            Mage::app()->setCurrentStore($storeCode);
+        }
+
+        Mage::getModel('adminnotification/inbox')->add(
+            $severity,
+            $title,
+            $text,
+            $url,
+            true,
+            $message->adminUserId,
+            $message->adminUserId === null ? 'catalog/linkrules' : null,
+        );
     }
 
     /**

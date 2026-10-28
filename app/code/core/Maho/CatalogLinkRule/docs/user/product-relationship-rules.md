@@ -360,10 +360,14 @@ A save does not change the product links. The links change only when the rules r
 
 ### Apply From the Admin
 
-- **Catalog > Product Relationship Rules > Apply Rules** runs all the active rules now.
+- **Catalog > Product Relationship Rules > Apply Rules** runs all the active rules.
 - **Save and Apply** on the rule page saves the rule. Then it runs all the active rules of the same link type, because they compete for the same products by priority.
 
-On a large catalog, a run takes some time. The page waits until the run is complete.
+Both buttons put the run in the message queue, so the page does not wait. A queue worker runs it in the background, and the links change when the run is complete. The workers start from cron, so cron must run on the server. **System > Message Queue** shows the run, in the queue `cataloglinkrule`.
+
+When the run is complete, the administrator who clicked the button gets a message in **System > Notifications**. If the run fails, the message has the error, and the queue tries the run again.
+
+If you click a button again while a run of the same link type waits or runs, Maho does not add a second run.
 
 ### Automatic Processing (Cron)
 

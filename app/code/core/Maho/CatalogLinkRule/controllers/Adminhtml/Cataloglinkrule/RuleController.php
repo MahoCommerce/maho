@@ -135,10 +135,9 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
     {
         $session = Mage::getSingleton('adminhtml/session');
         try {
-            Mage::getModel('cataloglinkrule/processor')->applyRules($linkTypeId);
-            $session->addSuccess(Mage::helper('cataloglinkrule')->__('The rules have been applied.'));
-        } catch (Mage_Core_Exception $e) {
-            $session->addError(Mage::helper('cataloglinkrule')->__('Unable to apply rules.') . ' ' . $e->getMessage());
+            $adminUserId = Mage::getSingleton('admin/session')->getUser()?->getId();
+            Mage::getModel('cataloglinkrule/processor')->queueApplyRules($linkTypeId, $adminUserId === null ? null : (int) $adminUserId);
+            $session->addSuccess(Mage::helper('cataloglinkrule')->__('The rules will be applied in the background. A message in the notifications tells you when they are applied.'));
         } catch (Exception $e) {
             Mage::logException($e);
             $session->addError(Mage::helper('cataloglinkrule')->__('Unable to apply rules.'));
