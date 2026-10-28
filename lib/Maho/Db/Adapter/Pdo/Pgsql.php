@@ -1001,7 +1001,7 @@ class Pgsql extends AbstractPdoAdapter
         }
 
         // Get the primary key column for RETURNING clause
-        $tableName = is_array($table) ? reset($table) : (string) $table;
+        $tableName = is_array($table) ? array_first($table) : (string) $table;
         $primaryKey = $this->_getPrimaryKeyColumns($tableName);
         $returningColumn = empty($primaryKey) ? null : $primaryKey[0];
 
@@ -1114,7 +1114,7 @@ class Pgsql extends AbstractPdoAdapter
     #[\Override]
     public function insertOnDuplicate(string|array|\Maho\Db\Select $table, array $data, array $fields = []): int
     {
-        $row = reset($data);
+        $row = array_first($data);
         $bind = [];
         $values = [];
         $boundColumns = [];
@@ -1178,7 +1178,7 @@ class Pgsql extends AbstractPdoAdapter
         $this->_lastInsertedId = null;
 
         // Get the primary key column for RETURNING clause
-        $tableName = is_array($table) ? reset($table) : (string) $table;
+        $tableName = is_array($table) ? array_first($table) : (string) $table;
         $primaryKey = $this->_getPrimaryKeyColumns($tableName);
         $returningColumn = empty($primaryKey) ? null : $primaryKey[0];
 
@@ -1211,7 +1211,7 @@ class Pgsql extends AbstractPdoAdapter
 
         // Explicit values bypass the sequence; bump it so the next
         // auto-increment insert does not collide (see insert()).
-        if (is_array(reset($data))) {
+        if (is_array(array_first($data))) {
             foreach ($data as $dataRow) {
                 $this->bumpIdentitySequencesForBind($tableName, $dataRow);
             }
@@ -1227,7 +1227,7 @@ class Pgsql extends AbstractPdoAdapter
      */
     protected function _getPrimaryKeyColumns(string|array|\Maho\Db\Select $table): array
     {
-        $tableName = is_array($table) ? reset($table) : (string) $table;
+        $tableName = is_array($table) ? array_first($table) : (string) $table;
         $describe = $this->describeTable($tableName);
         $primaryKeys = [];
 
@@ -1248,7 +1248,7 @@ class Pgsql extends AbstractPdoAdapter
     #[\Override]
     public function insertMultiple(string|array|\Maho\Db\Select $table, array $data): int
     {
-        $row = reset($data);
+        $row = array_first($data);
         if (!is_array($row)) {
             return $this->insert($table, $data);
         }
@@ -1343,7 +1343,7 @@ class Pgsql extends AbstractPdoAdapter
         }
 
         // Get the primary key column for RETURNING clause
-        $tableName = is_array($table) ? reset($table) : (string) $table;
+        $tableName = is_array($table) ? array_first($table) : (string) $table;
         $primaryKey = $this->_getPrimaryKeyColumns($tableName);
         $returningColumn = empty($primaryKey) ? null : $primaryKey[0];
 

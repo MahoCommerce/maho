@@ -22,6 +22,24 @@ describe('Downloadable link URL guard', function (): void {
         expect(fn() => $helper->getFilesize())->toThrow(Mage_Core_Exception::class, 'not allowed');
     });
 
+    it('refuses to save a link or a sample with a URL that is not valid', function (): void {
+        $link = Mage::getModel('downloadable/link')
+            ->setLinkType(Mage_Downloadable_Helper_Download::LINK_TYPE_URL)
+            ->setLinkUrl('https://files.example:99999/a.pdf');
+        expect(fn() => $link->save())->toThrow(Mage_Core_Exception::class, 'is not valid');
+
+        $sample = Mage::getModel('downloadable/sample')
+            ->setSampleType(Mage_Downloadable_Helper_Download::LINK_TYPE_URL)
+            ->setSampleUrl('ftp://files.example/a.pdf');
+        expect(fn() => $sample->save())->toThrow(Mage_Core_Exception::class, 'is not valid');
+
+        $linkWithSample = Mage::getModel('downloadable/link')
+            ->setLinkType(Mage_Downloadable_Helper_Download::LINK_TYPE_FILE)
+            ->setSampleType(Mage_Downloadable_Helper_Download::LINK_TYPE_URL)
+            ->setSampleUrl('ftp://files.example/a.pdf');
+        expect(fn() => $linkWithSample->save())->toThrow(Mage_Core_Exception::class, 'is not valid');
+    });
+
     it('rejects ftp link URLs in the API validator', function (): void {
         $validator = new Mage_Downloadable_Model_Link_Api_Validator();
         $url = 'ftp://example.com/file.zip';
@@ -29,5 +47,8 @@ describe('Downloadable link URL guard', function (): void {
         $url = 'https://example.com/file.zip';
         $validator->validateUrl($url);
         expect($url)->toBe('https://example.com/file.zip');
+        $url = 'https://files.example/gu%C3%ADa.pdf';
+        $validator->validateUrl($url);
+        expect($url)->toBe('https://files.example/gu%C3%ADa.pdf');
     });
 });

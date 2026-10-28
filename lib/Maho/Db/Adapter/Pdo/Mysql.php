@@ -1885,7 +1885,7 @@ class Mysql extends AbstractPdoAdapter
     public function insertOnDuplicate(string|array|\Maho\Db\Select $table, array $data, array $fields = []): int
     {
         // extract and quote col names from the array keys
-        $row    = reset($data); // get first element from data array
+        $row    = array_first($data);
         $bind   = []; // SQL bind array
         $values = [];
 
@@ -1952,7 +1952,7 @@ class Mysql extends AbstractPdoAdapter
     #[\Override]
     public function insertMultiple(string|array|\Maho\Db\Select $table, array $data): int
     {
-        $row = reset($data);
+        $row = array_first($data);
         // support insert syntaxes
         if (!is_array($row)) {
             return $this->insert($table, $data);

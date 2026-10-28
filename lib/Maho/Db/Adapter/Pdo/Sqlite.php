@@ -913,7 +913,7 @@ class Sqlite extends AbstractPdoAdapter
     #[\Override]
     public function insertOnDuplicate(string|array|\Maho\Db\Select $table, array $data, array $fields = []): int
     {
-        $row = reset($data);
+        $row = array_first($data);
         $bind = [];
         $values = [];
 
@@ -995,7 +995,7 @@ class Sqlite extends AbstractPdoAdapter
      */
     protected function _getPrimaryKeyColumns(string|array|\Maho\Db\Select $table, array $insertCols = [], bool $allowRetry = true): array
     {
-        $tableName = is_array($table) ? reset($table) : (string) $table;
+        $tableName = is_array($table) ? array_first($table) : (string) $table;
 
         // Get all indexes for the table
         $indexes = $this->getIndexList($tableName);
@@ -1053,7 +1053,7 @@ class Sqlite extends AbstractPdoAdapter
     #[\Override]
     public function insertMultiple(string|array|\Maho\Db\Select $table, array $data): int
     {
-        $row = reset($data);
+        $row = array_first($data);
         if (!is_array($row)) {
             return $this->insert($table, $data);
         }

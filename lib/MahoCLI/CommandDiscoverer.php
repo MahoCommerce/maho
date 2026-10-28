@@ -69,7 +69,7 @@ class CommandDiscoverer
         );
 
         $parts = explode('lib\\MahoCLI\\Commands\\', $className);
-        $className = end($parts);
+        $className = array_last($parts);
 
         return $this->namespace . $className;
     }

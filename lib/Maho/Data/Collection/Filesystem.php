@@ -476,7 +476,7 @@ class Filesystem extends Collection
         if (!array_key_exists((string) $field, $row)) {
             return false;
         }
-        return call_user_func_array($callback, $callbackParams);
+        return $callback(...$callbackParams);
     }
 
     /**

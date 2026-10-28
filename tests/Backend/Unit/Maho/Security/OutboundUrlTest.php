@@ -51,8 +51,40 @@ describe('OutboundUrl', function (): void {
         expect(fn() => outboundUrl()->validate('http://nowhere.example/'))->toThrow(OutboundUrlException::class, 'resolved');
     });
 
-    it('rejects a URL without a host', function (): void {
-        expect(fn() => outboundUrl()->validate('http:///path'))->toThrow(OutboundUrlException::class);
+    it('reads a URL with three slashes as a host name, as a browser does', function (): void {
+        expect(fn() => outboundUrl(['path' => ['10.0.0.1']])->validate('http:///path'))
+            ->toThrow(OutboundUrlException::class, 'private or reserved');
+    });
+
+    it('rejects a malformed URL and a URL with a control character', function (string $url): void {
+        expect(fn() => outboundUrl(['good.example' => ['93.184.216.34']])->validate($url))
+            ->toThrow(OutboundUrlException::class, 'malformed');
+    })->with([
+        "http://good.example/a\r\nX-Injected: 1",
+        "http://good.example/a\tb",
+        'http://good.example:99999/',
+        'http://[::1/',
+    ]);
+
+    it('reads the URL as a browser does', function (string $url, string $host, string $pinnedUrl): void {
+        $target = outboundUrl([
+            'good.example' => ['93.184.216.34'],
+            'evil.example' => ['93.184.216.35'],
+            'xn--bcher-kva.example' => ['93.184.216.36'],
+        ])->validate($url);
+        expect($target->host)->toBe($host)
+            ->and($target->pinnedUrl())->toBe($pinnedUrl);
+    })->with([
+        ['https://good.example/guía.pdf', 'good.example', 'https://93.184.216.34/gu%C3%ADa.pdf'],
+        ['http://good.example/a b.pdf?crop[x]=1', 'good.example', 'http://93.184.216.34/a%20b.pdf?crop[x]=1'],
+        ['http://evil.example\\@good.example/', 'evil.example', 'http://93.184.216.35/@good.example/'],
+        ['https://bücher.example/a.pdf', 'xn--bcher-kva.example', 'https://93.184.216.36/a.pdf'],
+    ]);
+
+    it('lowercases the host and keeps the percent-encoding of the path and query', function (): void {
+        $target = outboundUrl(['cdn.example' => ['93.184.216.34']])->validate('HTTPS://CDN.Example/a%20b.jpg?x=%2F');
+        expect($target->host)->toBe('cdn.example')
+            ->and($target->pinnedUrl())->toBe('https://93.184.216.34/a%20b.jpg?x=%2F');
     });
 
     it('accepts a public host and pins the resolved address', function (): void {
@@ -89,6 +121,28 @@ describe('OutboundUrl', function (): void {
             ->and($target->httpClientOptions())->not->toHaveKey('resolve');
         expect(fn() => outboundUrl()->validate('http://intranet.example/other', ['http://intranet.example/files/']))
             ->toThrow(OutboundUrlException::class);
+    });
+
+    it('matches an allowed prefix whatever the case of the host', function (): void {
+        $target = outboundUrl()->validate('http://INTRANET.example/files/a.zip', ['HTTP://Intranet.EXAMPLE/files/']);
+        expect($target->ip)->toBeNull()
+            ->and($target->host)->toBe('intranet.example');
+    });
+
+    it('does not let a dot segment leave the path of an allowed prefix', function (string $url): void {
+        expect(fn() => outboundUrl(['intranet.example' => ['10.0.0.5']])->validate($url, ['http://intranet.example/files/']))
+            ->toThrow(OutboundUrlException::class, 'private or reserved');
+    })->with([
+        'http://intranet.example/files/../admin',
+        'http://intranet.example/files/%2e%2e/admin',
+        'http://intranet.example/files/..%2Fadmin',
+        'http://intranet.example/files/..%5cadmin',
+        'http://intranet.example/files/..;/admin',
+    ]);
+
+    it('sends the path that it compared with the allowed prefix', function (): void {
+        $target = outboundUrl()->validate('http://intranet.example/admin/../files/x', ['http://intranet.example/files/']);
+        expect($target->path)->toBe('/files/x');
     });
 
     it('classifies addresses', function (): void {
