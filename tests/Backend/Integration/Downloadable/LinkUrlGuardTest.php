@@ -32,6 +32,12 @@ describe('Downloadable link URL guard', function (): void {
             ->setSampleType(Mage_Downloadable_Helper_Download::LINK_TYPE_URL)
             ->setSampleUrl('https://files.example/a b.pdf');
         expect(fn() => $sample->save())->toThrow(Mage_Core_Exception::class, 'is not valid');
+
+        $linkWithSample = Mage::getModel('downloadable/link')
+            ->setLinkType(Mage_Downloadable_Helper_Download::LINK_TYPE_FILE)
+            ->setSampleType(Mage_Downloadable_Helper_Download::LINK_TYPE_URL)
+            ->setSampleUrl('https://files.example/a b.pdf');
+        expect(fn() => $linkWithSample->save())->toThrow(Mage_Core_Exception::class, 'is not valid');
     });
 
     it('rejects ftp link URLs in the API validator', function (): void {

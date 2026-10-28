@@ -87,7 +87,7 @@
 "The link has expired.","The link has expired."
 "The link is not available.","The link is not available."
 "There are files that were selected but not uploaded yet. Please upload or remove them first","There are files that were selected but not uploaded yet. Please upload or remove them first"
-"The URL of a link or a sample is not valid: %s Percent-encode each space and each character that is not ASCII.","The URL of a link or a sample is not valid: %s Percent-encode each space and each character that is not ASCII."
+"The URL of a link or a sample is not valid: %s","The URL of a link or a sample is not valid: %s"
 "Title","Title"
 "To:","To:"
 "U","U"

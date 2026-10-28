@@ -359,7 +359,7 @@ class Mage_Downloadable_Helper_Download extends Mage_Core_Helper_Abstract
         try {
             \Maho\Security\OutboundUrl::parse($url);
         } catch (\Maho\Security\OutboundUrlException $e) {
-            Mage::throwException(Mage::helper('downloadable')->__('The URL of a link or a sample is not valid: %s Percent-encode each space and each character that is not ASCII.', $e->getMessage()));
+            Mage::throwException(Mage::helper('downloadable')->__('The URL of a link or a sample is not valid: %s', $e->getMessage()));
         }
     }
 

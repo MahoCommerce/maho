@@ -45,4 +45,41 @@ describe('Downloadable data upgrade 2.0.1', function (): void {
         ['https://files.example/ok%20already.pdf', 'https://files.example/ok%20already.pdf'],
         ['http://evil.example\\@good.example/', 'http://evil.example\\@good.example/'],
     ]);
+
+    it('percent-encodes the URL in the sample and purchased item tables', function (): void {
+        $resource = Mage::getSingleton('core/resource');
+        $adapter = $resource->getConnection('core_write');
+        $purchasedTable = $resource->getTableName('downloadable/link_purchased');
+        $itemTable = $resource->getTableName('downloadable/link_purchased_item');
+        $sampleTable = $resource->getTableName('downloadable/sample');
+
+        $adapter->insert($purchasedTable, ['order_id' => null, 'customer_id' => null]);
+        $purchasedId = (int) $adapter->lastInsertId($purchasedTable);
+        $adapter->insert($itemTable, [
+            'purchased_id' => $purchasedId,
+            'order_item_id' => null,
+            'link_type' => Mage_Downloadable_Helper_Download::LINK_TYPE_URL,
+            'link_url' => 'https://files.example/guía.pdf',
+        ]);
+        $itemId = (int) $adapter->lastInsertId($itemTable);
+        $adapter->insert($sampleTable, [
+            'product_id' => (int) $adapter->fetchOne($adapter->select()->from($resource->getTableName('catalog/product'), ['entity_id'])->limit(1)),
+            'sample_type' => Mage_Downloadable_Helper_Download::LINK_TYPE_URL,
+            'sample_url' => 'https://files.example/a b.pdf',
+        ]);
+        $sampleId = (int) $adapter->lastInsertId($sampleTable);
+
+        try {
+            linkUrlUpgradeRun();
+            $itemUrl = $adapter->fetchOne($adapter->select()->from($itemTable, ['link_url'])->where('item_id = ?', $itemId));
+            $sampleUrl = $adapter->fetchOne($adapter->select()->from($sampleTable, ['sample_url'])->where('sample_id = ?', $sampleId));
+        } finally {
+            $adapter->delete($sampleTable, ['sample_id = ?' => $sampleId]);
+            $adapter->delete($itemTable, ['item_id = ?' => $itemId]);
+            $adapter->delete($purchasedTable, ['purchased_id = ?' => $purchasedId]);
+        }
+
+        expect($itemUrl)->toBe('https://files.example/gu%C3%ADa.pdf')
+            ->and($sampleUrl)->toBe('https://files.example/a%20b.pdf');
+    });
 });
