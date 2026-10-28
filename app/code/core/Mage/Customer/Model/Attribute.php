@@ -61,14 +61,65 @@ class Mage_Customer_Model_Attribute extends Mage_Eav_Model_Attribute
                 'acl' => 'system/attributes/customer',
                 'title' => $helper->__('Customer Attributes'),
                 'sets_title' => $helper->__('Customer Attribute Sets'),
+                'main_tab' => 'adminhtml/customer_attribute_edit_tab_main',
             ],
             'customer_address' => [
                 'acl' => 'system/attributes/customer_address',
                 'title' => $helper->__('Customer Address Attributes'),
                 'sets_title' => $helper->__('Customer Address Attribute Sets'),
+                'main_tab' => 'adminhtml/customer_attribute_edit_tab_main',
             ],
             default => null,
         };
+    }
+
+    /**
+     * Keep only the known forms and input rules. A system attribute keeps its forms.
+     */
+    #[\Override]
+    public function prepareAdminData(array $data): array
+    {
+        if ($this->getId() && $this->getIsSystem()) {
+            unset($data['used_in_forms']);
+        } else {
+            $allowed = array_keys($this->getFormCodes());
+            $data['used_in_forms'] = array_values(array_intersect((array) ($data['used_in_forms'] ?? []), $allowed));
+        }
+        if (!$this->getId()) {
+            $data['is_system'] = 0;
+        }
+
+        $data['input_filter'] = in_array($data['input_filter'] ?? '', ['striptags', 'escapehtml'], true)
+            ? $data['input_filter'] : null;
+
+        $rules = [];
+        foreach (['min_text_length', 'max_text_length'] as $key) {
+            if (!empty($data[$key])) {
+                $rules[$key] = (int) $data[$key];
+            }
+        }
+        if (in_array($data['input_validation'] ?? '', ['alphanumeric', 'alpha', 'numeric', 'email', 'url'], true)) {
+            $rules['input_validation'] = $data['input_validation'];
+        }
+        $data['validate_rules'] = $rules;
+        unset($data['min_text_length'], $data['max_text_length'], $data['input_validation'], $data['website_values']);
+
+        if (isset($data['multiline_count'])) {
+            $data['multiline_count'] = max(1, (int) $data['multiline_count']);
+        }
+        return $data;
+    }
+
+    /**
+     * Save the hidden, optional or required mode of each website.
+     */
+    #[\Override]
+    public function saveAdminData(array $data): void
+    {
+        if (is_array($data['website_values'] ?? null)) {
+            $websiteIds = array_map(intval(...), array_keys(Mage::app()->getWebsites()));
+            $this->getResource()->saveWebsiteValues((int) $this->getId(), array_intersect_key($data['website_values'], array_flip($websiteIds)));
+        }
     }
 
     #[\Override]

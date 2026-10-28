@@ -215,6 +215,20 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
     }
 
     /**
+     * Turn the posted values of the admin attribute form into the data of this attribute.
+     * The attribute is loaded when it exists.
+     */
+    public function prepareAdminData(array $data): array
+    {
+        return $data;
+    }
+
+    /**
+     * Save the posted values of the admin attribute form that the attribute does not save itself.
+     */
+    public function saveAdminData(array $data): void {}
+
+    /**
      * Return the input types that the admin offers for the entity type of this attribute.
      *
      * The key is the input code. Each type has a label, and can name a backend_model, a

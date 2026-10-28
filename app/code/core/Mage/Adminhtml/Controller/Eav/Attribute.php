@@ -173,6 +173,7 @@ abstract class Mage_Adminhtml_Controller_Eav_Attribute extends Mage_Adminhtml_Co
             $this->_redirect('*/*/');
             return;
         }
+        $posted = $data;
 
         $session = $this->_getSession();
         $id = (int) $this->getRequest()->getParam('attribute_id');
@@ -232,7 +233,7 @@ abstract class Mage_Adminhtml_Controller_Eav_Attribute extends Mage_Adminhtml_Co
             $data['default_value'] = $this->getRequest()->getParam($defaultValueField);
         }
 
-        $data = $this->prepareSaveData($this->filterPostData($data), $model);
+        $data = $this->prepareSaveData($model->prepareAdminData($this->filterPostData($data)), $model);
         $model->addData($data);
 
         if (!$id) {
@@ -249,7 +250,7 @@ abstract class Mage_Adminhtml_Controller_Eav_Attribute extends Mage_Adminhtml_Co
 
         try {
             $model->save();
-            $this->afterSave($model, $data);
+            $model->saveAdminData($posted);
         } catch (Exception $e) {
             $session->addError($e->getMessage());
             $session->setAttributeData($data);
@@ -291,11 +292,6 @@ abstract class Mage_Adminhtml_Controller_Eav_Attribute extends Mage_Adminhtml_Co
     {
         return $data;
     }
-
-    /**
-     * Save the values that the attribute model does not save itself.
-     */
-    protected function afterSave(Mage_Eav_Model_Entity_Attribute $model, array $data): void {}
 
     protected function getSavedMessage(): string
     {
