@@ -105,7 +105,9 @@ export class UpscaleTool {
     }
 
     activate() {}
-    deactivate() {}
+    deactivate() {
+        if (this._processing) this._cancelled = true;
+    }
     onPointerDown() {}
     onPointerMove() {}
     onPointerUp() {}
@@ -187,7 +189,7 @@ export class UpscaleTool {
 
             const source = this.editor.baseCanvas;
             const result = await this._upscale(source, this._scale, model, Tensor);
-            if (this.editor.baseCanvas !== source) {
+            if (this._cancelled || this.editor.baseCanvas !== source) {
                 result.width = 0;
                 throw new UpscaleCancelled();
             }
@@ -203,9 +205,11 @@ export class UpscaleTool {
             }
         } finally {
             this._processing = false;
-            const status = this._statusEl?.textContent;
-            this.editor.setOptions(this.renderOptions());
-            this._setStatus(status);
+            if (this.editor.activeTool === this) {
+                const status = this._statusEl?.textContent;
+                this.editor.setOptions(this.renderOptions());
+                this._setStatus(status);
+            }
         }
     }
 
@@ -273,6 +277,8 @@ export class UpscaleTool {
     destroy() {
         this._cancelled = true;
         latestProgressCallback = null;
+        const pending = modelPromise;
         modelPromise = null;
+        pending?.then(({ model }) => model.dispose()).catch(() => {});
     }
 }
