@@ -1,0 +1,51 @@
+<?php
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package base_default
+ */
+
+/** @var Mage_Customer_Block_Form_Attributes $this */
+?>
+<?php foreach ($this->getAttributes() as $_attribute): ?>
+<?php
+    $_input = $_attribute->getFrontendInput();
+    $_id = $this->escapeHtml($this->getFieldId($_attribute));
+    $_label = $this->escapeHtml($this->__($_attribute->getStoreLabel()));
+    $_required = (bool) $_attribute->getIsRequired();
+    $_class = $this->escapeHtml($this->getValidationClass($_attribute));
+    $_value = $this->getValue($_attribute);
+?>
+    <li class="<?= $_input === 'textarea' || $_input === 'multiline' ? 'wide' : '' ?>">
+        <label for="<?= $_id ?>"<?php if ($_required): ?> class="required"<?php endif ?>><?= $_label ?></label>
+        <div class="input-box">
+        <?php if ($_input === 'textarea'): ?>
+            <textarea name="<?= $this->escapeHtml($this->getFieldName($_attribute)) ?>" id="<?= $_id ?>" title="<?= $_label ?>" class="input-text <?= $_class ?>"<?php if ($_required): ?> aria-required="true"<?php endif ?>><?= $this->escapeHtml((string) $_value) ?></textarea>
+        <?php elseif ($_input === 'select' || $_input === 'boolean'): ?>
+            <?php $_selected = $this->getSelectedValues($_attribute) ?>
+            <select name="<?= $this->escapeHtml($this->getFieldName($_attribute)) ?>" id="<?= $_id ?>" title="<?= $_label ?>" class="<?= $_class ?>"<?php if ($_required): ?> aria-required="true"<?php endif ?>>
+                <option value=""></option>
+                <?php foreach ($this->getOptions($_attribute) as $_option): ?>
+                    <option value="<?= $this->escapeHtml($_option['value']) ?>"<?php if (in_array($_option['value'], $_selected, true)): ?> selected<?php endif ?>><?= $this->escapeHtml($_option['label']) ?></option>
+                <?php endforeach ?>
+            </select>
+        <?php elseif ($_input === 'multiselect'): ?>
+            <?php $_selected = $this->getSelectedValues($_attribute) ?>
+            <select multiple name="<?= $this->escapeHtml($this->getFieldName($_attribute, '[]')) ?>" id="<?= $_id ?>" title="<?= $_label ?>" class="multiselect <?= $_class ?>"<?php if ($_required): ?> aria-required="true"<?php endif ?>>
+                <?php foreach ($this->getOptions($_attribute) as $_option): ?>
+                    <option value="<?= $this->escapeHtml($_option['value']) ?>"<?php if (in_array($_option['value'], $_selected, true)): ?> selected<?php endif ?>><?= $this->escapeHtml($_option['label']) ?></option>
+                <?php endforeach ?>
+            </select>
+        <?php elseif ($_input === 'multiline'): ?>
+            <?php $_lines = is_array($_value) ? $_value : explode("\n", (string) $_value) ?>
+            <?php for ($_i = 0; $_i < max(1, (int) $_attribute->getMultilineCount()); $_i++): ?>
+                <input type="text" name="<?= $this->escapeHtml($this->getFieldName($_attribute, '[]')) ?>" id="<?= $_id . ($_i ? '_' . $_i : '') ?>" value="<?= $this->escapeHtml($_lines[$_i] ?? '') ?>" title="<?= $_label ?>" class="input-text <?= $_i === 0 ? $_class : '' ?>">
+            <?php endfor ?>
+        <?php elseif ($_input === 'date'): ?>
+            <input type="date" name="<?= $this->escapeHtml($this->getFieldName($_attribute)) ?>" id="<?= $_id ?>" value="<?= $this->escapeHtml(substr((string) $_value, 0, 10)) ?>" title="<?= $_label ?>" class="input-text <?= $_class ?>"<?php if ($_required): ?> aria-required="true"<?php endif ?>>
+        <?php else: ?>
+            <input type="text" name="<?= $this->escapeHtml($this->getFieldName($_attribute)) ?>" id="<?= $_id ?>" value="<?= $this->escapeHtml((string) $_value) ?>" title="<?= $_label ?>" class="input-text <?= $_class ?>"<?php if ($_required): ?> aria-required="true"<?php endif ?>>
+        <?php endif ?>
+        </div>
+    </li>
+<?php endforeach ?>

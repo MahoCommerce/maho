@@ -8,40 +8,9 @@
  * @package Mage_Adminhtml
  */
 
-class Mage_Adminhtml_Block_Catalog_Product_Attribute_Set_Toolbar_Main extends Mage_Adminhtml_Block_Template
+class Mage_Adminhtml_Block_Catalog_Product_Attribute_Set_Toolbar_Main extends Mage_Eav_Block_Adminhtml_Attribute_Set_Toolbar_Main
 {
-    public function __construct()
-    {
-        parent::__construct();
-        $this->setTemplate('catalog/product/attribute/set/toolbar/main.phtml');
-    }
-
     #[\Override]
-    protected function _prepareLayout()
-    {
-        $this->setChild(
-            'addButton',
-            $this->getLayout()->createBlock('adminhtml/widget_button')
-                ->setData([
-                    'label'     => Mage::helper('catalog')->__('Add'),
-                    'onclick'   => Mage::helper('core/js')->getSetLocationJs($this->getUrl('*/*/add')),
-                    'class'     => 'add',
-                ]),
-        );
-        return parent::_prepareLayout();
-    }
-
-    /**
-     * @return string
-     */
-    protected function getNewButtonHtml()
-    {
-        return $this->getChildHtml('addButton');
-    }
-
-    /**
-     * @return string
-     */
     protected function _getHeader()
     {
         return Mage::helper('catalog')->__('Manage Attribute Sets');

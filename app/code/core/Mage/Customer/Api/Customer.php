@@ -264,6 +264,10 @@ class Customer extends CrudResource
     #[ApiProperty(writable: false)]
     public ?string $updatedAt = null;
 
+    /** @var array<string, mixed>|null */
+    #[ApiProperty(description: 'Values of the user-defined customer attributes, keyed by attribute code. A write is checked against the attributes of the Admin Customer form. Admin and API tokens only', security: "has_backend_access('customers')")]
+    public ?array $customAttributes = null;
+
     /** @var string|null Write-only password for registration */
     #[ApiProperty(writable: true, readable: false)]
     public ?string $password = null;
@@ -285,5 +289,8 @@ class Customer extends CrudResource
         }
         // Derived only; the confirmation token itself is never exposed
         $dto->isConfirmed = !$model->getData('confirmation');
+        if ($model instanceof \Mage_Customer_Model_Customer) {
+            $dto->customAttributes = CustomAttributes::readCustomer($model);
+        }
     }
 }

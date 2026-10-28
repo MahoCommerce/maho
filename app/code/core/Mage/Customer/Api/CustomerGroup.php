@@ -100,6 +100,12 @@ class CustomerGroup extends CrudResource
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public ?string $taxClassName = null;
 
+    #[ApiProperty(description: 'Attribute set of the customers of the group. Null uses the default customer set', extraProperties: [EnumSource::KEY => 'Maho\ApiPlatform\Metadata\ValueLists::customerAttributeSets'])]
+    public ?int $customerAttributeSetId = null;
+
+    #[ApiProperty(description: 'Attribute set of the addresses of the customers of the group. Null uses the default address set', extraProperties: [EnumSource::KEY => 'Maho\ApiPlatform\Metadata\ValueLists::customerAddressAttributeSets'])]
+    public ?int $customerAddressAttributeSetId = null;
+
     /**
      * Enrich DTO with the resolved tax class name after model data is mapped.
      */

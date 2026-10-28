@@ -291,6 +291,10 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
                 $address->setData($field, $value === '' ? null : $value);
             }
         }
+
+        if ($data->customAttributes !== null) {
+            CustomAttributes::apply($address, 'adminhtml_customer_address', $data->customAttributes);
+        }
     }
 
     /**

@@ -95,7 +95,8 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
                 if ($storeId && !$parent->getResource()->isInStore($parent, $storeId)) {
                     Mage::throwException(Mage::helper('catalog')->__('Parent category was not found.'));
                 }
-                $category->setPath($parent->getPath());
+                $category->setPath($parent->getPath())
+                    ->setAttributeSetId($parent->getAttributeSetId() ?: (int) $category->getDefaultAttributeSetId());
             }
         } catch (Mage_Core_Exception $e) {
             $error = $e->getMessage();
@@ -231,8 +232,13 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
                 }
                 $category
                     ->setPath($parent->getPath())
-                    ->setStoreId(Mage_Core_Model_App::ADMIN_STORE_ID)
-                    ->setAttributeSetId($category->getDefaultAttributeSetId());
+                    ->setStoreId(Mage_Core_Model_App::ADMIN_STORE_ID);
+            }
+            // An existing category keeps its set, as a product does
+            if ($category->getId() && $category->getOrigData('attribute_set_id')) {
+                $category->setAttributeSetId((int) $category->getOrigData('attribute_set_id'));
+            } else {
+                $category->assignAttributeSet((int) ($data['general']['attribute_set_id'] ?? 0) ?: null);
             }
 
             // Check "Use Default Value" checkboxes values

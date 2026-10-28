@@ -48,6 +48,9 @@
         <?php if ($_gender->isEnabled()): ?>
             <li><?= $_gender->setGender($this->getFormData()->getGender())->toHtml() ?></li>
         <?php endif ?>
+        <?= $this->getLayout()->createBlock('customer/form_attributes')
+            ->setCustomerForm('customer_account_create', Mage::getModel('customer/customer'))
+            ->setValues($this->getFormData())->setIdPrefix('register_')->toHtml() ?>
         </ul>
     </fieldset>
 <?php if ($this->getShowAddressFields()): ?>
@@ -119,6 +122,9 @@
                 </div>
             </li>
         <?php endfor ?>
+        <?= $this->getLayout()->createBlock('customer/form_attributes')
+            ->setCustomerForm('customer_register_address', $this->getAddress())
+            ->setValues($this->getFormData())->setIdPrefix('register_address_')->toHtml() ?>
         </ul>
         <input type="hidden" name="default_billing" value="1">
         <input type="hidden" name="default_shipping" value="1">

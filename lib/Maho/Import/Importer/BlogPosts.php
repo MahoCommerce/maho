@@ -21,6 +21,15 @@ class BlogPosts extends AbstractCmsImporter
 {
     private const TEXT_COLUMNS = ['title', 'image', 'meta_title', 'meta_keywords', 'meta_description', 'short_content'];
 
+    /** @var array<string, \Mage_Eav_Model_Entity_Attribute_Abstract>|null */
+    private ?array $customAttributes = null;
+
+    /** @var array<int, list<string>> */
+    private array $setAttributeCodes = [];
+
+    /** @var array<string, int> */
+    private array $setIds = [];
+
     #[\Override]
     protected function requiredColumns(): array
     {
@@ -58,6 +67,26 @@ class BlogPosts extends AbstractCmsImporter
             if ($row['post_id'] === null && ($row['title'] ?? '') === '') {
                 $this->fail($file, $line, 'title is required for a new post');
             }
+            $row['attribute_set_id'] = ($row['attribute_set'] ?? '') !== '' ? $this->attributeSetId($file, $line, $row['attribute_set']) : null;
+            $row['custom'] = [];
+            $setCodes = null;
+            foreach ($this->customAttributes() as $code => $attribute) {
+                if (($row[$code] ?? '') === '') {
+                    // A new post needs each required attribute of its set, unless the attribute has a default value
+                    if ($row['post_id'] === null && $attribute->getIsRequired() && (string) $attribute->getDefaultValue() === ''
+                        && in_array($code, $setCodes ??= $this->setAttributeCodes($row['attribute_set_id'] ?? $this->postSetId(null)), true)
+                    ) {
+                        $this->fail($file, $line, "$code is required for a new post");
+                    }
+                    continue;
+                }
+                // The nightly eav_clean_orphaned_records cron deletes a value whose attribute is not in the set
+                $setCodes ??= $this->setAttributeCodes($row['attribute_set_id'] ?? $this->postSetId($row['post_id']));
+                if (!in_array($code, $setCodes, true)) {
+                    $this->fail($file, $line, "$code is not in the attribute set of the post");
+                }
+                $row['custom'][$code] = $this->customValue($file, $line, $attribute, $row[$code]);
+            }
             $rows[$line] = $row;
         }
         return $rows;
@@ -91,10 +120,61 @@ class BlogPosts extends AbstractCmsImporter
             if ($row['body'] !== null) {
                 $post->setContent($row['body']);
             }
+            if ($row['attribute_set_id'] !== null) {
+                $post->setAttributeSetId($row['attribute_set_id']);
+            }
+            foreach ($row['custom'] as $code => $value) {
+                $post->setData($code, $value);
+            }
             $post->save();
         }
         $reporter->info(count($rows) . ' posts');
         return $result;
+    }
+
+    /**
+     * The user-defined attributes of blog posts, keyed by code. Each one can be a column of the file.
+     *
+     * @return array<string, \Mage_Eav_Model_Entity_Attribute_Abstract>
+     */
+    private function customAttributes(): array
+    {
+        return $this->customAttributes ??= \Maho\ApiPlatform\Service\CustomAttributes::userDefined(\Maho_Blog_Model_Post::ENTITY);
+    }
+
+    private function attributeSetId(CsvFile $file, int $line, string $name): int
+    {
+        $type = Mage::getSingleton('eav/config')->getEntityType(\Maho_Blog_Model_Post::ENTITY);
+        $id = $this->setIds[$name] ??= (int) Mage::getResourceModel('eav/entity_attribute_set_collection')
+            ->setEntityTypeFilter((int) $type->getId())
+            ->addFieldToFilter('attribute_set_name', $name)
+            ->getFirstItem()
+            ->getId();
+        if (!$id) {
+            $this->fail($file, $line, "attribute_set '$name' is not a set of blog posts");
+        }
+        return $id;
+    }
+
+    private function postSetId(?int $postId): int
+    {
+        $resource = Mage::getResourceSingleton('blog/post');
+        $adapter = $resource->getReadConnection();
+        $setId = $postId !== null ? (int) $adapter->fetchOne($adapter->select()
+            ->from($resource->getEntityTable(), ['attribute_set_id'])
+            ->where($resource->getEntityIdField() . ' = ?', $postId)) : 0;
+        return $setId ?: (int) Mage::getSingleton('eav/config')->getEntityType(\Maho_Blog_Model_Post::ENTITY)->getDefaultAttributeSetId();
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function setAttributeCodes(int $setId): array
+    {
+        $this->setAttributeCodes[$setId] ??= array_values(array_map(strval(...), Mage::getResourceModel('eav/entity_attribute_collection')
+            ->setAttributeSetFilter($setId)
+            ->getColumnValues('attribute_code')));
+        return $this->setAttributeCodes[$setId];
     }
 
     private function enabled(): bool

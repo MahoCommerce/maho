@@ -270,7 +270,7 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
     }
 
     /**
-     * Retrieve all customer attributes
+     * Retrieve the attributes of the attribute set of the category
      *
      * @param bool $noDesignAttributes
      * @return array
@@ -279,7 +279,7 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
     {
         $result = $this->getResource()
             ->loadAllAttributes($this)
-            ->getSortedAttributes();
+            ->getSortedAttributes($this->getAttributeSetId() ?: null);
 
         if ($noDesignAttributes) {
             foreach (array_keys($result) as $k) {
@@ -1080,9 +1080,35 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
         return $this->setData('affected_product_ids', $value);
     }
 
+    public function getAttributeSetId(): ?int
+    {
+        $value = $this->getData('attribute_set_id');
+        return $value === null ? null : (int) $value;
+    }
+
     public function setAttributeSetId(?int $value): static
     {
         return $this->setData('attribute_set_id', $value);
+    }
+
+    /**
+     * Set the attribute set $setId. Without $setId, a category with no set takes the set of its parent.
+     *
+     * @throws Mage_Core_Exception when $setId is not a category attribute set
+     */
+    public function assignAttributeSet(?int $setId): static
+    {
+        if ($setId) {
+            if ((int) Mage::getModel('eav/entity_attribute_set')->load($setId)->getEntityTypeId() !== (int) $this->getResource()->getTypeId()) {
+                Mage::throwException(Mage::helper('catalog')->__('The attribute set is not a category attribute set.'));
+            }
+            return $this->setAttributeSetId($setId);
+        }
+        if ($this->getAttributeSetId()) {
+            return $this;
+        }
+        $parent = Mage::getModel('catalog/category')->load($this->getParentId());
+        return $this->setAttributeSetId($parent->getAttributeSetId() ?: (int) $this->getDefaultAttributeSetId());
     }
 
     public function getCategoryPath(): ?string

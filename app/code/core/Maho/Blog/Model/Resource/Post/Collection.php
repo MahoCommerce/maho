@@ -6,25 +6,12 @@
  * @package Maho_Blog
  */
 
+/**
+ * @method Maho_Blog_Model_Resource_Post getEntity()
+ */
 class Maho_Blog_Model_Resource_Post_Collection extends Mage_Eav_Model_Entity_Collection_Abstract
 {
     public const ENTITY = 'blog_post';
-
-    /**
-     * Static attributes that are stored directly in the main entity table
-     */
-    protected array $_staticAttributes = [
-        'title',
-        'url_key',
-        'is_active',
-        'publish_date',
-        'content',
-        'short_content',
-        'meta_description',
-        'meta_keywords',
-        'meta_title',
-        'meta_robots',
-    ];
 
     /**
      * Flag to prevent infinite loops when filtering static attributes
@@ -144,7 +131,7 @@ class Maho_Blog_Model_Resource_Post_Collection extends Mage_Eav_Model_Entity_Col
      */
     public function isStaticAttribute(string $attribute): bool
     {
-        return in_array($attribute, $this->_staticAttributes, true);
+        return in_array($attribute, $this->getEntity()->getStaticAttributeCodes(), true);
     }
 
     /**
@@ -180,7 +167,7 @@ class Maho_Blog_Model_Resource_Post_Collection extends Mage_Eav_Model_Entity_Col
             $this->_selectAttributes = [];
 
             // Add all static attributes to selection (they're already in main table)
-            foreach ($this->_staticAttributes as $staticAttr) {
+            foreach ($this->getEntity()->getStaticAttributeCodes() as $staticAttr) {
                 $this->_selectAttributes[] = $staticAttr;
             }
         }

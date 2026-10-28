@@ -15,6 +15,7 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\State\Pagination\TraversablePaginator;
+use Maho\ApiPlatform\Service\CustomAttributes;
 use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
@@ -326,6 +327,7 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
         $dto->childrenCount = (int) $category->getData('children_count');
         $dto->createdAt = $category->getCreatedAt();
         $dto->updatedAt = $category->getUpdatedAt();
+        $dto->attributeSetId = $category->getAttributeSetId() ?: null;
 
         // Get image URL
         $dto->image = $category->getImageUrl() ?: null;
@@ -357,6 +359,10 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
 
         if ($withStoreOverrides && $this->backendCategoriesAccess()) {
             $dto->storeOverrides = StoreOverrides::forModel($category);
+            $dto->customAttributes = CustomAttributes::read(
+                $category,
+                array_filter($category->getAttributes(), fn($attribute) => $attribute->getIsUserDefined()),
+            );
         }
 
         \Mage::dispatchEvent('api_category_dto_build', ['category' => $category, 'dto' => $dto]);

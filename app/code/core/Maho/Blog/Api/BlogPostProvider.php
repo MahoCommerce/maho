@@ -89,6 +89,7 @@ final class BlogPostProvider extends CrudProvider
     protected function applyCollectionFilters(object $collection, array $filters): void
     {
         parent::applyCollectionFilters($collection, $filters);
+        $collection->addAttributeToSelect(CustomAttributes::codes(\Maho_Blog_Model_Post::ENTITY));
 
         if (!$this->isScopeAll($filters)) {
             $collection->addPublishedFilter();

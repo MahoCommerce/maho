@@ -11,6 +11,23 @@ class Maho_Blog_Helper_Data extends Mage_Core_Helper_Abstract
     #[\Override]
     protected $_moduleName = 'Maho_Blog';
 
+    /**
+     * Return $setId, or the default set of $entityType when $setId is 0.
+     *
+     * @throws Mage_Core_Exception when $setId is a set of another entity type
+     */
+    public function getValidAttributeSetId(int $setId, Mage_Eav_Model_Entity_Type $entityType): int
+    {
+        if (!$setId) {
+            return (int) $entityType->getDefaultAttributeSetId();
+        }
+        $set = Mage::getModel('eav/entity_attribute_set')->load($setId);
+        if ((int) $set->getEntityTypeId() !== (int) $entityType->getId()) {
+            Mage::throwException($this->__('Attribute set %d is not a set of the entity type %s.', $setId, $entityType->getEntityTypeCode()));
+        }
+        return $setId;
+    }
+
     public function isEnabled(): bool
     {
         return $this->isModuleEnabled() && $this->isModuleOutputEnabled();

@@ -180,6 +180,13 @@ class BlogPost extends CrudResource
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public ?string $excerpt = null;
 
+    #[ApiProperty(description: 'Attribute set ID. A new post without one takes the default set', security: "has_backend_access('blog-posts')", extraProperties: [EnumSource::KEY => 'Maho\ApiPlatform\Metadata\ValueLists::blogPostAttributeSets'])]
+    public ?int $attributeSetId = null;
+
+    /** @var array<string, mixed>|null */
+    #[ApiProperty(description: 'Values of the user-defined attributes, keyed by attribute code. Admin and API tokens only', security: "has_backend_access('blog-posts')", extraProperties: ['computed' => true])]
+    public ?array $customAttributes = null;
+
     #[ApiProperty(writable: false)]
     public ?string $createdAt = null;
 
@@ -196,11 +203,17 @@ class BlogPost extends CrudResource
         // Handled below: the generic mapping would write the raw (possibly
         // {id, position}-shaped) input to the model's category_ids field.
         $categoryIds = $this->categoryIds;
+        $customAttributes = $this->customAttributes;
         $this->categoryIds = null;
+        $this->customAttributes = null;
         try {
             parent::applyToModel($model, $sentProperties);
         } finally {
             $this->categoryIds = $categoryIds;
+            $this->customAttributes = $customAttributes;
+        }
+        if ($customAttributes !== null) {
+            CustomAttributes::apply($model, $customAttributes);
         }
 
         if ($categoryIds !== null) {
@@ -292,6 +305,7 @@ class BlogPost extends CrudResource
 
         $dto->stores = array_map(intval(...), $model->getStores());
         $dto->categoryIds = array_map(intval(...), $model->getCategories());
+        $dto->customAttributes = CustomAttributes::read($model);
 
         if ($model->getContent()) {
             $text = strip_tags($model->getContent());

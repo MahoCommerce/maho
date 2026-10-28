@@ -77,6 +77,8 @@ class Maho_Blog_Block_Adminhtml_Category_Edit_Tab_General extends Mage_Adminhtml
             }
         }
 
+        Maho_Blog_Block_Adminhtml_Edit_Tabs::addAttributeSetField($fieldset, $model);
+
         $fieldset->addField('is_active', 'select', [
             'label' => Mage::helper('blog')->__('Status'),
             'title' => Mage::helper('blog')->__('Status'),

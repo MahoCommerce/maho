@@ -76,6 +76,8 @@ class Maho_Blog_Adminhtml_Blog_PostController extends Mage_Adminhtml_Controller_
 
             if ($id) {
                 $model->load($id);
+                // A record keeps its attribute set, as a product does
+                unset($data['attribute_set_id']);
             }
 
             try {

@@ -1,0 +1,24 @@
+<?php
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package base_default
+ */
+
+/** @var Mage_Eav_Block_Frontend_Attributes $this */
+?>
+<?php if ($_rows = $this->getAttributeValues()): ?>
+    <table class="data-table attribute-specs-table">
+        <caption><?= $this->escapeHtml($this->getTitle() ?: $this->__('Additional Information')) ?></caption>
+        <col width="25%">
+        <col>
+        <tbody>
+        <?php foreach ($_rows as $_row): ?>
+            <tr>
+                <th class="label"><?= $this->escapeHtml($_row['label']) ?></th>
+                <td class="data"><?= $this->getValueHtml($_row) ?></td>
+            </tr>
+        <?php endforeach ?>
+        </tbody>
+    </table>
+<?php endif ?>

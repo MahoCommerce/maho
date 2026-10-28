@@ -108,6 +108,8 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
             renderer: Mage::helper('cms')->getPageTemplateProcessor(),
         );
 
+        $this->prepareCustomAttributes($object);
+
         if (!$this->getIsUniquePageToStores($object)) {
             Mage::throwException(Mage::helper('cms')->__('A page URL key for specified store already exists.'));
         }
@@ -128,6 +130,106 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
         $object->setUpdateTime(Mage::app()->getLocale()->formatDateForDb('now'));
 
         return parent::_beforeSave($object);
+    }
+
+    /**
+     * Return the custom attributes of CMS pages that have a column, keyed by code.
+     *
+     * @return array<string, Mage_Eav_Model_Entity_Attribute_Abstract>
+     */
+    public function getCustomAttributes(): array
+    {
+        try {
+            $all = Mage::getSingleton('eav/config')->getAttributes(Mage_Cms_Model_Page::ENTITY);
+        } catch (Mage_Core_Exception) {
+            // The install saves pages before the cms_setup upgrade adds the entity type
+            return [];
+        }
+        $columns = $this->_getReadAdapter()->describeTable($this->getMainTable());
+        $attributes = [];
+        foreach ($all as $attribute) {
+            $code = (string) $attribute->getAttributeCode();
+            if ($attribute->getIsUserDefined() && isset($columns[$code])) {
+                $attributes[$code] = $attribute;
+            }
+        }
+        uasort($attributes, fn($a, $b): int => (int) $a->getId() <=> (int) $b->getId());
+        return $attributes;
+    }
+
+    /**
+     * Turn the custom attribute values of $page into column values, and check the required and unique attributes.
+     * An attribute that $page does not hold keeps its stored value, and a new page gets its default value.
+     *
+     * @throws Mage_Core_Exception_Input
+     */
+    protected function prepareCustomAttributes(Mage_Core_Model_Abstract $page): void
+    {
+        $helper = Mage::helper('eav');
+        $errors = new Mage_Core_Exception_Input();
+        foreach ($this->getCustomAttributes() as $code => $attribute) {
+            $label = (string) $attribute->getFrontend()->getLabel();
+            if (!$page->hasData($code)) {
+                if ($page->getId()) {
+                    continue;
+                }
+                $default = (string) $attribute->getDefaultValue();
+                if ($default === '') {
+                    if ($attribute->getIsRequired()) {
+                        $errors->addError($code, $helper->__('"%s" is a required value.', $label));
+                    }
+                    continue;
+                }
+                $page->setData($code, $default);
+            }
+
+            $value = $page->getData($code);
+            if (is_array($value)) {
+                $value = implode(',', array_filter(array_map(strval(...), $value), fn(string $item): bool => $item !== ''));
+            }
+            if (is_bool($value)) {
+                $value = (int) $value;
+            }
+            if (is_string($value) && trim($value) === '') {
+                $value = null;
+            }
+            if ($value !== null && $attribute->getFrontendInput() === 'date') {
+                try {
+                    $value = Mage::app()->getLocale()->formatDateForDb($value, withTime: false);
+                } catch (Exception) {
+                    $errors->addError($code, $helper->__('The value of "%s" must be a date.', $label));
+                    continue;
+                }
+            }
+            $length = $attribute->getColumnDefinition()['length'];
+            if ($length === 255 && $value !== null && mb_strlen((string) $value) > $length) {
+                $errors->addError($code, $helper->__('"%s" length must be equal or less than %s characters.', $label, $length));
+                continue;
+            }
+            $page->setData($code, $value);
+
+            if ($value === null) {
+                if ($attribute->getIsRequired()) {
+                    $errors->addError($code, $helper->__('"%s" is a required value.', $label));
+                }
+                continue;
+            }
+            if ($attribute->getIsUnique() && $this->isCustomAttributeValueUsed($code, $value, (int) $page->getId())) {
+                $errors->addError($code, $helper->__('The value of attribute "%s" must be unique', $label));
+            }
+        }
+        $errors->throwIfErrors();
+    }
+
+    protected function isCustomAttributeValueUsed(string $code, mixed $value, int $pageId): bool
+    {
+        $adapter = $this->_getReadAdapter();
+        $select = $adapter->select()
+            ->from($this->getMainTable(), ['page_id'])
+            ->where($adapter->quoteIdentifier($code) . ' = ?', $value)
+            ->where('page_id != ?', $pageId)
+            ->limit(1);
+        return (bool) $adapter->fetchOne($select);
     }
 
     /**

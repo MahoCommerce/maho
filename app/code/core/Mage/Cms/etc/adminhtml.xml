@@ -7,6 +7,19 @@ SPDX-License-Identifier: AFL-3.0
 -->
 <config>
     <menu>
+        <system>
+            <children>
+                <attributes>
+                    <children>
+                        <cms_page translate="title" module="cms">
+                            <title>CMS Pages</title>
+                            <action>adminhtml/eav_attribute/index/entity_type/cms_page</action>
+                            <sort_order>40</sort_order>
+                        </cms_page>
+                    </children>
+                </attributes>
+            </children>
+        </system>
          <cms translate="title" module="cms">
             <title>CMS</title>
             <sort_order>70</sort_order>
@@ -33,6 +46,18 @@ SPDX-License-Identifier: AFL-3.0
         <resources>
             <admin>
                 <children>
+                    <system>
+                        <children>
+                            <attributes>
+                                <children>
+                                    <cms_page translate="title" module="cms">
+                                        <title>CMS Pages</title>
+                                        <sort_order>40</sort_order>
+                                    </cms_page>
+                                </children>
+                            </attributes>
+                        </children>
+                    </system>
                     <cms translate="title" module="cms">
                         <title>CMS</title>
                         <sort_order>70</sort_order>

@@ -22,6 +22,9 @@ class Mage_Cms_Model_Page extends Mage_Core_Model_Abstract
 {
     public const NOROUTE_PAGE_ID = 'no-route';
 
+    /** The EAV entity type that holds the custom attributes of CMS pages. */
+    public const ENTITY = 'cms_page';
+
     /**
      * Page's Statuses
      */

@@ -39,6 +39,8 @@
         <?php if ($_gender->isEnabled()): ?>
             <li><?= $_gender->setGender($this->getCustomer()->getGender())->toHtml() ?></li>
         <?php endif ?>
+        <?= $this->getLayout()->createBlock('customer/form_attributes')
+            ->setCustomerForm('customer_account_edit', $this->getCustomer())->toHtml() ?>
         <?php $magicLinkMode = Mage::helper('customer')->getMagicLinkRegistrationMode(); ?>
         <?php if ($magicLinkMode !== Mage_Customer_Model_Config_Registrationmode::MODE_NO_PASSWORD): ?>
             <li>

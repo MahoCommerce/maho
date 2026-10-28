@@ -89,6 +89,8 @@ class Maho_Blog_Adminhtml_Blog_CategoryController extends Mage_Adminhtml_Control
 
             if ($id) {
                 $model->load($id);
+                // A record keeps its attribute set, as a product does
+                unset($data['attribute_set_id']);
             }
 
             // Process post_ids from grid serializer (simplified format: "3&5&7")

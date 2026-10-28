@@ -109,7 +109,10 @@ class Mage_Adminhtml_Customer_GroupController extends Mage_Adminhtml_Controller_
                     $customerGroup->setCode($customerGroupCode);
                 }
 
-                $customerGroup->setTaxClassId($taxClass)->save();
+                $customerGroup->setTaxClassId($taxClass)
+                    ->setCustomerAttributeSetId((int) $this->getRequest()->getParam('customer_attribute_set_id') ?: null)
+                    ->setCustomerAddressAttributeSetId((int) $this->getRequest()->getParam('customer_address_attribute_set_id') ?: null)
+                    ->save();
                 Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('customer')->__('The customer group has been saved.'));
                 $this->getResponse()->setRedirect($this->getUrl('*/customer_group'));
                 return;

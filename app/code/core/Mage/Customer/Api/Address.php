@@ -264,6 +264,10 @@ class Address extends CrudResource
     #[ApiProperty(extraProperties: ['computed' => true])]
     public ?bool $isDefaultShipping = null;
 
+    /** @var array<string, mixed>|null */
+    #[ApiProperty(description: 'Values of the user-defined address attributes, keyed by attribute code. A write is checked against the attributes of the Admin Customer Address form. An order address holds the option labels. Admin and API tokens only', security: "has_backend_access('addresses') or has_backend_access('orders')")]
+    public ?array $customAttributes = null;
+
     public static function afterLoad(self $dto, object $model): void
     {
         // Normalize street to array
@@ -273,6 +277,10 @@ class Address extends CrudResource
         // Normalize regionId
         $regionId = $model->getData('region_id');
         $dto->regionId = $regionId ? (int) $regionId : null;
+
+        if ($model instanceof \Maho\DataObject) {
+            $dto->customAttributes = CustomAttributes::readAddress($model);
+        }
     }
 
     /**
@@ -280,7 +288,9 @@ class Address extends CrudResource
      */
     public static function fromOrderAddress(\Mage_Sales_Model_Order_Address $address): self
     {
-        return self::fromGenericAddress($address);
+        $dto = self::fromGenericAddress($address);
+        $dto->customAttributes = CustomAttributes::readAddress($address);
+        return $dto;
     }
 
     /**

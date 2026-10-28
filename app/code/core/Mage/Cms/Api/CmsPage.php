@@ -22,6 +22,7 @@ use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use Maho\ApiPlatform\CrudResource;
+use Maho\ApiPlatform\Service\CustomAttributes;
 
 #[ApiResource(
     mahoLabel: 'CMS Pages',
@@ -139,6 +140,39 @@ class CmsPage extends CrudResource
     #[ApiProperty(writable: false, extraProperties: ['modelField' => 'update_time'])]
     public ?string $updatedAt = null;
 
+    /** @var array<string, mixed>|null */
+    #[ApiProperty(description: 'Values of the custom attributes of the page, keyed by attribute code. Admin and API tokens only', security: "has_backend_access('cms-pages')", extraProperties: ['computed' => true])]
+    public ?array $customAttributes = null;
+
+    #[\Override]
+    public function applyToModel(object $model, ?array $sentProperties = null): void
+    {
+        $customAttributes = $this->customAttributes;
+        $this->customAttributes = null;
+        try {
+            parent::applyToModel($model, $sentProperties);
+        } finally {
+            $this->customAttributes = $customAttributes;
+        }
+
+        /** @var \Mage_Cms_Model_Resource_Page $resource */
+        $resource = \Mage::getResourceSingleton('cms/page');
+        $attributes = $resource->getCustomAttributes();
+        $customAttributes ??= [];
+        if (!$model->getId()) {
+            $errors = new \Mage_Core_Exception_Input();
+            foreach ($attributes as $code => $attribute) {
+                if ($attribute->getIsRequired() && (string) $attribute->getDefaultValue() === '' && !array_key_exists($code, $customAttributes)) {
+                    $errors->addError("customAttributes.{$code}", \Mage::helper('eav')->__('"%s" is a required value.', $code));
+                }
+            }
+            $errors->throwIfErrors();
+        }
+        if ($customAttributes) {
+            CustomAttributes::apply($model, $customAttributes, $attributes);
+        }
+    }
+
     /**
      * Enrich DTO with computed fields after model data is mapped.
      */
@@ -155,5 +189,6 @@ class CmsPage extends CrudResource
         if (method_exists($model->getResource(), 'lookupStoreIds')) {
             $dto->stores = array_map(intval(...), $model->getResource()->lookupStoreIds($model->getId()));
         }
+        $dto->customAttributes = CustomAttributes::read($model, \Mage::getResourceSingleton('cms/page')->getCustomAttributes());
     }
 }

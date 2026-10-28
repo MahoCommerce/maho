@@ -103,6 +103,7 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
 
         $this->applyCategoryData($category, $data);
 
+        $this->validateCategory($category);
         $this->safeSave($category, 'create category');
 
         $this->logApiActivity('catalog/category', 'create', null, $category);
@@ -153,6 +154,7 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
         // A store view write stores only the fields of the request.
         $inherited = StoreScopeWrite::keepInheritedValues($category, $oldData, StoreScopeWrite::requestedCodes($data));
 
+        $this->validateCategory($category);
         $this->safeSave($category, 'update category');
 
         StoreScopeWrite::restoreInheritedValues($category, $oldData, $inherited);
@@ -186,8 +188,70 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
         return null;
     }
 
+    /**
+     * Check the required and unique attributes of the set of the category, as the admin save does.
+     * An empty sort-by attribute uses the configuration, as the "Use Config Settings" box of the admin.
+     * Each problem names its attribute, so the 422 lists the fields.
+     *
+     * @throws \Mage_Core_Exception_Input
+     */
+    private function validateCategory(Mage_Catalog_Model_Category $category): void
+    {
+        $useConfig = array_values(array_filter(
+            ['available_sort_by', 'default_sort_by'],
+            function (string $code) use ($category): bool {
+                $attribute = $category->getResource()->getAttribute($code);
+                return !$attribute || $attribute->isValueEmpty($category->getData($code));
+            },
+        ));
+        $isAdminScope = (int) $category->getStoreId() === Mage_Core_Model_App::ADMIN_STORE_ID;
+        $errors = new \Mage_Core_Exception_Input();
+
+        // The save gives a new category the default values, but the check runs before the save
+        if (!$category->getId()) {
+            foreach ($category->getAttributes() as $code => $attribute) {
+                $default = $attribute->getBackend()->getDefaultValue();
+                if (!$category->hasData($code) && $default) {
+                    $category->setData($code, $default);
+                }
+            }
+        }
+
+        $category->setData('use_post_data_config', $useConfig);
+        try {
+            foreach ($category->getAttributes() as $code => $attribute) {
+                $value = $category->getData($code);
+                // In a store view, false means that the store view uses the default value
+                if (!$isAdminScope && $value === false) {
+                    continue;
+                }
+                $required = Mage::helper('catalog')->__('Attribute "%s" is required.', (string) $attribute->getFrontend()->getLabel());
+                // isValueEmpty() accepts a blank string for a text attribute
+                if ($attribute->getIsRequired() && is_string($value) && trim($value) === '' && !in_array($code, $useConfig, true)) {
+                    $errors->addError((string) $code, $required);
+                    continue;
+                }
+                try {
+                    $result = $attribute->getBackend()->validate($category);
+                } catch (\Mage_Core_Exception $e) {
+                    $errors->addError((string) $code, $e->getMessage());
+                    continue;
+                }
+                if ($result === false) {
+                    $errors->addError((string) $code, $required);
+                } elseif (is_string($result)) {
+                    $errors->addError((string) $code, $result);
+                }
+            }
+        } finally {
+            $category->unsetData('use_post_data_config');
+        }
+        $errors->throwIfErrors();
+    }
+
     private function applyCategoryData(Mage_Catalog_Model_Category $category, Category $data): void
     {
+        $category->assignAttributeSet($data->attributeSetId);
         if ($data->description !== null) {
             $category->setDescription($data->description);
         }
@@ -453,7 +517,14 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
                 continue;
             }
 
-            $category->setData($code, $this->validateAttributeValue($code, $value));
+            $value = $this->validateAttributeValue($code, $value);
+            // In a store view, false means "use the default value". In the default scope, it is No.
+            if ($value === false && $attribute->getFrontendInput() === 'boolean'
+                && (int) $category->getStoreId() === Mage_Core_Model_App::ADMIN_STORE_ID
+            ) {
+                $value = 0;
+            }
+            $category->setData($code, $value);
         }
     }
 

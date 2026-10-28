@@ -85,6 +85,7 @@ final class BlogCategoryProvider extends CrudProvider
     protected function applyCollectionFilters(object $collection, array $filters): void
     {
         parent::applyCollectionFilters($collection, $filters);
+        $collection->addAttributeToSelect(CustomAttributes::codes(\Maho_Blog_Model_Category::ENTITY));
 
         if (!$this->isScopeAll($filters)) {
             $collection->addActiveFilter();

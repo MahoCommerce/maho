@@ -45,7 +45,9 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
     }
 
     /**
-     * Get static attribute codes
+     * The codes of the attributes that are columns of the entity table.
+     *
+     * @return list<string>
      */
     public function getStaticAttributeCodes(): array
     {
@@ -174,6 +176,11 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
     protected function _beforeSave(\Maho\DataObject $object): self
     {
         $coreHelper = Mage::helper('core');
+
+        $object->setData('attribute_set_id', Mage::helper('blog')->getValidAttributeSetId(
+            (int) $object->getData('attribute_set_id'),
+            $this->getEntityType(),
+        ));
 
         // Strip all HTML tags from title and meta fields
         $stringFields = ['title', 'url_key', 'meta_title', 'meta_keywords', 'meta_description'];
