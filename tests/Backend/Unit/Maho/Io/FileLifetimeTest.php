@@ -21,12 +21,12 @@ describe('\Maho\Io\File lifetime', function () {
         mkdir($dir, 0755, true);
         $io = new \Maho\Io\File();
         $io->open(['path' => $dir]);
-        $io->streamOpen('closed.txt', 'w+', 0600);
+        $io->streamOpen('closed.txt', 'w+', 0700);
         $io->streamWrite('data');
         unset($io);
         clearstatcache();
 
-        expect(fileperms($dir . '/closed.txt') & 0777)->toBe(0600)
+        expect(fileperms($dir . '/closed.txt') & 0777)->toBe(0700)
             ->and(file_get_contents($dir . '/closed.txt'))->toBe('data');
 
         unlink($dir . '/closed.txt');

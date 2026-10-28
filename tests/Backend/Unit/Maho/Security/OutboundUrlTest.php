@@ -63,6 +63,7 @@ describe('OutboundUrl', function (): void {
         'http://good.example/a b',
         "http://good.example/a\r\nX-Injected: 1",
         'http://good.example:99999/',
+        'https://good.example/guía.pdf',
     ]);
 
     it('lowercases the host and keeps the path and query as sent', function (): void {
@@ -105,6 +106,12 @@ describe('OutboundUrl', function (): void {
             ->and($target->httpClientOptions())->not->toHaveKey('resolve');
         expect(fn() => outboundUrl()->validate('http://intranet.example/other', ['http://intranet.example/files/']))
             ->toThrow(OutboundUrlException::class);
+    });
+
+    it('matches an allowed prefix whatever the case of the host', function (): void {
+        $target = outboundUrl()->validate('http://INTRANET.example/files/a.zip', ['HTTP://Intranet.EXAMPLE/files/']);
+        expect($target->ip)->toBeNull()
+            ->and($target->host)->toBe('intranet.example');
     });
 
     it('classifies addresses', function (): void {
