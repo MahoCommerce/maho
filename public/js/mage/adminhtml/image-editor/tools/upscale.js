@@ -13,6 +13,8 @@ const MAX_INPUT_SIDE = 1024;
 
 let modelPromise = null;
 let latestProgressCallback = null;
+// The runs that still use the model. destroy() disposes the model only after they finish.
+const activeRuns = new Set();
 
 class UpscaleCancelled extends Error {}
 
@@ -177,6 +179,10 @@ export class UpscaleTool {
         this.editor.setOptions(this.renderOptions());
         this._setStatus('Loading model…');
 
+        let finishRun;
+        const run = new Promise((resolve) => { finishRun = resolve; });
+        activeRuns.add(run);
+
         try {
             const { model, Tensor } = await getModel((p) => {
                 if (p.status === 'progress' && p.total) {
@@ -204,6 +210,8 @@ export class UpscaleTool {
                 this._setStatus('Error: ' + err.message);
             }
         } finally {
+            activeRuns.delete(run);
+            finishRun();
             this._processing = false;
             if (this.editor.activeTool === this) {
                 const status = this._statusEl?.textContent;
@@ -279,6 +287,11 @@ export class UpscaleTool {
         latestProgressCallback = null;
         const pending = modelPromise;
         modelPromise = null;
-        pending?.then(({ model }) => model.dispose()).catch(() => {});
+        if (pending) {
+            Promise.allSettled([...activeRuns])
+                .then(() => pending)
+                .then(({ model }) => model.dispose())
+                .catch(() => {});
+        }
     }
 }
