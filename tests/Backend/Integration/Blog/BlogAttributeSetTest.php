@@ -147,6 +147,25 @@ it('lists a value that is visible on the storefront', function () {
         ->and($block->getValueHtml($rows[array_search($code, array_column($rows, 'code'), true)]))->toBe('&lt;b&gt;5&lt;/b&gt; minutes');
 });
 
+it('lists a Yes/No value of 0 as No and leaves out an empty one', function () {
+    $code = 'pest_flag_' . $this->suffix;
+    $this->records[] = blogSetTestAttribute(Maho_Blog_Model_Post::ENTITY, $code, [
+        'backend_type' => 'int',
+        'frontend_input' => 'boolean',
+        'source_model' => 'eav/entity_attribute_source_boolean',
+        'is_visible_on_front' => 1,
+    ]);
+    $codes = function (?int $value) use ($code): array {
+        $post = Mage::getModel('blog/post')->setData(['entity_id' => 1, $code => $value]);
+        $rows = Mage::app()->getLayout()->createBlock('eav/frontend_attributes')->setData('entity', $post)->getAttributeValues();
+        return array_column($rows, 'value', 'code');
+    };
+
+    expect($codes(0))->toHaveKey($code)
+        ->and($codes(0)[$code])->toBe('No')
+        ->and($codes(null))->not->toHaveKey($code);
+});
+
 it('adds a tab for each group that holds a user-defined attribute to the post edit page', function () {
     $code = 'pest_tab_' . $this->suffix;
     $this->records[] = blogSetTestAttribute(Maho_Blog_Model_Post::ENTITY, $code);

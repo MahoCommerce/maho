@@ -144,6 +144,36 @@ it('offers the image input type for categories, not for products', function () {
         ->and($product->getInputTypes())->not->toHaveKey('image');
 });
 
+it('ignores the entity type, the storage and the models in the posted data', function () {
+    $productTypeId = (int) Mage::getSingleton('eav/config')->getEntityType(Mage_Catalog_Model_Product::ENTITY)->getId();
+    $posted = [
+        'entity_type_id' => $productTypeId,
+        'backend_type' => 'decimal',
+        'backend_model' => 'eav/entity_attribute_backend_array',
+        'source_model' => 'eav/entity_attribute_source_boolean',
+        'frontend_model' => 'eav/entity_attribute_frontend_datetime',
+    ];
+    categoryAttributeAdminRun(Mage_Adminhtml_Catalog_Category_AttributeController::class, 'catalog_category_attribute', 'save', $posted + [
+        'attribute_code' => $this->code,
+        'frontend_input' => 'text',
+        'frontend_label' => ['Pest Text'],
+    ]);
+    $attribute = Mage::getModel('catalog/resource_eav_attribute')
+        ->loadByCode(Mage_Catalog_Model_Category::ENTITY, $this->code);
+
+    categoryAttributeAdminRun(Mage_Adminhtml_Catalog_Category_AttributeController::class, 'catalog_category_attribute', 'save', $posted + [
+        'attribute_id' => $attribute->getId(),
+        'frontend_label' => ['Pest Text'],
+    ]);
+    $reloaded = Mage::getModel('catalog/resource_eav_attribute')->load($attribute->getId());
+
+    expect((int) $reloaded->getEntityTypeId())->toBe(categoryAttributeAdminTypeId())
+        ->and($reloaded->getBackendType())->toBe('varchar')
+        ->and($reloaded->getData('backend_model'))->toBeEmpty()
+        ->and($reloaded->getData('source_model'))->toBeEmpty()
+        ->and($reloaded->getData('frontend_model'))->toBeEmpty();
+});
+
 it('does not update a product attribute through the category page', function () {
     $name = Mage::getModel('catalog/resource_eav_attribute')
         ->loadByCode(Mage_Catalog_Model_Product::ENTITY, 'name');

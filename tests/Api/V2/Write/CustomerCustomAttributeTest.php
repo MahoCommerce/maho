@@ -137,6 +137,21 @@ describe('Customer customAttributes (REST)', function (): void {
         expect($response['status'])->toBe(422);
     });
 
+    it('ignores customAttributes on anonymous registration', function (): void {
+        $response = apiPost('/api/rest/v2/customers', [
+            'email' => CUSTOM_ATTR_EMAIL_PREFIX . uniqid() . '@example.test',
+            'password' => 'PestWrite1234!',
+            'firstname' => 'Pest',
+            'lastname' => 'Anonymous',
+            'customAttributes' => [CUSTOM_ATTR_CUSTOMER_CODE => 'RN-ANON'],
+        ]);
+        expect($response['status'])->toBeSuccessful();
+
+        $read = apiGet('/api/rest/v2/customers/' . (int) $response['json']['id'], adminToken());
+        expect($read['status'])->toBe(200)
+            ->and($read['json']['customAttributes'] ?? [])->not->toHaveKey(CUSTOM_ATTR_CUSTOMER_CODE);
+    });
+
     it('hides customAttributes from the token of the customer', function (): void {
         $create = customAttrTestCreateCustomer(['customAttributes' => [CUSTOM_ATTR_CUSTOMER_CODE => 'RN-789']]);
         $id = (int) $create['json']['id'];

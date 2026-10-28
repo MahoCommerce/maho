@@ -133,7 +133,66 @@ describe('Category attribute sets (REST)', function (): void {
         trackCreated('category', $categoryId);
 
         $read = apiGet("/api/rest/v2/categories/{$categoryId}");
-        expect($read['json']['customAttributes'] ?? null)->toBeNull();
+        expect($read['status'])->toBe(200)
+            ->and($read['json'])->not->toHaveKey('customAttributes');
+    });
+
+    it('refuses a category that leaves a required attribute of its set empty', function (): void {
+        $token = serviceToken(['categories/write', 'categories/delete']);
+        Tests\Helpers\ApiV2Helper::ensureMahoBootstrapped();
+        $type = Mage::getSingleton('eav/config')->getEntityType(Mage_Catalog_Model_Category::ENTITY);
+        $set = Mage::getModel('eav/entity_attribute_set')
+            ->setEntityTypeId((int) $type->getId())
+            ->setAttributeSetName('Pest API Required ' . uniqid());
+        $set->save();
+        $set->initFromSkeleton((int) $type->getDefaultAttributeSetId())->save();
+        $code = 'pest_api_required_' . substr(uniqid(), -6);
+        $attribute = Mage::getModel('catalog/resource_eav_attribute')->setData([
+            'entity_type_id' => (int) $type->getId(),
+            'attribute_code' => $code,
+            'backend_type' => 'varchar',
+            'frontend_input' => 'text',
+            'frontend_label' => 'Pest Required',
+            'is_user_defined' => 1,
+            'is_required' => 1,
+            'is_global' => Mage_Catalog_Model_Resource_Eav_Attribute::SCOPE_GLOBAL,
+            'attribute_set_id' => (int) $set->getId(),
+            'attribute_group_id' => (int) Mage::getResourceModel('eav/entity_attribute_group_collection')
+                ->setAttributeSetFilter((int) $set->getId())
+                ->setSortOrder()
+                ->getFirstItem()
+                ->getId(),
+        ]);
+        $attribute->save();
+        Mage::app()->cleanCache();
+        Mage::getSingleton('eav/config')->clear();
+
+        try {
+            $missing = apiPost('/api/rest/v2/categories', [
+                'name' => 'Pest Set Required ' . uniqid(),
+                'attributeSetId' => (int) $set->getId(),
+            ], $token);
+            if (in_array($missing['status'], [200, 201], true)) {
+                trackCreated('category', (int) $missing['json']['id']);
+            }
+            $filled = apiPost('/api/rest/v2/categories', [
+                'name' => 'Pest Set Required ' . uniqid(),
+                'attributeSetId' => (int) $set->getId(),
+                'customAttributesWrite' => [$code => 'Filled'],
+            ], $token);
+            if (in_array($filled['status'], [200, 201], true)) {
+                trackCreated('category', (int) $filled['json']['id']);
+            }
+
+            expect($missing['status'])->toBe(422)
+                ->and($filled['status'])->toBeIn([200, 201]);
+        } finally {
+            cleanupTestData();
+            Tests\Helpers\ApiV2Helper::ensureMahoBootstrapped();
+            $attribute->delete();
+            $set->delete();
+            Mage::app()->cleanCache();
+        }
     });
 
 });

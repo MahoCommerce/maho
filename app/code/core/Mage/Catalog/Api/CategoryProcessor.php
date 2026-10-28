@@ -105,6 +105,7 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
 
         $this->applyCategoryData($category, $data);
 
+        $this->validateCategory($category);
         $this->safeSave($category, 'create category');
 
         $this->logApiActivity('catalog/category', 'create', null, $category);
@@ -155,6 +156,7 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
         // A store view write stores only the fields of the request.
         $inherited = StoreScopeWrite::keepInheritedValues($category, $oldData, StoreScopeWrite::requestedCodes($data));
 
+        $this->validateCategory($category);
         $this->safeSave($category, 'update category');
 
         StoreScopeWrite::restoreInheritedValues($category, $oldData, $inherited);
@@ -186,6 +188,42 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
         $this->logApiActivity('catalog/category', 'delete', $oldData, null);
 
         return null;
+    }
+
+    /**
+     * Check the required and unique attributes of the set of the category, as the admin save does.
+     * An empty sort-by attribute uses the configuration, as the "Use Config Settings" box of the admin.
+     *
+     * @throws \Mage_Core_Exception_Input
+     */
+    private function validateCategory(Mage_Catalog_Model_Category $category): void
+    {
+        $useConfig = array_values(array_filter(
+            ['available_sort_by', 'default_sort_by'],
+            function (string $code) use ($category): bool {
+                $attribute = $category->getResource()->getAttribute($code);
+                return !$attribute || $attribute->isValueEmpty($category->getData($code));
+            },
+        ));
+        $category->setData('use_post_data_config', $useConfig);
+        try {
+            $result = $category->validate();
+        } finally {
+            $category->unsetData('use_post_data_config');
+        }
+        if ($result === true) {
+            return;
+        }
+
+        $errors = new \Mage_Core_Exception_Input();
+        foreach ($result as $code => $error) {
+            $attribute = $category->getResource()->getAttribute($code);
+            $label = $attribute ? (string) $attribute->getFrontend()->getLabel() : (string) $code;
+            $errors->addError((string) $code, $error === true
+                ? Mage::helper('catalog')->__('Attribute "%s" is required.', $label)
+                : (string) $error);
+        }
+        $errors->throwIfErrors();
     }
 
     private function applyCategoryData(Mage_Catalog_Model_Category $category, Category $data): void

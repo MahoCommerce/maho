@@ -18,8 +18,9 @@ one attribute set.
    underscores, and start with a letter. You cannot change the code later.
 4. Select the **Input Type**: Text Field, Text Area, Date, Yes/No, Multiple Select, Dropdown or
    Image. You cannot change the input type later.
-5. Select the **Scope**. **Store View** lets each store view have its own value. **Website** and
-   **Global** share one value.
+5. Select the **Scope**. **Store View** lets each store view have its own value. **Website** gives
+   all the store views of a website one value, and each website can have its own value.
+   **Global** gives all the websites one value.
 6. On the **Manage Label / Options** tab, enter the label. For a Dropdown or a Multiple Select,
    add the options.
 7. Click **Save**.

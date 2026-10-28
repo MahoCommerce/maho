@@ -169,6 +169,16 @@ abstract class Mage_Adminhtml_Controller_Eav_Attribute extends Mage_Adminhtml_Co
         $id = (int) $this->getRequest()->getParam('attribute_id');
         $model = $this->createAttributeModel();
 
+        // The entity type, the storage and the models come from the server, never from the form
+        unset(
+            $data['attribute_id'],
+            $data['entity_type_id'],
+            $data['backend_type'],
+            $data['backend_model'],
+            $data['source_model'],
+            $data['frontend_model'],
+        );
+
         if (isset($data['attribute_code'])
             && !Mage::helper('core')->isValidRegex($data['attribute_code'], '/^(?!event$)[a-z][a-z_0-9]{1,254}$/')
         ) {
@@ -201,7 +211,7 @@ abstract class Mage_Adminhtml_Controller_Eav_Attribute extends Mage_Adminhtml_Co
                 $this->_redirect('*/*/edit', ['_current' => true]);
                 return;
             }
-            $data += $this->getInputTypeModels($input, $model);
+            $data = array_merge($data, $this->getInputTypeModels($input, $model));
         }
 
         if (!$model->getBackendType() && $model->getIsUserDefined() !== false) {

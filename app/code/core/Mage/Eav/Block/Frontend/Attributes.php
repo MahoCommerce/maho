@@ -53,8 +53,13 @@ class Mage_Eav_Block_Frontend_Attributes extends Mage_Core_Block_Template
 
         $rows = [];
         foreach ($visible as $code => $attribute) {
+            // A Yes/No frontend shows "No" for null, so an empty raw value skips the row
+            $raw = $entity->getData($code);
+            if ($raw === null || $raw === '' || $raw === false) {
+                continue;
+            }
             $value = $attribute->getFrontend()->getValue($entity);
-            if (!is_string($value) || $value === '' || !$entity->hasData($code)) {
+            if (!is_string($value) || $value === '') {
                 continue;
             }
             $rows[] = [
