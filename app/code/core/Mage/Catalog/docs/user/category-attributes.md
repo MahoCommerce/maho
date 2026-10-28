@@ -80,4 +80,6 @@ read them:
   parent. An update can change the set, as for a product. The next night, the store deletes the
   values of the attributes that are not in the new set.
 - `customAttributes`: the values of the attributes that you added, by attribute code. To write
-  these values, use `customAttributesWrite`.
+  these values, use `customAttributesWrite`. Only a read of one category by its ID and the
+  response of a create or an update have this field. The list of categories, the children of a
+  category and a read by URL key do not have it.
