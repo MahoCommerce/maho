@@ -362,6 +362,44 @@ deletes the row permanently.
 Three ACL resources under **System > Tools > Message Queue** let you split access: *View Messages*,
 *Retry Messages* and *Discard Messages*.
 
+### Run an admin action in the background
+
+An admin action that can take minutes, such as an import or the application of rules, queues its work
+and returns at once. The administrator who clicked gets the result in **System > Notifications**.
+`Mage_AdminNotification_Helper_Data` gives the three steps:
+
+```php
+// The controller: queue the job for the current administrator
+$message = new My_Module_Model_RebuildMessage((int) $entity->getId(), Mage::helper('adminnotification')->getCurrentAdminUserId());
+\Maho\Queue\QueueManager::dispatch($message, queue: 'my_module', dedupeKey: 'my_module_rebuild_' . $entity->getId());
+$this->_getSession()->addSuccess($this->__('The rebuild runs in the background. A message in the notifications tells you when it is done.'));
+
+// The handler: run the job, then send a notice, or a major message with the error
+#[Maho\Config\MessageHandler]
+public function rebuild(My_Module_Model_RebuildMessage $message): void
+{
+    Mage::helper('adminnotification')->runAndNotify(
+        function () use ($message): string {
+            Mage::getModel('my_module/entity')->load($message->entityId)->rebuild();
+            return Mage::helper('my_module')->__('The entity is up to date.');
+        },
+        Mage::helper('my_module')->__('The entity has been rebuilt'),
+        Mage::helper('my_module')->__('The entity could not be rebuilt'),
+        'adminhtml/my_module/index',
+        $message->adminUserId,
+        'my_module/entity',
+    );
+}
+```
+
+`runAndNotify()` throws the exception of the job again after the major message, so the queue retries
+the message. Each failed attempt sends one message. Without an administrator, for example when cron
+queued the job, the administrators allowed the ACL resource get the messages.
+
+The link in the message has no secret key, because a worker cannot make a key that is valid in the
+session of the reader. So the action of the link must be in the `$_publicActions` of its controller,
+and it must only read, such as the grid of the module. The ACL check still applies.
+
 ## Configuration
 
 **System > Configuration > Advanced > System > Message Queue**:

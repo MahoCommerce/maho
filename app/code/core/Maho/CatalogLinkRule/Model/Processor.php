@@ -68,49 +68,16 @@ class Maho_CatalogLinkRule_Model_Processor
             ? $helper->__('all link types')
             : $helper->getLinkTypes()[$message->linkTypeId] ?? (string) $message->linkTypeId;
 
-        try {
-            $this->applyRules($message->linkTypeId);
-        } catch (Throwable $e) {
-            $this->notifyAdmin(
-                $message,
-                Mage_AdminNotification_Model_Inbox::SEVERITY_MAJOR,
-                $helper->__('The product relationship rules could not be applied'),
-                $helper->__('The rules of %s failed: %s. The message queue tries again.', $linkTypes, $e->getMessage()),
-            );
-            throw $e;
-        }
-
-        $this->notifyAdmin(
-            $message,
-            Mage_AdminNotification_Model_Inbox::SEVERITY_NOTICE,
+        Mage::helper('adminnotification')->runAndNotify(
+            function () use ($message, $helper, $linkTypes): string {
+                $this->applyRules($message->linkTypeId);
+                return $helper->__('The product links of %s are up to date.', $linkTypes);
+            },
             $helper->__('The product relationship rules have been applied'),
-            $helper->__('The product links of %s are up to date.', $linkTypes),
-        );
-    }
-
-    protected function notifyAdmin(
-        Maho_CatalogLinkRule_Model_ApplyRulesMessage $message,
-        int $severity,
-        string $title,
-        string $text,
-    ): void {
-        // A worker runs outside the admin area, so build the link from the admin store
-        $storeCode = Mage::app()->getStore()->getCode();
-        Mage::app()->setCurrentStore(Mage_Core_Model_Store::ADMIN_CODE);
-        try {
-            $url = Mage::helper('adminhtml')->getUrl('adminhtml/cataloglinkrule_rule/index', ['_nosecret' => true]);
-        } finally {
-            Mage::app()->setCurrentStore($storeCode);
-        }
-
-        Mage::getModel('adminnotification/inbox')->add(
-            $severity,
-            $title,
-            $text,
-            $url,
-            true,
+            $helper->__('The product relationship rules could not be applied'),
+            'adminhtml/cataloglinkrule_rule/index',
             $message->adminUserId,
-            $message->adminUserId === null ? 'catalog/linkrules' : null,
+            'catalog/linkrules',
         );
     }
 

@@ -16,6 +16,10 @@ class Mage_Adminhtml_Promo_CatalogController extends Mage_Adminhtml_Controller_A
      */
     public const ADMIN_RESOURCE = 'promo/catalog';
 
+    /** The link of a notice from the message queue has no secret key: the grid only reads. */
+    #[\Override]
+    protected $_publicActions = ['index'];
+
     /**
      * Dirty rules notice message
      *
@@ -267,22 +271,17 @@ class Mage_Adminhtml_Promo_CatalogController extends Mage_Adminhtml_Controller_A
     }
 
     /**
-     * Apply all active catalog price rules
+     * Queue the application of all active catalog price rules
      */
     #[Maho\Config\Route('/admin/promo_catalog/applyRules')]
     public function applyRulesAction(): void
     {
-        $errorMessage = Mage::helper('catalogrule')->__('Unable to apply rules.');
         try {
-            Mage::getModel('catalogrule/rule')->applyAll();
-            Mage::getModel('catalogrule/flag')->loadSelf()
-                ->setState(0)
-                ->save();
-            $this->_getSession()->addSuccess(Mage::helper('catalogrule')->__('The rules have been applied.'));
-        } catch (Mage_Core_Exception $e) {
-            $this->_getSession()->addError($errorMessage . ' ' . $e->getMessage());
+            Mage::getModel('catalogrule/rule')
+                ->queueApplyAll(Mage::helper('adminnotification')->getCurrentAdminUserId());
+            $this->_getSession()->addSuccess(Mage::helper('catalogrule')->__('The rules will be applied in the background. A message in the notifications tells you when they are applied.'));
         } catch (Exception $e) {
-            $this->_getSession()->addError($errorMessage);
+            $this->_getSession()->addError(Mage::helper('catalogrule')->__('Unable to apply rules.'));
             Mage::logException($e);
         }
         $this->_redirect('*/*');

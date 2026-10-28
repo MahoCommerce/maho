@@ -320,6 +320,30 @@ describe('CatalogLinkRule processor merge modes', function () {
             ->and($upsells)->toHaveKey($ruleTarget);
     });
 
+    test('a second save of the same rule removes the links of the link type it leaves', function () use ($linkType) {
+        $upsell = Mage_Catalog_Model_Product_Link::LINK_TYPE_UPSELL;
+        $source = clrCreateProduct('clr-src-' . uniqid());
+        $ruleTarget = clrCreateProduct('clr-tgt-' . uniqid());
+
+        $rule = Mage::getModel('cataloglinkrule/rule');
+        $rule->setName('clr-twice-' . uniqid());
+        $rule->setLinkTypeId($linkType);
+        $rule->setIsActive(true);
+        $rule->setPriority(0);
+        $rule->setSortOrder('random');
+        $rule->save();
+
+        $rule = Mage::getModel('cataloglinkrule/rule')->load($rule->getId());
+        $rule->setLinkTypeId($upsell)->save();
+        clrInsertLink($source, $ruleTarget, $upsell, 1, (int) $rule->getId());
+        $rule->setLinkTypeId($linkType)->save();
+
+        $upsells = clrReadLinks($source, $upsell);
+        $rule->delete();
+
+        expect($upsells)->not->toHaveKey($ruleTarget);
+    });
+
     test('merge mode removes rule links for products no longer matched, keeping manual links', function () use ($linkType) {
         $source = clrCreateProduct('clr-src-' . uniqid());
         $manual = clrCreateProduct('clr-man-' . uniqid());

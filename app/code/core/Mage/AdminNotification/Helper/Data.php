@@ -59,4 +59,98 @@ class Mage_AdminNotification_Helper_Data extends Mage_Core_Helper_Abstract
         $this->_unreadNoticeCounts ??= Mage::getModel('adminnotification/inbox')->getNoticeStatus();
         return $this->_unreadNoticeCounts[$severity] ?? 0;
     }
+
+    /**
+     * The ID of the administrator who sends the current request, or null outside the admin.
+     */
+    public function getCurrentAdminUserId(): ?int
+    {
+        $id = Mage::getSingleton('admin/session')->getUser()?->getId();
+        return $id === null ? null : (int) $id;
+    }
+
+    /**
+     * Put a message in the admin inbox, with a link to the admin page of $route.
+     *
+     * When $adminUserId is set, only that administrator sees the message. When $aclResource is set,
+     * only the administrators allowed that resource see it. With both null, every administrator does.
+     */
+    public function notifyAdmin(
+        int $severity,
+        string $title,
+        string $text,
+        string $route = '',
+        array $routeParams = [],
+        ?int $adminUserId = null,
+        ?string $aclResource = null,
+    ): void {
+        Mage::getModel('adminnotification/inbox')->add(
+            $severity,
+            mb_substr(trim($title), 0, 255),
+            trim($text),
+            $route === '' ? '' : $this->getAdminUrl($route, $routeParams),
+            true,
+            $adminUserId,
+            $aclResource,
+        );
+    }
+
+    /**
+     * Run $job in a queue handler and tell the administrator the result. $job returns the text of
+     * the notice. When $job fails, the administrator gets a major message with the error, and the
+     * exception goes on, so the queue tries the message again. Without $adminUserId, the
+     * administrators allowed $aclResource get the messages.
+     *
+     * @param callable(): string $job
+     * @throws Throwable the exception of $job
+     */
+    public function runAndNotify(
+        callable $job,
+        string $doneTitle,
+        string $failedTitle,
+        string $route,
+        ?int $adminUserId,
+        ?string $aclResource = null,
+    ): void {
+        try {
+            $text = $job();
+        } catch (Throwable $e) {
+            Mage::logException($e);
+            $this->notifyAdmin(
+                Mage_AdminNotification_Model_Inbox::SEVERITY_MAJOR,
+                $failedTitle,
+                $this->__('%s The message queue tries again.', $e->getMessage()),
+                $route,
+                [],
+                $adminUserId,
+                $adminUserId === null ? $aclResource : null,
+            );
+            throw $e;
+        }
+
+        $this->notifyAdmin(
+            Mage_AdminNotification_Model_Inbox::SEVERITY_NOTICE,
+            $doneTitle,
+            $text,
+            $route,
+            [],
+            $adminUserId,
+            $adminUserId === null ? $aclResource : null,
+        );
+    }
+
+    /**
+     * A queue worker runs outside the admin area, so build the URL from the admin store. The link
+     * has no secret key, because the key of the worker is not valid in the session of the reader.
+     */
+    public function getAdminUrl(string $route, array $params = []): string
+    {
+        $storeCode = Mage::app()->getStore()->getCode();
+        Mage::app()->setCurrentStore(Mage_Core_Model_Store::ADMIN_CODE);
+        try {
+            return Mage::helper('adminhtml')->getUrl($route, $params + ['_nosecret' => true]);
+        } finally {
+            Mage::app()->setCurrentStore($storeCode);
+        }
+    }
 }

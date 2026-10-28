@@ -14,8 +14,12 @@ final class Mage_Reports_Model_Queue_RefreshStatistics
 {
     public const QUEUE_NAME = 'reports';
 
+    /**
+     * @param ?int $adminUserId the administrator who gets the result in the inbox, or null for no message
+     */
     public function __construct(
         public readonly string $code,
+        public readonly ?int $adminUserId = null,
     ) {}
 
     /**

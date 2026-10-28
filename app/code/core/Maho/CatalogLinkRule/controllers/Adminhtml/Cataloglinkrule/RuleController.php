@@ -12,6 +12,10 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
 {
     public const ADMIN_RESOURCE = 'catalog/linkrules';
 
+    /** The link of a notice from the message queue has no secret key: the grid only reads. */
+    #[\Override]
+    protected $_publicActions = ['index'];
+
     #[Maho\Config\Route('/admin/cataloglinkrule_rule/index')]
     public function indexAction(): void
     {
@@ -135,8 +139,8 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
     {
         $session = Mage::getSingleton('adminhtml/session');
         try {
-            $adminUserId = Mage::getSingleton('admin/session')->getUser()?->getId();
-            Mage::getModel('cataloglinkrule/processor')->queueApplyRules($linkTypeId, $adminUserId === null ? null : (int) $adminUserId);
+            Mage::getModel('cataloglinkrule/processor')
+                ->queueApplyRules($linkTypeId, Mage::helper('adminnotification')->getCurrentAdminUserId());
             $session->addSuccess(Mage::helper('cataloglinkrule')->__('The rules will be applied in the background. A message in the notifications tells you when they are applied.'));
         } catch (Exception $e) {
             Mage::logException($e);

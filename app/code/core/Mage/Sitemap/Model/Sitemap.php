@@ -155,6 +155,20 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
     }
 
     /**
+     * Queue generateXml(). A second request for this sitemap is dropped while the first one waits or
+     * runs. The result goes to the inbox of $adminUserId.
+     */
+    public function queueGenerate(?int $adminUserId = null): void
+    {
+        $message = new Mage_Sitemap_Model_GenerateMessage((int) $this->getId(), $adminUserId);
+        \Maho\Queue\QueueManager::dispatch(
+            $message,
+            queue: Mage_Sitemap_Model_GenerateMessage::QUEUE_NAME,
+            dedupeKey: $message->getDedupeKey(),
+        );
+    }
+
+    /**
      * Generate XML file
      *
      * @return $this

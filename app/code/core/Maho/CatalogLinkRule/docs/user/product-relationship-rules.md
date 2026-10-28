@@ -368,7 +368,7 @@ A save changes the links at once in two cases:
 - **Catalog > Product Relationship Rules > Apply Rules** runs all the active rules.
 - **Save and Apply** on the rule page saves the rule. Then it runs all the active rules of the same link type, because they compete for the same products by priority.
 
-Both buttons put the run in the message queue, so the page does not wait. A queue worker runs it in the background, and the links change when the run is complete. The workers start from cron, so cron must run on the server. **System > Message Queue** shows the run, in the queue `cataloglinkrule`.
+Both buttons put the run in the message queue, so the page does not wait. A queue worker runs it in the background, and the links change when the run is complete. The workers start from cron, so cron must run on the server. **System > Tools > Message Queue** shows the run, in the queue `cataloglinkrule`.
 
 When the run is complete, the administrator who clicked the button gets a message in **System > Notifications**. If the run fails, the message has the error, and the queue tries the run again.
 

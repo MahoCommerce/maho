@@ -131,4 +131,26 @@ class Maho_CustomerSegmentation_Service_Segment
     {
         return $segment->refreshCustomers();
     }
+
+    /**
+     * Queue refresh() for $segment and mark it pending. A second request for the segment is dropped
+     * while the first one waits or runs. The result goes to the inbox of $adminUserId.
+     */
+    public function queueRefresh(Maho_CustomerSegmentation_Model_Segment $segment, ?int $adminUserId = null): void
+    {
+        $message = new Maho_CustomerSegmentation_Model_RefreshMessage((int) $segment->getId(), $adminUserId);
+        \Maho\Queue\QueueManager::dispatch(
+            $message,
+            queue: Maho_CustomerSegmentation_Model_RefreshMessage::QUEUE_NAME,
+            dedupeKey: $message->getDedupeKey(),
+        );
+
+        // Only the status column: a full save of the segment runs its save hooks
+        Mage::getSingleton('core/resource')->getConnection('core_write')->update(
+            $segment->getResource()->getMainTable(),
+            ['refresh_status' => Maho_CustomerSegmentation_Model_Segment::STATUS_PENDING],
+            ['segment_id = ?' => (int) $segment->getId()],
+        );
+        $segment->setRefreshStatus(Maho_CustomerSegmentation_Model_Segment::STATUS_PENDING);
+    }
 }

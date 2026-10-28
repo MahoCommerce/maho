@@ -52,6 +52,15 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
     }
 
     #[\Override]
+    public function save()
+    {
+        parent::save();
+        // _afterSave() compares with the original link type, so a second save must see this one
+        $this->setOrigData('link_type_id', $this->getData('link_type_id'));
+        return $this;
+    }
+
+    #[\Override]
     protected function _afterSave()
     {
         // A deactivated rule should no longer contribute links: drop the ones it generated so

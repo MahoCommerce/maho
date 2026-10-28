@@ -276,6 +276,19 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
     }
 
     /**
+     * Queue applyAll(). A second request is dropped while the first one waits or runs. The result
+     * goes to the inbox of $adminUserId.
+     */
+    public function queueApplyAll(?int $adminUserId = null): void
+    {
+        \Maho\Queue\QueueManager::dispatch(
+            new Mage_CatalogRule_Model_ApplyAllMessage($adminUserId),
+            queue: Mage_CatalogRule_Model_ApplyAllMessage::QUEUE_NAME,
+            dedupeKey: Mage_CatalogRule_Model_ApplyAllMessage::DEDUPE_KEY,
+        );
+    }
+
+    /**
      * Apply all price rules to product
      *
      * @param  int|Mage_Catalog_Model_Product $product
