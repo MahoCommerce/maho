@@ -114,6 +114,14 @@ describe('OutboundUrl', function (): void {
             ->and($target->host)->toBe('intranet.example');
     });
 
+    it('does not let a dot segment leave the path of an allowed prefix', function (string $url): void {
+        expect(fn() => outboundUrl(['intranet.example' => ['10.0.0.5']])->validate($url, ['http://intranet.example/files/']))
+            ->toThrow(OutboundUrlException::class, 'private or reserved');
+    })->with([
+        'http://intranet.example/files/../admin',
+        'http://intranet.example/files/%2e%2e/admin',
+    ]);
+
     it('classifies addresses', function (): void {
         expect(OutboundUrl::isPublicAddress('8.8.8.8'))->toBeTrue()
             ->and(OutboundUrl::isPublicAddress('2001:4860:4860::8888'))->toBeTrue()

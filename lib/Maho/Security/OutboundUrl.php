@@ -53,7 +53,7 @@ final class OutboundUrl
         $path = $uri->getRawPath() === '' ? '/' : $uri->getRawPath();
         $query = $uri->getRawQuery();
 
-        if (self::matchesPrefix($scheme, $host, $port, $path, $allowedPrefixes)) {
+        if (self::matchesPrefix($scheme, $host, $port, $uri->getPath() ?: '/', $allowedPrefixes)) {
             return new OutboundTarget($url, $scheme, $host, $port, $path, $query, null);
         }
 
@@ -108,7 +108,7 @@ final class OutboundUrl
                 continue;
             }
             $prefixPort = $uri->getPort() ?? ($prefixScheme === 'https' ? 443 : 80);
-            $prefixPath = $uri->getRawPath() === '' ? '/' : $uri->getRawPath();
+            $prefixPath = $uri->getPath() ?: '/';
             if ($prefixScheme === $scheme
                 && $prefixHost === $host
                 && $prefixPort === $port
