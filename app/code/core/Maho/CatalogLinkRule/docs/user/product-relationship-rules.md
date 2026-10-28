@@ -79,12 +79,15 @@ A rule links only products that the storefront can show. It skips a target produ
 - the product is disabled
 - the visibility of the product is not "Catalog" or "Catalog, Search"
 - the product is not in a website of the source product
-- the product is out of stock, and **System > Configuration > Catalog > Inventory > Stock Options > Display Out of Stock Products** is "No"
-- the product is out of stock, and the link type is Cross-sell Products. The cart never shows a cross-sell that is out of stock
 
 So **Maximum Links** counts only products that the customer can see. A source product that is in no website gets no links.
 
-The rule checks the stock when it runs. If a linked product goes out of stock and the storefront hides out-of-stock products, the storefront hides the link until the next run replaces it.
+A rule does not check the stock, because a store can sell out-of-stock products, for example on backorder. To link only products that are in stock, add the target condition **Stock Availability** is "In Stock". The rule checks this condition when it runs. A product that comes back in stock gets its links on the next run.
+
+The storefront also hides some out-of-stock products:
+
+- The cart never shows a cross-sell that is out of stock.
+- The product page hides out-of-stock related products and up-sells when **System > Configuration > Catalog > Inventory > Stock Options > Display Out of Stock Products** is "No".
 
 ## Rule Components
 
@@ -156,7 +159,7 @@ Define which products should receive relationship links using standard product a
 | **Status** | is, is not | Status is "Enabled" |
 | **Visibility** | is, is not | Visibility is "Catalog, Search" |
 | **Type** | is, is not | Type is "Simple" |
-| **Stock Status** | is, is not | Stock Status is "In Stock" |
+| **Stock Availability** | is, is not | Stock Availability is "In Stock" |
 | **Manufacturer** | is, is not, is one of | Manufacturer is "Acme Corp" |
 | **Custom Attributes** | Various depending on type | Color is "Blue" |
 
@@ -192,7 +195,7 @@ Target Conditions:
   IF ALL of these conditions are TRUE:
     - Category (Source Match) matches source
     - Type is "Simple"
-    - Stock Status is "In Stock"
+    - Stock Availability is "In Stock"
 
 Result: Each T-shirt gets related to other T-shirts in the same category
 ```
@@ -207,7 +210,7 @@ Target Conditions:
   IF ALL of these conditions are TRUE:
     - Category is "Electronics/Cameras"
     - Price is greater than source product price
-    - Stock Status is "In Stock"
+    - Stock Availability is "In Stock"
 
 Result: Each camera gets up-sold to more expensive cameras
 ```
@@ -237,7 +240,7 @@ IF ALL of these conditions are TRUE:
 ```
 IF ALL of these conditions are TRUE:
   - Category (Source Match) matches source
-  - Stock Status is "In Stock"
+  - Stock Availability is "In Stock"
 ```
 
 ### Example 2: Brand-Specific Up-sells
@@ -264,7 +267,7 @@ IF ALL of these conditions are TRUE:
 IF ALL of these conditions are TRUE:
   - Manufacturer (Source Match) matches source
   - Price is greater than source product price
-  - Stock Status is "In Stock"
+  - Stock Availability is "In Stock"
 ```
 
 ### Example 3: Accessory Cross-sells
@@ -290,7 +293,7 @@ IF ALL of these conditions are TRUE:
 ```
 IF ALL of these conditions are TRUE:
   - Category is "Electronics/Camera Accessories"
-  - Stock Status is "In Stock"
+  - Stock Availability is "In Stock"
   - Price is less than 100
 ```
 
@@ -347,7 +350,7 @@ IF ALL of these conditions are TRUE:
 IF ALL of these conditions are TRUE:
   - Category (Source Match) does not match source
   - Color (Source Match) matches source
-  - Stock Status is "In Stock"
+  - Stock Availability is "In Stock"
 ```
 
 ## Admin Interface

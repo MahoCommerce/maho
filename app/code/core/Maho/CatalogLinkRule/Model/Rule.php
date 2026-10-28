@@ -296,8 +296,8 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
 
     /**
      * Scan the catalog and return the target product IDs matched by this rule, in the configured
-     * sort order. The scan skips the products that the storefront blocks never show for this link
-     * type, so they do not count toward the maximum links.
+     * sort order. The scan skips the products that the storefront blocks never show, so they do not
+     * count toward the maximum links. The stock is a target condition that the merchant chooses.
      *
      * @param int[]|null $websiteIds
      * @return int[]
@@ -311,10 +311,6 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
 
         if ($websiteIds !== null) {
             $this->_addWebsiteFilter($productCollection, $websiteIds);
-        }
-
-        if ($this->_hidesOutOfStockTargets()) {
-            Mage::getSingleton('cataloginventory/stock')->addInStockFilterToCollection($productCollection);
         }
 
         /** @var Maho_CatalogLinkRule_Model_Rule_Target_Combine $targetConditions */
@@ -361,18 +357,5 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
             ->where('pw.website_id IN (?)', array_map(intval(...), $websiteIds));
 
         $productCollection->getSelect()->where('EXISTS (' . $inWebsite . ')');
-    }
-
-    /**
-     * The cart shows only cross-sells that are in stock. The product page hides out of stock
-     * related products and up-sells unless "Display Out of Stock Products" is on.
-     */
-    protected function _hidesOutOfStockTargets(): bool
-    {
-        if ((int) $this->getLinkTypeId() === Mage_Catalog_Model_Product_Link::LINK_TYPE_CROSSSELL) {
-            return true;
-        }
-
-        return !Mage::helper('cataloginventory')->isShowOutOfStock();
     }
 }
