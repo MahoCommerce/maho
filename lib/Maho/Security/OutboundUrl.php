@@ -110,8 +110,8 @@ final class OutboundUrl
      */
     private static function matchesPrefix(string $scheme, string $host, int $port, string $path, array $prefixes): bool
     {
-        // A server that decodes %2F or %5C to a slash before it removes dot segments can leave the prefix path
-        if (preg_match('/%(2F|5C)/i', $path)) {
+        // Some servers decode %2F or %5C to a slash, or remove a ";" parameter, before they remove "..", so the path can leave the prefix
+        if (preg_match('/%(2F|5C)|;/i', $path)) {
             return false;
         }
         foreach ($prefixes as $prefix) {
@@ -122,7 +122,7 @@ final class OutboundUrl
                 continue;
             }
             $prefixPort = $uri->getPort() ?? ($prefixScheme === 'https' ? 443 : 80);
-            $prefixPath = $uri->getPath() ?: '/';
+            $prefixPath = $uri->getPath();
             if ($prefixScheme === $scheme
                 && $prefixHost === $host
                 && $prefixPort === $port

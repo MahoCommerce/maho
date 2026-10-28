@@ -51,8 +51,9 @@ describe('OutboundUrl', function (): void {
         expect(fn() => outboundUrl()->validate('http://nowhere.example/'))->toThrow(OutboundUrlException::class, 'resolved');
     });
 
-    it('rejects a URL without a host', function (): void {
-        expect(fn() => outboundUrl()->validate('http:///path'))->toThrow(OutboundUrlException::class);
+    it('reads a URL with three slashes as a host name, as a browser does', function (): void {
+        expect(fn() => outboundUrl(['path' => ['10.0.0.1']])->validate('http:///path'))
+            ->toThrow(OutboundUrlException::class, 'private or reserved');
     });
 
     it('rejects a malformed URL and a URL with a control character', function (string $url): void {
@@ -136,6 +137,7 @@ describe('OutboundUrl', function (): void {
         'http://intranet.example/files/%2e%2e/admin',
         'http://intranet.example/files/..%2Fadmin',
         'http://intranet.example/files/..%5cadmin',
+        'http://intranet.example/files/..;/admin',
     ]);
 
     it('sends the path that it compared with the allowed prefix', function (): void {

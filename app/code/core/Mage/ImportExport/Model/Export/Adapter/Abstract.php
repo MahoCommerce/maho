@@ -84,7 +84,7 @@ abstract class Mage_ImportExport_Model_Export_Adapter_Abstract
     }
 
     /**
-     * Called when the adapter is freed
+     * `__destruct()` calls this method. A subclass closes its file here.
      */
     public function destruct() {}
 

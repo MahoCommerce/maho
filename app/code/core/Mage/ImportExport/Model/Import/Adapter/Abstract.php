@@ -87,7 +87,7 @@ abstract class Mage_ImportExport_Model_Import_Adapter_Abstract implements Seekab
     }
 
     /**
-     * Called when the adapter is freed
+     * `__destruct()` calls this method. A subclass closes its file here.
      */
     public function destruct() {}
 
