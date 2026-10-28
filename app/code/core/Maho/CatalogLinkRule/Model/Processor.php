@@ -38,12 +38,23 @@ class Maho_CatalogLinkRule_Model_Processor
     #[Maho\Config\CronJob('cataloglinkrule_apply_all', configPath: 'catalog/linkrule/schedule')]
     public function processRules(): void
     {
+        $this->applyRules();
+    }
+
+    /**
+     * Apply the active rules of one link type, or of every link type when $linkTypeId is null
+     */
+    public function applyRules(?int $linkTypeId = null): void
+    {
         // Get all active rules, ordered by priority
         $rules = Mage::getResourceModel('cataloglinkrule/rule_collection')
             ->addFieldToFilter('is_active', 1)
             ->addDateFilter()
             ->setOrder('priority', 'ASC')
             ->setOrder('rule_id', 'ASC');
+        if ($linkTypeId !== null) {
+            $rules->addFieldToFilter('link_type_id', $linkTypeId);
+        }
 
         // Group by link_type_id
         $rulesByType = [];
@@ -127,6 +138,9 @@ class Maho_CatalogLinkRule_Model_Processor
                     );
                 }
 
+                $websiteIdsByProduct = Mage::getResourceSingleton('catalog/product')
+                    ->getWebsiteIdsByProductIds($batchProductIds);
+
                 // Process each product in batch
                 foreach ($batchProductIds as $productId) {
                     $existing = $existingLinks[$productId] ?? ['targets' => [], 'max_position' => 0];
@@ -141,6 +155,7 @@ class Maho_CatalogLinkRule_Model_Processor
                         $linkAttrTable,
                         $existing['targets'],
                         $existing['max_position'],
+                        $websiteIdsByProduct[$productId] ?? [],
                     );
                 }
 
@@ -223,9 +238,11 @@ class Maho_CatalogLinkRule_Model_Processor
     }
 
     /**
-     * Apply a rule to a single product
+     * Apply a rule to a single product. A target must share a website with the source product:
+     * $websiteIds are the websites of the source product, and null applies no website filter.
      *
      * @param Maho\Db\Adapter\AdapterInterface $adapter
+     * @param int[]|null $websiteIds
      */
     protected function applyRuleToProduct(
         int $productId,
@@ -237,6 +254,7 @@ class Maho_CatalogLinkRule_Model_Processor
         string $linkAttrTable,
         array $existingTargetIds = [],
         int $startPosition = 0,
+        ?array $websiteIds = null,
     ): void {
         // Only load the source product when a target condition actually reads its attributes;
         // otherwise the matched target set is source-independent and the load is pure overhead.
@@ -245,7 +263,7 @@ class Maho_CatalogLinkRule_Model_Processor
             : null;
 
         // Get matching target products, passing the source product for matching conditions
-        $targetProductIds = $rule->getMatchingTargetProductIds($sourceProduct);
+        $targetProductIds = $rule->getMatchingTargetProductIds($sourceProduct, $websiteIds);
         $maxLinks = $rule->getMaxLinks();
         $ruleId = $rule->getId() !== null ? (int) $rule->getId() : null;
 

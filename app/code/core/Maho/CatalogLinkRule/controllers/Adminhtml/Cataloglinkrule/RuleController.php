@@ -97,6 +97,11 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
                     Mage::helper('cataloglinkrule')->__('The rule has been saved.'),
                 );
 
+                // The other rules of the same link type compete for the same products by priority
+                if ($this->getRequest()->getParam('apply')) {
+                    $this->_applyRules((int) $model->getLinkTypeId());
+                }
+
                 if ($this->getRequest()->getParam('back')) {
                     $this->_redirect('*/*/edit', ['id' => $model->getId()]);
                     return;
@@ -117,6 +122,27 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
             }
         }
         $this->_redirect('*/*/');
+    }
+
+    #[Maho\Config\Route('/admin/cataloglinkrule_rule/applyRules')]
+    public function applyRulesAction(): void
+    {
+        $this->_applyRules();
+        $this->_redirect('*/*/');
+    }
+
+    private function _applyRules(?int $linkTypeId = null): void
+    {
+        $session = Mage::getSingleton('adminhtml/session');
+        try {
+            Mage::getModel('cataloglinkrule/processor')->applyRules($linkTypeId);
+            $session->addSuccess(Mage::helper('cataloglinkrule')->__('The rules have been applied.'));
+        } catch (Mage_Core_Exception $e) {
+            $session->addError(Mage::helper('cataloglinkrule')->__('Unable to apply rules.') . ' ' . $e->getMessage());
+        } catch (Exception $e) {
+            Mage::logException($e);
+            $session->addError(Mage::helper('cataloglinkrule')->__('Unable to apply rules.'));
+        }
     }
 
     #[Maho\Config\Route('/admin/cataloglinkrule_rule/delete')]

@@ -17,6 +17,7 @@ class Maho_CatalogLinkRule_Test_StubRule extends Maho_CatalogLinkRule_Model_Rule
 {
     public array $sourceIds = [];
     public array $targetIds = [];
+    public array $websiteIdsBySource = [];
 
     #[\Override]
     public function getMatchingSourceProductIds(): array
@@ -25,8 +26,9 @@ class Maho_CatalogLinkRule_Test_StubRule extends Maho_CatalogLinkRule_Model_Rule
     }
 
     #[\Override]
-    public function getMatchingTargetProductIds(?Mage_Catalog_Model_Product $sourceProduct = null): array
+    public function getMatchingTargetProductIds(?Mage_Catalog_Model_Product $sourceProduct = null, ?array $websiteIds = null): array
     {
+        $this->websiteIdsBySource[] = $websiteIds;
         return $this->targetIds;
     }
 }
@@ -220,6 +222,18 @@ describe('CatalogLinkRule processor merge modes', function () {
         expect($links)->toHaveKey($manual);
         expect($links)->toHaveKey($second);
         expect($links)->not->toHaveKey($first);
+    });
+
+    test('the target scan gets the websites of the source product', function () use ($linkType) {
+        $source = clrCreateProduct('clr-src-' . uniqid());
+
+        $rule = new Maho_CatalogLinkRule_Test_StubRule();
+        $rule->sourceIds = [$source];
+
+        (new Maho_CatalogLinkRule_Test_Processor())->runLinkType($linkType, [$rule]);
+
+        expect($rule->websiteIdsBySource)->toHaveCount(1)
+            ->and(array_map(intval(...), $rule->websiteIdsBySource[0]))->toBe([1]);
     });
 
     test('deleting a rule removes its generated links but keeps manual ones', function () use ($linkType) {
