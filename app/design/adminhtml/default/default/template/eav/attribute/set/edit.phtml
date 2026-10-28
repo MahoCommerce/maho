@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
         isReadOnly: <?= var_export((bool) $this->getIsReadOnly(), true) ?>,
         saveUrl: '<?= $this->getSaveUrl() ?>',
         deleteUrl: '<?= $this->getDeleteUrl() ?>',
-        canDeleteSet: () => confirm(Translator.translate('The records of this set will move to the default set. Delete the set?')),
+        canDeleteSet: () => confirm('<?= $this->jsQuoteEscape(Mage::helper('eav')->__('The records of this set will move to the default set. Delete the set?')) ?>'),
     });
 
     setForm.buildGroupTree(<?= $this->getGroupTreeJson() ?>);

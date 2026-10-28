@@ -108,7 +108,7 @@ class BlogCategory extends CrudResource
     /** @var int[]|null */
     public ?array $stores = null;
 
-    #[ApiProperty(description: 'Attribute set ID. A new category without one takes the default set', extraProperties: [EnumSource::KEY => 'Maho\ApiPlatform\Metadata\ValueLists::blogCategoryAttributeSets'])]
+    #[ApiProperty(description: 'Attribute set ID. A new category without one takes the default set', security: "has_backend_access('blog-categories')", extraProperties: [EnumSource::KEY => 'Maho\ApiPlatform\Metadata\ValueLists::blogCategoryAttributeSets'])]
     public ?int $attributeSetId = null;
 
     /** @var array<string, mixed>|null */

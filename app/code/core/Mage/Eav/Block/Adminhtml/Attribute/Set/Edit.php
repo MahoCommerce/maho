@@ -21,7 +21,6 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Edit extends Mage_Adminhtml_Block_T
         Mage::helper('core/js')->addTranslateData([
             'Cannot unassign system attribute',
             'Cannot delete group. Please move system attributes to another group and try again.',
-            'The records of this set will move to the default set. Delete the set?',
         ], 'eav');
 
         $this->setTemplate('eav/attribute/set/edit.phtml');

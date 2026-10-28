@@ -21,22 +21,22 @@ SPDX-License-Identifier: AFL-3.0
                             <action>adminhtml/blog_category</action>
                             <sort_order>20</sort_order>
                         </categories>
-                        <post_attributes module="blog">
+                        <post_attributes module="blog" translate="title">
                             <title>Manage Post Attributes</title>
                             <action>adminhtml/blog_post_attribute</action>
                             <sort_order>30</sort_order>
                         </post_attributes>
-                        <post_sets module="blog">
+                        <post_sets module="blog" translate="title">
                             <title>Post Attribute Sets</title>
                             <action>adminhtml/blog_post_set</action>
                             <sort_order>40</sort_order>
                         </post_sets>
-                        <category_attributes module="blog">
+                        <category_attributes module="blog" translate="title">
                             <title>Manage Category Attributes</title>
                             <action>adminhtml/blog_category_attribute</action>
                             <sort_order>50</sort_order>
                         </category_attributes>
-                        <category_sets module="blog">
+                        <category_sets module="blog" translate="title">
                             <title>Category Attribute Sets</title>
                             <action>adminhtml/blog_category_set</action>
                             <sort_order>60</sort_order>
@@ -61,16 +61,16 @@ SPDX-License-Identifier: AFL-3.0
                                     <categories>
                                         <title>Categories</title>
                                     </categories>
-                                    <post_attributes>
+                                    <post_attributes translate="title">
                                         <title>Manage Post Attributes</title>
                                     </post_attributes>
-                                    <post_sets>
+                                    <post_sets translate="title">
                                         <title>Post Attribute Sets</title>
                                     </post_sets>
-                                    <category_attributes>
+                                    <category_attributes translate="title">
                                         <title>Manage Category Attributes</title>
                                     </category_attributes>
-                                    <category_sets>
+                                    <category_sets translate="title">
                                         <title>Category Attribute Sets</title>
                                     </category_sets>
                                 </children>

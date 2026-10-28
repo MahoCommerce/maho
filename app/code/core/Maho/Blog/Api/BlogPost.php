@@ -180,7 +180,7 @@ class BlogPost extends CrudResource
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public ?string $excerpt = null;
 
-    #[ApiProperty(description: 'Attribute set ID. A new post without one takes the default set', extraProperties: [EnumSource::KEY => 'Maho\ApiPlatform\Metadata\ValueLists::blogPostAttributeSets'])]
+    #[ApiProperty(description: 'Attribute set ID. A new post without one takes the default set', security: "has_backend_access('blog-posts')", extraProperties: [EnumSource::KEY => 'Maho\ApiPlatform\Metadata\ValueLists::blogPostAttributeSets'])]
     public ?int $attributeSetId = null;
 
     /** @var array<string, mixed>|null */

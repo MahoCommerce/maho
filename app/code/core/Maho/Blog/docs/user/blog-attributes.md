@@ -60,11 +60,12 @@ An import refuses a value for an attribute that is not in the set of the post.
 
 ## The API
 
-The blog posts and blog categories of the REST and GraphQL API have two more fields:
+The blog posts and blog categories of the REST and GraphQL API have two more fields. Only an admin
+and an API token can read and write them:
 
 - `attributeSetId`: the set of the post or the category. A new one without a set takes the default
   set. An update can change the set. The next night, the store deletes the values of the
   attributes that are not in the new set.
-- `customAttributes`: the values of the attributes that you added, by attribute code. Only an admin
-  and an API token can read and write it. A write refuses a code that is not in the set of the
-  record, and a value that is not an option of a Dropdown.
+- `customAttributes`: the values of the attributes that you added, by attribute code. A write
+  refuses a code that is not in the set of the record, and a value that is not an option of a
+  Dropdown.
