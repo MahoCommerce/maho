@@ -120,6 +120,8 @@ describe('OutboundUrl', function (): void {
     })->with([
         'http://intranet.example/files/../admin',
         'http://intranet.example/files/%2e%2e/admin',
+        'http://intranet.example/files/..%2Fadmin',
+        'http://intranet.example/files/..%5cadmin',
     ]);
 
     it('sends the path that it compared with the allowed prefix', function (): void {

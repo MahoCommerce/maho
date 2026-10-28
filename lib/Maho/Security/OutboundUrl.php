@@ -37,18 +37,9 @@ final class OutboundUrl
      */
     public function validate(string $url, array $allowedPrefixes = []): OutboundTarget
     {
-        $uri = Uri::parse($url);
-        if ($uri === null || $uri->getPort() > 65535) {
-            throw new OutboundUrlException('The URL is malformed.');
-        }
-        $scheme = $uri->getScheme() ?? '';
-        if (!in_array($scheme, self::SCHEMES, true)) {
-            throw new OutboundUrlException('The URL must use the http or https scheme.');
-        }
-        $host = trim($uri->getHost() ?? '', '[]');
-        if ($host === '') {
-            throw new OutboundUrlException('The URL has no host.');
-        }
+        $uri = self::parse($url);
+        $scheme = $uri->getScheme();
+        $host = trim($uri->getHost(), '[]');
         $port = $uri->getPort() ?? ($scheme === 'https' ? 443 : 80);
         $path = $uri->getPath() ?: '/';
         $query = $uri->getRawQuery();
@@ -68,6 +59,26 @@ final class OutboundUrl
         }
 
         return new OutboundTarget($url, $scheme, $host, $port, $path, $query, $addresses[0]);
+    }
+
+    /**
+     * Check the form of the URL, with no DNS lookup.
+     *
+     * @throws OutboundUrlException
+     */
+    public static function parse(string $url): Uri
+    {
+        $uri = Uri::parse($url);
+        if ($uri === null || $uri->getPort() > 65535) {
+            throw new OutboundUrlException('The URL is malformed.');
+        }
+        if (!in_array($uri->getScheme(), self::SCHEMES, true)) {
+            throw new OutboundUrlException('The URL must use the http or https scheme.');
+        }
+        if (trim($uri->getHost() ?? '', '[]') === '') {
+            throw new OutboundUrlException('The URL has no host.');
+        }
+        return $uri;
     }
 
     public static function isPublicAddress(string $address): bool
@@ -100,6 +111,10 @@ final class OutboundUrl
      */
     private static function matchesPrefix(string $scheme, string $host, int $port, string $path, array $prefixes): bool
     {
+        // A server that decodes %2F or %5C to a slash before it removes dot segments can leave the prefix path
+        if (preg_match('/%(2F|5C)/i', $path)) {
+            return false;
+        }
         foreach ($prefixes as $prefix) {
             $uri = Uri::parse(trim($prefix));
             $prefixScheme = $uri?->getScheme();
