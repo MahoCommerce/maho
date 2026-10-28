@@ -50,6 +50,21 @@ function qieAdminUserId(): int
     return (int) Mage::getResourceModel('admin/user_collection')->setPageSize(1)->getFirstItem()->getId();
 }
 
+/**
+ * Import that records, during its validation, whether an import counts as in progress.
+ */
+class Qie_Test_ImportThatProbes extends Mage_ImportExport_Model_Import
+{
+    public ?bool $inProgressDuringValidation = null;
+
+    #[\Override]
+    protected function _getEntityAdapter()
+    {
+        $this->inProgressDuringValidation = self::isImportInProgress();
+        throw new Mage_Core_Exception('qie-stop');
+    }
+}
+
 describe('Import/Export in the queue', function () {
     test('an export queues one message with the entity, the format and the filters only', function () {
         qieTakeMessages(Mage_ImportExport_Model_ExportMessage::class);
@@ -106,6 +121,15 @@ describe('Import/Export in the queue', function () {
         }
     });
 
+    test('a validation holds the import lock, so no import starts while it replaces the rows', function () {
+        qieTakeMessages(Mage_ImportExport_Model_ImportMessage::class);
+        $import = new Qie_Test_ImportThatProbes();
+
+        expect(fn() => $import->validateSource([]))->toThrow(Mage_Core_Exception::class, 'qie-stop');
+        expect($import->inProgressDuringValidation)->toBeTrue()
+            ->and(Mage_ImportExport_Model_Import::isImportInProgress())->toBeFalse();
+    });
+
     test('an import that runs counts as in progress, so a second import does not start', function () {
         qieTakeMessages(Mage_ImportExport_Model_ImportMessage::class);
         $lock = Mage::getSingleton('core/lock');
@@ -142,17 +166,16 @@ describe('Import/Export in the queue', function () {
         Mage::app()->setRequest($request);
 
         try {
-            $controller = new Mage_ImportExport_Adminhtml_ImportController($request, new Mage_Core_Controller_Response_Http());
-            try {
-                $controller->validateAction();
-            } catch (Throwable) {
-                // The render step can need an admin URL. The action adds the message before it renders.
-            }
+            $response = new Mage_Core_Controller_Response_Http();
+            (new Mage_ImportExport_Adminhtml_ImportController($request, $response))->validateAction();
             $block = Mage::app()->getLayout()->getBlock('import.frame.result');
 
             expect($block)->toBeInstanceOf(Mage_ImportExport_Block_Adminhtml_Import_Frame_Result::class)
                 ->and($block->getMessages()['error'])
-                ->toBe(['An import waits or runs. Start a new import when it is done.']);
+                ->toBe(['An import waits or runs. Start a new import when it is done.'])
+                ->and($response->getBody())
+                ->toContain('postToFrameComplete')
+                ->toContain('An import waits or runs. Start a new import when it is done.');
         } finally {
             qieTakeMessages(Mage_ImportExport_Model_ImportMessage::class);
             Mage::getDesign()->setArea($previousArea);

@@ -35,7 +35,7 @@ class Mage_ImportExport_Model_Import extends Mage_ImportExport_Model_Abstract
     public const MAX_IMPORT_CHUNKS = 4;
 
     /**
-     * The lock that importSource() holds while it reads the import data table
+     * The lock that validateSource() and importSource() hold while they use the import data table
      */
     public const IMPORT_LOCK = 'importexport_import';
 
@@ -445,21 +445,30 @@ class Mage_ImportExport_Model_Import extends Mage_ImportExport_Model_Abstract
      */
     public function validateSource($source)
     {
-        // The validation replaces the rows that a queued import still reads
-        if (self::isImportInProgress()) {
+        // The validation replaces the rows that an import reads, so it holds the import lock too
+        $lock = Mage::getSingleton('core/lock');
+        if (!$lock->acquire(self::IMPORT_LOCK)) {
             Mage::throwException(Mage::helper('importexport')->__('An import waits or runs. Start a new import when it is done.'));
         }
-        $this->addLogComment(Mage::helper('importexport')->__('Begin data validation'));
-        $result = $this->_getEntityAdapter()
-            ->setSource($this->_getSourceAdapter($source))
-            ->isDataValid();
+        try {
+            // Not isImportInProgress(): it would count the lock that this process now holds
+            if (\Maho\Queue\QueueManager::dbTransport()->inFlightRowExists(Mage_ImportExport_Model_ImportMessage::DEDUPE_KEY)) {
+                Mage::throwException(Mage::helper('importexport')->__('An import waits or runs. Start a new import when it is done.'));
+            }
+            $this->addLogComment(Mage::helper('importexport')->__('Begin data validation'));
+            $result = $this->_getEntityAdapter()
+                ->setSource($this->_getSourceAdapter($source))
+                ->isDataValid();
 
-        $messages = $this->getOperationResultMessages($result);
-        $this->addLogComment($messages);
-        if ($result) {
-            $this->addLogComment(Mage::helper('importexport')->__('Done import data validation'));
+            $messages = $this->getOperationResultMessages($result);
+            $this->addLogComment($messages);
+            if ($result) {
+                $this->addLogComment(Mage::helper('importexport')->__('Done import data validation'));
+            }
+            return $result;
+        } finally {
+            $lock->release(self::IMPORT_LOCK);
         }
-        return $result;
     }
 
     /**

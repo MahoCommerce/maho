@@ -295,6 +295,24 @@ describe('Admin actions that run in the queue', function () {
             ->and($status)->toBe(Maho_CustomerSegmentation_Model_Segment::STATUS_PENDING);
     });
 
+    test('Refresh while the segment is refreshed queues one more refresh', function () {
+        $segment = Mage::getModel('customersegmentation/segment')->setId(990004);
+        $dedupeKey = (new Maho_CustomerSegmentation_Model_RefreshMessage(990004))->getDedupeKey();
+        qajTakeMessages($dedupeKey);
+        $resource = Mage::getSingleton('core/resource');
+
+        $service = Mage::getService('customersegmentation/segment');
+        $service->queueRefresh($segment, qajAdminUserId());
+        $resource->getConnection('core_write')->update(
+            $resource->getTableName('queue/message'),
+            ['status' => Maho\Queue\Transport\DbTransport::STATUS_PROCESSING, 'claimed_at' => Mage_Core_Model_Locale::nowUtc()],
+            ['dedupe_key = ?' => $dedupeKey],
+        );
+        $service->queueRefresh($segment, qajAdminUserId());
+
+        expect(qajTakeMessages($dedupeKey))->toHaveCount(2);
+    });
+
     test('a queued refresh of a segment that an administrator deleted sends no message', function () {
         (new Maho_CustomerSegmentation_Model_RefreshMessageHandler())
             ->refresh(new Maho_CustomerSegmentation_Model_RefreshMessage(990003, qajAdminUserId()));

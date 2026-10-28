@@ -129,29 +129,54 @@ class Maho_CustomerSegmentation_Service_Segment
      */
     public function refresh(Maho_CustomerSegmentation_Model_Segment $segment): Maho_CustomerSegmentation_Model_Segment
     {
-        return $segment->refreshCustomers();
+        // Two refreshes of one segment at once read and change the same members
+        $lock = Mage::getSingleton('core/lock');
+        $lockName = 'customersegmentation_refresh_' . (int) $segment->getId();
+        if (!$lock->acquireWithin($lockName, 3600)) {
+            throw new RuntimeException(Mage::helper('customersegmentation')->__('Another refresh of the segment is in progress.'));
+        }
+        try {
+            $segment->refreshCustomers();
+        } finally {
+            $lock->release($lockName);
+        }
+
+        // A click during the refresh queued one more, so the segment waits again
+        $dedupeKey = (new Maho_CustomerSegmentation_Model_RefreshMessage((int) $segment->getId()))->getDedupeKey();
+        if (\Maho\Queue\QueueManager::dbTransport()->inFlightRowExists($dedupeKey, pendingOnly: true)) {
+            $this->markPending($segment);
+        }
+        return $segment;
     }
 
     /**
      * Queue refresh() for $segment and mark it pending. A second request for the segment is dropped
-     * while the first one waits or runs. The result goes to the inbox of $adminUserId.
+     * while the first one waits. A request that comes while it runs queues one more refresh, because
+     * the refresh read the customers at its start. The result goes to the inbox of $adminUserId.
      */
     public function queueRefresh(Maho_CustomerSegmentation_Model_Segment $segment, ?int $adminUserId = null): void
     {
-        // Only the status column: a full save of the segment runs its save hooks. It comes first,
-        // so it cannot overwrite the status of a worker that finishes the refresh at once.
+        // First, so it cannot overwrite the status of a worker that finishes the refresh at once
+        $this->markPending($segment);
+
+        $message = new Maho_CustomerSegmentation_Model_RefreshMessage((int) $segment->getId(), $adminUserId);
+        \Maho\Queue\QueueManager::dispatch(
+            $message,
+            queue: Maho_CustomerSegmentation_Model_RefreshMessage::QUEUE_NAME,
+            stamps: [new \Maho\Queue\Stamp\DedupeKeyStamp($message->getDedupeKey(), pendingOnly: true)],
+        );
+    }
+
+    /**
+     * Write only the status column: a full save of the segment runs its save hooks.
+     */
+    private function markPending(Maho_CustomerSegmentation_Model_Segment $segment): void
+    {
         Mage::getSingleton('core/resource')->getConnection('core_write')->update(
             $segment->getResource()->getMainTable(),
             ['refresh_status' => Maho_CustomerSegmentation_Model_Segment::STATUS_PENDING],
             ['segment_id = ?' => (int) $segment->getId()],
         );
         $segment->setRefreshStatus(Maho_CustomerSegmentation_Model_Segment::STATUS_PENDING);
-
-        $message = new Maho_CustomerSegmentation_Model_RefreshMessage((int) $segment->getId(), $adminUserId);
-        \Maho\Queue\QueueManager::dispatch(
-            $message,
-            queue: Maho_CustomerSegmentation_Model_RefreshMessage::QUEUE_NAME,
-            dedupeKey: $message->getDedupeKey(),
-        );
     }
 }
