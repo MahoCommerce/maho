@@ -9,6 +9,7 @@ import { AnnotateTool } from './tools/annotate.js';
 import { RedactTool } from './tools/redact.js';
 import { FrameTool } from './tools/frame.js';
 import { RemoveBackgroundTool } from './tools/rembg.js';
+import { UpscaleTool } from './tools/upscale.js';
 import { renderToCanvas, exportBlob, adjustCanvas, drawAnnotation } from './export.js';
 import { neutralAdjustments, isNeutral } from './adjust-engine.js';
 
@@ -376,6 +377,7 @@ export class MahoImageEditor {
             new RedactTool(this),
             new FrameTool(this),
             new RemoveBackgroundTool(this),
+            new UpscaleTool(this),
         ];
 
         this._sidebar.innerHTML = '';

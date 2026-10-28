@@ -1,21 +1,13 @@
 // SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
 // SPDX-License-Identifier: AFL-3.0
 
+import { TRANSFORMERS_URL, hasWebGPU } from '../ml-runtime.js';
+
 const MODEL_ID = 'onnx-community/BEN2-ONNX';
 const MODEL_DTYPE = 'fp16';
 const MAX_PROCESSING_SIZE = 1024;
 
 let pipelinePromise = null;
-
-async function hasWebGPU() {
-    if (!navigator.gpu) return false;
-    try {
-        const adapter = await navigator.gpu.requestAdapter();
-        return !!adapter;
-    } catch {
-        return false;
-    }
-}
 
 let latestProgressCallback = null;
 
@@ -28,7 +20,7 @@ async function getSegmenter(onProgress) {
 
     pipelinePromise = (async () => {
         try {
-            const { pipeline } = await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1');
+            const { pipeline } = await import(TRANSFORMERS_URL);
             const device = await hasWebGPU() ? 'webgpu' : 'wasm';
             return pipeline('background-removal', MODEL_ID, {
                 dtype: MODEL_DTYPE,
