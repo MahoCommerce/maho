@@ -61,6 +61,7 @@ export class MahoImageEditor {
         this._redoBtn = null;
         this._zoomDisplay = null;
         this._optionsPanel = null;
+        this._dock = null;
         this._resizeObserver = null;
     }
 
@@ -141,11 +142,14 @@ export class MahoImageEditor {
         });
     }
 
+    /** Show el in the options panel. A part of el with data-dock="bottom" goes under the photo instead. */
     setOptions(el) {
-        if (this._optionsPanel) {
-            this._optionsPanel.innerHTML = '';
-            if (el) this._optionsPanel.appendChild(el);
-        }
+        if (!this._optionsPanel) return;
+        this._optionsPanel.innerHTML = '';
+        this._dock.innerHTML = '';
+        if (!el) return;
+        for (const part of el.querySelectorAll('[data-dock="bottom"]')) this._dock.appendChild(part);
+        this._optionsPanel.appendChild(el);
     }
 
     setCursor(cursor) {
@@ -329,11 +333,14 @@ export class MahoImageEditor {
         this.canvas = document.createElement('canvas');
         this.canvasWrap.appendChild(this.canvas);
 
+        this._dock = document.createElement('div');
+        this._dock.className = 'maho-ie-dock';
+
         this._optionsPanel = document.createElement('div');
         this._optionsPanel.className = 'maho-ie-options';
 
-        main.append(this.canvasWrap, this._optionsPanel);
-        body.append(this._sidebar, main);
+        main.append(this.canvasWrap, this._dock);
+        body.append(this._sidebar, main, this._optionsPanel);
         this.container.append(header, body);
 
         this.ctx = this.canvas.getContext('2d', { willReadFrequently: true });

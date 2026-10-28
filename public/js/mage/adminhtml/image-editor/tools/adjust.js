@@ -84,6 +84,7 @@ export class AdjustTool {
     _renderFilters() {
         const strip = document.createElement('div');
         strip.className = 'maho-ie-adjust-filters';
+        strip.dataset.dock = 'bottom';
         const thumb = this._thumbImage();
 
         for (const filter of FILTERS) {
