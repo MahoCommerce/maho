@@ -285,8 +285,8 @@ export class RemoveBackgroundTool {
             this._bgApplied = false;
             this.editor.pushUndo();
             this.editor.replaceBase(outputCanvas);
-            this._setStatus('Background removed');
             this.editor.setOptions(this.renderOptions());
+            this._setStatus('Background removed');
         } catch (err) {
             console.error('Background removal failed:', err);
             this._setStatus('Error: ' + err.message);
