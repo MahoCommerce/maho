@@ -72,16 +72,24 @@ describe('Category attribute sets (REST)', function (): void {
 
     it('gives a new category the set of its parent', function (): void {
         $token = serviceToken(['categories/write', 'categories/delete']);
+        $setId = (int) $GLOBALS['_cat_set_test_set_id'];
+
+        // The parent is in the custom set, so the default set of the entity type cannot pass
+        $parent = apiPost('/api/rest/v2/categories', [
+            'name' => 'Pest Set Parent ' . uniqid(),
+            'attributeSetId' => $setId,
+        ], $token);
+        expect($parent['status'])->toBeIn([200, 201]);
+        trackCreated('category', (int) $parent['json']['id']);
 
         $create = apiPost('/api/rest/v2/categories', [
-            'name' => 'Pest Set Default ' . uniqid(),
+            'name' => 'Pest Set Child ' . uniqid(),
+            'parentId' => (int) $parent['json']['id'],
         ], $token);
         expect($create['status'])->toBeIn([200, 201]);
         trackCreated('category', (int) $create['json']['id']);
 
-        $parent = apiGet('/api/rest/v2/categories/' . (int) $create['json']['parentId'], $token);
-        expect($create['json']['attributeSetId'])->not->toBeNull()
-            ->and($create['json']['attributeSetId'])->toBe($parent['json']['attributeSetId']);
+        expect($create['json']['attributeSetId'])->toBe($setId);
     });
 
     it('creates a category in a set and round-trips a user-defined attribute', function (): void {

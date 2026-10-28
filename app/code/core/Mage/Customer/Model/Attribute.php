@@ -89,16 +89,24 @@ class Mage_Customer_Model_Attribute extends Mage_Eav_Model_Attribute
             $data['is_system'] = 0;
         }
 
-        $data['input_filter'] = in_array($data['input_filter'] ?? '', ['striptags', 'escapehtml'], true)
-            ? $data['input_filter'] : null;
+        // A filter or a rule that the form does not offer, such as the date rule of dob, stays as it is
+        $filters = ['striptags', 'escapehtml'];
+        $storedFilter = (string) $this->getInputFilter();
+        $data['input_filter'] = in_array($data['input_filter'] ?? '', $filters, true) ? $data['input_filter']
+            : ($storedFilter === '' || in_array($storedFilter, $filters, true) ? null : $storedFilter);
 
-        $rules = [];
+        $formats = ['alphanumeric', 'alpha', 'numeric', 'email', 'url'];
+        $rules = $this->getValidateRules();
+        unset($rules['min_text_length'], $rules['max_text_length']);
+        if (in_array($rules['input_validation'] ?? '', $formats, true)) {
+            unset($rules['input_validation']);
+        }
         foreach (['min_text_length', 'max_text_length'] as $key) {
             if (!empty($data[$key])) {
                 $rules[$key] = (int) $data[$key];
             }
         }
-        if (in_array($data['input_validation'] ?? '', ['alphanumeric', 'alpha', 'numeric', 'email', 'url'], true)) {
+        if (in_array($data['input_validation'] ?? '', $formats, true)) {
             $rules['input_validation'] = $data['input_validation'];
         }
         $data['validate_rules'] = $rules;

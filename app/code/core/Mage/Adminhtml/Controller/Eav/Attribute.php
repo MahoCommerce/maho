@@ -184,9 +184,12 @@ abstract class Mage_Adminhtml_Controller_Eav_Attribute extends Mage_Adminhtml_Co
             $data['attribute_id'],
             $data['entity_type_id'],
             $data['backend_type'],
+            $data['backend_table'],
             $data['backend_model'],
             $data['source_model'],
             $data['frontend_model'],
+            $data['attribute_model'],
+            $data['data_model'],
         );
 
         if (isset($data['attribute_code'])
@@ -243,7 +246,10 @@ abstract class Mage_Adminhtml_Controller_Eav_Attribute extends Mage_Adminhtml_Co
 
         $setId = (int) $this->getRequest()->getParam('set');
         $groupId = (int) $this->getRequest()->getParam('group');
-        if ($setId && $groupId) {
+        if ($setId && $groupId
+            && (int) Mage::getModel('eav/entity_attribute_set')->load($setId)->getEntityTypeId() === (int) $this->getEntityType()->getId()
+            && (int) Mage::getModel('eav/entity_attribute_group')->load($groupId)->getAttributeSetId() === $setId
+        ) {
             $model->setAttributeSetId($setId);
             $model->setAttributeGroupId($groupId);
         }
@@ -329,9 +335,12 @@ abstract class Mage_Adminhtml_Controller_Eav_Attribute extends Mage_Adminhtml_Co
         if (!empty($data['option']['value']) && is_array($data['option']['value'])) {
             $allowedTags = !empty($data['is_html_allowed_on_front']) && $this->getAllowedTags()
                 ? sprintf('<%s>', implode('><', $this->getAllowedTags())) : null;
+            $filter = Mage::getSingleton('core/input_filter_maliciousCode');
             foreach ($data['option']['value'] as $key => $values) {
                 foreach ($values as $storeId => $storeLabel) {
-                    $data['option']['value'][$key][$storeId] = $helper->stripTags($storeLabel, $allowedTags);
+                    $storeLabel = $helper->stripTags($storeLabel, $allowedTags);
+                    // An allowed tag keeps its attributes, such as onclick
+                    $data['option']['value'][$key][$storeId] = $allowedTags ? $filter->filter($storeLabel) : $storeLabel;
                 }
             }
         }

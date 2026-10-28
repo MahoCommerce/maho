@@ -15,6 +15,7 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\State\Pagination\TraversablePaginator;
+use Maho\ApiPlatform\Service\CustomAttributes;
 use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
@@ -266,26 +267,6 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
     }
 
     /**
-     * Return the values of the user-defined attributes of the set of a category, keyed by attribute code.
-     *
-     * @return array<string, mixed>
-     */
-    private function customAttributeValues(\Mage_Catalog_Model_Category $category): array
-    {
-        $values = [];
-        foreach ($category->getAttributes() as $code => $attribute) {
-            if (!$attribute->getIsUserDefined()) {
-                continue;
-            }
-            $value = $category->getData($code);
-            if ($value !== null && $value !== '') {
-                $values[$code] = $value;
-            }
-        }
-        return $values;
-    }
-
-    /**
      * Map Maho category model to Category DTO. $withStoreOverrides fills storeOverrides
      * for backend callers; single-category reads and write responses set it.
      */
@@ -378,7 +359,10 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
 
         if ($withStoreOverrides && $this->backendCategoriesAccess()) {
             $dto->storeOverrides = StoreOverrides::forModel($category);
-            $dto->customAttributes = $this->customAttributeValues($category);
+            $dto->customAttributes = CustomAttributes::read(
+                $category,
+                array_filter($category->getAttributes(), fn($attribute) => $attribute->getIsUserDefined()),
+            );
         }
 
         \Mage::dispatchEvent('api_category_dto_build', ['category' => $category, 'dto' => $dto]);

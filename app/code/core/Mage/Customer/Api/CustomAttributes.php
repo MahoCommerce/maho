@@ -12,6 +12,8 @@ declare(strict_types=1);
 
 namespace Mage\Customer\Api;
 
+use Maho\ApiPlatform\Service\CustomAttributes as Values;
+
 final class CustomAttributes
 {
     /**
@@ -22,7 +24,7 @@ final class CustomAttributes
      */
     public static function readAddress(\Maho\DataObject $address): array
     {
-        return self::values($address, \Mage::getSingleton('eav/config')->getAttributes('customer_address'));
+        return Values::read($address, Values::userDefined('customer_address'));
     }
 
     /**
@@ -30,7 +32,7 @@ final class CustomAttributes
      */
     public static function readCustomer(\Mage_Customer_Model_Customer $customer): array
     {
-        return self::values($customer, \Mage::getSingleton('eav/config')->getAttributes('customer'));
+        return Values::read($customer, Values::userDefined('customer'));
     }
 
     /**
@@ -55,6 +57,7 @@ final class CustomAttributes
             ->setEntity($entity)
             ->ignoreInvisible(false);
         $attributes = $form->getUserAttributes();
+        $values = array_map(fn(mixed $value): mixed => is_bool($value) ? (int) $value : $value, $values);
         $request = $form->prepareRequest($values);
         $helper = \Mage::helper('customer');
 
@@ -88,26 +91,6 @@ final class CustomAttributes
         foreach ($models as [$model, $value]) {
             $model->compactValue($value);
         }
-    }
-
-    /**
-     * @param list<\Mage_Eav_Model_Entity_Attribute_Abstract> $attributes
-     * @return array<string, mixed>
-     */
-    private static function values(\Maho\DataObject $entity, array $attributes): array
-    {
-        $values = [];
-        foreach ($attributes as $attribute) {
-            if (!$attribute->getIsUserDefined()) {
-                continue;
-            }
-            $code = (string) $attribute->getAttributeCode();
-            $value = $entity->getData($code);
-            if ($value !== null && $value !== '') {
-                $values[$code] = $value;
-            }
-        }
-        return $values;
     }
 
     /**

@@ -27,6 +27,9 @@ class BlogPosts extends AbstractCmsImporter
     /** @var array<int, list<string>> */
     private array $setAttributeCodes = [];
 
+    /** @var array<string, int> */
+    private array $setIds = [];
+
     #[\Override]
     protected function requiredColumns(): array
     {
@@ -130,21 +133,13 @@ class BlogPosts extends AbstractCmsImporter
      */
     private function customAttributes(): array
     {
-        if ($this->customAttributes === null) {
-            $this->customAttributes = [];
-            foreach (Mage::getSingleton('eav/config')->getAttributes(\Maho_Blog_Model_Post::ENTITY) as $attribute) {
-                if ($attribute->getIsUserDefined()) {
-                    $this->customAttributes[(string) $attribute->getAttributeCode()] = $attribute;
-                }
-            }
-        }
-        return $this->customAttributes;
+        return $this->customAttributes ??= \Maho\ApiPlatform\Service\CustomAttributes::userDefined(\Maho_Blog_Model_Post::ENTITY);
     }
 
     private function attributeSetId(CsvFile $file, int $line, string $name): int
     {
         $type = Mage::getSingleton('eav/config')->getEntityType(\Maho_Blog_Model_Post::ENTITY);
-        $id = (int) Mage::getResourceModel('eav/entity_attribute_set_collection')
+        $id = $this->setIds[$name] ??= (int) Mage::getResourceModel('eav/entity_attribute_set_collection')
             ->setEntityTypeFilter((int) $type->getId())
             ->addFieldToFilter('attribute_set_name', $name)
             ->getFirstItem()
@@ -157,7 +152,11 @@ class BlogPosts extends AbstractCmsImporter
 
     private function postSetId(?int $postId): int
     {
-        $setId = $postId !== null ? (int) Mage::getModel('blog/post')->load($postId)->getAttributeSetId() : 0;
+        $resource = Mage::getResourceSingleton('blog/post');
+        $adapter = $resource->getReadConnection();
+        $setId = $postId !== null ? (int) $adapter->fetchOne($adapter->select()
+            ->from($resource->getEntityTable(), ['attribute_set_id'])
+            ->where($resource->getEntityIdField() . ' = ?', $postId)) : 0;
         return $setId ?: (int) Mage::getSingleton('eav/config')->getEntityType(\Maho_Blog_Model_Post::ENTITY)->getDefaultAttributeSetId();
     }
 

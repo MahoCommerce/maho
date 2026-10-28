@@ -56,6 +56,31 @@ function customerSetTestCreateAttribute(string $entityTypeCode, string $code, ?i
 }
 
 /**
+ * Post $params to the customer attribute save of the admin, as an admin who may edit customer attributes.
+ */
+function customerSetTestAdminSave(array $params): void
+{
+    $user = AdminRoleFixture::login(['admin/system/attributes/customer']);
+    $request = new Mage_Core_Controller_Request_Http(
+        SymfonyRequest::create('/index.php/admin/eav_attribute/save', 'POST', $params + ['entity_type' => 'customer']),
+    );
+    $request->setRouteName('adminhtml')->setControllerName('eav_attribute')->setActionName('save')->setDispatched(true);
+    Mage::app()->setRequest($request);
+
+    try {
+        $controller = new Mage_Adminhtml_Eav_AttributeController($request, new Mage_Core_Controller_Response_Http());
+        try {
+            $controller->saveAction();
+        } catch (Throwable) {
+            // The trailing redirect builds an admin url that needs no assertion here
+        }
+    } finally {
+        AdminRoleFixture::delete($user);
+    }
+    Mage::getSingleton('eav/config')->clear();
+}
+
+/**
  * @return list<string>
  */
 function customerSetTestFormCodes(string $formCode, Mage_Core_Model_Abstract $entity): array
@@ -161,10 +186,9 @@ it('refuses a group set of another entity type', function () {
 });
 
 it('saves the forms, the rules and the website modes of a new customer attribute from the admin', function () {
-    $user = AdminRoleFixture::login(['admin/system/attributes/customer']);
     $code = 'pest_admin_' . $this->suffix;
     $websiteId = (int) Mage::app()->getWebsite(true)->getId();
-    $params = [
+    customerSetTestAdminSave([
         'attribute_code' => $code,
         'frontend_input' => 'text',
         'frontend_label' => ['Pest Admin'],
@@ -172,23 +196,7 @@ it('saves the forms, the rules and the website modes of a new customer attribute
         'max_text_length' => '20',
         'input_validation' => 'alphanumeric',
         'website_values' => [$websiteId => 'required'],
-    ];
-    $request = new Mage_Core_Controller_Request_Http(
-        SymfonyRequest::create('/index.php/admin/eav_attribute/save', 'POST', $params + ['entity_type' => 'customer']),
-    );
-    $request->setRouteName('adminhtml')->setControllerName('eav_attribute')->setActionName('save')->setDispatched(true);
-    Mage::app()->setRequest($request);
-
-    try {
-        $controller = new Mage_Adminhtml_Eav_AttributeController($request, new Mage_Core_Controller_Response_Http());
-        try {
-            $controller->saveAction();
-        } catch (Throwable) {
-            // The trailing redirect builds an admin url that needs no assertion here
-        }
-    } finally {
-        AdminRoleFixture::delete($user);
-    }
+    ]);
 
     /** @var Mage_Customer_Model_Attribute $attribute */
     $attribute = Mage::getModel('customer/attribute')->loadByCode('customer', $code);
@@ -201,4 +209,34 @@ it('saves the forms, the rules and the website modes of a new customer attribute
         ->and($attribute->getValidateRules())->toBe(['max_text_length' => 20, 'input_validation' => 'alphanumeric'])
         ->and($attribute->getResource()->getWebsiteValues((int) $attribute->getId()))
         ->toBe([$websiteId => ['is_visible' => 1, 'is_required' => 1]]);
+});
+
+it('keeps a filter and a rule that the admin form does not offer', function () {
+    $before = Mage::getModel('customer/attribute')->loadByCode('customer', 'dob');
+    $filter = $before->getInputFilter();
+    $rules = $before->getValidateRules();
+    expect($filter)->toBe('date')
+        ->and($rules)->toHaveKey('input_validation', 'date');
+    $resource = Mage::getSingleton('core/resource');
+    $adapter = $resource->getConnection('core_write');
+    $table = $resource->getTableName('customer/eav_attribute');
+    $row = $adapter->fetchRow($adapter->select()
+        ->from($table, ['input_filter', 'validate_rules'])
+        ->where('attribute_id = ?', (int) $before->getId()));
+
+    try {
+        customerSetTestAdminSave([
+            'attribute_id' => $before->getId(),
+            'frontend_label' => [$before->getFrontendLabel()],
+            'used_in_forms' => $before->getUsedInForms(),
+            'input_filter' => '',
+            'input_validation' => '',
+        ]);
+        $after = Mage::getModel('customer/attribute')->loadByCode('customer', 'dob');
+        expect($after->getInputFilter())->toBe($filter)
+            ->and($after->getValidateRules())->toBe($rules);
+    } finally {
+        $adapter->update($table, $row, ['attribute_id = ?' => (int) $before->getId()]);
+        Mage::getSingleton('eav/config')->clear();
+    }
 });

@@ -138,8 +138,6 @@ it('offers the image input type for categories, not for products', function () {
         ->setEntityTypeId((int) Mage::getSingleton('eav/config')->getEntityType(Mage_Catalog_Model_Product::ENTITY)->getId());
 
     expect($category->getInputTypes())->toHaveKey('image')
-        ->and($category->getInputTypes())->not->toHaveKey('price')
-        ->and($product->getInputTypes())->toHaveKey('price')
         ->and($product->getInputTypes())->not->toHaveKey('image');
 });
 

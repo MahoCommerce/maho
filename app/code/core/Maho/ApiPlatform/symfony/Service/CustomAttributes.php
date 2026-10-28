@@ -74,6 +74,7 @@ final class CustomAttributes
                 $errors->addError($field, $helper->__('"%s" is not in the attribute set of this record.', $code));
                 continue;
             }
+            $value = is_bool($value) ? (int) $value : $value;
             if (is_array($value) && $attribute->getFrontendInput() === 'multiselect') {
                 $value = implode(',', $value);
             }

@@ -253,21 +253,13 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
      */
     protected function _getInputTypes(): array
     {
-        $helper = Mage::helper('eav');
-        return [
-            'text' => ['label' => $helper->__('Text Field')],
-            'textarea' => ['label' => $helper->__('Text Area')],
-            'date' => ['label' => $helper->__('Date')],
-            'boolean' => [
-                'label' => $helper->__('Yes/No'),
-                'source_model' => 'eav/entity_attribute_source_boolean',
-            ],
-            'multiselect' => [
-                'label' => $helper->__('Multiple Select'),
-                'backend_model' => 'eav/entity_attribute_backend_array',
-            ],
-            'select' => ['label' => $helper->__('Dropdown')],
-        ];
+        $types = [];
+        foreach (Mage::getModel('eav/adminhtml_system_config_source_inputtype')->toOptionArray() as $option) {
+            $types[$option['value']] = ['label' => $option['label']];
+        }
+        $types['boolean']['source_model'] = 'eav/entity_attribute_source_boolean';
+        $types['multiselect']['backend_model'] = 'eav/entity_attribute_backend_array';
+        return $types;
     }
 
     /**

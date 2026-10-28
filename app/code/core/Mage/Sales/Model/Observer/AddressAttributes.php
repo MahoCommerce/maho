@@ -164,6 +164,10 @@ class Mage_Sales_Model_Observer_AddressAttributes
 
     protected function labelsToValue(Mage_Eav_Model_Entity_Attribute $attribute, string $labels): ?string
     {
+        if ($attribute->getFrontendInput() !== 'multiselect') {
+            $id = $attribute->getSource()->getOptionId(trim($labels));
+            return $id !== null && $id !== '' ? (string) $id : null;
+        }
         $ids = [];
         foreach (array_map(trim(...), explode(',', $labels)) as $label) {
             $id = $attribute->getSource()->getOptionId($label);

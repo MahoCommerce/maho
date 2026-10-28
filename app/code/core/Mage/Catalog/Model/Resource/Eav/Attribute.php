@@ -197,16 +197,12 @@ class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_At
     protected function _getInputTypes(): array
     {
         $types = parent::_getInputTypes();
-        $helper = Mage::helper('catalog');
         if ($this->getEntityType()->getEntityTypeCode() === Mage_Catalog_Model_Category::ENTITY) {
             $types['image'] = [
-                'label' => $helper->__('Image'),
+                'label' => Mage::helper('catalog')->__('Image'),
                 'backend_model' => 'catalog/category_attribute_backend_image',
             ];
-            return $types;
         }
-        $types['price'] = ['label' => $helper->__('Price')];
-        $types['media_image'] = ['label' => $helper->__('Media Image')];
         return $types;
     }
 

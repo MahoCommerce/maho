@@ -152,6 +152,10 @@ abstract class Mage_Adminhtml_Controller_Eav_Set extends Mage_Adminhtml_Controll
             if ($isNewSet) {
                 $name = $helper->stripTags($this->getRequest()->getParam('attribute_set_name'));
                 $model->setAttributeSetName(trim($name));
+                $skeleton = $this->loadAttributeSet((int) $this->getRequest()->getParam('skeleton_set'));
+                if (!$skeleton) {
+                    Mage::throwException(Mage::helper('eav')->__('This attribute set no longer exists.'));
+                }
             } else {
                 $model = $this->loadAttributeSet((int) $this->getRequest()->getParam('id'));
                 if (!$model) {
@@ -165,7 +169,7 @@ abstract class Mage_Adminhtml_Controller_Eav_Set extends Mage_Adminhtml_Controll
             $model->validate();
             if ($isNewSet) {
                 $model->save();
-                $model->initFromSkeleton($this->getRequest()->getParam('skeleton_set'));
+                $model->initFromSkeleton($skeleton->getId());
             }
             $model->save();
             $this->_getSession()->addSuccess(Mage::helper('eav')->__('The attribute set has been saved.'));

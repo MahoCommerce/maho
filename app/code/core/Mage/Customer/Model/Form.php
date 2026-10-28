@@ -26,14 +26,14 @@ class Mage_Customer_Model_Form extends Mage_Eav_Model_Form
     #[\Override]
     protected $_entityTypeCode = 'customer';
 
+    protected ?int $customerGroupId = null;
+
     /**
      * Get EAV Entity Form Attribute Collection for Customer
      * exclude 'created_at'
      *
      * @return Mage_Customer_Model_Resource_Form_Attribute_Collection
      */
-    protected ?int $customerGroupId = null;
-
     #[\Override]
     protected function _getFormAttributeCollection()
     {
@@ -92,6 +92,12 @@ class Mage_Customer_Model_Form extends Mage_Eav_Model_Form
         }
         if ($entity instanceof Mage_Customer_Model_Address && $entity->getCustomer()) {
             return (int) $entity->getCustomer()->getGroupId();
+        }
+
+        // On the admin customer page, a new address belongs to the customer of the page
+        $customer = Mage::registry('current_customer');
+        if ($customer instanceof Mage_Customer_Model_Customer) {
+            return (int) $customer->getGroupId();
         }
 
         // A new address without a customer belongs to a customer who registers now
