@@ -142,7 +142,7 @@ class Maho_CustomerSegmentation_Service_Segment
         }
 
         // A click during the refresh queued one more, so the segment waits again
-        $dedupeKey = (new Maho_CustomerSegmentation_Model_RefreshMessage((int) $segment->getId()))->getDedupeKey();
+        $dedupeKey = new Maho_CustomerSegmentation_Model_RefreshMessage((int) $segment->getId())->getDedupeKey();
         if (\Maho\Queue\QueueManager::dbTransport()->inFlightRowExists($dedupeKey, pendingOnly: true)) {
             $this->markPending($segment);
         }
