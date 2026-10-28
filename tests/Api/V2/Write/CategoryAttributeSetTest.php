@@ -137,7 +137,7 @@ describe('Category attribute sets (REST)', function (): void {
             ->and($read['json'])->not->toHaveKey('customAttributes');
     });
 
-    it('refuses a category that leaves a required attribute of its set empty', function (): void {
+    it('refuses a category that leaves a required attribute of its set empty or repeats a unique value', function (): void {
         $token = serviceToken(['categories/write', 'categories/delete']);
         Tests\Helpers\ApiV2Helper::ensureMahoBootstrapped();
         $type = Mage::getSingleton('eav/config')->getEntityType(Mage_Catalog_Model_Category::ENTITY);
@@ -155,6 +155,7 @@ describe('Category attribute sets (REST)', function (): void {
             'frontend_label' => 'Pest Required',
             'is_user_defined' => 1,
             'is_required' => 1,
+            'is_unique' => 1,
             'is_global' => Mage_Catalog_Model_Resource_Eav_Attribute::SCOPE_GLOBAL,
             'attribute_set_id' => (int) $set->getId(),
             'attribute_group_id' => (int) Mage::getResourceModel('eav/entity_attribute_group_collection')
@@ -167,25 +168,33 @@ describe('Category attribute sets (REST)', function (): void {
         Mage::app()->cleanCache();
         Mage::getSingleton('eav/config')->clear();
 
+        $create = function (array $customAttributes) use ($token, $set): array {
+            $response = apiPost('/api/rest/v2/categories', array_filter([
+                'name' => 'Pest Set Required ' . uniqid(),
+                'attributeSetId' => (int) $set->getId(),
+                'customAttributesWrite' => $customAttributes,
+            ], fn($value) => $value !== []), $token);
+            if (in_array($response['status'], [200, 201], true)) {
+                trackCreated('category', (int) $response['json']['id']);
+            }
+            return $response;
+        };
+        $fields = fn(array $response): array => array_column($response['json']['details']['errors'] ?? [], 'field');
+        $field = lcfirst(str_replace('_', '', ucwords($code, '_')));
+
         try {
-            $missing = apiPost('/api/rest/v2/categories', [
-                'name' => 'Pest Set Required ' . uniqid(),
-                'attributeSetId' => (int) $set->getId(),
-            ], $token);
-            if (in_array($missing['status'], [200, 201], true)) {
-                trackCreated('category', (int) $missing['json']['id']);
-            }
-            $filled = apiPost('/api/rest/v2/categories', [
-                'name' => 'Pest Set Required ' . uniqid(),
-                'attributeSetId' => (int) $set->getId(),
-                'customAttributesWrite' => [$code => 'Filled'],
-            ], $token);
-            if (in_array($filled['status'], [200, 201], true)) {
-                trackCreated('category', (int) $filled['json']['id']);
-            }
+            $missing = $create([]);
+            $blank = $create([$code => '']);
+            $filled = $create([$code => 'Filled']);
+            $duplicate = $create([$code => 'Filled']);
 
             expect($missing['status'])->toBe(422)
-                ->and($filled['status'])->toBeIn([200, 201]);
+                ->and($fields($missing))->toContain($field)
+                ->and($blank['status'])->toBe(422)
+                ->and($fields($blank))->toContain($field)
+                ->and($filled['status'])->toBeIn([200, 201])
+                ->and($duplicate['status'])->toBe(422)
+                ->and($fields($duplicate))->toContain($field);
         } finally {
             cleanupTestData();
             Tests\Helpers\ApiV2Helper::ensureMahoBootstrapped();

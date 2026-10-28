@@ -193,6 +193,7 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
     /**
      * Check the required and unique attributes of the set of the category, as the admin save does.
      * An empty sort-by attribute uses the configuration, as the "Use Config Settings" box of the admin.
+     * Each problem names its attribute, so the 422 lists the fields.
      *
      * @throws \Mage_Core_Exception_Input
      */
@@ -205,23 +206,37 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
                 return !$attribute || $attribute->isValueEmpty($category->getData($code));
             },
         ));
+        $isAdminScope = (int) $category->getStoreId() === Mage_Core_Model_App::ADMIN_STORE_ID;
+        $errors = new \Mage_Core_Exception_Input();
+
         $category->setData('use_post_data_config', $useConfig);
         try {
-            $result = $category->validate();
+            foreach ($category->getAttributes() as $code => $attribute) {
+                $value = $category->getData($code);
+                // In a store view, false means that the store view uses the default value
+                if (!$isAdminScope && $value === false) {
+                    continue;
+                }
+                $required = Mage::helper('catalog')->__('Attribute "%s" is required.', (string) $attribute->getFrontend()->getLabel());
+                // isValueEmpty() accepts a blank string for a text attribute
+                if ($attribute->getIsRequired() && is_string($value) && trim($value) === '' && !in_array($code, $useConfig, true)) {
+                    $errors->addError((string) $code, $required);
+                    continue;
+                }
+                try {
+                    $result = $attribute->getBackend()->validate($category);
+                } catch (\Mage_Core_Exception $e) {
+                    $errors->addError((string) $code, $e->getMessage());
+                    continue;
+                }
+                if ($result === false) {
+                    $errors->addError((string) $code, $required);
+                } elseif (is_string($result)) {
+                    $errors->addError((string) $code, $result);
+                }
+            }
         } finally {
             $category->unsetData('use_post_data_config');
-        }
-        if ($result === true) {
-            return;
-        }
-
-        $errors = new \Mage_Core_Exception_Input();
-        foreach ($result as $code => $error) {
-            $attribute = $category->getResource()->getAttribute($code);
-            $label = $attribute ? (string) $attribute->getFrontend()->getLabel() : (string) $code;
-            $errors->addError((string) $code, $error === true
-                ? Mage::helper('catalog')->__('Attribute "%s" is required.', $label)
-                : (string) $error);
         }
         $errors->throwIfErrors();
     }
