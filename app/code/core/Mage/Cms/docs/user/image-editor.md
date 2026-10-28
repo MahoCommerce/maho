@@ -6,9 +6,13 @@ admin_pages: [cms_wysiwyg_images]
 # Image Editor <span class="version-badge">v26.5+</span>
 
 The image editor changes the images of the media library without a second application. It has nine
-tools: Crop, Resize, Transform, Adjust, Annotate, Redact, Frame, Remove BG and Upscale. The editor
-runs in the browser. Remove BG and Upscale use AI models that also run in the browser, so the image
-never goes to a third party.
+tools: Crop, Resize, Transform, Adjust, Annotate, Redact, Frame, Remove BG and Upscale.
+
+!!! info "Your images stay on your computer"
+    The editor and all its tools run in your browser, on your computer. This includes the two AI
+    tools, Remove BG and Upscale. Maho sends no image to a cloud service, to an AI provider or to
+    any other third party. There is no account to make, no API key and no cost for each image. The
+    image goes to one place only: your own store, when you click **Save**.
 
 The editor is for the daily work on product and content images. For example, use it to:
 
@@ -167,7 +171,8 @@ The compare line shows only when the photo has an adjustment or a filter.
 
 Upscale makes a photo 2 or 4 times larger with an AI model. The model draws new detail, so the
 result is much sharper than a resize. Use it for a small photo from a supplier, or for an old photo
-that is too small for a zoom on the product page.
+that is too small for a zoom on the product page. The model runs in your browser, so the photo
+stays on your computer.
 
 1. Click **Upscale** in the tool bar.
 2. Select a **Scale**: 2× or 4×. The line under it shows the size before and after.
@@ -200,7 +205,7 @@ computer with WebGPU, and about 14 seconds without it. A photo of 500 × 500 px 
 ## Remove BG
 
 Remove BG removes the background of a photo with an AI model. The product stays, and the background
-becomes transparent.
+becomes transparent. The model runs in your browser, so the photo stays on your computer.
 
 1. Click **Remove BG** in the tool bar.
 2. Click **Remove Background**.
@@ -381,11 +386,19 @@ its cache for a short time.
 
 ## The AI tools
 
-Remove BG and Upscale use AI models that run in the browser of the admin user. The image never goes
-to a server: not to the server of the store, and not to a third party.
+Remove BG and Upscale use AI models that run in the browser of the admin user, on the processor or
+the graphics card of the computer. Many image editors send the photo to an AI service in the cloud.
+The Maho editor does not:
+
+- The photo never leaves the computer while you edit it.
+- No cloud service, AI provider or other third party receives the photo, a copy of it or data
+  about it.
+- There is no account, no API key, no subscription and no cost for each image.
+- The tools work the same for a photo with private data, for example a photo before you redact it.
 
 The first use of each tool downloads the model, and the status shows the progress of the download.
-The browser then keeps the model in its cache, so the next use starts fast.
+The download only receives the model. It sends no image and no data about the image. The browser
+then keeps the model in its cache, so the next use starts fast.
 
 | Tool | Model |
 |------|-------|
