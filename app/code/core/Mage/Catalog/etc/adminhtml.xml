@@ -13,7 +13,7 @@ SPDX-License-Identifier: AFL-3.0
                         <catalog_category translate="title" module="catalog">
                             <title>Categories</title>
                             <action>adminhtml/eav_attribute/index/entity_type/catalog_category</action>
-                            <sort_order>10</sort_order>
+                            <sort_order>30</sort_order>
                         </catalog_category>
                     </children>
                 </attributes>
@@ -69,7 +69,7 @@ SPDX-License-Identifier: AFL-3.0
                                 <children>
                                     <catalog_category translate="title" module="catalog">
                                         <title>Categories</title>
-                                        <sort_order>10</sort_order>
+                                        <sort_order>30</sort_order>
                                     </catalog_category>
                                 </children>
                             </attributes>

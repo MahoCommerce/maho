@@ -13,12 +13,12 @@ SPDX-License-Identifier: AFL-3.0
                         <customer translate="title" module="customer">
                             <title>Customers</title>
                             <action>adminhtml/eav_attribute/index/entity_type/customer</action>
-                            <sort_order>20</sort_order>
+                            <sort_order>60</sort_order>
                         </customer>
                         <customer_address translate="title" module="customer">
                             <title>Customer Addresses</title>
                             <action>adminhtml/eav_attribute/index/entity_type/customer_address</action>
-                            <sort_order>30</sort_order>
+                            <sort_order>50</sort_order>
                         </customer_address>
                     </children>
                 </attributes>
@@ -57,11 +57,11 @@ SPDX-License-Identifier: AFL-3.0
                                 <children>
                                     <customer translate="title" module="customer">
                                         <title>Customers</title>
-                                        <sort_order>20</sort_order>
+                                        <sort_order>60</sort_order>
                                     </customer>
                                     <customer_address translate="title" module="customer">
                                         <title>Customer Addresses</title>
-                                        <sort_order>30</sort_order>
+                                        <sort_order>50</sort_order>
                                     </customer_address>
                                 </children>
                             </attributes>

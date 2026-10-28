@@ -12,12 +12,12 @@ SPDX-License-Identifier: AFL-3.0
                         <blog_post translate="title" module="blog">
                             <title>Blog Posts</title>
                             <action>adminhtml/eav_attribute/index/entity_type/blog_post</action>
-                            <sort_order>40</sort_order>
+                            <sort_order>20</sort_order>
                         </blog_post>
                         <blog_category translate="title" module="blog">
                             <title>Blog Categories</title>
                             <action>adminhtml/eav_attribute/index/entity_type/blog_category</action>
-                            <sort_order>50</sort_order>
+                            <sort_order>10</sort_order>
                         </blog_category>
                     </children>
                 </attributes>
@@ -54,11 +54,11 @@ SPDX-License-Identifier: AFL-3.0
                                 <children>
                                     <blog_post translate="title" module="blog">
                                         <title>Blog Posts</title>
-                                        <sort_order>40</sort_order>
+                                        <sort_order>20</sort_order>
                                     </blog_post>
                                     <blog_category translate="title" module="blog">
                                         <title>Blog Categories</title>
-                                        <sort_order>50</sort_order>
+                                        <sort_order>10</sort_order>
                                     </blog_category>
                                 </children>
                             </attributes>
