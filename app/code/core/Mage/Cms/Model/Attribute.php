@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 /**
  * The attribute is static: its values are a column of cms_page with the attribute code as its name.
- * The first save adds the column, and a delete keeps it, so the pages keep their values.
+ * The first save adds the column. A delete drops the column and all its values.
  */
 class Mage_Cms_Model_Attribute extends Mage_Eav_Model_Entity_Attribute
 {
@@ -74,13 +74,17 @@ class Mage_Cms_Model_Attribute extends Mage_Eav_Model_Entity_Attribute
     }
 
     /**
-     * @throws Mage_Core_Exception when the code of a new attribute is a column that the CMS schema declares, or a reserved code
+     * @throws Mage_Core_Exception when the code of a new attribute is a column of cms_page, or a reserved code
      */
     #[\Override]
     protected function _beforeSave()
     {
         $code = (string) $this->getAttributeCode();
-        if ($this->isObjectNew() && in_array($code, [...\Maho\Db\Schema\Collector::declaredColumns('cms_page'), ...self::RESERVED_CODES], true)) {
+        $resource = Mage::getSingleton('core/resource');
+        if ($this->isObjectNew()
+            && (in_array($code, [...\Maho\Db\Schema\Collector::declaredColumns('cms_page'), ...self::RESERVED_CODES], true)
+                || $resource->getConnection('core_read')->tableColumnExists($resource->getTableName('cms/page'), $code))
+        ) {
             Mage::throwException(Mage::helper('cms')->__('The code "%s" is already used by CMS pages. Use another code.', $code));
         }
         return parent::_beforeSave();

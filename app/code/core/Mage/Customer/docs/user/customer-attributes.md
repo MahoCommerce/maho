@@ -103,7 +103,8 @@ The checkout copies the values of the address attributes to the order:
 
 Each address attribute adds a column with its **Attribute Code** to the order addresses. So the code of
 an address attribute cannot be the name of a field that orders already have, such as `subtotal`. When you
-delete an address attribute, the orders keep its values.
+delete an address attribute, the carts and the orders keep its values. So a new address attribute cannot
+use the code of a deleted one.
 
 An order email or an address template shows a value with `{{var attribute_code}}`.
 

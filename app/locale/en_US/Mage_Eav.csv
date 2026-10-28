@@ -138,6 +138,7 @@
 "The attribute has been saved.","The attribute has been saved."
 "The attribute set has been saved.","The attribute set has been saved."
 "The records of this set will move to the default set. Delete the set?","The records of this set will move to the default set. Delete the set?"
+"The value of ""%s"" is too large.","The value of ""%s"" is too large."
 "The value of ""%s"" must be a date.","The value of ""%s"" must be a date."
 "The value of ""%s"" must be a number.","The value of ""%s"" must be a number."
 "The value of ""%s"" must be a string or a number.","The value of ""%s"" must be a string or a number."

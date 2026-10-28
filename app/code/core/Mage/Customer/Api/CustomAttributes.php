@@ -70,6 +70,13 @@ final class CustomAttributes
                 $errors->addError("customAttributes.{$code}", $helper->__('"%s" is not a custom attribute of this form.', $code));
                 continue;
             }
+            // Only a multiselect and a multiline take a list, and a list holds only strings and numbers
+            $isList = in_array($attribute->getFrontendInput(), ['multiselect', 'multiline'], true);
+            $items = $isList && is_array($value) ? $value : [$value];
+            if (array_filter($items, fn(mixed $item): bool => $item !== null && !is_scalar($item)) !== []) {
+                $errors->addError("customAttributes.{$code}", \Mage::helper('eav')->__('The value of "%s" must be a string or a number.', $code));
+                continue;
+            }
             $message = self::checkOptions($attribute, $value);
             if ($message !== null) {
                 $errors->addError("customAttributes.{$code}", $message);

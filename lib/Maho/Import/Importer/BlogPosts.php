@@ -72,6 +72,12 @@ class BlogPosts extends AbstractCmsImporter
             $setCodes = null;
             foreach ($this->customAttributes() as $code => $attribute) {
                 if (($row[$code] ?? '') === '') {
+                    // A new post needs each required attribute of its set, unless the attribute has a default value
+                    if ($row['post_id'] === null && $attribute->getIsRequired() && (string) $attribute->getDefaultValue() === ''
+                        && in_array($code, $setCodes ??= $this->setAttributeCodes($row['attribute_set_id'] ?? $this->postSetId(null)), true)
+                    ) {
+                        $this->fail($file, $line, "$code is required for a new post");
+                    }
                     continue;
                 }
                 // The nightly eav_clean_orphaned_records cron deletes a value whose attribute is not in the set

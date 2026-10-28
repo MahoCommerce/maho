@@ -126,9 +126,19 @@ final class CustomAttributes
             case 'date':
                 return \Mage::helper('core')->isValidDate($value) ? null : $helper->__('The value of "%s" must be a date.', $code);
         }
+        // The limits are the widths of the EAV value tables: varchar(255), int and decimal(12,4)
         return match ($attribute->getBackendType()) {
-            'int' => preg_match('/^-?\d+$/', $value) ? null : $helper->__('The value of "%s" must be a whole number.', $code),
-            'decimal' => is_numeric($value) ? null : $helper->__('The value of "%s" must be a number.', $code),
+            'varchar' => mb_strlen($value) > 255 ? $helper->__('"%s" length must be equal or less than %s characters.', $code, 255) : null,
+            'int' => match (true) {
+                !preg_match('/^-?\d+$/', $value) => $helper->__('The value of "%s" must be a whole number.', $code),
+                (float) $value < -2147483648 || (float) $value > 2147483647 => $helper->__('The value of "%s" is too large.', $code),
+                default => null,
+            },
+            'decimal' => match (true) {
+                !is_numeric($value) => $helper->__('The value of "%s" must be a number.', $code),
+                abs(round((float) $value, 4)) >= 1e8 => $helper->__('The value of "%s" is too large.', $code),
+                default => null,
+            },
             default => null,
         };
     }

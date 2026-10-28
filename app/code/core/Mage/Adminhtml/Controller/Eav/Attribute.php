@@ -182,6 +182,8 @@ abstract class Mage_Adminhtml_Controller_Eav_Attribute extends Mage_Adminhtml_Co
         // The entity type, the storage and the models come from the server, never from the form
         unset(
             $data['attribute_id'],
+            $data['attribute_set_id'],
+            $data['attribute_group_id'],
             $data['entity_type_id'],
             $data['backend_type'],
             $data['backend_table'],

@@ -36,12 +36,10 @@ store views of the page.
 
 ## Delete an attribute
 
-You can delete a page attribute on its edit page. The pages keep their values in the database, but
-the **Attributes** tab, the import and the API do not show the attribute any more.
+You can delete a page attribute on its edit page. The store deletes the attribute and the values
+of all the pages for it. You cannot undo this.
 
-If you add an attribute with the same code again, the pages show their old values again. Use the
-same input type. A Dropdown or a Multiple Select does not get its old options back, so its old
-values do not show.
+If you add an attribute with the same code again, the pages have no value for it.
 
 ## Show a value on the storefront
 
