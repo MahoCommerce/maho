@@ -207,6 +207,16 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
         $isAdminScope = (int) $category->getStoreId() === Mage_Core_Model_App::ADMIN_STORE_ID;
         $errors = new \Mage_Core_Exception_Input();
 
+        // The save gives a new category the default values, but the check runs before the save
+        if (!$category->getId()) {
+            foreach ($category->getAttributes() as $code => $attribute) {
+                $default = $attribute->getBackend()->getDefaultValue();
+                if (!$category->hasData($code) && $default) {
+                    $category->setData($code, $default);
+                }
+            }
+        }
+
         $category->setData('use_post_data_config', $useConfig);
         try {
             foreach ($category->getAttributes() as $code => $attribute) {
@@ -507,7 +517,14 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
                 continue;
             }
 
-            $category->setData($code, $this->validateAttributeValue($code, $value));
+            $value = $this->validateAttributeValue($code, $value);
+            // In a store view, false means "use the default value". In the default scope, it is No.
+            if ($value === false && $attribute->getFrontendInput() === 'boolean'
+                && (int) $category->getStoreId() === Mage_Core_Model_App::ADMIN_STORE_ID
+            ) {
+                $value = 0;
+            }
+            $category->setData($code, $value);
         }
     }
 

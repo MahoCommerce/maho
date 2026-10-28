@@ -201,6 +201,11 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
                     continue;
                 }
             }
+            $length = $attribute->getColumnDefinition()['length'];
+            if ($length === 255 && $value !== null && mb_strlen((string) $value) > $length) {
+                $errors->addError($code, $helper->__('"%s" length must be equal or less than %s characters.', $label, $length));
+                continue;
+            }
             $page->setData($code, $value);
 
             if ($value === null) {

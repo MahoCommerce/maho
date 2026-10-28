@@ -112,6 +112,11 @@ class Mage_Customer_Model_Attribute extends Mage_Eav_Model_Attribute
         if (in_array($data['input_validation'] ?? '', $formats, true)) {
             $rules['input_validation'] = $data['input_validation'];
         }
+        // A date attribute checks and normalizes its value, as dob does
+        if (($data['frontend_input'] ?? $this->getFrontendInput()) === 'date') {
+            $data['input_filter'] = 'date';
+            $rules['input_validation'] = 'date';
+        }
         $data['validate_rules'] = $rules;
         unset($data['min_text_length'], $data['max_text_length'], $data['input_validation'], $data['website_values']);
 

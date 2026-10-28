@@ -227,16 +227,22 @@ abstract class Mage_Adminhtml_Controller_Eav_Set extends Mage_Adminhtml_Controll
             return;
         }
 
+        // The records leave the set only when the set goes too
+        $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
+        $adapter->beginTransaction();
         try {
             $this->beforeSetDelete($attributeSet);
             $attributeSet->delete();
-            $this->_getSession()->addSuccess($this->__('The attribute set has been removed.'));
-            $this->getResponse()->setRedirect($this->getUrl('*/*/'));
+            $adapter->commit();
         } catch (Exception $e) {
+            $adapter->rollBack();
             Mage::logException($e);
             $this->_getSession()->addError($this->__('An error occurred while deleting this set.'));
             $this->_redirectReferer();
+            return;
         }
+        $this->_getSession()->addSuccess($this->__('The attribute set has been removed.'));
+        $this->getResponse()->setRedirect($this->getUrl('*/*/'));
     }
 
     /**
