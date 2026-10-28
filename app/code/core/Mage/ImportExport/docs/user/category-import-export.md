@@ -25,7 +25,22 @@ The Category Import/Export feature allows you to bulk manage categories in Maho 
 - Navigate to **System > Import/Export > Export**
 - Select **Categories** as Entity Type
 - Configure filters if needed (optional)
-- Download the generated CSV file
+- Click **Continue**, then download the file from the notification
+
+### Imports and Exports Run in the Background
+
+The **Import** button and the **Continue** button of the export put the job in the message queue,
+so the page does not wait. A queue worker runs the job, and you get a message in
+**System > Notifications** when it is done:
+
+- After an import, the message tells you that the import is done, or gives the error.
+- After an export, the message has a link to the file. Each export deletes the export files that are older than 7 days.
+
+The queue workers start from cron, so cron must run on the server. **System > Message Queue** shows
+the jobs, in the queue `importexport`.
+
+While an import waits or runs, Maho does not check a new file and does not start a new import. The
+new file replaces the rows that the import still reads.
 
 ## CSV Format
 
@@ -119,7 +134,8 @@ category_id,parent_id,_store
 
 1. Go to System > Import/Export > Export
 2. Select "Categories" as Entity Type
-3. Click "Continue" to download CSV
+3. Click "Continue"
+4. When the message about the export file arrives in **System > Notifications**, open its link to download the CSV
 
 ### Filtered Export
 

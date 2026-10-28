@@ -445,6 +445,28 @@ class Mage_ImportExport_Model_Import extends Mage_ImportExport_Model_Abstract
     }
 
     /**
+     * Queue importSource() and invalidateIndex() for the rows that the last validation stored.
+     * The result goes to the inbox of $adminUserId.
+     */
+    public function queueImportSource(?int $adminUserId = null): void
+    {
+        \Maho\Queue\QueueManager::dispatch(
+            new Mage_ImportExport_Model_ImportMessage($adminUserId),
+            queue: Mage_ImportExport_Model_ImportMessage::QUEUE_NAME,
+            dedupeKey: Mage_ImportExport_Model_ImportMessage::DEDUPE_KEY,
+        );
+    }
+
+    /**
+     * Whether a queued import waits or runs. The import data table holds one set of rows, so a
+     * new validation must wait until that import is done.
+     */
+    public static function isImportInProgress(): bool
+    {
+        return \Maho\Queue\QueueManager::dbTransport()->inFlightRowExists(Mage_ImportExport_Model_ImportMessage::DEDUPE_KEY);
+    }
+
+    /**
      * Invalidate indexes by process codes.
      *
      * @return $this

@@ -17,6 +17,13 @@ class Mage_ImportExport_Adminhtml_ExportController extends Mage_Adminhtml_Contro
     public const ADMIN_RESOURCE = 'system/convert/export';
 
     /**
+     * The download link in the notification has no secret key. The download only reads a file
+     * with a random name, and the ACL check above still applies.
+     */
+    #[\Override]
+    protected $_publicActions = ['download'];
+
+    /**
      * Custom constructor.
      */
     #[\Override]
@@ -42,36 +49,20 @@ class Mage_ImportExport_Adminhtml_ExportController extends Mage_Adminhtml_Contro
     }
 
     /**
-     * Load data with filter applying and create file for download.
-     *
-     * @return Mage_Adminhtml_Controller_Action
+     * Queue the export with the filters of the form. The worker writes the file and sends a link
+     * to it in a notification.
      */
     #[Maho\Config\Route('/admin/export/export')]
-    public function exportAction()
+    public function exportAction(): void
     {
         if ($this->getRequest()->getPost(Mage_ImportExport_Model_Export::FILTER_ELEMENT_GROUP)) {
             try {
                 /** @var Mage_ImportExport_Model_Export $model */
                 $model = Mage::getModel('importexport/export');
                 $model->setData($this->getRequest()->getParams())
-                    ->setDestination(null);
-
-                $result = $model->exportFile();
-
-                // Handle different result types correctly
-                if (isset($result['type']) && $result['type'] === 'string') {
-                    // For string content, pass the content directly
-                    $content = $result['value'];
-                } else {
-                    // For file-based exports, use the full result array
-                    $result['type'] = 'filename';
-                    $content = $result;
-                }
-
-                return $this->_prepareDownloadResponse(
-                    $model->getFileName(),
-                    $content,
-                    $model->getContentType(),
+                    ->queueExport(Mage::helper('adminnotification')->getCurrentAdminUserId());
+                $this->_getSession()->addSuccess(
+                    $this->__('The export will run in the background. A message in the notifications tells you when the file is ready.'),
                 );
             } catch (Mage_Core_Exception $e) {
                 $this->_getSession()->addError($e->getMessage());
@@ -82,7 +73,33 @@ class Mage_ImportExport_Adminhtml_ExportController extends Mage_Adminhtml_Contro
         } else {
             $this->_getSession()->addError($this->__('No valid data sent'));
         }
-        return $this->_redirect('*/*/index');
+        $this->_redirect('*/*/index');
+    }
+
+    /**
+     * Download an export file that a queued export wrote.
+     */
+    #[Maho\Config\Route('/admin/export/download')]
+    public function downloadAction(): void
+    {
+        /** @var Mage_ImportExport_Model_Export $model */
+        $model = Mage::getModel('importexport/export');
+        $path = $model->getStoragePath((string) $this->getRequest()->getParam('file'));
+        $mount = $model->getStorage();
+        if ($path === null || !$mount->fileExists($path)) {
+            $this->_getSession()->addError(
+                $this->__('The export file does not exist. Each export deletes the export files that are older than %d days.', Mage_ImportExport_Model_Export::FILE_LIFETIME_DAYS),
+            );
+            $this->_redirect('*/*/index');
+            return;
+        }
+
+        $this->_prepareDownloadResponse(
+            basename($path),
+            ['type' => 'stream', 'value' => $mount->readStream($path)],
+            'application/octet-stream',
+            $mount->fileSize($path),
+        );
     }
 
     /**

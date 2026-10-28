@@ -97,6 +97,24 @@ describe('runAndNotify()', function () {
             ->and($notices[0]['acl_resource'])->toBe('system/config');
     });
 
+    test('an error in the data sends one major message and stops, because a retry does not fix it', function () {
+        $title = 'qaj-data-' . uniqid();
+
+        Mage::helper('adminnotification')->runAndNotify(
+            fn(): string => throw new Mage_Core_Exception('qaj-no-data'),
+            'qaj-done',
+            $title,
+            'adminhtml/dashboard/index',
+            qajAdminUserId(),
+        );
+        $notices = qajTakeNotices($title);
+
+        expect($notices)->toHaveCount(1)
+            ->and((int) $notices[0]['severity'])->toBe(Mage_AdminNotification_Model_Inbox::SEVERITY_MAJOR)
+            ->and($notices[0]['description'])->toContain('qaj-no-data')
+            ->and($notices[0]['description'])->not->toContain('tries again');
+    });
+
     test('the link of a message has no secret key', function () {
         expect(Mage::helper('adminnotification')->getAdminUrl('adminhtml/promo_catalog/index'))
             ->not->toContain('/key/');

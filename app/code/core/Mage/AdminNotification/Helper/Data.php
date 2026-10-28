@@ -97,12 +97,13 @@ class Mage_AdminNotification_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Run $job in a queue handler and tell the administrator the result. $job returns the text of
-     * the notice. When $job fails, the administrator gets a major message with the error, and the
-     * exception goes on, so the queue tries the message again. Without $adminUserId, the
+     * the notice. When $job fails, the administrator gets a major message with the error. A
+     * Mage_Core_Exception is an error in the data, which a retry does not fix, so it stops there.
+     * Any other exception goes on, so the queue tries the message again. Without $adminUserId, the
      * administrators allowed $aclResource get the messages.
      *
      * @param callable(): string $job
-     * @throws Throwable the exception of $job
+     * @throws Throwable the exception of $job, unless it is a Mage_Core_Exception
      */
     public function runAndNotify(
         callable $job,
@@ -119,12 +120,15 @@ class Mage_AdminNotification_Helper_Data extends Mage_Core_Helper_Abstract
             $this->notifyAdmin(
                 Mage_AdminNotification_Model_Inbox::SEVERITY_MAJOR,
                 $failedTitle,
-                $this->__('%s The message queue tries again.', $e->getMessage()),
+                $this->getFailureText($e),
                 $route,
                 [],
                 $adminUserId,
                 $adminUserId === null ? $aclResource : null,
             );
+            if ($e instanceof Mage_Core_Exception) {
+                return;
+            }
             throw $e;
         }
 
@@ -137,6 +141,16 @@ class Mage_AdminNotification_Helper_Data extends Mage_Core_Helper_Abstract
             $adminUserId,
             $adminUserId === null ? $aclResource : null,
         );
+    }
+
+    /**
+     * The text of the major message about the failed job of a queue handler.
+     */
+    public function getFailureText(Throwable $e): string
+    {
+        return $e instanceof Mage_Core_Exception
+            ? $this->__('%s Correct the data, then start the action again.', $e->getMessage())
+            : $this->__('%s The message queue tries again.', $e->getMessage());
     }
 
     /**
