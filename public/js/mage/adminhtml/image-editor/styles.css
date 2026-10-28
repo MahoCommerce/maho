@@ -329,6 +329,94 @@ SPDX-License-Identifier: AFL-3.0
     font-variant-numeric: tabular-nums;
 }
 
+.maho-ie-slider input[type="range"]:disabled {
+    opacity: 0.4;
+}
+
+/* Adjust tool */
+.maho-ie-options:has(> .maho-ie-adjust) {
+    max-height: 45vh;
+    padding: 0;
+}
+
+.maho-ie-adjust {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-width: 0;
+}
+
+.maho-ie-adjust-filters {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 10px 16px;
+    border-bottom: 1px solid #2e2e33;
+}
+
+.maho-ie-adjust-filter {
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 4px;
+    border: 1px solid #3f3f46;
+    border-radius: 6px;
+    background: #27272a;
+    color: #a1a1aa;
+    font-size: 11px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+}
+
+.maho-ie-adjust-filter canvas {
+    display: block;
+    width: 72px;
+    height: 54px;
+    border-radius: 4px;
+}
+
+.maho-ie-adjust-filter:hover {
+    border-color: #52525b;
+    color: #fafafa;
+}
+
+.maho-ie-adjust-filter.active {
+    border-color: #0090ff;
+    box-shadow: 0 0 0 1px #0090ff;
+    color: #fafafa;
+}
+
+.maho-ie-adjust-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px 16px;
+}
+
+.maho-ie-adjust-group {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+}
+
+.maho-ie-adjust-group-title {
+    min-width: 56px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #71717a;
+}
+
+.maho-ie-adjust-hint {
+    font-size: 11px;
+    color: #71717a;
+}
+
 /* Number input */
 .maho-ie-input {
     display: flex;

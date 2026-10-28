@@ -9,12 +9,15 @@ import { AnnotateTool } from './tools/annotate.js';
 import { RedactTool } from './tools/redact.js';
 import { FrameTool } from './tools/frame.js';
 import { RemoveBackgroundTool } from './tools/rembg.js';
-import { renderToCanvas, exportBlob, buildFilterString, drawAnnotation } from './export.js';
+import { renderToCanvas, exportBlob, adjustCanvas, drawAnnotation } from './export.js';
+import { neutralAdjustments, isNeutral } from './adjust-engine.js';
 
 const MAX_UNDO = 30;
 const MIN_ZOOM = 0.1;
 const MAX_ZOOM = 20;
 const ZOOM_STEP = 1.15;
+const ADJUST_PREVIEW_SIDE = 1600;
+const ADJUST_FULL_DELAY = 250;
 
 export class MahoImageEditor {
     constructor(container, options) {
@@ -40,13 +43,10 @@ export class MahoImageEditor {
         this._panOrigin = null;
         this._spaceHeld = false;
 
-        this.adjustments = {
-            brightness: 100,
-            contrast: 100,
-            hue: 0,
-            saturation: 100,
-            warmth: 0,
-        };
+        this.adjustments = neutralAdjustments();
+        this.compareAt = null;
+        this._adjusted = null;
+        this._adjustTimer = null;
         this.annotations = [];
         this.redactions = [];
         this.frame = null;
@@ -78,6 +78,9 @@ export class MahoImageEditor {
         for (const tool of this.tools) tool.destroy();
         if (this._resizeObserver) this._resizeObserver.disconnect();
         if (this._eventController) this._eventController.abort();
+        clearTimeout(this._adjustTimer);
+        if (this._adjusted) this._adjusted.canvas.width = 0;
+        this._adjusted = null;
         for (const snap of this._undoStack) snap.baseCanvas.width = 0;
         for (const snap of this._redoStack) snap.baseCanvas.width = 0;
         this._undoStack = [];
@@ -610,11 +613,17 @@ export class MahoImageEditor {
             drawH = this.activeTool.height * this.scale;
         }
 
-        // Base image with adjustments
-        const filter = buildFilterString(this.adjustments);
-        ctx.filter = filter;
-        ctx.drawImage(this.baseCanvas, this.offsetX, this.offsetY, drawW, drawH);
-        ctx.filter = 'none';
+        // Base image with adjustments, and the original left of the compare line
+        const source = this._adjustedSource();
+        ctx.drawImage(source, this.offsetX, this.offsetY, drawW, drawH);
+        if (this.compareAt !== null && source !== this.baseCanvas) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(this.offsetX, this.offsetY, drawW * this.compareAt, drawH);
+            ctx.clip();
+            ctx.drawImage(this.baseCanvas, this.offsetX, this.offsetY, drawW, drawH);
+            ctx.restore();
+        }
 
         // Redactions
         for (const r of this.redactions) {
@@ -656,6 +665,38 @@ export class MahoImageEditor {
         if (this.activeTool) {
             this.activeTool.renderOverlay(ctx, this.scale, this.offsetX, this.offsetY);
         }
+    }
+
+    /**
+     * Return the base image with the adjustments applied. A change renders a preview at once and the
+     * full size after a pause, because a large photo takes too long to render on each slider move.
+     */
+    _adjustedSource() {
+        if (isNeutral(this.adjustments)) return this.baseCanvas;
+
+        const key = JSON.stringify(this.adjustments);
+        const cached = this._adjusted;
+        if (cached?.base === this.baseCanvas && cached.key === key) return cached.canvas;
+
+        const base = this.baseCanvas;
+        const previewSide = Math.min(ADJUST_PREVIEW_SIDE, Math.max(this.canvas.width, this.canvas.height, 800));
+        const isFull = Math.max(base.width, base.height) <= previewSide;
+        this._setAdjusted(base, key, adjustCanvas(base, this.adjustments, previewSide));
+
+        clearTimeout(this._adjustTimer);
+        if (!isFull) {
+            this._adjustTimer = setTimeout(() => {
+                if (this.baseCanvas !== base || JSON.stringify(this.adjustments) !== key) return;
+                this._setAdjusted(base, key, adjustCanvas(base, this.adjustments));
+                this.requestRender();
+            }, ADJUST_FULL_DELAY);
+        }
+        return this._adjusted.canvas;
+    }
+
+    _setAdjusted(base, key, canvas) {
+        if (this._adjusted) this._adjusted.canvas.width = 0;
+        this._adjusted = { base, key, canvas };
     }
 
     _drawPixelatedPreview(ctx, rx, ry, rw, rh) {
