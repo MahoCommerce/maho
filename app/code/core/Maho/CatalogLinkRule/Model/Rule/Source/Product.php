@@ -17,7 +17,7 @@ class Maho_CatalogLinkRule_Model_Rule_Source_Product extends Mage_CatalogRule_Mo
     }
 
     /**
-     * Add status, visibility and stock availability to special attributes
+     * Add status, visibility and stock status to special attributes
      */
     #[\Override]
     protected function _addSpecialAttributes(array &$attributes): void
@@ -25,13 +25,13 @@ class Maho_CatalogLinkRule_Model_Rule_Source_Product extends Mage_CatalogRule_Mo
         parent::_addSpecialAttributes($attributes);
         $attributes['status'] = Mage::helper('cataloglinkrule')->__('Status');
         $attributes['visibility'] = Mage::helper('cataloglinkrule')->__('Visibility');
-        $attributes['is_in_stock'] = Mage::helper('cataloglinkrule')->__('Stock Availability');
+        $attributes['stock_status'] = Mage::helper('cataloglinkrule')->__('Stock Status');
     }
 
     #[\Override]
     protected function _prepareValueOptions()
     {
-        if ($this->getAttribute() === 'is_in_stock' && !$this->getData('value_select_options')) {
+        if ($this->getAttribute() === 'stock_status' && !$this->getData('value_select_options')) {
             $options = Mage::getSingleton('cataloginventory/source_stock')->toOptionArray();
             $this->setData('value_select_options', $options);
             $this->setData('value_option', array_column($options, 'label', 'value'));
@@ -43,35 +43,36 @@ class Maho_CatalogLinkRule_Model_Rule_Source_Product extends Mage_CatalogRule_Mo
     #[\Override]
     public function getInputType(): string
     {
-        return $this->getAttribute() === 'is_in_stock' ? 'select' : parent::getInputType();
+        return $this->getAttribute() === 'stock_status' ? 'select' : parent::getInputType();
     }
 
     #[\Override]
     public function getValueElementType(): string
     {
-        return $this->getAttribute() === 'is_in_stock' ? 'select' : parent::getValueElementType();
+        return $this->getAttribute() === 'stock_status' ? 'select' : parent::getValueElementType();
     }
 
     /**
-     * The stock is not an EAV attribute, so join the stock item of each product once
+     * Read the stock status index, like the storefront: a configurable product is out of stock when
+     * all its children are. A product is in stock when it is in stock in one of its websites.
      */
     #[\Override]
     public function collectValidatedAttributes($productCollection)
     {
-        if ($this->getAttribute() !== 'is_in_stock') {
+        if ($this->getAttribute() !== 'stock_status') {
             return parent::collectValidatedAttributes($productCollection);
         }
 
-        if (!$productCollection->hasFlag('cataloglinkrule_is_in_stock')) {
-            $productCollection->joinField(
-                'is_in_stock',
-                'cataloginventory/stock_item',
-                'is_in_stock',
-                'product_id=entity_id',
-                '{{table}}.stock_id=' . Mage_CatalogInventory_Model_Stock::DEFAULT_STOCK_ID,
-                'left',
-            );
-            $productCollection->setFlag('cataloglinkrule_is_in_stock', true);
+        if (!$productCollection->hasFlag('cataloglinkrule_stock_status')) {
+            $inStock = $productCollection->getConnection()->select()
+                ->from(['ss' => $productCollection->getTable('cataloginventory/stock_status')], [new Maho\Db\Expr('1')])
+                ->where('ss.product_id = e.entity_id')
+                ->where('ss.stock_id = ?', Mage_CatalogInventory_Model_Stock::DEFAULT_STOCK_ID)
+                ->where('ss.stock_status = ?', Mage_CatalogInventory_Model_Stock_Status::STATUS_IN_STOCK);
+            $productCollection->getSelect()->columns([
+                'stock_status' => new Maho\Db\Expr('CASE WHEN EXISTS (' . $inStock . ') THEN 1 ELSE 0 END'),
+            ]);
+            $productCollection->setFlag('cataloglinkrule_stock_status', true);
         }
 
         return $this;

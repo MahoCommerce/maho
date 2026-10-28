@@ -76,7 +76,7 @@ function clsfRule(int $linkTypeId, string $sourceToken, string $targetToken, arr
  */
 function clsfStockCondition(string $type, int $isInStock): array
 {
-    return ['type' => $type, 'attribute' => 'is_in_stock', 'operator' => '==', 'value' => (string) $isInStock];
+    return ['type' => $type, 'attribute' => 'stock_status', 'operator' => '==', 'value' => (string) $isInStock];
 }
 
 function clsfLinkedIds(int $sourceId, int $linkTypeId): array
@@ -153,19 +153,19 @@ describe('CatalogLinkRule targets that the storefront can show', function () {
             ->and($crosssell->getMatchingTargetProductIds(null, [1]))->toBe([$inStock, $outOfStock]);
     });
 
-    test('the Stock Availability condition keeps out of stock targets out of the links', function () {
+    test('the Stock Status condition keeps out of stock targets out of the links', function () {
         $token = 'clsf-' . uniqid();
         $inStock = clsfProduct("$token-a");
         clsfProduct("$token-b", [], false);
 
         $condition = clsfStockCondition('cataloglinkrule/rule_target_product', Mage_CatalogInventory_Model_Stock::STOCK_IN_STOCK);
-        // A second condition on the stock must not join the stock table twice
+        // A second condition on the stock must not add the column twice
         $rule = clsfRule(Mage_Catalog_Model_Product_Link::LINK_TYPE_UPSELL, 'none', $token, targetConditions: [$condition, $condition]);
 
         expect($rule->getMatchingTargetProductIds(null, [1]))->toBe([$inStock]);
     });
 
-    test('the Stock Availability condition selects the source products', function () {
+    test('the Stock Status condition selects the source products', function () {
         $token = 'clsf-' . uniqid();
         clsfProduct("$token-src-a");
         $outOfStock = clsfProduct("$token-src-b", [], false);
@@ -176,10 +176,10 @@ describe('CatalogLinkRule targets that the storefront can show', function () {
         expect($rule->getMatchingSourceProductIds())->toBe([$outOfStock]);
     });
 
-    test('the Stock Availability condition offers In Stock and Out of Stock', function () {
-        $condition = Mage::getModel('cataloglinkrule/rule_target_product')->setAttribute('is_in_stock');
+    test('the Stock Status condition offers In Stock and Out of Stock', function () {
+        $condition = Mage::getModel('cataloglinkrule/rule_target_product')->setAttribute('stock_status');
 
-        expect($condition->loadAttributeOptions()->getAttributeOption())->toHaveKey('is_in_stock')
+        expect($condition->loadAttributeOptions()->getAttributeOption())->toHaveKey('stock_status')
             ->and($condition->getInputType())->toBe('select')
             ->and($condition->getValueElementType())->toBe('select')
             ->and(array_column($condition->getValueSelectOptions(), 'value'))->toBe([
