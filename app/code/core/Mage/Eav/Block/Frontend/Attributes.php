@@ -75,6 +75,11 @@ class Mage_Eav_Block_Frontend_Attributes extends Mage_Core_Block_Template
         if ($entity instanceof Mage_Catalog_Model_Category) {
             return (string) $this->helper('catalog/output')->categoryAttribute($entity, $row['value'], $row['code']);
         }
+        $resource = $entity?->getResource();
+        $attribute = $resource instanceof Mage_Eav_Model_Entity_Abstract ? $resource->getAttribute($row['code']) : null;
+        if ($attribute instanceof Mage_Eav_Model_Entity_Attribute && $attribute->getData('is_html_allowed_on_front')) {
+            return Mage::getSingleton('core/input_filter_maliciousCode')->filter($row['value']);
+        }
         return $this->escapeHtml($row['value']);
     }
 

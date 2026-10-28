@@ -202,14 +202,14 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
      * Return the attribute set that a category saves with.
      *
      * A new category takes the set of its parent when the form posts none. A posted set must be a
-     * category attribute set.
+     * category attribute set. An existing category keeps its set, as a product does.
      */
     protected function _getPostedAttributeSetId(Mage_Catalog_Model_Category $category, int $postedSetId): int
     {
+        if ($category->getId() && $category->getOrigData('attribute_set_id')) {
+            return (int) $category->getOrigData('attribute_set_id');
+        }
         if (!$postedSetId) {
-            if ($category->getId() && $category->getOrigData('attribute_set_id')) {
-                return (int) $category->getOrigData('attribute_set_id');
-            }
             $parent = Mage::getModel('catalog/category')->load($category->getParentId());
             return $parent->getAttributeSetId() ?: (int) $category->getDefaultAttributeSetId();
         }

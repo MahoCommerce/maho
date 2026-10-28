@@ -8,18 +8,18 @@
 
 declare(strict_types=1);
 
+/**
+ * @method Maho_Blog_Model_Resource_Category getEntity()
+ */
 class Maho_Blog_Model_Resource_Category_Collection extends Mage_Eav_Model_Entity_Collection_Abstract
 {
     public const ENTITY = 'blog_category';
-
-    protected ?array $_staticAttributes = null;
 
     protected bool $_isFilteringStaticAttribute = false;
 
     protected function _getStaticAttributes(): array
     {
-        $this->_staticAttributes ??= Mage::getModel('blog/category')->getStaticAttributes();
-        return $this->_staticAttributes;
+        return $this->getEntity()->getStaticAttributeCodes();
     }
 
     #[\Override]

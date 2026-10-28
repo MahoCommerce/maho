@@ -49,10 +49,13 @@ and the **Default** set does not show them.
    attributes of that set.
 3. Click **Save**, then change the groups and the attributes.
 
-When a store has more than one category set, the first tab of the category page shows the
+When a store has more than one category set, the first tab of a new category shows the
 **Attribute Set** field. A new category starts with the set of its parent. Select another set and
-save the category. The tabs of the new set show after the save. The values of the attributes that
-are not in the new set stay in the database.
+save the category. The tabs of the set show after the save. The admin does not change the set of a
+category after the first save, the same as for a product.
+
+Every night, the store deletes the value of an attribute that is not in the set of its category. So
+the value of an attribute shows and stays only when the attribute is in the set.
 
 You cannot delete the default set. When you delete another set, its categories move to the default
 set.
@@ -72,6 +75,7 @@ It does not show Image attributes.
 The categories of the REST and GraphQL API have two more fields:
 
 - `attributeSetId`: the set of the category. A new category without one takes the set of its
-  parent.
+  parent. An update can change the set, as for a product. The next night, the store deletes the
+  values of the attributes that are not in the new set.
 - `customAttributes`: the values of the attributes that you added, by attribute code. Only an
   admin and an API token can read it. To write these values, use `customAttributesWrite`.

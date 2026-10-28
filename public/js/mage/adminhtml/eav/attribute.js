@@ -68,6 +68,12 @@ class EavAttributeForm {
             this.setRowVisibility(id, !hidden.includes(id));
         }
 
+        const isText = input === 'text' || input === 'textarea';
+        this.setRowVisibility('multiline_count', input === 'multiline');
+        this.setRowVisibility('min_text_length', isText);
+        this.setRowVisibility('max_text_length', isText);
+        this.setRowVisibility('input_validation', input === 'text');
+
         const wysiwyg = document.getElementById('is_wysiwyg_enabled');
         this.setRowVisibility('is_wysiwyg_enabled', input === 'textarea');
         this.setRowVisibility(

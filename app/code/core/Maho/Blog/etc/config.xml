@@ -6,10 +6,13 @@ SPDX-License-Identifier: AFL-3.0
 <config>
     <modules>
         <Maho_Blog>
-            <version>2.0.0</version>
+            <version>2.0.1</version>
         </Maho_Blog>
     </modules>
     <global>
+        <docs>
+            <user>docs/user</user>
+        </docs>
         <cms>
             <preview>
                 <providers>

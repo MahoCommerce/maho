@@ -108,6 +108,13 @@ class BlogCategory extends CrudResource
     /** @var int[]|null */
     public ?array $stores = null;
 
+    #[ApiProperty(description: 'Attribute set ID. A new category without one takes the default set', extraProperties: [EnumSource::KEY => 'Maho\ApiPlatform\Metadata\ValueLists::blogCategoryAttributeSets'])]
+    public ?int $attributeSetId = null;
+
+    /** @var array<string, mixed>|null */
+    #[ApiProperty(description: 'Values of the user-defined attributes, keyed by attribute code. Admin and API tokens only', security: "has_backend_access('blog-categories')", extraProperties: ['computed' => true])]
+    public ?array $customAttributes = null;
+
     #[ApiProperty(writable: false)]
     public ?string $createdAt = null;
 
@@ -117,7 +124,16 @@ class BlogCategory extends CrudResource
     #[\Override]
     public function applyToModel(object $model, ?array $sentProperties = null): void
     {
-        parent::applyToModel($model, $sentProperties);
+        $customAttributes = $this->customAttributes;
+        $this->customAttributes = null;
+        try {
+            parent::applyToModel($model, $sentProperties);
+        } finally {
+            $this->customAttributes = $customAttributes;
+        }
+        if ($customAttributes !== null) {
+            CustomAttributes::apply($model, $customAttributes);
+        }
 
         // On create, apply sensible defaults for fields omitted from the request.
         // On update these stay untouched, so an enabled or store-restricted category is not reset.
@@ -134,5 +150,6 @@ class BlogCategory extends CrudResource
     public static function afterLoad(self $dto, object $model): void
     {
         $dto->stores = array_map(intval(...), $model->getStores());
+        $dto->customAttributes = CustomAttributes::read($model);
     }
 }

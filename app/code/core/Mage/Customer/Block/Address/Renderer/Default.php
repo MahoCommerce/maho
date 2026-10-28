@@ -88,6 +88,11 @@ class Mage_Customer_Block_Address_Renderer_Default extends Mage_Core_Block_Abstr
                 $data['country'] = $address->getCountryModel()->getName();
             } elseif ($attribute->getAttributeCode() == 'region') {
                 $data['region'] = Mage::helper('directory')->__($address->getRegion());
+            } elseif ($address instanceof Mage_Sales_Model_Order_Address && $attribute->getIsUserDefined()
+                && in_array($attribute->getFrontendInput(), ['select', 'multiselect', 'boolean'], true)
+            ) {
+                // An order address keeps the option labels, not the option ids
+                $data[$attribute->getAttributeCode()] = (string) $address->getData($attribute->getAttributeCode());
             } else {
                 $dataModel = Mage_Customer_Model_Attribute_Data::factory($attribute, $address);
                 $value     = $dataModel->outputValue($dataFormat);

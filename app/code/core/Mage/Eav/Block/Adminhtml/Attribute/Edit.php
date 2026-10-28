@@ -72,6 +72,7 @@ class Mage_Eav_Block_Adminhtml_Attribute_Edit extends Mage_Adminhtml_Block_Widge
     {
         return [
             'image' => ['is_unique', 'frontend_class', '_default_value'],
+            'multiline' => ['is_unique', 'frontend_class', '_default_value'],
             'boolean' => ['is_unique', 'frontend_class'],
             'date' => ['frontend_class'],
             'select' => ['frontend_class'],

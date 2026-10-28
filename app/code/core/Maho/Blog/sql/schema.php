@@ -294,6 +294,9 @@ return function (SchemaEditor $schema): void {
             ->addColumn(Schema::column('attribute_id', Types::SMALLINT, unsigned: true))
             ->addColumn(Schema::column('is_global', Types::SMALLINT, unsigned: true, default: 1))
             ->addColumn(Schema::column('position', Types::INTEGER, default: 0))
+            ->addColumn(Schema::column('is_visible_on_front', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('is_html_allowed_on_front', Types::SMALLINT, unsigned: true, default: 0))
+            ->addColumn(Schema::column('is_wysiwyg_enabled', Types::SMALLINT, unsigned: true, default: 0))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('attribute_id')->create())
             ->addForeignKeyConstraint(
                 ForeignKeyConstraint::editor()
@@ -414,4 +417,64 @@ return function (SchemaEditor $schema): void {
             ->setComment('Blog Post To Category Linkage Table')
             ->create(),
     );
+
+    // A value table of $entityTable: one row for each entity, attribute and store
+    $valueTable = function (string $entityTable, string $type, string $label, Column $value) use ($schema): void {
+        $schema->addTable(
+            Table::editor()
+                ->setUnquotedName("{$entityTable}_{$type}")
+                ->addColumn(Schema::column('value_id', Types::INTEGER, autoincrement: true))
+                ->addColumn(Schema::column('entity_type_id', Types::INTEGER, unsigned: true, default: 0))
+                ->addColumn(Schema::column('attribute_id', Types::SMALLINT, unsigned: true, default: 0))
+                ->addColumn(Schema::column('store_id', Types::SMALLINT, unsigned: true, default: 0))
+                ->addColumn(Schema::column('entity_id', Types::INTEGER, unsigned: true, default: 0))
+                ->addColumn($value)
+                ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('value_id')->create())
+                ->addIndex(
+                    Index::editor()
+                        ->setType(IndexType::UNIQUE)
+                        ->setUnquotedColumnNames('entity_id', 'attribute_id', 'store_id'),
+                )
+                ->addIndex(Index::editor()->setUnquotedColumnNames('attribute_id'))
+                ->addIndex(Index::editor()->setUnquotedColumnNames('store_id'))
+                ->addIndex(Index::editor()->setUnquotedColumnNames('entity_id'))
+                ->addForeignKeyConstraint(
+                    ForeignKeyConstraint::editor()
+                        ->setUnquotedReferencingColumnNames('attribute_id')
+                        ->setUnquotedReferencedTableName('eav_attribute')
+                        ->setUnquotedReferencedColumnNames('attribute_id')
+                        ->setOnUpdateAction(ReferentialAction::CASCADE)
+                        ->setOnDeleteAction(ReferentialAction::CASCADE)
+                        ->create(),
+                )
+                ->addForeignKeyConstraint(
+                    ForeignKeyConstraint::editor()
+                        ->setUnquotedReferencingColumnNames('entity_id')
+                        ->setUnquotedReferencedTableName($entityTable)
+                        ->setUnquotedReferencedColumnNames('entity_id')
+                        ->setOnUpdateAction(ReferentialAction::CASCADE)
+                        ->setOnDeleteAction(ReferentialAction::CASCADE)
+                        ->create(),
+                )
+                ->addForeignKeyConstraint(
+                    ForeignKeyConstraint::editor()
+                        ->setUnquotedReferencingColumnNames('store_id')
+                        ->setUnquotedReferencedTableName('core_store')
+                        ->setUnquotedReferencedColumnNames('store_id')
+                        ->setOnUpdateAction(ReferentialAction::CASCADE)
+                        ->setOnDeleteAction(ReferentialAction::CASCADE)
+                        ->create(),
+                )
+                ->setComment("{$label} Attribute Backend Table")
+                ->create(),
+        );
+    };
+
+    $decimal = fn() => Schema::column('value', Types::DECIMAL, precision: 12, scale: 4, notNull: false);
+    $valueTable('blog_post_entity', 'decimal', 'Blog Post Decimal', $decimal());
+    $valueTable('blog_category_entity', 'datetime', 'Blog Category Datetime', Schema::column('value', Types::DATETIME_MUTABLE, notNull: false));
+    $valueTable('blog_category_entity', 'decimal', 'Blog Category Decimal', $decimal());
+    $valueTable('blog_category_entity', 'int', 'Blog Category Integer', Schema::column('value', Types::INTEGER, notNull: false));
+    $valueTable('blog_category_entity', 'text', 'Blog Category Text', Schema::column('value', Types::TEXT, length: 65535, notNull: false));
+    $valueTable('blog_category_entity', 'varchar', 'Blog Category Varchar', Schema::column('value', Types::STRING, length: 255, notNull: false));
 };

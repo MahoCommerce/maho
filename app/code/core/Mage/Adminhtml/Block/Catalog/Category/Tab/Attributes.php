@@ -47,6 +47,9 @@ class Mage_Adminhtml_Block_Catalog_Category_Tab_Attributes extends Mage_Adminhtm
      */
     protected function _addAttributeSetField(\Maho\Data\Form\Element\Fieldset $fieldset): void
     {
+        if ($this->getCategory()->getId()) {
+            return;
+        }
         $sets = Mage::getResourceModel('eav/entity_attribute_set_collection')
             ->setEntityTypeFilter((int) $this->getCategory()->getResource()->getTypeId())
             ->setOrder('attribute_set_name', 'asc')
@@ -58,7 +61,7 @@ class Mage_Adminhtml_Block_Catalog_Category_Tab_Attributes extends Mage_Adminhtm
             'name' => 'attribute_set_id',
             'label' => Mage::helper('catalog')->__('Attribute Set'),
             'title' => Mage::helper('catalog')->__('Attribute Set'),
-            'note' => Mage::helper('catalog')->__('The fields of the new set show after you save the category.'),
+            'note' => Mage::helper('catalog')->__('The fields of the set show after you save the category. You cannot change the set later.'),
             'values' => $sets,
         ]);
     }

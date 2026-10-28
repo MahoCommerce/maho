@@ -230,6 +230,7 @@ abstract class Mage_Adminhtml_Controller_Eav_Attribute extends Mage_Adminhtml_Co
 
         try {
             $model->save();
+            $this->afterSave($model, $data);
         } catch (Exception $e) {
             $session->addError($e->getMessage());
             $session->setAttributeData($data);
@@ -271,6 +272,11 @@ abstract class Mage_Adminhtml_Controller_Eav_Attribute extends Mage_Adminhtml_Co
     {
         return $data;
     }
+
+    /**
+     * Save the values that the attribute model does not save itself.
+     */
+    protected function afterSave(Mage_Eav_Model_Entity_Attribute $model, array $data): void {}
 
     protected function getSavedMessage(): string
     {

@@ -40,7 +40,37 @@ final class ValueLists
     /** @return list<int> */
     public static function categoryAttributeSets(): array
     {
-        $typeId = (int) \Mage::getSingleton('eav/config')->getEntityType(\Mage_Catalog_Model_Category::ENTITY)->getId();
+        return self::attributeSets(\Mage_Catalog_Model_Category::ENTITY);
+    }
+
+    /** @return list<int> */
+    public static function customerAttributeSets(): array
+    {
+        return self::attributeSets('customer');
+    }
+
+    /** @return list<int> */
+    public static function customerAddressAttributeSets(): array
+    {
+        return self::attributeSets('customer_address');
+    }
+
+    /** @return list<int> */
+    public static function blogPostAttributeSets(): array
+    {
+        return self::attributeSets('blog_post');
+    }
+
+    /** @return list<int> */
+    public static function blogCategoryAttributeSets(): array
+    {
+        return self::attributeSets('blog_category');
+    }
+
+    /** @return list<int> */
+    private static function attributeSets(string $entityTypeCode): array
+    {
+        $typeId = (int) \Mage::getSingleton('eav/config')->getEntityType($entityTypeCode)->getId();
         $ids = \Mage::getResourceModel('eav/entity_attribute_set_collection')->setEntityTypeFilter($typeId)->getAllIds();
 
         return array_values(array_map(intval(...), $ids));

@@ -226,6 +226,9 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             $customer->setData($field, $value);
         }
         $this->applyAdminOnlyFields($customer, $data);
+        if ($data->customAttributes !== null) {
+            CustomAttributes::apply($customer, 'adminhtml_customer', $data->customAttributes);
+        }
         if ($data->isActive === null) {
             $customer->setData('is_active', 1);
         }
@@ -496,6 +499,9 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             $customer->setGroupId($data->groupId);
         }
         $this->applyAdminOnlyFields($customer, $data);
+        if ($data->customAttributes !== null) {
+            CustomAttributes::apply($customer, 'adminhtml_customer', $data->customAttributes);
+        }
 
         $customer->save();
 

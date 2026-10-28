@@ -130,7 +130,24 @@ class Mage_Customer_Model_Group extends Mage_Core_Model_Abstract
     protected function _beforeSave()
     {
         $this->_prepareData();
+        $this->validateAttributeSet($this->getCustomerAttributeSetId(), 'customer');
+        $this->validateAttributeSet($this->getCustomerAddressAttributeSetId(), 'customer_address');
         return parent::_beforeSave();
+    }
+
+    /**
+     * Throw an exception when a set is not a set of the entity type.
+     */
+    protected function validateAttributeSet(?int $setId, string $entityTypeCode): void
+    {
+        if (!$setId) {
+            return;
+        }
+        $set = Mage::getModel('eav/entity_attribute_set')->load($setId);
+        $typeId = (int) Mage::getSingleton('eav/config')->getEntityType($entityTypeCode)->getId();
+        if ((int) $set->getEntityTypeId() !== $typeId) {
+            Mage::throwException(Mage::helper('customer')->__('Attribute set %d is not a set of the entity type %s.', $setId, $entityTypeCode));
+        }
     }
 
     /**
@@ -162,4 +179,25 @@ class Mage_Customer_Model_Group extends Mage_Core_Model_Abstract
         return $this->setData('tax_class_id', $value);
     }
 
+    public function getCustomerAttributeSetId(): ?int
+    {
+        $value = $this->getData('customer_attribute_set_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCustomerAttributeSetId(?int $value): static
+    {
+        return $this->setData('customer_attribute_set_id', $value);
+    }
+
+    public function getCustomerAddressAttributeSetId(): ?int
+    {
+        $value = $this->getData('customer_address_attribute_set_id');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setCustomerAddressAttributeSetId(?int $value): static
+    {
+        return $this->setData('customer_address_attribute_set_id', $value);
+    }
 }
