@@ -119,30 +119,8 @@ export class AdjustTool {
         const controls = document.createElement('div');
         controls.className = 'maho-ie-adjust-controls';
 
-        const groups = new Map();
-        for (const s of SLIDERS) {
-            if (!groups.has(s.group)) {
-                const group = document.createElement('div');
-                group.className = 'maho-ie-adjust-group';
-                const title = document.createElement('span');
-                title.className = 'maho-ie-adjust-group-title';
-                title.textContent = s.group;
-                group.appendChild(title);
-                groups.set(s.group, group);
-                controls.appendChild(group);
-            }
-            groups.get(s.group).appendChild(this._slider(s.key, s.label, s.min, s.max, 0));
-        }
-
         const actions = document.createElement('div');
-        actions.className = 'maho-ie-adjust-group';
-        const spacer = document.createElement('span');
-        spacer.className = 'maho-ie-adjust-group-title';
-        actions.appendChild(spacer);
-
-        const strength = this._slider('filterStrength', 'Filter strength', 0, 100, 100);
-        strength.querySelector('input').disabled = this.editor.adjustments.filter === 'none';
-        actions.appendChild(strength);
+        actions.className = 'maho-ie-adjust-actions';
 
         const autoBtn = document.createElement('button');
         autoBtn.type = 'button';
@@ -169,12 +147,36 @@ export class AdjustTool {
             this._refresh();
         });
 
+        actions.append(autoBtn, resetBtn);
+        controls.appendChild(actions);
+
+        const groups = new Map();
+        for (const s of SLIDERS) {
+            if (!groups.has(s.group)) {
+                const group = document.createElement('div');
+                group.className = 'maho-ie-adjust-group';
+                const title = document.createElement('span');
+                title.className = 'maho-ie-adjust-group-title';
+                title.textContent = s.group;
+                group.appendChild(title);
+                groups.set(s.group, group);
+                controls.appendChild(group);
+            }
+            groups.get(s.group).appendChild(this._slider(s.key, s.label, s.min, s.max, 0));
+        }
+
+        const footer = document.createElement('div');
+        footer.className = 'maho-ie-adjust-footer';
+
+        const strength = this._slider('filterStrength', 'Filter strength', 0, 100, 100);
+        strength.querySelector('input').disabled = this.editor.adjustments.filter === 'none';
+
         const hint = document.createElement('span');
         hint.className = 'maho-ie-adjust-hint';
         hint.textContent = 'Drag across the photo to compare it with the original. Double-click a slider to reset it.';
 
-        actions.append(autoBtn, resetBtn, hint);
-        controls.appendChild(actions);
+        footer.append(strength, hint);
+        controls.appendChild(footer);
         return controls;
     }
 

@@ -451,26 +451,22 @@ SPDX-License-Identifier: AFL-3.0
     gap: 12px;
 }
 
-.maho-ie-adjust-group:last-child {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 12px 8px;
-    padding-top: 16px;
-    border-top: 1px solid #2e2e33;
+.maho-ie-adjust-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
 }
 
-.maho-ie-adjust-group:last-child > .maho-ie-slider,
-.maho-ie-adjust-group:last-child > .maho-ie-adjust-hint {
-    flex-basis: 100%;
-}
-
-.maho-ie-adjust-group:last-child > .maho-ie-opt-btn {
-    flex: 1;
+.maho-ie-adjust-actions > .maho-ie-opt-btn {
     justify-content: center;
 }
 
-.maho-ie-adjust-group-title:empty {
-    display: none;
+.maho-ie-adjust-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-top: 16px;
+    border-top: 1px solid #2e2e33;
 }
 
 .maho-ie-adjust-group-title {
@@ -492,7 +488,8 @@ SPDX-License-Identifier: AFL-3.0
         grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     }
 
-    .maho-ie-adjust-group:last-child {
+    .maho-ie-adjust-actions,
+    .maho-ie-adjust-footer {
         grid-column: 1 / -1;
     }
 }
