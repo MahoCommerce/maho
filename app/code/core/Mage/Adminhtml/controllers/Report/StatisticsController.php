@@ -16,6 +16,10 @@ class Mage_Adminhtml_Report_StatisticsController extends Mage_Adminhtml_Controll
      */
     public const ADMIN_RESOURCE = 'report/statistics';
 
+    /** The link of a notice from the message queue has no secret key: the grid only reads. */
+    #[\Override]
+    protected $_publicActions = ['index'];
+
     /**
      * Admin session model
      *
@@ -108,7 +112,7 @@ class Mage_Adminhtml_Report_StatisticsController extends Mage_Adminhtml_Controll
     }
 
     /**
-     * Refresh statistics for all period
+     * Queue the refresh of the statistics for all periods, one message for each report
      *
      * @return $this
      */
@@ -116,8 +120,21 @@ class Mage_Adminhtml_Report_StatisticsController extends Mage_Adminhtml_Controll
     public function refreshLifetimeAction()
     {
         try {
-            Mage::getModel('reports/statistics')->refreshLifetime($this->_getReportCodes());
-            Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('adminhtml')->__('Lifetime statistics have been updated.'));
+            /** @var Mage_Reports_Model_Statistics $statistics */
+            $statistics = Mage::getModel('reports/statistics');
+            $adminUserId = Mage::helper('adminnotification')->getCurrentAdminUserId();
+            foreach ($this->_getReportCodes() as $code) {
+                if (!$statistics->isKnownCode($code)) {
+                    Mage::throwException(Mage::helper('adminhtml')->__('Unknown report code: %s', $code));
+                }
+                $message = new Mage_Reports_Model_Queue_RefreshStatistics($code, $adminUserId);
+                \Maho\Queue\QueueManager::dispatch(
+                    $message,
+                    queue: Mage_Reports_Model_Queue_RefreshStatistics::QUEUE_NAME,
+                    dedupeKey: $message->getDedupeKey(),
+                );
+            }
+            Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('adminhtml')->__('The lifetime statistics will be updated in the background. A message in the notifications tells you when each report is updated.'));
         } catch (Mage_Core_Exception $e) {
             Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
         } catch (Exception $e) {

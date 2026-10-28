@@ -20,21 +20,16 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
 {
     /**
      * Target product IDs matched by this rule, cached when the target conditions do not depend on
-     * the source product (see targetConditionsUseSourceProduct()).
+     * the source product (see targetConditionsUseSourceProduct()). The key is the sort order and the
+     * websites that the scan used, so a scan is reused only for the same order and websites.
      *
      * Scoped to one instance whose target conditions don't change: the processor loads each rule
      * fresh per run and only reads it, so there is deliberately no invalidation hook. Code that
      * edits the conditions of a rule it has already scanned must use a fresh instance.
      *
-     * @var int[]|null
+     * @var array<string, int[]>
      */
-    protected ?array $_targetProductIds = null;
-
-    /**
-     * Sort order the cached scan above was collected under, so a later sort order change can't be
-     * served from a differently-ordered cache.
-     */
-    protected ?string $_targetProductIdsSortOrder = null;
+    protected array $_targetProductIds = [];
 
     protected ?bool $_targetConditionsUseSourceProduct = null;
 
@@ -57,12 +52,26 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
     }
 
     #[\Override]
+    public function save(): static
+    {
+        parent::save();
+        // _afterSave() compares with the original link type, so a second save must see this one
+        $this->setOrigData('link_type_id', $this->getData('link_type_id'));
+        return $this;
+    }
+
+    #[\Override]
     protected function _afterSave()
     {
         // A deactivated rule should no longer contribute links: drop the ones it generated so
         // they don't linger (the processor only refreshes active rules). Manual links untouched.
         if (!$this->getIsActive()) {
             $this->deleteGeneratedLinks();
+        } elseif ($this->getOrigData('link_type_id') !== null
+            && (int) $this->getOrigData('link_type_id') !== (int) $this->getLinkTypeId()
+        ) {
+            // The processor never runs this rule for its former link type again
+            $this->deleteGeneratedLinks((int) $this->getOrigData('link_type_id'));
         }
         return parent::_afterSave();
     }
@@ -75,15 +84,18 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
     }
 
     /**
-     * Remove the catalog links this rule generated (rule_id tag); manual links are untouched.
+     * Remove the catalog links this rule generated (rule_id tag), of one link type or of all of
+     * them; manual links are untouched.
      */
-    protected function deleteGeneratedLinks(): void
+    protected function deleteGeneratedLinks(?int $linkTypeId = null): void
     {
+        $where = ['rule_id = ?' => (int) $this->getId()];
+        if ($linkTypeId !== null) {
+            $where['link_type_id = ?'] = $linkTypeId;
+        }
+
         $resource = Mage::getSingleton('core/resource');
-        $resource->getConnection('core_write')->delete(
-            $resource->getTableName('catalog/product_link'),
-            ['rule_id = ?' => (int) $this->getId()],
-        );
+        $resource->getConnection('core_write')->delete($resource->getTableName('catalog/product_link'), $where);
     }
 
     public function hasConditionsSerialized(): bool
@@ -238,41 +250,68 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
     }
 
     /**
-     * Get matching target product IDs with sorting for a specific source product
+     * Get matching target product IDs with sorting for a specific source product.
+     *
+     * A target must be in one of $websiteIds. Null applies no website filter. The storefront shows
+     * a linked product only on a website of that product, so the processor passes the websites of
+     * the source product.
+     *
+     * @param int[]|null $websiteIds
+     * @return int[]
      */
-    public function getMatchingTargetProductIds(?Mage_Catalog_Model_Product $sourceProduct = null): array
+    public function getMatchingTargetProductIds(?Mage_Catalog_Model_Product $sourceProduct = null, ?array $websiteIds = null): array
     {
+        if ($websiteIds === []) {
+            return [];
+        }
+
         // When no target condition looks at the source product, the matched set is identical for
-        // every source product: scan the catalog once and reuse it. Only the order may differ, so
-        // random sorting still shuffles a fresh copy per source product below.
+        // every source product on the same websites: scan the catalog once and reuse it. Only the
+        // order may differ, so random sorting still shuffles a fresh copy per source product below.
         if (!$this->targetConditionsUseSourceProduct()) {
-            // The cache holds the IDs *in* the sort order they were collected under, so a changed
-            // sort order has to rescan rather than reuse a differently-ordered array.
-            if ($this->_targetProductIds === null || $this->_targetProductIdsSortOrder !== (string) $this->getSortOrder()) {
-                $this->_targetProductIds = $this->_collectMatchingTargetProductIds();
-                $this->_targetProductIdsSortOrder = (string) $this->getSortOrder();
-            }
-            $productIds = $this->_targetProductIds;
+            $cacheKey = $this->_getTargetCacheKey($websiteIds);
+            $this->_targetProductIds[$cacheKey] ??= $this->_collectMatchingTargetProductIds(null, $websiteIds);
+            $productIds = $this->_targetProductIds[$cacheKey];
             if ($this->_isRandomSort()) {
                 shuffle($productIds);
             }
             return $productIds;
         }
 
-        return $this->_collectMatchingTargetProductIds($sourceProduct);
+        return $this->_collectMatchingTargetProductIds($sourceProduct, $websiteIds);
     }
 
     /**
-     * Scan the enabled catalog and return the target product IDs matched by this rule, in the
-     * configured sort order.
+     * @param int[]|null $websiteIds
+     */
+    protected function _getTargetCacheKey(?array $websiteIds): string
+    {
+        if ($websiteIds !== null) {
+            $websiteIds = array_map(intval(...), $websiteIds);
+            sort($websiteIds);
+        }
+
+        return $this->getSortOrder() . '|' . ($websiteIds === null ? '*' : implode(',', $websiteIds));
+    }
+
+    /**
+     * Scan the catalog and return the target product IDs matched by this rule, in the configured
+     * sort order. The scan skips the products that the storefront blocks never show, so they do not
+     * count toward the maximum links. The stock is a target condition that the merchant chooses.
      *
+     * @param int[]|null $websiteIds
      * @return int[]
      */
-    protected function _collectMatchingTargetProductIds(?Mage_Catalog_Model_Product $sourceProduct = null): array
+    protected function _collectMatchingTargetProductIds(?Mage_Catalog_Model_Product $sourceProduct = null, ?array $websiteIds = null): array
     {
         $productCollection = Mage::getResourceModel('catalog/product_collection')
             ->addAttributeToSelect(['name', 'price', 'created_at'])
-            ->addAttributeToFilter('status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED);
+            ->addAttributeToFilter('status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
+            ->addAttributeToFilter('visibility', ['in' => Mage_Catalog_Model_Product_Visibility::getVisibleInCatalogIds()]);
+
+        if ($websiteIds !== null) {
+            $this->_addWebsiteFilter($productCollection, $websiteIds);
+        }
 
         /** @var Maho_CatalogLinkRule_Model_Rule_Target_Combine $targetConditions */
         $targetConditions = $this->getTargetConditions();
@@ -302,5 +341,21 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
         }
 
         return $productIds;
+    }
+
+    /**
+     * Keep the products that are in one of $websiteIds. EXISTS instead of a join: a join needs
+     * DISTINCT for a product in two websites, and PostgreSQL rejects DISTINCT with the attribute sort.
+     *
+     * @param int[] $websiteIds
+     */
+    protected function _addWebsiteFilter(Mage_Catalog_Model_Resource_Product_Collection $productCollection, array $websiteIds): void
+    {
+        $inWebsite = $productCollection->getConnection()->select()
+            ->from(['pw' => $productCollection->getTable('catalog/product_website')], [new Maho\Db\Expr('1')])
+            ->where('pw.product_id = e.entity_id')
+            ->where('pw.website_id IN (?)', array_map(intval(...), $websiteIds));
+
+        $productCollection->getSelect()->where('EXISTS (' . $inWebsite . ')');
     }
 }
