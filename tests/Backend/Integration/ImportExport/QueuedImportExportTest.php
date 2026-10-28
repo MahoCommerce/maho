@@ -171,7 +171,8 @@ describe('Import/Export in the queue', function () {
         expect($notices)->toHaveCount(1)
             ->and((int) $notices[0]['severity'])->toBe(Mage_AdminNotification_Model_Inbox::SEVERITY_MAJOR)
             ->and($notices[0]['title'])->toBe('The import failed')
-            ->and($notices[0]['description'])->not->toContain('tries again');
+            ->and($notices[0]['description'])->not->toContain('tries again')
+            ->and(Mage_ImportExport_Model_Import::isImportInProgress())->toBeFalse();
     });
 
     test('a customer export copies the temporary file to the mount and deletes the temporary file', function () {
