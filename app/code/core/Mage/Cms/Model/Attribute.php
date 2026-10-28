@@ -81,7 +81,8 @@ class Mage_Cms_Model_Attribute extends Mage_Eav_Model_Entity_Attribute
     {
         $code = (string) $this->getAttributeCode();
         $resource = Mage::getSingleton('core/resource');
-        if ($this->isObjectNew()
+        // isObjectNew() stays true after the first save of an attribute, so a second save looks new too
+        if (!$this->getId()
             && (in_array($code, [...\Maho\Db\Schema\Collector::declaredColumns('cms_page'), ...self::RESERVED_CODES], true)
                 || $resource->getConnection('core_read')->tableColumnExists($resource->getTableName('cms/page'), $code))
         ) {

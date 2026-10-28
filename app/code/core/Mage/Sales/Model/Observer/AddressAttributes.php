@@ -29,7 +29,8 @@ class Mage_Sales_Model_Observer_AddressAttributes
     public function validateCode(\Maho\Event\Observer $observer): void
     {
         $attribute = $observer->getEvent()->getAttribute();
-        if (!$this->isUserAddressAttribute($attribute) || !$attribute->isObjectNew()) {
+        // isObjectNew() stays true after the first save of an attribute, so a second save looks new too
+        if (!$this->isUserAddressAttribute($attribute) || $attribute->getId()) {
             return;
         }
         $code = (string) $attribute->getAttributeCode();
