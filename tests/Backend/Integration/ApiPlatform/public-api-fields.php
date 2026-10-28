@@ -155,7 +155,8 @@ return [
         'storeId', 'suffix', 'taxvat', 'updatedAt', 'websiteId',
     ],
     'CustomerGroup' => [
-        'code', 'extensions', 'id', 'taxClassId', 'taxClassName',
+        'code', 'customerAddressAttributeSetId', 'customerAttributeSetId', 'extensions', 'id', 'taxClassId',
+        'taxClassName',
     ],
     'CustomerSegment' => [
         'allowOverlappingSequences', 'autoEmailActive', 'conditions', 'customerGroupIds', 'description',

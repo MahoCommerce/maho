@@ -73,10 +73,11 @@ It does not show Image attributes.
 
 ## The API
 
-The categories of the REST and GraphQL API have two more fields:
+The categories of the REST and GraphQL API have two more fields. Only an admin and an API token can
+read them:
 
 - `attributeSetId`: the set of the category. A new category without one takes the set of its
   parent. An update can change the set, as for a product. The next night, the store deletes the
   values of the attributes that are not in the new set.
-- `customAttributes`: the values of the attributes that you added, by attribute code. Only an
-  admin and an API token can read it. To write these values, use `customAttributesWrite`.
+- `customAttributes`: the values of the attributes that you added, by attribute code. To write
+  these values, use `customAttributesWrite`.

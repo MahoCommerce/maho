@@ -265,7 +265,7 @@ class Category extends CrudResource
     public ?float $filterPriceRange = null;
 
     #[Groups(['category:read'])]
-    #[ApiProperty(description: 'Attribute set ID. A new category without one takes the set of its parent', extraProperties: [EnumSource::KEY => 'Maho\ApiPlatform\Metadata\ValueLists::categoryAttributeSets'])]
+    #[ApiProperty(description: 'Attribute set ID. A new category without one takes the set of its parent. Admin and API tokens only', security: "has_backend_access('categories')", extraProperties: [EnumSource::KEY => 'Maho\ApiPlatform\Metadata\ValueLists::categoryAttributeSets'])]
     public ?int $attributeSetId = null;
 
     /** @var array<string, mixed>|null Arbitrary EAV attributes to set: {"attribute_code": value} (write only) */
