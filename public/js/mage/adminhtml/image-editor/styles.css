@@ -132,6 +132,8 @@ SPDX-License-Identifier: AFL-3.0
 }
 
 .maho-ie-tool-btn {
+    height: auto;
+    flex-shrink: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -356,6 +358,7 @@ SPDX-License-Identifier: AFL-3.0
 
 .maho-ie-adjust-filter {
     flex: none;
+    height: auto;
     display: flex;
     flex-direction: column;
     align-items: center;
