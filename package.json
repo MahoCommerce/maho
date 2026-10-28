@@ -23,7 +23,7 @@
         "@lezer/highlight": "^1.2.5",
         "@tailwindcss/browser": "^4.3.3",
         "@tailwindcss/cli": "^4.3.3",
-        "altcha": "^3.3.0",
+        "altcha": "^3.4.1",
         "chart.js": "^4.5.1",
         "codemirror": "^6.0.2",
         "daisyui": "^5.7.50",
