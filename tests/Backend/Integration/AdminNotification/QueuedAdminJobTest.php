@@ -206,7 +206,8 @@ describe('Admin actions that run in the queue', function () {
 
         expect($state)->toBe(0)
             ->and($notices)->toHaveCount(1)
-            ->and((int) $notices[0]['severity'])->toBe(Mage_AdminNotification_Model_Inbox::SEVERITY_NOTICE);
+            ->and((int) $notices[0]['severity'])->toBe(Mage_AdminNotification_Model_Inbox::SEVERITY_NOTICE)
+            ->and(Mage::getSingleton('core/lock')->isHeld(Mage_CatalogRule_Model_Rule::APPLY_LOCK))->toBeFalse();
     });
 
     test('Generate of a sitemap queues one run for each sitemap', function () {

@@ -25,6 +25,16 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
     public const XML_NODE_RELATED_CACHE = 'global/catalogrule/related_cache_types';
 
     /**
+     * The lock that applyAll() holds while it runs
+     */
+    public const APPLY_LOCK = 'catalogrule_apply_all';
+
+    /**
+     * Seconds that applyAll() waits for another run to end
+     */
+    public const APPLY_LOCK_WAIT_SECONDS = 3600;
+
+    /**
      * Prefix of model events names
      *
      * @var string
@@ -265,13 +275,22 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
      */
     public function applyAll()
     {
-        $this->getResourceCollection()->walk([$this->_getResource(), 'updateRuleProductData']);
-        $this->_getResource()->applyAllRules();
-        $this->_cleanCache();
-        $indexProcess = Mage::getSingleton('index/indexer')->getProcessByCode('catalog_product_price');
-        if ($indexProcess) {
-            $indexProcess->changeStatus(Mage_Index_Model_Process::STATUS_REQUIRE_REINDEX);
-            $indexProcess->reindexAll();
+        // The queue, the cron job and the REST API can start a run at the same time, so a run waits for the other one
+        $lock = Mage::getSingleton('core/lock');
+        if (!$lock->acquireWithin(self::APPLY_LOCK, self::APPLY_LOCK_WAIT_SECONDS)) {
+            throw new RuntimeException(Mage::helper('catalogrule')->__('Another run of the catalog price rules is in progress.'));
+        }
+        try {
+            $this->getResourceCollection()->walk([$this->_getResource(), 'updateRuleProductData']);
+            $this->_getResource()->applyAllRules();
+            $this->_cleanCache();
+            $indexProcess = Mage::getSingleton('index/indexer')->getProcessByCode('catalog_product_price');
+            if ($indexProcess) {
+                $indexProcess->changeStatus(Mage_Index_Model_Process::STATUS_REQUIRE_REINDEX);
+                $indexProcess->reindexAll();
+            }
+        } finally {
+            $lock->release(self::APPLY_LOCK);
         }
     }
 

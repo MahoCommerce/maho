@@ -5,6 +5,7 @@
 "Active","Active"
 "An error occurred while deleting the rule. Please review the log and try again.","An error occurred while deleting the rule. Please review the log and try again."
 "An error occurred while saving the rule data. Please review the log and try again.","An error occurred while saving the rule data. Please review the log and try again."
+"Another run of the catalog price rules is in progress.","Another run of the catalog price rules is in progress."
 "Apply","Apply"
 "Apply Rules","Apply Rules"
 "Attribute Set","Attribute Set"

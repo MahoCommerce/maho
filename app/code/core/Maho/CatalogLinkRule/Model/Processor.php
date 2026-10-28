@@ -92,15 +92,10 @@ class Maho_CatalogLinkRule_Model_Processor
      */
     public function applyRules(?int $linkTypeId = null): void
     {
-        // The cron job and the queue worker write the same links, so a run waits for the other one, then
-        // reads the rules. It polls: a blocking acquire stops the claim refresh of the queue worker.
+        // The cron job and the queue worker write the same links, so a run waits for the other one, then reads the rules
         $lock = Mage::getSingleton('core/lock');
-        $giveUpAt = time() + self::LOCK_WAIT_SECONDS;
-        while (!$lock->acquire('cataloglinkrule_apply')) {
-            if (time() >= $giveUpAt) {
-                throw new RuntimeException(Mage::helper('cataloglinkrule')->__('Another run of the product relationship rules is in progress.'));
-            }
-            sleep(2);
+        if (!$lock->acquireWithin('cataloglinkrule_apply', self::LOCK_WAIT_SECONDS)) {
+            throw new RuntimeException(Mage::helper('cataloglinkrule')->__('Another run of the product relationship rules is in progress.'));
         }
         try {
             // Get all active rules, ordered by priority
