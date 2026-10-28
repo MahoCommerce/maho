@@ -392,8 +392,8 @@ All Zend Framework and Varien components have been deleted:
 
 ### File headers (SPDX)
 
-Dual-licensed: source code (PHP, JS, CSS) under `OSL-3.0`; templates, config, and assets
-(PHTML, XML, HTML) under `AFL-3.0`.
+Dual-licensed, as in Magento: PHP under `OSL-3.0`; templates, config and front-end assets
+(PHTML, XML, HTML, JS, CSS) under `AFL-3.0`.
 
 New PHP files get a single `SPDX-FileCopyrightText` line with the current year and Maho as
 holder. Add a short class description on the first line ending with a period (it becomes the

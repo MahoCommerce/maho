@@ -1,5 +1,5 @@
 // SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
-// SPDX-License-Identifier: OSL-3.0
+// SPDX-License-Identifier: AFL-3.0
 
 export const TRANSFORMERS_URL = 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1';
 
