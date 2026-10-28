@@ -1,6 +1,6 @@
 ---
 description: How to add a field to categories - category attributes, category attribute sets, the set of each category, and how a field shows on the category page.
-admin_pages: [catalog_category_attribute, catalog_category_set, catalog_category]
+admin_pages: [eav_attribute, eav_set, catalog_category]
 ---
 
 # Category Attributes and Attribute Sets
@@ -12,8 +12,8 @@ one attribute set.
 
 ## Add an attribute
 
-1. Go to **Catalog > Attributes > Manage Category Attributes**.
-2. Click **Add New Attribute**.
+1. Go to **System > Attributes > Categories**.
+2. Click **Add**.
 3. On the **Properties** tab, enter the **Attribute Code**. Use only lowercase letters, numbers and
    underscores, and start with a letter. You cannot change the code later.
 4. Select the **Input Type**: Text Field, Text Area, Date, Yes/No, Multiple Select, Dropdown or
@@ -32,7 +32,7 @@ the **System** column of the grid.
 
 ## Put the attribute in a set
 
-1. Go to **Catalog > Attributes > Category Attribute Sets**.
+1. Go to **System > Attributes > Categories** and click **Attribute Sets**.
 2. Click the set, for example **Default**.
 3. Drag the attribute from **Unassigned Attributes** to a group. To make a new tab, click **Add**
    above the groups.
@@ -45,7 +45,7 @@ The groups of the set are the tabs of the category page. A group with no attribu
 Make a set for each kind of category. For example, a **Brand** set adds a logo and a brand story,
 and the **Default** set does not show them.
 
-1. Go to **Catalog > Attributes > Category Attribute Sets** and click **Add**.
+1. Go to **System > Attributes > Categories**, click **Attribute Sets**, and click **Add**.
 2. Enter the name, and select the set in **Based On**. The new set starts with the groups and the
    attributes of that set.
 3. Click **Save**, then change the groups and the attributes.

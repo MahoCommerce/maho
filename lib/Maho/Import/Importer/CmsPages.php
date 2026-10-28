@@ -2,7 +2,7 @@
 
 /**
  * CMS pages keyed by identifier and store set; `is_home` also points the store's home page at the page.
- * A custom field of CMS pages is a column too, with option labels for a dropdown.
+ * A custom attribute of CMS pages is a column too, with option labels for a dropdown.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0

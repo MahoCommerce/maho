@@ -10,6 +10,8 @@ declare(strict_types=1);
 
 class Mage_Eav_Block_Adminhtml_Attribute_Set_Toolbar_Main extends Mage_Adminhtml_Block_Template
 {
+    use Mage_Eav_Block_Adminhtml_EntityTypeUrlTrait;
+
     public function __construct()
     {
         parent::__construct();

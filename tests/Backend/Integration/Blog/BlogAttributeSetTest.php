@@ -183,3 +183,12 @@ it('adds a tab for each group that holds a user-defined attribute to the post ed
 
     expect($attributeTabs)->toHaveCount(1);
 });
+
+it('saves every blog attribute with the global scope', function () {
+    $attribute = $this->records[] = blogSetTestAttribute(Maho_Blog_Model_Post::ENTITY, 'pest_scope_' . $this->suffix, [
+        'is_global' => Maho_Blog_Model_Resource_Eav_Attribute::SCOPE_STORE,
+    ]);
+
+    $loaded = Mage::getModel('blog/resource_eav_attribute')->load($attribute->getId());
+    expect((int) $loaded->getData('is_global'))->toBe(Maho_Blog_Model_Resource_Eav_Attribute::SCOPE_GLOBAL);
+});

@@ -13,6 +13,7 @@ declare(strict_types=1);
 /**
  * A subclass gives the entity type, the ACL resource and the page titles. It declares each
  * action again with its #[Maho\Config\Route], because the route compiler skips abstract classes.
+ * The pages under System > Attributes use one subclass for every entity type.
  */
 abstract class Mage_Adminhtml_Controller_Eav_Set extends Mage_Adminhtml_Controller_Action
 {
@@ -51,13 +52,21 @@ abstract class Mage_Adminhtml_Controller_Eav_Set extends Mage_Adminhtml_Controll
         return $this->entityType;
     }
 
+    /**
+     * Return the path of the menu entry that the pages mark as active.
+     */
+    protected function getActiveMenu(): string
+    {
+        return static::ADMIN_RESOURCE;
+    }
+
     protected function _initAction(): static
     {
         $this->getEntityType();
         foreach ($this->getPageTitles() as $title) {
             $this->_title($title);
         }
-        $this->loadLayout()->_setActiveMenu(static::ADMIN_RESOURCE);
+        $this->loadLayout()->_setActiveMenu($this->getActiveMenu());
         foreach ($this->getPageTitles() as $title) {
             $this->_addBreadcrumb($title, $title);
         }

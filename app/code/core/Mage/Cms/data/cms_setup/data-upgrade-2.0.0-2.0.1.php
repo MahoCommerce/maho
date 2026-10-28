@@ -8,8 +8,8 @@
 
 declare(strict_types=1);
 
-// The cms_page entity type holds the definitions of the custom fields of CMS pages. Each field is
-// a static attribute, so its values are columns of cms_page and the type has no value tables.
+// The cms_page entity type holds the definitions of the custom attributes of CMS pages. Each one is
+// static, so its values are columns of cms_page and the type has no value tables.
 $installer = new Mage_Eav_Model_Entity_Setup('cms_setup');
 $installer->startSetup();
 

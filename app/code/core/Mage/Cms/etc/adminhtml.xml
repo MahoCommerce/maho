@@ -7,6 +7,19 @@ SPDX-License-Identifier: AFL-3.0
 -->
 <config>
     <menu>
+        <system>
+            <children>
+                <attributes>
+                    <children>
+                        <cms_page translate="title" module="cms">
+                            <title>CMS Pages</title>
+                            <action>adminhtml/eav_attribute/index/entity_type/cms_page</action>
+                            <sort_order>60</sort_order>
+                        </cms_page>
+                    </children>
+                </attributes>
+            </children>
+        </system>
          <cms translate="title" module="cms">
             <title>CMS</title>
             <sort_order>70</sort_order>
@@ -16,11 +29,6 @@ SPDX-License-Identifier: AFL-3.0
                     <action>adminhtml/cms_page</action>
                     <sort_order>0</sort_order>
                 </page>
-                <page_attributes translate="title" module="cms">
-                    <title>Page Fields</title>
-                    <action>adminhtml/cms_page_attribute</action>
-                    <sort_order>5</sort_order>
-                </page_attributes>
                 <block translate="title" module="cms">
                     <title>Static Blocks</title>
                     <action>adminhtml/cms_block</action>
@@ -38,6 +46,18 @@ SPDX-License-Identifier: AFL-3.0
         <resources>
             <admin>
                 <children>
+                    <system>
+                        <children>
+                            <attributes>
+                                <children>
+                                    <cms_page translate="title" module="cms">
+                                        <title>CMS Pages</title>
+                                        <sort_order>60</sort_order>
+                                    </cms_page>
+                                </children>
+                            </attributes>
+                        </children>
+                    </system>
                     <cms translate="title" module="cms">
                         <title>CMS</title>
                         <sort_order>70</sort_order>
@@ -60,10 +80,6 @@ SPDX-License-Identifier: AFL-3.0
                                     </delete>
                                 </children>
                             </page>
-                            <page_attributes translate="title">
-                                <title>Page Fields</title>
-                                <sort_order>5</sort_order>
-                            </page_attributes>
                             <media_gallery translate="title">
                                 <title>Media Gallery</title>
                                 <sort_order>20</sort_order>

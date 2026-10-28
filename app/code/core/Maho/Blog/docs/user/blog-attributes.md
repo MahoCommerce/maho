@@ -1,6 +1,6 @@
 ---
 description: How to add a field to blog posts and blog categories - blog attributes, blog attribute sets, the set of each post and category, the storefront, the import and the API.
-admin_pages: [blog_post_attribute, blog_post_set, blog_category_attribute, blog_category_set, blog_post, blog_category]
+admin_pages: [eav_attribute, eav_set, blog_post, blog_category]
 ---
 
 # Blog Attributes and Attribute Sets
@@ -12,9 +12,8 @@ can edit.
 
 ## Add an attribute
 
-1. Go to **CMS > Blog > Manage Post Attributes**, or to **Manage Category Attributes** for a
-   category field.
-2. Click **Add New Attribute**.
+1. Go to **System > Attributes > Blog Posts**, or to **Blog Categories** for a category field.
+2. Click **Add**.
 3. Enter the **Attribute Code** and select the **Input Type**. You cannot change them later.
 4. On the **Manage Label / Options** tab, enter the label, and the options of a Dropdown or a
    Multiple Select.
@@ -26,7 +25,8 @@ A blog attribute has one value for all store views.
 
 A new attribute is in no set. The edit page of a post shows it only after you add it to a set.
 
-1. Go to **CMS > Blog > Post Attribute Sets**, or to **Category Attribute Sets**.
+1. Go to **System > Attributes > Blog Posts**, or to **Blog Categories**, and click
+   **Attribute Sets**.
 2. Click the set, for example **Default**.
 3. Drag the attribute from **Unassigned Attributes** to a group. To add a group, click **Add New**.
 4. Click **Save Attribute Set**.

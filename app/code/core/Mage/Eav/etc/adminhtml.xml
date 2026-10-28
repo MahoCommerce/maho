@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<!--
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: AFL-3.0
+-->
+<config>
+    <menu>
+        <system>
+            <children>
+                <attributes translate="title" module="eav">
+                    <title>Attributes</title>
+                    <sort_order>45</sort_order>
+                </attributes>
+            </children>
+        </system>
+    </menu>
+    <acl>
+        <resources>
+            <admin>
+                <children>
+                    <system>
+                        <children>
+                            <attributes translate="title" module="eav">
+                                <title>Attributes</title>
+                                <sort_order>45</sort_order>
+                            </attributes>
+                        </children>
+                    </system>
+                </children>
+            </admin>
+        </resources>
+    </acl>
+</config>

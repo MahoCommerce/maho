@@ -19,7 +19,7 @@ uses(Tests\MahoBackendTestCase::class);
 function categoryAttributeAdminRun(string $class, string $controllerName, string $action, array $params): void
 {
     $request = new Mage_Core_Controller_Request_Http(
-        SymfonyRequest::create("/index.php/admin/{$controllerName}/{$action}", 'POST', $params),
+        SymfonyRequest::create("/index.php/admin/{$controllerName}/{$action}", 'POST', $params + ['entity_type' => Mage_Catalog_Model_Category::ENTITY]),
     );
     $request->setRouteName('adminhtml')
         ->setControllerName($controllerName)
@@ -69,8 +69,7 @@ function categoryAttributeAdminCreateSet(string $name): Mage_Eav_Model_Entity_At
 
 beforeEach(function () {
     $this->user = AdminRoleFixture::login([
-        'admin/catalog/attributes/category_attributes',
-        'admin/catalog/attributes/category_sets',
+        'admin/system/attributes/catalog_category',
     ]);
     $this->code = 'pest_cat_' . substr(uniqid(), -6);
     $this->setIds = [];
@@ -91,7 +90,7 @@ afterEach(function () {
 });
 
 it('creates a category dropdown attribute with its options', function () {
-    categoryAttributeAdminRun(Mage_Adminhtml_Catalog_Category_AttributeController::class, 'catalog_category_attribute', 'save', [
+    categoryAttributeAdminRun(Mage_Adminhtml_Eav_AttributeController::class, 'eav_attribute', 'save', [
         'attribute_code' => $this->code,
         'frontend_input' => 'select',
         'frontend_label' => ['Pest <b>Color</b>'],
@@ -119,7 +118,7 @@ it('creates a category dropdown attribute with its options', function () {
 });
 
 it('rejects an input type that the category entity does not offer', function () {
-    categoryAttributeAdminRun(Mage_Adminhtml_Catalog_Category_AttributeController::class, 'catalog_category_attribute', 'save', [
+    categoryAttributeAdminRun(Mage_Adminhtml_Eav_AttributeController::class, 'eav_attribute', 'save', [
         'attribute_code' => $this->code,
         'frontend_input' => 'price',
         'frontend_label' => ['Pest Price'],
@@ -153,7 +152,7 @@ it('ignores the entity type, the storage and the models in the posted data', fun
         'source_model' => 'eav/entity_attribute_source_boolean',
         'frontend_model' => 'eav/entity_attribute_frontend_datetime',
     ];
-    categoryAttributeAdminRun(Mage_Adminhtml_Catalog_Category_AttributeController::class, 'catalog_category_attribute', 'save', $posted + [
+    categoryAttributeAdminRun(Mage_Adminhtml_Eav_AttributeController::class, 'eav_attribute', 'save', $posted + [
         'attribute_code' => $this->code,
         'frontend_input' => 'text',
         'frontend_label' => ['Pest Text'],
@@ -161,7 +160,7 @@ it('ignores the entity type, the storage and the models in the posted data', fun
     $attribute = Mage::getModel('catalog/resource_eav_attribute')
         ->loadByCode(Mage_Catalog_Model_Category::ENTITY, $this->code);
 
-    categoryAttributeAdminRun(Mage_Adminhtml_Catalog_Category_AttributeController::class, 'catalog_category_attribute', 'save', $posted + [
+    categoryAttributeAdminRun(Mage_Adminhtml_Eav_AttributeController::class, 'eav_attribute', 'save', $posted + [
         'attribute_id' => $attribute->getId(),
         'frontend_label' => ['Pest Text'],
     ]);
@@ -178,7 +177,7 @@ it('does not update a product attribute through the category page', function () 
     $name = Mage::getModel('catalog/resource_eav_attribute')
         ->loadByCode(Mage_Catalog_Model_Product::ENTITY, 'name');
 
-    categoryAttributeAdminRun(Mage_Adminhtml_Catalog_Category_AttributeController::class, 'catalog_category_attribute', 'save', [
+    categoryAttributeAdminRun(Mage_Adminhtml_Eav_AttributeController::class, 'eav_attribute', 'save', [
         'attribute_id' => $name->getId(),
         'frontend_label' => ['Hijacked'],
     ]);
@@ -191,7 +190,7 @@ it('does not update a product attribute through the category page', function () 
 it('deletes a user-defined category attribute and refuses a system one', function () {
     $system = Mage::getModel('catalog/resource_eav_attribute')
         ->loadByCode(Mage_Catalog_Model_Category::ENTITY, 'name');
-    categoryAttributeAdminRun(Mage_Adminhtml_Catalog_Category_AttributeController::class, 'catalog_category_attribute', 'delete', [
+    categoryAttributeAdminRun(Mage_Adminhtml_Eav_AttributeController::class, 'eav_attribute', 'delete', [
         'attribute_id' => $system->getId(),
     ]);
     expect(categoryAttributeAdminMessages()['errors'])->toBe(['This attribute cannot be deleted.']);
@@ -205,7 +204,7 @@ it('deletes a user-defined category attribute and refuses a system one', functio
         'is_user_defined' => 1,
     ])->save();
 
-    categoryAttributeAdminRun(Mage_Adminhtml_Catalog_Category_AttributeController::class, 'catalog_category_attribute', 'delete', [
+    categoryAttributeAdminRun(Mage_Adminhtml_Eav_AttributeController::class, 'eav_attribute', 'delete', [
         'attribute_id' => $attribute->getId(),
     ]);
 
@@ -215,7 +214,7 @@ it('deletes a user-defined category attribute and refuses a system one', functio
 
 it('creates a category set with the groups of the set it is based on', function () {
     $name = 'Pest Set ' . uniqid();
-    categoryAttributeAdminRun(Mage_Adminhtml_Catalog_Category_SetController::class, 'catalog_category_set', 'save', [
+    categoryAttributeAdminRun(Mage_Adminhtml_Eav_SetController::class, 'eav_set', 'save', [
         'gotoEdit' => '1',
         'attribute_set_name' => $name,
         'skeleton_set' => categoryAttributeAdminDefaultSetId(),
@@ -244,7 +243,7 @@ it('moves the categories of a deleted set to the default set', function () {
     $adapter->update($table, ['attribute_set_id' => (int) $set->getId()], ['entity_id = ?' => $categoryId]);
 
     try {
-        categoryAttributeAdminRun(Mage_Adminhtml_Catalog_Category_SetController::class, 'catalog_category_set', 'delete', [
+        categoryAttributeAdminRun(Mage_Adminhtml_Eav_SetController::class, 'eav_set', 'delete', [
             'id' => $set->getId(),
         ]);
         $setId = (int) $adapter->fetchOne($adapter->select()->from($table, ['attribute_set_id'])->where('entity_id = ?', $categoryId));
@@ -261,7 +260,7 @@ it('refuses to delete the default category set or a product set', function () {
     $productSetId = (int) Mage::getSingleton('eav/config')->getEntityType(Mage_Catalog_Model_Product::ENTITY)->getDefaultAttributeSetId();
 
     foreach ([categoryAttributeAdminDefaultSetId(), $productSetId] as $setId) {
-        categoryAttributeAdminRun(Mage_Adminhtml_Catalog_Category_SetController::class, 'catalog_category_set', 'delete', [
+        categoryAttributeAdminRun(Mage_Adminhtml_Eav_SetController::class, 'eav_set', 'delete', [
             'id' => $setId,
         ]);
         expect(categoryAttributeAdminMessages()['errors'])->toBe(['This attribute set cannot be deleted.'])

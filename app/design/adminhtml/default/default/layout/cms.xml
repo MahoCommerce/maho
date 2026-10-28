@@ -32,12 +32,12 @@ SPDX-License-Identifier: AFL-3.0
                 <block type="adminhtml/cms_page_edit_tab_content" name="cms_page_edit_tab_content" />
                 <block type="adminhtml/cms_page_edit_tab_design" name="cms_page_edit_tab_design" />
                 <block type="adminhtml/cms_page_edit_tab_meta" name="cms_page_edit_tab_meta" />
-                <block type="adminhtml/cms_page_edit_tab_fields" name="cms_page_edit_tab_fields" />
+                <block type="adminhtml/cms_page_edit_tab_attributes" name="cms_page_edit_tab_attributes" />
                 <action method="addTab"><name>main_section</name><block>cms_page_edit_tab_main</block></action>
                 <action method="addTab"><name>content_section</name><block>cms_page_edit_tab_content</block></action>
                 <action method="addTab"><name>design_section</name><block>cms_page_edit_tab_design</block></action>
                 <action method="addTab"><name>meta_section</name><block>cms_page_edit_tab_meta</block></action>
-                <action method="addTab"><name>fields_section</name><block>cms_page_edit_tab_fields</block></action>
+                <action method="addTab"><name>attributes_section</name><block>cms_page_edit_tab_attributes</block></action>
             </block>
         </reference>
     </adminhtml_cms_page_edit>

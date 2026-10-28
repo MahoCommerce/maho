@@ -6,6 +6,24 @@ SPDX-License-Identifier: AFL-3.0
 -->
 <config>
     <menu>
+        <system>
+            <children>
+                <attributes>
+                    <children>
+                        <customer translate="title" module="customer">
+                            <title>Customers</title>
+                            <action>adminhtml/eav_attribute/index/entity_type/customer</action>
+                            <sort_order>20</sort_order>
+                        </customer>
+                        <customer_address translate="title" module="customer">
+                            <title>Customer Addresses</title>
+                            <action>adminhtml/eav_attribute/index/entity_type/customer_address</action>
+                            <sort_order>30</sort_order>
+                        </customer_address>
+                    </children>
+                </attributes>
+            </children>
+        </system>
         <customer translate="title" module="customer">
             <title>Customers</title>
             <sort_order>40</sort_order>
@@ -21,32 +39,6 @@ SPDX-License-Identifier: AFL-3.0
                     <action>adminhtml/customer_group/</action>
                     <sort_order>10</sort_order>
                 </group>
-                <attributes translate="title" module="customer">
-                    <title>Attributes</title>
-                    <sort_order>20</sort_order>
-                    <children>
-                        <customer_attributes translate="title" module="customer">
-                            <title>Manage Customer Attributes</title>
-                            <action>adminhtml/customer_attribute/</action>
-                            <sort_order>0</sort_order>
-                        </customer_attributes>
-                        <customer_sets translate="title" module="customer">
-                            <title>Customer Attribute Sets</title>
-                            <action>adminhtml/customer_set/</action>
-                            <sort_order>10</sort_order>
-                        </customer_sets>
-                        <address_attributes translate="title" module="customer">
-                            <title>Manage Address Attributes</title>
-                            <action>adminhtml/customer_address_attribute/</action>
-                            <sort_order>20</sort_order>
-                        </address_attributes>
-                        <address_sets translate="title" module="customer">
-                            <title>Address Attribute Sets</title>
-                            <action>adminhtml/customer_address_set/</action>
-                            <sort_order>30</sort_order>
-                        </address_sets>
-                    </children>
-                </attributes>
                 <online translate="title" module="customer">
                     <title>Online Customers</title>
                     <action>adminhtml/customer_online/</action>
@@ -59,6 +51,22 @@ SPDX-License-Identifier: AFL-3.0
         <resources>
             <admin>
                 <children>
+                    <system>
+                        <children>
+                            <attributes>
+                                <children>
+                                    <customer translate="title" module="customer">
+                                        <title>Customers</title>
+                                        <sort_order>20</sort_order>
+                                    </customer>
+                                    <customer_address translate="title" module="customer">
+                                        <title>Customer Addresses</title>
+                                        <sort_order>30</sort_order>
+                                    </customer_address>
+                                </children>
+                            </attributes>
+                        </children>
+                    </system>
                     <customer translate="title" module="customer">
                         <title>Customers</title>
                         <sort_order>40</sort_order>
@@ -67,24 +75,6 @@ SPDX-License-Identifier: AFL-3.0
                                 <title>Customer Groups</title>
                                 <sort_order>10</sort_order>
                             </group>
-                            <attributes translate="title">
-                                <title>Attributes</title>
-                                <sort_order>20</sort_order>
-                                <children>
-                                    <customer_attributes translate="title">
-                                        <title>Manage Customer Attributes</title>
-                                    </customer_attributes>
-                                    <customer_sets translate="title">
-                                        <title>Customer Attribute Sets</title>
-                                    </customer_sets>
-                                    <address_attributes translate="title">
-                                        <title>Manage Address Attributes</title>
-                                    </address_attributes>
-                                    <address_sets translate="title">
-                                        <title>Address Attribute Sets</title>
-                                    </address_sets>
-                                </children>
-                            </attributes>
                             <manage translate="title">
                                 <title>Manage Customers</title>
                                 <sort_order>0</sort_order>

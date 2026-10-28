@@ -161,7 +161,7 @@ it('refuses a group set of another entity type', function () {
 });
 
 it('saves the forms, the rules and the website modes of a new customer attribute from the admin', function () {
-    $user = AdminRoleFixture::login(['admin/customer/attributes/customer_attributes']);
+    $user = AdminRoleFixture::login(['admin/system/attributes/customer']);
     $code = 'pest_admin_' . $this->suffix;
     $websiteId = (int) Mage::app()->getWebsite(true)->getId();
     $params = [
@@ -174,13 +174,13 @@ it('saves the forms, the rules and the website modes of a new customer attribute
         'website_values' => [$websiteId => 'required'],
     ];
     $request = new Mage_Core_Controller_Request_Http(
-        SymfonyRequest::create('/index.php/admin/customer_attribute/save', 'POST', $params),
+        SymfonyRequest::create('/index.php/admin/eav_attribute/save', 'POST', $params + ['entity_type' => 'customer']),
     );
-    $request->setRouteName('adminhtml')->setControllerName('customer_attribute')->setActionName('save')->setDispatched(true);
+    $request->setRouteName('adminhtml')->setControllerName('eav_attribute')->setActionName('save')->setDispatched(true);
     Mage::app()->setRequest($request);
 
     try {
-        $controller = new Mage_Adminhtml_Customer_AttributeController($request, new Mage_Core_Controller_Response_Http());
+        $controller = new Mage_Adminhtml_Eav_AttributeController($request, new Mage_Core_Controller_Response_Http());
         try {
             $controller->saveAction();
         } catch (Throwable) {

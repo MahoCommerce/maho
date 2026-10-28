@@ -1,7 +1,7 @@
 <?php
 
 /**
- * A custom field of CMS pages.
+ * A custom attribute of CMS pages.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -27,6 +27,16 @@ class Mage_Cms_Model_Attribute extends Mage_Eav_Model_Entity_Attribute
     /**
      * Every input type stores its values in a column of cms_page.
      */
+    #[\Override]
+    public function getAdminPageSettings(): ?array
+    {
+        return [
+            'acl' => 'system/attributes/cms_page',
+            'title' => Mage::helper('cms')->__('CMS Page Attributes'),
+            'sets_title' => null,
+        ];
+    }
+
     #[\Override]
     public function getBackendTypeByInput($type)
     {
@@ -59,7 +69,7 @@ class Mage_Cms_Model_Attribute extends Mage_Eav_Model_Entity_Attribute
             'type' => $type,
             'length' => $length,
             'nullable' => true,
-            'comment' => 'Page field ' . $this->getAttributeCode(),
+            'comment' => 'Page attribute ' . $this->getAttributeCode(),
         ];
     }
 
@@ -71,7 +81,7 @@ class Mage_Cms_Model_Attribute extends Mage_Eav_Model_Entity_Attribute
     {
         $code = (string) $this->getAttributeCode();
         if ($this->isObjectNew() && in_array($code, [...$this->getDeclaredColumns(), ...self::RESERVED_CODES], true)) {
-            Mage::throwException(Mage::helper('cms')->__('The code "%s" is a field of CMS pages. Use another code.', $code));
+            Mage::throwException(Mage::helper('cms')->__('The code "%s" is already used by CMS pages. Use another code.', $code));
         }
         return parent::_beforeSave();
     }

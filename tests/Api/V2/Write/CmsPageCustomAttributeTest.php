@@ -100,7 +100,7 @@ describe('CMS page customAttributes (REST)', function (): void {
         expect($guest['json']['customAttributes'] ?? null)->toBeNull();
     });
 
-    it('refuses a code that is not a page field, and a value that is not an option', function (): void {
+    it('refuses a code that is not a page attribute, and a value that is not an option', function (): void {
         $response = apiPost('/api/rest/v2/cms-pages', [
             'identifier' => 'pest-cms-field-bad-' . uniqid(),
             'title' => 'Pest CMS Field Bad Page',

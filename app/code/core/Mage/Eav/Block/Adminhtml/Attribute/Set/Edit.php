@@ -15,6 +15,8 @@ declare(strict_types=1);
  */
 class Mage_Eav_Block_Adminhtml_Attribute_Set_Edit extends Mage_Adminhtml_Block_Template
 {
+    use Mage_Eav_Block_Adminhtml_EntityTypeUrlTrait;
+
     #[\Override]
     protected function _construct()
     {

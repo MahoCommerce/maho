@@ -1,7 +1,7 @@
 <?php
 
 /**
- * The tab of the custom fields of a CMS page.
+ * The tab of the custom attributes of a CMS page.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -10,7 +10,7 @@
 
 declare(strict_types=1);
 
-class Mage_Adminhtml_Block_Cms_Page_Edit_Tab_Fields extends Mage_Adminhtml_Block_Widget_Form implements Mage_Adminhtml_Block_Widget_Tab_Interface
+class Mage_Adminhtml_Block_Cms_Page_Edit_Tab_Attributes extends Mage_Adminhtml_Block_Widget_Form implements Mage_Adminhtml_Block_Widget_Tab_Interface
 {
     /**
      * @return array<string, Mage_Eav_Model_Entity_Attribute_Abstract>
@@ -25,7 +25,7 @@ class Mage_Adminhtml_Block_Cms_Page_Edit_Tab_Fields extends Mage_Adminhtml_Block
     {
         $form = new \Maho\Data\Form();
         $form->setHtmlIdPrefix('page_');
-        $fieldset = $form->addFieldset('fields_fieldset', [
+        $fieldset = $form->addFieldset('attributes_fieldset', [
             'legend' => $this->getTabLabel(),
             'class' => 'fieldset-wide',
         ]);
@@ -53,7 +53,7 @@ class Mage_Adminhtml_Block_Cms_Page_Edit_Tab_Fields extends Mage_Adminhtml_Block
     #[\Override]
     public function getTabLabel()
     {
-        return Mage::helper('cms')->__('Custom Fields');
+        return Mage::helper('cms')->__('Attributes');
     }
 
     #[\Override]

@@ -141,7 +141,7 @@ class CmsPage extends CrudResource
     public ?string $updatedAt = null;
 
     /** @var array<string, mixed>|null */
-    #[ApiProperty(description: 'Values of the custom fields of the page, keyed by field code. Admin and API tokens only', security: "has_backend_access('cms-pages')", extraProperties: ['computed' => true])]
+    #[ApiProperty(description: 'Values of the custom attributes of the page, keyed by attribute code. Admin and API tokens only', security: "has_backend_access('cms-pages')", extraProperties: ['computed' => true])]
     public ?array $customAttributes = null;
 
     #[\Override]

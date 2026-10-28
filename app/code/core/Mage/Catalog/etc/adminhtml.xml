@@ -6,6 +6,19 @@ SPDX-License-Identifier: AFL-3.0
 -->
 <config>
     <menu>
+        <system>
+            <children>
+                <attributes>
+                    <children>
+                        <catalog_category translate="title" module="catalog">
+                            <title>Categories</title>
+                            <action>adminhtml/eav_attribute/index/entity_type/catalog_category</action>
+                            <sort_order>10</sort_order>
+                        </catalog_category>
+                    </children>
+                </attributes>
+            </children>
+        </system>
         <catalog translate="title" module="catalog">
             <title>Catalog</title>
             <sort_order>30</sort_order>
@@ -35,14 +48,6 @@ SPDX-License-Identifier: AFL-3.0
                             <title>Manage Attribute Sets</title>
                             <action>adminhtml/catalog_product_set/</action>
                         </sets>
-                        <category_attributes translate="title" module="catalog">
-                            <title>Manage Category Attributes</title>
-                            <action>adminhtml/catalog_category_attribute/</action>
-                        </category_attributes>
-                        <category_sets translate="title" module="catalog">
-                            <title>Category Attribute Sets</title>
-                            <action>adminhtml/catalog_category_set/</action>
-                        </category_sets>
                     </children>
                     <sort_order>20</sort_order>
                 </attributes>
@@ -58,6 +63,18 @@ SPDX-License-Identifier: AFL-3.0
         <resources>
             <admin>
                 <children>
+                    <system>
+                        <children>
+                            <attributes>
+                                <children>
+                                    <catalog_category translate="title" module="catalog">
+                                        <title>Categories</title>
+                                        <sort_order>10</sort_order>
+                                    </catalog_category>
+                                </children>
+                            </attributes>
+                        </children>
+                    </system>
                     <system>
                         <children>
                             <config>
@@ -82,12 +99,6 @@ SPDX-License-Identifier: AFL-3.0
                                     <sets translate="title">
                                         <title>Manage Attribute Sets</title>
                                     </sets>
-                                    <category_attributes translate="title">
-                                        <title>Manage Category Attributes</title>
-                                    </category_attributes>
-                                    <category_sets translate="title">
-                                        <title>Category Attribute Sets</title>
-                                    </category_sets>
                                 </children>
                             </attributes>
                             <categories translate="title">

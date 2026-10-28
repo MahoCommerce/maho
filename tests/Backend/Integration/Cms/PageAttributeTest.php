@@ -10,7 +10,7 @@ declare(strict_types=1);
 
 uses(Tests\MahoBackendTestCase::class);
 
-function pageFieldTestAttribute(array $data): Mage_Cms_Model_Attribute
+function pageAttributeTestAttribute(array $data): Mage_Cms_Model_Attribute
 {
     $type = Mage::getSingleton('eav/config')->getEntityType(Mage_Cms_Model_Page::ENTITY);
     /** @var Mage_Cms_Model_Attribute $attribute */
@@ -25,11 +25,11 @@ function pageFieldTestAttribute(array $data): Mage_Cms_Model_Attribute
     return $attribute;
 }
 
-function pageFieldTestPage(array $data): Mage_Cms_Model_Page
+function pageAttributeTestPage(array $data): Mage_Cms_Model_Page
 {
     $page = Mage::getModel('cms/page')->setData($data + [
-        'identifier' => 'pest-page-field-' . uniqid(),
-        'title' => 'Pest Page Field',
+        'identifier' => 'pest-page-attribute-' . uniqid(),
+        'title' => 'Pest Page Attribute',
         'content' => '<p>Pest</p>',
         'stores' => [0],
         'is_active' => 1,
@@ -76,13 +76,13 @@ it('gives CMS pages an entity type for their fields', function () {
 });
 
 it('refuses a field whose code is a column of cms_page or a data key of a page', function (string $code) {
-    expect(fn() => pageFieldTestAttribute(['attribute_code' => $code, 'frontend_input' => 'text']))
+    expect(fn() => pageAttributeTestAttribute(['attribute_code' => $code, 'frontend_input' => 'text']))
         ->toThrow(Mage_Core_Exception::class);
 })->with(['title', 'identifier', 'stores', 'store_id']);
 
 it('adds the column of a new field and keeps it after a delete', function () {
     $code = $this->codes['text'];
-    $attribute = pageFieldTestAttribute(['attribute_code' => $code, 'frontend_input' => 'text']);
+    $attribute = pageAttributeTestAttribute(['attribute_code' => $code, 'frontend_input' => 'text']);
 
     $this->connection->resetDdlCache($this->table);
     expect($this->connection->tableColumnExists($this->table, $code))->toBeTrue()
@@ -97,16 +97,16 @@ it('adds the column of a new field and keeps it after a delete', function () {
 });
 
 it('saves a text, a multiselect and a date value of a page', function () {
-    $this->attributes[] = pageFieldTestAttribute(['attribute_code' => $this->codes['text'], 'frontend_input' => 'text']);
-    $multi = $this->attributes[] = pageFieldTestAttribute([
+    $this->attributes[] = pageAttributeTestAttribute(['attribute_code' => $this->codes['text'], 'frontend_input' => 'text']);
+    $multi = $this->attributes[] = pageAttributeTestAttribute([
         'attribute_code' => $this->codes['multi'],
         'frontend_input' => 'multiselect',
         'option' => ['value' => ['o1' => ['Spring'], 'o2' => ['Summer']], 'order' => ['o1' => 1, 'o2' => 2]],
     ]);
-    $this->attributes[] = pageFieldTestAttribute(['attribute_code' => $this->codes['date'], 'frontend_input' => 'date']);
+    $this->attributes[] = pageAttributeTestAttribute(['attribute_code' => $this->codes['date'], 'frontend_input' => 'date']);
     $optionIds = array_map(strval(...), array_column($multi->getSource()->getAllOptions(false), 'value'));
 
-    $page = $this->pages[] = pageFieldTestPage([
+    $page = $this->pages[] = pageAttributeTestPage([
         $this->codes['text'] => 'SPRING26',
         $this->codes['multi'] => $optionIds,
         $this->codes['date'] => '2026-03-21',
@@ -120,56 +120,62 @@ it('saves a text, a multiselect and a date value of a page', function () {
 });
 
 it('keeps the stored value when a save does not send the field', function () {
-    $this->attributes[] = pageFieldTestAttribute(['attribute_code' => $this->codes['text'], 'frontend_input' => 'text']);
-    $page = $this->pages[] = pageFieldTestPage([$this->codes['text'] => 'KEEP']);
+    $this->attributes[] = pageAttributeTestAttribute(['attribute_code' => $this->codes['text'], 'frontend_input' => 'text']);
+    $page = $this->pages[] = pageAttributeTestPage([$this->codes['text'] => 'KEEP']);
     $page->save();
 
     $update = Mage::getModel('cms/page')->load($page->getId());
-    $update->unsetData($this->codes['text'])->setTitle('Pest Page Field Renamed')->save();
+    $update->unsetData($this->codes['text'])->setTitle('Pest Page Attribute Renamed')->save();
 
     expect(Mage::getModel('cms/page')->load($page->getId())->getData($this->codes['text']))->toBe('KEEP');
 });
 
 it('refuses a new page without a required field, and uses the default value', function () {
-    $attribute = $this->attributes[] = pageFieldTestAttribute([
+    $attribute = $this->attributes[] = pageAttributeTestAttribute([
         'attribute_code' => $this->codes['text'],
         'frontend_input' => 'text',
         'is_required' => 1,
     ]);
 
-    expect(fn() => pageFieldTestPage([])->save())->toThrow(Mage_Core_Exception_Input::class);
+    expect(fn() => pageAttributeTestPage([])->save())->toThrow(Mage_Core_Exception_Input::class);
 
     $attribute->setDefaultValue('DEFAULT')->save();
     Mage::getSingleton('eav/config')->clear();
-    $page = $this->pages[] = pageFieldTestPage([]);
+    $page = $this->pages[] = pageAttributeTestPage([]);
     $page->save();
 
     expect(Mage::getModel('cms/page')->load($page->getId())->getData($this->codes['text']))->toBe('DEFAULT');
 });
 
 it('refuses the value of a unique field that another page uses', function () {
-    $this->attributes[] = pageFieldTestAttribute([
+    $this->attributes[] = pageAttributeTestAttribute([
         'attribute_code' => $this->codes['text'],
         'frontend_input' => 'text',
         'is_unique' => 1,
     ]);
-    $first = $this->pages[] = pageFieldTestPage([$this->codes['text'] => 'ONLY-ONE']);
+    $first = $this->pages[] = pageAttributeTestPage([$this->codes['text'] => 'ONLY-ONE']);
     $first->save();
-    $first->setTitle('Pest Page Field Again')->save();
+    $first->setTitle('Pest Page Attribute Again')->save();
 
-    expect(fn() => pageFieldTestPage([$this->codes['text'] => 'ONLY-ONE'])->save())
+    expect(fn() => pageAttributeTestPage([$this->codes['text'] => 'ONLY-ONE'])->save())
         ->toThrow(Mage_Core_Exception_Input::class);
 });
 
-it('shows the Custom Fields tab only when CMS pages have a field', function () {
+it('shows the Attributes tab only when CMS pages have an attribute', function () {
     Mage::register('cms_page', Mage::getModel('cms/page'), true);
-    $tab = fn() => Mage::app()->getLayout()->createBlock('adminhtml/cms_page_edit_tab_fields');
+    $tab = fn() => Mage::app()->getLayout()->createBlock('adminhtml/cms_page_edit_tab_attributes');
 
     expect($tab()->canShowTab())->toBe(Mage::getResourceSingleton('cms/page')->getCustomAttributes() !== []);
 
-    $this->attributes[] = pageFieldTestAttribute(['attribute_code' => $this->codes['text'], 'frontend_input' => 'text']);
-    expect($tab()->canShowTab())->toBeTrue()
-        ->and($tab()->toHtml())->toContain('page_' . $this->codes['text']);
-
-    Mage::unregister('cms_page');
+    $this->attributes[] = pageAttributeTestAttribute(['attribute_code' => $this->codes['text'], 'frontend_input' => 'text']);
+    $design = Mage::getDesign();
+    [$area, $package, $theme] = [$design->getArea(), $design->getPackageName(), $design->getTheme('template')];
+    $design->setArea('adminhtml')->setPackageName('default')->setTheme('default');
+    try {
+        expect($tab()->canShowTab())->toBeTrue()
+            ->and($tab()->toHtml())->toContain('page_' . $this->codes['text']);
+    } finally {
+        $design->setArea($area)->setPackageName($package)->setTheme($theme);
+        Mage::unregister('cms_page');
+    }
 });

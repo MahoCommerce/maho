@@ -178,6 +178,22 @@ class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_At
     }
 
     #[\Override]
+    public function getAdminPageSettings(): ?array
+    {
+        if ($this->getEntityType()->getEntityTypeCode() !== Mage_Catalog_Model_Category::ENTITY) {
+            return null;
+        }
+        $helper = Mage::helper('catalog');
+        return [
+            'acl' => 'system/attributes/catalog_category',
+            'title' => $helper->__('Category Attributes'),
+            'sets_title' => $helper->__('Category Attribute Sets'),
+            'main_tab' => 'adminhtml/catalog_category_attribute_edit_tab_main',
+            'allowed_tags' => explode(',', (string) Mage::getStoreConfig('system/catalog/frontend/allowed_html_tags_list')),
+        ];
+    }
+
+    #[\Override]
     protected function _getInputTypes(): array
     {
         $types = parent::_getInputTypes();

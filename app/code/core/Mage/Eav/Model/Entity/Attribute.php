@@ -196,6 +196,25 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
     }
 
     /**
+     * Return the settings of the admin pages that manage the attributes of this entity type,
+     * or null when System > Attributes does not manage the type.
+     *
+     * The module of the entity type gives them, and declares the menu entry and the ACL resource
+     * in its own adminhtml.xml.
+     * - acl: the ACL resource and the menu entry, below system/attributes
+     * - title: the title of the attribute grid
+     * - sets_title: the title of the set grid, or null when the type has no sets
+     * - main_tab: the block of the properties tab
+     * - allowed_tags: the HTML tags that an option label keeps when HTML is allowed on the storefront
+     *
+     * @return array{acl: string, title: string, sets_title: ?string, main_tab?: string, allowed_tags?: list<string>}|null
+     */
+    public function getAdminPageSettings(): ?array
+    {
+        return null;
+    }
+
+    /**
      * Return the input types that the admin offers for the entity type of this attribute.
      *
      * The key is the input code. Each type has a label, and can name a backend_model, a

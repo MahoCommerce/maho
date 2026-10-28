@@ -10,6 +10,8 @@ declare(strict_types=1);
 
 class Mage_Eav_Block_Adminhtml_Attribute_Edit extends Mage_Adminhtml_Block_Widget_Form_Container
 {
+    use Mage_Eav_Block_Adminhtml_EntityTypeUrlTrait;
+
     public function __construct()
     {
         $this->_objectId = 'attribute_id';

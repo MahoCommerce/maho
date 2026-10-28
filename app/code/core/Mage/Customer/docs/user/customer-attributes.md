@@ -1,6 +1,6 @@
 ---
 description: How to add a field to customers and customer addresses - customer and address attributes, the forms that show them, attribute sets per customer group, website settings, and the checkout.
-admin_pages: [customer_attribute, customer_set, customer_address_attribute, customer_address_set, customer_group]
+admin_pages: [eav_attribute, eav_set, customer_group]
 ---
 
 # Customer and Address Attributes
@@ -11,9 +11,9 @@ registration number for business customers, or delivery hours for an address.
 
 ## Add an attribute
 
-1. Go to **Customers > Attributes > Manage Customer Attributes**, or to **Manage Address
-   Attributes** for an address field.
-2. Click **Add New Attribute**.
+1. Go to **System > Attributes > Customers**, or to **Customer Addresses** for an address
+   field.
+2. Click **Add**.
 3. Enter the **Attribute Code** and select the **Input Type**. You cannot change them later. An
    address attribute can also use **Multiple Lines**, with the number of lines in **Lines Count**.
 4. In **Used in Forms**, select the forms that show the field. Hold the Ctrl or Cmd key to select
@@ -59,7 +59,7 @@ set. A group with no set uses the default set of the entity.
 
 For example, wholesale customers give a company registration number, and retail customers do not:
 
-1. Go to **Customers > Attributes > Customer Attribute Sets** and click **Add**.
+1. Go to **System > Attributes > Customers**, click **Attribute Sets**, and click **Add**.
 2. Enter **Wholesale**, select **Default** in **Based On**, and click **Save**.
 3. Drag the new attribute from **Unassigned Attributes** to a group of the **Wholesale** set, and
    click **Save**.

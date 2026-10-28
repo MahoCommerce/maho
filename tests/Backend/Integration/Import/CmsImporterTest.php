@@ -106,7 +106,7 @@ it('rejects a missing body, an unknown store and a missing content file', functi
     expect(Mage::getModel('cms/page')->getCollection()->addFieldToFilter('identifier', ['like' => 'imp-%'])->count())->toBe(0);
 });
 
-it('imports the page fields, with option labels for a dropdown, and refuses an unknown label', function (): void {
+it('imports the page attributes, with option labels for a dropdown, and refuses an unknown label', function (): void {
     $typeId = (int) Mage::getSingleton('eav/config')->getEntityType(Mage_Cms_Model_Page::ENTITY)->getId();
     $code = 'pest_imp_season_' . substr(uniqid(), -6);
     $attribute = Mage::getModel('cms/attribute')->setData([

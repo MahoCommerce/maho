@@ -1,7 +1,7 @@
 <?php
 
 /**
- * The EAV entity of the cms_page type, which the EAV config needs to load the custom fields of CMS pages.
+ * The EAV entity of the cms_page type, which the EAV config needs to load the custom attributes of CMS pages.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0

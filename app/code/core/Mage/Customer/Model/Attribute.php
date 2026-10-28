@@ -53,6 +53,25 @@ class Mage_Customer_Model_Attribute extends Mage_Eav_Model_Attribute
     }
 
     #[\Override]
+    public function getAdminPageSettings(): ?array
+    {
+        $helper = Mage::helper('customer');
+        return match ($this->getEntityType()->getEntityTypeCode()) {
+            'customer' => [
+                'acl' => 'system/attributes/customer',
+                'title' => $helper->__('Customer Attributes'),
+                'sets_title' => $helper->__('Customer Attribute Sets'),
+            ],
+            'customer_address' => [
+                'acl' => 'system/attributes/customer_address',
+                'title' => $helper->__('Customer Address Attributes'),
+                'sets_title' => $helper->__('Customer Address Attribute Sets'),
+            ],
+            default => null,
+        };
+    }
+
+    #[\Override]
     protected function _getInputTypes(): array
     {
         $types = parent::_getInputTypes();

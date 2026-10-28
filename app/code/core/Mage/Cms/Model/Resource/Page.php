@@ -108,7 +108,7 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
             renderer: Mage::helper('cms')->getPageTemplateProcessor(),
         );
 
-        $this->prepareCustomFields($object);
+        $this->prepareCustomAttributes($object);
 
         if (!$this->getIsUniquePageToStores($object)) {
             Mage::throwException(Mage::helper('cms')->__('A page URL key for specified store already exists.'));
@@ -133,7 +133,7 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
     }
 
     /**
-     * Return the custom fields of CMS pages that have a column, keyed by code.
+     * Return the custom attributes of CMS pages that have a column, keyed by code.
      *
      * @return array<string, Mage_Eav_Model_Entity_Attribute_Abstract>
      */
@@ -158,12 +158,12 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
     }
 
     /**
-     * Turn the custom field values of $page into column values, and check the required and unique fields.
-     * A field that $page does not hold keeps its stored value, and a new page gets its default value.
+     * Turn the custom attribute values of $page into column values, and check the required and unique attributes.
+     * An attribute that $page does not hold keeps its stored value, and a new page gets its default value.
      *
      * @throws Mage_Core_Exception_Input
      */
-    protected function prepareCustomFields(Mage_Core_Model_Abstract $page): void
+    protected function prepareCustomAttributes(Mage_Core_Model_Abstract $page): void
     {
         $helper = Mage::helper('eav');
         $errors = new Mage_Core_Exception_Input();
@@ -209,14 +209,14 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
                 }
                 continue;
             }
-            if ($attribute->getIsUnique() && $this->isCustomFieldValueUsed($code, $value, (int) $page->getId())) {
+            if ($attribute->getIsUnique() && $this->isCustomAttributeValueUsed($code, $value, (int) $page->getId())) {
                 $errors->addError($code, $helper->__('The value of attribute "%s" must be unique', $label));
             }
         }
         $errors->throwIfErrors();
     }
 
-    protected function isCustomFieldValueUsed(string $code, mixed $value, int $pageId): bool
+    protected function isCustomAttributeValueUsed(string $code, mixed $value, int $pageId): bool
     {
         $adapter = $this->_getReadAdapter();
         $select = $adapter->select()
