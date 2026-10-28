@@ -84,7 +84,7 @@ A rule links only products that the storefront can show. It skips a target produ
 
 So **Maximum Links** counts only products that the customer can see. A source product that is in no website gets no links.
 
-The rule checks the stock when it runs. If a linked product goes out of stock, the storefront hides it until the next run replaces it.
+The rule checks the stock when it runs. If a linked product goes out of stock and the storefront hides out-of-stock products, the storefront hides the link until the next run replaces it.
 
 ## Rule Components
 
@@ -356,7 +356,12 @@ Navigate to: **Catalog > Product Relationship Rules**
 
 ## Processing Rules
 
-A save does not change the product links. The links change only when the rules run: with the cron job, with the **Apply Rules** button, or with the **Save and Apply** button.
+A save of an active rule does not change the product links. The links change only when the rules run: with the cron job, with the **Apply Rules** button, or with the **Save and Apply** button.
+
+A save changes the links at once in two cases:
+
+- A save of an inactive rule deletes the links that the rule generated. Deleting the rule does the same.
+- A save that changes the link type of a rule deletes the links that the rule generated for its former link type.
 
 ### Apply From the Admin
 

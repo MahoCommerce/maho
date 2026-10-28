@@ -58,6 +58,11 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
         // they don't linger (the processor only refreshes active rules). Manual links untouched.
         if (!$this->getIsActive()) {
             $this->deleteGeneratedLinks();
+        } elseif ($this->getOrigData('link_type_id') !== null
+            && (int) $this->getOrigData('link_type_id') !== (int) $this->getLinkTypeId()
+        ) {
+            // The processor never runs this rule for its former link type again
+            $this->deleteGeneratedLinks((int) $this->getOrigData('link_type_id'));
         }
         return parent::_afterSave();
     }
@@ -70,15 +75,18 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
     }
 
     /**
-     * Remove the catalog links this rule generated (rule_id tag); manual links are untouched.
+     * Remove the catalog links this rule generated (rule_id tag), of one link type or of all of
+     * them; manual links are untouched.
      */
-    protected function deleteGeneratedLinks(): void
+    protected function deleteGeneratedLinks(?int $linkTypeId = null): void
     {
+        $where = ['rule_id = ?' => (int) $this->getId()];
+        if ($linkTypeId !== null) {
+            $where['link_type_id = ?'] = $linkTypeId;
+        }
+
         $resource = Mage::getSingleton('core/resource');
-        $resource->getConnection('core_write')->delete(
-            $resource->getTableName('catalog/product_link'),
-            ['rule_id = ?' => (int) $this->getId()],
-        );
+        $resource->getConnection('core_write')->delete($resource->getTableName('catalog/product_link'), $where);
     }
 
     public function hasConditionsSerialized(): bool
