@@ -2,6 +2,7 @@
 
 /**
  * CMS pages keyed by identifier and store set; `is_home` also points the store's home page at the page.
+ * A custom field of CMS pages is a column too, with option labels for a dropdown.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -44,6 +45,14 @@ class CmsPages extends AbstractCmsImporter
             if ($row['page_id'] === null && ($row['title'] ?? '') === '') {
                 $this->fail($file, $line, 'title is required for a new page');
             }
+            $row['custom'] = [];
+            foreach (Mage::getResourceSingleton('cms/page')->getCustomAttributes() as $code => $attribute) {
+                if (($row[$code] ?? '') !== '') {
+                    $row['custom'][$code] = $this->customValue($file, $line, $attribute, $row[$code]);
+                } elseif ($row['page_id'] === null && $attribute->getIsRequired() && (string) $attribute->getDefaultValue() === '') {
+                    $this->fail($file, $line, "$code is required for a new page");
+                }
+            }
             $rows[$line] = $row;
         }
         return $rows;
@@ -72,6 +81,9 @@ class CmsPages extends AbstractCmsImporter
             }
             if ($row['body'] !== null) {
                 $page->setContent($row['body']);
+            }
+            foreach ($row['custom'] as $code => $value) {
+                $page->setData($code, $value);
             }
             $page->save();
             if ($row['is_home']) {

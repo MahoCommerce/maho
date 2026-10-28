@@ -186,9 +186,11 @@ class Mage_Eav_Model_Config
             // Ensure eav entity type model class is defined, otherwise skip processing it.
             // This check prevents leftover eav_entity_type entries from disabled/removed modules creating errors and
             // is necessary because the entire EAV model is now loaded eagerly for performance optimization.
+            // getEntity() uses the resource model, so a type whose entity model is a resource only is valid too.
             $entityModelClass = $entityType['entity_model'];
             $fqEntityModelClass = Mage::getConfig()->getModelClassName($entityModelClass);
-            if (!class_exists($fqEntityModelClass)) {
+            $fqEntityResourceClass = Mage::getConfig()->getResourceModelClassName($entityModelClass);
+            if (!class_exists($fqEntityModelClass) && !($fqEntityResourceClass && class_exists($fqEntityResourceClass))) {
                 if (Mage::getIsDeveloperMode()) {
                     //throw new Exception('Failed loading of eav entity type because it does not exist: ' . $entityModelClass);
                 } else {

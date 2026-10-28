@@ -101,6 +101,7 @@
     customer_address_attribute: (f, tag) => [set(f, 'frontend_label[0]', tag), set(f, 'attribute_code', tag)],
     blog_post_attribute: (f, tag) => [set(f, 'frontend_label[0]', tag), set(f, 'attribute_code', tag)],
     blog_category_attribute: (f, tag) => [set(f, 'frontend_label[0]', tag), set(f, 'attribute_code', tag)],
+    cms_page_attribute: (f, tag) => [set(f, 'frontend_label[0]', tag), set(f, 'attribute_code', tag)],
     directory_country: f => [set(f, 'country_id', 'QZ'), set(f, 'iso2_code', 'QZ'), set(f, 'iso3_code', 'QZQ')],
     sitemap: (f, tag) => [set(f, 'sitemap_path', '/'), set(f, 'sitemap_filename', tag + '.xml')],
     customer: (f, tag) => {

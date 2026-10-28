@@ -15,6 +15,7 @@ nav:
 - Store views & content:
   - 'Scope: default, website and store view': scope.md
   - CMS pages and blocks in store views: cms-store-views.md
+  - CMS page fields: cms-page-fields.md
   - HTML and Tailwind classes in content: content-html-and-classes.md
   - Blog attributes and attribute sets: blog-attributes.md
 - Marketing:

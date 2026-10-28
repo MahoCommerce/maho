@@ -105,3 +105,47 @@ it('rejects a missing body, an unknown store and a missing content file', functi
 
     expect(Mage::getModel('cms/page')->getCollection()->addFieldToFilter('identifier', ['like' => 'imp-%'])->count())->toBe(0);
 });
+
+it('imports the page fields, with option labels for a dropdown, and refuses an unknown label', function (): void {
+    $typeId = (int) Mage::getSingleton('eav/config')->getEntityType(Mage_Cms_Model_Page::ENTITY)->getId();
+    $code = 'pest_imp_season_' . substr(uniqid(), -6);
+    $attribute = Mage::getModel('cms/attribute')->setData([
+        'entity_type_id' => $typeId,
+        'attribute_code' => $code,
+        'backend_type' => 'static',
+        'frontend_input' => 'select',
+        'frontend_label' => 'Season',
+        'is_user_defined' => 1,
+        'option' => ['value' => ['o1' => ['Spring'], 'o2' => ['Summer']], 'order' => ['o1' => 1, 'o2' => 2]],
+    ]);
+    $attribute->save();
+    Mage::getSingleton('eav/config')->clear();
+    $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
+    $table = Mage::getSingleton('core/resource')->getTableName('cms/page');
+
+    try {
+        $summer = (string) $attribute->getSource()->getOptionId('Summer');
+        $path = cmsCsv([
+            ['identifier', 'stores', 'title', 'content', $code],
+            ['imp-field', '', 'Imp Field', '<p>Body</p>', 'Summer'],
+        ]);
+        expect((new CmsPages())->import($path)->created)->toBe(1)
+            ->and((string) Mage::getModel('cms/page')->load('imp-field', 'identifier')->getData($code))->toBe($summer);
+        unlink($path);
+
+        $path = cmsCsv([
+            ['identifier', 'stores', 'title', 'content', $code],
+            ['imp-field-bad', '', 'Imp Field Bad', '<p>Body</p>', 'Winter'],
+        ]);
+        expect(fn() => (new CmsPages())->validate($path))->toThrow(RowException::class, 'Winter');
+        unlink($path);
+    } finally {
+        cmsCleanup();
+        $attribute->delete();
+        if ($connection->tableColumnExists($table, $code)) {
+            $connection->dropColumn($table, $code);
+        }
+        $connection->resetDdlCache($table);
+        Mage::getSingleton('eav/config')->clear();
+    }
+});

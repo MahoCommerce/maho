@@ -141,26 +141,6 @@ class BlogPosts extends AbstractCmsImporter
         return $this->customAttributes;
     }
 
-    /**
-     * Return the stored value of $value. A select, a multiselect or a boolean takes option labels,
-     * and a multiselect separates them with commas.
-     */
-    private function customValue(CsvFile $file, int $line, \Mage_Eav_Model_Entity_Attribute_Abstract $attribute, string $value): string
-    {
-        if (!in_array($attribute->getFrontendInput(), ['select', 'multiselect', 'boolean'], true)) {
-            return $value;
-        }
-        $ids = [];
-        foreach (array_map(trim(...), explode(',', $value)) as $label) {
-            $id = $attribute->getSource()->getOptionId($label);
-            if ($id === null || $id === '') {
-                $this->fail($file, $line, "'$label' is not an option of {$attribute->getAttributeCode()}");
-            }
-            $ids[] = (string) $id;
-        }
-        return implode(',', $ids);
-    }
-
     private function attributeSetId(CsvFile $file, int $line, string $name): int
     {
         $type = Mage::getSingleton('eav/config')->getEntityType(\Maho_Blog_Model_Post::ENTITY);
