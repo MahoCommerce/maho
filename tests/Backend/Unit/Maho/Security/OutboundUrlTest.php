@@ -66,7 +66,7 @@ describe('OutboundUrl', function (): void {
         'https://good.example/guía.pdf',
     ]);
 
-    it('lowercases the host and keeps the path and query as sent', function (): void {
+    it('lowercases the host and keeps the percent-encoding of the path and query', function (): void {
         $target = outboundUrl(['cdn.example' => ['93.184.216.34']])->validate('HTTPS://CDN.Example/a%20b.jpg?x=%2F');
         expect($target->host)->toBe('cdn.example')
             ->and($target->pinnedUrl())->toBe('https://93.184.216.34/a%20b.jpg?x=%2F');
@@ -121,6 +121,11 @@ describe('OutboundUrl', function (): void {
         'http://intranet.example/files/../admin',
         'http://intranet.example/files/%2e%2e/admin',
     ]);
+
+    it('sends the path that it compared with the allowed prefix', function (): void {
+        $target = outboundUrl()->validate('http://intranet.example/admin/../files/x', ['http://intranet.example/files/']);
+        expect($target->path)->toBe('/files/x');
+    });
 
     it('classifies addresses', function (): void {
         expect(OutboundUrl::isPublicAddress('8.8.8.8'))->toBeTrue()

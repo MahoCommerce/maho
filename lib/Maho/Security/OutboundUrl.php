@@ -50,10 +50,10 @@ final class OutboundUrl
             throw new OutboundUrlException('The URL has no host.');
         }
         $port = $uri->getPort() ?? ($scheme === 'https' ? 443 : 80);
-        $path = $uri->getRawPath() === '' ? '/' : $uri->getRawPath();
+        $path = $uri->getPath() ?: '/';
         $query = $uri->getRawQuery();
 
-        if (self::matchesPrefix($scheme, $host, $port, $uri->getPath() ?: '/', $allowedPrefixes)) {
+        if (self::matchesPrefix($scheme, $host, $port, $path, $allowedPrefixes)) {
             return new OutboundTarget($url, $scheme, $host, $port, $path, $query, null);
         }
 
