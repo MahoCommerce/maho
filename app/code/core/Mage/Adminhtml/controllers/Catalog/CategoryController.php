@@ -95,7 +95,8 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
                 if ($storeId && !$parent->getResource()->isInStore($parent, $storeId)) {
                     Mage::throwException(Mage::helper('catalog')->__('Parent category was not found.'));
                 }
-                $category->setPath($parent->getPath());
+                $category->setPath($parent->getPath())
+                    ->setAttributeSetId($parent->getAttributeSetId() ?: (int) $category->getDefaultAttributeSetId());
             }
         } catch (Mage_Core_Exception $e) {
             $error = $e->getMessage();
@@ -198,6 +199,28 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
     }
 
     /**
+     * Return the attribute set that a category saves with.
+     *
+     * A new category takes the set of its parent when the form posts none. A posted set must be a
+     * category attribute set.
+     */
+    protected function _getPostedAttributeSetId(Mage_Catalog_Model_Category $category, int $postedSetId): int
+    {
+        if (!$postedSetId) {
+            if ($category->getId() && $category->getOrigData('attribute_set_id')) {
+                return (int) $category->getOrigData('attribute_set_id');
+            }
+            $parent = Mage::getModel('catalog/category')->load($category->getParentId());
+            return $parent->getAttributeSetId() ?: (int) $category->getDefaultAttributeSetId();
+        }
+        $set = Mage::getModel('eav/entity_attribute_set')->load($postedSetId);
+        if ((int) $set->getEntityTypeId() !== (int) $category->getResource()->getTypeId()) {
+            Mage::throwException(Mage::helper('catalog')->__('The attribute set is not a category attribute set.'));
+        }
+        return $postedSetId;
+    }
+
+    /**
      * Category save
      */
     #[Maho\Config\Route('/admin/catalog_category/save')]
@@ -231,9 +254,9 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
                 }
                 $category
                     ->setPath($parent->getPath())
-                    ->setStoreId(Mage_Core_Model_App::ADMIN_STORE_ID)
-                    ->setAttributeSetId($category->getDefaultAttributeSetId());
+                    ->setStoreId(Mage_Core_Model_App::ADMIN_STORE_ID);
             }
+            $category->setAttributeSetId($this->_getPostedAttributeSetId($category, (int) ($data['general']['attribute_set_id'] ?? 0)));
 
             // Check "Use Default Value" checkboxes values
             if ($useDefaults = $this->getRequest()->getPost('use_default')) {

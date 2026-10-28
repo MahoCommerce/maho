@@ -1,0 +1,56 @@
+<?php
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package default_default
+ */
+
+/** @var Mage_Eav_Block_Adminhtml_Attribute_Set_Edit $this */
+?>
+<div class="content-header">
+    <h3><?= $this->escapeHtml($this->_getHeader()) ?></h3>
+    <p class="content-buttons form-buttons">
+        <?= $this->getBackButtonHtml() ?>
+        <?= $this->getResetButtonHtml() ?>
+        <?= $this->getDeleteButtonHtml() ?>
+        <?= $this->getSaveButtonHtml() ?>
+    </p>
+</div>
+<div class="edit-attribute-set">
+    <div>
+        <?= $this->getSetFormHtml() ?>
+    </div>
+
+    <div class="edit-attribute-set-column">
+        <div class="content-header">
+            <h3><?= Mage::helper('eav')->__('Groups') ?></h3>
+            <?php if (!$this->getIsReadOnly()): ?>
+            <div>
+                <?= $this->getAddGroupButton() ?><?= $this->getRenameButton() ?><?= $this->getDeleteGroupButton() ?>
+            </div>
+            <?php endif ?>
+        </div>
+        <div id="tree-div1" class="hor-scroll"></div>
+    </div>
+
+    <div id="remove-drop-zone" class="drop-zone edit-attribute-set-column">
+        <div class="content-header">
+            <h3><?= Mage::helper('eav')->__('Unassigned Attributes') ?></h3>
+        </div>
+        <div id="tree-div2" class="hor-scroll"></div>
+    </div>
+</div>
+
+<script type="module">
+document.addEventListener('DOMContentLoaded', () => {
+    const setForm = new EavAttributeSetForm({
+        isReadOnly: <?= var_export((bool) $this->getIsReadOnly(), true) ?>,
+        saveUrl: '<?= $this->getSaveUrl() ?>',
+        deleteUrl: '<?= $this->getDeleteUrl() ?>',
+        canDeleteSet: () => confirm(Translator.translate('The records of this set will move to the default set. Delete the set?')),
+    });
+
+    setForm.buildGroupTree(<?= $this->getGroupTreeJson() ?>);
+    setForm.buildAttributeTree(<?= $this->getAttributeTreeJson() ?>);
+});
+</script>

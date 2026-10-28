@@ -37,6 +37,15 @@ final class ValueLists
         return array_values(array_map(intval(...), $ids));
     }
 
+    /** @return list<int> */
+    public static function categoryAttributeSets(): array
+    {
+        $typeId = (int) \Mage::getSingleton('eav/config')->getEntityType(\Mage_Catalog_Model_Category::ENTITY)->getId();
+        $ids = \Mage::getResourceModel('eav/entity_attribute_set_collection')->setEntityTypeFilter($typeId)->getAllIds();
+
+        return array_values(array_map(intval(...), $ids));
+    }
+
     /** @return array<int, array{value: int|string, label: string}> every customer group, NOT LOGGED IN included: a rule can apply to guests */
     public static function ruleCustomerGroups(): array
     {

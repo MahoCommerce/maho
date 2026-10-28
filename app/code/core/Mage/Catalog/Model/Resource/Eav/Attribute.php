@@ -177,6 +177,23 @@ class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_At
         return is_null($storeId) ? null : (int) $storeId;
     }
 
+    #[\Override]
+    protected function _getInputTypes(): array
+    {
+        $types = parent::_getInputTypes();
+        $helper = Mage::helper('catalog');
+        if ($this->getEntityType()->getEntityTypeCode() === Mage_Catalog_Model_Category::ENTITY) {
+            $types['image'] = [
+                'label' => $helper->__('Image'),
+                'backend_model' => 'catalog/category_attribute_backend_image',
+            ];
+            return $types;
+        }
+        $types['price'] = ['label' => $helper->__('Price')];
+        $types['media_image'] = ['label' => $helper->__('Media Image')];
+        return $types;
+    }
+
     /**
      * Retrieve apply to products array
      * Return empty array if applied to all products

@@ -196,6 +196,48 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
     }
 
     /**
+     * Return the input types that the admin offers for the entity type of this attribute.
+     *
+     * The key is the input code. Each type has a label, and can name a backend_model, a
+     * source_model and a frontend_model. The event eav_attribute_input_types_prepare lets a
+     * module add or remove a type.
+     *
+     * @return array<string, array{label: string, backend_model?: string, source_model?: string, frontend_model?: string}>
+     */
+    public function getInputTypes(): array
+    {
+        $types = new \Maho\DataObject($this->_getInputTypes());
+        Mage::dispatchEvent('eav_attribute_input_types_prepare', [
+            'attribute' => $this,
+            'entity_type_code' => $this->getEntityType()->getEntityTypeCode(),
+            'types' => $types,
+        ]);
+        return $types->getData();
+    }
+
+    /**
+     * @return array<string, array{label: string, backend_model?: string, source_model?: string, frontend_model?: string}>
+     */
+    protected function _getInputTypes(): array
+    {
+        $helper = Mage::helper('eav');
+        return [
+            'text' => ['label' => $helper->__('Text Field')],
+            'textarea' => ['label' => $helper->__('Text Area')],
+            'date' => ['label' => $helper->__('Date')],
+            'boolean' => [
+                'label' => $helper->__('Yes/No'),
+                'source_model' => 'eav/entity_attribute_source_boolean',
+            ],
+            'multiselect' => [
+                'label' => $helper->__('Multiple Select'),
+                'backend_model' => 'eav/entity_attribute_backend_array',
+            ],
+            'select' => ['label' => $helper->__('Dropdown')],
+        ];
+    }
+
+    /**
      * Detect backend storage type using frontend input type
      *
      * @return string backend_type field value

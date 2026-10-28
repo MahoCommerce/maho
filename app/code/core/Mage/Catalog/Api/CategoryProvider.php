@@ -266,6 +266,26 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
     }
 
     /**
+     * Return the values of the user-defined attributes of the set of a category, keyed by attribute code.
+     *
+     * @return array<string, mixed>
+     */
+    private function customAttributeValues(\Mage_Catalog_Model_Category $category): array
+    {
+        $values = [];
+        foreach ($category->getAttributes() as $code => $attribute) {
+            if (!$attribute->getIsUserDefined()) {
+                continue;
+            }
+            $value = $category->getData($code);
+            if ($value !== null && $value !== '') {
+                $values[$code] = $value;
+            }
+        }
+        return $values;
+    }
+
+    /**
      * Map Maho category model to Category DTO. $withStoreOverrides fills storeOverrides
      * for backend callers; single-category reads and write responses set it.
      */
@@ -326,6 +346,7 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
         $dto->childrenCount = (int) $category->getData('children_count');
         $dto->createdAt = $category->getCreatedAt();
         $dto->updatedAt = $category->getUpdatedAt();
+        $dto->attributeSetId = $category->getAttributeSetId() ?: null;
 
         // Get image URL
         $dto->image = $category->getImageUrl() ?: null;
@@ -357,6 +378,7 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
 
         if ($withStoreOverrides && $this->backendCategoriesAccess()) {
             $dto->storeOverrides = StoreOverrides::forModel($category);
+            $dto->customAttributes = $this->customAttributeValues($category);
         }
 
         \Mage::dispatchEvent('api_category_dto_build', ['category' => $category, 'dto' => $dto]);

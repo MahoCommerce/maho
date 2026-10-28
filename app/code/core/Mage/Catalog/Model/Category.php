@@ -270,7 +270,7 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
     }
 
     /**
-     * Retrieve all customer attributes
+     * Retrieve the attributes of the attribute set of the category
      *
      * @param bool $noDesignAttributes
      * @return array
@@ -279,7 +279,7 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
     {
         $result = $this->getResource()
             ->loadAllAttributes($this)
-            ->getSortedAttributes();
+            ->getSortedAttributes($this->getAttributeSetId() ?: null);
 
         if ($noDesignAttributes) {
             foreach (array_keys($result) as $k) {
@@ -1078,6 +1078,12 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
     public function setAffectedProductIds(?array $value): static
     {
         return $this->setData('affected_product_ids', $value);
+    }
+
+    public function getAttributeSetId(): ?int
+    {
+        $value = $this->getData('attribute_set_id');
+        return $value === null ? null : (int) $value;
     }
 
     public function setAttributeSetId(?int $value): static

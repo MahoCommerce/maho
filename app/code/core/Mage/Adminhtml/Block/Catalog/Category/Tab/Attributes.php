@@ -43,6 +43,27 @@ class Mage_Adminhtml_Block_Catalog_Category_Tab_Attributes extends Mage_Adminhtm
     }
 
     /**
+     * Add the attribute set select when there is more than one category set.
+     */
+    protected function _addAttributeSetField(\Maho\Data\Form\Element\Fieldset $fieldset): void
+    {
+        $sets = Mage::getResourceModel('eav/entity_attribute_set_collection')
+            ->setEntityTypeFilter((int) $this->getCategory()->getResource()->getTypeId())
+            ->setOrder('attribute_set_name', 'asc')
+            ->toOptionArray();
+        if (count($sets) < 2) {
+            return;
+        }
+        $fieldset->addField('attribute_set_id', 'select', [
+            'name' => 'attribute_set_id',
+            'label' => Mage::helper('catalog')->__('Attribute Set'),
+            'title' => Mage::helper('catalog')->__('Attribute Set'),
+            'note' => Mage::helper('catalog')->__('The fields of the new set show after you save the category.'),
+            'values' => $sets,
+        ]);
+    }
+
+    /**
      * Prepare form before rendering HTML
      *
      * @return $this
@@ -86,6 +107,7 @@ class Mage_Adminhtml_Block_Catalog_Category_Tab_Attributes extends Mage_Adminhtm
                     'value' => $this->getCategory()->getPath(),
                 ]);
             }
+            $this->_addAttributeSetField($fieldset);
         }
 
         $this->_setFieldset($attributes, $fieldset);

@@ -277,12 +277,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Attribute/Set/Main/Formgroup.php
 
 		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Catalog_Product_Attribute_Set_Toolbar_Add::getFormId() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Catalog/Product/Attribute/Set/Toolbar/Add.php
-
-		-
 			rawMessage: Property Mage_Adminhtml_Block_Catalog_Product_Composite_Configure::$_product has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -4501,18 +4495,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/Catalog/Category/WidgetController.php
 
 		-
-			rawMessage: 'Method Mage_Adminhtml_Catalog_Product_AttributeController::_initAction() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Catalog/Product/AttributeController.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Catalog_Product_AttributeController::$_entityTypeId has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Catalog/Product/AttributeController.php
-
-		-
 			rawMessage: 'Method Mage_Adminhtml_Catalog_Product_ReviewController::indexAction() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -4529,12 +4511,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Adminhtml/controllers/Catalog/Product/ReviewController.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Catalog_Product_SetController::_setTypeId() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Catalog/Product/SetController.php
 
 		-
 			rawMessage: 'Method Mage_Adminhtml_Catalog_ProductController::_filterStockData() has no return type specified.'
