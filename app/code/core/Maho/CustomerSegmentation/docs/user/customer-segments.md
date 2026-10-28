@@ -554,7 +554,7 @@ Segments can be refreshed manually or automatically:
 **Manual Refresh**:
 - Click **Refresh** in the **Action** column of the segment grid
 - The refresh runs in the background, through the message queue. The status of the segment changes to "Pending"
-- When the refresh is complete, you get a message in **System > Notifications** with the number of customers in the segment. If the refresh fails, the message has the error. When the cause is not in the data, for example a lost database connection, the queue tries again
+- When the refresh is complete, you get a message in **System > Notifications** with the number of customers in the segment. The newest message also shows in the bar at the top of the next admin page that you open. If the refresh fails, the message has the error. When the cause is not in the data, for example a lost database connection, the queue tries again
 - If you click **Refresh** again while the refresh waits, Maho does not add a second refresh. If you click while the refresh is in progress, Maho adds one more refresh after it, because the refresh read the customers when it started
 
 **Automatic Refresh**:

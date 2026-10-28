@@ -373,7 +373,7 @@ A save changes the links at once in two cases:
 
 Both buttons put the run in the message queue, so the page does not wait. A queue worker runs it in the background, and the links change when the run is complete. The workers start from cron, so cron must run on the server. **System > Tools > Message Queue** shows the run, in the queue `cataloglinkrule`.
 
-When the run is complete, the administrator who clicked the button gets a message in **System > Notifications**. If the run fails, the message has the error. When the cause is not in the data, for example a lost database connection, the queue tries the run again.
+When the run is complete, the administrator who clicked the button gets a message in **System > Notifications**. The newest message also shows in the bar at the top of the next admin page that this administrator opens. If the run fails, the message has the error. When the cause is not in the data, for example a lost database connection, the queue tries the run again.
 
 If you click a button again while a run of the same link type waits, Maho does not add a second run. If you click while a run is in progress, Maho adds one more run after it, because the run read the rules when it started.
 

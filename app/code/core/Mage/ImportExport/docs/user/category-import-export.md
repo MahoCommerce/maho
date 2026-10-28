@@ -36,6 +36,8 @@ so the page does not wait. A queue worker runs the job, and you get a message in
 - After an import, the message tells you that the import is done, or gives the error.
 - After an export, the message has a link to the file. A daily cron job deletes the export files that are older than 7 days.
 
+The newest message also shows in the bar at the top of the next admin page that you open.
+
 The queue workers start from cron, so cron must run on the server. **System > Tools > Message Queue** shows
 the jobs, in the queue `importexport`.
 
