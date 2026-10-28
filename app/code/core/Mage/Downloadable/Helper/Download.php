@@ -347,6 +347,23 @@ class Mage_Downloadable_Helper_Download extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * Check the form of a link or sample URL before it is saved, with no DNS lookup.
+     *
+     * @throws Mage_Core_Exception
+     */
+    public static function checkUrl(?string $url): void
+    {
+        if ($url === null || $url === '') {
+            return;
+        }
+        try {
+            \Maho\Security\OutboundUrl::parse($url);
+        } catch (\Maho\Security\OutboundUrlException $e) {
+            Mage::throwException(Mage::helper('downloadable')->__('The URL of a link or a sample is not valid: %s Percent-encode each space and each character that is not ASCII.', $e->getMessage()));
+        }
+    }
+
+    /**
      * Use Content-Disposition: attachment
      *
      * @param mixed $store

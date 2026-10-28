@@ -22,6 +22,18 @@ describe('Downloadable link URL guard', function (): void {
         expect(fn() => $helper->getFilesize())->toThrow(Mage_Core_Exception::class, 'not allowed');
     });
 
+    it('refuses to save a link or a sample with a URL that is not valid RFC 3986', function (): void {
+        $link = Mage::getModel('downloadable/link')
+            ->setLinkType(Mage_Downloadable_Helper_Download::LINK_TYPE_URL)
+            ->setLinkUrl('https://files.example/guía.pdf');
+        expect(fn() => $link->save())->toThrow(Mage_Core_Exception::class, 'is not valid');
+
+        $sample = Mage::getModel('downloadable/sample')
+            ->setSampleType(Mage_Downloadable_Helper_Download::LINK_TYPE_URL)
+            ->setSampleUrl('https://files.example/a b.pdf');
+        expect(fn() => $sample->save())->toThrow(Mage_Core_Exception::class, 'is not valid');
+    });
+
     it('rejects ftp link URLs in the API validator', function (): void {
         $validator = new Mage_Downloadable_Model_Link_Api_Validator();
         $url = 'ftp://example.com/file.zip';

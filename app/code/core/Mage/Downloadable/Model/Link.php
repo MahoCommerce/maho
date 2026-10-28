@@ -48,6 +48,18 @@ class Mage_Downloadable_Model_Link extends Mage_Core_Model_Abstract
     }
 
     #[\Override]
+    protected function _beforeSave()
+    {
+        if ($this->getLinkType() === Mage_Downloadable_Helper_Download::LINK_TYPE_URL) {
+            Mage_Downloadable_Helper_Download::checkUrl($this->getLinkUrl());
+        }
+        if ($this->getSampleType() === Mage_Downloadable_Helper_Download::LINK_TYPE_URL) {
+            Mage_Downloadable_Helper_Download::checkUrl($this->getSampleUrl());
+        }
+        return parent::_beforeSave();
+    }
+
+    #[\Override]
     protected function _afterSave()
     {
         $this->getResource()->saveItemTitleAndPrice($this);
