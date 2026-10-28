@@ -55,15 +55,29 @@ describe('OutboundUrl', function (): void {
         expect(fn() => outboundUrl()->validate('http:///path'))->toThrow(OutboundUrlException::class);
     });
 
-    it('rejects a URL that is not valid RFC 3986', function (string $url): void {
+    it('rejects a malformed URL and a URL with a control character', function (string $url): void {
         expect(fn() => outboundUrl(['good.example' => ['93.184.216.34']])->validate($url))
             ->toThrow(OutboundUrlException::class, 'malformed');
     })->with([
-        'http://evil.example\\@good.example/',
-        'http://good.example/a b',
         "http://good.example/a\r\nX-Injected: 1",
+        "http://good.example/a\tb",
         'http://good.example:99999/',
-        'https://good.example/guía.pdf',
+        'http://[::1/',
+    ]);
+
+    it('reads the URL as a browser does', function (string $url, string $host, string $pinnedUrl): void {
+        $target = outboundUrl([
+            'good.example' => ['93.184.216.34'],
+            'evil.example' => ['93.184.216.35'],
+            'xn--bcher-kva.example' => ['93.184.216.36'],
+        ])->validate($url);
+        expect($target->host)->toBe($host)
+            ->and($target->pinnedUrl())->toBe($pinnedUrl);
+    })->with([
+        ['https://good.example/guía.pdf', 'good.example', 'https://93.184.216.34/gu%C3%ADa.pdf'],
+        ['http://good.example/a b.pdf?crop[x]=1', 'good.example', 'http://93.184.216.34/a%20b.pdf?crop[x]=1'],
+        ['http://evil.example\\@good.example/', 'evil.example', 'http://93.184.216.35/@good.example/'],
+        ['https://bücher.example/a.pdf', 'xn--bcher-kva.example', 'https://93.184.216.36/a.pdf'],
     ]);
 
     it('lowercases the host and keeps the percent-encoding of the path and query', function (): void {

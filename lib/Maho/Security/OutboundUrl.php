@@ -11,7 +11,7 @@ declare(strict_types=1);
 
 namespace Maho\Security;
 
-use Uri\Rfc3986\Uri;
+use Uri\WhatWg\Url;
 
 final class OutboundUrl
 {
@@ -38,11 +38,12 @@ final class OutboundUrl
     public function validate(string $url, array $allowedPrefixes = []): OutboundTarget
     {
         $uri = self::parse($url);
+        $url = $uri->toAsciiString();
         $scheme = $uri->getScheme();
-        $host = trim($uri->getHost(), '[]');
+        $host = trim((string) $uri->getAsciiHost(), '[]');
         $port = $uri->getPort() ?? ($scheme === 'https' ? 443 : 80);
-        $path = $uri->getPath() ?: '/';
-        $query = $uri->getRawQuery();
+        $path = $uri->getPath();
+        $query = $uri->getQuery();
 
         if (self::matchesPrefix($scheme, $host, $port, $path, $allowedPrefixes)) {
             return new OutboundTarget($url, $scheme, $host, $port, $path, $query, null);
@@ -62,21 +63,19 @@ final class OutboundUrl
     }
 
     /**
-     * Check the form of the URL, with no DNS lookup.
+     * Read the URL as a browser does, with no DNS lookup.
      *
      * @throws OutboundUrlException
      */
-    public static function parse(string $url): Uri
+    public static function parse(string $url): Url
     {
-        $uri = Uri::parse($url);
-        if ($uri === null || $uri->getPort() > 65535) {
+        // The parser removes a tab, a CR or an LF with no error, which changes the URL
+        $uri = preg_match('/[\x00-\x1F\x7F]/', $url) ? null : Url::parse($url);
+        if ($uri === null) {
             throw new OutboundUrlException('The URL is malformed.');
         }
         if (!in_array($uri->getScheme(), self::SCHEMES, true)) {
             throw new OutboundUrlException('The URL must use the http or https scheme.');
-        }
-        if (trim($uri->getHost() ?? '', '[]') === '') {
-            throw new OutboundUrlException('The URL has no host.');
         }
         return $uri;
     }
@@ -116,9 +115,9 @@ final class OutboundUrl
             return false;
         }
         foreach ($prefixes as $prefix) {
-            $uri = Uri::parse(trim($prefix));
+            $uri = Url::parse(trim($prefix));
             $prefixScheme = $uri?->getScheme();
-            $prefixHost = trim($uri?->getHost() ?? '', '[]');
+            $prefixHost = trim($uri?->getAsciiHost() ?? '', '[]');
             if ($prefixScheme === null || $prefixHost === '') {
                 continue;
             }

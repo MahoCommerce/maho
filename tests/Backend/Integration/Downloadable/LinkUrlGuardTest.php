@@ -22,21 +22,21 @@ describe('Downloadable link URL guard', function (): void {
         expect(fn() => $helper->getFilesize())->toThrow(Mage_Core_Exception::class, 'not allowed');
     });
 
-    it('refuses to save a link or a sample with a URL that is not valid RFC 3986', function (): void {
+    it('refuses to save a link or a sample with a URL that is not valid', function (): void {
         $link = Mage::getModel('downloadable/link')
             ->setLinkType(Mage_Downloadable_Helper_Download::LINK_TYPE_URL)
-            ->setLinkUrl('https://files.example/guía.pdf');
+            ->setLinkUrl('https://files.example:99999/a.pdf');
         expect(fn() => $link->save())->toThrow(Mage_Core_Exception::class, 'is not valid');
 
         $sample = Mage::getModel('downloadable/sample')
             ->setSampleType(Mage_Downloadable_Helper_Download::LINK_TYPE_URL)
-            ->setSampleUrl('https://files.example/a b.pdf');
+            ->setSampleUrl('ftp://files.example/a.pdf');
         expect(fn() => $sample->save())->toThrow(Mage_Core_Exception::class, 'is not valid');
 
         $linkWithSample = Mage::getModel('downloadable/link')
             ->setLinkType(Mage_Downloadable_Helper_Download::LINK_TYPE_FILE)
             ->setSampleType(Mage_Downloadable_Helper_Download::LINK_TYPE_URL)
-            ->setSampleUrl('https://files.example/a b.pdf');
+            ->setSampleUrl('ftp://files.example/a.pdf');
         expect(fn() => $linkWithSample->save())->toThrow(Mage_Core_Exception::class, 'is not valid');
     });
 
