@@ -119,28 +119,48 @@ describe('CatalogLinkRule apply from the admin', function () {
         expect($free)->toBeTrue();
     });
 
-    test('a second run of the rules waits for the run that holds the lock', function () {
+    test('a second run of the rules waits for the lock, and the alarm of the worker still fires', function () {
         if ((string) Mage::getConfig()->getNode(Mage_Core_Model_Lock::XML_PATH_BACKEND) === 'db') {
             $this->markTestSkipped('This test needs the file lock backend.');
+        }
+        if (!function_exists('pcntl_alarm')) {
+            $this->markTestSkipped('This test needs pcntl.');
         }
 
         $path = Mage::getConfig()->getVarDir('locks') . DS . 'cataloglinkrule_apply.lock';
         $child = proc_open(
-            [PHP_BINARY, '-r', '$h = fopen($argv[1], "c"); flock($h, LOCK_EX); echo "locked\n"; sleep(2);', $path],
+            [PHP_BINARY, '-r', '$h = fopen($argv[1], "c"); flock($h, LOCK_EX); echo "locked\n"; sleep(3);', $path],
             [1 => ['pipe', 'w']],
             $pipes,
         );
         expect(trim((string) fgets($pipes[1])))->toBe('locked');
         $startedAt = microtime(true);
+
+        // The queue worker refreshes its claim on this alarm. A blocking flock() would delay it.
+        $firedAt = null;
+        $oldHandler = pcntl_signal_get_handler(SIGALRM);
+        $oldAsync = pcntl_async_signals(true);
+        pcntl_signal(SIGALRM, function () use (&$firedAt): void {
+            $firedAt ??= microtime(true);
+        });
+        $oldAlarm = pcntl_alarm(1);
         try {
             expect(fn() => Mage::getModel('cataloglinkrule/processor')->applyRules(999999))
                 ->not->toThrow(RuntimeException::class);
         } finally {
+            pcntl_alarm(0);
+            pcntl_signal(SIGALRM, $oldHandler);
+            pcntl_async_signals($oldAsync);
+            if ($oldAlarm > 0) {
+                pcntl_alarm($oldAlarm);
+            }
             fclose($pipes[1]);
             proc_close($child);
         }
 
-        expect(microtime(true) - $startedAt)->toBeGreaterThan(1.0);
+        expect(microtime(true) - $startedAt)->toBeGreaterThan(1.0)
+            ->and($firedAt)->not->toBeNull()
+            ->and($firedAt - $startedAt)->toBeLessThan(2.5);
     });
 
     test('a queue worker has a handler for the apply message', function () {
