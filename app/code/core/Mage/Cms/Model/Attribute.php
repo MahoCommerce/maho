@@ -80,7 +80,7 @@ class Mage_Cms_Model_Attribute extends Mage_Eav_Model_Entity_Attribute
     protected function _beforeSave()
     {
         $code = (string) $this->getAttributeCode();
-        if ($this->isObjectNew() && in_array($code, [...$this->getDeclaredColumns(), ...self::RESERVED_CODES], true)) {
+        if ($this->isObjectNew() && in_array($code, [...\Maho\Db\Schema\Collector::declaredColumns('cms_page'), ...self::RESERVED_CODES], true)) {
             Mage::throwException(Mage::helper('cms')->__('The code "%s" is already used by CMS pages. Use another code.', $code));
         }
         return parent::_beforeSave();
@@ -106,15 +106,19 @@ class Mage_Cms_Model_Attribute extends Mage_Eav_Model_Entity_Attribute
     }
 
     /**
-     * @return list<string>
+     * Drop the column after the commit, since DDL cannot run in a transaction.
      */
-    protected function getDeclaredColumns(): array
+    #[\Override]
+    protected function _afterDeleteCommit()
     {
-        [$schema] = \Maho\Db\Schema\Collector::collect();
-        $columns = [];
-        foreach ($schema->getTable(\Maho\Db\Schema\Collector::tablePrefix() . 'cms_page')->getColumns() as $column) {
-            $columns[] = $column->getObjectName()->getIdentifier()->getValue();
+        parent::_afterDeleteCommit();
+        if ($this->getIsUserDefined()) {
+            $resource = Mage::getSingleton('core/resource');
+            $connection = $resource->getConnection('core_write');
+            $table = $resource->getTableName('cms/page');
+            $connection->dropColumn($table, (string) $this->getAttributeCode());
+            $connection->resetDdlCache($table);
         }
-        return $columns;
+        return $this;
     }
 }

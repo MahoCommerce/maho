@@ -11,12 +11,6 @@
 class Mage_Adminhtml_Block_Catalog_Product_Attribute_Set_Toolbar_Add extends Mage_Eav_Block_Adminhtml_Attribute_Set_Toolbar_Add
 {
     #[\Override]
-    protected function _construct()
-    {
-        $this->setTemplate('catalog/product/attribute/set/toolbar/add.phtml');
-    }
-
-    #[\Override]
     protected function _prepareLayout()
     {
         parent::_prepareLayout();

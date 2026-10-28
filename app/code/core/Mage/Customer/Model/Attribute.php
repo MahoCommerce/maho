@@ -87,6 +87,9 @@ class Mage_Customer_Model_Attribute extends Mage_Eav_Model_Attribute
         }
         if (!$this->getId()) {
             $data['is_system'] = 0;
+        } elseif (!$this->getIsUserDefined()) {
+            // The Customer Configuration shows or hides the attributes of the platform, such as dob
+            unset($data['is_visible']);
         }
 
         // A filter or a rule that the form does not offer, such as the date rule of dob, stays as it is

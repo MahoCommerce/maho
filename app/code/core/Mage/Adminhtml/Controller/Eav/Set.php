@@ -161,7 +161,7 @@ abstract class Mage_Adminhtml_Controller_Eav_Set extends Mage_Adminhtml_Controll
                 if (!$model) {
                     Mage::throwException(Mage::helper('eav')->__('This attribute set no longer exists.'));
                 }
-                $data = Mage::helper('core')->jsonDecode($this->getRequest()->getPost('data'));
+                $data = $this->filterSetData($model, Mage::helper('core')->jsonDecode($this->getRequest()->getPost('data')));
                 $data['attribute_set_name'] = $helper->stripTags($data['attribute_set_name']);
                 $model->organizeData($data);
             }
@@ -193,6 +193,29 @@ abstract class Mage_Adminhtml_Controller_Eav_Set extends Mage_Adminhtml_Controll
         } else {
             $this->getResponse()->setBodyJson(['error' => true, 'message' => $error]);
         }
+    }
+
+    /**
+     * Remove the groups and the attributes of other sets and of other entity types from the posted data.
+     */
+    protected function filterSetData(Mage_Eav_Model_Entity_Attribute_Set $set, array $data): array
+    {
+        $resource = Mage::getSingleton('core/resource');
+        $adapter = $resource->getConnection('core_read');
+        $ids = fn(string $table, string $column, string $field, int $value): array => array_map(intval(...), $adapter->fetchCol(
+            $adapter->select()->from($resource->getTableName($table), [$column])->where("$field = ?", $value),
+        ));
+        $groupIds = $ids('eav/attribute_group', 'attribute_group_id', 'attribute_set_id', (int) $set->getId());
+        $rowIds = $ids('eav/entity_attribute', 'entity_attribute_id', 'attribute_set_id', (int) $set->getId());
+        $attributeIds = $ids('eav/attribute', 'attribute_id', 'entity_type_id', (int) $set->getEntityTypeId());
+        $keep = fn(string $key, callable $check): array => array_values(array_filter((array) ($data[$key] ?? []), $check));
+
+        // A group id that is not a number is a group that the editor added
+        $data['groups'] = $keep('groups', fn($group) => !is_numeric($group[0] ?? null) || in_array((int) $group[0], $groupIds, true));
+        $data['attributes'] = $keep('attributes', fn($attribute) => in_array((int) ($attribute[0] ?? 0), $attributeIds, true));
+        $data['not_attributes'] = $keep('not_attributes', fn($id) => in_array((int) $id, $rowIds, true));
+        $data['removeGroups'] = $keep('removeGroups', fn($id) => in_array((int) $id, $groupIds, true));
+        return $data;
     }
 
     public function deleteAction(): void

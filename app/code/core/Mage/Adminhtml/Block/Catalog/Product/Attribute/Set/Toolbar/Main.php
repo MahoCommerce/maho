@@ -10,12 +10,6 @@
 
 class Mage_Adminhtml_Block_Catalog_Product_Attribute_Set_Toolbar_Main extends Mage_Eav_Block_Adminhtml_Attribute_Set_Toolbar_Main
 {
-    public function __construct()
-    {
-        parent::__construct();
-        $this->setTemplate('catalog/product/attribute/set/toolbar/main.phtml');
-    }
-
     #[\Override]
     protected function _getHeader()
     {

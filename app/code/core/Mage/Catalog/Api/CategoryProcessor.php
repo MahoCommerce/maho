@@ -10,7 +10,6 @@ declare(strict_types=1);
 
 namespace Mage\Catalog\Api;
 
-use Maho\ApiPlatform\Metadata\ValueLists;
 use ApiPlatform\Metadata\DeleteOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use Mage;
@@ -95,7 +94,6 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
 
         // After setData(), which replaces the whole data array including store_id.
         $this->useAdminScope($category);
-        $category->setAttributeSetId($parentCategory->getAttributeSetId() ?: (int) $category->getDefaultAttributeSetId());
 
         if ($data->urlKey !== null) {
             $category->setUrlKey($data->urlKey);
@@ -243,12 +241,7 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
 
     private function applyCategoryData(Mage_Catalog_Model_Category $category, Category $data): void
     {
-        if ($data->attributeSetId !== null) {
-            if (!in_array($data->attributeSetId, ValueLists::categoryAttributeSets(), true)) {
-                throw new UnprocessableEntityHttpException("Attribute set {$data->attributeSetId} is not a category attribute set.");
-            }
-            $category->setAttributeSetId($data->attributeSetId);
-        }
+        $category->assignAttributeSet($data->attributeSetId);
         if ($data->description !== null) {
             $category->setDescription($data->description);
         }

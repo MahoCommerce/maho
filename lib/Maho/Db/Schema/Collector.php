@@ -110,6 +110,23 @@ final class Collector
     }
 
     /**
+     * Return the names of the columns that the schema declares on $tables. Give each name without the table prefix.
+     *
+     * @return list<string>
+     */
+    public static function declaredColumns(string ...$tables): array
+    {
+        [$schema] = self::collect();
+        $columns = [];
+        foreach ($tables as $table) {
+            foreach ($schema->getTable(self::tablePrefix() . $table)->getColumns() as $column) {
+                $columns[] = $column->getObjectName()->getIdentifier()->getValue();
+            }
+        }
+        return $columns;
+    }
+
+    /**
      * Run one schema.php closure. A closure written before DBAL 4.5 takes a
      * Schema and changes it in place, so it gets one built from the editor,
      * and its tables go back into the editor.

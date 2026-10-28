@@ -80,7 +80,7 @@ it('refuses a field whose code is a column of cms_page or a data key of a page',
         ->toThrow(Mage_Core_Exception::class);
 })->with(['title', 'identifier', 'stores', 'store_id']);
 
-it('adds the column of a new field and keeps it after a delete', function () {
+it('adds the column of a new field and drops it after a delete', function () {
     $code = $this->codes['text'];
     $attribute = pageAttributeTestAttribute(['attribute_code' => $code, 'frontend_input' => 'text']);
 
@@ -92,7 +92,7 @@ it('adds the column of a new field and keeps it after a delete', function () {
     Mage::getSingleton('eav/config')->clear();
 
     $this->connection->resetDdlCache($this->table);
-    expect($this->connection->tableColumnExists($this->table, $code))->toBeTrue()
+    expect($this->connection->tableColumnExists($this->table, $code))->toBeFalse()
         ->and(Mage::getResourceSingleton('cms/page')->getCustomAttributes())->not->toHaveKey($code);
 });
 

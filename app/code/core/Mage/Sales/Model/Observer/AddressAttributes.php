@@ -22,7 +22,8 @@ class Mage_Sales_Model_Observer_AddressAttributes
     protected ?array $attributes = null;
 
     /**
-     * Refuse a new address attribute whose code is a column that the sales schema declares.
+     * Refuse a new address attribute whose code is a column of the order addresses: a column that
+     * the sales schema declares, or the column of a deleted attribute, which keeps the values of past quotes and orders.
      */
     #[Maho\Config\Observer('customer_entity_attribute_save_before', id: 'sales_address_attribute_code')]
     public function validateCode(\Maho\Event\Observer $observer): void
@@ -32,7 +33,10 @@ class Mage_Sales_Model_Observer_AddressAttributes
             return;
         }
         $code = (string) $attribute->getAttributeCode();
-        if (in_array($code, $this->getDeclaredColumns(), true)) {
+        $resource = Mage::getSingleton('core/resource');
+        if (in_array($code, \Maho\Db\Schema\Collector::declaredColumns('sales_flat_quote_address', 'sales_flat_order_address'), true)
+            || $resource->getConnection('core_read')->tableColumnExists($resource->getTableName('sales/order_address'), $code)
+        ) {
             Mage::throwException(Mage::helper('sales')->__('The code "%s" is a column of the order addresses. Use another code.', $code));
         }
     }
@@ -176,23 +180,5 @@ class Mage_Sales_Model_Observer_AddressAttributes
             }
         }
         return $ids ? implode(',', $ids) : null;
-    }
-
-    /**
-     * Return the columns that the sales schema declares on the quote and order address tables.
-     *
-     * @return list<string>
-     */
-    protected function getDeclaredColumns(): array
-    {
-        [$schema] = \Maho\Db\Schema\Collector::collect();
-        $prefix = \Maho\Db\Schema\Collector::tablePrefix();
-        $columns = [];
-        foreach (['sales_flat_quote_address', 'sales_flat_order_address'] as $table) {
-            foreach ($schema->getTable($prefix . $table)->getColumns() as $column) {
-                $columns[] = $column->getObjectName()->getIdentifier()->getValue();
-            }
-        }
-        return $columns;
     }
 }

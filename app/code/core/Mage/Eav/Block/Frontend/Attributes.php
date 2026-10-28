@@ -76,11 +76,7 @@ class Mage_Eav_Block_Frontend_Attributes extends Mage_Core_Block_Template
      */
     public function getValueHtml(array $row): string
     {
-        $entity = $this->getEntity();
-        if ($entity instanceof Mage_Catalog_Model_Category) {
-            return (string) $this->helper('catalog/output')->categoryAttribute($entity, $row['value'], $row['code']);
-        }
-        $resource = $entity?->getResource();
+        $resource = $this->getEntity()?->getResource();
         $attribute = $resource instanceof Mage_Eav_Model_Entity_Abstract ? $resource->getAttribute($row['code']) : null;
         if ($attribute instanceof Mage_Eav_Model_Entity_Attribute && $attribute->getData('is_html_allowed_on_front')) {
             $html = Mage::helper('cms')->getPageTemplateProcessor()->filter($row['value']);

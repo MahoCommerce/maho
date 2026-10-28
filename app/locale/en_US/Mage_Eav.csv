@@ -57,6 +57,7 @@
 "Default Product Listing Sort by does not exist in Available Product Listing Sort By.","Default Product Listing Sort by does not exist in Available Product Listing Sort By."
 "Default Value","Default Value"
 "Delete","Delete"
+"Delete this attribute? The records lose their values for it, and you cannot undo this.","Delete this attribute? The records lose their values for it, and you cannot undo this."
 "Dropdown","Dropdown"
 "Edit Attribute ""%s""","Edit Attribute ""%s"""
 "Edit Attribute Set '%s'","Edit Attribute Set '%s'"

@@ -42,7 +42,7 @@ Category default layout
         </reference>
         <reference name="content">
             <block type="catalog/category_view" name="category.products" template="catalog/category/view.phtml">
-                <block type="eav/frontend_attributes" name="category.attributes" as="category.attributes">
+                <block type="catalog/category_attributes" name="category.attributes" as="category.attributes">
                     <action method="setRegistryKey"><key>current_category</key></action>
                 </block>
                 <block type="catalog/product_list" name="product_list" template="catalog/product/list.phtml">
@@ -87,7 +87,7 @@ Category layered navigation layout
         </reference>
         <reference name="content">
             <block type="catalog/category_view" name="category.products" template="catalog/category/view.phtml">
-                <block type="eav/frontend_attributes" name="category.attributes" as="category.attributes">
+                <block type="catalog/category_attributes" name="category.attributes" as="category.attributes">
                     <action method="setRegistryKey"><key>current_category</key></action>
                 </block>
                 <block type="catalog/product_list" name="product_list" template="catalog/product/list.phtml">

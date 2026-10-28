@@ -49,6 +49,7 @@ class Mage_Adminhtml_Block_Customer_Attribute_Edit_Tab_Main extends Mage_Eav_Blo
             'title' => $helper->__('Show in Forms'),
             'values' => $yesno,
             'value' => $attribute->getId() ? null : 1,
+            'disabled' => $attribute->getId() && !$attribute->getIsUserDefined(),
         ]);
         $front->addField('sort_order', 'text', [
             'name' => 'sort_order',

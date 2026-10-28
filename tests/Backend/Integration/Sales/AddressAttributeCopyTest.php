@@ -60,13 +60,14 @@ it('refuses an address attribute whose code is a column of the order addresses',
     ]))->toThrow(Mage_Core_Exception::class);
 });
 
-it('adds the sales columns of a new address attribute and keeps them after a delete', function () {
-    $attribute = addressCopyTestAttribute([
+it('adds the sales columns of a new address attribute, keeps them after a delete, and refuses the code again', function () {
+    $data = [
         'attribute_code' => $this->textCode,
         'backend_type' => 'varchar',
         'frontend_input' => 'text',
         'frontend_label' => 'Delivery Hours',
-    ]);
+    ];
+    $attribute = addressCopyTestAttribute($data);
 
     foreach ($this->tables as $table) {
         expect($this->connection->tableColumnExists($table, $this->textCode))->toBeTrue();
@@ -77,6 +78,8 @@ it('adds the sales columns of a new address attribute and keeps them after a del
         $this->connection->resetDdlCache($table);
         expect($this->connection->tableColumnExists($table, $this->textCode))->toBeTrue();
     }
+    expect(fn() => addressCopyTestAttribute(['frontend_input' => 'select', 'backend_type' => 'int'] + $data))
+        ->toThrow(Mage_Core_Exception::class);
 });
 
 it('copies address attribute values to the quote, to the order with labels, and back on reorder', function () {

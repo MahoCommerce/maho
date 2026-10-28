@@ -199,28 +199,6 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
     }
 
     /**
-     * Return the attribute set that a category saves with.
-     *
-     * A new category takes the set of its parent when the form posts none. A posted set must be a
-     * category attribute set. An existing category keeps its set, as a product does.
-     */
-    protected function _getPostedAttributeSetId(Mage_Catalog_Model_Category $category, int $postedSetId): int
-    {
-        if ($category->getId() && $category->getOrigData('attribute_set_id')) {
-            return (int) $category->getOrigData('attribute_set_id');
-        }
-        if (!$postedSetId) {
-            $parent = Mage::getModel('catalog/category')->load($category->getParentId());
-            return $parent->getAttributeSetId() ?: (int) $category->getDefaultAttributeSetId();
-        }
-        $set = Mage::getModel('eav/entity_attribute_set')->load($postedSetId);
-        if ((int) $set->getEntityTypeId() !== (int) $category->getResource()->getTypeId()) {
-            Mage::throwException(Mage::helper('catalog')->__('The attribute set is not a category attribute set.'));
-        }
-        return $postedSetId;
-    }
-
-    /**
      * Category save
      */
     #[Maho\Config\Route('/admin/catalog_category/save')]
@@ -256,7 +234,12 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
                     ->setPath($parent->getPath())
                     ->setStoreId(Mage_Core_Model_App::ADMIN_STORE_ID);
             }
-            $category->setAttributeSetId($this->_getPostedAttributeSetId($category, (int) ($data['general']['attribute_set_id'] ?? 0)));
+            // An existing category keeps its set, as a product does
+            if ($category->getId() && $category->getOrigData('attribute_set_id')) {
+                $category->setAttributeSetId((int) $category->getOrigData('attribute_set_id'));
+            } else {
+                $category->assignAttributeSet((int) ($data['general']['attribute_set_id'] ?? 0) ?: null);
+            }
 
             // Check "Use Default Value" checkboxes values
             if ($useDefaults = $this->getRequest()->getPost('use_default')) {

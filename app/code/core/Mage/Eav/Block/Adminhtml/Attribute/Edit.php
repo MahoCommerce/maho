@@ -29,6 +29,9 @@ class Mage_Eav_Block_Adminhtml_Attribute_Edit extends Mage_Adminhtml_Block_Widge
 
         if (!$this->getAttribute()->getIsUserDefined()) {
             $this->_removeButton('delete');
+        } else {
+            $message = Mage::helper('eav')->__('Delete this attribute? The records lose their values for it, and you cannot undo this.');
+            $this->_updateButton('delete', 'onclick', Mage::helper('core/js')->getDeleteConfirmJs($this->getDeleteUrl(), $message));
         }
 
         $config = Mage::helper('core')->jsonEncode([
