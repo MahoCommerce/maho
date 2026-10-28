@@ -20,9 +20,6 @@ class Mage_CatalogRule_Model_ApplyAllMessageHandler
         Mage::helper('adminnotification')->runAndNotify(
             function () use ($helper): string {
                 Mage::getModel('catalogrule/rule')->applyAll();
-                Mage::getModel('catalogrule/flag')->loadSelf()
-                    ->setState(0)
-                    ->save();
                 return $helper->__('The catalog prices now use the active catalog price rules.');
             },
             $helper->__('The catalog price rules have been applied'),

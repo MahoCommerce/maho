@@ -166,6 +166,19 @@ describe('runAndNotify()', function () {
     });
 });
 
+/**
+ * Catalog price rule that saves the "rules not applied" flag during applyAll(), as an administrator who saves a rule.
+ */
+class Qaj_Test_RuleSavedDuringRun extends Mage_CatalogRule_Model_Rule
+{
+    #[\Override]
+    protected function _cleanCache()
+    {
+        Mage::getModel('catalogrule/flag')->loadSelf()->setState(1)->save();
+        return parent::_cleanCache();
+    }
+}
+
 describe('Admin actions that run in the queue', function () {
     test('Apply Rules of the catalog price rules queues one run', function () {
         $dedupeKey = Mage_CatalogRule_Model_ApplyAllMessage::DEDUPE_KEY;
@@ -208,6 +221,27 @@ describe('Admin actions that run in the queue', function () {
             ->and($notices)->toHaveCount(1)
             ->and((int) $notices[0]['severity'])->toBe(Mage_AdminNotification_Model_Inbox::SEVERITY_NOTICE)
             ->and(Mage::getSingleton('core/lock')->isHeld(Mage_CatalogRule_Model_Rule::APPLY_LOCK))->toBeFalse();
+    });
+
+    test('a rule saved during the run keeps the "rules not applied" flag, because its change is not in the prices', function () {
+        $flag = Mage::getModel('catalogrule/flag')->loadSelf()->setState(1)->save();
+        // An older time than the save in the run, which writes the current second
+        $resource = Mage::getSingleton('core/resource');
+        $resource->getConnection('core_write')->update(
+            $resource->getTableName('core/flag'),
+            ['last_update' => '2000-01-01 00:00:00'],
+            ['flag_id = ?' => (int) $flag->getId()],
+        );
+
+        Mage::getConfig()->setNode('global/models/catalogrule/rewrite/rule', Qaj_Test_RuleSavedDuringRun::class);
+
+        (new Mage_CatalogRule_Model_ApplyAllMessageHandler())
+            ->applyAll(new Mage_CatalogRule_Model_ApplyAllMessage(qajAdminUserId()));
+        $state = (int) Mage::getModel('catalogrule/flag')->loadSelf()->getState();
+        Mage::getModel('catalogrule/flag')->loadSelf()->setState(0)->save();
+        qajTakeNotices('The catalog price rules have been applied');
+
+        expect($state)->toBe(1);
     });
 
     test('Generate of a sitemap queues one run for each sitemap', function () {

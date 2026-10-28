@@ -269,7 +269,8 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
     }
 
     /**
-     * Apply all price rules, clean related cache and refresh price index
+     * Apply all price rules, clean related cache and refresh price index. Then clear the "rules not
+     * applied" flag, unless a rule changed during the run.
      *
      * @throws Exception
      */
@@ -281,6 +282,8 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
             throw new RuntimeException(Mage::helper('catalogrule')->__('Another run of the catalog price rules is in progress.'));
         }
         try {
+            // Read before the rules: a save during the run changes this time, and its rule is not in the prices
+            $flagUpdatedAt = Mage::getModel('catalogrule/flag')->loadSelf()->getLastUpdate();
             $this->getResourceCollection()->walk([$this->_getResource(), 'updateRuleProductData']);
             $this->_getResource()->applyAllRules();
             $this->_cleanCache();
@@ -288,6 +291,10 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
             if ($indexProcess) {
                 $indexProcess->changeStatus(Mage_Index_Model_Process::STATUS_REQUIRE_REINDEX);
                 $indexProcess->reindexAll();
+            }
+            $flag = Mage::getModel('catalogrule/flag')->loadSelf();
+            if ($flag->getLastUpdate() === $flagUpdatedAt) {
+                $flag->setState(0)->save();
             }
         } finally {
             $lock->release(self::APPLY_LOCK);
