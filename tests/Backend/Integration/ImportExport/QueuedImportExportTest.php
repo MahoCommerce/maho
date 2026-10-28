@@ -106,6 +106,23 @@ describe('Import/Export in the queue', function () {
         }
     });
 
+    test('an import that runs counts as in progress, so a second import does not start', function () {
+        qieTakeMessages(Mage_ImportExport_Model_ImportMessage::class);
+        $lock = Mage::getSingleton('core/lock');
+
+        expect($lock->acquire(Mage_ImportExport_Model_Import::IMPORT_LOCK))->toBeTrue();
+        try {
+            $inProgress = Mage_ImportExport_Model_Import::isImportInProgress();
+            expect(fn() => Mage::getModel('importexport/import')->importSource())
+                ->toThrow(Mage_Core_Exception::class, 'An import waits or runs');
+        } finally {
+            $lock->release(Mage_ImportExport_Model_Import::IMPORT_LOCK);
+        }
+
+        expect($inProgress)->toBeTrue()
+            ->and(Mage_ImportExport_Model_Import::isImportInProgress())->toBeFalse();
+    });
+
     test('the validate action refuses a new file while a queued import waits', function () {
         qieTakeMessages(Mage_ImportExport_Model_ImportMessage::class);
         Mage::getModel('importexport/import')->queueImportSource();
