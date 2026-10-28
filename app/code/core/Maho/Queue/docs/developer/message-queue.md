@@ -76,6 +76,11 @@ QueueManager::dispatch(
 | `$dedupeKey` | `null` | While a pending or processing message with the same key exists, dispatching is a no-op (DB transport) |
 | `$stamps` | `[]` | Additional Messenger stamps, for advanced cases |
 
+A job that reads its data when it starts, such as the application of rules, passes
+`stamps: [new \Maho\Queue\Stamp\DedupeKeyStamp($key, pendingOnly: true)]` in place of `$dedupeKey`.
+Then only a pending message drops the new one. A request that comes while the job runs queues one
+more run, so the changes that the running job did not read are applied too.
+
 `dispatch()` returns the Messenger `Envelope` and throws a `RuntimeException` if the `Maho_Queue` module
 is disabled.
 

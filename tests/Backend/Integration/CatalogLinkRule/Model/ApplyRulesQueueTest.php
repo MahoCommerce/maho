@@ -81,6 +81,28 @@ describe('CatalogLinkRule apply from the admin', function () {
             ->and($messages[0]['message_class'])->toBe(Maho_CatalogLinkRule_Model_ApplyRulesMessage::class);
     });
 
+    test('a click while a run is in progress queues one more run, because the run read the rules at its start', function () {
+        $linkType = Mage_Catalog_Model_Product_Link::LINK_TYPE_UPSELL;
+        $dedupeKey = 'cataloglinkrule_apply_' . $linkType;
+        clqDeleteMessages($dedupeKey);
+        $resource = Mage::getSingleton('core/resource');
+
+        $processor = Mage::getModel('cataloglinkrule/processor');
+        $processor->queueApplyRules($linkType);
+        $resource->getConnection('core_write')->update(
+            $resource->getTableName('queue/message'),
+            ['status' => Maho\Queue\Transport\DbTransport::STATUS_PROCESSING, 'claimed_at' => Mage_Core_Model_Locale::nowUtc()],
+            ['dedupe_key = ?' => $dedupeKey],
+        );
+        $processor->queueApplyRules($linkType);
+        $processor->queueApplyRules($linkType);
+        $statuses = array_column(clqMessages($dedupeKey), 'status');
+        clqDeleteMessages($dedupeKey);
+        sort($statuses);
+
+        expect($statuses)->toBe([Maho\Queue\Transport\DbTransport::STATUS_PENDING, Maho\Queue\Transport\DbTransport::STATUS_PROCESSING]);
+    });
+
     test('a finished run sends a notice to the administrator who started it', function () {
         $adminUserId = clqAdminUserId();
         clqTakeNotices($adminUserId);

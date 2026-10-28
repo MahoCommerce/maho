@@ -180,6 +180,22 @@ describe('Admin actions that run in the queue', function () {
             ->and($messages[0]['message_class'])->toBe(Mage_CatalogRule_Model_ApplyAllMessage::class);
     });
 
+    test('Apply Rules while the catalog price rules are applied queues one more run', function () {
+        $dedupeKey = Mage_CatalogRule_Model_ApplyAllMessage::DEDUPE_KEY;
+        qajTakeMessages($dedupeKey);
+        $resource = Mage::getSingleton('core/resource');
+
+        Mage::getModel('catalogrule/rule')->queueApplyAll(qajAdminUserId());
+        $resource->getConnection('core_write')->update(
+            $resource->getTableName('queue/message'),
+            ['status' => Maho\Queue\Transport\DbTransport::STATUS_PROCESSING, 'claimed_at' => Mage_Core_Model_Locale::nowUtc()],
+            ['dedupe_key = ?' => $dedupeKey],
+        );
+        Mage::getModel('catalogrule/rule')->queueApplyAll(qajAdminUserId());
+
+        expect(qajTakeMessages($dedupeKey))->toHaveCount(2);
+    });
+
     test('the apply handler clears the "rules not applied" flag and sends a notice', function () {
         Mage::getModel('catalogrule/flag')->loadSelf()->setState(1)->save();
 

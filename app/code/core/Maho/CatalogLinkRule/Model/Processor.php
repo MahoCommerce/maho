@@ -50,15 +50,16 @@ class Maho_CatalogLinkRule_Model_Processor
 
     /**
      * Queue applyRules() for $linkTypeId. A second request for the same link type is dropped
-     * while the first one waits or runs. The result goes to the inbox of $adminUserId, or of every
-     * administrator who can manage the rules when it is null.
+     * while the first one waits. A request that comes while it runs queues one more run, because
+     * the run read the rules at its start. The result goes to the inbox of $adminUserId, or of
+     * every administrator who can manage the rules when it is null.
      */
     public function queueApplyRules(?int $linkTypeId = null, ?int $adminUserId = null): void
     {
         \Maho\Queue\QueueManager::dispatch(
             new Maho_CatalogLinkRule_Model_ApplyRulesMessage($linkTypeId, $adminUserId),
             queue: self::QUEUE_NAME,
-            dedupeKey: 'cataloglinkrule_apply_' . ($linkTypeId ?? 'all'),
+            stamps: [new \Maho\Queue\Stamp\DedupeKeyStamp('cataloglinkrule_apply_' . ($linkTypeId ?? 'all'), pendingOnly: true)],
         );
     }
 

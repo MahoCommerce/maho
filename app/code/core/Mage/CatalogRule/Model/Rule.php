@@ -276,7 +276,8 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
     }
 
     /**
-     * Queue applyAll(). A second request is dropped while the first one waits or runs. The result
+     * Queue applyAll(). A second request is dropped while the first one waits. A request that comes
+     * while it runs queues one more run, because the run read the rules at its start. The result
      * goes to the inbox of $adminUserId.
      */
     public function queueApplyAll(?int $adminUserId = null): void
@@ -284,7 +285,7 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
         \Maho\Queue\QueueManager::dispatch(
             new Mage_CatalogRule_Model_ApplyAllMessage($adminUserId),
             queue: Mage_CatalogRule_Model_ApplyAllMessage::QUEUE_NAME,
-            dedupeKey: Mage_CatalogRule_Model_ApplyAllMessage::DEDUPE_KEY,
+            stamps: [new \Maho\Queue\Stamp\DedupeKeyStamp(Mage_CatalogRule_Model_ApplyAllMessage::DEDUPE_KEY, pendingOnly: true)],
         );
     }
 

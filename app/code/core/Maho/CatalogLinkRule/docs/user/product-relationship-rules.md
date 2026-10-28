@@ -372,7 +372,7 @@ Both buttons put the run in the message queue, so the page does not wait. A queu
 
 When the run is complete, the administrator who clicked the button gets a message in **System > Notifications**. If the run fails, the message has the error. When the cause is not in the data, for example a lost database connection, the queue tries the run again.
 
-If you click a button again while a run of the same link type waits or runs, Maho does not add a second run.
+If you click a button again while a run of the same link type waits, Maho does not add a second run. If you click while a run is in progress, Maho adds one more run after it, because the run read the rules when it started.
 
 ### Automatic Processing (Cron)
 

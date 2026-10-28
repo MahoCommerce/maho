@@ -110,7 +110,7 @@ final class DbTransport implements TransportInterface, QueueReceiverInterface, L
             $lockName = 'queue_dedupe_' . $dedupeStamp->key;
             $locked = $lock->acquire($lockName, blocking: true);
             try {
-                if ($this->inFlightRowExists($dedupeStamp->key)) {
+                if ($this->inFlightRowExists($dedupeStamp->key, pendingOnly: $dedupeStamp->pendingOnly)) {
                     return $envelope;
                 }
                 return $this->insertEnvelope($envelope, $availableAt, $now);
@@ -389,9 +389,10 @@ final class DbTransport implements TransportInterface, QueueReceiverInterface, L
 
     /**
      * A pending or freshly claimed row already carries this dedupe key: gates
-     * both new dispatches and the admin retry of an older copy.
+     * both new dispatches and the admin retry of an older copy. With
+     * $pendingOnly, only a pending row counts.
      */
-    public function inFlightRowExists(string $dedupeKey, ?int $excludeMessageId = null): bool
+    public function inFlightRowExists(string $dedupeKey, ?int $excludeMessageId = null, bool $pendingOnly = false): bool
     {
         // A claim a dead worker left behind waits for an operator forever, so it
         // must not keep suppressing new dispatches of the same key: that would
@@ -400,7 +401,7 @@ final class DbTransport implements TransportInterface, QueueReceiverInterface, L
         $select = $this->adapter->select()
             ->from($this->table, 'message_id')
             ->where('dedupe_key = ?', $dedupeKey)
-            ->where('status IN (?)', [self::STATUS_PENDING, self::STATUS_PROCESSING])
+            ->where('status IN (?)', $pendingOnly ? [self::STATUS_PENDING] : [self::STATUS_PENDING, self::STATUS_PROCESSING])
             ->where('claimed_at IS NULL OR claimed_at >= ?', self::abandonedBefore())
             ->limit(1);
         if ($excludeMessageId !== null) {
