@@ -86,31 +86,32 @@ class Maho_CatalogLinkRule_Model_Processor
      */
     public function applyRules(?int $linkTypeId = null): void
     {
-        // Get all active rules, ordered by priority
-        $rules = Mage::getResourceModel('cataloglinkrule/rule_collection')
-            ->addFieldToFilter('is_active', 1)
-            ->addDateFilter()
-            ->setOrder('priority', 'ASC')
-            ->setOrder('rule_id', 'ASC');
-        if ($linkTypeId !== null) {
-            $rules->addFieldToFilter('link_type_id', $linkTypeId);
-        }
-
-        // Group by link_type_id
-        $rulesByType = [];
-        foreach ($rules as $rule) {
-            $rulesByType[$rule->getLinkTypeId()][] = $rule;
-        }
-
-        // The cron job and the queue worker write the same links, so only one run writes at a time
+        // The cron job and the queue worker write the same links, so a run waits for the other one.
+        // It reads the rules after the wait, so it applies the changes that an administrator made.
         $lock = Mage::getSingleton('core/lock');
-        if (!$lock->acquire('cataloglinkrule_apply')) {
+        if (!$lock->acquire('cataloglinkrule_apply', true)) {
             throw new RuntimeException(Mage::helper('cataloglinkrule')->__('Another run of the product relationship rules is in progress.'));
         }
         try {
+            // Get all active rules, ordered by priority
+            $rules = Mage::getResourceModel('cataloglinkrule/rule_collection')
+                ->addFieldToFilter('is_active', 1)
+                ->addDateFilter()
+                ->setOrder('priority', 'ASC')
+                ->setOrder('rule_id', 'ASC');
+            if ($linkTypeId !== null) {
+                $rules->addFieldToFilter('link_type_id', $linkTypeId);
+            }
+
+            // Group by link_type_id
+            $rulesByType = [];
+            foreach ($rules as $rule) {
+                $rulesByType[$rule->getLinkTypeId()][] = $rule;
+            }
+
             // Process each link type separately
-            foreach ($rulesByType as $linkTypeId => $typeRules) {
-                $this->processLinkType((int) $linkTypeId, $typeRules);
+            foreach ($rulesByType as $typeId => $typeRules) {
+                $this->processLinkType((int) $typeId, $typeRules);
             }
         } finally {
             $lock->release('cataloglinkrule_apply');

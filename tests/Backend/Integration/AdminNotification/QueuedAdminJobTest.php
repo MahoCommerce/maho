@@ -54,7 +54,41 @@ function qajTakeMessages(string $dedupeKey): array
     return $messages;
 }
 
+/**
+ * Observer of the admin area, to check that a queued job runs the observers of the admin request.
+ */
+class Qaj_Test_AdminAreaProbe
+{
+    public static int $calls = 0;
+
+    public function record(): void
+    {
+        self::$calls++;
+    }
+}
+
 describe('runAndNotify()', function () {
+    test('the job runs the observers of the admin area', function () {
+        $title = 'qaj-area-' . uniqid();
+        Qaj_Test_AdminAreaProbe::$calls = 0;
+        Mage::getConfig()->setNode('adminhtml/events/qaj_area_event/observers/qaj/class', Qaj_Test_AdminAreaProbe::class);
+        Mage::getConfig()->setNode('adminhtml/events/qaj_area_event/observers/qaj/method', 'record');
+
+        Mage::helper('adminnotification')->runAndNotify(
+            function (): string {
+                Mage::dispatchEvent('qaj_area_event');
+                return 'qaj-ok';
+            },
+            $title,
+            'qaj-failed',
+            'adminhtml/dashboard/index',
+            qajAdminUserId(),
+        );
+        qajTakeNotices($title);
+
+        expect(Qaj_Test_AdminAreaProbe::$calls)->toBe(1);
+    });
+
     test('a finished job sends its text as a notice to the administrator', function () {
         $title = 'qaj-done-' . uniqid();
         $adminUserId = qajAdminUserId();

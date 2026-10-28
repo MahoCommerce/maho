@@ -114,6 +114,13 @@ class Mage_ImportExport_Adminhtml_ImportController extends Mage_Adminhtml_Contro
                     Mage_ImportExport_Model_Import::FIELD_NAME_SOURCE_FILE,
                     Mage_ImportExport_Model_Import::FIELD_NAME_IMG_ARCHIVE_FILE]);
 
+            // validateSource() refuses too, but its error would come with the advice to fix the file
+            if (Mage_ImportExport_Model_Import::isImportInProgress()) {
+                $resultBlock->addError($this->__('An import waits or runs. Start a new import when it is done.'));
+                $this->renderLayout();
+                return;
+            }
+
             try {
                 /** @var Mage_ImportExport_Model_Import $import */
                 $import = Mage::getModel('importexport/import');

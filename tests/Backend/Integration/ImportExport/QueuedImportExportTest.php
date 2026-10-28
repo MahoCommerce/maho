@@ -200,6 +200,11 @@ describe('Import/Export in the queue', function () {
         }
     });
 
+    test('the daily cleanup is registered as a cron job', function () {
+        expect(Maho::getCompiledAttributes()['crontab']['importexport_delete_expired_exports'] ?? null)
+            ->toMatchArray(['alias' => 'importexport/export', 'method' => 'deleteExpiredFiles']);
+    });
+
     test('the daily cleanup deletes the export files that are older than the lifetime', function () {
         $export = Mage::getModel('importexport/export');
         $mount = $export->getStorage();

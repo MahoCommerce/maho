@@ -109,6 +109,25 @@ describe('CatalogLinkRule apply from the admin', function () {
             ->and($notices[0]['description'])->toContain('clq-failure');
     });
 
+    test('a run of the rules fails when it cannot take the lock, and a run releases the lock at its end', function () {
+        $lock = Mage::getSingleton('core/lock');
+        $processor = Mage::getModel('cataloglinkrule/processor');
+
+        expect($lock->acquire('cataloglinkrule_apply'))->toBeTrue();
+        try {
+            expect(fn() => $processor->applyRules(999999))
+                ->toThrow(RuntimeException::class, 'Another run of the product relationship rules is in progress.');
+        } finally {
+            $lock->release('cataloglinkrule_apply');
+        }
+
+        $processor->applyRules(999999);
+        $free = $lock->acquire('cataloglinkrule_apply');
+        $lock->release('cataloglinkrule_apply');
+
+        expect($free)->toBeTrue();
+    });
+
     test('a queue worker has a handler for the apply message', function () {
         expect(Maho\Queue\HandlerRegistry::allowedMessageClasses())
             ->toContain(Maho_CatalogLinkRule_Model_ApplyRulesMessage::class);

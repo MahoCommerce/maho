@@ -52,7 +52,7 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
     }
 
     #[\Override]
-    public function save()
+    public function save(): static
     {
         parent::save();
         // _afterSave() compares with the original link type, so a second save must see this one

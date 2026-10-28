@@ -138,19 +138,20 @@ class Maho_CustomerSegmentation_Service_Segment
      */
     public function queueRefresh(Maho_CustomerSegmentation_Model_Segment $segment, ?int $adminUserId = null): void
     {
-        $message = new Maho_CustomerSegmentation_Model_RefreshMessage((int) $segment->getId(), $adminUserId);
-        \Maho\Queue\QueueManager::dispatch(
-            $message,
-            queue: Maho_CustomerSegmentation_Model_RefreshMessage::QUEUE_NAME,
-            dedupeKey: $message->getDedupeKey(),
-        );
-
-        // Only the status column: a full save of the segment runs its save hooks
+        // Only the status column: a full save of the segment runs its save hooks. It comes first,
+        // so it cannot overwrite the status of a worker that finishes the refresh at once.
         Mage::getSingleton('core/resource')->getConnection('core_write')->update(
             $segment->getResource()->getMainTable(),
             ['refresh_status' => Maho_CustomerSegmentation_Model_Segment::STATUS_PENDING],
             ['segment_id = ?' => (int) $segment->getId()],
         );
         $segment->setRefreshStatus(Maho_CustomerSegmentation_Model_Segment::STATUS_PENDING);
+
+        $message = new Maho_CustomerSegmentation_Model_RefreshMessage((int) $segment->getId(), $adminUserId);
+        \Maho\Queue\QueueManager::dispatch(
+            $message,
+            queue: Maho_CustomerSegmentation_Model_RefreshMessage::QUEUE_NAME,
+            dedupeKey: $message->getDedupeKey(),
+        );
     }
 }
