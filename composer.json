@@ -12,7 +12,7 @@
     ],
     "type": "maho-source",
     "require": {
-        "php": ">=8.5",
+        "php": ">=8.5.1",
         "ext-ctype": "*",
         "ext-curl": "*",
         "ext-dom": "*",
@@ -183,7 +183,7 @@
             "tbachert/spi": false
         },
         "platform": {
-            "php": "8.5"
+            "php": "8.5.1"
         },
         "process-timeout": 1800
     }
