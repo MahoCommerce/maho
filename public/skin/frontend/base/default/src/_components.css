@@ -1991,18 +1991,32 @@
                 grid-column: 2;
             }
 
-            /* Too narrow for one row: qty and links share the first row, the CTA takes the full second row */
-            @container (max-width: 30rem) {
+            &:not(:has(> .add-to-links)) .add-to-cart {
+                grid-column: 1 / -1;
+            }
+
+            /* Qty, a 10rem CTA and the links do not fit in one row: qty and links
+               share the first row, the CTA takes the full second row */
+            @container (max-width: 24.5rem) {
+                &:has(> .add-to-links > :nth-child(2)) .add-to-cart:has(> .qty-wrapper) {
+                    display: contents;
+                }
+            }
+
+            @container (max-width: 21rem) {
                 .add-to-cart:has(> .qty-wrapper) {
                     display: contents;
+                }
+            }
 
-                    .add-to-cart-buttons {
-                        grid-column: 1 / -1;
-                    }
+            /* Takes effect only when .add-to-cart is display: contents */
+            .add-to-cart:has(> .qty-wrapper) {
+                .add-to-cart-buttons {
+                    grid-column: 1 / -1;
+                }
 
-                    ~ .add-to-links {
-                        grid-row: 1;
-                    }
+                ~ .add-to-links {
+                    grid-row: 1;
                 }
             }
         }
@@ -2028,7 +2042,7 @@
             @apply flex flex-1 flex-wrap items-center gap-3;
 
             .btn-cart {
-                @apply btn-lg min-w-48 flex-1;
+                @apply btn-lg min-w-40 flex-1;
             }
         }
 
