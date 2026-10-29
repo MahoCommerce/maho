@@ -61,6 +61,22 @@ describe('configured lifetime', function () {
             ->toBe(604800);
     })->with([[null], [''], ['0']]);
 
+    it('clamps a low storefront lifetime to the storefront minimum', function () {
+        Mage::app()->getStore()->setConfig('web/cookie/cookie_lifetime', '5');
+
+        expect(resolveLifetime(Mage_Core_Controller_Front_Action::SESSION_NAMESPACE))
+            ->toBe(Mage_Core_Controller_Front_Action::SESSION_MIN_LIFETIME);
+    });
+
+    it('uses the default Remember Me lifetime when the stored value is empty', function () {
+        Mage::app()->getStore()->setConfig('web/cookie/remember_enabled', '1');
+        Mage::app()->getStore()->setConfig('web/cookie/cookie_lifetime', '86400');
+        Mage::app()->getStore()->setConfig('web/cookie/remember_cookie_lifetime', '');
+
+        expect(resolveLifetime(Mage_Core_Controller_Front_Action::SESSION_NAMESPACE, true))
+            ->toBe(Mage_Core_Controller_Front_Action::SESSION_REMEMBER_DEFAULT_LIFETIME);
+    });
+
     it('clamps the storefront lifetime down to SESSION_MAX_LIFETIME', function () {
         Mage::app()->getStore()->setConfig('web/cookie/cookie_lifetime', '99999999999');
 

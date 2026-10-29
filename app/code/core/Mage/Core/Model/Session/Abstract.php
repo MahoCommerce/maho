@@ -142,14 +142,14 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
         int|string|Mage_Core_Model_Store|null $store = null,
     ): int {
         if ($sessionName === Mage_Core_Controller_Front_Action::SESSION_NAMESPACE) {
-            $path = $rememberMe && Mage::getStoreConfigFlag(self::XML_PATH_REMEMBER_ENABLED, $store)
-                ? self::XML_PATH_REMEMBER_LIFETIME
-                : self::XML_PATH_COOKIE_LIFETIME;
+            [$path, $default] = $rememberMe && Mage::getStoreConfigFlag(self::XML_PATH_REMEMBER_ENABLED, $store)
+                ? [self::XML_PATH_REMEMBER_LIFETIME, Mage_Core_Controller_Front_Action::SESSION_REMEMBER_DEFAULT_LIFETIME]
+                : [self::XML_PATH_COOKIE_LIFETIME, Mage_Core_Controller_Front_Action::SESSION_DEFAULT_LIFETIME];
 
             return max(
                 Mage_Core_Controller_Front_Action::SESSION_MIN_LIFETIME,
                 min(
-                    self::getConfiguredLifetime($path, Mage_Core_Controller_Front_Action::SESSION_DEFAULT_LIFETIME, $store),
+                    self::getConfiguredLifetime($path, $default, $store),
                     Mage_Core_Controller_Front_Action::SESSION_MAX_LIFETIME,
                 ),
             );
@@ -414,15 +414,11 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
     /** Longest lifetime a store can hand out, for callers that cannot know which policy applies */
     protected static function getLongestConfiguredSessionLifetime(int|string|Mage_Core_Model_Store|null $store = null): int
     {
-        $rememberLifetime = Mage::getStoreConfigFlag(self::XML_PATH_REMEMBER_ENABLED, $store)
-            ? Mage::getStoreConfigAsInt(self::XML_PATH_REMEMBER_LIFETIME, $store)
-            : 0;
-
         return min(
             max(
-                Mage::getStoreConfigAsInt(self::XML_PATH_ADMIN_LIFETIME, $store),
-                Mage::getStoreConfigAsInt(self::XML_PATH_COOKIE_LIFETIME, $store),
-                $rememberLifetime,
+                self::resolveConfiguredSessionLifetime(Mage_Adminhtml_Controller_Action::SESSION_NAMESPACE, false, $store),
+                self::resolveConfiguredSessionLifetime(Mage_Core_Controller_Front_Action::SESSION_NAMESPACE, false, $store),
+                self::resolveConfiguredSessionLifetime(Mage_Core_Controller_Front_Action::SESSION_NAMESPACE, true, $store),
                 self::DEFAULT_SESSION_LIFETIME,
             ),
             Mage_Core_Controller_Front_Action::SESSION_MAX_LIFETIME,
