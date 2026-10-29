@@ -113,7 +113,7 @@ $orderStoreDate = $this->formatDate($_order->getCreatedAtStoreDate(), 'medium', 
                     <td class="label"><label><?= Mage::helper('sales')->__('Email') ?></label></td>
                     <td class="value">
                         <a href="mailto:<?= $this->escapeHtml($_order->getCustomerEmail()) ?>" data-copy-text="<?= $this->escapeHtml($_order->getCustomerEmail()) ?>"><strong><?= $this->escapeHtml($_order->getCustomerEmail()) ?></strong></a>
-                        <?php if ($_order->getCustomerIsGuest()): ?>
+                        <?php if ($_order->getCustomerIsGuest() && $this->canEditOrder()): ?>
                             <button type="button" onclick="updateGuestEmail()"><?= Mage::helper('sales')->__('Edit') ?></button>
                         <?php endif ?>
                     </td>
@@ -165,7 +165,7 @@ $orderStoreDate = $this->formatDate($_order->getCreatedAtStoreDate(), 'medium', 
 <div class="clear"></div>
 <?php endif ?>
 
-<?php if ($_order->getCustomerIsGuest()): ?>
+<?php if ($_order->getCustomerIsGuest() && $this->canEditOrder()): ?>
 <script>
 function updateGuestEmail() {
     const currentEmail = <?= Mage::helper('core')->jsonEncode($_order->getCustomerEmail()) ?>;

@@ -69,7 +69,7 @@ class Mage_Shipping_Model_Info extends \Maho\DataObject
     {
         $order = Mage::getModel('sales/order')->load($this->getOrderId());
 
-        if (!$order->getId() || $this->getProtectCode() !== $order->getProtectCode()) {
+        if (!$order->getId() || !$this->isProtectCodeValid($order->getProtectCode())) {
             return false;
         }
 
@@ -86,11 +86,19 @@ class Mage_Shipping_Model_Info extends \Maho\DataObject
         /** @var Mage_Sales_Model_Order_Shipment $model */
         $model = Mage::getModel('sales/order_shipment');
         $ship = $model->load($this->getShipId());
-        if (!$ship->getEntityId() || $this->getProtectCode() !== $ship->getProtectCode()) {
+        if (!$ship->getEntityId() || !$this->isProtectCodeValid($ship->getProtectCode())) {
             return false;
         }
 
         return $ship;
+    }
+
+    /**
+     * Compare the protect code of the request with $expected in constant time.
+     */
+    protected function isProtectCodeValid(?string $expected): bool
+    {
+        return hash_equals((string) $expected, (string) $this->getProtectCode());
     }
 
     /**
@@ -151,7 +159,7 @@ class Mage_Shipping_Model_Info extends \Maho\DataObject
     public function getTrackingInfoByTrackId()
     {
         $track = Mage::getModel('sales/order_shipment_track')->load($this->getTrackId());
-        if ($track->getId() && $this->getProtectCode() === $track->getProtectCode()) {
+        if ($track->getId() && $this->isProtectCodeValid($track->getProtectCode())) {
             $this->_trackingInfo = [[$track->getNumberDetail()]];
         }
         return $this->_trackingInfo;

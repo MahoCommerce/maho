@@ -199,3 +199,23 @@ it('automatically generates guid from link if not provided', function () {
     expect($guid)->not->toBeNull();
     expect($guid->textContent)->toBe('https://example.com/item1');
 });
+
+it('writes the channel description as text, so a feed reader does not render it as HTML', function () {
+    $rss = Mage::getModel('rss/rss');
+    $rss->_addHeader([
+        'title' => 'Products tagged with <img src=x onerror=alert(1)>',
+        'description' => 'Products tagged with <img src=x onerror=alert(1)>]]><b>',
+        'link' => 'https://example.com',
+        'charset' => 'UTF-8',
+    ]);
+
+    $xml = $rss->createRssXml();
+
+    $dom = new DOMDocument();
+    expect($dom->loadXML($xml))->toBeTrue();
+    $description = $dom->getElementsByTagName('channel')->item(0)->getElementsByTagName('description')->item(0);
+    expect($description->firstChild)->toBeInstanceOf(DOMText::class)
+        ->and($description->firstChild)->not->toBeInstanceOf(DOMCdataSection::class)
+        ->and($description->textContent)->toBe('Products tagged with <img src=x onerror=alert(1)>]]><b>')
+        ->and($xml)->not->toContain('<img src=x');
+});
