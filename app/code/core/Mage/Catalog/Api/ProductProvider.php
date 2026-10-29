@@ -592,13 +592,16 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
                 foreach (is_array($value) ? $value : explode(',', (string) $value) as $optionId) {
                     $optionId = trim((string) $optionId);
                     if ($optionId !== '') {
-                        $conditions[] = ['finset' => $optionId];
+                        $conditions[] = ['finset' => $this->optionId($attribute, $optionId)];
                     }
                 }
                 if ($conditions !== []) {
                     $collection->addAttributeToFilter($code, $conditions);
                 }
                 continue;
+            }
+            if ($attribute->getId() && $attribute->getFrontendInput() === 'select' && is_scalar($value)) {
+                $value = $this->optionId($attribute, trim((string) $value));
             }
             $collection->addAttributeToFilter($code, $value);
         }
@@ -699,6 +702,42 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
 
         // Return paginator with total count for proper pagination
         return new TraversablePaginator(new \ArrayIterator($products), $page, $pageSize, (int) $result['total']);
+    }
+
+    /**
+     * Return the option ID that $value names in the options of $attribute. $value is an option ID,
+     * the admin label of an option or its label in the current store, in any letter case. An
+     * attribute without options in the option table, such as visibility, keeps $value.
+     *
+     * @throws BadRequestHttpException when $value is not a number and no label matches it
+     */
+    private function optionId(\Mage_Eav_Model_Entity_Attribute_Abstract $attribute, string $value): string
+    {
+        $options = \Mage::getResourceModel('eav/entity_attribute_option_collection')
+            ->setAttributeFilter((int) $attribute->getId())
+            ->setStoreFilter((int) StoreContext::getStore()->getId());
+        if ($options->count() === 0 || (ctype_digit($value) && $options->getItemById((int) $value))) {
+            return $value;
+        }
+
+        $label = mb_strtolower($value);
+        foreach ($options as $option) {
+            if (mb_strtolower((string) $option->getData('default_value')) === $label
+                || mb_strtolower((string) $option->getData('value')) === $label
+            ) {
+                return (string) $option->getId();
+            }
+        }
+
+        if (ctype_digit($value)) {
+            return $value;
+        }
+
+        throw new BadRequestHttpException(sprintf(
+            'attributeFilters: the attribute %s has no option "%s". Give the label of an option as the admin shows it, or its option ID.',
+            $attribute->getAttributeCode(),
+            $value,
+        ));
     }
 
     /**

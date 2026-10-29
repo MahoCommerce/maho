@@ -279,6 +279,10 @@ Filters work the same way, and a list tool advertises the ones its resource decl
 | `tax_tax_rates_list` | `search`, `taxCountryId` |
 | `sales_coupons_list` | `code`, `is_active` |
 
+### Attribute filters
+
+`attributeFilters` is a JSON object of attribute codes and values: `{"manufacturer":"Acme","color":"Black"}`. A select or multiselect attribute takes the label of an option or its option ID. The label is the admin label or the label of the store view, in any letter case. A label that no option has returns a 400 error. In REST, the same filter is `attr_<code>=<value>`.
+
 ### Date ranges
 
 `createdFrom`, `createdTo` and `updatedSince` take a UTC date (`2026-07-29`) or datetime (`2026-07-29 14:30:00`). A bare date on `createdTo` covers the **whole** day, so a single day is `createdFrom` and `createdTo` set to the same value:
