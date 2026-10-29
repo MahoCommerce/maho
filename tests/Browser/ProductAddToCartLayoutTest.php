@@ -47,18 +47,13 @@ function visitBuyBoxOnPhone(int $count): object
     return $page;
 }
 
-it('shows the add to cart button between the qty and the link on a phone', function () {
-    $page = visitBuyBoxOnPhone(1);
-
-    expect($page->script('Math.abs(' . BUY_BOX_BUTTON . '.top - ' . BUY_BOX_QTY . '.top) < 2'))->toBeTrue()
-        ->and($page->script(BUY_BOX_BUTTON . '.left > ' . BUY_BOX_QTY . '.right'))->toBeTrue()
-        ->and($page->script(BUY_BOX_LINKS . '.left - ' . BUY_BOX_BUTTON . '.right < 16'))->toBeTrue();
-});
-
-it('shows the add to cart button at the full width below the qty and the links on a phone when they do not fit in one row', function () {
-    $page = visitBuyBoxOnPhone(2);
+it('shows the add to cart button at the full width below the qty and the links on a phone', function (int $count) {
+    $page = visitBuyBoxOnPhone($count);
 
     $box = "document.querySelector('.btn-cart').closest('.add-to-box, .product-options-bottom').getBoundingClientRect()";
     expect($page->script('Math.round(' . BUY_BOX_BUTTON . ".width) === Math.round({$box}.width)"))->toBeTrue()
         ->and($page->script(BUY_BOX_LINKS . '.top < ' . BUY_BOX_QTY . '.bottom && ' . BUY_BOX_LINKS . '.bottom > ' . BUY_BOX_QTY . '.top'))->toBeTrue();
-});
+})->with([
+    'wishlist' => 1,
+    'wishlist and compare' => 2,
+]);

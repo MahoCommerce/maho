@@ -1995,15 +1995,15 @@
                 grid-column: 1 / -1;
             }
 
-            /* Qty, a 10rem CTA and the links do not fit in one row: qty and links
-               share the first row, the CTA takes the full second row */
-            @container (max-width: 24.5rem) {
+            /* Qty and gap (7rem), the 12rem CTA and 3.625rem for each link do not fit in
+               one row: qty and links share the first row, the CTA takes the full second row */
+            @container (max-width: 26.5rem) {
                 &:has(> .add-to-links > :nth-child(2)) .add-to-cart:has(> .qty-wrapper) {
                     display: contents;
                 }
             }
 
-            @container (max-width: 21rem) {
+            @container (max-width: 23rem) {
                 .add-to-cart:has(> .qty-wrapper) {
                     display: contents;
                 }
@@ -2042,7 +2042,7 @@
             @apply flex flex-1 flex-wrap items-center gap-3;
 
             .btn-cart {
-                @apply btn-lg min-w-40 flex-1;
+                @apply btn-lg min-w-48 flex-1;
             }
         }
 
