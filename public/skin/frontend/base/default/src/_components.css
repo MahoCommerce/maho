@@ -2009,14 +2009,16 @@
                 }
             }
 
-            /* Takes effect only when .add-to-cart is display: contents */
+            /* Takes effect only when .add-to-cart is display: contents. The CTA is
+               placed last, so qty and links share a row below any tier prices */
             .add-to-cart:has(> .qty-wrapper) {
-                .add-to-cart-buttons {
-                    grid-column: 1 / -1;
+                .qty-wrapper {
+                    grid-column: 1;
                 }
 
-                ~ .add-to-links {
-                    grid-row: 1;
+                .add-to-cart-buttons {
+                    @apply order-1;
+                    grid-column: 1 / -1;
                 }
             }
         }
