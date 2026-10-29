@@ -28,7 +28,7 @@ if (!defined('MAHO_ROOT_DIR')) {
 function dbImportTester(): CommandTester
 {
     $command = new DBImport('db:import');
-    (new Application())->addCommand($command);
+    new Application()->addCommand($command);
 
     return new CommandTester($command);
 }
@@ -54,7 +54,7 @@ function dbImportReflect(string $method, mixed ...$arguments): mixed
     static $command = null;
     $command ??= new DBImport('db:import');
 
-    return (new ReflectionMethod(DBImport::class, $method))->invoke($command, ...$arguments);
+    return new ReflectionMethod(DBImport::class, $method)->invoke($command, ...$arguments);
 }
 
 /**
@@ -128,20 +128,26 @@ it('detects the compression of a dump from its magic bytes', function () {
 it('loads a plain dump through a redirect when no progress viewer is available', function () {
     $command = dbImportReflect('buildImportCommand', dbImportConnection(), '/tmp/dump.sql', 'none', null);
 
-    expect($command)->toBe("mysql -h 'db' -u'maho' -p'maho' 'maho' < '/tmp/dump.sql'");
+    $client = dbImportReflect('loadBinary', dbImportConnection());
+
+    expect($command)->toBe("{$client} -h 'db' -u'maho' 'maho' < '/tmp/dump.sql'");
 });
 
 it('streams a compressed dump through pv exactly once', function () {
     $command = dbImportReflect('buildImportCommand', dbImportConnection(), '/tmp/dump.sql.gz', 'gzip', 'pv');
 
-    expect($command)->toStartWith("pv '/tmp/dump.sql.gz' | gzip -dc | mysql")
+    $client = dbImportReflect('loadBinary', dbImportConnection());
+
+    expect($command)->toStartWith("pv '/tmp/dump.sql.gz' | gzip -dc | {$client}")
         ->not->toContain('cat ');
 });
 
 it('streams a plain dump through pv without reading the file twice', function () {
     $command = dbImportReflect('buildImportCommand', dbImportConnection(), '/tmp/dump.sql', 'none', 'pv');
 
-    expect($command)->toBe("pv '/tmp/dump.sql' | mysql -h 'db' -u'maho' -p'maho' 'maho'");
+    $client = dbImportReflect('loadBinary', dbImportConnection());
+
+    expect($command)->toBe("pv '/tmp/dump.sql' | {$client} -h 'db' -u'maho' 'maho'");
 });
 
 it('builds a PostgreSQL load command that stops on the first error', function () {
@@ -150,7 +156,7 @@ it('builds a PostgreSQL load command that stops on the first error', function ()
     ]), '/tmp/dump.sql.zst', 'zstd', null);
 
     expect($command)->toBe(
-        "zstd -dc '/tmp/dump.sql.zst' | PGPASSWORD='maho' psql -q -o /dev/null -v ON_ERROR_STOP=1"
+        "zstd -dc '/tmp/dump.sql.zst' | psql -q -o /dev/null -v ON_ERROR_STOP=1"
             . " -h 'db' -U 'maho' -d 'maho'",
     );
 });
@@ -178,4 +184,105 @@ it('removes the SQLite database file with --drop-tables', function () {
 
     $file = MAHO_ROOT_DIR . '/var/db/maho.sqlite';
     expect($commands)->toBe(["rm -f '{$file}' '{$file}-wal' '{$file}-shm'"]);
+});
+
+it('stops the SQLite load at the first error', function () {
+    $command = dbImportReflect('buildImportCommand', dbImportConnection([
+        'engine' => 'sqlite',
+        'dbname' => 'maho.sqlite',
+    ]), '/tmp/dump.sql', 'none', null);
+
+    expect($command)->toContain('sqlite3 -bail ');
+});
+
+/**
+ * Command whose shell calls are recorded instead of run.
+ *
+ * @param list<int> $exitCodes One exit code for each call, in order.
+ */
+function dbImportRecordingCommand(array $exitCodes): DBImport
+{
+    return new class ('db:import', $exitCodes) extends DBImport {
+        /** @var list<string> */
+        public array $ran = [];
+
+        /** @param list<int> $exitCodes */
+        public function __construct(string $name, private array $exitCodes)
+        {
+            parent::__construct($name);
+        }
+
+        #[\Override]
+        protected function readConnectionConfig(): array
+        {
+            return dbImportConnection();
+        }
+
+        #[\Override]
+        protected function missingBinaries(array $conn, string $compression, bool $exporting): array
+        {
+            return [];
+        }
+
+        #[\Override]
+        protected function runShellCommand(string $command, array $conn): int
+        {
+            $this->ran[] = $command;
+
+            return $this->exitCodes[count($this->ran) - 1] ?? 0;
+        }
+    };
+}
+
+it('empties the database before the load with --drop-tables', function () {
+    $command = dbImportRecordingCommand([]);
+    new Application()->addCommand($command);
+
+    dbImportWithTempFile('-- Maho', function (string $file) use ($command): void {
+        $result = new CommandTester($command)->run(['file' => $file, '--drop-tables' => true, '--force' => true]);
+
+        $this->assertCommandIsSuccessful($result);
+        expect($command->ran)->toHaveCount(3)
+            ->and($command->ran[0])->toContain('DROP DATABASE')
+            ->and($command->ran[1])->toContain('CREATE DATABASE')
+            ->and($command->ran[2])->toContain($file);
+    });
+});
+
+it('does not load the dump when emptying the database fails', function () {
+    $command = dbImportRecordingCommand([1]);
+    new Application()->addCommand($command);
+
+    dbImportWithTempFile('-- Maho', function (string $file) use ($command): void {
+        $result = new CommandTester($command)->run(['file' => $file, '--drop-tables' => true, '--force' => true]);
+
+        $this->assertCommandFailed($result);
+        expect($command->ran)->toHaveCount(1)
+            ->and($result->getErrorOutput())->toContain('nothing has been imported');
+    });
+});
+
+it('does not empty the database when the question is not confirmed', function () {
+    $command = dbImportRecordingCommand([]);
+    new Application()->addCommand($command);
+
+    dbImportWithTempFile('-- Maho', function (string $file) use ($command): void {
+        $result = new CommandTester($command)->run(['file' => $file, '--drop-tables' => true], interactive: false);
+
+        $this->assertCommandFailed($result);
+        expect($command->ran)->toBe([])
+            ->and($result->getErrorOutput())->toContain('--force');
+    });
+});
+
+it('runs no command with --dry-run', function () {
+    $command = dbImportRecordingCommand([]);
+    new Application()->addCommand($command);
+
+    dbImportWithTempFile('-- Maho', function (string $file) use ($command): void {
+        $result = new CommandTester($command)->run(['file' => $file, '--drop-tables' => true, '--dry-run' => true]);
+
+        $this->assertCommandIsSuccessful($result);
+        expect($command->ran)->toBe([]);
+    });
 });

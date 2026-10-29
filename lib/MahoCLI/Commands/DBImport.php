@@ -11,10 +11,14 @@ declare(strict_types=1);
 namespace MahoCLI\Commands;
 
 use Symfony\Component\Console\Attribute\Argument;
+use Symfony\Component\Console\Attribute\Ask;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\QuestionHelper;
+use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 #[AsCommand(
     name: 'db:import',
@@ -25,13 +29,17 @@ class DBImport extends BaseMahoCommand
     use DatabaseDumpTrait;
 
     public function __invoke(
+        InputInterface $input,
         OutputInterface $output,
         #[Argument(description: 'Path of the SQL dump file to load')]
+        #[Ask('Dump file:')]
         string $file,
         #[Option(description: 'Compression of the dump: gzip, zstd or none')]
         string $compression = 'none',
         #[Option(description: 'Empty the database before loading the dump')]
         bool $dropTables = false,
+        #[Option(description: 'Skip the question before --drop-tables empties the database', shortcut: 'f')]
+        bool $force = false,
         #[Option(description: 'Print the resolved connection and the commands that would run, without executing them')]
         bool $dryRun = false,
     ): int {
@@ -49,8 +57,6 @@ class DBImport extends BaseMahoCommand
             return Command::FAILURE;
         }
 
-        // Compression is never auto-detected, so a plain .sql name on a compressed dump
-        // would reach the client and fail as "ASCII '\0' appeared in the statement".
         $detected = $this->detectCompression($file);
         if ($detected !== null && $detected !== $compression) {
             $this->writeError($output, sprintf(
@@ -93,6 +99,16 @@ class DBImport extends BaseMahoCommand
             return Command::FAILURE;
         }
 
+        if ($dropTables && !$force && !$dryRun) {
+            $question = new ConfirmationQuestion(sprintf('Empty database %s before loading the dump? [y/N] ', $conn['dbname']), false);
+            /** @var QuestionHelper $helper */
+            $helper = $this->getHelper('question');
+            if (!$helper->ask($input, $output, $question)) {
+                $this->writeError($output, 'Import cancelled. Use --force to skip this question.');
+                return Command::FAILURE;
+            }
+        }
+
         $commands = [];
         if ($dropTables) {
             $commands = $this->buildResetCommands($conn);
@@ -109,7 +125,7 @@ class DBImport extends BaseMahoCommand
             $output->writeln(sprintf('Emptying database <info>%s</info>...', $conn['dbname']));
         }
         foreach (array_slice($commands, 0, $resetCount) as $resetCommand) {
-            if ($this->runShellCommand($resetCommand) !== 0) {
+            if ($this->runShellCommand($resetCommand, $conn) !== 0) {
                 $this->writeError($output, 'Could not empty the database, nothing has been imported.');
                 return Command::FAILURE;
             }
@@ -122,7 +138,7 @@ class DBImport extends BaseMahoCommand
             $compression === 'none' ? 'uncompressed' : $compression,
         ));
 
-        if ($this->runShellCommand($commands[$resetCount]) !== 0) {
+        if ($this->runShellCommand($commands[$resetCount], $conn) !== 0) {
             $this->writeError($output, 'Database import failed.');
             return Command::FAILURE;
         }

@@ -168,8 +168,8 @@ client has to be installed on the host, and they work even while the database is
 # print the resolved connection and the exact command, without running anything
 ./maho db:export var/backups/shop.sql --dry-run
 
-# restore, emptying the database first
-./maho db:import var/backups/shop.sql --drop-tables
+# restore, emptying the database first (the command asks first, --force skips the question)
+./maho db:import var/backups/shop.sql --drop-tables --force
 ```
 
 Compression is not auto-detected on import, but the file header is checked: a gzip or

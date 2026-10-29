@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace MahoCLI\Commands;
 
 use Symfony\Component\Console\Attribute\Argument;
+use Symfony\Component\Console\Attribute\Ask;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
@@ -27,6 +28,7 @@ class DBExport extends BaseMahoCommand
     public function __invoke(
         OutputInterface $output,
         #[Argument(description: 'Path of the dump file to write, relative to the current directory')]
+        #[Ask('Dump file:')]
         string $file,
         #[Option(description: 'Compression of the dump: gzip, zstd or none')]
         string $compression = 'gzip',
@@ -100,7 +102,7 @@ class DBExport extends BaseMahoCommand
             $compression === 'none' ? 'uncompressed' : $compression,
         ));
 
-        if ($this->runShellCommand($command) !== 0) {
+        if ($this->runShellCommand($command, $conn) !== 0) {
             if (is_file($file)) {
                 unlink($file);
             }
@@ -110,7 +112,7 @@ class DBExport extends BaseMahoCommand
 
         $output->writeln(sprintf(
             '<info>Database exported successfully (%s).</info>',
-            $this->formatBytes((int) @filesize($file)),
+            new \Mage_Core_Helper_Data()->formatFileSize((int) @filesize($file)),
         ));
 
         return Command::SUCCESS;

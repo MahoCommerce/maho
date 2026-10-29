@@ -9,6 +9,9 @@ declare(strict_types=1);
 
 namespace MahoCLI\Commands;
 
+use Symfony\Component\Console\Output\ConsoleOutputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+
 trait DatabaseCliTrait
 {
     private function getEngine(mixed $connConfig): string
@@ -207,6 +210,17 @@ trait DatabaseCliTrait
         $this->scheduleFileDeletion($configFile);
 
         return $configFile;
+    }
+
+    /**
+     * Write a diagnostic to STDERR. Uses the console's dedicated error stream when available
+     * (so it stays off STDOUT and is assertable in tests) and OUTPUT_RAW so a message that
+     * happens to contain "<...>" is not parsed as console markup.
+     */
+    private function writeError(OutputInterface $output, string $message): void
+    {
+        $stream = $output instanceof ConsoleOutputInterface ? $output->getErrorOutput() : $output;
+        $stream->writeln($message, OutputInterface::OUTPUT_RAW);
     }
 
     private function scheduleFileDeletion(string $filename): void

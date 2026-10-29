@@ -10,7 +10,6 @@ declare(strict_types=1);
 
 namespace MahoCLI\Commands;
 
-use Symfony\Component\Console\Output\ConsoleOutputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -69,6 +68,7 @@ trait DatabaseDumpTrait
      */
     protected function readConnectionConfig(): array
     {
+        \Mage::isInstalled();
         $path = $this->projectRoot() . '/app/etc/local.xml';
         if (!is_file($path)) {
             throw new \RuntimeException("local.xml not found at {$path}");
@@ -101,6 +101,10 @@ trait DatabaseDumpTrait
      */
     protected function dumpBinary(array $conn): string
     {
+        if ($conn['engine'] === 'mysql' && \Mage::findExecutable('mysqldump') === null && \Mage::findExecutable('mariadb-dump') !== null) {
+            return 'mariadb-dump';
+        }
+
         return $this->engineDumpSettings($conn['engine'])[0];
     }
 
@@ -166,9 +170,8 @@ trait DatabaseDumpTrait
         $steps = [$this->buildDumpCommand($conn)];
 
         if ($conn['engine'] === 'mysql') {
-            // DEFINER clauses bind routines and views to the account that dumped them and
-            // break a restore under a different user, so they are stripped on the way out.
-            $steps[] = 'LANG=C LC_CTYPE=C LC_ALL=C sed -e ' . escapeshellarg('s/DEFINER[ ]*=[ ]*[^*]*\*/\*/');
+            // A DEFINER clause breaks a restore under another user. Remove it, but never in a data row.
+            $steps[] = 'LANG=C LC_CTYPE=C LC_ALL=C sed -e ' . escapeshellarg('/^INSERT /!s/DEFINER[ ]*=[ ]*[^*]*\*/\*/');
         }
         if ($pv !== null) {
             $steps[] = $pv;
@@ -238,8 +241,7 @@ trait DatabaseDumpTrait
                     )),
                 ),
             ],
-            // PostgreSQL has no cheap "drop the database" from inside it (and the
-            // session owns the current database), so the schema is what gets reset.
+            // Drop the public schema instead of the database: the open connection uses the database.
             'pgsql' => [sprintf(
                 '%s -c %s',
                 $this->buildPgsqlClient($conn),
@@ -256,16 +258,11 @@ trait DatabaseDumpTrait
     }
 
     /**
-     * Whether the dump file is in a format other than the one requested, judged from
-     * its first bytes. Compression is not auto-detected, but a mismatch is caught
-     * before the client fails with "ASCII '\0' appeared in the statement".
+     * Return 'gzip' or 'zstd' from the first bytes of the file, or null for any other file.
+     * Compression is not auto-detected, so db:import uses this to catch a wrong --compression value.
      */
     protected function detectCompression(string $file): ?string
     {
-        if (!is_file($file)) {
-            return null;
-        }
-
         $handle = @fopen($file, 'rb');
         if ($handle === false) {
             return null;
@@ -321,47 +318,35 @@ trait DatabaseDumpTrait
     }
 
     /**
-     * Report a problem on STDERR, so it stays off STDOUT and out of the dry-run output.
-     */
-    protected function writeError(OutputInterface $output, string $message): void
-    {
-        $stream = $output instanceof ConsoleOutputInterface ? $output->getErrorOutput() : $output;
-        $stream->writeln($message, OutputInterface::OUTPUT_RAW);
-    }
-
-    /**
      * Run a shell command, streaming its STDERR (progress bars included) to the
      * terminal. Where bash exists it is used with pipefail, so a failure in the
      * middle of a pipeline is not masked by the compressor succeeding.
+     * The password goes to the client in the environment, so `ps` does not show it.
+     *
+     * @param array<string, string> $conn
      */
-    protected function runShellCommand(string $command): int
+    protected function runShellCommand(string $command, array $conn): int
     {
+        $passwordVariable = match ($conn['engine']) {
+            'mysql' => 'MYSQL_PWD',
+            'pgsql' => 'PGPASSWORD',
+            default => null,
+        };
+        if ($passwordVariable !== null && $conn['password'] !== '') {
+            putenv("{$passwordVariable}={$conn['password']}");
+        }
+
         $bash = \Mage::findExecutable('bash');
         $wrapped = $bash === null
             ? $command
             : sprintf('%s -o pipefail -c %s', escapeshellarg($bash), escapeshellarg($command));
 
         passthru($wrapped, $exitCode);
-
-        return $exitCode;
-    }
-
-    /**
-     * Human-readable byte size. Mage::helper('core') cannot be used here: these
-     * commands run without a framework bootstrap.
-     */
-    protected function formatBytes(int $bytes): string
-    {
-        $units = ['B', 'KB', 'MB', 'GB', 'TB'];
-        $value = (float) $bytes;
-        $unit = 0;
-
-        while ($value >= 1024 && $unit < count($units) - 1) {
-            $value /= 1024;
-            $unit++;
+        if ($passwordVariable !== null) {
+            putenv($passwordVariable);
         }
 
-        return $unit === 0 ? $bytes . ' B' : sprintf('%.1f %s', $value, $units[$unit]);
+        return $exitCode;
     }
 
     /**
@@ -381,7 +366,6 @@ trait DatabaseDumpTrait
                 escapeshellarg($conn['dbname']),
             ]),
             'pgsql' => implode(' ', [
-                ...$this->pgsqlEnvironment($conn),
                 $binary,
                 '--no-owner',
                 '--no-privileges',
@@ -409,7 +393,6 @@ trait DatabaseDumpTrait
                 escapeshellarg($conn['dbname']),
             ]),
             'pgsql' => implode(' ', [
-                ...$this->pgsqlEnvironment($conn),
                 $this->loadBinary($conn),
                 '-q',
                 // pg_dump closes every sequence with a setval() SELECT: keep its
@@ -424,6 +407,7 @@ trait DatabaseDumpTrait
             ]),
             'sqlite' => implode(' ', [
                 $this->loadBinary($conn),
+                '-bail',
                 escapeshellarg($this->sqliteDatabaseFile($conn['dbname'])),
             ]),
             default => '',
@@ -447,7 +431,6 @@ trait DatabaseDumpTrait
     private function buildPgsqlClient(array $conn): string
     {
         return implode(' ', [
-            ...$this->pgsqlEnvironment($conn),
             $this->loadBinary($conn),
             '-q',
             ...$this->pgsqlConnectionArguments($conn),
@@ -465,20 +448,25 @@ trait DatabaseDumpTrait
         $arguments = [];
         $defaultPort = $this->engineDumpSettings('mysql')[1];
 
-        if ($conn['host'] !== '') {
-            $arguments[] = '-h';
-            $arguments[] = escapeshellarg($conn['host']);
+        // Like the framework adapter: a host with a slash is a socket, and "host:port" holds the port.
+        $host = $conn['host'];
+        $port = $conn['port'];
+        if (!str_contains($host, '/') && substr_count($host, ':') === 1) {
+            [$host, $port] = explode(':', $host);
         }
-        if ($conn['port'] !== '' && $conn['port'] !== $defaultPort) {
+
+        if (str_contains($host, '/')) {
+            $arguments[] = '--socket=' . escapeshellarg($host);
+        } elseif ($host !== '') {
+            $arguments[] = '-h';
+            $arguments[] = escapeshellarg($host);
+        }
+        if ($port !== '' && $port !== $defaultPort) {
             $arguments[] = '-P';
-            $arguments[] = escapeshellarg($conn['port']);
+            $arguments[] = escapeshellarg($port);
         }
         if ($conn['username'] !== '') {
             $arguments[] = '-u' . escapeshellarg($conn['username']);
-        }
-        // Without a password -p alone would turn into an interactive prompt.
-        if ($conn['password'] !== '') {
-            $arguments[] = '-p' . escapeshellarg($conn['password']);
         }
 
         return $arguments;
@@ -507,18 +495,6 @@ trait DatabaseDumpTrait
         }
 
         return $arguments;
-    }
-
-    /**
-     * PGPASSWORD as a command prefix, kept out of the argument list where it
-     * would show up in `ps` for every process in the pipeline.
-     *
-     * @param array<string, string> $conn
-     * @return list<string>
-     */
-    private function pgsqlEnvironment(array $conn): array
-    {
-        return $conn['password'] === '' ? [] : ['PGPASSWORD=' . escapeshellarg($conn['password'])];
     }
 
     /**

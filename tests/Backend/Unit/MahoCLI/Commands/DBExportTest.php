@@ -11,6 +11,7 @@ declare(strict_types=1);
 use MahoCLI\Commands\DBExport;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Tester\CommandTester;
+use Symfony\Component\Console\Tester\ExecutionResult;
 use Symfony\Component\Console\Tester\ConsoleAssertionsTrait;
 
 uses(Tests\MahoBackendTestCase::class, ConsoleAssertionsTrait::class);
@@ -28,7 +29,7 @@ if (!defined('MAHO_ROOT_DIR')) {
 function dbExportTester(): CommandTester
 {
     $command = new DBExport('db:export');
-    (new Application())->addCommand($command);
+    new Application()->addCommand($command);
 
     return new CommandTester($command);
 }
@@ -54,7 +55,7 @@ function dbExportReflect(string $method, mixed ...$arguments): mixed
     static $command = null;
     $command ??= new DBExport('db:export');
 
-    return (new ReflectionMethod(DBExport::class, $method))->invoke($command, ...$arguments);
+    return new ReflectionMethod(DBExport::class, $method)->invoke($command, ...$arguments);
 }
 
 it('rejects an unknown --compression value', function () {
@@ -77,14 +78,14 @@ it('refuses to overwrite an existing dump without --force', function () {
     }
 });
 
-it('builds a MySQL pipeline with inline credentials, definer stripping and compression', function () {
+it('builds a MySQL pipeline without the password, with definer stripping and compression', function () {
     $command = dbExportReflect('buildExportCommand', dbExportConnection(), '/tmp/dump.sql.gz', 'gzip', 'pv');
 
-    expect($command)->toStartWith('mysqldump --single-transaction --quick --no-tablespaces')
+    expect($command)->toMatch('/^(mysqldump|mariadb-dump) --single-transaction --quick --no-tablespaces/')
         ->toContain("-h 'db'")
         ->toContain("-u'maho'")
-        ->toContain("-p'maho'")
-        ->toContain("sed -e 's/DEFINER[ ]*=[ ]*[^*]*\\*/\\*/'")
+        ->not->toContain('-p')
+        ->toContain("sed -e '/^INSERT /!s/DEFINER[ ]*=[ ]*[^*]*\\*/\\*/'")
         ->toContain('| pv | gzip -c')
         ->toEndWith("> '/tmp/dump.sql.gz'");
 });
@@ -109,12 +110,12 @@ it('builds a PostgreSQL pipeline that keeps the password out of the argument lis
         'port' => '5433',
     ]), '/tmp/dump.sql.zst', 'zstd', null);
 
-    expect($command)->toStartWith("PGPASSWORD='maho' pg_dump --no-owner --no-privileges")
+    expect($command)->toStartWith('pg_dump --no-owner --no-privileges')
+        ->not->toContain('PGPASSWORD')
         ->toContain("-h 'db'")
         ->toContain("-p '5433'")
         ->toContain("-U 'maho'")
         ->toContain('| zstd -q -c')
-        ->not->toContain('-p\'maho\'')
         ->not->toContain('sed');
 });
 
@@ -148,8 +149,89 @@ it('prints the resolved connection and the command in --dry-run mode', function 
         ->toContain($command);
 });
 
-it('formats dump sizes in human readable units', function () {
-    expect(dbExportReflect('formatBytes', 512))->toBe('512 B')
-        ->and(dbExportReflect('formatBytes', 2048))->toBe('2.0 KB')
-        ->and(dbExportReflect('formatBytes', 13702261))->toBe('13.1 MB');
+it('splits a host:port value and sends a socket path to --socket', function () {
+    $split = dbExportReflect('buildExportCommand', dbExportConnection(['host' => 'db:3307']), '/tmp/dump.sql', 'none', null);
+    $socket = dbExportReflect('buildExportCommand', dbExportConnection(['host' => '/run/mysqld/mysqld.sock']), '/tmp/dump.sql', 'none', null);
+
+    expect($split)->toContain("-h 'db' -P '3307'")
+        ->and($socket)->toContain("--socket='/run/mysqld/mysqld.sock'")
+        ->not->toContain('-h ');
+});
+
+it('fails a pipeline when a step before the last one fails', function () {
+    expect(dbExportReflect('runShellCommand', 'false | true', dbExportConnection(['engine' => 'sqlite'])))->not->toBe(0);
+});
+
+/**
+ * Command whose shell calls are recorded instead of run.
+ */
+function dbExportRecordingCommand(int $exitCode, ?string $writeFile = null): DBExport
+{
+    return new class ('db:export', $exitCode, $writeFile) extends DBExport {
+        /** @var list<string> */
+        public array $ran = [];
+
+        public function __construct(string $name, private int $exitCode, private ?string $writeFile)
+        {
+            parent::__construct($name);
+        }
+
+        #[\Override]
+        protected function readConnectionConfig(): array
+        {
+            return dbExportConnection();
+        }
+
+        #[\Override]
+        protected function missingBinaries(array $conn, string $compression, bool $exporting): array
+        {
+            return [];
+        }
+
+        #[\Override]
+        protected function runShellCommand(string $command, array $conn): int
+        {
+            $this->ran[] = $command;
+            if ($this->writeFile !== null) {
+                file_put_contents($this->writeFile, 'partial');
+            }
+
+            return $this->exitCode;
+        }
+    };
+}
+
+function dbExportRunRecording(DBExport $command, array $input): ExecutionResult
+{
+    new Application()->addCommand($command);
+
+    return new CommandTester($command)->run($input);
+}
+
+it('removes the partial file when the export fails', function () {
+    $file = sys_get_temp_dir() . '/maho_dbexport_fail.sql';
+    $command = dbExportRecordingCommand(1, $file);
+
+    try {
+        $result = dbExportRunRecording($command, ['file' => $file, '--compression' => 'none']);
+        $this->assertCommandFailed($result);
+        expect(is_file($file))->toBeFalse();
+    } finally {
+        @unlink($file);
+    }
+});
+
+it('runs no command and ignores an existing file with --dry-run', function () {
+    $file = sys_get_temp_dir() . '/maho_dbexport_dry.sql';
+    file_put_contents($file, 'x');
+    $command = dbExportRecordingCommand(0);
+
+    try {
+        $result = dbExportRunRecording($command, ['file' => $file, '--dry-run' => true]);
+        $this->assertCommandIsSuccessful($result);
+        expect($command->ran)->toBe([])
+            ->and($result->getDisplay())->toContain('Dry run');
+    } finally {
+        unlink($file);
+    }
 });
