@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2019-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Adminhtml
@@ -549,12 +549,20 @@ class Mage_Adminhtml_Sales_Order_CreateController extends Mage_Adminhtml_Control
     protected function _getAclResourse()
     {
         $action = strtolower($this->getRequest()->getActionName());
-        if (in_array($action, ['index', 'save']) && $this->_getSession()->getReordered()) {
-            $action = 'reorder';
+        // These actions build and submit the quote of a new order, a reorder or an order edit.
+        // The edit page calls some of them on this controller.
+        $quoteActions = [
+            'index', 'save', 'loadblock', 'processdata', 'addconfigured',
+            'configureproducttoadd', 'configurequoteitems',
+        ];
+        if (in_array($action, $quoteActions, true)) {
+            $session = $this->_getSession();
+            $action = $session->getReordered() ? 'reorder' : ($session->getOrderId() ? 'edit' : 'index');
         }
         $aclResource = match ($action) {
-            'index', 'save' => 'sales/order/actions/create',
+            'index', 'start' => 'sales/order/actions/create',
             'reorder' => 'sales/order/actions/reorder',
+            'edit' => 'sales/order/actions/edit',
             'cancel' => 'sales/order/actions/cancel',
             default => 'sales/order/actions',
         };

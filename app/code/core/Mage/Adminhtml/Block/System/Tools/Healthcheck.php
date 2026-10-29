@@ -125,10 +125,8 @@ class Mage_Adminhtml_Block_System_Tools_Healthcheck extends Mage_Adminhtml_Block
             'memory_free' => $this->formatBytes((int) ($status['memory_usage']['free_memory'] ?? 0)),
             'memory_total' => $config ? $this->formatBytes((int) $config['directives']['opcache.memory_consumption']) : 'N/A',
             'memory_wasted' => $this->formatBytes((int) ($status['memory_usage']['wasted_memory'] ?? 0)),
-            'memory_wasted_pct' => round($status['memory_usage']['current_wasted_percentage'] ?? 0, 1) . '%',
-            'hit_rate' => isset($status['opcache_statistics']['opcache_hit_rate'])
-                ? round($status['opcache_statistics']['opcache_hit_rate'], 1) . '%'
-                : 'N/A',
+            'memory_wasted_pct' => $this->formatPercentage($status['memory_usage']['current_wasted_percentage'] ?? null),
+            'hit_rate' => $this->formatPercentage($status['opcache_statistics']['opcache_hit_rate'] ?? null),
             'hits' => (int) ($status['opcache_statistics']['hits'] ?? 0),
             'misses' => (int) ($status['opcache_statistics']['misses'] ?? 0),
             'cached_scripts' => (int) ($status['opcache_statistics']['num_cached_scripts'] ?? 0),
@@ -150,6 +148,21 @@ class Mage_Adminhtml_Block_System_Tools_Healthcheck extends Mage_Adminhtml_Block
         $result['directives'] = $config ? $config['directives'] : [];
 
         return $result;
+    }
+
+    /**
+     * Format a percentage reported by opcache.
+     *
+     * A fresh opcache reports NAN for the hit rate (no hits and no misses yet), and NAN cannot be
+     * interpolated into a string: PHP 8.5 raises an ErrorException while rendering the report.
+     */
+    protected function formatPercentage(mixed $value): string
+    {
+        if (!is_numeric($value) || !is_finite((float) $value)) {
+            return 'N/A';
+        }
+
+        return round((float) $value, 1) . '%';
     }
 
     public function getDatabaseType(): string

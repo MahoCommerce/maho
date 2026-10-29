@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2022-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Adminhtml
@@ -62,5 +62,14 @@ class Mage_Adminhtml_Sales_Order_EditController extends Mage_Adminhtml_Sales_Ord
         $this->_initSession()
             ->_setActiveMenu('sales/order')
             ->renderLayout();
+    }
+
+    /**
+     * Check the Edit permission for every action. The parent maps its actions to Create and Reorder.
+     */
+    #[\Override]
+    protected function _isAllowed(): bool
+    {
+        return Mage::getSingleton('admin/session')->isAllowed(self::ADMIN_RESOURCE);
     }
 }

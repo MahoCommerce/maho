@@ -17,6 +17,28 @@ final class OutboundUrl
 {
     public const SCHEMES = ['http', 'https'];
 
+    /**
+     * Special-purpose ranges that FILTER_FLAG_NO_RES_RANGE accepts. A host on a NAT64,
+     * a cloud or a lab network can route them to an internal service.
+     */
+    private const NON_PUBLIC_RANGES = [
+        '100.64.0.0/10',
+        '192.0.0.0/24',
+        '192.0.2.0/24',
+        '198.18.0.0/15',
+        '198.51.100.0/24',
+        '203.0.113.0/24',
+        '224.0.0.0/3',
+        '64:ff9b:1::/48',
+        '100::/64',
+        '100:0:0:1::/64',
+        '2001::/23',
+        '2001:db8::/32',
+        '3fff::/20',
+        'fec0::/10',
+        'ff00::/8',
+    ];
+
     /** @var \Closure(string): list<string> */
     private \Closure $resolver;
 
@@ -89,20 +111,42 @@ final class OutboundUrl
         if ($packed === false) {
             return false;
         }
-        if (strlen($packed) === 4) {
-            $first = ord($packed[0]);
-            $second = ord($packed[1]);
-            // 100.64.0.0/10 shared address space, 224.0.0.0/4 multicast and everything above
-            return $first < 224 && !($first === 100 && ($second & 0xC0) === 0x40);
+        foreach (self::NON_PUBLIC_RANGES as $range) {
+            if (self::isInRange($packed, $range)) {
+                return false;
+            }
         }
-        // NAT64 (64:ff9b::/96) and 6to4 (2002::/16) embed an IPv4 address that must be public too
-        if (str_starts_with($packed, "\x00\x64\xff\x9b" . str_repeat("\x00", 8))) {
+        if (strlen($packed) === 4) {
+            return true;
+        }
+        // IPv4-compatible (::/96), NAT64 (64:ff9b::/96) and 6to4 (2002::/16) embed an IPv4 address that must be public too
+        if (str_starts_with($packed, str_repeat("\x00", 12)) || str_starts_with($packed, "\x00\x64\xff\x9b" . str_repeat("\x00", 8))) {
             return self::isPublicAddress(inet_ntop(substr($packed, 12)) ?: '');
         }
         if (str_starts_with($packed, "\x20\x02")) {
             return self::isPublicAddress(inet_ntop(substr($packed, 2, 4)) ?: '');
         }
-        return ord($packed[0]) !== 0xff;
+        return true;
+    }
+
+    private static function isInRange(string $packed, string $range): bool
+    {
+        [$network, $bits] = explode('/', $range);
+        $packedNetwork = inet_pton($network);
+        if ($packedNetwork === false || strlen($packedNetwork) !== strlen($packed)) {
+            return false;
+        }
+        $bits = (int) $bits;
+        $bytes = intdiv($bits, 8);
+        if (substr($packed, 0, $bytes) !== substr($packedNetwork, 0, $bytes)) {
+            return false;
+        }
+        $rest = $bits % 8;
+        if ($rest === 0) {
+            return true;
+        }
+        $mask = (0xFF << (8 - $rest)) & 0xFF;
+        return (ord($packed[$bytes]) & $mask) === (ord($packedNetwork[$bytes]) & $mask);
     }
 
     /**

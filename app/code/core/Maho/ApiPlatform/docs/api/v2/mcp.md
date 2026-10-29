@@ -53,6 +53,8 @@ The same admin is not asked again when the same application asks for the same sc
 
 **Connected Applications** under **System → API** lists the applications that registered. Select one and revoke it to cut its grants: refreshing fails at once, and access tokens already issued stop working when they expire.
 
+When you deactivate an admin user, its access tokens stop working at once, because the API refuses the tokens of an inactive admin. Maho also revokes every grant that the user approved, so no application can refresh its tokens. If you activate the user again before an access token expires (1 hour by default), that access token works again until it expires. After that, each application must ask for approval again.
+
 ### Settings
 
 All of them are under **System → Configuration → Services → API → OAuth2 Settings**:
@@ -276,6 +278,10 @@ Filters work the same way, and a list tool advertises the ones its resource decl
 | `catalog_categories_list` | `search`, `urlKey`, `parentId`, `includeInMenu` |
 | `tax_tax_rates_list` | `search`, `taxCountryId` |
 | `sales_coupons_list` | `code`, `is_active` |
+
+### Attribute filters
+
+`attributeFilters` is a JSON object of attribute codes and values: `{"manufacturer":"12","color":"49"}`. A select or multiselect attribute takes option IDs, not labels. `catalog_product_attributes_list` with `search` set to the attribute code returns the attribute with its options, and the `value` of each option is its ID. That tool needs the `product-attributes/read` permission, which an administrator has. A storefront client gets the option IDs of the filterable attributes of a category from `/layered-filters`. A value that is not a number returns a 400 error, when the options of the attribute are in the option table. In REST, the same filter is `attr_<code>=<value>`.
 
 ### Date ranges
 

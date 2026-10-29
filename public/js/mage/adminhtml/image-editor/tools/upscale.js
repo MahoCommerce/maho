@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
 // SPDX-License-Identifier: AFL-3.0
 
-import { TRANSFORMERS_URL, hasWebGPU } from '../ml-runtime.js';
+import { ModelWorker, ModelCancelled } from '../ml-runtime.js';
 
 const MODEL_ID = 'MahoCommerce/Real_HAT_GAN_sharper-ONNX';
 const MODEL_SCALE = 4;
@@ -11,44 +11,11 @@ const TILE_PAD = 16;
 const TILE_CORE = TILE - 2 * TILE_PAD;
 const MAX_INPUT_SIDE = 1024;
 
-let modelPromise = null;
-let latestProgressCallback = null;
-// The runs that still use the model. destroy() disposes the model only after they finish.
-const activeRuns = new Set();
-
-class UpscaleCancelled extends Error {}
-
-async function getModel(onProgress) {
-    latestProgressCallback = onProgress;
-
-    if (modelPromise) {
-        return modelPromise;
-    }
-
-    modelPromise = (async () => {
-        try {
-            const { AutoModelForImageToImage, Tensor } = await import(TRANSFORMERS_URL);
-            const device = await hasWebGPU() ? 'webgpu' : 'wasm';
-            const model = await AutoModelForImageToImage.from_pretrained(MODEL_ID, {
-                dtype: 'fp32',
-                device,
-                progress_callback: (p) => latestProgressCallback?.(p),
-            });
-            return { model, Tensor };
-        } catch (e) {
-            modelPromise = null;
-            throw e;
-        }
-    })();
-
-    return modelPromise;
-}
-
 /**
- * Put the TILE × TILE area at (x, y) of the RGBA pixels into a planar RGB tensor with values from 0 to 1.
+ * Put the TILE × TILE area at (x, y) of the RGBA pixels into planar RGB values from 0 to 1.
  * A pixel outside the image takes the value of the nearest edge pixel.
  */
-function readTile(rgba, width, height, x, y, Tensor) {
+function readTile(rgba, width, height, x, y) {
     const plane = TILE * TILE;
     const data = new Float32Array(3 * plane);
     for (let ty = 0; ty < TILE; ty++) {
@@ -62,7 +29,7 @@ function readTile(rgba, width, height, x, y, Tensor) {
             data[2 * plane + d] = rgba[s + 2] / 255;
         }
     }
-    return new Tensor('float32', data, [1, 3, TILE, TILE]);
+    return data;
 }
 
 /** Write the w × h area at (x, y) of the planar RGB model output into an opaque ImageData. */
@@ -83,6 +50,11 @@ function writeTile(output, x, y, w, h) {
     return image;
 }
 
+function formatRemaining(ms) {
+    const minutes = Math.round(ms / 60000);
+    return minutes < 1 ? 'less than a minute left' : `about ${minutes} min left`;
+}
+
 function hasTransparency(rgba) {
     for (let i = 3; i < rgba.length; i += 4) {
         if (rgba[i] < 255) return true;
@@ -98,6 +70,8 @@ export class UpscaleTool {
         this._scale = 2;
         this._statusEl = null;
         this._runBtn = null;
+        this._model = new ModelWorker('image-to-image', MODEL_ID, 'fp32');
+        this._tileStatus = null;
     }
 
     get name() { return 'upscale'; }
@@ -154,6 +128,7 @@ export class UpscaleTool {
             if (this._processing) {
                 this._cancelled = true;
                 this._setStatus('Canceling…');
+                this._model.terminate();
             } else {
                 this._runUpscale();
             }
@@ -179,39 +154,36 @@ export class UpscaleTool {
         this.editor.setOptions(this.renderOptions());
         this._setStatus('Loading model…');
 
-        let finishRun;
-        const run = new Promise((resolve) => { finishRun = resolve; });
-        activeRuns.add(run);
+        this._model.onProgress = (p) => {
+            if (p.status === 'progress' && p.total) {
+                const pct = Math.round((p.loaded / p.total) * 100);
+                this._setStatus(`Downloading model… ${pct}%`);
+            } else if (p.status === 'ready') {
+                this._setStatus(this._tileStatus?.() ?? 'Model ready, processing…');
+            }
+        };
 
         try {
-            const { model, Tensor } = await getModel((p) => {
-                if (p.status === 'progress' && p.total) {
-                    const pct = Math.round((p.loaded / p.total) * 100);
-                    this._setStatus(`Downloading model… ${pct}%`);
-                } else if (p.status === 'ready') {
-                    this._setStatus('Model ready, processing…');
-                }
-            });
-
             const source = this.editor.baseCanvas;
-            const result = await this._upscale(source, this._scale, model, Tensor);
+            const result = await this._upscale(source, this._scale);
             if (this._cancelled || this.editor.baseCanvas !== source) {
                 result.width = 0;
-                throw new UpscaleCancelled();
+                throw new ModelCancelled();
             }
             this.editor.pushUndo();
             this.editor.replaceBase(result);
             this._setStatus(`Upscaled to ${result.width} × ${result.height} px`);
         } catch (err) {
-            if (err instanceof UpscaleCancelled) {
+            if (err instanceof ModelCancelled) {
                 this._setStatus('Canceled');
             } else {
                 console.error('Upscale failed:', err);
                 this._setStatus('Error: ' + err.message);
             }
         } finally {
-            activeRuns.delete(run);
-            finishRun();
+            this._model.onProgress = null;
+            this._model.onFallback = null;
+            this._tileStatus = null;
             this._processing = false;
             if (this.editor.activeTool === this) {
                 const status = this._statusEl?.textContent;
@@ -221,7 +193,7 @@ export class UpscaleTool {
         }
     }
 
-    async _upscale(source, scale, model, Tensor) {
+    async _upscale(source, scale) {
         const { width, height } = source;
         const rgba = source.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, width, height).data;
 
@@ -238,22 +210,39 @@ export class UpscaleTool {
         const rows = Math.ceil(height / TILE_CORE);
         const total = cols * rows;
 
+        // The estimate of the remaining time uses only the tiles of the current device.
+        let timedTiles = 0;
+        let timedSince = 0;
+        this._model.onFallback = () => {
+            timedTiles = 0;
+            this._setStatus('The GPU failed. Loading the model on the CPU…');
+        };
+
         try {
             for (let row = 0; row < rows; row++) {
                 for (let col = 0; col < cols; col++) {
-                    if (this._cancelled) throw new UpscaleCancelled();
-                    this._setStatus(`Upscaling… tile ${row * cols + col + 1} of ${total}`);
+                    if (this._cancelled) throw new ModelCancelled();
+                    const index = row * cols + col;
+                    this._tileStatus = () => {
+                        let status = `${this._model.onCpu ? 'Upscaling on the CPU' : 'Upscaling'}… tile ${index + 1} of ${total}`;
+                        if (timedTiles > 0) {
+                            status += ', ' + formatRemaining((performance.now() - timedSince) / timedTiles * (total - index));
+                        }
+                        return status;
+                    };
+                    this._setStatus(this._tileStatus());
 
                     const x = col * TILE_CORE;
                     const y = row * TILE_CORE;
                     const w = Math.min(TILE_CORE, width - x);
                     const h = Math.min(TILE_CORE, height - y);
 
-                    const input = readTile(rgba, width, height, x - TILE_PAD, y - TILE_PAD, Tensor);
-                    const { reconstruction } = await model({ pixel_values: input });
-                    input.dispose?.();
-                    const tile = writeTile(reconstruction.data, TILE_PAD * MODEL_SCALE, TILE_PAD * MODEL_SCALE, w * MODEL_SCALE, h * MODEL_SCALE);
-                    reconstruction.dispose?.();
+                    const data = readTile(rgba, width, height, x - TILE_PAD, y - TILE_PAD);
+                    const tileStart = performance.now();
+                    const output = await this._model.run({ data, dims: [1, 3, TILE, TILE] });
+                    if (timedTiles === 0) timedSince = tileStart;
+                    timedTiles++;
+                    const tile = writeTile(output, TILE_PAD * MODEL_SCALE, TILE_PAD * MODEL_SCALE, w * MODEL_SCALE, h * MODEL_SCALE);
 
                     tileCanvas.width = tile.width;
                     tileCanvas.height = tile.height;
@@ -284,14 +273,6 @@ export class UpscaleTool {
 
     destroy() {
         this._cancelled = true;
-        latestProgressCallback = null;
-        const pending = modelPromise;
-        modelPromise = null;
-        if (pending) {
-            Promise.allSettled([...activeRuns])
-                .then(() => pending)
-                .then(({ model }) => model.dispose())
-                .catch(() => {});
-        }
+        this._model.terminate();
     }
 }
