@@ -17,9 +17,17 @@ class AllratestodayHarness extends Mage_Directory_Model_Currency_Import_Allrates
 
     private string $bank = '';
 
+    private string $apiKey = '';
+
     public function setBank(string $bank): static
     {
         $this->bank = $bank;
+        return $this;
+    }
+
+    public function setApiKey(string $apiKey): static
+    {
+        $this->apiKey = $apiKey;
         return $this;
     }
 
@@ -27,5 +35,11 @@ class AllratestodayHarness extends Mage_Directory_Model_Currency_Import_Allrates
     protected function _getBank(): string
     {
         return strtolower(trim($this->bank));
+    }
+
+    #[\Override]
+    protected function _getApiKey(): string
+    {
+        return trim($this->apiKey);
     }
 }

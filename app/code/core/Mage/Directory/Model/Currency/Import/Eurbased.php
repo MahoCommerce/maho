@@ -152,6 +152,16 @@ abstract class Mage_Directory_Model_Currency_Import_Eurbased extends Mage_Direct
     }
 
     /**
+     * Extra request headers for the service, e.g. credentials
+     *
+     * @return array<string, string>
+     */
+    protected function _getRequestHeaders(): array
+    {
+        return [];
+    }
+
+    /**
      * Get response from external service
      *
      * @param string $url
@@ -164,6 +174,7 @@ abstract class Mage_Directory_Model_Currency_Import_Eurbased extends Mage_Direct
         try {
             $httpResponse = $this->_httpClient->request('GET', $url, [
                 'timeout' => $this->_getTimeout(),
+                'headers' => $this->_getRequestHeaders(),
             ]);
             // Use false to not throw on HTTP errors, allowing us to read error response body
             $jsonResponse = $httpResponse->getContent(false);

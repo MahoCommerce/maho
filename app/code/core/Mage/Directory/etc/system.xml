@@ -99,7 +99,7 @@ SPDX-License-Identifier: AFL-3.0
                 </frankfurter>
                 <allratestoday translate="label comment">
                     <label>AllRatesToday</label>
-                    <comment><![CDATA[ECB reference rates by default, or the official table of one central bank, including banks other free services do not carry (Saudi Arabia, UAE, Qatar, Korea, New Zealand, Vietnam, Bangladesh). No account or API key needed. <a href='https://allratestoday.com/open-api/' target='_blank'>allratestoday.com</a>]]></comment>
+                    <comment><![CDATA[ECB reference rates without an account or API key (the <a href='https://allratestoday.com/terms/#attribution' target='_blank'>terms</a> ask for a visible link to allratestoday.com), or with an API key the official table of one central bank, including banks other services do not carry (Saudi Arabia, UAE, Qatar, Korea, New Zealand, Vietnam, Bangladesh). <a href='https://allratestoday.com/open-api/' target='_blank'>allratestoday.com</a>]]></comment>
                     <sort_order>37</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>0</show_in_website>
@@ -129,11 +129,24 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
-                            <comment><![CDATA[Leave empty for the ECB reference table. Otherwise the code of the central bank whose official table should be imported, e.g. <code>sama</code>, <code>cbuae</code>, <code>bok</code> or <code>rbnz</code>; see the <a href='https://allratestoday.com/central-bank-rates-api/institutions/' target='_blank'>list of institutions</a>. The bank must publish a EUR rate.]]></comment>
+                            <comment><![CDATA[Leave empty for the ECB reference table. Otherwise the code of the central bank whose official table should be imported, e.g. <code>sama</code>, <code>cbuae</code>, <code>bok</code> or <code>rbnz</code>; see the <a href='https://allratestoday.com/central-bank-rates-api/institutions/' target='_blank'>list of institutions</a>. The bank must publish a EUR rate, and an API key is required.]]></comment>
                             <depends>
                                 <active>1</active>
                             </depends>
                         </bank>
+                        <api_key translate="label comment">
+                            <label>API Access Key</label>
+                            <frontend_type>obscure</frontend_type>
+                            <backend_model>adminhtml/system_config_backend_encrypted</backend_model>
+                            <sort_order>25</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <comment><![CDATA[Only needed for a central bank table. Free keys are for testing; a store needs a <a href='https://allratestoday.com/pricing/' target='_blank'>paid plan</a>.]]></comment>
+                            <depends>
+                                <active>1</active>
+                            </depends>
+                        </api_key>
                         <sort_order translate="label comment">
                             <label>Sort Order</label>
                             <sort_order>30</sort_order>

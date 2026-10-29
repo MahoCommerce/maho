@@ -47,10 +47,6 @@ it('imports usable rates from AllRatesToday', function () {
     expectUsableRates((new AllratestodayHarness())->setCurrencies(['EUR', 'GBP', 'USD'], ['EUR', 'USD']));
 });
 
-it('imports usable rates from AllRatesToday\'s Saudi Central Bank table', function () {
-    expectUsableRates((new AllratestodayHarness())->setBank('sama')->setCurrencies(['EUR', 'GBP', 'USD'], ['EUR', 'USD']));
-});
-
 it('imports usable rates from ExchangeRate-API', function () {
     expectUsableRates((new ExchangerateapiHarness())->setCurrencies(['EUR', 'GBP', 'USD'], ['EUR', 'USD']));
 });

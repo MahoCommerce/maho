@@ -136,6 +136,7 @@ SPDX-License-Identifier: AFL-3.0
                 <active>0</active>
                 <sort_order>15</sort_order>
                 <bank></bank>
+                <api_key backend_model="adminhtml/system_config_backend_encrypted"/>
             </allratestoday>
             <exchangerateapi>
                 <timeout>100</timeout>
