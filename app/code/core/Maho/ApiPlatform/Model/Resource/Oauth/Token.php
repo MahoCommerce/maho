@@ -59,6 +59,18 @@ class Maho_ApiPlatform_Model_Resource_Oauth_Token extends Mage_Core_Model_Resour
     }
 
     /**
+     * Revoke every grant this admin approved, and everything issued under them.
+     */
+    public function revokeAdminGrants(int $adminId): int
+    {
+        return $this->_getWriteAdapter()->update(
+            $this->getMainTable(),
+            ['revoked' => 1],
+            ['admin_id = ?' => $adminId, 'revoked = ?' => 0],
+        );
+    }
+
+    /**
      * Revoke one consent of this admin, and everything issued under it. False when
      * the consent does not exist, belongs to another admin, or is already revoked.
      */

@@ -10,6 +10,9 @@
 
 class Mage_Core_Model_Email_Template_Filter extends \Maho\Filter\Template
 {
+    /** Config node that lists the layout handles that the {{layout}} directive can render. */
+    public const XML_PATH_EMAIL_LAYOUT_HANDLES = 'global/template/email_layout_handles';
+
     /**
      * Use absolute links flag
      *
@@ -168,6 +171,12 @@ class Mage_Core_Model_Email_Template_Filter extends \Maho\Filter\Template
         $skipParams = ['handle', 'area'];
 
         $params = $this->_getIncludeParameters($construction[2]);
+        $handle = isset($params['handle']) && is_string($params['handle']) ? $params['handle'] : '';
+        if (!$this->isLayoutHandleAllowed($handle)) {
+            Mage::log('Security problem: layout handle ' . $handle . ' is not on the allowlist.');
+            return '';
+        }
+
         $layout = Mage::getModel('core/layout');
         /** @var Mage_Core_Model_Layout $layout */
         if (isset($params['area'])) {
@@ -176,7 +185,7 @@ class Mage_Core_Model_Email_Template_Filter extends \Maho\Filter\Template
             $layout->setArea(Mage::app()->getLayout()->getArea());
         }
 
-        $layout->getUpdate()->addHandle($params['handle']);
+        $layout->getUpdate()->addHandle($handle);
         $layout->getUpdate()->load();
 
         $layout->generateXml();
@@ -185,7 +194,8 @@ class Mage_Core_Model_Email_Template_Filter extends \Maho\Filter\Template
         /** @var Mage_Core_Block_Abstract $block */
         foreach ($layout->getAllBlocks() as $block) {
             foreach ($params as $k => $v) {
-                if (in_array($k, $skipParams)) {
+                // setDataUsingMethod() ignores case and underscores, so tem_plate also calls setTemplate()
+                if (in_array($k, $skipParams) || strtolower((string) preg_replace('/[^a-z]/i', '', (string) $k)) === 'template') {
                     continue;
                 }
 
@@ -204,6 +214,30 @@ class Mage_Core_Model_Email_Template_Filter extends \Maho\Filter\Template
 
         $layout->setDirectOutput(false);
         return $layout->getOutput();
+    }
+
+    /**
+     * Return true when a module declares $handle under global/template/email_layout_handles.
+     * A template editor can lack the rights for any block, so {{layout}} renders only these handles.
+     */
+    public function isLayoutHandleAllowed(string $handle): bool
+    {
+        if ($handle === '') {
+            return false;
+        }
+
+        $handles = Mage::getConfig()->getNode(self::XML_PATH_EMAIL_LAYOUT_HANDLES);
+        if (!$handles) {
+            return false;
+        }
+
+        foreach ($handles->children() as $node) {
+            if ($node->getName() === $handle) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

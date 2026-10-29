@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2019-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Api2
@@ -14,6 +14,19 @@
 class Mage_Api2_Adminhtml_Api2_RoleController extends Mage_Adminhtml_Controller_Action
 {
     public const ADMIN_RESOURCE = 'system/api/rest_roles';
+
+    #[\Override]
+    protected function _isAllowed(): bool
+    {
+        $aclPath = match (strtolower($this->getRequest()->getActionName())) {
+            'new' => self::ADMIN_RESOURCE . '/add',
+            'save' => self::ADMIN_RESOURCE . ($this->getRequest()->getParam('id') ? '/edit' : '/add'),
+            'delete' => self::ADMIN_RESOURCE . '/delete',
+            default => self::ADMIN_RESOURCE,
+        };
+
+        return Mage::getSingleton('admin/session')->isAllowed($aclPath);
+    }
 
     /**
      * Show grid

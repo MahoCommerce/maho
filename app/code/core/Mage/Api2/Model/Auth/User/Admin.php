@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2019-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Api2
@@ -34,6 +34,7 @@ class Mage_Api2_Model_Auth_User_Admin extends Mage_Api2_Model_Auth_User_Abstract
      *
      * @return int
      * @throws Exception
+     * @throws Mage_Api2_Exception
      */
     #[\Override]
     public function getRole()
@@ -41,6 +42,12 @@ class Mage_Api2_Model_Auth_User_Admin extends Mage_Api2_Model_Auth_User_Abstract
         if (!$this->_role) {
             if (!$this->getUserId()) {
                 throw new Exception('Admin identifier is not set');
+            }
+
+            // An OAuth token outlives the deactivation of its admin user, so check the account on each request
+            $user = Mage::getModel('admin/user')->load((int) $this->getUserId());
+            if (!$user->getId() || !$user->getIsActive()) {
+                throw new Mage_Api2_Exception('Admin user is not active', Mage_Api2_Model_Server::HTTP_UNAUTHORIZED);
             }
 
             /** @var Mage_Api2_Model_Resource_Acl_Global_Role_Collection $collection */

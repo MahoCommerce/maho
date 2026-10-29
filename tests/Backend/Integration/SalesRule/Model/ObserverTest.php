@@ -61,7 +61,7 @@ describe('SalesRule Observer Integration', function () {
             ->save();
 
         // Trigger the observer
-        Mage::dispatchEvent('sales_order_place_after', ['order' => $order]);
+        Mage::dispatchEvent('sales_order_place_before', ['order' => $order]);
 
         // Reload models to get fresh data
         $rule->load($rule->getId());
@@ -119,7 +119,7 @@ describe('SalesRule Observer Integration', function () {
             ->setBaseGrandTotal(90)
             ->save();
 
-        Mage::dispatchEvent('sales_order_place_after', ['order' => $order]);
+        Mage::dispatchEvent('sales_order_place_before', ['order' => $order]);
 
         $rule->load($rule->getId());
         $coupon->load($coupon->getId());
@@ -168,7 +168,7 @@ describe('SalesRule Observer Integration', function () {
             ->setBaseGrandTotal(85)
             ->save();
 
-        Mage::dispatchEvent('sales_order_place_after', ['order' => $order]);
+        Mage::dispatchEvent('sales_order_place_before', ['order' => $order]);
 
         $rule->load($rule->getId());
         $coupon->load($coupon->getId());
@@ -215,7 +215,7 @@ describe('SalesRule Observer Integration', function () {
             ->save();
 
         // Trigger the observer
-        Mage::dispatchEvent('sales_order_place_after', ['order' => $order]);
+        Mage::dispatchEvent('sales_order_place_before', ['order' => $order]);
 
         // Reload models to get fresh data
         $rule->load($rule->getId());
@@ -239,7 +239,7 @@ describe('SalesRule Observer Integration', function () {
             ->setBaseGrandTotal(100)
             ->save();
 
-        Mage::dispatchEvent('sales_order_place_after', ['order' => $order]);
+        Mage::dispatchEvent('sales_order_place_before', ['order' => $order]);
 
         // Nothing to verify except no errors occurred
         expect(true)->toBe(true);

@@ -85,6 +85,30 @@ Template authors get the same power in conditions as in `{{var}}`, no more:
 {{template config_path="design/email/footer"}}
 ```
 
+## Layout handles: `{{layout}}`
+
+`{{layout handle="..."}}` renders the blocks of a layout handle. The order emails use it to show their items:
+
+```
+{{layout handle="sales_email_order_items" order=$order}}
+```
+
+The directive renders only the handles that a module declares under `global/template/email_layout_handles`. For any other handle, it writes a line to the system log and renders nothing. A template editor can lack the rights to use a block, and a handle can contain any block, so each handle needs a declaration.
+
+A module that uses its own handle in an email, a newsletter or a CMS template declares it in its `config.xml`:
+
+```xml
+<config>
+    <global>
+        <template>
+            <email_layout_handles>
+                <mymodule_email_items/>
+            </email_layout_handles>
+        </template>
+    </global>
+</config>
+```
+
 ## Sanitization of stored content <span class="version-badge">v26.9+</span>
 
 A directive is not valid HTML. The nested quotes in `{{media url="..."}}` close the surrounding attribute. Any HTML sanitizer that parses content with an unresolved directive in it will therefore mangle that directive, usually into a broken `%7B%7B…` URL.
