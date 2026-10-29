@@ -1975,6 +1975,7 @@
         .add-to-box,
         .product-options-bottom {
             @apply grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2.5 gap-y-4 border-t border-line pt-6;
+            container-type: inline-size;
 
             /* The template renders a JS-updated price clone here; the price under
                the title updates too, so showing both would duplicate it */
@@ -1988,6 +1989,21 @@
 
             .add-to-links {
                 grid-column: 2;
+            }
+
+            /* Too narrow for one row: qty and links share the first row, the CTA takes the full second row */
+            @container (max-width: 30rem) {
+                .add-to-cart:has(> .qty-wrapper) {
+                    display: contents;
+
+                    .add-to-cart-buttons {
+                        grid-column: 1 / -1;
+                    }
+
+                    ~ .add-to-links {
+                        grid-row: 1;
+                    }
+                }
             }
         }
 
