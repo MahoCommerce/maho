@@ -256,6 +256,22 @@ describe('coupon usage counters', function () {
             ->and((int) $coupon->load($coupon->getId())->getTimesUsed())->toBe(1);
     });
 
+    test('a limit added during the payment does not refuse an order with no limit', function () {
+        $customer = usageLimitCustomer('order-limit-added-' . uniqid() . '@example.com');
+        $rule = usageLimitRule();
+        $coupon = usageLimitCoupon($rule, null);
+        $observer = new \Maho\Event\Observer(['event' => new \Maho\Event(['order' => usageLimitOrder($rule, $coupon, (int) $customer->getId())])]);
+        $salesRuleObserver = Mage::getModel('salesrule/observer');
+
+        $salesRuleObserver->sales_order_beforePlace($observer);
+        $coupon->setUsageLimit(1)->setTimesUsed(1)->setUsagePerCustomer(1)->save();
+        $rule->setUsesPerCustomer(1)->save();
+        Mage::getResourceModel('salesrule/rule_customer')->incrementTimesUsed((int) $customer->getId(), (int) $rule->getId());
+
+        expect(fn() => $salesRuleObserver->sales_order_afterPlace($observer))->not->toThrow(Exception::class);
+        expect((int) $rule->load($rule->getId())->getTimesUsed())->toBe(1);
+    });
+
     test('an order with a usage limit is not counted again after the payment', function () {
         $customer = usageLimitCustomer('order-limit-once-' . uniqid() . '@example.com');
         $rule = usageLimitRule();
