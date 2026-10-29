@@ -592,7 +592,8 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
                 foreach (is_array($value) ? $value : explode(',', (string) $value) as $optionId) {
                     $optionId = trim((string) $optionId);
                     if ($optionId !== '') {
-                        $conditions[] = ['finset' => $this->optionId($attribute, $optionId)];
+                        $this->assertOptionId($attribute, $optionId);
+                        $conditions[] = ['finset' => $optionId];
                     }
                 }
                 if ($conditions !== []) {
@@ -601,7 +602,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
                 continue;
             }
             if ($attribute->getId() && $attribute->getFrontendInput() === 'select' && is_scalar($value)) {
-                $value = $this->optionId($attribute, trim((string) $value));
+                $this->assertOptionId($attribute, trim((string) $value));
             }
             $collection->addAttributeToFilter($code, $value);
         }
@@ -705,36 +706,19 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
     }
 
     /**
-     * Return the option ID that $value names in the options of $attribute. $value is an option ID,
-     * the admin label of an option or its label in the current store, in any letter case. An
-     * attribute without options in the option table, such as visibility, keeps $value.
+     * Refuse a value that cannot be an option ID of $attribute, such as the label of the option.
+     * Only an attribute whose options are in the option table has option IDs.
      *
-     * @throws BadRequestHttpException when $value is not a number and no label matches it
+     * @throws BadRequestHttpException
      */
-    private function optionId(\Mage_Eav_Model_Entity_Attribute_Abstract $attribute, string $value): string
+    private function assertOptionId(\Mage_Eav_Model_Entity_Attribute_Abstract $attribute, string $value): void
     {
-        $options = \Mage::getResourceModel('eav/entity_attribute_option_collection')
-            ->setAttributeFilter((int) $attribute->getId())
-            ->setStoreFilter((int) StoreContext::getStore()->getId());
-        if ($options->count() === 0 || (ctype_digit($value) && $options->getItemById((int) $value))) {
-            return $value;
-        }
-
-        $label = mb_strtolower($value);
-        foreach ($options as $option) {
-            if (mb_strtolower((string) $option->getData('default_value')) === $label
-                || mb_strtolower((string) $option->getData('value')) === $label
-            ) {
-                return (string) $option->getId();
-            }
-        }
-
-        if (ctype_digit($value)) {
-            return $value;
+        if (ctype_digit($value) || !$attribute->getSource() instanceof \Mage_Eav_Model_Entity_Attribute_Source_Table) {
+            return;
         }
 
         throw new BadRequestHttpException(sprintf(
-            'attributeFilters: the attribute %s has no option "%s". Give the label of an option as the admin shows it, or its option ID.',
+            'attributeFilters: %1$s takes option IDs, not "%2$s". List the product attributes with search=%1$s to get the ID of each option.',
             $attribute->getAttributeCode(),
             $value,
         ));
