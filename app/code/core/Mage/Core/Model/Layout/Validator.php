@@ -149,10 +149,7 @@ class Mage_Core_Model_Layout_Validator
         }
 
         // Disallowed blocks
-        $xpathBlockValidationExpression = $this->_getXpathBlockValidationExpression();
-        if (($xpathBlockValidationExpression && $value->xpath($xpathBlockValidationExpression))
-            || $this->_hasDisallowedBlock($value)
-        ) {
+        if ($this->_hasDisallowedBlock($value)) {
             $this->_error(self::INVALID_BLOCK_NAME);
             return false;
         }
@@ -178,7 +175,7 @@ class Mage_Core_Model_Layout_Validator
                 continue;
             }
             foreach ($node->xpath('.//*') ?: [] as $argument) {
-                if (str_contains(strtolower((string) $argument), 'template')) {
+                if (str_contains(preg_replace('/[^a-z]/', '', strtolower((string) $argument)), 'template')) {
                     return true;
                 }
             }

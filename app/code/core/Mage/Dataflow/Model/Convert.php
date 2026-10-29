@@ -12,8 +12,6 @@ class Mage_Dataflow_Model_Convert
 {
     public static function convert($class, $method, $data, array $vars = [])
     {
-        $class = is_object($class) ? $class::class : (string) $class;
-        Mage_Dataflow_Model_Convert_Action_Abstract::validateContainerClass($class);
         $action = new Mage_Dataflow_Model_Convert_Action();
         $action->setParam('method', $method)->setParam('class', $class);
 

@@ -106,6 +106,10 @@ it('checks the leaf of each action', function (string $class, string $action, ar
     yield 'order pdfcreditmemos denied without credit memos' => [$order, 'pdfcreditmemos', [], $view, false];
     yield 'order pdfcreditmemos allowed with order credit memos' => [$order, 'pdfcreditmemos', [], ['sales/order/actions/creditmemo'], true];
     yield 'order pdfcreditmemos allowed with credit memo grid' => [$order, 'pdfcreditmemos', [], ['sales/order', 'sales/creditmemo'], true];
+    yield 'order pdfinvoices denied without invoices' => [$order, 'pdfinvoices', [], $view, false];
+    yield 'order pdfinvoices allowed with invoice grid' => [$order, 'pdfinvoices', [], ['sales/order', 'sales/invoice'], true];
+    yield 'order pdfshipments denied without shipments' => [$order, 'pdfshipments', [], $view, false];
+    yield 'order pdfshipments allowed with order ship' => [$order, 'pdfshipments', [], ['sales/order/actions/ship'], true];
     yield 'order pdfdocs allowed to order viewers' => [$order, 'pdfdocs', [], $view, true];
     yield 'order grid allowed to order viewers' => [$order, 'index', [], $view, true];
     yield 'order export allowed to order viewers' => [$order, 'exportCsv', [], $view, true];
@@ -200,7 +204,7 @@ it('checks the leaf of each action', function (string $class, string $action, ar
 
 it('checks Create, or Reorder during a reorder, for the steps of order creation', function (string $action, bool $reordering, array $granted, bool $expected): void {
     actionAclLogin($granted);
-    Mage::getSingleton('adminhtml/session_quote')->setReordered($reordering ? 12 : null);
+    Mage::getSingleton('adminhtml/session_quote')->setReordered($reordering ? 12 : null)->setOrderId(null);
     $controller = new Mage_Adminhtml_Sales_Order_CreateController(actionAclRequest($action), new Mage_Core_Controller_Response_Http());
 
     expect(actionAclIsAllowed($controller))->toBe($expected);
@@ -215,6 +219,23 @@ it('checks Create, or Reorder during a reorder, for the steps of order creation'
     yield 'start allowed with create' => ['start', false, ['sales/order/actions/create'], true];
     yield 'index allowed with create' => ['index', false, ['sales/order/actions/create'], true];
     yield 'save during a reorder denied to create' => ['save', true, ['sales/order/actions/create'], false];
+});
+
+it('checks Edit for the create steps that the order edit page calls', function (string $action, array $granted, bool $expected): void {
+    actionAclLogin($granted);
+    Mage::getSingleton('adminhtml/session_quote')->setReordered(null)->setOrderId(7);
+    $controller = new Mage_Adminhtml_Sales_Order_CreateController(actionAclRequest($action), new Mage_Core_Controller_Response_Http());
+
+    try {
+        expect(actionAclIsAllowed($controller))->toBe($expected);
+    } finally {
+        Mage::getSingleton('adminhtml/session_quote')->setOrderId(null);
+    }
+})->with(function (): Generator {
+    foreach (['addConfigured', 'configureProductToAdd', 'configureQuoteItems'] as $action) {
+        yield "$action allowed with edit" => [$action, ['sales/order/actions/edit'], true];
+        yield "$action denied to create" => [$action, ['sales/order/actions/create'], false];
+    }
 });
 
 it('allows Pending Tags to act only on tags that are still pending', function (string $action, array $params, array $statuses, array $granted, bool $expected): void {
@@ -256,6 +277,8 @@ it('allows Pending Tags to act only on tags that are still pending', function (s
     yield 'save pending tag allowed with pending' => ['save', ['tag_id' => '5'], [5 => $pending], $pendingOnly, true];
     yield 'delete approved tag denied to pending' => ['delete', ['tag_id' => '5'], [5 => $approved], $pendingOnly, false];
     yield 'delete missing tag denied to pending' => ['delete', ['tag_id' => '5'], [], $pendingOnly, false];
+    yield 'delete approved tag_id with a pending tag denied to pending' => ['delete', ['tag' => ['5'], 'tag_id' => '6'], [5 => $pending, 6 => $approved], $pendingOnly, false];
+    yield 'delete pending tag and pending tag_id allowed with pending' => ['delete', ['tag' => ['5'], 'tag_id' => '6'], [5 => $pending, 6 => $pending], $pendingOnly, true];
     yield 'mass delete with an approved tag denied to pending' => ['massDelete', ['tag' => ['5', '6']], [5 => $pending, 6 => $approved], $pendingOnly, false];
     yield 'mass delete with an invalid id denied to pending' => ['massDelete', ['tag' => ['5', '6abc']], [5 => $pending, 6 => $approved], $pendingOnly, false];
     yield 'mass status of pending tags allowed with pending' => ['massStatus', ['tag' => ['5', '6']], [5 => $pending, 6 => $pending], $pendingOnly, true];

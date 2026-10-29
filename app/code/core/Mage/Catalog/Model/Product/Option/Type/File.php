@@ -854,7 +854,8 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
      * Return the extensions that an upload to this option refuses.
      *
      * The protected extensions and catalog/custom_options/forbidden_extensions always apply.
-     * ACTIVE_CONTENT_EXTENSIONS apply only when $allowed is null. An option that lists one of them keeps it.
+     * ACTIVE_CONTENT_EXTENSIONS apply only when $allowed is null. An option that lists one of them keeps it,
+     * unless the protected or the forbidden extensions also hold it, as the default protected extensions hold htm and html.
      *
      * @param list<string>|null $allowed The allowed extensions of the option, or null when the option has no list
      * @return list<string>

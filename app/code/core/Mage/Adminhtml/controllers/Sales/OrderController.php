@@ -556,52 +556,25 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     {
         $orderIds = $this->getRequest()->getPost('order_ids');
         if (!empty($orderIds)) {
-            $allInvoices = [];
-            $allShipments = [];
-            $allCreditmemos = [];
-            $canViewCreditmemos = $this->_canViewCreditmemos();
-
+            $documents = array_fill_keys(array_filter(['invoice', 'shipment', 'creditmemo'], $this->_canViewDocuments(...)), []);
             foreach ($orderIds as $orderId) {
-                $invoices = Mage::getResourceModel('sales/order_invoice_collection')
-                    ->setOrderFilter($orderId)
-                    ->load();
-                if ($invoices->getSize()) {
-                    foreach ($invoices as $invoice) {
-                        $allInvoices[] = $invoice;
-                    }
-                }
-
-                $shipments = Mage::getResourceModel('sales/order_shipment_collection')
-                    ->setOrderFilter($orderId)
-                    ->load();
-                if ($shipments->getSize()) {
-                    foreach ($shipments as $shipment) {
-                        $allShipments[] = $shipment;
-                    }
-                }
-
-                if (!$canViewCreditmemos) {
-                    continue;
-                }
-
-                $creditmemos = Mage::getResourceModel('sales/order_creditmemo_collection')
-                    ->setOrderFilter($orderId)
-                    ->load();
-                if ($creditmemos->getSize()) {
-                    foreach ($creditmemos as $creditmemo) {
-                        $allCreditmemos[] = $creditmemo;
+                foreach (array_keys($documents) as $type) {
+                    $collection = Mage::getResourceModel("sales/order_{$type}_collection")
+                        ->setOrderFilter($orderId)
+                        ->load();
+                    foreach ($collection as $document) {
+                        $documents[$type][] = $document;
                     }
                 }
             }
 
             // Generate PDF for the first available document type
             $pdfContent = '';
-            if (!empty($allInvoices)) {
-                $pdfContent = Mage::getModel('sales/order_pdf_invoice')->getPdf($allInvoices);
-            } elseif (!empty($allShipments)) {
-                $pdfContent = Mage::getModel('sales/order_pdf_shipment')->getPdf($allShipments);
-            } elseif (!empty($allCreditmemos)) {
-                $pdfContent = Mage::getModel('sales/order_pdf_creditmemo')->getPdf($allCreditmemos);
+            foreach ($documents as $type => $items) {
+                if ($items !== []) {
+                    $pdfContent = Mage::getModel("sales/order_pdf_{$type}")->getPdf($items);
+                    break;
+                }
             }
 
             if (!empty($pdfContent)) {
@@ -645,8 +618,9 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     protected function _isAllowed()
     {
         $action = strtolower($this->getRequest()->getActionName());
-        if ($action === 'pdfcreditmemos') {
-            return Mage::getSingleton('admin/session')->isAllowed('sales/order') && $this->_canViewCreditmemos();
+        $documentType = ['pdfinvoices' => 'invoice', 'pdfshipments' => 'shipment', 'pdfcreditmemos' => 'creditmemo'][$action] ?? null;
+        if ($documentType !== null) {
+            return Mage::getSingleton('admin/session')->isAllowed('sales/order') && $this->_canViewDocuments($documentType);
         }
 
         $aclResource = match ($action) {
@@ -667,12 +641,14 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     }
 
     /**
-     * Return true when the admin can see the credit memos: the Credit Memos tab of the order or the Credit Memos grid.
+     * Return true when the admin can see the documents of $type (invoice, shipment or creditmemo):
+     * with the order action that creates them, or with their grid.
      */
-    protected function _canViewCreditmemos(): bool
+    protected function _canViewDocuments(string $type): bool
     {
         $session = Mage::getSingleton('admin/session');
-        return $session->isAllowed('sales/order/actions/creditmemo') || $session->isAllowed('sales/creditmemo');
+        $orderAction = $type === 'shipment' ? 'ship' : $type;
+        return $session->isAllowed('sales/order/actions/' . $orderAction) || $session->isAllowed('sales/' . $type);
     }
 
     /**

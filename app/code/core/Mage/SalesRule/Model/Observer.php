@@ -53,7 +53,7 @@ class Mage_SalesRule_Model_Observer
                     ->incrementTimesUsed($customerId, $ruleId, (int) $rule->getUsesPerCustomer())
                 ) {
                     Mage::throwException(Mage::helper('salesrule')->__(
-                        'You already used a discount of this order the maximum number of times.',
+                        'This order has a discount that you used the maximum number of times.',
                     ));
                 }
             }
@@ -64,7 +64,7 @@ class Mage_SalesRule_Model_Observer
                     $couponId = (int) $coupon->getId();
                     if (!$coupon->getResource()->incrementTimesUsed($couponId)) {
                         Mage::throwException(Mage::helper('salesrule')->__(
-                            'Coupon code "%s" was already used the maximum number of times.',
+                            'Coupon code "%s" reached its maximum number of uses.',
                             $order->getCouponCode(),
                         ));
                     }

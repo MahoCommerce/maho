@@ -45,7 +45,7 @@ class Mage_Api2_Model_Auth_User_Admin extends Mage_Api2_Model_Auth_User_Abstract
             }
 
             // An OAuth token outlives the deactivation of its admin user, so check the account on each request
-            $user = $this->_loadAdminUser((int) $this->getUserId());
+            $user = Mage::getModel('admin/user')->load((int) $this->getUserId());
             if (!$user->getId() || !$user->getIsActive()) {
                 throw new Mage_Api2_Exception('Admin user is not active', Mage_Api2_Model_Server::HTTP_UNAUTHORIZED);
             }
@@ -64,11 +64,6 @@ class Mage_Api2_Model_Auth_User_Admin extends Mage_Api2_Model_Auth_User_Abstract
         }
 
         return $this->_role;
-    }
-
-    protected function _loadAdminUser(int $userId): Mage_Admin_Model_User
-    {
-        return Mage::getModel('admin/user')->load($userId);
     }
 
     /**

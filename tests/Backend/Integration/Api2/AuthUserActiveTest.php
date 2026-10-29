@@ -87,8 +87,12 @@ it('gives the role of an active admin user', function () {
 
 it('refuses an admin user that is deactivated', function () {
     $user = api2ActiveCreateAdmin();
+    /** @var Mage_Api2_Model_Acl_Global_Role $role */
+    $role = Mage::getModel('api2/acl_global_role');
+    $role->setRoleName('Api2 Active ' . uniqid())->save();
 
     try {
+        Mage::getResourceModel('api2/acl_global_role')->saveAdminToRoleRelation($user->getId(), $role->getId());
         Mage::getModel('admin/user')->load($user->getId())->setIsActive(false)->save();
 
         $apiUser = Mage::getModel('api2/auth_user_admin')->setUserId($user->getId());
@@ -96,6 +100,7 @@ it('refuses an admin user that is deactivated', function () {
         expect(api2ActiveRoleError($apiUser))->toBe(Mage_Api2_Model_Server::HTTP_UNAUTHORIZED);
     } finally {
         $user->delete();
+        $role->delete();
     }
 });
 

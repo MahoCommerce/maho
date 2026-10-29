@@ -185,7 +185,7 @@ describe('coupon usage counters', function () {
 
         $second = usageLimitOrder($rule, $coupon, $customerId, false);
         expect(fn() => usageLimitPlace($second))
-            ->toThrow(Mage_Core_Exception::class, 'was already used the maximum number of times');
+            ->toThrow(Mage_Core_Exception::class, 'reached its maximum number of uses');
 
         // The order got an ID when it was saved, and the rollback removed its row.
         expect($second->getId())->not->toBeNull();
@@ -224,7 +224,7 @@ describe('coupon usage counters', function () {
         usageLimitPlace(usageLimitOrder($rule, $coupon, $customerId, false));
 
         expect(fn() => usageLimitPlace(usageLimitOrder($rule, $coupon, $customerId, false)))
-            ->toThrow(Mage_Core_Exception::class, 'You already used a discount of this order');
+            ->toThrow(Mage_Core_Exception::class, 'This order has a discount that you used the maximum number of times');
         expect((int) $rule->load($rule->getId())->getTimesUsed())->toBe(1);
         expect((int) $coupon->load($coupon->getId())->getTimesUsed())->toBe(1);
     });
@@ -237,7 +237,7 @@ describe('coupon usage counters', function () {
         usageLimitPlace(usageLimitOrder($rule, $coupon, null, false));
 
         expect(fn() => usageLimitPlace(usageLimitOrder($rule, $coupon, null, false)))
-            ->toThrow(Mage_Core_Exception::class, 'was already used the maximum number of times');
+            ->toThrow(Mage_Core_Exception::class, 'reached its maximum number of uses');
         expect((int) $coupon->load($coupon->getId())->getTimesUsed())->toBe(2);
     });
 

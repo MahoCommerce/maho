@@ -47,9 +47,9 @@ class Image extends AbstractElement
                 $url = \Mage::getBaseUrl('media') . $url;
             }
 
-            $html = '<a href="' . $url . '"'
+            $html = '<a href="' . $this->_escape($url) . '"'
                 . ' onclick="imagePreview(\'' . $this->getHtmlId() . '_image\'); return false;">'
-                . '<img src="' . ($this->_getPreviewUrl() ?? $url) . '" id="' . $this->getHtmlId() . '_image" title="' . $this->_escape($value) . '"'
+                . '<img src="' . $this->_escape($this->_getPreviewUrl() ?? $url) . '" id="' . $this->getHtmlId() . '_image" title="' . $this->_escape($value) . '"'
                 . ' alt="' . $this->_escape($value) . '" height="22" width="22" class="small-image-preview v-middle" />'
                 . '</a> ';
         }

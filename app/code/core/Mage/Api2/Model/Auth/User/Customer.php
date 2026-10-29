@@ -51,7 +51,7 @@ class Mage_Api2_Model_Auth_User_Customer extends Mage_Api2_Model_Auth_User_Abstr
     {
         if (!$this->_role) {
             // An OAuth token outlives the deactivation of its customer, so check the account on each request
-            $customer = $this->_loadCustomer((int) $this->getUserId());
+            $customer = Mage::getModel('customer/customer')->load((int) $this->getUserId());
             if (!$customer->getId() || !$customer->getIsActive()) {
                 throw new Mage_Api2_Exception('Customer is not active', Mage_Api2_Model_Server::HTTP_UNAUTHORIZED);
             }
@@ -66,10 +66,5 @@ class Mage_Api2_Model_Auth_User_Customer extends Mage_Api2_Model_Auth_User_Abstr
         }
 
         return $this->_role;
-    }
-
-    protected function _loadCustomer(int $customerId): Mage_Customer_Model_Customer
-    {
-        return Mage::getModel('customer/customer')->load($customerId);
     }
 }

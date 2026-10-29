@@ -329,14 +329,15 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
     }
 
     /**
-     * Return true when the request names one or more tags and all of them exist and are pending.
+     * Return true when the request names one or more tags in tag or tag_id, and all of them exist and are pending.
      */
     protected function _isPendingTagRequest(): bool
     {
         $request = $this->getRequest();
         $tagIds = $request->getParam('tag');
-        if (!is_array($tagIds)) {
-            $tagIds = [$request->getParam('tag_id')];
+        $tagIds = is_array($tagIds) ? $tagIds : [];
+        if ($request->getParam('tag_id') !== null) {
+            $tagIds[] = $request->getParam('tag_id');
         }
 
         $validIds = [];

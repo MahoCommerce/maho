@@ -19,6 +19,10 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
 {
     public const XML_PATH_DEFAULT_COUNTRY              = 'general/country/default';
     public const XML_PATH_PROTECTED_FILE_EXTENSIONS    = 'general/file/protected_extensions';
+    public const XML_PATH_ENCRYPTION_MODEL             = 'global/helpers/core/encryption_model';
+    public const XML_PATH_DEV_ALLOW_IPS                = 'dev/restrict/allow_ips';
+    public const XML_PATH_CACHE_BETA_TYPES             = 'global/cache/betatypes';
+    public const XML_PATH_MIME_TYPES                   = 'global/mime/types';
 
     /**
      * Extensions that stay protected when a saved general/file/protected_extensions value leaves them out.
@@ -27,10 +31,6 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
         'php', 'php3', 'php4', 'php5', 'php7', 'php8', 'phtml', 'pht', 'phar', 'phps',
         'pl', 'py', 'cgi', 'sh', 'asp', 'aspx', 'jsp', 'htaccess', 'shtml',
     ];
-    public const XML_PATH_ENCRYPTION_MODEL             = 'global/helpers/core/encryption_model';
-    public const XML_PATH_DEV_ALLOW_IPS                = 'dev/restrict/allow_ips';
-    public const XML_PATH_CACHE_BETA_TYPES             = 'global/cache/betatypes';
-    public const XML_PATH_MIME_TYPES                   = 'global/mime/types';
 
     /** @deprecated since 26.9 Only ipRateLimiter() uses it. */
     public const RATE_LIMIT_TIMEFRAME                  = 30;

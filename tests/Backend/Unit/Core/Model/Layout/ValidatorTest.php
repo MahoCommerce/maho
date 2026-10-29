@@ -77,6 +77,8 @@ describe(Mage_Core_Model_Layout_Validator::class, function () {
         'setDataUsingMethod in mixed case' => ['<reference name="content"><action method="SetDataUsingMethod"><k>Template</k><v>../x.phtml</v></action></reference>'],
         'setDataUsingMethod as Class::method' => ['<reference name="content"><action method="Mage_Core_Block_Abstract::setdatausingmethod"><k>TEMPLATE</k><v>../x.phtml</v></action></reference>'],
         'template attribute' => ['<reference name="content"><block type="core/template" name="t" template="page/x.phtml"/></reference>'],
+        'setDataUsingMethod with an underscore' => ['<reference name="content"><action method="setDataUsingMethod"><k>tem_plate</k><v>../x.phtml</v></action></reference>'],
+        'setDataUsingMethod with a space' => ['<reference name="content"><action method="setDataUsingMethod"><k>tem plate</k><v>../x.phtml</v></action></reference>'],
     ]);
 
     it('refuses invalid XML', function () {
