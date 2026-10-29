@@ -106,7 +106,9 @@ function optionFilterFixture(): array
 function optionFilterCreateProduct(string $sku, int $setId, array $data): int
 {
     $product = Mage::getModel('catalog/product');
-    $product->setTypeId(Mage_Catalog_Model_Product_Type::TYPE_SIMPLE)
+    // Like an admin save: a store-scoped value saved from store 1 gets no default row, so the EAV filter misses it
+    $product->setStoreId(Mage_Core_Model_App::ADMIN_STORE_ID)
+        ->setTypeId(Mage_Catalog_Model_Product_Type::TYPE_SIMPLE)
         ->setAttributeSetId($setId)
         ->setSku($sku)
         ->setName($sku)
