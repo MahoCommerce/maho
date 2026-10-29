@@ -86,27 +86,27 @@ describe('Maho\Convert profile XML types', function () {
     it('refuses a container type that is not a container before it creates the class', function () {
         $xml = '<convert><container name="x" type="' . DataflowContainerProbe::class . '"/></convert>';
 
-        expect(fn() => new Maho\Convert\Profile\Collection()->importXml($xml))
+        expect(fn() => (new Maho\Convert\Profile\Collection())->importXml($xml))
             ->toThrow(Maho\Convert\Exception::class, 'not a container');
         expect(DataflowContainerProbe::$constructed)->toBeFalse();
     });
 
     it('refuses an action class that is not a container before it creates the class', function () {
-        $action = new Maho\Convert\Action()->setParam('class', DataflowContainerProbe::class);
+        $action = (new Maho\Convert\Action())->setParam('class', DataflowContainerProbe::class);
 
         expect(fn() => $action->getContainer())->toThrow(Maho\Convert\Exception::class, 'not a container');
         expect(DataflowContainerProbe::$constructed)->toBeFalse();
     });
 
     it('accepts a real container class', function () {
-        $action = new Maho\Convert\Action()->setParam('class', Maho\Convert\Container\Generic::class);
+        $action = (new Maho\Convert\Action())->setParam('class', Maho\Convert\Container\Generic::class);
         $action->setProfile(new Maho\Convert\Profile());
 
         expect($action->getContainer())->toBeInstanceOf(Maho\Convert\Container\Generic::class);
     });
 
     it('stops the action when the container has no such method', function () {
-        $action = new Maho\Convert\Action()
+        $action = (new Maho\Convert\Action())
             ->setParam('class', Maho\Convert\Container\Generic::class)
             ->setParam('method', 'doesNotExist');
         $action->setProfile(new Maho\Convert\Profile());
@@ -116,7 +116,7 @@ describe('Maho\Convert profile XML types', function () {
     });
 
     it('returns the action when it has no method', function () {
-        $action = new Maho\Convert\Action()->setParam('class', Maho\Convert\Container\Generic::class);
+        $action = (new Maho\Convert\Action())->setParam('class', Maho\Convert\Container\Generic::class);
         $action->setProfile(new Maho\Convert\Profile());
 
         expect($action->run())->toBe($action);
