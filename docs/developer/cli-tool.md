@@ -66,6 +66,8 @@ Available commands:
   customer:list                 List all customers
  db
   db:connect                    Opens the database command-line interface using credentials from your local.xml file
+  db:export                     Dump the database to a SQL file using the credentials from your local.xml file
+  db:import                     Import a SQL dump into the database using the credentials from your local.xml file
   db:optimize                   Rebuild bloated tables to return their free space to the filesystem
   db:query                      Execute a SQL query using the database credentials from your local.xml file
  dev
@@ -149,6 +151,32 @@ The list of the built-in commands is growing rapidly, at the moment yon can eith
 within our GitHub repository.
 
 All commands should be self-explanatory, also thanks to the inline descriptions.
+
+### Database dumps
+
+<span class="version-badge">v26.11+</span> `db:export` and `db:import` move a database in
+and out of a project using the connection in `app/etc/local.xml`. They drive the native
+client of the configured engine (`mysqldump`, `pg_dump` or `sqlite3`), so the matching
+client has to be installed on the host, and they work even while the database is empty.
+
+```bash
+# gzip dump (the default), a plain SQL dump, or a zstd one
+./maho db:export var/backups/shop.sql.gz
+./maho db:export var/backups/shop.sql --compression=none
+./maho db:export var/backups/shop.sql.zst --compression=zstd
+
+# print the resolved connection and the exact command, without running anything
+./maho db:export var/backups/shop.sql --dry-run
+
+# restore, emptying the database first
+./maho db:import var/backups/shop.sql --drop-tables
+```
+
+Compression is not auto-detected on import, but the file header is checked: a gzip or
+zstd dump loaded with the wrong `--compression` is refused with a hint instead of
+reaching the client. `--drop-tables` empties the database first: it drops and recreates
+the database on MySQL, resets the `public` schema on PostgreSQL, and removes the file
+on SQLite. After a restore run `./maho cache:flush`.
 
 ## Give the input on the command line
 
