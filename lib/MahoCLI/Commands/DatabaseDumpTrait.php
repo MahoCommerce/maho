@@ -68,7 +68,7 @@ trait DatabaseDumpTrait
      */
     protected function readConnectionConfig(): array
     {
-        \Mage::isInstalled();
+        \Mage::isInstalled(['etc_dir' => $this->projectRoot() . '/app/etc']);
         $path = $this->projectRoot() . '/app/etc/local.xml';
         if (!is_file($path)) {
             throw new \RuntimeException("local.xml not found at {$path}");
