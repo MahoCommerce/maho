@@ -54,14 +54,12 @@ describe('configured lifetime', function () {
             ->toBe(604800);
     });
 
-    it('clamps the storefront lifetime to the storefront minimum, not a lower one', function () {
-        // A cookie_lifetime of 0 is a valid merchant setting; the session must not fall below
-        // the same floor the cookie observes.
-        Mage::app()->getStore()->setConfig('web/cookie/cookie_lifetime', '0');
+    it('uses the default storefront lifetime when the stored value is empty', function (?string $value) {
+        Mage::app()->getStore()->setConfig('web/cookie/cookie_lifetime', $value);
 
         expect(resolveLifetime(Mage_Core_Controller_Front_Action::SESSION_NAMESPACE))
-            ->toBe(Mage_Core_Controller_Front_Action::SESSION_MIN_LIFETIME);
-    });
+            ->toBe(604800);
+    })->with([[null], [''], ['0']]);
 
     it('clamps the storefront lifetime down to SESSION_MAX_LIFETIME', function () {
         Mage::app()->getStore()->setConfig('web/cookie/cookie_lifetime', '99999999999');
@@ -101,8 +99,15 @@ describe('configured lifetime', function () {
             ->toBe(10800);
     });
 
-    it('clamps the admin lifetime to the admin minimum, not the one day floor', function () {
-        Mage::app()->getStore()->setConfig('admin/security/session_cookie_lifetime', '0');
+    it('uses the default admin lifetime when the stored value is empty', function (?string $value) {
+        Mage::app()->getStore()->setConfig('admin/security/session_cookie_lifetime', $value);
+
+        expect(resolveLifetime(Mage_Adminhtml_Controller_Action::SESSION_NAMESPACE))
+            ->toBe(10800);
+    })->with([[null], [''], ['0']]);
+
+    it('clamps a low admin lifetime to the admin minimum', function () {
+        Mage::app()->getStore()->setConfig('admin/security/session_cookie_lifetime', '5');
 
         expect(resolveLifetime(Mage_Adminhtml_Controller_Action::SESSION_NAMESPACE))
             ->toBe(Mage_Adminhtml_Controller_Action::SESSION_MIN_LIFETIME);

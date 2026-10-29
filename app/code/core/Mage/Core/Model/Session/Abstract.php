@@ -129,6 +129,12 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
         return $lifetime;
     }
 
+    /** An empty or zero value means "not set", for example a row that an older platform saved */
+    private static function getConfiguredLifetime(string $path, int $default, int|string|Mage_Core_Model_Store|null $store): int
+    {
+        return Mage::getStoreConfigAsInt($path, $store) ?: $default;
+    }
+
     /** Remember Me lives inside the session, so only the observer can pass it */
     public static function resolveConfiguredSessionLifetime(
         string $sessionName,
@@ -143,7 +149,7 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
             return max(
                 Mage_Core_Controller_Front_Action::SESSION_MIN_LIFETIME,
                 min(
-                    Mage::getStoreConfigAsInt($path, $store),
+                    self::getConfiguredLifetime($path, Mage_Core_Controller_Front_Action::SESSION_DEFAULT_LIFETIME, $store),
                     Mage_Core_Controller_Front_Action::SESSION_MAX_LIFETIME,
                 ),
             );
@@ -153,7 +159,7 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
             return max(
                 Mage_Adminhtml_Controller_Action::SESSION_MIN_LIFETIME,
                 min(
-                    Mage::getStoreConfigAsInt(self::XML_PATH_ADMIN_LIFETIME, $store),
+                    self::getConfiguredLifetime(self::XML_PATH_ADMIN_LIFETIME, Mage_Adminhtml_Controller_Action::SESSION_DEFAULT_LIFETIME, $store),
                     Mage_Adminhtml_Controller_Action::SESSION_MAX_LIFETIME,
                 ),
             );
