@@ -11,10 +11,12 @@ uses(Tests\MahoBackendTestCase::class);
 
 describe('Gmail actions', function () {
     beforeEach(function () {
+        // These are fixtures, not a query: the order is never loaded, and 4242 comes back in the
+        // action target, so the test states where the link has to point instead of matching a row.
         $order = Mage::getModel('sales/order')
-            ->setId(7)
+            ->setId(4242)
             ->setStoreId((int) Mage::app()->getDefaultStoreView()->getId())
-            ->setIncrementId('100000007');
+            ->setIncrementId('900000042');
 
         $shipment = new class extends Mage_Sales_Model_Order_Shipment {
             /** @var list<Mage_Sales_Model_Order_Shipment_Track> */
@@ -27,6 +29,7 @@ describe('Gmail actions', function () {
             }
         };
         $shipment->fakeTracks = [
+            // The example tracking number from the carrier documentation.
             Mage::getModel('sales/order_shipment_track')
                 ->setNumber('1Z999AA10123456784')
                 ->setTitle('United Parcel Service'),
@@ -48,6 +51,7 @@ describe('Gmail actions', function () {
         expect($payload['@type'])->toBe('EmailMessage');
         expect($payload['potentialAction']['@type'])->toBe('ViewAction');
         expect($payload['potentialAction']['target'])->toContain('sales/order/view');
+        expect($payload['potentialAction']['target'])->toContain('/order_id/4242/');
         expect($payload['description'])->toContain('1Z999AA10123456784');
     });
 
