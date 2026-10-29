@@ -103,7 +103,7 @@ describe('configured lifetime', function () {
         Mage::app()->getStore()->setConfig('admin/security/session_cookie_lifetime', $value);
 
         expect(resolveLifetime(Mage_Adminhtml_Controller_Action::SESSION_NAMESPACE))
-            ->toBe(10800);
+            ->toBe(3600);
     })->with([[null], [''], ['0']]);
 
     it('clamps a low admin lifetime to the admin minimum', function () {
