@@ -279,6 +279,10 @@ Filters work the same way, and a list tool advertises the ones its resource decl
 | `tax_tax_rates_list` | `search`, `taxCountryId` |
 | `sales_coupons_list` | `code`, `is_active` |
 
+### Attribute filters
+
+`attributeFilters` is a JSON object of attribute codes and values: `{"manufacturer":"12","color":"49"}`. A select or multiselect attribute takes option IDs, not labels. `catalog_product_attributes_list` with `search` set to the attribute code returns the attribute with its options, and the `value` of each option is its ID. That tool needs the `product-attributes/read` permission, which an administrator has. A storefront client gets the option IDs of the filterable attributes of a category from `/layered-filters`. A value that is not a number returns a 400 error, when the options of the attribute are in the option table. In REST, the same filter is `attr_<code>=<value>`.
+
 ### Date ranges
 
 `createdFrom`, `createdTo` and `updatedSince` take a UTC date (`2026-07-29`) or datetime (`2026-07-29 14:30:00`). A bare date on `createdTo` covers the **whole** day, so a single day is `createdFrom` and `createdTo` set to the same value:
