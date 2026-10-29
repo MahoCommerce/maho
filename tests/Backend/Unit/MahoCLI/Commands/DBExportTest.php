@@ -168,6 +168,22 @@ it('passes the password in the environment and removes it afterwards', function 
         ->and(getenv($variable))->toBeFalse();
 })->with([['mysql', 'MYSQL_PWD'], ['pgsql', 'PGPASSWORD']]);
 
+it('keeps the password of the shell when local.xml has none', function () {
+    putenv('MYSQL_PWD=from-shell');
+
+    try {
+        ob_start();
+        dbExportReflect('runShellCommand', 'printf %s "$MYSQL_PWD"', dbExportConnection(['password' => '']));
+        $output = ob_get_clean();
+        $after = getenv('MYSQL_PWD');
+    } finally {
+        putenv('MYSQL_PWD');
+    }
+
+    expect($output)->toBe('from-shell')
+        ->and($after)->toBe('from-shell');
+});
+
 it('uses mariadb-dump when mysqldump is not installed', function () {
     $directory = sys_get_temp_dir() . '/maho_dbexport_bin_' . uniqid();
     mkdir($directory);
