@@ -1788,7 +1788,8 @@
         }
 
         .filter-tag-link {
-            @apply badge-lg gap-1.5 pr-1.5 text-13 hover:border-error/40 hover:bg-error/10 hover:text-error;
+            /* The badge has a fixed height, and a long value wraps to a second line */
+            @apply badge-lg h-auto min-h-(--size) gap-1.5 py-0.5 pr-1.5 text-13 hover:border-error/40 hover:bg-error/10 hover:text-error;
             background: color-mix(in oklab, var(--filter-accent, var(--color-primary)) 12%, var(--color-base-100));
             border-color: color-mix(in oklab, var(--filter-accent, var(--color-primary)) 35%, transparent);
 
