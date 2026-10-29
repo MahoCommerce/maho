@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2019-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2019-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Catalog
@@ -22,6 +22,17 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
         'application/x-msdownload', 'application/x-dosexec',
         'application/java-archive', 'application/x-java-applet',
     ];
+
+    /**
+     * Extensions of files that a browser shows as an active document in the store origin.
+     * An option with no list of allowed extensions refuses them.
+     */
+    public const ACTIVE_CONTENT_EXTENSIONS = ['htm', 'html', 'svg', 'svgz', 'xhtml', 'xht', 'xml', 'xsl', 'xslt'];
+
+    /**
+     * MIME types of active documents. An option with no list of allowed extensions refuses them.
+     */
+    protected const ACTIVE_CONTENT_MIME_TYPES = ['text/html', 'image/svg+xml', 'application/xhtml+xml'];
 
     /**
      * Url for custom option download controller
@@ -231,29 +242,18 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
 
             // File extension validation
             $_allowed = $this->_parseExtensionsString($option->getFileExtension());
-            $_forbidden = $this->_parseExtensionsString(Mage::getStoreConfig('catalog/custom_options/forbidden_extensions'));
+            $_forbidden = $this->getUploadForbiddenExtensions($_allowed);
 
             // ALWAYS check forbidden list first (security)
-            if ($_forbidden !== null && in_array($fileExtension, array_map(strtolower(...), $_forbidden))) {
+            if (in_array($fileExtension, $_forbidden, true)) {
                 Mage::throwException(
                     Mage::helper('catalog')->__('The following file extensions are not allowed for security reasons: %s', $fileExtension),
                 );
             }
 
             if ($_allowed !== null) {
-                // Check if any allowed extension is in the forbidden list
-                if ($_forbidden !== null) {
-                    $forbiddenFound = array_intersect(array_map(strtolower(...), $_allowed), array_map(strtolower(...), $_forbidden));
-                    if (!empty($forbiddenFound)) {
-                        Mage::throwException(Mage::helper('catalog')->__(
-                            'The following file extensions are not allowed for security reasons: %s',
-                            implode(', ', $forbiddenFound),
-                        ));
-                    }
-                }
-
                 // Validate the uploaded file extension against allowed list
-                if (!in_array($fileExtension, array_map(strtolower(...), $_allowed))) {
+                if (!in_array($fileExtension, $_allowed, true)) {
                     Mage::throwException(
                         Mage::helper('catalog')->__('The following file extensions are not allowed for security reasons: %s', $fileExtension),
                     );
@@ -361,21 +361,13 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
 
         // File extension validation - check this FIRST before trying to read the file
         $_allowed = $this->_parseExtensionsString($option->getFileExtension());
-        $_forbidden = $this->_parseExtensionsString(Mage::getStoreConfig('catalog/custom_options/forbidden_extensions'));
+        $_forbidden = $this->getUploadForbiddenExtensions($_allowed);
         $extension = strtolower(pathinfo($fileFullPath, PATHINFO_EXTENSION));
 
-        if ($_allowed !== null) {
-            // Check if allowed extension is in forbidden list first
-            if ($_forbidden !== null && in_array($extension, array_map(strtolower(...), $_forbidden))) {
-                $errors[] = sprintf('The file extension "%s" is not allowed for security reasons.', $extension);
-            } elseif (!in_array($extension, array_map(strtolower(...), $_allowed))) {
-                $errors[] = sprintf('The file extension "%s" is not allowed.', $extension);
-            }
-        } else {
-            // No specific allowed extensions - check forbidden list
-            if ($_forbidden !== null && in_array($extension, array_map(strtolower(...), $_forbidden))) {
-                $errors[] = sprintf('The file extension "%s" is not allowed for security reasons.', $extension);
-            }
+        if (in_array($extension, $_forbidden, true)) {
+            $errors[] = sprintf('The file extension "%s" is not allowed for security reasons.', $extension);
+        } elseif ($_allowed !== null && !in_array($extension, $_allowed, true)) {
+            $errors[] = sprintf('The file extension "%s" is not allowed.', $extension);
         }
 
         // If extension is invalid, don't proceed with further validations
@@ -846,16 +838,35 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
     /**
      * Parse file extensions string with various separators
      *
-     * @param string $extensions String to parse
-     * @return array|null
+     * @param string|null $extensions String to parse
+     * @return list<string>|null
      */
     protected function _parseExtensionsString($extensions)
     {
-        preg_match_all('/[a-z0-9]+/si', strtolower($extensions), $matches);
+        preg_match_all('/[a-z0-9]+/si', strtolower((string) $extensions), $matches);
         if (count($matches[0]) > 0) {
             return $matches[0];
         }
         return null;
+    }
+
+    /**
+     * Return the extensions that an upload to this option refuses.
+     *
+     * The protected extensions and catalog/custom_options/forbidden_extensions always apply.
+     * ACTIVE_CONTENT_EXTENSIONS apply only when $allowed is null. An option that lists one of them keeps it,
+     * unless the protected or the forbidden extensions also hold it, as the default protected extensions hold htm and html.
+     *
+     * @param list<string>|null $allowed The allowed extensions of the option, or null when the option has no list
+     * @return list<string>
+     */
+    public function getUploadForbiddenExtensions(?array $allowed): array
+    {
+        return array_values(array_unique(array_merge(
+            Mage::helper('core')->getProtectedFileExtensions(),
+            $this->_parseExtensionsString(Mage::getStoreConfig('catalog/custom_options/forbidden_extensions')) ?? [],
+            $allowed === null ? self::ACTIVE_CONTENT_EXTENSIONS : [],
+        )));
     }
 
     /**
@@ -934,28 +945,17 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
         }
 
         // 3. Forbidden extensions FIRST (security)
-        $_forbidden = $this->_parseExtensionsString(
-            Mage::getStoreConfig('catalog/custom_options/forbidden_extensions'),
-        );
-        if ($_forbidden !== null && in_array($fileExtension, array_map(strtolower(...), $_forbidden))) {
+        $_allowed = $this->_parseExtensionsString($option->getFileExtension());
+        $_forbidden = $this->getUploadForbiddenExtensions($_allowed);
+        if (in_array($fileExtension, $_forbidden, true)) {
             Mage::throwException(
                 Mage::helper('catalog')->__('The following file extensions are not allowed for security reasons: %s', $fileExtension),
             );
         }
 
         // 4. Allowed extensions check
-        $_allowed = $this->_parseExtensionsString($option->getFileExtension());
         if ($_allowed !== null) {
-            if ($_forbidden !== null) {
-                $forbiddenFound = array_intersect(array_map(strtolower(...), $_allowed), array_map(strtolower(...), $_forbidden));
-                if (!empty($forbiddenFound)) {
-                    Mage::throwException(Mage::helper('catalog')->__(
-                        'The following file extensions are not allowed for security reasons: %s',
-                        implode(', ', $forbiddenFound),
-                    ));
-                }
-            }
-            if (!in_array($fileExtension, array_map(strtolower(...), $_allowed))) {
+            if (!in_array($fileExtension, $_allowed, true)) {
                 Mage::throwException(
                     Mage::helper('catalog')->__('The following file extensions are not allowed for security reasons: %s', $fileExtension),
                 );
@@ -966,7 +966,9 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
         $finfo = new \finfo(FILEINFO_MIME_TYPE);
         $detectedMime = $finfo->buffer($decodedData);
 
-        if (in_array($detectedMime, self::DANGEROUS_MIME_TYPES)) {
+        if (in_array($detectedMime, self::DANGEROUS_MIME_TYPES, true)
+            || ($_allowed === null && in_array($detectedMime, self::ACTIVE_CONTENT_MIME_TYPES, true))
+        ) {
             Mage::throwException(
                 Mage::helper('catalog')->__('The file content type "%s" is not allowed for security reasons.', $detectedMime),
             );

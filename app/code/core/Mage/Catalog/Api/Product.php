@@ -48,7 +48,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
         new GetCollection(
             uriTemplate: '/products',
             security: 'true',
-            description: 'Get product collection. Admin and API tokens with product access see every status and visibility, their search matches part of the name or the SKU, and they can filter by sku (partial match), status (enabled or disabled) and type',
+            description: 'Get product collection. Admin and API tokens with product access see every status and visibility, their search matches part of the name or the SKU, and they can filter by sku (partial match), status (enabled or disabled) and type. Every caller can filter by any product attribute, such as the manufacturer, the brand or the color, with attributeFilters',
         ),
         new HttpQuery(
             uriTemplate: '/products',
@@ -102,7 +102,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
                 'sortDir' => ['type' => 'String', 'description' => 'Sort direction (asc, desc)'],
                 'pageSize' => ['type' => 'Int', 'description' => 'Items per page (max 100)'],
                 'page' => ['type' => 'Int', 'description' => 'Page number'],
-                'attributeFilters' => ['type' => 'String', 'description' => 'JSON-encoded attribute filters: {"brand_id":"10","series":"1877"}'],
+                'attributeFilters' => ['type' => 'String', 'description' => 'JSON-encoded object of attribute codes and values, such as {"manufacturer":"12","color":"49"}. A select or multiselect attribute takes option IDs, not labels: the product attributes list gives the options of each attribute with their IDs'],
                 'sku' => ['type' => 'String', 'description' => 'Exact SKU lookup (returns 0 or 1 product)'],
                 'barcode' => ['type' => 'String', 'description' => 'Exact barcode lookup (returns 0 or 1 product)'],
                 'status' => ['type' => 'String', 'description' => 'Admin and API tokens only: enabled or disabled'],

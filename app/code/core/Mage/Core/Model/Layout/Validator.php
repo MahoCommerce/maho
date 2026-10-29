@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2022-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Core
@@ -20,6 +20,7 @@ class Mage_Core_Model_Layout_Validator
     public const INVALID_TEMPLATE_PATH                   = 'invalidTemplatePath';
     public const INVALID_BLOCK_NAME                      = 'invalidBlockName';
     public const PROTECTED_ATTR_HELPER_IN_TAG_ACTION_VAR = 'protectedAttrHelperInActionVar';
+    public const PROTECTED_ATTR_JSON_IN_TAG_ACTION       = 'protectedAttrJsonInTagAction';
     public const INVALID_XML_OBJECT_EXCEPTION            = 'invalidXmlObject';
 
     /**
@@ -30,9 +31,6 @@ class Mage_Core_Model_Layout_Validator
     protected array $_disallowedXPathExpressions = [
         '*//template',
         '*//@template',
-        '//*[@method=\'setTemplate\']',
-        '//*[@method=\'setDataUsingMethod\']//*[contains(translate(text(),
-        \'ABCDEFGHIJKLMNOPQRSTUVWXYZ\', \'abcdefghijklmnopqrstuvwxyz\'), \'template\')]/../*',
     ];
 
     /**
@@ -42,6 +40,8 @@ class Mage_Core_Model_Layout_Validator
      */
     protected array $_protectedExpressions = [
         self::PROTECTED_ATTR_HELPER_IN_TAG_ACTION_VAR => '//action/*[@helper]',
+        // The layout decodes a json argument after this validator reads it
+        self::PROTECTED_ATTR_JSON_IN_TAG_ACTION => '//action[@json]',
     ];
 
     /**
@@ -78,6 +78,8 @@ class Mage_Core_Model_Layout_Validator
             $this->_messageTemplates = [
                 self::PROTECTED_ATTR_HELPER_IN_TAG_ACTION_VAR
                     => Mage::helper('core')->__('Helper attributes should not be used in custom layout updates.'),
+                self::PROTECTED_ATTR_JSON_IN_TAG_ACTION
+                    => Mage::helper('core')->__('Custom layout updates cannot use the json attribute.'),
                 self::XML_INVALID => Mage::helper('core')->__('XML data is invalid.'),
                 self::INVALID_TEMPLATE_PATH => Mage::helper('core')->__(
                     'Invalid template path used in layout update.',
@@ -110,12 +112,19 @@ class Mage_Core_Model_Layout_Validator
             try {
                 $value = simplexml_load_string('<config>' . $value . '</config>', \Maho\Simplexml\Element::class);
             } catch (Exception) {
+                $value = false;
+            }
+            if (!$value instanceof \Maho\Simplexml\Element) {
                 $this->_error(self::XML_INVALID);
                 return false;
             }
         }
-        // If $value is not a string at this point, it must be a \Maho\Simplexml\Element
-        // due to the type declaration, so no additional check is needed
+
+        // The layout ignores namespaces, but XPath name tests do not match a namespaced node
+        if ($value->xpath("//*[namespace-uri() != ''] | //@*[namespace-uri() != '']")) {
+            $this->_error(self::XML_INVALID);
+            return false;
+        }
 
         // if layout update declare custom templates then validate their paths
         if ($templatePaths = $value->xpath('//*[@template]')) {
@@ -129,7 +138,9 @@ class Mage_Core_Model_Layout_Validator
 
         // XPath expressions
         $xpathValidationExpression = $this->_getXpathValidationExpression();
-        if ($xpathValidationExpression && $value->xpath($xpathValidationExpression)) {
+        if (($xpathValidationExpression && $value->xpath($xpathValidationExpression))
+            || $this->_hasTemplateMethod($value)
+        ) {
             $this->_error(self::INVALID_TEMPLATE_PATH);
             return false;
         }
@@ -143,13 +154,91 @@ class Mage_Core_Model_Layout_Validator
         }
 
         // Disallowed blocks
-        $xpathBlockValidationExpression = $this->_getXpathBlockValidationExpression();
-        if ($xpathBlockValidationExpression && $value->xpath($xpathBlockValidationExpression)) {
+        if ($this->_hasDisallowedBlock($value)) {
             $this->_error(self::INVALID_BLOCK_NAME);
             return false;
         }
 
         return true;
+    }
+
+    /**
+     * Return true when an action calls setTemplate(), or calls setDataUsingMethod() with an argument
+     * that contains "template". PHP finds a method in any case and accepts "Class::method".
+     */
+    protected function _hasTemplateMethod(\Maho\Simplexml\Element $xml): bool
+    {
+        foreach ($xml->xpath('//*[@method]') ?: [] as $node) {
+            $method = strtolower((string) $node['method']);
+            if (str_contains($method, '::')) {
+                $method = substr($method, strrpos($method, '::') + 2);
+            }
+            if ($method === 'settemplate') {
+                return true;
+            }
+            if ($method !== 'setdatausingmethod') {
+                continue;
+            }
+            foreach ($node->xpath('.//*') ?: [] as $argument) {
+                if (str_contains(preg_replace('/[^a-z]/', '', strtolower((string) $argument)), 'template')) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Return true when a block is of a disallowed class or of a subclass of one. The class comes from the
+     * "class" and the "type" attributes, as Mage_Core_Model_Layout::_generateBlock() reads them,
+     * or from an action argument.
+     */
+    protected function _hasDisallowedBlock(\Maho\Simplexml\Element $xml): bool
+    {
+        $disallowed = [];
+        foreach ($this->getDisallowedBlocks() as $blockName) {
+            $className = $this->_getBlockClassName((string) $blockName);
+            if ($className !== '') {
+                $disallowed[] = $className;
+            }
+        }
+        if ($disallowed === []) {
+            return false;
+        }
+
+        // An action can create a block from an argument, as addOptionRenderer() and addItemRender() do
+        foreach ($xml->xpath('//block/@class | //block/@type | //action//*[not(*)]') ?: [] as $node) {
+            $className = $this->_getBlockClassName((string) $node);
+            if ($className === '') {
+                continue;
+            }
+            foreach ($disallowed as $disallowedClass) {
+                if (strcasecmp($className, $disallowedClass) === 0) {
+                    return true;
+                }
+                if (preg_match('/^[A-Za-z_][A-Za-z0-9_]*(\\\\[A-Za-z_][A-Za-z0-9_]*)*$/', $className)
+                    && is_a($className, $disallowedClass, true)
+                ) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Return the class name that the layout creates for a block type or a block class name.
+     */
+    protected function _getBlockClassName(string $blockType): string
+    {
+        $blockType = trim($blockType);
+        if ($blockType === '') {
+            return '';
+        }
+
+        return ltrim((string) Mage::getConfig()->getBlockClassName($blockType), '\\');
     }
 
     public function getDisallowedBlocks(): array
@@ -223,12 +312,17 @@ class Mage_Core_Model_Layout_Validator
 
     /**
      * Get XPath block validation expression
+     *
+     * @deprecated since 26.11 isValid() checks the blocks with _hasDisallowedBlock().
      */
     public function getXpathBlockValidationExpression(): string
     {
         return $this->_getXpathBlockValidationExpression();
     }
 
+    /**
+     * @deprecated since 26.11 isValid() checks the blocks with _hasDisallowedBlock().
+     */
     protected function _getXpathBlockValidationExpression(): string
     {
         $disallowedBlocks = $this->getDisallowedBlocks();
