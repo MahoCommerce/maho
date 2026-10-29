@@ -258,6 +258,8 @@ Resize changes the width and the height of the image in pixels.
 2. Type the **Width** or the **Height**. You can also drag the handles at the edges of the photo.
 3. Click **Apply**, or press Enter.
 
+If you click **Save** or open another tool before you apply, the editor applies the new size.
+
 ![The Resize tool, with the width, the height and the lock of the aspect ratio](images/image-editor-resize.webp)
 
 The lock button between the two fields keeps the aspect ratio. It is on when the tool opens. Click

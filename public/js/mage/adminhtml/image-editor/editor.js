@@ -788,6 +788,7 @@ export class MahoImageEditor {
 
     async _save() {
         if (this._saving) return;
+        if (this.activeTool?.applyPending?.() === false) return;
 
         const originalName = this.options.filename || 'image';
         const newName = prompt('Save as:', originalName);
