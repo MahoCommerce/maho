@@ -549,11 +549,16 @@ class Mage_Adminhtml_Sales_Order_CreateController extends Mage_Adminhtml_Control
     protected function _getAclResourse()
     {
         $action = strtolower($this->getRequest()->getActionName());
-        if (in_array($action, ['index', 'save']) && $this->_getSession()->getReordered()) {
-            $action = 'reorder';
+        // These actions build and submit the quote of a new order, or of a reorder in progress
+        $quoteActions = [
+            'index', 'save', 'loadblock', 'processdata', 'addconfigured',
+            'configureproducttoadd', 'configurequoteitems',
+        ];
+        if (in_array($action, $quoteActions, true)) {
+            $action = $this->_getSession()->getReordered() ? 'reorder' : 'index';
         }
         $aclResource = match ($action) {
-            'index', 'save' => 'sales/order/actions/create',
+            'index', 'start' => 'sales/order/actions/create',
             'reorder' => 'sales/order/actions/reorder',
             'cancel' => 'sales/order/actions/cancel',
             default => 'sales/order/actions',

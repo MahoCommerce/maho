@@ -337,13 +337,13 @@ class Mage_Adminhtml_Report_SalesController extends Mage_Adminhtml_Controller_Re
     {
         $action = strtolower($this->getRequest()->getActionName());
         return match ($action) {
-            'sales' => $this->_getSession()->isAllowed('report/salesroot/sales'),
-            'tax' => $this->_getSession()->isAllowed('report/salesroot/tax'),
-            'shipping' => $this->_getSession()->isAllowed('report/salesroot/shipping'),
-            'invoiced' => $this->_getSession()->isAllowed('report/salesroot/invoiced'),
-            'refunded' => $this->_getSession()->isAllowed('report/salesroot/refunded'),
-            'coupons' => $this->_getSession()->isAllowed('report/salesroot/coupons'),
-            'bestsellers' => $this->_getSession()->isAllowed('report/products/bestsellers'),
+            'sales', 'exportsalescsv', 'exportsalesexcel' => $this->_getSession()->isAllowed('report/salesroot/sales'),
+            'tax', 'exporttaxcsv', 'exporttaxexcel' => $this->_getSession()->isAllowed('report/salesroot/tax'),
+            'shipping', 'exportshippingcsv', 'exportshippingexcel' => $this->_getSession()->isAllowed('report/salesroot/shipping'),
+            'invoiced', 'exportinvoicedcsv', 'exportinvoicedexcel' => $this->_getSession()->isAllowed('report/salesroot/invoiced'),
+            'refunded', 'exportrefundedcsv', 'exportrefundedexcel' => $this->_getSession()->isAllowed('report/salesroot/refunded'),
+            'coupons', 'exportcouponscsv', 'exportcouponsexcel' => $this->_getSession()->isAllowed('report/salesroot/coupons'),
+            'bestsellers', 'exportbestsellerscsv', 'exportbestsellersexcel' => $this->_getSession()->isAllowed('report/products/bestsellers'),
             default => $this->_getSession()->isAllowed('report/salesroot'),
         };
     }

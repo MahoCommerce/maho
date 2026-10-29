@@ -17,7 +17,18 @@ class Mage_Api2_Adminhtml_Api2_AttributeController extends Mage_Adminhtml_Contro
      * ACL resource
      * @see Mage_Adminhtml_Controller_Action::_isAllowed()
      */
-    public const ADMIN_RESOURCE = 'system/api';
+    public const ADMIN_RESOURCE = 'system/api/rest_attributes';
+
+    #[\Override]
+    protected function _isAllowed(): bool
+    {
+        $aclPath = match (strtolower($this->getRequest()->getActionName())) {
+            'save' => self::ADMIN_RESOURCE . '/edit',
+            default => self::ADMIN_RESOURCE,
+        };
+
+        return Mage::getSingleton('admin/session')->isAllowed($aclPath);
+    }
 
     /**
      * Show user types grid

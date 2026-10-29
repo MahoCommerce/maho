@@ -284,7 +284,7 @@ class Template
                         || str_starts_with($stackVars[$i]['name'], 'get')
                     ) {
                         $isEncrypted = false;
-                        if ($stackVars[$i]['name'] == 'getConfig') {
+                        if (strcasecmp($stackVars[$i]['name'], 'getConfig') === 0) {
                             $isEncrypted = $emailPathValidator->isValid($stackVars[$i]['args']);
                         }
                         $stackVars[$i]['variable'] = $stackVars[$i - 1]['variable']->{$stackVars[$i]['name']}(

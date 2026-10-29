@@ -215,7 +215,7 @@
                                 updatedRows.insertAdjacentHTML('beforebegin', config.tpl.evaluate({
                                     style: "background-color:"+config.styles.error.bg,
                                     image: config.styles.error.icon,
-                                    text: data.errors[i],
+                                    text: escapeHtml(String(data.errors[i])),
                                     id: "id-" + (countOfUpdated + i + 1)
                                 }));
                                 countOfError ++;

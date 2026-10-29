@@ -45,8 +45,9 @@ class Mage_SalesRule_Model_Resource_Rule_Customer extends Mage_Core_Model_Resour
      * concurrent order placements cannot both pass uses_per_customer.
      *
      * @param int $usesPerCustomer 0 for unlimited
+     * @return bool false when the customer is at the limit
      */
-    public function incrementTimesUsed(int $customerId, int $ruleId, int $usesPerCustomer = 0): void
+    public function incrementTimesUsed(int $customerId, int $ruleId, int $usesPerCustomer = 0): bool
     {
         $adapter = $this->_getWriteAdapter();
         $where = [
@@ -59,7 +60,7 @@ class Mage_SalesRule_Model_Resource_Rule_Customer extends Mage_Core_Model_Resour
         $bind = ['times_used' => new Maho\Db\Expr('times_used + 1')];
 
         if ($adapter->update($this->getMainTable(), $bind, $where) > 0) {
-            return;
+            return true;
         }
 
         $adapter->insertIgnore($this->getMainTable(), [
@@ -68,7 +69,7 @@ class Mage_SalesRule_Model_Resource_Rule_Customer extends Mage_Core_Model_Resour
             'times_used' => 0,
         ]);
 
-        $adapter->update($this->getMainTable(), $bind, $where);
+        return $adapter->update($this->getMainTable(), $bind, $where) > 0;
     }
 
     public function decrementTimesUsed(int $customerId, int $ruleId): void

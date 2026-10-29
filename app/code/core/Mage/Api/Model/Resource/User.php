@@ -158,6 +158,18 @@ class Mage_Api_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstract
     }
 
     /**
+     * Delete all the API sessions of a user.
+     */
+    public function clearByUserId(int $userId): static
+    {
+        $this->_getWriteAdapter()->delete(
+            $this->getTable('api/session'),
+            ['user_id = ?' => $userId],
+        );
+        return $this;
+    }
+
+    /**
      * Retrieve api user role data if it was assigned to role
      *
      * @param int | Mage_Api_Model_User $user

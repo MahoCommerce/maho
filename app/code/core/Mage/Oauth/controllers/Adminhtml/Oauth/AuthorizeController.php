@@ -261,7 +261,7 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizeController extends Mage_Adminhtml_Cont
     #[Maho\Config\Route('/admin/oauth_authorize/confirmSimple')]
     public function confirmSimpleAction(): void
     {
-        $this->_initConfirmPage();
+        $this->_initConfirmPage(true);
     }
 
     /**
@@ -279,7 +279,7 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizeController extends Mage_Adminhtml_Cont
     #[Maho\Config\Route('/admin/oauth_authorize/rejectSimple')]
     public function rejectSimpleAction(): void
     {
-        $this->_initRejectPage();
+        $this->_initRejectPage(true);
     }
 
     /**

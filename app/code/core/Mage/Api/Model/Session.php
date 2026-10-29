@@ -214,6 +214,12 @@ class Mage_Api_Model_Session extends Mage_Core_Model_Session_Abstract
             return false;
         }
 
+        // login() refuses an inactive user, so a session opened before the deactivation ends too
+        if (!$user->getIsActive()) {
+            $user->getResource()->clearBySessId($sessId);
+            return false;
+        }
+
         if ($user->getSessid() == $sessId && !$this->isSessionExpired($user)) {
             $this->setUser($user);
             $this->setAcl(Mage::getResourceModel('api/acl')->loadAcl());

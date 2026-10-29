@@ -38,8 +38,9 @@ class Mage_SalesRule_Model_Resource_Coupon_Usage extends Mage_Core_Model_Resourc
      * concurrent order placements cannot both pass the per-customer limit.
      *
      * @param int $usagePerCustomer 0 for unlimited
+     * @return bool false when the customer is at the limit
      */
-    public function incrementCustomerTimesUsed(int $customerId, int $couponId, int $usagePerCustomer = 0): void
+    public function incrementCustomerTimesUsed(int $customerId, int $couponId, int $usagePerCustomer = 0): bool
     {
         $adapter = $this->_getWriteAdapter();
         $where = [
@@ -52,7 +53,7 @@ class Mage_SalesRule_Model_Resource_Coupon_Usage extends Mage_Core_Model_Resourc
         $bind = ['times_used' => new Maho\Db\Expr('times_used + 1')];
 
         if ($adapter->update($this->getMainTable(), $bind, $where) > 0) {
-            return;
+            return true;
         }
 
         $adapter->insertIgnore($this->getMainTable(), [
@@ -61,7 +62,7 @@ class Mage_SalesRule_Model_Resource_Coupon_Usage extends Mage_Core_Model_Resourc
             'times_used' => 0,
         ]);
 
-        $adapter->update($this->getMainTable(), $bind, $where);
+        return $adapter->update($this->getMainTable(), $bind, $where) > 0;
     }
 
     public function decrementCustomerTimesUsed(int $customerId, int $couponId): void

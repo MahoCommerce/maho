@@ -68,7 +68,56 @@ class Mage_Adminhtml_Tax_ClassController extends Mage_Adminhtml_Controller_Actio
     #[\Override]
     protected function _isAllowed()
     {
-        return Mage::getSingleton('admin/session')->isAllowed('sales/tax/classes_product')
-            || Mage::getSingleton('admin/session')->isAllowed('sales/tax/classes_customer');
+        $allowedTypes = $this->_getAllowedClassTypes();
+        if ($allowedTypes === []) {
+            return false;
+        }
+
+        $request = $this->getRequest();
+        if (strtolower($request->getActionName()) !== 'save' || !$request->isPost()) {
+            return true;
+        }
+
+        // Both class types use this save action, so check the posted type and the type of the saved class
+        $types = [];
+        $postedType = $request->getPost('class_type');
+        if ($postedType !== null) {
+            $types[] = is_string($postedType) ? $postedType : '';
+        }
+
+        $classId = (int) $request->getPost('class_id');
+        if ($classId > 0) {
+            $types[] = (string) $this->_getClassType($classId);
+        }
+
+        return $types !== [] && array_diff($types, $allowedTypes) === [];
+    }
+
+    /**
+     * Return the tax class types that the admin can manage.
+     *
+     * @return list<string>
+     */
+    protected function _getAllowedClassTypes(): array
+    {
+        $session = Mage::getSingleton('admin/session');
+        $types = [];
+        if ($session->isAllowed('sales/tax/classes_product')) {
+            $types[] = Mage_Tax_Model_Class::TAX_CLASS_TYPE_PRODUCT;
+        }
+        if ($session->isAllowed('sales/tax/classes_customer')) {
+            $types[] = Mage_Tax_Model_Class::TAX_CLASS_TYPE_CUSTOMER;
+        }
+
+        return $types;
+    }
+
+    /**
+     * Return the type of a saved tax class, or null when the class does not exist.
+     */
+    protected function _getClassType(int $classId): ?string
+    {
+        $class = Mage::getModel('tax/class')->load($classId);
+        return $class->getId() ? (string) $class->getClassType() : null;
     }
 }

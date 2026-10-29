@@ -19,6 +19,14 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
 {
     public const XML_PATH_DEFAULT_COUNTRY              = 'general/country/default';
     public const XML_PATH_PROTECTED_FILE_EXTENSIONS    = 'general/file/protected_extensions';
+
+    /**
+     * Extensions that stay protected when a saved general/file/protected_extensions value leaves them out.
+     */
+    public const PROTECTED_FILE_EXTENSIONS_MINIMUM = [
+        'php', 'php3', 'php4', 'php5', 'php7', 'php8', 'phtml', 'pht', 'phar', 'phps',
+        'pl', 'py', 'cgi', 'sh', 'asp', 'aspx', 'jsp', 'htaccess', 'shtml',
+    ];
     public const XML_PATH_ENCRYPTION_MODEL             = 'global/helpers/core/encryption_model';
     public const XML_PATH_DEV_ALLOW_IPS                = 'dev/restrict/allow_ips';
     public const XML_PATH_CACHE_BETA_TYPES             = 'global/cache/betatypes';
@@ -782,14 +790,28 @@ XML;
     }
 
     /**
-     * Return list with protected file extensions
+     * Return the protected file extensions in lower case, with PROTECTED_FILE_EXTENSIONS_MINIMUM always included.
      *
-     * @param Mage_Core_Model_Store|string|int $store
-     * @return array
+     * The configured value is a list of nodes, or a comma-separated string when a store saved its own value.
+     *
+     * @return list<string>
      */
-    public function getProtectedFileExtensions($store = null)
+    public function getProtectedFileExtensions(Mage_Core_Model_Store|string|int|null $store = null): array
     {
-        return Mage::getStoreConfig(self::XML_PATH_PROTECTED_FILE_EXTENSIONS, $store);
+        $configured = Mage::getStoreConfig(self::XML_PATH_PROTECTED_FILE_EXTENSIONS, $store);
+        $configured = is_array($configured) ? $configured : explode(',', (string) $configured);
+
+        $extensions = [];
+        foreach ($configured as $extension) {
+            if (is_scalar($extension)) {
+                $extensions[] = strtolower(trim((string) $extension));
+            }
+        }
+
+        return array_values(array_unique(array_filter(
+            array_merge(self::PROTECTED_FILE_EXTENSIONS_MINIMUM, $extensions),
+            fn(string $extension): bool => $extension !== '',
+        )));
     }
 
     /**

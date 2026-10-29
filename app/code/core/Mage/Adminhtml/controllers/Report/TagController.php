@@ -240,9 +240,12 @@ class Mage_Adminhtml_Report_TagController extends Mage_Adminhtml_Controller_Acti
     {
         $action = strtolower($this->getRequest()->getActionName());
         return match ($action) {
-            'customer' => Mage::getSingleton('admin/session')->isAllowed('report/tags/customer'),
-            'productall', 'product' => Mage::getSingleton('admin/session')->isAllowed('report/tags/product'),
-            'popular' => Mage::getSingleton('admin/session')->isAllowed('report/tags/popular'),
+            'customer', 'exportcustomercsv', 'exportcustomerexcel',
+            'customerdetail', 'exportcustomerdetailcsv', 'exportcustomerdetailexcel' => Mage::getSingleton('admin/session')->isAllowed('report/tags/customer'),
+            'productall', 'product', 'exportproductcsv', 'exportproductexcel',
+            'productdetail', 'exportproductdetailcsv', 'exportproductdetailexcel' => Mage::getSingleton('admin/session')->isAllowed('report/tags/product'),
+            'popular', 'exportpopularcsv', 'exportpopularexcel',
+            'tagdetail', 'exporttagdetailcsv', 'exporttagdetailexcel' => Mage::getSingleton('admin/session')->isAllowed('report/tags/popular'),
             default => Mage::getSingleton('admin/session')->isAllowed('report/tags'),
         };
     }

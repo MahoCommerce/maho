@@ -27,7 +27,7 @@ abstract class Mage_Api_Model_Server_Handler_Abstract
      * @param string $errorFile
      * @return bool
      */
-    public function handlePhpError($errorCode, $errorMessage, $errorFile, $errLine)
+    protected function handlePhpError($errorCode, $errorMessage, $errorFile, $errLine)
     {
         Mage::log($errorMessage . ' in ' . $errorFile . ' on line ' . $errLine, Mage::LOG_ERROR);
         if (in_array($errorCode, [E_ERROR, E_USER_ERROR, E_RECOVERABLE_ERROR])) {

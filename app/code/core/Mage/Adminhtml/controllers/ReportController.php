@@ -57,7 +57,7 @@ class Mage_Adminhtml_ReportController extends Mage_Adminhtml_Controller_Action
     {
         $action = strtolower($this->getRequest()->getActionName());
         return match ($action) {
-            'search' => Mage::getSingleton('admin/session')->isAllowed('report/search'),
+            'search', 'exportsearchcsv', 'exportsearchexcel' => Mage::getSingleton('admin/session')->isAllowed('report/search'),
             default => Mage::getSingleton('admin/session')->isAllowed('report'),
         };
     }

@@ -94,6 +94,15 @@ describe('Mage_Adminhtml_Model_Email_PathValidator', function () {
             }
         });
 
+        it('returns true for a parent of an encrypted path', function (string $path) {
+            expect($this->validator->isValid($path))->toBeTrue();
+        })->with(['system/smtp', 'system', '/system/smtp/password/']);
+
+        it('returns false for a path that only shares a prefix with an encrypted path', function () {
+            expect($this->validator->isValid('system/smtp/password_not'))->toBeFalse();
+            expect($this->validator->isValid('system/smt'))->toBeFalse();
+        });
+
         it('rejects obviously non-encrypted paths', function () {
             $nonEncryptedPaths = [
                 'general/store_information/name',

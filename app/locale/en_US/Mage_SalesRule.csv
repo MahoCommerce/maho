@@ -28,6 +28,7 @@
 "Conditions combination","Conditions combination"
 "Coupon","Coupon"
 "Coupon Code","Coupon Code"
+"Coupon code ""%s"" was already used the maximum number of times.","Coupon code ""%s"" was already used the maximum number of times."
 "Coupon Qty","Coupon Qty"
 "Coupons Information","Coupons Information"
 "Coupon validation","Coupon validation"
@@ -134,3 +135,5 @@
 "Websites","Websites"
 "Wrong rule specified.","Wrong rule specified."
 "Yes","Yes"
+"You already used a discount of this order the maximum number of times.","You already used a discount of this order the maximum number of times."
+"You already used coupon code ""%s"" the maximum number of times.","You already used coupon code ""%s"" the maximum number of times."

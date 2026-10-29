@@ -24,6 +24,23 @@ class Mage_Oauth_Model_Observer
     }
 
     /**
+     * Revoke the tokens of an admin user that a save deactivates. Without this, a reactivation
+     * of the account brings the old tokens back. The OAuth tokens grid can enable them again.
+     */
+    #[Maho\Config\Observer('admin_user_save_after')]
+    public function revokeTokensOfDeactivatedAdmin(\Maho\Event\Observer $observer): void
+    {
+        $user = $observer->getEvent()->getObject();
+        if (!$user instanceof Mage_Admin_Model_User || !$user->getId() || $user->getIsActive() !== false) {
+            return;
+        }
+
+        /** @var Mage_Oauth_Model_Resource_Token $resource */
+        $resource = Mage::getResourceSingleton('oauth/token');
+        $resource->revokeAdminTokens((int) $user->getId());
+    }
+
+    /**
      * Redirect admin to authorize controller after login success
      */
     #[Maho\Config\Observer('admin_session_user_login_success')]

@@ -34,6 +34,7 @@ class Mage_Api2_Model_Auth_User_Admin extends Mage_Api2_Model_Auth_User_Abstract
      *
      * @return int
      * @throws Exception
+     * @throws Mage_Api2_Exception
      */
     #[\Override]
     public function getRole()
@@ -41,6 +42,12 @@ class Mage_Api2_Model_Auth_User_Admin extends Mage_Api2_Model_Auth_User_Abstract
         if (!$this->_role) {
             if (!$this->getUserId()) {
                 throw new Exception('Admin identifier is not set');
+            }
+
+            // An OAuth token outlives the deactivation of its admin user, so check the account on each request
+            $user = $this->_loadAdminUser((int) $this->getUserId());
+            if (!$user->getId() || !$user->getIsActive()) {
+                throw new Mage_Api2_Exception('Admin user is not active', Mage_Api2_Model_Server::HTTP_UNAUTHORIZED);
             }
 
             /** @var Mage_Api2_Model_Resource_Acl_Global_Role_Collection $collection */
@@ -57,6 +64,11 @@ class Mage_Api2_Model_Auth_User_Admin extends Mage_Api2_Model_Auth_User_Abstract
         }
 
         return $this->_role;
+    }
+
+    protected function _loadAdminUser(int $userId): Mage_Admin_Model_User
+    {
+        return Mage::getModel('admin/user')->load($userId);
     }
 
     /**

@@ -139,9 +139,25 @@ abstract class AbstractAction implements ActionInterface
 
         if (!$this->_container) {
             $class = $this->getParam('class');
+            $class = is_object($class) ? $class::class : (string) $class;
+            self::validateContainerClass($class);
             $this->setContainer(new $class());
         }
         return $this->_container;
+    }
+
+    /**
+     * Throw an exception when $class is not a container.
+     *
+     * The class comes from the type attribute of the profile XML. Do this check before the class is instantiated.
+     *
+     * @throws Exception
+     */
+    public static function validateContainerClass(string $class): void
+    {
+        if (!preg_match('/^[A-Za-z_][A-Za-z0-9_\\\\]*$/', $class) || !is_subclass_of($class, ContainerInterface::class)) {
+            throw new Exception('The profile XML names a type that is not a container.');
+        }
     }
 
     /**
@@ -153,8 +169,8 @@ abstract class AbstractAction implements ActionInterface
     public function run()
     {
         if ($method = $this->getParam('method')) {
-            if (!method_exists($this->getContainer(), $method)) {
-                $this->addException('Unable to run action method: ' . $method, Exception::FATAL);
+            if (!is_callable([$this->getContainer(), $method])) {
+                throw $this->getContainer()->addException('Unable to run action method: ' . $method, Exception::FATAL);
             }
 
             $this->getContainer()->addException('Starting ' . $this->getContainer()::class . ' :: ' . $method);
@@ -169,7 +185,7 @@ abstract class AbstractAction implements ActionInterface
                 $this->getContainer($this->getParam('to'))->setData($this->getContainer()->getData());
             }
         } else {
-            $this->addException('No method specified', Exception::FATAL);
+            $this->getContainer()->addException('No method specified', Exception::FATAL);
         }
         return $this;
     }

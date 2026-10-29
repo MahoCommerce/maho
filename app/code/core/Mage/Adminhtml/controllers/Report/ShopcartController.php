@@ -126,9 +126,9 @@ class Mage_Adminhtml_Report_ShopcartController extends Mage_Adminhtml_Controller
     {
         $action = strtolower($this->getRequest()->getActionName());
         return match ($action) {
-            'customer' => Mage::getSingleton('admin/session')->isAllowed('report/shopcart/customer'),
-            'product' => Mage::getSingleton('admin/session')->isAllowed('report/shopcart/product'),
-            'abandoned' => Mage::getSingleton('admin/session')->isAllowed('report/shopcart/abandoned'),
+            'customer', 'exportcustomercsv', 'exportcustomerexcel' => Mage::getSingleton('admin/session')->isAllowed('report/shopcart/customer'),
+            'product', 'exportproductcsv', 'exportproductexcel' => Mage::getSingleton('admin/session')->isAllowed('report/shopcart/product'),
+            'abandoned', 'exportabandonedcsv', 'exportabandonedexcel' => Mage::getSingleton('admin/session')->isAllowed('report/shopcart/abandoned'),
             default => Mage::getSingleton('admin/session')->isAllowed('report/shopcart'),
         };
     }

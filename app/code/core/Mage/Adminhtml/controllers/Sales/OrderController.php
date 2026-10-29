@@ -559,6 +559,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
             $allInvoices = [];
             $allShipments = [];
             $allCreditmemos = [];
+            $canViewCreditmemos = $this->_canViewCreditmemos();
 
             foreach ($orderIds as $orderId) {
                 $invoices = Mage::getResourceModel('sales/order_invoice_collection')
@@ -577,6 +578,10 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
                     foreach ($shipments as $shipment) {
                         $allShipments[] = $shipment;
                     }
+                }
+
+                if (!$canViewCreditmemos) {
+                    continue;
                 }
 
                 $creditmemos = Mage::getResourceModel('sales/order_creditmemo_collection')
@@ -640,18 +645,34 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     protected function _isAllowed()
     {
         $action = strtolower($this->getRequest()->getActionName());
+        if ($action === 'pdfcreditmemos') {
+            return Mage::getSingleton('admin/session')->isAllowed('sales/order') && $this->_canViewCreditmemos();
+        }
+
         $aclResource = match ($action) {
-            'hold' => 'sales/order/actions/hold',
-            'unhold' => 'sales/order/actions/unhold',
+            'hold', 'masshold' => 'sales/order/actions/hold',
+            'unhold', 'massunhold' => 'sales/order/actions/unhold',
             'email' => 'sales/order/actions/email',
-            'cancel' => 'sales/order/actions/cancel',
+            'cancel', 'masscancel' => 'sales/order/actions/cancel',
             'view' => 'sales/order/actions/view',
             'addcomment' => 'sales/order/actions/comment',
             'creditmemos' => 'sales/order/actions/creditmemo',
             'reviewpayment' => 'sales/order/actions/review_payment',
+            // The order view shows the Void button only to a role with the Invoice permission
+            'voidpayment' => 'sales/order/actions/invoice',
+            'address', 'addresssave', 'guestorderemailchange' => 'sales/order/actions/edit',
             default => 'sales/order',
         };
         return Mage::getSingleton('admin/session')->isAllowed($aclResource);
+    }
+
+    /**
+     * Return true when the admin can see the credit memos: the Credit Memos tab of the order or the Credit Memos grid.
+     */
+    protected function _canViewCreditmemos(): bool
+    {
+        $session = Mage::getSingleton('admin/session');
+        return $session->isAllowed('sales/order/actions/creditmemo') || $session->isAllowed('sales/creditmemo');
     }
 
     /**

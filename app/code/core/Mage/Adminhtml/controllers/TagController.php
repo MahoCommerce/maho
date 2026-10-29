@@ -315,11 +315,65 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
     #[\Override]
     protected function _isAllowed()
     {
+        $session = Mage::getSingleton('admin/session');
         $action = strtolower($this->getRequest()->getActionName());
         return match ($action) {
-            'pending' => Mage::getSingleton('admin/session')->isAllowed('catalog/tag/pending'),
-            'all' => Mage::getSingleton('admin/session')->isAllowed('catalog/tag/all'),
-            default => Mage::getSingleton('admin/session')->isAllowed('catalog/tag'),
+            'index', 'ajaxgrid' => $session->isAllowed('catalog/tag/all'),
+            'pending', 'ajaxpendinggrid' => $session->isAllowed('catalog/tag/pending'),
+            // Both grids use these actions. Pending Tags allows them only for tags that are still pending.
+            'new', 'edit', 'save', 'delete', 'assigned', 'assignedgridonly', 'product', 'customer',
+            'massdelete', 'massstatus' => $session->isAllowed('catalog/tag/all')
+                || ($session->isAllowed('catalog/tag/pending') && $this->_isPendingTagRequest()),
+            default => $session->isAllowed('catalog/tag'),
         };
+    }
+
+    /**
+     * Return true when the request names one or more tags and all of them exist and are pending.
+     */
+    protected function _isPendingTagRequest(): bool
+    {
+        $request = $this->getRequest();
+        $tagIds = $request->getParam('tag');
+        if (!is_array($tagIds)) {
+            $tagIds = [$request->getParam('tag_id')];
+        }
+
+        $validIds = [];
+        foreach ($tagIds as $tagId) {
+            $tagId = is_scalar($tagId) ? filter_var($tagId, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]) : false;
+            if ($tagId === false) {
+                return false;
+            }
+            $validIds[$tagId] = $tagId;
+        }
+        if ($validIds === []) {
+            return false;
+        }
+        $tagIds = array_values($validIds);
+
+        $statuses = $this->_getTagStatuses($tagIds);
+        if (count($statuses) !== count($tagIds)) {
+            return false;
+        }
+        return array_all($statuses, fn($status) => $status === Mage_Tag_Model_Tag::STATUS_PENDING);
+    }
+
+    /**
+     * Return the status of each tag that exists, with the tag ID as key.
+     *
+     * @param int[] $tagIds
+     * @return array<int, int>
+     */
+    protected function _getTagStatuses(array $tagIds): array
+    {
+        $collection = Mage::getResourceModel('tag/tag_collection')
+            ->addFieldToFilter('main_table.tag_id', ['in' => $tagIds]);
+        $statuses = [];
+        foreach ($collection as $tag) {
+            $statuses[(int) $tag->getId()] = (int) $tag->getStatus();
+        }
+
+        return $statuses;
     }
 }

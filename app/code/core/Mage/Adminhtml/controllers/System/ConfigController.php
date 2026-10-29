@@ -24,6 +24,22 @@ class Mage_Adminhtml_System_ConfigController extends Mage_Adminhtml_Controller_A
     protected $_isSectionAllowedFlag = true;
 
     /**
+     * The table rates export has no section parameter, so check the Shipping Methods section here.
+     */
+    #[\Override]
+    protected function _isAllowed(): bool
+    {
+        if (!parent::_isAllowed()) {
+            return false;
+        }
+
+        return match (strtolower($this->getRequest()->getActionName())) {
+            'exporttablerates' => Mage::getSingleton('admin/session')->isAllowed('system/config/carriers'),
+            default => true,
+        };
+    }
+
+    /**
      * Controller pre-dispatch method
      * Check if current section is found and is allowed
      *

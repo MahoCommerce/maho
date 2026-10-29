@@ -138,9 +138,9 @@ class Mage_Adminhtml_Report_CustomerController extends Mage_Adminhtml_Controller
     {
         $action = strtolower($this->getRequest()->getActionName());
         return match ($action) {
-            'accounts' => Mage::getSingleton('admin/session')->isAllowed('report/customers/accounts'),
-            'orders' => Mage::getSingleton('admin/session')->isAllowed('report/customers/orders'),
-            'totals' => Mage::getSingleton('admin/session')->isAllowed('report/customers/totals'),
+            'accounts', 'exportaccountscsv', 'exportaccountsexcel' => Mage::getSingleton('admin/session')->isAllowed('report/customers/accounts'),
+            'orders', 'exportorderscsv', 'exportordersexcel' => Mage::getSingleton('admin/session')->isAllowed('report/customers/orders'),
+            'totals', 'exporttotalscsv', 'exporttotalsexcel' => Mage::getSingleton('admin/session')->isAllowed('report/customers/totals'),
             default => Mage::getSingleton('admin/session')->isAllowed('report/customers'),
         };
     }

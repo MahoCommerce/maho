@@ -91,7 +91,8 @@ class Mage_Dataflow_Model_Convert_Profile_Collection
             if (!$containerNode['name'] || !$containerNode['type']) {
                 continue;
             }
-            $class = $this->getClassNameByType((string) $containerNode['type']);
+            $class = (string) $this->getClassNameByType((string) $containerNode['type']);
+            Mage_Dataflow_Model_Convert_Action_Abstract::validateContainerClass($class);
             $container = $this->addContainer((string) $containerNode['name'], new $class());
             foreach ($containerNode->var as $varNode) {
                 $container->setVar((string) $varNode['name'], (string) $varNode);

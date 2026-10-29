@@ -32,3 +32,4 @@
 "Total records: %s","Total records: %s"
 "Upload failed. Can not find required columns: %s in file %s.","Upload failed. Can not find required columns: %s in file %s."
 "Upload failed. Wrong data format in file: %s.","Upload failed. Wrong data format in file: %s."
+"The profile XML names a type that is not a Dataflow container.","The profile XML names a type that is not a Dataflow container."

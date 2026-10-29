@@ -635,7 +635,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
 
             // check if it is inactive
             if ($customer->getConfirmation()) {
-                if ($customer->getConfirmation() !== $key) {
+                if (!is_string($key) || !hash_equals((string) $customer->getConfirmation(), $key)) {
                     $limiter->hit();
                     throw new Exception($this->__('Wrong confirmation key.'));
                 }

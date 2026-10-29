@@ -46,6 +46,32 @@ class Mage_Payment_Model_Method_Free extends Mage_Payment_Model_Method_Abstract
     }
 
     /**
+     * Refuse an order or a quote that has something to pay.
+     *
+     * isAvailable() runs only when the payment data is imported. The order can be placed later
+     * without a new import, after the cart total went up.
+     *
+     * @return $this
+     * @throws Mage_Core_Exception
+     */
+    #[\Override]
+    public function validate()
+    {
+        parent::validate();
+
+        $paymentInfo = $this->getInfoInstance();
+        $grandTotal = $paymentInfo instanceof Mage_Sales_Model_Order_Payment
+            ? $paymentInfo->getOrder()->getGrandTotal()
+            : $paymentInfo->getQuote()->getGrandTotal();
+
+        if (Mage::app()->getStore()->roundPrice((float) $grandTotal) != 0) {
+            Mage::throwException(Mage::helper('payment')->__('The requested Payment Method is not available.'));
+        }
+
+        return $this;
+    }
+
+    /**
      * Get config payment action, do nothing if status is pending
      *
      * @return string|null

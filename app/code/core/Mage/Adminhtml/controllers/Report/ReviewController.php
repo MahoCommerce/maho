@@ -128,8 +128,9 @@ class Mage_Adminhtml_Report_ReviewController extends Mage_Adminhtml_Controller_A
     {
         $action = strtolower($this->getRequest()->getActionName());
         return match ($action) {
-            'customer' => Mage::getSingleton('admin/session')->isAllowed('report/review/customer'),
-            'product' => Mage::getSingleton('admin/session')->isAllowed('report/review/product'),
+            'customer', 'exportcustomercsv', 'exportcustomerexcel' => Mage::getSingleton('admin/session')->isAllowed('report/review/customer'),
+            'product', 'exportproductcsv', 'exportproductexcel',
+            'productdetail', 'exportproductdetailcsv', 'exportproductdetailexcel' => Mage::getSingleton('admin/session')->isAllowed('report/review/product'),
             default => Mage::getSingleton('admin/session')->isAllowed('report/review'),
         };
     }

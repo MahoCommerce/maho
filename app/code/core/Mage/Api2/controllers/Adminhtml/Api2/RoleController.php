@@ -15,6 +15,19 @@ class Mage_Api2_Adminhtml_Api2_RoleController extends Mage_Adminhtml_Controller_
 {
     public const ADMIN_RESOURCE = 'system/api/rest_roles';
 
+    #[\Override]
+    protected function _isAllowed(): bool
+    {
+        $aclPath = match (strtolower($this->getRequest()->getActionName())) {
+            'new' => self::ADMIN_RESOURCE . '/add',
+            'save' => self::ADMIN_RESOURCE . ($this->getRequest()->getParam('id') ? '/edit' : '/add'),
+            'delete' => self::ADMIN_RESOURCE . '/delete',
+            default => self::ADMIN_RESOURCE,
+        };
+
+        return Mage::getSingleton('admin/session')->isAllowed($aclPath);
+    }
+
     /**
      * Show grid
      */

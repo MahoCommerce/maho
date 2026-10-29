@@ -47,7 +47,7 @@ function usageLimitCoupon(Mage_SalesRule_Model_Rule $rule, ?int $usageLimit, ?in
     return $coupon;
 }
 
-function usageLimitOrder(Mage_SalesRule_Model_Rule $rule, Mage_SalesRule_Model_Coupon $coupon, ?int $customerId): Mage_Sales_Model_Order
+function usageLimitOrder(Mage_SalesRule_Model_Rule $rule, Mage_SalesRule_Model_Coupon $coupon, ?int $customerId, bool $save = true): Mage_Sales_Model_Order
 {
     $order = Mage::getModel('sales/order');
     $order->setCustomerId($customerId)
@@ -70,8 +70,21 @@ function usageLimitOrder(Mage_SalesRule_Model_Rule $rule, Mage_SalesRule_Model_C
         ->setRowTotal(100)
         ->setBaseRowTotal(100);
     $order->addItem($item);
-    $order->save();
+    if ($save) {
+        $order->save();
+    }
     return $order;
+}
+
+/**
+ * Save the order and place it in one transaction, as Mage_Sales_Model_Service_Quote::submitOrder() does.
+ */
+function usageLimitPlace(Mage_Sales_Model_Order $order): void
+{
+    Mage::getModel('core/resource_transaction')
+        ->addObject($order)
+        ->addCommitCallback(static fn() => Mage::dispatchEvent('sales_order_place_before', ['order' => $order]))
+        ->save();
 }
 
 describe('coupon usage counters', function () {
@@ -79,9 +92,9 @@ describe('coupon usage counters', function () {
         $coupon = usageLimitCoupon(usageLimitRule(), 2);
         $resource = Mage::getResourceModel('salesrule/coupon');
 
-        $resource->incrementTimesUsed((int) $coupon->getId());
-        $resource->incrementTimesUsed((int) $coupon->getId());
-        $resource->incrementTimesUsed((int) $coupon->getId());
+        expect($resource->incrementTimesUsed((int) $coupon->getId()))->toBeTrue();
+        expect($resource->incrementTimesUsed((int) $coupon->getId()))->toBeTrue();
+        expect($resource->incrementTimesUsed((int) $coupon->getId()))->toBeFalse();
 
         expect((int) $coupon->load($coupon->getId())->getTimesUsed())->toBe(2);
     });
@@ -115,8 +128,8 @@ describe('coupon usage counters', function () {
         $couponId = (int) $coupon->getId();
         $resource = Mage::getResourceModel('salesrule/coupon_usage');
 
-        $resource->incrementCustomerTimesUsed($customerId, $couponId, 1);
-        $resource->incrementCustomerTimesUsed($customerId, $couponId, 1);
+        expect($resource->incrementCustomerTimesUsed($customerId, $couponId, 1))->toBeTrue();
+        expect($resource->incrementCustomerTimesUsed($customerId, $couponId, 1))->toBeFalse();
 
         $usage = new \Maho\DataObject();
         $resource->loadByCustomerCoupon($usage, $customerId, $couponId);
@@ -148,9 +161,9 @@ describe('coupon usage counters', function () {
         $ruleId = (int) $rule->getId();
         $resource = Mage::getResourceModel('salesrule/rule_customer');
 
-        $resource->incrementTimesUsed($customerId, $ruleId, 2);
-        $resource->incrementTimesUsed($customerId, $ruleId, 2);
-        $resource->incrementTimesUsed($customerId, $ruleId, 2);
+        expect($resource->incrementTimesUsed($customerId, $ruleId, 2))->toBeTrue();
+        expect($resource->incrementTimesUsed($customerId, $ruleId, 2))->toBeTrue();
+        expect($resource->incrementTimesUsed($customerId, $ruleId, 2))->toBeFalse();
 
         $ruleCustomer = Mage::getModel('salesrule/rule_customer')->loadByCustomerRule($customerId, $ruleId);
         expect((int) $ruleCustomer->getTimesUsed())->toBe(2);
@@ -162,24 +175,70 @@ describe('coupon usage counters', function () {
         expect((int) $ruleCustomer->getTimesUsed())->toBe(0);
     });
 
-    test('an order placed past the coupon limit stands and leaves the coupon counter at its limit', function () {
+    test('an order past the coupon usage limit is refused and rolled back', function () {
         $customer = usageLimitCustomer('order-beyond-limit@example.com');
         $rule = usageLimitRule();
         $coupon = usageLimitCoupon($rule, 1);
         $customerId = (int) $customer->getId();
 
-        $first = usageLimitOrder($rule, $coupon, $customerId);
-        Mage::dispatchEvent('sales_order_place_after', ['order' => $first]);
+        usageLimitPlace(usageLimitOrder($rule, $coupon, $customerId, false));
 
-        $second = usageLimitOrder($rule, $coupon, $customerId);
-        Mage::dispatchEvent('sales_order_place_after', ['order' => $second]);
+        $second = usageLimitOrder($rule, $coupon, $customerId, false);
+        expect(fn() => usageLimitPlace($second))
+            ->toThrow(Mage_Core_Exception::class, 'was already used the maximum number of times');
 
+        // The order got an ID when it was saved, and the rollback removed its row.
+        expect($second->getId())->not->toBeNull();
+        expect(Mage::getModel('sales/order')->load($second->getId())->getId())->toBeNull();
         expect((int) $coupon->load($coupon->getId())->getTimesUsed())->toBe(1);
-        // The rule counter is a tally, not a limit, so both orders count.
-        expect((int) $rule->load($rule->getId())->getTimesUsed())->toBe(2);
+        expect((int) $rule->load($rule->getId())->getTimesUsed())->toBe(1);
 
         $ruleCustomer = Mage::getModel('salesrule/rule_customer')->loadByCustomerRule($customerId, (int) $rule->getId());
-        expect((int) $ruleCustomer->getTimesUsed())->toBe(2);
+        expect((int) $ruleCustomer->getTimesUsed())->toBe(1);
+    });
+
+    test('an order past the per-customer coupon limit is refused', function () {
+        $customer = usageLimitCustomer('order-beyond-coupon-per-customer@example.com');
+        $rule = usageLimitRule();
+        $coupon = usageLimitCoupon($rule, null, 1);
+        $customerId = (int) $customer->getId();
+
+        usageLimitPlace(usageLimitOrder($rule, $coupon, $customerId, false));
+
+        expect(fn() => usageLimitPlace(usageLimitOrder($rule, $coupon, $customerId, false)))
+            ->toThrow(Mage_Core_Exception::class, 'You already used coupon code');
+        expect((int) $coupon->load($coupon->getId())->getTimesUsed())->toBe(1);
+
+        // Another customer still gets the coupon.
+        $other = usageLimitCustomer('order-coupon-per-customer-other@example.com');
+        usageLimitPlace(usageLimitOrder($rule, $coupon, (int) $other->getId(), false));
+        expect((int) $coupon->load($coupon->getId())->getTimesUsed())->toBe(2);
+    });
+
+    test('an order past the uses per customer of a rule is refused', function () {
+        $customer = usageLimitCustomer('order-beyond-rule-per-customer@example.com');
+        $rule = usageLimitRule(1);
+        $coupon = usageLimitCoupon($rule, null);
+        $customerId = (int) $customer->getId();
+
+        usageLimitPlace(usageLimitOrder($rule, $coupon, $customerId, false));
+
+        expect(fn() => usageLimitPlace(usageLimitOrder($rule, $coupon, $customerId, false)))
+            ->toThrow(Mage_Core_Exception::class, 'You already used a discount of this order');
+        expect((int) $rule->load($rule->getId())->getTimesUsed())->toBe(1);
+        expect((int) $coupon->load($coupon->getId())->getTimesUsed())->toBe(1);
+    });
+
+    test('guest orders are refused only by the coupon usage limit', function () {
+        $rule = usageLimitRule(1);
+        $coupon = usageLimitCoupon($rule, 2, 1);
+
+        usageLimitPlace(usageLimitOrder($rule, $coupon, null, false));
+        usageLimitPlace(usageLimitOrder($rule, $coupon, null, false));
+
+        expect(fn() => usageLimitPlace(usageLimitOrder($rule, $coupon, null, false)))
+            ->toThrow(Mage_Core_Exception::class, 'was already used the maximum number of times');
+        expect((int) $coupon->load($coupon->getId())->getTimesUsed())->toBe(2);
     });
 
     test('payment cancel releases every counter', function () {
@@ -189,7 +248,7 @@ describe('coupon usage counters', function () {
         $customerId = (int) $customer->getId();
 
         $order = usageLimitOrder($rule, $coupon, $customerId);
-        Mage::dispatchEvent('sales_order_place_after', ['order' => $order]);
+        Mage::dispatchEvent('sales_order_place_before', ['order' => $order]);
 
         $payment = Mage::getModel('sales/order_payment')->setOrder($order);
         Mage::dispatchEvent('sales_order_payment_cancel', ['payment' => $payment]);
@@ -204,7 +263,7 @@ describe('coupon usage counters', function () {
         $ruleCustomer = Mage::getModel('salesrule/rule_customer')->loadByCustomerRule($customerId, (int) $rule->getId());
         expect((int) $ruleCustomer->getTimesUsed())->toBe(0);
 
-        Mage::dispatchEvent('sales_order_place_after', ['order' => usageLimitOrder($rule, $coupon, $customerId)]);
+        Mage::dispatchEvent('sales_order_place_before', ['order' => usageLimitOrder($rule, $coupon, $customerId)]);
         expect((int) $coupon->load($coupon->getId())->getTimesUsed())->toBe(1);
     });
 });

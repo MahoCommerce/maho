@@ -89,7 +89,7 @@ class Mage_Core_Model_File_Validator_AvailablePath
         $valuePathInfo = pathinfo(ltrim($normalizedValue, '\\\\/'));
         $fileNameExtension = pathinfo($valuePathInfo['filename'], PATHINFO_EXTENSION);
 
-        if (in_array($fileNameExtension, $protectedExtensions)) {
+        if (in_array(strtolower($fileNameExtension), $protectedExtensions, true)) {
             $this->messages[] = Mage::helper('core')->__('Path "%s" is not available and cannot be used.', $value);
             return false;
         }

@@ -63,4 +63,13 @@ class Mage_Adminhtml_Sales_Order_EditController extends Mage_Adminhtml_Sales_Ord
             ->_setActiveMenu('sales/order')
             ->renderLayout();
     }
+
+    /**
+     * Check the Edit permission for every action. The parent maps its actions to Create and Reorder.
+     */
+    #[\Override]
+    protected function _isAllowed(): bool
+    {
+        return Mage::getSingleton('admin/session')->isAllowed(self::ADMIN_RESOURCE);
+    }
 }

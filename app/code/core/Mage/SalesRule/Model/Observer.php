@@ -11,18 +11,21 @@
 class Mage_SalesRule_Model_Observer
 {
     /**
-     * Registered callback: called after an order is placed
+     * Registered callback: called before the payment of an order is placed
      *
      * Every counter moves in a conditional UPDATE inside one transaction: the
      * rule row is locked first, so concurrent placements of the same rule
-     * queue behind it and the second one stops at the limit.
+     * queue behind it and the second one stops at the limit. A counter at its
+     * limit refuses the order. The order placement transaction then rolls back
+     * the order and the counters, before the payment runs.
      *
      * @param \Maho\Event\Observer $observer
      * @return $this
+     * @throws Mage_Core_Exception
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    #[Maho\Config\Observer('sales_order_place_after')]
-    public function sales_order_afterPlace($observer)
+    #[Maho\Config\Observer('sales_order_place_before')]
+    public function sales_order_beforePlace($observer)
     {
         /** @var Mage_Sales_Model_Order $order */
         $order = $observer->getEvent()->getOrder();
@@ -46,9 +49,12 @@ class Mage_SalesRule_Model_Observer
                     continue;
                 }
                 $rule->getResource()->incrementTimesUsed($ruleId);
-                if ($customerId) {
-                    Mage::getResourceModel('salesrule/rule_customer')
-                        ->incrementTimesUsed($customerId, $ruleId, (int) $rule->getUsesPerCustomer());
+                if ($customerId && !Mage::getResourceModel('salesrule/rule_customer')
+                    ->incrementTimesUsed($customerId, $ruleId, (int) $rule->getUsesPerCustomer())
+                ) {
+                    Mage::throwException(Mage::helper('salesrule')->__(
+                        'You already used a discount of this order the maximum number of times.',
+                    ));
                 }
             }
 
@@ -56,10 +62,19 @@ class Mage_SalesRule_Model_Observer
                 $coupon = Mage::getModel('salesrule/coupon')->loadByCode($order->getCouponCode());
                 if ($coupon->getId()) {
                     $couponId = (int) $coupon->getId();
-                    $coupon->getResource()->incrementTimesUsed($couponId);
-                    if ($customerId) {
-                        Mage::getResourceModel('salesrule/coupon_usage')
-                            ->incrementCustomerTimesUsed($customerId, $couponId, (int) $coupon->getUsagePerCustomer());
+                    if (!$coupon->getResource()->incrementTimesUsed($couponId)) {
+                        Mage::throwException(Mage::helper('salesrule')->__(
+                            'Coupon code "%s" was already used the maximum number of times.',
+                            $order->getCouponCode(),
+                        ));
+                    }
+                    if ($customerId && !Mage::getResourceModel('salesrule/coupon_usage')
+                        ->incrementCustomerTimesUsed($customerId, $couponId, (int) $coupon->getUsagePerCustomer())
+                    ) {
+                        Mage::throwException(Mage::helper('salesrule')->__(
+                            'You already used coupon code "%s" the maximum number of times.',
+                            $order->getCouponCode(),
+                        ));
                     }
                 }
             }

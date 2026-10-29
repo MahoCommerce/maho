@@ -97,6 +97,9 @@ If a token is enabled (the No value in the Revoked column), you can revoke it. T
 2.  In the **Actions** drop-down list, select the **Revoke** option and click **Submit**.
 3.  The required token is revoked.
 
+When you deactivate an admin user, Maho revokes all the tokens of that user. If you activate the user again, enable its tokens in this grid.
+The REST API also refuses every request with a token of an admin user or a customer that is not active.
+
 ### Deleting Tokens
 
 To delete the required token, perform the following steps:

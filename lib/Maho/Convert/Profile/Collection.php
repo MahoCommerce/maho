@@ -10,6 +10,7 @@
 namespace Maho\Convert\Profile;
 
 use SimpleXMLElement;
+use Maho\Convert\Action\AbstractAction;
 use Maho\Convert\Container\ContainerInterface;
 use Maho\Simplexml\Element;
 
@@ -90,7 +91,8 @@ class Collection
             if (!$containerNode['name'] || !$containerNode['type']) {
                 continue;
             }
-            $class = $this->getClassNameByType((string) $containerNode['type']);
+            $class = (string) $this->getClassNameByType((string) $containerNode['type']);
+            AbstractAction::validateContainerClass($class);
             $container = $this->addContainer((string) $containerNode['name'], new $class());
             foreach ($containerNode->var as $varNode) {
                 $container->setVar((string) $varNode['name'], (string) $varNode);

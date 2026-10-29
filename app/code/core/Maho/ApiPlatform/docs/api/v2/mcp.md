@@ -53,6 +53,8 @@ The same admin is not asked again when the same application asks for the same sc
 
 **Connected Applications** under **System → API** lists the applications that registered. Select one and revoke it to cut its grants: refreshing fails at once, and access tokens already issued stop working when they expire.
 
+When you deactivate an admin user, its access tokens stop working at once and Maho revokes every grant that the user approved. If you activate the user again, each application must ask for approval again.
+
 ### Settings
 
 All of them are under **System → Configuration → Services → API → OAuth2 Settings**:

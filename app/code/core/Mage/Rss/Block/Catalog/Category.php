@@ -116,8 +116,8 @@ class Mage_Rss_Block_Catalog_Category extends Mage_Rss_Block_Catalog_Abstract
         $helper = $this->helper('catalog/image');
 
         $description = '<table><tr>'
-                     . '<td><a href="' . $product->getProductUrl() . '"><img src="'
-                     . $helper->init($product, 'image')->resize(75, 75)
+                     . '<td><a href="' . $this->escapeUrl($product->getProductUrl()) . '"><img src="'
+                     . $this->escapeUrl((string) $helper->init($product, 'image')->resize(75, 75))
                      . '" border="0" align="left" width="75"></a></td>'
                      . '<td  style="text-decoration:none;">' . $product->getDescription();
 

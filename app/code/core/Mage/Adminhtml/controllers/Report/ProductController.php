@@ -187,7 +187,10 @@ class Mage_Adminhtml_Report_ProductController extends Mage_Adminhtml_Controller_
     {
         $action = strtolower($this->getRequest()->getActionName());
         return match ($action) {
-            'lowstock', 'sold', 'viewed' => Mage::getSingleton('admin/session')->isAllowed("report/products/$action"),
+            'sold', 'exportsoldcsv', 'exportsoldexcel' => Mage::getSingleton('admin/session')->isAllowed('report/products/sold'),
+            'viewed', 'exportviewedcsv', 'exportviewedexcel' => Mage::getSingleton('admin/session')->isAllowed('report/products/viewed'),
+            'lowstock', 'exportlowstockcsv', 'exportlowstockexcel' => Mage::getSingleton('admin/session')->isAllowed('report/products/lowstock'),
+            'downloads', 'exportdownloadscsv', 'exportdownloadsexcel' => Mage::getSingleton('admin/session')->isAllowed('report/products/downloads'),
             default => Mage::getSingleton('admin/session')->isAllowed('report/products'),
         };
     }

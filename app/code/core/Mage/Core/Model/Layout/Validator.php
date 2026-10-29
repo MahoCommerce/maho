@@ -30,9 +30,6 @@ class Mage_Core_Model_Layout_Validator
     protected array $_disallowedXPathExpressions = [
         '*//template',
         '*//@template',
-        '//*[@method=\'setTemplate\']',
-        '//*[@method=\'setDataUsingMethod\']//*[contains(translate(text(),
-        \'ABCDEFGHIJKLMNOPQRSTUVWXYZ\', \'abcdefghijklmnopqrstuvwxyz\'), \'template\')]/../*',
     ];
 
     /**
@@ -110,12 +107,19 @@ class Mage_Core_Model_Layout_Validator
             try {
                 $value = simplexml_load_string('<config>' . $value . '</config>', \Maho\Simplexml\Element::class);
             } catch (Exception) {
+                $value = false;
+            }
+            if (!$value instanceof \Maho\Simplexml\Element) {
                 $this->_error(self::XML_INVALID);
                 return false;
             }
         }
-        // If $value is not a string at this point, it must be a \Maho\Simplexml\Element
-        // due to the type declaration, so no additional check is needed
+
+        // The layout ignores namespaces, but XPath name tests do not match a namespaced node
+        if ($value->xpath("//*[namespace-uri() != ''] | //@*[namespace-uri() != '']")) {
+            $this->_error(self::XML_INVALID);
+            return false;
+        }
 
         // if layout update declare custom templates then validate their paths
         if ($templatePaths = $value->xpath('//*[@template]')) {
@@ -129,7 +133,9 @@ class Mage_Core_Model_Layout_Validator
 
         // XPath expressions
         $xpathValidationExpression = $this->_getXpathValidationExpression();
-        if ($xpathValidationExpression && $value->xpath($xpathValidationExpression)) {
+        if (($xpathValidationExpression && $value->xpath($xpathValidationExpression))
+            || $this->_hasTemplateMethod($value)
+        ) {
             $this->_error(self::INVALID_TEMPLATE_PATH);
             return false;
         }
@@ -144,12 +150,93 @@ class Mage_Core_Model_Layout_Validator
 
         // Disallowed blocks
         $xpathBlockValidationExpression = $this->_getXpathBlockValidationExpression();
-        if ($xpathBlockValidationExpression && $value->xpath($xpathBlockValidationExpression)) {
+        if (($xpathBlockValidationExpression && $value->xpath($xpathBlockValidationExpression))
+            || $this->_hasDisallowedBlock($value)
+        ) {
             $this->_error(self::INVALID_BLOCK_NAME);
             return false;
         }
 
         return true;
+    }
+
+    /**
+     * Return true when an action calls setTemplate(), or calls setDataUsingMethod() with an argument
+     * that contains "template". PHP finds a method in any case and accepts "Class::method".
+     */
+    protected function _hasTemplateMethod(\Maho\Simplexml\Element $xml): bool
+    {
+        foreach ($xml->xpath('//*[@method]') ?: [] as $node) {
+            $method = strtolower((string) $node['method']);
+            if (str_contains($method, '::')) {
+                $method = substr($method, strrpos($method, '::') + 2);
+            }
+            if ($method === 'settemplate') {
+                return true;
+            }
+            if ($method !== 'setdatausingmethod') {
+                continue;
+            }
+            foreach ($node->xpath('.//*') ?: [] as $argument) {
+                if (str_contains(strtolower((string) $argument), 'template')) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Return true when a block is of a disallowed class or of a subclass of one. The class comes from the
+     * "class" and the "type" attributes, as Mage_Core_Model_Layout::_generateBlock() reads them.
+     */
+    protected function _hasDisallowedBlock(\Maho\Simplexml\Element $xml): bool
+    {
+        $disallowed = [];
+        foreach ($this->getDisallowedBlocks() as $blockName) {
+            $className = $this->_getBlockClassName((string) $blockName);
+            if ($className !== '') {
+                $disallowed[] = $className;
+            }
+        }
+        if ($disallowed === []) {
+            return false;
+        }
+
+        foreach ($xml->xpath('//block') ?: [] as $block) {
+            foreach (['class', 'type'] as $attribute) {
+                $className = $this->_getBlockClassName((string) $block[$attribute]);
+                if ($className === '') {
+                    continue;
+                }
+                foreach ($disallowed as $disallowedClass) {
+                    if (strcasecmp($className, $disallowedClass) === 0) {
+                        return true;
+                    }
+                    if (preg_match('/^[A-Za-z_][A-Za-z0-9_]*(\\\\[A-Za-z_][A-Za-z0-9_]*)*$/', $className)
+                        && is_a($className, $disallowedClass, true)
+                    ) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Return the class name that the layout creates for a block type or a block class name.
+     */
+    protected function _getBlockClassName(string $blockType): string
+    {
+        $blockType = trim($blockType);
+        if ($blockType === '') {
+            return '';
+        }
+
+        return ltrim((string) Mage::getConfig()->getBlockClassName($blockType), '\\');
     }
 
     public function getDisallowedBlocks(): array

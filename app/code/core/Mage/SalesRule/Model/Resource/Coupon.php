@@ -74,20 +74,20 @@ class Mage_SalesRule_Model_Resource_Coupon extends Mage_Core_Model_Resource_Db_A
 
     /**
      * Count one more use of the coupon in one conditional UPDATE, so concurrent
-     * order placements cannot both pass usage_limit. The order still stands
-     * once the limit is reached: the shopper was shown the discount, and the
-     * payment already ran by the time this is called.
+     * order placements cannot both pass usage_limit.
+     *
+     * @return bool false when the coupon is at its usage limit or does not exist
      */
-    public function incrementTimesUsed(int $couponId): void
+    public function incrementTimesUsed(int $couponId): bool
     {
-        $this->_getWriteAdapter()->update(
+        return $this->_getWriteAdapter()->update(
             $this->getMainTable(),
             ['times_used' => new Maho\Db\Expr('times_used + 1')],
             [
                 'coupon_id = ?' => $couponId,
                 '(usage_limit IS NULL OR usage_limit = 0 OR times_used < usage_limit)',
             ],
-        );
+        ) > 0;
     }
 
     public function decrementTimesUsed(int $couponId): void
