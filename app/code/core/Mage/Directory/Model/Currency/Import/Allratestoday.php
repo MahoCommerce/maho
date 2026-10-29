@@ -123,12 +123,12 @@ class Mage_Directory_Model_Currency_Import_Allratestoday extends Mage_Directory_
         $bank = $this->_getBank();
 
         if (isset($response['error']) || !isset($response['rates']) || !is_array($response['rates'])) {
-            $this->_bankError($bank, $response['error'] ?? 'unexpected response');
+            $this->_bankError($bank, (string) ($response['error'] ?? 'unexpected response'));
             return null;
         }
 
         if (($response['stale'] ?? false) === true) {
-            $this->_bankError($bank, sprintf('the table dated %s is stale', $response['rate_date'] ?? 'unknown'));
+            $this->_bankError($bank, sprintf('the table dated %s is stale', (string) ($response['rate_date'] ?? 'unknown')));
             return null;
         }
 
