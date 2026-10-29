@@ -13,7 +13,7 @@ class Mage_SalesRule_Model_Observer
     /**
      * Registered callback: called before the payment of an order is placed
      *
-     * Every counter moves in a conditional UPDATE inside one transaction: the
+     * Only an order with a usage limit counts its uses here. Every counter moves in a conditional UPDATE inside one transaction: the
      * rule row is locked first, so concurrent placements of the same rule
      * queue behind it and the second one stops at the limit. A counter at its
      * limit refuses the order. The order placement transaction then rolls back
@@ -29,9 +29,57 @@ class Mage_SalesRule_Model_Observer
     {
         /** @var Mage_Sales_Model_Order $order */
         $order = $observer->getEvent()->getOrder();
+        if ($order && $this->_hasUsageLimit($order)) {
+            $this->_incrementUsage($order);
+            $order->setData('salesrule_usage_counted', true);
+        }
+        return $this;
+    }
 
-        if (!$order || (!$order->getAppliedRuleIds() && !$order->getCouponCode())) {
-            return $this;
+    /**
+     * Count the uses of an order with no usage limit, after the payment, so the payment
+     * does not hold the lock of a rule row that other checkouts share.
+     *
+     * @param \Maho\Event\Observer $observer
+     * @return $this
+     */
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    #[Maho\Config\Observer('sales_order_place_after')]
+    public function sales_order_afterPlace($observer)
+    {
+        /** @var Mage_Sales_Model_Order $order */
+        $order = $observer->getEvent()->getOrder();
+        if ($order && !$order->getData('salesrule_usage_counted')) {
+            $this->_incrementUsage($order);
+        }
+        return $this;
+    }
+
+    /**
+     * Return true when a rule or the coupon of the order has a limit that can refuse the order.
+     */
+    protected function _hasUsageLimit(Mage_Sales_Model_Order $order): bool
+    {
+        $customerId = (int) $order->getCustomerId();
+        foreach ($customerId ? array_filter(explode(',', (string) $order->getAppliedRuleIds())) : [] as $ruleId) {
+            if ((int) Mage::getModel('salesrule/rule')->load((int) $ruleId)->getUsesPerCustomer() > 0) {
+                return true;
+            }
+        }
+        if (!$order->getCouponCode()) {
+            return false;
+        }
+        $coupon = Mage::getModel('salesrule/coupon')->loadByCode($order->getCouponCode());
+        return (int) $coupon->getUsageLimit() > 0 || ($customerId && (int) $coupon->getUsagePerCustomer() > 0);
+    }
+
+    /**
+     * @throws Mage_Core_Exception when a counter is at its limit
+     */
+    protected function _incrementUsage(Mage_Sales_Model_Order $order): void
+    {
+        if (!$order->getAppliedRuleIds() && !$order->getCouponCode()) {
+            return;
         }
 
         // Sorted so concurrent placements take the rule row locks in the same
@@ -83,7 +131,6 @@ class Mage_SalesRule_Model_Observer
             $adapter->rollBack();
             throw $e;
         }
-        return $this;
     }
 
     /**

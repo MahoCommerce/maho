@@ -241,6 +241,35 @@ describe('coupon usage counters', function () {
         expect((int) $coupon->load($coupon->getId())->getTimesUsed())->toBe(2);
     });
 
+    test('an order with no usage limit counts its uses after the payment', function () {
+        $customer = usageLimitCustomer('order-no-limit-' . uniqid() . '@example.com');
+        $rule = usageLimitRule();
+        $coupon = usageLimitCoupon($rule, null);
+        $observer = new \Maho\Event\Observer(['event' => new \Maho\Event(['order' => usageLimitOrder($rule, $coupon, (int) $customer->getId())])]);
+        $salesRuleObserver = Mage::getModel('salesrule/observer');
+
+        $salesRuleObserver->sales_order_beforePlace($observer);
+        expect((int) $rule->load($rule->getId())->getTimesUsed())->toBe(0);
+
+        $salesRuleObserver->sales_order_afterPlace($observer);
+        expect((int) $rule->load($rule->getId())->getTimesUsed())->toBe(1)
+            ->and((int) $coupon->load($coupon->getId())->getTimesUsed())->toBe(1);
+    });
+
+    test('an order with a usage limit is not counted again after the payment', function () {
+        $customer = usageLimitCustomer('order-limit-once-' . uniqid() . '@example.com');
+        $rule = usageLimitRule();
+        $coupon = usageLimitCoupon($rule, 5);
+        $observer = new \Maho\Event\Observer(['event' => new \Maho\Event(['order' => usageLimitOrder($rule, $coupon, (int) $customer->getId())])]);
+        $salesRuleObserver = Mage::getModel('salesrule/observer');
+
+        $salesRuleObserver->sales_order_beforePlace($observer);
+        $salesRuleObserver->sales_order_afterPlace($observer);
+
+        expect((int) $rule->load($rule->getId())->getTimesUsed())->toBe(1)
+            ->and((int) $coupon->load($coupon->getId())->getTimesUsed())->toBe(1);
+    });
+
     test('payment cancel releases every counter', function () {
         $customer = usageLimitCustomer('order-cancel-release@example.com');
         $rule = usageLimitRule(1);

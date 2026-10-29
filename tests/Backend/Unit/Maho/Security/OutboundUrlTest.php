@@ -39,6 +39,9 @@ describe('OutboundUrl', function (): void {
         'http://[::ffff:127.0.0.1]/',
         'http://[64:ff9b::7f00:1]/',
         'http://[2002:7f00:1::1]/',
+        'http://[3fff::1]/',
+        'http://[3fff:fff:ffff::1]/',
+        'http://[100:0:0:1::1]/',
     ]);
 
     it('rejects a host that resolves to a non-public address', function (): void {

@@ -458,7 +458,8 @@ it('saves the tag that the check reads, not a tag_id of the POST body', function
         expect(actionAclIsAllowed($controller))->toBeTrue();
         $controller->saveAction();
 
-        expect($adapter->fetchOne($adapter->select()->from($table, 'name')->where('tag_id = ?', $approvedId)))->toBe($approvedName);
+        expect($adapter->fetchOne($adapter->select()->from($table, 'name')->where('tag_id = ?', $approvedId)))->toBe($approvedName)
+            ->and($adapter->fetchOne($adapter->select()->from($table, 'name')->where('tag_id = ?', $pendingId)))->toBe('changed');
     } finally {
         Mage::unregister('current_tag');
         $adapter->delete($table, ['tag_id IN (?)' => $tagIds]);
