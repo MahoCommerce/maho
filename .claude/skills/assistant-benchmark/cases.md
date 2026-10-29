@@ -3,7 +3,8 @@
 Each case is one new conversation. A `{name}` in a step is an ID that you look up before the run
 (see step 3 of `SKILL.md`): `{color_attribute_id}` is `COLOR_ID`, `{configurable_product_id}` is
 `CONF_ID`, `{simple_product_id}` is `SIMPLE_ID`, `{category_id}` is `CATEGORY_ID`, `{cms_page_id}` is
-`CMS_ID`, `{order_id}` is `ORDER_ID` and `{customer_with_orders_id}` is `CUSTOMER_ID`.
+`CMS_ID`, `{order_id}` is `ORDER_ID`, `{customer_with_orders_id}` is `CUSTOMER_ID` and `{brand}`
+is `BRAND`, a label and not an ID.
 
 `pass.sh` runs the steps of these cases. When you change a case here, change it there too.
 
@@ -123,6 +124,31 @@ Steps: `{"open": "dashboard/index"}`.
 | Why does the filter show a colour but the product page shows the option as text? | Causes from the page, or an honest "I do not know". For example: in a store view where the option name is translated and the value has no visible variant, the product page falls back to text | an invented setting, "the product page does not support swatches" |
 
 Check each cause in `app/code/core/Mage/ConfigurableSwatches/` before you grade.
+
+## attribute-filter
+
+From a merchant report: the assistant answered that no product had the manufacturer that 13
+products had. `attributeFilters` of the product list takes option IDs for a select attribute such
+as `brand`, so the assistant must get the ID of {brand} from the product attributes list first. A
+label in place of the ID returns a 400 error.
+
+Steps: `{"open": "dashboard/index"}`.
+
+| Message | Must say | Must not say |
+|---------|----------|--------------|
+| Give me the list of the products that have {brand} as brand | Every product whose `brand` is {brand}, and no other product. The number of products is the count of the query below | "there are no products with this brand", a product of another brand, a count that differs |
+
+The products of the brand, in every status, because the admin sees disabled products too:
+
+```sql
+SELECT e.sku FROM catalog_product_entity e
+JOIN catalog_product_entity_int i ON i.entity_id = e.entity_id AND i.store_id = 0
+JOIN eav_attribute a ON a.attribute_id = i.attribute_id AND a.attribute_code = 'brand'
+JOIN eav_attribute_option_value ov ON ov.option_id = i.value AND ov.store_id = 0
+WHERE ov.value = '{brand}'
+```
+
+If the answer gives only the enabled products and says so, compare it with the enabled products.
 
 ## times
 
@@ -322,6 +348,7 @@ and no store view in that language: the admin stays in English, and only the mes
 | `cms-store-view` | Perché questa pagina CMS non è visibile nella vista negozio italiana? |
 | `swatch-filter-text` | Perché il filtro mostra un colore ma la pagina prodotto mostra l'opzione come testo? |
 | `examples-guest-checkout` | Come faccio a permettere ai clienti di fare il checkout senza un account? |
+| `attribute-filter` | Fammi l'elenco dei prodotti che hanno come brand {brand} |
 | `examples-order-summary` | Riassumi questo ordine |
 | `examples-to-ship` | Quali ordini sono in attesa di spedizione? |
 | `times` | 1. Mostrami gli 8 ordini più recenti, con l'ora di ciascuno.<br>2. Quali sono arrivati tra le 22:00 e mezzanotte del 18 ottobre?<br>3. Chi ha fatto l'ordine delle 07:21 del 19 ottobre? |

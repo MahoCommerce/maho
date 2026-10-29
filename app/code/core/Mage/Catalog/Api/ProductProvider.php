@@ -592,6 +592,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
                 foreach (is_array($value) ? $value : explode(',', (string) $value) as $optionId) {
                     $optionId = trim((string) $optionId);
                     if ($optionId !== '') {
+                        $this->assertOptionId($attribute, $optionId);
                         $conditions[] = ['finset' => $optionId];
                     }
                 }
@@ -599,6 +600,13 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
                     $collection->addAttributeToFilter($code, $conditions);
                 }
                 continue;
+            }
+            if ($attribute->getId() && $attribute->getFrontendInput() === 'select') {
+                foreach (is_array($value) ? $value : [$value] as $optionId) {
+                    if (is_scalar($optionId)) {
+                        $this->assertOptionId($attribute, trim((string) $optionId));
+                    }
+                }
             }
             $collection->addAttributeToFilter($code, $value);
         }
@@ -699,6 +707,25 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
 
         // Return paginator with total count for proper pagination
         return new TraversablePaginator(new \ArrayIterator($products), $page, $pageSize, (int) $result['total']);
+    }
+
+    /**
+     * Refuse a value that cannot be an option ID of $attribute, such as the label of the option.
+     * Only an attribute whose options are in the option table has option IDs.
+     *
+     * @throws BadRequestHttpException
+     */
+    private function assertOptionId(\Mage_Eav_Model_Entity_Attribute_Abstract $attribute, string $value): void
+    {
+        if (ctype_digit($value) || !$attribute->getSource() instanceof \Mage_Eav_Model_Entity_Attribute_Source_Table) {
+            return;
+        }
+
+        throw new BadRequestHttpException(sprintf(
+            'attributeFilters: %1$s takes option IDs, not "%2$s". List the product attributes with search=%1$s to get the ID of each option.',
+            $attribute->getAttributeCode(),
+            $value,
+        ));
     }
 
     /**
