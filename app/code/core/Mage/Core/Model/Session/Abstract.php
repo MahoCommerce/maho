@@ -414,14 +414,11 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
     /** Longest lifetime a store can hand out, for callers that cannot know which policy applies */
     protected static function getLongestConfiguredSessionLifetime(int|string|Mage_Core_Model_Store|null $store = null): int
     {
-        return min(
-            max(
-                self::resolveConfiguredSessionLifetime(Mage_Adminhtml_Controller_Action::SESSION_NAMESPACE, false, $store),
-                self::resolveConfiguredSessionLifetime(Mage_Core_Controller_Front_Action::SESSION_NAMESPACE, false, $store),
-                self::resolveConfiguredSessionLifetime(Mage_Core_Controller_Front_Action::SESSION_NAMESPACE, true, $store),
-                self::DEFAULT_SESSION_LIFETIME,
-            ),
-            Mage_Core_Controller_Front_Action::SESSION_MAX_LIFETIME,
+        return max(
+            self::resolveConfiguredSessionLifetime(Mage_Adminhtml_Controller_Action::SESSION_NAMESPACE, false, $store),
+            self::resolveConfiguredSessionLifetime(Mage_Core_Controller_Front_Action::SESSION_NAMESPACE, false, $store),
+            self::resolveConfiguredSessionLifetime(Mage_Core_Controller_Front_Action::SESSION_NAMESPACE, true, $store),
+            self::DEFAULT_SESSION_LIFETIME,
         );
     }
 
