@@ -55,6 +55,26 @@ describe('Gmail actions', function () {
         expect($payload['description'])->toContain('1Z999AA10123456784');
     });
 
+    it('links the carrier page when the track exposes one', function () {
+        $track = new class extends Mage_Sales_Model_Order_Shipment_Track {
+            public function getTrackingUrl(): ?string
+            {
+                return 'https://www.ups.com/track?tracknum=1Z999AA10123456784';
+            }
+        };
+        $track->setNumber('1Z999AA10123456784')->setTitle('United Parcel Service');
+        $this->variables['shipment']->fakeTracks = [$track];
+
+        $markup = $this->actions->getMarkup($this->variables);
+
+        preg_match('#<script type="application/ld\+json">(.*)</script>#s', $markup, $matches);
+        $payload = json_decode($matches[1], true);
+
+        expect($payload['potentialAction']['@type'])->toBe('TrackAction');
+        expect($payload['potentialAction']['target'])
+            ->toBe('https://www.ups.com/track?tracknum=1Z999AA10123456784');
+    });
+
     it('puts the markup before the closing head tag, and only once', function () {
         $html = '<html><head><title>Order</title></head><body>Body</body></html>';
         $injected = $this->actions->inject($this->variables, $html);

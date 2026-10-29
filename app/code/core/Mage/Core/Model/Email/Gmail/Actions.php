@@ -4,8 +4,8 @@
  * Gmail go-to actions for transactional emails.
  *
  * Gmail reads schema.org EmailMessage markup from the document head and turns it into a button
- * next to the subject line. For a shipment email that button opens the order, where the customer
- * finds the tracking numbers.
+ * next to the subject line. For a shipment email that button opens the public tracking page of
+ * the carrier when there is one, and the order in the store otherwise.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -17,13 +17,20 @@ declare(strict_types=1);
 class Mage_Core_Model_Email_Gmail_Actions
 {
     /**
-     * The action is a link to the store, so ViewAction is the honest type: TrackAction expects a
-     * parcel carrier URL, and building one here would mean asking the carrier API for the tracking
-     * detail while the email is being rendered.
+     * The carrier page of the shipment, when the carrier publishes one and its URL can be composed
+     * from configuration: the track accessor never asks the carrier while the email is rendered.
+     */
+    public const TRACK_ACTION_TYPE = 'TrackAction';
+
+    /**
+     * The action is a link to the store, so ViewAction is the honest type: it is used whenever no
+     * carrier page is available, and TrackAction has nothing to point at.
      */
     public const ACTION_TYPE = 'ViewAction';
 
     public const ACTION_LABEL = 'Track your order';
+
+    public const TRACK_ACTION_LABEL = 'Track your shipment';
 
     /**
      * Add the markup to a rendered email, immediately before the closing head tag.
@@ -80,7 +87,14 @@ class Mage_Core_Model_Email_Gmail_Actions
             return '';
         }
 
-        $target = $this->getOrderUrl($order);
+        $target = $this->getTrackingUrl($shipment);
+        $actionType = self::TRACK_ACTION_TYPE;
+        $actionLabel = self::TRACK_ACTION_LABEL;
+        if ($target === '') {
+            $target = $this->getOrderUrl($order);
+            $actionType = self::ACTION_TYPE;
+            $actionLabel = self::ACTION_LABEL;
+        }
         if ($target === '') {
             return '';
         }
@@ -88,11 +102,11 @@ class Mage_Core_Model_Email_Gmail_Actions
         $payload = [
             '@context' => 'https://schema.org',
             '@type' => 'EmailMessage',
-            'name' => Mage::helper('core')->__(self::ACTION_LABEL),
+            'name' => Mage::helper('core')->__($actionLabel),
             'description' => Mage::helper('core')->__('Tracking number %s', implode(', ', $numbers)),
             'potentialAction' => [
-                '@type' => self::ACTION_TYPE,
-                'name' => Mage::helper('core')->__(self::ACTION_LABEL),
+                '@type' => $actionType,
+                'name' => Mage::helper('core')->__($actionLabel),
                 'target' => $target,
             ],
         ];
@@ -109,9 +123,32 @@ class Mage_Core_Model_Email_Gmail_Actions
     }
 
     /**
+     * The public tracking page of the first track that has one, or '' when none has.
+     *
+     * The guard on the method keeps this class working on an installation where the carrier
+     * tracking URL contract is not available yet: the action then falls back to the order page.
+     *
+     * @return string
+     */
+    protected function getTrackingUrl(Mage_Sales_Model_Order_Shipment $shipment)
+    {
+        foreach ($shipment->getAllTracks() as $track) {
+            if (!is_object($track) || !method_exists($track, 'getTrackingUrl')) {
+                continue;
+            }
+
+            $url = trim((string) $track->getTrackingUrl());
+            if ($url !== '') {
+                return $url;
+            }
+        }
+
+        return '';
+    }
+
+    /**
      * The order page in the store the email belongs to.
      *
-     * @param Mage_Sales_Model_Order $order
      * @return string
      */
     protected function getOrderUrl(Mage_Sales_Model_Order $order)
