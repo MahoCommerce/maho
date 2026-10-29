@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2016-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2016-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Adminhtml
@@ -565,47 +565,25 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     {
         $orderIds = $this->getRequest()->getPost('order_ids');
         if (!empty($orderIds)) {
-            $allInvoices = [];
-            $allShipments = [];
-            $allCreditmemos = [];
-
+            $documents = array_fill_keys(array_filter(['invoice', 'shipment', 'creditmemo'], $this->_canViewDocuments(...)), []);
             foreach ($orderIds as $orderId) {
-                $invoices = Mage::getResourceModel('sales/order_invoice_collection')
-                    ->setOrderFilter($orderId)
-                    ->load();
-                if ($invoices->getSize()) {
-                    foreach ($invoices as $invoice) {
-                        $allInvoices[] = $invoice;
-                    }
-                }
-
-                $shipments = Mage::getResourceModel('sales/order_shipment_collection')
-                    ->setOrderFilter($orderId)
-                    ->load();
-                if ($shipments->getSize()) {
-                    foreach ($shipments as $shipment) {
-                        $allShipments[] = $shipment;
-                    }
-                }
-
-                $creditmemos = Mage::getResourceModel('sales/order_creditmemo_collection')
-                    ->setOrderFilter($orderId)
-                    ->load();
-                if ($creditmemos->getSize()) {
-                    foreach ($creditmemos as $creditmemo) {
-                        $allCreditmemos[] = $creditmemo;
+                foreach (array_keys($documents) as $type) {
+                    $collection = Mage::getResourceModel("sales/order_{$type}_collection")
+                        ->setOrderFilter($orderId)
+                        ->load();
+                    foreach ($collection as $document) {
+                        $documents[$type][] = $document;
                     }
                 }
             }
 
             // Generate PDF for the first available document type
             $pdfContent = '';
-            if (!empty($allInvoices)) {
-                $pdfContent = Mage::getModel('sales/order_pdf_invoice')->getPdf($allInvoices);
-            } elseif (!empty($allShipments)) {
-                $pdfContent = Mage::getModel('sales/order_pdf_shipment')->getPdf($allShipments);
-            } elseif (!empty($allCreditmemos)) {
-                $pdfContent = Mage::getModel('sales/order_pdf_creditmemo')->getPdf($allCreditmemos);
+            foreach ($documents as $type => $items) {
+                if ($items !== []) {
+                    $pdfContent = Mage::getModel("sales/order_pdf_{$type}")->getPdf($items);
+                    break;
+                }
             }
 
             if (!empty($pdfContent)) {
@@ -649,18 +627,37 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     protected function _isAllowed()
     {
         $action = strtolower($this->getRequest()->getActionName());
+        $documentType = ['pdfinvoices' => 'invoice', 'pdfshipments' => 'shipment', 'pdfcreditmemos' => 'creditmemo'][$action] ?? null;
+        if ($documentType !== null) {
+            return Mage::getSingleton('admin/session')->isAllowed('sales/order') && $this->_canViewDocuments($documentType);
+        }
+
         $aclResource = match ($action) {
-            'hold' => 'sales/order/actions/hold',
-            'unhold' => 'sales/order/actions/unhold',
+            'hold', 'masshold' => 'sales/order/actions/hold',
+            'unhold', 'massunhold' => 'sales/order/actions/unhold',
             'email' => 'sales/order/actions/email',
-            'cancel' => 'sales/order/actions/cancel',
+            'cancel', 'masscancel' => 'sales/order/actions/cancel',
             'view' => 'sales/order/actions/view',
             'addcomment' => 'sales/order/actions/comment',
             'creditmemos' => 'sales/order/actions/creditmemo',
             'reviewpayment' => 'sales/order/actions/review_payment',
+            // The order view shows the Void button only to a role with the Invoice permission
+            'voidpayment' => 'sales/order/actions/invoice',
+            'address', 'addresssave', 'guestorderemailchange' => 'sales/order/actions/edit',
             default => 'sales/order',
         };
         return Mage::getSingleton('admin/session')->isAllowed($aclResource);
+    }
+
+    /**
+     * Return true when the admin can see the documents of $type (invoice, shipment or creditmemo):
+     * with the order action that creates them, or with their grid.
+     */
+    protected function _canViewDocuments(string $type): bool
+    {
+        $session = Mage::getSingleton('admin/session');
+        $orderAction = $type === 'shipment' ? 'ship' : $type;
+        return $session->isAllowed('sales/order/actions/' . $orderAction) || $session->isAllowed('sales/' . $type);
     }
 
     /**

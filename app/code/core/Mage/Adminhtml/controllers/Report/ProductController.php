@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2019-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Adminhtml
@@ -187,7 +187,10 @@ class Mage_Adminhtml_Report_ProductController extends Mage_Adminhtml_Controller_
     {
         $action = strtolower($this->getRequest()->getActionName());
         return match ($action) {
-            'lowstock', 'sold', 'viewed' => Mage::getSingleton('admin/session')->isAllowed("report/products/$action"),
+            'sold', 'exportsoldcsv', 'exportsoldexcel' => Mage::getSingleton('admin/session')->isAllowed('report/products/sold'),
+            'viewed', 'exportviewedcsv', 'exportviewedexcel' => Mage::getSingleton('admin/session')->isAllowed('report/products/viewed'),
+            'lowstock', 'exportlowstockcsv', 'exportlowstockexcel' => Mage::getSingleton('admin/session')->isAllowed('report/products/lowstock'),
+            'downloads', 'exportdownloadscsv', 'exportdownloadsexcel' => Mage::getSingleton('admin/session')->isAllowed('report/products/downloads'),
             default => Mage::getSingleton('admin/session')->isAllowed('report/products'),
         };
     }

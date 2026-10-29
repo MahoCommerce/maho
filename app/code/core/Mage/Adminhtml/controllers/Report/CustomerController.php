@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2022-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Adminhtml
@@ -143,9 +143,9 @@ class Mage_Adminhtml_Report_CustomerController extends Mage_Adminhtml_Controller
     {
         $action = strtolower($this->getRequest()->getActionName());
         return match ($action) {
-            'accounts' => Mage::getSingleton('admin/session')->isAllowed('report/customers/accounts'),
-            'orders' => Mage::getSingleton('admin/session')->isAllowed('report/customers/orders'),
-            'totals' => Mage::getSingleton('admin/session')->isAllowed('report/customers/totals'),
+            'accounts', 'exportaccountscsv', 'exportaccountsexcel' => Mage::getSingleton('admin/session')->isAllowed('report/customers/accounts'),
+            'orders', 'exportorderscsv', 'exportordersexcel' => Mage::getSingleton('admin/session')->isAllowed('report/customers/orders'),
+            'totals', 'exporttotalscsv', 'exporttotalsexcel' => Mage::getSingleton('admin/session')->isAllowed('report/customers/totals'),
             default => Mage::getSingleton('admin/session')->isAllowed('report/customers'),
         };
     }

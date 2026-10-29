@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!--
 SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
-SPDX-FileCopyrightText: 2017-2025 The OpenMage Contributors <https://openmage.org>
+SPDX-FileCopyrightText: 2017-2026 The OpenMage Contributors <https://openmage.org>
 SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
 SPDX-License-Identifier: AFL-3.0
 -->
@@ -483,8 +483,9 @@ SPDX-License-Identifier: AFL-3.0
                     <pl>pl</pl>
                     <!-- Python script file extension -->
                     <py>py</py>
-                    <!-- Active Server Page script file extension -->
+                    <!-- Active Server Page script file extensions -->
                     <asp>asp</asp>
+                    <aspx>aspx</aspx>
                     <!-- UNIX command prompt file extension -->
                     <sh>sh</sh>
                     <!-- Common Gateway Interface script extension type -->

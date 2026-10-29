@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2021-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2021-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Rss
@@ -116,8 +116,8 @@ class Mage_Rss_Block_Catalog_Category extends Mage_Rss_Block_Catalog_Abstract
         $helper = $this->helper('catalog/image');
 
         $description = '<table><tr>'
-                     . '<td><a href="' . $product->getProductUrl() . '"><img src="'
-                     . $helper->init($product, 'thumbnail')->resize(75, 75)
+                     . '<td><a href="' . $this->escapeUrl($product->getProductUrl()) . '"><img src="'
+                     . $this->escapeUrl((string) $helper->init($product, 'thumbnail')->resize(75, 75))
                      . '" border="0" align="left" height="75" width="75"></a></td>'
                      . '<td  style="text-decoration:none;">' . $product->getDescription();
 

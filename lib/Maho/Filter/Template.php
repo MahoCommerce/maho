@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2020-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2020-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  */
@@ -288,8 +288,14 @@ class Template
                     if (method_exists($stackVars[$i - 1]['variable'], $stackVars[$i]['name'])
                         || str_starts_with($stackVars[$i]['name'], 'get')
                     ) {
+                        // These methods can return a decrypted config value: getDataUsingMethod() calls a getter by name
+                        if (in_array(strtolower($stackVars[$i]['name']), ['getconfigdata', 'getdatausingmethod'], true)) {
+                            $stackVars[$i]['variable'] = null;
+                            $last = $i;
+                            continue;
+                        }
                         $isEncrypted = false;
-                        if ($stackVars[$i]['name'] == 'getConfig') {
+                        if (strcasecmp($stackVars[$i]['name'], 'getConfig') === 0) {
                             $isEncrypted = $emailPathValidator->isValid($stackVars[$i]['args']);
                         }
                         $stackVars[$i]['variable'] = call_user_func_array(

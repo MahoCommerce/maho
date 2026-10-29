@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2020-2023 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2020-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Oauth
@@ -21,6 +21,23 @@ class Mage_Oauth_Model_Observer
     protected function _getOauthToken()
     {
         return Mage::helper('oauth')->getOauthToken();
+    }
+
+    /**
+     * Revoke the tokens of an admin user that a save deactivates. Without this, a reactivation
+     * of the account brings the old tokens back. The OAuth tokens grid can enable them again.
+     */
+    #[Maho\Config\Observer('admin_user_save_after')]
+    public function revokeTokensOfDeactivatedAdmin(\Maho\Event\Observer $observer): void
+    {
+        $user = $observer->getEvent()->getObject();
+        if (!$user instanceof Mage_Admin_Model_User || !$user->getId() || $user->getIsActive() === null || $user->getIsActive()) {
+            return;
+        }
+
+        /** @var Mage_Oauth_Model_Resource_Token $resource */
+        $resource = Mage::getResourceSingleton('oauth/token');
+        $resource->revokeAdminTokens((int) $user->getId());
     }
 
     /**

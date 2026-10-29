@@ -45,10 +45,10 @@ class Image extends AbstractElement
                 $url = \Mage::getBaseUrl('media') . $url;
             }
 
-            $html = '<a href="' . $url . '"'
+            $html = '<a href="' . $this->_escape($url) . '"'
                 . ' onclick="imagePreview(\'' . $this->getHtmlId() . '_image\'); return false;">'
-                . '<img src="' . $url . '" id="' . $this->getHtmlId() . '_image" title="' . $value . '"'
-                . ' alt="' . $value . '" height="22" width="22" class="small-image-preview v-middle" />'
+                . '<img src="' . $this->_escape($url) . '" id="' . $this->getHtmlId() . '_image" title="' . $this->_escape($value) . '"'
+                . ' alt="' . $this->_escape($value) . '" height="22" width="22" class="small-image-preview v-middle" />'
                 . '</a> ';
         }
         $this->setClass('input-file');
@@ -94,7 +94,7 @@ class Image extends AbstractElement
         if (is_array($value)) {
             return '';
         }
-        return '<input type="hidden" name="' . parent::getName() . '[value]" value="' . $value . '">';
+        return '<input type="hidden" name="' . parent::getName() . '[value]" value="' . $this->_escape($value) . '">';
     }
 
     /**

@@ -56,6 +56,10 @@ DirectoryIndex index.php
     RewriteCond %{REQUEST_URI} !/\.well-known/
     RewriteRule ^(.*)$ / [R=404,L]
 
+    # Deny the folders that hold the files that customers upload and the files that customers buy.
+    # Each folder also has its own .htaccess, but a copy or a sync can lose it.
+    RewriteRule ^media/(customer|customer_address|downloadable|custom_options)/ - [F,L]
+
     # Uncomment next line to enable light API calls processing
     #RewriteRule ^api/([a-z][0-9a-z_]+)/?$ api.php?type=$1 [QSA,L]
 

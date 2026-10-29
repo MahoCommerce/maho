@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2022-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Adminhtml
@@ -133,8 +133,9 @@ class Mage_Adminhtml_Report_ReviewController extends Mage_Adminhtml_Controller_A
     {
         $action = strtolower($this->getRequest()->getActionName());
         return match ($action) {
-            'customer' => Mage::getSingleton('admin/session')->isAllowed('report/review/customer'),
-            'product' => Mage::getSingleton('admin/session')->isAllowed('report/review/product'),
+            'customer', 'exportcustomercsv', 'exportcustomerexcel' => Mage::getSingleton('admin/session')->isAllowed('report/review/customer'),
+            'product', 'exportproductcsv', 'exportproductexcel',
+            'productdetail', 'exportproductdetailcsv', 'exportproductdetailexcel' => Mage::getSingleton('admin/session')->isAllowed('report/review/product'),
             default => Mage::getSingleton('admin/session')->isAllowed('report/review'),
         };
     }

@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2022-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Dataflow
@@ -152,9 +152,27 @@ abstract class Mage_Dataflow_Model_Convert_Action_Abstract implements Mage_Dataf
 
         if (!$this->_container) {
             $class = $this->getParam('class');
+            $class = is_object($class) ? $class::class : (string) $class;
+            self::validateContainerClass($class);
             $this->setContainer(new $class());
         }
         return $this->_container;
+    }
+
+    /**
+     * Throw an exception when $class is not a Dataflow container.
+     *
+     * The class comes from the type attribute of the profile XML. Do this check before the class is instantiated.
+     *
+     * @throws Mage_Core_Exception
+     */
+    public static function validateContainerClass(string $class): void
+    {
+        if (!preg_match('/^[A-Za-z_][A-Za-z0-9_\\\\]*$/', $class)
+            || !is_subclass_of($class, Mage_Dataflow_Model_Convert_Container_Interface::class)
+        ) {
+            Mage::throwException(Mage::helper('dataflow')->__('The profile XML names a type that is not a Dataflow container.'));
+        }
     }
 
     public function importXml(\Maho\Simplexml\Element $actionNode)
@@ -193,8 +211,8 @@ abstract class Mage_Dataflow_Model_Convert_Action_Abstract implements Mage_Dataf
     public function run(array $args = [])
     {
         if ($method = $this->getParam('method')) {
-            if (!method_exists($this->getContainer(), $method)) {
-                $this->getContainer()->addException(
+            if (!is_callable([$this->getContainer(), $method])) {
+                throw $this->getContainer()->addException(
                     'Unable to run action method: ' . $method,
                     Mage_Dataflow_Model_Convert_Exception::FATAL,
                 );

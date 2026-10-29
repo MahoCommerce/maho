@@ -32,6 +32,7 @@
 "Skip undefined row.","Skip undefined row."
 "Starting %s :: %s","Starting %s :: %s"
 "The destination folder ""%s"" does not exist or there is no access to create it.","The destination folder ""%s"" does not exist or there is no access to create it."
+"The profile XML names a type that is not a Dataflow container.","The profile XML names a type that is not a Dataflow container."
 "Total records: %s","Total records: %s"
 "Upload failed. Can not find required columns: %s in file %s.","Upload failed. Can not find required columns: %s in file %s."
 "Upload failed. Wrong data format in file: %s.","Upload failed. Wrong data format in file: %s."

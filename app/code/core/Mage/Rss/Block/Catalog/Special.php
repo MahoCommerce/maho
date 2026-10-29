@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2020-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2020-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Rss
@@ -105,8 +105,8 @@ class Mage_Rss_Block_Catalog_Special extends Mage_Rss_Block_Catalog_Abstract
                     '<table><tr>
                     <td><a href="%s"><img src="%s" alt="" border="0" align="left" height="75" width="75"></a></td>
                     <td style="text-decoration:none;">%s',
-                    $product->getProductUrl(),
-                    $imageHelper->init($product, 'thumbnail')->resize(75, 75),
+                    $this->escapeUrl($product->getProductUrl()),
+                    $this->escapeUrl((string) $imageHelper->init($product, 'thumbnail')->resize(75, 75)),
                     $outputHelper->productAttribute(
                         $product,
                         $product->getDescription(),
@@ -117,7 +117,7 @@ class Mage_Rss_Block_Catalog_Special extends Mage_Rss_Block_Catalog_Abstract
                 // add price data if needed
                 if ($product->getAllowedPriceInRss()) {
                     if (Mage::helper('catalog')->canApplyMsrp($product)) {
-                        $html .= '<br><a href="' . $product->getProductUrl() . '">'
+                        $html .= '<br><a href="' . $this->escapeUrl($product->getProductUrl()) . '">'
                             . $this->__('Click for price') . '</a>';
                     } else {
                         $special = '';

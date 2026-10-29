@@ -118,6 +118,23 @@ class Maho_ApiPlatform_Model_Observer
     }
 
     /**
+     * Revoke the OAuth grants of an admin user that a save deactivates, so that a reactivation
+     * of the account does not bring the connected applications back.
+     */
+    #[Maho\Config\Observer('admin_user_save_after')]
+    public function revokeGrantsOfDeactivatedAdmin(\Maho\Event\Observer $observer): void
+    {
+        $user = $observer->getEvent()->getObject();
+        if (!$user instanceof Mage_Admin_Model_User || !$user->getId() || $user->getIsActive() === null || $user->getIsActive()) {
+            return;
+        }
+
+        /** @var Maho_ApiPlatform_Model_Resource_Oauth_Token $resource */
+        $resource = Mage::getResourceSingleton('apiplatform/oauth_token');
+        $resource->revokeAdminGrants((int) $user->getId());
+    }
+
+    /**
      * Invalidate API cache when a product is saved or deleted
      */
     #[Maho\Config\Observer('catalog_product_save_after')]
