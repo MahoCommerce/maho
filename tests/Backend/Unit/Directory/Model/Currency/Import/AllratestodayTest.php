@@ -198,6 +198,26 @@ describe('AllRatesToday currency import', function () {
         expect($rates['NZD']['USD'])->toEqualWithDelta(0.5, 0.000001);
     });
 
+    it('drops a rate that is out of the float range instead of dividing by zero', function () {
+        // JSON allows 1e400, which PHP decodes to INF
+        $body = str_replace('"huge"', '1e400', allratestodayBankTable('sama', [
+            ['EUR', 'SAR', 4.5],
+            ['USD', 'SAR', 3.75],
+            ['SAR', 'JPY', 'huge'],
+        ]));
+        $importer = (new AllratestodayHarness())
+            ->setBank('sama')
+            ->setApiKey('test-key')
+            ->setCurrencies(['EUR', 'JPY', 'SAR', 'USD'], ['SAR'])
+            ->setHttpClient(allratestodayClient($this->requests, $body));
+
+        $rates = $importer->fetchRates();
+
+        expect($rates['SAR']['USD'])->toEqualWithDelta(1 / 3.75, 0.000001);
+        expect($rates['SAR']['JPY'])->toBeNull();
+        expect($importer->getMessages())->toBe(['Unable to calculate rate for SAR to JPY.']);
+    });
+
     it('reports a central bank table without a EUR rate', function () {
         $importer = (new AllratestodayHarness())
             ->setBank('sama')

@@ -179,7 +179,10 @@ class Mage_Directory_Model_Currency_Import_Allratestoday extends Mage_Directory_
 
         $rates = [];
         foreach ($homeUnits as $code => $homeUnit) {
-            $rates[$code] = $homeUnits['EUR'] / $homeUnit;
+            $rate = fdiv($homeUnits['EUR'], $homeUnit);
+            if (is_finite($rate) && $rate > 0) {
+                $rates[$code] = $rate;
+            }
         }
 
         return $rates;
