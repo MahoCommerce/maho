@@ -38,4 +38,13 @@ describe('{{layout}} renders only declared layout handles', function () {
             ->and($this->filter->layoutDirective(['{{layout area="adminhtml" handle="adminhtml_dashboard_index"}}', 'layout', ' area="adminhtml" handle="adminhtml_dashboard_index"']))->toBe('')
             ->and($this->filter->layoutDirective(['{{layout}}', 'layout', '']))->toBe('');
     });
+
+    it('does not let a parameter change the template of a block', function (string $key) {
+        $this->filter->setVariables(['order' => Mage::getModel('sales/order')]);
+        $render = fn(string $extra): string => $this->filter->filter(
+            '{{layout area="frontend" handle="sales_email_order_items" order=$order' . $extra . '}}',
+        );
+        // The old code gives the blocks a template that does not exist, so they render nothing
+        expect($render(' ' . $key . '="layout-test/none.phtml"'))->toBe($render(''));
+    })->with(['template', 'TEMPLATE', 'tem_plate']);
 });

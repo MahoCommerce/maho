@@ -194,7 +194,8 @@ class Mage_Core_Model_Email_Template_Filter extends \Maho\Filter\Template
         /** @var Mage_Core_Block_Abstract $block */
         foreach ($layout->getAllBlocks() as $block) {
             foreach ($params as $k => $v) {
-                if (in_array($k, $skipParams)) {
+                // setDataUsingMethod() ignores case and underscores, so tem_plate also calls setTemplate()
+                if (in_array($k, $skipParams) || strtolower((string) preg_replace('/[^a-z]/i', '', (string) $k)) === 'template') {
                     continue;
                 }
 
