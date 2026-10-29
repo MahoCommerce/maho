@@ -2009,6 +2009,20 @@
                 }
             }
 
+            /* A grouped product has no qty: when the 12rem CTA, the gap and the links do not
+               fit in one row, the CTA takes the full row and the links go below it */
+            @container (max-width: 20rem) {
+                &:has(> .add-to-links > :nth-child(2)) .add-to-cart:not(:has(> .qty-wrapper)) {
+                    grid-column: 1 / -1;
+                }
+            }
+
+            @container (max-width: 16.5rem) {
+                .add-to-cart:not(:has(> .qty-wrapper)) {
+                    grid-column: 1 / -1;
+                }
+            }
+
             /* Takes effect only when .add-to-cart is display: contents. The CTA is
                placed last, so qty and links share a row below any tier prices */
             .add-to-cart:has(> .qty-wrapper) {
