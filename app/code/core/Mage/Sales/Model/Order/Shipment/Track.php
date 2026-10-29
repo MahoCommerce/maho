@@ -121,7 +121,38 @@ class Mage_Sales_Model_Order_Shipment_Track extends Mage_Sales_Model_Abstract
             return Mage::helper('sales')->__('No detail for number "%s"', $this->getNumber());
         }
 
+        if ($trackingInfo instanceof \Maho\DataObject
+            && !$trackingInfo->getUrl()
+            && method_exists($carrierInstance, 'getTrackingUrl')
+            && $url = $carrierInstance->getTrackingUrl((string) $this->getNumber())
+        ) {
+            $trackingInfo->setUrl($url);
+        }
+
         return $trackingInfo;
+    }
+
+    /**
+     * Retrieve the public tracking page of the carrier, or null when the carrier has none.
+     *
+     * Unlike getNumberDetail(), this does not ask the carrier for the tracking status, so it is
+     * safe to use while rendering a message or a page for the customer.
+     */
+    public function getTrackingUrl(): ?string
+    {
+        $number = (string) $this->getNumber();
+        if ($number === '') {
+            return null;
+        }
+
+        $carrierInstance = Mage::getSingleton('shipping/config')->getCarrierInstance($this->getCarrierCode());
+        if (!$carrierInstance || !method_exists($carrierInstance, 'getTrackingUrl')) {
+            return null;
+        }
+
+        $carrierInstance->setStore($this->getStore());
+
+        return $carrierInstance->getTrackingUrl($number) ?: null;
     }
 
     /**

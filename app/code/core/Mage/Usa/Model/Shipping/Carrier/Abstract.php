@@ -61,6 +61,23 @@ abstract class Mage_Usa_Model_Shipping_Carrier_Abstract extends Mage_Shipping_Mo
     }
 
     /**
+     * Return the public tracking page, composed from the "tracking_url" configuration value.
+     *
+     * The configured URL holds the {{number}} placeholder, which is replaced with the
+     * URL-encoded tracking number, so no call to the carrier API is made.
+     */
+    #[\Override]
+    public function getTrackingUrl(string $number): ?string
+    {
+        $template = trim((string) $this->getConfigData('tracking_url'));
+        if ($template === '' || $number === '') {
+            return null;
+        }
+
+        return str_replace('{{number}}', rawurlencode($number), $template);
+    }
+
+    /**
      * Check if carrier has shipping tracking option available
      * All Mage_Usa carriers have shipping tracking option available
      *
