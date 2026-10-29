@@ -141,14 +141,15 @@ abstract class Mage_Directory_Model_Currency_Import_Eurbased extends Mage_Direct
     {
         $eurToFrom = $eurRates[$currencyFrom] ?? null;
         $eurToTo = $eurRates[$currencyTo] ?? null;
+        $rate = is_numeric($eurToFrom) && is_numeric($eurToTo) ? fdiv((float) $eurToTo, (float) $eurToFrom) : NAN;
 
-        if ($eurToFrom === null || $eurToTo === null || $eurToFrom == 0) {
+        if (!is_finite($rate) || $rate <= 0) {
             $this->_messages[] = Mage::helper('directory')
                 ->__('Unable to calculate rate for %s to %s.', $currencyFrom, $currencyTo);
             return null;
         }
 
-        return (float) $eurToTo / (float) $eurToFrom;
+        return $rate;
     }
 
     /**

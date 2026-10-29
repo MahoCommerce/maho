@@ -85,6 +85,33 @@ describe('AllRatesToday currency import', function () {
         expect($importer->getMessages())->toBe(['Unable to calculate rate for USD to GBP.']);
     });
 
+    it('reports a pair instead of dividing by zero when the base rate is not a number', function () {
+        $importer = (new AllratestodayHarness())
+            ->setCurrencies(['EUR', 'GBP', 'USD'], ['USD'])
+            ->setHttpClient(allratestodayClient($this->requests, allratestodayEcbTable(['USD' => 'abc', 'GBP' => 0.85])));
+
+        $rates = $importer->fetchRates();
+
+        expect($rates['USD']['EUR'])->toBeNull();
+        expect($rates['USD']['GBP'])->toBeNull();
+        expect($importer->getMessages())->toBe([
+            'Unable to calculate rate for USD to EUR.',
+            'Unable to calculate rate for USD to GBP.',
+        ]);
+    });
+
+    it('reports a target rate of zero instead of importing it', function () {
+        $importer = (new AllratestodayHarness())
+            ->setCurrencies(['EUR', 'GBP', 'USD'], ['USD'])
+            ->setHttpClient(allratestodayClient($this->requests, allratestodayEcbTable(['USD' => 1.10, 'GBP' => 0])));
+
+        $rates = $importer->fetchRates();
+
+        expect($rates['USD']['EUR'])->toEqualWithDelta(1 / 1.10, 0.000001);
+        expect($rates['USD']['GBP'])->toBeNull();
+        expect($importer->getMessages())->toBe(['Unable to calculate rate for USD to GBP.']);
+    });
+
     it('re-bases a central bank table quoted in the home currency on EUR', function () {
         // SAMA quotes SAR per unit of foreign currency: 1 USD = 3.75 SAR, 1 EUR = 4.5 SAR
         $importer = (new AllratestodayHarness())
