@@ -123,8 +123,7 @@ class Mage_Sales_Model_Order_Shipment_Track extends Mage_Sales_Model_Abstract
 
         if ($trackingInfo instanceof \Maho\DataObject
             && !$trackingInfo->getUrl()
-            && method_exists($carrierInstance, 'getTrackingUrl')
-            && $url = $carrierInstance->getTrackingUrl((string) $this->getNumber())
+            && $url = $this->getTrackingUrl()
         ) {
             $trackingInfo->setUrl($url);
         }
@@ -133,10 +132,9 @@ class Mage_Sales_Model_Order_Shipment_Track extends Mage_Sales_Model_Abstract
     }
 
     /**
-     * Retrieve the public tracking page of the carrier, or null when the carrier has none.
+     * Return the public tracking page of the carrier. Return null when the carrier has none.
      *
-     * Unlike getNumberDetail(), this does not ask the carrier for the tracking status, so it is
-     * safe to use while rendering a message or a page for the customer.
+     * This method does not call the carrier API. Use it to render a message or a page.
      */
     public function getTrackingUrl(): ?string
     {
@@ -146,7 +144,7 @@ class Mage_Sales_Model_Order_Shipment_Track extends Mage_Sales_Model_Abstract
         }
 
         $carrierInstance = Mage::getSingleton('shipping/config')->getCarrierInstance($this->getCarrierCode());
-        if (!$carrierInstance || !method_exists($carrierInstance, 'getTrackingUrl')) {
+        if (!$carrierInstance) {
             return null;
         }
 

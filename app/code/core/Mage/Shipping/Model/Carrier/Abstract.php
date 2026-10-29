@@ -311,14 +311,10 @@ abstract class Mage_Shipping_Model_Carrier_Abstract extends \Maho\DataObject
     }
 
     /**
-     * Return the public tracking page for a shipment number, or null when the carrier has none.
+     * Return the public tracking page for $number. Return null when the carrier has none.
      *
-     * The URL is meant to be shared with the customer (emails, order pages, admin), so it must
-     * be composed from configuration alone: implementations must not call the carrier API.
-     * Carriers that expose a tracking page override this method, typically from a
-     * "carriers/<code>/tracking_url" configuration value with a {{number}} placeholder.
-     *
-     * @param string $number Tracking number as stored in the shipment
+     * Build the URL from configuration only. Do not call the carrier API.
+     * A carrier with a tracking page overrides this method.
      */
     public function getTrackingUrl(string $number): ?string
     {

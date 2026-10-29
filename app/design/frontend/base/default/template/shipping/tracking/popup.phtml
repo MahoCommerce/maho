@@ -109,13 +109,7 @@
                     <!--if the tracking is custom value-->
                     <tr>
                         <th class="label"><?= ($track['title'] ? $this->escapeHtml($track['title']) : $this->__('N/A')) ?>:</th>
-                        <td class="value">
-                            <?php if (!empty($track['url'])): ?>
-                            <a href="<?= $this->escapeHtml($track['url']) ?>" target="_blank" rel="noopener"><?= $this->escapeHtml($track['number']) ?></a>
-                            <?php else: ?>
-                            <?= (isset($track['number']) ? $this->escapeHtml($track['number']) : '') ?>
-                            <?php endif ?>
-                        </td>
+                        <td class="value"><?= (isset($track['number']) ? $this->escapeHtml($track['number']) : '') ?></td>
                     </tr>
                 <?php endif ?>
                 </tbody>

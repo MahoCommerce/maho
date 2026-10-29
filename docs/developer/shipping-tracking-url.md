@@ -43,7 +43,7 @@ $track->getNumberDetail(); // asks the carrier API - do not use in messages
 
 ## Configuration
 
-Every carrier reads `carriers/<code>/tracking_url`, a URL with a `{{number}}` placeholder. The number is URL-encoded before it replaces the placeholder.
+Each carrier that extends `Mage_Usa_Model_Shipping_Carrier_Abstract` (UPS, FedEx, USPS and DHL) reads `carriers/<code>/tracking_url`, a URL with a `{{number}}` placeholder. The number is URL-encoded before it replaces the placeholder.
 
 ```xml
 <config>

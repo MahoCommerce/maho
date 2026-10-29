@@ -57,4 +57,14 @@ describe('carrier tracking url', function () {
         expect(carrierTrackingUrlTrack('custom', 'TRACK-1')->getTrackingUrl())->toBeNull();
         expect(carrierTrackingUrlTrack('ups', '')->getTrackingUrl())->toBeNull();
     });
+
+    test('reads the template from the store of the shipment', function () {
+        $store = Mage::app()->getDefaultStoreView();
+        $store->setConfig('carriers/ups/tracking_url', 'https://store.test/{{number}}');
+        $order = Mage::getModel('sales/order')->setStoreId((int) $store->getId());
+        $shipment = Mage::getModel('sales/order_shipment')->setOrder($order);
+
+        expect(carrierTrackingUrlTrack('ups', '1Z1')->setShipment($shipment)->getTrackingUrl())
+            ->toBe('https://store.test/1Z1');
+    });
 });

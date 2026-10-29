@@ -61,10 +61,9 @@ abstract class Mage_Usa_Model_Shipping_Carrier_Abstract extends Mage_Shipping_Mo
     }
 
     /**
-     * Return the public tracking page, composed from the "tracking_url" configuration value.
+     * Return the public tracking page from the "tracking_url" configuration value.
      *
-     * The configured URL holds the {{number}} placeholder, which is replaced with the
-     * URL-encoded tracking number, so no call to the carrier API is made.
+     * The method replaces {{number}} in that value with the URL-encoded tracking number.
      */
     #[\Override]
     public function getTrackingUrl(string $number): ?string
