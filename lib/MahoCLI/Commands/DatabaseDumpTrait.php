@@ -19,8 +19,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  * because importing must work while the database is empty, missing, or unreadable,
  * which is exactly when the framework cannot boot.
  *
- * Every pipeline is built as a plain shell string, so the same text is what
- * --dry-run prints and what is executed.
+ * Every pipeline is a plain shell string. --dry-run prints the same text, but not the password.
  */
 trait DatabaseDumpTrait
 {
@@ -68,6 +67,7 @@ trait DatabaseDumpTrait
      */
     protected function readConnectionConfig(): array
     {
+        // Write local.xml from MAHO_LOCAL_XML when the file is missing.
         \Mage::isInstalled(['etc_dir' => $this->projectRoot() . '/app/etc']);
         $path = $this->projectRoot() . '/app/etc/local.xml';
         if (!is_file($path)) {
@@ -292,9 +292,8 @@ trait DatabaseDumpTrait
     }
 
     /**
-     * Print the resolved connection and every command a run would execute, without
-     * running anything. The commands are printed exactly as they would be executed,
-     * credentials included, so they can be pasted into a shell to debug a failure.
+     * Print the connection and the commands, without running anything.
+     * The password is in the Connection list. A run sends it to the client in MYSQL_PWD or PGPASSWORD.
      *
      * @param array<string, string> $conn
      * @param list<string> $commands
@@ -332,7 +331,10 @@ trait DatabaseDumpTrait
             'pgsql' => 'PGPASSWORD',
             default => null,
         };
-        if ($passwordVariable !== null && $conn['password'] !== '') {
+        if ($conn['password'] === '') {
+            $passwordVariable = null;
+        }
+        if ($passwordVariable !== null) {
             putenv("{$passwordVariable}={$conn['password']}");
         }
 

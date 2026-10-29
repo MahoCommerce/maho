@@ -86,6 +86,14 @@ it('reports a missing dump file', function () {
     expect($result->getErrorOutput())->toContain('File not found');
 });
 
+it('asks for the dump file when the argument is missing', function () {
+    $path = sys_get_temp_dir() . '/maho_dbimport_asked.sql';
+    $result = dbImportTester()->run([], [$path]);
+
+    $this->assertCommandFailed($result);
+    expect($result->getErrorOutput())->toContain("File not found: {$path}");
+});
+
 it('refuses a gzip dump loaded as plain SQL', function () {
     dbImportWithTempFile("\x1f\x8b\x08\x00", function (string $file): void {
         $result = dbImportTester()->run(['file' => $file]);

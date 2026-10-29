@@ -165,7 +165,7 @@ client has to be installed on the host, and they work even while the database is
 ./maho db:export var/backups/shop.sql --compression=none
 ./maho db:export var/backups/shop.sql.zst --compression=zstd
 
-# print the resolved connection and the exact command, without running anything
+# print the resolved connection and the commands, without running anything
 ./maho db:export var/backups/shop.sql --dry-run
 
 # restore, emptying the database first (the command asks first, --force skips the question)
@@ -177,6 +177,10 @@ zstd dump loaded with the wrong `--compression` is refused with a hint instead o
 reaching the client. `--drop-tables` empties the database first: it drops and recreates
 the database on MySQL, resets the `public` schema on PostgreSQL, and removes the file
 on SQLite. After a restore run `./maho cache:flush`.
+
+On MySQL, `db:export` and `db:import` give the password to the client in the `MYSQL_PWD`
+variable. A `password=` line in an option file such as `~/.my.cnf` has priority over it. If the
+commands fail with "Access denied", remove that line or make it match `local.xml`.
 
 ## Give the input on the command line
 

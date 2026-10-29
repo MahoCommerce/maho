@@ -85,7 +85,7 @@ it('builds a MySQL pipeline without the password, with definer stripping and com
         ->toContain("-h 'db'")
         ->toContain("-u'maho'")
         ->not->toContain('-p')
-        ->toContain("sed -e '/^INSERT /!s/DEFINER[ ]*=[ ]*[^*]*\\*/\\*/'")
+        ->toContain('LANG=C LC_CTYPE=C LC_ALL=C sed -e')
         ->toContain('| pv | gzip -c')
         ->toEndWith("> '/tmp/dump.sql.gz'");
 });
@@ -147,6 +147,45 @@ it('prints the resolved connection and the command in --dry-run mode', function 
         ->toContain('db.internal')
         ->toContain('secret')
         ->toContain($command);
+});
+
+it('removes a DEFINER clause but never changes a data row', function () {
+    $pipeline = dbExportReflect('buildExportCommand', dbExportConnection(), '/tmp/dump.sql', 'none', null);
+    $sed = current(array_filter(explode(' | ', $pipeline), static fn(string $step): bool => str_starts_with($step, 'LANG=C')));
+    $input = "/*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER t\nINSERT INTO x VALUES ('DEFINER = x */ y');\n";
+
+    expect(shell_exec('printf %s ' . escapeshellarg($input) . ' | ' . $sed))
+        ->toBe("/*!50017 */ /*!50003 TRIGGER t\nINSERT INTO x VALUES ('DEFINER = x */ y');\n");
+});
+
+it('passes the password in the environment and removes it afterwards', function (string $engine, string $variable) {
+    ob_start();
+    $code = dbExportReflect('runShellCommand', 'printf %s "$' . $variable . '"', dbExportConnection(['engine' => $engine, 'password' => 'se cret']));
+    $output = ob_get_clean();
+
+    expect($output)->toBe('se cret')
+        ->and($code)->toBe(0)
+        ->and(getenv($variable))->toBeFalse();
+})->with([['mysql', 'MYSQL_PWD'], ['pgsql', 'PGPASSWORD']]);
+
+it('uses mariadb-dump when mysqldump is not installed', function () {
+    $directory = sys_get_temp_dir() . '/maho_dbexport_bin_' . uniqid();
+    mkdir($directory);
+    file_put_contents($directory . '/mariadb-dump', "#!/bin/sh\n");
+    chmod($directory . '/mariadb-dump', 0755);
+    $path = (string) getenv('PATH');
+    putenv('PATH=' . $directory);
+
+    try {
+        if (Mage::findExecutable('mysqldump') !== null) {
+            $this->markTestSkipped('mysqldump is installed in a fixed directory');
+        }
+        expect(dbExportReflect('dumpBinary', dbExportConnection()))->toBe('mariadb-dump');
+    } finally {
+        putenv('PATH=' . $path);
+        unlink($directory . '/mariadb-dump');
+        rmdir($directory);
+    }
 });
 
 it('splits a host:port value and sends a socket path to --socket', function () {

@@ -213,9 +213,7 @@ trait DatabaseCliTrait
     }
 
     /**
-     * Write a diagnostic to STDERR. Uses the console's dedicated error stream when available
-     * (so it stays off STDOUT and is assertable in tests) and OUTPUT_RAW so a message that
-     * happens to contain "<...>" is not parsed as console markup.
+     * Write $message to STDERR. Use OUTPUT_RAW, so that the console does not read "<...>" in the message as a tag.
      */
     private function writeError(OutputInterface $output, string $message): void
     {
