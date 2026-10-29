@@ -129,7 +129,7 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
-                            <comment><![CDATA[Leave empty for the ECB reference table. Otherwise the code of the central bank whose official table should be imported, e.g. <code>sama</code>, <code>cbuae</code>, <code>bok</code> or <code>rbnz</code>; see the <a href='https://allratestoday.com/central-bank-rates-api/institutions/' target='_blank'>list of institutions</a>. The bank must publish a EUR rate, and an API key is required.]]></comment>
+                            <comment><![CDATA[Leave this field empty to import the ECB reference table. To import the table of one central bank, enter its code, such as <code>sama</code>, <code>cbuae</code>, <code>bok</code> or <code>rbnz</code>. See the <a href='https://allratestoday.com/central-bank-rates-api/institutions/' target='_blank'>list of institutions</a>. The bank must publish a EUR rate, and an API key is required.]]></comment>
                             <depends>
                                 <active>1</active>
                             </depends>
