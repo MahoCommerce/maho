@@ -152,6 +152,7 @@ it('prints the resolved connection and the command in --dry-run mode', function 
 it('removes a DEFINER clause but never changes a data row', function () {
     $pipeline = dbExportReflect('buildExportCommand', dbExportConnection(), '/tmp/dump.sql', 'none', null);
     $sed = current(array_filter(explode(' | ', $pipeline), static fn(string $step): bool => str_starts_with($step, 'LANG=C')));
+    $sed = preg_replace('/ > .*$/', '', $sed);
     $input = "/*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER t\nINSERT INTO x VALUES ('DEFINER = x */ y');\n";
 
     expect(shell_exec('printf %s ' . escapeshellarg($input) . ' | ' . $sed))
