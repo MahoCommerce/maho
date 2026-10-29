@@ -19,7 +19,7 @@ class Mage_Sales_DownloadController extends Mage_Core_Controller_Front_Action
     {
         $secretKey = $this->getRequest()->getParam('key');
         try {
-            if (!isset($info['secret_key']) || !hash_equals($info['secret_key'], (string) $secretKey)) {
+            if (!isset($info['secret_key']) || !hash_equals((string) $info['secret_key'], (string) $secretKey)) {
                 throw new Exception();
             }
 
@@ -138,7 +138,7 @@ class Mage_Sales_DownloadController extends Mage_Core_Controller_Front_Action
             if ($requestKey) {
                 try {
                     $info = Mage::helper('core/unserializeArray')->unserialize($option->getValue());
-                    $hasKeyAccess = isset($info['secret_key']) && hash_equals($info['secret_key'], $requestKey);
+                    $hasKeyAccess = isset($info['secret_key']) && hash_equals((string) $info['secret_key'], (string) $requestKey);
                 } catch (Exception) {
                     // Invalid data — deny access
                 }

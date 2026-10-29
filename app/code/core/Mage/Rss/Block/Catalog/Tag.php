@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2021-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2021-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Rss
@@ -89,9 +89,15 @@ class Mage_Rss_Block_Catalog_Tag extends Mage_Rss_Block_Catalog_Abstract
         $helper = $this->helper('catalog/image');
 
         $product->unsetData()->load($args['row']['entity_id']);
+<<<<<<< HEAD
         $description = '<table><tr><td><a href="' . $product->getProductUrl() . '">'
             . '<img src="' . $helper->init($product, 'thumbnail')->resize(75, 75)
             . '" border="0" align="left" height="75" width="75"></a></td>'
+=======
+        $description = '<table><tr><td><a href="' . $this->escapeUrl($product->getProductUrl()) . '">'
+            . '<img src="' . $this->escapeUrl((string) $helper->init($product, 'image')->resize(75, 75))
+            . '" border="0" align="left" width="75"></a></td>'
+>>>>>>> 628960d8 (Fixed security issues from the OpenMage 20.19 advisories, such as unpaid orders with the free payment method and admin roles that reached actions outside their permissions (#1688))
             . '<td  style="text-decoration:none;">' . $product->getDescription();
 
         if ($allowedPriceInRss) {

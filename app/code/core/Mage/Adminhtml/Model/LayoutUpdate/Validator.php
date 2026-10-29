@@ -137,6 +137,7 @@ class Mage_Adminhtml_Model_LayoutUpdate_Validator
      * Returns xPath for validate incorrect block name
      *
      * @return string xPath for validate incorrect block name
+     * @deprecated since 26.11 isValid() checks the blocks with _hasDisallowedBlock().
      */
     protected function _getXpathBlockValidationExpression()
     {

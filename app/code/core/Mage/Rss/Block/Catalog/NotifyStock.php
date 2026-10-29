@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2021-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2021-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Rss
@@ -97,7 +97,7 @@ class Mage_Rss_Block_Catalog_NotifyStock extends Mage_Rss_Block_Abstract
             ['id' => $product->getId(), '_secure' => true, '_nosecret' => true],
         );
         $qty = 1 * $product->getQty();
-        $description = Mage::helper('rss')->__('%s has reached a quantity of %s.', $product->getName(), $qty);
+        $description = Mage::helper('rss')->__('%s has reached a quantity of %s.', $this->escapeHtml($product->getName()), $qty);
         $rssObj = $args['rssObj'];
         $data = [
             'title'         => $product->getName(),

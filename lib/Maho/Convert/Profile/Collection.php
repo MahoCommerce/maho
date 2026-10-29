@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2022-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  */
@@ -10,6 +10,7 @@
 namespace Maho\Convert\Profile;
 
 use SimpleXMLElement;
+use Maho\Convert\Action\AbstractAction;
 use Maho\Convert\Container\ContainerInterface;
 use Maho\Simplexml\Element;
 
@@ -90,7 +91,8 @@ class Collection
             if (!$containerNode['name'] || !$containerNode['type']) {
                 continue;
             }
-            $class = $this->getClassNameByType((string) $containerNode['type']);
+            $class = (string) $this->getClassNameByType((string) $containerNode['type']);
+            AbstractAction::validateContainerClass($class);
             $container = $this->addContainer((string) $containerNode['name'], new $class());
             foreach ($containerNode->var as $varNode) {
                 $container->setVar((string) $varNode['name'], (string) $varNode);

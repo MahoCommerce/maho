@@ -793,6 +793,7 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
         }
 
         try {
+<<<<<<< HEAD
             $info      = unserialize($option->getValue(), ['allowed_classes' => false]);
             $filePath  = Mage::getBaseDir() . $info['quote_path'];
             $secretKey = $this->getRequest()->getParam('key');
@@ -802,6 +803,19 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
                     'value' => $filePath,
                     'type'  => 'filename',
                 ]);
+=======
+            $info      = Mage::helper('core/unserializeArray')->unserialize($option->getValue());
+            $secretKey = $this->getRequest()->getParam('key');
+
+            if (is_array($info) && isset($info['secret_key']) && hash_equals((string) $info['secret_key'], (string) $secretKey)) {
+                $file = Mage::getModel('catalog/product_option_type_file')->openStoredFile($info);
+                if ($file !== null) {
+                    $this->_prepareDownloadResponse($info['title'], [
+                        'value' => $file['stream'],
+                        'type'  => 'stream',
+                    ], contentLength: $file['size']);
+                }
+>>>>>>> 628960d8 (Fixed security issues from the OpenMage 20.19 advisories, such as unpaid orders with the free payment method and admin roles that reached actions outside their permissions (#1688))
             }
         } catch (Exception) {
             $this->_forward('noRoute');

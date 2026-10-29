@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2020-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Api
@@ -214,6 +214,12 @@ class Mage_Api_Model_Session extends Mage_Core_Model_Session_Abstract
     {
         $user = Mage::getModel('api/user')->loadBySessId($sessId);
         if (!$user->getId() || !$user->getSessid()) {
+            return false;
+        }
+
+        // login() refuses an inactive user, so a session opened before the deactivation ends too
+        if (!$user->getIsActive()) {
+            $user->getResource()->clearBySessId($sessId);
             return false;
         }
 

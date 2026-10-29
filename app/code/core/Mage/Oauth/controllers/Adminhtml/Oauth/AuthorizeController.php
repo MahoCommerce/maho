@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2019-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Oauth
@@ -260,7 +260,7 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizeController extends Mage_Adminhtml_Cont
     #[Maho\Config\Route('/admin/oauth_authorize/confirmSimple')]
     public function confirmSimpleAction(): void
     {
-        $this->_initConfirmPage();
+        $this->_initConfirmPage(true);
     }
 
     /**
@@ -278,7 +278,7 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizeController extends Mage_Adminhtml_Cont
     #[Maho\Config\Route('/admin/oauth_authorize/rejectSimple')]
     public function rejectSimpleAction(): void
     {
-        $this->_initRejectPage();
+        $this->_initRejectPage(true);
     }
 
     /**
