@@ -15,6 +15,7 @@ nav:
   - 'Scope: default, website and store view': scope.md
   - CMS pages and blocks in store views: cms-store-views.md
   - HTML and Tailwind classes in content: content-html-and-classes.md
+  - Image editor: image-editor.md
 - Marketing:
   - Customer segments: customer-segments.md
   - Email automation: email-automation.md

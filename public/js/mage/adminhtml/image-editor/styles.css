@@ -113,7 +113,9 @@ SPDX-License-Identifier: AFL-3.0
 
 /* Body layout */
 .maho-ie-body {
-    display: flex;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-rows: minmax(0, 1fr);
     flex: 1;
     min-height: 0;
 }
@@ -132,6 +134,8 @@ SPDX-License-Identifier: AFL-3.0
 }
 
 .maho-ie-tool-btn {
+    height: auto;
+    flex-shrink: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -247,54 +251,103 @@ SPDX-License-Identifier: AFL-3.0
 }
 
 /* Options panel */
+/* Options panel, right of the photo */
 .maho-ie-options {
+    width: 280px;
     background: #141416;
-    border-top: 1px solid #2e2e33;
-    padding: 10px 16px;
-    min-height: 52px;
+    border-left: 1px solid #2e2e33;
+    padding: 16px;
     display: flex;
-    align-items: center;
-    gap: 16px;
-    flex-wrap: wrap;
+    flex-direction: column;
+    gap: 14px;
     overflow-y: auto;
-    max-height: 140px;
 }
 
 .maho-ie-options:empty {
     display: none;
 }
 
+/* A run of two or more buttons fills two columns. Every other control takes the full width. */
 .maho-ie-options-group {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     align-items: center;
     gap: 8px;
 }
 
+.maho-ie-options-group > * {
+    grid-column: 1 / -1;
+}
+
+.maho-ie-options-group > .maho-ie-opt-btn:has(+ .maho-ie-opt-btn),
+.maho-ie-options-group > .maho-ie-opt-btn + .maho-ie-opt-btn {
+    grid-column: auto;
+}
+
+.maho-ie-options-group > .maho-ie-opt-btn {
+    justify-content: center;
+}
+
 .maho-ie-options-divider {
-    width: 1px;
-    height: 24px;
+    height: 1px;
     background: #2e2e33;
     flex-shrink: 0;
 }
 
-/* Slider control */
+/* Dock under the photo */
+.maho-ie-dock {
+    background: #141416;
+    border-top: 1px solid #2e2e33;
+}
+
+.maho-ie-dock:empty {
+    display: none;
+}
+
+/* Below this width, the options panel goes under the photo */
+@media (max-width: 1100px) {
+    .maho-ie-body {
+        grid-template-columns: auto minmax(0, 1fr);
+        grid-template-rows: minmax(0, 1fr) auto;
+    }
+
+    .maho-ie-sidebar {
+        grid-row: 1 / 3;
+    }
+
+    .maho-ie-options {
+        grid-column: 2;
+        width: auto;
+        max-height: 40vh;
+        border-left: 0;
+        border-top: 1px solid #2e2e33;
+    }
+
+    .maho-ie-options-group {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    }
+}
+
+/* Slider control: label and value above the track */
 .maho-ie-slider {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "label value" "range range";
     align-items: center;
-    gap: 8px;
+    gap: 4px 8px;
 }
 
 .maho-ie-slider label {
+    grid-area: label;
     font-size: 11px;
     color: #a1a1aa;
-    min-width: 70px;
-    text-align: right;
 }
 
 .maho-ie-slider input[type="range"] {
+    grid-area: range;
     -webkit-appearance: none;
     appearance: none;
-    width: 120px;
+    width: 100%;
     height: 4px;
     background: #3f3f46;
     border-radius: 2px;
@@ -322,11 +375,123 @@ SPDX-License-Identifier: AFL-3.0
 }
 
 .maho-ie-slider-value {
+    grid-area: value;
     font-size: 11px;
     color: #71717a;
     min-width: 32px;
-    text-align: center;
+    text-align: right;
     font-variant-numeric: tabular-nums;
+}
+
+.maho-ie-slider input[type="range"]:disabled {
+    opacity: 0.4;
+}
+
+/* Adjust tool */
+.maho-ie-adjust {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-width: 0;
+}
+
+.maho-ie-adjust-filters {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 10px 16px;
+    mask-image: linear-gradient(to right, #000 calc(100% - 48px), transparent);
+}
+
+.maho-ie-adjust-filter {
+    flex: none;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 4px;
+    border: 1px solid #3f3f46;
+    border-radius: 6px;
+    background: #27272a;
+    color: #a1a1aa;
+    font-size: 11px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+}
+
+.maho-ie-adjust-filter canvas {
+    display: block;
+    width: 72px;
+    height: 54px;
+    border-radius: 4px;
+}
+
+.maho-ie-adjust-filter:hover {
+    border-color: #52525b;
+    color: #fafafa;
+}
+
+.maho-ie-adjust-filter.active {
+    border-color: #0090ff;
+    box-shadow: 0 0 0 1px #0090ff;
+    color: #fafafa;
+}
+
+.maho-ie-adjust-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.maho-ie-adjust-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.maho-ie-adjust-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.maho-ie-adjust-actions > .maho-ie-opt-btn {
+    justify-content: center;
+}
+
+.maho-ie-adjust-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-top: 16px;
+    border-top: 1px solid #2e2e33;
+}
+
+.maho-ie-adjust-group-title {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #71717a;
+}
+
+.maho-ie-adjust-hint {
+    font-size: 11px;
+    color: #71717a;
+}
+
+@media (max-width: 1100px) {
+    .maho-ie-adjust-controls {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    .maho-ie-adjust-actions,
+    .maho-ie-adjust-footer {
+        grid-column: 1 / -1;
+    }
 }
 
 /* Number input */

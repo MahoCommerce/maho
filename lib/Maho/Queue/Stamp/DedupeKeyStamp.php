@@ -18,11 +18,15 @@ use Symfony\Component\Messenger\Stamp\StampInterface;
  * A handler continuing its own chain passes `enforce: false`: its own row is
  * still in flight under the key and would swallow the continuation, yet the key
  * has to stay on the new message so outside dispatchers keep seeing the chain.
+ *
+ * With `pendingOnly: true`, only a pending message drops the new one. Use it when the
+ * job reads its data at its start: a request that comes while it runs needs a new run.
  */
 final readonly class DedupeKeyStamp implements StampInterface
 {
     public function __construct(
         public string $key,
         public bool $enforce = true,
+        public bool $pendingOnly = false,
     ) {}
 }

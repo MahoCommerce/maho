@@ -16,6 +16,10 @@ class Mage_ImportExport_Adminhtml_ImportController extends Mage_Adminhtml_Contro
      */
     public const ADMIN_RESOURCE = 'system/convert/import';
 
+    /** The link of a notice from the message queue has no secret key: the page only reads. */
+    #[\Override]
+    protected $_publicActions = ['index'];
+
     /**
      * Custom constructor.
      */
@@ -74,8 +78,10 @@ class Mage_ImportExport_Adminhtml_ImportController extends Mage_Adminhtml_Contro
             $importModel = Mage::getModel('importexport/import');
 
             try {
-                $importModel->importSource();
-                $importModel->invalidateIndex();
+                if (Mage_ImportExport_Model_Import::isImportInProgress()) {
+                    Mage::throwException($this->__('An import waits or runs. Start a new import when it is done.'));
+                }
+                $importModel->queueImportSource(Mage::helper('adminnotification')->getCurrentAdminUserId());
                 $resultBlock->addAction('show', 'import_validation_container')
                     ->addAction('innerHTML', 'import_validation_container_header', $this->__('Status'));
             } catch (Throwable $e) {
@@ -84,7 +90,7 @@ class Mage_ImportExport_Adminhtml_ImportController extends Mage_Adminhtml_Contro
                 return;
             }
             $resultBlock->addAction('hide', ['edit_form', 'upload_button', 'messages'])
-                ->addSuccess($this->__('Import successfully done.'));
+                ->addSuccess($this->__('The import will run in the background. A message in the notifications tells you when it is done.'));
             $this->renderLayout();
         } else {
             $this->_redirect('*/*/index');
@@ -107,6 +113,13 @@ class Mage_ImportExport_Adminhtml_ImportController extends Mage_Adminhtml_Contro
                 ->addAction('clear', [
                     Mage_ImportExport_Model_Import::FIELD_NAME_SOURCE_FILE,
                     Mage_ImportExport_Model_Import::FIELD_NAME_IMG_ARCHIVE_FILE]);
+
+            // validateSource() refuses too, but its error would come with the advice to fix the file
+            if (Mage_ImportExport_Model_Import::isImportInProgress()) {
+                $resultBlock->addError($this->__('An import waits or runs. Start a new import when it is done.'));
+                $this->renderLayout();
+                return;
+            }
 
             try {
                 /** @var Mage_ImportExport_Model_Import $import */

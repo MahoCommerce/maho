@@ -180,7 +180,7 @@ class CustomerSegment extends \Maho\ApiPlatform\Resource
     #[Map(if: new TargetClass(self::class))]
     public ?int $matchedCustomersCount = null;
 
-    #[ApiProperty(writable: false, description: 'State of the last refresh: pending (never refreshed), processing, completed or error', example: 'completed', extraProperties: [EnumSource::KEY => ['pending', 'processing', 'completed', 'error']])]
+    #[ApiProperty(writable: false, description: 'State of the last refresh: pending (not refreshed yet, or a refresh waits in the queue), processing, completed or error', example: 'completed', extraProperties: [EnumSource::KEY => ['pending', 'processing', 'completed', 'error']])]
     #[Map(if: new TargetClass(self::class))]
     public ?string $refreshStatus = null;
 

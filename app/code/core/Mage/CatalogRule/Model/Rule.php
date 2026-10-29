@@ -25,6 +25,16 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
     public const XML_NODE_RELATED_CACHE = 'global/catalogrule/related_cache_types';
 
     /**
+     * The lock that applyAll() holds while it runs
+     */
+    public const APPLY_LOCK = 'catalogrule_apply_all';
+
+    /**
+     * Seconds that applyAll() waits for another run to end
+     */
+    public const APPLY_LOCK_WAIT_SECONDS = 3600;
+
+    /**
      * Prefix of model events names
      *
      * @var string
@@ -259,20 +269,50 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
     }
 
     /**
-     * Apply all price rules, clean related cache and refresh price index
+     * Apply all price rules, clean related cache and refresh price index. Then clear the "rules not
+     * applied" flag, unless a rule changed during the run.
      *
      * @throws Exception
      */
     public function applyAll()
     {
-        $this->getResourceCollection()->walk([$this->_getResource(), 'updateRuleProductData']);
-        $this->_getResource()->applyAllRules();
-        $this->_cleanCache();
-        $indexProcess = Mage::getSingleton('index/indexer')->getProcessByCode('catalog_product_price');
-        if ($indexProcess) {
-            $indexProcess->changeStatus(Mage_Index_Model_Process::STATUS_REQUIRE_REINDEX);
-            $indexProcess->reindexAll();
+        // The queue, the cron job and the REST API can start a run at the same time, so a run waits for the other one
+        $lock = Mage::getSingleton('core/lock');
+        if (!$lock->acquireWithin(self::APPLY_LOCK, self::APPLY_LOCK_WAIT_SECONDS)) {
+            throw new RuntimeException(Mage::helper('catalogrule')->__('Another run of the catalog price rules is in progress.'));
         }
+        try {
+            // Read before the rules: a save during the run changes this time, and its rule is not in the prices
+            $flagUpdatedAt = Mage::getModel('catalogrule/flag')->loadSelf()->getLastUpdate();
+            $this->getResourceCollection()->walk([$this->_getResource(), 'updateRuleProductData']);
+            $this->_getResource()->applyAllRules();
+            $this->_cleanCache();
+            $indexProcess = Mage::getSingleton('index/indexer')->getProcessByCode('catalog_product_price');
+            if ($indexProcess) {
+                $indexProcess->changeStatus(Mage_Index_Model_Process::STATUS_REQUIRE_REINDEX);
+                $indexProcess->reindexAll();
+            }
+            $flag = Mage::getModel('catalogrule/flag')->loadSelf();
+            if ($flag->getLastUpdate() === $flagUpdatedAt) {
+                $flag->setState(0)->save();
+            }
+        } finally {
+            $lock->release(self::APPLY_LOCK);
+        }
+    }
+
+    /**
+     * Queue applyAll(). A second request is dropped while the first one waits. A request that comes
+     * while it runs queues one more run, because the run read the rules at its start. The result
+     * goes to the inbox of $adminUserId.
+     */
+    public function queueApplyAll(?int $adminUserId = null): void
+    {
+        \Maho\Queue\QueueManager::dispatch(
+            new Mage_CatalogRule_Model_ApplyAllMessage($adminUserId),
+            queue: Mage_CatalogRule_Model_ApplyAllMessage::QUEUE_NAME,
+            stamps: [new \Maho\Queue\Stamp\DedupeKeyStamp(Mage_CatalogRule_Model_ApplyAllMessage::DEDUPE_KEY, pendingOnly: true)],
+        );
     }
 
     /**

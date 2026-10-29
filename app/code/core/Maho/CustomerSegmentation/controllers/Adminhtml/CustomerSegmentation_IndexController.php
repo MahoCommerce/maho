@@ -10,6 +10,10 @@ declare(strict_types=1);
 
 class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController extends Mage_Adminhtml_Controller_Action
 {
+    /** The link of a notice from the message queue has no secret key: the grid only reads. */
+    #[\Override]
+    protected $_publicActions = ['index'];
+
     protected function _initAction(): self
     {
         $this->loadLayout()
@@ -199,9 +203,12 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
         $segmentId = $this->getRequest()->getParam('id');
         if ($segmentId) {
             try {
-                $this->segmentService()->refresh($this->segmentService()->getById((int) $segmentId));
+                $this->segmentService()->queueRefresh(
+                    $this->segmentService()->getById((int) $segmentId),
+                    Mage::helper('adminnotification')->getCurrentAdminUserId(),
+                );
                 Mage::getSingleton('adminhtml/session')->addSuccess(
-                    Mage::helper('customersegmentation')->__('The segment has been refreshed.'),
+                    Mage::helper('customersegmentation')->__('The segment will be refreshed in the background. A message in the notifications tells you when it is refreshed.'),
                 );
             } catch (Exception $e) {
                 Mage::getSingleton('adminhtml/session')->addError($e->getMessage());

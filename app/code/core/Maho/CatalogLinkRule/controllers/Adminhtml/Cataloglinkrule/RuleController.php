@@ -12,6 +12,10 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
 {
     public const ADMIN_RESOURCE = 'catalog/linkrules';
 
+    /** The link of a notice from the message queue has no secret key: the grid only reads. */
+    #[\Override]
+    protected $_publicActions = ['index'];
+
     #[Maho\Config\Route('/admin/cataloglinkrule_rule/index')]
     public function indexAction(): void
     {
@@ -97,6 +101,11 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
                     Mage::helper('cataloglinkrule')->__('The rule has been saved.'),
                 );
 
+                // The other rules of the same link type compete for the same products by priority
+                if ($this->getRequest()->getParam('apply')) {
+                    $this->_applyRules((int) $model->getLinkTypeId());
+                }
+
                 if ($this->getRequest()->getParam('back')) {
                     $this->_redirect('*/*/edit', ['id' => $model->getId()]);
                     return;
@@ -117,6 +126,26 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
             }
         }
         $this->_redirect('*/*/');
+    }
+
+    #[Maho\Config\Route('/admin/cataloglinkrule_rule/applyRules')]
+    public function applyRulesAction(): void
+    {
+        $this->_applyRules();
+        $this->_redirect('*/*/');
+    }
+
+    private function _applyRules(?int $linkTypeId = null): void
+    {
+        $session = Mage::getSingleton('adminhtml/session');
+        try {
+            Mage::getModel('cataloglinkrule/processor')
+                ->queueApplyRules($linkTypeId, Mage::helper('adminnotification')->getCurrentAdminUserId());
+            $session->addSuccess(Mage::helper('cataloglinkrule')->__('The rules will be applied in the background. A message in the notifications tells you when they are applied.'));
+        } catch (Exception $e) {
+            Mage::logException($e);
+            $session->addError(Mage::helper('cataloglinkrule')->__('Unable to apply rules.'));
+        }
     }
 
     #[Maho\Config\Route('/admin/cataloglinkrule_rule/delete')]

@@ -102,6 +102,22 @@ class Mage_Core_Model_Lock
         return true;
     }
 
+    /**
+     * Try to take the lock every two seconds, for up to $seconds. A blocking acquire() delays the
+     * signal handlers of the process until it returns, such as the alarm that refreshes a queue claim.
+     */
+    public function acquireWithin(string $name, int $seconds): bool
+    {
+        $giveUpAt = time() + $seconds;
+        while (!$this->acquire($name)) {
+            if (time() >= $giveUpAt) {
+                return false;
+            }
+            sleep(2);
+        }
+        return true;
+    }
+
     public function release(string $name): bool
     {
         if (!isset(self::$_locks[$name])) {
