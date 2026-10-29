@@ -186,7 +186,8 @@ class Mage_Core_Model_Layout_Validator
 
     /**
      * Return true when a block is of a disallowed class or of a subclass of one. The class comes from the
-     * "class" and the "type" attributes, as Mage_Core_Model_Layout::_generateBlock() reads them.
+     * "class" and the "type" attributes, as Mage_Core_Model_Layout::_generateBlock() reads them,
+     * or from an action argument.
      */
     protected function _hasDisallowedBlock(\Maho\Simplexml\Element $xml): bool
     {
@@ -201,21 +202,20 @@ class Mage_Core_Model_Layout_Validator
             return false;
         }
 
-        foreach ($xml->xpath('//block') ?: [] as $block) {
-            foreach (['class', 'type'] as $attribute) {
-                $className = $this->_getBlockClassName((string) $block[$attribute]);
-                if ($className === '') {
-                    continue;
+        // An action can create a block from an argument, as addOptionRenderer() and addItemRender() do
+        foreach ($xml->xpath('//block/@class | //block/@type | //action//*[not(*)]') ?: [] as $node) {
+            $className = $this->_getBlockClassName((string) $node);
+            if ($className === '') {
+                continue;
+            }
+            foreach ($disallowed as $disallowedClass) {
+                if (strcasecmp($className, $disallowedClass) === 0) {
+                    return true;
                 }
-                foreach ($disallowed as $disallowedClass) {
-                    if (strcasecmp($className, $disallowedClass) === 0) {
-                        return true;
-                    }
-                    if (preg_match('/^[A-Za-z_][A-Za-z0-9_]*(\\\\[A-Za-z_][A-Za-z0-9_]*)*$/', $className)
-                        && is_a($className, $disallowedClass, true)
-                    ) {
-                        return true;
-                    }
+                if (preg_match('/^[A-Za-z_][A-Za-z0-9_]*(\\\\[A-Za-z_][A-Za-z0-9_]*)*$/', $className)
+                    && is_a($className, $disallowedClass, true)
+                ) {
+                    return true;
                 }
             }
         }

@@ -26,6 +26,7 @@ describe(Mage_Core_Model_Layout_Validator::class, function () {
         'method that only contains settemplate' => ['<reference name="content"><action method="unsetTemplateData"><t>x</t></action></reference>'],
         'setDataUsingMethod without template' => ['<reference name="content"><action method="setDataUsingMethod"><k>title</k><v>x</v></action></reference>'],
         'remove' => ['<remove name="right.poll"/>'],
+        'renderer with an allowed block' => ['<reference name="product.info.options"><action method="addOptionRenderer"><a>text</a><b>catalog/product_view_options_type_text</b></action></reference>'],
     ]);
 
     it('refuses a namespaced element or attribute', function (string $xml) {
@@ -63,6 +64,8 @@ describe(Mage_Core_Model_Layout_Validator::class, function () {
         'install class in the class attribute' => ['<block type="core/text" class="\\mage_install_block_complete" name="z"/>'],
         'subclass' => ['<block type="LayoutValidatorTestCompleteBlock" name="z"/>'],
         'subclass in the class attribute' => ['<block type="core/text" class="layoutvalidatortestcompleteblock" name="z"/>'],
+        'action argument as alias' => ['<reference name="product.info.options"><action method="addOptionRenderer"><a>text</a><b>rss/order_new</b></action></reference>'],
+        'action argument as class name' => ['<reference name="content"><action method="addItemRender"><a>simple</a><b>Mage_Rss_Block_Order_New</b></action></reference>'],
     ]);
 
     it('refuses setTemplate and setDataUsingMethod with a template in any case', function (string $xml) {
