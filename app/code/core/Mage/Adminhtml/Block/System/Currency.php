@@ -96,4 +96,12 @@ class Mage_Adminhtml_Block_System_Currency extends Mage_Adminhtml_Block_Template
     {
         return $this->getUrl('*/*/fetchRates');
     }
+
+    /**
+     * The AllRatesToday terms ask for a visible link on each page that shows its rates.
+     */
+    protected function isAllratestodayActive(): bool
+    {
+        return Mage::getStoreConfigFlag('currency/allratestoday/active');
+    }
 }

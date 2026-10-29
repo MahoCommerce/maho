@@ -22,3 +22,6 @@
     </div>
 </div>
 <?= $this->getRatesMatrixHtml() ?>
+<?php if ($this->isAllratestodayActive()): ?>
+<p class="note"><?= $this->__('Currency rates by %s', '<a href="https://allratestoday.com/" target="_blank" rel="noopener">AllRatesToday</a>') ?></p>
+<?php endif ?>

@@ -262,6 +262,7 @@
 "Currency ""%s"" is used as %s in %s.","Currency ""%s"" is used as %s in %s."
 "Currency doesn't exist.","Currency doesn't exist."
 "Currency Information","Currency Information"
+"Currency rates by %s","Currency rates by %s"
 "Current Admin Password","Current Admin Password"
 "Current Configuration Scope:","Current Configuration Scope:"
 "Current Month","Current Month"
