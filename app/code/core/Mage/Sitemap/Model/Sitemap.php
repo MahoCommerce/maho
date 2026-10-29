@@ -84,9 +84,9 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
     /**
      * Return real file path
      *
-     * @deprecated since 26.11 the file is on the sitemaps mount, use getStoragePath()
      * @return string
      */
+    #[\Deprecated(message: 'the file is on the sitemaps mount, use getStoragePath()', since: '26.11')]
     protected function getPath()
     {
         $this->_filePath ??= str_replace('//', '/', Mage::getBaseDir('public') . '/'
@@ -97,9 +97,9 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
     /**
      * Return full file name with path
      *
-     * @deprecated since 26.11 the file is on the sitemaps mount, use getStoragePath()
      * @return string
      */
+    #[\Deprecated(message: 'the file is on the sitemaps mount, use getStoragePath()', since: '26.11')]
     public function getPreparedFilename()
     {
         return $this->getPath() . $this->getSitemapFilename();

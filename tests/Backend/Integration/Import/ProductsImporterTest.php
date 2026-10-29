@@ -130,8 +130,7 @@ it('takes the file of an old small_image column as the image of the product', fu
     (new Products())->import($path, [Products::OPTION_MEDIA_DIR => $mediaDir]);
 
     $product = Mage::getModel('catalog/product')->load(Mage::getModel('catalog/product')->getIdBySku('IMP-OLD'));
-    expect($product->getImage())->toBe('/i/m/imp-pic.png')
-        ->and($product->getSmallImage())->toBe('/i/m/imp-pic.png');
+    expect($product->getImage())->toBe('/i/m/imp-pic.png');
 
     unlink($path);
     unlink($mediaDir . '/imp-pic.png');

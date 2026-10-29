@@ -2959,17 +2959,13 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
         return $this->setData('sku', $value);
     }
 
-    /**
-     * @deprecated since 26.11 a product has one image, use getImage()
-     */
+    #[\Deprecated(message: 'a product has one image, use getImage()', since: '26.11')]
     public function getSmallImage(): ?string
     {
         return $this->getImage();
     }
 
-    /**
-     * @deprecated since 26.11 a product has one image, use getData('image_label')
-     */
+    #[\Deprecated(message: 'a product has one image, use getData(\'image_label\')', since: '26.11')]
     public function getSmallImageLabel(): ?string
     {
         $value = $this->getData('image_label');
@@ -3022,17 +3018,13 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
         return $value === null ? null : (int) $value;
     }
 
-    /**
-     * @deprecated since 26.11 a product has one image, use getImage()
-     */
+    #[\Deprecated(message: 'a product has one image, use getImage()', since: '26.11')]
     public function getThumbnail(): ?string
     {
         return $this->getImage();
     }
 
-    /**
-     * @deprecated since 26.11 a product has one image, use getData('image_label')
-     */
+    #[\Deprecated(message: 'a product has one image, use getData(\'image_label\')', since: '26.11')]
     public function getThumbnailLabel(): ?string
     {
         $value = $this->getData('image_label');

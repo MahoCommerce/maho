@@ -16,14 +16,12 @@ declare(strict_types=1);
  */
 class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
 {
-    /** @deprecated since 26.11 no cache holds the sizes of the source images, see Mage_Core_Model_Image_Size */
+    #[\Deprecated(message: 'no cache holds the sizes of the source images, see Mage_Core_Model_Image_Size', since: '26.11')]
     public const CACHE_TAG = 'catalog_product_image';
 
     public const CACHE_DIRECTORY = 'catalog/product/' . Mage_Core_Model_Image_Set::CACHE_FOLDER;
 
-    /**
-     * @deprecated since 26.11 use Mage_Core_Model_Image_Resizer::refreshAll()
-     */
+    #[\Deprecated(message: 'use Mage_Core_Model_Image_Resizer::refreshAll()', since: '26.11')]
     public function clearCache(): void
     {
         Mage::getSingleton('core/image_resizer')->refreshAll();

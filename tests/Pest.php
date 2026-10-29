@@ -882,3 +882,22 @@ function orderStateForStatus(string $status): string
     }
     throw new InvalidArgumentException("No order state has the status \"$status\" assigned");
 }
+
+/**
+ * Run $call with the E_USER_DEPRECATED notices silenced, for a test that calls a deprecated
+ * method on purpose. Developer mode turns the notice of #[\Deprecated] into an exception.
+ *
+ * @template T
+ * @param callable(): T $call
+ * @return T
+ */
+function withoutDeprecations(callable $call): mixed
+{
+    set_error_handler(fn(): bool => true, E_USER_DEPRECATED);
+
+    try {
+        return $call();
+    } finally {
+        restore_error_handler();
+    }
+}

@@ -32,7 +32,7 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
         'pl', 'py', 'cgi', 'sh', 'asp', 'aspx', 'jsp', 'htaccess', 'shtml',
     ];
 
-    /** @deprecated since 26.9 Only ipRateLimiter() uses it. */
+    #[\Deprecated(message: 'only ipRateLimiter() uses it', since: '26.9')]
     public const RATE_LIMIT_TIMEFRAME                  = 30;
 
     public const CHARS_LOWERS                          = 'abcdefghijklmnopqrstuvwxyz';
@@ -1013,9 +1013,8 @@ XML;
      * IP limiter fixed at one request per RATE_LIMIT_TIMEFRAME seconds. Returns null when the
      * client IP is unknown; callers treat null as "not limited". The store-config keys that
      * governed it (system/rate_limit/active and /timeframe) are gone, so the values are fixed.
-     *
-     * @deprecated since 26.9 Use rateLimiter() with a per-endpoint system/rate_limit/<key> budget.
      */
+    #[\Deprecated(message: 'use rateLimiter() with a per-endpoint system/rate_limit/<key> budget', since: '26.9')]
     public function ipRateLimiter(): ?\Maho\Security\RateLimiter
     {
         $ip = Mage::helper('core/http')->getRemoteAddr();

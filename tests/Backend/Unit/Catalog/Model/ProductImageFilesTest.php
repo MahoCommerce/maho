@@ -151,10 +151,10 @@ describe('product image URLs and the creation of their files', function () {
 
         expect((string) Mage::helper('catalog/image')->init($product, 'small_image')->resize(300))->toContain('/300/a/b/shirt.png')
             ->and((string) Mage::helper('catalog/image')->init($product, 'thumbnail')->resize(300))->toContain('/300/a/b/shirt.png')
-            ->and($product->getSmallImage())->toBe('/a/b/shirt.png')
-            ->and($product->getThumbnail())->toBe('/a/b/shirt.png')
-            ->and($product->getSmallImageLabel())->toBe('Red shirt')
-            ->and($product->getThumbnailLabel())->toBe('Red shirt')
+            ->and(withoutDeprecations(fn() => $product->getSmallImage()))->toBe('/a/b/shirt.png')
+            ->and(withoutDeprecations(fn() => $product->getThumbnail()))->toBe('/a/b/shirt.png')
+            ->and(withoutDeprecations(fn() => $product->getSmallImageLabel()))->toBe('Red shirt')
+            ->and(withoutDeprecations(fn() => $product->getThumbnailLabel()))->toBe('Red shirt')
             ->and($block->getImageLabel($product, 'small_image'))->toBe('Red shirt');
     });
 
@@ -182,8 +182,7 @@ describe('product image URLs and the creation of their files', function () {
             ->getFirstItem();
 
         expect($product->getId())->not->toBeNull()
-            ->and($product->getImage())->toBeString()->not->toBe('no_selection')
-            ->and($product->getSmallImage())->toBe($product->getImage());
+            ->and($product->getImage())->toBeString()->not->toBe('no_selection');
     });
 
     it('uses the placeholder of the config, and the skin placeholder when the config names none', function (): void {
