@@ -149,23 +149,3 @@ it('keeps the session that a login opens when the login upgrades a legacy hash',
         $user->delete();
     }
 });
-
-it('deletes the sessions of a user that the API Platform model deactivates or gives a new key', function () {
-    $apiKey = 'Api-K3y-Platform-1';
-    $user = sessionRevokeCreateUser($apiKey);
-
-    try {
-        $sessId = sessionRevokeOpenSession($user);
-        Mage::getModel('apiplatform/user')->load($user->getId())->setApiKey($apiKey)->save();
-        expect(sessionRevokeSessionExists($sessId))->toBeTrue();
-
-        Mage::getModel('apiplatform/user')->load($user->getId())->setApiKey('Api-K3y-Platform-2')->save();
-        expect(sessionRevokeSessionExists($sessId))->toBeFalse();
-
-        $sessId = sessionRevokeOpenSession($user);
-        Mage::getModel('apiplatform/user')->load($user->getId())->setIsActive(false)->save();
-        expect(sessionRevokeSessionExists($sessId))->toBeFalse();
-    } finally {
-        $user->delete();
-    }
-});

@@ -17,7 +17,6 @@ declare(strict_types=1);
 class Mage_Api_Model_Observer
 {
     /**
-     * Mage_Api_Model_User and Maho_ApiPlatform_Model_User both save the api_user table with this event.
      * Only the event before the save holds the plain API key, which isAccessRevoked() needs.
      */
     #[Maho\Config\Observer('api_user_save_before')]
