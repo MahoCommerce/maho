@@ -32,9 +32,13 @@ class AllratestodayHarness extends Mage_Directory_Model_Currency_Import_Allrates
         return $this;
     }
 
+    /**
+     * Store the key encrypted, the way the admin field does, so reads use the real decryption.
+     */
     public function setApiKey(string $apiKey): static
     {
-        Mage::app()->getStore()->setConfig(self::XML_PATH_ALLRATESTODAY_API_KEY, $apiKey);
+        $value = $apiKey === '' ? '' : Mage::helper('core')->encrypt($apiKey);
+        Mage::app()->getStore()->setConfig(self::XML_PATH_ALLRATESTODAY_API_KEY, $value);
         return $this;
     }
 }

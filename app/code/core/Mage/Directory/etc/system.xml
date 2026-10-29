@@ -99,7 +99,7 @@ SPDX-License-Identifier: AFL-3.0
                 </frankfurter>
                 <allratestoday translate="label comment">
                     <label>AllRatesToday</label>
-                    <comment><![CDATA[ECB reference rates without an account or API key (the <a href='https://allratestoday.com/terms/#attribution' target='_blank'>terms</a> ask for a visible link to allratestoday.com), or with an API key the official table of one central bank, including banks other services do not carry (Saudi Arabia, UAE, Qatar, Korea, New Zealand, Vietnam, Bangladesh). <a href='https://allratestoday.com/open-api/' target='_blank'>allratestoday.com</a>]]></comment>
+                    <comment><![CDATA[ECB reference rates with no account and no API key. The <a href='https://allratestoday.com/terms/#attribution' target='_blank'>terms</a> ask for a visible link to allratestoday.com. With an API key, the official table of one central bank, including banks that other services do not carry: Saudi Arabia, UAE, Qatar, Korea, New Zealand, Vietnam and Bangladesh. <a href='https://allratestoday.com/open-api/' target='_blank'>allratestoday.com</a>]]></comment>
                     <sort_order>37</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>0</show_in_website>
@@ -142,7 +142,7 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
-                            <comment><![CDATA[Only needed for a central bank table. Free keys are for testing; a store needs a <a href='https://allratestoday.com/pricing/' target='_blank'>paid plan</a>.]]></comment>
+                            <comment><![CDATA[Only needed for a central bank table. A free key is for tests only. A store needs a <a href='https://allratestoday.com/pricing/' target='_blank'>paid plan</a>.]]></comment>
                             <depends>
                                 <active>1</active>
                             </depends>

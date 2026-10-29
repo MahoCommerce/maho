@@ -20,7 +20,7 @@ SPDX-License-Identifier: AFL-3.0
                         <model>directory/currency_import_frankfurter</model>
                     </frankfurter>
                     <allratestoday>
-                        <name>AllRatesToday (no API key)</name>
+                        <name>AllRatesToday</name>
                         <model>directory/currency_import_allratestoday</model>
                     </allratestoday>
                     <exchangerateapi>

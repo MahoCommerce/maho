@@ -13,11 +13,11 @@ use Tests\Helpers\AllratestodayHarness;
 
 uses(Tests\MahoBackendTestCase::class);
 
-function allratestodayClient(array &$requests, string $body): MockHttpClient
+function allratestodayClient(array &$requests, string $body, array &$headers = []): MockHttpClient
 {
-    return new MockHttpClient(function (string $method, string $url, array $options) use (&$requests, $body): MockResponse {
+    return new MockHttpClient(function (string $method, string $url, array $options) use (&$requests, &$headers, $body): MockResponse {
         $requests[] = $url;
-        $GLOBALS['allratestodayHeaders'][] = json_encode($options['headers'] ?? []);
+        $headers[] = json_encode($options['headers'] ?? []);
         return new MockResponse($body);
     });
 }
@@ -43,18 +43,18 @@ function allratestodayBankTable(string $bank, array $rows, bool $stale = false):
 describe('AllRatesToday currency import', function () {
     beforeEach(function () {
         $this->requests = [];
-        $GLOBALS['allratestodayHeaders'] = [];
+        $this->headers = [];
     });
 
     it('fetches the EUR-based ECB table in a single request', function () {
         $importer = (new AllratestodayHarness())
             ->setCurrencies(['EUR', 'GBP', 'USD'], ['EUR', 'USD'])
-            ->setHttpClient(allratestodayClient($this->requests, allratestodayEcbTable(['EUR' => 1, 'GBP' => 0.85, 'USD' => 1.10, 'JPY' => 160.0])));
+            ->setHttpClient(allratestodayClient($this->requests, allratestodayEcbTable(['EUR' => 1, 'GBP' => 0.85, 'USD' => 1.10, 'JPY' => 160.0]), $this->headers));
 
         $rates = $importer->fetchRates();
 
         expect($this->requests)->toBe(['https://allratestoday.com/api/open/latest/EUR']);
-        expect($GLOBALS['allratestodayHeaders'][0])->not->toContain('Authorization');
+        expect($this->headers[0])->not->toContain('Authorization');
         expect($importer->getMessages())->toBe([]);
         expect($rates['EUR']['USD'])->toEqualWithDelta(1.10, 0.000001);
         expect($rates['EUR']['EUR'])->toEqual(1);
@@ -95,12 +95,12 @@ describe('AllRatesToday currency import', function () {
                 ['USD', 'SAR', 3.75],
                 ['EUR', 'SAR', 4.5],
                 ['GBP', 'SAR', 5.0],
-            ])));
+            ]), $this->headers));
 
         $rates = $importer->fetchRates();
 
         expect($this->requests)->toBe(['https://allratestoday.com/api/v1/central-bank/sama/latest']);
-        expect($GLOBALS['allratestodayHeaders'][0])->toContain('Bearer test-key');
+        expect($this->headers[0])->toContain('Bearer test-key');
         expect($importer->getMessages())->toBe([]);
         expect($rates['SAR']['USD'])->toEqualWithDelta(1 / 3.75, 0.000001);
         expect($rates['SAR']['EUR'])->toEqualWithDelta(1 / 4.5, 0.000001);
@@ -147,6 +147,33 @@ describe('AllRatesToday currency import', function () {
         expect($importer->getMessages())->toBe([]);
         expect($rates['BDT']['EUR'])->toEqualWithDelta(1 / 138.0, 0.000001);
         expect($rates['BDT']['USD'])->toEqualWithDelta(1 / 120.0, 0.000001);
+    });
+
+    it('reads middle, mid and official rows, and drops a pair with three rows and no named type', function () {
+        $importer = (new AllratestodayHarness())
+            ->setBank('bb')
+            ->setApiKey('test-key')
+            ->setCurrencies(['BDT', 'CHF', 'EUR', 'GBP', 'JPY', 'USD'], ['BDT'])
+            ->setHttpClient(allratestodayClient($this->requests, allratestodayBankTable('bb', [
+                ['EUR', 'BDT', 137.0, 'buy'],
+                ['EUR', 'BDT', 138.4, 'middle'],
+                ['EUR', 'BDT', 139.0, 'sell'],
+                ['USD', 'BDT', 120.0, 'reference'],
+                ['CHF', 'BDT', 130.0, 'mid'],
+                ['JPY', 'BDT', 0.8, 'official'],
+                ['GBP', 'BDT', 150.0, 'buy'],
+                ['GBP', 'BDT', 152.0, 'sell'],
+                ['GBP', 'BDT', 149.0, 'cash'],
+            ])));
+
+        $rates = $importer->fetchRates();
+
+        expect($rates['BDT']['EUR'])->toEqualWithDelta(1 / 138.4, 0.000001);
+        expect($rates['BDT']['USD'])->toEqualWithDelta(1 / 120.0, 0.000001);
+        expect($rates['BDT']['CHF'])->toEqualWithDelta(1 / 130.0, 0.000001);
+        expect($rates['BDT']['JPY'])->toEqualWithDelta(1 / 0.8, 0.000001);
+        expect($rates['BDT']['GBP'])->toBeNull();
+        expect($importer->getMessages())->toBe(['Unable to calculate rate for BDT to GBP.']);
     });
 
     it('skips central bank rows with a value of zero or not a number', function () {
@@ -215,8 +242,20 @@ describe('AllRatesToday currency import', function () {
 
         $rates = $importer->fetchRates();
 
-        expect($importer->getMessages())->toBe(['Central bank cbvs has not published a fresh table; the last one is dated 2026-10-28.']);
+        expect($importer->getMessages())->toBe(['Central bank cbvs has not published a new table. The last table is dated 2026-10-28.']);
         expect($rates)->toBe(['SRD' => ['EUR' => null, 'SRD' => null]]);
+    });
+
+    it('does not send the API key to the ECB table', function () {
+        $importer = (new AllratestodayHarness())
+            ->setApiKey('test-key')
+            ->setCurrencies(['EUR', 'USD'], ['USD'])
+            ->setHttpClient(allratestodayClient($this->requests, allratestodayEcbTable(['USD' => 1.10]), $this->headers));
+
+        $importer->fetchRates();
+
+        expect($this->requests)->toBe(['https://allratestoday.com/api/open/latest/EUR']);
+        expect($this->headers[0])->not->toContain('test-key');
     });
 
     it('does not call the service for a EUR-only store', function () {

@@ -1,8 +1,8 @@
 <?php
 
 /**
- * Currency rate import from AllRatesToday: the keyless ECB reference table, or (with an API key)
- * the official table of one central bank.
+ * Currency rate import from AllRatesToday: the ECB reference table with no API key, or the official
+ * table of one central bank with an API key.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -18,16 +18,16 @@ class Mage_Directory_Model_Currency_Import_Allratestoday extends Mage_Directory_
     public const XML_PATH_ALLRATESTODAY_API_KEY = 'currency/allratestoday/api_key';
 
     /**
-     * URL for the ECB reference table (no credentials; the endpoint always answers with every
-     * currency it knows, so symbols are filtered on our side)
+     * URL of the ECB reference table. It needs no API key. The service returns all its currencies,
+     * and the parent class keeps only the store currencies.
      *
      * @var string
      */
     protected $_url = 'https://allratestoday.com/api/open/latest/EUR';
 
     /**
-     * URL template for the latest official table of one central bank (needs an API key: the
-     * keyless official-rate endpoint is not licensed for stores)
+     * URL of the latest official table of one central bank. It needs an API key, because the
+     * official-rate endpoint without a key has no license for stores.
      */
     protected string $_bankUrl = 'https://allratestoday.com/api/v1/central-bank/{{BANK}}/latest';
 
@@ -121,12 +121,11 @@ class Mage_Directory_Model_Currency_Import_Allratestoday extends Mage_Directory_
             return null;
         }
 
-        // A table the service itself flags as stale must not replace a fresher one from another
-        // service, so the scheduled import can fall back
+        // Reject a stale table. The scheduled import then tries the next service.
         if (($response['stale'] ?? false) === true) {
             $rateDate = (string) ($response['rate_date'] ?? 'unknown');
             Mage::log("AllRatesToday error: the $bank table dated $rateDate is stale", Mage::LOG_ERROR);
-            $this->_messages[] = Mage::helper('directory')->__('Central bank %s has not published a fresh table; the last one is dated %s.', $bank, $rateDate);
+            $this->_messages[] = Mage::helper('directory')->__('Central bank %s has not published a new table. The last table is dated %s.', $bank, $rateDate);
             return null;
         }
 
@@ -140,7 +139,7 @@ class Mage_Directory_Model_Currency_Import_Allratestoday extends Mage_Directory_
         }
 
         $rows = [];
-        $seen = [];
+        $rowCountByCode = [];
         foreach ($valuesByType as $pair => $types) {
             // Without a reference-type row, a pair has one rate or a buy and a sell rate: take the mean
             $value = $types['reference'] ?? $types['middle'] ?? $types['mid'] ?? $types['official']
@@ -150,8 +149,8 @@ class Mage_Directory_Model_Currency_Import_Allratestoday extends Mage_Directory_
             }
             [$base, $quote] = explode('/', $pair);
             $rows[] = [$base, $quote, $value];
-            $seen[$base] = ($seen[$base] ?? 0) + 1;
-            $seen[$quote] = ($seen[$quote] ?? 0) + 1;
+            $rowCountByCode[$base] = ($rowCountByCode[$base] ?? 0) + 1;
+            $rowCountByCode[$quote] = ($rowCountByCode[$quote] ?? 0) + 1;
         }
 
         if ($rows === []) {
@@ -160,8 +159,8 @@ class Mage_Directory_Model_Currency_Import_Allratestoday extends Mage_Directory_
             return null;
         }
 
-        arsort($seen, SORT_NUMERIC);
-        $home = (string) array_key_first($seen);
+        arsort($rowCountByCode, SORT_NUMERIC);
+        $home = (string) array_key_first($rowCountByCode);
 
         $homeUnits = [$home => 1.0];
         foreach ($rows as [$base, $quote, $value]) {

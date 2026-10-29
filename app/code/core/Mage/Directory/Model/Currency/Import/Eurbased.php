@@ -152,7 +152,7 @@ abstract class Mage_Directory_Model_Currency_Import_Eurbased extends Mage_Direct
     }
 
     /**
-     * Extra request headers for the service, e.g. credentials
+     * HTTP headers to send with each request, such as an API key
      *
      * @return array<string, string>
      */
