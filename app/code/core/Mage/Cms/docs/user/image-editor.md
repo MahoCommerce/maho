@@ -199,8 +199,11 @@ A transparent background stays transparent after the upscale.
     a package. Zoom in to check the result before you save. If the text changed, click **Undo**.
 
 The time of an upscale depends on the computer. As an example, one tile takes about 4 seconds on a
-computer with WebGPU, and about 14 seconds without it. A photo of 500 × 500 px has 9 tiles. See
+computer with WebGPU, and from 20 seconds to a few minutes without it. A photo of 500 × 500 px has 9 tiles. After
+the first tile, the status shows an estimate of the remaining time. See
 [The AI tools](#the-ai-tools) for the first use.
+
+To stop an upscale, click **Cancel**. The upscale stops at once, and the image does not change.
 
 ## Remove BG
 
@@ -413,7 +416,13 @@ without them.
 
 A browser with WebGPU uses the graphics card, and the AI tools are much faster. Recent versions of
 Chrome and Edge have WebGPU. Without WebGPU, the tools use the processor. They still work, but they
-are slower.
+are slower. The tools run in the background, so the admin stays responsive during a long run.
+
+Some graphics cards, mostly older ones, cannot run a model. If the graphics card stops or returns
+an incorrect result, the status shows "The GPU failed", and the tool continues on the processor.
+The browser remembers this for the model, so the next run starts on the processor. To try the
+graphics card again, for example after a driver update, clear the site data of the admin in the
+browser.
 
 ## Example: make a product photo ready for the store
 
