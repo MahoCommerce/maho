@@ -4,7 +4,6 @@
  * Validates a URL before the server fetches it, so a stored or submitted URL cannot reach internal hosts.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-License-Identifier: OSL-3.0
  */
 
