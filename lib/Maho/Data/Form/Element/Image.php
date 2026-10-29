@@ -47,13 +47,8 @@ class Image extends AbstractElement
 
             $html = '<a href="' . $this->_escape($url) . '"'
                 . ' onclick="imagePreview(\'' . $this->getHtmlId() . '_image\'); return false;">'
-<<<<<<< HEAD
-                . '<img src="' . $url . '" id="' . $this->getHtmlId() . '_image" title="' . $value . '"'
-                . ' alt="' . $value . '" height="22" width="22" class="small-image-preview v-middle" />'
-=======
-                . '<img src="' . $this->_escape($this->_getPreviewUrl() ?? $url) . '" id="' . $this->getHtmlId() . '_image" title="' . $this->_escape($value) . '"'
+                . '<img src="' . $this->_escape($url) . '" id="' . $this->getHtmlId() . '_image" title="' . $this->_escape($value) . '"'
                 . ' alt="' . $this->_escape($value) . '" height="22" width="22" class="small-image-preview v-middle" />'
->>>>>>> 628960d8 (Fixed security issues from the OpenMage 20.19 advisories, such as unpaid orders with the free payment method and admin roles that reached actions outside their permissions (#1688))
                 . '</a> ';
         }
         $this->setClass('input-file');

@@ -76,15 +76,10 @@ class Mage_Core_Model_Layout_Validator
     {
         if (!$this->_messageTemplates) {
             $this->_messageTemplates = [
-<<<<<<< HEAD
                 self::PROTECTED_ATTR_HELPER_IN_TAG_ACTION_VAR =>
                     Mage::helper('core')->__('Helper attributes should not be used in custom layout updates.'),
-=======
-                self::PROTECTED_ATTR_HELPER_IN_TAG_ACTION_VAR
-                    => Mage::helper('core')->__('Helper attributes should not be used in custom layout updates.'),
-                self::PROTECTED_ATTR_JSON_IN_TAG_ACTION
-                    => Mage::helper('core')->__('Custom layout updates cannot use the json attribute.'),
->>>>>>> 628960d8 (Fixed security issues from the OpenMage 20.19 advisories, such as unpaid orders with the free payment method and admin roles that reached actions outside their permissions (#1688))
+                self::PROTECTED_ATTR_JSON_IN_TAG_ACTION =>
+                    Mage::helper('core')->__('Custom layout updates cannot use the json attribute.'),
                 self::XML_INVALID => Mage::helper('core')->__('XML data is invalid.'),
                 self::INVALID_TEMPLATE_PATH => Mage::helper('core')->__(
                     'Invalid template path used in layout update.',

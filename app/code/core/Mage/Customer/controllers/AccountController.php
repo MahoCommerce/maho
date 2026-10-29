@@ -653,12 +653,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
 
             // check if it is inactive
             if ($customer->getConfirmation()) {
-<<<<<<< HEAD
-                if ($customer->getConfirmation() !== $key) {
-=======
                 if (!is_string($key) || !hash_equals((string) $customer->getConfirmation(), $key)) {
-                    $limiter->hit();
->>>>>>> 628960d8 (Fixed security issues from the OpenMage 20.19 advisories, such as unpaid orders with the free payment method and admin roles that reached actions outside their permissions (#1688))
                     throw new Exception($this->__('Wrong confirmation key.'));
                 }
 

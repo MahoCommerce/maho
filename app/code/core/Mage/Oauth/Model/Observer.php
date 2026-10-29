@@ -31,7 +31,7 @@ class Mage_Oauth_Model_Observer
     public function revokeTokensOfDeactivatedAdmin(\Maho\Event\Observer $observer): void
     {
         $user = $observer->getEvent()->getObject();
-        if (!$user instanceof Mage_Admin_Model_User || !$user->getId() || $user->getIsActive() !== false) {
+        if (!$user instanceof Mage_Admin_Model_User || !$user->getId() || $user->getIsActive() === null || $user->getIsActive()) {
             return;
         }
 

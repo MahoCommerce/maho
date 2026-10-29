@@ -766,7 +766,6 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
     }
 
     /**
-<<<<<<< HEAD
      * Simple check if file is image
      *
      * @param array|string $fileInfo - either file data from $_FILES or file path
@@ -788,7 +787,9 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
             return false;
         }
         return true;
-=======
+    }
+
+    /**
      * Return the extensions that an upload to this option refuses.
      *
      * The protected extensions and catalog/custom_options/forbidden_extensions always apply.
@@ -805,7 +806,6 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
             $this->_parseExtensionsString(Mage::getStoreConfig('catalog/custom_options/forbidden_extensions')) ?? [],
             $allowed === null ? self::ACTIVE_CONTENT_EXTENSIONS : [],
         )));
->>>>>>> 628960d8 (Fixed security issues from the OpenMage 20.19 advisories, such as unpaid orders with the free payment method and admin roles that reached actions outside their permissions (#1688))
     }
 
     /**

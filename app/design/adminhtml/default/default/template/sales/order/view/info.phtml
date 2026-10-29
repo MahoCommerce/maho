@@ -112,13 +112,8 @@ $orderStoreDate = $this->formatDate($_order->getCreatedAtStoreDate(), 'medium', 
                 <tr>
                     <td class="label"><label><?= Mage::helper('sales')->__('Email') ?></label></td>
                     <td class="value">
-<<<<<<< HEAD
-                        <a href="mailto:<?= $this->escapeHtml($_order->getCustomerEmail()) ?>" data-copy-text="<?= $_order->getCustomerEmail() ?>"><strong><?= $this->escapeHtml($_order->getCustomerEmail()) ?></strong></a>
-                        <?php if ($_order->getCustomerIsGuest()): ?>
-=======
                         <a href="mailto:<?= $this->escapeHtml($_order->getCustomerEmail()) ?>" data-copy-text="<?= $this->escapeHtml($_order->getCustomerEmail()) ?>"><strong><?= $this->escapeHtml($_order->getCustomerEmail()) ?></strong></a>
                         <?php if ($_order->getCustomerIsGuest() && $this->canEditOrder()): ?>
->>>>>>> 628960d8 (Fixed security issues from the OpenMage 20.19 advisories, such as unpaid orders with the free payment method and admin roles that reached actions outside their permissions (#1688))
                             <button type="button" onclick="updateGuestEmail()"><?= Mage::helper('sales')->__('Edit') ?></button>
                         <?php endif ?>
                     </td>

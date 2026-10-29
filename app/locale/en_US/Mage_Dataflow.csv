@@ -31,11 +31,8 @@
 "Sheet 1","Sheet 1"
 "Skip undefined row.","Skip undefined row."
 "Starting %s :: %s","Starting %s :: %s"
-<<<<<<< HEAD
 "The destination folder ""%s"" does not exist or there is no access to create it.","The destination folder ""%s"" does not exist or there is no access to create it."
-=======
 "The profile XML names a type that is not a Dataflow container.","The profile XML names a type that is not a Dataflow container."
->>>>>>> 628960d8 (Fixed security issues from the OpenMage 20.19 advisories, such as unpaid orders with the free payment method and admin roles that reached actions outside their permissions (#1688))
 "Total records: %s","Total records: %s"
 "Upload failed. Can not find required columns: %s in file %s.","Upload failed. Can not find required columns: %s in file %s."
 "Upload failed. Wrong data format in file: %s.","Upload failed. Wrong data format in file: %s."

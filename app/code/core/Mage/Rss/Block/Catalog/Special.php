@@ -105,13 +105,8 @@ class Mage_Rss_Block_Catalog_Special extends Mage_Rss_Block_Catalog_Abstract
                     '<table><tr>
                     <td><a href="%s"><img src="%s" alt="" border="0" align="left" height="75" width="75"></a></td>
                     <td style="text-decoration:none;">%s',
-<<<<<<< HEAD
-                    $product->getProductUrl(),
-                    $imageHelper->init($product, 'thumbnail')->resize(75, 75),
-=======
                     $this->escapeUrl($product->getProductUrl()),
-                    $this->escapeUrl((string) $imageHelper->init($product, 'image')->resize(75, 75)),
->>>>>>> 628960d8 (Fixed security issues from the OpenMage 20.19 advisories, such as unpaid orders with the free payment method and admin roles that reached actions outside their permissions (#1688))
+                    $this->escapeUrl((string) $imageHelper->init($product, 'thumbnail')->resize(75, 75)),
                     $outputHelper->productAttribute(
                         $product,
                         $product->getDescription(),

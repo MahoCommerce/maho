@@ -82,6 +82,6 @@ class Mage_Cms_Model_Adminhtml_Template_Filter extends Mage_Cms_Model_Template_F
         foreach (Maho::getInstalledPackages() as $package) {
             $skinDirs[] = $package['path'] . '/public/skin';
         }
-        return array_any(array_unique($skinDirs), fn($skinDir) => \Maho\Io::getPathWithinDir($skinDir, $path) !== null);
+        return array_any(array_unique($skinDirs), fn($skinDir) => \Maho\Io::validatePath($path, $skinDir) !== false);
     }
 }

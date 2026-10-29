@@ -144,15 +144,9 @@ class Mage_Rss_Block_Wishlist extends Mage_Wishlist_Block_Abstract
                 /** @var Mage_Catalog_Helper_Output $outputHelper */
                 $outputHelper = $this->helper('catalog/output');
 
-<<<<<<< HEAD
-                $description = '<table><tr><td><a href="' . $productUrl . '"><img src="'
-                    . $imageHelper->init($product, 'thumbnail')->resize(75, 75)
-                    . '" border="0" align="left" height="75" width="75"></a></td>'
-=======
                 $description = '<table><tr><td><a href="' . $this->escapeUrl($productUrl) . '"><img src="'
-                    . $this->escapeUrl((string) $imageHelper->init($product, 'image')->resize(75, 75))
-                    . '" border="0" align="left" width="75"></a></td>'
->>>>>>> 628960d8 (Fixed security issues from the OpenMage 20.19 advisories, such as unpaid orders with the free payment method and admin roles that reached actions outside their permissions (#1688))
+                    . $this->escapeUrl((string) $imageHelper->init($product, 'thumbnail')->resize(75, 75))
+                    . '" border="0" align="left" height="75" width="75"></a></td>'
                     . '<td style="text-decoration:none;">'
                     . $outputHelper->productAttribute($product, $product->getShortDescription(), 'short_description')
                     . '<p>';

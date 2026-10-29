@@ -118,41 +118,6 @@ class Maho_ApiPlatform_Model_Observer
     }
 
     /**
-<<<<<<< HEAD
-=======
-     * Send an admin who logged in during an OAuth authorization on to the consent screen.
-     *
-     * The login form always posts to the admin index, so the login would end on the
-     * dashboard and the parked request (see Server::createPendingRequest) would never
-     * be seen. Mage_Oauth_Model_Observer::afterAdminLogin does the same for OAuth 1.
-     */
-    #[Maho\Config\Observer('admin_session_user_login_success')]
-    public function resumeOauthAuthorization(\Maho\Event\Observer $_observer): void
-    {
-        /** @var Maho_ApiPlatform_Helper_Data $helper */
-        $helper = Mage::helper('apiplatform');
-        if (!$helper->isAuthorizationServerEnabled()) {
-            return;
-        }
-
-        $secret = (string) Mage::app()->getRequest()->getCookie(Maho_ApiPlatform_Model_Oauth_Server::PENDING_REQUEST_COOKIE, '');
-        if ($secret === '') {
-            return;
-        }
-
-        /** @var Maho_ApiPlatform_Model_Oauth_Server $server */
-        $server = Mage::getSingleton('apiplatform/oauth_server');
-        if ($server->readPendingRequest($secret) === null) {
-            return;
-        }
-
-        Mage::app()->getResponse()
-            ->clearHeaders()
-            ->setRedirect(Mage::helper('adminhtml')->getUrl('adminhtml/apiplatform_oauth/authorize', ['_nosecret' => true]))
-            ->sendHeadersAndExit();
-    }
-
-    /**
      * Revoke the OAuth grants of an admin user that a save deactivates, so that a reactivation
      * of the account does not bring the connected applications back.
      */
@@ -160,7 +125,7 @@ class Maho_ApiPlatform_Model_Observer
     public function revokeGrantsOfDeactivatedAdmin(\Maho\Event\Observer $observer): void
     {
         $user = $observer->getEvent()->getObject();
-        if (!$user instanceof Mage_Admin_Model_User || !$user->getId() || $user->getIsActive() !== false) {
+        if (!$user instanceof Mage_Admin_Model_User || !$user->getId() || $user->getIsActive() === null || $user->getIsActive()) {
             return;
         }
 
@@ -170,26 +135,6 @@ class Maho_ApiPlatform_Model_Observer
     }
 
     /**
-     * Show the connected applications of the admin below the My Account form. The
-     * controller adds the form after the layout loads, so a layout block would sit above it.
-     */
-    #[Maho\Config\Observer('controller_action_layout_render_before_adminhtml_system_account_index', area: 'adminhtml')]
-    public function addAccountConnections(\Maho\Event\Observer $_observer): void
-    {
-        /** @var Maho_ApiPlatform_Helper_Data $helper */
-        $helper = Mage::helper('apiplatform');
-        if (!$helper->isAuthorizationServerEnabled()) {
-            return;
-        }
-
-        $layout = Mage::app()->getLayout();
-        $layout->getBlock('content')?->append(
-            $layout->createBlock('apiplatform/adminhtml_apiplatform_oauth_connections', 'apiplatform.oauth.connections'),
-        );
-    }
-
-    /**
->>>>>>> 628960d8 (Fixed security issues from the OpenMage 20.19 advisories, such as unpaid orders with the free payment method and admin roles that reached actions outside their permissions (#1688))
      * Invalidate API cache when a product is saved or deleted
      */
     #[Maho\Config\Observer('catalog_product_save_after')]
