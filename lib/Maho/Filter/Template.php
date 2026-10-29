@@ -283,6 +283,12 @@ class Template
                     if (method_exists($stackVars[$i - 1]['variable'], $stackVars[$i]['name'])
                         || str_starts_with($stackVars[$i]['name'], 'get')
                     ) {
+                        // getConfigData() returns encrypted config values in plain text, so a template must not call it
+                        if (strcasecmp($stackVars[$i]['name'], 'getConfigData') === 0) {
+                            $stackVars[$i]['variable'] = null;
+                            $last = $i;
+                            continue;
+                        }
                         $isEncrypted = false;
                         if (strcasecmp($stackVars[$i]['name'], 'getConfig') === 0) {
                             $isEncrypted = $emailPathValidator->isValid($stackVars[$i]['args']);

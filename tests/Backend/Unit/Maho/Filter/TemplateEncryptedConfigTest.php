@@ -33,3 +33,18 @@ describe('getConfig() in a template variable', function () {
         expect($this->filter->filter("{{var store.getConfig('{$path}')}}"))->toBe('value-of:' . $path);
     })->with(['general/store_information/name', 'system/smtp/password_not']);
 });
+
+describe('getConfigData() in a template variable', function () {
+    it('does not call getConfigData() in any case of the method name', function (string $method) {
+        $payment = new class extends \Maho\DataObject {
+            public function getConfigData(?string $field = null): string
+            {
+                return 'value-of:' . $field;
+            }
+        };
+        $filter = new \Maho\Filter\Template();
+        $filter->setVariables(['payment' => $payment]);
+
+        expect($filter->filter("{{var payment.{$method}('trans_key')}}"))->toBe('');
+    })->with(['getConfigData', 'getconfigdata', 'GETCONFIGDATA']);
+});
