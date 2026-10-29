@@ -95,7 +95,7 @@ class Mage_Core_Model_Email_Gmail_Actions
     /**
      * The carrier page of the first track that has one, or '' when none has.
      *
-     * The track has getTrackingUrl() only when the carrier tracking URL change is installed.
+     * The track has getTrackingUrl() only after MahoCommerce/maho#1686 is merged.
      */
     protected function getTrackingUrl(Mage_Sales_Model_Order_Shipment $shipment): string
     {
