@@ -102,7 +102,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
                 'sortDir' => ['type' => 'String', 'description' => 'Sort direction (asc, desc)'],
                 'pageSize' => ['type' => 'Int', 'description' => 'Items per page (max 100)'],
                 'page' => ['type' => 'Int', 'description' => 'Page number'],
-                'attributeFilters' => ['type' => 'String', 'description' => 'JSON object of attribute codes and values, such as {"manufacturer":"12","color":"49"}. A select or multiselect attribute takes option IDs, not labels: the product attributes list gives the options of each attribute with their IDs'],
+                'attributeFilters' => ['type' => 'String', 'description' => 'JSON-encoded object of attribute codes and values, such as {"manufacturer":"12","color":"49"}. A select or multiselect attribute takes option IDs, not labels: the product attributes list gives the options of each attribute with their IDs'],
                 'sku' => ['type' => 'String', 'description' => 'Exact SKU lookup (returns 0 or 1 product)'],
                 'barcode' => ['type' => 'String', 'description' => 'Exact barcode lookup (returns 0 or 1 product)'],
                 'status' => ['type' => 'String', 'description' => 'Admin and API tokens only: enabled or disabled'],

@@ -281,7 +281,7 @@ Filters work the same way, and a list tool advertises the ones its resource decl
 
 ### Attribute filters
 
-`attributeFilters` is a JSON object of attribute codes and values: `{"manufacturer":"12","color":"49"}`. A select or multiselect attribute takes option IDs, not labels. `catalog_product_attributes_list` with `search` set to the attribute code returns the attribute with its options, and the `value` of each option is its ID. A value that is not a number returns a 400 error. In REST, the same filter is `attr_<code>=<value>`.
+`attributeFilters` is a JSON object of attribute codes and values: `{"manufacturer":"12","color":"49"}`. A select or multiselect attribute takes option IDs, not labels. `catalog_product_attributes_list` with `search` set to the attribute code returns the attribute with its options, and the `value` of each option is its ID. That tool needs the `product-attributes/read` permission, which an administrator has. A storefront client gets the option IDs of the filterable attributes of a category from `/layered-filters`. A value that is not a number returns a 400 error, when the options of the attribute are in the option table. In REST, the same filter is `attr_<code>=<value>`.
 
 ### Date ranges
 

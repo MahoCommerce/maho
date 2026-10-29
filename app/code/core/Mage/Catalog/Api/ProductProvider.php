@@ -601,8 +601,12 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
                 }
                 continue;
             }
-            if ($attribute->getId() && $attribute->getFrontendInput() === 'select' && is_scalar($value)) {
-                $this->assertOptionId($attribute, trim((string) $value));
+            if ($attribute->getId() && $attribute->getFrontendInput() === 'select') {
+                foreach (is_array($value) ? $value : [$value] as $optionId) {
+                    if (is_scalar($optionId)) {
+                        $this->assertOptionId($attribute, trim((string) $optionId));
+                    }
+                }
             }
             $collection->addAttributeToFilter($code, $value);
         }

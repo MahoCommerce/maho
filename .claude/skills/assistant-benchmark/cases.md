@@ -128,9 +128,9 @@ Check each cause in `app/code/core/Mage/ConfigurableSwatches/` before you grade.
 ## attribute-filter
 
 From a merchant report: the assistant answered that no product had the manufacturer that 13
-products had. `attributeFilters` of the product list takes option IDs, so the assistant must get
-the ID of {brand} from the product attributes list first. A label in `attributeFilters` returns a
-400 error.
+products had. `attributeFilters` of the product list takes option IDs for a select attribute such
+as `brand`, so the assistant must get the ID of {brand} from the product attributes list first. A
+label in place of the ID returns a 400 error.
 
 Steps: `{"open": "dashboard/index"}`.
 

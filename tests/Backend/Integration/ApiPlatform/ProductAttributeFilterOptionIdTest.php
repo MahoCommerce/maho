@@ -89,10 +89,12 @@ function optionFilterFixture(): array
         optionFilterCreateProduct($skus['rossa'], $setId, [
             OPTION_FILTER_SELECT_CODE => $options[OPTION_FILTER_SELECT_CODE]['Cantina Rossa'],
             OPTION_FILTER_MULTI_CODE => [$options[OPTION_FILTER_MULTI_CODE]['Nebbiolo'], $options[OPTION_FILTER_MULTI_CODE]['Barbera']],
+            'options_container' => 'container2',
         ]),
         optionFilterCreateProduct($skus['bianca'], $setId, [
             OPTION_FILTER_SELECT_CODE => $options[OPTION_FILTER_SELECT_CODE]['Cantina Bianca'],
             OPTION_FILTER_MULTI_CODE => [$options[OPTION_FILTER_MULTI_CODE]['Barbera']],
+            'options_container' => 'container1',
         ]),
     ];
     Mage::getResourceSingleton('catalog/product_indexer_price')->reindexProductIds($ids);
@@ -190,8 +192,17 @@ it('refuses the label of an option on a multiselect attribute', function (): voi
     optionFilterSkus(['attributeFilters' => [OPTION_FILTER_MULTI_CODE => [(string) $fx['multi']['Barbera'], 'Nebbiolo']]]);
 })->throws(BadRequestHttpException::class, OPTION_FILTER_MULTI_CODE . ' takes option IDs, not "Nebbiolo"');
 
-it('keeps a text value of a select attribute whose options are not in the option table', function (): void {
+it('refuses an array of labels on a select attribute', function (): void {
     optionFilterFixture();
 
-    expect(optionFilterSkus(['attr_options_container' => 'container2']))->toBeArray();
+    optionFilterSkus(['attributeFilters' => [OPTION_FILTER_SELECT_CODE => ['Cantina Rossa']]]);
+})->throws(BadRequestHttpException::class, OPTION_FILTER_SELECT_CODE . ' takes option IDs, not "Cantina Rossa"');
+
+it('keeps a text value of a select attribute whose options are not in the option table', function (): void {
+    $fx = optionFilterFixture();
+
+    $skus = optionFilterSkus(['attr_options_container' => 'container2']);
+
+    expect($skus)->toContain($fx['skus']['rossa']);
+    expect($skus)->not->toContain($fx['skus']['bianca']);
 });
