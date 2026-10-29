@@ -9,23 +9,25 @@ declare(strict_types=1);
 
 namespace Tests\Helpers;
 
+use Mage;
 use Mage_Directory_Model_Currency_Import_Allratestoday;
 
 class AllratestodayHarness extends Mage_Directory_Model_Currency_Import_Allratestoday
 {
     use CurrencyImportHarness;
 
-    private string $bank = '';
-
-    public function setBank(string $bank): static
+    public function __construct()
     {
-        $this->bank = $bank;
-        return $this;
+        parent::__construct();
+        $this->setBank('');
     }
 
-    #[\Override]
-    protected function _getBank(): string
+    /**
+     * Store the code the way the admin field does, so reads use the real config path.
+     */
+    public function setBank(string $bank): static
     {
-        return strtolower(trim($this->bank));
+        Mage::app()->getStore()->setConfig(self::XML_PATH_ALLRATESTODAY_BANK, $bank);
+        return $this;
     }
 }

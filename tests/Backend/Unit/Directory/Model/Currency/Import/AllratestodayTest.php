@@ -27,13 +27,13 @@ function allratestodayEcbTable(array $rates): string
 }
 
 /**
- * @param array<array{string, string, float}> $rows [base, quote, value] = "1 base = value quote"
+ * @param array<array{0: string, 1: string, 2: mixed, 3?: string}> $rows [base, quote, value, type] = "1 base = value quote"
  */
 function allratestodayBankTable(string $bank, array $rows): string
 {
     $rates = [];
-    foreach ($rows as [$base, $quote, $value]) {
-        $rates[] = ['base' => $base, 'quote' => $quote, 'type' => 'reference', 'value' => $value];
+    foreach ($rows as $row) {
+        $rates[] = ['base' => $row[0], 'quote' => $row[1], 'type' => $row[3] ?? 'reference', 'value' => $row[2]];
     }
 
     return json_encode(['bank' => $bank, 'rate_date' => '2026-10-28', 'age_days' => 1, 'stale' => false, 'rates' => $rates]);
@@ -106,7 +106,7 @@ describe('AllRatesToday currency import', function () {
     it('re-bases a central bank table quoted per home unit on EUR', function () {
         // RBNZ quotes foreign currency per 1 NZD: 1 NZD = 0.5 USD, 1 NZD = 0.5 EUR
         $importer = (new AllratestodayHarness())
-            ->setBank('RBNZ')
+            ->setBank(' RBNZ ')
             ->setCurrencies(['EUR', 'NZD', 'USD'], ['NZD'])
             ->setHttpClient(allratestodayClient($this->requests, allratestodayBankTable('rbnz', [
                 ['NZD', 'USD', 0.5],
@@ -123,6 +123,42 @@ describe('AllRatesToday currency import', function () {
         expect($rates['NZD']['NZD'])->toEqual(1);
     });
 
+    it('takes the middle rate when a central bank publishes buy and sell rows', function () {
+        $importer = (new AllratestodayHarness())
+            ->setBank('bb')
+            ->setCurrencies(['BDT', 'EUR', 'USD'], ['BDT'])
+            ->setHttpClient(allratestodayClient($this->requests, allratestodayBankTable('bb', [
+                ['EUR', 'BDT', 137.0, 'buy'],
+                ['EUR', 'BDT', 139.0, 'sell'],
+                ['USD', 'BDT', 119.0, 'buy'],
+                ['USD', 'BDT', 120.0, 'reference'],
+                ['USD', 'BDT', 121.0, 'sell'],
+            ])));
+
+        $rates = $importer->fetchRates();
+
+        expect($importer->getMessages())->toBe([]);
+        expect($rates['BDT']['EUR'])->toEqualWithDelta(1 / 138.0, 0.000001);
+        expect($rates['BDT']['USD'])->toEqualWithDelta(1 / 120.0, 0.000001);
+    });
+
+    it('skips central bank rows with a value of zero or not a number', function () {
+        $importer = (new AllratestodayHarness())
+            ->setBank('rbnz')
+            ->setCurrencies(['EUR', 'NZD', 'USD'], ['NZD'])
+            ->setHttpClient(allratestodayClient($this->requests, allratestodayBankTable('rbnz', [
+                ['NZD', 'USD', 0.5],
+                ['NZD', 'EUR', 0.5],
+                ['NZD', 'JPY', 0],
+                ['NZD', 'AUD', 'n/a'],
+            ])));
+
+        $rates = $importer->fetchRates();
+
+        expect($importer->getMessages())->toBe([]);
+        expect($rates['NZD']['USD'])->toEqualWithDelta(0.5, 0.000001);
+    });
+
     it('reports a central bank table without a EUR rate', function () {
         $importer = (new AllratestodayHarness())
             ->setBank('sama')
@@ -131,7 +167,7 @@ describe('AllRatesToday currency import', function () {
 
         $rates = $importer->fetchRates();
 
-        expect($importer->getMessages())->toBe(['Currency rate service error: central bank sama publishes no EUR rate']);
+        expect($importer->getMessages())->toBe(['Central bank sama publishes no EUR rate.']);
         expect($rates)->toBe(['SAR' => ['EUR' => null, 'SAR' => null, 'USD' => null]]);
     });
 

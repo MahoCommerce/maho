@@ -9,6 +9,8 @@
  * @package Mage_Directory
  */
 
+declare(strict_types=1);
+
 class Mage_Directory_Model_Currency_Import_Allratestoday extends Mage_Directory_Model_Currency_Import_Eurbased
 {
     public const XML_PATH_ALLRATESTODAY_TIMEOUT = 'currency/allratestoday/timeout';
@@ -24,10 +26,8 @@ class Mage_Directory_Model_Currency_Import_Allratestoday extends Mage_Directory_
 
     /**
      * URL template for the latest official table of one central bank
-     *
-     * @var string
      */
-    protected $_bankUrl = 'https://allratestoday.com/api/open/central-bank/{{BANK}}';
+    protected string $_bankUrl = 'https://allratestoday.com/api/open/central-bank/{{BANK}}';
 
     #[\Override]
     protected function _getTimeout(): int
@@ -80,24 +80,34 @@ class Mage_Directory_Model_Currency_Import_Allratestoday extends Mage_Directory_
     }
 
     /**
-     * Central bank table: {"bank":"sama","rates":[{"base":"USD","quote":"SAR","value":3.75},...]}
+     * Central bank table: {"bank":"sama","rates":[{"base":"USD","quote":"SAR","type":"reference","value":3.75},...]}
      *
-     * Every row says "1 base = value quote". Banks publish either foreign-per-home (the quote is
-     * the home currency) or home-per-foreign (the base is), so the home currency is the code
-     * common to every row. The table is then re-based on EUR for the EUR-based import.
+     * Each row means: 1 base = value quote. The home currency is the code that occurs in the
+     * most rows. The method converts every rate to a rate from EUR.
      */
     protected function _extractBankRates(array $response): ?array
     {
         $bank = $this->_getBank();
-        $rows = [];
-        $seen = [];
+        $valuesByType = [];
         foreach ($response['rates'] ?? [] as $row) {
             if (!is_array($row) || !isset($row['base'], $row['quote'], $row['value']) || !is_numeric($row['value']) || (float) $row['value'] <= 0) {
                 continue;
             }
-            $base = strtoupper((string) $row['base']);
-            $quote = strtoupper((string) $row['quote']);
-            $rows[] = [$base, $quote, (float) $row['value']];
+            $pair = strtoupper((string) $row['base']) . '/' . strtoupper((string) $row['quote']);
+            $valuesByType[$pair][(string) ($row['type'] ?? '')] = (float) $row['value'];
+        }
+
+        $rows = [];
+        $seen = [];
+        foreach ($valuesByType as $pair => $types) {
+            // Without a reference row, a pair has one rate or a buy and a sell rate: take the mean
+            $value = $types['reference'] ?? $types['middle'] ?? $types['official']
+                ?? (count($types) <= 2 ? array_sum($types) / count($types) : null);
+            if ($value === null) {
+                continue;
+            }
+            [$base, $quote] = explode('/', $pair);
+            $rows[] = [$base, $quote, $value];
             $seen[$base] = ($seen[$base] ?? 0) + 1;
             $seen[$quote] = ($seen[$quote] ?? 0) + 1;
         }
@@ -114,25 +124,24 @@ class Mage_Directory_Model_Currency_Import_Allratestoday extends Mage_Directory_
         arsort($seen, SORT_NUMERIC);
         $home = (string) array_key_first($seen);
 
-        // Home-currency units per one unit of each currency
-        $units = [$home => 1.0];
+        $homeUnits = [$home => 1.0];
         foreach ($rows as [$base, $quote, $value]) {
             if ($quote === $home) {
-                $units[$base] = $value;
+                $homeUnits[$base] = $value;
             } elseif ($base === $home) {
-                $units[$quote] = 1 / $value;
+                $homeUnits[$quote] = 1 / $value;
             }
         }
 
-        if (!isset($units['EUR'])) {
+        if (!isset($homeUnits['EUR'])) {
             Mage::log("AllRatesToday error: central bank $bank publishes no EUR rate", Mage::LOG_ERROR);
-            $this->_messages[] = Mage::helper('directory')->__('Currency rate service error: %s', "central bank $bank publishes no EUR rate");
+            $this->_messages[] = Mage::helper('directory')->__('Central bank %s publishes no EUR rate.', $bank);
             return null;
         }
 
         $rates = [];
-        foreach ($units as $code => $unit) {
-            $rates[$code] = $units['EUR'] / $unit;
+        foreach ($homeUnits as $code => $homeUnit) {
+            $rates[$code] = $homeUnits['EUR'] / $homeUnit;
         }
 
         return $rates;
