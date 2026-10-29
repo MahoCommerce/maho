@@ -11,12 +11,11 @@ uses(Tests\MahoBackendTestCase::class);
 
 describe('Gmail actions', function () {
     beforeEach(function () {
-        // These are fixtures, not a query: the order is never loaded, and 4242 comes back in the
-        // action target, so the test states where the link has to point instead of matching a row.
         $order = Mage::getModel('sales/order')
             ->setId(4242)
             ->setStoreId((int) Mage::app()->getDefaultStoreView()->getId())
-            ->setIncrementId('900000042');
+            ->setIncrementId('900000042')
+            ->setProtectCode('a1b2c3');
 
         $shipment = new class extends Mage_Sales_Model_Order_Shipment {
             /** @var list<Mage_Sales_Model_Order_Shipment_Track> */
@@ -28,6 +27,7 @@ describe('Gmail actions', function () {
                 return $this->fakeTracks;
             }
         };
+        $shipment->setId(77)->setOrder($order);
         $shipment->fakeTracks = [
             // The example tracking number from the carrier documentation.
             Mage::getModel('sales/order_shipment_track')
@@ -37,21 +37,24 @@ describe('Gmail actions', function () {
 
         $this->variables = ['order' => $order, 'shipment' => $shipment];
         $this->actions = Mage::getSingleton('core/email_gmail_actions');
+        $this->payload = function (string $markup): array {
+            preg_match('#<script type="application/ld\+json">(.*)</script>#s', $markup, $matches);
+            return json_decode($matches[1], true, flags: JSON_THROW_ON_ERROR);
+        };
     });
 
-    it('builds a schema.org EmailMessage with a go-to action', function () {
+    it('links the tracking page of the store when the carrier has no page', function () {
         $markup = $this->actions->getMarkup($this->variables);
 
         expect($markup)->toStartWith('<script type="application/ld+json">');
 
-        preg_match('#<script type="application/ld\+json">(.*)</script>#s', $markup, $matches);
-        $payload = json_decode($matches[1], true);
+        $payload = ($this->payload)($markup);
+        $hash = Mage::helper('core')->urlEncode('ship_id:77:a1b2c3');
 
-        expect($payload)->toBeArray();
         expect($payload['@type'])->toBe('EmailMessage');
-        expect($payload['potentialAction']['@type'])->toBe('ViewAction');
-        expect($payload['potentialAction']['target'])->toContain('sales/order/view');
-        expect($payload['potentialAction']['target'])->toContain('/order_id/4242/');
+        expect($payload['potentialAction']['@type'])->toBe('TrackAction');
+        expect($payload['potentialAction']['target'])->toContain('shipping/tracking/popup');
+        expect($payload['potentialAction']['target'])->toContain($hash);
         expect($payload['description'])->toContain('1Z999AA10123456784');
     });
 
@@ -65,14 +68,26 @@ describe('Gmail actions', function () {
         $track->setNumber('1Z999AA10123456784')->setTitle('United Parcel Service');
         $this->variables['shipment']->fakeTracks = [$track];
 
-        $markup = $this->actions->getMarkup($this->variables);
-
-        preg_match('#<script type="application/ld\+json">(.*)</script>#s', $markup, $matches);
-        $payload = json_decode($matches[1], true);
+        $payload = ($this->payload)($this->actions->getMarkup($this->variables));
 
         expect($payload['potentialAction']['@type'])->toBe('TrackAction');
         expect($payload['potentialAction']['target'])
             ->toBe('https://www.ups.com/track?tracknum=1Z999AA10123456784');
+    });
+
+    it('links the tracking page of the store when the carrier page is empty', function () {
+        $track = new class extends Mage_Sales_Model_Order_Shipment_Track {
+            public function getTrackingUrl(): ?string
+            {
+                return null;
+            }
+        };
+        $track->setNumber('1Z999AA10123456784');
+        $this->variables['shipment']->fakeTracks = [$track];
+
+        $payload = ($this->payload)($this->actions->getMarkup($this->variables));
+
+        expect($payload['potentialAction']['target'])->toContain('shipping/tracking/popup');
     });
 
     it('puts the markup before the closing head tag, and only once', function () {
@@ -85,6 +100,28 @@ describe('Gmail actions', function () {
         $headAt = strpos($injected, '</head>');
 
         expect($scriptAt)->toBeInt()->toBeLessThan($headAt);
+    });
+
+    it('keeps a backslash and a dollar sign of a tracking number', function () {
+        $this->variables['shipment']->fakeTracks = [
+            Mage::getModel('sales/order_shipment_track')->setNumber('AB\\12$0'),
+        ];
+        $html = '<html><head></head><body>Body</body></html>';
+
+        $payload = ($this->payload)($this->actions->inject($this->variables, $html));
+
+        expect($payload['description'])->toContain('AB\\12$0');
+    });
+
+    it('keeps a tracking number with HTML inside the script tag', function () {
+        $this->variables['shipment']->fakeTracks = [
+            Mage::getModel('sales/order_shipment_track')->setNumber('1Z</script><img src=x onerror=alert(1)>'),
+        ];
+
+        $markup = $this->actions->getMarkup($this->variables);
+
+        expect(substr_count($markup, '</script>'))->toBe(1);
+        expect($markup)->not->toContain('<img');
     });
 
     it('leaves the document alone when there is nothing to link', function () {
@@ -108,5 +145,24 @@ describe('Gmail actions', function () {
         $html = '<html><head><script type="application/ld+json">{}</script></head><body>Body</body></html>';
 
         expect($this->actions->inject($this->variables, $html))->toBe($html);
+    });
+
+    it('adds the markup to a rendered HTML email and keeps it after CSS inlining', function () {
+        $template = Mage::getModel('core/email_template')
+            ->setTemplateType(Mage_Core_Model_Template::TYPE_HTML)
+            ->setTemplateText('{{inlinecss file="email-inline.css"}}<html><head></head><body><p>Body</p></body></html>');
+
+        $html = $template->getProcessedTemplate($this->variables);
+
+        expect($html)->toContain('<script type="application/ld+json">');
+        expect(strpos($html, 'application/ld+json'))->toBeLessThan(stripos($html, '</head>'));
+    });
+
+    it('adds no markup to a plain text email', function () {
+        $template = Mage::getModel('core/email_template')
+            ->setTemplateType(Mage_Core_Model_Template::TYPE_TEXT)
+            ->setTemplateText('<html><head></head><body>Body</body></html>');
+
+        expect($template->getProcessedTemplate($this->variables))->not->toContain('application/ld+json');
     });
 });
