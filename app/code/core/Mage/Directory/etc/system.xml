@@ -97,6 +97,57 @@ SPDX-License-Identifier: AFL-3.0
                         </sort_order>
                     </fields>
                 </frankfurter>
+                <allratestoday translate="label comment">
+                    <label>AllRatesToday</label>
+                    <comment><![CDATA[ECB reference rates by default, or the official table of one central bank, including banks other free services do not carry (Saudi Arabia, UAE, Qatar, Korea, New Zealand, Vietnam, Bangladesh). No account or API key needed. <a href='https://allratestoday.com/open-api/' target='_blank'>allratestoday.com</a>]]></comment>
+                    <sort_order>37</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>0</show_in_website>
+                    <show_in_store>0</show_in_store>
+                    <fields>
+                        <active translate="label">
+                            <label>Enabled</label>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>0</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </active>
+                        <timeout translate="label">
+                            <label>Connection Timeout in Seconds</label>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends>
+                                <active>1</active>
+                            </depends>
+                        </timeout>
+                        <bank translate="label comment">
+                            <label>Central Bank Code</label>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <comment><![CDATA[Leave empty for the ECB reference table. Otherwise the code of the central bank whose official table should be imported, e.g. <code>sama</code>, <code>cbuae</code>, <code>bok</code> or <code>rbnz</code>; see the <a href='https://allratestoday.com/central-bank-rates-api/institutions/' target='_blank'>list of institutions</a>. The bank must publish a EUR rate.]]></comment>
+                            <depends>
+                                <active>1</active>
+                            </depends>
+                        </bank>
+                        <sort_order translate="label comment">
+                            <label>Sort Order</label>
+                            <sort_order>30</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <frontend_class>validate-number</frontend_class>
+                            <comment>Lower numbers are tried first when the scheduled import falls back to another service.</comment>
+                            <depends>
+                                <active>1</active>
+                            </depends>
+                        </sort_order>
+                    </fields>
+                </allratestoday>
                 <exchangerateapi translate="label comment">
                     <label>ExchangeRate-API</label>
                     <comment><![CDATA[Open access endpoint covering far more currencies than the ECB list, updated once a day. No account or API key needed. <a href='https://www.exchangerate-api.com/docs/free' target='_blank'>exchangerate-api.com</a>]]></comment>
