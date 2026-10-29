@@ -84,6 +84,14 @@ describe(Mage_Core_Model_Layout_Validator::class, function () {
         'setDataUsingMethod with a space' => ['<reference name="content"><action method="setDataUsingMethod"><k>tem plate</k><v>../x.phtml</v></action></reference>'],
     ]);
 
+    it('refuses the json attribute of an action', function (string $xml) {
+        expect($this->validator->isValid($xml))->toBeFalse()
+            ->and($this->validator->getMessages())->toBe(['Custom layout updates cannot use the json attribute.']);
+    })->with([
+        'block type in a json argument' => ['<reference name="product.info.options"><action method="addOptionRenderer" json="b"><a>text</a><b>"rss\/order_new"</b><c>x</c></action></reference>'],
+        'template key in a json argument' => ['<reference name="content"><action method="setDataUsingMethod" json="k"><k>"\u0074emplate"</k><v>page/x.phtml</v></action></reference>'],
+    ]);
+
     it('refuses invalid XML', function () {
         expect($this->validator->isValid('<reference name="content">'))->toBeFalse()
             ->and($this->validator->getMessages())->toBe(['XML data is invalid.']);

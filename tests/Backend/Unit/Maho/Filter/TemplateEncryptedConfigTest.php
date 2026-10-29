@@ -47,4 +47,23 @@ describe('getConfigData() in a template variable', function () {
 
         expect($filter->filter("{{var payment.{$method}('trans_key')}}"))->toBe('');
     })->with(['getConfigData', 'getconfigdata', 'GETCONFIGDATA']);
+
+    it('does not call getDataUsingMethod(), which calls a getter by name', function (string $method) {
+        $object = new class extends \Maho\DataObject {
+            public function getConfigData(?string $field = null): string
+            {
+                return 'value-of:' . $field;
+            }
+
+            public function getConfig(?string $path = null): string
+            {
+                return 'value-of:' . $path;
+            }
+        };
+        $filter = new \Maho\Filter\Template();
+        $filter->setVariables(['payment' => $object]);
+
+        expect($filter->filter("{{var payment.{$method}('config_data', 'trans_key')}}"))->toBe('')
+            ->and($filter->filter("{{var payment.{$method}('config', 'system/smtp/password')}}"))->toBe('');
+    })->with(['getDataUsingMethod', 'getdatausingmethod', 'GETDATAUSINGMETHOD']);
 });

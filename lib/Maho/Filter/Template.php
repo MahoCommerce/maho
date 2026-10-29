@@ -283,8 +283,8 @@ class Template
                     if (method_exists($stackVars[$i - 1]['variable'], $stackVars[$i]['name'])
                         || str_starts_with($stackVars[$i]['name'], 'get')
                     ) {
-                        // getConfigData() returns encrypted config values in plain text, so a template must not call it
-                        if (strcasecmp($stackVars[$i]['name'], 'getConfigData') === 0) {
+                        // These methods can return a decrypted config value: getDataUsingMethod() calls a getter by name
+                        if (in_array(strtolower($stackVars[$i]['name']), ['getconfigdata', 'getdatausingmethod'], true)) {
                             $stackVars[$i]['variable'] = null;
                             $last = $i;
                             continue;

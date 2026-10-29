@@ -362,3 +362,105 @@ it('shows the Save button of the REST attributes only with the Edit permission',
     actionAclLogin(['system/api/rest_attributes/edit']);
     expect($buttons->getSaveButtonHtml())->not->toBe('');
 });
+
+it('puts in the all-documents PDF only the document types that the admin can see', function (): void {
+    $uniqueId = strtoupper(bin2hex(random_bytes(8)));
+    $order = Mage::getModel('sales/order')
+        ->setStoreId(1)
+        ->setState(Mage_Sales_Model_Order::STATE_NEW)
+        ->setStatus('pending')
+        ->setCustomerIsGuest()
+        ->setCustomerEmail("pdfdocs.{$uniqueId}@example.com")
+        ->setOrderCurrencyCode('USD')
+        ->setBaseCurrencyCode('USD')
+        ->setGlobalCurrencyCode('USD')
+        ->setStoreCurrencyCode('USD')
+        ->setGrandTotal(100.00)
+        ->setBaseGrandTotal(100.00)
+        ->setSubtotal(100.00)
+        ->setBaseSubtotal(100.00)
+        ->setIncrementId('TSTO' . $uniqueId)
+        ->setBillingAddress(Mage::getModel('sales/order_address')->setData([
+            'address_type' => 'billing', 'firstname' => 'Test', 'lastname' => 'Customer', 'street' => '1 Main St',
+            'city' => 'Testville', 'postcode' => '12345', 'country_id' => 'US', 'telephone' => '5551234567',
+        ]))
+        ->addItem(Mage::getModel('sales/order_item')->setData([
+            'sku' => 'TEST-SKU', 'name' => 'Test Product', 'qty_ordered' => 1, 'price' => 100.00,
+            'base_price' => 100.00, 'row_total' => 100.00, 'base_row_total' => 100.00, 'product_type' => 'simple',
+        ]));
+    $order->save();
+
+    try {
+        $payment = Mage::getModel('sales/order_payment')->setMethod('checkmo');
+        $order->setPayment($payment);
+        $payment->setParentId($order->getId())->save();
+        $invoice = $order->prepareInvoice()->register();
+        $invoice->setIncrementId('TSTI' . $uniqueId);
+        $order->save();
+        $invoice->save();
+
+        $printDocs = function (array $granted) use ($order): ?string {
+            actionAclLogin($granted);
+            $request = actionAclRequest('pdfdocs', [], ['order_ids' => [$order->getId()]]);
+            $controller = new class ($request, new Mage_Core_Controller_Response_Http()) extends Mage_Adminhtml_Sales_OrderController {
+                public ?string $pdf = null;
+
+                #[\Override]
+                protected function _prepareDownloadResponse($fileName, $content, $contentType = 'application/octet-stream', $contentLength = null)
+                {
+                    $this->pdf = (string) $content;
+                    return $this;
+                }
+
+                #[\Override]
+                protected function _redirect($path, $arguments = [])
+                {
+                    return $this;
+                }
+            };
+            $controller->pdfdocsAction();
+
+            return $controller->pdf;
+        };
+
+        expect($printDocs(['sales/order/actions/view']))->toBeNull()
+            ->and(substr((string) $printDocs(['sales/order/actions/view', 'sales/invoice']), 0, 5))->toBe('%PDF-');
+    } finally {
+        $order->delete();
+    }
+});
+
+it('saves the tag that the check reads, not a tag_id of the POST body', function (): void {
+    $resource = Mage::getSingleton('core/resource');
+    $adapter = $resource->getConnection('core_write');
+    $table = $resource->getTableName('tag/tag');
+    $tagIds = [];
+    foreach ([Mage_Tag_Model_Tag::STATUS_PENDING, Mage_Tag_Model_Tag::STATUS_APPROVED] as $status) {
+        $adapter->insert($table, ['name' => 'action-acl-tag-' . uniqid(), 'status' => $status, 'first_store_id' => 0]);
+        $tagIds[] = (int) $adapter->lastInsertId($table);
+    }
+    [$pendingId, $approvedId] = $tagIds;
+    $approvedName = (string) $adapter->fetchOne($adapter->select()->from($table, 'name')->where('tag_id = ?', $approvedId));
+
+    try {
+        actionAclLogin(['catalog/tag/pending']);
+        $request = actionAclRequest('save', ['tag_id' => (string) $pendingId], [
+            'tag_id' => (string) $approvedId, 'tag_name' => 'changed', 'tag_status' => Mage_Tag_Model_Tag::STATUS_PENDING, 'store_id' => '0',
+        ]);
+        $controller = new class ($request, new Mage_Core_Controller_Response_Http()) extends Mage_Adminhtml_TagController {
+            #[\Override]
+            protected function _redirect($path, $arguments = [])
+            {
+                return $this;
+            }
+        };
+
+        expect(actionAclIsAllowed($controller))->toBeTrue();
+        $controller->saveAction();
+
+        expect($adapter->fetchOne($adapter->select()->from($table, 'name')->where('tag_id = ?', $approvedId)))->toBe($approvedName);
+    } finally {
+        Mage::unregister('current_tag');
+        $adapter->delete($table, ['tag_id IN (?)' => $tagIds]);
+    }
+});
