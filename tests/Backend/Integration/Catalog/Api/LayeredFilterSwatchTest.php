@@ -111,13 +111,21 @@ describe('the swatches of the layered filters API', function (): void {
     });
 
     it('returns no swatch when the Configurable Swatches module is disabled', function (): void {
+        $aliases = ['configurableswatches', 'configurableswatches/productimg', 'configurableswatches/swatchdimensions'];
         Mage::getConfig()->setNode('modules/Mage_ConfigurableSwatches/active', 'false');
-        foreach (['configurableswatches', 'configurableswatches/productimg', 'configurableswatches/swatchdimensions'] as $alias) {
+        foreach ($aliases as $alias) {
             Mage::unregister("_helper/{$alias}");
             Mage::register("_helper/{$alias}", false);
         }
 
-        expect(array_column(layeredColorOptions(), 'swatch'))->each->toBeNull();
+        try {
+            expect(array_column(layeredColorOptions(), 'swatch'))->each->toBeNull();
+        } finally {
+            Mage::getConfig()->setNode('modules/Mage_ConfigurableSwatches/active', 'true');
+            foreach ($aliases as $alias) {
+                Mage::unregister("_helper/{$alias}");
+            }
+        }
     });
 
     it('uses the admin label of the option when its store label has no swatch', function (): void {
