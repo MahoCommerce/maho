@@ -54,7 +54,7 @@ describe('Gmail actions', function () {
         expect($payload['@type'])->toBe('EmailMessage');
         expect($payload['potentialAction']['@type'])->toBe('TrackAction');
         expect($payload['potentialAction']['target'])->toContain('shipping/tracking/popup');
-        expect($payload['potentialAction']['target'])->toContain($hash);
+        expect($payload['potentialAction']['target'])->toContain(urlencode($hash));
         expect($payload['description'])->toContain('1Z999AA10123456784');
     });
 
