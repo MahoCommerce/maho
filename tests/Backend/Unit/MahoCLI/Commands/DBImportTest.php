@@ -22,7 +22,7 @@ if (!defined('MAHO_ROOT_DIR')) {
 /**
  * Coverage for db:import: option validation, the compression sniffing that
  * guards against loading a compressed dump as plain SQL, the per-engine
- * pipelines and the --drop-tables statements. No client binary is executed.
+ * pipelines and the --empty statements. No client binary is executed.
  */
 
 function dbImportTester(): CommandTester
@@ -101,7 +101,7 @@ it('refuses a dump that the user cannot read', function () {
 
     dbImportWithTempFile('-- Maho', function (string $file): void {
         chmod($file, 0000);
-        $result = dbImportTester()->run(['file' => $file, '--drop-tables' => true]);
+        $result = dbImportTester()->run(['file' => $file, '--empty' => true]);
 
         $this->assertCommandFailed($result);
         expect($result->getErrorOutput())->toContain('Cannot read file');
@@ -183,7 +183,7 @@ it('builds a PostgreSQL load command that stops on the first error', function ()
     );
 });
 
-it('recreates the MySQL database with --drop-tables', function () {
+it('recreates the MySQL database with --empty', function () {
     $commands = dbImportReflect('buildResetCommands', dbImportConnection());
 
     expect($commands)->toHaveCount(2)
@@ -191,14 +191,14 @@ it('recreates the MySQL database with --drop-tables', function () {
         ->and($commands[1])->toContain('CREATE DATABASE `maho` DEFAULT CHARACTER SET utf8mb4');
 });
 
-it('resets the PostgreSQL public schema with --drop-tables', function () {
+it('resets the PostgreSQL public schema with --empty', function () {
     $commands = dbImportReflect('buildResetCommands', dbImportConnection(['engine' => 'pgsql']));
 
     expect($commands)->toHaveCount(1)
         ->and($commands[0])->toContain('DROP SCHEMA public CASCADE; CREATE SCHEMA public');
 });
 
-it('removes the SQLite database file with --drop-tables', function () {
+it('removes the SQLite database file with --empty', function () {
     $commands = dbImportReflect('buildResetCommands', dbImportConnection([
         'engine' => 'sqlite',
         'dbname' => 'maho.sqlite',
@@ -260,12 +260,12 @@ function dbImportRecordingCommand(array $exitCodes, array $connection = []): DBI
     };
 }
 
-it('empties the database before the load with --drop-tables', function () {
+it('empties the database before the load with --empty', function () {
     $command = dbImportRecordingCommand([]);
     new Application()->addCommand($command);
 
     dbImportWithTempFile('-- Maho', function (string $file) use ($command): void {
-        $result = new CommandTester($command)->run(['file' => $file, '--drop-tables' => true, '--force' => true]);
+        $result = new CommandTester($command)->run(['file' => $file, '--empty' => true, '--force' => true]);
 
         $this->assertCommandIsSuccessful($result);
         expect($command->ran)->toHaveCount(3)
@@ -281,7 +281,7 @@ it('runs one reset command before the load for PostgreSQL and SQLite', function 
     new Application()->addCommand($command);
 
     dbImportWithTempFile('-- Maho', function (string $file) use ($command, $reset): void {
-        $result = new CommandTester($command)->run(['file' => $file, '--drop-tables' => true, '--force' => true]);
+        $result = new CommandTester($command)->run(['file' => $file, '--empty' => true, '--force' => true]);
 
         $this->assertCommandIsSuccessful($result);
         expect($command->ran)->toHaveCount(2)
@@ -344,7 +344,7 @@ it('does not load the dump when emptying the database fails', function () {
     new Application()->addCommand($command);
 
     dbImportWithTempFile('-- Maho', function (string $file) use ($command): void {
-        $result = new CommandTester($command)->run(['file' => $file, '--drop-tables' => true, '--force' => true]);
+        $result = new CommandTester($command)->run(['file' => $file, '--empty' => true, '--force' => true]);
 
         $this->assertCommandFailed($result);
         expect($command->ran)->toHaveCount(1)
@@ -357,7 +357,7 @@ it('does not empty the database when the question is not confirmed', function ()
     new Application()->addCommand($command);
 
     dbImportWithTempFile('-- Maho', function (string $file) use ($command): void {
-        $result = new CommandTester($command)->run(['file' => $file, '--drop-tables' => true], interactive: false);
+        $result = new CommandTester($command)->run(['file' => $file, '--empty' => true], interactive: false);
 
         $this->assertCommandFailed($result);
         expect($command->ran)->toBe([])
@@ -370,7 +370,7 @@ it('runs no command with --dry-run', function () {
     new Application()->addCommand($command);
 
     dbImportWithTempFile('-- Maho', function (string $file) use ($command): void {
-        $result = new CommandTester($command)->run(['file' => $file, '--drop-tables' => true, '--dry-run' => true]);
+        $result = new CommandTester($command)->run(['file' => $file, '--empty' => true, '--dry-run' => true]);
 
         $this->assertCommandIsSuccessful($result);
         expect($command->ran)->toBe([]);

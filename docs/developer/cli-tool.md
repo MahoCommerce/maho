@@ -169,16 +169,16 @@ the matching client on the host. They also work while the database is empty.
 ./maho db:export var/backups/shop.sql --dry-run
 
 # restore, emptying the database first (the command asks first, --force skips the question)
-./maho db:import var/backups/shop.sql --drop-tables --force
+./maho db:import var/backups/shop.sql --empty --force
 ```
 
 `db:import` does not choose the compression for you. It reads the file header and refuses a gzip
 or zstd dump that you load with the wrong `--compression`. The error message names the right value.
 
-`--drop-tables` empties the database first. On MySQL and MariaDB, it drops and creates the database.
+`--empty` empties the database first. On MySQL and MariaDB, it drops and creates the database.
 On PostgreSQL, it resets the `public` schema. On SQLite, it removes the file.
 A dump from `pg_dump` and a dump from MariaDB or MySQL replace the tables they find. A SQLite dump
-does not. To load a SQLite dump into a database that has tables, use `--drop-tables`.
+does not. To load a SQLite dump into a database that has tables, use `--empty`.
 After a restore, run `./maho cache:flush`.
 
 On MySQL, `db:export` and `db:import` give the password to the client in the `MYSQL_PWD`

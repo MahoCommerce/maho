@@ -209,7 +209,7 @@ trait DatabaseDumpTrait
     }
 
     /**
-     * Commands that empty the database before the dump is loaded (--drop-tables).
+     * Commands that empty the database before the dump is loaded (--empty).
      *
      * @param array<string, string> $conn
      * @return list<string>

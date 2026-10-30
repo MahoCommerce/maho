@@ -37,8 +37,8 @@ class DBImport extends BaseMahoCommand
         #[Option(description: 'Compression of the dump: gzip, zstd or none')]
         string $compression = 'none',
         #[Option(description: 'Empty the database before loading the dump')]
-        bool $dropTables = false,
-        #[Option(description: 'Skip the question before --drop-tables empties the database', shortcut: 'f')]
+        bool $empty = false,
+        #[Option(description: 'Skip the question before --empty empties the database', shortcut: 'f')]
         bool $force = false,
         #[Option(description: 'Print the resolved connection and the commands that would run, without executing them')]
         bool $dryRun = false,
@@ -104,7 +104,7 @@ class DBImport extends BaseMahoCommand
             return Command::FAILURE;
         }
 
-        if ($dropTables && !$force && !$dryRun) {
+        if ($empty && !$force && !$dryRun) {
             $question = new ConfirmationQuestion(sprintf('Empty database %s before loading the dump? [y/N] ', $conn['dbname']), false);
             /** @var QuestionHelper $helper */
             $helper = $this->getHelper('question');
@@ -114,7 +114,7 @@ class DBImport extends BaseMahoCommand
             }
         }
 
-        $resetCommands = $dropTables ? $this->buildResetCommands($conn) : [];
+        $resetCommands = $empty ? $this->buildResetCommands($conn) : [];
         $importCommand = $this->buildImportCommand($conn, $file, $compression, $this->progressViewer());
 
         if ($dryRun) {
