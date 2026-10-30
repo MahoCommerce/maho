@@ -312,17 +312,14 @@ class Mage_Core_Model_Layout_Validator
 
     /**
      * Get XPath block validation expression
-     *
-     * @deprecated since 26.11 isValid() checks the blocks with _hasDisallowedBlock().
      */
+    #[\Deprecated(message: 'isValid() checks the blocks with _hasDisallowedBlock()', since: '26.11')]
     public function getXpathBlockValidationExpression(): string
     {
         return $this->_getXpathBlockValidationExpression();
     }
 
-    /**
-     * @deprecated since 26.11 isValid() checks the blocks with _hasDisallowedBlock().
-     */
+    #[\Deprecated(message: 'isValid() checks the blocks with _hasDisallowedBlock()', since: '26.11')]
     protected function _getXpathBlockValidationExpression(): string
     {
         $disallowedBlocks = $this->getDisallowedBlocks();

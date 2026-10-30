@@ -18,20 +18,20 @@ class Mage_Newsletter_Model_Session extends Mage_Core_Model_Session_Abstract
     }
 
     /**
-     * @deprecated since 26.9 Render the messages with a core/messages block instead. The block
-     *             escapes the text and renders a \Maho\Message\Link as a link. This method
-     *             returns plain text. The caller must escape it. A link is reduced to its label.
+     * The core/messages block escapes the text and renders a \Maho\Message\Link as a link. This method
+     * returns plain text. The caller must escape it. A link is reduced to its label.
      */
+    #[\Deprecated(message: 'render the messages with a core/messages block instead', since: '26.9')]
     public function getError(): string
     {
         return $this->takeFirstMessageText(Mage_Core_Model_Message::ERROR);
     }
 
     /**
-     * @deprecated since 26.9 Render the messages with a core/messages block instead. The block
-     *             escapes the text and renders a \Maho\Message\Link as a link. This method
-     *             returns plain text. The caller must escape it. A link is reduced to its label.
+     * The core/messages block escapes the text and renders a \Maho\Message\Link as a link. This method
+     * returns plain text. The caller must escape it. A link is reduced to its label.
      */
+    #[\Deprecated(message: 'render the messages with a core/messages block instead', since: '26.9')]
     public function getSuccess(): string
     {
         return $this->takeFirstMessageText(Mage_Core_Model_Message::SUCCESS);

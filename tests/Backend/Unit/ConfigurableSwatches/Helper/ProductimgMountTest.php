@@ -26,7 +26,7 @@ describe('Mage_ConfigurableSwatches_Helper_Productimg on the media mount', funct
         $this->helper = new class extends Mage_ConfigurableSwatches_Helper_Productimg {
             public function resize(string $filename, string $tag): string|false
             {
-                return $this->_resizeSwatchImage($filename, $tag, 20, 20);
+                return withoutDeprecations(fn() => $this->_resizeSwatchImage($filename, $tag, 20, 20));
             }
         };
         $this->useMount = function (FilesystemAdapter $adapter): Mount {

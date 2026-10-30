@@ -19,9 +19,9 @@ declare(strict_types=1);
 
 class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract implements \Stringable
 {
-    /** @deprecated since 26.11 the slots of the theme set the widths */
+    #[\Deprecated(message: 'the slots of the theme set the widths', since: '26.11')]
     public const XML_NODE_PRODUCT_BASE_IMAGE_WIDTH = 'catalog/product_image/base_width';
-    /** @deprecated since 26.11 the listing slot of the theme sets the width */
+    #[\Deprecated(message: 'the listing slot of the theme sets the width', since: '26.11')]
     public const XML_NODE_PRODUCT_SMALL_IMAGE_WIDTH = 'catalog/product_image/small_width';
     public const XML_NODE_PRODUCT_MAX_DIMENSION = 'catalog/product_image/max_dimension';
 
@@ -229,105 +229,105 @@ class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract implements \St
     }
 
     /**
-     * @deprecated since 26.11 the store config sets the quality of all images
      * @param int $quality
      * @return $this
      */
+    #[\Deprecated(message: 'the store config sets the quality of all images', since: '26.11')]
     public function setQuality($quality)
     {
         return $this;
     }
 
     /**
-     * @deprecated since 26.11 the ratio of the theme applies to all images
      * @param bool $flag
      * @return $this
      */
+    #[\Deprecated(message: 'the ratio of the theme applies to all images', since: '26.11')]
     public function keepAspectRatio($flag)
     {
         return $this;
     }
 
     /**
-     * @deprecated since 26.11 the fit of the theme applies to all images
      * @param bool $flag
      * @param array $position
      * @return $this
      */
+    #[\Deprecated(message: 'the fit of the theme applies to all images', since: '26.11')]
     public function keepFrame($flag, $position = ['center', 'middle'])
     {
         return $this;
     }
 
     /**
-     * @deprecated since 26.11 the output format decides whether transparency stays
      * @param bool $flag
      * @param int $alphaOpacity
      * @return $this
      */
+    #[\Deprecated(message: 'the output format decides whether transparency stays', since: '26.11')]
     public function keepTransparency($flag, $alphaOpacity = null)
     {
         return $this;
     }
 
     /**
-     * @deprecated since 26.11 an image is never scaled up
      * @param bool $flag
      * @return $this
      */
+    #[\Deprecated(message: 'an image is never scaled up', since: '26.11')]
     public function constrainOnly($flag)
     {
         return $this;
     }
 
     /**
-     * @deprecated since 26.11 the store config sets the background color of all images
      * @param array $colorRGB
      * @return $this
      */
+    #[\Deprecated(message: 'the store config sets the background color of all images', since: '26.11')]
     public function backgroundColor($colorRGB)
     {
         return $this;
     }
 
     /**
-     * @deprecated since 26.11 a rotation is not supported, rotate the original instead
      * @param int $angle
      * @return $this
      */
+    #[\Deprecated(message: 'a rotation is not supported, rotate the original instead', since: '26.11')]
     public function rotate($angle)
     {
         return $this;
     }
 
     /**
-     * @deprecated since 26.11 the store config sets the watermark of all product images
      * @param string $fileName
      * @param string $position
      * @param string $size
      * @param int $imageOpacity
      * @return $this
      */
+    #[\Deprecated(message: 'the store config sets the watermark of all product images', since: '26.11')]
     public function watermark($fileName, $position, $size = null, $imageOpacity = null)
     {
         return $this;
     }
 
     /**
-     * @deprecated since 26.11 the store config sets the watermark of all product images
      * @param string $size
      * @return $this
      */
+    #[\Deprecated(message: 'the store config sets the watermark of all product images', since: '26.11')]
     public function setWatermarkSize($size)
     {
         return $this;
     }
 
     /**
-     * @deprecated since 26.11 the store config sets the watermark of all product images
      * @param int $imageOpacity
      * @return $this
      */
+    #[\Deprecated(message: 'the store config sets the watermark of all product images', since: '26.11')]
     public function setWatermarkImageOpacity($imageOpacity)
     {
         return $this;

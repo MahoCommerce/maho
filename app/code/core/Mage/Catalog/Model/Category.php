@@ -521,9 +521,9 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
     }
 
     /**
-     * @deprecated since 26.11 the file can be on a remote mount, use getImageStoragePath() or getImageSize()
      * @return string
      */
+    #[\Deprecated(message: 'the file can be on a remote mount, use getImageStoragePath() or getImageSize()', since: '26.11')]
     public function getImagePath()
     {
         if ($image = $this->getImage()) {

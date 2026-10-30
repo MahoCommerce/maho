@@ -22,7 +22,7 @@ describe('Helper Data', function () {
 
     test('getOutputDirectory returns absolute path', function () {
         $helper = Mage::helper('feedmanager');
-        $path = $helper->getOutputDirectory();
+        $path = withoutDeprecations(fn() => $helper->getOutputDirectory());
         expect($path)->toBeString()
             ->and($path)->toStartWith('/');
     });

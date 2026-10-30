@@ -37,15 +37,15 @@ it('reads the oldest message of one type and removes it', function () {
     $this->session->addError('First.');
     $this->session->addError('Second.');
 
-    expect($this->session->getError())->toBe('First.')
-        ->and($this->session->getError())->toBe('Second.')
-        ->and($this->session->getError())->toBe('');
+    expect(withoutDeprecations(fn() => $this->session->getError()))->toBe('First.')
+        ->and(withoutDeprecations(fn() => $this->session->getError()))->toBe('Second.')
+        ->and(withoutDeprecations(fn() => $this->session->getError()))->toBe('');
 });
 
 it('reads an error and a success apart from each other', function () {
     $this->session->addError('Bad.');
     $this->session->addSuccess('Good.');
 
-    expect($this->session->getSuccess())->toBe('Good.')
-        ->and($this->session->getError())->toBe('Bad.');
+    expect(withoutDeprecations(fn() => $this->session->getSuccess()))->toBe('Good.')
+        ->and(withoutDeprecations(fn() => $this->session->getError()))->toBe('Bad.');
 });

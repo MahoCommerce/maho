@@ -92,10 +92,9 @@ class Mage_Downloadable_Model_Link extends Mage_Core_Model_Abstract
 
     /**
      * Retrieve base temporary path
-     *
      * @return string
-     * @deprecated since 26.11 the file is on the downloadable mount, use getBaseTmpStoragePath()
      */
+    #[\Deprecated(message: 'the file is on the downloadable mount, use getBaseTmpStoragePath()', since: '26.11')]
     public static function getBaseTmpPath()
     {
         return Mage::getBaseDir('media') . DS . 'downloadable' . DS . 'tmp' . DS . 'links';
@@ -103,10 +102,9 @@ class Mage_Downloadable_Model_Link extends Mage_Core_Model_Abstract
 
     /**
      * Retrieve Base files path
-     *
      * @return string
-     * @deprecated since 26.11 the file is on the downloadable mount, use getBaseStoragePath()
      */
+    #[\Deprecated(message: 'the file is on the downloadable mount, use getBaseStoragePath()', since: '26.11')]
     public static function getBasePath()
     {
         return Mage::getBaseDir('media') . DS . 'downloadable' . DS . 'files' . DS . 'links';
@@ -114,10 +112,9 @@ class Mage_Downloadable_Model_Link extends Mage_Core_Model_Abstract
 
     /**
      * Retrieve base sample temporary path
-     *
      * @return string
-     * @deprecated since 26.11 the file is on the downloadable mount, use getBaseSampleTmpStoragePath()
      */
+    #[\Deprecated(message: 'the file is on the downloadable mount, use getBaseSampleTmpStoragePath()', since: '26.11')]
     public static function getBaseSampleTmpPath()
     {
         return Mage::getBaseDir('media') . DS . 'downloadable' . DS . 'tmp' . DS . 'link_samples';
@@ -125,10 +122,9 @@ class Mage_Downloadable_Model_Link extends Mage_Core_Model_Abstract
 
     /**
      * Retrieve base sample path
-     *
      * @return string
-     * @deprecated since 26.11 the file is on the downloadable mount, use getBaseSampleStoragePath()
      */
+    #[\Deprecated(message: 'the file is on the downloadable mount, use getBaseSampleStoragePath()', since: '26.11')]
     public static function getBaseSamplePath()
     {
         return Mage::getBaseDir('media') . DS . 'downloadable' . DS . 'files' . DS . 'link_samples';

@@ -1,0 +1,60 @@
+<?php
+
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ */
+
+declare(strict_types=1);
+
+uses(Tests\MahoBackendTestCase::class);
+
+it('hides a deprecation and lets a warning reach the active error handler', function () {
+    $seen = [];
+    $errorLevel = error_reporting(E_ALL);
+    set_error_handler(function (int $errno) use (&$seen): bool {
+        if (($errno & error_reporting()) === 0) {
+            return true;
+        }
+        $seen[] = $errno;
+        return true;
+    });
+
+    try {
+        withoutDeprecations(function () {
+            trigger_error('x', E_USER_DEPRECATED);
+            trigger_error('x', E_USER_WARNING);
+        });
+    } finally {
+        restore_error_handler();
+        error_reporting($errorLevel);
+    }
+
+    expect($seen)->toBe([E_USER_WARNING]);
+});
+
+it('restores the error level after the call', function () {
+    $level = error_reporting(E_ALL);
+
+    try {
+        withoutDeprecations(fn() => null);
+
+        expect(error_reporting())->toBe(E_ALL);
+    } finally {
+        error_reporting($level);
+    }
+});
+
+it('restores the error level when the callback throws', function () {
+    $level = error_reporting(E_ALL);
+
+    try {
+        expect(fn() => withoutDeprecations(function () {
+            throw new RuntimeException('callback failed');
+        }))->toThrow(RuntimeException::class);
+
+        expect(error_reporting())->toBe(E_ALL);
+    } finally {
+        error_reporting($level);
+    }
+});

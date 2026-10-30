@@ -100,11 +100,11 @@ class Mage_Downloadable_Helper_File extends Mage_Core_Helper_Abstract
     /**
      * Return full path to file
      *
-     * @deprecated since 26.11 the file is on the downloadable mount, use getStoragePath()
      * @param string $path
      * @param string|null $file
      * @return string
      */
+    #[\Deprecated(message: 'the file is on the downloadable mount, use getStoragePath()', since: '26.11')]
     public function getFilePath($path, $file)
     {
         if ($file === null || $file === '') {

@@ -18,7 +18,7 @@ describe('the signed resize URL of earlier releases', function () {
         Mage::app()->setCurrentStore((int) Mage::app()->getDefaultStoreView()->getId());
 
         $this->resize = function (array $params): Mage_Core_Controller_Response_Http {
-            parse_str(Maho::signImageResizeRequest($params, Mage::getEncryptionKeyAsHex()), $query);
+            parse_str(withoutDeprecations(fn() => Maho::signImageResizeRequest($params, Mage::getEncryptionKeyAsHex())), $query);
             $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create('/core/index/resize', 'GET', $query));
             $response = new Mage_Core_Controller_Response_Http();
             new Mage_Core_IndexController($request, $response)->resizeAction();

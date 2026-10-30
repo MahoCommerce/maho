@@ -111,20 +111,20 @@ class Mage_Catalog_Helper_Product extends Mage_Core_Helper_Url
     }
 
     /**
-     * @deprecated since 26.11 a product has one image, use getImageUrl()
      * @param  Mage_Catalog_Model_Product $product
      * @return string
      */
+    #[\Deprecated(message: 'a product has one image, use getImageUrl()', since: '26.11')]
     public function getSmallImageUrl($product)
     {
         return $this->getImageUrl($product);
     }
 
     /**
-     * @deprecated since 26.11 a product has one image, use getImageUrl()
      * @param  Mage_Catalog_Model_Product $product
      * @return string
      */
+    #[\Deprecated(message: 'a product has one image, use getImageUrl()', since: '26.11')]
     public function getThumbnailUrl($product)
     {
         return $this->getImageUrl($product);
