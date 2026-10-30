@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
 // SPDX-License-Identifier: AFL-3.0
 
-import { Extension, Mark, Node } from 'https://esm.sh/@tiptap/core@3.31.3';
-import { Plugin } from 'https://esm.sh/@tiptap/pm@3.31.3/state';
+import { Extension, Mark, Node, Plugin } from '../../../../../tiptap.js';
 import { DATA_ATTRIBUTE, groupingTags, hasOwnDivNode, inlineTags, isInlineContext, isTextContainer, rawTags } from './html-context.js';
 import { buildSvgElement, parseSvgTree, renderSvgTree } from './svg.js';
 

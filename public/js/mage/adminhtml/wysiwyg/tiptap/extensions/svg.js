@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
 // SPDX-License-Identifier: AFL-3.0
 
-import { Node } from 'https://esm.sh/@tiptap/core@3.31.3';
+import { Node } from '../../../../../tiptap.js';
 import { DATA_ATTRIBUTE, isInlineContext } from './html-context.js';
 
 const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';

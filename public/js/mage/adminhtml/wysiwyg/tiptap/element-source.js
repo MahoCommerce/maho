@@ -1,9 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
 // SPDX-License-Identifier: OSL-3.0
 
-import { Extension, createNodeFromContent, getHTMLFromFragment } from 'https://esm.sh/@tiptap/core@3.31.3';
-import { Plugin } from 'https://esm.sh/@tiptap/pm@3.31.3/state';
-import { Fragment } from 'https://esm.sh/@tiptap/pm@3.31.3/model';
+import { Extension, createNodeFromContent, getHTMLFromFragment, Plugin, Fragment } from '../../../../tiptap.js';
 
 /** The HTML of `node`, as the plain HTML editor shows it. */
 const nodeHtml = (setup, node) => setup.convertToPlain(getHTMLFromFragment(Fragment.from(node), node.type.schema)).trim();
