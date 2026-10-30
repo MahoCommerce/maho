@@ -60,6 +60,22 @@ function failingContentBundle(): Mage_Core_Model_Design_Content_Bundle
     };
 }
 
+/**
+ * A bundle whose Tailwind CLI is the executable $script.
+ */
+function scriptContentBundle(string $script): Mage_Core_Model_Design_Content_Bundle
+{
+    return new class ($script) extends Mage_Core_Model_Design_Content_Bundle {
+        public function __construct(private readonly string $script) {}
+
+        #[\Override]
+        public function getTailwindBinary(): ?string
+        {
+            return $this->script;
+        }
+    };
+}
+
 function createContentBlock(string $content): Mage_Cms_Model_Block
 {
     return Mage::getModel('cms/block')
@@ -368,16 +384,7 @@ describe('the URLs in the copy of a theme stylesheet', function () {
 
     it('point at the same file from the directory of the copy', function (): void {
         $this->blocks[] = createContentBlock('<div class="rotate-47"></div>');
-        $script = $this->script;
-        $bundle = new class ($script) extends Mage_Core_Model_Design_Content_Bundle {
-            public function __construct(private readonly string $script) {}
-
-            #[\Override]
-            public function getTailwindBinary(): ?string
-            {
-                return $this->script;
-            }
-        };
+        $bundle = scriptContentBundle($this->script);
 
         $status = $bundle->build();
         $file = $bundle->getManifest()['base/default']['file'] ?? null;
@@ -419,16 +426,7 @@ describe('the URLs in the copy of a theme stylesheet', function () {
 
     it('read the media URL of the default store view when the current store is the admin store', function (): void {
         $this->blocks[] = createContentBlock('<div class="rotate-47"></div>');
-        $script = $this->script;
-        $bundle = new class ($script) extends Mage_Core_Model_Design_Content_Bundle {
-            public function __construct(private readonly string $script) {}
-
-            #[\Override]
-            public function getTailwindBinary(): ?string
-            {
-                return $this->script;
-            }
-        };
+        $bundle = scriptContentBundle($this->script);
 
         $app = Mage::app();
         $previousStoreId = (int) $app->getStore()->getId();
