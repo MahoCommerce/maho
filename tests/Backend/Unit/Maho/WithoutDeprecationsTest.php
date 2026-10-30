@@ -11,6 +11,7 @@ uses(Tests\MahoBackendTestCase::class);
 
 it('hides a deprecation and lets a warning reach the active error handler', function () {
     $seen = [];
+    $errorLevel = error_reporting(E_ALL);
     set_error_handler(function (int $errno) use (&$seen): bool {
         if (($errno & error_reporting()) === 0) {
             return true;
@@ -26,6 +27,7 @@ it('hides a deprecation and lets a warning reach the active error handler', func
         });
     } finally {
         restore_error_handler();
+        error_reporting($errorLevel);
     }
 
     expect($seen)->toBe([E_USER_WARNING]);
