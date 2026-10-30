@@ -7,6 +7,7 @@
 
 declare(strict_types=1);
 
+use Tests\Helpers\AllratestodayHarness;
 use Tests\Helpers\ExchangerateapiHarness;
 use Tests\Helpers\FrankfurterHarness;
 
@@ -40,6 +41,10 @@ function expectUsableRates(Mage_Directory_Model_Currency_Import_Eurbased $import
 
 it('imports usable rates from Frankfurter', function () {
     expectUsableRates((new FrankfurterHarness())->setCurrencies(['EUR', 'GBP', 'USD'], ['EUR', 'USD']));
+});
+
+it('imports usable rates from AllRatesToday', function () {
+    expectUsableRates((new AllratestodayHarness())->setCurrencies(['EUR', 'GBP', 'USD'], ['EUR', 'USD']));
 });
 
 it('imports usable rates from ExchangeRate-API', function () {

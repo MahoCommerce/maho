@@ -141,14 +141,25 @@ abstract class Mage_Directory_Model_Currency_Import_Eurbased extends Mage_Direct
     {
         $eurToFrom = $eurRates[$currencyFrom] ?? null;
         $eurToTo = $eurRates[$currencyTo] ?? null;
+        $rate = is_numeric($eurToFrom) && is_numeric($eurToTo) ? fdiv((float) $eurToTo, (float) $eurToFrom) : NAN;
 
-        if ($eurToFrom === null || $eurToTo === null || $eurToFrom == 0) {
+        if (!is_finite($rate) || $rate <= 0) {
             $this->_messages[] = Mage::helper('directory')
                 ->__('Unable to calculate rate for %s to %s.', $currencyFrom, $currencyTo);
             return null;
         }
 
-        return (float) $eurToTo / (float) $eurToFrom;
+        return $rate;
+    }
+
+    /**
+     * HTTP headers to send with each request, such as an API key
+     *
+     * @return array<string, string>
+     */
+    protected function _getRequestHeaders(): array
+    {
+        return [];
     }
 
     /**
@@ -164,6 +175,7 @@ abstract class Mage_Directory_Model_Currency_Import_Eurbased extends Mage_Direct
         try {
             $httpResponse = $this->_httpClient->request('GET', $url, [
                 'timeout' => $this->_getTimeout(),
+                'headers' => $this->_getRequestHeaders(),
             ]);
             // Use false to not throw on HTTP errors, allowing us to read error response body
             $jsonResponse = $httpResponse->getContent(false);
