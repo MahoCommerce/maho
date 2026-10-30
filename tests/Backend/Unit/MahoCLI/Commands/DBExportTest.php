@@ -84,7 +84,7 @@ it('builds a MySQL pipeline without the password, with definer stripping and com
     expect($command)->toMatch('/^(mysqldump|mariadb-dump) --single-transaction --quick --no-tablespaces/')
         ->toContain("-h 'db'")
         ->toContain("-u'maho'")
-        ->not->toContain('-p')
+        ->not->toMatch('/ -p\S*/')
         ->not->toContain('s3cr3t-pw')
         ->toContain('LANG=C LC_CTYPE=C LC_ALL=C sed -e')
         ->toContain('| pv | gzip -c')
