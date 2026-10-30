@@ -15,7 +15,6 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
-use Symfony\Component\Console\Output\ConsoleOutputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
@@ -149,17 +148,6 @@ class DBQuery extends BaseMahoCommand
         $table->render();
 
         return Command::SUCCESS;
-    }
-
-    /**
-     * Write a diagnostic to STDERR. Uses the console's dedicated error stream when available
-     * (so it stays off STDOUT and is assertable in tests) and OUTPUT_RAW so a message that
-     * happens to contain "<...>" is not parsed as console markup.
-     */
-    private function writeError(OutputInterface $output, string $message): void
-    {
-        $stream = $output instanceof ConsoleOutputInterface ? $output->getErrorOutput() : $output;
-        $stream->writeln($message, OutputInterface::OUTPUT_RAW);
     }
 
     private function executeMysql(mixed $connConfig, string $query): int

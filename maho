@@ -55,6 +55,8 @@ $application->addCommand(new \MahoCLI\Commands\CustomerGroupDelete());
 $application->addCommand(new \MahoCLI\Commands\CustomerGroupList());
 
 $application->addCommand(new \MahoCLI\Commands\DBConnect());
+$application->addCommand(new \MahoCLI\Commands\DBExport());
+$application->addCommand(new \MahoCLI\Commands\DBImport());
 $application->addCommand(new \MahoCLI\Commands\DBOptimize());
 $application->addCommand(new \MahoCLI\Commands\DBQuery());
 
