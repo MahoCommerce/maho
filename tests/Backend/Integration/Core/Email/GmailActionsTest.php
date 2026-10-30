@@ -52,7 +52,7 @@ describe('Gmail actions', function () {
         $hash = Mage::helper('core')->urlEncode('ship_id:77:a1b2c3');
 
         expect($payload['@type'])->toBe('EmailMessage');
-        expect($payload['potentialAction']['@type'])->toBe('TrackAction');
+        expect($payload['potentialAction']['@type'])->toBe('ViewAction');
         expect($payload['potentialAction']['target'])->toContain('shipping/tracking/popup');
         expect($payload['potentialAction']['target'])->toContain(urlencode($hash));
         expect($payload['description'])->toContain('1Z999AA10123456784');
@@ -70,7 +70,7 @@ describe('Gmail actions', function () {
 
         $payload = ($this->payload)($this->actions->getMarkup($this->variables));
 
-        expect($payload['potentialAction']['@type'])->toBe('TrackAction');
+        expect($payload['potentialAction']['@type'])->toBe('ViewAction');
         expect($payload['potentialAction']['target'])
             ->toBe('https://www.ups.com/track?tracknum=1Z999AA10123456784');
     });

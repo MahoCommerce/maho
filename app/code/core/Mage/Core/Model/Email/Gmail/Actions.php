@@ -74,7 +74,7 @@ class Mage_Core_Model_Email_Gmail_Actions
             'name' => $label,
             'description' => Mage::helper('core')->__('Tracking number %s', implode(', ', $numbers)),
             'potentialAction' => [
-                '@type' => 'TrackAction',
+                '@type' => 'ViewAction',
                 'name' => $label,
                 'target' => $target,
             ],
