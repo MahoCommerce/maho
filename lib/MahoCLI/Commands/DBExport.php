@@ -102,19 +102,15 @@ class DBExport extends BaseMahoCommand
             $compression === 'none' ? 'uncompressed' : $compression,
         ));
 
-        $partial = $file . '.part';
-        if (is_file($partial)) {
-            chmod($partial, 0600);
+        $partial = is_writable($directory) ? tempnam($directory, basename($file) . '.') : false;
+        if ($partial === false) {
+            $this->writeError($output, "Cannot write in directory: {$directory}");
+            return Command::FAILURE;
         }
-        $previousUmask = umask(0077);
-        try {
-            $exitCode = $this->runShellCommand(
-                $this->buildExportCommand($conn, $partial, $compression, $this->progressViewer()),
-                $conn,
-            );
-        } finally {
-            umask($previousUmask);
-        }
+        $exitCode = $this->runShellCommand(
+            $this->buildExportCommand($conn, $partial, $compression, $this->progressViewer()),
+            $conn,
+        );
         if ($exitCode !== 0) {
             if (is_file($partial)) {
                 unlink($partial);

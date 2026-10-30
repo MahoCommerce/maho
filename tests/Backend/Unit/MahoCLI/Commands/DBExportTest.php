@@ -249,8 +249,8 @@ function dbExportRecordingCommand(int $exitCode, ?string $writeFile = null): DBE
         protected function runShellCommand(string $command, array $conn): int
         {
             $this->ran[] = $command;
-            if ($this->writeFile !== null) {
-                file_put_contents($this->writeFile, 'partial');
+            if ($this->writeFile !== null && preg_match("/> '([^']+)'\$/", $command, $target) === 1) {
+                file_put_contents($target[1], 'partial');
             }
 
             return $this->exitCode;
@@ -268,16 +268,15 @@ function dbExportRunRecording(DBExport $command, array $input): ExecutionResult
 it('keeps the existing dump and removes the partial file when a forced export fails', function () {
     $file = sys_get_temp_dir() . '/maho_dbexport_fail.sql';
     file_put_contents($file, 'old');
-    $command = dbExportRecordingCommand(1, $file . '.part');
+    $command = dbExportRecordingCommand(1, $file);
 
     try {
         $result = dbExportRunRecording($command, ['file' => $file, '--compression' => 'none', '--force' => true]);
         $this->assertCommandFailed($result);
-        expect(is_file($file . '.part'))->toBeFalse()
+        expect(glob($file . '.*'))->toBe([])
             ->and(file_get_contents($file))->toBe('old');
     } finally {
         @unlink($file);
-        @unlink($file . '.part');
     }
 });
 
@@ -285,7 +284,7 @@ it('replaces the dump with a file that only the owner can read', function () {
     $file = sys_get_temp_dir() . '/maho_dbexport_mode.sql';
     file_put_contents($file, 'old');
     chmod($file, 0644);
-    $command = dbExportRecordingCommand(0, $file . '.part');
+    $command = dbExportRecordingCommand(0, $file);
     $umask = umask();
 
     try {
@@ -296,7 +295,6 @@ it('replaces the dump with a file that only the owner can read', function () {
             ->and(umask())->toBe($umask);
     } finally {
         @unlink($file);
-        @unlink($file . '.part');
     }
 });
 
