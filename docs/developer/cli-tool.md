@@ -172,7 +172,7 @@ the matching client on the host. They also work while the database is empty.
 ./maho db:import var/backups/shop.sql --drop-tables --force
 ```
 
-`db:import` does not detect the compression. It reads the file header and refuses a gzip
+`db:import` does not choose the compression for you. It reads the file header and refuses a gzip
 or zstd dump that you load with the wrong `--compression`. The error message names the right value.
 
 `--drop-tables` empties the database first. On MySQL and MariaDB, it drops and creates the database.
