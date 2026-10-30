@@ -114,24 +114,29 @@ class DBImport extends BaseMahoCommand
             }
         }
 
-        $commands = [];
-        if ($dropTables) {
-            $commands = $this->buildResetCommands($conn);
-        }
-        $commands[] = $this->buildImportCommand($conn, $file, $compression, $this->progressViewer());
+        $resetCommands = $dropTables ? $this->buildResetCommands($conn) : [];
+        $importCommand = $this->buildImportCommand($conn, $file, $compression, $this->progressViewer());
 
         if ($dryRun) {
-            $this->renderDryRun($output, $conn, $commands);
+            $this->renderDryRun($output, $conn, [...$resetCommands, $importCommand]);
             return Command::SUCCESS;
         }
 
-        $resetCount = $dropTables ? count($commands) - 1 : 0;
-        if ($resetCount > 0) {
+        if ($resetCommands !== []) {
             $output->writeln(sprintf('Emptying database <info>%s</info>...', $conn['dbname']));
         }
-        foreach (array_slice($commands, 0, $resetCount) as $resetCommand) {
+        foreach ($resetCommands as $resetCommand) {
             if ($this->runShellCommand($resetCommand, $conn) !== 0) {
-                $this->writeError($output, 'Could not empty the database, nothing has been imported.');
+                $this->writeError($output, 'The command could not empty the database. It imported nothing.');
+                return Command::FAILURE;
+            }
+        }
+
+        // sqlite3 does not create the directory of the database file.
+        if ($conn['engine'] === 'sqlite') {
+            $directory = dirname($this->sqliteDatabaseFile($conn['dbname']));
+            if (!is_dir($directory) && !@mkdir($directory, 0775, true) && !is_dir($directory)) {
+                $this->writeError($output, "Cannot create directory: {$directory}");
                 return Command::FAILURE;
             }
         }
@@ -143,7 +148,7 @@ class DBImport extends BaseMahoCommand
             $compression === 'none' ? 'uncompressed' : $compression,
         ));
 
-        if ($this->runShellCommand($commands[$resetCount], $conn) !== 0) {
+        if ($this->runShellCommand($importCommand, $conn) !== 0) {
             $this->writeError($output, 'Database import failed.');
             return Command::FAILURE;
         }

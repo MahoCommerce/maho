@@ -154,10 +154,10 @@ All commands should be self-explanatory, also thanks to the inline descriptions.
 
 ### Database dumps
 
-<span class="version-badge">v26.11+</span> `db:export` and `db:import` move a database in
-and out of a project using the connection in `app/etc/local.xml`. They drive the native
-client of the configured engine (`mysqldump`, `pg_dump` or `sqlite3`), so the matching
-client has to be installed on the host, and they work even while the database is empty.
+<span class="version-badge">v26.11+</span> `db:export` and `db:import` write and load a database
+dump. They use the connection in `app/etc/local.xml`. They run the native client of the
+configured engine (`mysqldump` or `mariadb-dump`, `pg_dump` or `sqlite3`), so you must install
+the matching client on the host. They also work while the database is empty.
 
 ```bash
 # gzip dump (the default), a plain SQL dump, or a zstd one
@@ -172,11 +172,14 @@ client has to be installed on the host, and they work even while the database is
 ./maho db:import var/backups/shop.sql --drop-tables --force
 ```
 
-Compression is not auto-detected on import, but the file header is checked: a gzip or
-zstd dump loaded with the wrong `--compression` is refused with a hint instead of
-reaching the client. `--drop-tables` empties the database first: it drops and recreates
-the database on MySQL, resets the `public` schema on PostgreSQL, and removes the file
-on SQLite. After a restore run `./maho cache:flush`.
+`db:import` does not detect the compression. It reads the file header and refuses a gzip
+or zstd dump that you load with the wrong `--compression`. The error message names the right value.
+
+`--drop-tables` empties the database first. On MySQL and MariaDB, it drops and creates the database.
+On PostgreSQL, it resets the `public` schema. On SQLite, it removes the file.
+A dump from `pg_dump` and a dump from MariaDB or MySQL replace the tables they find. A SQLite dump
+does not. To load a SQLite dump into a database that has tables, use `--drop-tables`.
+After a restore, run `./maho cache:flush`.
 
 On MySQL, `db:export` and `db:import` give the password to the client in the `MYSQL_PWD`
 variable. A `password=` line in an option file such as `~/.my.cnf` has priority over it. If the

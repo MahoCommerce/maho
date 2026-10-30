@@ -13,11 +13,10 @@ namespace MahoCLI\Commands;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * Connection resolution and native-client pipelines shared by db:export and db:import.
+ * Connection settings and native client pipelines for db:export and db:import.
  *
- * The connection is read straight from app/etc/local.xml rather than through Mage,
- * because importing must work while the database is empty, missing, or unreadable,
- * which is exactly when the framework cannot boot.
+ * The connection comes from the configuration files, not from the application,
+ * because an import must work when the database is empty, missing or unreadable.
  *
  * Every pipeline is a plain shell string. --dry-run prints the same text, but not the password.
  */
@@ -51,36 +50,23 @@ trait DatabaseDumpTrait
     }
 
     /**
-     * Project root: the constant the CLI entry point defines, with the Composer
-     * root package path as a fallback for calls made outside the CLI.
-     */
-    private function projectRoot(): string
-    {
-        return defined('MAHO_ROOT_DIR') ? MAHO_ROOT_DIR : \Maho::getBasePath();
-    }
-
-    /**
      * Connection settings from local.xml, with the engine resolved.
      *
      * @return array{engine: string, host: string, port: string, dbname: string, username: string, password: string}
-     * @throws \RuntimeException when local.xml is missing, unparsable, or has no connection node
+     * @throws \RuntimeException when local.xml is missing or the configuration has no connection node
      */
     protected function readConnectionConfig(): array
     {
         // Write local.xml from MAHO_LOCAL_XML when the file is missing.
-        \Mage::isInstalled(['etc_dir' => $this->projectRoot() . '/app/etc']);
-        $path = $this->projectRoot() . '/app/etc/local.xml';
+        \Mage::isInstalled(['etc_dir' => MAHO_ROOT_DIR . '/app/etc']);
+        $path = MAHO_ROOT_DIR . '/app/etc/local.xml';
         if (!is_file($path)) {
             throw new \RuntimeException("local.xml not found at {$path}");
         }
 
-        $xml = @simplexml_load_file($path);
-        if ($xml === false) {
-            throw new \RuntimeException("Cannot parse {$path}");
-        }
-
-        $node = $xml->global->resources->default_setup->connection ?? null;
-        if ($node === null) {
+        // loadBase() merges every file of app/etc, as the application does, and needs no database.
+        $node = new \Mage_Core_Model_Config()->loadBase()->getNode('global/resources/default_setup/connection');
+        if ($node === false) {
             throw new \RuntimeException("global/resources/default_setup/connection is missing from {$path}");
         }
 
@@ -152,8 +138,7 @@ trait DatabaseDumpTrait
     }
 
     /**
-     * The `pv` progress bar, when installed. It is a soft dependency: the
-     * pipeline is valid without it.
+     * The `pv` progress bar, when installed. The pipeline also works without it.
      */
     protected function progressViewer(): ?string
     {
@@ -171,7 +156,9 @@ trait DatabaseDumpTrait
 
         if ($conn['engine'] === 'mysql') {
             // A DEFINER clause breaks a restore under another user. Remove it, but never in a data row.
-            $steps[] = 'LANG=C LC_CTYPE=C LC_ALL=C sed -e ' . escapeshellarg('/^INSERT /!s/DEFINER[ ]*=[ ]*[^*]*\*/\*/');
+            // The first line that MariaDB writes is an error in the MySQL client. Remove it too.
+            $steps[] = 'LANG=C LC_CTYPE=C LC_ALL=C sed -e ' . escapeshellarg('/^INSERT /!s/DEFINER[ ]*=[ ]*[^*]*\*/\*/')
+                . ' -e ' . escapeshellarg('1{/^\/\*M!999999\\\\- enable the sandbox mode \*\/$/d;}');
         }
         if ($pv !== null) {
             $steps[] = $pv;
@@ -236,8 +223,10 @@ trait DatabaseDumpTrait
                     '%s -e %s',
                     $this->buildMysqlClient($conn),
                     escapeshellarg(sprintf(
-                        'CREATE DATABASE %s DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci',
+                        'CREATE DATABASE %s DEFAULT CHARACTER SET %s COLLATE %s',
                         $this->quoteIdentifier($conn, $dbname),
+                        \Maho\Db\Adapter\Pdo\Mysql::DEFAULT_CHARSET,
+                        \Maho\Db\Adapter\Pdo\Mysql::DEFAULT_COLLATION,
                     )),
                 ),
             ],
@@ -288,7 +277,7 @@ trait DatabaseDumpTrait
             return $dbname;
         }
 
-        return $this->projectRoot() . '/var/db/' . $dbname;
+        return MAHO_ROOT_DIR . '/var/db/' . $dbname;
     }
 
     /**
@@ -317,9 +306,9 @@ trait DatabaseDumpTrait
     }
 
     /**
-     * Run a shell command, streaming its STDERR (progress bars included) to the
-     * terminal. Bash runs it with pipefail, so a failure in the
-     * middle of a pipeline is not masked by the compressor succeeding.
+     * Run a shell command. STDERR (progress bars included) goes to the terminal.
+     * Bash runs the command with pipefail. If one step of the pipeline fails, the command fails,
+     * also when the last step succeeds.
      * The password goes to the client in the environment, so `ps` does not show it.
      *
      * @param array<string, string> $conn
@@ -349,6 +338,19 @@ trait DatabaseDumpTrait
     }
 
     /**
+     * Whether the dump tool knows --set-gtid-purged. The MySQL tool does, and its default
+     * writes statements that a normal user cannot load. The MariaDB tools do not know the option.
+     */
+    protected function supportsGtidPurged(string $binary): bool
+    {
+        if ($binary === 'mariadb-dump') {
+            return false;
+        }
+
+        return !str_contains((string) shell_exec(escapeshellarg($binary) . ' --version 2>/dev/null'), 'MariaDB');
+    }
+
+    /**
      * @param array<string, string> $conn
      */
     private function buildDumpCommand(array $conn): string
@@ -362,6 +364,7 @@ trait DatabaseDumpTrait
                 '--quick',
                 '--no-tablespaces',
                 '--default-character-set=utf8mb4',
+                ...($this->supportsGtidPurged($binary) ? ['--set-gtid-purged=OFF'] : []),
                 ...$this->mysqlConnectionArguments($conn),
                 escapeshellarg($conn['dbname']),
             ]),
@@ -369,6 +372,8 @@ trait DatabaseDumpTrait
                 $binary,
                 '--no-owner',
                 '--no-privileges',
+                '--clean',
+                '--if-exists',
                 ...$this->pgsqlConnectionArguments($conn),
                 escapeshellarg($conn['dbname']),
             ]),
@@ -388,7 +393,7 @@ trait DatabaseDumpTrait
     {
         return match ($conn['engine']) {
             'mysql' => implode(' ', [
-                ...[$this->loadBinary($conn)],
+                $this->loadBinary($conn),
                 ...$this->mysqlConnectionArguments($conn),
                 escapeshellarg($conn['dbname']),
             ]),
@@ -448,10 +453,13 @@ trait DatabaseDumpTrait
         $arguments = [];
         $defaultPort = $this->engineDumpSettings('mysql')[1];
 
-        // Like the framework adapter: a host with a slash is a socket, and "host:port" holds the port.
+        // Like the framework adapter: a host with a slash is a socket, and "host:port" or "[ipv6]:port" holds the port.
         $host = $conn['host'];
         $port = $conn['port'];
-        if (!str_contains($host, '/') && substr_count($host, ':') === 1) {
+        if (preg_match('/^\[([^\]]+)\](?::(\d+))?$/', $host, $matches) === 1) {
+            $host = $matches[1];
+            $port = $matches[2] ?? $port;
+        } elseif (!str_contains($host, '/') && substr_count($host, ':') === 1) {
             [$host, $port] = explode(':', $host);
         }
 

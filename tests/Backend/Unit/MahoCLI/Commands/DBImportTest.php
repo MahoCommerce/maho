@@ -221,15 +221,19 @@ it('stops the SQLite load at the first error', function () {
  * Command whose shell calls are recorded instead of run.
  *
  * @param list<int> $exitCodes One exit code for each call, in order.
+ * @param array<string, string> $connection
  */
-function dbImportRecordingCommand(array $exitCodes): DBImport
+function dbImportRecordingCommand(array $exitCodes, array $connection = []): DBImport
 {
-    return new class ('db:import', $exitCodes) extends DBImport {
+    return new class ('db:import', $exitCodes, $connection) extends DBImport {
         /** @var list<string> */
         public array $ran = [];
 
-        /** @param list<int> $exitCodes */
-        public function __construct(string $name, private array $exitCodes)
+        /**
+         * @param list<int> $exitCodes
+         * @param array<string, string> $connection
+         */
+        public function __construct(string $name, private array $exitCodes, private array $connection)
         {
             parent::__construct($name);
         }
@@ -237,7 +241,7 @@ function dbImportRecordingCommand(array $exitCodes): DBImport
         #[\Override]
         protected function readConnectionConfig(): array
         {
-            return dbImportConnection();
+            return dbImportConnection($this->connection);
         }
 
         #[\Override]
@@ -267,7 +271,53 @@ it('empties the database before the load with --drop-tables', function () {
         expect($command->ran)->toHaveCount(3)
             ->and($command->ran[0])->toContain('DROP DATABASE')
             ->and($command->ran[1])->toContain('CREATE DATABASE')
+            ->and($command->ran[1])->toContain('COLLATE ' . \Maho\Db\Adapter\Pdo\Mysql::DEFAULT_COLLATION)
             ->and($command->ran[2])->toContain($file);
+    });
+});
+
+it('runs one reset command before the load for PostgreSQL and SQLite', function (string $engine, string $reset) {
+    $command = dbImportRecordingCommand([], ['engine' => $engine, 'dbname' => sys_get_temp_dir() . '/maho_dbimport_reset.sqlite']);
+    new Application()->addCommand($command);
+
+    dbImportWithTempFile('-- Maho', function (string $file) use ($command, $reset): void {
+        $result = new CommandTester($command)->run(['file' => $file, '--drop-tables' => true, '--force' => true]);
+
+        $this->assertCommandIsSuccessful($result);
+        expect($command->ran)->toHaveCount(2)
+            ->and($command->ran[0])->toContain($reset)
+            ->and($command->ran[1])->toContain($file);
+    });
+})->with([['pgsql', 'DROP SCHEMA public CASCADE'], ['sqlite', 'rm -f']]);
+
+it('creates the directory of a SQLite database file before the load', function () {
+    $directory = sys_get_temp_dir() . '/maho_dbimport_dir_' . uniqid();
+    $command = dbImportRecordingCommand([], ['engine' => 'sqlite', 'dbname' => $directory . '/db/shop.sqlite']);
+    new Application()->addCommand($command);
+
+    try {
+        dbImportWithTempFile('-- Maho', function (string $file) use ($command, $directory): void {
+            $result = new CommandTester($command)->run(['file' => $file]);
+
+            $this->assertCommandIsSuccessful($result);
+            expect(is_dir($directory . '/db'))->toBeTrue();
+        });
+    } finally {
+        @rmdir($directory . '/db');
+        @rmdir($directory);
+    }
+});
+
+it('refuses an engine that has no client', function () {
+    $command = dbImportRecordingCommand([], ['engine' => 'oracle']);
+    new Application()->addCommand($command);
+
+    dbImportWithTempFile('-- Maho', function (string $file) use ($command): void {
+        $result = new CommandTester($command)->run(['file' => $file]);
+
+        $this->assertCommandFailed($result);
+        expect($command->ran)->toBe([])
+            ->and($result->getErrorOutput())->toContain('Unsupported database engine: oracle');
     });
 });
 
@@ -280,7 +330,7 @@ it('does not load the dump when emptying the database fails', function () {
 
         $this->assertCommandFailed($result);
         expect($command->ran)->toHaveCount(1)
-            ->and($result->getErrorOutput())->toContain('nothing has been imported');
+            ->and($result->getErrorOutput())->toContain('It imported nothing');
     });
 });
 

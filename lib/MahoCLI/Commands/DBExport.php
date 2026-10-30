@@ -82,10 +82,8 @@ class DBExport extends BaseMahoCommand
             return Command::FAILURE;
         }
 
-        $command = $this->buildExportCommand($conn, $file, $compression, $this->progressViewer());
-
         if ($dryRun) {
-            $this->renderDryRun($output, $conn, [$command]);
+            $this->renderDryRun($output, $conn, [$this->buildExportCommand($conn, $file, $compression, $this->progressViewer())]);
             return Command::SUCCESS;
         }
 
@@ -115,7 +113,7 @@ class DBExport extends BaseMahoCommand
             if (is_file($partial)) {
                 unlink($partial);
             }
-            $this->writeError($output, 'Database export failed, the partial file has been removed.');
+            $this->writeError($output, 'The database export failed. The command removed the partial file.');
             return Command::FAILURE;
         }
         if (!@rename($partial, $file)) {

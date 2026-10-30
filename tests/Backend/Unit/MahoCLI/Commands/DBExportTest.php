@@ -79,12 +79,13 @@ it('refuses to overwrite an existing dump without --force', function () {
 });
 
 it('builds a MySQL pipeline without the password, with definer stripping and compression', function () {
-    $command = dbExportReflect('buildExportCommand', dbExportConnection(), '/tmp/dump.sql.gz', 'gzip', 'pv');
+    $command = dbExportReflect('buildExportCommand', dbExportConnection(['password' => 's3cr3t-pw']), '/tmp/dump.sql.gz', 'gzip', 'pv');
 
     expect($command)->toMatch('/^(mysqldump|mariadb-dump) --single-transaction --quick --no-tablespaces/')
         ->toContain("-h 'db'")
         ->toContain("-u'maho'")
         ->not->toContain('-p')
+        ->not->toContain('s3cr3t-pw')
         ->toContain('LANG=C LC_CTYPE=C LC_ALL=C sed -e')
         ->toContain('| pv | gzip -c')
         ->toEndWith("> '/tmp/dump.sql.gz'");
@@ -108,10 +109,12 @@ it('builds a PostgreSQL pipeline that keeps the password out of the argument lis
     $command = dbExportReflect('buildExportCommand', dbExportConnection([
         'engine' => 'pgsql',
         'port' => '5433',
+        'password' => 's3cr3t-pw',
     ]), '/tmp/dump.sql.zst', 'zstd', null);
 
     expect($command)->toStartWith('pg_dump --no-owner --no-privileges')
-        ->not->toContain('PGPASSWORD')
+        ->toContain('--clean --if-exists')
+        ->not->toContain('s3cr3t-pw')
         ->toContain("-h 'db'")
         ->toContain("-p '5433'")
         ->toContain("-U 'maho'")
@@ -215,6 +218,46 @@ it('splits a host:port value and sends a socket path to --socket', function () {
         ->not->toContain('-h ');
 });
 
+it('splits a host in brackets, with or without a port', function (string $host, string $expected) {
+    $command = dbExportReflect('buildExportCommand', dbExportConnection(['host' => $host]), '/tmp/dump.sql', 'none', null);
+
+    expect($command)->toContain($expected);
+})->with([
+    ['[::1]:3307', "-h '::1' -P '3307'"],
+    ['[fd00::5]', "-h 'fd00::5'"],
+    ['::1', "-h '::1'"],
+]);
+
+it('removes the first line that MariaDB writes, but not a data row with the same text', function () {
+    $pipeline = dbExportReflect('buildExportCommand', dbExportConnection(), '/tmp/dump.sql', 'none', null);
+    $sed = current(array_filter(explode(' | ', $pipeline), static fn(string $step): bool => str_starts_with($step, 'LANG=C')));
+    $sed = preg_replace('/ > .*$/', '', $sed);
+    $line = '/*M!999999\\- enable the sandbox mode */';
+    $input = "{$line}\nCREATE TABLE t (a int);\n{$line}\n";
+
+    expect(shell_exec('printf %s ' . escapeshellarg($input) . ' | ' . $sed))
+        ->toBe("CREATE TABLE t (a int);\n{$line}\n");
+});
+
+it('asks the MySQL dump tool for no GTID statements only when the tool knows the option', function (bool $supported) {
+    $command = new class ('db:export', $supported) extends DBExport {
+        public function __construct(string $name, private bool $supported)
+        {
+            parent::__construct($name);
+        }
+
+        #[\Override]
+        protected function supportsGtidPurged(string $binary): bool
+        {
+            return $this->supported;
+        }
+    };
+    $pipeline = new ReflectionMethod(DBExport::class, 'buildExportCommand')
+        ->invoke($command, dbExportConnection(), '/tmp/dump.sql', 'none', null);
+
+    expect(str_contains($pipeline, '--set-gtid-purged=OFF'))->toBe($supported);
+})->with([[true], [false]]);
+
 it('fails a pipeline when a step before the last one fails', function () {
     expect(dbExportReflect('runShellCommand', 'false | true', dbExportConnection(['engine' => 'sqlite'])))->not->toBe(0);
 });
@@ -222,13 +265,17 @@ it('fails a pipeline when a step before the last one fails', function () {
 /**
  * Command whose shell calls are recorded instead of run.
  */
-function dbExportRecordingCommand(int $exitCode, ?string $writeFile = null): DBExport
+/**
+ * @param array<string, string> $connection
+ */
+function dbExportRecordingCommand(int $exitCode, ?string $writeFile = null, array $connection = []): DBExport
 {
-    return new class ('db:export', $exitCode, $writeFile) extends DBExport {
+    return new class ('db:export', $exitCode, $writeFile, $connection) extends DBExport {
         /** @var list<string> */
         public array $ran = [];
 
-        public function __construct(string $name, private int $exitCode, private ?string $writeFile)
+        /** @param array<string, string> $connection */
+        public function __construct(string $name, private int $exitCode, private ?string $writeFile, private array $connection)
         {
             parent::__construct($name);
         }
@@ -236,7 +283,7 @@ function dbExportRecordingCommand(int $exitCode, ?string $writeFile = null): DBE
         #[\Override]
         protected function readConnectionConfig(): array
         {
-            return dbExportConnection();
+            return dbExportConnection($this->connection);
         }
 
         #[\Override]
@@ -311,4 +358,24 @@ it('runs no command and ignores an existing file with --dry-run', function () {
     } finally {
         unlink($file);
     }
+});
+
+it('refuses a SQLite database file that does not exist', function () {
+    $command = dbExportRecordingCommand(0, null, ['engine' => 'sqlite', 'dbname' => sys_get_temp_dir() . '/maho_dbexport_none.sqlite']);
+
+    $result = dbExportRunRecording($command, ['file' => sys_get_temp_dir() . '/maho_dbexport_sqlite.sql', '--compression' => 'none']);
+
+    $this->assertCommandFailed($result);
+    expect($command->ran)->toBe([])
+        ->and($result->getErrorOutput())->toContain('SQLite database file not found');
+});
+
+it('refuses an engine that has no dump tool', function () {
+    $command = dbExportRecordingCommand(0, null, ['engine' => 'oracle']);
+
+    $result = dbExportRunRecording($command, ['file' => sys_get_temp_dir() . '/maho_dbexport_oracle.sql', '--compression' => 'none']);
+
+    $this->assertCommandFailed($result);
+    expect($command->ran)->toBe([])
+        ->and($result->getErrorOutput())->toContain('Unsupported database engine: oracle');
 });
