@@ -102,11 +102,29 @@ class DBExport extends BaseMahoCommand
             $compression === 'none' ? 'uncompressed' : $compression,
         ));
 
-        if ($this->runShellCommand($command, $conn) !== 0) {
-            if (is_file($file)) {
-                unlink($file);
+        $partial = $file . '.part';
+        if (is_file($partial)) {
+            chmod($partial, 0600);
+        }
+        $previousUmask = umask(0077);
+        try {
+            $exitCode = $this->runShellCommand(
+                $this->buildExportCommand($conn, $partial, $compression, $this->progressViewer()),
+                $conn,
+            );
+        } finally {
+            umask($previousUmask);
+        }
+        if ($exitCode !== 0) {
+            if (is_file($partial)) {
+                unlink($partial);
             }
             $this->writeError($output, 'Database export failed, the partial file has been removed.');
+            return Command::FAILURE;
+        }
+        if (!@rename($partial, $file)) {
+            @unlink($partial);
+            $this->writeError($output, "Cannot move the dump to {$file}.");
             return Command::FAILURE;
         }
 

@@ -57,6 +57,11 @@ class DBImport extends BaseMahoCommand
             return Command::FAILURE;
         }
 
+        if (!is_readable($file)) {
+            $this->writeError($output, "Cannot read file: {$file}");
+            return Command::FAILURE;
+        }
+
         $detected = $this->detectCompression($file);
         if ($detected !== null && $detected !== $compression) {
             $this->writeError($output, sprintf(

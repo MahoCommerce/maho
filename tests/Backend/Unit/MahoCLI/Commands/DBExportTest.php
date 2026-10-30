@@ -137,7 +137,7 @@ it('keeps an absolute SQLite database path untouched', function () {
 
 it('prints the resolved connection and the command in --dry-run mode', function () {
     $conn = dbExportConnection(['host' => 'db.internal', 'password' => 'secret']);
-    $command = "mysqldump -p'secret' maho > '/tmp/dump.sql'";
+    $command = "mysqldump maho > '/tmp/dump.sql'";
 
     $buffer = new \Symfony\Component\Console\Output\BufferedOutput();
     dbExportReflect('renderDryRun', $buffer, $conn, [$command]);
@@ -145,7 +145,8 @@ it('prints the resolved connection and the command in --dry-run mode', function 
 
     expect($display)->toContain('Dry run')
         ->toContain('db.internal')
-        ->toContain('secret')
+        ->toContain('********')
+        ->not->toContain('secret')
         ->toContain($command);
 });
 
@@ -264,16 +265,38 @@ function dbExportRunRecording(DBExport $command, array $input): ExecutionResult
     return new CommandTester($command)->run($input);
 }
 
-it('removes the partial file when the export fails', function () {
+it('keeps the existing dump and removes the partial file when a forced export fails', function () {
     $file = sys_get_temp_dir() . '/maho_dbexport_fail.sql';
-    $command = dbExportRecordingCommand(1, $file);
+    file_put_contents($file, 'old');
+    $command = dbExportRecordingCommand(1, $file . '.part');
 
     try {
-        $result = dbExportRunRecording($command, ['file' => $file, '--compression' => 'none']);
+        $result = dbExportRunRecording($command, ['file' => $file, '--compression' => 'none', '--force' => true]);
         $this->assertCommandFailed($result);
-        expect(is_file($file))->toBeFalse();
+        expect(is_file($file . '.part'))->toBeFalse()
+            ->and(file_get_contents($file))->toBe('old');
     } finally {
         @unlink($file);
+        @unlink($file . '.part');
+    }
+});
+
+it('replaces the dump with a file that only the owner can read', function () {
+    $file = sys_get_temp_dir() . '/maho_dbexport_mode.sql';
+    file_put_contents($file, 'old');
+    chmod($file, 0644);
+    $command = dbExportRecordingCommand(0, $file . '.part');
+    $umask = umask();
+
+    try {
+        $result = dbExportRunRecording($command, ['file' => $file, '--compression' => 'none', '--force' => true]);
+        $this->assertCommandIsSuccessful($result);
+        expect(file_get_contents($file))->toBe('partial')
+            ->and(fileperms($file) & 0777)->toBe(0600)
+            ->and(umask())->toBe($umask);
+    } finally {
+        @unlink($file);
+        @unlink($file . '.part');
     }
 });
 

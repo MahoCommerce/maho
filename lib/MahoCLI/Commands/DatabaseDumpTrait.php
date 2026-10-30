@@ -126,7 +126,7 @@ trait DatabaseDumpTrait
      */
     protected function missingBinaries(array $conn, string $compression, bool $exporting): array
     {
-        $required = [$exporting ? $this->dumpBinary($conn) : $this->loadBinary($conn)];
+        $required = [$exporting ? $this->dumpBinary($conn) : $this->loadBinary($conn), 'bash'];
 
         $compressor = $this->compressionBinary($compression);
         if ($compressor !== null) {
@@ -293,7 +293,7 @@ trait DatabaseDumpTrait
 
     /**
      * Print the connection and the commands, without running anything.
-     * The password is in the Connection list. A run sends it to the client in MYSQL_PWD or PGPASSWORD.
+     * The password is hidden. A run sends it to the client in MYSQL_PWD or PGPASSWORD.
      *
      * @param array<string, string> $conn
      * @param list<string> $commands
@@ -308,7 +308,7 @@ trait DatabaseDumpTrait
         $output->writeln(sprintf('  Port:     %s', $conn['port'] === '' ? '-' : $conn['port']));
         $output->writeln(sprintf('  Database: %s', $conn['dbname']));
         $output->writeln(sprintf('  User:     %s', $conn['username'] === '' ? '-' : $conn['username']));
-        $output->writeln(sprintf('  Password: %s', $conn['password'] === '' ? '-' : $conn['password']));
+        $output->writeln(sprintf('  Password: %s', $conn['password'] === '' ? '-' : '********'));
         $output->writeln('');
         $output->writeln('Command(s):');
         foreach ($commands as $command) {
@@ -318,7 +318,7 @@ trait DatabaseDumpTrait
 
     /**
      * Run a shell command, streaming its STDERR (progress bars included) to the
-     * terminal. Where bash exists it is used with pipefail, so a failure in the
+     * terminal. Bash runs it with pipefail, so a failure in the
      * middle of a pipeline is not masked by the compressor succeeding.
      * The password goes to the client in the environment, so `ps` does not show it.
      *
@@ -338,10 +338,7 @@ trait DatabaseDumpTrait
             putenv("{$passwordVariable}={$conn['password']}");
         }
 
-        $bash = \Mage::findExecutable('bash');
-        $wrapped = $bash === null
-            ? $command
-            : sprintf('%s -o pipefail -c %s', escapeshellarg($bash), escapeshellarg($command));
+        $wrapped = sprintf('%s -o pipefail -c %s', escapeshellarg(\Mage::findExecutable('bash') ?? 'bash'), escapeshellarg($command));
 
         passthru($wrapped, $exitCode);
         if ($passwordVariable !== null) {
@@ -364,6 +361,7 @@ trait DatabaseDumpTrait
                 '--single-transaction',
                 '--quick',
                 '--no-tablespaces',
+                '--default-character-set=utf8mb4',
                 ...$this->mysqlConnectionArguments($conn),
                 escapeshellarg($conn['dbname']),
             ]),

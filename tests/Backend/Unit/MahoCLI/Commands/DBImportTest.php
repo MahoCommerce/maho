@@ -94,6 +94,20 @@ it('asks for the dump file when the argument is missing', function () {
     expect($result->getErrorOutput())->toContain("File not found: {$path}");
 });
 
+it('refuses a dump that the user cannot read', function () {
+    if (posix_geteuid() === 0) {
+        $this->markTestSkipped('root reads every file');
+    }
+
+    dbImportWithTempFile('-- Maho', function (string $file): void {
+        chmod($file, 0000);
+        $result = dbImportTester()->run(['file' => $file, '--drop-tables' => true]);
+
+        $this->assertCommandFailed($result);
+        expect($result->getErrorOutput())->toContain('Cannot read file');
+    });
+});
+
 it('refuses a gzip dump loaded as plain SQL', function () {
     dbImportWithTempFile("\x1f\x8b\x08\x00", function (string $file): void {
         $result = dbImportTester()->run(['file' => $file]);
