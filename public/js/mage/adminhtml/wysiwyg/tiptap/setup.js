@@ -4,7 +4,7 @@
 import * as TiptapModules from './extensions.js';
 import { blockButtons, blockDropdown } from './blocks.js';
 import { MahoElementSource, openElementSource } from './element-source.js';
-import { html_beautify } from 'https://esm.sh/js-beautify@2.0.3/js/lib/beautify-html.js';
+import { html_beautify } from '../../../../tiptap.js';
 
 class tiptapWysiwygSetup {
 

@@ -1,9 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
 // SPDX-License-Identifier: OSL-3.0
 
-import { Extension } from 'https://esm.sh/@tiptap/core@3.31.3';
-import { Fragment } from 'https://esm.sh/@tiptap/pm@3.31.3/model';
-import { NodeSelection, TextSelection } from 'https://esm.sh/@tiptap/pm@3.31.3/state';
+import { Extension, Fragment, NodeSelection, TextSelection } from '../../../../../tiptap.js';
 
 /**
  * Nodes that belong to the structure of their parent. A drag or a move never takes

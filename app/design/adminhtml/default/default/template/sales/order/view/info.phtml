@@ -178,7 +178,7 @@ function updateGuestEmail() {
     // Create and submit a form
     const form = document.createElement('form');
     form.method = 'POST';
-    form.action = '<?= $this->getUrl('*/*/guestOrderEmailChange') ?>';
+    form.action = '<?= $this->getUrl('adminhtml/sales_order/guestOrderEmailChange') ?>';
 
     const formKey = document.createElement('input');
     formKey.type = 'hidden';
