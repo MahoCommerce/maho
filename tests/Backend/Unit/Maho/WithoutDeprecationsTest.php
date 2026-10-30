@@ -9,15 +9,21 @@ declare(strict_types=1);
 
 uses(Tests\MahoBackendTestCase::class);
 
-it('lets a warning reach the active error handler', function () {
+it('hides a deprecation and lets a warning reach the active error handler', function () {
     $seen = [];
     set_error_handler(function (int $errno) use (&$seen): bool {
+        if (($errno & error_reporting()) === 0) {
+            return true;
+        }
         $seen[] = $errno;
         return true;
     });
 
     try {
-        withoutDeprecations(fn() => trigger_error('x', E_USER_WARNING));
+        withoutDeprecations(function () {
+            trigger_error('x', E_USER_DEPRECATED);
+            trigger_error('x', E_USER_WARNING);
+        });
     } finally {
         restore_error_handler();
     }
