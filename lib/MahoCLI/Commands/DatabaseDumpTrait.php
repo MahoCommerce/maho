@@ -53,7 +53,7 @@ trait DatabaseDumpTrait
      * Connection settings from local.xml, with the engine resolved.
      *
      * @return array{engine: string, host: string, port: string, dbname: string, username: string, password: string}
-     * @throws \RuntimeException when local.xml is missing or the configuration has no connection node
+     * @throws \RuntimeException when local.xml is missing, unreadable or unparsable
      */
     protected function readConnectionConfig(): array
     {
@@ -63,12 +63,13 @@ trait DatabaseDumpTrait
         if (!is_file($path)) {
             throw new \RuntimeException("local.xml not found at {$path}");
         }
+        // loadBase() skips a file that it cannot read, and then it returns the default connection.
+        if (@simplexml_load_file($path) === false) {
+            throw new \RuntimeException("Cannot read or parse {$path}");
+        }
 
         // loadBase() merges every file of app/etc, as the application does, and needs no database.
         $node = new \Mage_Core_Model_Config()->loadBase()->getNode('global/resources/default_setup/connection');
-        if ($node === false) {
-            throw new \RuntimeException("global/resources/default_setup/connection is missing from {$path}");
-        }
 
         return [
             'engine' => $this->getEngine($node),
@@ -158,7 +159,7 @@ trait DatabaseDumpTrait
             // A DEFINER clause breaks a restore under another user. Remove it, but never in a data row.
             // The first line that MariaDB writes is an error in the MySQL client. Remove it too.
             $steps[] = 'LANG=C LC_CTYPE=C LC_ALL=C sed -e ' . escapeshellarg('/^INSERT /!s/DEFINER[ ]*=[ ]*[^*]*\*/\*/')
-                . ' -e ' . escapeshellarg('1{/^\/\*M!999999\\\\- enable the sandbox mode \*\/$/d;}');
+                . ' -e ' . escapeshellarg('1{/^\/\*M!999999\\\\- enable the sandbox mode \*\/[ ]*$/d;}');
         }
         if ($pv !== null) {
             $steps[] = $pv;
@@ -338,16 +339,12 @@ trait DatabaseDumpTrait
     }
 
     /**
-     * Whether the dump tool knows --set-gtid-purged. The MySQL tool does, and its default
-     * writes statements that a normal user cannot load. The MariaDB tools do not know the option.
+     * Whether the help text of the dump tool lists $option. Only the MySQL tool lists
+     * --set-gtid-purged and --column-statistics, and the MariaDB tools refuse both.
      */
-    protected function supportsGtidPurged(string $binary): bool
+    protected function dumpToolKnows(string $binary, string $option): bool
     {
-        if ($binary === 'mariadb-dump') {
-            return false;
-        }
-
-        return !str_contains((string) shell_exec(escapeshellarg($binary) . ' --version 2>/dev/null'), 'MariaDB');
+        return str_contains((string) shell_exec(escapeshellarg($binary) . ' --help 2>/dev/null'), $option);
     }
 
     /**
@@ -364,7 +361,9 @@ trait DatabaseDumpTrait
                 '--quick',
                 '--no-tablespaces',
                 '--default-character-set=utf8mb4',
-                ...($this->supportsGtidPurged($binary) ? ['--set-gtid-purged=OFF'] : []),
+                // The MySQL tool writes GTID statements that need extra rights to load, and it reads a table that MariaDB lacks.
+                ...($this->dumpToolKnows($binary, '--set-gtid-purged') ? ['--set-gtid-purged=OFF'] : []),
+                ...($this->dumpToolKnows($binary, '--column-statistics') ? ['--column-statistics=0'] : []),
                 ...$this->mysqlConnectionArguments($conn),
                 escapeshellarg($conn['dbname']),
             ]),

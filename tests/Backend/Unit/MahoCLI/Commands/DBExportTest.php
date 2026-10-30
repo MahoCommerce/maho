@@ -228,35 +228,50 @@ it('splits a host in brackets, with or without a port', function (string $host, 
     ['::1', "-h '::1'"],
 ]);
 
-it('removes the first line that MariaDB writes, but not a data row with the same text', function () {
+it('removes the first line that MariaDB writes, but not a data row with the same text', function (string $suffix) {
     $pipeline = dbExportReflect('buildExportCommand', dbExportConnection(), '/tmp/dump.sql', 'none', null);
     $sed = current(array_filter(explode(' | ', $pipeline), static fn(string $step): bool => str_starts_with($step, 'LANG=C')));
     $sed = preg_replace('/ > .*$/', '', $sed);
     $line = '/*M!999999\\- enable the sandbox mode */';
-    $input = "{$line}\nCREATE TABLE t (a int);\n{$line}\n";
+    $input = "{$line}{$suffix}\nCREATE TABLE t (a int);\n{$line}{$suffix}\n";
 
     expect(shell_exec('printf %s ' . escapeshellarg($input) . ' | ' . $sed))
-        ->toBe("CREATE TABLE t (a int);\n{$line}\n");
-});
+        ->toBe("CREATE TABLE t (a int);\n{$line}{$suffix}\n");
+})->with([[''], [' ']]);
 
-it('asks the MySQL dump tool for no GTID statements only when the tool knows the option', function (bool $supported) {
-    $command = new class ('db:export', $supported) extends DBExport {
-        public function __construct(string $name, private bool $supported)
+it('passes the options that the MySQL dump tool knows, and no others', function (bool $known) {
+    $command = new class ('db:export', $known) extends DBExport {
+        public function __construct(string $name, private bool $known)
         {
             parent::__construct($name);
         }
 
         #[\Override]
-        protected function supportsGtidPurged(string $binary): bool
+        protected function dumpToolKnows(string $binary, string $option): bool
         {
-            return $this->supported;
+            return $this->known;
         }
     };
     $pipeline = new ReflectionMethod(DBExport::class, 'buildExportCommand')
         ->invoke($command, dbExportConnection(), '/tmp/dump.sql', 'none', null);
 
-    expect(str_contains($pipeline, '--set-gtid-purged=OFF'))->toBe($supported);
+    expect(str_contains($pipeline, '--set-gtid-purged=OFF'))->toBe($known)
+        ->and(str_contains($pipeline, '--column-statistics=0'))->toBe($known);
 })->with([[true], [false]]);
+
+it('reads the options of a dump tool from its help text', function () {
+    $script = Mage::getBaseDir('var') . '/maho_fake_dump_' . uniqid();
+    file_put_contents($script, "#!/bin/sh\necho '  --column-statistics Add an ANALYZE TABLE statement.'\n");
+    chmod($script, 0755);
+
+    try {
+        expect(dbExportReflect('dumpToolKnows', $script, '--column-statistics'))->toBeTrue()
+            ->and(dbExportReflect('dumpToolKnows', $script, '--set-gtid-purged'))->toBeFalse()
+            ->and(dbExportReflect('dumpToolKnows', $script . '_missing', '--column-statistics'))->toBeFalse();
+    } finally {
+        unlink($script);
+    }
+});
 
 it('fails a pipeline when a step before the last one fails', function () {
     expect(dbExportReflect('runShellCommand', 'false | true', dbExportConnection(['engine' => 'sqlite'])))->not->toBe(0);
@@ -264,8 +279,7 @@ it('fails a pipeline when a step before the last one fails', function () {
 
 /**
  * Command whose shell calls are recorded instead of run.
- */
-/**
+ *
  * @param array<string, string> $connection
  */
 function dbExportRecordingCommand(int $exitCode, ?string $writeFile = null, array $connection = []): DBExport

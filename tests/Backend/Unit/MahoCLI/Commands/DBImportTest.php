@@ -308,6 +308,24 @@ it('creates the directory of a SQLite database file before the load', function (
     }
 });
 
+it('stops before the load when the directory of a SQLite database file cannot be created', function () {
+    $parent = (string) tempnam(sys_get_temp_dir(), 'maho_dbimport_file_');
+    $command = dbImportRecordingCommand([], ['engine' => 'sqlite', 'dbname' => $parent . '/db/shop.sqlite']);
+    new Application()->addCommand($command);
+
+    try {
+        dbImportWithTempFile('-- Maho', function (string $file) use ($command): void {
+            $result = new CommandTester($command)->run(['file' => $file]);
+
+            $this->assertCommandFailed($result);
+            expect($command->ran)->toBe([])
+                ->and($result->getErrorOutput())->toContain('Cannot create directory');
+        });
+    } finally {
+        unlink($parent);
+    }
+});
+
 it('refuses an engine that has no client', function () {
     $command = dbImportRecordingCommand([], ['engine' => 'oracle']);
     new Application()->addCommand($command);
