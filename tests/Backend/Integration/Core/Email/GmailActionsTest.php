@@ -102,6 +102,31 @@ describe('Gmail actions', function () {
         expect($scriptAt)->toBeInt()->toBeLessThan($headAt);
     });
 
+    it('lists every number and links the first carrier page of several tracks', function () {
+        $withPage = new class extends Mage_Sales_Model_Order_Shipment_Track {
+            public function getTrackingUrl(): ?string
+            {
+                return 'https://www.ups.com/track?tracknum=222';
+            }
+        };
+        $withPage->setNumber('222');
+        $this->variables['shipment']->fakeTracks = [
+            Mage::getModel('sales/order_shipment_track')->setNumber('111'),
+            $withPage,
+        ];
+
+        $payload = ($this->payload)($this->actions->getMarkup($this->variables));
+
+        expect($payload['potentialAction']['target'])->toBe('https://www.ups.com/track?tracknum=222');
+        expect($payload['description'])->toContain('111, 222');
+    });
+
+    it('finds the head tag in upper case', function () {
+        $html = '<HTML><HEAD></HEAD><BODY>Body</BODY></HTML>';
+
+        expect($this->actions->inject($this->variables, $html))->toContain('application/ld+json');
+    });
+
     it('keeps a backslash and a dollar sign of a tracking number', function () {
         $this->variables['shipment']->fakeTracks = [
             Mage::getModel('sales/order_shipment_track')->setNumber('AB\\12$0'),

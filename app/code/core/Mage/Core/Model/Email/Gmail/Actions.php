@@ -51,7 +51,6 @@ class Mage_Core_Model_Email_Gmail_Actions
             return '';
         }
 
-        // The action says "track", so it needs at least one number to be worth showing.
         $numbers = [];
         foreach ($shipment->getAllTracks() as $track) {
             $number = trim((string) $track->getNumber());
@@ -94,8 +93,6 @@ class Mage_Core_Model_Email_Gmail_Actions
 
     /**
      * The carrier page of the first track that has one, or '' when none has.
-     *
-     * The track has getTrackingUrl() only after MahoCommerce/maho#1686 is merged.
      */
     protected function getTrackingUrl(Mage_Sales_Model_Order_Shipment $shipment): string
     {
