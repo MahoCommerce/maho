@@ -199,7 +199,7 @@ A setting a module of yours adds to Theme Settings is exported too. See the [The
 
 ## theme:content:build
 
-Compiles the Tailwind classes of the CMS, blog and catalog content into a copy of the `css/styles.css` of each theme, and writes it to the media mount. The page head then links the copy.
+Compiles the Tailwind classes of the CMS, blog and catalog content into a copy of the `css/styles.css` of each theme, and writes it to the media mount. The page head then links the copy. A relative `url()` in the CSS, such as a font or an image, still points at the same file: the command rewrites it to a path from the media mount to the skin directory.
 
 ```bash
 ./maho theme:content:build
