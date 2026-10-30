@@ -468,6 +468,19 @@ A `403` or `404` here means the server still denies `.md` files. Remove `md` fro
 denied extensions. A `301` means the store adds or removes a trailing slash: repeat the check with
 the URL from the `Location` header.
 
+When MCP is on, the MCP server card must answer `200` with `Content-Type: application/json`:
+
+```shell
+curl -si https://maho.example.com/.well-known/mcp.json | grep -iE '^(HTTP|content-type)'
+curl -si https://maho.example.com/index.php/.well-known/mcp.json | grep -iE '^(HTTP|content-type)'
+```
+
+The second URL goes to PHP through `index.php`, and Maho does not redirect a `/.well-known/` path.
+If both URLs answer `404`, MCP is off. If only the first URL answers `404`, the request does not
+reach PHP. Make sure that the server sends `/.well-known/` to `index.php`. On a managed host, a
+proxy in front of your server can answer `/.well-known/` itself, often for TLS certificates. You
+cannot change that proxy: ask the support of the host to send these paths to your server.
+
 Then check the `/api/*` paths. Each one proves a different rule:
 
 ```shell
