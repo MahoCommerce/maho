@@ -34,11 +34,15 @@ it('hides a deprecation and lets a warning reach the active error handler', func
 });
 
 it('restores the error level after the call', function () {
-    $level = error_reporting();
+    $level = error_reporting(E_ALL);
 
-    withoutDeprecations(fn() => null);
+    try {
+        withoutDeprecations(fn() => null);
 
-    expect(error_reporting())->toBe($level);
+        expect(error_reporting())->toBe(E_ALL);
+    } finally {
+        error_reporting($level);
+    }
 });
 
 it('restores the error level when the callback throws', function () {
