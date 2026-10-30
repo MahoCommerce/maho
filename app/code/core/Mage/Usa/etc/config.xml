@@ -81,6 +81,7 @@ SPDX-License-Identifier: AFL-3.0
                 <free_method>FEDEX_GROUND</free_method>
                 <handling>0</handling>
                 <model>usa/shipping_carrier_fedex</model>
+                <tracking_url>https://www.fedex.com/fedextrack/?trknbr={{number}}</tracking_url>
                 <packaging>YOUR_PACKAGING</packaging>
                 <title>Federal Express</title>
                 <unit_of_measure>LB</unit_of_measure>
@@ -104,6 +105,7 @@ SPDX-License-Identifier: AFL-3.0
                 <gateway_rest_url>https://onlinetools.ups.com/api/rating/</gateway_rest_url>
                 <tracking_xml_url>https://onlinetools.ups.com/ups.app/xml/Track</tracking_xml_url>
                 <tracking_rest_url>https://onlinetools.ups.com/api/track/</tracking_rest_url>
+                <tracking_url>https://www.ups.com/track?tracknum={{number}}</tracking_url>
                 <shipconfirm_xml_url>https://onlinetools.ups.com/ups.app/xml/ShipConfirm</shipconfirm_xml_url>
                 <shipconfirm_rest_url>https://onlinetools.ups.com/api/shipments/v2403/ship</shipconfirm_rest_url>
                 <shipaccept_xml_url>https://onlinetools.ups.com/ups.app/xml/ShipAccept</shipaccept_xml_url>
@@ -147,6 +149,7 @@ SPDX-License-Identifier: AFL-3.0
                 <machinable>true</machinable>
                 <methods></methods>
                 <model>usa/shipping_carrier_usps</model>
+                <tracking_url>https://tools.usps.com/go/TrackConfirmAction?tLabels={{number}}</tracking_url>
                 <size>REGULAR</size>
                 <title>United States Postal Service</title>
                 <specificerrmsg>This shipping method is currently unavailable.</specificerrmsg>

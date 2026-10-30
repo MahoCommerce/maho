@@ -22,6 +22,7 @@ nav:
   - Override configs: override-configurations.md
   - Rate limiting & honeypot: rate-limiting-honeypot.md
   - Message queue: message-queue.md
+  - Shipping tracking URLs: shipping-tracking-url.md
 - Database:
   - Database layer: database-layer.md
   - Declarative DB schema: declarative-database-schema.md

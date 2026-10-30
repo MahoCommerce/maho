@@ -46,6 +46,8 @@
             <td>
                 <?php if ($_track->isCustom()): ?>
                 <?= $this->escapeHtml($_track->getNumber()) ?>
+                <?php elseif ($_trackingUrl = $_track->getTrackingUrl()): ?>
+                <a href="<?= $this->escapeHtml($_trackingUrl) ?>" target="_blank" rel="noopener"><?= $this->escapeHtml($_track->getNumber()) ?></a>
                 <?php else: ?>
                 <a href="#" onclick="popWin('<?= $this->helper('shipping')->getTrackingPopupUrlBySalesModel($_track) ?>','trackorder','width=800,height=600,resizable=yes,scrollbars=yes')"><?= $this->escapeHtml($_track->getNumber()) ?></a>
                 <div id="shipment_tracking_info_response_<?= $_track->getId() ?>"></div>
