@@ -239,39 +239,66 @@ it('removes the first line that MariaDB writes, but not a data row with the same
         ->toBe("CREATE TABLE t (a int);\n{$line}{$suffix}\n");
 })->with([[''], [' ']]);
 
-it('passes the options that the MySQL dump tool knows, and no others', function (bool $known) {
-    $command = new class ('db:export', $known) extends DBExport {
-        public function __construct(string $name, private bool $known)
+it('passes an option of the MySQL dump tool only when the help text lists it', function (string $help, bool $gtid, bool $statistics) {
+    $command = new class ('db:export', $help) extends DBExport {
+        public function __construct(string $name, private string $help)
         {
             parent::__construct($name);
         }
 
         #[\Override]
-        protected function dumpToolKnows(string $binary, string $option): bool
+        protected function dumpToolHelp(string $binary): string
         {
-            return $this->known;
+            return $this->help;
         }
     };
     $pipeline = new ReflectionMethod(DBExport::class, 'buildExportCommand')
         ->invoke($command, dbExportConnection(), '/tmp/dump.sql', 'none', null);
 
-    expect(str_contains($pipeline, '--set-gtid-purged=OFF'))->toBe($known)
-        ->and(str_contains($pipeline, '--column-statistics=0'))->toBe($known);
-})->with([[true], [false]]);
+    expect(str_contains($pipeline, '--set-gtid-purged=OFF'))->toBe($gtid)
+        ->and(str_contains($pipeline, '--column-statistics=0'))->toBe($statistics);
+})->with([
+    'MySQL 8' => ['--set-gtid-purged --column-statistics', true, true],
+    'MySQL 5.7' => ['--set-gtid-purged', true, false],
+    'MariaDB' => ['--gtid', false, false],
+]);
 
-it('reads the options of a dump tool from its help text', function () {
+it('reads the help text of a dump tool', function () {
     $script = Mage::getBaseDir('var') . '/maho_fake_dump_' . uniqid();
     file_put_contents($script, "#!/bin/sh\necho '  --column-statistics Add an ANALYZE TABLE statement.'\n");
     chmod($script, 0755);
 
     try {
-        expect(dbExportReflect('dumpToolKnows', $script, '--column-statistics'))->toBeTrue()
-            ->and(dbExportReflect('dumpToolKnows', $script, '--set-gtid-purged'))->toBeFalse()
-            ->and(dbExportReflect('dumpToolKnows', $script . '_missing', '--column-statistics'))->toBeFalse();
+        expect(dbExportReflect('dumpToolHelp', $script))->toContain('--column-statistics')
+            ->and(dbExportReflect('dumpToolHelp', $script . '_missing'))->toBe('');
     } finally {
         unlink($script);
     }
 });
+
+it('refuses a local.xml that is empty or broken', function (string $content) {
+    $file = (string) tempnam(sys_get_temp_dir(), 'maho_dbexport_xml_');
+    file_put_contents($file, $content);
+    $command = new class ('db:export', $file) extends DBExport {
+        public function __construct(string $name, private string $file)
+        {
+            parent::__construct($name);
+        }
+
+        #[\Override]
+        protected function localXmlPath(): string
+        {
+            return $this->file;
+        }
+    };
+
+    try {
+        expect(fn() => new ReflectionMethod(DBExport::class, 'readConnectionConfig')->invoke($command))
+            ->toThrow(\RuntimeException::class, 'Cannot read or parse');
+    } finally {
+        unlink($file);
+    }
+})->with(['empty' => [''], 'broken' => ['<config><global>']]);
 
 it('fails a pipeline when a step before the last one fails', function () {
     expect(dbExportReflect('runShellCommand', 'false | true', dbExportConnection(['engine' => 'sqlite'])))->not->toBe(0);

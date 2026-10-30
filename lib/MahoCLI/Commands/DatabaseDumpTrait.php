@@ -49,6 +49,11 @@ trait DatabaseDumpTrait
         };
     }
 
+    protected function localXmlPath(): string
+    {
+        return MAHO_ROOT_DIR . '/app/etc/local.xml';
+    }
+
     /**
      * Connection settings from local.xml, with the engine resolved.
      *
@@ -59,7 +64,7 @@ trait DatabaseDumpTrait
     {
         // Write local.xml from MAHO_LOCAL_XML when the file is missing.
         \Mage::isInstalled(['etc_dir' => MAHO_ROOT_DIR . '/app/etc']);
-        $path = MAHO_ROOT_DIR . '/app/etc/local.xml';
+        $path = $this->localXmlPath();
         if (!is_file($path)) {
             throw new \RuntimeException("local.xml not found at {$path}");
         }
@@ -339,12 +344,12 @@ trait DatabaseDumpTrait
     }
 
     /**
-     * Whether the help text of the dump tool lists $option. Only the MySQL tool lists
-     * --set-gtid-purged and --column-statistics, and the MariaDB tools refuse both.
+     * Help text of the dump tool. Only the MySQL tool lists --set-gtid-purged and
+     * --column-statistics, and the MariaDB tools refuse both.
      */
-    protected function dumpToolKnows(string $binary, string $option): bool
+    protected function dumpToolHelp(string $binary): string
     {
-        return str_contains((string) shell_exec(escapeshellarg($binary) . ' --help 2>/dev/null'), $option);
+        return (string) shell_exec(escapeshellarg($binary) . ' --help 2>/dev/null');
     }
 
     /**
@@ -353,6 +358,7 @@ trait DatabaseDumpTrait
     private function buildDumpCommand(array $conn): string
     {
         $binary = $this->dumpBinary($conn);
+        $help = $conn['engine'] === 'mysql' ? $this->dumpToolHelp($binary) : '';
 
         return match ($conn['engine']) {
             'mysql' => implode(' ', [
@@ -362,8 +368,8 @@ trait DatabaseDumpTrait
                 '--no-tablespaces',
                 '--default-character-set=utf8mb4',
                 // The MySQL tool writes GTID statements that need extra rights to load, and it reads a table that MariaDB lacks.
-                ...($this->dumpToolKnows($binary, '--set-gtid-purged') ? ['--set-gtid-purged=OFF'] : []),
-                ...($this->dumpToolKnows($binary, '--column-statistics') ? ['--column-statistics=0'] : []),
+                ...(str_contains($help, '--set-gtid-purged') ? ['--set-gtid-purged=OFF'] : []),
+                ...(str_contains($help, '--column-statistics') ? ['--column-statistics=0'] : []),
                 ...$this->mysqlConnectionArguments($conn),
                 escapeshellarg($conn['dbname']),
             ]),
