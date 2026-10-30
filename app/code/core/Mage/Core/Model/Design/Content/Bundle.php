@@ -5,7 +5,8 @@
  * storefront HTML in the database, and gives its URL to the page head.
  *
  * The copy replaces the committed file, so the utilities stay in the order of one Tailwind
- * build. It needs the Tailwind CLI in node_modules. Without it, the store serves the committed
+ * build. A relative URL in the CSS, such as a font, points at the same file from the new
+ * directory. It needs the Tailwind CLI in node_modules. Without it, the store serves the committed
  * file. The manifest records, for each theme, the hash of the committed file that the copy
  * came from. A copy whose committed file changed is not served.
  *
@@ -104,7 +105,7 @@ class Mage_Core_Model_Design_Content_Bundle
     protected function buildThemes(string $binary): array
     {
         $tokens = Mage::getSingleton('core/design_content_collector')->collectTokens();
-        $tokensHash = sha1(implode("\n", $tokens));
+        $tokensHash = sha1($this->getSkinUrl() . "\n" . $this->getCopyUrl() . "\n" . implode("\n", $tokens));
         $workDir = Mage::getBaseDir('tmp') . '/theme_content';
         if (!is_dir($workDir)) {
             mkdir($workDir, 0777, true);
@@ -182,9 +183,80 @@ class Mage_Core_Model_Design_Content_Bundle
             return null;
         }
 
+        $css = $this->rebaseUrls($css, $this->getSkinUrl() . $theme . '/' . dirname(self::STYLES_FILE) . '/', $this->getCopyUrl());
+
         $file = self::FOLDER . "/{$name}-" . substr(hash('xxh128', $css), 0, 16) . '.css';
         Mage::getStorage(self::MOUNT)->moveAtomic($file, $css);
         return $file;
+    }
+
+    /**
+     * The URL of the frontend skin directory of the default store view, with a trailing slash.
+     */
+    protected function getSkinUrl(): string
+    {
+        return rtrim(Mage::app()->getDefaultStoreView()->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_SKIN), '/') . '/frontend/';
+    }
+
+    /**
+     * The URL of the directory of the copies, with a trailing slash.
+     */
+    protected function getCopyUrl(): string
+    {
+        $url = (string) strstr(Mage::getStorage(self::MOUNT)->publicUrl(self::FOLDER . '/theme.css') . '?', '?', true);
+        return substr($url, 0, (int) strrpos($url, '/') + 1);
+    }
+
+    /**
+     * Change each relative URL in $css, so that it points at the same file from the directory
+     * $toUrl. $fromUrl is the directory that the relative URLs of $css start from. A URL on
+     * another host stays absolute.
+     */
+    public function rebaseUrls(string $css, string $fromUrl, string $toUrl): string
+    {
+        $from = parse_url($fromUrl);
+        $to = parse_url($toUrl);
+        if (!isset($from['scheme'], $from['host'], $to['scheme'], $to['host'])) {
+            return $css;
+        }
+        $origin = fn(array $url): string => $url['scheme'] . '://' . $url['host'] . (isset($url['port']) ? ':' . $url['port'] : '');
+        $sameOrigin = $origin($from) === $origin($to);
+
+        return (string) preg_replace_callback(
+            '~url\(\s*(?:"([^"]*)"|\'([^\']*)\'|([^"\'\s)][^)]*?))\s*\)~i',
+            function (array $match) use ($from, $to, $origin, $sameOrigin): string {
+                $quote = $match[1] !== null ? '"' : ($match[2] !== null ? "'" : '');
+                $value = $match[1] ?? $match[2] ?? $match[3];
+                if ($value === '' || preg_match('~^(?:[a-z][a-z0-9+.-]*:|/|#)~i', $value)) {
+                    return $match[0];
+                }
+
+                preg_match('~^([^?#]*)(.*)$~s', $value, $parts);
+                $target = [];
+                foreach (explode('/', ($from['path'] ?? '/') . $parts[1]) as $segment) {
+                    if ($segment === '..') {
+                        array_pop($target);
+                    } elseif ($segment !== '' && $segment !== '.') {
+                        $target[] = $segment;
+                    }
+                }
+                $trailing = str_ends_with($parts[1], '/') ? '/' : '';
+
+                if (!$sameOrigin) {
+                    $url = $origin($from) . '/' . implode('/', $target) . $trailing;
+                } else {
+                    $base = array_values(array_filter(explode('/', $to['path'] ?? '/'), fn(string $segment): bool => $segment !== ''));
+                    $common = 0;
+                    while (isset($base[$common], $target[$common]) && $base[$common] === $target[$common]) {
+                        $common++;
+                    }
+                    $url = str_repeat('../', count($base) - $common) . implode('/', array_slice($target, $common)) . $trailing;
+                }
+                return 'url(' . $quote . $url . $parts[2] . $quote . ')';
+            },
+            $css,
+            flags: PREG_UNMATCHED_AS_NULL,
+        );
     }
 
     /**
