@@ -38,14 +38,14 @@ describe('the relative URLs of a copied theme stylesheet', function () {
         'no URL' => ['a{b:red}'],
     ]);
 
-    it('gives an absolute URL when the new file is on another host', function (): void {
+    it('gives a URL with the host of the skin when the new file is on another host', function (): void {
         $css = Mage::getModel('core/design_content_bundle')->rebaseUrls(
             'a{src:url(../fonts/a.woff2)}',
             'https://shop.test/skin/frontend/base/default/css/',
             'https://cdn.test/theme/',
         );
 
-        expect($css)->toBe('a{src:url(https://shop.test/skin/frontend/base/default/fonts/a.woff2)}');
+        expect($css)->toBe('a{src:url(//shop.test/skin/frontend/base/default/fonts/a.woff2)}');
     });
 
     it('keeps the path of a store in a subdirectory', function (): void {

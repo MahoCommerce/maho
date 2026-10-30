@@ -203,14 +203,19 @@ class Mage_Core_Model_Design_Content_Bundle
      */
     protected function getCopyUrl(): string
     {
-        $url = (string) strstr(Mage::getStorage(self::MOUNT)->publicUrl(self::FOLDER . '/theme.css') . '?', '?', true);
+        $app = Mage::app();
+        $publicUrl = $app->withStore(
+            (int) $app->getDefaultStoreView()->getId(),
+            fn(): string => Mage::getStorage(self::MOUNT)->publicUrl(self::FOLDER . '/theme.css'),
+        );
+        $url = (string) strstr($publicUrl . '?', '?', true);
         return substr($url, 0, (int) strrpos($url, '/') + 1);
     }
 
     /**
      * Change each relative URL in $css, so that it points at the same file from the directory
-     * $toUrl. $fromUrl is the directory that the relative URLs of $css start from. A URL on
-     * another host stays absolute.
+     * $toUrl. $fromUrl is the directory that the relative URLs of $css start from. When $toUrl
+     * is on another host than $fromUrl, the new URL has the host of $fromUrl and no scheme.
      */
     public function rebaseUrls(string $css, string $fromUrl, string $toUrl): string
     {
@@ -219,12 +224,12 @@ class Mage_Core_Model_Design_Content_Bundle
         if (!isset($from['scheme'], $from['host'], $to['scheme'], $to['host'])) {
             return $css;
         }
-        $origin = fn(array $url): string => $url['scheme'] . '://' . $url['host'] . (isset($url['port']) ? ':' . $url['port'] : '');
-        $sameOrigin = $origin($from) === $origin($to);
+        $host = fn(array $url): string => $url['host'] . (isset($url['port']) ? ':' . $url['port'] : '');
+        $sameOrigin = $from['scheme'] === $to['scheme'] && $host($from) === $host($to);
 
         return (string) preg_replace_callback(
             '~url\(\s*(?:"([^"]*)"|\'([^\']*)\'|([^"\'\s)][^)]*?))\s*\)~i',
-            function (array $match) use ($from, $to, $origin, $sameOrigin): string {
+            function (array $match) use ($from, $to, $host, $sameOrigin): string {
                 $quote = $match[1] !== null ? '"' : ($match[2] !== null ? "'" : '');
                 $value = $match[1] ?? $match[2] ?? $match[3];
                 if ($value === '' || preg_match('~^(?:[a-z][a-z0-9+.-]*:|/|#)~i', $value)) {
@@ -243,7 +248,7 @@ class Mage_Core_Model_Design_Content_Bundle
                 $trailing = str_ends_with($parts[1], '/') ? '/' : '';
 
                 if (!$sameOrigin) {
-                    $url = $origin($from) . '/' . implode('/', $target) . $trailing;
+                    $url = '//' . $host($from) . '/' . implode('/', $target) . $trailing;
                 } else {
                     $base = array_values(array_filter(explode('/', $to['path'] ?? '/'), fn(string $segment): bool => $segment !== ''));
                     $common = 0;

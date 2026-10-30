@@ -350,3 +350,70 @@ describe('the build', function () {
         expect($bundle->build())->toHaveKey('base/default', Mage_Core_Model_Design_Content_Bundle::STATUS_UNCHANGED);
     });
 });
+
+describe('the URLs in the copy of a theme stylesheet', function () {
+    beforeEach(function (): void {
+        $this->script = Mage::getBaseDir('tmp') . '/test-tailwind-' . bin2hex(random_bytes(4)) . '.sh';
+        file_put_contents($this->script, "#!/bin/sh\nprintf 'a{src:url(../fonts/a.woff2)}' > \"\$4\"\n");
+        chmod($this->script, 0755);
+    });
+
+    afterEach(function (): void {
+        @unlink($this->script);
+        $mount = Mage::getStorage(Mage_Core_Model_Design_Content_Bundle::MOUNT);
+        foreach ($mount->listFiles(Mage_Core_Model_Design_Content_Bundle::FOLDER) as $file) {
+            $mount->delete($file->path());
+        }
+    });
+
+    it('point at the same file from the directory of the copy', function (): void {
+        $this->blocks[] = createContentBlock('<div class="rotate-47"></div>');
+        $script = $this->script;
+        $bundle = new class ($script) extends Mage_Core_Model_Design_Content_Bundle {
+            public function __construct(private readonly string $script) {}
+
+            #[\Override]
+            public function getTailwindBinary(): ?string
+            {
+                return $this->script;
+            }
+        };
+
+        $status = $bundle->build();
+        $file = $bundle->getManifest()['base/default']['file'] ?? null;
+
+        expect($status)->toHaveKey('base/default', Mage_Core_Model_Design_Content_Bundle::STATUS_BUILT)
+            ->and($file)->toBeString();
+        expect(Mage::getStorage(Mage_Core_Model_Design_Content_Bundle::MOUNT)->read($file))
+            ->toContain('skin/frontend/base/default/fonts/a.woff2)')
+            ->not->toContain('url(../fonts/a.woff2)');
+    });
+
+    it('make the next build run again when the skin URL changes', function (): void {
+        $this->blocks[] = createContentBlock('<div class="rotate-47"></div>');
+        $script = $this->script;
+        $bundle = new class ($script) extends Mage_Core_Model_Design_Content_Bundle {
+            public string $skinUrl = 'https://a.test/skin/frontend/';
+
+            public function __construct(private readonly string $script) {}
+
+            #[\Override]
+            public function getTailwindBinary(): ?string
+            {
+                return $this->script;
+            }
+
+            #[\Override]
+            protected function getSkinUrl(): string
+            {
+                return $this->skinUrl;
+            }
+        };
+
+        $bundle->build();
+        expect($bundle->build())->toHaveKey('base/default', Mage_Core_Model_Design_Content_Bundle::STATUS_UNCHANGED);
+
+        $bundle->skinUrl = 'https://b.test/skin/frontend/';
+        expect($bundle->build())->toHaveKey('base/default', Mage_Core_Model_Design_Content_Bundle::STATUS_BUILT);
+    });
+});
