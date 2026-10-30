@@ -416,4 +416,41 @@ describe('the URLs in the copy of a theme stylesheet', function () {
         $bundle->skinUrl = 'https://b.test/skin/frontend/';
         expect($bundle->build())->toHaveKey('base/default', Mage_Core_Model_Design_Content_Bundle::STATUS_BUILT);
     });
+
+    it('read the media URL of the default store view when the current store is the admin store', function (): void {
+        $this->blocks[] = createContentBlock('<div class="rotate-47"></div>');
+        $script = $this->script;
+        $bundle = new class ($script) extends Mage_Core_Model_Design_Content_Bundle {
+            public function __construct(private readonly string $script) {}
+
+            #[\Override]
+            public function getTailwindBinary(): ?string
+            {
+                return $this->script;
+            }
+        };
+
+        $app = Mage::app();
+        $previousStoreId = (int) $app->getStore()->getId();
+        $store = $app->getDefaultStoreView();
+        $store->resetConfig();
+        $store->setConfig('web/unsecure/base_media_url', 'https://cdn.test/media/');
+        $store->setConfig('web/secure/base_media_url', 'https://cdn.test/media/');
+        $app->setCurrentStore(Mage_Core_Model_App::ADMIN_STORE_ID);
+
+        try {
+            $status = $bundle->build();
+            $file = $bundle->getManifest()['base/default']['file'] ?? null;
+
+            expect($status)->toHaveKey('base/default', Mage_Core_Model_Design_Content_Bundle::STATUS_BUILT)
+                ->and($file)->toBeString();
+            expect(Mage::getStorage(Mage_Core_Model_Design_Content_Bundle::MOUNT)->read($file))
+                ->toContain('url(//')
+                ->toContain('/skin/frontend/base/default/fonts/a.woff2)')
+                ->not->toContain('../');
+        } finally {
+            $app->setCurrentStore($previousStoreId);
+            $store->resetConfig();
+        }
+    });
 });
