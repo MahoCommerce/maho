@@ -15,11 +15,11 @@ describe('Mage_Catalog_Model_Product_Option_Type_File::resolveStoredPath()', fun
         $this->quoteRel = $this->model->getQuoteTargetDir(true);
         $this->orderRel = $this->model->getOrderTargetDir(true);
         // The subject is the deprecated method itself. Developer mode turns its notice into an exception.
-        set_error_handler(fn(): bool => true, E_USER_DEPRECATED);
+        $this->errorLevel = error_reporting(error_reporting() & ~E_USER_DEPRECATED);
     });
 
     afterEach(function () {
-        restore_error_handler();
+        error_reporting($this->errorLevel);
     });
 
     it('resolves a quote path inside the quote directory', function () {

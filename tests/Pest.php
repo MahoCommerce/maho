@@ -893,11 +893,11 @@ function orderStateForStatus(string $status): string
  */
 function withoutDeprecations(callable $call): mixed
 {
-    set_error_handler(fn(): bool => true, E_USER_DEPRECATED);
+    $level = error_reporting(error_reporting() & ~E_USER_DEPRECATED);
 
     try {
         return $call();
     } finally {
-        restore_error_handler();
+        error_reporting($level);
     }
 }

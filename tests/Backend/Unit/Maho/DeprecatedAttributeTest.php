@@ -87,7 +87,7 @@ it('finds a tag on a method, a constant and an enum case, and not on a class or 
     file_put_contents($file, <<<'PHP'
         <?php
         /** @deprecated */
-        class A
+        abstract class A
         {
             /** @deprecated */
             public const X = 1;
@@ -99,6 +99,16 @@ it('finds a tag on a method, a constant and an enum case, and not on a class or 
             #[\Override]
             #[SomeAttribute(['key' => 'value'])]
             final public static function method() {}
+
+            /** @deprecated */
+            abstract protected function second();
+
+            /** @deprecated */
+            private function third() {}
+
+            /** @deprecated */
+            // note
+            function fourth() {}
         }
         enum E
         {
@@ -108,7 +118,7 @@ it('finds a tag on a method, a constant and an enum case, and not on a class or 
         PHP);
 
     try {
-        expect(docblockDeprecationLines($file))->toBe([5, 11, 18]);
+        expect(docblockDeprecationLines($file))->toBe([5, 11, 16, 19, 22, 28]);
     } finally {
         unlink($file);
     }

@@ -726,6 +726,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
 
     /**
      * Absolute path of a stored option file, or null when the stored value leaves its target directory
+     *
      * The stored value is relative to the Maho base directory. A 'quote_path' must stay inside the
      * quote target directory and an 'order_path' inside the order target directory.
      *
