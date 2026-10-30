@@ -40,3 +40,17 @@ it('restores the error level after the call', function () {
 
     expect(error_reporting())->toBe($level);
 });
+
+it('restores the error level when the callback throws', function () {
+    $level = error_reporting(E_ALL);
+
+    try {
+        expect(fn() => withoutDeprecations(function () {
+            throw new RuntimeException('callback failed');
+        }))->toThrow(RuntimeException::class);
+
+        expect(error_reporting())->toBe(E_ALL);
+    } finally {
+        error_reporting($level);
+    }
+});

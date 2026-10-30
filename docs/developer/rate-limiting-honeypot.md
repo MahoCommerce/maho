@@ -71,13 +71,13 @@ if ($limiter->tooManyAttempts()) {
 $limiter->hit();
 ```
 
-`Mage_Sales_Helper_Guest` uses this pattern. A limit of `0` disables the limiter, so the code needs no `null` check.
+`Mage_Sales_Helper_Guest` uses this pattern. A limit of `0` or less disables the limiter, so the code needs no `null` check.
 
 Do not use `ipRateLimiter()`. It is deprecated since 26.9. It allows one request per 30 seconds, and no store configuration changes that.
 
 ### Budget in store configuration
 
-A public endpoint reads its budget from `system/rate_limit/<key>`. Add a non-zero default in `config.xml`, and add a field under "Per-endpoint Limits" in `system.xml`. Without a default, the limit is off.
+A public endpoint reads its budget from `system/rate_limit/<key>`. Add a positive default in `config.xml`, and add a field under "Per-endpoint Limits" in `system.xml`. Without a default, the limit is off.
 
 ### The RateLimiter API
 
