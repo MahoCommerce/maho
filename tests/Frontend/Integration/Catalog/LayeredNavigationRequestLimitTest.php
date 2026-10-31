@@ -45,14 +45,18 @@ function lnlColorOptionIds(): array
 
 function lnlParentCategory(): Mage_Catalog_Model_Category
 {
+    $storeId = (int) Mage::app()->getStore()->getId();
+    $rootId = (int) Mage::app()->getStore()->getRootCategoryId();
     $category = Mage::getModel('catalog/category')->getCollection()
-        ->addAttributeToFilter('level', 2)
+        ->setStoreId($storeId)
+        ->addAttributeToFilter('is_active', 1)
         ->addAttributeToFilter('children_count', ['gt' => 0])
+        ->addFieldToFilter('path', ['like' => "1/{$rootId}/%"])
         ->setPageSize(1)
         ->getFirstItem();
     expect((int) $category->getId())->toBeGreaterThan(0);
 
-    return Mage::getModel('catalog/category')->load($category->getId());
+    return Mage::getModel('catalog/category')->setStoreId($storeId)->load($category->getId());
 }
 
 function lnlLayer(Mage_Catalog_Model_Category $category): Mage_Catalog_Model_Layer
@@ -79,7 +83,7 @@ beforeEach(function () {
 describe('attribute filter values', function () {
     beforeEach(function () {
         $this->filter = Mage::getModel('catalog/layer_filter_attribute')->setAttributeModel(lnlAttribute('color'));
-        $this->options = lnlColorOptionIds();
+        $this->colorIds = lnlColorOptionIds();
     });
 
     test('a request without the parameter applies no value', function () {
@@ -87,7 +91,7 @@ describe('attribute filter values', function () {
     });
 
     test('an existing option is one value', function () {
-        expect($this->filter->countRequestValues(lnlRequest('color=' . $this->options[0])))->toBe(1);
+        expect($this->filter->countRequestValues(lnlRequest('color=' . $this->colorIds[0])))->toBe(1);
     });
 
     test('an option that does not exist is refused', function () {
@@ -96,30 +100,30 @@ describe('attribute filter values', function () {
     });
 
     test('another spelling of an option ID is refused', function () {
-        expect($this->filter->countRequestValues(lnlRequest('color=0' . $this->options[0])))->toBeNull();
+        expect($this->filter->countRequestValues(lnlRequest('color=0' . $this->colorIds[0])))->toBeNull();
     });
 
     test('a single-select filter refuses a list of values', function () {
-        $query = 'color=' . $this->options[0] . ',' . $this->options[1];
+        $query = 'color=' . $this->colorIds[0] . ',' . $this->colorIds[1];
         expect($this->filter->countRequestValues(lnlRequest($query)))->toBeNull();
-        expect($this->filter->countRequestValues(lnlRequest('color[]=' . $this->options[0])))->toBeNull();
+        expect($this->filter->countRequestValues(lnlRequest('color[]=' . $this->colorIds[0])))->toBeNull();
     });
 
     test('a multi-select filter counts each value', function () {
         $attribute = lnlAttribute('color')->setIsFilterableMultiple(1);
         $filter = Mage::getModel('catalog/layer_filter_attribute')->setAttributeModel($attribute);
 
-        $query = 'color=' . $this->options[0] . ',' . $this->options[1];
+        $query = 'color=' . $this->colorIds[0] . ',' . $this->colorIds[1];
         expect($filter->countRequestValues(lnlRequest($query)))->toBe(2);
     });
 
     test('a multi-select filter refuses repeated, padded and unknown values', function () {
         $attribute = lnlAttribute('color')->setIsFilterableMultiple(1);
         $filter = Mage::getModel('catalog/layer_filter_attribute')->setAttributeModel($attribute);
-        $first = $this->options[0];
+        $first = $this->colorIds[0];
 
         expect($filter->countRequestValues(lnlRequest("color={$first},{$first}")))->toBeNull();
-        expect($filter->countRequestValues(lnlRequest("color={$first},%20{$this->options[1]}")))->toBeNull();
+        expect($filter->countRequestValues(lnlRequest("color={$first},%20{$this->colorIds[1]}")))->toBeNull();
         expect($filter->countRequestValues(lnlRequest("color={$first},")))->toBeNull();
         expect($filter->countRequestValues(lnlRequest("color={$first},99999999")))->toBeNull();
     });
@@ -182,7 +186,7 @@ describe('price and decimal filter values', function () {
 describe('the limit of the layer', function () {
     beforeEach(function () {
         $this->layer = lnlLayer(lnlParentCategory());
-        $this->options = lnlColorOptionIds();
+        $this->colorIds = lnlColorOptionIds();
     });
 
     test('the default limit is 7 selected filters', function () {
@@ -192,19 +196,19 @@ describe('the limit of the layer', function () {
     test('a request with values up to the limit is valid', function () {
         Mage::app()->getStore()->setConfig(Mage_Catalog_Model_Layer::XML_PATH_MAX_SELECTED_FILTERS, '2');
 
-        expect($this->layer->isValidRequest(lnlRequest('color=' . $this->options[0] . '&price=10-20')))->toBeTrue();
+        expect($this->layer->isValidRequest(lnlRequest('color=' . $this->colorIds[0] . '&price=10-20')))->toBeTrue();
     });
 
     test('a request with more values than the limit is refused', function () {
         Mage::app()->getStore()->setConfig(Mage_Catalog_Model_Layer::XML_PATH_MAX_SELECTED_FILTERS, '1');
 
-        expect($this->layer->isValidRequest(lnlRequest('color=' . $this->options[0] . '&price=10-20')))->toBeFalse();
+        expect($this->layer->isValidRequest(lnlRequest('color=' . $this->colorIds[0] . '&price=10-20')))->toBeFalse();
     });
 
     test('a limit of 0 accepts any number of valid values', function () {
         Mage::app()->getStore()->setConfig(Mage_Catalog_Model_Layer::XML_PATH_MAX_SELECTED_FILTERS, '0');
 
-        expect($this->layer->isValidRequest(lnlRequest('color=' . $this->options[0] . '&price=10-20')))->toBeTrue();
+        expect($this->layer->isValidRequest(lnlRequest('color=' . $this->colorIds[0] . '&price=10-20')))->toBeTrue();
     });
 
     test('one unknown value makes the request invalid', function () {
@@ -238,7 +242,7 @@ describe('the limit of the layer', function () {
     test('parameters that are not filters do not count', function () {
         Mage::app()->getStore()->setConfig(Mage_Catalog_Model_Layer::XML_PATH_MAX_SELECTED_FILTERS, '1');
 
-        expect($this->layer->isValidRequest(lnlRequest('p=2&dir=asc&utm_source=x&color=' . $this->options[0])))->toBeTrue();
+        expect($this->layer->isValidRequest(lnlRequest('p=2&dir=asc&utm_source=x&color=' . $this->colorIds[0])))->toBeTrue();
     });
 
     test('the limit is reached when the state holds as many values as the limit', function () {
@@ -246,10 +250,10 @@ describe('the limit of the layer', function () {
         $filter = Mage::getModel('catalog/layer_filter_attribute')->setAttributeModel(lnlAttribute('color'));
         $item = fn(string $value) => Mage::getModel('catalog/layer_filter_item')->setFilter($filter)->setValue($value);
 
-        $this->layer->getState()->addFilter($item($this->options[0]));
+        $this->layer->getState()->addFilter($item($this->colorIds[0]));
         expect($this->layer->isFilterLimitReached())->toBeFalse();
 
-        $this->layer->getState()->addFilter($item($this->options[1]));
+        $this->layer->getState()->addFilter($item($this->colorIds[1]));
         expect($this->layer->isFilterLimitReached())->toBeTrue();
     });
 });
