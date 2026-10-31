@@ -89,6 +89,41 @@ class Mage_Catalog_Model_Layer_Filter_Attribute extends Mage_Catalog_Model_Layer
     }
 
     /**
+     * Accept only the exact option values that the filter links contain.
+     */
+    #[\Override]
+    public function countRequestValues(Mage_Core_Controller_Request_Http $request): ?int
+    {
+        $filter = $request->getParam($this->_requestVar);
+        if ($filter === null || $filter === '') {
+            return 0;
+        }
+
+        if ($this->isMultipleSelect()) {
+            $values = $this->_parseRequestValues($filter);
+            $rawValues = is_array($filter) ? array_values($filter) : explode(',', (string) $filter);
+            if ($rawValues !== $values) {
+                return null;
+            }
+        } else {
+            $values = is_string($filter) ? [$filter] : [];
+        }
+        if ($values === []) {
+            return null;
+        }
+
+        foreach ($values as $value) {
+            $value = $this->_getCanonicalOptionValue($value);
+            $text = $value === null ? false : $this->_getOptionText($value);
+            if (!is_string($text) || $text === '') {
+                return null;
+            }
+        }
+
+        return count($values);
+    }
+
+    /**
      * Apply a multi-select attribute filter (OR within the facet).
      *
      * Every valid value is applied to the product collection with a single

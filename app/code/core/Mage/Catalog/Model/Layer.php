@@ -12,6 +12,8 @@ declare(strict_types=1);
 
 class Mage_Catalog_Model_Layer extends \Maho\DataObject
 {
+    public const XML_PATH_MAX_SELECTED_FILTERS = 'catalog/layered_navigation/max_selected_filters';
+
     /**
      * Product collections array
      *
@@ -262,6 +264,75 @@ class Mage_Catalog_Model_Layer extends \Maho\DataObject
         }
 
         return $state;
+    }
+
+    /**
+     * Check the filter values of the request before the filters apply them.
+     * Return false for a value that no filter link produces, or for more values than the limit.
+     */
+    public function isValidRequest(Mage_Core_Controller_Request_Http $request): bool
+    {
+        if ($request->getSymfonyRequest()->query->count() === 0) {
+            return true;
+        }
+
+        $count = 0;
+        foreach ($this->_getRequestFilters() as $filter) {
+            $values = $filter->countRequestValues($request);
+            if ($values === null) {
+                return false;
+            }
+            $count += $values;
+        }
+
+        $limit = $this->getMaxSelectedFilters();
+
+        return $limit === 0 || $count <= $limit;
+    }
+
+    /**
+     * The highest number of filter options that one page can select, or 0 for no limit.
+     */
+    public function getMaxSelectedFilters(): int
+    {
+        return max(0, (int) Mage::getStoreConfig(self::XML_PATH_MAX_SELECTED_FILTERS));
+    }
+
+    public function isFilterLimitReached(): bool
+    {
+        $limit = $this->getMaxSelectedFilters();
+
+        return $limit > 0 && count($this->getState()->getFilters()) >= $limit;
+    }
+
+    /**
+     * @return Mage_Catalog_Model_Layer_Filter_Abstract[]
+     */
+    protected function _getRequestFilters(): array
+    {
+        $filters = [Mage::getModel('catalog/layer_filter_category')->setLayer($this)];
+        foreach ($this->getFilterableAttributes() as $attribute) {
+            $filters[] = Mage::getModel($this->_getFilterModelName($attribute))
+                ->setLayer($this)
+                ->setAttributeModel($attribute);
+        }
+
+        return $filters;
+    }
+
+    /**
+     * The filter model for an attribute, as Mage_Catalog_Block_Layer_View picks its filter block.
+     */
+    protected function _getFilterModelName(Mage_Catalog_Model_Resource_Eav_Attribute $attribute): string
+    {
+        if ($attribute->getAttributeCode() === 'price') {
+            return 'catalog/layer_filter_price';
+        }
+        if ($attribute->getBackendType() === 'decimal') {
+            return 'catalog/layer_filter_decimal';
+        }
+
+        return 'catalog/layer_filter_attribute';
     }
 
     /**

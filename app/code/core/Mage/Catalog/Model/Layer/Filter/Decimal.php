@@ -86,6 +86,33 @@ class Mage_Catalog_Model_Layer_Filter_Decimal extends Mage_Catalog_Model_Layer_F
     }
 
     /**
+     * Accept only an "index,range" pair of positive integers.
+     */
+    #[\Override]
+    public function countRequestValues(Mage_Core_Controller_Request_Http $request): ?int
+    {
+        $filter = $request->getParam($this->getRequestVar());
+        if ($filter === null || $filter === '') {
+            return 0;
+        }
+        if (!is_string($filter)) {
+            return null;
+        }
+
+        $parts = explode(',', $filter);
+        if (count($parts) !== 2) {
+            return null;
+        }
+        foreach ($parts as $part) {
+            if (!ctype_digit($part) || (int) $part < 1 || $part !== (string) (int) $part) {
+                return null;
+            }
+        }
+
+        return 1;
+    }
+
+    /**
      * Retrieve price aggreagation data cache key
      *
      * @return string
