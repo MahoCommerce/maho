@@ -272,10 +272,6 @@ class Mage_Catalog_Model_Layer extends \Maho\DataObject
      */
     public function isValidRequest(Mage_Core_Controller_Request_Http $request): bool
     {
-        if ($request->getSymfonyRequest()->query->count() === 0) {
-            return true;
-        }
-
         $count = 0;
         foreach ($this->_getRequestFilters() as $filter) {
             $values = $filter->countRequestValues($request);

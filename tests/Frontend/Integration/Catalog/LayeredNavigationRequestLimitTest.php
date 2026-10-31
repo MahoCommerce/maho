@@ -211,6 +211,30 @@ describe('the limit of the layer', function () {
         expect($this->layer->isValidRequest(lnlRequest('color=99999999')))->toBeFalse();
     });
 
+    test('a filter value in the URL path is checked like a query value', function () {
+        $request = lnlRequest('')->setParam('color', '99999999');
+
+        expect($this->layer->isValidRequest($request))->toBeFalse();
+    });
+
+    test('a decimal attribute is checked with the decimal filter', function () {
+        $layer = new class (lnlParentCategory()) extends Mage_Catalog_Model_Layer {
+            public function __construct(Mage_Catalog_Model_Category $category)
+            {
+                parent::__construct();
+                $this->setData('current_category', $category);
+            }
+
+            #[\Override]
+            public function getFilterableAttributes()
+            {
+                return [lnlAttribute('weight')];
+            }
+        };
+
+        expect($layer->isValidRequest(lnlRequest('weight=2,10')))->toBeTrue();
+    });
+
     test('parameters that are not filters do not count', function () {
         Mage::app()->getStore()->setConfig(Mage_Catalog_Model_Layer::XML_PATH_MAX_SELECTED_FILTERS, '1');
 
@@ -230,9 +254,43 @@ describe('the limit of the layer', function () {
     });
 });
 
+describe('layered navigation block', function () {
+    test('the options are hidden when the limit is reached', function () {
+        $block = new class extends Mage_Catalog_Block_Layer_View {
+            public Mage_Catalog_Model_Layer $testLayer;
+
+            #[\Override]
+            public function getLayer()
+            {
+                return $this->testLayer;
+            }
+
+            #[\Override]
+            public function getFilters()
+            {
+                return [new \Maho\DataObject(['items_count' => 1])];
+            }
+        };
+        $layer = lnlLayer(lnlParentCategory());
+        $block->testLayer = $layer;
+        $options = lnlColorOptionIds();
+        $filter = Mage::getModel('catalog/layer_filter_attribute')->setAttributeModel(lnlAttribute('color'));
+        foreach ([$options[0], $options[1]] as $value) {
+            $layer->getState()->addFilter(Mage::getModel('catalog/layer_filter_item')->setFilter($filter)->setValue($value));
+        }
+
+        Mage::app()->getStore()->setConfig(Mage_Catalog_Model_Layer::XML_PATH_MAX_SELECTED_FILTERS, '0');
+        expect($block->canShowOptions())->toBeTrue();
+
+        Mage::app()->getStore()->setConfig(Mage_Catalog_Model_Layer::XML_PATH_MAX_SELECTED_FILTERS, '2');
+        expect($block->canShowOptions())->toBeFalse();
+    });
+});
+
 describe('category page', function () {
     test('an unknown filter value forwards to the 404 page before the layout loads', function () {
         $category = lnlParentCategory();
+        expect(Mage::helper('catalog/category')->canShow($category))->toBeTrue();
         $request = new Mage_Core_Controller_Request_Http(
             SymfonyRequest::create('/catalog/category/view/id/' . $category->getId() . '?cat=99999999'),
         );
@@ -249,6 +307,26 @@ describe('category page', function () {
 
         expect($request->getActionName())->toBe('noRoute');
         expect($request->isDispatched())->toBeFalse();
+        expect($controller->getLayout()->getAllBlocks())->toBe([]);
+    });
+});
+
+describe('search result page', function () {
+    test('an unknown filter value forwards to the 404 page before the layout loads', function () {
+        $request = new Mage_Core_Controller_Request_Http(
+            SymfonyRequest::create('/catalogsearch/result/?q=shirt&cat=99999999'),
+        );
+        $request->setRouteName('catalogsearch')
+            ->setControllerName('result')
+            ->setActionName('index')
+            ->setControllerModule('Mage_CatalogSearch')
+            ->setDispatched(true);
+        Mage::app()->setRequest($request);
+
+        $controller = new Mage_CatalogSearch_ResultController($request, new Mage_Core_Controller_Response_Http());
+        $controller->indexAction();
+
+        expect($request->getActionName())->toBe('noRoute');
         expect($controller->getLayout()->getAllBlocks())->toBe([]);
     });
 });
