@@ -48,7 +48,6 @@ class Mage_Eav_Block_Frontend_Attributes extends Mage_Core_Block_Template
                 $visible[$code] = $attribute;
             }
         }
-        uasort($visible, fn($a, $b): int => (int) $a->getData('position') <=> (int) $b->getData('position'));
         $this->loadMissingValues($entity, array_keys($visible));
 
         $rows = [];

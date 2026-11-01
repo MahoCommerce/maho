@@ -41,13 +41,5 @@ class Maho_Blog_Block_Adminhtml_Attribute_Edit_Tab_Main extends Mage_Eav_Block_A
             'note' => $helper->__('Show the value in the list of details on the post or category page'),
             'values' => $yesno,
         ]);
-
-        $front->addField('position', 'text', [
-            'name' => 'position',
-            'label' => $helper->__('Position'),
-            'title' => $helper->__('Position'),
-            'note' => $helper->__('Position of the attribute in the list of details'),
-            'class' => 'validate-digits',
-        ]);
     }
 }

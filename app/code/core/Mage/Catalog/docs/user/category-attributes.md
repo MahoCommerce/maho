@@ -65,8 +65,9 @@ set.
 
 Set **Visible on Category Page on Front-end** to **Yes** in the **Frontend Properties** of the
 attribute. The category page then shows the attribute and its value in a table under the category
-description. A category with no value for the attribute does not show it. **Position** sets the
-order of the attributes in the table.
+description. A category with no value for the attribute does not show it. The table follows the
+order of the set: first the order of the groups, then the order of the attributes in each group.
+To change the order, drag the attribute in the set.
 
 The table shows HTML only when **Allow HTML Tags on Frontend** or **Enable WYSIWYG** is **Yes**.
 It does not show Image attributes.

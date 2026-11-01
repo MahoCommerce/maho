@@ -66,12 +66,12 @@ it('gives each blog entity type a default set', function () {
 it('saves the frontend flags of a blog attribute in the additional table', function () {
     $attribute = $this->records[] = blogSetTestAttribute(Maho_Blog_Model_Category::ENTITY, 'pest_flag_' . $this->suffix, [
         'is_visible_on_front' => 1,
-        'position' => 7,
+        'is_html_allowed_on_front' => 1,
     ]);
 
     $loaded = Mage::getModel('blog/resource_eav_attribute')->load($attribute->getId());
     expect((int) $loaded->getData('is_visible_on_front'))->toBe(1)
-        ->and((int) $loaded->getData('position'))->toBe(7);
+        ->and((int) $loaded->getData('is_html_allowed_on_front'))->toBe(1);
 });
 
 it('stores a user-defined value of a post and of a category, in the default set', function () {
@@ -145,6 +145,18 @@ it('lists a value that is visible on the storefront', function () {
 
     expect(array_column($rows, 'code'))->toContain($code)
         ->and($block->getValueHtml($rows[array_search($code, array_column($rows, 'code'), true)]))->toBe('&lt;b&gt;5&lt;/b&gt; minutes');
+});
+
+it('lists the visible values in the order of the attribute set', function () {
+    $later = 'pest_later_' . $this->suffix;
+    $sooner = 'pest_sooner_' . $this->suffix;
+    $this->records[] = blogSetTestAttribute(Maho_Blog_Model_Post::ENTITY, $later, ['is_visible_on_front' => 1, 'sort_order' => 900]);
+    $this->records[] = blogSetTestAttribute(Maho_Blog_Model_Post::ENTITY, $sooner, ['is_visible_on_front' => 1, 'sort_order' => 800]);
+    $post = Mage::getModel('blog/post')->setData(['entity_id' => 1, $later => 'B', $sooner => 'A']);
+
+    $codes = array_column(Mage::app()->getLayout()->createBlock('eav/frontend_attributes')->setData('entity', $post)->getAttributeValues(), 'code');
+
+    expect(array_values(array_intersect($codes, [$later, $sooner])))->toBe([$sooner, $later]);
 });
 
 it('lists a Yes/No value of 0 as No and leaves out an empty one', function () {

@@ -53,13 +53,5 @@ class Mage_Adminhtml_Block_Catalog_Category_Attribute_Edit_Tab_Main extends Mage
             'title' => $helper->__('Visible on Category Page on Front-end'),
             'values' => $yesno,
         ]);
-
-        $front->addField('position', 'text', [
-            'name' => 'position',
-            'label' => $helper->__('Position'),
-            'title' => $helper->__('Position'),
-            'note' => $helper->__('Position of the attribute in the list on the category page'),
-            'class' => 'validate-digits',
-        ]);
     }
 }
