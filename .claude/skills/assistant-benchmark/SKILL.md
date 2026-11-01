@@ -89,6 +89,7 @@ Look up the IDs that `pass.sh` reads from the environment:
 | `CMS_ID` | `SELECT page_id FROM cms_page WHERE identifier NOT IN ('home', 'no-route', 'enable-cookies') ORDER BY page_id LIMIT 1` |
 | `ORDER_ID` | `SELECT entity_id FROM sales_flat_order ORDER BY entity_id DESC LIMIT 1` |
 | `CUSTOMER_ID` | `SELECT customer_id FROM sales_flat_order WHERE customer_id IS NOT NULL GROUP BY customer_id ORDER BY COUNT(*) DESC LIMIT 1` |
+| `BRAND` | A label of the `brand` attribute, not an ID: `SELECT ov.value FROM catalog_product_entity_int i JOIN eav_attribute a ON a.attribute_id = i.attribute_id AND a.attribute_code = 'brand' AND a.entity_type_id = (SELECT entity_type_id FROM eav_entity_type WHERE entity_type_code = 'catalog_product') JOIN eav_attribute_option_value ov ON ov.option_id = i.value AND ov.store_id = 0 WHERE i.store_id = 0 GROUP BY ov.value HAVING COUNT(*) >= 5 ORDER BY COUNT(*), ov.value LIMIT 1` |
 
 If a query gives no row, leave its variable out. `pass.sh` skips the cases that need it and writes
 "Skipped" in their transcript file: say so in the report. `examples-rule` needs a cart price rule,
@@ -104,7 +105,7 @@ user. Create one user for each group in step 3. The write cases change the same 
 
 ```bash
 STORE=<dir> ADMIN=http://127.0.0.1:8123/admin COLOR_ID=94 CONF_ID=3 SIMPLE_ID=7 \
-CATEGORY_ID=13 CMS_ID=3 ORDER_ID=300 CUSTOMER_ID=47 \
+CATEGORY_ID=13 CMS_ID=3 ORDER_ID=300 CUSTOMER_ID=47 BRAND='Kestrel Audio' \
   "$SKILL_DIR/parallel.sh" <out>/<phase>/<model>/r<run> <creds 1> <creds 2> ... [-- case names]
 ```
 
@@ -112,7 +113,7 @@ To run the cases one at a time, use `pass.sh` with `CREDS`:
 
 ```bash
 STORE=<dir> ADMIN=http://127.0.0.1:8123/admin CREDS=<file> COLOR_ID=94 CONF_ID=3 SIMPLE_ID=7 \
-CATEGORY_ID=13 CMS_ID=3 ORDER_ID=300 CUSTOMER_ID=47 \
+CATEGORY_ID=13 CMS_ID=3 ORDER_ID=300 CUSTOMER_ID=47 BRAND='Kestrel Audio' \
   "$SKILL_DIR/pass.sh" <out>/<phase>/<model>/r<run> [case names]
 ```
 

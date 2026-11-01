@@ -20,7 +20,7 @@ use PhpParser\Node\Param;
 use Rector\Contract\Rector\ConfigurableRectorInterface;
 use Rector\Php80\NodeAnalyzer\PhpAttributeAnalyzer;
 use Rector\Rector\AbstractRector;
-use Rector\ValueObject\PhpVersionFeature;
+use Rector\ValueObject\PhpVersion;
 use Rector\VersionBonding\Contract\MinPhpVersionInterface;
 use Symplify\RuleDocGenerator\ValueObject\CodeSample\ConfiguredCodeSample;
 use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
@@ -95,6 +95,6 @@ final class AddSensitiveParameterAttributeRector extends AbstractRector implemen
     #[\Override]
     public function provideMinPhpVersion(): int
     {
-        return PhpVersionFeature::SENSITIVE_PARAMETER_ATTRIBUTE;
+        return PhpVersion::PHP_82;
     }
 }

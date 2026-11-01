@@ -110,6 +110,7 @@
 "Custom Email 1","Custom Email 1"
 "Custom Email 2","Custom Email 2"
 "Customer Support","Customer Support"
+"Custom layout updates cannot use the json attribute.","Custom layout updates cannot use the json attribute."
 "Custom Variables","Custom Variables"
 "Dark Mode","Dark Mode"
 "Dashboard","Dashboard"

@@ -16,6 +16,10 @@ class Mage_Adminhtml_SitemapController extends Mage_Adminhtml_Controller_Action
      */
     public const ADMIN_RESOURCE = 'catalog/sitemap';
 
+    /** The link of a notice from the message queue has no secret key: the grid only reads. */
+    #[\Override]
+    protected $_publicActions = ['index'];
+
     /**
      * Maximum sitemap name length
      */
@@ -228,7 +232,7 @@ class Mage_Adminhtml_SitemapController extends Mage_Adminhtml_Controller_Action
     }
 
     /**
-     * Generate sitemap
+     * Queue the generation of a sitemap
      */
     #[Maho\Config\Route('/admin/sitemap/generate')]
     public function generateAction(): void
@@ -241,13 +245,10 @@ class Mage_Adminhtml_SitemapController extends Mage_Adminhtml_Controller_Action
         // if sitemap record exists
         if ($sitemap->getId()) {
             try {
-                $sitemap->generateXml();
-
+                $sitemap->queueGenerate(Mage::helper('adminnotification')->getCurrentAdminUserId());
                 $this->_getSession()->addSuccess(
-                    Mage::helper('sitemap')->__('The sitemap "%s" has been generated.', $sitemap->getSitemapFilename()),
+                    Mage::helper('sitemap')->__('The sitemap "%s" will be generated in the background. A message in the notifications tells you when it is generated.', $sitemap->getSitemapFilename()),
                 );
-            } catch (Mage_Core_Exception $e) {
-                $this->_getSession()->addError($e->getMessage());
             } catch (Exception $e) {
                 $this->_getSession()->addException(
                     $e,

@@ -152,7 +152,6 @@ final class CatalogPriceRuleProcessor extends \Maho\ApiPlatform\Processor
 
         set_time_limit(0);
         \Mage::getModel('catalogrule/rule')->applyAll();
-        \Mage::getModel('catalogrule/flag')->loadSelf()->setState(0)->save();
         $this->logApiActivity('catalog_price_rule', 'apply', null, null);
 
         return $this->respondRaw(['success' => true]);

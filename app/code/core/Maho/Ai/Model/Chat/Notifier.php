@@ -34,12 +34,12 @@ class Maho_Ai_Model_Chat_Notifier
         bool $creatorOnly = false,
     ): void {
         $toCreator = $creatorOnly || $schedule === null;
-        Mage::getModel('adminnotification/inbox')->add(
+        Mage::helper('adminnotification')->notifyAdmin(
             $severity,
-            mb_substr(trim($title), 0, 255),
-            trim($text),
-            Mage::helper('ai')->adminUrl('adminhtml/ai_chat/open', ['id' => (int) $conversation->getId(), '_nosecret' => true]),
-            true,
+            $title,
+            $text,
+            'adminhtml/ai_chat/open',
+            ['id' => (int) $conversation->getId()],
             $toCreator ? $conversation->getAdminUserId() : $schedule->notifyAdminUserId(),
             $toCreator ? null : $schedule->notifyAclResource(),
         );

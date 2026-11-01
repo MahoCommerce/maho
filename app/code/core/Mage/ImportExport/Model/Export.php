@@ -30,6 +30,16 @@ class Mage_ImportExport_Model_Export extends Mage_ImportExport_Model_Abstract
     public const CONFIG_KEY_FORMATS  = 'global/importexport/export_file_formats';
 
     /**
+     * The private mount that keeps the export files until an administrator downloads them.
+     */
+    public const STORAGE_MOUNT = 'importexport_exports';
+
+    /**
+     * The number of days that an export file stays in the mount.
+     */
+    public const FILE_LIFETIME_DAYS = 7;
+
+    /**
      * Entity adapter.
      *
      * @var Mage_ImportExport_Model_Export_Entity_Abstract
@@ -266,5 +276,101 @@ class Mage_ImportExport_Model_Export extends Mage_ImportExport_Model_Abstract
     public function getFileName()
     {
         return $this->getEntity() . '_' . date('Ymd_His') . '.' . $this->_getWriter()->getFileExtension();
+    }
+
+    /**
+     * Queue the export of the current entity, file format and filters. The result goes to the
+     * inbox of $adminUserId.
+     *
+     * @throws Mage_Core_Exception when the entity or the file format is unknown
+     */
+    public function queueExport(?int $adminUserId = null): void
+    {
+        if (!isset(Mage_ImportExport_Model_Config::getModels(self::CONFIG_KEY_ENTITIES)[$this->getEntity()])) {
+            Mage::throwException(Mage::helper('importexport')->__('Invalid entity'));
+        }
+        if (!isset(Mage_ImportExport_Model_Config::getModels(self::CONFIG_KEY_FORMATS)[$this->getFileFormat()])) {
+            Mage::throwException(Mage::helper('importexport')->__('Invalid file format'));
+        }
+        if (!is_array($this->getData(self::FILTER_ELEMENT_GROUP))) {
+            Mage::throwException(Mage::helper('importexport')->__('No filter data provided'));
+        }
+
+        $parameters = [];
+        foreach (['entity', 'file_format', self::FILTER_ELEMENT_GROUP, self::FILTER_ELEMENT_SKIP] as $key) {
+            if ($this->hasData($key)) {
+                $parameters[$key] = $this->getData($key);
+            }
+        }
+
+        \Maho\Queue\QueueManager::dispatch(
+            new Mage_ImportExport_Model_ExportMessage($parameters, $adminUserId),
+            queue: Mage_ImportExport_Model_ExportMessage::QUEUE_NAME,
+        );
+    }
+
+    /**
+     * Export the data to a new file in the export mount, and return the name of that file.
+     *
+     * @throws Mage_Core_Exception when there is no data to export
+     */
+    public function exportToStorage(): string
+    {
+        $this->setDestination(null);
+        $result = $this->exportFile();
+        if (!isset($result['value'])) {
+            Mage::throwException(Mage::helper('importexport')->__('There is no data for export'));
+        }
+
+        // A random part makes the name hard to guess, because the download link has no secret key
+        $fileName = $this->getEntity() . '_' . date('Ymd_His') . '_' . bin2hex(random_bytes(8))
+            . '.' . $this->_getWriter()->getFileExtension();
+        $mount = $this->getStorage();
+        if (($result['type'] ?? null) === 'string') {
+            $mount->write($fileName, (string) $result['value']);
+        } else {
+            $this->_getWriter()->destruct();
+            try {
+                $mount->copyFromLocalFile((string) $result['value'], $fileName);
+            } finally {
+                @unlink((string) $result['value']);
+            }
+        }
+
+        return $fileName;
+    }
+
+    /**
+     * The path in the export mount of the file $fileName, or null when $fileName is not the name
+     * of an export file. $fileName comes from a request, so only a plain file name passes.
+     */
+    public function getStoragePath(string $fileName): ?string
+    {
+        if (!preg_match('/^[a-z0-9_]+\.[a-z0-9]+$/i', $fileName)) {
+            return null;
+        }
+
+        return \Maho\Io::getPathWithinMount($this->getStorage(), '', $fileName);
+    }
+
+    /**
+     * Delete the export files that are older than FILE_LIFETIME_DAYS.
+     */
+    #[Maho\Config\CronJob('importexport_delete_expired_exports', schedule: '45 3 * * *')]
+    public function deleteExpiredFiles(): void
+    {
+        $mount = $this->getStorage();
+        $limit = time() - self::FILE_LIFETIME_DAYS * 86400;
+        foreach ($mount->listFiles() as $file) {
+            $lastModified = $file->lastModified();
+            if ($lastModified !== null && $lastModified < $limit) {
+                $mount->delete($file->path());
+            }
+        }
+    }
+
+    public function getStorage(): \Maho\Storage\Mount
+    {
+        return Mage::getStorage(self::STORAGE_MOUNT);
     }
 }

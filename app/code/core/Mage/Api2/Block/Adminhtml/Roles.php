@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2020-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Api2
@@ -24,7 +24,7 @@ class Mage_Api2_Block_Adminhtml_Roles extends Mage_Adminhtml_Block_Widget_Grid_C
         //check allow edit
         /** @var Mage_Admin_Model_Session $session */
         $session = Mage::getSingleton('admin/session');
-        if (!$session->isAllowed('system/api/roles/add')) {
+        if (!$session->isAllowed('system/api/rest_roles/add')) {
             $this->_removeButton('add');
         }
     }

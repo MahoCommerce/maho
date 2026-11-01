@@ -95,9 +95,9 @@ class Mage_Catalog_Model_Product_Media_Config
     }
 
     /**
-     * @deprecated since 26.11 the file is on the media mount, use getBaseTmpMediaStoragePath()
      * @return string
      */
+    #[\Deprecated(message: 'the file is on the media mount, use getBaseTmpMediaStoragePath()', since: '26.11')]
     public function getBaseTmpMediaPath()
     {
         return Mage::getBaseDir('media') . DS . $this->getBaseTmpMediaPathAddition();
@@ -192,10 +192,10 @@ class Mage_Catalog_Model_Product_Media_Config
     }
 
     /**
-     * @deprecated since 26.11 the file is on the media mount, use getTmpMediaStoragePath()
      * @param string $file
      * @return string
      */
+    #[\Deprecated(message: 'the file is on the media mount, use getTmpMediaStoragePath()', since: '26.11')]
     public function getTmpMediaPath($file)
     {
         $file = $this->_prepareFileForPath($file);

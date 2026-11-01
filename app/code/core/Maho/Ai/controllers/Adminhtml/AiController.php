@@ -26,6 +26,7 @@ class Maho_Ai_Adminhtml_AiController extends Mage_Adminhtml_Controller_Action
         'usage'       => 'system/ai/usage',
         'reindex'     => 'system/ai/reindex',
         'reindexpost' => 'system/ai/reindex',
+        'fetchmodels' => 'system/config/ai',
     ];
 
     /** Read-only JSON poll — skip URL secret key, session cookie + ACL is sufficient. */

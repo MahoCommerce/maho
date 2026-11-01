@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2019-2023 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2019-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Core
@@ -89,7 +89,7 @@ class Mage_Core_Model_File_Validator_AvailablePath
         $valuePathInfo = pathinfo(ltrim($normalizedValue, '\\\\/'));
         $fileNameExtension = pathinfo($valuePathInfo['filename'], PATHINFO_EXTENSION);
 
-        if (in_array($fileNameExtension, $protectedExtensions)) {
+        if (in_array(strtolower($fileNameExtension), $protectedExtensions, true)) {
             $this->messages[] = Mage::helper('core')->__('Path "%s" is not available and cannot be used.', $value);
             return false;
         }

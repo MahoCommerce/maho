@@ -1,48 +1,11 @@
 // SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
 // SPDX-License-Identifier: AFL-3.0
 
+import { ModelWorker } from '../ml-runtime.js';
+
 const MODEL_ID = 'onnx-community/BEN2-ONNX';
 const MODEL_DTYPE = 'fp16';
 const MAX_PROCESSING_SIZE = 1024;
-
-let pipelinePromise = null;
-
-async function hasWebGPU() {
-    if (!navigator.gpu) return false;
-    try {
-        const adapter = await navigator.gpu.requestAdapter();
-        return !!adapter;
-    } catch {
-        return false;
-    }
-}
-
-let latestProgressCallback = null;
-
-async function getSegmenter(onProgress) {
-    latestProgressCallback = onProgress;
-
-    if (pipelinePromise) {
-        return pipelinePromise;
-    }
-
-    pipelinePromise = (async () => {
-        try {
-            const { pipeline } = await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1');
-            const device = await hasWebGPU() ? 'webgpu' : 'wasm';
-            return pipeline('background-removal', MODEL_ID, {
-                dtype: MODEL_DTYPE,
-                device,
-                progress_callback: (p) => latestProgressCallback?.(p),
-            });
-        } catch (e) {
-            pipelinePromise = null;
-            throw e;
-        }
-    })();
-
-    return pipelinePromise;
-}
 
 function downscale(canvas, maxSize) {
     const { width, height } = canvas;
@@ -133,6 +96,7 @@ export class RemoveBackgroundTool {
         this._removeBtn = null;
         this._transparentCanvas = null;
         this._bgApplied = false;
+        this._model = new ModelWorker('background-removal', MODEL_ID, MODEL_DTYPE);
     }
 
     get name() { return 'rembg'; }
@@ -264,23 +228,25 @@ export class RemoveBackgroundTool {
         this._removeBtn.textContent = 'Processing…';
         this._setStatus('Loading model…');
 
+        this._model.onProgress = (p) => {
+            if (p.status === 'progress' && p.total) {
+                const pct = Math.round((p.loaded / p.total) * 100);
+                this._setStatus(`Downloading model… ${pct}%`);
+            } else if (p.status === 'ready') {
+                this._setStatus(this._model.onCpu ? 'Removing background on the CPU…' : 'Removing background…');
+            }
+        };
+        this._model.onFallback = () => this._setStatus('The GPU failed. Removing background on the CPU…');
+
         try {
-            const segmenter = await getSegmenter((p) => {
-                if (p.status === 'progress' && p.total) {
-                    const pct = Math.round((p.loaded / p.total) * 100);
-                    this._setStatus(`Downloading model… ${pct}%`);
-                } else if (p.status === 'ready') {
-                    this._setStatus('Model ready, processing…');
-                }
-            });
-
-            this._setStatus('Removing background…');
-
             const source = this.editor.baseCanvas;
             const { canvas: inputCanvas, scale } = downscale(source, MAX_PROCESSING_SIZE);
             const blob = await new Promise(resolve => inputCanvas.toBlob(resolve, 'image/png'));
-            const result = await segmenter(blob);
-            const maskCanvas = result[0].toCanvas();
+            const pixels = await this._model.run(blob);
+            const maskCanvas = document.createElement('canvas');
+            maskCanvas.width = pixels.width;
+            maskCanvas.height = pixels.height;
+            maskCanvas.getContext('2d').putImageData(pixels, 0, 0);
 
             let outputCanvas;
             if (scale < 1) {
@@ -293,12 +259,14 @@ export class RemoveBackgroundTool {
             this._bgApplied = false;
             this.editor.pushUndo();
             this.editor.replaceBase(outputCanvas);
-            this._setStatus('Background removed');
             this.editor.setOptions(this.renderOptions());
+            this._setStatus('Background removed');
         } catch (err) {
             console.error('Background removal failed:', err);
             this._setStatus('Error: ' + err.message);
         } finally {
+            this._model.onProgress = null;
+            this._model.onFallback = null;
             this._processing = false;
             this._removeBtn.disabled = false;
             this._removeBtn.textContent = 'Remove Background';
@@ -314,7 +282,6 @@ export class RemoveBackgroundTool {
             this._transparentCanvas.width = 0;
             this._transparentCanvas = null;
         }
-        latestProgressCallback = null;
-        pipelinePromise = null;
+        this._model.terminate();
     }
 }

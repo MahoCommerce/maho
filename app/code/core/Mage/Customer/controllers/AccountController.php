@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2018-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2018-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Customer
@@ -635,7 +635,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
 
             // check if it is inactive
             if ($customer->getConfirmation()) {
-                if ($customer->getConfirmation() !== $key) {
+                if (!is_string($key) || !hash_equals((string) $customer->getConfirmation(), $key)) {
                     $limiter->hit();
                     throw new Exception($this->__('Wrong confirmation key.'));
                 }

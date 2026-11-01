@@ -95,6 +95,19 @@ it('does not retain for Remember Me when the feature is disabled', function () {
     expect(file_exists($path))->toBeFalse();
 });
 
+it('keeps a session for the default cookie lifetime when the cookie lifetime is empty', function () {
+    foreach ([Mage::app()->getStore(), ...Mage::app()->getStores()] as $store) {
+        $store->setConfig('web/cookie/cookie_lifetime', '');
+        $store->setConfig('web/cookie/remember_enabled', '0');
+    }
+
+    $path = seedSessionFile('sess_default_lifetime', 3 * 86400);
+
+    runSessionCleanup();
+
+    expect(file_exists($path))->toBeTrue();
+});
+
 it('respects a store view that configures a longer lifetime than the current scope', function () {
     // The reaper runs in one scope, but the lifetimes are per store view. getStores() hands back
     // the very object getStore() returns, so the current store has to be skipped or the short

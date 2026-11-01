@@ -24,10 +24,13 @@ Each node then reads and writes the same files, and a node can start with an emp
 | `imports`          | `var/import`                    | Dataflow import files and profile uploads               |
 | `feeds`            | `var/feedmanager`               | Work files of a feed that the admin generates in batches: a state file and one part file for each batch. The finished feed goes to `media`. |
 | `sitemaps`         | `public`                        | The sitemap files                                       |
+| `importexport_exports` | `var/importexport/export`   | Files of System > Import/Export > Export. A daily cron job deletes the files that are older than 7 days |
 
 The cache, the sessions, the logs, `var/tmp` and the locks are not on a mount. Put the cache and
 the sessions on [Redis](redis.md). Each node keeps its own logs and temporary files. System >
-Import/Export keeps its working files on the local disk of the node that runs the import. On more
+Import/Export keeps its uploaded files on the local disk of the node that receives the upload. A
+queue worker runs the import from the rows in the database, and a product import reads its images
+from `media/import` on the node of that worker. On more
 than one node, set the lock backend to `db`, so that all nodes share the locks: see
 [locking across multiple servers](cron.md#locking-across-multiple-servers).
 
@@ -117,8 +120,10 @@ other mounts in a bucket that allows no public read.
 
 ## Private files
 
-The `custom_options`, `downloadable`, `customer` and `customer_address` mounts hold files that only
-Maho can serve. Their local folders are below `public/media`, and the web server denies them.
+The `custom_options`, `downloadable`, `customer`, `customer_address` and `importexport_exports`
+mounts hold files that only Maho can serve. The local folders of the first four mounts are below
+`public/media`, and the web server denies them. The local folder of `importexport_exports` is
+`var/importexport/export`, outside the web root.
 
 A private mount does not follow the `media` mount. When you move `media` to a bucket, move each
 private mount too, or its files stay on the disk of the node that received them. Put the private
@@ -135,7 +140,8 @@ mounts in a bucket that allows no public read, never in the public media bucket:
 </downloadable>
 ```
 
-Do the same for `custom_options`, `customer` and `customer_address`, each with its own prefix.
+Do the same for `custom_options`, `customer`, `customer_address` and `importexport_exports`, each
+with its own prefix.
 
 Make sure that a private file answers `403`, and that a product image answers `200`:
 

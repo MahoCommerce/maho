@@ -16,5 +16,10 @@ class Maho_CatalogLinkRule_Block_Adminhtml_Rule extends Mage_Adminhtml_Block_Wid
         $this->_blockGroup = 'cataloglinkrule';
         $this->_headerText = Mage::helper('cataloglinkrule')->__('Product Relationship Rules');
         parent::__construct();
+
+        $this->_addButton('apply_rules', [
+            'label'   => Mage::helper('cataloglinkrule')->__('Apply Rules'),
+            'onclick' => "setLocation('" . $this->getUrl('*/*/applyRules') . "')",
+        ]);
     }
 }

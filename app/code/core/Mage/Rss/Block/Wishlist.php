@@ -145,8 +145,8 @@ class Mage_Rss_Block_Wishlist extends Mage_Wishlist_Block_Abstract
                 /** @var Mage_Catalog_Helper_Output $outputHelper */
                 $outputHelper = $this->helper('catalog/output');
 
-                $description = '<table><tr><td><a href="' . $productUrl . '"><img src="'
-                    . $imageHelper->init($product, 'image')->resize(75, 75)
+                $description = '<table><tr><td><a href="' . $this->escapeUrl($productUrl) . '"><img src="'
+                    . $this->escapeUrl((string) $imageHelper->init($product, 'image')->resize(75, 75))
                     . '" border="0" align="left" width="75"></a></td>'
                     . '<td style="text-decoration:none;">'
                     . $outputHelper->productAttribute($product, $product->getShortDescription(), 'short_description')

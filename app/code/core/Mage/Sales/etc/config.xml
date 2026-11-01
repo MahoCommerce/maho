@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <!--
-SPDX-FileCopyrightText: 2016-2023 The OpenMage Contributors <https://openmage.org>
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+SPDX-FileCopyrightText: 2016-2026 The OpenMage Contributors <https://openmage.org>
 SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
 SPDX-License-Identifier: AFL-3.0
 -->
@@ -1105,6 +1106,12 @@ SPDX-License-Identifier: AFL-3.0
                     <type>html</type>
                 </sales_email_shipment_comment_guest_template>
             </email>
+            <email_layout_handles>
+                <sales_email_order_items/>
+                <sales_email_order_invoice_items/>
+                <sales_email_order_shipment_items/>
+                <sales_email_order_creditmemo_items/>
+            </email_layout_handles>
         </template>
         <resources>
             <sales_setup>

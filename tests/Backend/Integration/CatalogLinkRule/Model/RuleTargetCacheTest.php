@@ -19,7 +19,7 @@ class Maho_CatalogLinkRule_Test_CountingRule extends Maho_CatalogLinkRule_Model_
     public array $collectResult = [];
 
     #[\Override]
-    protected function _collectMatchingTargetProductIds(?Mage_Catalog_Model_Product $sourceProduct = null): array
+    protected function _collectMatchingTargetProductIds(?Mage_Catalog_Model_Product $sourceProduct = null, ?array $websiteIds = null): array
     {
         $this->collectCalls++;
         return $this->collectResult;
@@ -96,6 +96,19 @@ describe('CatalogLinkRule target-scan caching', function () {
         $rule->setSortOrder('name_desc');
         $rule->getMatchingTargetProductIds();
 
+        expect($rule->collectCalls)->toBe(2);
+    });
+
+    test('other websites rescan instead of reusing the cache of a different website set', function () {
+        $rule = new Maho_CatalogLinkRule_Test_CountingRule();
+        $rule->collectResult = [11, 22, 33];
+        $rule->setSortOrder('price_asc');
+
+        $rule->getMatchingTargetProductIds(null, [1, 2]);
+        $rule->getMatchingTargetProductIds(null, [2, 1]);
+        expect($rule->collectCalls)->toBe(1);
+
+        $rule->getMatchingTargetProductIds(null, [2]);
         expect($rule->collectCalls)->toBe(2);
     });
 

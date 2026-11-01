@@ -66,6 +66,8 @@ Available commands:
   customer:list                 List all customers
  db
   db:connect                    Opens the database command-line interface using credentials from your local.xml file
+  db:export                     Dump the database to a SQL file using the credentials from your local.xml file
+  db:import                     Import a SQL dump into the database using the credentials from your local.xml file
   db:optimize                   Rebuild bloated tables to return their free space to the filesystem
   db:query                      Execute a SQL query using the database credentials from your local.xml file
  dev
@@ -149,6 +151,39 @@ The list of the built-in commands is growing rapidly, at the moment yon can eith
 within our GitHub repository.
 
 All commands should be self-explanatory, also thanks to the inline descriptions.
+
+### Database dumps
+
+<span class="version-badge">v26.11+</span> `db:export` and `db:import` write and load a database
+dump. They use the connection in `app/etc/local.xml`. They run the native client of the
+configured engine (`mysqldump` or `mariadb-dump`, `pg_dump` or `sqlite3`), so you must install
+the matching client on the host. They also work while the database is empty.
+
+```bash
+# gzip dump (the default), a plain SQL dump, or a zstd one
+./maho db:export var/backups/shop.sql.gz
+./maho db:export var/backups/shop.sql --compression=none
+./maho db:export var/backups/shop.sql.zst --compression=zstd
+
+# print the resolved connection and the commands, without running anything
+./maho db:export var/backups/shop.sql --dry-run
+
+# restore, emptying the database first (the command asks first, --force skips the question)
+./maho db:import var/backups/shop.sql --empty --force
+```
+
+`db:import` does not choose the compression for you. It reads the file header and refuses a gzip
+or zstd dump that you load with the wrong `--compression`. The error message names the right value.
+
+`--empty` empties the database first. On MySQL and MariaDB, it drops and creates the database.
+On PostgreSQL, it resets the `public` schema. On SQLite, it removes the file.
+A dump from `pg_dump` and a dump from MariaDB or MySQL replace the tables they find. A SQLite dump
+does not. To load a SQLite dump into a database that has tables, use `--empty`.
+After a restore, run `./maho cache:flush`.
+
+On MySQL, `db:export` and `db:import` give the password to the client in the `MYSQL_PWD`
+variable. A `password=` line in an option file such as `~/.my.cnf` has priority over it. If the
+commands fail with "Access denied", remove that line or make it match `local.xml`.
 
 ## Give the input on the command line
 

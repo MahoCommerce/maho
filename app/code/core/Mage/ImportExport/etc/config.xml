@@ -15,6 +15,15 @@ SPDX-License-Identifier: AFL-3.0
             <user>docs/user</user>
             <developer>docs/developer</developer>
         </docs>
+        <storage>
+            <mounts>
+                <!-- Private: the export files hold catalog and customer data -->
+                <importexport_exports>
+                    <dir>var</dir>
+                    <path>importexport/export</path>
+                </importexport_exports>
+            </mounts>
+        </storage>
         <models>
             <importexport>
                 <class>Mage_ImportExport_Model</class>

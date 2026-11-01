@@ -35,6 +35,11 @@ class Mage_ImportExport_Model_Import extends Mage_ImportExport_Model_Abstract
     public const MAX_IMPORT_CHUNKS = 4;
 
     /**
+     * The lock that validateSource() and importSource() hold while they use the import data table
+     */
+    public const IMPORT_LOCK = 'importexport_import';
+
+    /**
      * Entity adapter.
      *
      * @var Mage_ImportExport_Model_Import_Entity_Abstract
@@ -306,19 +311,28 @@ class Mage_ImportExport_Model_Import extends Mage_ImportExport_Model_Abstract
      */
     public function importSource()
     {
-        $this->setData([
-            'entity'   => self::getDataSourceModel()->getEntityTypeCode(),
-            'behavior' => self::getDataSourceModel()->getBehavior(),
-        ]);
-        $this->addLogComment(Mage::helper('importexport')->__('Begin import of "%s" with "%s" behavior', $this->getEntity(), $this->getBehavior()));
-        $result = $this->_getEntityAdapter()->importData();
-        // The import writes with SQL, so no save queues the build of the content classes
-        Mage::getSingleton('core/design_content_bundle')->queueBuild();
-        $this->addLogComment([
-            Mage::helper('importexport')->__('Checked rows: %d, checked entities: %d, invalid rows: %d, total errors: %d', $this->getProcessedRowsCount(), $this->getProcessedEntitiesCount(), $this->getInvalidRowsCount(), $this->getErrorsCount()),
-            Mage::helper('importexport')->__('Import has been done successfuly.'),
-        ]);
-        return $result;
+        // The lock tells isImportInProgress() that a run reads the rows, even when its queue claim looks old
+        $lock = Mage::getSingleton('core/lock');
+        if (!$lock->acquire(self::IMPORT_LOCK)) {
+            Mage::throwException(Mage::helper('importexport')->__('An import waits or runs. Start a new import when it is done.'));
+        }
+        try {
+            $this->setData([
+                'entity'   => self::getDataSourceModel()->getEntityTypeCode(),
+                'behavior' => self::getDataSourceModel()->getBehavior(),
+            ]);
+            $this->addLogComment(Mage::helper('importexport')->__('Begin import of "%s" with "%s" behavior', $this->getEntity(), $this->getBehavior()));
+            $result = $this->_getEntityAdapter()->importData();
+            // The import writes with SQL, so no save queues the build of the content classes
+            Mage::getSingleton('core/design_content_bundle')->queueBuild();
+            $this->addLogComment([
+                Mage::helper('importexport')->__('Checked rows: %d, checked entities: %d, invalid rows: %d, total errors: %d', $this->getProcessedRowsCount(), $this->getProcessedEntitiesCount(), $this->getInvalidRowsCount(), $this->getErrorsCount()),
+                Mage::helper('importexport')->__('Import has been done successfuly.'),
+            ]);
+            return $result;
+        } finally {
+            $lock->release(self::IMPORT_LOCK);
+        }
     }
 
     /**
@@ -431,17 +445,53 @@ class Mage_ImportExport_Model_Import extends Mage_ImportExport_Model_Abstract
      */
     public function validateSource($source)
     {
-        $this->addLogComment(Mage::helper('importexport')->__('Begin data validation'));
-        $result = $this->_getEntityAdapter()
-            ->setSource($this->_getSourceAdapter($source))
-            ->isDataValid();
-
-        $messages = $this->getOperationResultMessages($result);
-        $this->addLogComment($messages);
-        if ($result) {
-            $this->addLogComment(Mage::helper('importexport')->__('Done import data validation'));
+        // The validation replaces the rows that an import reads, so it holds the import lock too
+        $lock = Mage::getSingleton('core/lock');
+        if (!$lock->acquire(self::IMPORT_LOCK)) {
+            Mage::throwException(Mage::helper('importexport')->__('An import waits or runs. Start a new import when it is done.'));
         }
-        return $result;
+        try {
+            // Not isImportInProgress(): it would count the lock that this process now holds
+            if (\Maho\Queue\QueueManager::dbTransport()->inFlightRowExists(Mage_ImportExport_Model_ImportMessage::DEDUPE_KEY)) {
+                Mage::throwException(Mage::helper('importexport')->__('An import waits or runs. Start a new import when it is done.'));
+            }
+            $this->addLogComment(Mage::helper('importexport')->__('Begin data validation'));
+            $result = $this->_getEntityAdapter()
+                ->setSource($this->_getSourceAdapter($source))
+                ->isDataValid();
+
+            $messages = $this->getOperationResultMessages($result);
+            $this->addLogComment($messages);
+            if ($result) {
+                $this->addLogComment(Mage::helper('importexport')->__('Done import data validation'));
+            }
+            return $result;
+        } finally {
+            $lock->release(self::IMPORT_LOCK);
+        }
+    }
+
+    /**
+     * Queue importSource() and invalidateIndex() for the rows that the last validation stored.
+     * The result goes to the inbox of $adminUserId.
+     */
+    public function queueImportSource(?int $adminUserId = null): void
+    {
+        \Maho\Queue\QueueManager::dispatch(
+            new Mage_ImportExport_Model_ImportMessage($adminUserId),
+            queue: Mage_ImportExport_Model_ImportMessage::QUEUE_NAME,
+            dedupeKey: Mage_ImportExport_Model_ImportMessage::DEDUPE_KEY,
+        );
+    }
+
+    /**
+     * Whether a queued import waits or an import runs. The import data table holds one set of rows,
+     * so a new validation must wait until that import is done.
+     */
+    public static function isImportInProgress(): bool
+    {
+        return \Maho\Queue\QueueManager::dbTransport()->inFlightRowExists(Mage_ImportExport_Model_ImportMessage::DEDUPE_KEY)
+            || Mage::getSingleton('core/lock')->isHeld(self::IMPORT_LOCK);
     }
 
     /**

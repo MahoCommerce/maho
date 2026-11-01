@@ -168,7 +168,7 @@ class Mage_Sales_Helper_Guest extends Mage_Core_Helper_Data
                 $order = Mage::getModel('sales/order');
                 $order->loadByIncrementId($incrementId);
 
-                if ($order->getProtectCode() === $protectCode) {
+                if (hash_equals((string) $order->getProtectCode(), $protectCode)) {
                     return $order;
                 }
             }

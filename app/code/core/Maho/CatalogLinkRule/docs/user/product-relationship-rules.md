@@ -72,6 +72,23 @@ The unique **Source Match** condition in target conditions allows you to link pr
 
 This powerful feature enables context-aware product relationships that adapt to each product's specific attributes.
 
+### Products That a Rule Never Links
+
+A rule links only products that the storefront can show. It skips a target product when:
+
+- the product is disabled
+- the visibility of the product is not "Catalog" or "Catalog, Search"
+- the product is not in a website of the source product
+
+So **Maximum Links** counts only products that the customer can see. A source product that is in no website gets no links.
+
+A rule does not check the stock, because a store can sell out-of-stock products, for example on backorder. To link only products that are in stock, add the target condition **Stock Status** is "In Stock". The condition reads the same [stock status](stock-status.md) as the storefront, so a configurable product is out of stock when all its children are. In a store with several websites, a product is "In Stock" when it is in stock in one of its websites. The rule checks this condition when it runs. A product that comes back in stock gets its links on the next run.
+
+The storefront also hides some out-of-stock products:
+
+- The cart never shows a cross-sell that is out of stock.
+- The product page hides out-of-stock related products and up-sells when **System > Configuration > Catalog > Inventory > Stock Options > Display Out of Stock Products** is "No".
+
 ## Rule Components
 
 ### Basic Information
@@ -104,7 +121,7 @@ Control how linked products are ordered:
 
 | Sort Order | Description | Use Case |
 |------------|-------------|----------|
-| **Random** | Shuffle products randomly | Provide variety on each page load |
+| **Random** | Shuffle products randomly | Give each product a different selection. The order changes only when the rules run again |
 | **Price: Low to High** | Cheapest products first | Encourage add-on purchases |
 | **Price: High to Low** | Most expensive products first | Promote premium options |
 | **Name: A-Z** | Alphabetical ascending | Organized browsing |
@@ -342,7 +359,23 @@ Navigate to: **Catalog > Product Relationship Rules**
 
 ## Processing Rules
 
-Product Relationship Rules are processed automatically via cron job, but can also be triggered manually.
+A save of an active rule does not change the product links. The links change only when the rules run: with the cron job, with the **Apply Rules** button, or with the **Save and Apply** button.
+
+A save changes the links at once in two cases:
+
+- A save of an inactive rule deletes the links that the rule generated. Deleting the rule does the same.
+- A save that changes the link type of a rule deletes the links that the rule generated for its former link type.
+
+### Apply From the Admin
+
+- **Catalog > Product Relationship Rules > Apply Rules** runs all the active rules.
+- **Save and Apply** on the rule page saves the rule. Then it runs all the active rules of the same link type, because they compete for the same products by priority.
+
+Both buttons put the run in the message queue, so the page does not wait. A queue worker runs it in the background, and the links change when the run is complete. The workers start from cron, so cron must run on the server. **System > Tools > Message Queue** shows the run, in the queue `cataloglinkrule`.
+
+When the run is complete, the administrator who clicked the button gets a message in **System > Notifications**. The newest message also shows in the bar at the top of the next admin page that this administrator opens. If the run fails, the message has the error. When the cause is not in the data, for example a lost database connection, the queue tries the run again.
+
+If you click a button again while a run of the same link type waits, Maho does not add a second run. If you click while a run is in progress, Maho adds one more run after it, because the run read the rules when it started.
 
 ### Automatic Processing (Cron)
 
@@ -375,6 +408,7 @@ Process all rules immediately from the command line:
    - **For Each Product**:
      - Loads the source product with all attributes (needed for Source Match conditions)
      - Matches target products based on target conditions (sorting is applied during matching)
+     - Skips the target products that the storefront cannot show (see [Products That a Rule Never Links](#products-that-a-rule-never-links))
      - Applies max links limit if configured
      - Excludes self-links (product linking to itself)
      - Creates new link records with sequential position values

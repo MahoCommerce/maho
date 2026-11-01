@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2022-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2022-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Dataflow
@@ -91,7 +91,8 @@ class Mage_Dataflow_Model_Convert_Profile_Collection
             if (!$containerNode['name'] || !$containerNode['type']) {
                 continue;
             }
-            $class = $this->getClassNameByType((string) $containerNode['type']);
+            $class = (string) $this->getClassNameByType((string) $containerNode['type']);
+            Mage_Dataflow_Model_Convert_Action_Abstract::validateContainerClass($class);
             $container = $this->addContainer((string) $containerNode['name'], new $class());
             foreach ($containerNode->var as $varNode) {
                 $container->setVar((string) $varNode['name'], (string) $varNode);

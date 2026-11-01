@@ -358,13 +358,13 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
     /**
      * Create a swatch image for the given filename
      *
-     * @deprecated since 26.11 a color swatch is an SVG data URL, see getGlobalSwatchUrl()
      * @param string $value
      * @param int $width
      * @param int $height
      * @return string|false $destPath
      * @throws Mage_Core_Exception
      */
+    #[\Deprecated(message: 'a color swatch is an SVG data URL, see getGlobalSwatchUrl()', since: '26.11')]
     public function createSwatchImage($value, $width, $height)
     {
         $filename = Mage::helper('configurableswatches')->getHyphenatedString($value) . self::getSwatchFileExt();
@@ -394,13 +394,13 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
      * Performs the resize operation on the given swatch image file and returns a
      * relative path to the resulting image file
      *
-     * @deprecated since 26.11 a swatch image has the resized files of its image entity, product or swatch
      * @param string $filename
      * @param string $tag
      * @param int $width
      * @param int $height
      * @return false|string
      */
+    #[\Deprecated(message: 'a swatch image has the resized files of its image entity, product or swatch', since: '26.11')]
     protected function _resizeSwatchImage($filename, $tag, $width, $height)
     {
         $mount = Mage::getStorage('media');

@@ -76,6 +76,11 @@ QueueManager::dispatch(
 | `$dedupeKey` | `null` | While a pending or processing message with the same key exists, dispatching is a no-op (DB transport) |
 | `$stamps` | `[]` | Additional Messenger stamps, for advanced cases |
 
+A job that reads its data when it starts, such as the application of rules, passes
+`stamps: [new \Maho\Queue\Stamp\DedupeKeyStamp($key, pendingOnly: true)]` in place of `$dedupeKey`.
+Then only a pending message drops the new one. A request that comes while the job runs queues one
+more run, so the changes that the running job did not read are applied too.
+
 `dispatch()` returns the Messenger `Envelope` and throws a `RuntimeException` if the `Maho_Queue` module
 is disabled.
 
@@ -361,6 +366,46 @@ deletes the row permanently.
 
 Three ACL resources under **System > Tools > Message Queue** let you split access: *View Messages*,
 *Retry Messages* and *Discard Messages*.
+
+### Run an admin action in the background
+
+An admin action that can take minutes, such as an import or the application of rules, queues its work
+and returns at once. The administrator who clicked gets the result in **System > Notifications**.
+`Mage_AdminNotification_Helper_Data` gives the three steps:
+
+```php
+// The controller: queue the job for the current administrator
+$message = new My_Module_Model_RebuildMessage((int) $entity->getId(), Mage::helper('adminnotification')->getCurrentAdminUserId());
+\Maho\Queue\QueueManager::dispatch($message, queue: 'my_module', dedupeKey: 'my_module_rebuild_' . $entity->getId());
+$this->_getSession()->addSuccess($this->__('The rebuild runs in the background. A message in the notifications tells you when it is done.'));
+
+// The handler: run the job, then send a notice, or a major message with the error
+#[Maho\Config\MessageHandler]
+public function rebuild(My_Module_Model_RebuildMessage $message): void
+{
+    Mage::helper('adminnotification')->runAndNotify(
+        function () use ($message): string {
+            Mage::getModel('my_module/entity')->load($message->entityId)->rebuild();
+            return Mage::helper('my_module')->__('The entity is up to date.');
+        },
+        Mage::helper('my_module')->__('The entity has been rebuilt'),
+        Mage::helper('my_module')->__('The entity could not be rebuilt'),
+        'adminhtml/my_module/index',
+        $message->adminUserId,
+        'my_module/entity',
+    );
+}
+```
+
+After the major message, `runAndNotify()` throws the error of the job again. The queue then retries
+the message, and each failed attempt sends one message. A `Mage_Core_Exception` is an error in the
+data. A retry does not fix it, so `runAndNotify()` does not throw it again, and the job stops after
+one message. Without an administrator, for example when cron queued the job, the administrators
+allowed the ACL resource get the messages.
+
+The link in the message has no secret key, because a worker cannot make a key that is valid in the
+session of the reader. So the action of the link must be in the `$_publicActions` of its controller,
+and it must only read, such as the grid of the module. The ACL check still applies.
 
 ## Configuration
 

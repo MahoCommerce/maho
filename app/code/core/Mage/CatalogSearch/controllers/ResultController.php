@@ -55,6 +55,11 @@ class Mage_CatalogSearch_ResultController extends Mage_Core_Controller_Front_Act
                 }
             }
 
+            if (!Mage::getSingleton('catalogsearch/layer')->isValidRequest($this->getRequest())) {
+                $this->_forward('noRoute');
+                return;
+            }
+
             $helper->checkNotes();
 
             $this->loadLayout();

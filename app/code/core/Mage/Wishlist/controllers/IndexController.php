@@ -779,10 +779,10 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
         }
 
         try {
-            $info      = unserialize($option->getValue(), ['allowed_classes' => false]);
+            $info      = Mage::helper('core/unserializeArray')->unserialize($option->getValue());
             $secretKey = $this->getRequest()->getParam('key');
 
-            if (is_array($info) && isset($info['secret_key']) && hash_equals($info['secret_key'], (string) $secretKey)) {
+            if (is_array($info) && isset($info['secret_key']) && hash_equals((string) $info['secret_key'], (string) $secretKey)) {
                 $file = Mage::getModel('catalog/product_option_type_file')->openStoredFile($info);
                 if ($file !== null) {
                     $this->_prepareDownloadResponse($info['title'], [

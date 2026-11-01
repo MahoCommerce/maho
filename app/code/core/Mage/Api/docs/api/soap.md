@@ -96,6 +96,9 @@ you can call only resources that ACL does not protect.
 
 **Note:** For `multiCall()`, if the "break" option is specified, `multiCall()` breaks on the first error.
 
+**Note:** A session ends when an admin deactivates its API user or gives the user a new API key.
+The client must then call `login()` again.
+
 The Maho SOAP API v2 does not support the `call()` and `multiCall()` methods,
 and instead provides a separate method for each API resource.
 

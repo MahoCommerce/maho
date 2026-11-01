@@ -22,6 +22,13 @@ class Maho_CatalogLinkRule_Model_Processor
 
     public const CONFIG_MERGE_MODE = 'catalog/linkrule/merge_mode';
 
+    public const QUEUE_NAME = 'cataloglinkrule';
+
+    /**
+     * Seconds that a run of the rules waits for another run to end
+     */
+    public const LOCK_WAIT_SECONDS = 3600;
+
     /**
      * Resolve the configured merge mode (how rule results combine with existing links)
      */
@@ -38,22 +45,81 @@ class Maho_CatalogLinkRule_Model_Processor
     #[Maho\Config\CronJob('cataloglinkrule_apply_all', configPath: 'catalog/linkrule/schedule')]
     public function processRules(): void
     {
-        // Get all active rules, ordered by priority
-        $rules = Mage::getResourceModel('cataloglinkrule/rule_collection')
-            ->addFieldToFilter('is_active', 1)
-            ->addDateFilter()
-            ->setOrder('priority', 'ASC')
-            ->setOrder('rule_id', 'ASC');
+        $this->applyRules();
+    }
 
-        // Group by link_type_id
-        $rulesByType = [];
-        foreach ($rules as $rule) {
-            $rulesByType[$rule->getLinkTypeId()][] = $rule;
+    /**
+     * Queue applyRules() for $linkTypeId. A second request for the same link type is dropped
+     * while the first one waits. A request that comes while it runs queues one more run, because
+     * the run read the rules at its start. The result goes to the inbox of $adminUserId, or of
+     * every administrator who can manage the rules when it is null.
+     */
+    public function queueApplyRules(?int $linkTypeId = null, ?int $adminUserId = null): void
+    {
+        \Maho\Queue\QueueManager::dispatch(
+            new Maho_CatalogLinkRule_Model_ApplyRulesMessage($linkTypeId, $adminUserId),
+            queue: self::QUEUE_NAME,
+            stamps: [new \Maho\Queue\Stamp\DedupeKeyStamp('cataloglinkrule_apply_' . ($linkTypeId ?? 'all'), pendingOnly: true)],
+        );
+    }
+
+    /**
+     * @throws Throwable when a rule could not be applied, so the queue tries the message again
+     */
+    #[Maho\Config\MessageHandler]
+    public function handleApplyRules(Maho_CatalogLinkRule_Model_ApplyRulesMessage $message): void
+    {
+        $helper = Mage::helper('cataloglinkrule');
+        $linkTypes = $message->linkTypeId === null
+            ? $helper->__('all link types')
+            : $helper->getLinkTypes()[$message->linkTypeId] ?? (string) $message->linkTypeId;
+
+        Mage::helper('adminnotification')->runAndNotify(
+            function () use ($message, $helper, $linkTypes): string {
+                $this->applyRules($message->linkTypeId);
+                return $helper->__('The product links of %s are up to date.', $linkTypes);
+            },
+            $helper->__('The product relationship rules have been applied'),
+            $helper->__('The product relationship rules could not be applied'),
+            'adminhtml/cataloglinkrule_rule/index',
+            $message->adminUserId,
+            'catalog/linkrules',
+        );
+    }
+
+    /**
+     * Apply the active rules of one link type, or of every link type when $linkTypeId is null
+     */
+    public function applyRules(?int $linkTypeId = null): void
+    {
+        // The cron job and the queue worker write the same links, so a run waits for the other one, then reads the rules
+        $lock = Mage::getSingleton('core/lock');
+        if (!$lock->acquireWithin('cataloglinkrule_apply', self::LOCK_WAIT_SECONDS)) {
+            throw new RuntimeException(Mage::helper('cataloglinkrule')->__('Another run of the product relationship rules is in progress.'));
         }
+        try {
+            // Get all active rules, ordered by priority
+            $rules = Mage::getResourceModel('cataloglinkrule/rule_collection')
+                ->addFieldToFilter('is_active', 1)
+                ->addDateFilter()
+                ->setOrder('priority', 'ASC')
+                ->setOrder('rule_id', 'ASC');
+            if ($linkTypeId !== null) {
+                $rules->addFieldToFilter('link_type_id', $linkTypeId);
+            }
 
-        // Process each link type separately
-        foreach ($rulesByType as $linkTypeId => $typeRules) {
-            $this->processLinkType((int) $linkTypeId, $typeRules);
+            // Group by link_type_id
+            $rulesByType = [];
+            foreach ($rules as $rule) {
+                $rulesByType[$rule->getLinkTypeId()][] = $rule;
+            }
+
+            // Process each link type separately
+            foreach ($rulesByType as $typeId => $typeRules) {
+                $this->processLinkType((int) $typeId, $typeRules);
+            }
+        } finally {
+            $lock->release('cataloglinkrule_apply');
         }
     }
 
@@ -127,6 +193,9 @@ class Maho_CatalogLinkRule_Model_Processor
                     );
                 }
 
+                $websiteIdsByProduct = Mage::getResourceSingleton('catalog/product')
+                    ->getWebsiteIdsByProductIds($batchProductIds);
+
                 // Process each product in batch
                 foreach ($batchProductIds as $productId) {
                     $existing = $existingLinks[$productId] ?? ['targets' => [], 'max_position' => 0];
@@ -141,6 +210,7 @@ class Maho_CatalogLinkRule_Model_Processor
                         $linkAttrTable,
                         $existing['targets'],
                         $existing['max_position'],
+                        $websiteIdsByProduct[$productId] ?? [],
                     );
                 }
 
@@ -223,9 +293,11 @@ class Maho_CatalogLinkRule_Model_Processor
     }
 
     /**
-     * Apply a rule to a single product
+     * Apply a rule to a single product. A target must share a website with the source product:
+     * $websiteIds are the websites of the source product, and null applies no website filter.
      *
      * @param Maho\Db\Adapter\AdapterInterface $adapter
+     * @param int[]|null $websiteIds
      */
     protected function applyRuleToProduct(
         int $productId,
@@ -237,6 +309,7 @@ class Maho_CatalogLinkRule_Model_Processor
         string $linkAttrTable,
         array $existingTargetIds = [],
         int $startPosition = 0,
+        ?array $websiteIds = null,
     ): void {
         // Only load the source product when a target condition actually reads its attributes;
         // otherwise the matched target set is source-independent and the load is pure overhead.
@@ -245,7 +318,7 @@ class Maho_CatalogLinkRule_Model_Processor
             : null;
 
         // Get matching target products, passing the source product for matching conditions
-        $targetProductIds = $rule->getMatchingTargetProductIds($sourceProduct);
+        $targetProductIds = $rule->getMatchingTargetProductIds($sourceProduct, $websiteIds);
         $maxLinks = $rule->getMaxLinks();
         $ruleId = $rule->getId() !== null ? (int) $rule->getId() : null;
 

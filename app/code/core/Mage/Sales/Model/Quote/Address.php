@@ -353,10 +353,9 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
     }
 
     /**
-     * @deprecated since 26.11 there are no nominal items, use getAllItems()
-     *
      * @return Mage_Sales_Model_Quote_Address_Item[]
      */
+    #[\Deprecated(message: 'there are no nominal items, use getAllItems()', since: '26.11')]
     public function getAllNonNominalItems()
     {
         return $this->getAllItems();
