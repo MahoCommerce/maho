@@ -293,6 +293,7 @@ return function (SchemaEditor $schema): void {
             ->setUnquotedName('blog_eav_attribute')
             ->addColumn(Schema::column('attribute_id', Types::SMALLINT, unsigned: true))
             ->addColumn(Schema::column('is_global', Types::SMALLINT, unsigned: true, default: 1))
+            ->addColumn(Schema::column('position', Types::INTEGER, default: 0))
             ->addColumn(Schema::column('is_visible_on_front', Types::SMALLINT, unsigned: true, default: 0))
             ->addColumn(Schema::column('is_html_allowed_on_front', Types::SMALLINT, unsigned: true, default: 0))
             ->addColumn(Schema::column('is_wysiwyg_enabled', Types::SMALLINT, unsigned: true, default: 0))
