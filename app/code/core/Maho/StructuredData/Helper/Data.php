@@ -234,10 +234,10 @@ class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * @deprecated since 26.11 use Mage_Catalog_Model_Product_Type_Configurable_Price::getVariantPriceDeltas()
      * @param array<int, array<string, mixed>> $attributesInfo from getConfigurableAttributesAsArray()
      * @return array<string, array<string, float>>
      */
+    #[\Deprecated(message: 'use Mage_Catalog_Model_Product_Type_Configurable_Price::getVariantPriceDeltas()', since: '26.11')]
     public function getVariantPriceDeltas(array $attributesInfo, float $basePrice): array
     {
         /** @var Mage_Catalog_Model_Product_Type_Configurable_Price $priceModel */

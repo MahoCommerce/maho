@@ -26,9 +26,8 @@ class Maho_FeedManager_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Get output directory path (absolute)
-     *
-     * @deprecated since 26.11 the feed files are on the media mount, use getOutputStorageDirectory()
      */
+    #[\Deprecated(message: 'the feed files are on the media mount, use getOutputStorageDirectory()', since: '26.11')]
     public function getOutputDirectory(): string
     {
         $relative = Mage::getStoreConfig(self::XML_PATH_OUTPUT_DIRECTORY) ?: 'feeds';

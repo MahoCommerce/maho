@@ -102,7 +102,7 @@ describe('Feed Model', function () {
         $this->feed->setFilename('my-feed');
         $this->feed->setFileFormat('xml');
 
-        $path = $this->feed->getOutputFilePath();
+        $path = withoutDeprecations(fn() => $this->feed->getOutputFilePath());
         expect($path)->toEndWith('my-feed.xml');
     });
 

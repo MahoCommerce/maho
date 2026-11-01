@@ -44,7 +44,7 @@ it('escapes messages coming from a session storage', function () use ($payload) 
 });
 
 it('still escapes after the deprecated escape flag is turned off', function () use ($payload) {
-    $this->block->setEscapeMessageFlag(false);
+    withoutDeprecations(fn() => $this->block->setEscapeMessageFlag(false));
     $this->block->addError($payload);
 
     $html = $this->block->getGroupedHtml();

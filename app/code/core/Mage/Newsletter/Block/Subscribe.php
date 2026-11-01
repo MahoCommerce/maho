@@ -11,20 +11,22 @@
 class Mage_Newsletter_Block_Subscribe extends Mage_Core_Block_Template
 {
     /**
-     * @deprecated since 26.9 Render the messages with a core/messages block instead.
-     *             This method returns plain text. The template must escape it.
+     * This method returns plain text. The template must escape it.
+     *
      * @return string
      */
+    #[\Deprecated(message: 'render the messages with a core/messages block instead', since: '26.9')]
     public function getSuccessMessage()
     {
         return Mage::getSingleton('newsletter/session')->getSuccess();
     }
 
     /**
-     * @deprecated since 26.9 Render the messages with a core/messages block instead.
-     *             This method returns plain text. The template must escape it.
+     * This method returns plain text. The template must escape it.
+     *
      * @return string
      */
+    #[\Deprecated(message: 'render the messages with a core/messages block instead', since: '26.9')]
     public function getErrorMessage()
     {
         return Mage::getSingleton('newsletter/session')->getError();

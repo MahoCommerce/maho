@@ -103,7 +103,7 @@ it('exposes the borrowed image through getImageUrl() and getImagePath()', functi
     $mediaConfig = Mage::getSingleton('catalog/product_media_config');
 
     expect($category->getImageUrl())->toBe((string) $mediaConfig->getMediaUrl('/c/i/cif-url.jpg'))
-        ->and($category->getImagePath())->toBe((string) $mediaConfig->getMediaPath('/c/i/cif-url.jpg'));
+        ->and(withoutDeprecations(fn() => $category->getImagePath()))->toBe((string) $mediaConfig->getMediaPath('/c/i/cif-url.jpg'));
 });
 
 it('keeps a manually uploaded category image ahead of the product one', function () {
@@ -111,7 +111,7 @@ it('keeps a manually uploaded category image ahead of the product one', function
     $category = cifCreateCategory('CIF Manual', [$product => 0], 'cif-category.jpg');
 
     expect($category->getImageUrl())->toBe(Mage::getBaseUrl('media') . 'catalog/category/cif-category.jpg')
-        ->and($category->getImagePath())->toBe(Mage::getBaseDir('media') . '/catalog/category/cif-category.jpg');
+        ->and(withoutDeprecations(fn() => $category->getImagePath()))->toBe(Mage::getBaseDir('media') . '/catalog/category/cif-category.jpg');
 });
 
 it('skips products that are disabled, not visible in catalog, or have no image', function () {
@@ -226,7 +226,7 @@ it('returns nothing when the category holds no usable product', function () {
 
     expect($category->getFallbackImage())->toBeNull()
         ->and($category->getImageUrl())->toBe('')
-        ->and($category->getImagePath())->toBe('');
+        ->and(withoutDeprecations(fn() => $category->getImagePath()))->toBe('');
 });
 
 it('ships switched off so an upgrade does not change how existing categories render', function () {
