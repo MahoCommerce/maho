@@ -23,6 +23,7 @@ class Mage_Adminhtml_Controller_Action extends Mage_Core_Controller_Varien_Actio
      */
     public const SESSION_NAMESPACE = 'maho_admin_session';
     public const SESSION_MIN_LIFETIME = 60;
+    public const SESSION_DEFAULT_LIFETIME = 60 * 60;
     public const SESSION_MAX_LIFETIME = 60 * 60 * 24 * 400;
 
     /**
