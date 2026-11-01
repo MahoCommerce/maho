@@ -87,6 +87,37 @@ class Mage_Catalog_Model_Layer_Filter_Category extends Mage_Catalog_Model_Layer_
     }
 
     /**
+     * Accept only the ID of a category below the current category, as the filter links contain.
+     */
+    #[\Override]
+    public function countRequestValues(Mage_Core_Controller_Request_Http $request): ?int
+    {
+        $filter = $request->getParam($this->getRequestVar());
+        if ($filter === null || $filter === '') {
+            return 0;
+        }
+        if (!is_string($filter) || !ctype_digit($filter) || $filter !== (string) (int) $filter) {
+            return null;
+        }
+
+        $currentCategoryId = (int) $this->getLayer()->getCurrentCategory()->getId();
+        if ((int) $filter === $currentCategoryId) {
+            return null;
+        }
+
+        $category = Mage::getModel('catalog/category')
+            ->setStoreId(Mage::app()->getStore()->getId())
+            ->load((int) $filter);
+        if (!$this->_isValidCategory($category)
+            || !in_array($currentCategoryId, array_map(intval(...), $category->getPathIds()), true)
+        ) {
+            return null;
+        }
+
+        return 1;
+    }
+
+    /**
      * Validate category for be using as filter
      *
      * @param Mage_Catalog_Model_Category $category
