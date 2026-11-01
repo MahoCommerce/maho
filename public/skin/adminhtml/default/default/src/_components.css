@@ -459,6 +459,11 @@
     .validation-failed {
         --d-input-color: var(--color-error);
     }
+
+    /* The focus outline sits on the border. With the daisyUI offset of 2px, a field shows two borders */
+    :is(input.input-text, input:is([type=date], [type=time], [type=datetime-local]), textarea, select, .d-input, .d-select, .d-textarea):is(:focus, :focus-within) {
+        outline-offset: 0;
+    }
 }
 
 /*
