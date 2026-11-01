@@ -1549,11 +1549,12 @@ td.divider {
 }
 
 /* Two-column edit layout: side column + main column. Grid replaces the legacy
-   negative-margin float trick; `auto 1fr` lets the side column keep its own width
-   (220px default, 260px on order-create) without a paired main-col margin. */
+   negative-margin float trick; `auto` lets the side column keep its own width
+   (220px default, 260px on order-create) without a paired main-col margin.
+   The main column can get narrower than its content, so a wide table scrolls in its .hor-scroll. */
 .columns:has(> .side-col) {
     display: grid;
-    grid-template-columns: auto 1fr;
+    grid-template-columns: auto minmax(0, 1fr);
     align-items: start
 }
 
