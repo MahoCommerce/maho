@@ -111,13 +111,9 @@ class Mage_Sales_Model_Resource_Report_Invoiced extends Mage_Sales_Model_Resourc
             $filterSubSelect->from(['filter_source_table' => $sourceTable], 'MAX(filter_source_table.entity_id)')
                 ->where('filter_source_table.order_id = source_table.order_id');
 
-            // Filter by date range directly on source column (WHERE is evaluated before GROUP BY,
-            // so we can't use the 'period' alias here - it doesn't exist yet)
-            if ($from !== null) {
-                $select->where('source_table.created_at >= ?', $from);
-            }
-            if ($to !== null) {
-                $select->where('source_table.created_at <= ?', $to);
+            // The clear step deleted whole periods: rebuild every one of them, not only rows since $from
+            if ($subSelect !== null) {
+                $select->where($this->_makeConditionFromDateRangeSelect($subSelect, $periodExpr));
             }
 
             $select->where('source_table.entity_id = (?)', new Maho\Db\Expr($filterSubSelect));
@@ -238,13 +234,9 @@ class Mage_Sales_Model_Resource_Report_Invoiced extends Mage_Sales_Model_Resourc
         $select->from($sourceTable, $columns)
                 ->where('state <> ?', Mage_Sales_Model_Order::STATE_CANCELED);
 
-        // Filter by date range directly on source column (WHERE is evaluated before GROUP BY,
-        // so we can't use the 'period' alias here - it doesn't exist yet)
-        if ($from !== null) {
-            $select->where('created_at >= ?', $from);
-        }
-        if ($to !== null) {
-            $select->where('created_at <= ?', $to);
+        // The clear step deleted whole periods: rebuild every one of them, not only rows since $from
+        if ($subSelect !== null) {
+            $select->where($this->_makeConditionFromDateRangeSelect($subSelect, $periodExpr));
         }
 
         $select->group([

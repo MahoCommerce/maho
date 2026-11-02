@@ -169,13 +169,9 @@ class Mage_Reports_Model_Resource_Report_Product_Viewed extends Mage_Sales_Model
             [],
         );
 
-        // Filter by date range directly on source column (WHERE is evaluated before GROUP BY,
-        // so we can't use the 'period' alias here - it doesn't exist yet)
-        if ($from !== null) {
-            $select->where('source_table.logged_at >= ?', $from);
-        }
-        if ($to !== null) {
-            $select->where('source_table.logged_at <= ?', $to);
+        // The clear step deleted whole periods: rebuild every one of them, not only rows since $from
+        if ($subSelect !== null) {
+            $select->where($this->_makeConditionFromDateRangeSelect($subSelect, $periodExpr));
         }
         $select->having($adapter->prepareSqlCondition($viewsNumExpr, ['gt' => 0]));
 
