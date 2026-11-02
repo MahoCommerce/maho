@@ -62,6 +62,12 @@ class Mage_Customer_Model_Session extends Mage_Core_Model_Session_Abstract
         Mage::dispatchEvent('customer_session_init', ['customer_session' => $this]);
     }
 
+    #[\Override]
+    protected function getDisposableKeys(): array
+    {
+        return ['wishlist_item_count'];
+    }
+
     /**
      * Set customer object and setting customer id in session
      *

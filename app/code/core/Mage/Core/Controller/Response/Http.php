@@ -748,9 +748,7 @@ class Mage_Core_Controller_Response_Http implements \Stringable
             flush();
         }
 
-        if (session_status() === PHP_SESSION_ACTIVE) {
-            session_write_close();
-        }
+        Mage_Core_Model_Session_Abstract::closeSession();
     }
 
     /**

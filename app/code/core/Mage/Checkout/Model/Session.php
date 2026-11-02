@@ -58,6 +58,13 @@ class Mage_Checkout_Model_Session extends Mage_Core_Model_Session_Abstract
         $this->init('checkout');
     }
 
+    #[\Override]
+    protected function getDisposableKeys(): array
+    {
+        // The flag matters only for a quote with items, and a quote id is state on its own
+        return ['cart_was_updated'];
+    }
+
     /**
      * Unset all data associated with object
      */
