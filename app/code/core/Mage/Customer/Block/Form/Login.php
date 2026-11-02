@@ -46,14 +46,25 @@ class Mage_Customer_Block_Form_Login extends Mage_Core_Block_Template
             return;
         }
 
-        if (!$this->getRequest()->isGet()) {
+        // On the login page the target is that page or the dashboard, and loginPostAction() sends
+        // the customer to the account page without one. Storing it gives a crawler a session
+        $request = $this->getRequest();
+        if ($request->isGet()
+            && $request->getRouteName() === 'customer'
+            && $request->getControllerName() === 'account'
+            && $request->getActionName() === 'login'
+        ) {
+            return;
+        }
+
+        if (!$request->isGet()) {
             // This block renders on ordinary pages too, so the current URL here can be a
             // POST-only endpoint (customer/account/prelogin) that a redirect cannot reach.
             $url = Mage::helper('customer')->getDefaultBeforeAuthUrl();
         } elseif (Mage::getStoreConfigFlag(Mage_Customer_Helper_Data::XML_PATH_CUSTOMER_LOGIN_REDIRECT_TO_DASHBOARD)) {
             $url = Mage::helper('customer')->getDashboardUrl();
         } else {
-            $pathInfo = $this->getRequest()->getOriginalPathInfo();
+            $pathInfo = $request->getOriginalPathInfo();
             if (strtolower(substr($pathInfo, -5)) === '.html') {
                 $url = Mage::getBaseUrl() . ltrim($pathInfo, '/');
             } else {
