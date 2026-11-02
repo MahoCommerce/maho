@@ -15,7 +15,7 @@ uses(Tests\MahoBackendTestCase::class);
  *
  * @see https://github.com/MahoCommerce/maho/issues/1708
  */
-describe('Invoiced report partial refresh', function () {
+describe('Sales report partial refresh', function () {
     beforeEach(function () {
         $this->resource = Mage::getSingleton('core/resource');
         $this->adapter = $this->resource->getConnection('core_write');
@@ -33,6 +33,7 @@ describe('Invoiced report partial refresh', function () {
             'base_grand_total' => 100.00,
             'base_total_invoiced' => 100.00,
             'base_total_paid' => 100.00,
+            'total_refunded' => 100.00,
             'base_total_refunded' => 100.00,
             'is_virtual' => 0,
             'shipping_description' => 'Flat Rate - Fixed',
@@ -90,7 +91,9 @@ describe('Partial refresh of a period that starts before $from', function () {
         }
         $adapter->delete($resource->getTableName('sales/order_aggregated_created'), ['period = ?' => '2001-03-14']);
         $adapter->delete($resource->getTableName('reports/viewed_aggregated_daily'), ['period = ?' => '2001-03-14']);
-        $adapter->delete($resource->getTableName('reports/event'), ['logged_at LIKE ?' => '2001-03-14%']);
+        $adapter->delete($resource->getTableName('reports/viewed_aggregated_monthly'), ['period = ?' => '2001-03-01']);
+        $adapter->delete($resource->getTableName('reports/viewed_aggregated_yearly'), ['period = ?' => '2001-01-01']);
+        $adapter->delete($resource->getTableName('reports/event'), ['logged_at >= ?' => '2001-03-14 00:00:00', 'logged_at < ?' => '2001-03-15 00:00:00']);
     });
 
     it('counts the orders of the whole day in the orders report', function () {
