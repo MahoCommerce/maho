@@ -64,7 +64,7 @@ class Mage_Sales_Model_Resource_Report_Refunded extends Mage_Sales_Model_Resourc
             $this->_clearTableByDateRange($table, $from, $to, $subSelect);
             // convert dates from UTC to current admin timezone
             $periodExpr = $adapter->getDatePartSql(
-                $this->getStoreTZOffsetQuery($sourceTable, 'created_at', $from, $to),
+                $this->getStoreTZOffsetQuery($sourceTable, 'created_at'),
             );
             $columns = [
                 'period'            => $periodExpr,
@@ -170,8 +170,6 @@ class Mage_Sales_Model_Resource_Report_Refunded extends Mage_Sales_Model_Resourc
                 $this->getStoreTZOffsetQuery(
                     ['source_table' => $sourceTable],
                     'source_table.created_at',
-                    $from,
-                    $to,
                 ),
             );
 

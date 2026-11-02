@@ -75,8 +75,6 @@ class Mage_Sales_Model_Resource_Report_Invoiced extends Mage_Sales_Model_Resourc
                 $this->getStoreTZOffsetQuery(
                     ['source_table' => $sourceTable],
                     'source_table.created_at',
-                    $from,
-                    $to,
                 ),
             );
             $columns = [
@@ -190,8 +188,6 @@ class Mage_Sales_Model_Resource_Report_Invoiced extends Mage_Sales_Model_Resourc
             $this->getStoreTZOffsetQuery(
                 $sourceTable,
                 'created_at',
-                $from,
-                $to,
             ),
         );
 

@@ -56,8 +56,6 @@ class Mage_Reports_Model_Resource_Report_Product_Viewed extends Mage_Sales_Model
             $this->getStoreTZOffsetQuery(
                 ['source_table' => $this->getTable('reports/event')],
                 'source_table.logged_at',
-                $from,
-                $to,
             ),
         );
 

@@ -64,8 +64,6 @@ class Mage_Sales_Model_Resource_Report_Order_Createdat extends Mage_Sales_Model_
             $periodExpr = $adapter->getDatePartSql($this->getStoreTZOffsetQuery(
                 ['o' => $this->getTable('sales/order')],
                 'o.' . $aggregationField,
-                $from,
-                $to,
             ));
             // Columns list
             $columns = [

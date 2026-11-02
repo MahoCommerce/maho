@@ -51,7 +51,7 @@ class Mage_Tax_Model_Resource_Report_Tax_Createdat extends Mage_Reports_Model_Re
             if ($from !== null || $to !== null) {
                 $subSelect = $this->_getTableDateRangeSelect(
                     $this->getTable('sales/order'),
-                    'created_at',
+                    $aggregationField,
                     'updated_at',
                     $from,
                     $to,
@@ -66,8 +66,6 @@ class Mage_Tax_Model_Resource_Report_Tax_Createdat extends Mage_Reports_Model_Re
                 $this->getStoreTZOffsetQuery(
                     ['e' => $this->getTable('sales/order')],
                     'e.' . $aggregationField,
-                    $from,
-                    $to,
                 ),
             );
 

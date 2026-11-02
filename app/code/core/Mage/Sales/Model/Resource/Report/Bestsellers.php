@@ -59,8 +59,6 @@ class Mage_Sales_Model_Resource_Report_Bestsellers extends Mage_Sales_Model_Reso
                 $this->getStoreTZOffsetQuery(
                     ['source_table' => $this->getTable('sales/order')],
                     'source_table.created_at',
-                    $from,
-                    $to,
                 ),
             );
 
