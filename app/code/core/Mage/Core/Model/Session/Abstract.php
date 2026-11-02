@@ -107,7 +107,7 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
                 'gc_probability' => '0',
                 // A lazy session gives the cookie before the record exists, so the next request
                 // must keep that id. Login renews the id, which stops session fixation
-                'use_strict_mode' => $sessionName === Mage_Core_Controller_Front_Action::SESSION_NAMESPACE ? '0' : '1',
+                'use_strict_mode' => $this->useLazyStart($sessionName) ? '0' : '1',
             ],
             $handler,
             // Use Symfony's default MetadataBag - no custom one needed!

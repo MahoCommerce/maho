@@ -737,6 +737,8 @@ class Mage_Core_Controller_Response_Http implements \Stringable
      */
     public static function finishRequest(): void
     {
+        Mage_Core_Model_Session_Abstract::closeSession();
+
         // LiteSpeed names the same call differently, and only some builds alias the
         // FastCGI name, so both are tried before the fallback that keeps the
         // connection open for the rest of the script
@@ -747,8 +749,6 @@ class Mage_Core_Controller_Response_Http implements \Stringable
         } else {
             flush();
         }
-
-        Mage_Core_Model_Session_Abstract::closeSession();
     }
 
     /**
