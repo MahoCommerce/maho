@@ -9,11 +9,11 @@
 # Usage: pass.sh <output folder> [case name ...]
 # Environment: STORE (the Maho checkout of the store), ADMIN (the admin URL), CREDS (a file with the
 # username and the password of the benchmark user on two lines), and the IDs of SKILL.md step 3:
-# COLOR_ID, CONF_ID, SIMPLE_ID, CATEGORY_ID, CMS_ID, ORDER_ID, CUSTOMER_ID.
+# COLOR_ID, CONF_ID, SIMPLE_ID, CATEGORY_ID, CMS_ID, ORDER_ID, CUSTOMER_ID, BRAND.
 
 set -u
 # A query of SKILL.md step 3 that gives no row leaves its ID empty: the cases that need it are skipped.
-: "${COLOR_ID:=}" "${CONF_ID:=}" "${SIMPLE_ID:=}" "${CATEGORY_ID:=}" "${CMS_ID:=}" "${ORDER_ID:=}" "${CUSTOMER_ID:=}"
+: "${COLOR_ID:=}" "${CONF_ID:=}" "${SIMPLE_ID:=}" "${CATEGORY_ID:=}" "${CMS_ID:=}" "${ORDER_ID:=}" "${CUSTOMER_ID:=}" "${BRAND:=}"
 SK=$(cd "$(dirname "$0")" && pwd)
 OUT=$(mkdir -p "$1" && cd "$1" && pwd)
 shift
@@ -29,8 +29,8 @@ q "DELETE FROM ai_memory WHERE admin_user_id = $BENCH_ID" > /dev/null
 run() {
     local name=$1 steps=$2
     [ "$ONLY" != "  " ] && [[ "$ONLY" != *" $name "* ]] && return
-    if [[ "$steps" == *'":""'* ]]; then
-        echo "Skipped: an ID of SKILL.md step 3 is missing." > "$OUT/$name.txt"
+    if [[ "$steps" == *'":""'* || "$steps" == *'"say": ""'* ]]; then
+        echo "Skipped: a value of SKILL.md step 3 is missing." > "$OUT/$name.txt"
         return
     fi
     # The input holds the password: a private temporary file, not a file of the output folder.
@@ -80,6 +80,7 @@ run tax-cart-order "[$D,$(say "Why does the order show a different tax than the 
 run cms-store-view "[$CMS,$(say "Why is this CMS page invisible in the Italian store view?")]"
 run swatch-filter-text "[$D,$(say "Why does the filter show a colour but the product page shows the option as text?")]"
 run examples-guest-checkout "[$D,$(say "How do I let customers check out without an account?")]"
+run attribute-filter "[$D,$(say "${BRAND:+Give me the list of the products that have $BRAND as brand}")]"
 run examples-proofread "[$CMS,$(say "Proofread this page")]"
 run examples-meta "[$CONF,$(say "Write a meta title and a meta description for this product")]"
 run examples-order-summary "[$ORDER,$(say "Summarize this order")]"
@@ -101,6 +102,8 @@ run it-tax-cart-order "[$D,$(say "Perché l'ordine mostra un'imposta diversa da 
 run it-cms-store-view "[$CMS,$(say "Perché questa pagina CMS non è visibile nella vista negozio italiana?")]"
 run it-swatch-filter-text "[$D,$(say "Perché il filtro mostra un colore ma la pagina prodotto mostra l'opzione come testo?")]"
 run it-examples-guest-checkout "[$D,$(say "Come faccio a permettere ai clienti di fare il checkout senza un account?")]"
+IT_BRAND="Fammi l'elenco dei prodotti che hanno come brand $BRAND"
+run it-attribute-filter "[$D,$(say "${BRAND:+$IT_BRAND}")]"
 run it-examples-order-summary "[$ORDER,$(say "Riassumi questo ordine")]"
 run it-examples-to-ship "[$D,$(say "Quali ordini sono in attesa di spedizione?")]"
 run it-times "[$D,$(say "Mostrami gli 8 ordini più recenti, con l'ora di ciascuno." "Quali sono arrivati tra le 22:00 e mezzanotte del 18 ottobre?" "Chi ha fatto l'ordine delle 07:21 del 19 ottobre?")]"

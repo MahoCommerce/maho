@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2019-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2019-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Adminhtml
@@ -22,6 +22,22 @@ class Mage_Adminhtml_System_ConfigController extends Mage_Adminhtml_Controller_A
      * @var bool
      */
     protected $_isSectionAllowedFlag = true;
+
+    /**
+     * The table rates export has no section parameter, so check the Shipping Methods section here.
+     */
+    #[\Override]
+    protected function _isAllowed(): bool
+    {
+        if (!parent::_isAllowed()) {
+            return false;
+        }
+
+        return match (strtolower($this->getRequest()->getActionName())) {
+            'exporttablerates' => Mage::getSingleton('admin/session')->isAllowed('system/config/carriers'),
+            default => true,
+        };
+    }
 
     /**
      * Controller pre-dispatch method

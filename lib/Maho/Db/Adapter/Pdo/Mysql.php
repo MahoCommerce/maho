@@ -2806,10 +2806,6 @@ class Mysql extends AbstractPdoAdapter
             $date = date($format, $date);
         }
 
-        if ($date === null) {
-            return new \Maho\Db\Expr('NULL');
-        }
-
         return new \Maho\Db\Expr($this->quote($date));
     }
 

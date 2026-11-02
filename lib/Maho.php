@@ -370,9 +370,8 @@ final class Maho
 
     /**
      * Sign image transformation parameters into a query string: "t=...&s=..."
-     *
-     * @deprecated since 26.11 a resized image has a plain URL, see Mage_Core_Model_Image_Set
      */
+    #[\Deprecated(message: 'a resized image has a plain URL, see Mage_Core_Model_Image_Set', since: '26.11')]
     public static function signImageResizeRequest(array $params, string $key): string
     {
         $t = base64_encode(json_encode($params, JSON_THROW_ON_ERROR));
@@ -407,9 +406,8 @@ final class Maho
      * Build the cache file path for a resized product image from transform params.
      * The path holds the complete source file name, so two source files that differ
      * only by extension never share one cache file.
-     *
-     * @deprecated since 26.11 see Mage_Core_Model_Image_Set::buildPath()
      */
+    #[\Deprecated(message: 'see Mage_Core_Model_Image_Set::buildPath()', since: '26.11')]
     public static function buildImageResizeCachePath(array $params, string $baseMediaPath, string $sourceFile): string
     {
         $storeId = (int) \Mage::app()->getStore()->getId();

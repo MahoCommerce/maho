@@ -14089,12 +14089,6 @@ parameters:
 			path: lib/Maho/Convert.php
 
 		-
-			rawMessage: 'Call to an undefined method Maho\Convert\Action\AbstractAction::addException().'
-			identifier: method.notFound
-			count: 2
-			path: lib/Maho/Convert/Action/AbstractAction.php
-
-		-
 			rawMessage: 'Method Maho\Convert\Container\AbstractContainer::getGridFields() has no return type specified.'
 			identifier: missingType.return
 			count: 1

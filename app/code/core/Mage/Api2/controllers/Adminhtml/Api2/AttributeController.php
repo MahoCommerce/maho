@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2020-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Api2
@@ -17,7 +17,18 @@ class Mage_Api2_Adminhtml_Api2_AttributeController extends Mage_Adminhtml_Contro
      * ACL resource
      * @see Mage_Adminhtml_Controller_Action::_isAllowed()
      */
-    public const ADMIN_RESOURCE = 'system/api';
+    public const ADMIN_RESOURCE = 'system/api/rest_attributes';
+
+    #[\Override]
+    protected function _isAllowed(): bool
+    {
+        $aclPath = match (strtolower($this->getRequest()->getActionName())) {
+            'save' => self::ADMIN_RESOURCE . '/edit',
+            default => self::ADMIN_RESOURCE,
+        };
+
+        return Mage::getSingleton('admin/session')->isAllowed($aclPath);
+    }
 
     /**
      * Show user types grid

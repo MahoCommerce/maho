@@ -309,6 +309,35 @@ class Mage_Catalog_Model_Layer_Filter_Price extends Mage_Catalog_Model_Layer_Fil
     }
 
     /**
+     * Accept only "from-to" ranges of numbers, separated by commas when the range has prior intervals.
+     */
+    #[\Override]
+    public function countRequestValues(Mage_Core_Controller_Request_Http $request): ?int
+    {
+        $filter = $request->getParam($this->getRequestVar());
+        if ($filter === null || $filter === '') {
+            return 0;
+        }
+        if (!is_string($filter)) {
+            return null;
+        }
+
+        foreach (explode(',', $filter) as $range) {
+            $limits = $this->_validateFilter($range);
+            if (!$limits) {
+                return null;
+            }
+            foreach ($limits as $limit) {
+                if ($limit !== '' && !is_numeric($limit)) {
+                    return null;
+                }
+            }
+        }
+
+        return 1;
+    }
+
+    /**
      * Apply price range filter
      *
      * @param null $filterBlock deprecated

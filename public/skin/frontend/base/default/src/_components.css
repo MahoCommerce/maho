@@ -1975,6 +1975,7 @@
         .add-to-box,
         .product-options-bottom {
             @apply grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2.5 gap-y-4 border-t border-line pt-6;
+            container-type: inline-size;
 
             /* The template renders a JS-updated price clone here; the price under
                the title updates too, so showing both would duplicate it */
@@ -1988,6 +1989,51 @@
 
             .add-to-links {
                 grid-column: 2;
+            }
+
+            &:not(:has(> .add-to-links)) .add-to-cart {
+                grid-column: 1 / -1;
+            }
+
+            /* Qty and gap (7rem), the 12rem CTA and 3.625rem for each link do not fit in
+               one row: qty and links share the first row, the CTA takes the full second row */
+            @container (max-width: 26.5rem) {
+                &:has(> .add-to-links > :nth-child(2)) .add-to-cart:has(> .qty-wrapper) {
+                    display: contents;
+                }
+            }
+
+            @container (max-width: 23rem) {
+                .add-to-cart:has(> .qty-wrapper) {
+                    display: contents;
+                }
+            }
+
+            /* A grouped product has no qty: when the 12rem CTA, the gap and the links do not
+               fit in one row, the CTA takes the full row and the links go below it */
+            @container (max-width: 20rem) {
+                &:has(> .add-to-links > :nth-child(2)) .add-to-cart:not(:has(> .qty-wrapper)) {
+                    grid-column: 1 / -1;
+                }
+            }
+
+            @container (max-width: 16.5rem) {
+                .add-to-cart:not(:has(> .qty-wrapper)) {
+                    grid-column: 1 / -1;
+                }
+            }
+
+            /* Takes effect only when .add-to-cart is display: contents. The CTA is
+               placed last, so qty and links share a row below any tier prices */
+            .add-to-cart:has(> .qty-wrapper) {
+                .qty-wrapper {
+                    grid-column: 1;
+                }
+
+                .add-to-cart-buttons {
+                    @apply order-1;
+                    grid-column: 1 / -1;
+                }
             }
         }
 

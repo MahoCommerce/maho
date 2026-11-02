@@ -60,16 +60,7 @@ class Mage_Core_Model_File_Validator_NotProtectedExtension
     protected function _initProtectedFileExtensions(): self
     {
         if (!$this->_protectedFileExtensions) {
-            /** @var Mage_Core_Helper_Data $helper */
-            $helper = Mage::helper('core');
-            $extensions = $helper->getProtectedFileExtensions();
-            if (is_string($extensions)) {
-                $extensions = explode(',', $extensions);
-            }
-            foreach ($extensions as &$ext) {
-                $ext = strtolower(trim($ext));
-            }
-            $this->_protectedFileExtensions = (array) $extensions;
+            $this->_protectedFileExtensions = Mage::helper('core')->getProtectedFileExtensions();
         }
         return $this;
     }

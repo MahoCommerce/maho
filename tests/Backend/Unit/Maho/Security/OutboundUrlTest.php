@@ -39,6 +39,9 @@ describe('OutboundUrl', function (): void {
         'http://[::ffff:127.0.0.1]/',
         'http://[64:ff9b::7f00:1]/',
         'http://[2002:7f00:1::1]/',
+        'http://[3fff::1]/',
+        'http://[3fff:fff:ffff::1]/',
+        'http://[100:0:0:1::1]/',
     ]);
 
     it('rejects a host that resolves to a non-public address', function (): void {
@@ -152,4 +155,28 @@ describe('OutboundUrl', function (): void {
             ->and(OutboundUrl::isPublicAddress('fc00::1'))->toBeFalse()
             ->and(OutboundUrl::isPublicAddress('not-an-ip'))->toBeFalse();
     });
+
+    it('accepts public addresses, also inside an IPv6 address', function (string $address): void {
+        expect(OutboundUrl::isPublicAddress($address))->toBeTrue();
+    })->with(['1.1.1.1', '2606:4700::1111', '::808:808', '64:ff9b::808:808', '2002:808:808::1']);
+
+    it('refuses special-purpose ranges that filter_var() accepts', function (string $address): void {
+        expect(OutboundUrl::isPublicAddress($address))->toBeFalse();
+    })->with([
+        'IPv4-compatible metadata' => '::a9fe:a9fe',
+        'IPv4-compatible loopback' => '::7f00:1',
+        'local-use NAT64' => '64:ff9b:1::a9fe:a9fe',
+        'IETF protocol assignments' => '192.0.0.170',
+        'benchmarking' => '198.18.0.1',
+        'TEST-NET-1' => '192.0.2.1',
+        'TEST-NET-2' => '198.51.100.1',
+        'TEST-NET-3' => '203.0.113.1',
+        'shared address space' => '100.64.0.1',
+        'multicast' => '224.0.0.1',
+        'discard-only' => '100::1',
+        'Teredo' => '2001::1',
+        'documentation' => '2001:db8::1',
+        'site-local' => 'fec0::1',
+        'IPv6 multicast' => 'ff02::1',
+    ]);
 });

@@ -149,7 +149,11 @@ CODE_SAMPLE,
             return null;
         }
 
-        if (!$this->nodeComparator->areNodesEqual($node->stmts, $parentClassMethod->stmts)) {
+        if ($node->stmts === null || $parentClassMethod->stmts === null) {
+            return null;
+        }
+
+        if ($this->nodeComparator->printWithoutComments($node->stmts) !== $this->nodeComparator->printWithoutComments($parentClassMethod->stmts)) {
             return null;
         }
 

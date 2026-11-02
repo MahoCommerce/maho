@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2019-2023 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2019-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_SalesRule
@@ -11,11 +11,34 @@
 class Mage_SalesRule_Model_Observer
 {
     /**
-     * Registered callback: called after an order is placed
+     * Registered callback: called before the payment of an order is placed
      *
-     * Every counter moves in a conditional UPDATE inside one transaction: the
+     * Only an order with a usage limit counts its uses here. Every counter moves in a conditional UPDATE inside one transaction: the
      * rule row is locked first, so concurrent placements of the same rule
-     * queue behind it and the second one stops at the limit.
+     * queue behind it and the second one stops at the limit. A counter at its
+     * limit refuses the order. The order placement transaction then rolls back
+     * the order and the counters, before the payment runs.
+     *
+     * @param \Maho\Event\Observer $observer
+     * @return $this
+     * @throws Mage_Core_Exception
+     */
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    #[Maho\Config\Observer('sales_order_place_before')]
+    public function sales_order_beforePlace($observer)
+    {
+        /** @var Mage_Sales_Model_Order $order */
+        $order = $observer->getEvent()->getOrder();
+        if ($order && $this->_hasUsageLimit($order)) {
+            $this->_incrementUsage($order);
+            $order->setData('salesrule_usage_counted', true);
+        }
+        return $this;
+    }
+
+    /**
+     * Count the uses of an order with no usage limit, after the payment, so the payment
+     * does not hold the lock of a rule row that other checkouts share.
      *
      * @param \Maho\Event\Observer $observer
      * @return $this
@@ -26,9 +49,37 @@ class Mage_SalesRule_Model_Observer
     {
         /** @var Mage_Sales_Model_Order $order */
         $order = $observer->getEvent()->getOrder();
+        if ($order && !$order->getData('salesrule_usage_counted')) {
+            $this->_incrementUsage($order, false);
+        }
+        return $this;
+    }
 
-        if (!$order || (!$order->getAppliedRuleIds() && !$order->getCouponCode())) {
-            return $this;
+    /**
+     * Return true when a rule or the coupon of the order has a limit that can refuse the order.
+     */
+    protected function _hasUsageLimit(Mage_Sales_Model_Order $order): bool
+    {
+        $customerId = (int) $order->getCustomerId();
+        foreach ($customerId ? array_filter(explode(',', (string) $order->getAppliedRuleIds())) : [] as $ruleId) {
+            if ((int) Mage::getModel('salesrule/rule')->load((int) $ruleId)->getUsesPerCustomer() > 0) {
+                return true;
+            }
+        }
+        if (!$order->getCouponCode()) {
+            return false;
+        }
+        $coupon = Mage::getModel('salesrule/coupon')->loadByCode($order->getCouponCode());
+        return (int) $coupon->getUsageLimit() > 0 || ($customerId && (int) $coupon->getUsagePerCustomer() > 0);
+    }
+
+    /**
+     * @throws Mage_Core_Exception when a counter is at its limit and $applyLimits is true
+     */
+    protected function _incrementUsage(Mage_Sales_Model_Order $order, bool $applyLimits = true): void
+    {
+        if (!$order->getAppliedRuleIds() && !$order->getCouponCode()) {
+            return;
         }
 
         // Sorted so concurrent placements take the rule row locks in the same
@@ -46,9 +97,12 @@ class Mage_SalesRule_Model_Observer
                     continue;
                 }
                 $rule->getResource()->incrementTimesUsed($ruleId);
-                if ($customerId) {
-                    Mage::getResourceModel('salesrule/rule_customer')
-                        ->incrementTimesUsed($customerId, $ruleId, (int) $rule->getUsesPerCustomer());
+                if ($customerId && !Mage::getResourceModel('salesrule/rule_customer')
+                    ->incrementTimesUsed($customerId, $ruleId, $applyLimits ? (int) $rule->getUsesPerCustomer() : 0)
+                ) {
+                    Mage::throwException(Mage::helper('salesrule')->__(
+                        'This order has a discount that you used the maximum number of times.',
+                    ));
                 }
             }
 
@@ -56,10 +110,19 @@ class Mage_SalesRule_Model_Observer
                 $coupon = Mage::getModel('salesrule/coupon')->loadByCode($order->getCouponCode());
                 if ($coupon->getId()) {
                     $couponId = (int) $coupon->getId();
-                    $coupon->getResource()->incrementTimesUsed($couponId);
-                    if ($customerId) {
-                        Mage::getResourceModel('salesrule/coupon_usage')
-                            ->incrementCustomerTimesUsed($customerId, $couponId, (int) $coupon->getUsagePerCustomer());
+                    if (!$coupon->getResource()->incrementTimesUsed($couponId) && $applyLimits) {
+                        Mage::throwException(Mage::helper('salesrule')->__(
+                            'Coupon code "%s" reached its maximum number of uses.',
+                            $order->getCouponCode(),
+                        ));
+                    }
+                    if ($customerId && !Mage::getResourceModel('salesrule/coupon_usage')
+                        ->incrementCustomerTimesUsed($customerId, $couponId, $applyLimits ? (int) $coupon->getUsagePerCustomer() : 0)
+                    ) {
+                        Mage::throwException(Mage::helper('salesrule')->__(
+                            'You already used coupon code "%s" the maximum number of times.',
+                            $order->getCouponCode(),
+                        ));
                     }
                 }
             }
@@ -68,7 +131,6 @@ class Mage_SalesRule_Model_Observer
             $adapter->rollBack();
             throw $e;
         }
-        return $this;
     }
 
     /**

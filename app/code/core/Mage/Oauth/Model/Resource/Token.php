@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2020-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Oauth
@@ -48,6 +48,18 @@ class Mage_Oauth_Model_Resource_Token extends Mage_Core_Model_Resource_Db_Abstra
             Mage::throwException('Invalid token to except');
         }
         return $adapter->delete($this->getMainTable(), $where);
+    }
+
+    /**
+     * Revoke every live token of an admin user, and return the number of tokens revoked.
+     */
+    public function revokeAdminTokens(int $adminId): int
+    {
+        return $this->_getWriteAdapter()->update(
+            $this->getMainTable(),
+            ['revoked' => 1],
+            ['admin_id = ?' => $adminId, 'revoked = ?' => 0],
+        );
     }
 
     /**

@@ -58,7 +58,13 @@ class Mage_Catalog_CategoryController extends Mage_Core_Controller_Front_Action
     #[Maho\Config\Route('/catalog/category/view/{id}', name: 'catalog.category.view', methods: ['GET'], requirements: ['id' => '\d+'])]
     public function viewAction(): void
     {
-        if ($category = $this->_initCategory()) {
+        $category = $this->_initCategory();
+        if ($category && !Mage::getSingleton('catalog/layer')->isValidRequest($this->getRequest())) {
+            $this->_forward('noRoute');
+            return;
+        }
+
+        if ($category) {
             $design = Mage::getSingleton('catalog/design');
             $settings = $design->getDesignSettings($category);
 

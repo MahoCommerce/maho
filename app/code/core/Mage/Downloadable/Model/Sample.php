@@ -87,10 +87,9 @@ class Mage_Downloadable_Model_Sample extends Mage_Core_Model_Abstract
 
     /**
      * Retrieve base tmp path
-     *
      * @return string
-     * @deprecated since 26.11 the file is on the downloadable mount, use getBaseTmpStoragePath()
      */
+    #[\Deprecated(message: 'the file is on the downloadable mount, use getBaseTmpStoragePath()', since: '26.11')]
     public static function getBaseTmpPath()
     {
         return Mage::getBaseDir('media') . DS . 'downloadable' . DS . 'tmp' . DS . 'samples';
@@ -98,10 +97,9 @@ class Mage_Downloadable_Model_Sample extends Mage_Core_Model_Abstract
 
     /**
      * Retrieve sample files path
-     *
      * @return string
-     * @deprecated since 26.11 the file is on the downloadable mount, use getBaseStoragePath()
      */
+    #[\Deprecated(message: 'the file is on the downloadable mount, use getBaseStoragePath()', since: '26.11')]
     public static function getBasePath()
     {
         return Mage::getBaseDir('media') . DS . 'downloadable' . DS . 'files' . DS . 'samples';

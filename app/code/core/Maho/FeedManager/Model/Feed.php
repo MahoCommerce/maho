@@ -136,9 +136,8 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
 
     /**
      * Get the full file path for output
-     *
-     * @deprecated since 26.11 the feed file is on the media mount, use getStoragePath()
      */
+    #[\Deprecated(message: 'the feed file is on the media mount, use getStoragePath()', since: '26.11')]
     public function getOutputFilePath(): string
     {
         $directory = Mage::helper('feedmanager')->getOutputDirectory();

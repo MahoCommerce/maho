@@ -59,6 +59,7 @@ jobs:
           public/js/sortable.min.js
           public/js/tailwindcss-browser.js
           public/js/tailwindcss-design.js
+          public/js/tiptap.js
           "
 
           # Build regex pattern with valid years
