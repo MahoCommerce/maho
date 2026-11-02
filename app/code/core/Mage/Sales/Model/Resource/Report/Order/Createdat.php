@@ -64,8 +64,6 @@ class Mage_Sales_Model_Resource_Report_Order_Createdat extends Mage_Sales_Model_
             $periodExpr = $adapter->getDatePartSql($this->getStoreTZOffsetQuery(
                 ['o' => $this->getTable('sales/order')],
                 'o.' . $aggregationField,
-                $from,
-                $to,
             ));
             // Columns list
             $columns = [
@@ -207,13 +205,9 @@ class Mage_Sales_Model_Resource_Report_Order_Createdat extends Mage_Sales_Model_
                     Mage_Sales_Model_Order::STATE_NEW,
                 ]);
 
-            // Filter by date range directly on source column (WHERE is evaluated before GROUP BY,
-            // so we can't use the 'period' alias here - it doesn't exist yet)
-            if ($from !== null) {
-                $select->where('o.' . $aggregationField . ' >= ?', $from);
-            }
-            if ($to !== null) {
-                $select->where('o.' . $aggregationField . ' <= ?', $to);
+            // The clear step deleted whole periods: rebuild every one of them, not only rows since $from
+            if ($subSelect !== null) {
+                $select->where($this->_makeConditionFromDateRangeSelect($subSelect, $periodExpr));
             }
 
             $select->group([
