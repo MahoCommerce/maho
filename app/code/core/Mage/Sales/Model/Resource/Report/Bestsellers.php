@@ -59,8 +59,6 @@ class Mage_Sales_Model_Resource_Report_Bestsellers extends Mage_Sales_Model_Reso
                 $this->getStoreTZOffsetQuery(
                     ['source_table' => $this->getTable('sales/order')],
                     'source_table.created_at',
-                    $from,
-                    $to,
                 ),
             );
 
@@ -187,13 +185,9 @@ class Mage_Sales_Model_Resource_Report_Bestsellers extends Mage_Sales_Model_Reso
                 [],
             );
 
-            // Filter by date range directly on source column (WHERE is evaluated before GROUP BY,
-            // so we can't use the 'period' alias here - it doesn't exist yet)
-            if ($from !== null) {
-                $select->where('source_table.created_at >= ?', $from);
-            }
-            if ($to !== null) {
-                $select->where('source_table.created_at <= ?', $to);
+            // The clear step deleted whole periods: rebuild every one of them, not only rows since $from
+            if ($subSelect !== null) {
+                $select->where($this->_makeConditionFromDateRangeSelect($subSelect, $periodExpr));
             }
 
             $select->useStraightJoin();  // important!
