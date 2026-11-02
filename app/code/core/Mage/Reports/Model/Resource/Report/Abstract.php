@@ -156,7 +156,7 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
             ->from(
                 [$alias => $table],
                 $adapter->getDatePartSql(
-                    $this->getStoreTZOffsetQuery([$alias => $table], $alias . '.' . $column, $from, $to),
+                    $this->getStoreTZOffsetQuery([$alias => $table], $alias . '.' . $column),
                 ),
             )
             ->distinct(true);
@@ -265,7 +265,7 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
             ->from(
                 [$alias => $table],
                 $adapter->getDatePartSql(
-                    $this->getStoreTZOffsetQuery([$alias => $table], $alias . '.' . $column, $from, $to),
+                    $this->getStoreTZOffsetQuery([$alias => $table], $alias . '.' . $column),
                 ),
             )
             ->joinInner(
