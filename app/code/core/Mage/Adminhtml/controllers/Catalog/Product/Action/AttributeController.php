@@ -53,13 +53,6 @@ class Mage_Adminhtml_Catalog_Product_Action_AttributeController extends Mage_Adm
         /** @var Mage_Catalog_Service_Product $service */
         $service = Mage::getService('catalog/product');
 
-        /* Prepare inventory data item options (use config settings) */
-        foreach (Mage::helper('cataloginventory')->getConfigItemOptions() as $option) {
-            if (isset($inventoryData[$option]) && !isset($inventoryData['use_config_' . $option])) {
-                $inventoryData['use_config_' . $option] = 0;
-            }
-        }
-
         try {
             if ($attributesData) {
                 $dateFormat = Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT);
@@ -115,41 +108,9 @@ class Mage_Adminhtml_Catalog_Product_Action_AttributeController extends Mage_Adm
                 $service->updateAttributes($productIds, $attributesData, $this->_getHelper()->getSelectedStoreId());
             }
             if ($inventoryData) {
-                /** @var Mage_CatalogInventory_Model_Stock_Item $stockItem */
-                $stockItem = Mage::getModel('cataloginventory/stock_item');
-                $stockItem->setProcessIndexEvents(false);
-                $stockItemSaved = false;
-                $changedProductIds = [];
-
-                foreach ($productIds as $productId) {
-                    $stockItem->setData([]);
-                    $stockItem->loadByProduct($productId)
-                        ->setProductId($productId);
-
-                    $stockDataChanged = false;
-                    foreach ($inventoryData as $k => $v) {
-                        $stockItem->setDataUsingMethod($k, $v);
-                        if ($stockItem->dataHasChangedFor($k)) {
-                            $stockDataChanged = true;
-                        }
-                    }
-                    if ($stockDataChanged) {
-                        $stockItem->save();
-                        $stockItemSaved = true;
-                        $changedProductIds[] = $productId;
-                    }
-                }
-
-                if ($stockItemSaved) {
-                    Mage::getSingleton('index/indexer')->indexEvents(
-                        Mage_CatalogInventory_Model_Stock_Item::ENTITY,
-                        Mage_Index_Model_Event::TYPE_SAVE,
-                    );
-
-                    Mage::dispatchEvent('catalog_product_stock_item_mass_change', [
-                        'products' => $changedProductIds,
-                    ]);
-                }
+                /** @var Mage_CatalogInventory_Service_Stock $stock */
+                $stock = Mage::getService('cataloginventory/stock');
+                $stock->updateProducts($productIds, $inventoryData);
             }
 
             if ($websiteAddData || $websiteRemoveData) {

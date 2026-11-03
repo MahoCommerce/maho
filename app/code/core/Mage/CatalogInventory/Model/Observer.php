@@ -182,48 +182,15 @@ class Mage_CatalogInventory_Model_Observer
      */
     protected function _prepareItemForSave($item, $product)
     {
-        $item->addData($product->getStockData())
-            ->setProduct($product)
+        /** @var Mage_CatalogInventory_Service_Stock $service */
+        $service = Mage::getService('cataloginventory/stock');
+        $service->applyTo($item, $product->getStockData());
+        $item->setProduct($product)
             ->setProductId($product->getId())
             ->setStockId($item->getStockId());
-        if (!is_null($product->getData('stock_data/min_qty'))
-            && is_null($product->getData('stock_data/use_config_min_qty'))
-        ) {
-            $item->setData('use_config_min_qty', false);
-        }
-        if (!is_null($product->getData('stock_data/min_sale_qty'))
-            && is_null($product->getData('stock_data/use_config_min_sale_qty'))
-        ) {
-            $item->setData('use_config_min_sale_qty', false);
-        }
-        if (!is_null($product->getData('stock_data/max_sale_qty'))
-            && is_null($product->getData('stock_data/use_config_max_sale_qty'))
-        ) {
-            $item->setData('use_config_max_sale_qty', false);
-        }
-        if (!is_null($product->getData('stock_data/backorders'))
-            && is_null($product->getData('stock_data/use_config_backorders'))
-        ) {
-            $item->setData('use_config_backorders', false);
-        }
-        if (!is_null($product->getData('stock_data/notify_stock_qty'))
-            && is_null($product->getData('stock_data/use_config_notify_stock_qty'))
-        ) {
-            $item->setData('use_config_notify_stock_qty', false);
-        }
         $originalQty = $product->getData('stock_data/original_inventory_qty');
         if (is_numeric($originalQty)) {
             $item->setQtyCorrection($item->getQty() - $originalQty);
-        }
-        if (!is_null($product->getData('stock_data/enable_qty_increments'))
-            && is_null($product->getData('stock_data/use_config_enable_qty_inc'))
-        ) {
-            $item->setData('use_config_enable_qty_inc', false);
-        }
-        if (!is_null($product->getData('stock_data/qty_increments'))
-            && is_null($product->getData('stock_data/use_config_qty_increments'))
-        ) {
-            $item->setData('use_config_qty_increments', false);
         }
         return $this;
     }

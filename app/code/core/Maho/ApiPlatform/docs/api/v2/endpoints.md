@@ -388,7 +388,8 @@ There is no standalone collection endpoint or write endpoint for invoices, they 
 
 ### Inventory / Stock Updates
 
-Fast direct-SQL stock updates, no model overhead, no observers.
+Stock updates by SKU. They save the stock item as the admin product page does, so the store applies
+the same stock rules (see the Stock Status page of the user guide).
 
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
@@ -435,10 +436,14 @@ curl -X PUT /api/rest/v2/inventory/bulk \
 ```
 
 **Notes:**
-- `isInStock` auto-sets to `qty > 0` if not provided.
-- `manageStock` defaults to `true` if not provided.
-- Qty must be 0-99,999,999.
+- `isInStock` auto-sets to `qty > 0` if not provided. The store then applies its own rules: a product at or
+  below its out-of-stock threshold goes out of stock, and **Sync Stock Availability with Qty** puts a
+  product above the threshold back in stock.
+- A field such as `manageStock` or `minQty` sent without its `useConfig...` flag stops the product from
+  taking the store-wide value.
+- Qty must be 0-99,999,999.9999.
 - Bulk limit: 100 items per request (validated upfront, executed in a DB transaction).
+- A stock change updates the Stock Status index when the index runs on save.
 
 ---
 

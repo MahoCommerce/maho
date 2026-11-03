@@ -35,7 +35,6 @@ const LAYERING_HTTP_EXCEPTION_ALLOWLIST = [
     'app/code/core/Mage/Catalog/Api/ProductLinkProvider.php' => 1,
     'app/code/core/Mage/Catalog/Api/ProductMediaProcessor.php' => 11,
     'app/code/core/Mage/Catalog/Api/ProductTierPriceProcessor.php' => 4,
-    'app/code/core/Mage/CatalogInventory/Api/StockUpdateProcessor.php' => 8,
     'app/code/core/Mage/CatalogRule/Api/CatalogPriceRuleProcessor.php' => 1,
     'app/code/core/Mage/CatalogRule/Api/CatalogPriceRuleProvider.php' => 2,
     'app/code/core/Mage/Checkout/Api/CartProcessor.php' => 14,
