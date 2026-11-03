@@ -9,10 +9,15 @@ declare(strict_types=1);
 
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
 use Mage\Cms\Api\CmsBlock;
 use Mage\Cms\Api\CmsBlockProcessor;
 use Mage\Cms\Api\CmsPage;
 use Mage\Cms\Api\CmsPageProcessor;
+use Mage\Cms\Api\Media;
+use Mage\Cms\Api\MediaProcessor;
+use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 use Tests\Helpers\AdminApiParity;
@@ -43,6 +48,79 @@ function cmsParityApi(string $processorClass, string $resourceClass, array $prop
         $deleteId === null ? [] : ['id' => $deleteId],
         ['request' => $request],
     ));
+}
+
+/**
+ * @param array<string, mixed> $body
+ */
+function cmsParityApiUpdate(int $id, array $body): array
+{
+    $dto = new CmsPage();
+    foreach ($body as $property => $value) {
+        $dto->{$property} = $value;
+    }
+    $request = AdminApiParity::jsonRequest('PUT', "/api/rest/v2/cms-pages/{$id}", $body);
+    return AdminApiParity::api($request, fn() => new CmsPageProcessor(AdminApiParity::adminSecurity())
+        ->process($dto, new Put(class: CmsPage::class), ['id' => $id], ['request' => $request]));
+}
+
+/**
+ * Run $call with the value $value for the setting $path in the default scope, then put the stored value back.
+ */
+function cmsParityWithConfig(string $path, string $value, callable $call): void
+{
+    $stored = Mage::getResourceModel('core/config_data_collection')->addFieldToFilter('path', $path)
+        ->addFieldToFilter('scope', 'default')->addFieldToFilter('scope_id', 0)->getFirstItem();
+    $config = Mage::getModel('core/config');
+    $config->saveConfig($path, $value, 'default', 0);
+    try {
+        $call();
+    } finally {
+        $stored->getId() ? $config->saveConfig($path, (string) $stored->getValue(), 'default', 0) : $config->deleteConfig($path, 'default', 0);
+    }
+}
+
+/**
+ * Only a file that PHP received through a form passes is_uploaded_file(), so this uploader writes the temp file of the test.
+ */
+class CmsParityUploader extends Mage_Core_Model_File_Uploader
+{
+    #[\Override]
+    protected function _storeFile(\Maho\Storage\Mount $mount, string $path): bool
+    {
+        $mount->copyFromLocalFile($this->_file['tmp_name'], $path);
+        unlink($this->_file['tmp_name']);
+        return true;
+    }
+}
+
+/**
+ * Use $className for the model alias core/file_uploader, or the default class when $className is empty.
+ */
+function cmsParityUploaderClass(string $className): void
+{
+    Mage::getConfig()->setNode('global/models/core/rewrite/file_uploader', $className);
+    (function (): void {
+        unset($this->_classNameCache['global/models']['core']['file_uploader']);
+    })->call(Mage::getConfig());
+}
+
+/**
+ * Put a PNG image of 3x2 pixels named $name in the upload field $field.
+ */
+function cmsParityUploadField(string $field, string $name): void
+{
+    $tmp = (string) tempnam(sys_get_temp_dir(), 'cms');
+    imagepng(imagecreatetruecolor(3, 2), $tmp);
+    $_FILES[$field] = ['name' => $name, 'type' => 'image/png', 'tmp_name' => $tmp, 'error' => UPLOAD_ERR_OK, 'size' => (int) filesize($tmp)];
+}
+
+/**
+ * The extension that Mage_Cms_Service_Media::upload() gives a file, with its dot.
+ */
+function cmsParityImageExtension(): string
+{
+    return '.' . image_type_to_extension(Mage::getStoreConfigAsInt('system/media_storage_configuration/image_file_type') ?: IMAGETYPE_WEBP, false);
 }
 
 function cmsParityCleanup(): void
@@ -138,6 +216,41 @@ describe('pages', function (): void {
     });
 });
 
+describe('a page that the configuration uses', function (): void {
+    it('refuses to disable it with a conflict on both transports, and keeps it enabled', function (string $path): void {
+        $page = Mage::getService('cms/page')->save(Mage::getModel('cms/page')->setIdentifier(CMS_PARITY_PREFIX . 'used')
+            ->setTitle('Parity')->setStores([0])->setRootTemplate('one_column')->setIsActive());
+        $message = sprintf('Cannot disable page, it is used in configuration "%s".', $path);
+
+        cmsParityWithConfig($path, CMS_PARITY_PREFIX . 'used', function () use ($page, $message): void {
+            $admin = AdminApiParity::admin(Mage_Adminhtml_Cms_PageController::class, 'save', [
+                'page_id' => $page->getId(), 'identifier' => CMS_PARITY_PREFIX . 'used', 'title' => 'Parity', 'stores' => [0],
+                'is_active' => 0, 'root_template' => 'one_column',
+            ]);
+            $api = cmsParityApiUpdate((int) $page->getId(), ['isActive' => false]);
+
+            expect($admin['errors'])->toBe([$message])
+                ->and($admin['success'])->toBe([])
+                ->and($api)->toMatchArray(['status' => 409, 'errors' => [$message]])
+                ->and(Mage::getModel('cms/page')->load($page->getId())->getIsActive())->toBeTrue();
+        });
+    })->with([
+        'home page' => [Mage_Cms_Helper_Page::XML_PATH_HOME_PAGE],
+        'no-route page' => [Mage_Cms_Helper_Page::XML_PATH_NO_ROUTE_PAGE],
+        'no-cookies page' => [Mage_Cms_Helper_Page::XML_PATH_NO_COOKIES_PAGE],
+    ]);
+
+    it('saves a page that no setting uses as disabled', function (): void {
+        $page = Mage::getService('cms/page')->save(Mage::getModel('cms/page')->setIdentifier(CMS_PARITY_PREFIX . 'unused')
+            ->setTitle('Parity')->setStores([0])->setRootTemplate('one_column')->setIsActive());
+
+        $api = cmsParityApiUpdate((int) $page->getId(), ['isActive' => false]);
+
+        expect($api['status'])->toBe(200)
+            ->and(Mage::getModel('cms/page')->load($page->getId())->getIsActive())->toBeFalse();
+    });
+});
+
 describe('blocks', function (): void {
     it('refuses a block without an identifier on both transports', function (): void {
         $admin = AdminApiParity::admin(Mage_Adminhtml_Cms_BlockController::class, 'save', [
@@ -177,5 +290,71 @@ describe('media', function (): void {
     it('keeps a path of the API inside the root of the library', function (): void {
         expect(Mage::getService('cms/media')->getFolder('../../app/etc'))
             ->toStartWith(Mage::helper('cms/wysiwyg_images')->getStorageRootPath());
+    });
+});
+
+describe('media upload', function (): void {
+    beforeEach(function (): void {
+        cmsParityUploaderClass(CmsParityUploader::class);
+        $this->root = Mage::helper('cms/wysiwyg_images')->getStorageRootPath();
+    });
+
+    afterEach(function (): void {
+        foreach (['cms-parity-admin', 'cms-parity-api'] as $name) {
+            try {
+                Mage::getService('cms/media')->delete($this->root, $name . cmsParityImageExtension());
+            } catch (Mage_Core_Exception_NoSuchEntity) {
+                // The test refused the upload
+            }
+        }
+        cmsParityUploaderClass('');
+        $_FILES = [];
+    });
+
+    it('converts the upload to the configured image type on the admin page and in the API', function (): void {
+        cmsParityUploadField('image', 'cms-parity-admin.png');
+        cmsParityUploadField('file', 'cms-parity-api.png');
+        $extension = cmsParityImageExtension();
+
+        $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create('http://localhost/admin/cms_wysiwyg_images/upload', 'POST'));
+        Mage::app()->setRequest($request);
+        $response = new Mage_Core_Controller_Response_Http();
+        new Mage_Adminhtml_Cms_Wysiwyg_ImagesController($request, $response)->uploadAction();
+        $admin = json_decode((string) $response->getBody(), true);
+
+        $requestStack = new RequestStack();
+        $requestStack->push(SymfonyRequest::create('/api/rest/v2/media', 'POST', ['folder' => $this->root]));
+        $api = new MediaProcessor(AdminApiParity::adminSecurity(), $requestStack)->process(new Media(), new Post(class: Media::class));
+
+        expect($admin)->toBe([
+            'path' => $this->root . '/cms-parity-admin' . $extension, 'file' => 'cms-parity-admin' . $extension,
+            'size' => $admin['size'], 'width' => 3, 'height' => 2,
+        ])
+            ->and($api->path)->toBe($this->root . '/cms-parity-api' . $extension)
+            ->and($api->dimensions)->toBe(['width' => 3, 'height' => 2])
+            ->and(Mage::getStorage('media')->fileExists($admin['path']))->toBeTrue();
+    });
+
+    it('refuses a file that is not an image on the admin page and in the API', function (): void {
+        foreach (['image' => 'cms-parity-admin.png', 'file' => 'cms-parity-api.png'] as $field => $name) {
+            $tmp = (string) tempnam(sys_get_temp_dir(), 'cms');
+            file_put_contents($tmp, 'not an image');
+            $_FILES[$field] = ['name' => $name, 'type' => 'image/png', 'tmp_name' => $tmp, 'error' => UPLOAD_ERR_OK, 'size' => 12];
+        }
+
+        $request = new Mage_Core_Controller_Request_Http(SymfonyRequest::create('http://localhost/admin/cms_wysiwyg_images/upload', 'POST'));
+        Mage::app()->setRequest($request);
+        $response = new Mage_Core_Controller_Response_Http();
+        new Mage_Adminhtml_Cms_Wysiwyg_ImagesController($request, $response)->uploadAction();
+        $admin = json_decode((string) $response->getBody(), true);
+
+        $requestStack = new RequestStack();
+        $requestStack->push(SymfonyRequest::create('/api/rest/v2/media', 'POST', ['folder' => $this->root]));
+        $api = AdminApiParity::api($requestStack->getCurrentRequest(), fn() => new MediaProcessor(AdminApiParity::adminSecurity(), $requestStack)
+            ->process(new Media(), new Post(class: Media::class)));
+
+        expect($admin['error'])->toBeTrue()
+            ->and($api['status'])->toBe(422)
+            ->and($api['errors'])->toBe([$admin['message']]);
     });
 });

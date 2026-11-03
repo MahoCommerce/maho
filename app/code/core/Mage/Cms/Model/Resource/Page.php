@@ -56,7 +56,8 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
      *
      * @param Mage_Cms_Model_Page $object
      * @throws Mage_Core_Exception_Input with one error for each invalid field
-     * @throws Mage_Core_Exception_Conflict when a page of a store view of the page has the identifier
+     * @throws Mage_Core_Exception_Conflict when the save disables a page that the configuration uses, or when a page
+     *                                      of a store view of the page has the identifier
      */
     #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $object)
@@ -87,16 +88,13 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
             $object->setData('identifier', $urlkey);
         }
 
-        if (!$object->getIsActive()) {
+        if ($object->getId() && $object->getOrigData('is_active') && $object->getIsActive() === false) {
             $isUsedInConfig = $this->getUsedInStoreConfigCollection($object);
             if ($isUsedInConfig->count()) {
-                $object->setIsActive();
-                Mage::getSingleton('adminhtml/session')->addWarning(
-                    Mage::helper('cms')->__(
-                        'Cannot disable page, it is used in configuration "%s".',
-                        implode(', ', $isUsedInConfig->getColumnValues('path')),
-                    ),
-                );
+                throw new Mage_Core_Exception_Conflict(Mage::helper('cms')->__(
+                    'Cannot disable page, it is used in configuration "%s".',
+                    implode(', ', $isUsedInConfig->getColumnValues('path')),
+                ));
             }
         }
 

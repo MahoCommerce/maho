@@ -90,12 +90,14 @@ The **CMS No Route Page** has no URL of its own. Its URL key, for example `no-ro
 page with a "404 Not Found" status, as any other URL that does not exist. The XML sitemap does not
 list it.
 
-The admin keeps a page that a **CMS Home Page** or **CMS No Route Page** setting uses. You cannot
-delete it, and when you disable it, the store keeps it enabled and shows a warning.
+The store keeps a page that a **CMS Home Page** or **CMS No Route Page** setting uses. You cannot
+delete it or disable it. The admin shows an error with the path of the setting, and the API answers
+with the status 409 Conflict. The same rule applies to the page that the `web/default/cms_no_cookies`
+setting names, which has no field in the admin.
 
 This protection does not always work. When two pages have the same URL key, the setting can store
-the URL key with the page ID, for example `home|5`. The admin then does not find the page, and lets
-you disable or delete it. Before you disable or delete a page, check these two settings in each
+the URL key with the page ID, for example `home|5`. The store then does not find the page, and lets
+you disable or delete it. Before you disable or delete a page, check these settings in each
 scope.
 
 ## Static blocks on a page

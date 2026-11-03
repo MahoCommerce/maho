@@ -574,6 +574,13 @@ REST `GET /giftcards/{id}` is **admin-only and keyed by numeric ID**. A public *
 | GET | `/blog-categories` | None | List blog categories |
 | GET | `/blog-categories/{id}` | None | Get blog category |
 
+A read without a backend token follows the storefront. It gives 404 when the output of `Maho_Blog` is
+disabled for the store view (System > Configuration > Advanced > Advanced). A category read also gives 404
+when "Enable Categories" is off for the store view. An admin token, or a token with read or write access
+to the resource, reads every post and category, so the admin can manage the blog while the storefront
+blog is off. The same rule applies to the GraphQL queries `blogPost`, `blogPosts`, `blogCategory` and
+`blogCategories`.
+
 ---
 
 ### Media

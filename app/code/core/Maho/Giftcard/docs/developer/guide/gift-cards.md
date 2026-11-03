@@ -209,6 +209,10 @@ Mage::getModel('giftcard/history')->setData([
 ])->save();
 ```
 
+`save()` refuses a new card, or a changed balance, above `getMaxBalance()` with a `Mage_Core_Exception_Input`.
+The limit comes from `giftcard/general/max_balance` of the websites of the card. A card with a
+`purchase_order_id` and a save from `refund()` have no limit.
+
 ### Working with Collections
 
 ```php

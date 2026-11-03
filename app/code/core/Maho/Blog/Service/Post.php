@@ -39,12 +39,22 @@ class Maho_Blog_Service_Post
     }
 
     /**
+     * The blog is on for the store view $storeId when the module is enabled and its output is not disabled there.
+     */
+    public function isEnabled(int $storeId): bool
+    {
+        return Mage::helper('blog')->isModuleEnabled()
+            && !Mage::getStoreConfigFlag('advanced/modules_disable_output/Maho_Blog', $storeId);
+    }
+
+    /**
      * Load the post $id that a visitor of the store view $storeId can read: active, published and in that store view.
      *
-     * @throws Mage_Core_Exception_NoSuchEntity
+     * @throws Mage_Core_Exception_NoSuchEntity when the blog is off for $storeId or the visitor cannot read the post
      */
     public function getVisibleById(int $id, int $storeId): Maho_Blog_Model_Post
     {
+        $this->checkEnabled($storeId);
         $post = $this->getById($id);
         if (!$post->getIsActive() || !$this->isPublished($post, $storeId)
             || array_intersect([Mage_Core_Model_App::ADMIN_STORE_ID, $storeId], array_map(intval(...), $post->getStores())) === []
@@ -52,6 +62,18 @@ class Maho_Blog_Service_Post
             throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('blog')->__('This post no longer exists.'));
         }
         return $post;
+    }
+
+    /**
+     * Keep the posts of $collection that a visitor of the store view $storeId can read: active and published.
+     * The caller adds the store view filter.
+     *
+     * @throws Mage_Core_Exception_NoSuchEntity when the blog is off for $storeId
+     */
+    public function addVisibleFilter(Maho_Blog_Model_Resource_Post_Collection $collection, int $storeId): Maho_Blog_Model_Resource_Post_Collection
+    {
+        $this->checkEnabled($storeId);
+        return $collection->addPublishedFilter($storeId);
     }
 
     /**
@@ -79,5 +101,15 @@ class Maho_Blog_Service_Post
     public function delete(Maho_Blog_Model_Post $post): void
     {
         $post->delete();
+    }
+
+    /**
+     * @throws Mage_Core_Exception_NoSuchEntity
+     */
+    protected function checkEnabled(int $storeId): void
+    {
+        if (!$this->isEnabled($storeId)) {
+            throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('blog')->__('The blog is not enabled for this store view.'));
+        }
     }
 }

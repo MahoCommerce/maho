@@ -61,6 +61,16 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </refund_expiration_extension>
+                        <max_balance translate="label comment">
+                            <label>Maximum Balance</label>
+                            <comment>The highest balance, in the base currency, that an admin, the API or an import gives a card. A purchased card and a refund have no limit. Empty or 0 = no limit.</comment>
+                            <frontend_type>text</frontend_type>
+                            <validate>validate-zero-or-greater</validate>
+                            <sort_order>44</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </max_balance>
                         <allow_message translate="label comment">
                             <label>Allow Gift Message</label>
                             <comment>Can be overridden per product.</comment>

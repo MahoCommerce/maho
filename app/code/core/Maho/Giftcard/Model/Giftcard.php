@@ -26,6 +26,11 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
     public const ACTION_ADJUSTED = 'adjusted';
     public const ACTION_EXPIRED = 'expired';
 
+    public const XML_PATH_MAX_BALANCE = 'giftcard/general/max_balance';
+
+    /** True while refund() saves the card: a refund gives back money that the card held, so the cap does not apply. */
+    private bool $isRefund = false;
+
     #[\Override]
     protected function _construct()
     {
@@ -84,9 +89,44 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
         if ((float) $this->getData('balance') < 0) {
             $errors->addError('balance', $helper->__('Gift card balance cannot be negative'));
         }
+        $maxBalance = $this->isRefund ? null : $this->getMaxBalance();
+        if ($maxBalance !== null) {
+            $fields = $this->getId() ? [] : ['initial_balance'];
+            if ($this->getId() ? $this->dataHasChangedFor('balance') : $this->getData('balance') != $this->getData('initial_balance')) {
+                $fields[] = 'balance';
+            }
+            foreach ($fields as $field) {
+                if ((float) $this->getData($field) > $maxBalance) {
+                    $errors->addError($field, $helper->__('Gift card balance cannot exceed %s', $maxBalance));
+                }
+            }
+        }
         $errors->throwIfErrors();
 
         return parent::_beforeSave();
+    }
+
+    /**
+     * The highest balance that this card can get from an admin, the API or an import, in the base currency, or
+     * null for no limit. A purchased card has no limit. A card of several websites gets the lowest limit of them.
+     */
+    public function getMaxBalance(): ?float
+    {
+        if ($this->getPurchaseOrderId()) {
+            return null;
+        }
+        $websites = Mage::app()->getWebsites();
+        $limits = [];
+        foreach ($this->getWebsiteIds() as $websiteId) {
+            if (isset($websites[$websiteId])) {
+                $limits[] = (float) $websites[$websiteId]->getConfig(self::XML_PATH_MAX_BALANCE);
+            }
+        }
+        if ($limits === []) {
+            $limits[] = (float) Mage::getStoreConfig(self::XML_PATH_MAX_BALANCE, Mage_Core_Model_App::ADMIN_STORE_ID);
+        }
+        $limits = array_filter($limits, fn(float $limit) => $limit > 0);
+        return $limits === [] ? null : min($limits);
     }
 
     /**
@@ -404,7 +444,12 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
             $this->setStatus(self::STATUS_ACTIVE);
         }
 
-        $this->save();
+        $this->isRefund = true;
+        try {
+            $this->save();
+        } finally {
+            $this->isRefund = false;
+        }
 
         // Record history
         $this->_addHistory(

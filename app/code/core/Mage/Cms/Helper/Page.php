@@ -12,6 +12,7 @@ class Mage_Cms_Helper_Page extends Mage_Core_Helper_Abstract
 {
     public const XML_PATH_NO_ROUTE_PAGE        = 'web/default/cms_no_route';
     public const XML_PATH_HOME_PAGE            = 'web/default/cms_home_page';
+    public const XML_PATH_NO_COOKIES_PAGE      = 'web/default/cms_no_cookies';
 
     #[\Override]
     protected $_moduleName = 'Mage_Cms';
@@ -193,6 +194,7 @@ class Mage_Cms_Helper_Page extends Mage_Core_Helper_Abstract
         $searchPaths = [
             self::XML_PATH_NO_ROUTE_PAGE,
             self::XML_PATH_HOME_PAGE,
+            self::XML_PATH_NO_COOKIES_PAGE,
         ];
 
         if (is_array($paths) && $paths !== []) {
