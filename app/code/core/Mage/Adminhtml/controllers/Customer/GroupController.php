@@ -93,58 +93,62 @@ class Mage_Adminhtml_Customer_GroupController extends Mage_Adminhtml_Controller_
     #[Maho\Config\Route('/admin/customer_group/save')]
     public function saveAction(): void
     {
-        $customerGroup = Mage::getModel('customer/group');
+        $session = Mage::getSingleton('adminhtml/session');
         $id = $this->getRequest()->getParam('id');
-        if (!is_null($id)) {
-            $customerGroup->load((int) $id);
-        }
-
-        $taxClass = (int) $this->getRequest()->getParam('tax_class');
-
-        if ($taxClass) {
-            try {
-                $customerGroupCode = (string) $this->getRequest()->getParam('code');
-
-                if (!empty($customerGroupCode)) {
-                    $customerGroup->setCode($customerGroupCode);
-                }
-
-                $customerGroup->setTaxClassId($taxClass)->save();
-                Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('customer')->__('The customer group has been saved.'));
-                $this->getResponse()->setRedirect($this->getUrl('*/customer_group'));
-                return;
-            } catch (Exception $e) {
-                Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
-                Mage::getSingleton('adminhtml/session')->setCustomerGroupData($customerGroup->getData());
-                $this->getResponse()->setRedirect($this->getUrl('*/customer_group/edit', ['id' => $id]));
-                return;
+        $group = Mage::getModel('customer/group');
+        try {
+            if ($id !== null) {
+                $group = $this->groupService()->getById((int) $id);
             }
-        } else {
-            $this->_forward('new');
+            // The form posts no code for NOT LOGGED IN, because its field is disabled
+            $code = $this->getRequest()->getParam('code');
+            if ($code !== null) {
+                $group->setCode((string) $code);
+            }
+            $group->setTaxClassId((int) $this->getRequest()->getParam('tax_class') ?: null);
+            $this->groupService()->save($group);
+            $session->addSuccess(Mage::helper('customer')->__('The customer group has been saved.'));
+            $this->_redirect('*/customer_group');
+            return;
+        } catch (Mage_Core_Exception_Input $e) {
+            foreach ($e->getErrors() as $error) {
+                $session->addError($error['message']);
+            }
+        } catch (Mage_Core_Exception $e) {
+            $session->addError($e->getMessage());
+        } catch (Throwable $e) {
+            Mage::logException($e);
+            $session->addError(Mage::helper('customer')->__('Unable to save the customer group.'));
         }
+        $session->setCustomerGroupData($group->getData());
+        $this->_redirect('*/customer_group/edit', ['id' => $id]);
     }
 
-    /**
-     * Delete customer group action
-     */
     #[Maho\Config\Route('/admin/customer_group/delete')]
     public function deleteAction(): void
     {
-        $customerGroup = Mage::getModel('customer/group');
-        if ($id = (int) $this->getRequest()->getParam('id')) {
-            try {
-                $customerGroup->load($id);
-                $customerGroup->delete();
-                Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('customer')->__('The customer group has been deleted.'));
-                $this->getResponse()->setRedirect($this->getUrl('*/customer_group'));
-                return;
-            } catch (Exception $e) {
-                Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
-                $this->getResponse()->setRedirect($this->getUrl('*/customer_group/edit', ['id' => $id]));
-                return;
-            }
+        $session = Mage::getSingleton('adminhtml/session');
+        $id = (int) $this->getRequest()->getParam('id');
+        if (!$id) {
+            $this->_redirect('*/customer_group');
+            return;
         }
+        try {
+            $this->groupService()->delete($this->groupService()->getById($id));
+            $session->addSuccess(Mage::helper('customer')->__('The customer group has been deleted.'));
+            $this->_redirect('*/customer_group');
+            return;
+        } catch (Mage_Core_Exception $e) {
+            $session->addError($e->getMessage());
+        } catch (Throwable $e) {
+            Mage::logException($e);
+            $session->addError(Mage::helper('customer')->__('Unable to delete the customer group.'));
+        }
+        $this->_redirect('*/customer_group/edit', ['id' => $id]);
+    }
 
-        $this->_redirect('*/customer_group');
+    protected function groupService(): Mage_Customer_Service_Group
+    {
+        return Mage::getService('customer/group');
     }
 }

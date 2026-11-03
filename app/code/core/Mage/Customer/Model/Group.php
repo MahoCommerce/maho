@@ -141,7 +141,7 @@ class Mage_Customer_Model_Group extends Mage_Core_Model_Abstract
     protected function _prepareData()
     {
         $this->setCode(
-            substr($this->getCode(), 0, self::GROUP_CODE_MAX_LENGTH),
+            mb_substr((string) $this->getCode(), 0, self::GROUP_CODE_MAX_LENGTH),
         );
         return $this;
     }

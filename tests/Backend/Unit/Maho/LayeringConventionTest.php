@@ -56,7 +56,6 @@ const LAYERING_HTTP_EXCEPTION_ALLOWLIST = [
     'app/code/core/Mage/Core/Api/UrlRewriteProcessor.php' => 3,
     'app/code/core/Mage/Customer/Api/AddressProcessor.php' => 18,
     'app/code/core/Mage/Customer/Api/AddressProvider.php' => 4,
-    'app/code/core/Mage/Customer/Api/CustomerGroupProcessor.php' => 2,
     'app/code/core/Mage/Customer/Api/CustomerProcessor.php' => 33,
     'app/code/core/Mage/Index/Api/IndexProcessProcessor.php' => 2,
     'app/code/core/Mage/Index/Api/IndexProcessProvider.php' => 1,

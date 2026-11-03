@@ -1,6 +1,8 @@
 <?php
 
 /**
+ * Give a customer group write to the customer group service.
+ *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Customer
@@ -11,29 +13,32 @@ declare(strict_types=1);
 namespace Mage\Customer\Api;
 
 use Maho\ApiPlatform\CrudProcessor;
-use Maho\ApiPlatform\CrudResource;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 final class CustomerGroupProcessor extends CrudProcessor
 {
     #[\Override]
-    protected function validate(CrudResource $data, object $model, bool $isNew): void
+    protected function loadOrFail(string $modelAlias, int|string $id, string $notFoundMessage): \Mage_Customer_Model_Group
     {
-        /** @var CustomerGroup $data */
-        $code = trim($data->code);
+        return $this->groupService()->getById((int) $id);
+    }
 
-        // Code is required on create; on update an omitted code leaves the existing value untouched.
-        if ($isNew && $code === '') {
-            throw new UnprocessableEntityHttpException('Customer group code is required.');
-        }
+    #[\Override]
+    protected function safeSave(\Mage_Core_Model_Abstract $model, string $entityLabel): void
+    {
+        /** @var \Mage_Customer_Model_Group $model */
+        $this->groupService()->save($model);
+    }
 
-        if (mb_strlen($code) > \Mage_Customer_Model_Group::GROUP_CODE_MAX_LENGTH) {
-            throw new UnprocessableEntityHttpException(
-                sprintf(
-                    'Customer group code must not exceed %d characters.',
-                    \Mage_Customer_Model_Group::GROUP_CODE_MAX_LENGTH,
-                ),
-            );
-        }
+    #[\Override]
+    protected function safeDelete(\Mage_Core_Model_Abstract $model, string $entityLabel): void
+    {
+        /** @var \Mage_Customer_Model_Group $model */
+        $this->groupService()->delete($model);
+    }
+
+    private function groupService(): \Mage_Customer_Service_Group
+    {
+        /** @var \Mage_Customer_Service_Group */
+        return \Mage::getService('customer/group');
     }
 }
