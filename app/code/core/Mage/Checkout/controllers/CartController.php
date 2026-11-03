@@ -788,14 +788,12 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
 
         try {
             // A code that is not a gift card of this website gets the message of the promo code box
-            $giftcard = Mage::getModel('giftcard/giftcard')->loadByCode($code);
-            if (!$giftcard->getId() || !$giftcard->isAvailableOnWebsite((int) $quote->getStore()->getWebsiteId())) {
-                return ['success' => false, 'message' => ''];
-            }
-
+            Mage::getService('giftcard/giftcard')->getByCode($code, (int) $quote->getStore()->getWebsiteId());
             Mage::getService('checkout/cart')->applyGiftcard($quote, $code);
 
             return ['success' => true, 'message' => ''];
+        } catch (Mage_Core_Exception_NoSuchEntity) {
+            return ['success' => false, 'message' => ''];
         } catch (Mage_Core_Exception $e) {
             return ['success' => false, 'message' => $e->getMessage()];
         } catch (Exception $e) {
@@ -817,13 +815,10 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
                 $message = $this->__('Coupon code was removed.');
                 $this->_getSession()->setCartCouponCode('');
             } elseif ($type === 'giftcard') {
-                $appliedCodes = $quote->getGiftcardCodes();
-                $appliedCodes = $appliedCodes ? json_decode($appliedCodes, true) : [];
-
-                if (isset($appliedCodes[$code])) {
-                    unset($appliedCodes[$code]);
-                    $quote->setGiftcardCodes(empty($appliedCodes) ? null : json_encode($appliedCodes));
-                    $quote->collectTotals()->save();
+                try {
+                    Mage::getService('checkout/cart')->removeGiftcard($quote, $code);
+                } catch (Mage_Core_Exception_NoSuchEntity) {
+                    // The card is not in the cart, so the outcome is the same
                 }
                 $message = $this->__('Gift card "%s" was removed.', $code);
             } else {

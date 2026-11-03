@@ -220,7 +220,9 @@ Customers can check their gift card balance without applying it:
 3. View current balance and expiration date
 
 !!! warning "Rate Limiting"
-    Balance checks are rate-limited to 10 attempts per minute to prevent code enumeration attacks.
+    Balance checks are rate-limited to prevent code enumeration attacks. The limit is 10 checks per minute for one
+    visitor by default, and the checkout box, the My Account page and the API share it. Set it in
+    **System > Configuration > Advanced > System > Rate limit > Gift card balance check**.
 
 ### Check Balance From My Account <span class="version-badge">v26.9+</span>
 
@@ -238,10 +240,9 @@ The page is deliberately cautious about what it reveals:
 - The code is never placed in the address bar, so it does not reach browser
   history or server referer logs.
 - Failed lookups are limited to 10 per hour, per customer. Successful lookups do
-  not count, so a customer holding several cards is not penalised.
-
-This page is separate from the checkout balance check described above, and has
-its own limit.
+  not count, so a customer holding several cards is not penalised. This limit
+  applies to every balance check of a logged-in customer, on top of the limit
+  per minute described above.
 
 ### Partial Redemption
 
@@ -306,7 +307,7 @@ Administrators can create gift cards without a purchase:
    - **Code**: Leave blank for auto-generation or enter custom code
    - **Status**: Set to Active for immediate use
    - **Websites**: Select one or more websites the card is valid on. They must share one base currency <span class="version-badge">v26.9+</span>
-   - **Balance**: Enter the gift card value
+   - **Balance**: Enter the gift card value. It must be more than 0 and at most 10,000. A card from a purchase has no upper limit
    - **Recipient/Sender Info**: Optional delivery details
    - **Expiration Date**: Optional expiration
    - **Comment**: Internal note for audit trail

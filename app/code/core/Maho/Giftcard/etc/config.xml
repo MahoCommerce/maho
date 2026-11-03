@@ -41,6 +41,11 @@
                 </entities>
             </giftcard_resource>
         </models>
+        <services>
+            <giftcard>
+                <class>Maho_Giftcard_Service</class>
+            </giftcard>
+        </services>
 
         <helpers>
             <giftcard>

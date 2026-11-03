@@ -80,7 +80,26 @@ class Maho_Giftcard_Model_Resource_Giftcard extends Mage_Core_Model_Resource_Db_
             $this->_validateWebsiteIds($object, $ids);
         }
 
+        $code = (string) $object->getData('code');
+        if ($code !== '' && (!$object->getId() || $object->dataHasChangedFor('code')) && $this->_isCodeUsed($code, (int) $object->getId())) {
+            throw new Mage_Core_Exception_Conflict(Mage::helper('giftcard')->__("Gift card code '%s' already exists", $code));
+        }
+
         return parent::_beforeSave($object);
+    }
+
+    /**
+     * Return whether a card other than $exceptId has $code. Codes do not differ by case only, because loadByCode() ignores the case.
+     */
+    protected function _isCodeUsed(string $code, int $exceptId): bool
+    {
+        $adapter = $this->_getReadAdapter();
+        $select = $adapter->select()
+            ->from($this->getMainTable(), ['giftcard_id'])
+            ->where((string) $adapter->getCaseInsensitiveEqualsSql('code', '?'), $code)
+            ->where('giftcard_id != ?', $exceptId)
+            ->limit(1);
+        return (bool) $adapter->fetchOne($select);
     }
 
     /**
