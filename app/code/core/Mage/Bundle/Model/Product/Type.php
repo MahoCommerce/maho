@@ -223,6 +223,7 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
             $product->unsetData('msrp_display_actual_price_type');
         }
 
+        $this->_validateBundleData($product);
         $product->canAffectOptions(false);
 
         if ($product->getCanSaveBundleSelections()) {
@@ -297,7 +298,8 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
                         $selectionModel = Mage::getModel('bundle/selection')
                             ->setData($selection)
                             ->setOptionId($options[$index]['option_id'])
-                            ->setParentProductId($product->getId());
+                            ->setParentProductId($product->getId())
+                            ->setData('store_id', $product->getStoreId());
 
                         $selectionModel->isDeleted((bool) $selection['delete']);
                         $selectionModel->save();
@@ -321,6 +323,60 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
         }
 
         return $this;
+    }
+
+    /**
+     * Check the options and the selections that the save writes: each option needs a title and a known type,
+     * each selection a price of 0 or more and a quantity above 0 (or 0 in a drop-down or a radio option), and
+     * each new selection a product of an allowed type.
+     *
+     * @throws Mage_Core_Exception_Input
+     */
+    protected function _validateBundleData(Mage_Catalog_Model_Product $product): void
+    {
+        $options = $product->getBundleOptionsData();
+        if (!is_array($options)) {
+            return;
+        }
+        $helper = Mage::helper('bundle');
+        $types = array_column(Mage::getSingleton('bundle/source_option_type')->toOptionArray(), 'value');
+        $errors = new Mage_Core_Exception_Input();
+        foreach ($options as $option) {
+            if (!empty($option['delete'])) {
+                continue;
+            }
+            if (trim((string) ($option['title'] ?? '')) === '') {
+                $errors->addError('title', $helper->__('title is required'));
+            }
+            if (!in_array($option['type'] ?? null, $types, true)) {
+                $errors->addError('type', $helper->__('Invalid type: %s. Valid: %s', (string) ($option['type'] ?? ''), implode(', ', $types)));
+            }
+        }
+
+        $newProductIds = [];
+        foreach ((array) $product->getBundleSelectionsData() as $index => $group) {
+            if (!empty($options[$index]['delete'])) {
+                continue;
+            }
+            $multiple = in_array($options[$index]['type'] ?? null, ['checkbox', 'multi'], true);
+            foreach ((array) $group as $selection) {
+                if (!empty($selection['delete'])) {
+                    continue;
+                }
+                $qty = (float) ($selection['selection_qty'] ?? 0);
+                if ($qty < 0 || ($multiple && $qty <= 0)) {
+                    $errors->addError('selections', $helper->__('Quantity must be greater than 0'));
+                }
+                if ((float) ($selection['selection_price_value'] ?? 0) < 0) {
+                    $errors->addError('selections', $helper->__('Price must not be negative'));
+                }
+                if (empty($selection['selection_id'])) {
+                    $newProductIds[] = (int) ($selection['product_id'] ?? 0);
+                }
+            }
+        }
+        $errors->throwIfErrors();
+        $this->_validateChildProducts(array_values(array_unique($newProductIds)), Mage::helper('bundle')->getAllowedSelectionTypes(), 'selections');
     }
 
     /**

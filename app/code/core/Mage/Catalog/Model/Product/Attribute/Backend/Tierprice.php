@@ -34,6 +34,15 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Tierprice extends Mage_Catalo
         return $uniqueFields;
     }
 
+    #[\Override]
+    protected function _validatePriceRow(array $priceRow, Mage_Core_Exception_Input $errors): void
+    {
+        parent::_validatePriceRow($priceRow, $errors);
+        if ((float) ($priceRow['price_qty'] ?? 0) <= 0) {
+            $errors->addError($this->getAttribute()->getAttributeCode(), Mage::helper('catalog')->__('Quantity must be greater than 0'));
+        }
+    }
+
     /**
      * Error message when duplicates
      *

@@ -70,6 +70,8 @@ Country listings live under [Directory](#directory) (`/countries`).
 | DELETE | `/products/{productId}/links/up-sell/{linkedProductId}` | Admin/API | Remove an up-sell link |
 | GET / POST | `/products/{productId}/reviews` | GET=None, POST=Customer | Reviews for a product |
 
+The product sub-resources and the admin product page use the same rules. A tier price or a group price needs a price of 0 or more, a website and a customer group that exist, and one row for each website, group and quantity. A tier price needs a quantity above 0. An uploaded image goes through the checks of the admin upload: a known image type, the maximum size of `catalog/product_image/max_dimension`, and a new copy of the pixels. A grouped child, a configurable child and a bundle selection need a product of an allowed type. A super attribute needs the global scope, a list of options and "Use To Create Configurable Product", and it must be in the attribute set of the product. A problem in the body gives a 422 with `details.errors`. A DELETE of a link, a grouped child or a configurable child that does not exist gives a 404. A token restricted to some stores keeps the prices of the other websites when it replaces or deletes tier prices or group prices.
+
 **Layered navigation:**
 
 | Method | Endpoint | Auth | Description |

@@ -18,6 +18,9 @@
  */
 abstract class Mage_Catalog_Model_Product_Attribute_Backend_Groupprice_Abstract extends Mage_Catalog_Model_Product_Attribute_Backend_Price
 {
+    /** @var list<int>|null the IDs of the customer groups, read once for each validate() */
+    protected ?array $_customerGroupIds = null;
+
     /**
      * Error message when duplicates
      *
@@ -108,6 +111,15 @@ abstract class Mage_Catalog_Model_Product_Attribute_Backend_Groupprice_Abstract 
             return true;
         }
 
+        $this->_customerGroupIds = null;
+        $errors = new Mage_Core_Exception_Input();
+        foreach ($priceRows as $priceRow) {
+            if (empty($priceRow['delete'])) {
+                $this->_validatePriceRow($priceRow, $errors);
+            }
+        }
+        $errors->throwIfErrors();
+
         // validate per website
         $duplicates = [];
         foreach ($priceRows as $priceRow) {
@@ -162,6 +174,30 @@ abstract class Mage_Catalog_Model_Product_Attribute_Backend_Groupprice_Abstract 
         }
 
         return true;
+    }
+
+    /**
+     * Add an error to $errors for each value of $priceRow that the store cannot use: a negative price,
+     * a website or a customer group that does not exist.
+     *
+     * @param array<string, mixed> $priceRow
+     */
+    protected function _validatePriceRow(array $priceRow, Mage_Core_Exception_Input $errors): void
+    {
+        $code = $this->getAttribute()->getAttributeCode();
+        $helper = Mage::helper('catalog');
+        if ((float) ($priceRow['price'] ?? 0) < 0) {
+            $errors->addError($code, $helper->__('Price must not be negative'));
+        }
+        $websiteId = (int) ($priceRow['website_id'] ?? 0);
+        if ($websiteId !== 0 && !array_key_exists($websiteId, Mage::app()->getWebsites())) {
+            $errors->addError($code, $helper->__('Website %s does not exist.', $websiteId));
+        }
+        $groupId = (int) ($priceRow['cust_group'] ?? 0);
+        $this->_customerGroupIds ??= array_map(intval(...), Mage::getResourceModel('customer/group_collection')->getAllIds());
+        if ($groupId !== Mage_Customer_Model_Group::CUST_GROUP_ALL && !in_array($groupId, $this->_customerGroupIds, true)) {
+            $errors->addError($code, $helper->__('Customer group %s does not exist.', $groupId));
+        }
     }
 
     /**
