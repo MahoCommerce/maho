@@ -320,14 +320,14 @@ class Uploader
 
         //is file extension allowed
         if (!$this->checkAllowedExtension($this->getFileExtension())) {
-            throw new \Exception('Disallowed file type.');
+            throw new \Mage_Core_Exception('Disallowed file type.');
         }
 
         /*
          * Validate MIME-Types.
          */
         if (!$this->checkMimeType($this->_validMimeTypes)) {
-            throw new \Exception('Invalid MIME type.');
+            throw new \Mage_Core_Exception('Invalid MIME type.');
         }
 
         //run validate callbacks
