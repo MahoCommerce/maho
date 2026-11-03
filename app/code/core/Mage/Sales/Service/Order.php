@@ -1133,20 +1133,30 @@ class Mage_Sales_Service_Order
         }
 
         $labels = [];
+        $trackingNumbers = [];
         foreach ($response->hasInfo() ? $response->getInfo() : [] as $info) {
             if (!empty($info['tracking_number']) && !empty($info['label_content'])) {
                 $labels[sprintf('label_%s_package_%d.pdf', $shipment->getIncrementId(), count($labels) + 1)] = $info['label_content'];
-                $shipment->addTrack(Mage::getModel('sales/order_shipment_track')
-                    ->setNumber((string) $info['tracking_number'])
-                    ->setCarrierCode($carrier->getCarrierCode())
-                    ->setTitle((string) Mage::getStoreConfig('carriers/' . $carrier->getCarrierCode() . '/title', $shipment->getStoreId())));
+                $trackingNumbers[] = (string) $info['tracking_number'];
             }
         }
         if ($labels === []) {
             return false;
         }
 
-        $shipment->setShippingLabel(count($labels) === 1 ? reset($labels) : $this->zipShippingLabels($labels, 'shipping_label_'));
+        try {
+            $shipment->setShippingLabel(count($labels) === 1 ? reset($labels) : $this->zipShippingLabels($labels, 'shipping_label_'));
+        } catch (Mage_Core_Exception $e) {
+            // The shipment saves without its labels, as before: the admin can create them again
+            Mage::logException($e);
+            return false;
+        }
+        foreach ($trackingNumbers as $trackingNumber) {
+            $shipment->addTrack(Mage::getModel('sales/order_shipment_track')
+                ->setNumber($trackingNumber)
+                ->setCarrierCode($carrier->getCarrierCode())
+                ->setTitle((string) Mage::getStoreConfig('carriers/' . $carrier->getCarrierCode() . '/title', $shipment->getStoreId())));
+        }
         return true;
     }
 
