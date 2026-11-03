@@ -12,9 +12,6 @@ declare(strict_types=1);
 
 class Maho_Giftcard_Service_Giftcard
 {
-    /** The highest balance that an admin or an API client can give a card. A purchase has no limit. */
-    public const MAX_BALANCE = 10000;
-
     public const XML_PATH_BALANCE_RATE_LIMIT = 'system/rate_limit/giftcard_balance';
     public const BALANCE_RATE_LIMIT_WINDOW = 60;
 
@@ -96,8 +93,8 @@ class Maho_Giftcard_Service_Giftcard
     }
 
     /**
-     * Save $giftcard. A new card needs a balance above zero and at most MAX_BALANCE. The model checks the
-     * status, the code and the websites. An existing card changes its balance through adjustBalance().
+     * Save $giftcard. A new card needs a balance above zero. The model checks the status, the code, the
+     * websites and the highest balance. An existing card changes its balance through adjustBalance().
      *
      * @throws Mage_Core_Exception_Input
      * @throws Mage_Core_Exception_Conflict when another card has the code
@@ -110,11 +107,6 @@ class Maho_Giftcard_Service_Giftcard
             if ($balance <= 0) {
                 $errors->addError('initial_balance', Mage::helper('giftcard')->__('Gift card balance must be greater than zero'));
             }
-            foreach (['initial_balance', 'balance'] as $field) {
-                if ((float) $giftcard->getData($field) > self::MAX_BALANCE) {
-                    $errors->addError($field, Mage::helper('giftcard')->__('Gift card balance cannot exceed %s', self::MAX_BALANCE));
-                }
-            }
             $errors->throwIfErrors();
         }
         $giftcard->save();
@@ -124,15 +116,10 @@ class Maho_Giftcard_Service_Giftcard
     /**
      * Give $giftcard the balance $newBalance and write a history entry with $comment.
      *
-     * @throws Mage_Core_Exception_Input when the balance is below zero or above MAX_BALANCE
+     * @throws Mage_Core_Exception_Input when the model refuses the balance: below zero or above the highest balance
      */
     public function adjustBalance(Maho_Giftcard_Model_Giftcard $giftcard, float $newBalance, ?string $comment = null): Maho_Giftcard_Model_Giftcard
     {
-        if ($newBalance < 0 || $newBalance > self::MAX_BALANCE) {
-            throw new Mage_Core_Exception_Input()->addError('balance', $newBalance < 0
-                ? Mage::helper('giftcard')->__('Gift card balance cannot be negative')
-                : Mage::helper('giftcard')->__('Gift card balance cannot exceed %s', self::MAX_BALANCE));
-        }
         if ($newBalance !== (float) $giftcard->getBalance()) {
             $giftcard->adjustBalance($newBalance, $comment);
         }

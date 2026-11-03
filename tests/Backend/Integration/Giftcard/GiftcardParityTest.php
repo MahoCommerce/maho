@@ -71,6 +71,16 @@ function giftcardParityCard(string $suffix, array $data = []): Maho_Giftcard_Mod
     return Mage::getService('giftcard/giftcard')->save($giftcard);
 }
 
+/**
+ * Give the website of the current store the Maximum Balance $value.
+ */
+function giftcardParityMaxBalance(string $value): void
+{
+    $website = Mage::app()->getWebsite(Mage::app()->getStore()->getWebsiteId());
+    Mage::getConfig()->setNode('websites/' . $website->getCode() . '/' . Maho_Giftcard_Model_Giftcard::XML_PATH_MAX_BALANCE, $value);
+    (fn() => $this->_configCache = [])->call($website);
+}
+
 beforeEach(function (): void {
     Mage::unregister(Mage_Core_Model_Session_Abstract::REGISTRY_KEY);
     $session = new Session(new MockArraySessionStorage());
@@ -81,7 +91,10 @@ beforeEach(function (): void {
         $giftcard->delete();
     }
     $this->websiteId = (int) Mage::app()->getStore()->getWebsiteId();
+    giftcardParityMaxBalance('10000');
 });
+
+afterEach(fn() => giftcardParityMaxBalance('10000'));
 
 describe('a new card', function (): void {
     it('needs a balance of at most the maximum on the admin page and in the API', function (): void {
@@ -96,6 +109,39 @@ describe('a new card', function (): void {
             ->and($api['fields'])->toBe(['initialBalance']);
     });
 
+    it('reads the highest balance from the setting of the website, on the admin page and in the API', function (): void {
+        giftcardParityMaxBalance('100');
+
+        $admin = TransportParity::admin(Maho_Giftcard_Adminhtml_GiftcardController::class, 'save', [
+            'code' => GIFTCARD_PARITY_PREFIX . 'ADMIN', 'balance' => 200, 'website_ids' => [$this->websiteId],
+        ]);
+        $api = giftcardParityApi(['code' => GIFTCARD_PARITY_PREFIX . 'API', 'initialBalance' => 200.0, 'websiteIds' => [$this->websiteId]]);
+
+        expect($admin['errors'])->toBe(['Gift card balance cannot exceed 100'])
+            ->and($api['status'])->toBe(422)
+            ->and($api['errors'])->toBe($admin['errors']);
+    });
+
+    it('accepts any balance when the setting is empty or 0', function (string $value): void {
+        giftcardParityMaxBalance($value);
+
+        $admin = TransportParity::admin(Maho_Giftcard_Adminhtml_GiftcardController::class, 'save', [
+            'code' => GIFTCARD_PARITY_PREFIX . 'ADMIN', 'balance' => 20000, 'website_ids' => [$this->websiteId],
+        ]);
+        $api = giftcardParityApi(['code' => GIFTCARD_PARITY_PREFIX . 'API', 'initialBalance' => 20000.0, 'websiteIds' => [$this->websiteId]]);
+
+        expect($admin['errors'])->toBe([])
+            ->and($api['status'])->toBe(200)
+            ->and($api['result']->balance)->toBe(20000.0);
+    })->with(['empty' => [''], 'zero' => ['0']]);
+
+    it('gives no highest balance to a purchased card', function (): void {
+        $giftcard = Mage::getModel('giftcard/giftcard')->setPurchaseOrderId(1);
+        $giftcard->setWebsiteIds([$this->websiteId]);
+
+        expect($giftcard->getMaxBalance())->toBeNull();
+    });
+
     it('refuses a code that another card has in another case, on the admin page and in the API', function (): void {
         giftcardParityCard('TAKEN');
 
@@ -108,6 +154,52 @@ describe('a new card', function (): void {
         expect($admin['errors'])->toBe([$message])
             ->and($api['status'])->toBe(409)
             ->and($api['errors'])->toBe([$message]);
+    });
+});
+
+describe('a card above a lowered highest balance', function (): void {
+    it('keeps its balance and saves a change of status on the admin page and in the API', function (): void {
+        $adminCard = giftcardParityCard('ABOVE-ADMIN', ['balance' => 500.0]);
+        $apiCard = giftcardParityCard('ABOVE-API', ['balance' => 500.0]);
+        giftcardParityMaxBalance('100');
+
+        $admin = TransportParity::admin(Maho_Giftcard_Adminhtml_GiftcardController::class, 'massStatus', [
+            'giftcard' => [$adminCard->getId()], 'status' => Maho_Giftcard_Model_Giftcard::STATUS_DISABLED,
+        ]);
+        $api = giftcardParityApi(['status' => Maho_Giftcard_Model_Giftcard::STATUS_DISABLED], (int) $apiCard->getId());
+
+        expect($admin['errors'])->toBe([])
+            ->and($api['status'])->toBe(200)
+            ->and(Mage::getModel('giftcard/giftcard')->load($adminCard->getId())->getStatus())->toBe(Maho_Giftcard_Model_Giftcard::STATUS_DISABLED)
+            ->and($api['result']->status)->toBe(Maho_Giftcard_Model_Giftcard::STATUS_DISABLED)
+            ->and($api['result']->balance)->toBe(500.0);
+    });
+
+    it('refuses a new balance above the setting on the admin page and in the API', function (): void {
+        $adminCard = giftcardParityCard('RAISE-ADMIN', ['balance' => 50.0]);
+        $apiCard = giftcardParityCard('RAISE-API', ['balance' => 50.0]);
+        giftcardParityMaxBalance('100');
+
+        $admin = TransportParity::admin(Maho_Giftcard_Adminhtml_GiftcardController::class, 'save', [
+            'id' => $adminCard->getId(), 'giftcard_id' => $adminCard->getId(), 'code' => $adminCard->getCode(),
+            'status' => Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE, 'balance' => 200, 'website_ids' => [$this->websiteId],
+        ]);
+        $api = giftcardParityApi(['balance' => 200.0], (int) $apiCard->getId());
+
+        expect($admin['errors'])->toBe(['Gift card balance cannot exceed 100'])
+            ->and($api['status'])->toBe(422)
+            ->and($api['errors'])->toBe($admin['errors'])
+            ->and($api['fields'])->toBe(['balance'])
+            ->and((float) Mage::getModel('giftcard/giftcard')->load($adminCard->getId())->getBalance())->toBe(50.0);
+    });
+
+    it('takes a refund above the setting', function (): void {
+        $giftcard = giftcardParityCard('REFUND', ['balance' => 90.0]);
+        giftcardParityMaxBalance('100');
+
+        $giftcard->refund(50.0);
+
+        expect((float) Mage::getModel('giftcard/giftcard')->load($giftcard->getId())->getBalance())->toBe(140.0);
     });
 });
 
