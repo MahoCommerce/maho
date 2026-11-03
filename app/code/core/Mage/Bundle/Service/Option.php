@@ -73,8 +73,7 @@ class Mage_Bundle_Service_Option
      */
     private function write(Product $product, Option $target, array $newSelections, bool $delete): void
     {
-        /** @var Product $product */
-        $product = Mage::getModel('catalog/product')->setStoreId(Mage_Core_Model_App::ADMIN_STORE_ID)->load($product->getId());
+        $product = Mage::getService('catalog/product')->getById((int) $product->getId());
         $resource = Mage::getSingleton('core/resource');
         $read = $resource->getConnection('core_read');
         $selectionsByOption = [];

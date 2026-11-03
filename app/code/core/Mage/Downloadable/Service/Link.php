@@ -65,8 +65,7 @@ class Mage_Downloadable_Service_Link
 
     private function write(Product $product, Link $target, bool $delete): void
     {
-        /** @var Product $product */
-        $product = Mage::getModel('catalog/product')->setStoreId(Mage_Core_Model_App::ADMIN_STORE_ID)->load($product->getId());
+        $product = Mage::getService('catalog/product')->getById((int) $product->getId());
         /** @var Mage_Downloadable_Model_Product_Type $typeInstance */
         $typeInstance = $product->getTypeInstance(true);
         $items = [];

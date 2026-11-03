@@ -65,11 +65,7 @@ class Mage_Catalog_Service_Product_Price
             }
         }
 
-        /** @var Product $product */
-        $product = Mage::getModel('catalog/product')->setStoreId(Mage_Core_Model_App::ADMIN_STORE_ID)->load($product->getId());
-        if (!$product->getId()) {
-            throw new Mage_Core_Exception_NoSuchEntity($helper->__('Product not found'));
-        }
+        $product = Mage::getService('catalog/product')->getById((int) $product->getId());
         $backend = $product->getResource()->getAttribute($code)->getBackend();
         if (!is_array($product->getOrigData($code))) {
             $backend->afterLoad($product);
