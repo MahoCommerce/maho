@@ -40,7 +40,8 @@ class Mage_Cms_Service_Page
      * The resource model sanitizes the content and checks the identifier, the layouts, the layout updates and the robots value.
      *
      * @throws Mage_Core_Exception_Input with one error for each invalid field
-     * @throws Mage_Core_Exception_Conflict when a page of a store view of the page has the identifier
+     * @throws Mage_Core_Exception_Conflict when a page of a store view of the page has the identifier, or when the save
+     *                                      disables a page that the configuration uses, for example as the home page
      */
     public function save(Mage_Cms_Model_Page $page): Mage_Cms_Model_Page
     {

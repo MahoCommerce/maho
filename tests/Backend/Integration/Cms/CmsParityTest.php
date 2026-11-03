@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
 use Mage\Cms\Api\CmsBlock;
 use Mage\Cms\Api\CmsBlockProcessor;
 use Mage\Cms\Api\CmsPage;
@@ -47,6 +48,36 @@ function cmsParityApi(string $processorClass, string $resourceClass, array $prop
         $deleteId === null ? [] : ['id' => $deleteId],
         ['request' => $request],
     ));
+}
+
+/**
+ * @param array<string, mixed> $body
+ */
+function cmsParityApiUpdate(int $id, array $body): array
+{
+    $dto = new CmsPage();
+    foreach ($body as $property => $value) {
+        $dto->{$property} = $value;
+    }
+    $request = AdminApiParity::jsonRequest('PUT', "/api/rest/v2/cms-pages/{$id}", $body);
+    return AdminApiParity::api($request, fn() => new CmsPageProcessor(AdminApiParity::adminSecurity())
+        ->process($dto, new Put(class: CmsPage::class), ['id' => $id], ['request' => $request]));
+}
+
+/**
+ * Run $call with the value $value for the setting $path in the default scope, then put the stored value back.
+ */
+function cmsParityWithConfig(string $path, string $value, callable $call): void
+{
+    $stored = Mage::getResourceModel('core/config_data_collection')->addFieldToFilter('path', $path)
+        ->addFieldToFilter('scope', 'default')->addFieldToFilter('scope_id', 0)->getFirstItem();
+    $config = Mage::getModel('core/config');
+    $config->saveConfig($path, $value, 'default', 0);
+    try {
+        $call();
+    } finally {
+        $stored->getId() ? $config->saveConfig($path, (string) $stored->getValue(), 'default', 0) : $config->deleteConfig($path, 'default', 0);
+    }
 }
 
 /**
@@ -182,6 +213,41 @@ describe('pages', function (): void {
             ->and(Mage::getResourceSingleton('cms/page')->getIdentifierError('2026'))
             ->toBe('The page URL key cannot consist only of numbers.')
             ->and(Mage::getResourceSingleton('cms/page')->getIdentifierError('about-us.html'))->toBeNull();
+    });
+});
+
+describe('a page that the configuration uses', function (): void {
+    it('refuses to disable it with a conflict on both transports, and keeps it enabled', function (string $path): void {
+        $page = Mage::getService('cms/page')->save(Mage::getModel('cms/page')->setIdentifier(CMS_PARITY_PREFIX . 'used')
+            ->setTitle('Parity')->setStores([0])->setRootTemplate('one_column')->setIsActive());
+        $message = sprintf('Cannot disable page, it is used in configuration "%s".', $path);
+
+        cmsParityWithConfig($path, CMS_PARITY_PREFIX . 'used', function () use ($page, $message): void {
+            $admin = AdminApiParity::admin(Mage_Adminhtml_Cms_PageController::class, 'save', [
+                'page_id' => $page->getId(), 'identifier' => CMS_PARITY_PREFIX . 'used', 'title' => 'Parity', 'stores' => [0],
+                'is_active' => 0, 'root_template' => 'one_column',
+            ]);
+            $api = cmsParityApiUpdate((int) $page->getId(), ['isActive' => false]);
+
+            expect($admin['errors'])->toBe([$message])
+                ->and($admin['success'])->toBe([])
+                ->and($api)->toMatchArray(['status' => 409, 'errors' => [$message]])
+                ->and(Mage::getModel('cms/page')->load($page->getId())->getIsActive())->toBeTrue();
+        });
+    })->with([
+        'home page' => [Mage_Cms_Helper_Page::XML_PATH_HOME_PAGE],
+        'no-route page' => [Mage_Cms_Helper_Page::XML_PATH_NO_ROUTE_PAGE],
+        'no-cookies page' => [Mage_Cms_Helper_Page::XML_PATH_NO_COOKIES_PAGE],
+    ]);
+
+    it('saves a page that no setting uses as disabled', function (): void {
+        $page = Mage::getService('cms/page')->save(Mage::getModel('cms/page')->setIdentifier(CMS_PARITY_PREFIX . 'unused')
+            ->setTitle('Parity')->setStores([0])->setRootTemplate('one_column')->setIsActive());
+
+        $api = cmsParityApiUpdate((int) $page->getId(), ['isActive' => false]);
+
+        expect($api['status'])->toBe(200)
+            ->and(Mage::getModel('cms/page')->load($page->getId())->getIsActive())->toBeFalse();
     });
 });
 
