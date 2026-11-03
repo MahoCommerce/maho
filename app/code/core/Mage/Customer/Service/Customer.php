@@ -9,9 +9,12 @@
 declare(strict_types=1);
 
 use Maho\ApiPlatform\Trait\FilterValueTrait;
+use Maho\Security\RateLimitScope;
+use Mage_Customer_Model_Customer as Customer;
 
 /**
- * Finds, searches and saves customers, and changes and resets their passwords.
+ * Register, create, log in, find, save and delete customers, and change and reset their passwords,
+ * for the storefront, the admin, the API and the CLI.
  */
 class Mage_Customer_Service_Customer
 {
@@ -45,6 +48,26 @@ class Mage_Customer_Service_Customer
     }
 
     public const MAX_PAGE_SIZE = 100;
+
+    public const XML_PATH_REGISTER_RATE_LIMIT = 'system/rate_limit/customer_register';
+    public const XML_PATH_LOGIN_IP_RATE_LIMIT = 'system/rate_limit/auth_token_ip';
+    public const XML_PATH_LOGIN_RATE_LIMIT = 'system/rate_limit/customer_login';
+    public const XML_PATH_FORGOT_PASSWORD_RATE_LIMIT = 'system/rate_limit/forgot_password';
+    public const XML_PATH_CHANGE_PASSWORD_RATE_LIMIT = 'system/rate_limit/change_password';
+    /** Counts only a rejected token: a password reset link, an account confirmation key or a magic login link */
+    public const XML_PATH_TOKEN_RATE_LIMIT = 'system/rate_limit/reset_password';
+
+    public const RATE_LIMIT_WINDOW = 3600;
+    public const LOGIN_RATE_LIMIT_WINDOW = 60;
+
+    /**
+     * @throws Mage_Core_Exception_NoSuchEntity
+     */
+    public function requireById(int $id): Customer
+    {
+        return ($id > 0 ? $this->getById($id) : null)
+            ?? throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('customer')->__('Customer not found'));
+    }
 
     /**
      * Search customers like the admin customer grid, newest first.
@@ -180,17 +203,85 @@ class Mage_Customer_Service_Customer
     }
 
     /**
-     * Save a customer. Another customer of the same website must not use its email.
+     * Register $customer, who signs up on the store $storeId. The transport puts the input into the customer and its
+     * new addresses first, and sets the password and its confirmation. In the passwordless registration mode a
+     * missing password becomes a random one. Send the confirmation link when the store requires a confirmation,
+     * the magic login link in the passwordless mode, and the welcome email otherwise. $backUrl goes into the
+     * confirmation link.
+     *
+     * @throws Mage_Core_Exception_TooManyRequests when the client is over the registration limit
+     * @throws Mage_Core_Exception_Input with one error for each problem of the customer and of its new addresses
+     * @throws Mage_Core_Exception_Conflict when another customer has the email
      */
-    public function save(\Mage_Customer_Model_Customer $customer): \Mage_Customer_Model_Customer
+    public function register(Customer $customer, int $storeId, string $backUrl = ''): Customer
     {
-        $email = $customer->getEmail();
-        if ($email !== null && $customer->dataHasChangedFor('email')) {
-            $existing = $this->getByEmail($email);
-            if ($existing && $existing->getId() !== $customer->getId()) {
-                throw new \Mage_Core_Exception_Conflict('This email is already in use.');
+        $limit = (int) Mage::getStoreConfig(self::XML_PATH_REGISTER_RATE_LIMIT, $storeId);
+        $this->attempt(Mage::helper('core')->rateLimiter('create_customer', $limit, self::RATE_LIMIT_WINDOW, RateLimitScope::Ip));
+
+        $isPasswordless = $customer->getPassword() === '' && $this->isPasswordless();
+        if ($isPasswordless) {
+            $password = Mage::helper('core')->getRandomString(32);
+            $customer->setPassword($password)->setPasswordConfirmation($password);
+        }
+        $this->saveNew($customer, $storeId);
+        Mage::dispatchEvent('customer_register_success', ['customer' => $customer]);
+
+        try {
+            if ($customer->isConfirmationRequired() && $customer->getConfirmation()) {
+                $customer->sendNewAccountEmail('confirmation', $backUrl, $storeId);
+            } elseif ($isPasswordless) {
+                $customer->sendMagicLinkEmail();
+            } else {
+                $customer->sendNewAccountEmail('registered', '', $storeId);
+            }
+        } catch (Exception $e) {
+            Mage::logException($e);
+        }
+        return $customer;
+    }
+
+    /**
+     * Create $customer for an admin, the CLI or an API integration, on the store $storeId. The account needs no
+     * confirmation. When the transport sets no password, the customer gets a random one and sets their own with
+     * a password reset. With $welcomeEmailStoreId, send the welcome email from that store.
+     *
+     * @throws Mage_Core_Exception_Input with one error for each problem of the customer and of its new addresses
+     * @throws Mage_Core_Exception_Conflict when another customer has the email
+     */
+    public function create(Customer $customer, int $storeId, ?int $welcomeEmailStoreId = null): Customer
+    {
+        if ($customer->getPassword() === '') {
+            $password = $customer->generatePassword(16);
+            $customer->setPassword($password)->setPasswordConfirmation($password);
+        }
+        $customer->setForceConfirmed(true);
+        $this->saveNew($customer, $storeId);
+
+        if ($welcomeEmailStoreId !== null) {
+            try {
+                $customer->sendNewAccountEmail('registered', '', $welcomeEmailStoreId);
+            } catch (Exception $e) {
+                Mage::logException($e);
             }
         }
+        return $customer;
+    }
+
+    /**
+     * Save a customer for an admin, the CLI or an API integration. Another customer of the same website must not
+     * use its email: the resource model throws Mage_Core_Exception_Conflict.
+     *
+     * @throws Mage_Core_Exception_Input when the new email is not valid or the customer group does not exist
+     * @throws Mage_Core_Exception_Conflict when another customer has the email
+     */
+    public function save(Customer $customer): Customer
+    {
+        $errors = new Mage_Core_Exception_Input();
+        if ($customer->dataHasChangedFor('email') && !Mage::helper('core')->isValidEmail((string) $customer->getEmail())) {
+            $errors->addError('email', Mage::helper('customer')->__('Invalid email address "%s".', $customer->getEmail()));
+        }
+        $this->checkGroup($customer, $errors);
+        $errors->throwIfErrors();
 
         $customer->save();
 
@@ -198,61 +289,497 @@ class Mage_Customer_Service_Customer
     }
 
     /**
-     * Change customer password
+     * Save the changes that the customer made to their own account. With $currentPassword, check it first, unless
+     * the store registers customers without a password. A new email or a new password, set with its confirmation,
+     * ends the other sessions of the customer and invalidates the password reset link, and the customer gets an
+     * email about the change at the old address.
+     *
+     * @throws Mage_Core_Exception_TooManyRequests when the client or the customer is over the password change limit
+     * @throws Mage_Core_Exception when $currentPassword is wrong
+     * @throws Mage_Core_Exception_Input with one error for each problem of the customer
+     * @throws Mage_Core_Exception_Conflict when another customer has the email
+     */
+    public function updateAccount(
+        Customer $customer,
+        #[\SensitiveParameter]
+        ?string $currentPassword = null,
+    ): Customer {
+        if ($currentPassword !== null && !$this->isPasswordless()) {
+            $this->verifyPassword($customer, $currentPassword);
+        }
+
+        $oldEmail = (string) $customer->getOrigData('email');
+        $isChangeEmail = $oldEmail !== '' && $oldEmail !== (string) $customer->getEmail();
+        $isChangePassword = $customer->getPassword() !== '';
+
+        $errors = new Mage_Core_Exception_Input();
+        $this->addModelErrors($errors, 'customer', $customer->validate());
+        $this->checkGroup($customer, $errors);
+        $errors->throwIfErrors();
+
+        if ($isChangeEmail || $isChangePassword) {
+            $this->invalidateCredentials($customer);
+        }
+        $customer->cleanPasswordsValidationData();
+        $customer->save();
+
+        if ($isChangeEmail || $isChangePassword) {
+            $customer->setOldEmail($oldEmail)
+                ->setIsChangeEmail($isChangeEmail)
+                ->setIsChangePassword($isChangePassword);
+            try {
+                $customer->sendChangedPasswordOrEmail();
+            } catch (Exception $e) {
+                Mage::logException($e);
+            }
+        }
+        return $customer;
+    }
+
+    /**
+     * Change the password of the customer, who gives the current one. $confirmation defaults to $newPassword.
+     *
+     * @throws Mage_Core_Exception_TooManyRequests when the client or the customer is over the password change limit
+     * @throws Mage_Core_Exception when $currentPassword is wrong
+     * @throws Mage_Core_Exception_Input when the new password is not valid
      */
     public function changePassword(
-        \Mage_Customer_Model_Customer $customer,
+        Customer $customer,
+        #[\SensitiveParameter]
         string $currentPassword,
         #[\SensitiveParameter]
         string $newPassword,
+        #[\SensitiveParameter]
+        ?string $confirmation = null,
     ): bool {
-        // Validate current password
-        if (!$customer->validatePassword($currentPassword)) {
-            throw new \Mage_Core_Exception('Current password is incorrect.');
-        }
-
-        $customer->setPassword($newPassword);
+        $this->verifyPassword($customer, $currentPassword);
+        $this->applyPassword($customer, $newPassword, $confirmation);
         $customer->save();
 
+        $customer->setOldEmail($customer->getEmail())->setIsChangePassword(true);
+        try {
+            $customer->sendChangedPasswordOrEmail();
+        } catch (Exception $e) {
+            Mage::logException($e);
+        }
         return true;
     }
 
     /**
-     * Reset password using token
+     * Set the password that an admin or the CLI chose for $customer. The other sessions of the customer end.
+     *
+     * @throws Mage_Core_Exception_Input when the password is not valid
      */
-    public function resetPassword(#[\SensitiveParameter]
-        string $email, #[\SensitiveParameter]
-        string $token, #[\SensitiveParameter]
-        string $newPassword): bool
+    public function setPassword(
+        Customer $customer,
+        #[\SensitiveParameter]
+        string $password,
+    ): Customer {
+        $this->applyPassword($customer, $password, null);
+        $customer->save();
+        return $customer;
+    }
+
+    /**
+     * Delete $customer. Its addresses, its newsletter subscription and its other data go with it.
+     */
+    public function delete(Customer $customer): void
     {
-        $customer = $this->getByEmail($email);
+        $customer->delete();
+    }
 
-        if (!$customer) {
-            throw new \Mage_Core_Exception('Invalid or expired reset token.');
+    /**
+     * Check the email and the password of a customer of the website $websiteId, with the 2FA code when the customer
+     * uses 2FA. A wrong password, an unknown email and a wrong 2FA code throw the Mage_Core_Exception of
+     * Mage_Customer_Model_Customer::authenticate(), with its code.
+     *
+     * @throws Mage_Core_Exception_TooManyRequests when the client or the email is over the login limit
+     * @throws Mage_Core_Exception_Forbidden when the account is not confirmed, with the code EXCEPTION_EMAIL_NOT_CONFIRMED
+     * @throws Mage_Core_Exception
+     */
+    public function authenticate(
+        #[\SensitiveParameter]
+        string $email,
+        #[\SensitiveParameter]
+        string $password,
+        int $websiteId,
+        #[\SensitiveParameter]
+        ?string $twofaCode = null,
+    ): Customer {
+        $core = Mage::helper('core');
+        // The limit of the client comes first: a client that tries many addresses gets past the limit of one address
+        $ipLimit = (int) Mage::getStoreConfig(self::XML_PATH_LOGIN_IP_RATE_LIMIT);
+        $this->attempt($core->rateLimiter('customer_login', $ipLimit, self::LOGIN_RATE_LIMIT_WINDOW, RateLimitScope::Ip), self::LOGIN_RATE_LIMIT_WINDOW);
+        $limit = (int) Mage::getStoreConfig(self::XML_PATH_LOGIN_RATE_LIMIT);
+        $this->attempt($core->rateLimiterBy('customer_login', 'customer_login:email:' . strtolower($email), $limit, self::LOGIN_RATE_LIMIT_WINDOW), self::LOGIN_RATE_LIMIT_WINDOW);
+
+        $customer = Mage::getModel('customer/customer')->setWebsiteId($websiteId);
+        try {
+            $customer->authenticate($email, $password, $twofaCode);
+        } catch (Mage_Core_Exception $e) {
+            if ($e->getCode() === Customer::EXCEPTION_EMAIL_NOT_CONFIRMED) {
+                throw new Mage_Core_Exception_Forbidden(
+                    Mage::helper('customer')->__('This account is not confirmed. Please check your email for the confirmation link.'),
+                    $e->getCode(),
+                    $e,
+                );
+            }
+            throw $e;
+        }
+        return $customer;
+    }
+
+    /**
+     * Email a password reset link to the customer of the website $websiteId that has $email. Throw nothing when
+     * no customer has the email, or when the email fails, so that the answer does not show which addresses have
+     * an account.
+     *
+     * @throws Mage_Core_Exception_Input when the email is empty or not valid
+     * @throws Mage_Core_Exception_TooManyRequests when the client or the email is over its limit
+     */
+    public function sendPasswordResetLink(
+        #[\SensitiveParameter]
+        string $email,
+        int $websiteId,
+    ): void {
+        $helper = Mage::helper('customer');
+        $core = Mage::helper('core');
+        if (!$core->isValidNotBlank($email)) {
+            throw new Mage_Core_Exception_Input()->addError('email', $helper->__('Please enter your email.'));
+        }
+        if (!$core->isValidEmail($email)) {
+            throw new Mage_Core_Exception_Input()->addError('email', $helper->__('Invalid email address.'));
         }
 
-        // Validate reset token (use hash_equals to prevent timing attacks)
-        $storedToken = $customer->getRpToken();
-        if (!$storedToken || !hash_equals($storedToken, $token)) {
-            throw new \Mage_Core_Exception('Invalid or expired reset token.');
+        // The limit of the client comes first: a client that sends many addresses gets past the limit of one address
+        $limit = (int) Mage::getStoreConfig(self::XML_PATH_FORGOT_PASSWORD_RATE_LIMIT);
+        $this->attempt($core->rateLimiter('forgot_password', $limit, self::RATE_LIMIT_WINDOW, RateLimitScope::Ip));
+        $this->attempt($core->rateLimiterBy('forgot_password', 'forgot_password:email:' . strtolower($email), $limit, self::RATE_LIMIT_WINDOW));
+
+        $flow = Mage::getModel('customer/flowpassword');
+        $flow->setEmail($email)->save();
+        if (!$flow->checkCustomerForgotPasswordFlowEmail($email)) {
+            throw new Mage_Core_Exception_TooManyRequests($helper->__('You have exceeded requests to times per 24 hours from 1 e-mail.'));
+        }
+        if (!$flow->checkCustomerForgotPasswordFlowIp()) {
+            throw new Mage_Core_Exception_TooManyRequests($helper->__('You have exceeded requests to times per hour from 1 IP.'), self::RATE_LIMIT_WINDOW);
         }
 
-        if ($customer->isResetPasswordLinkTokenExpired()) {
-            // Use the same message as an invalid token so the response does not
-            // confirm to a caller that a supplied token was correct-but-expired.
-            throw new \Mage_Core_Exception('Invalid or expired reset token.');
+        $customer = Mage::getModel('customer/customer')->setWebsiteId($websiteId)->loadByEmail($email);
+        if ($customer->getId()) {
+            try {
+                $customer->sendPasswordResetLinkEmail();
+            } catch (Exception $e) {
+                Mage::logException($e);
+            }
+        }
+    }
+
+    /**
+     * Return the customer $customerId when $token is its password reset link and the link has not expired.
+     *
+     * @throws Mage_Core_Exception_TooManyRequests when the client is over the limit of rejected tokens
+     * @throws Mage_Core_Exception when the link is not valid
+     */
+    public function getByResetToken(
+        int $customerId,
+        #[\SensitiveParameter]
+        string $token,
+    ): Customer {
+        return $this->checkToken(function () use ($customerId, $token): Customer {
+            $customer = $customerId > 0 ? $this->getById($customerId) : null;
+            if ($customer === null || !$this->isResetTokenValid($customer, $token)) {
+                throw new Mage_Core_Exception(Mage::helper('customer')->__('Your password reset link has expired.'));
+            }
+            return $customer;
+        });
+    }
+
+    /**
+     * Set the new password of the customer $customerId, who follows the password reset link $token.
+     * $confirmation defaults to $newPassword.
+     *
+     * @throws Mage_Core_Exception_TooManyRequests when the client is over the limit of rejected tokens
+     * @throws Mage_Core_Exception when the link is not valid
+     * @throws Mage_Core_Exception_Input when the new password is not valid
+     */
+    public function resetPasswordById(
+        int $customerId,
+        #[\SensitiveParameter]
+        string $token,
+        #[\SensitiveParameter]
+        string $newPassword,
+        #[\SensitiveParameter]
+        ?string $confirmation = null,
+    ): Customer {
+        $customer = $this->getByResetToken($customerId, $token);
+        $this->completeReset($customer, $newPassword, $confirmation);
+        return $customer;
+    }
+
+    /**
+     * Set the new password of the customer of the current website that has $email, who gives the token of the
+     * password reset link. A wrong email, a wrong token and an expired token get the same error.
+     *
+     * @throws Mage_Core_Exception_TooManyRequests when the client is over the limit of rejected tokens
+     * @throws Mage_Core_Exception when the token is not valid
+     * @throws Mage_Core_Exception_Input when the new password is not valid
+     */
+    public function resetPassword(
+        #[\SensitiveParameter]
+        string $email,
+        #[\SensitiveParameter]
+        string $token,
+        #[\SensitiveParameter]
+        string $newPassword,
+    ): bool {
+        $customer = $this->checkToken(function () use ($email, $token): Customer {
+            $customer = $this->getByEmail($email);
+            if ($customer === null || !$this->isResetTokenValid($customer, $token)) {
+                throw new Mage_Core_Exception(Mage::helper('customer')->__('Invalid or expired reset token.'));
+            }
+            return $customer;
+        });
+        $this->completeReset($customer, $newPassword, null);
+        return true;
+    }
+
+    /**
+     * Confirm the account $customerId with the key of the confirmation link. Return the customer, with
+     * getIsJustConfirmed() true when the account was waiting for this confirmation.
+     *
+     * @throws Mage_Core_Exception_TooManyRequests when the client is over the limit of rejected tokens
+     * @throws Mage_Core_Exception when the account or the key is wrong
+     */
+    public function confirm(
+        int $customerId,
+        #[\SensitiveParameter]
+        string $key,
+    ): Customer {
+        $helper = Mage::helper('customer');
+        $customer = $this->checkToken(function () use ($customerId, $key, $helper): Customer {
+            $customer = $customerId > 0 ? $this->getById($customerId) : null;
+            if ($customer === null) {
+                throw new Mage_Core_Exception($helper->__('Wrong customer account specified.'));
+            }
+            if ($customer->getConfirmation() && !hash_equals((string) $customer->getConfirmation(), $key)) {
+                throw new Mage_Core_Exception($helper->__('Wrong confirmation key.'));
+            }
+            return $customer;
+        });
+
+        if ($customer->getConfirmation()) {
+            $customer->setConfirmation(null)->save();
+            $customer->setIsJustConfirmed(true);
+        }
+        return $customer;
+    }
+
+    /**
+     * Return the customer of the magic login link $token, and invalidate the link.
+     *
+     * @throws Mage_Core_Exception_TooManyRequests when the client is over the limit of rejected tokens
+     * @throws Mage_Core_Exception when the link is not valid or the account is not active
+     */
+    public function getByMagicLinkToken(
+        #[\SensitiveParameter]
+        string $token,
+    ): Customer {
+        $helper = Mage::helper('customer');
+        $customer = $this->checkToken(function () use ($token, $helper): Customer {
+            /** @var Customer $customer */
+            $customer = Mage::getModel('customer/customer')->getCollection()
+                ->addAttributeToSelect('*')
+                ->addFieldToFilter('rp_token', $token)
+                ->getFirstItem();
+            if (!$customer->getId()) {
+                throw new Mage_Core_Exception($helper->__('Invalid or expired login link.'));
+            }
+            if (!$customer->validateMagicLinkToken($token) || $customer->isMagicLinkTokenExpired()) {
+                throw new Mage_Core_Exception($helper->__('Your login link has expired. Please request a new one.'));
+            }
+            return $customer;
+        });
+
+        if (!$customer->getIsActive()) {
+            throw new Mage_Core_Exception($helper->__('This account is not active.'));
+        }
+        $customer->clearMagicLinkToken()->save();
+        return $customer;
+    }
+
+    protected function isPasswordless(): bool
+    {
+        return Mage::helper('customer')->getMagicLinkRegistrationMode() === Mage_Customer_Model_Config_Registrationmode::MODE_NO_PASSWORD;
+    }
+
+    /**
+     * Check a new customer and its new addresses, then save them.
+     *
+     * @throws Mage_Core_Exception_Input
+     * @throws Mage_Core_Exception_Conflict
+     */
+    private function saveNew(Customer $customer, int $storeId): void
+    {
+        $store = Mage::app()->getStore($storeId);
+        if (!$customer->getWebsiteId()) {
+            $customer->setWebsiteId((int) $store->getWebsiteId());
+        }
+        if ($customer->getStoreId() === null) {
+            $customer->setStoreId($storeId);
+        }
+        if ($customer->getPasswordConfirmation() === null) {
+            $customer->setPasswordConfirmation($customer->getPassword());
         }
 
-        // The API takes the new password once, so it is its own confirmation
-        $customer->setPassword($newPassword);
-        $customer->setPasswordConfirmation($newPassword);
-        $errors = $customer->validateResetPassword();
-        if (is_array($errors)) {
-            throw new \Mage_Core_Exception(implode(' ', $errors));
+        $errors = new Mage_Core_Exception_Input();
+        $this->addModelErrors($errors, 'customer', $customer->validate());
+        $this->checkGroup($customer, $errors);
+        foreach ($customer->getAddresses() as $address) {
+            $this->addModelErrors($errors, 'address', $address->validate());
         }
+        $errors->throwIfErrors();
+
+        $customer->setPasswordCreatedAt(time());
+        $customer->cleanPasswordsValidationData();
+        $customer->save();
+    }
+
+    /**
+     * @throws Mage_Core_Exception_TooManyRequests
+     * @throws Mage_Core_Exception
+     */
+    private function verifyPassword(
+        Customer $customer,
+        #[\SensitiveParameter]
+        string $password,
+    ): void {
+        $core = Mage::helper('core');
+        $limit = (int) Mage::getStoreConfig(self::XML_PATH_CHANGE_PASSWORD_RATE_LIMIT);
+        $this->attempt($core->rateLimiter('change_password', $limit, self::RATE_LIMIT_WINDOW, RateLimitScope::Ip));
+        $this->attempt($core->rateLimiterBy('change_password', 'change_password:customer:' . $customer->getId(), $limit, self::RATE_LIMIT_WINDOW));
+
+        if (!$customer->validatePassword($password)) {
+            throw new Mage_Core_Exception(Mage::helper('customer')->__('Current password is incorrect.'));
+        }
+    }
+
+    /**
+     * @throws Mage_Core_Exception_Input
+     */
+    private function applyPassword(
+        Customer $customer,
+        #[\SensitiveParameter]
+        string $password,
+        #[\SensitiveParameter]
+        ?string $confirmation,
+    ): void {
+        $customer->setPassword($password)->setPasswordConfirmation($confirmation ?? $password);
+        $errors = new Mage_Core_Exception_Input();
+        $this->addModelErrors($errors, 'password', $customer->validateResetPassword());
+        $errors->throwIfErrors();
+
+        $this->invalidateCredentials($customer);
+        $customer->cleanPasswordsValidationData();
+    }
+
+    /**
+     * @throws Mage_Core_Exception_Input
+     */
+    private function completeReset(
+        Customer $customer,
+        #[\SensitiveParameter]
+        string $password,
+        #[\SensitiveParameter]
+        ?string $confirmation,
+    ): void {
+        $customer->setPassword($password)->setPasswordConfirmation($confirmation ?? $password);
+        $errors = new Mage_Core_Exception_Input();
+        $this->addModelErrors($errors, 'password', $customer->validateResetPassword());
+        $errors->throwIfErrors();
 
         $customer->completePasswordReset()->save();
+    }
 
-        return true;
+    /**
+     * End the other sessions of the customer and invalidate the password reset link.
+     */
+    private function invalidateCredentials(Customer $customer): void
+    {
+        $customer->setRpToken(null)
+            ->setRpTokenCreatedAt(null)
+            ->setRpCustomerId(null)
+            ->setPasswordCreatedAt(time());
+    }
+
+    private function isResetTokenValid(
+        Customer $customer,
+        #[\SensitiveParameter]
+        string $token,
+    ): bool {
+        $stored = $customer->getRpToken();
+        return $token !== '' && $stored !== null && hash_equals($stored, $token) && !$customer->isResetPasswordLinkTokenExpired();
+    }
+
+    /**
+     * Run $check, which throws a Mage_Core_Exception for a rejected token. Count each rejected token against the
+     * client, so that a valid link never counts.
+     *
+     * @template T
+     * @param callable(): T $check
+     * @return T
+     * @throws Mage_Core_Exception_TooManyRequests
+     * @throws Mage_Core_Exception
+     */
+    private function checkToken(callable $check): mixed
+    {
+        $limiter = Mage::helper('core')->rateLimiter(
+            'customer_token',
+            (int) Mage::getStoreConfig(self::XML_PATH_TOKEN_RATE_LIMIT),
+            self::RATE_LIMIT_WINDOW,
+        );
+        if ($limiter->tooManyAttempts()) {
+            throw new Mage_Core_Exception_TooManyRequests(Mage::helper('customer')->__('Too many attempts. Please try again later.'), self::RATE_LIMIT_WINDOW);
+        }
+        try {
+            return $check();
+        } catch (Mage_Core_Exception $e) {
+            $limiter->hit();
+            throw $e;
+        }
+    }
+
+    private function checkGroup(Customer $customer, Mage_Core_Exception_Input $errors): void
+    {
+        if ($customer->getId() && !$customer->dataHasChangedFor('group_id')) {
+            return;
+        }
+        $groupId = (int) $customer->getGroupId();
+        $groups = Mage::getResourceModel('customer/group_collection')->setRealGroupsFilter()->toOptionHash();
+        if (!array_key_exists($groupId, $groups)) {
+            $errors->addError('group_id', Mage::helper('customer')->__('Customer group not found with ID: %s', $groupId));
+        }
+    }
+
+    /**
+     * @param array<string>|bool $result the result of validate() of a model
+     */
+    private function addModelErrors(Mage_Core_Exception_Input $errors, string $field, array|bool $result): void
+    {
+        if (is_array($result)) {
+            foreach (array_values(array_unique($result)) as $message) {
+                $errors->addError($field, (string) $message);
+            }
+        }
+    }
+
+    /**
+     * @throws Mage_Core_Exception_TooManyRequests
+     */
+    private function attempt(\Maho\Security\RateLimiter $limiter, int $window = self::RATE_LIMIT_WINDOW): void
+    {
+        if (!$limiter->attempt()) {
+            throw new Mage_Core_Exception_TooManyRequests(Mage::helper('customer')->__('Too many requests. Please try again later.'), $window);
+        }
     }
 }

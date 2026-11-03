@@ -160,8 +160,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
         $customer = Mage::registry('current_customer');
         if ($customer->getId()) {
             try {
-                $customer->load($customer->getId());
-                $customer->delete();
+                $this->getService()->delete($customer);
                 Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('adminhtml')->__('The customer has been deleted.'));
             } catch (Exception $e) {
                 Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
@@ -312,16 +311,10 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
 
             $isNewCustomer = $customer->isObjectNew();
             try {
-                $sendPassToEmail = false;
-                // Force new customer confirmation
+                // An empty password makes the service pick a random one
+                $sendPassToEmail = $isNewCustomer && trim((string) ($data['account']['password'] ?? '')) === 'auto';
                 if ($isNewCustomer) {
-                    $customer->setPassword($data['account']['password']);
-                    $customer->setPasswordCreatedAt(time());
-                    $customer->setForceConfirmed();
-                    if ($customer->getPassword() === 'auto') {
-                        $sendPassToEmail = true;
-                        $customer->setPassword($customer->generatePassword());
-                    }
+                    $customer->setPassword($sendPassToEmail ? '' : (string) ($data['account']['password'] ?? ''));
                 }
 
                 Mage::dispatchEvent('adminhtml_customer_prepare_save', [
@@ -329,32 +322,24 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
                     'request'   => $this->getRequest(),
                 ]);
 
-                $customer->save();
-
-                // Send welcome email
-                if ($customer->getWebsiteId() && (isset($data['account']['sendemail']) && !$sendPassToEmail)) {
-                    $storeId = $customer->getSendemailStoreId();
-                    if ($isNewCustomer) {
-                        $customer->sendNewAccountEmail('registered', '', $storeId);
-                    } elseif ((!$customer->getConfirmation())) {
+                $sendWelcomeEmail = $customer->getWebsiteId() && isset($data['account']['sendemail']) && !$sendPassToEmail;
+                $emailStoreId = (int) $customer->getSendemailStoreId();
+                if ($isNewCustomer) {
+                    $this->getService()->create($customer, Mage_Core_Model_App::ADMIN_STORE_ID, $sendWelcomeEmail ? $emailStoreId : null);
+                } else {
+                    $this->getService()->save($customer);
+                    if ($sendWelcomeEmail && !$customer->getConfirmation()) {
                         // Confirm not confirmed customer
-                        $customer->sendNewAccountEmail('confirmed', '', $storeId);
+                        $customer->sendNewAccountEmail('confirmed', '', $emailStoreId);
                     }
                 }
 
-                if (!empty($data['account']['new_password'])) {
-                    $newPassword = trim($data['account']['new_password']);
-                    if ($newPassword === 'auto') {
-                        $customer->sendPasswordLinkEmail($isNewCustomer);
-                    } else {
-                        $minPasswordLength = Mage::getModel('customer/customer')->getMinPasswordLength();
-                        if (Mage::helper('core/string')->strlen($newPassword) < $minPasswordLength) {
-                            Mage::throwException(Mage::helper('customer')
-                                ->__('The minimum password length is %s', $minPasswordLength));
-                        }
-                        $customer->changePassword($newPassword);
-                        $customer->sendPasswordReminderEmail();
-                    }
+                $newPassword = trim((string) ($data['account']['new_password'] ?? ''));
+                if ($newPassword === 'auto') {
+                    $customer->sendPasswordLinkEmail($isNewCustomer);
+                } elseif ($newPassword !== '') {
+                    $this->getService()->setPassword($customer, $newPassword);
+                    $customer->sendPasswordReminderEmail();
                 } elseif ($sendPassToEmail) {
                     $customer->sendPasswordLinkEmail($isNewCustomer);
                 }
@@ -374,6 +359,13 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
                     ]);
                     return;
                 }
+            } catch (Mage_Core_Exception_Input $e) {
+                foreach ($e->getErrors() as $error) {
+                    $this->_getSession()->addError($error['message']);
+                }
+                $this->_getSession()->setCustomerData($data);
+                $this->getResponse()->setRedirect($this->getUrl('*/customer/edit', ['id' => $customer->getId()]));
+                return;
             } catch (Mage_Core_Exception $e) {
                 $this->_getSession()->addError($e->getMessage());
                 $this->_getSession()->setCustomerData($data);
@@ -671,9 +663,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
         } else {
             try {
                 foreach ($customersIds as $customerId) {
-                    $customer = Mage::getModel('customer/customer')->load($customerId);
-                    $customer->setIsSubscribed();
-                    $customer->save();
+                    $this->getService()->save($this->getService()->requireById((int) $customerId)->setIsSubscribed(true));
                 }
                 Mage::getSingleton('adminhtml/session')->addSuccess(
                     Mage::helper('adminhtml')->__('Total of %d record(s) were updated.', count($customersIds)),
@@ -694,9 +684,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
         } else {
             try {
                 foreach ($customersIds as $customerId) {
-                    $customer = Mage::getModel('customer/customer')->load($customerId);
-                    $customer->setIsSubscribed(false);
-                    $customer->save();
+                    $this->getService()->save($this->getService()->requireById((int) $customerId)->setIsSubscribed(false));
                 }
                 Mage::getSingleton('adminhtml/session')->addSuccess(
                     Mage::helper('adminhtml')->__('Total of %d record(s) were updated.', count($customersIds)),
@@ -717,11 +705,8 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
             Mage::getSingleton('adminhtml/session')->addError(Mage::helper('adminhtml')->__('Please select customer(s).'));
         } else {
             try {
-                $customer = Mage::getModel('customer/customer');
                 foreach ($customersIds as $customerId) {
-                    $customer->reset()
-                        ->load($customerId)
-                        ->delete();
+                    $this->getService()->delete($this->getService()->requireById((int) $customerId));
                 }
                 Mage::getSingleton('adminhtml/session')->addSuccess(
                     Mage::helper('adminhtml')->__('Total of %d record(s) were deleted.', count($customersIds)),
@@ -743,9 +728,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
         } else {
             try {
                 foreach ($customersIds as $customerId) {
-                    $customer = Mage::getModel('customer/customer')->load($customerId);
-                    $customer->setGroupId($this->getRequest()->getParam('group'));
-                    $customer->save();
+                    $this->getService()->save($this->getService()->requireById((int) $customerId)->setGroupId((int) $this->getRequest()->getParam('group')));
                 }
                 Mage::getSingleton('adminhtml/session')->addSuccess(
                     Mage::helper('adminhtml')->__('Total of %d record(s) were updated.', count($customersIds)),
@@ -825,5 +808,10 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
     {
         $data['account'] = $this->_filterDates($data['account'], ['dob']);
         return $data;
+    }
+
+    protected function getService(): Mage_Customer_Service_Customer
+    {
+        return Mage::getService('customer/customer');
     }
 }

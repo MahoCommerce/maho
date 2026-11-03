@@ -68,9 +68,8 @@ class Mage_Customer_Model_Resource_Customer extends Mage_Eav_Model_Entity_Abstra
 
         $result = $adapter->fetchOne($select, $bind);
         if ($result) {
-            throw Mage::exception(
-                'Mage_Customer',
-                Mage::helper('customer')->__('This customer email already exists'),
+            throw new Mage_Core_Exception_Conflict(
+                Mage::helper('customer')->__('This email is already in use.'),
                 Mage_Customer_Model_Customer::EXCEPTION_EMAIL_EXISTS,
             );
         }

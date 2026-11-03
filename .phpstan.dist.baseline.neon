@@ -8911,12 +8911,6 @@ parameters:
 			path: app/code/core/Mage/Customer/controllers/AccountController.php
 
 		-
-			rawMessage: 'Method Mage_Customer_AccountController::_dispatchRegisterSuccess() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Customer/controllers/AccountController.php
-
-		-
 			rawMessage: 'Method Mage_Customer_AccountController::_loginPostRedirect() has no return type specified.'
 			identifier: missingType.return
 			count: 1
