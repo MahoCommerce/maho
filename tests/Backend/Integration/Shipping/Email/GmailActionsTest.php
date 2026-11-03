@@ -53,8 +53,8 @@ describe('Gmail actions', function () {
 
         expect($payload['@type'])->toBe('EmailMessage');
         expect($payload['potentialAction']['@type'])->toBe('ViewAction');
-        expect($payload['potentialAction']['target'])->toContain('shipping/tracking/popup');
-        expect($payload['potentialAction']['target'])->toContain(urlencode($hash));
+        expect($payload['potentialAction']['url'])->toContain('shipping/tracking/popup');
+        expect($payload['potentialAction']['url'])->toContain(urlencode($hash));
         expect($payload['description'])->toContain('1Z999AA10123456784');
     });
 
@@ -72,7 +72,7 @@ describe('Gmail actions', function () {
         $payload = ($this->payload)($this->actions->getMarkup($this->variables));
 
         expect($payload['potentialAction']['@type'])->toBe('ViewAction');
-        expect($payload['potentialAction']['target'])
+        expect($payload['potentialAction']['url'])
             ->toBe('https://www.ups.com/track?tracknum=1Z999AA10123456784');
     });
 
@@ -89,7 +89,7 @@ describe('Gmail actions', function () {
 
         $payload = ($this->payload)($this->actions->getMarkup($this->variables));
 
-        expect($payload['potentialAction']['target'])->toContain('shipping/tracking/popup');
+        expect($payload['potentialAction']['url'])->toContain('shipping/tracking/popup');
     });
 
     it('puts the markup before the closing head tag, and only once', function () {
@@ -120,7 +120,7 @@ describe('Gmail actions', function () {
 
         $payload = ($this->payload)($this->actions->getMarkup($this->variables));
 
-        expect($payload['potentialAction']['target'])->toBe('https://www.ups.com/track?tracknum=222');
+        expect($payload['potentialAction']['url'])->toBe('https://www.ups.com/track?tracknum=222');
         expect($payload['description'])->toContain('111, 222');
     });
 

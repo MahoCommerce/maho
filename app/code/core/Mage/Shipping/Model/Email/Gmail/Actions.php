@@ -94,7 +94,7 @@ class Mage_Shipping_Model_Email_Gmail_Actions
             'potentialAction' => [
                 '@type' => 'ViewAction',
                 'name' => $label,
-                'target' => $target,
+                'url' => $target,
             ],
         ];
 
