@@ -46,8 +46,7 @@ class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
     #[Maho\Config\Route('/admin/cache/flushAll')]
     public function flushAllAction(): void
     {
-        Mage::app()->getCache()->flush();
-        Mage::dispatchEvent('adminhtml_cache_flush_all');
+        $this->cacheService()->flush();
         $this->_getSession()->addSuccess(Mage::helper('adminhtml')->__('The cache storage has been flushed.'));
         $this->_redirect('*/*');
     }
@@ -81,21 +80,10 @@ class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
     #[Maho\Config\Route('/admin/cache/massEnable')]
     public function massEnableAction(): void
     {
-        $types = $this->getRequest()->getParam('types');
-        $allTypes = Mage::app()->useCache();
-
-        $updatedTypes = 0;
-        foreach ($types as $code) {
-            if (empty($allTypes[$code])) {
-                $allTypes[$code] = 1;
-                $updatedTypes++;
-            }
-        }
-        if ($updatedTypes > 0) {
-            Mage::app()->saveUseCache($allTypes);
-            $this->_getSession()->addSuccess(Mage::helper('adminhtml')->__('%s cache type(s) enabled.', $updatedTypes));
-        }
-        $this->_redirect('*/*');
+        $this->massAction(
+            fn(array $codes): int => $this->cacheService()->enable($codes),
+            fn(int $count): string => Mage::helper('adminhtml')->__('%s cache type(s) enabled.', $count),
+        );
     }
 
     /**
@@ -104,22 +92,10 @@ class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
     #[Maho\Config\Route('/admin/cache/massDisable')]
     public function massDisableAction(): void
     {
-        $types = $this->getRequest()->getParam('types');
-        $allTypes = Mage::app()->useCache();
-
-        $updatedTypes = 0;
-        foreach ($types as $code) {
-            if (!empty($allTypes[$code])) {
-                $allTypes[$code] = 0;
-                $updatedTypes++;
-            }
-            Mage::app()->getCache()->cleanType($code);
-        }
-        if ($updatedTypes > 0) {
-            Mage::app()->saveUseCache($allTypes);
-            $this->_getSession()->addSuccess(Mage::helper('adminhtml')->__('%s cache type(s) disabled.', $updatedTypes));
-        }
-        $this->_redirect('*/*');
+        $this->massAction(
+            fn(array $codes): int => $this->cacheService()->disable($codes),
+            fn(int $count): string => Mage::helper('adminhtml')->__('%s cache type(s) disabled.', $count),
+        );
     }
 
     /**
@@ -128,19 +104,10 @@ class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
     #[Maho\Config\Route('/admin/cache/massRefresh')]
     public function massRefreshAction(): void
     {
-        $types = $this->getRequest()->getParam('types');
-        $updatedTypes = 0;
-        if (!empty($types)) {
-            foreach ($types as $type) {
-                Mage::app()->getCache()->cleanType($type);
-                Mage::dispatchEvent('adminhtml_cache_refresh_type', ['type' => $type]);
-                $updatedTypes++;
-            }
-        }
-        if ($updatedTypes > 0) {
-            $this->_getSession()->addSuccess(Mage::helper('adminhtml')->__('%s cache type(s) refreshed.', $updatedTypes));
-        }
-        $this->_redirect('*/*');
+        $this->massAction(
+            fn(array $codes): int => $this->cacheService()->refresh($codes),
+            fn(int $count): string => Mage::helper('adminhtml')->__('%s cache type(s) refreshed.', $count),
+        );
     }
 
     /**
@@ -213,8 +180,7 @@ class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
     public function cleanMinifiedFilesAction(): void
     {
         try {
-            Mage::helper('core/minify')->clearCache();
-            Mage::dispatchEvent('clean_minified_cache_after');
+            $this->cacheService()->flushMinified();
             $this->_getSession()->addSuccess(
                 Mage::helper('adminhtml')->__('The minified CSS/JS cache was cleaned.'),
             );
@@ -227,5 +193,30 @@ class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
             );
         }
         $this->_redirect('*/*');
+    }
+
+    /**
+     * Run $action on the cache types of the grid selection, and show the message of $success for the number of changed types.
+     *
+     * @param callable(list<string>): int $action
+     * @param callable(int): string $success
+     */
+    protected function massAction(callable $action, callable $success): void
+    {
+        $codes = $this->getRequest()->getParam('types');
+        try {
+            $count = $action(is_array($codes) ? array_values(array_map(strval(...), $codes)) : []);
+            if ($count > 0) {
+                $this->_getSession()->addSuccess($success($count));
+            }
+        } catch (Mage_Core_Exception $e) {
+            $this->_getSession()->addError($e->getMessage());
+        }
+        $this->_redirect('*/*');
+    }
+
+    protected function cacheService(): Mage_Core_Service_Cache
+    {
+        return Mage::getService('core/cache');
     }
 }

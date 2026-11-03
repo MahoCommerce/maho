@@ -24,8 +24,9 @@ class CacheDisable extends BaseMahoCommand
     {
         $this->initMaho();
 
-        $db = Mage::getSingleton('core/resource')->getConnection('core_write');
-        $db->query('update core_cache_option set value=0');
+        /** @var \Mage_Core_Service_Cache $service */
+        $service = Mage::getService('core/cache');
+        $service->disable(array_keys($service->getTypes()));
 
         $output->writeln('Caches disabled successfully!');
         return Command::SUCCESS;
