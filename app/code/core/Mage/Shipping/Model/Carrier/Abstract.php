@@ -311,6 +311,17 @@ abstract class Mage_Shipping_Model_Carrier_Abstract extends \Maho\DataObject
     }
 
     /**
+     * Return the public tracking page for $number. Return null when the carrier has none.
+     *
+     * Build the URL from configuration only. Do not call the carrier API.
+     * A carrier with a tracking page overrides this method.
+     */
+    public function getTrackingUrl(string $number): ?string
+    {
+        return null;
+    }
+
+    /**
      * Check if carrier has shipping label option available
      *
      * @return bool
