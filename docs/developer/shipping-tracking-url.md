@@ -57,7 +57,9 @@ Each carrier that extends `Mage_Usa_Model_Shipping_Carrier_Abstract` (UPS, FedEx
 </config>
 ```
 
-The core ships defaults for UPS, FedEx and USPS. DHL Express is deliberately left empty: its public portal addresses a product (express, parcel, ecommerce) and the stable layout differs per business unit, so a wrong default would send customers to a page that cannot find the shipment. Set it per store when you know the right URL:
+The core ships defaults for UPS, FedEx and USPS. DHL Express is deliberately left empty: its public portal addresses a product (express, parcel, ecommerce) and the stable layout differs per business unit, so a wrong default would send customers to a page that cannot find the shipment.
+
+Merchants override the default in **System > Configuration > Sales > Shipping Methods > *carrier* > Tracking Page URL**, on the default, website or store scope. An empty value turns the link off, and the tracking number opens the tracking popup again. The same value can be set from the command line:
 
 ```sh
 maho config:set carriers/dhlint/tracking_url 'https://www.dhl.com/global-en/home/tracking.html?tracking-id={{number}}' --scope stores --scope-id 1
