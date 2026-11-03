@@ -81,7 +81,7 @@ class Mage_Shipping_Block_Tracking_Popup extends Mage_Core_Block_Template
      */
     public function getContactUsEnabled()
     {
-        return Mage::getStoreConfigFlag('contacts/contacts/enabled');
+        return Mage::getService('contacts/message')->isEnabled(Mage_Contacts_Model_Channel::Web);
     }
 
     /**

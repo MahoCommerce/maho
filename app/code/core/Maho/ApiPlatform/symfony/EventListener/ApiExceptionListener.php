@@ -283,6 +283,7 @@ class ApiExceptionListener implements EventSubscriberInterface
                 'error' => match ($statusCode) {
                     404 => 'not_found',
                     409 => 'conflict',
+                    429 => 'too_many_requests',
                     default => 'unprocessable_entity',
                 },
                 'message' => $exception->getMessage(),
@@ -302,7 +303,8 @@ class ApiExceptionListener implements EventSubscriberInterface
                 ];
             }
 
-            return new JsonResponse($data, $statusCode);
+            $retryAfter = $exception instanceof \Mage_Core_Exception_TooManyRequests ? $exception->getRetryAfter() : null;
+            return new JsonResponse($data, $statusCode, $retryAfter === null ? [] : ['Retry-After' => (string) $retryAfter]);
         }
 
         // Handle generic exceptions
@@ -336,6 +338,7 @@ class ApiExceptionListener implements EventSubscriberInterface
         return match (true) {
             $exception instanceof \Mage_Core_Exception_NoSuchEntity => 404,
             $exception instanceof \Mage_Core_Exception_Conflict => 409,
+            $exception instanceof \Mage_Core_Exception_TooManyRequests => 429,
             default => 422,
         };
     }

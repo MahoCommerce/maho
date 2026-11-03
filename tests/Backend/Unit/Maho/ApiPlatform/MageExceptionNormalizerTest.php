@@ -22,6 +22,7 @@ describe('MageExceptionNormalizer', function (): void {
     })->with([
         'no such entity' => [new Mage_Core_Exception_NoSuchEntity('Cart not found'), 404],
         'conflict' => [new Mage_Core_Exception_Conflict('Order cannot be held'), 409],
+        'too many requests' => [new Mage_Core_Exception_TooManyRequests('Too many requests. Please try again later.', 3600), 429],
         'other' => [new Mage_Core_Exception('Quantity must be greater than zero'), 422],
     ]);
 

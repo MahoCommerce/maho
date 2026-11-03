@@ -665,6 +665,8 @@ curl -X PUT /api/rest/v2/revocation-requests/1234 \
 
 The `honeypotField` value is **deterministic per install** (derived from the encryption key) and **opaque** to the frontend, render it as a hidden input and don't expose its value, e.g. `<input type="text" name="{honeypotField}" style="display:none" tabindex="-1" autocomplete="off" />`. If a request body arrives with a non-empty value in that field, the API silently treats it as spam (returns success without sending the email). When honeypot is disabled in admin, `honeypotField` is `null` and the frontend can skip it.
 
+`POST /contact` and the storefront contact form use the same rules. A field that is not valid gives a 422, with one entry for each field in `details.errors` (`name`, `email`, `comment`, `captchaToken`). A client or an email address over its limit gets a 429 with a `Retry-After` header. The email limit (`system/rate_limit/contact`) counts the messages of the storefront form and of the API together. A disabled contact API gives a 404.
+
 ---
 
 ### Directory

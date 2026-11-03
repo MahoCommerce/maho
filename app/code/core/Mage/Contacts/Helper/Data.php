@@ -10,7 +10,7 @@
 
 class Mage_Contacts_Helper_Data extends Mage_Core_Helper_Abstract
 {
-    public const XML_PATH_ENABLED   = 'contacts/contacts/enabled';
+    public const XML_PATH_ENABLED   = Mage_Contacts_Service_Message::XML_PATH_ENABLED;
 
     #[\Override]
     protected $_moduleName = 'Mage_Contacts';
@@ -20,7 +20,7 @@ class Mage_Contacts_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function isEnabled()
     {
-        return Mage::getStoreConfigFlag(self::XML_PATH_ENABLED);
+        return Mage::getService('contacts/message')->isEnabled(Mage_Contacts_Model_Channel::Web);
     }
 
     /**

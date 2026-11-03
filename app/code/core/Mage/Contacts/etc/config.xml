@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <!--
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
 SPDX-FileCopyrightText: 2022-2025 The OpenMage Contributors <https://openmage.org>
 SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
 SPDX-License-Identifier: AFL-3.0
@@ -29,6 +30,11 @@ SPDX-License-Identifier: AFL-3.0
         </layout>
     </frontend>
     <global>
+        <services>
+            <contacts>
+                <class>Mage_Contacts_Service</class>
+            </contacts>
+        </services>
         <template>
             <email>
                 <contacts_email_email_template translate="label" module="contacts">
