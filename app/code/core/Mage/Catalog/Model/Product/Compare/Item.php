@@ -97,13 +97,10 @@ class Mage_Catalog_Model_Product_Compare_Item extends Mage_Core_Model_Abstract
 
     /**
      * Set visitor
-     *
-     * @return $this
      */
-    public function addVisitorId(?int $visitorId)
+    public function addVisitorId(?int $visitorId): static
     {
-        $this->setVisitorId($visitorId);
-        return $this;
+        return $this->setVisitorId($visitorId);
     }
 
     /**

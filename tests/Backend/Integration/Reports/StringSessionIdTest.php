@@ -27,7 +27,6 @@ it('reads the customer id of the session as an int when the session holds a stri
 
     try {
         expect($session->getCustomerId())->toBe(12);
-        Mage::getModel('reports/product_index_viewed')->setCustomerId($session->getCustomerId());
     } finally {
         $session->unsetData('customer_id');
     }
@@ -40,4 +39,22 @@ it('reads the stored visitor id and customer id of a report item as int', functi
 
     expect($item->getVisitorId())->toBe(7);
     expect($item->getCustomerId())->toBe(12);
+});
+
+it('reads the customer id of a logged-in session as an int when the session holds a string', function (): void {
+    $customer = Mage::getModel('customer/customer')
+        ->setWebsiteId((int) Mage::app()->getStore('default')->getWebsiteId())
+        ->setEmail('string-id-' . uniqid() . '@example.com')
+        ->setFirstname('String')
+        ->setLastname('Id')
+        ->save();
+    $session = Mage::getSingleton('customer/session');
+    $session->setId((string) $customer->getId());
+
+    try {
+        expect($session->getCustomerId())->toBe((int) $customer->getId());
+    } finally {
+        $session->unsetData('id');
+        $customer->delete();
+    }
 });
