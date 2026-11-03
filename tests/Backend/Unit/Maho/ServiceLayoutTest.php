@@ -84,6 +84,7 @@ it('resolves each moved service through its alias', function (string $alias, str
     expect(Mage::getService($alias))->toBeInstanceOf($class);
 })->with([
     ['checkout/cart', Mage_Checkout_Service_Cart::class],
+    ['contacts/message', Mage_Contacts_Service_Message::class],
     ['customer/customer', Mage_Customer_Service_Customer::class],
     ['sales/order', Mage_Sales_Service_Order::class],
     ['revocation/request', Maho_Revocation_Service_Request::class],
