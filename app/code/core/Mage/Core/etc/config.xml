@@ -148,6 +148,11 @@ SPDX-License-Identifier: AFL-3.0
                 </control_size>
             </tokens>
         </design>
+        <services>
+            <core>
+                <class>Mage_Core_Service</class>
+            </core>
+        </services>
         <models>
             <core>
                 <class>Mage_Core_Model</class>

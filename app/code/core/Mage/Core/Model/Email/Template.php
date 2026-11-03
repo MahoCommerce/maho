@@ -592,22 +592,6 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
         return $optionArray;
     }
 
-    /**
-     * Validate email template code
-     */
-    #[\Override]
-    protected function _beforeSave()
-    {
-        $code = $this->getTemplateCode();
-        if (empty($code)) {
-            Mage::throwException(Mage::helper('core')->__('The template Name must not be empty.'));
-        }
-        if ($this->_getResource()->checkCodeUsage($this)) {
-            Mage::throwException(Mage::helper('core')->__('Duplicate Of Template Name'));
-        }
-        return parent::_beforeSave();
-    }
-
     public function getAddedAt(): ?string
     {
         $value = $this->getData('added_at');
