@@ -162,15 +162,13 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
     }
 
     /**
-     * Files upload processing
+     * Save the image of the upload field "image" in the current folder, in the image type of the configuration.
      */
     #[Maho\Config\Route('/admin/cms_wysiwyg_images/upload')]
     public function uploadAction(): void
     {
         try {
-            $this->_initAction();
-            $targetPath = Mage::helper('cms/wysiwyg_images')->getCurrentPath();
-            $result = $this->getStorage()->uploadFile($targetPath, $this->getRequest()->getParam('type'));
+            $result = $this->mediaService()->upload(Mage::helper('cms/wysiwyg_images')->getCurrentPath(), 'image');
             $this->getResponse()->setBodyJson($result);
         } catch (Exception $e) {
             $this->getResponse()->setBodyJson(['error' => true, 'message' => $e->getMessage()]);

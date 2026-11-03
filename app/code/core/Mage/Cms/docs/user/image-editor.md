@@ -385,6 +385,9 @@ So the extension of the file can change. For example, with WebP, the editor save
 `bag.webp`. In this case, the original `bag.jpg` stays in the folder, and the pages that use
 `bag.jpg` still show the old image. Insert the new file in these pages.
 
+An image that you upload to the media library, in the admin or through the API, gets the same file
+type and quality. For example, with WebP, an upload of `bag.jpg` gives `bag.webp`.
+
 When the editor replaces a file with the same name, the pages that use it show the new image. The
 editor also makes the thumbnails of the media library again. A browser can show the old image from
 its cache for a short time.
