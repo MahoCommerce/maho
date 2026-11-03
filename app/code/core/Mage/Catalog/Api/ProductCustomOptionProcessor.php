@@ -11,26 +11,16 @@ declare(strict_types=1);
 namespace Mage\Catalog\Api;
 
 use ApiPlatform\Metadata\DeleteOperationInterface;
+use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Post;
-use Mage;
 use Mage_Catalog_Model_Product_Option;
 use Maho\ApiPlatform\Trait\ProductLoaderTrait;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
-/**
- */
 final class ProductCustomOptionProcessor extends \Maho\ApiPlatform\Processor
 {
     use ProductLoaderTrait;
-
-    private const SELECT_TYPES = ['drop_down', 'radio', 'checkbox', 'multiple'];
-    private const VALID_TYPES = [
-        'field', 'area', 'drop_down', 'radio', 'checkbox', 'multiple',
-        'file', 'date', 'date_time', 'time',
-    ];
 
     public function __construct(
         Security $security,
@@ -44,285 +34,81 @@ final class ProductCustomOptionProcessor extends \Maho\ApiPlatform\Processor
     {
         $user = $this->requireUser();
         $productId = (int) ($uriVariables['productId'] ?? 0);
+        $product = $this->loadProduct($productId);
+        $this->assertProductWebsitesAllowed($product, $user);
 
-        // Enforce website scope for store-restricted API users on every
-        // sub-resource write/delete (mirrors ProductProcessor's main CRUD check).
-        $this->assertProductWebsitesAllowed($this->loadProduct($productId), $user);
+        /** @var \Mage_Catalog_Service_Product_Option $service */
+        $service = \Mage::getService('catalog/product_option');
+        $isNew = $operation instanceof Post;
+        /** @var Mage_Catalog_Model_Product_Option $option */
+        $option = $isNew ? \Mage::getModel('catalog/product_option') : $service->getById($product, (int) ($uriVariables['id'] ?? 0));
 
         if ($operation instanceof DeleteOperationInterface) {
-            return $this->handleDelete($productId, (int) ($uriVariables['id'] ?? 0));
+            $service->delete($product, $option);
+            return null;
         }
 
-        $request = $context['request'] ?? null;
-        $body = $this->parseRequestBody($request);
+        $this->applyBody($option, $this->parseRequestBody($context['request'] ?? null), $isNew);
+        $option = $service->save($product, $option);
 
-        if ($operation instanceof Post) {
-            return $this->handleCreate($productId, $body);
-        }
-
-        return $this->handleUpdate($productId, (int) ($uriVariables['id'] ?? 0), $body);
+        return $this->provider->provide(new GetCollection(), ['productId' => $productId, 'optionId' => (int) $option->getId()], []);
     }
 
-    private function handleCreate(int $productId, array $body): ProductCustomOption
+    /**
+     * Write the fields of $body into $option. A new option gets the default of each field that $body leaves out.
+     *
+     * @param array<string, mixed> $body
+     */
+    private function applyBody(Mage_Catalog_Model_Product_Option $option, array $body, bool $isNew): void
     {
-        $product = $this->loadProduct($productId);
-        $this->validateOptionData($body);
+        $field = static fn(string $camel, string $snake): mixed => $body[$camel] ?? $body[$snake] ?? null;
 
-        /** @var Mage_Catalog_Model_Product_Option $option */
-        $option = Mage::getModel('catalog/product_option');
-        $option->setProduct($product);
-        $option->setProductId((string) $productId);
-        $option->setStoreId(0);
-        $option->setTitle($body['title']);
-        $option->setType($body['type']);
-        $option->setIsRequire(!empty($body['required']));
-        $option->setSortOrder((int) ($body['sortOrder'] ?? $body['sort_order'] ?? 0));
-
-        if (in_array($body['type'], self::SELECT_TYPES)) {
-            $values = $body['values'] ?? [];
-            if (empty($values)) {
-                throw new UnprocessableEntityHttpException('Select-type options require at least one value');
-            }
-            $cleanValues = $this->prepareValues($values);
-            $option->setData('values', $cleanValues);
-        } else {
-            if (isset($body['price'])) {
-                $price = (float) $body['price'];
-                if ($price < 0) {
-                    throw new UnprocessableEntityHttpException('Price must not be negative');
-                }
-                $option->setPrice($price);
-            }
-            $option->setPriceType($body['priceType'] ?? $body['price_type'] ?? 'fixed');
-            if (isset($body['sku'])) {
-                $option->setSku($body['sku']);
-            }
-            $maxChars = $body['maxCharacters'] ?? $body['max_characters'] ?? null;
-            if ($maxChars !== null) {
-                $option->setMaxCharacters((int) $maxChars);
-            }
-            $fileExt = $body['fileExtensions'] ?? $body['file_extensions'] ?? null;
-            if ($fileExt !== null) {
-                $option->setFileExtension($fileExt);
-            }
-            $imageSizeX = $body['imageSizeX'] ?? $body['image_size_x'] ?? null;
-            if ($imageSizeX !== null) {
-                $option->setImageSizeX((int) $imageSizeX);
-            }
-            $imageSizeY = $body['imageSizeY'] ?? $body['image_size_y'] ?? null;
-            if ($imageSizeY !== null) {
-                $option->setImageSizeY((int) $imageSizeY);
-            }
+        if (isset($body['title']) || $isNew) {
+            $option->setTitle((string) ($body['title'] ?? ''));
         }
-
-        $this->safeSave($option, 'create option');
-
-        $this->syncProductOptionFlags($productId);
-
-        // Reload and return
-        $option = Mage::getModel('catalog/product_option')->load($option->getId());
-        return $this->provider->provide(
-            new \ApiPlatform\Metadata\GetCollection(),
-            ['productId' => $productId, 'optionId' => (int) $option->getId()],
-            [],
-        );
-    }
-
-    private function handleUpdate(int $productId, int $optionId, array $body): ProductCustomOption
-    {
-        $this->loadProduct($productId);
-
-        /** @var Mage_Catalog_Model_Product_Option $option */
-        $option = Mage::getModel('catalog/product_option')->load($optionId);
-
-        if (!$option->getId() || (int) $option->getProductId() !== $productId) {
-            throw new NotFoundHttpException('Option not found');
+        if (isset($body['type']) || $isNew) {
+            $option->setType((string) ($body['type'] ?? ''));
         }
-
-        $resource = Mage::getSingleton('core/resource');
-        $write = $resource->getConnection('core_write');
-
-        // Update main option table fields
-        $optionUpdate = [];
-        if (isset($body['type'])) {
-            if (!in_array($body['type'], self::VALID_TYPES)) {
-                throw new UnprocessableEntityHttpException('Invalid option type: ' . $body['type']);
-            }
-            $optionUpdate['type'] = $body['type'];
+        if (isset($body['required']) || $isNew) {
+            $option->setIsRequire(!empty($body['required']));
         }
-        if (isset($body['required'])) {
-            $optionUpdate['is_require'] = $body['required'] ? 1 : 0;
+        if (($sortOrder = $field('sortOrder', 'sort_order')) !== null || $isNew) {
+            $option->setSortOrder((int) $sortOrder);
         }
-        $sortOrder = $body['sortOrder'] ?? $body['sort_order'] ?? null;
-        if ($sortOrder !== null) {
-            $optionUpdate['sort_order'] = (int) $sortOrder;
+        if (isset($body['price'])) {
+            $option->setData('price', (float) $body['price']);
+        }
+        if (($priceType = $field('priceType', 'price_type')) !== null || $isNew) {
+            $option->setData('price_type', (string) ($priceType ?? 'fixed'));
         }
         if (isset($body['sku'])) {
-            $optionUpdate['sku'] = $body['sku'];
+            $option->setSku((string) $body['sku']);
         }
-        if (isset($body['maxCharacters']) || isset($body['max_characters'])) {
-            $optionUpdate['max_characters'] = (int) ($body['maxCharacters'] ?? $body['max_characters']);
+        if (($maxCharacters = $field('maxCharacters', 'max_characters')) !== null) {
+            $option->setMaxCharacters((int) $maxCharacters);
         }
-        if (isset($body['fileExtensions']) || isset($body['file_extensions'])) {
-            $optionUpdate['file_extension'] = $body['fileExtensions'] ?? $body['file_extensions'];
+        if (($fileExtensions = $field('fileExtensions', 'file_extensions')) !== null) {
+            $option->setFileExtension((string) $fileExtensions);
         }
-        if (isset($body['imageSizeX']) || isset($body['image_size_x'])) {
-            $optionUpdate['image_size_x'] = (int) ($body['imageSizeX'] ?? $body['image_size_x']);
+        if (($imageSizeX = $field('imageSizeX', 'image_size_x')) !== null) {
+            $option->setImageSizeX((int) $imageSizeX);
         }
-        if (isset($body['imageSizeY']) || isset($body['image_size_y'])) {
-            $optionUpdate['image_size_y'] = (int) ($body['imageSizeY'] ?? $body['image_size_y']);
+        if (($imageSizeY = $field('imageSizeY', 'image_size_y')) !== null) {
+            $option->setImageSizeY((int) $imageSizeY);
         }
-
-        if (!empty($optionUpdate)) {
-            $write->update(
-                $resource->getTableName('catalog/product_option'),
-                $optionUpdate,
-                ['option_id = ?' => $optionId],
-            );
-        }
-
-        // Update title via catalog_product_option_title table
-        if (isset($body['title'])) {
-            $titleTable = $resource->getTableName('catalog/product_option_title');
-            $write->insertOnDuplicate($titleTable, [
-                'option_id' => $optionId,
-                'store_id' => 0,
-                'title' => $body['title'],
-            ], ['title']);
-        }
-
-        // Clean up orphan rows when the type category changes (select <-> non-select)
-        $oldType = $option->getType();
-        $type = $body['type'] ?? $oldType;
-        $oldIsSelect = in_array($oldType, self::SELECT_TYPES);
-        $newIsSelect = in_array($type, self::SELECT_TYPES);
-        if ($oldIsSelect && !$newIsSelect) {
-            // Select -> non-select: drop now-orphaned option value rows
-            $write->delete(
-                $resource->getTableName('catalog/product_option_type_value'),
-                ['option_id = ?' => $optionId],
-            );
-        } elseif (!$oldIsSelect && $newIsSelect) {
-            // Non-select -> select: drop the now-orphaned price row
-            $write->delete(
-                $resource->getTableName('catalog/product_option_price'),
-                ['option_id = ?' => $optionId],
-            );
-        }
-
-        // Update price for non-select types
-        if (!in_array($type, self::SELECT_TYPES)) {
-            $priceUpdate = [];
-            if (isset($body['price'])) {
-                $price = (float) $body['price'];
-                if ($price < 0) {
-                    throw new UnprocessableEntityHttpException('Price must not be negative');
-                }
-                $priceUpdate['price'] = $price;
+        if (isset($body['values'])) {
+            $values = [];
+            foreach (array_values((array) $body['values']) as $index => $value) {
+                $value = is_array($value) ? $value : [];
+                $values[] = [
+                    'title' => (string) ($value['title'] ?? ''),
+                    'price' => (float) ($value['price'] ?? 0),
+                    'price_type' => (string) ($value['priceType'] ?? $value['price_type'] ?? 'fixed'),
+                    'sku' => (string) ($value['sku'] ?? ''),
+                    'sort_order' => (int) ($value['sortOrder'] ?? $value['sort_order'] ?? $index),
+                ];
             }
-            $priceType = $body['priceType'] ?? $body['price_type'] ?? null;
-            if ($priceType !== null) {
-                $priceUpdate['price_type'] = $priceType;
-            }
-            if (!empty($priceUpdate)) {
-                $priceTable = $resource->getTableName('catalog/product_option_price');
-                // Only the value columns may be updated on conflict; the
-                // identity columns (option_id, store_id) form the unique key
-                // and must not appear in the ON DUPLICATE/CONFLICT update list.
-                $updateFields = array_keys($priceUpdate);
-                $priceUpdate['option_id'] = $optionId;
-                $priceUpdate['store_id'] = 0;
-                $write->insertOnDuplicate($priceTable, $priceUpdate, $updateFields);
-            }
-        }
-
-        // Update select-type values
-        if (in_array($type, self::SELECT_TYPES) && isset($body['values'])) {
-            // Delete existing values and re-create
-            $typeValueTable = $resource->getTableName('catalog/product_option_type_value');
-            $write->delete($typeValueTable, ['option_id = ?' => $optionId]);
-            // Re-create via model (reload option, set values, save)
-            $option = Mage::getModel('catalog/product_option')->load($optionId);
-            $product = Mage::getModel('catalog/product')->load($productId);
-            $option->setProduct($product);
-            $option->setStoreId(0);
-            $cleanValues = $this->prepareValues($body['values']);
-            $option->setData('values', $cleanValues);
-            $this->safeSave($option, 'update option values');
-        }
-
-        $this->syncProductOptionFlags($productId);
-
-        return $this->provider->provide(
-            new \ApiPlatform\Metadata\GetCollection(),
-            ['productId' => $productId, 'optionId' => $optionId],
-            [],
-        );
-    }
-
-    private function handleDelete(int $productId, int $optionId): null
-    {
-        $this->loadProduct($productId);
-
-        /** @var Mage_Catalog_Model_Product_Option $option */
-        $option = Mage::getModel('catalog/product_option')->load($optionId);
-
-        if (!$option->getId() || (int) $option->getProductId() !== $productId) {
-            throw new NotFoundHttpException('Option not found');
-        }
-
-        $this->safeDelete($option, 'delete option');
-
-        $this->syncProductOptionFlags($productId);
-
-        return null;
-    }
-
-    private function validateOptionData(array $body): void
-    {
-        if (empty($body['title'])) {
-            throw new UnprocessableEntityHttpException('Title is required');
-        }
-        if (empty($body['type'])) {
-            throw new UnprocessableEntityHttpException('Type is required');
-        }
-        if (!in_array($body['type'], self::VALID_TYPES)) {
-            throw new UnprocessableEntityHttpException('Invalid option type: ' . $body['type']);
-        }
-    }
-
-    /**
-     * Prepare option values for save, stripping option_type_id to prevent FK constraint errors.
-     */
-    private function prepareValues(array $values): array
-    {
-        $cleanValues = [];
-        foreach ($values as $i => $value) {
-            if (!is_array($value) || empty($value['title'])) {
-                throw new UnprocessableEntityHttpException("Value at index {$i} must have a title");
-            }
-            $cleanValues[] = [
-                'title' => $value['title'],
-                'price' => (float) ($value['price'] ?? 0),
-                'price_type' => $value['priceType'] ?? $value['price_type'] ?? 'fixed',
-                'sku' => $value['sku'] ?? '',
-                'sort_order' => (int) ($value['sortOrder'] ?? $value['sort_order'] ?? $i),
-            ];
-        }
-        return $cleanValues;
-    }
-
-    /**
-     * Update the product's has_options and required_options flags based on current options.
-     * Must be called after any option create/update/delete.
-     */
-    private function syncProductOptionFlags(int $productId): void
-    {
-        $product = \Mage::getModel('catalog/product')
-            ->setStoreId(\Mage_Core_Model_App::ADMIN_STORE_ID)
-            ->load($productId);
-        if ($product->getId()) {
-            $product->save();
+            $option->setData('values', $values);
         }
     }
 }
