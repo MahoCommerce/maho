@@ -19,6 +19,26 @@ class Maho_Blog_Model_Post_Attribute_Backend_Image extends Mage_Eav_Model_Entity
         return Maho_Blog_Model_Post_Image::ENTITY;
     }
 
+    /**
+     * The image is a path under media/blog, so a path that leaves that folder or names a scheme is refused.
+     *
+     * @throws Mage_Core_Exception_Input
+     */
+    #[\Override]
+    public function beforeSave($object)
+    {
+        $value = $object->getData($this->getAttribute()->getName());
+        if (is_string($value) && $value !== '' && (
+            preg_match('#^(/|[a-z][a-z0-9+.-]*:)#i', str_replace('\\', '/', $value))
+            || in_array('..', explode('/', str_replace('\\', '/', $value)), true)
+        )) {
+            throw new Mage_Core_Exception_Input()->addError('image', Mage::helper('blog')->__(
+                'The image must be a path relative to media/blog, with no leading "/", no ".." segment and no scheme.',
+            ));
+        }
+        return parent::beforeSave($object);
+    }
+
     #[\Override]
     protected function saveValue(\Maho\DataObject $object, string $value): void
     {

@@ -18,6 +18,8 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
     public const STATUS_EXPIRED = 'expired';
     public const STATUS_DISABLED = 'disabled';
 
+    public const STATUSES = [self::STATUS_ACTIVE, self::STATUS_USED, self::STATUS_EXPIRED, self::STATUS_DISABLED];
+
     public const ACTION_CREATED = 'created';
     public const ACTION_USED = 'used';
     public const ACTION_REFUNDED = 'refunded';
@@ -73,6 +75,16 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
         }
 
         $this->setData('updated_at', Mage::app()->getLocale()->formatDateForDb('now'));
+
+        $helper = Mage::helper('giftcard');
+        $errors = new Mage_Core_Exception_Input();
+        if (!in_array($this->getStatus(), self::STATUSES, true)) {
+            $errors->addError('status', $helper->__('Invalid gift card status; allowed: %s', implode(', ', self::STATUSES)));
+        }
+        if ((float) $this->getData('balance') < 0) {
+            $errors->addError('balance', $helper->__('Gift card balance cannot be negative'));
+        }
+        $errors->throwIfErrors();
 
         return parent::_beforeSave();
     }

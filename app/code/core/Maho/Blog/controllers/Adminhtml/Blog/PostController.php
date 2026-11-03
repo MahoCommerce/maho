@@ -36,92 +36,71 @@ class Maho_Blog_Adminhtml_Blog_PostController extends Mage_Adminhtml_Controller_
     {
         $this->_title($this->__('Blog Post'));
 
-        $id = $this->getRequest()->getParam('id');
-        $model = Mage::getModel('blog/post');
-
-        if ($id) {
-            $model->load($id);
-            if (!$model->getId()) {
-                Mage::getSingleton('adminhtml/session')->addError(
-                    Mage::helper('blog')->__('This post no longer exists.'),
-                );
-                $this->_redirect('*/*/');
-                return;
-            }
+        $id = (int) $this->getRequest()->getParam('id');
+        $session = Mage::getSingleton('adminhtml/session');
+        try {
+            $model = $id ? $this->getService()->getById($id) : $this->getService()->newPost();
+        } catch (Mage_Core_Exception_NoSuchEntity $e) {
+            $session->addError($e->getMessage());
+            $this->_redirect('*/*/');
+            return;
         }
 
         $this->_title($model->getId() ? $model->getTitle() : $this->__('New Post'));
 
-        $data = Mage::getSingleton('adminhtml/session')->getFormData(true);
+        $data = $session->getFormData(true);
         if (!empty($data)) {
             $model->setData($data);
         }
 
         Mage::register('blog_post', $model);
 
-        $this->_initAction()
-            ->_addBreadcrumb(
-                $id ? Mage::helper('blog')->__('Edit Post') : Mage::helper('blog')->__('New Post'),
-                $id ? Mage::helper('blog')->__('Edit Post') : Mage::helper('blog')->__('New Post'),
-            )
-            ->renderLayout();
+        $label = $id ? Mage::helper('blog')->__('Edit Post') : Mage::helper('blog')->__('New Post');
+        $this->_initAction()->_addBreadcrumb($label, $label)->renderLayout();
     }
 
     #[Maho\Config\Route('/admin/blog_post/save')]
     public function saveAction(): void
     {
-        if ($data = $this->getRequest()->getPost()) {
-            $model = Mage::getModel('blog/post');
-            $id = $this->getRequest()->getParam('id');
-
-            if ($id) {
-                $model->load($id);
-            }
-
-            try {
-                $model->addData($data)
-                    ->setUpdatedAt(Mage::app()->getLocale()->formatDateForDb('now'))
-                    ->save();
-
-                Mage::getSingleton('adminhtml/session')->addSuccess(
-                    Mage::helper('blog')->__('Post was successfully saved'),
-                );
-                Mage::getSingleton('adminhtml/session')->setFormData(false);
-
-                if ($this->getRequest()->getParam('back')) {
-                    $this->_redirect('*/*/edit', ['id' => $model->getId()]);
-                    return;
-                }
-                $this->_redirect('*/*/');
-                return;
-
-            } catch (Exception $e) {
-                Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
-                Mage::getSingleton('adminhtml/session')->setFormData($data);
-                $this->_redirect('*/*/edit', ['id' => $this->getRequest()->getParam('id')]);
-                return;
-            }
+        $data = $this->getRequest()->getPost();
+        if (!$data) {
+            $this->_redirect('*/*/');
+            return;
         }
-        $this->_redirect('*/*/');
+
+        $session = Mage::getSingleton('adminhtml/session');
+        $id = (int) $this->getRequest()->getParam('id');
+        try {
+            $model = $id ? $this->getService()->getById($id) : $this->getService()->newPost();
+            $this->getService()->save($model->addData($data));
+            $session->addSuccess(Mage::helper('blog')->__('Post was successfully saved'));
+            $session->setFormData(false);
+            $this->getRequest()->getParam('back') ? $this->_redirect('*/*/edit', ['id' => $model->getId()]) : $this->_redirect('*/*/');
+            return;
+        } catch (Mage_Core_Exception_Input $e) {
+            foreach ($e->getErrors() as $error) {
+                $session->addError($error['message']);
+            }
+        } catch (Mage_Core_Exception $e) {
+            $session->addError($e->getMessage());
+        } catch (Throwable $e) {
+            Mage::logException($e);
+            $session->addError(Mage::helper('blog')->__('Unable to save the post.'));
+        }
+        $session->setFormData($data);
+        $this->_redirect('*/*/edit', ['id' => $id]);
     }
 
     #[Maho\Config\Route('/admin/blog_post/delete')]
     public function deleteAction(): void
     {
-        if ($id = $this->getRequest()->getParam('id')) {
-            try {
-                $model = Mage::getModel('blog/post');
-                $model->load($id);
-                $model->delete();
-
-                Mage::getSingleton('adminhtml/session')->addSuccess(
-                    Mage::helper('blog')->__('Post was successfully deleted'),
-                );
-                $this->_redirect('*/*/');
-            } catch (Exception $e) {
-                Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
-                $this->_redirect('*/*/edit', ['id' => $id]);
-            }
+        $id = (int) $this->getRequest()->getParam('id');
+        $session = Mage::getSingleton('adminhtml/session');
+        try {
+            $this->getService()->delete($this->getService()->getById($id));
+            $session->addSuccess(Mage::helper('blog')->__('Post was successfully deleted'));
+        } catch (Mage_Core_Exception $e) {
+            $session->addError($e->getMessage());
         }
         $this->_redirect('*/*/');
     }
@@ -130,24 +109,26 @@ class Maho_Blog_Adminhtml_Blog_PostController extends Mage_Adminhtml_Controller_
     public function massDeleteAction(): void
     {
         $postIds = $this->getRequest()->getParam('post');
+        $session = Mage::getSingleton('adminhtml/session');
         if (!is_array($postIds)) {
-            Mage::getSingleton('adminhtml/session')->addError(
-                Mage::helper('blog')->__('Please select post(s)'),
-            );
-        } else {
-            try {
-                foreach ($postIds as $postId) {
-                    $post = Mage::getModel('blog/post')->load($postId);
-                    $post->delete();
-                }
-                Mage::getSingleton('adminhtml/session')->addSuccess(
-                    Mage::helper('blog')->__('Total of %d post(s) were deleted', count($postIds)),
-                );
-            } catch (Exception $e) {
-                Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
+            $session->addError(Mage::helper('blog')->__('Please select post(s)'));
+            $this->_redirect('*/*/index');
+            return;
+        }
+        try {
+            foreach ($postIds as $postId) {
+                $this->getService()->delete($this->getService()->getById((int) $postId));
             }
+            $session->addSuccess(Mage::helper('blog')->__('Total of %d post(s) were deleted', count($postIds)));
+        } catch (Mage_Core_Exception $e) {
+            $session->addError($e->getMessage());
         }
         $this->_redirect('*/*/index');
+    }
+
+    private function getService(): Maho_Blog_Service_Post
+    {
+        return Mage::getService('blog/post');
     }
 
     #[\Override]

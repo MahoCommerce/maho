@@ -56,32 +56,16 @@ final class BlogPostProvider extends CrudProvider
     #[\Override]
     protected function provideItem(int|string $id): ?Resource
     {
-        $post = \Mage::getModel('blog/post')->load($id);
-
-        if (!$post->getId()) {
+        /** @var \Maho_Blog_Service_Post $service */
+        $service = \Mage::getService('blog/post');
+        try {
+            $post = $this->isBackendReader() ? $service->getById((int) $id) : $service->getVisibleById((int) $id, StoreContext::getStoreId());
+        } catch (\Mage_Core_Exception_NoSuchEntity) {
             return null;
         }
-
         if ($this->isBackendReader()) {
             $this->assertReadableStores($post->getStores(), 'post');
-
-            return $this->toDto($post);
         }
-
-        if (!$post->getIsActive()) {
-            return null;
-        }
-
-        if (!$this->isPublished($post)) {
-            return null;
-        }
-
-        $storeId = StoreContext::getStoreId();
-        $stores = $post->getStores();
-        if (!StoreContext::isAvailableForStore($stores, $storeId)) {
-            return null;
-        }
-
         return $this->toDto($post);
     }
 
@@ -118,38 +102,12 @@ final class BlogPostProvider extends CrudProvider
 
     private function getPostByUrlKey(string $urlKey): ?Resource
     {
-        if ($this->isBackendReader()) {
-            return $this->getPostByUrlKeyBackend($urlKey);
+        if (!$this->isBackendReader()) {
+            $postId = \Mage::getModel('blog/post')->getPostIdByUrlKey($urlKey, StoreContext::getStoreId());
+            return $postId ? $this->provideItem($postId) : null;
         }
 
-        $storeId = StoreContext::getStoreId();
-        $post = \Mage::getModel('blog/post');
-        $postId = $post->getPostIdByUrlKey($urlKey, $storeId);
-
-        if (!$postId) {
-            return null;
-        }
-
-        $post->load($postId);
-
-        if (!$post->getId() || !$post->getIsActive()) {
-            return null;
-        }
-
-        if (!$this->isPublished($post)) {
-            return null;
-        }
-
-        return $this->toDto($post);
-    }
-
-    /**
-     * getPostIdByUrlKey() only matches active, current-store posts; backend
-     * readers resolve across every store and status, then reuse the item path
-     * so the store-restricted-token check applies.
-     */
-    private function getPostByUrlKeyBackend(string $urlKey): ?Resource
-    {
+        // A backend reader finds a post of any store view and status, then the item path checks the stores of the token
         /** @var \Maho_Blog_Model_Resource_Post_Collection $collection */
         $collection = \Mage::getResourceModel('blog/post_collection');
         $collection->addAttributeToFilter('url_key', $urlKey);
@@ -163,33 +121,5 @@ final class BlogPostProvider extends CrudProvider
         $post = $collection->getFirstItem();
 
         return $post->getId() ? $this->provideItem((int) $post->getId()) : null;
-    }
-
-    /**
-     * A future-scheduled post must not be reachable by direct id or urlKey, so
-     * the single-item paths apply the same publish_date cutoff as the collection
-     * (applyCollectionFilters): a null publish_date is always live, otherwise it
-     * must be at or before the cutoff.
-     */
-    private function isPublished(object $post): bool
-    {
-        $publishDate = $post->getPublishDate();
-        if (empty($publishDate)) {
-            return true;
-        }
-
-        return $publishDate <= $this->publishedCutoff();
-    }
-
-    /**
-     * publish_date is a store-local date (Maho_Blog_Model_Resource_Post::_beforeSave
-     * defaults it to today in the store's timezone), so compare it against today in
-     * that same timezone — as the frontend blocks and the sitemap observer do. A UTC
-     * cutoff would hide a post published today from every store ahead of UTC until
-     * UTC caught up.
-     */
-    private function publishedCutoff(): string
-    {
-        return \Mage::app()->getLocale()->utcToStore()->format(\Mage_Core_Model_Locale::DATE_FORMAT);
     }
 }

@@ -12,6 +12,9 @@ class Maho_Blog_Model_Post extends Mage_Core_Model_Abstract
 {
     public const ENTITY = 'blog_post';
 
+    /** Lowercase letters and digits, in groups that one dash separates. */
+    public const URL_KEY_PATTERN = '/^[a-z0-9]+(-[a-z0-9]+)*$/';
+
     #[\Override]
     protected $_eventPrefix = 'blog_post';
     #[\Override]

@@ -69,10 +69,6 @@ const LAYERING_HTTP_EXCEPTION_ALLOWLIST = [
     'app/code/core/Mage/Tax/Api/TaxRateProcessor.php' => 5,
     'app/code/core/Mage/Tax/Api/TaxRuleProcessor.php' => 4,
     'app/code/core/Maho/Ai/Api/Chat/ChatController.php' => 17,
-    'app/code/core/Maho/Blog/Api/BlogCategoryProcessor.php' => 4,
-    'app/code/core/Maho/Blog/Api/BlogPost.php' => 2,
-    'app/code/core/Maho/Blog/Api/BlogPostImageProcessor.php' => 2,
-    'app/code/core/Maho/Giftcard/Api/GiftCardProcessor.php' => 12,
     'app/code/core/Maho/SocialLogin/Api/SocialAuthProcessor.php' => 3,
 ];
 
@@ -92,9 +88,6 @@ const LAYERING_TRANSPORT_GATE_ALLOWLIST = [
     'app/code/core/Maho/ApiPlatform/Api/AuthTokenProcessor.php' => 5,
     'app/code/core/Maho/ApiPlatform/symfony/Controller/OAuthController.php' => 1,
     'app/code/core/Maho/ApiPlatform/symfony/Trait/RateLimitTrait.php' => 2,
-    'app/code/core/Maho/Giftcard/Api/GiftCardProvider.php' => 1,
-    'app/code/core/Maho/Giftcard/controllers/BalanceController.php' => 2,
-    'app/code/core/Maho/Giftcard/controllers/CartController.php' => 1,
 ];
 
 /**

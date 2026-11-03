@@ -24,10 +24,8 @@ use ApiPlatform\Metadata\Put;
 use ApiPlatform\OpenApi\Model\Operation as OpenApiOperation;
 use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Response as OpenApiResponse;
-use Maho\ApiPlatform\CrudProcessor;
 use Maho\ApiPlatform\CrudResource;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 #[ApiResource(
     mahoSection: 'Content',
@@ -48,19 +46,19 @@ use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
         ),
         new Post(
             uriTemplate: '/blog-posts',
-            processor: CrudProcessor::class,
+            processor: BlogPostProcessor::class,
             security: "is_granted('ROLE_ADMIN') or is_granted('blog-posts/write')",
             description: 'Creates a new blog post',
         ),
         new Put(
             uriTemplate: '/blog-posts/{id}',
-            processor: CrudProcessor::class,
+            processor: BlogPostProcessor::class,
             security: "is_granted('ROLE_ADMIN') or is_granted('blog-posts/write')",
             description: 'Updates a blog post',
         ),
         new Delete(
             uriTemplate: '/blog-posts/{id}',
-            processor: CrudProcessor::class,
+            processor: BlogPostProcessor::class,
             security: "is_granted('ROLE_ADMIN') or is_granted('blog-posts/delete')",
             description: 'Deletes a blog post',
         ),
@@ -189,12 +187,7 @@ class BlogPost extends CrudResource
     #[\Override]
     public function applyToModel(object $model, ?array $sentProperties = null): void
     {
-        if ($this->image !== null && $this->image !== '') {
-            self::assertRelativeImagePath($this->image);
-        }
-
-        // Handled below: the generic mapping would write the raw (possibly
-        // {id, position}-shaped) input to the model's category_ids field.
+        // The generic mapping would write the raw input, which can hold {id, position} objects, to category_ids
         $categoryIds = $this->categoryIds;
         $this->categoryIds = null;
         try {
@@ -205,36 +198,8 @@ class BlogPost extends CrudResource
 
         if ($categoryIds !== null) {
             [$ids, $positions] = self::normalizeCategoryInput($categoryIds);
-            self::assertCategoriesExist($ids);
             $model->setData('categories', $ids);
             $model->setData('category_positions', $positions);
-        }
-
-        // On create, apply sensible defaults for fields omitted from the request.
-        // On update these stay untouched, so an enabled or store-restricted post is not reset.
-        if (!$model->getId()) {
-            if ($this->isActive === null) {
-                $model->setData('is_active', 1);
-            }
-            if ($this->stores === null) {
-                $model->setData('stores', [0]);
-            }
-        }
-    }
-
-    /**
-     * The image is a path under media/blog, so a path that leaves that folder or names a scheme is rejected.
-     */
-    private static function assertRelativeImagePath(string $path): void
-    {
-        $normalized = str_replace('\\', '/', $path);
-        if (str_starts_with($normalized, '/')
-            || preg_match('#^[a-z][a-z0-9+.-]*:#i', $normalized)
-            || in_array('..', explode('/', $normalized), true)
-        ) {
-            throw new UnprocessableEntityHttpException(
-                'image must be a path relative to media/blog, with no leading "/", no ".." segment and no scheme',
-            );
         }
     }
 
@@ -264,21 +229,6 @@ class BlogPost extends CrudResource
         }
 
         return [array_values(array_unique($ids)), $positions];
-    }
-
-    /** @param list<int> $ids */
-    private static function assertCategoriesExist(array $ids): void
-    {
-        if ($ids === []) {
-            return;
-        }
-        $existing = array_map(intval(...), \Mage::getResourceModel('blog/category_collection')
-            ->addFieldToFilter('entity_id', ['in' => $ids])
-            ->getAllIds());
-        $missing = array_diff($ids, $existing);
-        if ($missing !== []) {
-            throw new UnprocessableEntityHttpException('Unknown blog category id(s): ' . implode(', ', $missing));
-        }
     }
 
     public static function afterLoad(self $dto, object $model): void
