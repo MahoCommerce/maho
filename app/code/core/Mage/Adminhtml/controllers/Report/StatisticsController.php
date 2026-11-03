@@ -73,7 +73,7 @@ class Mage_Adminhtml_Report_StatisticsController extends Mage_Adminhtml_Controll
     {
         $codes = $this->getRequest()->getParam('code');
         if (!$codes) {
-            throw new Exception(Mage::helper('adminhtml')->__('No report code specified.'));
+            Mage::throwException(Mage::helper('adminhtml')->__('No report code specified.'));
         }
 
         if (!is_array($codes) && !str_contains($codes, ',')) {
@@ -94,7 +94,7 @@ class Mage_Adminhtml_Report_StatisticsController extends Mage_Adminhtml_Controll
     public function refreshRecentAction()
     {
         try {
-            Mage::getModel('reports/statistics')->refreshRecent($this->_getReportCodes());
+            $this->statisticsService()->refreshRecent($this->_getReportCodes(), $this->rateLimitCaller());
             Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('adminhtml')->__('Recent statistics have been updated.'));
         } catch (Mage_Core_Exception $e) {
             Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
@@ -120,20 +120,11 @@ class Mage_Adminhtml_Report_StatisticsController extends Mage_Adminhtml_Controll
     public function refreshLifetimeAction()
     {
         try {
-            /** @var Mage_Reports_Model_Statistics $statistics */
-            $statistics = Mage::getModel('reports/statistics');
-            $adminUserId = Mage::helper('adminnotification')->getCurrentAdminUserId();
-            foreach ($this->_getReportCodes() as $code) {
-                if (!$statistics->isKnownCode($code)) {
-                    Mage::throwException(Mage::helper('adminhtml')->__('Unknown report code: %s', $code));
-                }
-                $message = new Mage_Reports_Model_Queue_RefreshStatistics($code, $adminUserId);
-                \Maho\Queue\QueueManager::dispatch(
-                    $message,
-                    queue: Mage_Reports_Model_Queue_RefreshStatistics::QUEUE_NAME,
-                    dedupeKey: $message->getDedupeKey(),
-                );
-            }
+            $this->statisticsService()->refreshLifetime(
+                $this->_getReportCodes(),
+                $this->rateLimitCaller(),
+                Mage::helper('adminnotification')->getCurrentAdminUserId(),
+            );
             Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('adminhtml')->__('The lifetime statistics will be updated in the background. A message in the notifications tells you when each report is updated.'));
         } catch (Mage_Core_Exception $e) {
             Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
@@ -160,6 +151,19 @@ class Mage_Adminhtml_Report_StatisticsController extends Mage_Adminhtml_Controll
             ->_setActiveMenu('report/statistics/refreshstatistics')
             ->_addBreadcrumb(Mage::helper('adminhtml')->__('Refresh Statistics'), Mage::helper('adminhtml')->__('Refresh Statistics'))
             ->renderLayout();
+    }
+
+    /**
+     * Name the admin user for the rate limit as the API names the admin session, so that both share one limit.
+     */
+    protected function rateLimitCaller(): string
+    {
+        return 'admin_' . Mage::helper('adminnotification')->getCurrentAdminUserId();
+    }
+
+    protected function statisticsService(): Mage_Reports_Service_Statistics
+    {
+        return Mage::getService('reports/statistics');
     }
 
     /**
