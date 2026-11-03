@@ -33,25 +33,17 @@ class CustomerAddressDelete extends BaseMahoCommand
     ): int {
         $this->initMaho();
 
-        $address = Mage::getModel('customer/address');
-        // PostgreSQL refuses a query with an ID above the largest value of an INTEGER column.
-        if ($addressId > 0 && $addressId <= 2147483647) {
-            $address->load($addressId);
-        }
-        if (!$address->getId()) {
+        $service = Mage::getService('customer/address');
+        try {
+            $address = $service->getById($addressId);
+        } catch (\Mage_Core_Exception_NoSuchEntity) {
             $io->writeln("<error>Address not found with ID: $addressId</error>");
             return Command::FAILURE;
         }
 
-        $customer = Mage::getModel('customer/customer')->load($address->getCustomerId());
-        $address->delete();
-        // The admin also removes a deleted address from the default addresses of the customer.
-        foreach (['default_billing', 'default_shipping'] as $code) {
-            if ((int) $customer->getData($code) === $addressId) {
-                $customer->setData($code)->getResource()->saveAttribute($customer, $code);
-            }
-        }
-        $io->writeln("<info>Address $addressId of customer {$customer->getEmail()} deleted.</info>");
+        $email = Mage::getService('customer/customer')->getById((int) $address->getCustomerId())?->getEmail();
+        $service->delete($address);
+        $io->writeln("<info>Address $addressId of customer $email deleted.</info>");
         return Command::SUCCESS;
     }
 
