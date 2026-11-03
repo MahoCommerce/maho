@@ -240,12 +240,22 @@ class Maho_ApiPlatform_Model_Observer
     }
 
     /**
-     * Invalidate API reviews cache when a review is saved/approved
+     * Invalidate API reviews cache when a review is saved, approved or deleted
      */
     #[Maho\Config\Observer('review_save_after')]
+    #[Maho\Config\Observer('review_delete_after')]
     public function invalidateReviewCache(\Maho\Event\Observer $_observer): void
     {
         $this->cleanApiCache(['API_REVIEWS']);
+    }
+
+    /**
+     * Invalidate the API wishlist cache of the customer when a transport saves the wishlist after a change
+     */
+    #[Maho\Config\Observer('wishlist_save_after')]
+    public function invalidateWishlistCache(\Maho\Event\Observer $observer): void
+    {
+        $this->cleanApiCache(['API_WISHLIST_' . (int) $observer->getEvent()->getDataObject()->getCustomerId()]);
     }
 
     /**
