@@ -58,6 +58,20 @@ describe('Gmail actions', function () {
         expect($payload['description'])->toContain('1Z999AA10123456784');
     });
 
+    it('uses the structure that Gmail shows for GitHub notifications', function () {
+        $payload = ($this->payload)($this->actions->getMarkup($this->variables));
+        $store = Mage::app()->getDefaultStoreView();
+
+        expect($payload['@context'])->toBe('http://schema.org');
+        expect($payload['potentialAction']['name'])->toBe('Track your shipment');
+        expect($payload['potentialAction']['target'])->toBe($payload['potentialAction']['url']);
+        expect($payload['publisher'])->toBe([
+            '@type' => 'Organization',
+            'name' => $store->getFrontendName(),
+            'url' => $store->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB),
+        ]);
+    });
+
     it('links the carrier page when the track exposes one', function () {
         $track = new class extends Mage_Sales_Model_Order_Shipment_Track {
             #[\Override]

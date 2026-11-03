@@ -85,16 +85,22 @@ class Mage_Shipping_Model_Email_Gmail_Actions
             $url = Mage::helper('shipping')->getTrackingPopupUrlBySalesModel($shipment);
         }
 
-        $label = Mage::helper('shipping')->__('Track your shipment');
+        // Same structure as the GitHub notifications, which Gmail shows with a button.
+        $store = $shipment->getStore();
         $payload = [
-            '@context' => 'https://schema.org',
+            '@context' => 'http://schema.org',
             '@type' => 'EmailMessage',
-            'name' => $label,
-            'description' => Mage::helper('shipping')->__('Tracking number %s', implode(', ', $numbers)),
             'potentialAction' => [
                 '@type' => 'ViewAction',
-                'name' => $label,
+                'target' => $url,
                 'url' => $url,
+                'name' => Mage::helper('shipping')->__('Track your shipment'),
+            ],
+            'description' => Mage::helper('shipping')->__('Tracking number %s', implode(', ', $numbers)),
+            'publisher' => [
+                '@type' => 'Organization',
+                'name' => $store->getFrontendName(),
+                'url' => $store->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB),
             ],
         ];
 
