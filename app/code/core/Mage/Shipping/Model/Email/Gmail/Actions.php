@@ -80,9 +80,9 @@ class Mage_Shipping_Model_Email_Gmail_Actions
             return '';
         }
 
-        $target = $this->getTrackingUrl($shipment);
-        if ($target === '') {
-            $target = Mage::helper('shipping')->getTrackingPopupUrlBySalesModel($shipment);
+        $url = $this->getTrackingUrl($shipment);
+        if ($url === '') {
+            $url = Mage::helper('shipping')->getTrackingPopupUrlBySalesModel($shipment);
         }
 
         $label = Mage::helper('shipping')->__('Track your shipment');
@@ -94,7 +94,7 @@ class Mage_Shipping_Model_Email_Gmail_Actions
             'potentialAction' => [
                 '@type' => 'ViewAction',
                 'name' => $label,
-                'url' => $target,
+                'url' => $url,
             ],
         ];
 
