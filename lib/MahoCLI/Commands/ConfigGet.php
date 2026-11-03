@@ -23,6 +23,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class ConfigGet extends BaseMahoCommand
 {
+    use ConfigCommandTrait;
+
     public function __invoke(
         OutputInterface $output,
         #[Argument(description: 'Configuration path (e.g., web/url/base, general/store_information/name)')]
@@ -56,28 +58,13 @@ class ConfigGet extends BaseMahoCommand
 
             $results = $connection->fetchAll($select);
 
-            // Also get default value from XML configuration
-            $defaultValue = $this->getDefaultValue();
-
-            // If no results and no default value
-            if (empty($results) && $defaultValue === null) {
+            if (empty($results)) {
                 $output->writeln('<comment>Configuration path not found: ' . $path . '</comment>');
                 return Command::SUCCESS;
             }
 
             // Build table data
             $tableData = [];
-
-            // Add default value if exists and not filtered out
-            if ($defaultValue !== null && (!$scopeFilter || $scopeFilter === 'default') && (!$scopeIdFilter)) {
-                $tableData[] = [
-                    '-',
-                    'default',
-                    '0',
-                    '<comment>[XML Default]</comment>',
-                    $this->formatValue($defaultValue),
-                ];
-            }
 
             // Add database values
             foreach ($results as $row) {
@@ -139,42 +126,5 @@ class ConfigGet extends BaseMahoCommand
         }
 
         return (string) $value;
-    }
-
-    private function getDefaultValue(): mixed
-    {
-        // Don't show XML defaults since Mage::getConfig()->getNode() returns
-        // already-processed values with placeholders replaced, making it
-        // indistinguishable from database values
-        return null;
-    }
-
-    private function getScopeName(string $scope, int $scopeId): string
-    {
-        if ($scopeId === 0) {
-            return 'Default Config';
-        }
-
-        try {
-            switch ($scope) {
-                case 'websites':
-                    $website = Mage::getModel('core/website')->load($scopeId);
-                    if ($website && $website->getId()) {
-                        return $website->getName() . ' (' . $website->getCode() . ')';
-                    }
-                    break;
-
-                case 'stores':
-                    $store = Mage::getModel('core/store')->load($scopeId);
-                    if ($store && $store->getId()) {
-                        return $store->getName() . ' (' . $store->getCode() . ')';
-                    }
-                    break;
-            }
-        } catch (\Exception) {
-            // Ignore errors when getting names
-        }
-
-        return '<comment>[Unknown]</comment>';
     }
 }
