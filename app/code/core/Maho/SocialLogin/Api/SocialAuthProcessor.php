@@ -66,12 +66,12 @@ class SocialAuthProcessor extends \Maho\ApiPlatform\Processor
         // The storefront flow sends 2FA-enabled customers through a TOTP
         // challenge after the provider proves identity; the headless flow must
         // enforce the same second factor before a JWT is issued.
-        if (\Mage::getStoreConfigFlag('customer/password/allow_2fa') && $customer->getTwofaEnabled()) {
+        if ($customer->isTwofaRequired()) {
             $code = is_string($data->twofaCode) ? trim($data->twofaCode) : '';
             if ($code === '') {
                 throw new UnauthorizedHttpException('Bearer', 'Two-factor authentication code is required', null, 0, ['X-Api-Error-Code' => 'twofa_required']);
             }
-            if (!\Mage::helper('core/security')->verifyTotpCode($customer->getTwofaSecret() ?? '', $code)) {
+            if (!$customer->verifyTwofaCode($code)) {
                 throw new UnauthorizedHttpException('Bearer', 'Two-factor authentication code is invalid', null, 0, ['X-Api-Error-Code' => 'twofa_invalid']);
             }
         }

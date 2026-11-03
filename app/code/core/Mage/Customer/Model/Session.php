@@ -272,7 +272,7 @@ class Mage_Customer_Model_Session extends Mage_Core_Model_Session_Abstract
      */
     public function shouldChallengeTwofa(Mage_Customer_Model_Customer $customer): bool
     {
-        return Mage::getStoreConfigFlag('customer/password/allow_2fa') && (bool) $customer->getTwofaEnabled();
+        return $customer->isTwofaRequired();
     }
 
     /**
@@ -306,7 +306,7 @@ class Mage_Customer_Model_Session extends Mage_Core_Model_Session_Abstract
         if (!$customer) {
             return false;
         }
-        if (!Mage::helper('core/security')->verifyTotpCode($customer->getTwofaSecret() ?? '', $code)) {
+        if (!$customer->verifyTwofaCode($code)) {
             return false;
         }
         $this->unsTwofaPendingCustomerId();
