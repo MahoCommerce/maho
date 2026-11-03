@@ -315,7 +315,9 @@ class My_Module_Checkout_CartController extends Mage_Checkout_CartController { /
   `ApiExceptionListener` maps these for REST and `MageExceptionNormalizer` for GraphQL. Code that
   reads the request (a path, a body, the API Platform context) stays in the transport, as
   `Mage\Checkout\Api\CartRequest` does. `tests/Backend/Unit/Maho/ServiceLayoutTest.php` enforces the
-  layout
+  layout. `LayeringConventionTest.php` beside it fails on an HTTP exception outside the API, on the
+  request or the session in a service, and on a rate limit or a honeypot check in a transport. Its
+  allowlist only shrinks: the pull request that fixes a file lowers or removes the entry of that file
 - **Docs**: a module keeps the pages about its feature in its own folder and declares them in its
   `config.xml`, one folder for each audience: `<global><docs><user>docs/user</user></docs></global>`.
   `user` is the person who works in the admin, `developer` writes code, `sysadmin` runs the
