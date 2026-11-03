@@ -2,7 +2,7 @@
 description: Carriers publish the public tracking page of a shipment number through getTrackingUrl(), without calling the carrier API, so the same link can be shown in emails, the customer account and the admin.
 ---
 
-# Shipping Tracking URLs <span class="version-badge">v26.11+</span>
+# Shipping Tracking URLs <span class="version-badge">v27.1+</span>
 
 A shipment number is only useful to a customer when it links to the page where the carrier shows its status. Until now Maho could only ask the carrier for that status: `Mage_Sales_Model_Order_Shipment_Track::getNumberDetail()` calls `getTrackingInfo()`, which reaches the carrier API and needs credentials, a network round trip and a timeout budget.
 
