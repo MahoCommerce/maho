@@ -633,12 +633,14 @@ curl -X PUT /api/rest/v2/revocation-requests/1234 \
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
 | POST | `/newsletter/subscribe` | None | Subscribe to newsletter (gated by `newsletter/subscription/allow_guest_subscribe`) |
-| POST | `/newsletter/unsubscribe` | None | Unsubscribe by email |
+| POST | `/newsletter/unsubscribe` | Customer | Unsubscribe the address of the customer |
 | GET | `/newsletter/status` | Customer/API | Get subscription status |
 
 **Guest subscription control:** Guest (unauthenticated) subscribe is controlled by the Maho config flag `newsletter/subscription/allow_guest_subscribe` (**System > Config > Newsletter > Subscription Options > Allow Guest Subscription**). When disabled, only authenticated customers can subscribe, and a guest subscribe returns `403`. Recommended: set to **No** for API use to prevent abuse.
 
-**Confirmation emails:** When `newsletter/subscription/confirm` is enabled, new subscriptions receive a confirmation email and remain inactive until confirmed (double opt-in).
+**Confirmation emails:** When `newsletter/subscription/confirm` is enabled, new subscriptions receive a confirmation email and remain inactive until confirmed (double opt-in). A customer token subscribes the address of the account, which needs no confirmation.
+
+The API, the footer form and the newsletter page of the customer account use the same rules. An empty or invalid `email` gives a 422 with an entry in `details.errors`. A guest gets the same answer for an address that is already subscribed as for a new one. The limit `system/rate_limit/newsletter_subscribe` counts the subscriptions of one client and of one address on the API and the footer form together, and `system/rate_limit/newsletter_unsubscribe` counts the unsubscriptions of the API and the account page. A client over a limit gets a 429 with a `Retry-After` header. A customer token for a customer that does not exist gives a 404.
 
 ---
 

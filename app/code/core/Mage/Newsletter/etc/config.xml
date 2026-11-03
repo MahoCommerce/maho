@@ -45,6 +45,11 @@ SPDX-License-Identifier: AFL-3.0
                 </entities>
             </newsletter_resource>
         </models>
+        <services>
+            <newsletter>
+                <class>Mage_Newsletter_Service</class>
+            </newsletter>
+        </services>
         <template>
             <email>
                 <newsletter_subscription_confirm_email_template translate="label" module="newsletter">

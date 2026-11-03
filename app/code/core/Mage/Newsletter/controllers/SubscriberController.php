@@ -24,60 +24,30 @@ class Mage_Newsletter_SubscriberController extends Mage_Core_Controller_Front_Ac
     #[Maho\Config\Route('/newsletter/subscriber/new', name: 'newsletter.subscriber.new', methods: ['POST'])]
     public function newAction(): void
     {
-        if ($this->getRequest()->isPost() && $this->getRequest()->getPost('email')) {
-            $session            = Mage::getSingleton('core/session');
-            $customerSession    = Mage::getSingleton('customer/session');
-            $email              = (string) $this->getRequest()->getPost('email');
+        $session = Mage::getSingleton('core/session');
+        $customerSession = Mage::getSingleton('customer/session');
+        $customerId = $customerSession->isLoggedIn() ? (int) $customerSession->getCustomerId() : null;
+        $storeId = (int) Mage::app()->getStore()->getId();
+        $service = $this->subscriberService();
 
-            if (!Mage::helper('core')->isValidEmail($email)) {
-                $session->addError($this->__('There was a problem with the subscription: %s', $this->__('Please enter a valid email address.')));
-                $this->_redirectReferer();
-                return;
-            }
+        if ($customerId === null && !$service->isGuestSubscriptionAllowed($storeId)) {
+            $session->addError(
+                $this->__('There was a problem with the subscription: subscription for guests is not allowed. Please %s.'),
+                new \Maho\Message\Link($this->__('register'), Mage::helper('customer')->getRegisterUrl()),
+            );
+            $this->_redirectReferer();
+            return;
+        }
 
-            if (Mage::getStoreConfig(Mage_Newsletter_Model_Subscriber::XML_PATH_ALLOW_GUEST_SUBSCRIBE_FLAG) != 1
-                && !$customerSession->isLoggedIn()
-            ) {
-                $session->addError(
-                    $this->__('There was a problem with the subscription: subscription for guests is not allowed. Please %s.'),
-                    new \Maho\Message\Link($this->__('register'), Mage::helper('customer')->getRegisterUrl()),
-                );
-                $this->_redirectReferer();
-                return;
-            }
-
-            try {
-                // Same key as the API endpoint, so a bot that rotates between the form and the
-                // API shares one budget. The IP cap comes first: the per-address bucket alone is
-                // bypassed by submitting many distinct addresses from one client.
-                $limit = (int) Mage::getStoreConfig('system/rate_limit/newsletter_subscribe');
-                $ipLimiter = Mage::helper('core')->rateLimiter(
-                    'newsletter_subscribe',
-                    $limit,
-                    3600,
-                    \Maho\Security\RateLimitScope::Ip,
-                );
-                $emailLimiter = Mage::helper('core')->rateLimiterBy(
-                    'newsletter_subscribe',
-                    'newsletter_subscribe:email:' . strtolower($email),
-                    $limit,
-                    3600,
-                );
-                if (!$ipLimiter->attempt() || !$emailLimiter->attempt()) {
-                    Mage::throwException($this->__('Too Soon: You are trying to perform this operation too frequently. Please wait a few seconds and try again.'));
-                }
-
-                $status = Mage::getModel('newsletter/subscriber')->subscribe($email);
-                if ($status == Mage_Newsletter_Model_Subscriber::STATUS_NOT_ACTIVE) {
-                    $session->addSuccess($this->__('Confirmation request has been sent.'));
-                } else {
-                    $session->addSuccess($this->__('Thank you for your subscription.'));
-                }
-            } catch (Mage_Core_Exception $e) {
-                $session->addError($this->__('There was a problem with the subscription: %s', $e->getMessage()));
-            } catch (Exception $e) {
-                $session->addException($e, $this->__('There was a problem with the subscription.'));
-            }
+        try {
+            $subscriber = $service->subscribe((string) $this->getRequest()->getPost('email'), $storeId, $customerId);
+            $session->addSuccess($service->isConfirmationPending($subscriber, $customerId, $storeId)
+                ? $this->__('Confirmation request has been sent.')
+                : $this->__('Thank you for your subscription.'));
+        } catch (Mage_Core_Exception $e) {
+            $session->addError($this->__('There was a problem with the subscription: %s', $e->getMessage()));
+        } catch (Exception $e) {
+            $session->addException($e, $this->__('There was a problem with the subscription.'));
         }
         $this->_redirectReferer();
     }
@@ -135,9 +105,7 @@ class Mage_Newsletter_SubscriberController extends Mage_Core_Controller_Front_Ac
         if ($id && $code) {
             $session = Mage::getSingleton('core/session');
             try {
-                Mage::getModel('newsletter/subscriber')->load($id)
-                    ->setCheckCode($code)
-                    ->unsubscribe();
+                $this->subscriberService()->unsubscribe($id, $code);
                 if (!$isPost) {
                     $session->addSuccess($this->__('You have been unsubscribed.'));
                 }
@@ -161,5 +129,10 @@ class Mage_Newsletter_SubscriberController extends Mage_Core_Controller_Front_Ac
             return;
         }
         $this->_redirectReferer();
+    }
+
+    protected function subscriberService(): Mage_Newsletter_Service_Subscriber
+    {
+        return Mage::getService('newsletter/subscriber');
     }
 }
