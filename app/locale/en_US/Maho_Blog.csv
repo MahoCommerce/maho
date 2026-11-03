@@ -62,6 +62,8 @@
 "Show in Navigation","Show in Navigation"
 "Shown above the posts. Leave empty for no title.","Shown above the posts. Leave empty for no title."
 "Template","Template"
+"The blog categories are not enabled for this store view.","The blog categories are not enabled for this store view."
+"The blog is not enabled for this store view.","The blog is not enabled for this store view."
 "The image must be a path relative to media/blog, with no leading ""/"", no "".."" segment and no scheme.","The image must be a path relative to media/blog, with no leading ""/"", no "".."" segment and no scheme."
 "The latest published blog posts, optionally from one category","The latest published blog posts, optionally from one category"
 "The post title is required.","The post title is required."

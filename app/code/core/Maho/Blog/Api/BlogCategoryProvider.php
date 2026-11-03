@@ -74,7 +74,11 @@ final class BlogCategoryProvider extends CrudProvider
     {
         parent::applyCollectionFilters($collection, $filters);
 
-        if (!$this->isScopeAll($filters)) {
+        if (!$this->isBackendReader()) {
+            /** @var \Maho_Blog_Service_Category $service */
+            $service = \Mage::getService('blog/category');
+            $service->addVisibleFilter($collection, StoreContext::getStoreId());
+        } elseif (!$this->isScopeAll($filters)) {
             $collection->addActiveFilter();
         }
 

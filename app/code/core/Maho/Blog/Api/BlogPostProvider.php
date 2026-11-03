@@ -74,7 +74,11 @@ final class BlogPostProvider extends CrudProvider
     {
         parent::applyCollectionFilters($collection, $filters);
 
-        if (!$this->isScopeAll($filters)) {
+        if (!$this->isBackendReader()) {
+            /** @var \Maho_Blog_Service_Post $service */
+            $service = \Mage::getService('blog/post');
+            $service->addVisibleFilter($collection, StoreContext::getStoreId());
+        } elseif (!$this->isScopeAll($filters)) {
             $collection->addPublishedFilter();
         }
 

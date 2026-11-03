@@ -9,10 +9,13 @@ declare(strict_types=1);
 
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
+use Maho\ApiPlatform\Service\StoreContext;
 use Maho\Blog\Api\BlogCategory;
 use Maho\Blog\Api\BlogCategoryProcessor;
+use Maho\Blog\Api\BlogCategoryProvider;
 use Maho\Blog\Api\BlogPost;
 use Maho\Blog\Api\BlogPostProcessor;
 use Maho\Blog\Api\BlogPostProvider;
@@ -72,6 +75,21 @@ function blogParityApi(string $dtoClass, array $body, ?int $id = null, bool $del
     $operation = $delete ? new Delete() : ($id ? new Put() : new Post());
 
     return AdminApiParity::api($request, fn() => $processor->process($dto, $operation, $id ? ['id' => $id] : [], ['request' => $request]));
+}
+
+/**
+ * Run $call with the store config $path of the store view that the API reads set to $value.
+ */
+function blogParityWithConfig(string $path, string $value, callable $call): mixed
+{
+    $store = Mage::app()->getStore(StoreContext::ensureStore());
+    $previous = $store->getConfig($path);
+    $store->setConfig($path, $value);
+    try {
+        return $call((int) $store->getId());
+    } finally {
+        $store->setConfig($path, $previous);
+    }
 }
 
 function blogParityCleanup(): void
@@ -209,5 +227,52 @@ describe('blog categories', function (): void {
             ->and($api['status'])->toBe(200)
             ->and(Mage::getModel('blog/category')->load($adminChild->getId())->getId())->toBeNull()
             ->and(Mage::getModel('blog/category')->load($apiChild->getId())->getId())->toBeNull();
+    });
+});
+
+describe('storefront switches', function (): void {
+    it('gives 404 for every post read of a visitor when the blog output is disabled, and keeps the admin reads', function (): void {
+        $post = blogParityPost('blog-parity-disabled');
+
+        blogParityWithConfig('advanced/modules_disable_output/Maho_Blog', '1', function (int $storeId) use ($post): void {
+            $request = AdminApiParity::jsonRequest('GET', '/api/rest/v2/blog-posts');
+            $list = AdminApiParity::api($request, fn() => new BlogPostProvider()->provide(new GetCollection(class: BlogPost::class), [], []));
+            $admin = new BlogPostProvider(AdminApiParity::adminSecurity())->provide(new Get(class: BlogPost::class), ['id' => $post->getId()]);
+
+            expect(fn() => Mage::getService('blog/post')->getVisibleById((int) $post->getId(), $storeId))
+                ->toThrow(Mage_Core_Exception_NoSuchEntity::class, 'The blog is not enabled for this store view.')
+                ->and(Mage::helper('blog')->isEnabled())->toBeFalse()
+                ->and(new BlogPostProvider()->provide(new Get(class: BlogPost::class), ['id' => $post->getId()]))->toBeNull()
+                ->and($list['status'])->toBe(404)
+                ->and($list['errors'])->toBe(['The blog is not enabled for this store view.'])
+                ->and($admin)->toBeInstanceOf(BlogPost::class);
+        });
+    });
+
+    it('gives 404 for every category read of a visitor when the categories are off, and keeps the admin reads', function (): void {
+        $category = blogParityCategory('blog-parity-categories-off');
+
+        blogParityWithConfig(Maho_Blog_Service_Category::XML_PATH_ENABLE_CATEGORIES, '0', function (int $storeId) use ($category): void {
+            $request = AdminApiParity::jsonRequest('GET', '/api/rest/v2/blog-categories');
+            $list = AdminApiParity::api($request, fn() => new BlogCategoryProvider()->provide(new GetCollection(class: BlogCategory::class), [], []));
+            $admin = new BlogCategoryProvider(AdminApiParity::adminSecurity())->provide(new Get(class: BlogCategory::class), ['id' => $category->getId()]);
+
+            expect(fn() => Mage::getService('blog/category')->getVisibleById((int) $category->getId(), $storeId))
+                ->toThrow(Mage_Core_Exception_NoSuchEntity::class, 'The blog categories are not enabled for this store view.')
+                ->and(new BlogCategoryProvider()->provide(new Get(class: BlogCategory::class), ['id' => $category->getId()]))->toBeNull()
+                ->and($list['status'])->toBe(404)
+                ->and($list['errors'])->toBe(['The blog categories are not enabled for this store view.'])
+                ->and($admin)->toBeInstanceOf(BlogCategory::class);
+        });
+    });
+
+    it('reads a post and a category of a visitor when the switches are on', function (): void {
+        $post = blogParityPost('blog-parity-enabled');
+        $category = blogParityCategory('blog-parity-enabled');
+
+        blogParityWithConfig(Maho_Blog_Service_Category::XML_PATH_ENABLE_CATEGORIES, '1', function (int $storeId) use ($post, $category): void {
+            expect(Mage::getService('blog/post')->getVisibleById((int) $post->getId(), $storeId)->getId())->toBe($post->getId())
+                ->and(Mage::getService('blog/category')->getVisibleById((int) $category->getId(), $storeId)->getId())->toBe($category->getId());
+        });
     });
 });
