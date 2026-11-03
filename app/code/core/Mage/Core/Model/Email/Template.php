@@ -258,10 +258,13 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
         try {
             // Filter the template text so that all HTML content will be present
             $result = $processor->filter($this->getTemplateText());
-            if (!$this->isPlain()) {
-                // Gmail reads the action from the head, so add it before the CSS inliner runs.
-                $result = Mage::getSingleton('core/email_gmail_actions')->inject($variables, $result);
-            }
+            $transport = new \Maho\DataObject(['html' => $result]);
+            Mage::dispatchEvent('email_template_filter_after', [
+                'template'  => $this,
+                'variables' => $variables,
+                'transport' => $transport,
+            ]);
+            $result = (string) $transport->getData('html');
             // If the {{inlinecss file=""}} directive was included in the template, grab filename to use for inlining
             $this->setInlineCssFile($processor->getInlineCssFile());
             // Now that all HTML has been assembled, run email through CSS inlining process

@@ -36,7 +36,7 @@ describe('Gmail actions', function () {
         ];
 
         $this->variables = ['order' => $order, 'shipment' => $shipment];
-        $this->actions = Mage::getSingleton('core/email_gmail_actions');
+        $this->actions = Mage::getSingleton('shipping/email_gmail_actions');
         $this->payload = function (string $markup): array {
             preg_match('#<script type="application/ld\+json">(.*)</script>#s', $markup, $matches);
             return json_decode($matches[1], true, flags: JSON_THROW_ON_ERROR);
@@ -60,6 +60,7 @@ describe('Gmail actions', function () {
 
     it('links the carrier page when the track exposes one', function () {
         $track = new class extends Mage_Sales_Model_Order_Shipment_Track {
+            #[\Override]
             public function getTrackingUrl(): ?string
             {
                 return 'https://www.ups.com/track?tracknum=1Z999AA10123456784';
@@ -77,6 +78,7 @@ describe('Gmail actions', function () {
 
     it('links the tracking page of the store when the carrier page is empty', function () {
         $track = new class extends Mage_Sales_Model_Order_Shipment_Track {
+            #[\Override]
             public function getTrackingUrl(): ?string
             {
                 return null;
@@ -104,6 +106,7 @@ describe('Gmail actions', function () {
 
     it('lists every number and links the first carrier page of several tracks', function () {
         $withPage = new class extends Mage_Sales_Model_Order_Shipment_Track {
+            #[\Override]
             public function getTrackingUrl(): ?string
             {
                 return 'https://www.ups.com/track?tracknum=222';

@@ -9,13 +9,31 @@
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
- * @package Mage_Core
+ * @package Mage_Shipping
  */
 
 declare(strict_types=1);
 
-class Mage_Core_Model_Email_Gmail_Actions
+class Mage_Shipping_Model_Email_Gmail_Actions
 {
+    /**
+     * Add the markup to an HTML email after the template filter, before the CSS inliner runs.
+     */
+    #[Maho\Config\Observer('email_template_filter_after')]
+    public function addToEmail(\Maho\Event\Observer $observer): void
+    {
+        $template = $observer->getData('template');
+        if (!$template instanceof Mage_Core_Model_Email_Template || $template->isPlain()) {
+            return;
+        }
+
+        $transport = $observer->getData('transport');
+        $transport->setData('html', $this->inject(
+            (array) $observer->getData('variables'),
+            (string) $transport->getData('html'),
+        ));
+    }
+
     /**
      * Add the markup to a rendered email, immediately before the closing head tag.
      *
@@ -67,12 +85,12 @@ class Mage_Core_Model_Email_Gmail_Actions
             $target = Mage::helper('shipping')->getTrackingPopupUrlBySalesModel($shipment);
         }
 
-        $label = Mage::helper('core')->__('Track your shipment');
+        $label = Mage::helper('shipping')->__('Track your shipment');
         $payload = [
             '@context' => 'https://schema.org',
             '@type' => 'EmailMessage',
             'name' => $label,
-            'description' => Mage::helper('core')->__('Tracking number %s', implode(', ', $numbers)),
+            'description' => Mage::helper('shipping')->__('Tracking number %s', implode(', ', $numbers)),
             'potentialAction' => [
                 '@type' => 'ViewAction',
                 'name' => $label,
@@ -97,10 +115,6 @@ class Mage_Core_Model_Email_Gmail_Actions
     protected function getTrackingUrl(Mage_Sales_Model_Order_Shipment $shipment): string
     {
         foreach ($shipment->getAllTracks() as $track) {
-            if (!method_exists($track, 'getTrackingUrl')) {
-                continue;
-            }
-
             $url = trim((string) $track->getTrackingUrl());
             if ($url !== '') {
                 return $url;
