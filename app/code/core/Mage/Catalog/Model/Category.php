@@ -198,6 +198,13 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
             Mage::throwException(
                 Mage::helper('catalog')->__('Parent category is equal to child category.'),
             );
+        } elseif (in_array((string) $this->getId(), $parent->getPathIds(), true)) {
+            Mage::throwException(
+                Mage::helper('catalog')->__('A category cannot be moved under one of its own subcategories.'),
+            );
+        }
+        if ((int) $this->getLevel() <= 1 || in_array((int) $this->getId(), $this->getResource()->getRootIds(), true)) {
+            throw new Mage_Core_Exception_Conflict(Mage::helper('catalog')->__('A root category cannot be moved.'));
         }
 
         /**
@@ -853,8 +860,8 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
     protected function _beforeDelete()
     {
         $this->_protectFromNonAdmin();
-        if ($this->getResource()->isForbiddenToDelete($this->getId())) {
-            Mage::throwException("Can't delete root category.");
+        if ((int) $this->getId() === self::TREE_ROOT_ID || $this->getResource()->isForbiddenToDelete($this->getId())) {
+            throw new Mage_Core_Exception_Conflict(Mage::helper('catalog')->__("Can't delete root category."));
         }
         return parent::_beforeDelete();
     }

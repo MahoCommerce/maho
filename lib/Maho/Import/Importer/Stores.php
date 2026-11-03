@@ -115,15 +115,14 @@ class Stores extends AbstractImporter
         if ($id !== null) {
             return $id;
         }
-        $category = Mage::getModel('catalog/category');
-        $category->setStoreId(0)
+        /** @var \Mage_Catalog_Service_Category $service */
+        $service = Mage::getService('catalog/category');
+        $category = $service->newCategory(\Mage_Catalog_Model_Category::TREE_ROOT_ID)
             ->setName($name)
             ->setIsActive(1)
             ->setIncludeInMenu(1)
-            ->setDisplayMode(\Mage_Catalog_Model_Category::DM_PRODUCT)
-            ->setAttributeSetId($category->getDefaultAttributeSetId())
-            ->setPath((string) \Mage_Catalog_Model_Category::TREE_ROOT_ID)
-            ->save();
+            ->setDisplayMode(\Mage_Catalog_Model_Category::DM_PRODUCT);
+        $service->save($category);
         $result->created++;
         $this->resolver->reset();
         return (int) $category->getId();

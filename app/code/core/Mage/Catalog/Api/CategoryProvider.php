@@ -63,9 +63,9 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
      */
     private function getItem(int $id, bool $checkVisibility = true): ?Category
     {
-        $mahoCategory = \Mage::getModel('catalog/category')->load($id);
-
-        if (!$mahoCategory->getId()) {
+        try {
+            $mahoCategory = $this->service()->getById($id);
+        } catch (\Mage_Core_Exception_NoSuchEntity) {
             return null;
         }
 
@@ -132,11 +132,7 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
         // A backend caller reads the trees that scope=all gives it, as the admin category
         // tree shows them; a guest or a customer reads the tree of the current store only.
         $rootIds = $this->backendCategoriesAccess() ? $this->readableRootIds() : [(int) StoreContext::getRootCategoryId()];
-
-        // The store root and every descendant carry the root id in their path
-        // ("1/<root>/..."). Anchoring with slashes prevents substring matches.
-        $pathIds = array_map(intval(...), explode('/', (string) $category->getPath()));
-        return array_intersect($rootIds, $pathIds) !== [];
+        return $this->service()->isInTrees($category, $rootIds);
     }
 
     /**
@@ -187,19 +183,16 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
      */
     private function readableRootIds(): array
     {
-        $allowed = $this->requireUser()->getAllowedStoreIds();
-        if ($allowed === null) {
-            return [\Mage_Catalog_Model_Category::TREE_ROOT_ID];
-        }
-        $rootIds = [];
-        foreach (\Mage::app()->getStores() as $store) {
-            if (in_array((int) $store->getId(), $allowed, true)) {
-                $rootIds[] = (int) $store->getRootCategoryId();
-            }
-        }
+        $rootIds = $this->service()->getRootIds($this->requireUser()->getAllowedStoreIds()) ?? [\Mage_Catalog_Model_Category::TREE_ROOT_ID];
 
         // A token without a store view reads no tree: -1 matches no path.
         return $rootIds === [] ? [-1] : $rootIds;
+    }
+
+    private function service(): \Mage_Catalog_Service_Category
+    {
+        /** @var \Mage_Catalog_Service_Category */
+        return \Mage::getService('catalog/category');
     }
 
     /**
