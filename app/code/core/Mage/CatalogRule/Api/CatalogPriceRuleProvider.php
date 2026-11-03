@@ -13,7 +13,6 @@ namespace Mage\CatalogRule\Api;
 use ApiPlatform\State\Pagination\TraversablePaginator;
 use Maho\ApiPlatform\Security\ApiUser;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 final class CatalogPriceRuleProvider extends \Maho\ApiPlatform\Provider
 {
@@ -30,9 +29,7 @@ final class CatalogPriceRuleProvider extends \Maho\ApiPlatform\Provider
     #[\Override]
     protected function provideItem(int|string $id): CatalogPriceRule
     {
-        $rule = $this->loadRule((int) $id);
-        $this->assertRuleReadable($rule, $this->requireUser());
-        return $this->toRuleDto($rule, true);
+        return $this->toRuleDto($this->loadRule((int) $id, $this->requireUser()), true);
     }
 
     /**
@@ -111,29 +108,23 @@ final class CatalogPriceRuleProvider extends \Maho\ApiPlatform\Provider
     }
 
     /**
-     * Load a rule or answer 404.
+     * Load the rule $id. A restricted token reads a rule that has at least one of its websites.
      */
-    public function loadRule(int $id): \Mage_CatalogRule_Model_Rule
+    public function loadRule(int $id, ApiUser $user): \Mage_CatalogRule_Model_Rule
     {
-        /** @var \Mage_CatalogRule_Model_Rule $rule */
-        $rule = $this->loadById('catalogrule/rule', $id);
-        if (!$rule->getId()) {
-            throw new NotFoundHttpException('Catalog price rule not found');
-        }
-        return $rule;
+        /** @var \Mage_CatalogRule_Service_Rule $service */
+        $service = \Mage::getService('catalogrule/rule');
+        return $service->getById($id, $this->allowedWebsiteIds($user));
     }
 
     /**
-     * A restricted token reads a rule that has at least one of its websites. The rule is hidden otherwise.
+     * Load the rule $id. A restricted token changes only a rule whose websites are all in its scope.
      */
-    public function assertRuleReadable(\Mage_CatalogRule_Model_Rule $rule, ApiUser $user): void
+    public function loadWritableRule(int $id, ApiUser $user): \Mage_CatalogRule_Model_Rule
     {
-        $allowedWebsiteIds = $this->allowedWebsiteIds($user);
-        if ($allowedWebsiteIds !== null
-            && array_intersect(array_map(intval(...), (array) $rule->getWebsiteIds()), $allowedWebsiteIds) === []
-        ) {
-            throw new NotFoundHttpException('Catalog price rule not found');
-        }
+        $rule = $this->loadRule($id, $user);
+        $this->assertAllWebsitesAllowed((array) $rule->getWebsiteIds(), $user, 'catalog price rule');
+        return $rule;
     }
 
     /**
