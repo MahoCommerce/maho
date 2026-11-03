@@ -13,138 +13,45 @@ namespace Maho\Revocation\Api;
 use ApiPlatform\Metadata\Operation;
 use Maho\ApiPlatform\Processor;
 use Maho\ApiPlatform\Service\StoreContext;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
- * Adapts API requests to the existing revocation domain logic.
- *
- * The customer submit path resolves and re-checks order ownership, then hands
- * off to Maho_Revocation_Service_Request::submit() with the authenticated-session
- * input keys so the recorded declaration is verified (verified = 1). The admin
- * patch path mirrors the backend save action (status + internal note).
+ * Give the declaration of the authenticated customer, or the processing decision of an admin,
+ * to Maho_Revocation_Service_Request.
  */
 final class RevocationRequestProcessor extends Processor
 {
     #[\Override]
-    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): mixed
+    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): RevocationRequest
     {
         StoreContext::ensureStore();
-
-        $name = $operation->getName();
+        $service = \Mage::getService('revocation/request');
+        $dto = $data instanceof RevocationRequest ? $data : null;
 
         if (isset($uriVariables['id'])) {
-            return $this->processAdminUpdate((int) $uriVariables['id'], $data);
+            $model = $service->getById((int) $uriVariables['id']);
+            if ($dto?->processedStatus !== null && $dto->processedStatus !== '') {
+                $model->setProcessedStatus($dto->processedStatus);
+            }
+            if ($dto?->adminNote !== null) {
+                $model->setAdminNote($dto->adminNote);
+            }
+            return RevocationRequest::fromModel($service->save($model));
         }
 
-        if ($name === 'submit') {
-            $args = $context['args']['input'] ?? [];
-            return $this->submit(
-                isset($args['orderId']) ? (int) $args['orderId'] : null,
-                isset($args['orderReference']) ? (string) $args['orderReference'] : null,
-                isset($args['reason']) ? (string) $args['reason'] : null,
-                $context['request'] ?? null,
-            );
-        }
-
-        $dto = $data instanceof RevocationRequest ? $data : null;
-        return $this->submit(
-            $dto?->orderId,
-            $dto?->orderReference,
-            $dto?->reason,
-            $context['request'] ?? null,
-        );
-    }
-
-    private function submit(?int $orderId, ?string $orderReference, ?string $reason, mixed $request): RevocationRequest
-    {
-        $helper = \Mage::helper('revocation');
-
-        if (!$helper->isEnabled()) {
-            throw new NotFoundHttpException('Revocation is not available');
-        }
-
-        $customerId = $this->requireCustomerId();
-        $customer = \Mage::getModel('customer/customer')->load($customerId);
-        if (!$customer->getId()) {
-            throw new NotFoundHttpException('Customer not found');
-        }
-
-        $order = $this->resolveOwnedOrder($orderId, $orderReference, $customerId);
-
-        if (!$helper->isOrderWithinCoolingOffWindow($order)) {
-            throw new UnprocessableEntityHttpException('The revocation period for this order has expired');
-        }
-
+        $args = $context['args']['input'] ?? [];
         $ip = (string) \Mage::helper('core/http')->getRemoteAddr();
-        if ($ip !== '' && $helper->isIpRateLimited($order->getStore())) {
-            throw new TooManyRequestsHttpException(3600, 'Too many requests. Please try again later.');
-        }
-
-        $customerName = trim($customer->getName() ?: (string) $customer->getFirstname() . ' ' . $customer->getLastname());
-
-        $input = new \Maho\DataObject([
-            'customer_name' => $customerName,
-            'email' => (string) $customer->getEmail(),
-            'order_reference' => (string) $order->getIncrementId(),
-            'reason' => $reason,
+        /** @var \Maho_Revocation_Model_Request $model the API channel has no honeypot, so submit() returns a request */
+        $model = $service->submit(new \Maho\DataObject([
+            'customer_id' => $this->requireCustomerId(),
+            'order_id' => $args['orderId'] ?? $dto?->orderId,
+            'order_reference' => $args['orderReference'] ?? $dto?->orderReference,
+            'reason' => $args['reason'] ?? $dto?->reason,
             'ip' => $ip ?: null,
-            'user_agent' => $request?->headers->get('User-Agent'),
+            'user_agent' => ($context['request'] ?? null)?->headers->get('User-Agent'),
             'locale' => \Mage::app()->getLocale()->getLocaleCode(),
-            'store_id' => (int) $order->getStoreId(),
+            'store_id' => StoreContext::getStoreId(),
             'received_at_microtime' => microtime(true),
-            'customer_id' => $customerId,
-            'session_order_id' => (int) $order->getId(),
-        ]);
-
-        $model = \Mage::getService('revocation/request')->submit($input);
-
-        return RevocationRequest::fromModel($model);
-    }
-
-    /**
-     * Loads the referenced order and re-checks ownership server-side. Either the
-     * entity id or the increment id may be supplied; ownership is enforced either way.
-     */
-    private function resolveOwnedOrder(?int $orderId, ?string $orderReference, int $customerId): \Mage_Sales_Model_Order
-    {
-        $order = \Mage::getModel('sales/order');
-
-        if ($orderId) {
-            $order->load($orderId);
-        } elseif ($orderReference !== null && trim($orderReference) !== '') {
-            $order->loadByIncrementId(trim($orderReference));
-        } else {
-            throw new UnprocessableEntityHttpException('An order reference is required');
-        }
-
-        if (!$order->getId() || (int) $order->getCustomerId() !== $customerId) {
-            throw new NotFoundHttpException('Order not found');
-        }
-
-        return $order;
-    }
-
-    private function processAdminUpdate(int $id, mixed $data): RevocationRequest
-    {
-        $model = \Mage::getModel('revocation/request')->load($id);
-        if (!$model->getId()) {
-            throw new NotFoundHttpException('Revocation request not found');
-        }
-
-        $dto = $data instanceof RevocationRequest ? $data : null;
-
-        if ($dto?->processedStatus !== null && $dto->processedStatus !== '') {
-            \Mage::getService('revocation/request')->applyProcessedStatus($model, $dto->processedStatus);
-        }
-
-        if ($dto?->adminNote !== null) {
-            $note = trim($dto->adminNote);
-            $model->setAdminNote($note !== '' ? $note : null);
-        }
-
-        $model->save();
+        ]), \Maho_Revocation_Model_Channel::Api);
 
         return RevocationRequest::fromModel($model);
     }

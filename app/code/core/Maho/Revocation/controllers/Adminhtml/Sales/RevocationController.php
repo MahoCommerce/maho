@@ -23,13 +23,17 @@ class Maho_Revocation_Adminhtml_Sales_RevocationController extends Mage_Adminhtm
 
     protected function _initRequest(): ?Maho_Revocation_Model_Request
     {
-        $id = (int) $this->getRequest()->getParam('id');
-        $model = Mage::getModel('revocation/request')->load($id);
-        if (!$model->getId()) {
+        try {
+            return $this->_getService()->getById((int) $this->getRequest()->getParam('id'));
+        } catch (Mage_Core_Exception_NoSuchEntity) {
             Mage::getSingleton('adminhtml/session')->addError($this->__('This revocation request no longer exists.'));
             return null;
         }
-        return $model;
+    }
+
+    protected function _getService(): Maho_Revocation_Service_Request
+    {
+        return Mage::getService('revocation/request');
     }
 
     #[Maho\Config\Route('/admin/sales_revocation/index')]
@@ -78,16 +82,12 @@ class Maho_Revocation_Adminhtml_Sales_RevocationController extends Mage_Adminhtm
         }
 
         try {
-            $note = trim((string) $this->getRequest()->getParam('admin_note'));
-            $model->setAdminNote($note !== '' ? $note : null);
-
-            $service = Mage::getService('revocation/request');
+            $model->setAdminNote((string) $this->getRequest()->getParam('admin_note'));
             $processedStatus = (string) $this->getRequest()->getParam('processed_status');
-            if ($processedStatus !== '' && $service->isValidProcessedStatus($processedStatus)) {
-                $service->applyProcessedStatus($model, $processedStatus);
+            if ($processedStatus !== '') {
+                $model->setProcessedStatus($processedStatus);
             }
-
-            $model->save();
+            $this->_getService()->save($model);
             Mage::getSingleton('adminhtml/session')->addSuccess($this->__('The revocation request has been saved.'));
         } catch (Exception $e) {
             Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
@@ -122,11 +122,9 @@ class Maho_Revocation_Adminhtml_Sales_RevocationController extends Mage_Adminhtm
         $order = $model->getOrder();
 
         try {
-            $model->setProcessedStatus($accepted
+            $this->_getService()->save($model->setProcessedStatus($accepted
                 ? Maho_Revocation_Model_Request::PROCESSED_STATUS_ACCEPTED
-                : Maho_Revocation_Model_Request::PROCESSED_STATUS_REJECTED);
-            $model->setProcessedAt(Mage::app()->getLocale()->formatDateForDb('now'));
-            $model->save();
+                : Maho_Revocation_Model_Request::PROCESSED_STATUS_REJECTED));
 
             // Audit note only: the revocation outcome lives on the request, never on the
             // order's status/state. A revocation can target an order in any state, and the
@@ -173,9 +171,8 @@ class Maho_Revocation_Adminhtml_Sales_RevocationController extends Mage_Adminhtm
         }
 
         try {
-            $model->setOrderId((int) $order->getId())
-                ->appendAdminNote(sprintf('Manually linked to order %s', $order->getIncrementId()))
-                ->save();
+            $this->_getService()->save($model->setOrderId((int) $order->getId())
+                ->appendAdminNote(sprintf('Manually linked to order %s', $order->getIncrementId())));
             Mage::getSingleton('adminhtml/session')->addSuccess($this->__('The request has been linked to order %s.', $order->getIncrementId()));
         } catch (Exception $e) {
             Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
@@ -197,7 +194,7 @@ class Maho_Revocation_Adminhtml_Sales_RevocationController extends Mage_Adminhtm
         }
 
         try {
-            if (Mage::getService('revocation/request')->resendReceipt($model)) {
+            if ($this->_getService()->resendReceipt($model)) {
                 Mage::getSingleton('adminhtml/session')->addSuccess($this->__('The receipt email has been resent to %s.', $model->getEmail()));
             } else {
                 Mage::getSingleton('adminhtml/session')->addError($this->__('The receipt email could not be sent. Please check the email configuration.'));
@@ -245,13 +242,10 @@ class Maho_Revocation_Adminhtml_Sales_RevocationController extends Mage_Adminhtm
         try {
             foreach ($requestIds as $requestId) {
                 $model = Mage::getModel('revocation/request')->load((int) $requestId);
-                if (!$model->getId()) {
-                    continue;
+                if ($model->getId()) {
+                    $this->_getService()->save($model->setProcessedStatus($processedStatus));
+                    $processed++;
                 }
-                $model->setProcessedStatus($processedStatus);
-                $model->setProcessedAt(Mage::app()->getLocale()->formatDateForDb('now'));
-                $model->save();
-                $processed++;
             }
             Mage::getSingleton('adminhtml/session')->addSuccess($this->__('Total of %d request(s) were updated.', $processed));
         } catch (Exception $e) {

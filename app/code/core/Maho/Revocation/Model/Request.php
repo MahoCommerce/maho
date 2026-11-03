@@ -217,6 +217,27 @@ class Maho_Revocation_Model_Request extends Mage_Core_Model_Abstract
         return $order->getId() ? $order : null;
     }
 
+    /**
+     * A new processing status must be a known one, and it stamps processed_at. An empty admin note is stored as null.
+     *
+     * @throws Mage_Core_Exception_Input
+     */
+    #[\Override]
+    protected function _beforeSave(): self
+    {
+        $status = $this->getProcessedStatus();
+        if ($status !== null && $this->dataHasChangedFor('processed_status')) {
+            if (!array_key_exists($status, Mage::getModel('revocation/source_processedStatus')->toOptionHash())) {
+                throw new Mage_Core_Exception_Input()
+                    ->addError('processed_status', Mage::helper('revocation')->__('Invalid processing status.'));
+            }
+            $this->setProcessedAt(Mage::app()->getLocale()->formatDateForDb('now'));
+        }
+        $note = trim((string) $this->getAdminNote());
+        $this->setAdminNote($note === '' ? null : $note);
+        return parent::_beforeSave();
+    }
+
     public function appendAdminNote(string $note): self
     {
         $existing = trim((string) $this->getAdminNote());

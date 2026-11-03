@@ -8,21 +8,71 @@
 
 declare(strict_types=1);
 
+use Maho_Revocation_Model_Channel as Channel;
+
 /**
  * Records a revocation declaration and dispatches the receipt/notification emails.
  *
- * Input keys: customer_name, email, order_reference, reason, ip, user_agent, locale,
+ * Input keys of submit(): customer_name, email, order_reference, reason, ip, user_agent, locale,
  * store_id, received_at_microtime (float), customer_id (?int), session_order_id (?int).
+ * The web channel adds form_fields (the POST, for the honeypot) and render_token (the frt field).
+ * The API channel gives customer_id and order_id or order_reference. The service then takes the
+ * name, the email and the store from the customer and the order.
  */
 class Maho_Revocation_Service_Request
 {
+    public const RATE_LIMIT_WINDOW = 3600;
+
     /**
+     * @throws Mage_Core_Exception_NoSuchEntity
+     */
+    public function getById(int $id): Maho_Revocation_Model_Request
+    {
+        $request = Mage::getModel('revocation/request')->load($id);
+        if (!$request->getId()) {
+            throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('revocation')->__('Revocation request not found'));
+        }
+        return $request;
+    }
+
+    /**
+     * @throws Mage_Core_Exception_Input when the processing status is not valid
+     */
+    public function save(Maho_Revocation_Model_Request $request): Maho_Revocation_Model_Request
+    {
+        $request->save();
+        return $request;
+    }
+
+    /**
+     * Record the declaration in $input and send its emails. Return null and record nothing when the
+     * web form fills the honeypot or comes back too fast, so that a bot cannot detect the trap.
+     *
+     * @throws Mage_Core_Exception_NoSuchEntity when revocation is disabled, or the customer or the order of the API does not exist
+     * @throws Mage_Core_Exception_TooManyRequests when the client is over its limit
      * @throws Mage_Core_Exception on validation failure (before any row is written)
      */
-    public function submit(\Maho\DataObject $input): Maho_Revocation_Model_Request
+    public function submit(\Maho\DataObject $input, Channel $channel): ?Maho_Revocation_Model_Request
     {
         $helper = Mage::helper('revocation');
         $coreHelper = Mage::helper('core');
+
+        $input->setStoreId((int) ($input->getStoreId() ?? Mage::app()->getStore()->getId()));
+        if (!$helper->isEnabled($input->getStoreId())) {
+            throw new Mage_Core_Exception_NoSuchEntity($helper->__('Revocation is not available'));
+        }
+        if ($channel === Channel::Web && $this->_isBotSubmission($input)) {
+            return null;
+        }
+        if ($channel === Channel::Api) {
+            $this->_readCustomerOrder($input);
+        }
+        if ($helper->isIpRateLimited($input->getStoreId())) {
+            throw new Mage_Core_Exception_TooManyRequests(match ($channel) {
+                Channel::Web => $helper->__('Your request could not be processed right now. Please try again later or contact us directly.'),
+                Channel::Api => $helper->__('Too many requests. Please try again later.'),
+            }, self::RATE_LIMIT_WINDOW);
+        }
 
         $customerName = trim((string) $input->getCustomerName());
         $email = trim((string) $input->getEmail());
@@ -40,7 +90,7 @@ class Maho_Revocation_Service_Request
         $receivedMicrotime = (float) ($input->getReceivedAtMicrotime() ?: microtime(true));
 
         $request = Mage::getModel('revocation/request');
-        $request->setStoreId((int) ($input->getStoreId() ?? Mage::app()->getStore()->getId()))
+        $request->setStoreId((int) $input->getStoreId())
             ->setOrderId($orderId)
             ->setOrderReference(mb_substr($orderReference, 0, 64))
             ->setCustomerName(mb_substr($customerName, 0, 255))
@@ -87,27 +137,66 @@ class Maho_Revocation_Service_Request
         return $sent;
     }
 
-    public function isValidProcessedStatus(string $status): bool
+    /**
+     * Whether the web form filled the honeypot or came back faster than the minimum time.
+     * The form embeds an encrypted render timestamp. A missing or unreadable one counts as too fast.
+     */
+    protected function _isBotSubmission(\Maho\DataObject $input): bool
     {
-        return array_key_exists(
-            $status,
-            Mage::getModel('revocation/source_processedStatus')->toOptionHash(),
-        );
+        $storeId = (int) $input->getStoreId();
+        $fields = $input->getFormFields();
+        if (Mage::getStoreConfigFlag(Maho_Revocation_Helper_Data::XML_PATH_HONEYPOT_ENABLED, $storeId)
+            && Mage::helper('core')->isHoneypotTriggered(is_array($fields) ? $fields : [])) {
+            return true;
+        }
+
+        $minSeconds = (int) Mage::getStoreConfig(Maho_Revocation_Helper_Data::XML_PATH_MIN_SUBMIT_SECONDS, $storeId);
+        if ($minSeconds <= 0) {
+            return false;
+        }
+        $renderedAt = Mage::helper('core')->decrypt((string) $input->getRenderToken());
+        return !ctype_digit($renderedAt)
+            || ((float) $input->getReceivedAtMicrotime() - (float) $renderedAt) < $minSeconds;
     }
 
     /**
-     * Records a processing decision on the request: sets the status and stamps
-     * processed_at. Does not save (the caller persists). Throws on an unknown status.
+     * Fill the declaration of the API from the account of the customer and from the order, which the
+     * customer must own. The order must be inside its revocation period.
      *
+     * @throws Mage_Core_Exception_NoSuchEntity
      * @throws Mage_Core_Exception
      */
-    public function applyProcessedStatus(Maho_Revocation_Model_Request $request, string $status): void
+    protected function _readCustomerOrder(\Maho\DataObject $input): void
     {
-        if (!$this->isValidProcessedStatus($status)) {
-            Mage::throwException(Mage::helper('revocation')->__('Invalid processing status.'));
+        $helper = Mage::helper('revocation');
+        $customer = Mage::getService('customer/customer')->getById((int) $input->getCustomerId());
+        if (!$customer) {
+            throw new Mage_Core_Exception_NoSuchEntity($helper->__('Customer not found'));
         }
-        $request->setProcessedStatus($status);
-        $request->setProcessedAt(Mage::app()->getLocale()->formatDateForDb('now'));
+
+        $order = Mage::getModel('sales/order');
+        $orderReference = trim((string) $input->getOrderReference());
+        if ($input->getOrderId()) {
+            $order->load((int) $input->getOrderId());
+        } elseif ($orderReference !== '') {
+            $order->loadByIncrementId($orderReference);
+        } else {
+            Mage::throwException($helper->__('An order reference is required'));
+        }
+        if (!$order->getId() || (int) $order->getCustomerId() !== (int) $customer->getId()) {
+            throw new Mage_Core_Exception_NoSuchEntity($helper->__('Order not found'));
+        }
+        if (!$helper->isOrderWithinCoolingOffWindow($order)) {
+            Mage::throwException($helper->__('The revocation period for this order has expired'));
+        }
+
+        $input->addData([
+            'customer_name' => trim($customer->getName() ?: $customer->getFirstname() . ' ' . $customer->getLastname()),
+            'email' => (string) $customer->getEmail(),
+            'order_reference' => (string) $order->getIncrementId(),
+            'store_id' => (int) $order->getStoreId(),
+            'session_order_id' => (int) $order->getId(),
+        ]);
     }
 
     /**
