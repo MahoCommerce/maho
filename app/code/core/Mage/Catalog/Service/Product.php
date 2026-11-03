@@ -238,7 +238,13 @@ class Mage_Catalog_Service_Product
         if (is_array($product->getStockData())) {
             /** @var Mage_CatalogInventory_Service_Stock $stock */
             $stock = Mage::getService('cataloginventory/stock');
-            $product->setStockData($stock->prepare($product->getStockData()));
+            $storedItem = $product->getId()
+                ? ($product->getStockItem() ?? Mage::getModel('cataloginventory/stock_item')->loadByProduct($product))
+                : null;
+            $product->setStockData($stock->prepare(
+                $product->getStockData(),
+                $storedItem?->getId() ? (float) $storedItem->getQty() : null,
+            ));
         }
         $product->save();
         return $product;

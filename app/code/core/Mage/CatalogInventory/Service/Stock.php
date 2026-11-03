@@ -81,18 +81,21 @@ class Mage_CatalogInventory_Service_Stock
 
     /**
      * Check the stock change $data and return it with the stock status: a quantity without a stock status puts the
-     * product in stock when the quantity is above 0.
+     * product in stock when the quantity is above 0. A quantity equal to $storedQty is accepted when it is
+     * negative, because orders with backorders take the stock below 0 and a save must not refuse the product.
      *
      * @param array<string, mixed> $data the columns of the change
      * @return array<string, mixed>
      * @throws Mage_Core_Exception_Input
      */
-    public function prepare(array $data): array
+    public function prepare(array $data, ?float $storedQty = null): array
     {
         $errors = new Mage_Core_Exception_Input();
         $helper = Mage::helper('cataloginventory');
         foreach (self::NON_NEGATIVE_COLUMNS as $column) {
-            if (isset($data[$column]) && is_numeric($data[$column]) && (float) $data[$column] < 0) {
+            if (isset($data[$column]) && is_numeric($data[$column]) && (float) $data[$column] < 0
+                && !($column === 'qty' && $storedQty !== null && (float) $data[$column] === $storedQty)
+            ) {
                 $errors->addError($column, $column === 'qty'
                     ? $helper->__('Quantity cannot be negative')
                     : $helper->__('%s cannot be negative', $column));
@@ -165,7 +168,7 @@ class Mage_CatalogInventory_Service_Stock
      */
     public function update(StockItem $item, array $data): StockItem
     {
-        $this->applyTo($item, $this->prepare($data));
+        $this->applyTo($item, $this->prepare($data, $item->getId() ? (float) $item->getQty() : null));
         $item->save();
         return $item;
     }
@@ -180,7 +183,7 @@ class Mage_CatalogInventory_Service_Stock
     {
         $transaction = Mage::getModel('core/resource_transaction');
         foreach ($changes as [$item, $data]) {
-            $this->applyTo($item, $this->prepare($data));
+            $this->applyTo($item, $this->prepare($data, $item->getId() ? (float) $item->getQty() : null));
             $transaction->addObject($item);
         }
         $transaction->save();

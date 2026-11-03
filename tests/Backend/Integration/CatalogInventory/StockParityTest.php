@@ -116,6 +116,28 @@ it('refuses a negative quantity on both transports', function () {
         ->and((float) stockParityItem($forAdmin)->getQty())->toBe(10.0);
 });
 
+it('saves a product whose stored quantity is negative after orders with backorders, on both transports', function () {
+    $forAdmin = stockParityProduct('PEST-STOCK-PARITY-BACKORDER-ADMIN');
+    $forApi = stockParityProduct('PEST-STOCK-PARITY-BACKORDER-API');
+    // An order with backorders takes the stock below 0 without a save of the product
+    $write = Mage::getSingleton('core/resource')->getConnection('core_write');
+    foreach ([$forAdmin, $forApi] as $product) {
+        $write->update(
+            Mage::getSingleton('core/resource')->getTableName('cataloginventory/stock_item'),
+            ['qty' => -3, 'backorders' => Mage_CatalogInventory_Model_Stock::BACKORDERS_YES_NONOTIFY, 'use_config_backorders' => 0],
+            ['product_id = ?' => (int) $product->getId()],
+        );
+    }
+
+    $admin = stockViaAdmin($forAdmin, ['qty' => -3, 'is_in_stock' => 1, 'backorders' => 1, 'use_config_backorders' => 0]);
+    $api = stockViaApi(['sku' => 'PEST-STOCK-PARITY-BACKORDER-API', 'qty' => -3, 'notifyStockQty' => 2]);
+
+    expect($admin['errors'])->toBe([])
+        ->and($api['status'])->toBe(200)
+        ->and((float) stockParityItem($forAdmin)->getQty())->toBe(-3.0)
+        ->and((float) stockParityItem($forApi)->getQty())->toBe(-3.0);
+});
+
 it('refuses a quantity that the column cannot hold on both transports', function () {
     $forAdmin = stockParityProduct('PEST-STOCK-PARITY-MAX-ADMIN');
     stockParityProduct('PEST-STOCK-PARITY-MAX-API');
