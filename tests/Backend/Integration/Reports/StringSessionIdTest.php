@@ -27,8 +27,12 @@ it('reads the customer id of the session as an int when the session holds a stri
     $session = Mage::getSingleton('customer/session');
     $session->setData('customer_id', '12');
 
-    expect($session->getCustomerId())->toBe(12);
-    Mage::getModel('reports/product_index_viewed')->setCustomerId($session->getCustomerId());
+    try {
+        expect($session->getCustomerId())->toBe(12);
+        Mage::getModel('reports/product_index_viewed')->setCustomerId($session->getCustomerId());
+    } finally {
+        $session->unsetData('customer_id');
+    }
 });
 
 it('reads the stored visitor id and customer id of a report item as int', function (): void {
