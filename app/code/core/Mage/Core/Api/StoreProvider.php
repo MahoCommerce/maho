@@ -11,35 +11,20 @@ declare(strict_types=1);
 namespace Mage\Core\Api;
 
 use ApiPlatform\Metadata\Operation;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class StoreProvider extends \Maho\ApiPlatform\Provider
 {
+    /**
+     * @return list<Store>|Store
+     */
     #[\Override]
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): array|Store|null
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): array|Store
     {
-        // Single-store read: /stores/{id}. Load the model directly rather than
-        // Mage::app()->getStore(), which throws Mage_Core_Model_Store_Exception
-        // ("Invalid store code requested.") for an unknown id — surfacing as a
-        // 422 instead of the expected 404.
+        /** @var \Mage_Core_Service_Store $service */
+        $service = \Mage::getService('core/store');
         if (isset($uriVariables['id'])) {
-            $store = $this->loadById('core/store', (int) $uriVariables['id']);
-            if (!$store->getId() || !$store->getIsActive()) {
-                throw new NotFoundHttpException('Store not found');
-            }
-            return Store::fromModel($store);
+            return Store::fromModel($service->getActiveStore((int) $uriVariables['id']));
         }
-
-        $stores = [];
-
-        foreach (\Mage::app()->getStores(false) as $store) {
-            if (!$store->getIsActive()) {
-                continue;
-            }
-
-            $stores[] = Store::fromModel($store);
-        }
-
-        return $stores;
+        return array_map(Store::fromModel(...), $service->getActiveStores());
     }
 }

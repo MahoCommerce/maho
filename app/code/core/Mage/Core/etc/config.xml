@@ -226,6 +226,11 @@ SPDX-License-Identifier: AFL-3.0
                 <encryption_model>Mage_Core_Model_Encryption</encryption_model>
             </core>
         </helpers>
+        <services>
+            <core>
+                <class>Mage_Core_Service</class>
+            </core>
+        </services>
         <template>
             <email>
                 <design_email_header translate="label" module="core">

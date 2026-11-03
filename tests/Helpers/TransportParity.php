@@ -84,7 +84,7 @@ final class TransportParity
     }
 
     /**
-     * Call $action of an admin controller with $params as the request parameters.
+     * Post $params to $action of an admin controller. Return the success and the error messages of the session.
      *
      * @param class-string<\Mage_Adminhtml_Controller_Action> $controllerClass
      * @param array<string, mixed> $params
@@ -92,17 +92,17 @@ final class TransportParity
      */
     public static function admin(string $controllerClass, string $action, array $params): array
     {
-        $request = new \Mage_Core_Controller_Request_Http();
-        $request->setPost($params);
-        foreach ($params as $name => $value) {
-            $request->setParam($name, $value);
-        }
+        $request = new \Mage_Core_Controller_Request_Http(Request::create('/admin', 'POST', $params));
 
         new $controllerClass($request, new \Mage_Core_Controller_Response_Http())->{$action . 'Action'}();
 
         $messages = ['success' => [], 'errors' => []];
         foreach (\Mage::getSingleton('adminhtml/session')->getMessages(true)->getItems() as $message) {
-            $messages[$message->getType() === \Mage_Core_Model_Message::SUCCESS ? 'success' : 'errors'][] = $message->getText();
+            match ($message->getType()) {
+                \Mage_Core_Model_Message::SUCCESS => $messages['success'][] = $message->getText(),
+                \Mage_Core_Model_Message::ERROR => $messages['errors'][] = $message->getText(),
+                default => null,
+            };
         }
         return $messages;
     }
