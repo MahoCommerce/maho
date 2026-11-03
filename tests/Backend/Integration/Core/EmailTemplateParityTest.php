@@ -146,3 +146,11 @@ it('resets the config path that uses a deleted template on both transports', fun
             ->and(emailTemplateParityUsages($id))->toBe(0);
     }
 });
+
+it('checks a direct model save too, so an importer or an extension gets the same rules', function () {
+    $template = Mage::getModel('core/email_template')->setTemplateCode('Pest parity direct')
+        ->setTemplateSubject('<script>x</script>')->setTemplateText('Body');
+
+    expect(fn() => $template->save())->toThrow(Mage_Core_Exception_Input::class)
+        ->and(emailTemplateParityId('Pest parity direct'))->toBeNull();
+});

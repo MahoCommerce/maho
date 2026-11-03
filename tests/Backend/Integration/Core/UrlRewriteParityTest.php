@@ -103,7 +103,7 @@ it('rejects a request path that another rewrite of the store view has on both tr
     $admin = urlRewriteViaAdmin(['store_id' => $this->storeId, 'request_path' => 'pest-parity-taken.html', 'id_path' => 'pest/parity/two', 'target_path' => 'contacts']);
     $api = urlRewriteViaApi(['storeId' => $this->storeId, 'requestPath' => 'pest-parity-taken.html', 'idPath' => 'pest/parity/three', 'targetPath' => 'contacts']);
 
-    $message = "A URL rewrite for request path 'pest-parity-taken.html' already exists in store view {$this->storeId}";
+    $message = 'Request Path for Specified Store already exists.';
     expect($admin['errors'])->toBe([$message])
         ->and($api['status'])->toBe(409)
         ->and($api['errors'])->toBe([$message]);
@@ -159,4 +159,11 @@ describe('a system rewrite (decision needed: the admin page may change it, the A
             ->and($delete['status'])->toBe(409)
             ->and(Mage::getModel('core/url_rewrite')->load($this->system->getId())->getId())->not->toBeNull();
     });
+});
+
+it('checks a direct model save too, so an importer or an extension gets the same rules', function () {
+    $rewrite = Mage::getModel('core/url_rewrite')->setStoreId($this->storeId)->setIdPath('pest/parity/direct')
+        ->setRequestPath('pest-parity-direct.html')->setTargetPath('contacts')->setOptions('X');
+
+    expect(fn() => $rewrite->save())->toThrow(Mage_Core_Exception_Input::class, 'The redirect must be');
 });

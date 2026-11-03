@@ -116,11 +116,28 @@ class Mage_Newsletter_Model_Resource_Subscriber extends Mage_Core_Model_Resource
     }
 
     /**
+     * Refuse a new address that is empty or not valid. A stored address stays valid.
+     *
+     * @param Mage_Newsletter_Model_Subscriber $object
      * @return $this
+     * @throws Mage_Core_Exception_Input
      */
     #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $object)
     {
+        if (!$object->getId() || $object->dataHasChangedFor('subscriber_email')) {
+            $core = Mage::helper('core');
+            $email = (string) $object->getSubscriberEmail();
+            // The email validator accepts an empty value
+            $message = match (true) {
+                !$core->isValidNotBlank($email) => Mage::helper('newsletter')->__('Email address is required'),
+                !$core->isValidEmail($email) => Mage::helper('newsletter')->__('Invalid email address'),
+                default => null,
+            };
+            if ($message !== null) {
+                throw new Mage_Core_Exception_Input()->addError('email', $message);
+            }
+        }
         if ($object->hasData('subscriber_status') && $this->_shouldStampStatusChange($object)) {
             $object->setData('change_status_at', Mage::app()->getLocale()->formatDateForDb('now'));
         }

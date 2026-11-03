@@ -17,10 +17,97 @@ class Mage_Core_Model_Resource_Design extends Mage_Core_Model_Resource_Db_Abstra
     }
 
     /**
-     * Return whether another change of $storeId applies on a day between $dateFrom and $dateTo.
-     * A null date is an open bound. The change $excludeId does not count.
+     * Check the store view, the theme and the dates of $object, and the overlap with the other changes of its store view.
+     * An empty date removes that bound, and a date is stored as Y-m-d.
+     *
+     * @param Mage_Core_Model_Design $object
+     * @throws Mage_Core_Exception_Input with one error for each invalid field
+     * @throws Mage_Core_Exception_Conflict when the dates overlap another change of the same store view
      */
-    public function hasIntersection(int $storeId, ?string $dateFrom, ?string $dateTo, int $excludeId): bool
+    #[\Override]
+    protected function _beforeSave(Mage_Core_Model_Abstract $object)
+    {
+        $helper = Mage::helper('core');
+        $errors = new Mage_Core_Exception_Input();
+
+        $storeId = $object->getStoreId();
+        if ($storeId === null) {
+            $errors->addError('store_id', $helper->__('The store view is required.'));
+        } elseif (!array_key_exists($storeId, Mage::app()->getStores())) {
+            $errors->addError('store_id', $helper->__('The store view %s does not exist.', $storeId));
+        }
+
+        // Accept a stored design, because an admin can remove its theme after the change is saved
+        $design = (string) $object->getDesign();
+        if ($design === '') {
+            $errors->addError('design', $helper->__('The design is required.'));
+        } elseif ((!$object->getId() || $object->dataHasChangedFor('design')) && !in_array($design, $this->getInstalledDesigns(), true)) {
+            $errors->addError('design', $helper->__('The design "%s" is not an installed theme. Use the form "package/theme".', $design));
+        }
+
+        $dateFrom = $this->readDate($object, 'date_from', $errors);
+        $dateTo = $this->readDate($object, 'date_to', $errors);
+        if ($dateFrom !== null && $dateTo !== null && $dateFrom > $dateTo) {
+            $errors->addError('date_from', $helper->__('Start date cannot be greater than end date.'));
+        }
+
+        $errors->throwIfErrors();
+
+        if ($this->_checkIntersection((int) $storeId, $dateFrom, $dateTo, (int) $object->getId())) {
+            throw new Mage_Core_Exception_Conflict(
+                $helper->__('Your design change for the specified store intersects with another one, please specify another date range.'),
+            );
+        }
+
+        return parent::_beforeSave($object);
+    }
+
+    /**
+     * Write the date in $field of $object as Y-m-d, or null when it is empty, and return it.
+     * Add an error to $errors and return null when it is not a date.
+     */
+    private function readDate(Mage_Core_Model_Design $object, string $field, Mage_Core_Exception_Input $errors): ?string
+    {
+        $helper = Mage::helper('core');
+        $value = trim((string) $object->getData($field));
+        if ($value === '') {
+            $object->setData($field);
+            return null;
+        }
+        if (!$helper->isValidDate($value) && !$helper->isValidDateTime($value)) {
+            $errors->addError($field, $helper->__('The date "%s" is not valid. Use the format Y-m-d.', $value));
+            return null;
+        }
+        $date = substr($value, 0, 10);
+        $object->setData($field, $date);
+        return $date;
+    }
+
+    /**
+     * @return list<string> each installed theme as "package/theme"
+     */
+    private function getInstalledDesigns(): array
+    {
+        $designs = [];
+        foreach (Mage::getModel('core/design_package')->getThemeList() as $package => $themes) {
+            foreach ((array) $themes as $theme) {
+                $designs[] = $package . '/' . $theme;
+            }
+        }
+        return $designs;
+    }
+
+    /**
+     * Return whether another change of $storeId applies on a day between $dateFrom and $dateTo.
+     * A null date is an open bound. The change $currentId does not count.
+     *
+     * @param int $storeId
+     * @param string|null $dateFrom
+     * @param string|null $dateTo
+     * @param int $currentId
+     * @return bool
+     */
+    protected function _checkIntersection($storeId, $dateFrom, $dateTo, $currentId)
     {
         $adapter = $this->_getReadAdapter();
         $select = $adapter->select()
@@ -67,8 +154,8 @@ class Mage_Core_Model_Resource_Design extends Mage_Core_Model_Resource_Db_Abstra
         }
 
         $bind = [
-            'store_id'   => $storeId,
-            'current_id' => $excludeId,
+            'store_id'   => (int) $storeId,
+            'current_id' => (int) $currentId,
         ];
 
         if (!empty($dateTo)) {

@@ -62,10 +62,6 @@ class Mage_Index_Service_Process
      */
     public function setMode(Mage_Index_Model_Process $process, string $mode): void
     {
-        if (!array_key_exists($mode, $process->getModesOptions())) {
-            throw new Mage_Core_Exception_Input()
-                ->addError('mode', Mage::helper('index')->__('mode must be real_time or manual'));
-        }
         $process->setMode($mode)->save();
     }
 

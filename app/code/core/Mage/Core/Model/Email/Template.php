@@ -32,6 +32,19 @@ declare(strict_types=1);
 class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abstract
 {
     /**
+     * The fields that must not hold HTML tags, with their admin labels. Only the text of a template may hold HTML.
+     */
+    public const TAG_FREE_FIELDS = [
+        'template_code' => 'Template Name',
+        'template_subject' => 'Template Subject',
+        'template_styles' => 'Template Styles',
+        'template_sender_name' => 'Sender Name',
+        'template_sender_email' => 'Sender Email',
+        'orig_template_code' => 'Original Template',
+        'orig_template_variables' => 'Template Variables',
+    ];
+
+    /**
      * Configuration path for default email templates
      */
     public const XML_PATH_TEMPLATE_EMAIL               = 'global/template/email';
@@ -590,6 +603,57 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
             }
         }
         return $optionArray;
+    }
+
+    /**
+     * Check the template. The name must be set and unique, the subject and the text must be set, and only the text
+     * may hold HTML tags. The text keeps its template directives as they are, because only an admin user writes a
+     * template. A plain text template has no styles.
+     *
+     * @throws Mage_Core_Exception_Conflict when another template has the name
+     * @throws Mage_Core_Exception_Input with one error for each invalid field
+     */
+    #[\Override]
+    protected function _beforeSave()
+    {
+        $helper = Mage::helper('core');
+        $errors = new Mage_Core_Exception_Input();
+
+        $code = trim((string) $this->getTemplateCode());
+        $this->setTemplateCode($code);
+        if ($code === '') {
+            $errors->addError('template_code', $helper->__('The template Name must not be empty.'));
+        } elseif ($this->_getResource()->checkCodeUsage($this)) {
+            throw new Mage_Core_Exception_Conflict($helper->__("An email template with code '%s' already exists", $code));
+        }
+
+        if (trim((string) $this->getTemplateText()) === '') {
+            $errors->addError('template_text', $helper->__('The template text must not be empty.'));
+        }
+        if (trim((string) $this->getTemplateSubject()) === '') {
+            $errors->addError('template_subject', $helper->__('The template subject must not be empty.'));
+        }
+        // Accept a stored type, so that an old template without one can still be saved
+        $type = (int) $this->getData('template_type');
+        if ((!$this->getId() || $this->dataHasChangedFor('template_type')) && !in_array($type, [self::TYPE_TEXT, self::TYPE_HTML], true)) {
+            $errors->addError('template_type', $helper->__('The template type must be text or html.'));
+        }
+        $senderEmail = (string) $this->getTemplateSenderEmail();
+        if ($senderEmail !== '' && !$helper->isValidEmail($senderEmail)) {
+            $errors->addError('template_sender_email', $helper->__('The sender email is not a valid email address.'));
+        }
+        foreach (self::TAG_FREE_FIELDS as $field => $label) {
+            if ($helper->hasTags((string) $this->getData($field))) {
+                $errors->addError($field, $helper->__('%s must not contain HTML tags.', $helper->__($label)));
+            }
+        }
+
+        $errors->throwIfErrors();
+
+        if ($type === self::TYPE_TEXT) {
+            $this->setData('template_styles', '');
+        }
+        return parent::_beforeSave();
     }
 
     public function getAddedAt(): ?string
