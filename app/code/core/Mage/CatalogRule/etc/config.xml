@@ -21,6 +21,11 @@ SPDX-License-Identifier: AFL-3.0
                 <class>Mage_CatalogRule_Helper</class>
             </catalogrule>
         </helpers>
+        <services>
+            <catalogrule>
+                <class>Mage_CatalogRule_Service</class>
+            </catalogrule>
+        </services>
         <models>
             <catalogrule>
                 <class>Mage_CatalogRule_Model</class>
