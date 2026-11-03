@@ -71,28 +71,26 @@ abstract class Mage_Reports_Model_Product_Index_Abstract extends Mage_Core_Model
      * Retrieve visitor id
      *
      * if don't exists return current visitor id
-     *
-     * @return int
      */
-    public function getVisitorId()
+    public function getVisitorId(): ?int
     {
         if ($this->hasData('visitor_id')) {
-            return $this->getData('visitor_id');
+            $value = $this->getData('visitor_id');
+            return $value === null ? null : (int) $value;
         }
-        return Mage::getSingleton('log/visitor')->getId();
+        return Mage::getSingleton('log/visitor')->getVisitorId();
     }
 
     /**
      * Retrieve customer id
      *
      * if customer don't logged in return null
-     *
-     * @return int
      */
-    public function getCustomerId()
+    public function getCustomerId(): ?int
     {
         if ($this->hasData('customer_id')) {
-            return $this->getData('customer_id');
+            $value = $this->getData('customer_id');
+            return $value === null ? null : (int) $value;
         }
         return Mage::getSingleton('customer/session')->getCustomerId();
     }

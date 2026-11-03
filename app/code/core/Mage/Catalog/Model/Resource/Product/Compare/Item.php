@@ -36,7 +36,8 @@ class Mage_Catalog_Model_Resource_Product_Compare_Item extends Mage_Core_Model_R
         if ($object->getCustomerId()) {
             $select->where('customer_id = ?', (int) $object->getCustomerId());
         } else {
-            $select->where('visitor_id = ?', (int) $object->getVisitorId());
+            $select->where('visitor_id = ?', (int) $object->getVisitorId())
+                ->where('customer_id IS NULL');
         }
 
         $data = $read->fetchRow($select);
