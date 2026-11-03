@@ -19,6 +19,13 @@ it('sets the customer id of a compare item as int when the customer id is a stri
     expect($item->getCustomerId())->toBe(12);
 });
 
+it('keeps the customer id of a compare item null when the customer has no id', function (): void {
+    $item = Mage::getModel('catalog/product_compare_item');
+    $item->addCustomerData(Mage::getModel('customer/customer'));
+
+    expect($item->getCustomerId())->toBeNull();
+});
+
 it('reads the visitor id of a compare item as int when the visitor id is a string', function (): void {
     Mage::getSingleton('log/visitor')->setData('visitor_id', '7');
 

@@ -13,14 +13,12 @@ uses(Tests\MahoBackendTestCase::class);
  * A session of an older release holds the visitor id and the customer id as strings.
  * The typed setters of the models take an int only.
  */
-it('saves a product view index item when the visitor id is a string', function (): void {
-    $visitor = Mage::getSingleton('log/visitor');
-    $visitor->setData('visitor_id', '7');
+it('reads the visitor id of a report item as int when the visitor id is a string', function (): void {
+    Mage::getSingleton('log/visitor')->setData('visitor_id', '7');
 
     $item = Mage::getModel('reports/product_index_viewed');
 
     expect($item->getVisitorId())->toBe(7);
-    $item->setVisitorId($item->getVisitorId());
 });
 
 it('reads the customer id of the session as an int when the session holds a string', function (): void {

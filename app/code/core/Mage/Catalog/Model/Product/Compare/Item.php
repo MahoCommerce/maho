@@ -88,13 +88,11 @@ class Mage_Catalog_Model_Product_Compare_Item extends Mage_Core_Model_Abstract
 
     /**
      * Add customer data from customer object
-     *
-     * @return $this
      */
-    public function addCustomerData(Mage_Customer_Model_Customer $customer)
+    public function addCustomerData(Mage_Customer_Model_Customer $customer): static
     {
-        $this->setCustomerId((int) $customer->getId());
-        return $this;
+        $customerId = $customer->getId();
+        return $this->setCustomerId($customerId === null ? null : (int) $customerId);
     }
 
     /**
