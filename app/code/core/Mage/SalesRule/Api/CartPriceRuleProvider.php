@@ -13,7 +13,6 @@ namespace Mage\SalesRule\Api;
 use ApiPlatform\State\Pagination\TraversablePaginator;
 use Maho\ApiPlatform\Security\ApiUser;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 final class CartPriceRuleProvider extends \Maho\ApiPlatform\Provider
 {
@@ -30,9 +29,7 @@ final class CartPriceRuleProvider extends \Maho\ApiPlatform\Provider
     #[\Override]
     protected function provideItem(int|string $id): CartPriceRule
     {
-        $rule = $this->loadRule((int) $id);
-        $this->assertRuleReadable($rule, $this->requireUser());
-        return $this->toRuleDto($rule, true);
+        return $this->toRuleDto($this->loadRule((int) $id, $this->requireUser()), true);
     }
 
     /**
@@ -153,29 +150,23 @@ final class CartPriceRuleProvider extends \Maho\ApiPlatform\Provider
     }
 
     /**
-     * Load a rule or answer 404.
+     * Load the rule $id. A restricted token reads a rule that has at least one of its websites.
      */
-    public function loadRule(int $id): \Mage_SalesRule_Model_Rule
+    public function loadRule(int $id, ApiUser $user): \Mage_SalesRule_Model_Rule
     {
-        /** @var \Mage_SalesRule_Model_Rule $rule */
-        $rule = $this->loadById('salesrule/rule', $id);
-        if (!$rule->getId()) {
-            throw new NotFoundHttpException('Cart price rule not found');
-        }
-        return $rule;
+        /** @var \Mage_SalesRule_Service_Rule $service */
+        $service = \Mage::getService('salesrule/rule');
+        return $service->getById($id, $this->allowedWebsiteIds($user));
     }
 
     /**
-     * A restricted token reads a rule that has at least one of its websites. The rule is hidden otherwise.
+     * Load the rule $id. A restricted token changes only a rule whose websites are all in its scope.
      */
-    public function assertRuleReadable(\Mage_SalesRule_Model_Rule $rule, ApiUser $user): void
+    public function loadWritableRule(int $id, ApiUser $user): \Mage_SalesRule_Model_Rule
     {
-        $allowedWebsiteIds = $this->allowedWebsiteIds($user);
-        if ($allowedWebsiteIds !== null
-            && array_intersect(array_map(intval(...), (array) $rule->getWebsiteIds()), $allowedWebsiteIds) === []
-        ) {
-            throw new NotFoundHttpException('Cart price rule not found');
-        }
+        $rule = $this->loadRule($id, $user);
+        $this->assertAllWebsitesAllowed((array) $rule->getWebsiteIds(), $user, 'cart price rule');
+        return $rule;
     }
 
     /**

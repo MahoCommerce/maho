@@ -291,10 +291,12 @@ class ApiExceptionListener implements EventSubscriberInterface
                 'code' => $statusCode,
             ];
             if ($exception instanceof \Mage_Core_Exception_Input) {
-                $data['details'] = ['errors' => array_map(
+                $errors = array_map(
                     fn(array $error): array => ['field' => self::apiFieldName($error['field']), 'message' => $error['message']],
                     $exception->getErrors(),
-                )];
+                );
+                // The first field, as ValidationException gives it
+                $data['details'] = ['field' => $errors[0]['field'] ?? null, 'errors' => $errors];
             }
 
             if ($this->showDebug()) {

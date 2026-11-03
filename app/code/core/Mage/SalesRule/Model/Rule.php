@@ -50,6 +50,12 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
     public const CART_FIXED_ACTION = 'cart_fixed';
     public const BUY_X_GET_Y_ACTION = 'buy_x_get_y';
 
+    /** The actions of a cart price rule */
+    public const SIMPLE_ACTIONS = [self::BY_PERCENT_ACTION, self::BY_FIXED_ACTION, self::CART_FIXED_ACTION, self::BUY_X_GET_Y_ACTION];
+
+    /** A new specific coupon code */
+    public const COUPON_CODE_PATTERN = '/^[A-Za-z0-9_-]{3,64}$/';
+
     /**
      * Store coupon code generator instance
      *
@@ -122,6 +128,63 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
     public static function getCouponMassGenerator()
     {
         return Mage::getSingleton('salesrule/coupon_massgenerator');
+    }
+
+    /**
+     * @throws Mage_Core_Exception_Input with one error for each problem of the rule
+     */
+    #[\Override]
+    protected function _beforeSave()
+    {
+        $this->validateRecord()->throwIfErrors();
+        return parent::_beforeSave();
+    }
+
+    /**
+     * Add an error to $errors for each problem of the rule, and return $errors. The coupon resource model
+     * refuses a code that another coupon uses.
+     */
+    public function validateRecord(Mage_Core_Exception_Input $errors = new Mage_Core_Exception_Input()): Mage_Core_Exception_Input
+    {
+        $helper = Mage::helper('salesrule');
+        $this->_validateScope($errors);
+
+        if (!in_array($this->getData('simple_action') ?? self::BY_PERCENT_ACTION, self::SIMPLE_ACTIONS, true)) {
+            $this->_addRecordError($errors, 'simple_action', $helper->__('The action must be one of: %s.', implode(', ', self::SIMPLE_ACTIONS)));
+        }
+        $amount = (float) $this->getDiscountAmount();
+        if ($amount < 0) {
+            $this->_addRecordError($errors, 'discount_amount', $helper->__('The discount amount must be 0 or more.'));
+        } elseif ($amount > 100 && $this->getSimpleAction() === self::BY_PERCENT_ACTION) {
+            $this->_addRecordError($errors, 'discount_amount', $helper->__('The discount amount must not be more than 100 for a percent discount.'));
+        }
+        $counts = [
+            'discount_qty' => 'Maximum Qty Discount is Applied To',
+            'discount_step' => 'Discount Qty Step (Buy X)',
+            'uses_per_coupon' => 'Uses per Coupon',
+            'uses_per_customer' => 'Uses per Customer',
+            'sort_order' => 'Priority',
+        ];
+        foreach ($counts as $field => $label) {
+            if ((float) $this->getData($field) < 0) {
+                $this->_addRecordError($errors, $field, $helper->__('%s must be 0 or more.', $helper->__($label)));
+            }
+        }
+        if (!in_array((int) $this->getSimpleFreeShipping(), [0, self::FREE_SHIPPING_ITEM, self::FREE_SHIPPING_ADDRESS], true)) {
+            $this->_addRecordError($errors, 'simple_free_shipping', $helper->__('The free shipping option must be 0, 1 or 2.'));
+        }
+
+        $couponType = (int) ($this->getCouponType() ?? self::COUPON_TYPE_NO_COUPON);
+        if (!in_array($couponType, [self::COUPON_TYPE_NO_COUPON, self::COUPON_TYPE_SPECIFIC, self::COUPON_TYPE_AUTO], true)) {
+            $this->_addRecordError($errors, 'coupon_type', $helper->__('The coupon type is not valid.'));
+        } elseif ($couponType === self::COUPON_TYPE_SPECIFIC && !$this->getUseAutoGeneration()) {
+            $code = trim((string) $this->getCouponCode());
+            // A code that the rule had before passes, because older codes can have other characters
+            if ($code !== '' && (!$this->getId() || $this->dataHasChangedFor('coupon_code')) && !preg_match(self::COUPON_CODE_PATTERN, $code)) {
+                $this->_addRecordError($errors, 'coupon_code', $helper->__('The coupon code must have 3 to 64 characters of A-Z, a-z, 0-9, _ and -.'));
+            }
+        }
+        return $errors;
     }
 
     /**

@@ -1,6 +1,8 @@
 <?php
 
 /**
+ * Read a coupon from REST or GraphQL, and give the write and the check of a code to the cart price rule service.
+ *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_SalesRule
@@ -12,16 +14,11 @@ namespace Mage\SalesRule\Api;
 
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Operation;
-use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
+use Maho\ApiPlatform\Trait\PriceRuleFieldsTrait;
 
-/**
- * Coupon State Processor - Handles coupon CRUD and validation.
- */
 final class CouponProcessor extends \Maho\ApiPlatform\Processor
 {
-    use RuleFieldsTrait;
+    use PriceRuleFieldsTrait;
 
     private const DISCOUNT_TYPE_MAP = [
         'percent' => 'by_percent',
@@ -30,488 +27,258 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
         'buy_x_get_y' => 'buy_x_get_y',
     ];
 
-    private const VALID_DISCOUNT_TYPES = ['percent', 'fixed', 'cart_fixed', 'buy_x_get_y'];
+    /** The rule column and the type of each field */
+    private const RULE_FIELDS = [
+        'isActive' => ['is_active', 'bool'],
+        'usageLimit' => ['uses_per_coupon', 'int'],
+        'usagePerCustomer' => ['uses_per_customer', 'int'],
+        'fromDate' => ['from_date', 'date'],
+        'toDate' => ['to_date', 'date'],
+        'sortOrder' => ['sort_order', 'int'],
+        'stopRulesProcessing' => ['stop_rules_processing', 'bool'],
+        'discountQty' => ['discount_qty', 'float'],
+        'discountStep' => ['discount_step', 'int'],
+        'simpleFreeShipping' => ['simple_free_shipping', 'int'],
+        'applyToShipping' => ['apply_to_shipping', 'bool'],
+    ];
 
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): ?Coupon
     {
-        $operationName = $operation->getName();
+        $name = $operation->getName();
+        $isGraphQl = in_array($name, ['create', 'update', 'delete', 'validate'], true);
+        $input = $isGraphQl ? $context['args']['input'] ?? [] : ($operation instanceof Delete ? [] : $context['request']?->toArray() ?? []);
+        $id = (int) ($isGraphQl ? $input['id'] ?? 0 : $uriVariables['id'] ?? 0);
 
         return match (true) {
-            $operationName === 'create' => $this->createFromGraphQl($context),
-            $operationName === 'update' => $this->updateFromGraphQl($context),
-            $operationName === 'delete' => $this->deleteFromGraphQl($context),
-            $operationName === 'validate' => $this->validateFromGraphQl($context),
-            $operation instanceof Delete => $this->doDelete((int) ($uriVariables['id'] ?? 0)),
-            str_contains($operationName, 'validate') => $this->doValidateFromRest($context),
-            isset($uriVariables['id']) => $this->doUpdate((int) $uriVariables['id'], $context['request']?->toArray() ?? []),
-            default => $this->doCreate($context['request']?->toArray() ?? []),
+            str_contains($name, 'validate') => $this->validate((string) ($input['code'] ?? ''), isset($input['cartId']) ? (int) $input['cartId'] : null),
+            $name === 'delete', $operation instanceof Delete => $this->delete($id),
+            $name === 'update', isset($uriVariables['id']) => $this->update($id, $input),
+            default => $this->create($input),
         };
     }
 
-    private function createFromGraphQl(array $context): Coupon
+    /**
+     * @param array<string, mixed> $data
+     */
+    private function create(array $data): Coupon
     {
-        $args = $context['args']['input'] ?? [];
-        return $this->doCreate($args);
+        /** @var \Mage_SalesRule_Service_Rule $service */
+        $service = \Mage::getService('salesrule/rule');
+        $errors = new \Mage_Core_Exception_Input();
+        $code = (string) ($data['code'] ?? '');
+
+        $rule = $service->newRule()->setIsActive()->setName($data['description'] ?? "Coupon: {$code}")->setDescription($data['description'] ?? '');
+        // Without scope fields, a coupon is for all groups and for the website of the current store only
+        $rule->setCustomerGroupIds(\Mage::getResourceModel('customer/group_collection')->getAllIds())
+            ->setWebsiteIds([(int) \Maho\ApiPlatform\Service\StoreContext::getStore()->getWebsiteId()]);
+        $this->readFields($rule, $data + ['discountType' => ''], $errors);
+        $this->readDiscountAmount($rule, $data['discountAmount'] ?? 0, $errors);
+
+        /** @var \Mage_SalesRule_Model_Coupon $coupon */
+        $coupon = \Mage::getModel('salesrule/coupon');
+        $coupon->setIsPrimary()->setCode($code);
+        $this->readExpirationDate($coupon, $data, $errors);
+        return Coupon::fromModel($service->getCouponById((int) $service->saveCoupon($coupon, $rule, $errors)->getId()));
     }
 
-    private function updateFromGraphQl(array $context): Coupon
+    /**
+     * @param array<string, mixed> $data
+     */
+    private function update(int $id, array $data): Coupon
     {
-        $args = $context['args']['input'] ?? [];
-        $id = (int) ($args['id'] ?? 0);
         if (!$id) {
-            throw new UnprocessableEntityHttpException('Coupon ID is required');
+            throw new \Mage_Core_Exception_Input()->addError('id', 'Coupon ID is required');
         }
-        return $this->doUpdate($id, $args);
-    }
-
-    private function deleteFromGraphQl(array $context): null
-    {
-        $id = (int) ($context['args']['input']['id'] ?? 0);
-        return $this->doDelete($id);
-    }
-
-    private function validateFromGraphQl(array $context): Coupon
-    {
-        $args = $context['args']['input'] ?? [];
-        return $this->doValidate(
-            $args['code'] ?? '',
-            isset($args['cartId']) ? (int) $args['cartId'] : null,
-        );
-    }
-
-    private function doValidateFromRest(array $context): Coupon
-    {
-        $body = $context['request']?->toArray() ?? [];
-        return $this->doValidate(
-            $body['code'] ?? '',
-            isset($body['cartId']) ? (int) $body['cartId'] : null,
-        );
-    }
-
-    private function doCreate(array $data): Coupon
-    {
-        $code = $data['code'] ?? '';
-        $this->validateCouponCode($code);
-
-        $discountType = $data['discountType'] ?? '';
-        if (!in_array($discountType, self::VALID_DISCOUNT_TYPES, true)) {
-            throw new UnprocessableEntityHttpException('Invalid discount type. Must be one of: ' . implode(', ', self::VALID_DISCOUNT_TYPES));
-        }
-
-        $discountAmount = (float) ($data['discountAmount'] ?? 0);
-        if ($discountAmount <= 0) {
-            throw new UnprocessableEntityHttpException('Discount amount must be greater than 0');
-        }
-
-        if ($this->isCouponCodeTaken($code)) {
-            throw new ConflictHttpException("Coupon code '{$code}' already exists");
-        }
-
-        /** @var \Mage_SalesRule_Model_Rule $rule */
-        $rule = \Mage::getModel('salesrule/rule');
-        $rule->setName($data['description'] ?? "Coupon: {$code}");
-        $rule->setDescription($data['description'] ?? '');
-        $rule->setIsActive(isset($data['isActive']) ? (bool) $data['isActive'] : true);
-        $rule->setCouponType(\Mage_SalesRule_Model_Rule::COUPON_TYPE_SPECIFIC);
-        $rule->setSimpleAction(self::DISCOUNT_TYPE_MAP[$discountType]);
-        $rule->setDiscountAmount($discountAmount);
-        $rule->setSortOrder(isset($data['sortOrder']) ? (int) $data['sortOrder'] : 0);
-        $rule->setStopRulesProcessing(isset($data['stopRulesProcessing']) ? (bool) $data['stopRulesProcessing'] : false);
-        $rule->setDiscountStep(isset($data['discountStep']) ? (int) $data['discountStep'] : 0);
-        $rule->setSimpleFreeShipping($this->normalizeSimpleFreeShipping($data['simpleFreeShipping'] ?? 0));
-        $rule->setApplyToShipping(isset($data['applyToShipping']) ? (bool) $data['applyToShipping'] : false);
-        if (isset($data['discountQty'])) {
-            $rule->setDiscountQty((float) $data['discountQty']);
-        }
-
-        if (!empty($data['fromDate'])) {
-            $rule->setFromDate($data['fromDate']);
-        }
-        if (!empty($data['toDate'])) {
-            $rule->setToDate($data['toDate']);
-        }
-
-        if (isset($data['usageLimit'])) {
-            $rule->setUsesPerCoupon((int) $data['usageLimit']);
-        }
-        if (isset($data['usagePerCustomer'])) {
-            $rule->setUsesPerCustomer((int) $data['usagePerCustomer']);
-        }
-
-        // When omitted the rule keeps the historical all-groups default; websites
-        // default to the CURRENT store's website (not all websites) so a coupon
-        // never silently spans websites the caller didn't ask for.
-        $rule->setCustomerGroupIds(
-            isset($data['customerGroupIds'])
-                ? $this->normalizeCustomerGroupIds($data['customerGroupIds'])
-                : array_keys(\Mage::getModel('customer/group')->getCollection()->toOptionHash()),
-        );
-        $rule->setWebsiteIds(
-            isset($data['websiteIds'])
-                ? $this->normalizeWebsiteIds($data['websiteIds'])
-                : [(int) \Maho\ApiPlatform\Service\StoreContext::getStore()->getWebsiteId()],
-        );
-
-        if (isset($data['minimumSubtotal']) && (float) $data['minimumSubtotal'] > 0) {
-            $this->setMinimumSubtotalCondition($rule, (float) $data['minimumSubtotal']);
-        }
-
-        $rule->setCouponCode($code);
-        $rule->save();
-
-        /** @var \Mage_SalesRule_Model_Coupon $coupon */
-        $coupon = \Mage::getModel('salesrule/coupon');
-        $coupon->loadByCode($code);
-
-        if (array_key_exists('expirationDate', $data)) {
-            $coupon->setData('expiration_date', $this->normalizeExpirationDate($data['expirationDate']));
-            $coupon->save();
-        }
-
-        return Coupon::fromModel($coupon);
-    }
-
-    private function doUpdate(int $id, array $data): Coupon
-    {
-        /** @var \Mage_SalesRule_Model_Coupon $coupon */
-        $coupon = \Mage::getModel('salesrule/coupon');
-        $coupon->load($id);
-
-        if (!$coupon->getId()) {
-            throw new NotFoundHttpException('Coupon not found');
-        }
-
-        /** @var \Mage_SalesRule_Model_Rule $rule */
-        $rule = \Mage::getModel('salesrule/rule');
-        $rule->load($coupon->getRuleId());
-
-        if (!$rule->getId()) {
-            throw new NotFoundHttpException('Associated price rule not found');
-        }
-
-        $this->assertRuleWebsitesAllowed($rule);
-
-        if (isset($data['discountType'])) {
-            if (!in_array($data['discountType'], self::VALID_DISCOUNT_TYPES, true)) {
-                throw new UnprocessableEntityHttpException('Invalid discount type');
-            }
-            $rule->setSimpleAction(self::DISCOUNT_TYPE_MAP[$data['discountType']]);
-        }
-
-        if (isset($data['discountAmount'])) {
-            $amount = (float) $data['discountAmount'];
-            if ($amount <= 0) {
-                throw new UnprocessableEntityHttpException('Discount amount must be greater than 0');
-            }
-            $rule->setDiscountAmount($amount);
-        }
+        /** @var \Mage_SalesRule_Service_Rule $service */
+        $service = \Mage::getService('salesrule/rule');
+        [$coupon, $rule] = $this->loadWritable($service, $id);
+        $errors = new \Mage_Core_Exception_Input();
 
         if (isset($data['description'])) {
-            $rule->setDescription($data['description']);
-            $rule->setName($data['description']);
+            $rule->setDescription($data['description'])->setName($data['description']);
         }
-
-        if (isset($data['isActive'])) {
-            $rule->setIsActive((bool) $data['isActive']);
+        $this->readFields($rule, $data, $errors);
+        if (isset($data['discountAmount'])) {
+            $this->readDiscountAmount($rule, $data['discountAmount'], $errors);
         }
-
-        if (array_key_exists('usageLimit', $data)) {
-            $rule->setUsesPerCoupon($data['usageLimit'] !== null ? (int) $data['usageLimit'] : 0);
-        }
-
-        if (array_key_exists('usagePerCustomer', $data)) {
-            $rule->setUsesPerCustomer($data['usagePerCustomer'] !== null ? (int) $data['usagePerCustomer'] : 0);
-        }
-
-        if (array_key_exists('fromDate', $data)) {
-            $rule->setFromDate($data['fromDate']);
-        }
-
-        if (array_key_exists('toDate', $data)) {
-            $rule->setToDate($data['toDate']);
-        }
-
-        if (isset($data['sortOrder'])) {
-            $rule->setSortOrder((int) $data['sortOrder']);
-        }
-
-        if (isset($data['stopRulesProcessing'])) {
-            $rule->setStopRulesProcessing((bool) $data['stopRulesProcessing']);
-        }
-
-        if (array_key_exists('discountQty', $data)) {
-            $rule->setDiscountQty($data['discountQty'] !== null ? (float) $data['discountQty'] : null);
-        }
-
-        if (isset($data['discountStep'])) {
-            $rule->setDiscountStep((int) $data['discountStep']);
-        }
-
-        if (isset($data['simpleFreeShipping'])) {
-            $rule->setSimpleFreeShipping($this->normalizeSimpleFreeShipping($data['simpleFreeShipping']));
-        }
-
-        if (isset($data['applyToShipping'])) {
-            $rule->setApplyToShipping((bool) $data['applyToShipping']);
-        }
-
-        if (isset($data['customerGroupIds'])) {
-            $rule->setCustomerGroupIds($this->normalizeCustomerGroupIds($data['customerGroupIds']));
-        }
-
-        if (isset($data['websiteIds'])) {
-            $rule->setWebsiteIds($this->normalizeWebsiteIds($data['websiteIds']));
-        }
-
-        if (isset($data['minimumSubtotal'])) {
-            $this->setMinimumSubtotalCondition($rule, (float) $data['minimumSubtotal']);
-        }
-
-        // The coupon code saves after all checks, so a refused request changes nothing
         if (isset($data['code'])) {
-            $this->validateCouponCode($data['code']);
-            if ($this->isCouponCodeTaken($data['code'], $id)) {
-                throw new ConflictHttpException("Coupon code '{$data['code']}' already exists");
-            }
-            $coupon->setCode($data['code']);
-            $coupon->save();
+            $coupon->setCode((string) $data['code']);
         }
+        $this->readExpirationDate($coupon, $data, $errors);
+        $service->saveCoupon($coupon, $rule, $errors);
 
-        $rule->save();
-
-        if (array_key_exists('expirationDate', $data)) {
-            $coupon->load($id);
-            $coupon->setData('expiration_date', $this->normalizeExpirationDate($data['expirationDate']));
-            $coupon->save();
-        }
-
-        $coupon->load($id);
-
-        return Coupon::fromModel($coupon);
+        return Coupon::fromModel($service->getCouponById($id));
     }
 
-    private function doDelete(int $id): null
+    private function delete(int $id): null
     {
         if (!$id) {
-            throw new UnprocessableEntityHttpException('Coupon ID is required');
+            throw new \Mage_Core_Exception_Input()->addError('id', 'Coupon ID is required');
         }
-
-        /** @var \Mage_SalesRule_Model_Coupon $coupon */
-        $coupon = \Mage::getModel('salesrule/coupon');
-        $coupon->load($id);
-
-        if (!$coupon->getId()) {
-            throw new NotFoundHttpException('Coupon not found');
-        }
-
-        /** @var \Mage_SalesRule_Model_Rule $rule */
-        $rule = \Mage::getModel('salesrule/rule');
-        $rule->load($coupon->getRuleId());
-
-        if (!$rule->getId()) {
-            $coupon->delete();
-            return null;
-        }
-
-        $this->assertRuleWebsitesAllowed($rule);
-        // A delete of the primary coupon deletes the rule. A delete of a generated coupon deletes only that coupon.
-        if ($coupon->getIsPrimary()) {
-            $rule->delete();
-        } else {
-            $coupon->delete();
-        }
-
+        /** @var \Mage_SalesRule_Service_Rule $service */
+        $service = \Mage::getService('salesrule/rule');
+        $service->deleteCoupon($this->loadWritable($service, $id)[0]);
         return null;
     }
 
     /**
-     * Hide rules outside the token's website scope from mutations, matching
-     * the read-side filter (404, not 403, to avoid disclosing existence).
+     * Load the coupon $id and its rule. A restricted token changes only a coupon whose rule has all its websites
+     * in the scope of the token, and does not see a coupon whose rule has none.
+     *
+     * @return array{\Mage_SalesRule_Model_Coupon, \Mage_SalesRule_Model_Rule}
      */
-    private function assertRuleWebsitesAllowed(\Mage_SalesRule_Model_Rule $rule): void
+    private function loadWritable(\Mage_SalesRule_Service_Rule $service, int $id): array
     {
-        $allowedWebsiteIds = $this->allowedWebsiteIds($this->requireUser());
-        if ($allowedWebsiteIds === null) {
-            return;
+        $user = $this->requireUser();
+        $coupon = $service->getCouponById($id, $this->allowedWebsiteIds($user));
+        $rule = $service->getById((int) $coupon->getRuleId());
+        $this->assertAllWebsitesAllowed((array) $rule->getWebsiteIds(), $user, 'coupon');
+        return [$coupon, $rule];
+    }
+
+    /**
+     * Put the fields of $data into $rule. An empty date removes the date.
+     *
+     * @param array<string, mixed> $data
+     */
+    private function readFields(\Mage_SalesRule_Model_Rule $rule, array $data, \Mage_Core_Exception_Input $errors): void
+    {
+        foreach (self::RULE_FIELDS as $field => [$column, $type]) {
+            if (array_key_exists($field, $data) && ($data[$field] !== null || $type !== 'bool')) {
+                $value = $data[$field];
+                $rule->setData($column, match ($type) {
+                    'bool' => (bool) $value,
+                    'int' => (int) $value,
+                    'float' => $value === null ? null : (float) $value,
+                    'date' => $value ?: null,
+                });
+            }
         }
 
-        $ruleWebsiteIds = array_map(intval(...), (array) $rule->getWebsiteIds());
-        if (array_intersect($ruleWebsiteIds, $allowedWebsiteIds) === []) {
-            throw new NotFoundHttpException('Coupon not found');
+        if (isset($data['discountType'])) {
+            if (!isset(self::DISCOUNT_TYPE_MAP[$data['discountType']])) {
+                $errors->addError('discount_type', 'Invalid discount type. Must be one of: ' . implode(', ', array_keys(self::DISCOUNT_TYPE_MAP)));
+            } else {
+                $rule->setSimpleAction(self::DISCOUNT_TYPE_MAP[$data['discountType']]);
+            }
+        }
+        foreach (['customerGroupIds' => 'customer_group_ids', 'websiteIds' => 'website_ids'] as $field => $column) {
+            if (isset($data[$field])) {
+                $ids = $this->readIdList($data[$field]);
+                if ($ids === null) {
+                    $errors->addError($column, "{$field} must be a list of IDs");
+                    continue;
+                }
+                if ($column === 'website_ids') {
+                    $this->assertWebsitesInScope($ids);
+                }
+                $rule->setData($column, $ids);
+            }
+        }
+        if (isset($data['minimumSubtotal'])) {
+            $this->setMinimumSubtotalCondition($rule, (float) $data['minimumSubtotal']);
         }
     }
 
-    private function doValidate(string $code, ?int $cartId): Coupon
+    /**
+     * A coupon of this resource always gives a discount.
+     */
+    private function readDiscountAmount(\Mage_SalesRule_Model_Rule $rule, mixed $amount, \Mage_Core_Exception_Input $errors): void
     {
-        if (empty($code)) {
-            throw new UnprocessableEntityHttpException('Coupon code is required');
+        if ((float) $amount <= 0) {
+            $errors->addError('discount_amount', 'Discount amount must be greater than 0');
         }
+        $rule->setDiscountAmount((float) $amount);
+    }
 
-        // Public endpoint, throttle by IP to stop bulk enumeration of
-        // auto-generated coupon batches.
-        $this->checkRateLimitByIp('coupon_validate', 'coupon_validate', 60);
+    /**
+     * Put the expiration date of $data into $coupon. An empty value removes it.
+     *
+     * @param array<string, mixed> $data
+     */
+    private function readExpirationDate(\Mage_SalesRule_Model_Coupon $coupon, array $data, \Mage_Core_Exception_Input $errors): void
+    {
+        if (!array_key_exists('expirationDate', $data)) {
+            return;
+        }
+        $value = $data['expirationDate'];
+        try {
+            $coupon->setExpirationDate($value === null || $value === '' ? null : \Mage::app()->getLocale()->formatDateForDb((string) $value));
+        } catch (\Exception) {
+            $errors->addError('expiration_date', 'Invalid date for expirationDate; use Y-m-d or Y-m-d H:i:s format.');
+        }
+    }
 
-        // Add a per-customer cap on top of the IP limiter: a trivially-created
-        // account behind a rotating-IP pool would otherwise bypass the IP cap
-        // and still enumerate codes. Guests (no customer id) rely on IP alone.
+    /**
+     * Check the code for the website, the group and the customer of the caller, or of the cart for an admin or an
+     * API integration. An anonymous caller gets a yes or no only, so that it cannot read the value of each code
+     * before it uses it. A cart preview needs a caller that may read the cart.
+     */
+    private function validate(string $code, ?int $cartId): Coupon
+    {
         $customerId = $this->getAuthenticatedCustomerId();
-        if ($customerId !== null) {
-            $this->checkRateLimit('coupon_validate:customer:' . $customerId, 'coupon_validate', 60);
+        $isPrivileged = $this->isAdmin() || $this->isApiUser();
+        /** @var \Mage_Sales_Model_Quote $quote */
+        $quote = \Mage::getModel('sales/quote');
+        if ($cartId) {
+            $quote->load($cartId);
         }
-
-        // Anonymous callers get a yes/no answer only, the concrete discount
-        // type/amount would let an unauthenticated client harvest the value of
-        // every code before redeeming it. Customers/admins/API users still see
-        // the full result (they need it to preview a discount at checkout).
-        $isAnonymous = !$this->isAdmin()
-            && !$this->isApiUser()
-            && $this->getAuthenticatedCustomerId() === null;
+        $useCart = $isPrivileged && $quote->getId();
+        $groupId = match (true) {
+            $useCart => (int) $quote->getCustomerGroupId(),
+            $customerId !== null => (int) \Mage::getModel('customer/customer')->load($customerId)->getGroupId(),
+            $isPrivileged => null,
+            default => \Mage_Customer_Model_Group::NOT_LOGGED_IN_ID,
+        };
 
         $dto = new Coupon();
         $dto->id = 0;
         $dto->code = $code;
-
-        /** @var \Mage_SalesRule_Model_Coupon $coupon */
-        $coupon = \Mage::getModel('salesrule/coupon');
-        $coupon->loadByCode($code);
-
-        if (!$coupon->getId()) {
+        /** @var \Mage_SalesRule_Service_Rule $service */
+        $service = \Mage::getService('salesrule/rule');
+        try {
+            $coupon = $service->checkCoupon(
+                $code,
+                (int) ($useCart ? $quote->getStore() : \Maho\ApiPlatform\Service\StoreContext::getStore())->getWebsiteId(),
+                $groupId,
+                $useCart ? ((int) $quote->getCustomerId() ?: null) : $customerId,
+            );
+        } catch (\Mage_SalesRule_Exception $e) {
             $dto->isValid = false;
-            $dto->validationMessage = 'Coupon code not found';
+            $dto->validationMessage = $e->getMessage();
             return $dto;
         }
 
-        /** @var \Mage_SalesRule_Model_Rule $rule */
-        $rule = \Mage::getModel('salesrule/rule');
-        $rule->load($coupon->getRuleId());
-
-        if (!$rule->getId() || !$rule->getIsActive()) {
-            $dto->isValid = false;
-            $dto->validationMessage = 'Coupon is not active';
-            return $dto;
-        }
-
-        $locale = \Mage::app()->getLocale();
-        if (!$locale->isStoreDateInInterval(null, dateFrom: $rule->getFromDate())) {
-            $dto->isValid = false;
-            $dto->validationMessage = 'Coupon is not yet active';
-            return $dto;
-        }
-        if (!$locale->isStoreDateInInterval(null, dateTo: $rule->getToDate())) {
-            $dto->isValid = false;
-            $dto->validationMessage = 'Coupon has expired';
-            return $dto;
-        }
-
-        $expirationDate = $coupon->getData('expiration_date');
-        if ($expirationDate
-            && $expirationDate < \Mage::app()->getLocale()->formatDateForDb('now')
-        ) {
-            $dto->isValid = false;
-            $dto->validationMessage = 'Coupon has expired';
-            return $dto;
-        }
-
-        if ($rule->getUsesPerCoupon() && $coupon->getTimesUsed() >= $rule->getUsesPerCoupon()) {
-            $dto->isValid = false;
-            $dto->validationMessage = 'Coupon usage limit reached';
-            return $dto;
-        }
-
-        if ($cartId) {
-            /** @var \Mage_Sales_Model_Quote $quote */
-            $quote = \Mage::getModel('sales/quote');
-            $quote->load($cartId);
-            if ($quote->getId()) {
-                // Only the cart's owner (or a privileged caller) may preview a
-                // discount on someone else's cart, without this check, any
-                // authenticated client could probe arbitrary cart totals.
-                $this->assertCanPreviewQuote($quote);
-
-                // Run the discount preview on a transient copy so the
-                // persisted quote is never mutated and we don't have to roll
-                // back state. setCouponCode() + collectTotals() on a clone is
-                // enough to populate $shippingAddress->getDiscountAmount().
-                $previewQuote = clone $quote;
-                $previewQuote->setCouponCode($code);
-                $previewQuote->setTotalsCollectedFlag(false);
-                $previewQuote->collectTotals();
-
-                $dto->discountPreview = abs((float) $previewQuote->getShippingAddress()->getDiscountAmount());
+        if ($quote->getId()) {
+            // A guest cart has no owner to check here: its masked ID goes through the coupon endpoints of the cart
+            if (!$isPrivileged && ($customerId === null || (int) $quote->getCustomerId() !== $customerId)) {
+                throw new \Mage_Core_Exception('Cart not accessible');
             }
+            // A copy, so that the stored cart does not change
+            $preview = clone $quote;
+            $preview->setCouponCode($code)->setTotalsCollectedFlag(false)->collectTotals();
+            $dto->discountPreview = abs((float) $preview->getShippingAddress()->getDiscountAmount());
         }
-
         $dto->isValid = true;
         $dto->validationMessage = 'Coupon is valid';
-
-        // Don't disclose rule identity or discount value to anonymous callers.
-        if ($isAnonymous) {
+        if ($customerId === null && !$isPrivileged) {
             return $dto;
         }
 
+        $rule = $service->getById((int) $coupon->getRuleId());
         $dto->id = (int) $coupon->getId();
         $dto->ruleId = (int) $coupon->getRuleId();
-
-        $discountTypeMap = [
-            'by_percent' => 'percent',
-            'by_fixed' => 'fixed',
-            'cart_fixed' => 'cart_fixed',
-            'buy_x_get_y' => 'buy_x_get_y',
-        ];
-        $dto->discountType = $discountTypeMap[$rule->getSimpleAction()] ?? $rule->getSimpleAction();
+        $dto->discountType = array_search($rule->getSimpleAction(), self::DISCOUNT_TYPE_MAP, true) ?: $rule->getSimpleAction();
         $dto->discountAmount = (float) $rule->getDiscountAmount();
-
         return $dto;
-    }
-
-    /**
-     * Reject coupon preview attempts against carts the caller doesn't own.
-     * Admins and API users with full coupon access bypass this check.
-     */
-    private function assertCanPreviewQuote(\Mage_Sales_Model_Quote $quote): void
-    {
-        if ($this->isAdmin() || $this->isApiUser()) {
-            return;
-        }
-
-        $cartCustomerId = $quote->getCustomerId() ? (int) $quote->getCustomerId() : null;
-        $authenticatedCustomerId = $this->getAuthenticatedCustomerId();
-
-        if ($cartCustomerId !== null) {
-            if ($authenticatedCustomerId === null || $cartCustomerId !== $authenticatedCustomerId) {
-                throw new UnprocessableEntityHttpException('Cart not accessible');
-            }
-            return;
-        }
-
-        // Guest carts can't be previewed via the numeric ID endpoint,
-        // mirrors \Mage_Checkout_Service_Cart::verifyAccess(). The masked-id flow
-        // is exercised through the CartProcessor coupon endpoints instead.
-        throw new UnprocessableEntityHttpException('Cart not accessible');
-    }
-
-    /**
-     * Normalize a per-coupon expiration date; empty string clears it (returns null).
-     */
-    private function normalizeExpirationDate(mixed $value): ?string
-    {
-        if ($value === null || $value === '') {
-            return null;
-        }
-
-        try {
-            $date = \Mage::app()->getLocale()->formatDateForDb((string) $value);
-        } catch (\Exception) {
-            throw new UnprocessableEntityHttpException('Invalid date for expirationDate; use Y-m-d or Y-m-d H:i:s format.');
-        }
-
-        return $date;
     }
 
     /**
      * Insert, change or remove the top-level condition "subtotal equals or greater than" and keep all other conditions.
      * A root that is not "ALL of these conditions are TRUE" gives the minimum another meaning, so the change is refused.
+     *
+     * @throws \Mage_Core_Exception_Conflict when the rule has other conditions under another root
      */
     private function setMinimumSubtotalCondition(\Mage_SalesRule_Model_Rule $rule, float $minimumSubtotal): void
     {
@@ -519,7 +286,7 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
         $children = $conditions->getConditions();
         if ($conditions->getAggregator() !== 'all' || !$conditions->getValue()) {
             if ($children !== []) {
-                throw new ConflictHttpException('The rule has advanced conditions. Change them with /cart-price-rules.');
+                throw new \Mage_Core_Exception_Conflict('The rule has advanced conditions. Change them with /cart-price-rules.');
             }
             $conditions->setAggregator('all')->setValue(1);
         }
