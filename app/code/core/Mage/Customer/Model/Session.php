@@ -62,6 +62,12 @@ class Mage_Customer_Model_Session extends Mage_Core_Model_Session_Abstract
         Mage::dispatchEvent('customer_session_init', ['customer_session' => $this]);
     }
 
+    #[\Override]
+    protected function getDisposableKeys(): array
+    {
+        return ['wishlist_item_count'];
+    }
+
     /**
      * Set customer object and setting customer id in session
      *
@@ -121,14 +127,14 @@ class Mage_Customer_Model_Session extends Mage_Core_Model_Session_Abstract
     /**
      * Retrieve customer id from current session
      *
-     * @return int|null
+     * A session of an older release holds the id as a string.
      */
-    public function getCustomerId()
+    public function getCustomerId(): ?int
     {
         if ($this->getData('customer_id')) {
-            return $this->getData('customer_id');
+            return (int) $this->getData('customer_id');
         }
-        return ($this->isLoggedIn()) ? $this->getId() : null;
+        return $this->isLoggedIn() ? (int) $this->getId() : null;
     }
 
     /**

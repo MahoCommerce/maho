@@ -1,0 +1,132 @@
+<?php
+
+/**
+ * Gmail go-to actions for transactional emails.
+ *
+ * Gmail reads schema.org EmailMessage markup from the document head and turns it into a button
+ * next to the subject line. For a shipment email that button opens the public tracking page of
+ * the carrier when there is one, and the tracking page of the store otherwise.
+ *
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Shipping
+ */
+
+declare(strict_types=1);
+
+class Mage_Shipping_Model_Email_Gmail_Actions
+{
+    /**
+     * Add the markup to an HTML email after the template filter, before the CSS inliner runs.
+     */
+    #[Maho\Config\Observer('email_template_filter_after')]
+    public function addToEmail(\Maho\Event\Observer $observer): void
+    {
+        $template = $observer->getData('template');
+        if (!$template instanceof Mage_Core_Model_Email_Template || $template->isPlain()) {
+            return;
+        }
+
+        $transport = $observer->getData('transport');
+        $transport->setData('html', $this->inject(
+            (array) $observer->getData('variables'),
+            (string) $transport->getData('html'),
+        ));
+    }
+
+    /**
+     * Add the markup to a rendered email, immediately before the closing head tag.
+     *
+     * Nothing is added when the email has no head (a plain fragment), when it already carries
+     * schema.org markup, or when there is no shipment to link.
+     *
+     * @param array<string, mixed> $variables the variables the template was rendered with
+     */
+    public function inject(array $variables, string $html): string
+    {
+        $headAt = stripos($html, '</head>');
+        if ($headAt === false || stripos($html, 'application/ld+json') !== false) {
+            return $html;
+        }
+
+        $markup = $this->getMarkup($variables);
+        if ($markup === '') {
+            return $html;
+        }
+
+        return substr_replace($html, $markup, $headAt, 0);
+    }
+
+    /**
+     * The schema.org script for the shipment the email is about, or '' when there is none.
+     *
+     * @param array<string, mixed> $variables
+     */
+    public function getMarkup(array $variables): string
+    {
+        $shipment = $variables['shipment'] ?? null;
+        if (!$shipment instanceof Mage_Sales_Model_Order_Shipment) {
+            return '';
+        }
+
+        $numbers = [];
+        foreach ($shipment->getAllTracks() as $track) {
+            $number = trim((string) $track->getNumber());
+            if ($number !== '') {
+                $numbers[] = $number;
+            }
+        }
+        if ($numbers === []) {
+            return '';
+        }
+
+        $url = $this->getTrackingUrl($shipment);
+        if ($url === '') {
+            $url = Mage::helper('shipping')->getTrackingPopupUrlBySalesModel($shipment);
+        }
+
+        // Same structure as the GitHub notifications, which Gmail shows with a button.
+        $store = $shipment->getStore();
+        $payload = [
+            '@context' => 'http://schema.org',
+            '@type' => 'EmailMessage',
+            'potentialAction' => [
+                '@type' => 'ViewAction',
+                'target' => $url,
+                'url' => $url,
+                'name' => Mage::helper('shipping')->__('Track your shipment'),
+            ],
+            'description' => Mage::helper('shipping')->__('Tracking number %s', implode(', ', $numbers)),
+            'publisher' => [
+                '@type' => 'Organization',
+                'name' => $store->getFrontendName(),
+                'url' => $store->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB),
+            ],
+        ];
+
+        $json = json_encode(
+            $payload,
+            JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP,
+        );
+        if ($json === false) {
+            return '';
+        }
+
+        return '<script type="application/ld+json">' . $json . '</script>';
+    }
+
+    /**
+     * The carrier page of the first track that has one, or '' when none has.
+     */
+    protected function getTrackingUrl(Mage_Sales_Model_Order_Shipment $shipment): string
+    {
+        foreach ($shipment->getAllTracks() as $track) {
+            $url = trim((string) $track->getTrackingUrl());
+            if ($url !== '') {
+                return $url;
+            }
+        }
+
+        return '';
+    }
+}

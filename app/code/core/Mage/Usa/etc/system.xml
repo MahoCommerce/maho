@@ -222,6 +222,15 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_store>0</show_in_store>
                             <depends><active>1</active></depends>
                         </free_shipping_subtotal>
+                        <tracking_url translate="label comment">
+                            <label>Tracking Page URL</label>
+                            <comment><![CDATA[Public tracking page of the carrier. {{number}} is replaced with the tracking number. Leave empty to open the tracking popup instead.]]></comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>185</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </tracking_url>
                         <specificerrmsg translate="label">
                             <label>Displayed Error Message</label>
                             <frontend_type>textarea</frontend_type>
@@ -583,6 +592,15 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_store>0</show_in_store>
                             <depends><active>1</active></depends>
                         </showmethod>
+                        <tracking_url translate="label comment">
+                            <label>Tracking Page URL</label>
+                            <comment><![CDATA[Public tracking page of the carrier. {{number}} is replaced with the tracking number. Leave empty to open the tracking popup instead.]]></comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>790</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </tracking_url>
                         <specificerrmsg translate="label">
                             <label>Displayed Error Message</label>
                             <frontend_type>textarea</frontend_type>
@@ -890,6 +908,15 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_store>0</show_in_store>
                             <depends><active>1</active></depends>
                         </free_shipping_subtotal>
+                        <tracking_url translate="label comment">
+                            <label>Tracking Page URL</label>
+                            <comment><![CDATA[Public tracking page of the carrier. {{number}} is replaced with the tracking number. Leave empty to open the tracking popup instead.]]></comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>165</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </tracking_url>
                         <specificerrmsg translate="label">
                             <label>Displayed Error Message</label>
                             <frontend_type>textarea</frontend_type>
@@ -1157,6 +1184,15 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_store>0</show_in_store>
                             <depends><active>1</active></depends>
                         </ready_time>
+                        <tracking_url translate="label comment">
+                            <label>Tracking Page URL</label>
+                            <comment><![CDATA[Public tracking page of the carrier. {{number}} is replaced with the tracking number. Leave empty to open the tracking popup instead.]]></comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>790</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </tracking_url>
                         <specificerrmsg translate="label">
                             <label>Displayed Error Message</label>
                             <frontend_type>textarea</frontend_type>

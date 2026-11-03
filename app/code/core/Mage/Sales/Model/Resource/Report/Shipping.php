@@ -60,7 +60,7 @@ class Mage_Sales_Model_Resource_Report_Shipping extends Mage_Sales_Model_Resourc
             $this->_clearTableByDateRange($table, $from, $to, $subSelect);
             // convert dates from UTC to current admin timezone
             $periodExpr = $adapter->getDatePartSql(
-                $this->getStoreTZOffsetQuery($sourceTable, 'created_at', $from, $to),
+                $this->getStoreTZOffsetQuery($sourceTable, 'created_at'),
             );
             $ifnullBaseShippingCanceled = $adapter->getIfNullSql('base_shipping_canceled', 0);
             $ifnullBaseShippingRefunded = $adapter->getIfNullSql('base_shipping_refunded', 0);
@@ -86,13 +86,9 @@ class Mage_Sales_Model_Resource_Report_Shipping extends Mage_Sales_Model_Resourc
                  ])
                 ->where('is_virtual = 0');
 
-            // Filter by date range directly on source column (WHERE is evaluated before GROUP BY,
-            // so we can't use the 'period' alias here - it doesn't exist yet)
-            if ($from !== null) {
-                $select->where('created_at >= ?', $from);
-            }
-            if ($to !== null) {
-                $select->where('created_at <= ?', $to);
+            // The clear step deleted whole periods: rebuild every one of them, not only rows since $from
+            if ($subSelect !== null) {
+                $select->where($this->_makeConditionFromDateRangeSelect($subSelect, $periodExpr));
             }
 
             $select->group([
@@ -180,8 +176,6 @@ class Mage_Sales_Model_Resource_Report_Shipping extends Mage_Sales_Model_Resourc
                 $this->getStoreTZOffsetQuery(
                     ['source_table' => $sourceTable],
                     'source_table.created_at',
-                    $from,
-                    $to,
                 ),
             );
             $ifnullBaseShippingCanceled = $adapter->getIfNullSql('order_table.base_shipping_canceled', 0);
@@ -214,13 +208,9 @@ class Mage_Sales_Model_Resource_Report_Shipping extends Mage_Sales_Model_Resourc
                 ->from(['filter_source_table' => $sourceTable], 'MIN(filter_source_table.entity_id)')
                 ->where('filter_source_table.order_id = source_table.order_id');
 
-            // Filter by date range directly on source column (WHERE is evaluated before GROUP BY,
-            // so we can't use the 'period' alias here - it doesn't exist yet)
-            if ($from !== null) {
-                $select->where('source_table.created_at >= ?', $from);
-            }
-            if ($to !== null) {
-                $select->where('source_table.created_at <= ?', $to);
+            // The clear step deleted whole periods: rebuild every one of them, not only rows since $from
+            if ($subSelect !== null) {
+                $select->where($this->_makeConditionFromDateRangeSelect($subSelect, $periodExpr));
             }
 
             $select->where('source_table.entity_id = (?)', new Maho\Db\Expr($filterSubSelect));

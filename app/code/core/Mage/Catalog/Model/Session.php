@@ -24,6 +24,21 @@ class Mage_Catalog_Model_Session extends Mage_Core_Model_Session_Abstract
         $this->init('catalog');
     }
 
+    #[\Override]
+    protected function getDisposableKeys(): array
+    {
+        return [
+            'last_visited_category_id',
+            'last_viewed_category_id',
+            'last_viewed_product_id',
+            'sort_order',
+            'sort_direction',
+            'display_mode',
+            'limit_page',
+            'catalog_compare_items_count',
+        ];
+    }
+
     /**
      * @return string
      */
