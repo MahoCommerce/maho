@@ -17,50 +17,10 @@ class Mage_Core_Model_Resource_Design extends Mage_Core_Model_Resource_Db_Abstra
     }
 
     /**
-     * @param Mage_Core_Model_Design $object
+     * Return whether another change of $storeId applies on a day between $dateFrom and $dateTo.
+     * A null date is an open bound. The change $excludeId does not count.
      */
-    #[\Override]
-    protected function _beforeSave(Mage_Core_Model_Abstract $object)
-    {
-        $dateFrom = $object->getDateFrom();
-        $dateTo = $object->getDateTo();
-        if (!empty($dateFrom) && !empty($dateTo)) {
-            $helper = Mage::helper('core');
-            if ((!$helper->isValidDate($dateFrom) && !$helper->isValidDateTime($dateFrom))
-                || (!$helper->isValidDate($dateTo) && !$helper->isValidDateTime($dateTo))) {
-                Mage::throwException(Mage::helper('core')->__('Invalid date'));
-            }
-            if (strtotime($dateFrom) > strtotime($dateTo)) {
-                Mage::throwException(Mage::helper('core')->__('Start date cannot be greater than end date.'));
-            }
-        }
-
-        $check = $this->_checkIntersection(
-            $object->getStoreId(),
-            $dateFrom,
-            $dateTo,
-            $object->getId(),
-        );
-
-        if ($check) {
-            Mage::throwException(
-                Mage::helper('core')->__('Your design change for the specified store intersects with another one, please specify another date range.'),
-            );
-        }
-
-        return parent::_beforeSave($object);
-    }
-
-    /**
-     * Check intersections
-     *
-     * @param int $storeId
-     * @param string $dateFrom
-     * @param string $dateTo
-     * @param int $currentId
-     * @return string
-     */
-    protected function _checkIntersection($storeId, $dateFrom, $dateTo, $currentId)
+    public function hasIntersection(int $storeId, ?string $dateFrom, ?string $dateTo, int $excludeId): bool
     {
         $adapter = $this->_getReadAdapter();
         $select = $adapter->select()
@@ -107,8 +67,8 @@ class Mage_Core_Model_Resource_Design extends Mage_Core_Model_Resource_Db_Abstra
         }
 
         $bind = [
-            'store_id'   => (int) $storeId,
-            'current_id' => (int) $currentId,
+            'store_id'   => $storeId,
+            'current_id' => $excludeId,
         ];
 
         if (!empty($dateTo)) {
@@ -118,7 +78,7 @@ class Mage_Core_Model_Resource_Design extends Mage_Core_Model_Resource_Db_Abstra
             $bind['date_from'] = $dateFrom;
         }
 
-        return $adapter->fetchOne($select, $bind);
+        return (bool) $adapter->fetchOne($select, $bind);
     }
 
     /**
