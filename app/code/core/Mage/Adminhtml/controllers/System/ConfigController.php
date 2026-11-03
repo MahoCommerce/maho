@@ -162,31 +162,14 @@ class Mage_Adminhtml_System_ConfigController extends Mage_Adminhtml_Controller_A
                 throw new Exception(Mage::helper('adminhtml')->__('This section is not allowed.'));
             }
 
-            // custom save logic
             $this->_saveSection();
-            $section = $this->getRequest()->getParam('section');
-            $website = $this->getRequest()->getParam('website');
-            $store   = $this->getRequest()->getParam('store');
-            Mage::getSingleton('adminhtml/config_data')
-                ->setSection($section)
-                ->setWebsite($website)
-                ->setStore($store)
-                ->setGroupsSelector($groups)
-                ->save();
-
-            // reinit configuration
-            Mage::getConfig()->reinit();
-            Mage::dispatchEvent('admin_system_config_section_save_after', [
-                'website' => $website,
-                'store'   => $store,
-                'section' => $section,
-            ]);
-            Mage::app()->reinitStores();
-
-            // website and store codes can be used in event implementation, so set them as well
-            Mage::dispatchEvent(
-                "admin_system_config_changed_section_{$section}",
-                ['website' => $website, 'store' => $store],
+            /** @var Mage_Core_Service_Config $service */
+            $service = Mage::getService('core/config');
+            $service->saveSection(
+                (string) $this->getRequest()->getParam('section'),
+                (string) $this->getRequest()->getParam('website'),
+                (string) $this->getRequest()->getParam('store'),
+                $groups,
             );
 
             if (!empty($groups)) {
@@ -218,19 +201,6 @@ class Mage_Adminhtml_System_ConfigController extends Mage_Adminhtml_Controller_A
         if (method_exists($this, $method)) {
             $this->$method();
         }
-    }
-
-    /**
-     *  Advanced save procedure
-     */
-    protected function _saveAdvanced()
-    {
-        Mage::app()->cleanCache(
-            [
-                'layout',
-                Mage_Core_Model_Layout_Update::LAYOUT_GENERAL_CACHE_TAG,
-            ],
-        );
     }
 
     /**
