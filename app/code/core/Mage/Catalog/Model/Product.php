@@ -41,6 +41,13 @@ declare(strict_types=1);
  */
 class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
 {
+    /** The attributes that start a date range, with the attribute that ends it. */
+    public const DATE_RANGES = [
+        'special_from_date' => 'special_to_date',
+        'news_from_date' => 'news_to_date',
+        'custom_design_from' => 'custom_design_to',
+    ];
+
     /**
      * Entity code.
      * Can be used as part of method name for entity processing
@@ -192,13 +199,35 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      * @todo implement full validation process with errors returning which are ignoring now
      *
      * @return $this
+     * @throws Mage_Eav_Model_Entity_Attribute_Exception when the backend of an attribute refuses its value
+     * @throws Mage_Core_Exception_Input when a date range starts after it ends
      */
     public function validate()
     {
         Mage::dispatchEvent($this->_eventPrefix . '_validate_before', [$this->_eventObject => $this]);
         $this->_getResource()->validate($this);
+        self::assertDateRanges($this->getData());
         Mage::dispatchEvent($this->_eventPrefix . '_validate_after', [$this->_eventObject => $this]);
         return $this;
+    }
+
+    /**
+     * Check that each date range of DATE_RANGES in $values does not start after it ends.
+     *
+     * @param array<string, mixed> $values the value of each attribute, by attribute code
+     * @throws Mage_Core_Exception_Input with one error for each range
+     */
+    public static function assertDateRanges(array $values): void
+    {
+        $errors = new Mage_Core_Exception_Input();
+        foreach (self::DATE_RANGES as $from => $to) {
+            $start = $values[$from] ?? null;
+            $end = $values[$to] ?? null;
+            if (is_string($start) && $start !== '' && is_string($end) && $end !== '' && strtotime($start) > strtotime($end)) {
+                $errors->addError($from, Mage::helper('catalog')->__('The From Date value should be less than or equal to the To Date value.'));
+            }
+        }
+        $errors->throwIfErrors();
     }
 
     /**
