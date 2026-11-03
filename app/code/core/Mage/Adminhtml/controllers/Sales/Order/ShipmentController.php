@@ -30,53 +30,15 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
     {
         $this->_title($this->__('Sales'))->_title($this->__('Shipments'));
 
-        $shipment = false;
-        $shipmentId = $this->getRequest()->getParam('shipment_id');
-        $orderId = $this->getRequest()->getParam('order_id');
-        if ($shipmentId) {
-            $shipment = Mage::getModel('sales/order_shipment')->load($shipmentId);
-            if (!$shipment->getId()) {
-                $this->_getSession()->addError($this->__('The shipment no longer exists.'));
-                return false;
-            }
-        } elseif ($orderId) {
-            $order      = Mage::getModel('sales/order')->load($orderId);
-
-            /**
-             * Check order existing
-             */
-            if (!$order->getId()) {
-                $this->_getSession()->addError($this->__('The order no longer exists.'));
-                return false;
-            }
-            /**
-             * Check shipment is available to create separate from invoice
-             */
-            if ($order->getForcedDoShipmentWithInvoice()) {
-                $this->_getSession()->addError($this->__('Cannot do shipment for the order separately from invoice.'));
-                return false;
-            }
-            /**
-             * Check shipment create availability
-             */
-            if (!$order->canShip()) {
-                $this->_getSession()->addError($this->__('Cannot do shipment for the order.'));
-                return false;
-            }
-            $savedQtys = $this->_getItemQtys();
-            $shipment = Mage::getModel('sales/service_order', $order)->prepareShipment($savedQtys);
-
-            $tracks = $this->getRequest()->getPost('tracking');
-            if ($tracks) {
-                foreach ($tracks as $data) {
-                    if (empty($data['number'])) {
-                        Mage::throwException($this->__('Tracking number cannot be empty.'));
-                    }
-                    $track = Mage::getModel('sales/order_shipment_track')
-                        ->addData($data);
-                    $shipment->addTrack($track);
-                }
-            }
+        $service = Mage::getService('sales/order');
+        $shipmentId = (int) $this->getRequest()->getParam('shipment_id');
+        try {
+            $shipment = $shipmentId
+                ? $service->requireShipment($shipmentId)
+                : $service->prepareShipment($service->requireById((int) $this->getRequest()->getParam('order_id')), $this->_getItemQtys());
+        } catch (Mage_Core_Exception_NoSuchEntity|Mage_Core_Exception_Conflict $e) {
+            $this->_getSession()->addError($e->getMessage());
+            return false;
         }
 
         Mage::register('current_shipment', $shipment);
@@ -166,78 +128,58 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
     #[Maho\Config\Route('/admin/sales_order_shipment/save')]
     public function saveAction(): void
     {
-        $data = $this->getRequest()->getPost('shipment');
+        $data = (array) $this->getRequest()->getPost('shipment');
         if (!empty($data['comment_text'])) {
             Mage::getSingleton('adminhtml/session')->setCommentText($data['comment_text']);
         }
 
-        $shipment = $this->_initShipment();
-        if (!$shipment) {
-            $this->_forward('noRoute');
-            return;
-        }
-
+        $orderId = $this->getRequest()->getParam('order_id');
         $responseAjax = new \Maho\DataObject();
-        $isNeedCreateLabel = isset($data['create_shipping_label']) && $data['create_shipping_label'];
+        $isNeedCreateLabel = !empty($data['create_shipping_label']);
 
         try {
-            $shipment->register();
-            $comment = '';
-            if (!empty($data['comment_text'])) {
-                $shipment->addComment(
-                    $data['comment_text'],
-                    isset($data['comment_customer_notify']),
-                    isset($data['is_visible_on_front']),
-                );
-                if (isset($data['comment_customer_notify'])) {
-                    $comment = $data['comment_text'];
-                }
+            $service = Mage::getService('sales/order');
+            $tracks = [];
+            foreach ((array) $this->getRequest()->getPost('tracking') as $track) {
+                $tracks[] = Mage::getModel('sales/order_shipment_track')->addData($track);
             }
-
-            if (!empty($data['send_email'])) {
-                $shipment->setEmailSent();
-            }
-
-            $shipment->getOrder()->setCustomerNoteNotify(!empty($data['send_email']));
-
-            if ($isNeedCreateLabel && $this->_createShippingLabel($shipment)) {
+            $shipment = $service->ship(
+                $service->requireById((int) $orderId),
+                $this->_getItemQtys(),
+                $tracks,
+                ($data['comment_text'] ?? '') !== '' ? (string) $data['comment_text'] : null,
+                isset($data['comment_customer_notify']),
+                isset($data['is_visible_on_front']),
+                !empty($data['send_email']),
+                $isNeedCreateLabel ? (array) $this->getRequest()->getParam('packages') : null,
+            );
+            if ($isNeedCreateLabel && $shipment->getShippingLabel()) {
                 $responseAjax->setOk(true);
             }
 
-            $this->_saveShipment($shipment);
-
-            $shipment->sendEmail(!empty($data['send_email']), $comment);
-
-            $shipmentCreatedMessage = $this->__('The shipment has been created.');
-            $labelCreatedMessage    = $this->__('The shipping label has been created.');
-
-            $this->_getSession()->addSuccess($isNeedCreateLabel ? $shipmentCreatedMessage . ' ' . $labelCreatedMessage
-                : $shipmentCreatedMessage);
+            $this->_getSession()->addSuccess($isNeedCreateLabel
+                ? $this->__('The shipment has been created.') . ' ' . $this->__('The shipping label has been created.')
+                : $this->__('The shipment has been created.'));
             Mage::getSingleton('adminhtml/session')->getCommentText(true);
         } catch (Mage_Core_Exception $e) {
-            if ($isNeedCreateLabel) {
-                $responseAjax->setError(true);
-                $responseAjax->setMessage($e->getMessage());
-            } else {
-                $this->_getSession()->addError($e->getMessage());
-                $this->_redirect('*/*/new', ['order_id' => $this->getRequest()->getParam('order_id')]);
-            }
+            $message = $e->getMessage();
         } catch (Exception $e) {
             Mage::logException($e);
-            if ($isNeedCreateLabel) {
-                $responseAjax->setError(true);
-                $responseAjax->setMessage(
-                    Mage::helper('sales')->__('An error occurred while creating shipping label.'),
-                );
-            } else {
-                $this->_getSession()->addError($this->__('Cannot save shipment.'));
-                $this->_redirect('*/*/new', ['order_id' => $this->getRequest()->getParam('order_id')]);
-            }
+            $message = $isNeedCreateLabel
+                ? Mage::helper('sales')->__('An error occurred while creating shipping label.')
+                : $this->__('Cannot save shipment.');
         }
+
         if ($isNeedCreateLabel) {
+            if (isset($message)) {
+                $responseAjax->setError(true)->setMessage($message);
+            }
             $this->getResponse()->setBodyJson($responseAjax);
+        } elseif (isset($message)) {
+            $this->_getSession()->addError($message);
+            $this->_redirect('*/*/new', ['order_id' => $orderId]);
         } else {
-            $this->_redirect('*/sales_order/view', ['order_id' => $shipment->getOrderId()]);
+            $this->_redirect('*/sales_order/view', ['order_id' => $orderId]);
         }
     }
 
@@ -296,48 +238,13 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
     #[Maho\Config\Route('/admin/sales_order_shipment/addTrack')]
     public function addTrackAction(): void
     {
-        try {
-            $carrier = $this->getRequest()->getPost('carrier');
-            $number  = $this->getRequest()->getPost('number');
-            $title  = $this->getRequest()->getPost('title');
-            if (empty($carrier)) {
-                Mage::throwException($this->__('The carrier needs to be specified.'));
-            }
-            if (empty($number)) {
-                Mage::throwException($this->__('Tracking number cannot be empty.'));
-            }
-            $shipment = $this->_initShipment();
-            if ($shipment) {
-                $track = Mage::getModel('sales/order_shipment_track')
-                    ->setNumber($number)
-                    ->setCarrierCode($carrier)
-                    ->setTitle($title);
-                $shipment->addTrack($track)
-                    ->save();
-
-                $this->loadLayout();
-                $response = $this->getLayout()->getBlock('shipment_tracking')->toHtml();
-            } else {
-                $response = [
-                    'error'     => true,
-                    'message'   => $this->__('Cannot initialize shipment for adding tracking number.'),
-                ];
-            }
-        } catch (Mage_Core_Exception $e) {
-            $response = [
-                'error'     => true,
-                'message'   => $e->getMessage(),
-            ];
-        } catch (Exception) {
-            $response = [
-                'error'     => true,
-                'message'   => $this->__('Cannot add tracking number.'),
-            ];
-        }
-        if (is_array($response)) {
-            $response = Mage::helper('core')->jsonEncode($response);
-        }
-        $this->getResponse()->setBody($response);
+        $this->_changeTracks(fn(Mage_Sales_Model_Order_Shipment $shipment) => Mage::getService('sales/order')->addTrack(
+            $shipment,
+            Mage::getModel('sales/order_shipment_track')
+                ->setNumber((string) $this->getRequest()->getPost('number'))
+                ->setCarrierCode((string) $this->getRequest()->getPost('carrier'))
+                ->setTitle((string) $this->getRequest()->getPost('title')),
+        ), $this->__('Cannot add tracking number.'));
     }
 
     /**
@@ -346,37 +253,31 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
     #[Maho\Config\Route('/admin/sales_order_shipment/removeTrack')]
     public function removeTrackAction(): void
     {
-        $trackId    = $this->getRequest()->getParam('track_id');
-        $track = Mage::getModel('sales/order_shipment_track')->load($trackId);
-        if ($track->getId()) {
-            try {
-                if ($this->_initShipment()) {
-                    $track->delete();
+        $this->_changeTracks(fn(Mage_Sales_Model_Order_Shipment $shipment) => Mage::getService('sales/order')->removeTrack(
+            $shipment,
+            (int) $this->getRequest()->getParam('track_id'),
+        ), $this->__('Cannot delete tracking number.'));
+    }
 
-                    $this->loadLayout();
-                    $response = $this->getLayout()->getBlock('shipment_tracking')->toHtml();
-                } else {
-                    $response = [
-                        'error'     => true,
-                        'message'   => $this->__('Cannot initialize shipment for delete tracking number.'),
-                    ];
-                }
-            } catch (Exception) {
-                $response = [
-                    'error'     => true,
-                    'message'   => $this->__('Cannot delete tracking number.'),
-                ];
-            }
-        } else {
-            $response = [
-                'error'     => true,
-                'message'   => $this->__('Cannot load track with retrieving identifier.'),
-            ];
+    /**
+     * Run $change on the shipment of the request, then render its tracking block, or the error as JSON.
+     *
+     * @param callable(Mage_Sales_Model_Order_Shipment): mixed $change
+     */
+    protected function _changeTracks(callable $change, string $failure): void
+    {
+        try {
+            $change($this->_initShipment() ?: Mage::throwException($this->__('The shipment no longer exists.')));
+            $this->loadLayout();
+            $this->getResponse()->setBody($this->getLayout()->getBlock('shipment_tracking')->toHtml());
+            return;
+        } catch (Mage_Core_Exception $e) {
+            $message = $e->getMessage();
+        } catch (Exception $e) {
+            Mage::logException($e);
+            $message = $failure;
         }
-        if (is_array($response)) {
-            $response = Mage::helper('core')->jsonEncode($response);
-        }
-        $this->getResponse()->setBody($response);
+        $this->getResponse()->setBodyJson(['error' => true, 'message' => $message]);
     }
 
     /**
@@ -429,101 +330,24 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
     public function addCommentAction(): void
     {
         try {
-            $this->getRequest()->setParam(
-                'shipment_id',
-                $this->getRequest()->getParam('id'),
-            );
-            $data = $this->getRequest()->getPost('comment');
-            if (empty($data['comment'])) {
-                Mage::throwException($this->__('Comment text field cannot be empty.'));
-            }
-            $shipment = $this->_initShipment();
-            $shipment->addComment(
-                $data['comment'],
-                isset($data['is_customer_notified']),
+            $this->getRequest()->setParam('shipment_id', $this->getRequest()->getParam('id'));
+            $data = (array) $this->getRequest()->getPost('comment');
+            Mage::getService('sales/order')->addComment(
+                $this->_initShipment() ?: Mage::throwException($this->__('The shipment no longer exists.')),
+                (string) ($data['comment'] ?? ''),
+                !empty($data['is_customer_notified']),
                 isset($data['is_visible_on_front']),
             );
-            $shipment->sendUpdateEmail(!empty($data['is_customer_notified']), $data['comment']);
-            $shipment->save();
 
             $this->loadLayout(false);
             $response = $this->getLayout()->getBlock('shipment_comments')->toHtml();
         } catch (Mage_Core_Exception $e) {
-            $response = [
-                'error'     => true,
-                'message'   => $e->getMessage(),
-            ];
-            $response = Mage::helper('core')->jsonEncode($response);
-        } catch (Exception) {
-            $response = [
-                'error'     => true,
-                'message'   => $this->__('Cannot add new comment.'),
-            ];
-            $response = Mage::helper('core')->jsonEncode($response);
+            $response = Mage::helper('core')->jsonEncode(['error' => true, 'message' => $e->getMessage()]);
+        } catch (Exception $e) {
+            Mage::logException($e);
+            $response = Mage::helper('core')->jsonEncode(['error' => true, 'message' => $this->__('Cannot add new comment.')]);
         }
         $this->getResponse()->setBody($response);
-    }
-
-    /**
-     * Create shipping label for specific shipment with validation.
-     *
-     * @return bool
-     */
-    protected function _createShippingLabel(Mage_Sales_Model_Order_Shipment $shipment)
-    {
-        $carrier = $shipment->getOrder()->getShippingCarrier();
-        if (!$carrier->isShippingLabelsAvailable()) {
-            return false;
-        }
-        $shipment->setPackages($this->getRequest()->getParam('packages'));
-        $response = Mage::getModel('shipping/shipping')->requestToShipment($shipment);
-        if ($response->hasErrors()) {
-            Mage::throwException($response->getErrors());
-        }
-        if (!$response->hasInfo()) {
-            return false;
-        }
-        $labelsContent = [];
-        $trackingNumbers = [];
-        $info = $response->getInfo();
-        foreach ($info as $inf) {
-            if (!empty($inf['tracking_number']) && !empty($inf['label_content'])) {
-                $labelsContent[] = $inf['label_content'];
-                $trackingNumbers[] = $inf['tracking_number'];
-            }
-        }
-
-        // Handle single or multiple labels appropriately
-        if (!empty($labelsContent)) {
-            if (count($labelsContent) === 1) {
-                // Single label - store directly
-                $shipment->setShippingLabel($labelsContent[0]);
-            } else {
-                // Multiple labels - combine into ZIP archive
-                try {
-                    $zipContent = $this->createLabelsZipForSingleShipment($labelsContent, $shipment);
-                    $shipment->setShippingLabel($zipContent);
-                } catch (Exception $e) {
-                    Mage::logException($e);
-                    return false;
-                }
-            }
-        } else {
-            // No labels generated
-            return false;
-        }
-        $carrierCode = $carrier->getCarrierCode();
-        $carrierTitle = Mage::getStoreConfig('carriers/' . $carrierCode . '/title', $shipment->getStoreId());
-        if ($trackingNumbers) {
-            foreach ($trackingNumbers as $trackingNumber) {
-                $track = Mage::getModel('sales/order_shipment_track')
-                        ->setNumber($trackingNumber)
-                        ->setCarrierCode($carrierCode)
-                        ->setTitle($carrierTitle);
-                $shipment->addTrack($track);
-            }
-        }
-        return true;
     }
 
     /**
@@ -533,8 +357,8 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
     public function createLabelAction(): void
     {
         try {
-            $shipment = $this->_initShipment();
-            if (!$this->_createShippingLabel($shipment)) {
+            $shipment = $this->_initShipment() ?: Mage::throwException($this->__('The shipment no longer exists.'));
+            if (!Mage::getService('sales/order')->createShippingLabel($shipment, (array) $this->getRequest()->getParam('packages'))) {
                 Mage::throwException(Mage::helper('sales')->__('An error occurred while creating shipping label.'));
             }
             $shipment->save();
@@ -697,68 +521,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
      */
     protected function createZipArchive(array $files, string $tempFilePrefix = 'shipping_labels_'): string
     {
-        $tempFile = tempnam(Mage::getBaseDir('var') . DS . 'tmp', $tempFilePrefix);
-        if ($tempFile === false) {
-            throw new Mage_Core_Exception(
-                Mage::helper('sales')->__('Cannot create temporary file for shipping labels archive.'),
-            );
-        }
-
-        $zip = new ZipArchive();
-        $result = $zip->open($tempFile, ZipArchive::CREATE | ZipArchive::OVERWRITE);
-
-        if ($result !== true) {
-            @unlink($tempFile);
-            throw new Mage_Core_Exception(
-                Mage::helper('sales')->__('Cannot create ZIP archive for shipping labels. Error code: %s', $result),
-            );
-        }
-
-        try {
-            foreach ($files as $filename => $content) {
-                $zip->addFromString($filename, $content);
-            }
-
-            $zip->close();
-
-            // Read the ZIP file content
-            $zipContent = file_get_contents($tempFile);
-            @unlink($tempFile);
-
-            if ($zipContent === false) {
-                throw new Mage_Core_Exception(
-                    Mage::helper('sales')->__('Cannot read created ZIP archive.'),
-                );
-            }
-
-            return $zipContent;
-
-        } catch (Exception $e) {
-            $zip->close();
-            @unlink($tempFile);
-            throw new Mage_Core_Exception(
-                Mage::helper('sales')->__('Error creating shipping labels archive: %s', $e->getMessage()),
-            );
-        }
-    }
-
-    /**
-     * Create ZIP archive containing multiple shipping labels for a single shipment
-     *
-     * @param array $labelsContent Array of label content (PDF binary data)
-     * @param Mage_Sales_Model_Order_Shipment $shipment Single shipment
-     * @return string ZIP file binary content
-     * @throws Mage_Core_Exception
-     */
-    protected function createLabelsZipForSingleShipment(array $labelsContent, Mage_Sales_Model_Order_Shipment $shipment): string
-    {
-        $files = [];
-        foreach ($labelsContent as $index => $content) {
-            $filename = sprintf('label_%s_package_%d.pdf', $shipment->getIncrementId(), $index + 1);
-            $files[$filename] = $content;
-        }
-
-        return $this->createZipArchive($files, 'shipping_label_');
+        return Mage::getService('sales/order')->zipShippingLabels($files, $tempFilePrefix);
     }
 
     /**
