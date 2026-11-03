@@ -48,12 +48,6 @@ class CustomerChangepassword extends BaseMahoCommand
             return Command::INVALID;
         }
 
-        $password = trim($password);
-        if (!strlen($password)) {
-            $io->writeln('<error>New password cannot be empty</error>');
-            return Command::INVALID;
-        }
-
         $customers = $this->findCustomersByEmail($email, $website);
         if (!$customers) {
             $io->writeln('<error>Customer not found.</error>');
@@ -65,8 +59,14 @@ class CustomerChangepassword extends BaseMahoCommand
             return Command::FAILURE;
         }
 
-        $customer->setPassword($password);
-        $customer->save();
+        try {
+            Mage::getService('customer/customer')->setPassword($customer, trim($password));
+        } catch (\Mage_Core_Exception_Input $e) {
+            foreach ($e->getErrors() as $error) {
+                $io->writeln("<error>{$error['message']}</error>");
+            }
+            return Command::INVALID;
+        }
         $io->writeln("<info>Password changed for customer $email.</info>");
         return Command::SUCCESS;
     }
