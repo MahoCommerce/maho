@@ -14,7 +14,6 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\State\Pagination\TraversablePaginator;
 use Maho\ApiPlatform\Service\StoreContext;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Maho\ApiPlatform\Trait\DateRangeFilterTrait;
 
@@ -24,8 +23,6 @@ use Maho\ApiPlatform\Trait\DateRangeFilterTrait;
 final class ProductProvider extends \Maho\ApiPlatform\Provider
 {
     use DateRangeFilterTrait;
-    // Read-side reuse only: shares the stock item column list with the write paths.
-    use \Maho\ApiPlatform\Trait\StockWriterTrait;
 
     /** Whitelist of fields the client may sort by; everything else is rejected to keep ORDER BY injection-safe. */
     private const SORTABLE_FIELDS = ['name', 'price', 'special_price', 'created_at', 'updated_at', 'position', 'sku', 'entity_id'];
@@ -48,21 +45,23 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
      *
      * A backend read bypasses the current-store website check, but a
      * store-restricted token must stay inside the websites its allowed stores
-     * map to, exactly like every product write path (assertProductWebsitesAllowed).
+     * map to, exactly like every product write path.
      * Public: the admin GraphQL ProductQueryHandler applies the same allowlist.
+     *
+     * @throws \Mage_Core_Exception_Forbidden
      */
     public function assertBackendProductAccess(?Product $dto): ?Product
     {
-        if ($dto === null) {
-            return null;
-        }
-        $allowedWebsiteIds = $this->allowedWebsiteIds($this->requireUser());
-        if ($allowedWebsiteIds !== null
-            && array_intersect(array_map(intval(...), $dto->websiteIds ?? []), $allowedWebsiteIds) === []
-        ) {
-            throw new AccessDeniedHttpException("Access denied for this product's websites");
+        if ($dto !== null) {
+            self::service()->assertWebsitesInStores($dto->websiteIds ?? [], $this->requireUser()->getAllowedStoreIds());
         }
         return $dto;
+    }
+
+    private static function service(): \Mage_Catalog_Service_Product
+    {
+        /** @var \Mage_Catalog_Service_Product */
+        return \Mage::getService('catalog/product');
     }
 
     /**
@@ -303,16 +302,8 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
      */
     public function getProductBySku(string $sku, bool $visibleOnly = true): ?Product
     {
-        $product = \Mage::getModel('catalog/product')->loadByAttribute('sku', $sku);
-        if (!$product instanceof \Mage_Catalog_Model_Product || !$product->getId()) {
-            return null;
-        }
-        // loadByAttribute() returns a partially-hydrated model that doesn't fire
-        // the catalog_product_load_after event chain, so $product->getOptions()
-        // returns empty and getMediaGalleryImages() is null. Re-load by ID to
-        // get the full product surface (custom options, media gallery, type
-        // instance data) the detail DTO needs.
-        return $this->loadProductDto((int) $product->getId(), $visibleOnly);
+        $id = self::service()->getIdBySku($sku);
+        return $id === null ? null : $this->loadProductDto($id, $visibleOnly);
     }
 
     /**
@@ -342,30 +333,16 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
     /**
      * Full-load a product scoped to the current store and return its detail DTO.
      *
-     * Single-item public reads (by id, sku, barcode) pass $visibleOnly = true so
-     * a disabled product the listing hides can't be fetched by guessing its
-     * identifier. The admin GraphQL endpoint passes false, as admins must be able
-     * to load disabled products too.
+     * Single-item public reads (by id, sku, barcode) pass $visibleOnly = true, so
+     * they reach only a product that the storefront of the store shows. The admin
+     * GraphQL endpoint passes false, as admins must be able to load disabled products too.
      */
     public function loadProductDto(int $id, bool $visibleOnly = true): ?Product
     {
-        $product = \Mage::getModel('catalog/product')
-            ->setStoreId(StoreContext::getStoreId())
-            ->load($id);
-        if (!$product->getId()) {
-            return null;
-        }
-        // Scope to the current store's website. setStoreId() only scopes EAV
-        // attribute values, not website assignment, so without this check a
-        // caller could read a product that exists solely on another website by
-        // guessing its id/sku/barcode (the collection path already filters this).
-        if ($visibleOnly) {
-            $websiteId = (int) StoreContext::getStore()->getWebsiteId();
-            if (!in_array($websiteId, array_map(intval(...), $product->getWebsiteIds()), true)) {
-                return null;
-            }
-        }
-        if ($visibleOnly && (int) $product->getStatus() !== \Mage_Catalog_Model_Product_Status::STATUS_ENABLED) {
+        $storeId = StoreContext::getStoreId();
+        try {
+            $product = $visibleOnly ? self::service()->getVisibleById($id, $storeId) : self::service()->getById($id, $storeId);
+        } catch (\Mage_Core_Exception_NoSuchEntity) {
             return null;
         }
         // Set the group on the product too, so tier, catalog-rule and final prices match the cache key's group
@@ -852,9 +829,13 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
             // Full column set on purpose: this feeds the cache, and ProductStockItemNormalizer
             // drops the policy columns per request. qty takes the masked stockQty, not the column.
             $dto->stockItem = ['qty' => $dto->stockQty];
-            $columns = ['is_in_stock' => 'bool', 'manage_stock' => 'bool'] + self::STOCK_ITEM_EXTENDED_COLUMNS;
-            foreach ($columns as $column => $type) {
-                $dto->stockItem[$column] = $this->castStockColumnValue($stockData->getData($column), $type);
+            foreach (array_diff_key(\Mage_CatalogInventory_Service_Stock::COLUMNS, ['qty' => true]) as $column => $type) {
+                $value = $stockData->getData($column);
+                $dto->stockItem[$column] = match ($type) {
+                    'float' => (float) $value,
+                    'int' => (int) $value,
+                    default => (bool) $value,
+                };
             }
         }
 

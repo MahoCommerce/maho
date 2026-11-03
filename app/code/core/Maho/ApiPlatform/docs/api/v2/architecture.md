@@ -95,7 +95,7 @@ Domain-specific traits that can be added to providers or processors as needed:
 
 | Trait | Purpose | Used by |
 |---|---|---|
-| `ProductLoaderTrait` | Loads a product by ID with store context and optional type constraint | Catalog sub-resource providers/processors |
+| `ProductLoaderTrait` | Loads a product by ID through `Mage_Catalog_Service_Product`, in the store of the request, with an optional type constraint | Catalog sub-resource providers/processors |
 | `CacheTrait` | Cache-aside `remember()` helper for provider responses | ReviewProvider |
 | `ActivityLogTrait` | Logs write operations to the admin activity log | Product, Category, CMS, Blog processors |
 | `StoreAccessTrait` | Resolves store codes to IDs and validates store-level access | CMS and Blog processors |

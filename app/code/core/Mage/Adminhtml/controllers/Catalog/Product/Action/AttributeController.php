@@ -49,7 +49,9 @@ class Mage_Adminhtml_Catalog_Product_Action_AttributeController extends Mage_Adm
         $attributesData     = $this->getRequest()->getParam('attributes', []);
         $websiteRemoveData  = $this->getRequest()->getParam('remove_website_ids', []);
         $websiteAddData     = $this->getRequest()->getParam('add_website_ids', []);
-        $attributeName      = '';
+        $productIds         = $this->_getHelper()->getProductIds();
+        /** @var Mage_Catalog_Service_Product $service */
+        $service = Mage::getService('catalog/product');
 
         /* Prepare inventory data item options (use config settings) */
         foreach (Mage::helper('cataloginventory')->getConfigItemOptions() as $option) {
@@ -61,19 +63,13 @@ class Mage_Adminhtml_Catalog_Product_Action_AttributeController extends Mage_Adm
         try {
             if ($attributesData) {
                 $dateFormat = Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT);
-                $storeId    = $this->_getHelper()->getSelectedStoreId();
-                $data       = new \Maho\DataObject();
 
                 foreach ($attributesData as $attributeCode => $value) {
                     $attribute = Mage::getSingleton('eav/config')
                         ->getAttribute(Mage_Catalog_Model_Product::ENTITY, $attributeCode);
                     if (!$attribute->getAttributeId()) {
-                        unset($attributesData[$attributeCode]);
                         continue;
                     }
-                    $data->setData($attributeCode, $value);
-                    $attributeName = $attribute->getFrontendLabel();
-                    $attribute->getBackend()->validate($data);
                     if ($attribute->getBackendType() == 'datetime') {
                         if (!empty($value)) {
                             try {
@@ -116,8 +112,7 @@ class Mage_Adminhtml_Catalog_Product_Action_AttributeController extends Mage_Adm
                     }
                 }
 
-                Mage::getSingleton('catalog/product_action')
-                    ->updateAttributes($this->_getHelper()->getProductIds(), $attributesData, $storeId);
+                $service->updateAttributes($productIds, $attributesData, $this->_getHelper()->getSelectedStoreId());
             }
             if ($inventoryData) {
                 /** @var Mage_CatalogInventory_Model_Stock_Item $stockItem */
@@ -126,7 +121,7 @@ class Mage_Adminhtml_Catalog_Product_Action_AttributeController extends Mage_Adm
                 $stockItemSaved = false;
                 $changedProductIds = [];
 
-                foreach ($this->_getHelper()->getProductIds() as $productId) {
+                foreach ($productIds as $productId) {
                     $stockItem->setData([]);
                     $stockItem->loadByProduct($productId)
                         ->setProductId($productId);
@@ -158,20 +153,7 @@ class Mage_Adminhtml_Catalog_Product_Action_AttributeController extends Mage_Adm
             }
 
             if ($websiteAddData || $websiteRemoveData) {
-                /** @var Mage_Catalog_Model_Product_Action $actionModel */
-                $actionModel = Mage::getSingleton('catalog/product_action');
-                $productIds  = $this->_getHelper()->getProductIds();
-
-                if ($websiteRemoveData) {
-                    $actionModel->updateWebsites($productIds, $websiteRemoveData, 'remove');
-                }
-                if ($websiteAddData) {
-                    $actionModel->updateWebsites($productIds, $websiteAddData, 'add');
-                }
-
-                Mage::dispatchEvent('catalog_product_to_website_change', [
-                    'products' => $productIds,
-                ]);
+                $service->changeWebsites($productIds, (array) $websiteAddData, (array) $websiteRemoveData);
 
                 $notice = Mage::getConfig()->getNode('adminhtml/messages/website_chnaged_indexers/label');
                 if ($notice) {
@@ -186,10 +168,12 @@ class Mage_Adminhtml_Catalog_Product_Action_AttributeController extends Mage_Adm
             }
 
             $this->_getSession()->addSuccess(
-                $this->__('Total of %d record(s) were updated', count($this->_getHelper()->getProductIds())),
+                $this->__('Total of %d record(s) were updated', count($productIds)),
             );
-        } catch (Mage_Eav_Model_Entity_Attribute_Exception $e) {
-            $this->_getSession()->addError($attributeName . ': ' . $e->getMessage());
+        } catch (Mage_Core_Exception_Input $e) {
+            foreach ($e->getErrors() as $error) {
+                $this->_getSession()->addError($error['message']);
+            }
         } catch (Mage_Core_Exception $e) {
             $this->_getSession()->addError($e->getMessage());
         } catch (Throwable $e) {

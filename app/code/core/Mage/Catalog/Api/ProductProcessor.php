@@ -17,33 +17,21 @@ use Mage_Catalog_Model_Product;
 use Mage_Catalog_Model_Product_Status;
 use Mage_Catalog_Model_Product_Type;
 use Mage_Catalog_Model_Product_Visibility;
-use Mage_CatalogInventory_Model_Stock_Item;
-use Mage_Core_Model_App;
+use Mage_Catalog_Service_Product;
+use Mage_CatalogInventory_Service_Stock;
+use Mage_Core_Exception_Input;
+use Mage_Core_Exception_NoSuchEntity;
 use Maho\ApiPlatform\Security\ApiUser;
-use Maho\ApiPlatform\Trait\ActivityLogTrait;
-use Maho\ApiPlatform\Trait\ProductLoaderTrait;
-use Maho\ApiPlatform\Trait\StockWriterTrait;
 use Maho\ApiPlatform\Service\StoreContext;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
- * Product State Processor.
+ * Give a product write to the product service. Requires the products/write or the products/delete permission.
  *
- * Handles create, update, and delete operations for products.
- * Requires JWT authentication with products/write or products/delete permission.
- *
- * Supports a fast-update mode (via X-Fast-Update header or ?fast=true query param)
- * that uses bulk EAV updateAttributes() and direct SQL for stock/categories,
- * bypassing model save for significantly faster updates.
+ * A fast update (the X-Fast-Update header or ?fast=true) writes the attribute values without a save of the
+ * product, so it skips the observers and the URL rewrites of a save.
  */
 final class ProductProcessor extends \Maho\ApiPlatform\Processor
 {
-    use ActivityLogTrait;
-    use ProductLoaderTrait;
-    use StockWriterTrait;
-
     private const VISIBILITY_MAP = [
         'not_visible' => Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE,
         'catalog' => Mage_Catalog_Model_Product_Visibility::VISIBILITY_IN_CATALOG,
@@ -51,12 +39,19 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         'catalog_search' => Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH,
     ];
 
-    /**
-     * Dedicated scalar DTO fields applied verbatim, property => attribute code.
-     * Wired into both write paths (model save and fast EAV update); null means
-     * "leave unchanged".
-     */
+    /** The attribute that each scalar field of the DTO sets. A null field leaves the attribute as it is. */
     private const SCALAR_ATTRIBUTE_FIELDS = [
+        'description' => 'description',
+        'shortDescription' => 'short_description',
+        'price' => 'price',
+        'specialPrice' => 'special_price',
+        'weight' => 'weight',
+        'urlKey' => 'url_key',
+        'metaTitle' => 'meta_title',
+        'metaDescription' => 'meta_description',
+        'metaKeywords' => 'meta_keyword',
+        'barcode' => 'barcode',
+        'pageLayout' => 'page_layout',
         'cost' => 'cost',
         'msrp' => 'msrp',
         'msrpEnabled' => 'msrp_enabled',
@@ -80,113 +75,93 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         'samplesTitle' => 'samples_title',
     ];
 
-    /** Dedicated date DTO fields (special_from_date semantics), property => attribute code. */
+    /** The attribute that each date field of the DTO sets. An empty string clears the date. */
     private const DATE_ATTRIBUTE_FIELDS = [
+        'specialFromDate' => 'special_from_date',
+        'specialToDate' => 'special_to_date',
         'newsFromDate' => 'news_from_date',
         'newsToDate' => 'news_to_date',
         'customDesignFrom' => 'custom_design_from',
         'customDesignTo' => 'custom_design_to',
     ];
 
-    /** These attributes ship with the catalog data upgrades but may be absent on older installs; skip silently then. */
-    private const OPTIONAL_ATTRIBUTE_CODES = ['gtin', 'mpn'];
+    /** Codes that a dedicated field sets, and the system codes. customAttributesWrite cannot set them. */
+    private const PROTECTED_ATTRIBUTE_CODES = [
+        'entity_id', 'type_id', 'sku', 'attribute_set_id', 'tax_class_id',
+        'website_ids', 'stock_data', 'status', 'visibility',
+        'created_at', 'updated_at', 'entity_type_id',
+    ];
 
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): ?Product
     {
         $user = $this->requireUser();
+        $service = self::service();
 
         if ($operation instanceof DeleteOperationInterface) {
-            return $this->handleDelete((int) $uriVariables['id'], $user);
+            $product = $service->getById((int) $uriVariables['id']);
+            $service->assertInStores($product, $user->getAllowedStoreIds());
+            $oldData = $product->getData();
+            $service->delete($product);
+            $this->logApiActivity('catalog/product', 'delete', $oldData, null);
+            return null;
         }
 
         assert($data instanceof Product);
-
-        if (isset($uriVariables['id'])) {
-            $fastMode = ($context['request'] ?? null)?->headers->get('X-Fast-Update') === 'true'
-                || ($context['request'] ?? null)?->query->get('fast') === 'true';
-
-            // The DTO default of categoryIds is [], so only the body tells an empty list from an absent field
-            $categoryIdsSent = array_key_exists('categoryIds', $this->parseRequestBody($context['request'] ?? null));
-
-            if ($fastMode) {
-                return $this->handleFastUpdate((int) $uriVariables['id'], $data, $user, $categoryIdsSent);
-            }
-            return $this->handleUpdate((int) $uriVariables['id'], $data, $user, $categoryIdsSent);
-        }
-
-        return $this->handleCreate($data, $user);
-    }
-
-    private function handleCreate(Product $data, ApiUser $user): Product
-    {
         StoreContext::ensureStore();
 
-        if (empty($data->sku)) {
-            throw new UnprocessableEntityHttpException('SKU is required');
+        if (!isset($uriVariables['id'])) {
+            return $this->create($data, $user);
         }
 
-        if (empty($data->name)) {
-            throw new UnprocessableEntityHttpException('Name is required');
+        $request = $context['request'] ?? null;
+        // The DTO default of categoryIds is [], so only the body tells an empty list from an absent field
+        $categoryIdsSent = array_key_exists('categoryIds', $this->parseRequestBody($request));
+        if ($request?->headers->get('X-Fast-Update') === 'true' || $request?->query->get('fast') === 'true') {
+            return $this->fastUpdate((int) $uriVariables['id'], $data, $user, $categoryIdsSent);
         }
+        return $this->update((int) $uriVariables['id'], $data, $user, $categoryIdsSent);
+    }
 
-        /** @var Mage_Catalog_Model_Product $product */
-        $product = Mage::getModel('catalog/product');
+    private static function service(): Mage_Catalog_Service_Product
+    {
+        /** @var Mage_Catalog_Service_Product */
+        return Mage::getService('catalog/product');
+    }
 
-        $product->setData([
-            'sku' => $data->sku,
-            'name' => $data->name,
-            'type_id' => $data->type ?: Mage_Catalog_Model_Product_Type::TYPE_SIMPLE,
-            'attribute_set_id' => $data->attributeSetId ?: (int) Mage::getModel('catalog/product')->getDefaultAttributeSetId(),
-            'status' => ($data->isActive ?? true)
-                ? Mage_Catalog_Model_Product_Status::STATUS_ENABLED
-                : Mage_Catalog_Model_Product_Status::STATUS_DISABLED,
-            'visibility' => $data->visibility !== null
-                ? (self::VISIBILITY_MAP[$data->visibility] ?? Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH)
-                : Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH,
-            'tax_class_id' => $data->taxClassId ?? 0,
-        ]);
+    private static function stockService(): Mage_CatalogInventory_Service_Stock
+    {
+        /** @var Mage_CatalogInventory_Service_Stock */
+        return Mage::getService('cataloginventory/stock');
+    }
 
-        // Creates always write the global (admin) scope so every store view starts
-        // from the same values; store overrides come from an update with ?store=.
-        // Set after setData(), which replaced the whole data array.
-        $product->setStoreId(Mage_Core_Model_App::ADMIN_STORE_ID);
-
-        $this->applyProductData($product, $data);
-
-        $websiteIds = $data->websiteIds ?? $this->getDefaultWebsiteIds($user);
-        $this->validateSubmittedWebsiteIds($websiteIds, $user);
-        $product->setWebsiteIds($websiteIds);
-
-        $this->safeSave($product, 'create product');
-
-        if (!empty($data->categoryIds)) {
-            $this->assignCategories($product, $data->categoryIds);
+    private function create(Product $data, ApiUser $user): Product
+    {
+        $service = self::service();
+        $product = $service->newProduct($data->type ?: Mage_Catalog_Model_Product_Type::TYPE_SIMPLE, $data->attributeSetId ?: null);
+        $product->setSku($data->sku)
+            ->setName($data->name)
+            ->setStatus(($data->isActive ?? true) ? Mage_Catalog_Model_Product_Status::STATUS_ENABLED : Mage_Catalog_Model_Product_Status::STATUS_DISABLED)
+            ->setVisibility($this->toVisibility($data->visibility) ?? Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH)
+            ->setTaxClassId($data->taxClassId ?? 0);
+        $product->addData($this->collectAttributeData($data));
+        $allowedStoreIds = $user->getAllowedStoreIds();
+        $service->setWebsiteIds($product, $data->websiteIds ?? $service->getDefaultWebsiteIds(StoreContext::getStoreId(), $allowedStoreIds), $allowedStoreIds);
+        if ($data->categoryIds !== []) {
+            $product->setCategoryIds(array_map(intval(...), $data->categoryIds));
         }
-
-        $this->updateStockData($product, $data);
-        $this->invalidateCache((int) $product->getId());
+        $this->applyStockData($product, $data);
+        $service->save($product);
         $this->logApiActivity('catalog/product', 'create', null, $product);
 
         return $this->refreshDto($product);
     }
 
-    private function handleUpdate(int $id, Product $data, ApiUser $user, bool $categoryIdsSent): Product
+    private function update(int $id, Product $data, ApiUser $user, bool $categoryIdsSent): Product
     {
-        StoreContext::ensureStore();
-        $storeId = $this->resolveWriteScope($user);
-
-        /** @var Mage_Catalog_Model_Product $product */
-        $product = Mage::getModel('catalog/product');
-        $product->setStoreId($storeId);
-        $product->load($id);
-
-        if (!$product->getId()) {
-            throw new NotFoundHttpException('Product not found');
-        }
-
-        $this->assertProductWebsitesAllowed($product, $user);
-
+        $service = self::service();
+        $product = $service->getById($id, $this->resolveWriteScope($user));
+        $service->assertInStores($product, $user->getAllowedStoreIds());
         $oldData = $product->getData();
 
         if ($data->name !== '') {
@@ -195,35 +170,27 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         if ($data->sku !== '') {
             $product->setSku($data->sku);
         }
-
         if ($data->isActive !== null) {
-            $product->setStatus(
-                $data->isActive
-                    ? Mage_Catalog_Model_Product_Status::STATUS_ENABLED
-                    : Mage_Catalog_Model_Product_Status::STATUS_DISABLED,
-            );
+            $product->setStatus($data->isActive ? Mage_Catalog_Model_Product_Status::STATUS_ENABLED : Mage_Catalog_Model_Product_Status::STATUS_DISABLED);
         }
-
         if ($data->visibility !== null) {
-            $product->setVisibility(
-                self::VISIBILITY_MAP[$data->visibility] ?? (int) $oldData['visibility'],
-            );
+            $product->setVisibility($this->toVisibility($data->visibility));
         }
-
         if ($data->attributeSetId !== null) {
             $product->setAttributeSetId($data->attributeSetId);
         }
         if ($data->taxClassId !== null) {
             $product->setTaxClassId($data->taxClassId);
         }
-
-        $this->applyProductData($product, $data);
-        $this->applyUseDefault($product, $data, $storeId);
-
+        $product->addData($this->collectAttributeData($data));
+        $service->useDefault($product, array_map(strval(...), $data->useDefault ?? []));
         if ($data->websiteIds !== null) {
-            $this->validateSubmittedWebsiteIds($data->websiteIds, $user);
-            $product->setWebsiteIds($data->websiteIds);
+            $service->setWebsiteIds($product, $data->websiteIds, $user->getAllowedStoreIds());
         }
+        if ($categoryIdsSent) {
+            $product->setCategoryIds(array_map(intval(...), $data->categoryIds));
+        }
+        $this->applyStockData($product, $data);
 
         // A store view write stores only the fields of the request.
         $inherited = StoreScopeWrite::keepInheritedValues(
@@ -231,632 +198,161 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
             $oldData,
             StoreScopeWrite::requestedCodes($data, $data->isActive !== null ? ['status'] : []),
         );
-
-        $this->safeSave($product, 'update product');
-
-        if ($categoryIdsSent) {
-            $this->assignCategories($product, $data->categoryIds);
-        }
-
-        $this->updateStockData($product, $data);
+        $service->save($product);
         StoreScopeWrite::restoreInheritedValues($product, $oldData, $inherited);
-        $this->invalidateCache((int) $product->getId());
         $this->logApiActivity('catalog/product', 'update', $oldData, $product);
 
         return $this->refreshDto($product);
     }
 
-    /**
-     * Fast update using bulk EAV updateAttributes() and direct SQL.
-     *
-     * Bypasses model save, observers, and URL rewrites for significantly faster updates.
-     * Modeled on DataSync's _updateProductFast() pattern.
-     */
-    private function handleFastUpdate(int $id, Product $data, ApiUser $user, bool $categoryIdsSent): Product
+    private function fastUpdate(int $id, Product $data, ApiUser $user, bool $categoryIdsSent): Product
     {
-        StoreContext::ensureStore();
+        $service = self::service();
         $storeId = $this->resolveWriteScope($user);
-
-        /** @var Mage_Catalog_Model_Product $product */
-        $product = Mage::getModel('catalog/product');
-        $product->setStoreId($storeId);
-        $product->load($id);
-
-        if (!$product->getId()) {
-            throw new NotFoundHttpException('Product not found');
-        }
-
-        $this->assertProductWebsitesAllowed($product, $user);
-
+        $product = $service->getById($id, $storeId);
+        $service->assertInStores($product, $user->getAllowedStoreIds());
         $oldData = $product->getData();
 
-        // Build attribute data array (only non-null fields from the DTO)
-        $attrData = [];
+        $attrData = $this->collectAttributeData($data);
         if ($data->name !== '') {
             $attrData['name'] = $data->name;
         }
-        if ($data->description !== null) {
-            $attrData['description'] = $data->description;
-        }
-        if ($data->shortDescription !== null) {
-            $attrData['short_description'] = $data->shortDescription;
-        }
-        if ($data->price !== null) {
-            $attrData['price'] = $data->price;
-        }
-        if ($data->specialPrice !== null) {
-            $attrData['special_price'] = $data->specialPrice;
-        }
-        if ($data->specialFromDate !== null) {
-            $attrData['special_from_date'] = $this->normalizeDateInput($data->specialFromDate, 'specialFromDate');
-        }
-        if ($data->specialToDate !== null) {
-            $attrData['special_to_date'] = $this->normalizeDateInput($data->specialToDate, 'specialToDate');
-        }
-        $attrData = array_merge($attrData, $this->collectAttributeData($data));
-        $effective = fn(string $code): mixed => array_key_exists($code, $attrData) ? $attrData[$code] : ($oldData[$code] ?? null);
-        $this->validateDateRange($effective('special_from_date'), $effective('special_to_date'), 'specialFromDate', 'specialToDate');
-        $this->validateDateRange($effective('news_from_date'), $effective('news_to_date'), 'newsFromDate', 'newsToDate');
-        $this->validateDateRange($effective('custom_design_from'), $effective('custom_design_to'), 'customDesignFrom', 'customDesignTo');
-        if ($data->weight !== null) {
-            $attrData['weight'] = $data->weight;
-        }
-        if ($data->urlKey !== null) {
-            $attrData['url_key'] = $data->urlKey;
-        }
-        if ($data->metaTitle !== null) {
-            $attrData['meta_title'] = $data->metaTitle;
-        }
-        if ($data->metaDescription !== null) {
-            $attrData['meta_description'] = $data->metaDescription;
-        }
-        if ($data->metaKeywords !== null) {
-            $attrData['meta_keyword'] = $data->metaKeywords;
-        }
         if ($data->visibility !== null) {
-            $attrData['visibility'] = self::VISIBILITY_MAP[$data->visibility] ?? (int) $oldData['visibility'];
+            $attrData['visibility'] = $this->toVisibility($data->visibility);
         }
         if ($data->isActive !== null) {
-            $attrData['status'] = $data->isActive
-                ? Mage_Catalog_Model_Product_Status::STATUS_ENABLED
-                : Mage_Catalog_Model_Product_Status::STATUS_DISABLED;
+            $attrData['status'] = $data->isActive ? Mage_Catalog_Model_Product_Status::STATUS_ENABLED : Mage_Catalog_Model_Product_Status::STATUS_DISABLED;
         }
+        $service->updateAttributes([$id], $attrData, $storeId);
+        // The activity log records the new values
+        $product->addData($attrData);
 
-        if ($data->barcode !== null) {
-            $attrData['barcode'] = $data->barcode;
+        $service->deleteStoreValues($id, array_map(strval(...), $data->useDefault ?? []), $storeId);
+        $stockData = $this->toStockData($data);
+        if ($stockData !== []) {
+            $stock = self::stockService();
+            $stock->update($stock->getByProductId($id), $stockData);
         }
-        if ($data->pageLayout !== null) {
-            $attrData['page_layout'] = $data->pageLayout;
-        }
-
-        // Filter to only non-static EAV attributes (updateAttributes only works with EAV value tables)
-        $attributes = $product->getAttributes();
-        $validAttrCodes = [];
-        foreach ($attributes as $attrCode => $attribute) {
-            $backendType = $attribute->getBackendType();
-            if ($backendType && $backendType !== 'static') {
-                $validAttrCodes[] = $attrCode;
-            }
-        }
-        $attrData = array_filter($attrData, fn($key) => in_array($key, $validAttrCodes), ARRAY_FILTER_USE_KEY);
-
-        // Bulk EAV update, bypasses model save, observers, URL rewrites
-        if (!empty($attrData)) {
-            Mage::getSingleton('catalog/product_action')
-                ->updateAttributes([$id], $attrData, $storeId);
-            // Reflect the written values so the activity log records the new
-            // state, not the pre-update snapshot.
-            $product->addData($attrData);
-        }
-
-        if (!empty($data->useDefault)) {
-            $this->deleteStoreValuesDirect($id, $data, $storeId);
-        }
-
-        // Direct SQL for stock
-        if ($data->stockQty !== null || $data->stockData !== null) {
-            $this->updateStockDirect($id, $data);
-        }
-
-        // Direct SQL for categories
         if ($categoryIdsSent) {
-            $this->updateCategoriesDirect($id, $data->categoryIds);
+            $service->setCategoryIds($id, $data->categoryIds);
         }
-
-        // Website IDs still use model (infrequent, complex)
         if ($data->websiteIds !== null) {
-            $this->validateSubmittedWebsiteIds($data->websiteIds, $user);
-            $product->setWebsiteIds($data->websiteIds);
-            $product->save();
+            $current = array_map(intval(...), $product->getWebsiteIds());
+            $wanted = array_map(intval(...), $data->websiteIds);
+            $service->changeWebsites([$id], array_values(array_diff($wanted, $current)), array_values(array_diff($current, $wanted)), $user->getAllowedStoreIds());
+            $product->setWebsiteIds($wanted);
         }
 
-        $this->invalidateCache($id);
+        Mage::app()->cleanCache(["API_PRODUCT_{$id}", 'API_PRODUCTS']);
         $this->logApiActivity('catalog/product', 'update', $oldData, $product);
 
         return $this->refreshDto($product);
     }
 
-    private function handleDelete(int $id, ApiUser $user): null
-    {
-        /** @var Mage_Catalog_Model_Product $product */
-        $product = Mage::getModel('catalog/product')->load($id);
-
-        if (!$product->getId()) {
-            throw new NotFoundHttpException('Product not found');
-        }
-
-        $this->assertProductWebsitesAllowed($product, $user);
-
-        $oldData = $product->getData();
-
-        $this->secureAreaDelete($product, 'delete product');
-
-        $this->invalidateCache($id);
-        $this->logApiActivity('catalog/product', 'delete', $oldData, null);
-
-        return null;
-    }
-
-    private function applyProductData(Mage_Catalog_Model_Product $product, Product $data): void
-    {
-        if ($data->description !== null) {
-            $product->setDescription($data->description);
-        }
-        if ($data->shortDescription !== null) {
-            $product->setShortDescription($data->shortDescription);
-        }
-        if ($data->price !== null) {
-            $product->setPrice($data->price);
-        }
-        if ($data->specialPrice !== null) {
-            $product->setSpecialPrice($data->specialPrice);
-        }
-        if ($data->specialFromDate !== null) {
-            $product->setData('special_from_date', $this->normalizeDateInput($data->specialFromDate, 'specialFromDate'));
-        }
-        if ($data->specialToDate !== null) {
-            $product->setData('special_to_date', $this->normalizeDateInput($data->specialToDate, 'specialToDate'));
-        }
-        foreach ($this->collectAttributeData($data) as $attrCode => $value) {
-            if (in_array($attrCode, self::OPTIONAL_ATTRIBUTE_CODES, true) && !$this->attributeExists($attrCode)) {
-                continue;
-            }
-            $product->setData($attrCode, $value);
-        }
-        $this->validateDateRange($product->getData('special_from_date'), $product->getData('special_to_date'), 'specialFromDate', 'specialToDate');
-        $this->validateDateRange($product->getData('news_from_date'), $product->getData('news_to_date'), 'newsFromDate', 'newsToDate');
-        $this->validateDateRange($product->getData('custom_design_from'), $product->getData('custom_design_to'), 'customDesignFrom', 'customDesignTo');
-        if ($data->weight !== null) {
-            $product->setWeight($data->weight);
-        }
-        if ($data->urlKey !== null) {
-            $product->setUrlKey($data->urlKey);
-        }
-        if ($data->metaTitle !== null) {
-            $product->setMetaTitle($data->metaTitle);
-        }
-        if ($data->metaDescription !== null) {
-            $product->setMetaDescription($data->metaDescription);
-        }
-        if ($data->metaKeywords !== null) {
-            $product->setData('meta_keyword', $data->metaKeywords);
-        }
-        if ($data->barcode !== null) {
-            $product->setData('barcode', $data->barcode);
-        }
-        if ($data->pageLayout !== null) {
-            $product->setData('page_layout', $data->pageLayout);
-        }
-        if (!empty($data->customAttributesWrite)) {
-            $this->applyCustomAttributes($product, $data->customAttributesWrite);
-        }
-    }
-
     /**
-     * Revert store overrides to the default value. Catalog EAV treats `false` as
-     * the "use default" sentinel: saving it at a store scope deletes that store's
-     * value row, so reads fall back to the global value again.
-     */
-    private function applyUseDefault(Mage_Catalog_Model_Product $product, Product $data, int $storeId): void
-    {
-        foreach ($this->resolveUseDefaultAttributes($data, $storeId) as $attribute) {
-            $product->setData($attribute->getAttributeCode(), false);
-        }
-    }
-
-    /**
-     * Fast-update variant of applyUseDefault(): deletes the store value rows
-     * directly, matching the path's model-save bypass.
-     */
-    private function deleteStoreValuesDirect(int $id, Product $data, int $storeId): void
-    {
-        $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
-        foreach ($this->resolveUseDefaultAttributes($data, $storeId) as $attribute) {
-            $adapter->delete($attribute->getBackend()->getTable(), [
-                'entity_id = ?' => $id,
-                'attribute_id = ?' => (int) $attribute->getId(),
-                'store_id = ?' => $storeId,
-            ]);
-        }
-    }
-
-    /**
-     * Validate the useDefault input and resolve it to attribute models: requires
-     * an explicit store scope, and only non-global attributes can have a store
-     * override to revert.
-     *
-     * @return list<\Mage_Catalog_Model_Resource_Eav_Attribute>
-     */
-    private function resolveUseDefaultAttributes(Product $data, int $storeId): array
-    {
-        if (empty($data->useDefault)) {
-            return [];
-        }
-
-        if ($storeId === Mage_Core_Model_App::ADMIN_STORE_ID) {
-            throw new UnprocessableEntityHttpException('useDefault requires a store context (?store=): global values have no default to revert to.');
-        }
-
-        $attributes = [];
-        foreach ($data->useDefault as $code) {
-            $code = (string) $code;
-            $attribute = Mage::getSingleton('eav/config')->getAttribute(Mage_Catalog_Model_Product::ENTITY, $code);
-            if (!$attribute instanceof \Mage_Catalog_Model_Resource_Eav_Attribute || !$attribute->getId() || $attribute->getBackend()->isStatic()) {
-                throw new UnprocessableEntityHttpException("Unknown attribute in useDefault: {$code}");
-            }
-            if ($attribute->isScopeGlobal()) {
-                throw new UnprocessableEntityHttpException("Attribute '{$code}' is global scope and has no store override to revert.");
-            }
-            $attributes[] = $attribute;
-        }
-
-        return $attributes;
-    }
-
-    /**
-     * Collect the dedicated attribute fields the request provided, as
-     * attribute_code => value: dates normalized to midnight datetimes, bools
-     * cast to int. Shared by the model-save and fast-update write paths.
+     * Return the attribute values that the dedicated fields and customAttributesWrite of the request set, by code:
+     * a date in the midnight form of the admin, a flag as 0 or 1.
      *
      * @return array<string, mixed>
+     * @throws Mage_Core_Exception_Input for an invalid date and for a protected code in customAttributesWrite
      */
     private function collectAttributeData(Product $data): array
     {
         $attrData = [];
-        foreach (self::SCALAR_ATTRIBUTE_FIELDS as $prop => $attrCode) {
-            if ($data->$prop !== null) {
-                $attrData[$attrCode] = is_bool($data->$prop) ? (int) $data->$prop : $data->$prop;
+        foreach (self::SCALAR_ATTRIBUTE_FIELDS as $property => $code) {
+            if ($data->$property !== null) {
+                $attrData[$code] = is_bool($data->$property) ? (int) $data->$property : $data->$property;
             }
         }
-        foreach (self::DATE_ATTRIBUTE_FIELDS as $prop => $attrCode) {
-            if ($data->$prop !== null) {
-                $attrData[$attrCode] = $this->normalizeDateInput($data->$prop, $prop);
+        foreach (self::DATE_ATTRIBUTE_FIELDS as $property => $code) {
+            if ($data->$property !== null) {
+                $attrData[$code] = $this->toDate($data->$property, $code);
             }
         }
-        if (isset($attrData['custom_layout_update'])) {
-            $this->validateLayoutUpdateXml((string) $attrData['custom_layout_update']);
+        foreach ($data->customAttributesWrite ?? [] as $code => $value) {
+            $code = (string) $code;
+            if (in_array($code, self::PROTECTED_ATTRIBUTE_CODES, true)) {
+                throw new Mage_Core_Exception_Input()->addError($code, "Attribute '{$code}' cannot be set via customAttributes; use the dedicated field.");
+            }
+            $attrData[$code] = $value;
+        }
+        // An attribute that this install does not have, such as gtin on an old install, is skipped
+        foreach (array_keys($attrData) as $code) {
+            $attribute = Mage::getSingleton('eav/config')->getAttribute(Mage_Catalog_Model_Product::ENTITY, $code);
+            if (!$attribute || !$attribute->getId()) {
+                unset($attrData[$code]);
+            }
         }
         return $attrData;
     }
 
     /**
-     * Reject layout-update XML the admin form would reject (disallowed blocks,
-     * template overrides, helper attributes). The fast-update path writes EAV
-     * values directly, bypassing the attribute backend model that guards the
-     * model-save path, so both paths validate here.
+     * Return the stock change of the request: the stockData map, in snake case or camel case, and the stockQty
+     * shortcut.
+     *
+     * @return array<string, float|int>
      */
-    private function validateLayoutUpdateXml(string $xml): void
+    private function toStockData(Product $data): array
     {
-        $xml = trim($xml);
-        if ($xml === '') {
-            return;
+        $stockData = self::stockService()->toColumns($data->stockData ?? []);
+        if (!isset($stockData['qty']) && $data->stockQty !== null) {
+            $stockData['qty'] = $data->stockQty;
         }
-
-        /** @var \Mage_Adminhtml_Model_LayoutUpdate_Validator $validator */
-        $validator = Mage::getModel('adminhtml/layoutUpdate_validator');
-        try {
-            $isValid = $validator->isValid($xml);
-            $messages = $validator->getMessages();
-        } catch (\Throwable) {
-            $isValid = false;
-            $messages = [];
-        }
-
-        if (!$isValid) {
-            $message = $messages === [] ? 'XML data is invalid.' : (string) reset($messages);
-            throw new UnprocessableEntityHttpException("Invalid customLayoutUpdate: {$message}");
-        }
+        return $stockData;
     }
 
-    private function attributeExists(string $code): bool
+    private function applyStockData(Mage_Catalog_Model_Product $product, Product $data): void
     {
-        $attribute = Mage::getSingleton('eav/config')->getAttribute(Mage_Catalog_Model_Product::ENTITY, $code);
-        return (bool) ($attribute && $attribute->getId());
+        $stockData = $this->toStockData($data);
+        if ($stockData !== []) {
+            $product->setStockData($stockData);
+        }
     }
 
     /**
-     * Codes handled by dedicated DTO fields (or otherwise protected). They must
-     * never be written through the generic customAttributesWrite bag.
+     * @throws Mage_Core_Exception_Input for an unknown visibility
      */
-    private const PROTECTED_ATTRIBUTE_CODES = [
-        'entity_id', 'type_id', 'sku', 'attribute_set_id', 'tax_class_id',
-        'website_ids', 'stock_data', 'status', 'visibility',
-        'created_at', 'updated_at', 'entity_type_id',
-    ];
-
-    /**
-     * Apply arbitrary EAV attribute values supplied via customAttributesWrite.
-     *
-     * Protected/system codes are rejected outright; unknown codes (not real
-     * catalog_product EAV attributes) are skipped silently so a typo can't
-     * inject an arbitrary column.
-     *
-     * @param array<string, mixed> $attributes
-     */
-    private function applyCustomAttributes(Mage_Catalog_Model_Product $product, array $attributes): void
+    private function toVisibility(?string $visibility): ?int
     {
-        $eavConfig = Mage::getSingleton('eav/config');
-
-        foreach ($attributes as $code => $value) {
-            $code = (string) $code;
-
-            if (in_array($code, self::PROTECTED_ATTRIBUTE_CODES, true)) {
-                throw new UnprocessableEntityHttpException(
-                    "Attribute '{$code}' cannot be set via customAttributes; use the dedicated field.",
-                );
-            }
-
-            $attribute = $eavConfig->getAttribute(Mage_Catalog_Model_Product::ENTITY, $code);
-            if (!$attribute || !$attribute->getId()) {
-                // Unknown attribute, skip silently.
-                continue;
-            }
-
-            $product->setData($code, $value);
-        }
-    }
-
-    private function assignCategories(Mage_Catalog_Model_Product $product, array $categoryIds): void
-    {
-        $categoryIds = array_map(intval(...), $categoryIds);
-        $product->setCategoryIds($categoryIds);
-        $this->safeSave($product, 'assign categories');
-    }
-
-    /**
-     * Resolve the stock changes the caller supplied, coalescing the structured
-     * stockData map (snake_case or camelCase keys) and the flat stockQty
-     * shortcut. Extended inventory columns (min_qty, backorders, the
-     * use_config_* family, ...) are extracted alongside the core trio. Returns
-     * null when the request carries no stock change to apply (matching the
-     * original early-return: only manage_stock with no qty/availability and no
-     * extended columns is treated as "nothing to do").
-     *
-     * @return array{qty: ?float, isInStock: ?bool, manageStock: ?bool, extended: array<string, int|float>}|null
-     */
-    private function extractStockInput(Product $data): ?array
-    {
-        $qty = null;
-        $isInStock = null;
-        $manageStock = null;
-        $extended = [];
-
-        if ($data->stockData !== null) {
-            $stockData = [];
-            foreach ($data->stockData as $key => $value) {
-                $stockData[Product::camelToSnake((string) $key)] = $value;
-            }
-            $qty = isset($stockData['qty']) ? (float) $stockData['qty'] : null;
-            $isInStock = isset($stockData['is_in_stock']) ? (bool) $stockData['is_in_stock'] : null;
-            $manageStock = isset($stockData['manage_stock']) ? (bool) $stockData['manage_stock'] : null;
-            $extended = $this->extractExtendedStockColumns($stockData);
-        }
-
-        if ($qty === null && $data->stockQty !== null) {
-            $qty = $data->stockQty;
-        }
-
-        if ($qty === null && $isInStock === null && $extended === []) {
+        if ($visibility === null) {
             return null;
         }
-
-        return ['qty' => $qty, 'isInStock' => $isInStock, 'manageStock' => $manageStock, 'extended' => $extended];
-    }
-
-    private function updateStockData(Mage_Catalog_Model_Product $product, Product $data): void
-    {
-        $input = $this->extractStockInput($data);
-        if ($input === null) {
-            return;
-        }
-        ['qty' => $qty, 'isInStock' => $isInStock, 'manageStock' => $manageStock, 'extended' => $extended] = $input;
-
-        /** @var Mage_CatalogInventory_Model_Stock_Item $stockItem */
-        $stockItem = Mage::getModel('cataloginventory/stock_item')->loadByProduct($product);
-
-        // Stock_Item::_beforeSave() resets qty to 0 unless isQty() recognises the
-        // product type. It normally reads type_id off the joined product row, which
-        // a product with no stock row yet cannot supply, so state it explicitly.
-        $stockItem->setProductTypeId($product->getTypeId());
-
-        $isNew = !$stockItem->getId();
-        if ($isNew) {
-            $stockItem->setProductId($product->getId());
-            $stockItem->setStockId(1);
-        }
-
-        if ($qty !== null) {
-            $this->validateStockQty($qty);
-            $stockItem->setQty($qty);
-            $isInStock ??= $qty > 0;
-        }
-
-        if ($isInStock !== null) {
-            $stockItem->setIsInStock((bool) $isInStock);
-        }
-
-        // Only touch manage_stock when the caller explicitly provides it; otherwise
-        // preserve the existing setting and default to enabled only for new items.
-        if ($manageStock !== null) {
-            $stockItem->setManageStock((bool) $manageStock);
-        } elseif ($isNew) {
-            $stockItem->setManageStock();
-        }
-
-        foreach ($extended as $column => $value) {
-            $stockItem->setData($column, $value);
-        }
-
-        $this->safeSave($stockItem, 'update stock');
-    }
-
-    /**
-     * Direct SQL stock update for fast-update mode.
-     */
-    private function updateStockDirect(int $productId, Product $data): void
-    {
-        $input = $this->extractStockInput($data);
-        if ($input === null) {
-            return;
-        }
-        ['qty' => $qty, 'isInStock' => $isInStock, 'manageStock' => $manageStock, 'extended' => $extended] = $input;
-
-        if ($qty !== null) {
-            $this->validateStockQty($qty);
-        }
-
-        $stockData = array_merge($this->buildStockData($qty, $isInStock, $manageStock), $extended);
-        $this->upsertStockItemRow($productId, $stockData);
-    }
-
-    /**
-     * Direct SQL category update for fast-update mode.
-     */
-    private function updateCategoriesDirect(int $productId, array $categoryIds): void
-    {
-        $categoryIds = array_map(intval(...), $categoryIds);
-
-        $resource = Mage::getSingleton('core/resource');
-        $write = $resource->getConnection('core_write');
-        $table = $resource->getTableName('catalog/category_product');
-
-        $existing = $write->fetchCol(
-            "SELECT category_id FROM {$table} WHERE product_id = ?",
-            [$productId],
+        return self::VISIBILITY_MAP[$visibility] ?? throw new Mage_Core_Exception_Input()->addError(
+            'visibility',
+            'visibility must be one of: ' . implode(', ', array_keys(self::VISIBILITY_MAP)),
         );
-        $existing = array_map(intval(...), $existing);
-
-        $toAdd = array_diff($categoryIds, $existing);
-        $toRemove = array_diff($existing, $categoryIds);
-
-        foreach ($toAdd as $catId) {
-            $write->insertOnDuplicate($table, [
-                'category_id' => $catId,
-                'product_id' => $productId,
-                'position' => 0,
-            ]);
-        }
-
-        if (!empty($toRemove)) {
-            $write->delete($table, [
-                'product_id = ?' => $productId,
-                'category_id IN (?)' => $toRemove,
-            ]);
-        }
     }
 
     /**
-     * Default website assignment when the request omits websiteIds.
+     * Return the date $value in the midnight 'Y-m-d H:i:s' form of the admin. An empty string clears the date.
      *
-     * For an unrestricted user this mirrors core behaviour (current store's
-     * website, falling back to website 1). For a store-restricted user we never
-     * broaden beyond the websites they're allowed: we scope the default to the
-     * allowed websites so a missing websiteIds can't silently assign a product
-     * to a website outside the user's scope.
-     *
-     * @return int[]
+     * @throws Mage_Core_Exception_Input
      */
-    private function getDefaultWebsiteIds(ApiUser $user): array
+    private function toDate(string $value, string $code): ?string
     {
-        $allowedWebsiteIds = $this->getAllowedWebsiteIds($user);
-
-        $websiteId = (int) Mage::app()->getStore()->getWebsiteId();
-        $defaults = $websiteId ? [$websiteId] : [1];
-
-        if ($allowedWebsiteIds === null) {
-            return $defaults;
-        }
-
-        // Keep only defaults inside the allowed set; if none qualify, fall back
-        // to the full allowed set so the product lands in the user's scope.
-        $scoped = array_values(array_intersect($defaults, $allowedWebsiteIds));
-        return $scoped !== [] ? $scoped : $allowedWebsiteIds;
-    }
-
-    /**
-     * Reject submitted website IDs that fall outside a store-restricted user's
-     * allowed websites. No-op for unrestricted users.
-     *
-     * @param int[] $websiteIds
-     */
-    private function validateSubmittedWebsiteIds(array $websiteIds, ApiUser $user): void
-    {
-        $allowedWebsiteIds = $this->getAllowedWebsiteIds($user);
-        if ($allowedWebsiteIds === null) {
-            return;
-        }
-
-        foreach ($websiteIds as $websiteId) {
-            if (!in_array((int) $websiteId, $allowedWebsiteIds, true)) {
-                throw new AccessDeniedHttpException("Access denied for website: {$websiteId}");
-            }
-        }
-    }
-
-    private function invalidateCache(int $productId): void
-    {
-        Mage::app()->cleanCache(["API_PRODUCT_{$productId}", 'API_PRODUCTS']);
-    }
-
-    /**
-     * Normalize a date input to the midnight 'Y-m-d H:i:s' form the admin
-     * stores; empty string clears the value (returns null).
-     */
-    private function normalizeDateInput(string $value, string $field): ?string
-    {
-        // formatDateForDb() reads a numeric string as a unix timestamp, so an
-        // unseparated date such as "20260801" would silently store 1970-08-22.
-        if (is_numeric($value)) {
-            throw new UnprocessableEntityHttpException("Invalid date for {$field}; use Y-m-d format.");
-        }
+        $field = lcfirst(str_replace('_', '', ucwords($code, '_')));
+        // formatDateForDb() reads a numeric string as a unix timestamp, so "20260801" would store 1970-08-22
         try {
-            $date = Mage::app()->getLocale()->formatDateForDb($value, withTime: false);
+            $date = is_numeric($value) ? false : Mage::app()->getLocale()->formatDateForDb($value, withTime: false);
         } catch (\Exception) {
-            throw new UnprocessableEntityHttpException("Invalid date for {$field}; use Y-m-d format.");
+            $date = false;
+        }
+        if ($date === false) {
+            throw new Mage_Core_Exception_Input()->addError($code, "Invalid date for {$field}; use Y-m-d format.");
         }
         return $date === null ? null : $date . ' 00:00:00';
     }
 
-    private function validateDateRange(?string $from, ?string $to, string $fromField, string $toField): void
-    {
-        if ($from !== null && $to !== null && $from > $to) {
-            throw new UnprocessableEntityHttpException("{$fromField} must not be later than {$toField}.");
-        }
-    }
-
     /**
-     * Write responses mirror a GET of the saved product for the same caller.
-     * The fresh load also shows the values that the fast path writes directly.
+     * Return the product as a GET of the same caller shows it, with the values that a fast update writes directly.
      */
     private function refreshDto(Mage_Catalog_Model_Product $product): Product
     {
         $productId = (int) $product->getId();
-        // The inventory observer keeps the stock item of each loaded product for
-        // the request. Clear it, or the fresh load shows the old stock values.
+        // The inventory observer keeps the stock item of each loaded product for the request
         $product->clearInstance();
 
         return new ProductProvider($this->security)->loadProductDto($productId, visibleOnly: false)
-            ?? throw new NotFoundHttpException('Product not found');
+            ?? throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('catalog')->__('Product not found'));
     }
-
 }
