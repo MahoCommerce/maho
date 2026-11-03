@@ -79,7 +79,7 @@ const LAYERING_HTTP_EXCEPTION_ALLOWLIST = [
     'app/code/core/Maho/Blog/Api/BlogPost.php' => 2,
     'app/code/core/Maho/Blog/Api/BlogPostImageProcessor.php' => 2,
     'app/code/core/Maho/Giftcard/Api/GiftCardProcessor.php' => 12,
-    'app/code/core/Maho/SocialLogin/Api/SocialAuthProcessor.php' => 4,
+    'app/code/core/Maho/SocialLogin/Api/SocialAuthProcessor.php' => 3,
 ];
 
 /** Files in a Service folder that read the request, the superglobals or the session. */
@@ -104,8 +104,6 @@ const LAYERING_TRANSPORT_GATE_ALLOWLIST = [
     'app/code/core/Maho/Giftcard/Api/GiftCardProvider.php' => 1,
     'app/code/core/Maho/Giftcard/controllers/BalanceController.php' => 2,
     'app/code/core/Maho/Giftcard/controllers/CartController.php' => 1,
-    'app/code/core/Maho/SocialLogin/Api/SocialAuthProcessor.php' => 1,
-    'app/code/core/Maho/SocialLogin/controllers/SocialController.php' => 1,
 ];
 
 /**

@@ -152,18 +152,4 @@ class Maho_SocialLogin_Helper_Data extends Mage_Core_Helper_Abstract
             default => ucfirst($code),
         };
     }
-
-    /**
-     * Failed-attempt limiter: check tooManyAttempts() up front, hit() only on a
-     * failed login, so page views and successful sign-ins keep the budget intact.
-     */
-    public function getIpRateLimiter(?int $storeId = null): \Maho\Security\RateLimiter
-    {
-        return Mage::helper('core')->rateLimiter(
-            'sociallogin_auth',
-            (int) Mage::getStoreConfig(self::XML_PATH_IP_RATE_LIMIT, $storeId),
-            3600,
-            \Maho\Security\RateLimitScope::Ip,
-        );
-    }
 }

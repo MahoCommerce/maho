@@ -15,7 +15,6 @@ use Maho\ApiPlatform\Service\JwtService;
 use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
@@ -35,16 +34,10 @@ class SocialAuthProcessor extends \Maho\ApiPlatform\Processor
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): SocialAuth
     {
         StoreContext::ensureStore();
-        $this->checkRateLimitByIp('social_auth', 'auth_token_ip', 60);
 
         if (!$data instanceof SocialAuth || !is_string($data->provider) || !is_string($data->providerToken)) {
             throw new BadRequestHttpException('provider and providerToken are required', null, 0, ['X-Api-Error-Code' => 'invalid_request']);
         }
-
-        $nameHints = [
-            'firstname' => (string) $data->firstName,
-            'lastname' => (string) $data->lastName,
-        ];
 
         try {
             // Headless nonce contract: the caller generates its own nonce, passes it
@@ -53,18 +46,19 @@ class SocialAuthProcessor extends \Maho\ApiPlatform\Processor
             $result = \Mage::getService('sociallogin/identity')->authenticate(
                 $data->provider,
                 $data->providerToken,
-                (int) \Mage::app()->getStore()->getId(),
+                StoreContext::getStoreId(),
+                \Maho_SocialLogin_Model_Channel::Api,
                 is_string($data->nonce) && $data->nonce !== '' ? $data->nonce : null,
-                $nameHints,
+                ['firstname' => (string) $data->firstName, 'lastname' => (string) $data->lastName],
             );
+        } catch (\Mage_Core_Exception_TooManyRequests $e) {
+            throw $e;
         } catch (\Maho_SocialLogin_Model_ProviderUnavailableException $e) {
             // Transient upstream outage: retryable, not a credential rejection
             throw new ServiceUnavailableHttpException(30, $e->getMessage(), null, 0, ['X-Api-Error-Code' => 'temporarily_unavailable']);
         } catch (\Mage_Core_Exception $e) {
+            // A token endpoint answers a refused grant with a 400 (RFC 6749, section 5.2)
             throw new BadRequestHttpException($e->getMessage(), null, 0, ['X-Api-Error-Code' => 'invalid_grant']);
-        } catch (\Throwable $e) {
-            \Mage::logException($e);
-            throw new HttpException(500, 'An error occurred during authentication');
         }
 
         $customer = $result['customer'];
@@ -95,9 +89,7 @@ class SocialAuthProcessor extends \Maho\ApiPlatform\Processor
             'lastName' => $customer->getLastname(),
         ];
         $dto->isNewCustomer = $result['is_new'];
-        if ($result['is_new']) {
-            $dto->profileIncomplete = \Mage::helper('sociallogin')->hasIncompleteRequiredProfile($customer);
-        }
+        $dto->profileIncomplete = $result['is_new'] ? $result['profile_incomplete'] : null;
 
         $guestCartMaskedId = $data->cartId;
         $cartId = null;
