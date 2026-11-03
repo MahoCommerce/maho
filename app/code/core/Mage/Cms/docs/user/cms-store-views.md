@@ -54,7 +54,7 @@ rewrite wins over the CMS page.
 
 ## Rules for the URL key
 
-The admin refuses to save a page when one of these rules fails:
+The admin, the API and the CMS import refuse to save a page when one of these rules fails:
 
 | Rule | Error message |
 |------|---------------|
@@ -66,7 +66,7 @@ When the **URL Key** is empty, the store creates one from the **Page Title**.
 
 For static blocks, the rule is the same: no other block with the same identifier can have one of
 the same store views. The error message is "A block identifier with the same properties already
-exists in the selected store."
+exists in the selected store." A block without an identifier gives "Identifier is required."
 
 ## The home page per store view
 

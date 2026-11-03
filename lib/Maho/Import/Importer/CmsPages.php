@@ -33,8 +33,9 @@ class CmsPages extends AbstractCmsImporter
         $rows = [];
         foreach ($file as $line => $row) {
             $identifier = $this->requireValue($file, $line, $row, 'identifier');
-            if (!preg_match('/^[a-z0-9][a-z0-9_\/-]*$/', $identifier)) {
-                $this->fail($file, $line, "identifier '$identifier' must be lowercase letters, digits, dashes, underscores or slashes");
+            $error = Mage::getResourceSingleton('cms/page')->getIdentifierError($identifier);
+            if ($error !== null) {
+                $this->fail($file, $line, "identifier '$identifier': $error");
             }
             $row['store_ids'] = $this->storeIds($file, $line, $row);
             $row['is_active'] = $this->at($file, $line, fn() => CsvFile::bool($row['is_active'] ?? '', true));
@@ -73,7 +74,7 @@ class CmsPages extends AbstractCmsImporter
             if ($row['body'] !== null) {
                 $page->setContent($row['body']);
             }
-            $page->save();
+            Mage::getService('cms/page')->save($page);
             if ($row['is_home']) {
                 foreach ($row['store_ids'] as $storeId) {
                     $config->saveConfig(\Mage_Cms_Helper_Page::XML_PATH_HOME_PAGE, $row['identifier'], $storeId === 0 ? 'default' : 'stores', $storeId);
