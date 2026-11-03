@@ -107,7 +107,7 @@ class Mage_Catalog_Product_CompareController extends Mage_Core_Controller_Front_
                         Mage::getModel('customer/customer')->load($this->_customerId),
                     );
                 } else {
-                    $item->addVisitorId(Mage::getSingleton('log/visitor')->getId());
+                    $item->addVisitorId(Mage::getSingleton('log/visitor')->getVisitorId());
                 }
 
                 $item->loadByProduct($product);
