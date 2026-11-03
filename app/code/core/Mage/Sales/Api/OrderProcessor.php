@@ -63,32 +63,22 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
 
     /**
      * Resolve the target order from the request: numeric {id} in the REST URI,
-     * or orderId / incrementId in the GraphQL/body args. Enforces that a plain
-     * customer caller owns the order; admin and orders/write service tokens are
+     * or orderId / incrementId in the GraphQL/body args. A plain customer caller
+     * sees only their own orders; admin and orders/write service tokens are
      * trusted (gated upstream by the operation security expression).
      */
     private function resolveManagedOrder(array $context, array $uriVariables): \Mage_Sales_Model_Order
     {
         $args = $context['args']['input'] ?? [];
-        $orderId = $uriVariables['id'] ?? $args['orderId'] ?? null;
+        $orderId = (int) ($uriVariables['id'] ?? $args['orderId'] ?? 0);
         $incrementId = $args['incrementId'] ?? null;
+        $isBackend = $this->isAdmin() || $this->isApiUser();
+        $customerId = $isBackend ? null : (int) $this->getAuthenticatedCustomerId();
 
-        $order = match (true) {
-            (int) $orderId > 0 => $this->orderService->getById((int) $orderId),
-            is_string($incrementId) && $incrementId !== '' => $this->orderService->getByIncrementId($incrementId),
-            default => null,
-        };
-        if (!$order) {
-            throw new NotFoundHttpException('Order not found');
-        }
-
-        if (!$this->isAdmin() && !$this->isApiUser()) {
-            $customerId = $this->getAuthenticatedCustomerId();
-            if (!$customerId || (int) $order->getCustomerId() !== $customerId) {
-                // Don't disclose existence to a non-owner.
-                throw new NotFoundHttpException('Order not found');
-            }
-        } else {
+        $order = $orderId > 0 || !is_string($incrementId)
+            ? $this->orderService->requireById($orderId, $customerId)
+            : $this->orderService->requireByIncrementId($incrementId, $customerId);
+        if ($isBackend) {
             $this->assertStoreAllowed($order->getStoreId(), $this->requireUser(), 'order');
         }
 
@@ -279,41 +269,23 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
 
     /**
      * Add a status-history comment to an order (admin / orders-write only).
-     * An optional status is validated against the statuses assigned to the
-     * order's current state, the same constraint the admin comment form
-     * enforces, and applied via addStatusHistoryComment().
      */
     private function addOrderComment(array $context, array $uriVariables = []): Order
     {
         $args = $context['args']['input'] ?? [];
-        $comment = trim((string) ($args['comment'] ?? $args['note'] ?? ''));
-        if ($comment === '') {
-            throw new UnprocessableEntityHttpException('Comment text is required');
-        }
-        $notifyCustomer = (bool) ($args['notifyCustomer'] ?? false);
-        $visibleOnFront = (bool) ($args['visibleOnFront'] ?? false);
         $status = $args['status'] ?? null;
         if ($status !== null && !is_string($status)) {
             throw new BadRequestHttpException('Status must be a string');
         }
-        $status = $status !== null ? trim($status) : null;
-        if ($status === '') {
-            $status = null;
-        }
+        $status = trim((string) $status);
 
-        $order = $this->resolveManagedOrder($context, $uriVariables);
-        if ($status !== null) {
-            $allowed = $order->getConfig()->getStateStatuses($order->getState(), false);
-            if (!in_array($status, $allowed, true)) {
-                throw new UnprocessableEntityHttpException(sprintf(
-                    'Status "%s" is not assigned to the order\'s current state "%s"; allowed: %s',
-                    $status,
-                    (string) $order->getState(),
-                    implode(', ', $allowed),
-                ));
-            }
-        }
-        $order = $this->orderService->addNote($order, $comment, $notifyCustomer, $visibleOnFront, $status);
+        $order = $this->orderService->addNote(
+            $this->resolveManagedOrder($context, $uriVariables),
+            (string) ($args['comment'] ?? $args['note'] ?? ''),
+            (bool) ($args['notifyCustomer'] ?? false),
+            (bool) ($args['visibleOnFront'] ?? false),
+            $status !== '' ? $status : null,
+        );
 
         return $this->orderProvider->mapToDto($order);
     }

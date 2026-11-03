@@ -14,9 +14,6 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\Pagination\TraversablePaginator;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
-use Symfony\Component\HttpKernel\Exception\HttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class InvoiceProvider extends \Maho\ApiPlatform\Provider
 {
@@ -89,11 +86,7 @@ class InvoiceProvider extends \Maho\ApiPlatform\Provider
 
     private function getInvoice(int $id): Invoice
     {
-        $invoice = \Mage::getModel('sales/order_invoice')->load($id);
-        if (!$invoice->getId()) {
-            throw new NotFoundHttpException('Invoice not found');
-        }
-
+        $invoice = \Mage::getService('sales/order')->requireInvoice($id);
         $this->assertStoreAllowed($invoice->getStoreId(), $this->requireUser(), 'invoice');
 
         return $this->adminInvoiceDto($invoice);
@@ -145,19 +138,12 @@ class InvoiceProvider extends \Maho\ApiPlatform\Provider
 
     private function downloadPdf(array $uriVariables, string $operationName): Response
     {
-        $orderId = (int) ($uriVariables['orderId'] ?? 0);
-        $invoiceId = (int) ($uriVariables['id'] ?? 0);
-
-        $this->loadAndAuthorizeOrder($orderId, $operationName);
-
-        $invoice = \Mage::getModel('sales/order_invoice')->load($invoiceId);
-        if (!$invoice->getId() || $invoice->getOrderId() != $orderId) {
-            throw new NotFoundHttpException('Invoice not found');
-        }
+        $order = $this->loadAndAuthorizeOrder((int) ($uriVariables['orderId'] ?? 0), $operationName);
+        $invoice = \Mage::getService('sales/order')->requireInvoice((int) ($uriVariables['id'] ?? 0), (int) $order->getId());
 
         $pdf = \Mage::getModel('sales/order_pdf_invoice')->getPdf([$invoice]);
         if (empty($pdf)) {
-            throw new HttpException(500, 'Failed to generate invoice PDF');
+            throw new \RuntimeException('Failed to generate invoice PDF');
         }
 
         $filename = 'invoice_' . $invoice->getIncrementId() . '.pdf';
@@ -170,36 +156,18 @@ class InvoiceProvider extends \Maho\ApiPlatform\Provider
         ]);
     }
 
+    /**
+     * Load the order $orderId. A customer reads only their own orders, an admin or an API user the orders of the
+     * stores of the token. The operation's `security:` expression has already checked the permission.
+     */
     private function loadAndAuthorizeOrder(int $orderId, string $operationName): \Mage_Sales_Model_Order
     {
-        $order = \Mage::getModel('sales/order')->load($orderId);
-        if (!$order->getId()) {
-            throw new NotFoundHttpException('Order not found');
-        }
-
-        if (str_contains($operationName, 'my_')) {
-            $customerId = $this->getAuthenticatedCustomerId();
-            if (!$customerId || (int) $order->getCustomerId() !== $customerId) {
-                throw new NotFoundHttpException('Order not found');
-            }
-        } else {
-            // Admins and API users (permission already enforced upstream by the
-            // operation's `security:` expression) may access any order's
-            // invoices within their store allowlist. Customers are limited to
-            // their own orders.
-            if ($this->isAdmin() || $this->isApiUser()) {
-                $this->assertStoreAllowed($order->getStoreId(), $this->requireUser(), 'order');
-            } else {
-                $customerId = $order->getCustomerId();
-                if ($customerId) {
-                    $this->assertCustomerAccess((int) $customerId, 'You can only access your own order invoices');
-                } else {
-                    throw new AccessDeniedHttpException('Access denied');
-                }
-            }
+        $isBackend = !str_contains($operationName, 'my_') && ($this->isAdmin() || $this->isApiUser());
+        $order = \Mage::getService('sales/order')->requireById($orderId, $isBackend ? null : (int) $this->getAuthenticatedCustomerId());
+        if ($isBackend) {
+            $this->assertStoreAllowed($order->getStoreId(), $this->requireUser(), 'order');
         }
 
         return $order;
     }
-
 }
