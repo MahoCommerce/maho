@@ -15,15 +15,9 @@ use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
- * Newsletter Processor, handles subscribe/unsubscribe operations.
- *
- * Newsletter has custom subscribe/unsubscribe flows that don't map to standard CRUD,
- * so this extends the base Processor. It uses CrudResource::fromModel() for responses
- * where a subscriber model is available.
+ * Give a subscribe or an unsubscribe request to the subscriber service, then shape its answer.
  */
 final class NewsletterProcessor extends \Maho\ApiPlatform\Processor
 {
@@ -34,171 +28,70 @@ final class NewsletterProcessor extends \Maho\ApiPlatform\Processor
             throw new BadRequestHttpException('Invalid request data');
         }
 
-        $operationName = $operation->getName();
-
-        if ($operationName === 'subscribe' || $operationName === 'subscribe_rest') {
-            return $this->subscribe($data, $context);
-        }
-
-        if ($operationName === 'unsubscribe' || $operationName === 'unsubscribe_rest') {
-            return $this->unsubscribe();
-        }
-
-        throw new BadRequestHttpException('Invalid newsletter operation');
+        return match ($operation->getName()) {
+            'subscribe', 'subscribe_rest' => $this->subscribe($data, $context),
+            'unsubscribe', 'unsubscribe_rest' => $this->unsubscribe(),
+            default => throw new BadRequestHttpException('Invalid newsletter operation'),
+        };
     }
 
     private function subscribe(NewsletterSubscription $data, array $context): NewsletterSubscription
     {
-        $customerId = $this->getAuthenticatedCustomerId();
-        $email = $data->email;
-
-        if ($customerId !== null) {
-            $customer = \Mage::getModel('customer/customer')->load($customerId);
-            if (!$customer->getId()) {
-                throw new NotFoundHttpException('Customer not found');
-            }
-
-            // An authenticated customer may only subscribe their own address.
-            // Ignore any client-supplied email to prevent subscribing (and
-            // emailing) arbitrary third-party addresses under this customer_id.
-            $email = $customer->getEmail();
-
-            $data->customerId = $customerId;
-        }
-
-        if (empty($email) && isset($context['args']['input']['email'])) {
-            $email = $context['args']['input']['email'];
-        }
-
-        if (empty($email)) {
-            throw new UnprocessableEntityHttpException('Email address is required');
-        }
-
-        $coreHelper = \Mage::helper('core');
-        if (!$coreHelper->isValidEmail($email)) {
-            throw new UnprocessableEntityHttpException('Invalid email address');
-        }
-
-        // Multi-store targeting: subscribe() stamps the subscriber with the ambient
-        // store, so a validated storeId is applied by switching the store context.
-        $storeId = $data->storeId
-            ?? (isset($context['args']['input']['storeId']) ? (int) $context['args']['input']['storeId'] : null);
+        $input = $context['args']['input'] ?? [];
+        $storeId = $data->storeId ?? (isset($input['storeId']) ? (int) $input['storeId'] : null);
         if ($storeId !== null) {
             if (!isset(\Mage::app()->getStores()[$storeId])) {
-                throw new UnprocessableEntityHttpException("Unknown store ID: {$storeId}");
+                throw new \Mage_Core_Exception("Unknown store ID: {$storeId}");
             }
-            // A body-level storeId must respect the token's store allowlist; the
-            // request-level listeners only check ?store= / X-Store-Code.
+            // The listeners of the request check ?store= and X-Store-Code only, not a store ID in the body
             $user = $this->security?->getUser();
             if ($user instanceof ApiUser && !$user->canAccessStore($storeId)) {
                 throw new AccessDeniedHttpException("Token is not authorized for store: {$storeId}");
             }
-            StoreContext::setStore($storeId);
-        } else {
-            StoreContext::ensureStore();
+        }
+        $storeId = StoreContext::ensureStore($storeId);
+
+        $service = \Mage::getService('newsletter/subscriber');
+        $customerId = $this->getAuthenticatedCustomerId();
+        if ($customerId === null && !$service->isGuestSubscriptionAllowed($storeId)) {
+            throw new AccessDeniedHttpException('Guest subscription is not allowed. Please login first.', null, 0, ['X-Api-Error-Code' => 'forbidden']);
         }
 
-        // IP-level cap first: the per-email bucket alone is trivially bypassed
-        // by submitting many distinct addresses from one client, turning the
-        // endpoint into an uncapped confirmation-email relay. Mirrors unsubscribe().
-        $this->checkRateLimitByIp('newsletter_subscribe', 'newsletter_subscribe', 3600);
-        $this->checkRateLimit('newsletter_subscribe:email:' . strtolower($email), 'newsletter_subscribe', 3600);
+        // A customer subscribes the address of the account only, so that a token cannot subscribe the address of somebody else
+        $email = (string) ($data->email ?: ($input['email'] ?? ''));
+        $subscriber = $customerId === null
+            ? $service->subscribe($email, $storeId)
+            : $service->subscribeCustomer($customerId, $storeId);
+        $confirmationPending = $service->isConfirmationPending($subscriber, $customerId, $storeId);
+        $message = $confirmationPending
+            ? 'A confirmation email has been sent. Please check your inbox.'
+            : 'You have been successfully subscribed to the newsletter.';
 
+        // A guest gets no data of the subscriber, so that the answer does not show whether the address has an account
         if ($customerId === null) {
-            $allowGuest = \Mage::getStoreConfigFlag(\Mage_Newsletter_Model_Subscriber::XML_PATH_ALLOW_GUEST_SUBSCRIBE_FLAG);
-            if (!$allowGuest) {
-                throw new AccessDeniedHttpException('Guest subscription is not allowed. Please login first.', null, 0, ['X-Api-Error-Code' => 'forbidden']);
-            }
-        }
-
-        $data->email = $email;
-
-        /** @var \Mage_Newsletter_Model_Subscriber $subscriber */
-        $subscriber = \Mage::getModel('newsletter/subscriber');
-
-        $subscriber->loadByEmail($email);
-        $alreadySubscribed = $subscriber->getId()
-            && $subscriber->getSubscriberStatus() == \Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED;
-
-        $confirmRequired = \Mage::getStoreConfigFlag(\Mage_Newsletter_Model_Subscriber::XML_PATH_CONFIRMATION_FLAG);
-
-        // Guests get a uniform response regardless of prior state. Echoing
-        // "already subscribed" (or the subscriber's customer_id) would let an
-        // unauthenticated caller probe whether an address is a registered
-        // customer.
-        if ($customerId === null) {
-            if (!$alreadySubscribed) {
-                $subscriber->subscribe($email);
-            }
             $dto = new NewsletterSubscription();
             $dto->email = $email;
-            $dto->message = $confirmRequired
-                ? 'A confirmation email has been sent. Please check your inbox.'
-                : 'You have been successfully subscribed to the newsletter.';
+            $dto->message = $message;
             return $dto;
         }
 
-        if ($alreadySubscribed) {
-            $dto = NewsletterSubscription::fromModel($subscriber);
-            $dto->message = 'You are already subscribed to the newsletter.';
-            return $dto;
-        }
-
-        $subscriber->subscribe($email);
-
-        $subscriber->loadByEmail($email);
         $dto = NewsletterSubscription::fromModel($subscriber);
-
-        $dto->confirmationRequired = $confirmRequired && !$dto->isSubscribed;
-
-        if ($dto->confirmationRequired) {
-            $dto->message = 'A confirmation email has been sent. Please check your inbox.';
-        } else {
-            $dto->message = 'You have been successfully subscribed to the newsletter.';
-        }
-
+        $dto->confirmationRequired = $confirmationPending;
+        $dto->message = $subscriber->getIsStatusChanged() ? $message : 'You are already subscribed to the newsletter.';
         return $dto;
     }
 
     private function unsubscribe(): NewsletterSubscription
     {
-        $customerId = $this->getAuthenticatedCustomerId();
+        $customerId = $this->getAuthenticatedCustomerId()
+            ?? throw new AccessDeniedHttpException('Authentication required to unsubscribe. Use the unsubscribe link in your email.');
 
-        if ($customerId === null) {
-            throw new AccessDeniedHttpException(
-                'Authentication required to unsubscribe. Use the unsubscribe link in your email.',
-            );
-        }
-
-        $this->checkRateLimitByIp('newsletter_unsubscribe', 'newsletter_unsubscribe', 3600);
-
-        $customer = \Mage::getModel('customer/customer')->load($customerId);
-        if (!$customer->getId()) {
-            throw new NotFoundHttpException('Customer not found');
-        }
-
-        $email = $customer->getEmail();
-
-        /** @var \Mage_Newsletter_Model_Subscriber $subscriber */
-        $subscriber = \Mage::getModel('newsletter/subscriber');
-        $subscriber->loadByEmail($email);
-
-        if (!$subscriber->getId()) {
-            $dto = new NewsletterSubscription();
-            $dto->email = $email;
-            $dto->customerId = $customerId;
-            $dto->status = 'unsubscribed';
-            $dto->isSubscribed = false;
-            $dto->message = 'This email address is not subscribed to the newsletter.';
-            return $dto;
-        }
-
-        $subscriber->setCheckCode($subscriber->getCode());
-        $subscriber->unsubscribe();
+        $subscriber = \Mage::getService('newsletter/subscriber')->unsubscribeCustomer($customerId);
 
         $dto = NewsletterSubscription::fromModel($subscriber);
-        $dto->message = 'You have been successfully unsubscribed from the newsletter.';
-
+        $dto->message = $subscriber->getId()
+            ? 'You have been successfully unsubscribed from the newsletter.'
+            : 'This email address is not subscribed to the newsletter.';
         return $dto;
     }
 }
