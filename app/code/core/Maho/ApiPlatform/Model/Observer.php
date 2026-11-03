@@ -250,6 +250,15 @@ class Maho_ApiPlatform_Model_Observer
     }
 
     /**
+     * Invalidate the API wishlist cache of the customer when a transport saves the wishlist after a change
+     */
+    #[Maho\Config\Observer('wishlist_save_after')]
+    public function invalidateWishlistCache(\Maho\Event\Observer $observer): void
+    {
+        $this->cleanApiCache(['API_WISHLIST_' . (int) $observer->getEvent()->getDataObject()->getCustomerId()]);
+    }
+
+    /**
      * Invalidate config-derived API caches when configuration or store metadata
      * changes. StoreConfigProvider caches for 24h and CountryProvider for 1h;
      * without this, edits (store name, base URLs, allowed countries) would be

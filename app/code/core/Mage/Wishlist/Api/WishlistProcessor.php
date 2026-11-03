@@ -16,19 +16,20 @@ use ApiPlatform\Metadata\Delete;
 use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
- * Wishlist State Processor.
+ * Give the wishlist operations of the customer to the wishlist service, and return the item.
  */
 final class WishlistProcessor extends \Maho\ApiPlatform\Processor
 {
     private readonly \Mage_Checkout_Service_Cart $cartService;
+    private readonly \Mage_Wishlist_Service_Wishlist $wishlistService;
 
     public function __construct(Security $security)
     {
         parent::__construct($security);
         $this->cartService = \Mage::getService('checkout/cart');
+        $this->wishlistService = \Mage::getService('wishlist/wishlist');
     }
 
     /**
@@ -66,13 +67,7 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
 
         if ($operationName === 'sync') {
             $args = $context['args']['input'] ?? [];
-            $addedItems = $this->syncWishlist($args['productIds'] ?? []);
-            // GraphQL mutation expects a single WishlistItem
-            if (!empty($addedItems)) {
-                return $addedItems[0];
-            }
-            // Nothing was added, return first existing wishlist item
-            return $this->getFirstWishlistItem();
+            return $this->syncWishlist($args['productIds'] ?? []);
         }
 
         // REST operations
@@ -92,12 +87,7 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
 
         if ($operationName === 'sync_wishlist') {
             $body = $context['request']?->toArray() ?? [];
-            $addedItems = $this->syncWishlist($body['productIds'] ?? []);
-            // REST POST expects single resource, return first added or first existing
-            if (!empty($addedItems)) {
-                return $addedItems[0];
-            }
-            return $this->getFirstWishlistItem();
+            return $this->syncWishlist($body['productIds'] ?? []);
         }
 
         // Default POST - add to wishlist
@@ -112,140 +102,44 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
         throw new BadRequestHttpException('Invalid wishlist operation');
     }
 
-    /**
-     * Get or create customer wishlist
-     */
-    private function getWishlist(int $customerId): \Mage_Wishlist_Model_Wishlist
+    private function getWishlist(): \Mage_Wishlist_Model_Wishlist
     {
-        /** @var \Mage_Wishlist_Model_Wishlist $wishlist */
-        $wishlist = \Mage::getModel('wishlist/wishlist')->loadByCustomer($customerId, true);
-        // loadByCustomer(create: true) instantiates but does NOT persist a new
-        // wishlist, so its id is null. Attaching an item now would set
-        // wishlist_id = (int) null = 0, orphaning it from the customer's real
-        // wishlist. Persist first so the item binds to a valid wishlist id.
-        if (!$wishlist->getId()) {
-            $wishlist->save();
-        }
-        return $wishlist;
+        return $this->wishlistService->getForCustomer($this->requireCustomerId(), StoreContext::getStoreId());
     }
 
-    /**
-     * Add product to wishlist
-     */
-    private function addToWishlist(int $productId, int $qty = 1, ?string $description = null): WishlistItem
+    private function toDto(\Mage_Wishlist_Model_Item $item): WishlistItem
     {
-        $customerId = $this->requireCustomerId();
-
-        // Load product
-        /** @var \Mage_Catalog_Model_Product $product */
-        $product = \Mage::getModel('catalog/product')->load($productId);
-        if (!$product->getId()) {
-            throw new NotFoundHttpException('Product not found');
-        }
-
-        $wishlist = $this->getWishlist($customerId);
-
-        // Check if already in wishlist, use a fresh unfiltered collection query
-        // (the wishlist's own getItemsCollection() applies setVisibilityFilter() which can miss items)
-        // Must use setWishlist() instead of addFieldToFilter('wishlist_id') to initialize the typed property
-        /** @var \Mage_Wishlist_Model_Item $existingItem */
-        $existingItem = \Mage::getModel('wishlist/item')->getCollection()
-            ->setWishlist($wishlist)
-            ->addFieldToFilter('product_id', $productId)
-            ->setPageSize(1)
-            ->getFirstItem();
-
-        if ($existingItem && $existingItem->getId()) {
-            // Re-load the item as a clean standalone model. The collection-loaded
-            // instance carries joined product data and reset-changed flags whose
-            // save() round-trip drops the row; a fresh load updates cleanly.
-            /** @var \Mage_Wishlist_Model_Item $item */
-            $item = \Mage::getModel('wishlist/item')->load((int) $existingItem->getId());
-            $item->setQty($item->getQty() + $qty);
-            if ($description !== null) {
-                $item->setDescription($description);
-            }
-            $item->save();
-        } else {
-            // Add new item directly (skip core's addNewItem which has its own flawed dedup)
-            /** @var \Mage_Wishlist_Model_Item $item */
-            $item = \Mage::getModel('wishlist/item');
-            $item->setWishlistId((int) $wishlist->getId());
-            $item->setProductId($productId);
-            $item->setStoreId((int) \Mage::app()->getStore()->getId());
-            $item->setQty($qty);
-            if ($description !== null) {
-                $item->setDescription($description);
-            }
-            $item->setAddedAt(\Mage::app()->getLocale()->formatDateForDb('now'));
-            $item->save();
-        }
-
-        $wishlist->save();
-        WishlistProvider::invalidateCache($customerId);
-
         $dto = WishlistItem::fromModel($item);
         \Mage::dispatchEvent('api_wishlist_item_dto_build', ['dto' => $dto]);
-
         return $dto;
     }
 
-    /**
-     * Remove item from wishlist
-     */
+    private function addToWishlist(int $productId, int $qty = 1, ?string $description = null): WishlistItem
+    {
+        return $this->toDto($this->wishlistService->addProduct(
+            $this->getWishlist(),
+            $productId,
+            new \Maho\DataObject(['qty' => $qty]),
+            StoreContext::getStoreId(),
+            $description,
+        ));
+    }
+
     private function removeFromWishlist(int $itemId): null
     {
-        $customerId = $this->requireCustomerId();
-
-        /** @var \Mage_Wishlist_Model_Item $item */
-        $item = \Mage::getModel('wishlist/item')->load($itemId);
-
-        if (!$item->getId()) {
-            throw new NotFoundHttpException('Wishlist item not found');
-        }
-
-        // Verify ownership - load wishlist explicitly
-        $wishlistId = $item->getWishlistId();
-        /** @var \Mage_Wishlist_Model_Wishlist $wishlist */
-        $wishlist = \Mage::getModel('wishlist/wishlist')->load($wishlistId);
-        // Reported as missing rather than forbidden, so the endpoint cannot be
-        // used to probe which wishlist item ids exist.
-        if (!$wishlist->getId() || (int) $wishlist->getCustomerId() !== $customerId) {
-            throw new NotFoundHttpException('Wishlist item not found');
-        }
-
-        $item->delete();
-        WishlistProvider::invalidateCache($customerId);
-
+        $wishlist = $this->getWishlist();
+        $this->wishlistService->removeItem($wishlist, $this->wishlistService->getItem($wishlist, $itemId));
         return null;
     }
 
-    // TODO: Refactor cart loading to use the cart service instead of inline quote loading logic
     /**
-     * Move wishlist item to cart
+     * The cart of the API takes a SKU, so the item goes to the cart without the options of its buy request.
      */
     private function moveToCart(int $itemId, int $qty = 1, ?string $cartId = null): WishlistItem
     {
         $customerId = $this->requireCustomerId();
-
-        /** @var \Mage_Wishlist_Model_Item $item */
-        $item = \Mage::getModel('wishlist/item')->load($itemId);
-
-        if (!$item->getId()) {
-            throw new NotFoundHttpException('Wishlist item not found');
-        }
-
-        // Verify ownership - load wishlist explicitly
-        $wishlistId = $item->getWishlistId();
-        /** @var \Mage_Wishlist_Model_Wishlist $wishlist */
-        $wishlist = \Mage::getModel('wishlist/wishlist')->load($wishlistId);
-        // Reported as missing rather than forbidden, so the endpoint cannot be
-        // used to probe which wishlist item ids exist.
-        if (!$wishlist->getId() || (int) $wishlist->getCustomerId() !== $customerId) {
-            throw new NotFoundHttpException('Wishlist item not found');
-        }
-
-        $product = $item->getProduct();
+        $wishlist = $this->getWishlist();
+        $item = $this->wishlistService->getItem($wishlist, $itemId);
 
         // Get the quote - prefer guest cart if cartId provided
         /** @var \Mage_Sales_Model_Quote|null $quote */
@@ -272,80 +166,28 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
             $quote = $this->cartService->getForCustomer($customerId, (int) \Mage::app()->getStore()->getId());
         }
 
-        // Add to cart using the cart service
-        $this->cartService->addItem($quote, $product->getSku(), (float) $qty);
+        $this->cartService->addItem($quote, $item->getProduct()->getSku(), (float) $qty);
 
-        // Build response before deleting (we need the item data)
-        $wishlistItem = WishlistItem::fromModel($item);
-        \Mage::dispatchEvent('api_wishlist_item_dto_build', ['dto' => $wishlistItem]);
+        // Build the response before the delete, which needs the data of the item
+        $dto = $this->toDto($item);
+        $this->wishlistService->removeItem($wishlist, $item);
 
-        // Remove from wishlist
-        $item->delete();
-        WishlistProvider::invalidateCache($customerId);
-
-        return $wishlistItem;
+        return $dto;
     }
 
     /**
-     * Sync guest wishlist (from localStorage) with customer account
+     * Add the products of the guest wishlist (from localStorage) to the wishlist of the customer. Return the
+     * first new item, or else the first item of the wishlist, because the operation returns one resource.
      *
      * @param array<int> $productIds
-     * @return array<WishlistItem>
      */
-    private function syncWishlist(array $productIds): array
+    private function syncWishlist(array $productIds): WishlistItem
     {
-        $customerId = $this->requireCustomerId();
-        $wishlist = $this->getWishlist($customerId);
-
-        // Get existing product IDs in wishlist. Use a fresh unfiltered collection
-        // query: $wishlist->getItemsCollection() applies setVisibilityFilter(),
-        // which hides items whose product is currently disabled/invisible and
-        // would let us re-add them as duplicates below.
-        $existingProductIds = [];
-        $existingItems = \Mage::getModel('wishlist/item')->getCollection()
-            ->setWishlist($wishlist);
-        foreach ($existingItems as $item) {
-            $existingProductIds[] = (int) $item->getProductId();
+        $wishlist = $this->getWishlist();
+        $added = $this->wishlistService->addProducts($wishlist, $productIds, StoreContext::getStoreId());
+        if ($added !== []) {
+            return $this->toDto($added[0]);
         }
-
-        $addedItems = [];
-
-        foreach ($productIds as $productId) {
-            $productId = (int) $productId;
-
-            // Skip if already in wishlist
-            if (in_array($productId, $existingProductIds, true)) {
-                continue;
-            }
-
-            /** @var \Mage_Catalog_Model_Product $product */
-            $product = \Mage::getModel('catalog/product')->load($productId);
-            if (!$product->getId()) {
-                continue;
-            }
-
-            $item = $wishlist->addNewItem($product);
-            if ($item instanceof \Mage_Wishlist_Model_Item) {
-                $item->save();
-                $dto = WishlistItem::fromModel($item);
-                \Mage::dispatchEvent('api_wishlist_item_dto_build', ['dto' => $dto]);
-                $addedItems[] = $dto;
-            }
-        }
-
-        $wishlist->save();
-        WishlistProvider::invalidateCache($customerId);
-
-        return $addedItems;
-    }
-
-    /**
-     * Get the first item from the customer's wishlist (for mutation return when no new items added)
-     */
-    private function getFirstWishlistItem(): WishlistItem
-    {
-        $customerId = $this->requireCustomerId();
-        $wishlist = $this->getWishlist($customerId);
 
         $itemCollection = $wishlist->getItemsCollection();
         $itemCollection->addStoreFilter([\Mage::app()->getStore()->getId()]);
@@ -354,9 +196,7 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
         foreach ($itemCollection as $item) {
             $product = $item->getProduct();
             if ($product && $product->getId()) {
-                $dto = WishlistItem::fromModel($item);
-                \Mage::dispatchEvent('api_wishlist_item_dto_build', ['dto' => $dto]);
-                return $dto;
+                return $this->toDto($item);
             }
         }
 

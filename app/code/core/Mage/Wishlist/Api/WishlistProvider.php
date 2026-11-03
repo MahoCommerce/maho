@@ -15,7 +15,6 @@ use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\State\Pagination\TraversablePaginator;
 use Maho\ApiPlatform\Security\CustomerOwnership;
 use Maho\ApiPlatform\Service\StoreContext;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Wishlist State Provider.
@@ -68,7 +67,8 @@ final class WishlistProvider extends \Maho\ApiPlatform\Provider
     private function getWishlistItems(): array
     {
         $customerId = $this->requireCustomerId();
-        $storeId = \Mage::app()->getStore()->getId();
+        $storeId = (int) \Mage::app()->getStore()->getId();
+        $wishlist = \Mage::getService('wishlist/wishlist')->getForCustomer($customerId, $storeId);
         $groupId = \Mage::helper('customer')->getCurrentGroupId();
         $cacheKey = "api_wishlist_{$customerId}_{$storeId}_{$groupId}";
 
@@ -82,13 +82,6 @@ final class WishlistProvider extends \Maho\ApiPlatform\Provider
             if (is_array($data)) {
                 return array_map($this->arrayToWishlistDto(...), $data);
             }
-        }
-
-        /** @var \Mage_Wishlist_Model_Wishlist $wishlist */
-        $wishlist = \Mage::getModel('wishlist/wishlist')->loadByCustomer($customerId, true);
-
-        if (!$wishlist->getId()) {
-            return [];
         }
 
         $items = [];
@@ -133,14 +126,10 @@ final class WishlistProvider extends \Maho\ApiPlatform\Provider
         /** @var \Mage_Wishlist_Model_Item $item */
         $item = \Mage::getModel('wishlist/item')->load($itemId);
 
-        if (!$item->getId()) {
-            throw new NotFoundHttpException('Wishlist item not found');
-        }
-
         /** @var \Mage_Wishlist_Model_Wishlist $wishlist */
-        $wishlist = \Mage::getModel('wishlist/wishlist')->load($item->getWishlistId());
-        if (!$wishlist->getId()) {
-            throw new NotFoundHttpException('Wishlist item not found');
+        $wishlist = \Mage::getModel('wishlist/wishlist')->load((int) $item->getWishlistId());
+        if (!$item->getId() || !$wishlist->getId()) {
+            throw new \Mage_Core_Exception_NoSuchEntity('Wishlist item not found');
         }
 
         $dto = WishlistItem::fromModel($item);

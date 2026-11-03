@@ -16,6 +16,11 @@ SPDX-License-Identifier: AFL-3.0
                 <class>Mage_Wishlist_Block</class>
             </wishlist>
         </blocks>
+        <services>
+            <wishlist>
+                <class>Mage_Wishlist_Service</class>
+            </wishlist>
+        </services>
         <models>
             <wishlist>
                 <class>Mage_Wishlist_Model</class>
