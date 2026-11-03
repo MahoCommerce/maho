@@ -413,7 +413,7 @@ describe('the answers that each transport keeps (see #1348)', function () {
             ->and(newsletterParitySubscriber($email)->getId())->toBeNull();
 
         expect(fn() => Mage::getService('newsletter/subscriber')->subscribe($email, (int) Mage::app()->getStore()->getId()))
-            ->toThrow(Mage_Core_Exception::class, 'Guest subscription is not allowed. Please login first.');
+            ->toThrow(Mage_Core_Exception_Forbidden::class, 'Guest subscription is not allowed. Please login first.');
     });
 
     it('subscribes the address of the account on the API and the address of the form on the footer', function () {

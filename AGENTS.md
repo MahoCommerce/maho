@@ -307,7 +307,9 @@ class My_Module_Checkout_CartController extends Mage_Checkout_CartController { /
   `Mage_Core_Exception_NoSuchEntity` (404) when the record that the URL names does not exist,
   `Mage_Core_Exception_Conflict` (409) when the current state of the record does not allow the action
   (an order that is already canceled, an email that another customer uses, a lock that another request
-  holds), `Mage_Core_Exception_Input` (422 with `details.errors`) for errors of named fields,
+  holds), `Mage_Core_Exception_Forbidden` (403) when the store does not allow this client to do the action
+  (a guest where only customers can subscribe), `Mage_Core_Exception_Input` (422 with `details.errors`)
+  for errors of named fields,
   `Mage_Core_Exception_TooManyRequests` (429 with `Retry-After`) when a rate limit refuses the client, and a
   plain `Mage_Core_Exception` (422) for any other content that the service cannot accept, such as an
   unknown SKU in the body. 400 is for a malformed request only, which the transport detects. A

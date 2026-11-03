@@ -53,10 +53,6 @@ final class NewsletterProcessor extends \Maho\ApiPlatform\Processor
 
         $service = \Mage::getService('newsletter/subscriber');
         $customerId = $this->getAuthenticatedCustomerId();
-        if ($customerId === null && !$service->isGuestSubscriptionAllowed($storeId)) {
-            throw new AccessDeniedHttpException('Guest subscription is not allowed. Please login first.', null, 0, ['X-Api-Error-Code' => 'forbidden']);
-        }
-
         // A customer subscribes the address of the account only, so that a token cannot subscribe the address of somebody else
         $email = (string) ($data->email ?: ($input['email'] ?? ''));
         $subscriber = $customerId === null

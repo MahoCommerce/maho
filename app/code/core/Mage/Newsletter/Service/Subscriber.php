@@ -79,15 +79,15 @@ class Mage_Newsletter_Service_Subscriber
     {
         $helper = Mage::helper('newsletter');
         $core = Mage::helper('core');
+        if ($customerId === null && !$this->isGuestSubscriptionAllowed($storeId)) {
+            throw new Mage_Core_Exception_Forbidden($helper->__('Guest subscription is not allowed. Please login first.'));
+        }
         // The email validator accepts an empty value
         if (!$core->isValidNotBlank($email)) {
             throw new Mage_Core_Exception_Input()->addError('email', $helper->__('Email address is required'));
         }
         if (!$core->isValidEmail($email)) {
             throw new Mage_Core_Exception_Input()->addError('email', $helper->__('Invalid email address'));
-        }
-        if ($customerId === null && !$this->isGuestSubscriptionAllowed($storeId)) {
-            throw new Mage_Core_Exception($helper->__('Guest subscription is not allowed. Please login first.'));
         }
 
         // The limit of the client comes first: a client that sends many addresses gets past the limit of one address

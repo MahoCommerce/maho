@@ -281,6 +281,7 @@ class ApiExceptionListener implements EventSubscriberInterface
             }
             $data = [
                 'error' => match ($statusCode) {
+                    403 => 'forbidden',
                     404 => 'not_found',
                     409 => 'conflict',
                     429 => 'too_many_requests',
@@ -336,6 +337,7 @@ class ApiExceptionListener implements EventSubscriberInterface
     public static function mageExceptionStatus(\Mage_Core_Exception $exception): int
     {
         return match (true) {
+            $exception instanceof \Mage_Core_Exception_Forbidden => 403,
             $exception instanceof \Mage_Core_Exception_NoSuchEntity => 404,
             $exception instanceof \Mage_Core_Exception_Conflict => 409,
             $exception instanceof \Mage_Core_Exception_TooManyRequests => 429,

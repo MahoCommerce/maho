@@ -30,20 +30,16 @@ class Mage_Newsletter_SubscriberController extends Mage_Core_Controller_Front_Ac
         $storeId = (int) Mage::app()->getStore()->getId();
         $service = $this->subscriberService();
 
-        if ($customerId === null && !$service->isGuestSubscriptionAllowed($storeId)) {
-            $session->addError(
-                $this->__('There was a problem with the subscription: subscription for guests is not allowed. Please %s.'),
-                new \Maho\Message\Link($this->__('register'), Mage::helper('customer')->getRegisterUrl()),
-            );
-            $this->_redirectReferer();
-            return;
-        }
-
         try {
             $subscriber = $service->subscribe((string) $this->getRequest()->getPost('email'), $storeId, $customerId);
             $session->addSuccess($service->isConfirmationPending($subscriber, $customerId, $storeId)
                 ? $this->__('Confirmation request has been sent.')
                 : $this->__('Thank you for your subscription.'));
+        } catch (Mage_Core_Exception_Forbidden) {
+            $session->addError(
+                $this->__('There was a problem with the subscription: subscription for guests is not allowed. Please %s.'),
+                new \Maho\Message\Link($this->__('register'), Mage::helper('customer')->getRegisterUrl()),
+            );
         } catch (Mage_Core_Exception $e) {
             $session->addError($this->__('There was a problem with the subscription: %s', $e->getMessage()));
         } catch (Exception $e) {
