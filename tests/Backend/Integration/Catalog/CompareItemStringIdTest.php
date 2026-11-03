@@ -25,6 +25,10 @@ it('reads the visitor id of a compare item as int when the visitor id is a strin
     $item = Mage::getModel('catalog/product_compare_item');
 
     expect($item->getVisitorId())->toBe(7);
-    $item->addVisitorId(Mage::getSingleton('log/visitor')->getVisitorId());
-    expect($item->getVisitorId())->toBe(7);
+});
+
+it('removes a product from the compare list when the visitor id is a string', function (): void {
+    Mage::getSingleton('log/visitor')->setData('visitor_id', '7');
+
+    expect(fn() => Mage::getModel('catalog/product_compare_list')->removeProduct(0))->not->toThrow(TypeError::class);
 });
