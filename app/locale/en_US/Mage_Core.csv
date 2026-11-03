@@ -65,6 +65,7 @@
 "Button Letter Spacing","Button Letter Spacing"
 "Buttons, links and highlights. The readable text color on top is worked out for you.","Buttons, links and highlights. The readable text color on top is worked out for you."
 "Cache Storage Management","Cache Storage Management"
+"Cache type '%s' not found","Cache type '%s' not found"
 "Cache storage may contain additional data. Are you sure that you want flush it?","Cache storage may contain additional data. Are you sure that you want flush it?"
 "Can't retrieve entity config: %s","Can't retrieve entity config: %s"
 "Can't retrieve request object","Can't retrieve request object"

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Enables, disables, refreshes and flushes the cache types, as Mage_Adminhtml_CacheController does.
+ * Give the cache type operations of the API to the cache service.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -32,19 +32,24 @@ final class CacheTypeProcessor extends \Maho\ApiPlatform\Processor
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): CacheType|JsonResponse
     {
         $this->requireUser();
+        $service = CacheTypeProvider::service();
         $name = $operation->getName();
 
         if ($name === 'cache_type_flush_all') {
-            return $this->flushAll();
+            $service->flush();
+            $count = count($service->getTypes());
+            $this->logApiActivity('cache_type', 'flush_all', null, new DataObject(['flushed' => $count]));
+            return $this->respondRaw(['success' => true, 'flushed' => $count]);
         }
 
         $code = (string) ($uriVariables['code'] ?? '');
-        $this->provider->cacheType($code);
-
         if ($name === 'cache_type_refresh') {
-            return $this->refresh($code);
+            $service->refresh([$code]);
+            $this->logApiActivity('cache_type', 'refresh', ['code' => $code], new DataObject(['code' => $code]));
+            return $this->provider->toCacheTypeDto($service->getByCode($code));
         }
 
+        $wasEnabled = (bool) $service->getByCode($code)->getData('status');
         $body = $this->parseRequestBody($context['request'] ?? null);
         if (!array_key_exists('enabled', $body)) {
             throw ValidationException::requiredField('enabled');
@@ -53,55 +58,18 @@ final class CacheTypeProcessor extends \Maho\ApiPlatform\Processor
             throw new BadRequestHttpException('enabled must be a boolean');
         }
 
-        return $this->setEnabled($code, $body['enabled']);
-    }
-
-    private function setEnabled(string $code, bool $enabled): CacheType
-    {
-        $app = \Mage::app();
-        $allTypes = $app->useCache();
-        $allTypes = is_array($allTypes) ? $allTypes : [];
-        $wasEnabled = !empty($allTypes[$code]);
-
-        if ($wasEnabled !== $enabled) {
-            $allTypes[$code] = $enabled ? 1 : 0;
-            $app->saveUseCache($allTypes);
+        if ($body['enabled']) {
+            $service->enable([$code]);
+        } else {
+            $service->disable([$code]);
         }
-        if (!$enabled) {
-            $app->getCache()->cleanType($code);
-        }
-
         $this->logApiActivity(
             'cache_type',
             'update',
             ['code' => $code, 'enabled' => $wasEnabled],
-            new DataObject(['code' => $code, 'enabled' => $enabled]),
+            new DataObject(['code' => $code, 'enabled' => $body['enabled']]),
         );
 
-        return $this->provider->toCacheTypeDto(
-            $this->provider->types()[$code],
-            array_map(static fn(mixed $flag): bool => (bool) $flag, $allTypes),
-        );
-    }
-
-    private function refresh(string $code): CacheType
-    {
-        \Mage::app()->getCache()->cleanType($code);
-        \Mage::dispatchEvent('adminhtml_cache_refresh_type', ['type' => $code]);
-
-        $this->logApiActivity('cache_type', 'refresh', ['code' => $code], new DataObject(['code' => $code]));
-
-        return $this->provider->cacheType($code);
-    }
-
-    private function flushAll(): JsonResponse
-    {
-        \Mage::app()->getCache()->flush();
-        \Mage::dispatchEvent('adminhtml_cache_flush_all');
-
-        $count = count($this->provider->types());
-        $this->logApiActivity('cache_type', 'flush_all', null, new DataObject(['flushed' => $count]));
-
-        return $this->respondRaw(['success' => true, 'flushed' => $count]);
+        return $this->provider->toCacheTypeDto($service->getByCode($code));
     }
 }
