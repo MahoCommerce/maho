@@ -11,7 +11,7 @@ Maho dispatches a core event that lets full-page-cache (FPC) or edge-cache modul
 `Mage_Core_Controller_Varien_Action::preDispatch()` always starts the session unless `FLAG_NO_START_SESSION` was set in the constructor. Today that flag is only set in 3 controllers (Api + 2 OAuth), so for anonymous traffic on CMS, category, or product routes, Maho:
 
 1. emits `Set-Cookie: <session>` on the response, which makes the HTML unsafe to cache in any shared / edge cache (Cloudflare, Bunny, Varnish) - per RFC, `Set-Cookie` combined with `Cache-Control: public` is unsafe.
-2. writes an empty session row on every anonymous hit and later garbage-collects it - non-trivial write amplification under crawler / bot traffic.
+2. gives each anonymous visitor a session. Lazy storefront sessions keep this session in memory until the visitor stores data in it, such as a cart or a message, so a crawler that only browses writes no session record. The setting is **Lazy Storefront Sessions** in *System > Configuration > General > Web > Session Validation Settings*, and it is on by default.
 
 ## The opt-out event
 

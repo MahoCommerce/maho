@@ -730,9 +730,9 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
      * The stored value is relative to the Maho base directory. A 'quote_path' must stay inside the
      * quote target directory and an 'order_path' inside the order target directory.
      *
-     * @deprecated since 26.11 the file is on the custom_options mount, use resolveStoragePath()
      * @param array<string, mixed> $value Unserialized option value
      */
+    #[\Deprecated(message: 'the file is on the custom_options mount, use resolveStoragePath()', since: '26.11')]
     public function resolveStoredPath(array $value, string $key): ?string
     {
         if (!isset($value[$key]) || !is_string($value[$key]) || $value[$key] === '') {

@@ -195,3 +195,21 @@ it('does not let the login block capture a POST-only endpoint as the post-login 
         ->not->toContain('prelogin')
         ->toBe($_SERVER['HTTP_REFERER']);
 });
+
+it('stores no post-login target when the guest only opens the login page', function () {
+    // A crawler that follows the login link would otherwise leave a session record behind
+    $request = new Mage_Core_Controller_Request_Http(
+        SymfonyRequest::create('/customer/account/login/', 'GET'),
+    );
+    $request->setRouteName('customer')
+        ->setControllerName('account')
+        ->setActionName('login')
+        ->setDispatched(true);
+    Mage::app()->setRequest($request);
+
+    $block = new Mage_Customer_Block_Form_Login();
+    $block->setLayout(Mage::app()->getLayout());
+    $block->canShowLogin();
+
+    expect(Mage::getSingleton('customer/session')->getBeforeAuthUrl())->toBe('');
+});

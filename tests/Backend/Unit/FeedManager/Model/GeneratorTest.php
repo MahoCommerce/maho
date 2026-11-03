@@ -47,12 +47,20 @@ function createTestFeed(string $format): Maho_FeedManager_Model_Feed
 }
 
 /**
+ * The local path of the feed file. The media mount is local in the tests.
+ */
+function feedOutputPath(Maho_FeedManager_Model_Feed $feed): string
+{
+    return Mage::getBaseDir('media') . DS . $feed->getStoragePath();
+}
+
+/**
  * Clean up a test feed: generated file, logs, attribute mappings, and the feed itself
  */
 function cleanupTestFeed(Maho_FeedManager_Model_Feed $feed): void
 {
     // Delete generated file
-    $outputPath = $feed->getOutputFilePath();
+    $outputPath = feedOutputPath($feed);
     if (file_exists($outputPath)) {
         @unlink($outputPath);
     }
@@ -92,7 +100,7 @@ describe('Feed Generation - CSV', function () {
             }
             expect($log->getProductCount())->toBeGreaterThan(0);
 
-            $outputPath = $feed->getOutputFilePath();
+            $outputPath = feedOutputPath($feed);
             expect(file_exists($outputPath))->toBeTrue();
             expect(filesize($outputPath))->toBeGreaterThan(0);
 
@@ -122,7 +130,7 @@ describe('Feed Generation - JSON', function () {
             }
             expect($log->getProductCount())->toBeGreaterThan(0);
 
-            $outputPath = $feed->getOutputFilePath();
+            $outputPath = feedOutputPath($feed);
             expect(file_exists($outputPath))->toBeTrue();
             expect(filesize($outputPath))->toBeGreaterThan(0);
 
@@ -159,7 +167,7 @@ describe('Feed Generation - XML', function () {
             }
             expect($log->getProductCount())->toBeGreaterThan(0);
 
-            $outputPath = $feed->getOutputFilePath();
+            $outputPath = feedOutputPath($feed);
             expect(file_exists($outputPath))->toBeTrue();
             expect(filesize($outputPath))->toBeGreaterThan(0);
 
@@ -238,7 +246,7 @@ describe('Feed Generation - Fresh Output Directory', function () {
             $absoluteDir = Mage::getBaseDir('media') . DS . $relativeDir;
             expect(is_dir($absoluteDir))->toBeTrue('Output directory should have been created');
 
-            $outputPath = $feed->getOutputFilePath();
+            $outputPath = feedOutputPath($feed);
             expect(file_exists($outputPath))->toBeTrue('Feed file should exist on disk');
             expect(filesize($outputPath))->toBeGreaterThan(0);
 
@@ -262,7 +270,7 @@ describe('Feed Generation - Fresh Output Directory', function () {
             $absoluteDir = Mage::getBaseDir('media') . DS . $relativeDir;
             expect(is_dir($absoluteDir))->toBeTrue('Output directory should have been created');
 
-            $outputPath = $feed->getOutputFilePath();
+            $outputPath = feedOutputPath($feed);
             expect(file_exists($outputPath))->toBeTrue('Feed file should exist on disk');
             expect(filesize($outputPath))->toBeGreaterThan(0);
 
@@ -292,7 +300,7 @@ describe('Feed Generation - Fresh Output Directory', function () {
             $absoluteDir = Mage::getBaseDir('media') . DS . $relativeDir;
             expect(is_dir($absoluteDir))->toBeTrue('Output directory should have been created');
 
-            $outputPath = $feed->getOutputFilePath();
+            $outputPath = feedOutputPath($feed);
             expect(file_exists($outputPath))->toBeTrue('Feed file should exist on disk');
             expect(filesize($outputPath))->toBeGreaterThan(0);
 
@@ -321,7 +329,7 @@ describe('Feed Generation - Fresh Output Directory', function () {
             $absoluteDir = Mage::getBaseDir('media') . DS . $relativeDir;
             expect(is_dir($absoluteDir))->toBeTrue('Nested output directory should have been created recursively');
 
-            $outputPath = $feed->getOutputFilePath();
+            $outputPath = feedOutputPath($feed);
             expect(file_exists($outputPath))->toBeTrue('Feed file should exist on disk');
             expect(filesize($outputPath))->toBeGreaterThan(0);
 

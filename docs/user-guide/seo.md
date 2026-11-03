@@ -94,6 +94,21 @@ Filter links in the layered-navigation block carry `rel="nofollow"`, signaling t
 filter-combination URLs are not worth prioritizing. This reduces wasted crawl budget at the
 source, before a crawler even requests the filtered URL.
 
+### Maximum Selected Filters <span class="version-badge">v26.11+</span>
+
+The three options above are requests to crawlers. Some bots ignore them and request every filter
+combination. Maho stops these requests on the server, before it loads the products:
+
+- A request that selects more filter options than this setting gets a 404 page. Each selected
+  option counts, so two colors and one length are three options. The default is 7. Set 0 to remove
+  the limit.
+- A filter value that no filter link contains gets a 404 page, for example an option ID that does
+  not exist.
+
+When a visitor reaches the limit, the filter options are hidden and only the active filters show.
+A visitor removes a filter to choose another one. The setting is in
+**Catalog > Catalog > Layered Navigation**.
+
 ### How Maho decides
 
 The robots directive for a category view follows a clear order of precedence:

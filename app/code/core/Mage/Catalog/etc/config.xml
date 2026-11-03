@@ -736,6 +736,7 @@ SPDX-License-Identifier: AFL-3.0
                 <one_price_interval>0</one_price_interval>
                 <interval_division_limit>9</interval_division_limit>
                 <display_product_count>0</display_product_count>
+                <max_selected_filters>7</max_selected_filters>
             </layered_navigation>
         </catalog>
         <sales>

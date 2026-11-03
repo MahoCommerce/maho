@@ -28,14 +28,28 @@ class Mage_Core_Model_Session extends Mage_Core_Model_Session_Abstract
     /**
      * Retrieve Session Form Key
      *
-     * @return string A 16 bit unique key for forms
+     * A session that has no stored key gets a key derived from its id, so a lazy session that Maho
+     * did not save still accepts the key of its first page on the next request.
+     *
+     * @return string
      */
     public function getFormKey()
     {
         if (!$this->getData('_form_key')) {
-            $this->renewFormKey();
+            $sessionId = $this->getSessionId();
+            if ($sessionId) {
+                $this->setData('_form_key', substr(hash_hmac('sha256', 'form_key|' . $sessionId, Mage::getEncryptionKeyAsHex()), 0, 32));
+            } else {
+                $this->renewFormKey();
+            }
         }
         return $this->getData('_form_key');
+    }
+
+    #[\Override]
+    protected function getDisposableKeys(): array
+    {
+        return ['_form_key', 'last_url', 'visitor_data'];
     }
 
     /**

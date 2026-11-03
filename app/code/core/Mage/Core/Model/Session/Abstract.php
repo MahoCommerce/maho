@@ -45,6 +45,17 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
 
     public const XML_NODE_USET_AGENT_SKIP      = 'global/session/validation/http_user_agent_skip';
 
+    public const XML_PATH_LAZY                 = 'web/session/lazy';
+
+    /** Top-level keys that Symfony and Maho write for their own use */
+    private const BOOKKEEPING_KEYS = [
+        '_sf2_attributes',
+        '_symfony_flashes',
+        '_sf2_meta',
+        self::VALIDATOR_KEY,
+        self::SECURE_COOKIE_CHECK_KEY,
+    ];
+
     /** Lifetime floor, in seconds, wherever no area policy narrows it */
     private const DEFAULT_SESSION_LIFETIME = 86400;
 
@@ -59,6 +70,14 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
      * @example ['host.name' => true]
      */
     protected array $_sessionHosts = [];
+
+    /** True while the session data is in memory only and the storage is not open */
+    private static bool $storageDeferred = false;
+
+    private static bool $closeAtShutdown = false;
+
+    /** @var array<string, string[]> the disposable keys of each namespace */
+    private static array $disposableKeys = [];
 
     /**
      * Return the symfony session instance from the registry
@@ -86,6 +105,9 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
                 'name' => $sessionName,
                 'use_cookies' => false,
                 'gc_probability' => '0',
+                // A lazy session gives the cookie before the record exists, so the next request
+                // must keep that id. Login renews the id, which stops session fixation
+                'use_strict_mode' => $this->useLazyStart($sessionName) ? '0' : '1',
             ],
             $handler,
             // Use Symfony's default MetadataBag - no custom one needed!
@@ -129,6 +151,12 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
         return $lifetime;
     }
 
+    /** An empty or zero value means "not set", for example a row that an older platform saved */
+    private static function getConfiguredLifetime(string $path, int $default, int|string|Mage_Core_Model_Store|null $store): int
+    {
+        return Mage::getStoreConfigAsInt($path, $store) ?: $default;
+    }
+
     /** Remember Me lives inside the session, so only the observer can pass it */
     public static function resolveConfiguredSessionLifetime(
         string $sessionName,
@@ -136,14 +164,14 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
         int|string|Mage_Core_Model_Store|null $store = null,
     ): int {
         if ($sessionName === Mage_Core_Controller_Front_Action::SESSION_NAMESPACE) {
-            $path = $rememberMe && Mage::getStoreConfigFlag(self::XML_PATH_REMEMBER_ENABLED, $store)
-                ? self::XML_PATH_REMEMBER_LIFETIME
-                : self::XML_PATH_COOKIE_LIFETIME;
+            [$path, $default] = $rememberMe && Mage::getStoreConfigFlag(self::XML_PATH_REMEMBER_ENABLED, $store)
+                ? [self::XML_PATH_REMEMBER_LIFETIME, Mage_Core_Controller_Front_Action::SESSION_REMEMBER_DEFAULT_LIFETIME]
+                : [self::XML_PATH_COOKIE_LIFETIME, Mage_Core_Controller_Front_Action::SESSION_DEFAULT_LIFETIME];
 
             return max(
                 Mage_Core_Controller_Front_Action::SESSION_MIN_LIFETIME,
                 min(
-                    Mage::getStoreConfigAsInt($path, $store),
+                    self::getConfiguredLifetime($path, $default, $store),
                     Mage_Core_Controller_Front_Action::SESSION_MAX_LIFETIME,
                 ),
             );
@@ -153,7 +181,7 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
             return max(
                 Mage_Adminhtml_Controller_Action::SESSION_MIN_LIFETIME,
                 min(
-                    Mage::getStoreConfigAsInt(self::XML_PATH_ADMIN_LIFETIME, $store),
+                    self::getConfiguredLifetime(self::XML_PATH_ADMIN_LIFETIME, Mage_Adminhtml_Controller_Action::SESSION_DEFAULT_LIFETIME, $store),
                     Mage_Adminhtml_Controller_Action::SESSION_MAX_LIFETIME,
                 ),
             );
@@ -301,6 +329,8 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
             return $this;
         }
 
+        self::$storageDeferred = false;
+
         // Create Symfony session instance
         $symfonySession = $this->createSymfonySession($sessionName);
 
@@ -323,13 +353,18 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
 
         \Maho\Profiler::start(__METHOD__ . '/start');
 
-        // Start session using modern Symfony approach
-        $symfonySession->start();
+        $deferred = empty($this->getSessionId())
+            && $this->useLazyStart($sessionName)
+            && $this->deferStorage($symfonySession);
 
-        // Read before anything constructs a session model, whose validate() re-stamps this
-        $lastUsed = $symfonySession->getMetadataBag()->getLastUsed();
+        if (!$deferred) {
+            $symfonySession->start();
 
-        $this->expireIdleSession($symfonySession, $lastUsed);
+            // Read before anything constructs a session model, whose validate() re-stamps this
+            $lastUsed = $symfonySession->getMetadataBag()->getLastUsed();
+
+            $this->expireIdleSession($symfonySession, $lastUsed);
+        }
 
         // Secure cookie check to prevent MITM attack
         if (Mage::app()->getFrontController()->getRequest()->isSecure() && !$cookie->isSecure()) {
@@ -385,6 +420,121 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
         return $this;
     }
 
+    private function useLazyStart(string $sessionName): bool
+    {
+        return $sessionName === Mage_Core_Controller_Front_Action::SESSION_NAMESPACE
+            && Mage::getStoreConfigFlag(self::XML_PATH_LAZY);
+    }
+
+    /**
+     * Give the session a new id, but keep its data in memory. closeSession() opens the storage
+     * only if the request stores state, so a visitor who only browses leaves no record.
+     */
+    private function deferStorage(Session $symfonySession): bool
+    {
+        $sessionId = session_create_id();
+        if ($sessionId === false) {
+            return false;
+        }
+
+        $symfonySession->setId($sessionId);
+        // Symfony replaces the id when the cookie holds an invalid one, and the cookie gets this id
+        $_COOKIE[$symfonySession->getName()] = $sessionId;
+        $_SESSION = [];
+        self::$storageDeferred = true;
+
+        // Actions that exit() and failed dispatches skip finishRequest()
+        if (!self::$closeAtShutdown) {
+            register_shutdown_function([self::class, 'closeSession']);
+            self::$closeAtShutdown = true;
+        }
+
+        return true;
+    }
+
+    /**
+     * Write the session to its storage and release the lock. A deferred session is written only
+     * if it holds state.
+     */
+    public static function closeSession(): void
+    {
+        if (self::$storageDeferred && self::holdsState($_SESSION ?? [], self::$disposableKeys)) {
+            self::openDeferredStorage();
+        }
+        self::$storageDeferred = false;
+
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_write_close();
+        }
+    }
+
+    /**
+     * Start the storage of a deferred session and put its data in it. The session models keep
+     * references to the namespaces of $_SESSION, and session_start() replaces $_SESSION, so each
+     * namespace is put back as the same reference.
+     */
+    private static function openDeferredStorage(): void
+    {
+        self::$storageDeferred = false;
+
+        $data = $_SESSION ?? [];
+        Mage::registry(self::REGISTRY_KEY)?->start();
+
+        foreach ($data as $key => &$value) {
+            $_SESSION[$key] = &$value;
+        }
+    }
+
+    /**
+     * Tell if the session data holds something that a visitor loses when Maho does not save it.
+     *
+     * Bookkeeping keys, empty values, empty message collections and the disposable keys of each
+     * namespace hold no state. Any other value does, false and 0 included.
+     *
+     * @param array<string, string[]> $disposableKeys the disposable keys of each namespace
+     */
+    public static function holdsState(array $session, array $disposableKeys = []): bool
+    {
+        foreach ($session as $key => $value) {
+            if (in_array($key, self::BOOKKEEPING_KEYS, true)) {
+                continue;
+            }
+
+            if (!is_array($value)) {
+                if (!self::isEmptyValue($value)) {
+                    return true;
+                }
+                continue;
+            }
+
+            foreach ($value as $dataKey => $data) {
+                if (!self::isEmptyValue($data) && !in_array($dataKey, $disposableKeys[$key] ?? [], true)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private static function isEmptyValue(mixed $value): bool
+    {
+        return $value === null
+            || $value === ''
+            || $value === []
+            || ($value instanceof Mage_Core_Model_Message_Collection && $value->count() === 0);
+    }
+
+    /**
+     * Keys that a visitor does not miss when Maho does not save them on the first request.
+     *
+     * @return string[]
+     */
+    protected function getDisposableKeys(): array
+    {
+        return [];
+    }
+
     private function expireIdleSession(Session $symfonySession, int $lastUsed): bool
     {
         if ($lastUsed <= 0 || time() - $lastUsed <= $this->getSessionLifetime()) {
@@ -408,18 +558,11 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
     /** Longest lifetime a store can hand out, for callers that cannot know which policy applies */
     protected static function getLongestConfiguredSessionLifetime(int|string|Mage_Core_Model_Store|null $store = null): int
     {
-        $rememberLifetime = Mage::getStoreConfigFlag(self::XML_PATH_REMEMBER_ENABLED, $store)
-            ? Mage::getStoreConfigAsInt(self::XML_PATH_REMEMBER_LIFETIME, $store)
-            : 0;
-
-        return min(
-            max(
-                Mage::getStoreConfigAsInt(self::XML_PATH_ADMIN_LIFETIME, $store),
-                Mage::getStoreConfigAsInt(self::XML_PATH_COOKIE_LIFETIME, $store),
-                $rememberLifetime,
-                self::DEFAULT_SESSION_LIFETIME,
-            ),
-            Mage_Core_Controller_Front_Action::SESSION_MAX_LIFETIME,
+        return max(
+            self::resolveConfiguredSessionLifetime(Mage_Adminhtml_Controller_Action::SESSION_NAMESPACE, false, $store),
+            self::resolveConfiguredSessionLifetime(Mage_Core_Controller_Front_Action::SESSION_NAMESPACE, false, $store),
+            self::resolveConfiguredSessionLifetime(Mage_Core_Controller_Front_Action::SESSION_NAMESPACE, true, $store),
+            self::DEFAULT_SESSION_LIFETIME,
         );
     }
 
@@ -455,6 +598,7 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
         $_SESSION[$namespace] ??= [];
 
         $this->_data = &$_SESSION[$namespace];
+        self::$disposableKeys[$namespace] = $this->getDisposableKeys();
 
         $this->validate();
         $this->addHost(true);
@@ -522,6 +666,10 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
 
     public function regenerateSessionId(): self
     {
+        if (self::$storageDeferred) {
+            self::openDeferredStorage();
+        }
+
         if ($this->getSymfonySession()->migrate(true)) {
             $this->setSessionCookie();
         }
@@ -895,8 +1043,9 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
             return array_any($userAgentValidated, fn($agent) => preg_match('/' . $agent . '/iu', $validatorData[self::VALIDATOR_HTTP_USER_AGENT_KEY]));
         }
 
+        // A deferred session has no metadata yet, and it began in this request
         $session = $this->getSymfonySession();
-        if ($session !== null) {
+        if ($session?->isStarted()) {
             $metadataBag = $session->getMetadataBag();
 
             if ($this->useValidateSessionPasswordTimestamp()) {

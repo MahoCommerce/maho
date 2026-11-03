@@ -29,7 +29,13 @@
                 <?php if (is_object($track)): ?>
                     <tr>
                         <th class="label"><?= $this->__('Tracking Number:') ?></th>
-                        <td class="value"><?= $this->escapeHtml($track->getTracking()) ?></td>
+                        <td class="value">
+                            <?php if ($track->getUrl()): ?>
+                            <a href="<?= $this->escapeHtml($track->getUrl()) ?>" target="_blank" rel="noopener"><?= $this->escapeHtml($track->getTracking()) ?></a>
+                            <?php else: ?>
+                            <?= $this->escapeHtml($track->getTracking()) ?>
+                            <?php endif ?>
+                        </td>
                     </tr>
                     <?php if ($track->getCarrierTitle()): ?>
                     <tr>
@@ -48,11 +54,6 @@
                     <tr>
                         <th class="label"><?= $this->__('Info:') ?></th>
                         <td class="value"><?= $track->getTrackSummary() ?></td>
-                    </tr>
-                    <?php elseif ($track->getUrl()): ?>
-                    <tr>
-                        <th class="label"><?= $this->__('Track:') ?></th>
-                        <td class="value"><a href="<?= $this->escapeHtml($track->getUrl()) ?>" onclick="this.target='_blank'"><?= $this->escapeHtml($track->getUrl()) ?></a></td>
                     </tr>
                     <?php else: ?>
                         <?php if ($track->getStatus()): ?>

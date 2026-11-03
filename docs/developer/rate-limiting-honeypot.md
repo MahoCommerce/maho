@@ -4,7 +4,7 @@ description: Throttle public endpoints and trap spam bots in Maho with the share
 
 # Rate Limiting & Honeypot <span class="version-badge">v26.7+</span>
 
-Maho ships a single, shared toolkit for throttling public endpoints and trapping spam bots. Both live on the core helper (`Mage_Core_Helper_Data`), so you should never roll a per-feature limiter or hand-build a honeypot field. Use these factories and you get consistent behaviour, install-specific trap fields, and cache-backed counters for free.
+Maho ships a single, shared toolkit for throttling public endpoints and trapping spam bots. Both live on the core helper (`Mage_Core_Helper_Data`), so do not write a per-feature limiter or hand-build a honeypot field. Use these factories and you get consistent behaviour, install-specific trap fields, and cache-backed counters for free.
 
 The rate limiter is a value object: `\Maho\Security\RateLimiter`, a sliding window of `$maxAttempts` hits per `$windowSeconds`.
 
@@ -61,16 +61,23 @@ This is how the contact form prevents an attacker from email-bombing a third par
 `attempt()` does check-and-record in one call. When the check and the record need to happen at different points (for example, only count an attempt when validation fails), drive the object directly.
 
 ```php
-$limiter = Mage::helper('core')->ipRateLimiter();
-if ($limiter?->tooManyAttempts()) {
+$limit = (int) Mage::getStoreConfig('system/rate_limit/myfeature');
+$limiter = Mage::helper('core')->rateLimiter('myfeature', $limit, 3600);
+if ($limiter->tooManyAttempts()) {
     // blocked: present a "Too Soon" message
 }
 
 // ...later, on a failed attempt only:
-$limiter?->hit();
+$limiter->hit();
 ```
 
-`ipRateLimiter()` is the store-config-governed IP limiter wired to `system/rate_limit/*`. It returns `null` when rate limiting is disabled in the admin or the client IP is unknown, and callers treat `null` as "not limited" (note the `?->` null-safe calls above).
+`Mage_Sales_Helper_Guest` uses this pattern. A limit of `0` or less disables the limiter, so the code needs no `null` check.
+
+Do not use `ipRateLimiter()`. It is deprecated since 26.9. It allows one request per 30 seconds, and no store configuration changes that.
+
+### Budget in store configuration
+
+A public endpoint reads its budget from `system/rate_limit/<key>`. Add a positive default in `config.xml`, and add a field under "Per-endpoint Limits" in `system.xml`. Without a default, the limit is off.
 
 ### The RateLimiter API
 

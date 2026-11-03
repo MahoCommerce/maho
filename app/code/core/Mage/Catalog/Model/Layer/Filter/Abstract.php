@@ -100,6 +100,18 @@ abstract class Mage_Catalog_Model_Layer_Filter_Abstract extends \Maho\DataObject
     }
 
     /**
+     * Count the values that the request gives to this filter, 0 when the request has no value for it.
+     * Return null when the request has a value that the links of this filter never produce.
+     * This filter cannot check its values, so it counts any value as one.
+     */
+    public function countRequestValues(Mage_Core_Controller_Request_Http $request): ?int
+    {
+        $value = $request->getParam($this->getRequestVar());
+
+        return $value === null || $value === '' ? 0 : 1;
+    }
+
+    /**
      * Get filter items count
      *
      * @return int

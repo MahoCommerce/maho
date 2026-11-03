@@ -77,9 +77,7 @@ abstract class Mage_Dataflow_Model_Convert_Parser_Abstract extends Mage_Dataflow
         return \Maho\DataObject\Cache::singleton()->load($this->_batchImport);
     }
 
-    /**
-     * @deprecated since 26.11 the uploaded files are on the imports mount, use Mage_Dataflow_Helper_Data::copyToBatchFile()
-     */
+    #[\Deprecated(message: 'the uploaded files are on the imports mount, use Mage_Dataflow_Helper_Data::copyToBatchFile()', since: '26.11')]
     protected function _copy($file)
     {
         $ioAdapter = new \Maho\Io\File();
