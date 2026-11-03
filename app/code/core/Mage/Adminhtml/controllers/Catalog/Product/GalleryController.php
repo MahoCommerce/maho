@@ -22,18 +22,9 @@ class Mage_Adminhtml_Catalog_Product_GalleryController extends Mage_Adminhtml_Co
         try {
             $uploader = Mage::getModel('core/file_uploader', 'image');
             $uploader->setAllowedExtensions(\Maho\Io\File::ALLOWED_IMAGES_EXTENSIONS);
-            $uploader->addValidateCallback(
-                'catalog_product_image',
-                Mage::helper('catalog/image'),
-                'validateUploadFile',
-            );
+            $uploader->addValidateCallback('catalog_product_image', Mage::getService('catalog/product_media'), 'validateImage');
             $uploader->setAllowRenameFiles(true);
             $uploader->setFilesDispersion(true);
-            $uploader->addValidateCallback(
-                Mage_Core_Model_File_Validator_Image::NAME,
-                Mage::getModel('core/file_validator_image'),
-                'validate',
-            );
             $config = Mage::getSingleton('catalog/product_media_config');
             $mount = Mage::getStorage('media');
             $result = $uploader->saveToStorage($mount, $config->getBaseTmpMediaStoragePath());
