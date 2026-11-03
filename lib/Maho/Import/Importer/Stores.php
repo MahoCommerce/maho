@@ -20,9 +20,6 @@ use Maho\Import\Result;
 
 class Stores extends AbstractImporter
 {
-    private const WEBSITE_CODE = '/^[a-z]+[a-z0-9_]*$/';
-    private const STORE_CODE = '/^[a-z]+[a-z0-9_\-]*$/';
-
     #[\Override]
     protected function requiredColumns(): array
     {
@@ -39,11 +36,11 @@ class Stores extends AbstractImporter
             $websiteCode = $this->requireValue($file, $line, $row, 'website_code');
             $storeCode = $this->requireValue($file, $line, $row, 'store_code');
             $this->requireValue($file, $line, $row, 'root_category');
-            if (!preg_match(self::WEBSITE_CODE, $websiteCode)) {
-                $this->fail($file, $line, "website_code '$websiteCode' must match " . self::WEBSITE_CODE);
+            if (!preg_match(\Mage_Core_Model_Website::CODE_PATTERN, $websiteCode)) {
+                $this->fail($file, $line, "website_code '$websiteCode' must match " . \Mage_Core_Model_Website::CODE_PATTERN);
             }
-            if (!preg_match(self::STORE_CODE, $storeCode) || $storeCode === \Mage_Core_Model_Store::ADMIN_CODE) {
-                $this->fail($file, $line, "store_code '$storeCode' must match " . self::STORE_CODE . ' and cannot be admin');
+            if (!preg_match(\Mage_Core_Model_Store::CODE_PATTERN, $storeCode) || $storeCode === \Mage_Core_Model_Store::ADMIN_CODE) {
+                $this->fail($file, $line, "store_code '$storeCode' must match " . \Mage_Core_Model_Store::CODE_PATTERN . ' and cannot be admin');
             }
             if (isset($storeCodes[$storeCode])) {
                 $this->fail($file, $line, "store_code '$storeCode' appears twice");
@@ -70,13 +67,13 @@ class Stores extends AbstractImporter
             $website = $this->website($row, $result);
             $rootCategoryId = $this->rootCategory($row['root_category'], $result);
             $group = $this->group($website, $row, $rootCategoryId);
-            $store = $this->store($website, $group, $row, $result);
+            $store = $this->store($group, $row, $result);
 
             if (!$website->getDefaultGroupId()) {
-                $website->setDefaultGroupId((int) $group->getId())->save();
+                $this->storeService()->save($website->setDefaultGroupId((int) $group->getId()));
             }
             if (!$group->getDefaultStoreId() || $row['store_is_default']) {
-                $group->setDefaultStoreId((int) $store->getId())->save();
+                $this->storeService()->save($group->setDefaultStoreId((int) $store->getId()));
             }
             $reporter->progress(++$done, count($rows), $row['store_code']);
         }
@@ -107,7 +104,7 @@ class Stores extends AbstractImporter
         if ($row['website_is_default']) {
             $website->setIsDefault();
         }
-        $website->save();
+        $this->storeService()->save($website);
         $isNew ? $result->created++ : $result->updated++;
         return $website;
     }
@@ -149,14 +146,14 @@ class Stores extends AbstractImporter
             }
         }
         $group ??= Mage::getModel('core/store_group')->setWebsiteId((int) $website->getId());
-        $group->setName($name)->setRootCategoryId($rootCategoryId)->save();
+        $this->storeService()->save($group->setName($name)->setRootCategoryId($rootCategoryId));
         return $group;
     }
 
     /**
      * @param array<string, mixed> $row
      */
-    private function store(\Mage_Core_Model_Website $website, \Mage_Core_Model_Store_Group $group, array $row, Result $result): \Mage_Core_Model_Store
+    private function store(\Mage_Core_Model_Store_Group $group, array $row, Result $result): \Mage_Core_Model_Store
     {
         $code = $row['store_code'];
         $store = Mage::getModel('core/store')->load($code, 'code');
@@ -165,7 +162,6 @@ class Stores extends AbstractImporter
         }
         $isNew = !$store->getId();
         $store->setCode($code)
-            ->setWebsiteId((int) $website->getId())
             ->setGroupId((int) $group->getId())
             ->setIsActive((bool) $row['store_is_active']);
         if ($isNew || ($row['store_name'] ?? '') !== '') {
@@ -174,8 +170,13 @@ class Stores extends AbstractImporter
         if (($row['store_sort_order'] ?? '') !== '') {
             $store->setSortOrder((int) $row['store_sort_order']);
         }
-        $store->save();
+        $this->storeService()->save($store);
         $isNew ? $result->created++ : $result->updated++;
         return $store;
+    }
+
+    private function storeService(): \Mage_Core_Service_Store
+    {
+        return Mage::getService('core/store');
     }
 }

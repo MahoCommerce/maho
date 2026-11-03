@@ -36,12 +36,12 @@ class Mage_Customer_Model_Resource_Group extends Mage_Core_Model_Resource_Db_Abs
     /**
      * Refuse to delete the NOT LOGGED IN group, which guests use, and a group that a scope uses as the default group
      *
-     * @throws Mage_Core_Exception
+     * @throws Mage_Core_Exception_Conflict
      */
     public function validateDelete(Mage_Customer_Model_Group $group): void
     {
         if ((int) $group->getId() === Mage_Customer_Model_Group::NOT_LOGGED_IN_ID || $group->usesAsDefault()) {
-            Mage::throwException(Mage::helper('customer')->__('The group "%s" cannot be deleted', $group->getCode()));
+            throw new Mage_Core_Exception_Conflict(Mage::helper('customer')->__('The group "%s" cannot be deleted', $group->getCode()));
         }
     }
 

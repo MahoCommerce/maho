@@ -11,8 +11,9 @@ namespace MahoCLI\Commands;
 
 use Mage;
 use Mage_Core_Exception;
+use Mage_Core_Exception_Input;
 use Mage_Customer_Model_Group;
-use Mage_Tax_Model_Class;
+use Mage_Customer_Service_Group;
 use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Ask;
@@ -38,26 +39,16 @@ class CustomerGroupCreate extends BaseMahoCommand
     ): int {
         $this->initMaho();
 
-        $code = trim($code);
-        if (!strlen($code)) {
-            $output->writeln('<error>Code cannot be empty</error>');
-            return Command::INVALID;
-        }
-        if (strlen($code) > Mage_Customer_Model_Group::GROUP_CODE_MAX_LENGTH) {
-            $output->writeln('<error>Code cannot be longer than ' . Mage_Customer_Model_Group::GROUP_CODE_MAX_LENGTH . ' bytes</error>');
-            return Command::INVALID;
-        }
-
-        if (!array_key_exists($taxClassId, $this->getTaxClasses())) {
-            $output->writeln("<error>Customer tax class not found with ID: $taxClassId</error>");
-            return Command::INVALID;
-        }
-
+        /** @var Mage_Customer_Model_Group $group */
+        $group = Mage::getModel('customer/group');
+        $group->setCode($code)->setTaxClassId($taxClassId);
         try {
-            $group = Mage::getModel('customer/group')
-                ->setCode($code)
-                ->setTaxClassId($taxClassId)
-                ->save();
+            $this->groupService()->save($group);
+        } catch (Mage_Core_Exception_Input $e) {
+            foreach ($e->getErrors() as $error) {
+                $output->writeln('<error>' . $error['message'] . '</error>');
+            }
+            return Command::INVALID;
         } catch (Mage_Core_Exception $e) {
             $output->writeln('<error>' . $e->getMessage() . '</error>');
             return Command::FAILURE;
@@ -75,18 +66,13 @@ class CustomerGroupCreate extends BaseMahoCommand
         }
 
         $this->initMaho();
-        $taxClasses = $this->getTaxClasses();
+        $taxClasses = $this->groupService()->getTaxClasses();
         $answer = $io->choice('Tax class:', $taxClasses);
         $input->setArgument('tax_class_id', (string) array_search($answer, $taxClasses, true));
     }
 
-    /**
-     * @return array<int, string>
-     */
-    private function getTaxClasses(): array
+    private function groupService(): Mage_Customer_Service_Group
     {
-        return Mage::getResourceModel('tax/class_collection')
-            ->setClassTypeFilter(Mage_Tax_Model_Class::TAX_CLASS_TYPE_CUSTOMER)
-            ->toOptionHash();
+        return Mage::getService('customer/group');
     }
 }
