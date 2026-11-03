@@ -126,9 +126,46 @@ class Mage_Customer_Model_Group extends Mage_Core_Model_Abstract
         return $this;
     }
 
+    /**
+     * Check the code and the tax class. A code that another group uses is a conflict of the resource model.
+     *
+     * @throws Mage_Core_Exception_Input with one error for each invalid field
+     * @throws Mage_Core_Exception_Conflict when the change renames NOT LOGGED IN
+     */
     #[\Override]
     protected function _beforeSave()
     {
+        $helper = Mage::helper('customer');
+        $errors = new Mage_Core_Exception_Input();
+
+        $code = trim((string) $this->getCode());
+        if ($code === '') {
+            $errors->addError('code', $helper->__('Customer group code is required.'));
+        } elseif (mb_strlen($code) > self::GROUP_CODE_MAX_LENGTH) {
+            $errors->addError('code', $helper->__('Customer group code must not exceed %d characters.', self::GROUP_CODE_MAX_LENGTH));
+        }
+        $this->setCode($code);
+        // The admin form does not let an admin rename the group of the guests, so no other write may
+        if ($this->getOrigData('customer_group_id') !== null
+            && (int) $this->getId() === self::NOT_LOGGED_IN_ID
+            && $this->dataHasChangedFor('customer_group_code')
+        ) {
+            throw new Mage_Core_Exception_Conflict($helper->__('The NOT LOGGED IN group cannot be renamed.'));
+        }
+
+        // Accept a stored tax class, because an admin can delete it after the group is saved
+        $taxClassId = (int) $this->getData('tax_class_id');
+        if ($this->getId() === null || $this->dataHasChangedFor('tax_class_id')) {
+            $taxClass = $taxClassId === 0 ? null : Mage::getModel('tax/class')->load($taxClassId);
+            if ($taxClass === null) {
+                $errors->addError('tax_class_id', $helper->__('Customer tax class is required.'));
+            } elseif ($taxClass->getClassType() !== Mage_Tax_Model_Class::TAX_CLASS_TYPE_CUSTOMER) {
+                $errors->addError('tax_class_id', $helper->__('Customer tax class not found with ID: %s', $taxClassId));
+            }
+        }
+
+        $errors->throwIfErrors();
+
         $this->_prepareData();
         return parent::_beforeSave();
     }

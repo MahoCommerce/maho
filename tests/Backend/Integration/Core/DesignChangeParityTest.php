@@ -134,3 +134,12 @@ it('hides a change of another store view from a store-restricted token', functio
         ->and($read)->toBeNull()
         ->and(designChangeIds($this->storeId))->toBe([$id]);
 });
+
+it('checks a direct model save too, so an importer or an extension gets the same rules', function () {
+    designChangeViaAdmin(['store_id' => $this->storeId, 'design' => 'base/default', 'date_from' => '2095-01-01', 'date_to' => '2095-01-31']);
+
+    $overlap = Mage::getModel('core/design')->setStoreId($this->storeId)->setDesign('base/default')
+        ->setDateFrom('2095-01-15')->setDateTo('2095-02-15');
+
+    expect(fn() => $overlap->save())->toThrow(Mage_Core_Exception_Conflict::class);
+});

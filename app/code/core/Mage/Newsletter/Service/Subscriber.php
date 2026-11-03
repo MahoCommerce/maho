@@ -82,14 +82,6 @@ class Mage_Newsletter_Service_Subscriber
         if ($customerId === null && !$this->isGuestSubscriptionAllowed($storeId)) {
             throw new Mage_Core_Exception_Forbidden($helper->__('Guest subscription is not allowed. Please login first.'));
         }
-        // The email validator accepts an empty value
-        if (!$core->isValidNotBlank($email)) {
-            throw new Mage_Core_Exception_Input()->addError('email', $helper->__('Email address is required'));
-        }
-        if (!$core->isValidEmail($email)) {
-            throw new Mage_Core_Exception_Input()->addError('email', $helper->__('Invalid email address'));
-        }
-
         // The limit of the client comes first: a client that sends many addresses gets past the limit of one address
         $limit = (int) Mage::getStoreConfig(self::XML_PATH_SUBSCRIBE_RATE_LIMIT, $storeId);
         $this->attempt($core->rateLimiter('newsletter_subscribe', $limit, self::RATE_LIMIT_WINDOW, \Maho\Security\RateLimitScope::Ip));

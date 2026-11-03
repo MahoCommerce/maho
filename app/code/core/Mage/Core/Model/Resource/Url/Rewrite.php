@@ -25,6 +25,65 @@ class Mage_Core_Model_Resource_Url_Rewrite extends Mage_Core_Model_Resource_Db_A
     }
 
     /**
+     * Check the store view, the request path, the redirect type, the product and the category of $object.
+     * A rewrite without a product or a category needs an ID path and a target path. The request path is stored
+     * in lower case. _checkUnique() then refuses a request path or an ID path that another rewrite of the store
+     * view has.
+     *
+     * @param Mage_Core_Model_Url_Rewrite $object
+     * @throws Mage_Core_Exception_Input with one error for each invalid field
+     */
+    #[\Override]
+    protected function _beforeSave(Mage_Core_Model_Abstract $object)
+    {
+        $helper = Mage::helper('core');
+        $errors = new Mage_Core_Exception_Input();
+
+        $storeId = $object->getStoreId();
+        if ($storeId === null || $storeId === '') {
+            $errors->addError('store_id', $helper->__('The store view is required.'));
+        } elseif (!array_key_exists((int) $storeId, Mage::app()->getStores())) {
+            $errors->addError('store_id', $helper->__('The store view %s does not exist.', $storeId));
+        }
+
+        $requestPath = strtolower(trim((string) $object->getRequestPath()));
+        $object->setRequestPath($requestPath);
+        if ($requestPath === '') {
+            $errors->addError('request_path', $helper->__('The request path is required.'));
+        } else {
+            try {
+                Mage::helper('core/url_rewrite')->validateRequestPath($requestPath);
+            } catch (Mage_Core_Exception $e) {
+                $errors->addError('request_path', $e->getMessage());
+            }
+        }
+
+        if ($object->getOptions() !== null && !in_array($object->getOptions(), Mage_Core_Model_Url_Rewrite::OPTIONS, true)) {
+            $errors->addError('options', $helper->__('The redirect must be "" (no redirect), "R" (302) or "RP" (301).'));
+        }
+
+        $productId = $object->getProductId();
+        if ($productId !== null && !Mage::getResourceModel('catalog/product_collection')->addIdFilter($productId)->getSize()) {
+            $errors->addError('product_id', $helper->__('The product %s does not exist.', $productId));
+        }
+        $categoryId = $object->getCategoryId();
+        if ($categoryId !== null && !Mage::getResourceModel('catalog/category_collection')->addIdFilter($categoryId)->getSize()) {
+            $errors->addError('category_id', $helper->__('The category %s does not exist.', $categoryId));
+        }
+        if ($productId === null && $categoryId === null) {
+            if (trim((string) $object->getIdPath()) === '') {
+                $errors->addError('id_path', $helper->__('The ID path is required for a rewrite without a product or a category.'));
+            }
+            if (trim((string) $object->getTargetPath()) === '') {
+                $errors->addError('target_path', $helper->__('The target path is required for a rewrite without a product or a category.'));
+            }
+        }
+
+        $errors->throwIfErrors();
+        return parent::_beforeSave($object);
+    }
+
+    /**
      * Initialize array fields
      *
      * @return $this
