@@ -4825,12 +4825,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/TagController.php
 
 		-
-			rawMessage: 'Method Mage_Adminhtml_Tax_RateController::_importRates() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Tax/RateController.php
-
-		-
 			rawMessage: 'Method Mage_Adminhtml_Tax_RuleController::saveAction() has no return type specified.'
 			identifier: missingType.return
 			count: 1

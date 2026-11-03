@@ -32,7 +32,7 @@ class Mage_Cms_Model_Block extends Mage_Core_Model_Abstract
     /**
      * Prevent blocks recursion
      *
-     * @throws Mage_Core_Exception
+     * @throws Mage_Core_Exception_Input
      * @return Mage_Core_Model_Abstract
      */
     #[\Override]
@@ -42,7 +42,8 @@ class Mage_Cms_Model_Block extends Mage_Core_Model_Abstract
         if (!str_contains((string) $this->getContent(), $needle)) {
             return parent::_beforeSave();
         }
-        Mage::throwException(
+        throw new Mage_Core_Exception_Input()->addError(
+            'content',
             Mage::helper('cms')->__('The static block content cannot contain  directive with its self.'),
         );
     }

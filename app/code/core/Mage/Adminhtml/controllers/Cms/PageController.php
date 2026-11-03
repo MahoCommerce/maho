@@ -67,17 +67,13 @@ class Mage_Adminhtml_Cms_PageController extends Mage_Adminhtml_Controller_Action
              ->_title($this->__('Pages'))
              ->_title($this->__('Manage Content'));
 
-        // 1. Get ID and create model
         $id = $this->getRequest()->getParam('page_id');
         $model = Mage::getModel('cms/page');
-
-        // 2. Initial checking
         if ($id) {
-            $model->load($id);
-            if (!$model->getId()) {
-                Mage::getSingleton('adminhtml/session')->addError(
-                    Mage::helper('cms')->__('This page no longer exists.'),
-                );
+            try {
+                $model = $this->pageService()->getById((int) $id);
+            } catch (Mage_Core_Exception_NoSuchEntity $e) {
+                Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
                 $this->_redirect('*/*/');
                 return;
             }
@@ -107,107 +103,79 @@ class Mage_Adminhtml_Cms_PageController extends Mage_Adminhtml_Controller_Action
         $this->renderLayout();
     }
 
-    /**
-     * Save action
-     */
     #[Maho\Config\Route('/admin/cms_page/save')]
     public function saveAction(): void
     {
-        // check if data sent
-        if ($data = $this->getRequest()->getPost()) {
-            $data = $this->_filterPostData($data);
-            //init model and set data
-            $model = Mage::getModel('cms/page');
+        $data = $this->getRequest()->getPost();
+        if (!$data) {
+            $this->_redirect('*/*/');
+            return;
+        }
 
-            if ($id = $this->getRequest()->getParam('page_id')) {
-                $model->load($id);
+        $data = $this->_filterPostData($data);
+        $session = $this->_getSession();
+        $id = (int) $this->getRequest()->getParam('page_id');
+        $model = Mage::getModel('cms/page');
+        try {
+            if ($id) {
+                $model = $this->pageService()->getById($id);
             }
-
             $model->setData($data);
-
             Mage::dispatchEvent('cms_page_prepare_save', ['page' => $model, 'request' => $this->getRequest()]);
+            $this->pageService()->save($model);
 
-            //validating
-            if (!$this->_validatePostData($data)) {
+            $session->addSuccess(Mage::helper('cms')->__('The page has been saved.'));
+            $session->setFormData(false);
+            if ($this->getRequest()->getParam('back')) {
                 $this->_redirect('*/*/edit', ['page_id' => $model->getId(), '_current' => true]);
                 return;
             }
-
-            // try to save it
-            try {
-                // save the data
-                $model->save();
-
-                // display success message
-                Mage::getSingleton('adminhtml/session')->addSuccess(
-                    Mage::helper('cms')->__('The page has been saved.'),
-                );
-                // clear previously saved data from session
-                Mage::getSingleton('adminhtml/session')->setFormData(false);
-                // check if 'Save and Continue'
-                if ($this->getRequest()->getParam('back')) {
-                    $this->_redirect('*/*/edit', ['page_id' => $model->getId(), '_current' => true]);
-                    return;
-                }
-                // go to grid
-                $this->_redirect('*/*/');
-                return;
-            } catch (Mage_Core_Exception $e) {
-                $this->_getSession()->addError($e->getMessage());
-            } catch (Exception $e) {
-                $this->_getSession()->addException(
-                    $e,
-                    Mage::helper('cms')->__('An error occurred while saving the page.'),
-                );
-            }
-
-            if (empty($data['identifier'])) {
-                $data['identifier'] = $model->getIdentifier();
-            }
-
-            $this->_getSession()->setFormData($data);
-            $this->_redirect('*/*/edit', ['page_id' => $this->getRequest()->getParam('page_id')]);
+            $this->_redirect('*/*/');
             return;
+        } catch (Mage_Core_Exception_Input $e) {
+            foreach ($e->getErrors() as $error) {
+                $session->addError($error['message']);
+            }
+        } catch (Mage_Core_Exception $e) {
+            $session->addError($e->getMessage());
+        } catch (Exception $e) {
+            $session->addException($e, Mage::helper('cms')->__('An error occurred while saving the page.'));
         }
-        $this->_redirect('*/*/');
+
+        if (empty($data['identifier'])) {
+            $data['identifier'] = $model->getIdentifier();
+        }
+        $session->setFormData($data);
+        $this->_redirect('*/*/edit', ['page_id' => $id ?: null]);
     }
 
-    /**
-     * Delete action
-     */
     #[Maho\Config\Route('/admin/cms_page/delete')]
     public function deleteAction(): void
     {
-        // check if we know what should be deleted
-        if ($id = $this->getRequest()->getParam('page_id')) {
-            $title = '';
-            try {
-                // init model and delete
-                $model = Mage::getModel('cms/page');
-                $model->load($id);
-                $title = $model->getTitle();
-                $model->delete();
-                // display success message
-                Mage::getSingleton('adminhtml/session')->addSuccess(
-                    Mage::helper('cms')->__('The page has been deleted.'),
-                );
-                // go to grid
-                Mage::dispatchEvent('adminhtml_cmspage_on_delete', ['title' => $title, 'status' => 'success']);
-                $this->_redirect('*/*/');
-                return;
-            } catch (Exception $e) {
-                Mage::dispatchEvent('adminhtml_cmspage_on_delete', ['title' => $title, 'status' => 'fail']);
-                // display error message
-                Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
-                // go back to edit form
-                $this->_redirect('*/*/edit', ['page_id' => $id]);
-                return;
-            }
+        $session = Mage::getSingleton('adminhtml/session');
+        $id = (int) $this->getRequest()->getParam('page_id');
+        if (!$id) {
+            $session->addError(Mage::helper('cms')->__('Unable to find a page to delete.'));
+            $this->_redirect('*/*/');
+            return;
         }
-        // display error message
-        Mage::getSingleton('adminhtml/session')->addError(Mage::helper('cms')->__('Unable to find a page to delete.'));
-        // go to grid
-        $this->_redirect('*/*/');
+
+        $title = '';
+        try {
+            $model = $this->pageService()->getById($id);
+            $title = (string) $model->getTitle();
+            $this->pageService()->delete($model);
+            $session->addSuccess(Mage::helper('cms')->__('The page has been deleted.'));
+            Mage::dispatchEvent('adminhtml_cmspage_on_delete', ['title' => $title, 'status' => 'success']);
+            $this->_redirect('*/*/');
+        } catch (Mage_Core_Exception_NoSuchEntity $e) {
+            $session->addError($e->getMessage());
+            $this->_redirect('*/*/');
+        } catch (Exception $e) {
+            Mage::dispatchEvent('adminhtml_cmspage_on_delete', ['title' => $title, 'status' => 'fail']);
+            $session->addError($e->getMessage());
+            $this->_redirect('*/*/edit', ['page_id' => $id]);
+        }
     }
 
     #[\Override]
@@ -233,30 +201,8 @@ class Mage_Adminhtml_Cms_PageController extends Mage_Adminhtml_Controller_Action
         return $data;
     }
 
-    /**
-     * Validate post data
-     *
-     * @param array $data
-     * @return bool     Return FALSE if someone item is invalid
-     */
-    protected function _validatePostData($data)
+    protected function pageService(): Mage_Cms_Service_Page
     {
-        $errorNo = true;
-        if (!empty($data['layout_update_xml']) || !empty($data['custom_layout_update_xml'])) {
-            /** @var Mage_Adminhtml_Model_LayoutUpdate_Validator $validatorCustomLayout */
-            $validatorCustomLayout = Mage::getModel('adminhtml/layoutUpdate_validator');
-            if (!empty($data['layout_update_xml']) && !$validatorCustomLayout->isValid($data['layout_update_xml'])) {
-                $errorNo = false;
-            }
-            if (!empty($data['custom_layout_update_xml'])
-                && !$validatorCustomLayout->isValid($data['custom_layout_update_xml'])
-            ) {
-                $errorNo = false;
-            }
-            foreach ($validatorCustomLayout->getMessages() as $message) {
-                $this->_getSession()->addError($message);
-            }
-        }
-        return $errorNo;
+        return Mage::getService('cms/page');
     }
 }
