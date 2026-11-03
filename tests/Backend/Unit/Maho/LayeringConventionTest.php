@@ -71,9 +71,6 @@ const LAYERING_HTTP_EXCEPTION_ALLOWLIST = [
     'app/code/core/Mage/Tax/Api/TaxRateProcessor.php' => 5,
     'app/code/core/Mage/Tax/Api/TaxRuleProcessor.php' => 4,
     'app/code/core/Maho/Ai/Api/Chat/ChatController.php' => 17,
-    'app/code/core/Maho/Blog/Api/BlogCategoryProcessor.php' => 4,
-    'app/code/core/Maho/Blog/Api/BlogPost.php' => 2,
-    'app/code/core/Maho/Blog/Api/BlogPostImageProcessor.php' => 2,
     'app/code/core/Maho/Giftcard/Api/GiftCardProcessor.php' => 12,
     'app/code/core/Maho/SocialLogin/Api/SocialAuthProcessor.php' => 3,
 ];
