@@ -21,7 +21,6 @@ use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Service\StoreContext;
 use Maho\ApiPlatform\Trait\CacheTrait;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Review Provider, extends CrudProvider with review-specific operations.
@@ -268,12 +267,7 @@ final class ReviewProvider extends CrudProvider
 
     private function getReview(int $reviewId, bool $checkVisibility = true): Review
     {
-        /** @var \Mage_Review_Model_Review $review */
-        $review = \Mage::getModel('review/review')->load($reviewId);
-
-        if (!$review->getId()) {
-            throw new NotFoundHttpException('Review not found');
-        }
+        $review = \Mage::getService('review/review')->getById($reviewId);
 
         // Store scoping: outside the backend a review is only visible in
         // the store views it is assigned to. Store 0 is a marker row added on
@@ -289,10 +283,10 @@ final class ReviewProvider extends CrudProvider
             if ($this->isApiUser()) {
                 $allowedStoreIds = $this->requireUser()->getAllowedStoreIds();
                 if ($allowedStoreIds !== null && array_intersect($storeIds, $allowedStoreIds) === []) {
-                    throw new NotFoundHttpException('Review not found');
+                    throw new \Mage_Core_Exception_NoSuchEntity('Review not found');
                 }
             } elseif (!in_array(StoreContext::getStoreId(), $storeIds, true)) {
-                throw new NotFoundHttpException('Review not found');
+                throw new \Mage_Core_Exception_NoSuchEntity('Review not found');
             }
         }
 
@@ -304,7 +298,7 @@ final class ReviewProvider extends CrudProvider
         ) {
             $customerId = $this->getAuthenticatedCustomerId();
             if (!$customerId || (int) $review->getCustomerId() !== $customerId) {
-                throw new NotFoundHttpException('Review not found');
+                throw new \Mage_Core_Exception_NoSuchEntity('Review not found');
             }
         }
 

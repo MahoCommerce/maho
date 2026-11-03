@@ -240,9 +240,10 @@ class Maho_ApiPlatform_Model_Observer
     }
 
     /**
-     * Invalidate API reviews cache when a review is saved/approved
+     * Invalidate API reviews cache when a review is saved, approved or deleted
      */
     #[Maho\Config\Observer('review_save_after')]
+    #[Maho\Config\Observer('review_delete_after')]
     public function invalidateReviewCache(\Maho\Event\Observer $_observer): void
     {
         $this->cleanApiCache(['API_REVIEWS']);
