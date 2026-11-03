@@ -451,6 +451,7 @@
 "The group ""%s"" cannot be deleted","The group ""%s"" cannot be deleted"
 "The last name cannot be empty.","The last name cannot be empty."
 "The minimum password length is %s","The minimum password length is %s"
+"The NOT LOGGED IN group cannot be renamed.","The NOT LOGGED IN group cannot be renamed."
 "The password cannot be empty.","The password cannot be empty."
 "The password must have at least %d characters. Leading or trailing spaces will be ignored.","The password must have at least %d characters. Leading or trailing spaces will be ignored."
 "There are no items in customer's shopping cart at the moment","There are no items in customer's shopping cart at the moment"

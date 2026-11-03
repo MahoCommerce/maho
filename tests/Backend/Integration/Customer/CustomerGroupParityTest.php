@@ -149,6 +149,16 @@ it('refuses a code that another group uses on each transport', function (): void
         ->and(groupParityCount())->toBe(1);
 });
 
+it('refuses to rename NOT LOGGED IN, as the admin form does', function (): void {
+    $service = Mage::getService('customer/group');
+    $group = $service->getById(Mage_Customer_Model_Group::NOT_LOGGED_IN_ID);
+    $code = $group->getCode();
+
+    expect(fn() => $service->save($group->setCode(GROUP_PARITY_CODE)))
+        ->toThrow(Mage_Core_Exception_Conflict::class, 'The NOT LOGGED IN group cannot be renamed.')
+        ->and($service->getById(Mage_Customer_Model_Group::NOT_LOGGED_IN_ID)->getCode())->toBe($code);
+});
+
 it('refuses to delete the default group and an unknown group on each transport', function (Closure $input): void {
     [$groupId, $status, $message] = $input();
 

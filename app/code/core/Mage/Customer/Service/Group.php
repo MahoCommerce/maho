@@ -34,6 +34,7 @@ class Mage_Customer_Service_Group
      * A code that another group uses is a Mage_Core_Exception_Conflict of the resource model.
      *
      * @throws Mage_Core_Exception_Input with one error for each problem
+     * @throws Mage_Core_Exception_Conflict when the change renames NOT LOGGED IN
      */
     public function save(Mage_Customer_Model_Group $group): Mage_Customer_Model_Group
     {
@@ -47,6 +48,13 @@ class Mage_Customer_Service_Group
             $errors->addError('code', $helper->__('Customer group code must not exceed %d characters.', Mage_Customer_Model_Group::GROUP_CODE_MAX_LENGTH));
         }
         $group->setCode($code);
+        // The admin form does not let an admin rename the group of the guests, so no transport may
+        if ($group->getOrigData('customer_group_id') !== null
+            && (int) $group->getId() === Mage_Customer_Model_Group::NOT_LOGGED_IN_ID
+            && $group->dataHasChangedFor('customer_group_code')
+        ) {
+            throw new Mage_Core_Exception_Conflict($helper->__('The NOT LOGGED IN group cannot be renamed.'));
+        }
 
         // Accept a stored tax class, because an admin can delete it after the group is saved
         $taxClassId = (int) $group->getData('tax_class_id');
