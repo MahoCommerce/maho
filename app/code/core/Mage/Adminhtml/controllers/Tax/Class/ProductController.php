@@ -53,14 +53,13 @@ class Mage_Adminhtml_Tax_Class_ProductController extends Mage_Adminhtml_Controll
              ->_title($this->__('Tax'))
              ->_title($this->__('Product Tax Classes'));
 
-        $classId    = $this->getRequest()->getParam('id');
-        $model      = Mage::getModel('tax/class');
+        $classId = $this->getRequest()->getParam('id');
+        $model = Mage::getModel('tax/class');
         if ($classId) {
-            $model->load($classId);
-            if (!$model->getId() || $model->getClassType() != Mage_Tax_Model_Class::TAX_CLASS_TYPE_PRODUCT) {
-                Mage::getSingleton('adminhtml/session')->addError(
-                    Mage::helper('tax')->__('This class no longer exists'),
-                );
+            try {
+                $model = Mage::getService('tax/class')->getById((int) $classId, Mage_Tax_Model_Class::TAX_CLASS_TYPE_PRODUCT);
+            } catch (Mage_Core_Exception_NoSuchEntity $e) {
+                Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
                 $this->_redirect('*/*/');
                 return;
             }
@@ -88,49 +87,21 @@ class Mage_Adminhtml_Tax_Class_ProductController extends Mage_Adminhtml_Controll
             ->renderLayout();
     }
 
-    /**
-     * delete class action
-     */
     #[Maho\Config\Route('/admin/tax_class_product/delete')]
     public function deleteAction(): void
     {
-        $classId    = $this->getRequest()->getParam('id');
-        $session    = Mage::getSingleton('adminhtml/session');
-        $classModel = Mage::getModel('tax/class')
-            ->load($classId);
-
-        if (!$classModel->getId() || $classModel->getClassType() != Mage_Tax_Model_Class::TAX_CLASS_TYPE_PRODUCT) {
-            $session->addError(Mage::helper('tax')->__('This class no longer exists'));
+        $classId = (int) $this->getRequest()->getParam('id');
+        $session = Mage::getSingleton('adminhtml/session');
+        /** @var Mage_Tax_Service_Class $service */
+        $service = Mage::getService('tax/class');
+        try {
+            $service->delete($service->getById($classId, Mage_Tax_Model_Class::TAX_CLASS_TYPE_PRODUCT));
+            $session->addSuccess(Mage::helper('tax')->__('The tax class has been deleted.'));
             $this->_redirect('*/*/');
             return;
-        }
-
-        $ruleCollection = Mage::getModel('tax/calculation_rule')
-            ->getCollection()
-            ->setClassTypeFilter(Mage_Tax_Model_Class::TAX_CLASS_TYPE_PRODUCT, $classId);
-
-        if ($ruleCollection->getSize() > 0) {
-            $session->addError(Mage::helper('tax')->__('You cannot delete this tax class as it is used in Tax Rules. You have to delete the rules it is used in first.'));
-            $this->_redirect('*/*/edit/', ['id' => $classId]);
-            return;
-        }
-
-        $productCollection = Mage::getModel('catalog/product')
-            ->getCollection()
-            ->addAttributeToFilter('tax_class_id', $classId);
-        $productCount = $productCollection->getSize();
-
-        if ($productCount > 0) {
-            $session->addError(Mage::helper('tax')->__('You cannot delete this tax class as it is used for %d products.', $productCount));
-            $this->_redirect('*/*/edit/', ['id' => $classId]);
-            return;
-        }
-
-        try {
-            $classModel->delete();
-
-            $session->addSuccess(Mage::helper('tax')->__('The tax class has been deleted.'));
-            $this->getResponse()->setRedirect($this->getUrl('*/*/'));
+        } catch (Mage_Core_Exception_NoSuchEntity $e) {
+            $session->addError($e->getMessage());
+            $this->_redirect('*/*/');
             return;
         } catch (Mage_Core_Exception $e) {
             $session->addError($e->getMessage());
