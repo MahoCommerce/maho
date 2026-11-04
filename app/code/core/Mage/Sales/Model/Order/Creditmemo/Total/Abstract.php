@@ -23,10 +23,8 @@ abstract class Mage_Sales_Model_Order_Creditmemo_Total_Abstract extends Mage_Sal
     }
 
     /**
-     * Share of an amount of the order shipping that refunding $baseShipping more of it takes.
-     *
-     * It is counted on all the shipping refunded so far, so the shares of the credit memos of an order add up
-     * to the whole amount instead of each rounding a share of its own.
+     * Return the part of $amount that a refund of $baseShipping more shipping takes.
+     * It counts on all the shipping refunded so far, so the parts of all the credit memos add up to $amount.
      */
     protected function _getShippingShare(Mage_Sales_Model_Order_Creditmemo $creditmemo, float $amount, float $baseShipping): float
     {

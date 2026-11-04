@@ -95,7 +95,7 @@ function creditmemoShippingHiddenTaxInvoice(Mage_Sales_Model_Order $order): Mage
     $invoice = Mage::getModel('sales/order_invoice');
     $invoice->setOrder($order);
     $invoice->setShippingAmount(10.0)->setBaseShippingAmount(10.0);
-    $invoice->setShippingTaxAmount(1.98)->setBaseShippingTaxAmount(1.98);
+    $invoice->setShippingTaxAmount(1.99)->setBaseShippingTaxAmount(1.99);
     $invoice->setShippingHiddenTaxAmount(0.22)->setBaseShippingHiddenTaxAmount(0.22);
 
     return $invoice;
@@ -172,8 +172,8 @@ describe('Credit memo shipping hidden tax', function () {
             $refunded += (float) $creditmemo->getBaseGrandTotal();
         }
 
-        expect($tax)->toBe([0.66, 0.66, 0.66])
+        expect($tax)->toBe([0.66, 0.67, 0.66])
             ->and($hiddenTax)->toBe([0.07, 0.08, 0.07])
-            ->and(round($refunded, 4))->toBe(10.98);
+            ->and(round($refunded, 4))->toBe(10.99);
     });
 });

@@ -1312,8 +1312,8 @@ SPDX-License-Identifier: AFL-3.0
                         <class>sales/order_creditmemo_total_tax</class>
                         <after>subtotal</after>
                     </tax>
-                    <!-- The shipping discount is a share of the shipping refund, which the shipping total sets; the tax total
-                         still comes after it, as the rounding of the item amounts carries over between them. -->
+                    <!-- The shipping total sets the shipping refund, and the discount total takes a share of it.
+                         The tax total uses the rounding that the discount total leaves. -->
                     <discount>
                         <class>sales/order_creditmemo_total_discount</class>
                         <after>subtotal,shipping</after>

@@ -64,7 +64,8 @@ describe('Credit memo shipping discount', function () {
     test('collects the discount after the shipping refund', function () {
         $codes = array_keys(Mage::getSingleton('sales/order_creditmemo_config')->getTotalModels());
 
-        expect(array_search('discount', $codes, true))->toBeGreaterThan(array_search('shipping', $codes, true));
+        expect(array_search('discount', $codes, true))->toBeGreaterThan(array_search('shipping', $codes, true))
+            ->and(array_search('discount', $codes, true))->toBeLessThan(array_search('tax', $codes, true));
     });
 
     test('deducts the shipping discount when no shipping amount is given', function () {
@@ -137,10 +138,10 @@ describe('Credit memo shipping discount', function () {
     });
 
     test('rounds the item discount the same whether the shipping is refunded or not', function () {
-        // A discount of 0.008 over two items (0.004 each) and a shipping discount of 0.01 on 10.
+        // A discount of 0.008 over two items (0.004 each) and a shipping discount of 0.008 on 10.
         $order = creditmemoShippingDiscountOrder();
-        $order->setShippingDiscountAmount(0.01)->setBaseShippingDiscountAmount(0.01);
-        $order->setDiscountAmount(-0.018)->setBaseDiscountAmount(-0.018);
+        $order->setShippingDiscountAmount(0.008)->setBaseShippingDiscountAmount(0.008);
+        $order->setDiscountAmount(-0.016)->setBaseDiscountAmount(-0.016);
         $order->setGrandTotal(109.98)->setBaseGrandTotal(109.98);
         $order->setTotalPaid(109.98)->setBaseTotalPaid(109.98);
         $item = $order->getAllItems()[0];
