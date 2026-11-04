@@ -298,18 +298,14 @@ class Mage_Sales_Model_Service_Order
         $creditmemo->setTotalQty($totalQty);
 
         $this->_initCreditmemoData($creditmemo, $data);
-        if (!isset($data['shipping_amount'])) {
+        // Incl. tax, the shipping total offers what is left of the shipping itself: the shipping incl. tax of the
+        // order less the shipping and its tax refunded misses the shipping hidden tax refunded.
+        if (!isset($data['shipping_amount'])
+            && !Mage::getSingleton('tax/config')->displaySalesShippingInclTax($invoice->getOrder()->getStoreId())
+        ) {
             $order = $invoice->getOrder();
-            $isShippingInclTax = Mage::getSingleton('tax/config')->displaySalesShippingInclTax($order->getStoreId());
-            if ($isShippingInclTax) {
-                $baseAllowedAmount = $order->getBaseShippingInclTax()
-                        - $order->getBaseShippingRefunded()
-                        - $order->getBaseShippingTaxRefunded();
-            } else {
-                $baseAllowedAmount = $order->getBaseShippingAmount() - $order->getBaseShippingRefunded();
-                $baseAllowedAmount = min($baseAllowedAmount, $invoice->getBaseShippingAmount());
-            }
-            $creditmemo->setBaseShippingAmount($baseAllowedAmount);
+            $baseAllowedAmount = $order->getBaseShippingAmount() - $order->getBaseShippingRefunded();
+            $creditmemo->setBaseShippingAmount(min($baseAllowedAmount, $invoice->getBaseShippingAmount()));
         }
 
         $creditmemo->collectTotals();

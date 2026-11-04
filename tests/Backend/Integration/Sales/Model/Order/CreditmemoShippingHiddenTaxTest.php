@@ -89,6 +89,18 @@ function creditmemoShippingHiddenTaxRefund(Mage_Sales_Model_Order $order, ?float
     return $creditmemo;
 }
 
+// The invoice that charged the order, shipping included.
+function creditmemoShippingHiddenTaxInvoice(Mage_Sales_Model_Order $order): Mage_Sales_Model_Order_Invoice
+{
+    $invoice = Mage::getModel('sales/order_invoice');
+    $invoice->setOrder($order);
+    $invoice->setShippingAmount(10.0)->setBaseShippingAmount(10.0);
+    $invoice->setShippingTaxAmount(1.98)->setBaseShippingTaxAmount(1.98);
+    $invoice->setShippingHiddenTaxAmount(0.22)->setBaseShippingHiddenTaxAmount(0.22);
+
+    return $invoice;
+}
+
 describe('Credit memo shipping hidden tax', function () {
     test('refunds the shipping hidden tax with the shipping', function () {
         $order = creditmemoShippingHiddenTaxOrder();
@@ -138,6 +150,30 @@ describe('Credit memo shipping hidden tax', function () {
         }
 
         expect($hiddenTax)->toBe([0.07, 0.08, 0.07])
+            ->and(round($refunded, 4))->toBe(10.98);
+    });
+
+    test('splits the shipping tax and hidden tax over credit memos of the invoice', function () {
+        $order = creditmemoShippingHiddenTaxOrder();
+        $invoice = creditmemoShippingHiddenTaxInvoice($order);
+
+        $tax = [];
+        $hiddenTax = [];
+        $refunded = 0.0;
+        foreach ([3.33, 3.33, null] as $shippingAmount) {
+            $data = ['qtys' => [0 => 0]];
+            if ($shippingAmount !== null) {
+                $data['shipping_amount'] = $shippingAmount;
+            }
+            $creditmemo = Mage::getModel('sales/service_order', $order)->prepareInvoiceCreditmemo($invoice, $data);
+            $creditmemo->setPaymentRefundDisallowed(true)->refund();
+            $tax[] = round((float) $creditmemo->getBaseTaxAmount(), 4);
+            $hiddenTax[] = round((float) $creditmemo->getBaseHiddenTaxAmount(), 4);
+            $refunded += (float) $creditmemo->getBaseGrandTotal();
+        }
+
+        expect($tax)->toBe([0.66, 0.66, 0.66])
+            ->and($hiddenTax)->toBe([0.07, 0.08, 0.07])
             ->and(round($refunded, 4))->toBe(10.98);
     });
 });

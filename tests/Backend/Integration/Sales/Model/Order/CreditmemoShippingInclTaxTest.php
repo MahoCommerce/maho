@@ -69,6 +69,18 @@ function creditmemoShippingInclTaxPlainOrder(): Mage_Sales_Model_Order
     return $order;
 }
 
+// The invoice that charged the order, shipping included.
+function creditmemoShippingInclTaxInvoice(Mage_Sales_Model_Order $order): Mage_Sales_Model_Order_Invoice
+{
+    $invoice = Mage::getModel('sales/order_invoice');
+    $invoice->setOrder($order);
+    $invoice->setShippingAmount(10.0)->setBaseShippingAmount(10.0);
+    $invoice->setShippingTaxAmount(1.98)->setBaseShippingTaxAmount(1.98);
+    $invoice->setShippingHiddenTaxAmount(0.22)->setBaseShippingHiddenTaxAmount(0.22);
+
+    return $invoice;
+}
+
 describe('Credit memo shipping displayed incl. tax', function () {
     beforeEach(function () {
         Mage::app()->getStore(1)->setConfig('tax/sales_display/shipping', Mage_Tax_Model_Config::DISPLAY_TYPE_INCLUDING_TAX);
@@ -137,20 +149,18 @@ describe('Credit memo shipping displayed incl. tax', function () {
             ->and(round((float) $creditmemo->getBaseShippingAmount(), 4))->toBe(5.0);
     });
 
-    test('refunds the shipping left for the offered amount after partial refunds', function () {
-        // Three refunds of 3.24 incl. tax take 3.09 + 0.15 each and leave 0.73 + 0.05; converting 0.78 at the
-        // rate of the order would give 0.74.
-        $order = creditmemoShippingInclTaxPlainOrder();
-        for ($i = 0; $i < 3; $i++) {
-            creditmemoShippingInclTaxRefund($order, ['shipping_amount' => 3.24]);
-        }
+    test('refunds the shipping left for the offered amount after a partial refund', function () {
+        // A refund of 0.65 incl. tax takes 0.53 of shipping and leaves 9.47, offered as 11.56 incl. tax, which
+        // converts to 9.48 at the rate of the order.
+        $order = creditmemoShippingInclTaxOrder();
+        $first = creditmemoShippingInclTaxRefund($order, ['shipping_amount' => 0.65]);
         $offered = creditmemoShippingInclTaxMemo($order)->getBaseShippingInclTax();
 
-        $creditmemo = creditmemoShippingInclTaxMemo($order, ['shipping_amount' => $offered]);
+        $second = creditmemoShippingInclTaxMemo($order, ['shipping_amount' => $offered]);
 
-        expect((float) $offered)->toBe(0.78)
-            ->and(round((float) $creditmemo->getBaseShippingAmount(), 4))->toBe(0.73)
-            ->and(round((float) $creditmemo->getBaseGrandTotal(), 4))->toBe(0.78);
+        expect((float) $offered)->toBe(11.56)
+            ->and(round((float) $second->getBaseShippingAmount(), 4))->toBe(9.47)
+            ->and(round((float) $first->getBaseGrandTotal() + (float) $second->getBaseGrandTotal(), 4))->toBe(10.98);
     });
 
     test('still rejects more than the offered amount', function () {
@@ -168,6 +178,22 @@ describe('Credit memo shipping displayed incl. tax', function () {
         $second = creditmemoShippingInclTaxRefund($order, ['shipping_amount' => $offered]);
 
         expect((float) $offered)->toBe(6.1)
+            ->and((float) $second->getBaseShippingAmount())->toBe(5.0)
+            ->and(round((float) $first->getBaseGrandTotal() + (float) $second->getBaseGrandTotal(), 4))->toBe(10.98);
+    });
+
+    test('offers the shipping left on a credit memo of the invoice after a partial refund', function () {
+        // The shipping incl. tax of the order less the shipping and tax refunded would offer 6.21, which also
+        // counts the 0.11 of hidden tax already refunded, and converts to more shipping than is left.
+        $order = creditmemoShippingInclTaxOrder();
+        $invoice = creditmemoShippingInclTaxInvoice($order);
+        $service = Mage::getModel('sales/service_order', $order);
+        $first = $service->prepareInvoiceCreditmemo($invoice, ['qtys' => [0 => 0], 'shipping_amount' => 6.1]);
+        $first->setPaymentRefundDisallowed(true)->refund();
+
+        $second = $service->prepareInvoiceCreditmemo($invoice, ['qtys' => [0 => 0]]);
+
+        expect((float) $second->getBaseShippingInclTax())->toBe(6.1)
             ->and((float) $second->getBaseShippingAmount())->toBe(5.0)
             ->and(round((float) $first->getBaseGrandTotal() + (float) $second->getBaseGrandTotal(), 4))->toBe(10.98);
     });
