@@ -176,4 +176,10 @@ describe('Credit memo shipping hidden tax', function () {
             ->and($hiddenTax)->toBe([0.07, 0.08, 0.07])
             ->and(round($refunded, 4))->toBe(10.99);
     });
+
+    test('reads the base shipping hidden tax of a loaded invoice from its column', function () {
+        $invoice = Mage::getModel('sales/order_invoice')->setData(['base_shipping_hidden_tax_amnt' => '0.2200']);
+
+        expect(round((float) $invoice->getBaseShippingHiddenTaxAmount(), 4))->toBe(0.22);
+    });
 });

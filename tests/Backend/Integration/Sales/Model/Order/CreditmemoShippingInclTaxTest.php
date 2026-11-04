@@ -197,4 +197,18 @@ describe('Credit memo shipping displayed incl. tax', function () {
             ->and((float) $second->getBaseShippingAmount())->toBe(5.0)
             ->and(round((float) $first->getBaseGrandTotal() + (float) $second->getBaseGrandTotal(), 4))->toBe(10.98);
     });
+
+    test('refunds no shipping on a credit memo of an invoice that charged none', function () {
+        $order = creditmemoShippingInclTaxOrder();
+        $invoice = creditmemoShippingInclTaxInvoice($order);
+        $invoice->setShippingAmount(0.0)->setBaseShippingAmount(0.0);
+        $invoice->setShippingTaxAmount(0.0)->setBaseShippingTaxAmount(0.0);
+        $invoice->setShippingHiddenTaxAmount(0.0)->setBaseShippingHiddenTaxAmount(0.0);
+
+        $creditmemo = Mage::getModel('sales/service_order', $order)
+            ->prepareInvoiceCreditmemo($invoice, ['qtys' => [0 => 0]]);
+
+        expect((float) $creditmemo->getBaseShippingAmount())->toBe(0.0)
+            ->and((float) $creditmemo->getBaseGrandTotal())->toBe(0.0);
+    });
 });
