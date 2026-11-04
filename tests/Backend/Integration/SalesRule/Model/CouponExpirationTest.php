@@ -129,3 +129,15 @@ describe('the coupon expiration of a rule with a To date', function () {
             ->and(couponExpirationStored($explicitCouponId))->toBe("$today 12:00:00");
     });
 });
+
+test('a coupon that customer segmentation generates stores its expiration as a UTC time string', function () {
+    $rule = couponExpirationRule(null, useAutoGeneration: true);
+
+    $code = Mage::helper('customersegmentation/coupon')->generateCustomerCoupon(999999, (int) $rule->getId(), 'EXPIRE', 30);
+    $expirationDate = Mage::getModel('salesrule/coupon')->loadByCode((string) $code)->getExpirationDate();
+
+    expect($code)->not->toBeNull()
+        ->and($expirationDate)->toMatch('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/')
+        ->and(strtotime($expirationDate . ' UTC'))->toBeGreaterThan(strtotime('+29 days'))
+        ->and(strtotime($expirationDate . ' UTC'))->toBeLessThan(strtotime('+31 days'));
+});
