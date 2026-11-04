@@ -77,13 +77,22 @@ describe('Credit memo shipping displayed incl. tax', function () {
             ->and((float) $creditmemo->getBaseDiscountAmount())->toBe(-0.61);
     });
 
-    test('offers the shipping plus its tax for an order without the shipping incl. tax', function () {
+    test('offers what is left after an earlier credit memo rounded up the shipping tax', function () {
+        // Shipping of 1.00 plus 0.01 tax; refunding half of it rounded its 0.005 of tax up to the whole 0.01.
         $order = creditmemoShippingInclTaxOrder();
-        $order->setShippingInclTax(null)->setBaseShippingInclTax(null);
+        $order->setShippingAmount(1.0)->setBaseShippingAmount(1.0);
+        $order->setShippingInclTax(1.01)->setBaseShippingInclTax(1.01);
+        $order->setShippingTaxAmount(0.01)->setBaseShippingTaxAmount(0.01);
+        $order->setShippingHiddenTaxAmount(0.0)->setBaseShippingHiddenTaxAmount(0.0);
+        $order->setShippingDiscountAmount(0.0)->setBaseShippingDiscountAmount(0.0);
+        $order->setShippingRefunded(0.5)->setBaseShippingRefunded(0.5);
+        $order->setShippingTaxRefunded(0.01)->setBaseShippingTaxRefunded(0.01);
+        $order->save();
 
-        $creditmemo = creditmemoShippingInclTaxMemo($order);
+        $offered = creditmemoShippingInclTaxMemo($order)->getBaseShippingInclTax();
+        $creditmemo = creditmemoShippingInclTaxMemo($order, ['shipping_amount' => $offered]);
 
-        expect((float) $creditmemo->getBaseShippingInclTax())->toBe(11.98)
-            ->and((float) $creditmemo->getBaseShippingAmount())->toBe(10.0);
+        expect((float) $offered)->toBe(0.5)
+            ->and((float) $creditmemo->getBaseShippingAmount())->toBe(0.5);
     });
 });

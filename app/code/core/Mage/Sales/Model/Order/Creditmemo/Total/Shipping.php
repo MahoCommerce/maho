@@ -69,16 +69,20 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Shipping extends Mage_Sales_Model_
                 );
             }
         } else {
-            // A share of the order's amount incl. tax, the unit that a given amount incl. tax is divided by above.
-            if ($baseShipping != 0 && $baseShippingInclTax != 0) {
-                $shippingInclTax = Mage::app()->getStore()->roundPrice($shippingInclTax * $baseAllowedAmount / $baseShipping);
-                $baseShippingInclTax = Mage::app()->getStore()->roundPrice($baseShippingInclTax * $baseAllowedAmount / $baseShipping);
-            } elseif ($baseShipping != 0) {
+            if ($baseShipping != 0) {
                 $allowedTaxAmount = $order->getShippingTaxAmount() - $order->getShippingTaxRefunded();
                 $baseAllowedTaxAmount = $order->getBaseShippingTaxAmount() - $order->getBaseShippingTaxRefunded();
+                // The hidden tax of a shipping discount is part of the shipping incl. tax, and no column records
+                // its refunded share, so take the share of the shipping left, as the tax total does.
+                $allowedHiddenTaxAmount = $order->getShippingHiddenTaxAmount() * $baseAllowedAmount / $baseShipping;
+                $baseAllowedHiddenTaxAmount = $order->getBaseShippingHiddenTaxAmount() * $baseAllowedAmount / $baseShipping;
 
-                $shippingInclTax = Mage::app()->getStore()->roundPrice($allowedAmount + $allowedTaxAmount);
-                $baseShippingInclTax = Mage::app()->getStore()->roundPrice($baseAllowedAmount + $baseAllowedTaxAmount);
+                $shippingInclTax = Mage::app()->getStore()->roundPrice(
+                    $allowedAmount + $allowedTaxAmount + Mage::app()->getStore()->roundPrice($allowedHiddenTaxAmount),
+                );
+                $baseShippingInclTax = Mage::app()->getStore()->roundPrice(
+                    $baseAllowedAmount + $baseAllowedTaxAmount + Mage::app()->getStore()->roundPrice($baseAllowedHiddenTaxAmount),
+                );
             }
             $shipping           = $allowedAmount;
             $baseShipping       = $baseAllowedAmount;
