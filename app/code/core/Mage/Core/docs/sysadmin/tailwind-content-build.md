@@ -15,8 +15,10 @@ that this file does not have has no effect on the storefront.
 
 ## Requirements
 
-- **Node.js and the Tailwind CLI.** Run `npm install` in the Maho root. It installs the CLI in
-  `node_modules/.bin/tailwindcss`. Without that file, no build runs.
+- **Node.js and the Tailwind CLI.** In a clone of Maho, run `npm install` in the root. A project
+  that installs Maho with Composer has no `package.json` from Maho, so run
+  `./maho theme:content:build` in a terminal: it offers to install the toolchain. Either way, the
+  CLI goes to `node_modules/.bin/tailwindcss`. Without that file, no build runs.
 - **`node` in the `PATH` of the worker.** The CLI starts with `#!/usr/bin/env node`. A version
   manager such as nvm adds `node` to the `PATH` of your shell only, so set the `PATH` in the
   crontab, or in the unit file of the worker.
@@ -38,13 +40,15 @@ media mount.
 
 | Event | What happens |
 |-------|--------------|
-| A save of content that changes a field with HTML | A build is queued |
+| A save of content that changes a field with HTML | A build is queued, and runs 10 seconds later |
 | An import, from **System > Import/Export > Import** or `./maho import:*` | A build is queued when the import ends |
 | The cron job `theme_content_check`, every 15 minutes | A build is queued for a theme whose committed `css/styles.css` changed after its last build, that has no build, or whose file is missing from the media mount |
 | `./maho theme:content:build` | The build runs at once, with no queue |
+| `./maho dev:frontend:theme:build` | The build runs at once after the theme compiles, also in `--watch` |
 
-A queued build goes to the `theme_content` queue and runs one minute later. The queue drops a second
-request while the first one waits, so an import of many products gives one build. The
+A queued build goes to the `theme_content` queue. A build from an import runs one minute later. The
+queue drops a second request while the first one waits, so an import of many products gives one
+build. The
 `theme_content` queue has no routing, so it runs in the `slow` pool.
 
 A script of your own that writes content with SQL queues no build. Run `./maho theme:content:build`
@@ -52,13 +56,14 @@ after it.
 
 ## After a deploy
 
-The store serves a build only while it comes from the current `css/styles.css` of the theme. So
-when a deploy changes that file, for example a Maho upgrade, the store serves the committed file at
-once. The cron job queues a new build within 15 minutes. To skip that wait, add the build to the
-deploy script, after the cache flush:
+The store serves a build only while it comes from the current `css/styles.css` of the theme. Each
+page compares the time, size and inode of that file with the values of the build. When they
+change, it compares the hash. So when a deploy changes the file, for example a Maho upgrade with
+`composer install`, the store serves the committed file at once, with no cache flush. A deploy that
+copies the same file again keeps the build. The cron job queues a new build within 15 minutes. To
+skip that wait, add the build to the deploy script:
 
 ```bash
-./maho cache:flush
 ./maho theme:content:build
 ```
 
@@ -78,7 +83,8 @@ after a build.
 ## When a build fails
 
 The Tailwind output goes to the system log (`var/log/system.log` by default). The store keeps the
-file of the previous build, or the committed `css/styles.css` when there is none.
+file of the previous build, or the committed `css/styles.css` when there is none. The admin inbox
+gets one message for the theme, with the command that tries the build again.
 
 The cron job does not repeat a build that failed with the same `css/styles.css`, so a build that
 always fails does not run every 15 minutes. The next save of content, a new `css/styles.css` or

@@ -30,7 +30,7 @@ class Mage_Core_Model_Design_Content_Observer
             $changed = $source['fields'] === []
                 || array_any($source['fields'], fn(string $field): bool => $object->dataHasChangedFor($field));
             if ($changed) {
-                Mage::getSingleton('core/design_content_bundle')->queueBuild();
+                Mage::getSingleton('core/design_content_bundle')->queueBuild(Mage_Core_Model_Design_Content_Bundle::SAVE_DELAY);
                 return;
             }
         }
@@ -38,15 +38,13 @@ class Mage_Core_Model_Design_Content_Observer
 
     /**
      * Queue a build for a theme whose committed css/styles.css changed after its last build, or
-     * that has no build, such as after a deploy. A deploy that keeps the cache keeps the old
-     * manifest in it, so the cache entry goes too, and the head checks the files again.
+     * that has no build, such as after a deploy.
      */
     #[Maho\Config\CronJob('theme_content_check', schedule: '*/15 * * * *')]
     public function queueOutdated(): void
     {
         $bundle = Mage::getSingleton('core/design_content_bundle');
         if ($bundle->getOutdatedThemes() !== []) {
-            Mage::app()->removeCache(Mage_Core_Model_Design_Content_Bundle::CACHE_ID);
             $bundle->queueBuild();
         }
     }

@@ -38,7 +38,7 @@ class Mage_Page_Model_TailwindSource
             && in_array($object->getPath(), self::CONFIG_PATHS, true)
             && $object->isValueChanged()
         ) {
-            Mage::getSingleton('core/design_content_bundle')->queueBuild();
+            Mage::getSingleton('core/design_content_bundle')->queueBuild(Mage_Core_Model_Design_Content_Bundle::SAVE_DELAY);
         }
     }
 }
