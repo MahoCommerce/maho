@@ -326,12 +326,10 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
                     }
                 }
             } else {
-                /**
-                 * Convert dates into DateTime
-                 */
                 if (in_array($key, ['from_date', 'to_date']) && $value) {
-                    $parsed = DateTime::createFromFormat(Mage_Core_Model_Locale::DATE_FORMAT, $value);
-                    $value = $parsed !== false ? $parsed : new DateTime($value);
+                    $parsed = DateTime::createFromFormat(Mage_Core_Model_Locale::DATE_FORMAT, $value)
+                        ?: new DateTime($value);
+                    $value = $parsed->format(Mage_Core_Model_Locale::DATE_FORMAT);
                 }
                 $this->setData($key, $value);
             }
