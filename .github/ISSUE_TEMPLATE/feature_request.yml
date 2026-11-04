@@ -1,0 +1,24 @@
+name: Feature request
+description: A new feature, or an improvement to a feature that exists.
+type: Feature
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What you want to do, and why Maho does not let you do it today.
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: The solution you propose
+      description: How the feature works for the person who uses it, in the admin, the storefront, the API or the CLI.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives
+      description: Other ways to solve the problem, such as a module or a workaround that you use today.
