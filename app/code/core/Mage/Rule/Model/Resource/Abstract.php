@@ -40,19 +40,8 @@ abstract class Mage_Rule_Model_Resource_Abstract extends Mage_Core_Model_Resourc
     #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $object)
     {
-        $fromDate = $object->getFromDate();
-        if ($fromDate instanceof DateTimeInterface) {
-            $object->setFromDate($fromDate->format(Mage_Core_Model_Locale::DATE_FORMAT));
-        } elseif (!is_string($fromDate) || empty($fromDate)) {
-            $object->setFromDate(null);
-        }
-
-        $toDate = $object->getToDate();
-        if ($toDate instanceof DateTimeInterface) {
-            $object->setToDate($toDate->format(Mage_Core_Model_Locale::DATE_FORMAT));
-        } elseif (!is_string($toDate) || empty($toDate)) {
-            $object->setToDate(null);
-        }
+        $object->setFromDate($object->getFromDate() ?: null);
+        $object->setToDate($object->getToDate() ?: null);
 
         parent::_beforeSave($object);
         return $this;
