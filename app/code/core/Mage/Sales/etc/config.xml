@@ -1305,16 +1305,17 @@ SPDX-License-Identifier: AFL-3.0
                     </subtotal>
                     <shipping>
                         <class>sales/order_creditmemo_total_shipping</class>
-                        <after>subtotal,discount</after>
+                        <after>subtotal</after>
                         <before>grand_total,tax</before>
                     </shipping>
                     <tax>
                         <class>sales/order_creditmemo_total_tax</class>
                         <after>subtotal</after>
                     </tax>
+                    <!-- The shipping discount is a share of the shipping refund, which the shipping total sets. -->
                     <discount>
                         <class>sales/order_creditmemo_total_discount</class>
-                        <after>subtotal</after>
+                        <after>subtotal,shipping</after>
                     </discount>
                     <grand_total>
                         <class>sales/order_creditmemo_total_grand</class>
