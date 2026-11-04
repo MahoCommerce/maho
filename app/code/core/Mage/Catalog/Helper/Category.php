@@ -195,6 +195,14 @@ class Mage_Catalog_Helper_Category extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * Tell if a layered-navigation template adds rel="nofollow" to its filter links on the current page.
+     */
+    public function shouldAddNofollowToFilterLinks(): bool
+    {
+        return $this->canUseNofollowForFilterLinks() && !$this->isLayeredNavigationLandingPage();
+    }
+
+    /**
      * Whether the current request is being served as an indexable facet landing
      * page. A future facet-landing-page feature (see discussion #971) registers
      * REGISTRY_LN_LANDING_PAGE to opt the view out of the layered-navigation

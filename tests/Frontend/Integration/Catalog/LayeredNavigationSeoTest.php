@@ -221,4 +221,67 @@ describe('Layered Navigation SEO', function () {
             expect($this->helper->canUseNofollowForFilterLinks())->toBeFalse();
         });
     });
+
+    describe('nofollow on rendered filter links', function () {
+        beforeEach(function () {
+            $attribute = Mage::getSingleton('eav/config')->getAttribute(Mage_Catalog_Model_Product::ENTITY, 'color');
+            $filter = Mage::getModel('catalog/layer_filter_attribute')->setAttributeModel($attribute);
+            $item = new class extends Mage_Catalog_Model_Layer_Filter_Item {
+                #[\Override]
+                public function getUrl()
+                {
+                    return 'https://example.com/shoes.html?color=1';
+                }
+            };
+            $item->setFilter($filter)->setValue('1')->setLabel('Red')->setCount(3);
+
+            $this->filterHtml = function (string $template) use ($item): string {
+                $block = new class extends Mage_Catalog_Block_Layer_Filter_Attribute {
+                    public array $items = [];
+
+                    #[\Override]
+                    public function getItems()
+                    {
+                        return $this->items;
+                    }
+                };
+                $block->items = [$item];
+                return $block->setTemplate($template)->toHtml();
+            };
+        });
+
+        test('the helper adds nofollow when the toggle is on', function () {
+            expect($this->helper->shouldAddNofollowToFilterLinks())->toBeTrue();
+        });
+
+        test('the helper adds no nofollow when the toggle is off', function () {
+            Mage::app()->getStore()->setConfig(Mage_Catalog_Helper_Category::XML_PATH_LN_NOFOLLOW_FILTER_LINKS, '0');
+            expect($this->helper->shouldAddNofollowToFilterLinks())->toBeFalse();
+        });
+
+        test('the helper adds no nofollow on a facet landing page (#971)', function () {
+            Mage::register(Mage_Catalog_Helper_Category::REGISTRY_LN_LANDING_PAGE, true);
+            expect($this->helper->shouldAddNofollowToFilterLinks())->toBeFalse();
+        });
+
+        test('text filter links carry nofollow when the toggle is on', function () {
+            expect(($this->filterHtml)('catalog/layer/filter.phtml'))->toContain('rel="nofollow"');
+        });
+
+        test('text filter links carry no nofollow when the toggle is off', function () {
+            Mage::app()->getStore()->setConfig(Mage_Catalog_Helper_Category::XML_PATH_LN_NOFOLLOW_FILTER_LINKS, '0');
+            expect(($this->filterHtml)('catalog/layer/filter.phtml'))->not->toContain('nofollow');
+        });
+
+        test('color swatch filter links carry nofollow when the toggle is on', function () {
+            $html = ($this->filterHtml)('configurableswatches/catalog/layer/filter/swatches.phtml');
+            expect($html)->toContain('class="swatch-link"')->toContain('rel="nofollow"');
+        });
+
+        test('color swatch filter links carry no nofollow when the toggle is off', function () {
+            Mage::app()->getStore()->setConfig(Mage_Catalog_Helper_Category::XML_PATH_LN_NOFOLLOW_FILTER_LINKS, '0');
+            $html = ($this->filterHtml)('configurableswatches/catalog/layer/filter/swatches.phtml');
+            expect($html)->toContain('class="swatch-link"')->not->toContain('nofollow');
+        });
+    });
 });
