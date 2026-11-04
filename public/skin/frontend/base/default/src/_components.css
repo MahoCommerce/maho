@@ -2544,6 +2544,11 @@
         caption {
             @apply mb-2 text-left font-display text-lg font-semibold tracking-tight;
         }
+
+        /* The rows align flush with the heading */
+        :is(th, td):first-child {
+            @apply pl-0;
+        }
     }
 
     /* Product details as accordion rows in the buy column (Zalando pattern;
