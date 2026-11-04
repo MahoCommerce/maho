@@ -90,9 +90,9 @@ out of the index without blocking crawlers from walking through them.
 
 ### Add rel="nofollow" to Layered Navigation Filter Links
 
-Filter links in the layered-navigation block carry `rel="nofollow"`, signaling to crawlers that
-filter-combination URLs are not worth prioritizing. This reduces wasted crawl budget at the
-source, before a crawler even requests the filtered URL.
+Filter links in the layered-navigation block, including the color swatches, carry
+`rel="nofollow"`, signaling to crawlers that filter-combination URLs are not worth prioritizing.
+This reduces wasted crawl budget at the source, before a crawler even requests the filtered URL.
 
 ### Maximum Selected Filters <span class="version-badge">v26.11+</span>
 

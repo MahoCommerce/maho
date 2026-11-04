@@ -221,4 +221,80 @@ describe('Layered Navigation SEO', function () {
             expect($this->helper->canUseNofollowForFilterLinks())->toBeFalse();
         });
     });
+
+    describe('crawl control decisions (helper)', function () {
+        test('every crawl control applies by default', function () {
+            expect($this->helper->shouldAddNoindexToFilteredPages())->toBeTrue();
+            expect($this->helper->shouldAddNoindexToPaginatedPages())->toBeTrue();
+            expect($this->helper->shouldAddCanonicalTagToCategoryPages())->toBeTrue();
+            expect($this->helper->shouldAddNofollowToFilterLinks())->toBeTrue();
+        });
+
+        test('each crawl control follows its own toggle', function (string $path, string $method) {
+            Mage::app()->getStore()->setConfig($path, '0');
+            expect($this->helper->$method())->toBeFalse();
+        })->with([
+            'noindex filtered' => [Mage_Catalog_Helper_Category::XML_PATH_LN_NOINDEX_FILTERED, 'shouldAddNoindexToFilteredPages'],
+            'noindex paginated' => [Mage_Catalog_Helper_Category::XML_PATH_LN_NOINDEX_PAGINATED, 'shouldAddNoindexToPaginatedPages'],
+            'canonical' => [Mage_Catalog_Helper_Category::XML_PATH_USE_CATEGORY_CANONICAL_TAG, 'shouldAddCanonicalTagToCategoryPages'],
+            'nofollow' => [Mage_Catalog_Helper_Category::XML_PATH_LN_NOFOLLOW_FILTER_LINKS, 'shouldAddNofollowToFilterLinks'],
+        ]);
+
+        test('no crawl control applies on a facet landing page (#971)', function () {
+            Mage::register(Mage_Catalog_Helper_Category::REGISTRY_LN_LANDING_PAGE, true);
+            expect($this->helper->shouldAddNoindexToFilteredPages())->toBeFalse();
+            expect($this->helper->shouldAddNoindexToPaginatedPages())->toBeFalse();
+            expect($this->helper->shouldAddCanonicalTagToCategoryPages())->toBeFalse();
+            expect($this->helper->shouldAddNofollowToFilterLinks())->toBeFalse();
+        });
+    });
+
+    describe('nofollow on rendered filter links', function () {
+        beforeEach(function () {
+            $attribute = Mage::getSingleton('eav/config')->getAttribute(Mage_Catalog_Model_Product::ENTITY, 'color');
+            $filter = Mage::getModel('catalog/layer_filter_attribute')->setAttributeModel($attribute);
+            $item = new class extends Mage_Catalog_Model_Layer_Filter_Item {
+                #[\Override]
+                public function getUrl()
+                {
+                    return 'https://example.com/shoes.html?color=1';
+                }
+            };
+            $item->setFilter($filter)->setValue('1')->setLabel('Red')->setCount(3);
+
+            $this->filterHtml = function (string $template) use ($item): string {
+                $block = new class extends Mage_Catalog_Block_Layer_Filter_Attribute {
+                    public array $items = [];
+
+                    #[\Override]
+                    public function getItems()
+                    {
+                        return $this->items;
+                    }
+                };
+                $block->items = [$item];
+                return $block->setTemplate($template)->toHtml();
+            };
+        });
+
+        test('text filter links carry nofollow when the toggle is on', function () {
+            expect(($this->filterHtml)('catalog/layer/filter.phtml'))->toContain('rel="nofollow"');
+        });
+
+        test('text filter links carry no nofollow when the toggle is off', function () {
+            Mage::app()->getStore()->setConfig(Mage_Catalog_Helper_Category::XML_PATH_LN_NOFOLLOW_FILTER_LINKS, '0');
+            expect(($this->filterHtml)('catalog/layer/filter.phtml'))->not->toContain('nofollow');
+        });
+
+        test('color swatch filter links carry nofollow when the toggle is on', function () {
+            $html = ($this->filterHtml)('configurableswatches/catalog/layer/filter/swatches.phtml');
+            expect($html)->toContain('class="swatch-link"')->toContain('rel="nofollow"');
+        });
+
+        test('color swatch filter links carry no nofollow when the toggle is off', function () {
+            Mage::app()->getStore()->setConfig(Mage_Catalog_Helper_Category::XML_PATH_LN_NOFOLLOW_FILTER_LINKS, '0');
+            $html = ($this->filterHtml)('configurableswatches/catalog/layer/filter/swatches.phtml');
+            expect($html)->toContain('class="swatch-link"')->not->toContain('nofollow');
+        });
+    });
 });
