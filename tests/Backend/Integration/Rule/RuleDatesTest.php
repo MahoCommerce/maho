@@ -47,3 +47,26 @@ it('saves a cart price rule that has a From and a To date', function (): void {
         $rule->delete();
     }
 });
+
+it('saves a cart price rule with an empty From and To date as no date', function (): void {
+    $rule = Mage::getModel('salesrule/rule');
+    $rule->loadPost([
+        'name' => 'Rule empty dates test',
+        'is_active' => 1,
+        'website_ids' => [1],
+        'customer_group_ids' => [0],
+        'simple_action' => 'by_percent',
+        'discount_amount' => 5,
+        'from_date' => '',
+        'to_date' => '',
+    ]);
+    $rule->save();
+
+    try {
+        $loaded = Mage::getModel('salesrule/rule')->load($rule->getId());
+        expect($loaded->getFromDate())->toBeNull()
+            ->and($loaded->getToDate())->toBeNull();
+    } finally {
+        $rule->delete();
+    }
+});
