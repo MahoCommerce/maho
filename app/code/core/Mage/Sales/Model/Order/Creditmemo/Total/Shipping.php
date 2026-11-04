@@ -69,7 +69,11 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Shipping extends Mage_Sales_Model_
                 );
             }
         } else {
-            if ($baseShipping != 0) {
+            // A share of the order's amount incl. tax, the unit that a given amount incl. tax is divided by above.
+            if ($baseShipping != 0 && $baseShippingInclTax != 0) {
+                $shippingInclTax = Mage::app()->getStore()->roundPrice($shippingInclTax * $baseAllowedAmount / $baseShipping);
+                $baseShippingInclTax = Mage::app()->getStore()->roundPrice($baseShippingInclTax * $baseAllowedAmount / $baseShipping);
+            } elseif ($baseShipping != 0) {
                 $allowedTaxAmount = $order->getShippingTaxAmount() - $order->getShippingTaxRefunded();
                 $baseAllowedTaxAmount = $order->getBaseShippingTaxAmount() - $order->getBaseShippingTaxRefunded();
 
