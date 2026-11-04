@@ -95,12 +95,13 @@ class Mage_SalesRule_Model_Coupon extends Mage_Core_Model_Abstract
         return $this->setData('code', $value);
     }
 
-    public function getExpirationDate(): DateTimeInterface|string|null
+    public function getExpirationDate(): ?string
     {
-        return $this->getData('expiration_date');
+        $value = $this->getData('expiration_date');
+        return $value === null ? null : (string) $value;
     }
 
-    public function setExpirationDate(DateTimeInterface|string|null $value): static
+    public function setExpirationDate(?string $value): static
     {
         return $this->setData('expiration_date', $value);
     }
