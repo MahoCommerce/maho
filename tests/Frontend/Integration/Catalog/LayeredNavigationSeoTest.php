@@ -222,6 +222,33 @@ describe('Layered Navigation SEO', function () {
         });
     });
 
+    describe('crawl control decisions (helper)', function () {
+        test('every crawl control applies by default', function () {
+            expect($this->helper->shouldAddNoindexToFilteredPages())->toBeTrue();
+            expect($this->helper->shouldAddNoindexToPaginatedPages())->toBeTrue();
+            expect($this->helper->shouldAddCanonicalTagToCategoryPages())->toBeTrue();
+            expect($this->helper->shouldAddNofollowToFilterLinks())->toBeTrue();
+        });
+
+        test('each crawl control follows its own toggle', function (string $path, string $method) {
+            Mage::app()->getStore()->setConfig($path, '0');
+            expect($this->helper->$method())->toBeFalse();
+        })->with([
+            'noindex filtered' => [Mage_Catalog_Helper_Category::XML_PATH_LN_NOINDEX_FILTERED, 'shouldAddNoindexToFilteredPages'],
+            'noindex paginated' => [Mage_Catalog_Helper_Category::XML_PATH_LN_NOINDEX_PAGINATED, 'shouldAddNoindexToPaginatedPages'],
+            'canonical' => [Mage_Catalog_Helper_Category::XML_PATH_USE_CATEGORY_CANONICAL_TAG, 'shouldAddCanonicalTagToCategoryPages'],
+            'nofollow' => [Mage_Catalog_Helper_Category::XML_PATH_LN_NOFOLLOW_FILTER_LINKS, 'shouldAddNofollowToFilterLinks'],
+        ]);
+
+        test('no crawl control applies on a facet landing page (#971)', function () {
+            Mage::register(Mage_Catalog_Helper_Category::REGISTRY_LN_LANDING_PAGE, true);
+            expect($this->helper->shouldAddNoindexToFilteredPages())->toBeFalse();
+            expect($this->helper->shouldAddNoindexToPaginatedPages())->toBeFalse();
+            expect($this->helper->shouldAddCanonicalTagToCategoryPages())->toBeFalse();
+            expect($this->helper->shouldAddNofollowToFilterLinks())->toBeFalse();
+        });
+    });
+
     describe('nofollow on rendered filter links', function () {
         beforeEach(function () {
             $attribute = Mage::getSingleton('eav/config')->getAttribute(Mage_Catalog_Model_Product::ENTITY, 'color');
@@ -248,20 +275,6 @@ describe('Layered Navigation SEO', function () {
                 $block->items = [$item];
                 return $block->setTemplate($template)->toHtml();
             };
-        });
-
-        test('the helper adds nofollow when the toggle is on', function () {
-            expect($this->helper->shouldAddNofollowToFilterLinks())->toBeTrue();
-        });
-
-        test('the helper adds no nofollow when the toggle is off', function () {
-            Mage::app()->getStore()->setConfig(Mage_Catalog_Helper_Category::XML_PATH_LN_NOFOLLOW_FILTER_LINKS, '0');
-            expect($this->helper->shouldAddNofollowToFilterLinks())->toBeFalse();
-        });
-
-        test('the helper adds no nofollow on a facet landing page (#971)', function () {
-            Mage::register(Mage_Catalog_Helper_Category::REGISTRY_LN_LANDING_PAGE, true);
-            expect($this->helper->shouldAddNofollowToFilterLinks())->toBeFalse();
         });
 
         test('text filter links carry nofollow when the toggle is on', function () {
