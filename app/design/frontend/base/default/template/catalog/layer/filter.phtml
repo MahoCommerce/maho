@@ -9,11 +9,7 @@
 
 /** @var Mage_Catalog_Block_Layer_Filter_Attribute $this */
 ?>
-<?php
-$_seoHelper = $this->helper('catalog/category');
-$addNofollow = $_seoHelper->canUseNofollowForFilterLinks()
-    && !$_seoHelper->isLayeredNavigationLandingPage();
-?>
+<?php $addNofollow = $this->helper('catalog/category')->shouldAddNofollowToFilterLinks() ?>
 <ol>
 <?php foreach ($this->getItems() as $_item): ?>
     <li>
