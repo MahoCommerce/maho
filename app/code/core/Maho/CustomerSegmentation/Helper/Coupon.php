@@ -70,7 +70,8 @@ class Maho_CustomerSegmentation_Helper_Coupon extends Mage_Core_Helper_Abstract
             // Calculate expiration date in UTC
             $expirationDate = null;
             if ($expireDays > 0) {
-                $expirationDate = Mage::app()->getLocale()->storeToUtc(null, "+{$expireDays} days");
+                $expirationDate = Mage::app()->getLocale()->storeToUtc(null, "+{$expireDays} days")
+                    ->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
             }
 
             // Create coupon

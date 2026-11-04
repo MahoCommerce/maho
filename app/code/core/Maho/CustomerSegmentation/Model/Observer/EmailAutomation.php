@@ -374,15 +374,7 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
             if ($couponCode) {
                 // Load the coupon to get expiration date
                 $coupon = Mage::getModel('salesrule/coupon')->loadByCode($couponCode);
-                $expirationDateRaw = $coupon->getExpirationDate();
-
-                // Convert DateTime to string if needed
-                $expirationDate = null;
-                if ($expirationDateRaw instanceof DateTimeInterface) {
-                    $expirationDate = $expirationDateRaw->format('Y-m-d H:i:s');
-                } elseif (is_string($expirationDateRaw) && !empty($expirationDateRaw)) {
-                    $expirationDate = $expirationDateRaw;
-                }
+                $expirationDate = $coupon->getExpirationDate() ?: null;
 
                 // Add coupon variables to template
                 $couponHelper = Mage::helper('customersegmentation/coupon');
