@@ -29,13 +29,35 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Shipping extends Mage_Sales_Model_
 
         $isShippingInclTax = Mage::getSingleton('tax/config')->displaySalesShippingInclTax($order->getStoreId());
 
+        // What is left of the shipping incl. tax: the shipping and its tax left, and the share of the shipping
+        // hidden tax, which no column records as refunded.
+        $allowedInclTax = null;
+        $baseAllowedInclTax = null;
+        if ($baseShipping != 0) {
+            $allowedInclTax = Mage::app()->getStore()->roundPrice(
+                $allowedAmount + $order->getShippingTaxAmount() - $order->getShippingTaxRefunded()
+                + $this->_getShippingShare($creditmemo, (float) $order->getShippingHiddenTaxAmount(), (float) $baseAllowedAmount),
+            );
+            $baseAllowedInclTax = Mage::app()->getStore()->roundPrice(
+                $baseAllowedAmount + $order->getBaseShippingTaxAmount() - $order->getBaseShippingTaxRefunded()
+                + $this->_getShippingShare($creditmemo, (float) $order->getBaseShippingHiddenTaxAmount(), (float) $baseAllowedAmount),
+            );
+        }
+
         /**
          * Check if shipping amount was specified (from invoice or another source).
          * Using has magic method to allow setting 0 as shipping amount.
          */
         if ($creditmemo->hasBaseShippingAmount()) {
             $baseShippingAmount = Mage::app()->getStore()->roundPrice($creditmemo->getBaseShippingAmount());
-            if ($isShippingInclTax && $baseShippingInclTax != 0) {
+            if ($isShippingInclTax && $baseAllowedInclTax !== null
+                && abs($baseShippingAmount - $baseAllowedInclTax) < 0.0001
+            ) {
+                // Converting the whole of what is left at the rate of the order could round past it.
+                $shippingInclTax = $allowedInclTax;
+                $baseShippingInclTax = $baseAllowedInclTax;
+                $baseShippingAmount = $baseAllowedAmount;
+            } elseif ($isShippingInclTax && $baseShippingInclTax != 0) {
                 $part = $baseShippingAmount / $baseShippingInclTax;
                 $shippingInclTax    = Mage::app()->getStore()->roundPrice($shippingInclTax * $part);
                 $baseShippingInclTax = $baseShippingAmount;
@@ -69,19 +91,9 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Shipping extends Mage_Sales_Model_
                 );
             }
         } else {
-            if ($baseShipping != 0) {
-                $allowedTaxAmount = $order->getShippingTaxAmount() - $order->getShippingTaxRefunded();
-                $baseAllowedTaxAmount = $order->getBaseShippingTaxAmount() - $order->getBaseShippingTaxRefunded();
-                // No column stores the refunded shipping hidden tax. Use the share of the shipping that is left.
-                $allowedHiddenTaxAmount = $order->getShippingHiddenTaxAmount() * $baseAllowedAmount / $baseShipping;
-                $baseAllowedHiddenTaxAmount = $order->getBaseShippingHiddenTaxAmount() * $baseAllowedAmount / $baseShipping;
-
-                $shippingInclTax = Mage::app()->getStore()->roundPrice(
-                    $allowedAmount + $allowedTaxAmount + Mage::app()->getStore()->roundPrice($allowedHiddenTaxAmount),
-                );
-                $baseShippingInclTax = Mage::app()->getStore()->roundPrice(
-                    $baseAllowedAmount + $baseAllowedTaxAmount + Mage::app()->getStore()->roundPrice($baseAllowedHiddenTaxAmount),
-                );
+            if ($baseAllowedInclTax !== null) {
+                $shippingInclTax = $allowedInclTax;
+                $baseShippingInclTax = $baseAllowedInclTax;
             }
             $shipping           = $allowedAmount;
             $baseShipping       = $baseAllowedAmount;

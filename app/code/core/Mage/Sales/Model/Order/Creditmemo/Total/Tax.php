@@ -89,9 +89,6 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
 
             $baseOrderShippingRefundedAmount = $order->getBaseShippingRefunded();
 
-            $shippingHiddenTaxAmount = 0;
-            $baseShippingHiddenTaxAmount = 0;
-
             $shippingDelta = $baseOrderShippingAmount - $baseOrderShippingRefundedAmount;
 
             if ($shippingDelta > $creditmemo->getBaseShippingAmount()) {
@@ -99,26 +96,23 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
                 $basePart   = $creditmemo->getBaseShippingAmount() / $baseOrderShippingAmount;
                 $shippingTaxAmount          = $order->getShippingTaxAmount() * $part;
                 $baseShippingTaxAmount      = $order->getBaseShippingTaxAmount() * $basePart;
-                $shippingHiddenTaxAmount    = $order->getShippingHiddenTaxAmount() * $part;
-                $baseShippingHiddenTaxAmount = $order->getBaseShippingHiddenTaxAmount() * $basePart;
                 $shippingTaxAmount          = $creditmemo->roundPrice($shippingTaxAmount);
                 $baseShippingTaxAmount      = $creditmemo->roundPrice($baseShippingTaxAmount, 'base');
-                $shippingHiddenTaxAmount    = $creditmemo->roundPrice($shippingHiddenTaxAmount);
-                $baseShippingHiddenTaxAmount = $creditmemo->roundPrice($baseShippingHiddenTaxAmount, 'base');
             } elseif ($shippingDelta == $creditmemo->getBaseShippingAmount()) {
                 $shippingTaxAmount          = $order->getShippingTaxAmount() - $order->getShippingTaxRefunded();
                 $baseShippingTaxAmount      = $order->getBaseShippingTaxAmount() - $order->getBaseShippingTaxRefunded();
-                // No column stores the refunded shipping hidden tax. Use the share of the shipping that is left.
-                if ($baseOrderShippingAmount > 0) {
-                    $shippingHiddenTaxAmount = $creditmemo->roundPrice(
-                        $order->getShippingHiddenTaxAmount() * $shippingDelta / $baseOrderShippingAmount,
-                    );
-                    $baseShippingHiddenTaxAmount = $creditmemo->roundPrice(
-                        $order->getBaseShippingHiddenTaxAmount() * $shippingDelta / $baseOrderShippingAmount,
-                        'base',
-                    );
-                }
             }
+            // No column records the refunded shipping hidden tax, so take a share counted on the shipping refunded.
+            $shippingHiddenTaxAmount = $this->_getShippingShare(
+                $creditmemo,
+                (float) $order->getShippingHiddenTaxAmount(),
+                (float) $creditmemo->getBaseShippingAmount(),
+            );
+            $baseShippingHiddenTaxAmount = $this->_getShippingShare(
+                $creditmemo,
+                (float) $order->getBaseShippingHiddenTaxAmount(),
+                (float) $creditmemo->getBaseShippingAmount(),
+            );
             $totalTax           += $shippingTaxAmount;
             $baseTotalTax       += $baseShippingTaxAmount;
             $totalHiddenTax     += $shippingHiddenTaxAmount;

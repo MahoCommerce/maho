@@ -47,6 +47,19 @@ function creditmemoShippingDiscountQty(Mage_Sales_Model_Order $order, float $qty
     return [(int) $order->getAllItems()[0]->getId() => $qty];
 }
 
+// Refunds a shipping-only credit memo without a payment, as an offline refund records it on the order.
+function creditmemoShippingDiscountRefund(Mage_Sales_Model_Order $order, ?float $shippingAmount = null): Mage_Sales_Model_Order_Creditmemo
+{
+    $data = ['qtys' => creditmemoShippingDiscountQty($order, 0)];
+    if ($shippingAmount !== null) {
+        $data['shipping_amount'] = $shippingAmount;
+    }
+    $creditmemo = Mage::getModel('sales/service_order', $order)->prepareCreditmemo($data);
+    $creditmemo->setPaymentRefundDisallowed(true)->refund();
+
+    return $creditmemo;
+}
+
 describe('Credit memo shipping discount', function () {
     test('collects the discount after the shipping refund', function () {
         $codes = array_keys(Mage::getSingleton('sales/order_creditmemo_config')->getTotalModels());
@@ -100,5 +113,55 @@ describe('Credit memo shipping discount', function () {
 
         expect((float) $creditmemo->getBaseDiscountAmount())->toBe(-11.0)
             ->and((float) $creditmemo->getBaseGrandTotal())->toBe(99.0);
+    });
+
+    test('splits the shipping discount over credit memos so that they add up to it', function () {
+        $order = creditmemoShippingDiscountOrder();
+        $order->setShippingDiscountAmount(0.1)->setBaseShippingDiscountAmount(0.1);
+        $order->setDiscountAmount(-10.1)->setBaseDiscountAmount(-10.1);
+        $order->setGrandTotal(99.9)->setBaseGrandTotal(99.9);
+        $order->setTotalPaid(99.9)->setBaseTotalPaid(99.9);
+        $order->save();
+
+        // Each third of the shipping discount is 0.0333; rounding each on its own would deduct 0.09 in all.
+        $discounts = [];
+        $refunded = 0.0;
+        foreach ([3.33, 3.33, null] as $shippingAmount) {
+            $creditmemo = creditmemoShippingDiscountRefund($order, $shippingAmount);
+            $discounts[] = (float) $creditmemo->getBaseDiscountAmount();
+            $refunded += (float) $creditmemo->getBaseGrandTotal();
+        }
+
+        expect($discounts)->toBe([-0.03, -0.04, -0.03])
+            ->and(round($refunded, 4))->toBe(9.9);
+    });
+
+    test('rounds the item discount the same whether the shipping is refunded or not', function () {
+        // A discount of 0.008 over two items (0.004 each) and a shipping discount of 0.01 on 10.
+        $order = creditmemoShippingDiscountOrder();
+        $order->setShippingDiscountAmount(0.01)->setBaseShippingDiscountAmount(0.01);
+        $order->setDiscountAmount(-0.018)->setBaseDiscountAmount(-0.018);
+        $order->setGrandTotal(109.98)->setBaseGrandTotal(109.98);
+        $order->setTotalPaid(109.98)->setBaseTotalPaid(109.98);
+        $item = $order->getAllItems()[0];
+        $item->setDiscountAmount(0.008)->setBaseDiscountAmount(0.008);
+        $item->setDiscountInvoiced(0.008)->setBaseDiscountInvoiced(0.008);
+        $order->save();
+
+        $itemDiscount = function (float $shippingAmount) use ($order): float {
+            $creditmemo = Mage::getModel('sales/service_order', $order)->prepareCreditmemo([
+                'qtys' => creditmemoShippingDiscountQty($order, 1),
+                'shipping_amount' => $shippingAmount,
+            ]);
+            foreach ($creditmemo->getAllItems() as $item) {
+                if ($item->getQty() > 0) {
+                    return (float) $item->getBaseDiscountAmount();
+                }
+            }
+            return 0.0;
+        };
+
+        expect($itemDiscount(5))->toBe(0.0)
+            ->and($itemDiscount(0))->toBe(0.0);
     });
 });

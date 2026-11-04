@@ -41,6 +41,34 @@ function creditmemoShippingInclTaxMemo(Mage_Sales_Model_Order $order, array $dat
     return Mage::getModel('sales/service_order', $order)->prepareCreditmemo(['qtys' => [0 => 0]] + $data);
 }
 
+// Refunds a shipping-only credit memo without a payment, as an offline refund records it on the order.
+function creditmemoShippingInclTaxRefund(Mage_Sales_Model_Order $order, array $data = []): Mage_Sales_Model_Order_Creditmemo
+{
+    $creditmemo = creditmemoShippingInclTaxMemo($order, $data);
+    $creditmemo->setPaymentRefundDisallowed(true)->refund();
+
+    return $creditmemo;
+}
+
+// Shipping of 10 plus 5% tax (10.50 incl. tax), without a discount.
+function creditmemoShippingInclTaxPlainOrder(): Mage_Sales_Model_Order
+{
+    $order = creditmemoShippingInclTaxOrder();
+    $order->setShippingInclTax(10.5)->setBaseShippingInclTax(10.5);
+    $order->setShippingTaxAmount(0.5)->setBaseShippingTaxAmount(0.5);
+    $order->setShippingHiddenTaxAmount(0.0)->setBaseShippingHiddenTaxAmount(0.0);
+    $order->setShippingDiscountAmount(0.0)->setBaseShippingDiscountAmount(0.0);
+    $order->setDiscountAmount(0.0)->setBaseDiscountAmount(0.0);
+    $order->setTaxAmount(0.5)->setBaseTaxAmount(0.5);
+    $order->setTaxInvoiced(0.5)->setBaseTaxInvoiced(0.5);
+    $order->setHiddenTaxInvoiced(0.0)->setBaseHiddenTaxInvoiced(0.0);
+    $order->setGrandTotal(10.5)->setBaseGrandTotal(10.5);
+    $order->setTotalPaid(10.5)->setBaseTotalPaid(10.5);
+    $order->save();
+
+    return $order;
+}
+
 describe('Credit memo shipping displayed incl. tax', function () {
     beforeEach(function () {
         Mage::app()->getStore(1)->setConfig('tax/sales_display/shipping', Mage_Tax_Model_Config::DISPLAY_TYPE_INCLUDING_TAX);
@@ -107,5 +135,40 @@ describe('Credit memo shipping displayed incl. tax', function () {
 
         expect(round((float) $offered, 4))->toBe(6.1)
             ->and(round((float) $creditmemo->getBaseShippingAmount(), 4))->toBe(5.0);
+    });
+
+    test('refunds the shipping left for the offered amount after partial refunds', function () {
+        // Three refunds of 3.24 incl. tax take 3.09 + 0.15 each and leave 0.73 + 0.05; converting 0.78 at the
+        // rate of the order would give 0.74.
+        $order = creditmemoShippingInclTaxPlainOrder();
+        for ($i = 0; $i < 3; $i++) {
+            creditmemoShippingInclTaxRefund($order, ['shipping_amount' => 3.24]);
+        }
+        $offered = creditmemoShippingInclTaxMemo($order)->getBaseShippingInclTax();
+
+        $creditmemo = creditmemoShippingInclTaxMemo($order, ['shipping_amount' => $offered]);
+
+        expect((float) $offered)->toBe(0.78)
+            ->and(round((float) $creditmemo->getBaseShippingAmount(), 4))->toBe(0.73)
+            ->and(round((float) $creditmemo->getBaseGrandTotal(), 4))->toBe(0.78);
+    });
+
+    test('still rejects more than the offered amount', function () {
+        $order = creditmemoShippingInclTaxPlainOrder();
+        creditmemoShippingInclTaxRefund($order, ['shipping_amount' => 5.25]);
+
+        expect(fn() => creditmemoShippingInclTaxMemo($order, ['shipping_amount' => 5.3]))
+            ->toThrow(Mage_Core_Exception::class, 'Maximum shipping amount allowed to refund is');
+    });
+
+    test('refunds what the customer paid for the shipping over two credit memos', function () {
+        $order = creditmemoShippingInclTaxOrder();
+        $first = creditmemoShippingInclTaxRefund($order, ['shipping_amount' => 6.1]);
+        $offered = creditmemoShippingInclTaxMemo($order)->getBaseShippingInclTax();
+        $second = creditmemoShippingInclTaxRefund($order, ['shipping_amount' => $offered]);
+
+        expect((float) $offered)->toBe(6.1)
+            ->and((float) $second->getBaseShippingAmount())->toBe(5.0)
+            ->and(round((float) $first->getBaseGrandTotal() + (float) $second->getBaseGrandTotal(), 4))->toBe(10.98);
     });
 });

@@ -1312,10 +1312,12 @@ SPDX-License-Identifier: AFL-3.0
                         <class>sales/order_creditmemo_total_tax</class>
                         <after>subtotal</after>
                     </tax>
-                    <!-- The shipping discount is a share of the shipping refund, which the shipping total sets. -->
+                    <!-- The shipping discount is a share of the shipping refund, which the shipping total sets; the tax total
+                         still comes after it, as the rounding of the item amounts carries over between them. -->
                     <discount>
                         <class>sales/order_creditmemo_total_discount</class>
                         <after>subtotal,shipping</after>
+                        <before>tax</before>
                     </discount>
                     <grand_total>
                         <class>sales/order_creditmemo_total_grand</class>

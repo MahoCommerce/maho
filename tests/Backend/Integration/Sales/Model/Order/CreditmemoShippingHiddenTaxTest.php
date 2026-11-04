@@ -76,6 +76,19 @@ function creditmemoShippingHiddenTaxQty(Mage_Sales_Model_Order $order, float $qt
     return [(int) $order->getAllItems()[0]->getId() => $qty];
 }
 
+// Refunds a shipping-only credit memo without a payment, as an offline refund records it on the order.
+function creditmemoShippingHiddenTaxRefund(Mage_Sales_Model_Order $order, ?float $shippingAmount = null): Mage_Sales_Model_Order_Creditmemo
+{
+    $data = ['qtys' => creditmemoShippingHiddenTaxQty($order, 0)];
+    if ($shippingAmount !== null) {
+        $data['shipping_amount'] = $shippingAmount;
+    }
+    $creditmemo = Mage::getModel('sales/service_order', $order)->prepareCreditmemo($data);
+    $creditmemo->setPaymentRefundDisallowed(true)->refund();
+
+    return $creditmemo;
+}
+
 describe('Credit memo shipping hidden tax', function () {
     test('refunds the shipping hidden tax with the shipping', function () {
         $order = creditmemoShippingHiddenTaxOrder();
@@ -110,5 +123,21 @@ describe('Credit memo shipping hidden tax', function () {
             ->prepareCreditmemo(['qtys' => [0 => 0], 'shipping_amount' => 5]);
 
         expect(round((float) $creditmemo->getBaseHiddenTaxAmount(), 4))->toBe(0.11);
+    });
+
+    test('splits the shipping hidden tax over credit memos so that they add up to it', function () {
+        // The shipping hidden tax of 0.22 over three refunds of a third of the shipping (0.0733 each).
+        $order = creditmemoShippingHiddenTaxOrder();
+
+        $hiddenTax = [];
+        $refunded = 0.0;
+        foreach ([3.33, 3.33, null] as $shippingAmount) {
+            $creditmemo = creditmemoShippingHiddenTaxRefund($order, $shippingAmount);
+            $hiddenTax[] = round((float) $creditmemo->getBaseHiddenTaxAmount(), 4);
+            $refunded += (float) $creditmemo->getBaseGrandTotal();
+        }
+
+        expect($hiddenTax)->toBe([0.07, 0.08, 0.07])
+            ->and(round($refunded, 4))->toBe(10.98);
     });
 });
