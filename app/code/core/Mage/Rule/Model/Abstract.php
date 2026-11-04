@@ -306,7 +306,7 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
     /**
      * Set specified data to current rule.
      * Set conditions and actions recursively.
-     * Convert dates into DateTime.
+     * Convert dates into Y-m-d strings.
      *
      * @return array
      */

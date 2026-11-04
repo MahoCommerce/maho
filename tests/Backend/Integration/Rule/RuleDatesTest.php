@@ -18,6 +18,13 @@ it('reads the From and To dates of a posted rule as Y-m-d strings', function (st
         ->and($rule->getToDate())->toBe('2026-11-30');
 })->with(['salesrule/rule', 'catalogrule/rule']);
 
+it('cuts the time of day from a posted date that is not in Y-m-d format', function (string $model): void {
+    $rule = Mage::getModel($model);
+    $rule->loadPost(['from_date' => '2026-11-01 10:30:00']);
+
+    expect($rule->getFromDate())->toBe('2026-11-01');
+})->with(['salesrule/rule', 'catalogrule/rule']);
+
 it('saves a cart price rule that has a From and a To date', function (): void {
     $rule = Mage::getModel('salesrule/rule');
     $rule->loadPost([
