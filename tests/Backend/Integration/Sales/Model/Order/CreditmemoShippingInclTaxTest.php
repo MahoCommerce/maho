@@ -95,4 +95,17 @@ describe('Credit memo shipping displayed incl. tax', function () {
         expect((float) $offered)->toBe(0.5)
             ->and((float) $creditmemo->getBaseShippingAmount())->toBe(0.5);
     });
+
+    test('offers the share of the shipping hidden tax that is left after a partial refund', function () {
+        $order = creditmemoShippingInclTaxOrder();
+        $order->setShippingRefunded(5.0)->setBaseShippingRefunded(5.0);
+        $order->setShippingTaxRefunded(0.99)->setBaseShippingTaxRefunded(0.99);
+        $order->save();
+
+        $offered = creditmemoShippingInclTaxMemo($order)->getBaseShippingInclTax();
+        $creditmemo = creditmemoShippingInclTaxMemo($order, ['shipping_amount' => $offered]);
+
+        expect(round((float) $offered, 4))->toBe(6.1)
+            ->and(round((float) $creditmemo->getBaseShippingAmount(), 4))->toBe(5.0);
+    });
 });

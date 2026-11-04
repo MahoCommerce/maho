@@ -83,6 +83,15 @@ describe('Credit memo shipping discount', function () {
             ->and((float) $creditmemo->getBaseGrandTotal())->toBe(49.5);
     });
 
+    test('rounds the shipping discount of a partial shipping refund', function () {
+        $order = creditmemoShippingDiscountOrder();
+        $creditmemo = Mage::getModel('sales/service_order', $order)
+            ->prepareCreditmemo(['qtys' => creditmemoShippingDiscountQty($order, 1), 'shipping_amount' => 3.33]);
+
+        expect(round((float) $creditmemo->getBaseDiscountAmount(), 4))->toBe(-5.33)
+            ->and(round((float) $creditmemo->getBaseGrandTotal(), 4))->toBe(48.0);
+    });
+
     test('refunds the whole order for what the customer paid', function () {
         $creditmemo = Mage::getModel('sales/service_order', creditmemoShippingDiscountOrder())
             ->prepareCreditmemo();

@@ -108,7 +108,7 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
             } elseif ($shippingDelta == $creditmemo->getBaseShippingAmount()) {
                 $shippingTaxAmount          = $order->getShippingTaxAmount() - $order->getShippingTaxRefunded();
                 $baseShippingTaxAmount      = $order->getBaseShippingTaxAmount() - $order->getBaseShippingTaxRefunded();
-                // No column records the refunded shipping hidden tax, so take the share of the shipping left.
+                // No column stores the refunded shipping hidden tax. Use the share of the shipping that is left.
                 if ($baseOrderShippingAmount > 0) {
                     $shippingHiddenTaxAmount = $creditmemo->roundPrice(
                         $order->getShippingHiddenTaxAmount() * $shippingDelta / $baseOrderShippingAmount,

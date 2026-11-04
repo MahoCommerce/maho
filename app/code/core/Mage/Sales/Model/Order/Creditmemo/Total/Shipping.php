@@ -72,8 +72,7 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Shipping extends Mage_Sales_Model_
             if ($baseShipping != 0) {
                 $allowedTaxAmount = $order->getShippingTaxAmount() - $order->getShippingTaxRefunded();
                 $baseAllowedTaxAmount = $order->getBaseShippingTaxAmount() - $order->getBaseShippingTaxRefunded();
-                // The hidden tax of a shipping discount is part of the shipping incl. tax, and no column records
-                // its refunded share, so take the share of the shipping left, as the tax total does.
+                // No column stores the refunded shipping hidden tax. Use the share of the shipping that is left.
                 $allowedHiddenTaxAmount = $order->getShippingHiddenTaxAmount() * $baseAllowedAmount / $baseShipping;
                 $baseAllowedHiddenTaxAmount = $order->getBaseShippingHiddenTaxAmount() * $baseAllowedAmount / $baseShipping;
 
