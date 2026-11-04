@@ -25,12 +25,13 @@ one attribute set.
    add the options.
 7. Click **Save**.
 
-A new attribute is in no set. The category page shows it only after you add it to a set.
+A new attribute goes into the first group of the **Default** set, so the category page shows it
+at once. To move it to another tab or to add it to another set, edit the set.
 
 You can delete only the attributes that you added. The attributes of the platform show **Yes** in
 the **System** column of the grid.
 
-## Put the attribute in a set
+## Move the attribute in a set
 
 1. Go to **System > Attributes > Categories** and click **Attribute Sets**.
 2. Click the set, for example **Default**.

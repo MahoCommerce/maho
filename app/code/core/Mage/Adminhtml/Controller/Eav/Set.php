@@ -163,6 +163,7 @@ abstract class Mage_Adminhtml_Controller_Eav_Set extends Mage_Adminhtml_Controll
                 }
                 $data = $this->filterSetData($model, Mage::helper('core')->jsonDecode($this->getRequest()->getPost('data')));
                 $data['attribute_set_name'] = $helper->stripTags($data['attribute_set_name']);
+                $this->checkSystemAttributes($model, $data);
                 $model->organizeData($data);
             }
 
@@ -216,6 +217,38 @@ abstract class Mage_Adminhtml_Controller_Eav_Set extends Mage_Adminhtml_Controll
         $data['not_attributes'] = $keep('not_attributes', fn($id) => in_array((int) $id, $rowIds, true));
         $data['removeGroups'] = $keep('removeGroups', fn($id) => in_array((int) $id, $groupIds, true));
         return $data;
+    }
+
+    /**
+     * Refuse posted data that takes a system attribute out of the set. The nightly
+     * eav_clean_orphaned_records job deletes the values of an attribute that is not in the set.
+     *
+     * @throws Mage_Core_Exception
+     */
+    protected function checkSystemAttributes(Mage_Eav_Model_Entity_Attribute_Set $set, array $data): void
+    {
+        $resource = Mage::getSingleton('core/resource');
+        $adapter = $resource->getConnection('core_read');
+        $rows = $adapter->fetchAll(
+            $adapter->select()
+                ->from(['ea' => $resource->getTableName('eav/entity_attribute')], ['entity_attribute_id', 'attribute_id', 'attribute_group_id'])
+                ->join(['a' => $resource->getTableName('eav/attribute')], 'a.attribute_id = ea.attribute_id', [])
+                ->where('ea.attribute_set_id = ?', (int) $set->getId())
+                ->where('a.is_user_defined = ?', 0),
+        );
+        $removedRows = array_map(intval(...), $data['not_attributes']);
+        $removedGroups = array_map(intval(...), $data['removeGroups']);
+        $postedAttributes = array_map(fn($attribute) => (int) $attribute[0], $data['attributes']);
+        foreach ($rows as $row) {
+            if (in_array((int) $row['entity_attribute_id'], $removedRows, true)) {
+                Mage::throwException(Mage::helper('eav')->__('Cannot unassign system attribute'));
+            }
+            if (in_array((int) $row['attribute_group_id'], $removedGroups, true)
+                && !in_array((int) $row['attribute_id'], $postedAttributes, true)
+            ) {
+                Mage::throwException(Mage::helper('eav')->__('Cannot delete group. Please move system attributes to another group and try again.'));
+            }
+        }
     }
 
     public function deleteAction(): void

@@ -10,6 +10,8 @@ declare(strict_types=1);
 
 class Maho_Blog_Block_Adminhtml_Post_Edit_Tab_Content extends Mage_Adminhtml_Block_Widget_Form implements Mage_Adminhtml_Block_Widget_Tab_Interface
 {
+    use Maho_Blog_Block_Adminhtml_Edit_AttributeFieldsTrait;
+
     #[\Override]
     protected function _prepareLayout()
     {
@@ -125,6 +127,8 @@ class Maho_Blog_Block_Adminhtml_Post_Edit_Tab_Content extends Mage_Adminhtml_Blo
                 ...Mage::helper('cms/preview')->getEditorConfig('blog_post', $model),
             ]),
         ]);
+
+        $this->addAttributeFields($fieldset, Maho_Blog_Block_Adminhtml_Edit_Tabs::getMainTabAttributes($model), $model);
 
         $form->setValues($model->getData());
         $this->setForm($form);

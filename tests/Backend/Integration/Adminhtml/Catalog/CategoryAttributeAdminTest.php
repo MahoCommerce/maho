@@ -117,6 +117,32 @@ it('creates a category dropdown attribute with its options', function () {
         ->and($labels)->toBe(['Red']);
 });
 
+it('adds a new category attribute to the first group of the default set', function () {
+    categoryAttributeAdminRun(Mage_Adminhtml_Eav_AttributeController::class, 'eav_attribute', 'save', [
+        'attribute_code' => $this->code,
+        'frontend_input' => 'text',
+        'frontend_label' => ['Pest Text'],
+    ]);
+
+    $attributeId = (int) Mage::getModel('catalog/resource_eav_attribute')
+        ->loadByCode(Mage_Catalog_Model_Category::ENTITY, $this->code)
+        ->getId();
+    $firstGroupId = (int) Mage::getResourceModel('eav/entity_attribute_group_collection')
+        ->setAttributeSetFilter(categoryAttributeAdminDefaultSetId())
+        ->setSortOrder()
+        ->getFirstItem()
+        ->getId();
+    $adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
+    $rows = $adapter->fetchAll($adapter->select()
+        ->from(Mage::getSingleton('core/resource')->getTableName('eav/entity_attribute'), ['attribute_set_id', 'attribute_group_id'])
+        ->where('attribute_id = ?', $attributeId));
+
+    expect($rows)->toBe([[
+        'attribute_set_id' => categoryAttributeAdminDefaultSetId(),
+        'attribute_group_id' => $firstGroupId,
+    ]]);
+});
+
 it('rejects an input type that the category entity does not offer', function () {
     categoryAttributeAdminRun(Mage_Adminhtml_Eav_AttributeController::class, 'eav_attribute', 'save', [
         'attribute_code' => $this->code,
@@ -264,6 +290,39 @@ it('refuses to delete the default category set or a product set', function () {
         expect(categoryAttributeAdminMessages()['errors'])->toBe(['This attribute set cannot be deleted.'])
             ->and(Mage::getModel('eav/entity_attribute_set')->load($setId)->getId())->not->toBeNull();
     }
+});
+
+it('refuses to delete a group of a set that holds a system attribute', function () {
+    $set = categoryAttributeAdminCreateSet('Pest Group ' . uniqid());
+    $this->setIds[] = (int) $set->getId();
+    $groups = Mage::getResourceModel('eav/entity_attribute_group_collection')
+        ->setAttributeSetFilter((int) $set->getId())
+        ->setSortOrder();
+    $adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
+    $nameGroupId = (int) $adapter->fetchOne($adapter->select()
+        ->from(Mage::getSingleton('core/resource')->getTableName('eav/entity_attribute'), ['attribute_group_id'])
+        ->where('attribute_set_id = ?', (int) $set->getId())
+        ->where('attribute_id = ?', (int) Mage::getSingleton('eav/config')->getAttribute(Mage_Catalog_Model_Category::ENTITY, 'name')->getId()));
+
+    $data = [
+        'attribute_set_name' => $set->getAttributeSetName(),
+        'groups' => [],
+        'attributes' => [],
+        'not_attributes' => [],
+        'removeGroups' => [$nameGroupId],
+    ];
+    foreach ($groups as $group) {
+        if ((int) $group->getId() !== $nameGroupId) {
+            $data['groups'][] = [$group->getId(), $group->getAttributeGroupName(), (int) $group->getSortOrder()];
+        }
+    }
+    categoryAttributeAdminRun(Mage_Adminhtml_Eav_SetController::class, 'eav_set', 'save', [
+        'id' => $set->getId(),
+        'data' => Mage::helper('core')->jsonEncode($data),
+    ]);
+
+    expect($nameGroupId)->toBeGreaterThan(0)
+        ->and(Mage::getModel('eav/entity_attribute_group')->load($nameGroupId)->getId())->not->toBeNull();
 });
 
 it('gives a category the attributes of its own set', function () {

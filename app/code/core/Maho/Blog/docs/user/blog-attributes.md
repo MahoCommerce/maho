@@ -7,8 +7,8 @@ admin_pages: [eav_attribute, eav_set, blog_post, blog_category]
 
 A blog attribute is a field of a blog post or a blog category, for example a reading time or an
 author. An attribute set is a list of attributes in groups. Each post and each category uses one
-set. The fields of the blog itself, such as **Title** and **Content**, are not attributes that you
-can edit.
+set. The fields of the blog itself, such as **Title**, **Image** and **Content**, are not
+attributes, so the attribute grid and the sets show only the attributes that you add.
 
 ## Add an attribute
 
@@ -21,18 +21,22 @@ can edit.
 
 A blog attribute has one value for all store views.
 
-## Put the attribute in a set
+A new attribute goes into the first group of the **Default** set. The edit page of a post shows
+it at once, on the **Content** tab, below the fields of the blog. On a category, it shows on the
+**General** tab.
 
-A new attribute is in no set. The edit page of a post shows it only after you add it to a set.
+## Move the attribute in a set
 
 1. Go to **System > Attributes > Blog Posts**, or to **Blog Categories**, and click
    **Attribute Sets**.
 2. Click the set, for example **Default**.
-3. Drag the attribute from **Unassigned Attributes** to a group. To add a group, click **Add New**.
+3. Drag the attribute to another group, or from **Unassigned Attributes** to a group. To add a
+   group, click **Add New**.
 4. Click **Save Attribute Set**.
 
-Each group of the set that holds one of your attributes is a tab of the edit page of the post or
-the category.
+The attributes of the first group of the set show on the **Content** tab of a post and on the
+**General** tab of a category. Each other group that holds an attribute is a tab of its own, with
+the name of the group.
 
 When there is more than one set, a new post or category shows the **Attribute Set** field. Select
 the set before the first save. The admin does not change the set after the first save.

@@ -206,8 +206,14 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
      * - sets_title: the title of the set grid, or null when the type has no sets
      * - main_tab: the block of the properties tab
      * - allowed_tags: the HTML tags that an option label keeps when HTML is allowed on the storefront
+     * - user_defined_only: the pages list only the attributes that an admin added, because the edit
+     *   form of the entity shows the system attributes with fields of its own
+     * - sets_user_defined_only: the same as user_defined_only, for the set editor only, because the
+     *   form of the entity does not use the groups of the set
+     * - add_to_default_set: a new attribute goes into the first group of the default set, unless
+     *   the set page creates it
      *
-     * @return array{acl: string, title: string, sets_title: ?string, main_tab?: string, allowed_tags?: list<string>}|null
+     * @return array{acl: string, title: string, sets_title: ?string, main_tab?: string, allowed_tags?: list<string>, user_defined_only?: bool, sets_user_defined_only?: bool, add_to_default_set?: bool}|null
      */
     public function getAdminPageSettings(): ?array
     {

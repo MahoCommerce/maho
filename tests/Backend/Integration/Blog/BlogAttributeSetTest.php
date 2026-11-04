@@ -178,9 +178,18 @@ it('lists a Yes/No value of 0 as No and leaves out an empty one', function () {
         ->and($codes(null))->not->toHaveKey($code);
 });
 
-it('adds a tab for each group that holds a user-defined attribute to the post edit page', function () {
-    $code = 'pest_tab_' . $this->suffix;
-    $this->records[] = blogSetTestAttribute(Maho_Blog_Model_Post::ENTITY, $code);
+it('shows the first group on the main tab of the post edit page and adds a tab for each other group', function () {
+    $setId = (int) Mage::getSingleton('eav/config')->getEntityType(Maho_Blog_Model_Post::ENTITY)->getDefaultAttributeSetId();
+    $group = Mage::getModel('eav/entity_attribute_group')
+        ->setAttributeSetId($setId)
+        ->setAttributeGroupName('Pest Group ' . $this->suffix)
+        ->setSortOrder(99);
+    $group->save();
+    $this->records[] = $group;
+    $main = $this->records[] = blogSetTestAttribute(Maho_Blog_Model_Post::ENTITY, 'pest_main_' . $this->suffix);
+    $other = $this->records[] = blogSetTestAttribute(Maho_Blog_Model_Post::ENTITY, 'pest_tab_' . $this->suffix, [
+        'attribute_group_id' => (int) $group->getId(),
+    ]);
     $post = Mage::getModel('blog/post');
     Mage::register('blog_post', $post);
 
@@ -188,12 +197,29 @@ it('adds a tab for each group that holds a user-defined attribute to the post ed
         $tabs = Mage::app()->getLayout()->createBlock('blog/adminhtml_post_edit_tabs');
         $method = new ReflectionMethod($tabs, 'addAttributeTabs');
         $method->invoke($tabs);
-        $attributeTabs = array_filter($tabs->getTabsIds(), fn(string $id): bool => str_starts_with($id, 'attribute_group_'));
+        $attributeTabs = array_values(array_filter($tabs->getTabsIds(), fn(string $id): bool => str_starts_with($id, 'attribute_group_')));
+        $mainCodes = array_map(
+            fn($attribute) => $attribute->getAttributeCode(),
+            Maho_Blog_Block_Adminhtml_Edit_Tabs::getMainTabAttributes($post),
+        );
     } finally {
         Mage::unregister('blog_post');
     }
 
-    expect($attributeTabs)->toHaveCount(1);
+    expect($attributeTabs)->toBe(['attribute_group_' . $group->getId()])
+        ->and($mainCodes)->toContain($main->getAttributeCode())
+        ->and($mainCodes)->not->toContain($other->getAttributeCode());
+});
+
+it('lists only the attributes that an admin added on the blog attribute pages', function () {
+    $attribute = $this->records[] = blogSetTestAttribute(Maho_Blog_Model_Post::ENTITY, 'pest_list_' . $this->suffix);
+    $type = Mage::getSingleton('eav/config')->getEntityType(Maho_Blog_Model_Post::ENTITY);
+
+    $codes = Mage::helper('eav')->getManagedAttributeCollection($type)->getColumnValues('attribute_code');
+
+    expect($codes)->toContain($attribute->getAttributeCode())
+        ->and($codes)->not->toContain('image')
+        ->and($codes)->not->toContain('store_id');
 });
 
 it('saves every blog attribute with the global scope', function () {

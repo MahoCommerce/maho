@@ -69,6 +69,10 @@ For example, wholesale customers give a company registration number, and retail 
 A form shows an attribute when the attribute is in the set of the group, or when it is in no set.
 So a new attribute shows to every group until you add it to a set.
 
+The set page lists only the attributes that you added. The fields of the platform, such as
+**First Name** and **Email**, are in every set, and you cannot remove them. The groups of a set do
+not change the forms: each form shows its fields in one list.
+
 The store finds the group of a form in this order:
 
 1. The group of the customer.

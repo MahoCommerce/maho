@@ -330,7 +330,7 @@ class EavAttributeSetForm {
     }
 
     canDeleteGroup(group) {
-        if (group.childNodes.some((node) => !node.attributes.is_user_defined)) {
+        if (group.attributes.has_hidden_system_attributes || group.childNodes.some((node) => !node.attributes.is_user_defined)) {
             return Translator.translate('Cannot delete group. Please move system attributes to another group and try again.');
         }
         return true;

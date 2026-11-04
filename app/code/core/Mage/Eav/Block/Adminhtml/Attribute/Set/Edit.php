@@ -174,6 +174,10 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Edit extends Mage_Adminhtml_Block_T
             $nodeChildren = $this->_getAttributeCollection()
                 ->setAttributeGroupFilter($node->getId())
                 ->load();
+            $item['has_hidden_system_attributes'] = array_diff(
+                $this->getSystemAttributeIds((int) $node->getId()),
+                array_map(intval(...), $nodeChildren->getColumnValues('attribute_id')),
+            ) !== [];
 
             if ($nodeChildren->getSize() > 0) {
                 $item['children'] = [];
@@ -388,7 +392,25 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Edit extends Mage_Adminhtml_Block_T
     {
         /** @var Mage_Eav_Model_Entity_Type $entityType */
         $entityType = Mage::getSingleton('eav/config')->getEntityType(Mage::registry('entityType'));
-        return Mage::helper('eav')->getManagedAttributeCollection($entityType);
+        return Mage::helper('eav')->getManagedAttributeCollection($entityType, forSets: true);
+    }
+
+    /**
+     * Return the ids of the system attributes in group $groupId, with the attributes that the editor hides.
+     *
+     * @return list<int>
+     */
+    protected function getSystemAttributeIds(int $groupId): array
+    {
+        $resource = Mage::getSingleton('core/resource');
+        $adapter = $resource->getConnection('core_read');
+        return array_map(intval(...), $adapter->fetchCol(
+            $adapter->select()
+                ->from(['ea' => $resource->getTableName('eav/entity_attribute')], ['attribute_id'])
+                ->join(['a' => $resource->getTableName('eav/attribute')], 'a.attribute_id = ea.attribute_id', [])
+                ->where('ea.attribute_group_id = ?', $groupId)
+                ->where('a.is_user_defined = ?', 0),
+        ));
     }
 
     /**

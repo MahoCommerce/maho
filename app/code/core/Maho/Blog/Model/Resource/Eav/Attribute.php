@@ -47,12 +47,16 @@ class Maho_Blog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_Attri
                 'title' => $helper->__('Blog Post Attributes'),
                 'sets_title' => $helper->__('Blog Post Attribute Sets'),
                 'main_tab' => 'blog/adminhtml_attribute_edit_tab_main',
+                'user_defined_only' => true,
+                'add_to_default_set' => true,
             ],
             Maho_Blog_Model_Category::ENTITY => [
                 'acl' => 'system/attributes/blog_category',
                 'title' => $helper->__('Blog Category Attributes'),
                 'sets_title' => $helper->__('Blog Category Attribute Sets'),
                 'main_tab' => 'blog/adminhtml_attribute_edit_tab_main',
+                'user_defined_only' => true,
+                'add_to_default_set' => true,
             ],
             default => null,
         };

@@ -16,7 +16,7 @@ declare(strict_types=1);
  */
 trait Mage_Adminhtml_Controller_Eav_EntityTypeTrait
 {
-    /** @var array{acl: string, title: string, sets_title: ?string, main_tab?: string, allowed_tags?: list<string>}|false|null */
+    /** @var array{acl: string, title: string, sets_title: ?string, main_tab?: string, allowed_tags?: list<string>, user_defined_only?: bool, sets_user_defined_only?: bool, add_to_default_set?: bool}|false|null */
     protected array|false|null $adminPageSettings = null;
 
     #[\Override]
@@ -28,7 +28,7 @@ trait Mage_Adminhtml_Controller_Eav_EntityTypeTrait
     /**
      * Return the settings of the requested entity type, or null when System > Attributes does not manage it.
      *
-     * @return array{acl: string, title: string, sets_title: ?string, main_tab?: string, allowed_tags?: list<string>}|null
+     * @return array{acl: string, title: string, sets_title: ?string, main_tab?: string, allowed_tags?: list<string>, user_defined_only?: bool, sets_user_defined_only?: bool, add_to_default_set?: bool}|null
      */
     protected function getAdminPageSettings(): ?array
     {
@@ -38,9 +38,8 @@ trait Mage_Adminhtml_Controller_Eav_EntityTypeTrait
             try {
                 $type = Mage::getSingleton('eav/config')->getEntityType($code);
                 // getEntityType() also finds a type by its id, and the urls must name the code
-                $attribute = $type->getEntityTypeCode() === $code ? Mage::getModel($type->getAttributeModel()) : null;
-                if ($attribute instanceof Mage_Eav_Model_Entity_Attribute) {
-                    $this->adminPageSettings = $attribute->setEntityTypeId((int) $type->getId())->getAdminPageSettings() ?? false;
+                if ($type->getEntityTypeCode() === $code) {
+                    $this->adminPageSettings = Mage::helper('eav')->getAdminPageSettings($type) ?? false;
                 }
             } catch (Mage_Core_Exception) {
                 // An unknown entity type has no settings

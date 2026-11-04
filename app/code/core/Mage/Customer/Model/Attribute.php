@@ -62,12 +62,14 @@ class Mage_Customer_Model_Attribute extends Mage_Eav_Model_Attribute
                 'title' => $helper->__('Customer Attributes'),
                 'sets_title' => $helper->__('Customer Attribute Sets'),
                 'main_tab' => 'adminhtml/customer_attribute_edit_tab_main',
+                'sets_user_defined_only' => true,
             ],
             'customer_address' => [
                 'acl' => 'system/attributes/customer_address',
                 'title' => $helper->__('Customer Address Attributes'),
                 'sets_title' => $helper->__('Customer Address Attribute Sets'),
                 'main_tab' => 'adminhtml/customer_attribute_edit_tab_main',
+                'sets_user_defined_only' => true,
             ],
             default => null,
         };

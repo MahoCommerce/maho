@@ -39,6 +39,12 @@ class Mage_Adminhtml_Eav_AttributeController extends Mage_Adminhtml_Controller_E
     }
 
     #[\Override]
+    protected function addsNewAttributeToDefaultSet(): bool
+    {
+        return $this->getAdminPageSettings()['add_to_default_set'] ?? false;
+    }
+
+    #[\Override]
     #[Maho\Config\Route('/admin/eav_attribute/index')]
     public function indexAction(): void
     {

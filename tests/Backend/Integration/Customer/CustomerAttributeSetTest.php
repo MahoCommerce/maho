@@ -240,3 +240,15 @@ it('keeps a filter and a rule that the admin form does not offer', function () {
         Mage::getSingleton('eav/config')->clear();
     }
 });
+
+it('lists the system attributes of customers in the grid and not in the set editor', function () {
+    foreach (['customer' => 'firstname', 'customer_address' => 'city'] as $entityTypeCode => $systemCode) {
+        $type = Mage::getSingleton('eav/config')->getEntityType($entityTypeCode);
+
+        $grid = Mage::helper('eav')->getManagedAttributeCollection($type)->getColumnValues('attribute_code');
+        $sets = Mage::helper('eav')->getManagedAttributeCollection($type, forSets: true)->getColumnValues('attribute_code');
+
+        expect($grid)->toContain($systemCode)
+            ->and($sets)->not->toContain($systemCode);
+    }
+});

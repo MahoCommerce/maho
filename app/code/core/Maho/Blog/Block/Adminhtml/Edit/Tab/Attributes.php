@@ -12,7 +12,9 @@ declare(strict_types=1);
 
 class Maho_Blog_Block_Adminhtml_Edit_Tab_Attributes extends Mage_Adminhtml_Block_Widget_Form implements Mage_Adminhtml_Block_Widget_Tab_Interface
 {
-    public function getEntity(): Mage_Core_Model_Abstract
+    use Maho_Blog_Block_Adminhtml_Edit_AttributeFieldsTrait;
+
+    public function getEntity(): Maho_Blog_Model_Post|Maho_Blog_Model_Category
     {
         return $this->getData('entity');
     }
@@ -43,25 +45,7 @@ class Maho_Blog_Block_Adminhtml_Edit_Tab_Attributes extends Mage_Adminhtml_Block
             'class' => 'fieldset-wide',
         ]);
 
-        $editors = [];
-        $others = [];
-        foreach ($this->getAttributes() as $attribute) {
-            if ($attribute->getFrontendInput() === 'textarea' && $attribute->getData('is_wysiwyg_enabled')) {
-                $editors[] = $attribute;
-            } else {
-                $others[] = $attribute;
-            }
-        }
-        $this->_setFieldset($others, $fieldset);
-        foreach ($editors as $attribute) {
-            $fieldset->addField((string) $attribute->getAttributeCode(), 'editor', [
-                'name' => $attribute->getAttributeCode(),
-                'label' => $attribute->getFrontend()->getLabel(),
-                'required' => (bool) $attribute->getIsRequired(),
-                'style' => 'height:20em;',
-                'config' => Mage::getSingleton('cms/wysiwyg_config')->getConfig(),
-            ]);
-        }
+        $this->addAttributeFields($fieldset, $this->getAttributes(), $this->getEntity());
 
         $form->setValues($this->getEntity()->getData());
         $this->setForm($form);

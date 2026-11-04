@@ -254,6 +254,17 @@ abstract class Mage_Adminhtml_Controller_Eav_Attribute extends Mage_Adminhtml_Co
         ) {
             $model->setAttributeSetId($setId);
             $model->setAttributeGroupId($groupId);
+        } elseif (!$id && $this->addsNewAttributeToDefaultSet()) {
+            $setId = (int) $this->getEntityType()->getDefaultAttributeSetId();
+            $groupId = (int) Mage::getResourceModel('eav/entity_attribute_group_collection')
+                ->setAttributeSetFilter($setId)
+                ->setSortOrder()
+                ->getFirstItem()
+                ->getId();
+            if ($setId && $groupId) {
+                $model->setAttributeSetId($setId);
+                $model->setAttributeGroupId($groupId);
+            }
         }
 
         try {
@@ -271,6 +282,15 @@ abstract class Mage_Adminhtml_Controller_Eav_Attribute extends Mage_Adminhtml_Co
         Mage::app()->cleanCache([Mage_Core_Model_Translate::CACHE_TAG]);
         $session->setAttributeData(false);
         $this->redirectAfterSave($model);
+    }
+
+    /**
+     * Return true when a new attribute goes into the first group of the default set. The set page
+     * names the set and the group of an attribute that it creates.
+     */
+    protected function addsNewAttributeToDefaultSet(): bool
+    {
+        return false;
     }
 
     protected function isValidInputType(string $input, Mage_Eav_Model_Entity_Attribute $model): bool

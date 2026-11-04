@@ -190,6 +190,7 @@ class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_At
             'sets_title' => $helper->__('Category Attribute Sets'),
             'main_tab' => 'adminhtml/catalog_category_attribute_edit_tab_main',
             'allowed_tags' => explode(',', (string) Mage::getStoreConfig('system/catalog/frontend/allowed_html_tags_list')),
+            'add_to_default_set' => true,
         ];
     }
 

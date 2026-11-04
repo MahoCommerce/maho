@@ -2514,13 +2514,11 @@
         }
     }
 
-    /* Product attributes: a tidy spec sheet (the caption repeats the tab label) */
-    #product-attribute-specs-table {
+    /* Attributes as a spec sheet: the product details, and the eav/frontend/attributes.phtml
+       table of blog posts, blog categories and catalog categories */
+    #product-attribute-specs-table,
+    .attribute-specs-table {
         @apply w-full max-w-2xl;
-
-        caption {
-            @apply sr-only;
-        }
 
         th.label {
             @apply w-48 border-b border-line py-3 pr-6 text-left align-top text-sm font-medium text-base-content/70;
@@ -2532,6 +2530,19 @@
 
         tr:last-child :is(th, td) {
             @apply border-b-0;
+        }
+    }
+
+    /* The accordion row of the product repeats the caption */
+    #product-attribute-specs-table caption {
+        @apply sr-only;
+    }
+
+    .attribute-specs-table {
+        @apply mt-10;
+
+        caption {
+            @apply mb-2 text-left font-display text-lg font-semibold tracking-tight;
         }
     }
 
