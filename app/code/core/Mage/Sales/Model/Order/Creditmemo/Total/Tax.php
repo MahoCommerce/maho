@@ -108,10 +108,16 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
             } elseif ($shippingDelta == $creditmemo->getBaseShippingAmount()) {
                 $shippingTaxAmount          = $order->getShippingTaxAmount() - $order->getShippingTaxRefunded();
                 $baseShippingTaxAmount      = $order->getBaseShippingTaxAmount() - $order->getBaseShippingTaxRefunded();
-                $shippingHiddenTaxAmount    = $order->getShippingHiddenTaxAmount()
-                        - $order->getShippingHiddenTaxRefunded();
-                $baseShippingHiddenTaxAmount = $order->getBaseShippingHiddenTaxAmount()
-                        - $order->getBaseShippingHiddenTaxRefunded();
+                // No column records the refunded shipping hidden tax, so take the share of the shipping left.
+                if ($baseOrderShippingAmount > 0) {
+                    $shippingHiddenTaxAmount = $creditmemo->roundPrice(
+                        $order->getShippingHiddenTaxAmount() * $shippingDelta / $baseOrderShippingAmount,
+                    );
+                    $baseShippingHiddenTaxAmount = $creditmemo->roundPrice(
+                        $order->getBaseShippingHiddenTaxAmount() * $shippingDelta / $baseOrderShippingAmount,
+                        'base',
+                    );
+                }
             }
             $totalTax           += $shippingTaxAmount;
             $baseTotalTax       += $baseShippingTaxAmount;
@@ -122,10 +128,9 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
         $allowedTax = $order->getTaxInvoiced() - $order->getTaxRefunded() - $creditmemo->getTaxAmount();
         $allowedBaseTax = $order->getBaseTaxInvoiced() - $order->getBaseTaxRefunded()
                 - $creditmemo->getBaseTaxAmount();
-        $allowedHiddenTax = $order->getHiddenTaxInvoiced() + $order->getShippingHiddenTaxAmount()
-            - $order->getHiddenTaxRefunded() - $order->getShippingHiddenTaxRefunded();
-        $allowedBaseHiddenTax = $order->getBaseHiddenTaxInvoiced() + $order->getBaseShippingHiddenTaxAmount()
-            - $order->getBaseHiddenTaxRefunded() - $order->getBaseShippingHiddenTaxRefunded();
+        // The invoiced and refunded hidden tax of the order both include the shipping hidden tax.
+        $allowedHiddenTax = $order->getHiddenTaxInvoiced() - $order->getHiddenTaxRefunded();
+        $allowedBaseHiddenTax = $order->getBaseHiddenTaxInvoiced() - $order->getBaseHiddenTaxRefunded();
 
         $totalTax = min($allowedTax, $totalTax);
         $baseTotalTax = min($allowedBaseTax, $baseTotalTax);
