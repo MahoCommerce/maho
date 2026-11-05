@@ -2,13 +2,17 @@
   <img src="https://mahocommerce.com/assets/maho-logo.svg" alt="Maho" width=400 />
 </p>
 <p align="center">
-  <a href="https://github.com/MahoCommerce/maho/releases/latest"><img src="https://img.shields.io/github/v/release/MahoCommerce/maho?label=release" alt="Latest release" /></a>
   <img src="https://img.shields.io/badge/PHP-8.5+-8993be.svg" alt="PHP 8.5+" />
   <img src="https://poser.pugx.org/mahocommerce/maho/license.svg" alt="License" />
   <a href="https://plumbphp.dev/mahocommerce/maho" target="_blank"><img src="https://plumbphp.dev/badges/mahocommerce/maho/composite.svg" alt="Plumb score" /></a>
   <img src="https://github.com/MahoCommerce/maho/actions/workflows/security-php.yml/badge.svg" alt="Security" />
   <img src="https://github.com/MahoCommerce/maho/actions/workflows/codeql-analysis.yml/badge.svg" alt="CodeQL" />
   <a href="https://crowdin.com/project/maho" target="_blank"><img src="https://badges.crowdin.net/maho/localized.svg" alt="Localization" /></a>
+</p>
+<p align="center">
+  <a href="https://github.com/MahoCommerce/phpstorm" target="_blank"><img src="https://img.shields.io/badge/PHPStorm-Plugin-000000?logo=phpstorm&logoColor=white" alt="PHPStorm Plugin" /></a>
+  <a href="https://github.com/MahoCommerce/vscode" target="_blank"><img src="https://img.shields.io/badge/VS_Code-Extension-2F80ED?logo=vscodium&logoColor=white" alt="VS Code Extension" /></a>
+  <a href="https://github.com/MahoCommerce/zed" target="_blank"><img src="https://img.shields.io/badge/Zed-Extension-084CCF?logo=zedindustries&logoColor=white" alt="Zed Extension" /></a>
 </p>
 <p align="center">
   <a href="https://demo.mahocommerce.com">Live demo</a> ·
@@ -92,8 +96,6 @@ controller, extend it: the router finds the subclass.
 - **Message queue** on Symfony Messenger, with worker pools and an admin grid
 - **Storage mounts** on Flysystem: put media, uploads and feeds on S3, Google Cloud Storage or Azure
 - **Built-in LSP and MCP servers** for your editor and your coding agent
-- **IDE extensions** for [PhpStorm](https://github.com/MahoCommerce/phpstorm),
-  [VS Code](https://github.com/MahoCommerce/vscode) and [Zed](https://github.com/MahoCommerce/zed)
 - **[Composer plugin](https://github.com/MahoCommerce/maho-composer-plugin)** for modules and a
   **[PHPStan plugin](https://github.com/MahoCommerce/maho-phpstan-plugin)** for static analysis
 - **Signed release packages** at SLSA Build Level 3
