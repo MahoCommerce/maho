@@ -36,7 +36,9 @@ class FrontendThemeBuild extends AbstractThemeBuild
         bool $sourceMap = false,
         #[Option(description: 'Do not compile the classes of the CMS, blog and catalog content into the copy that the store serves', name: 'no-content')]
         bool $noContent = false,
+        #[Option(description: 'Install the Tailwind CSS toolchain with no question when it is missing', shortcut: 'f')]
+        bool $force = false,
     ): int {
-        return $this->compileThemes($input, $output, $io, $themeFilter, $watch, $sourceMap, !$noContent);
+        return $this->compileThemes($input, $output, $io, $themeFilter, $watch, $sourceMap, !$noContent, $force);
     }
 }

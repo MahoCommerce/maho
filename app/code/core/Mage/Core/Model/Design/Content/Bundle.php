@@ -326,11 +326,9 @@ class Mage_Core_Model_Design_Content_Bundle
         }
         if (($entry['stat'] ?? null) !== $this->getStatKey($stylesFile)) {
             // The flag has the file even when the cache dropped it, so a styles.css that goes back gets its copy again
-            $entry = $this->checkEntry($this->loadManifest()[$theme] ?? $entry, $stylesFile);
-            $this->manifest[$theme] = $entry;
-            $this->saveManifestCache($this->manifest);
+            $entry = $this->refreshManifest()[$theme] ?? null;
         }
-        if ($entry['file'] === null) {
+        if ($entry === null || $entry['file'] === null) {
             return null;
         }
 
@@ -424,11 +422,27 @@ class Mage_Core_Model_Design_Content_Bundle
             }
         }
 
-        $manifest = $this->loadManifest();
-        foreach ($manifest as $theme => $entry) {
+        return $this->refreshManifest();
+    }
+
+    /**
+     * Check each entry of the manifest in the flag, and put the result in the cache. When a
+     * build saved a new manifest after this method read the flag, the cache entry goes, so the
+     * cache cannot keep the old manifest.
+     *
+     * @return array<string, array{file: ?string, tokens: string, styles: string, failed?: string, stat: ?string}>
+     */
+    protected function refreshManifest(): array
+    {
+        $source = $this->loadManifest();
+        $manifest = [];
+        foreach ($source as $theme => $entry) {
             $manifest[$theme] = $this->checkEntry($entry, $this->getSkinDir() . "/{$theme}/" . self::STYLES_FILE);
         }
-        $this->saveManifestCache($manifest);
+        Mage::app()->saveCache(Mage::helper('core')->jsonEncode($manifest), self::CACHE_ID, [Mage_Core_Model_Config::CACHE_TAG]);
+        if ($this->loadManifest() !== $source) {
+            Mage::app()->removeCache(self::CACHE_ID);
+        }
         return $this->manifest = $manifest;
     }
 
@@ -452,22 +466,15 @@ class Mage_Core_Model_Design_Content_Bundle
     }
 
     /**
-     * The modification time, size and inode of $file, or null when it does not exist. When the
-     * key changes, the caller compares the hash, because a copy of the same file changes the time.
+     * The modification time, change time, size and inode of $file, or null when it does not
+     * exist. Each write sets the change time, also a copy that keeps the modification time. When
+     * the key changes, the caller compares the hash, because a copy of the same file changes the time.
      */
     protected function getStatKey(string $file): ?string
     {
         clearstatcache();
         $stat = @stat($file);
-        return $stat === false ? null : "{$stat['mtime']}-{$stat['size']}-{$stat['ino']}";
-    }
-
-    /**
-     * @param array<string, array{file: ?string, tokens: string, styles: string, failed?: string, stat?: ?string}> $manifest
-     */
-    protected function saveManifestCache(array $manifest): void
-    {
-        Mage::app()->saveCache(Mage::helper('core')->jsonEncode($manifest), self::CACHE_ID, [Mage_Core_Model_Config::CACHE_TAG]);
+        return $stat === false ? null : "{$stat['mtime']}-{$stat['ctime']}-{$stat['size']}-{$stat['ino']}";
     }
 
     /**

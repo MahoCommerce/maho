@@ -40,10 +40,10 @@ class TailwindToolchain
     private const INSTALL_TIMEOUT = 600;
 
     /**
-     * The path of the Tailwind CLI. When it is missing, ask to install the toolchain in an
-     * interactive terminal, or show the install command otherwise.
+     * The path of the Tailwind CLI. When it is missing, install the toolchain when $force is
+     * true, ask to install it in an interactive terminal, or show the install command otherwise.
      */
-    public static function resolveBinary(SymfonyStyle $io, bool $interactive): ?string
+    public static function resolveBinary(SymfonyStyle $io, bool $interactive, bool $force): ?string
     {
         $binary = MAHO_ROOT_DIR . '/' . Mage_Core_Model_Design_Content_Bundle::TAILWIND_BINARY;
         if (is_file($binary)) {
@@ -63,16 +63,18 @@ class TailwindToolchain
         }
 
         $command = implode(' ', $installCommand);
-        if (!$interactive) {
+        if (!$interactive && !$force) {
             $io->error([
                 'The Tailwind CSS toolchain is not installed in ' . MAHO_ROOT_DIR . '/node_modules.',
-                "Run \"{$command}\" in that folder, then run this command again.",
+                "Run \"{$command}\" in that folder, or add --force, then run this command again.",
             ]);
             return null;
         }
 
         $io->text('The Tailwind CSS toolchain is not installed in ' . MAHO_ROOT_DIR . '/node_modules.');
-        if (!$io->confirm("Run \"{$command}\" now?")) {
+        if ($force) {
+            $io->text("Running \"{$command}\".");
+        } elseif (!$io->confirm("Run \"{$command}\" now?")) {
             $io->text('Aborted. Install the toolchain, then run this command again.');
             return null;
         }

@@ -330,6 +330,18 @@ describe('a styles.css that changes after the cache has the manifest', function 
         expect($cached['test/theme']['stat'])->toStartWith((time() + 60) . '-');
     });
 
+    it('links the new styles.css when a copy keeps the modification time and the size of the old one', function (): void {
+        $mtime = filemtime($this->styles);
+        // The change time has a resolution of one second
+        while (time() <= filectime($this->styles)) {
+            usleep(50_000);
+        }
+        file_put_contents($this->styles, 'b{}');
+        touch($this->styles, $mtime);
+
+        expect(skinDirContentBundle($this->skinDir)->getUrl($this->styles))->toBeNull();
+    });
+
     it('links the copy again when styles.css goes back to the version of the copy', function (): void {
         file_put_contents($this->styles, 'b{color:red}');
         skinDirContentBundle($this->skinDir)->getUrl($this->styles);
@@ -355,6 +367,50 @@ describe('a manifest whose file is not on the mount', function () {
 
     it('makes the theme outdated, so the cron job queues a build', function (): void {
         expect(Mage::getModel('core/design_content_bundle')->getOutdatedThemes())->toContain('base/default');
+    });
+
+    it('makes the cron job remove the manifest from the cache, so the head links the committed styles.css', function (): void {
+        $mount = Mage::getStorage(Mage_Core_Model_Design_Content_Bundle::MOUNT);
+        $mount->write('theme/missing-0000.css', '.copy{}');
+        expect(Mage::getModel('core/design_content_bundle')->getUrl($this->styles))->not->toBeNull();
+        $mount->delete('theme/missing-0000.css');
+
+        (new Mage_Core_Model_Design_Content_Observer())->queueOutdated();
+        deleteContentBuildRows();
+
+        expect(Mage::getModel('core/design_content_bundle')->getUrl($this->styles))->toBeNull();
+    });
+});
+
+describe('a build that saves its manifest while a request puts the manifest in the cache', function () {
+    afterEach(function (): void {
+        deleteContentFlags();
+    });
+
+    it('leaves no old manifest in the cache', function (): void {
+        Mage::getModel('core/flag', ['flag_code' => Mage_Core_Model_Design_Content_Bundle::FLAG_MANIFEST])->loadSelf()
+            ->setFlagData(['base/default' => ['file' => 'theme/old.css', 'tokens' => 'x', 'styles' => 'old']])
+            ->save();
+        Mage::app()->removeCache(Mage_Core_Model_Design_Content_Bundle::CACHE_ID);
+        $bundle = new class extends Mage_Core_Model_Design_Content_Bundle {
+            private bool $buildSaved = false;
+
+            #[\Override]
+            protected function loadManifest(): array
+            {
+                $manifest = parent::loadManifest();
+                if (!$this->buildSaved) {
+                    $this->buildSaved = true;
+                    // The build saves its manifest and removes the cache entry before the request writes it
+                    $this->saveManifest(['base/default' => ['file' => 'theme/new.css', 'tokens' => 'y', 'styles' => 'new']]);
+                }
+                return $manifest;
+            }
+        };
+
+        $bundle->getManifest();
+
+        expect(Mage::app()->loadCache(Mage_Core_Model_Design_Content_Bundle::CACHE_ID))->toBeFalsy();
     });
 });
 

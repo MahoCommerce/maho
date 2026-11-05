@@ -57,8 +57,8 @@ after it.
 ## After a deploy
 
 The store serves a build only while it comes from the current `css/styles.css` of the theme. Each
-page compares the time, size and inode of that file with the values of the build. When they
-change, it compares the hash. So when a deploy changes the file, for example a Maho upgrade with
+page compares the modification time, change time, size and inode of that file with the values of
+the build. When they change, it compares the hash. So when a deploy changes the file, for example a Maho upgrade with
 `composer install`, the store serves the committed file at once, with no cache flush. A deploy that
 copies the same file again keeps the build. The cron job queues a new build within 15 minutes. To
 skip that wait, add the build to the deploy script:

@@ -38,13 +38,16 @@ class Mage_Core_Model_Design_Content_Observer
 
     /**
      * Queue a build for a theme whose committed css/styles.css changed after its last build, or
-     * that has no build, such as after a deploy.
+     * that has no build, such as after a deploy. The cache entry of the manifest goes too: the
+     * head checks the files again only when css/styles.css changes, and a copy that is not on the
+     * mount any more leaves css/styles.css as it is.
      */
     #[Maho\Config\CronJob('theme_content_check', schedule: '*/15 * * * *')]
     public function queueOutdated(): void
     {
         $bundle = Mage::getSingleton('core/design_content_bundle');
         if ($bundle->getOutdatedThemes() !== []) {
+            Mage::app()->removeCache(Mage_Core_Model_Design_Content_Bundle::CACHE_ID);
             $bundle->queueBuild();
         }
     }

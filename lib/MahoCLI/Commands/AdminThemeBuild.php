@@ -36,7 +36,9 @@ class AdminThemeBuild extends AbstractThemeBuild
         bool $watch = false,
         #[Option(description: 'Add an inline source map, so devtools show the src/ partials instead of the bundle', name: 'map')]
         bool $sourceMap = false,
+        #[Option(description: 'Install the Tailwind CSS toolchain with no question when it is missing', shortcut: 'f')]
+        bool $force = false,
     ): int {
-        return $this->compileThemes($input, $output, $io, $themeFilter, $watch, $sourceMap, false);
+        return $this->compileThemes($input, $output, $io, $themeFilter, $watch, $sourceMap, false, $force);
     }
 }

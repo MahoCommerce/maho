@@ -35,6 +35,7 @@ abstract class AbstractThemeBuild extends BaseMahoCommand
         bool $watch,
         bool $sourceMap,
         bool $buildContent,
+        bool $force,
     ): int {
         $entries = $this->discoverEntries($themeFilter);
         if (!$entries) {
@@ -53,7 +54,7 @@ abstract class AbstractThemeBuild extends BaseMahoCommand
             return Command::SUCCESS;
         }
 
-        $tailwind = TailwindToolchain::resolveBinary($io, $input->isInteractive());
+        $tailwind = TailwindToolchain::resolveBinary($io, $input->isInteractive(), $force);
         if ($tailwind === null) {
             return Command::FAILURE;
         }
