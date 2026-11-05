@@ -12,42 +12,20 @@ declare(strict_types=1);
 
 namespace MahoCLI\Commands;
 
-use Mage_Core_Model_Design_Content_Bundle;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Option;
-use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\Process\ExecutableFinder;
-use Symfony\Component\Process\Process;
 
 #[AsCommand(
     name: 'dev:frontend:theme:build',
     description: 'Compile the CSS sources (src/*.css) of every frontend theme into their css/ bundles',
 )]
-class FrontendThemeBuild extends BaseMahoCommand
+class FrontendThemeBuild extends AbstractThemeBuild
 {
-    protected const SKIN_PATH = 'public/skin/frontend';
-    private const NPM_PACKAGES = ['tailwindcss', '@tailwindcss/cli', 'daisyui'];
-
-    /** Supported package managers in preference order, with the arguments that add a dev dependency. */
-    private const PACKAGE_MANAGERS = [
-        'npm' => ['install', '--save-dev'],
-        'bun' => ['add', '--dev'],
-        'pnpm' => ['add', '-D'],
-        'yarn' => ['add', '--dev'],
-    ];
-
-    /** @var array<string, list<string>> */
-    private const LOCK_FILES = [
-        'npm' => ['package-lock.json'],
-        'bun' => ['bun.lock', 'bun.lockb'],
-        'pnpm' => ['pnpm-lock.yaml'],
-        'yarn' => ['yarn.lock'],
-    ];
-    private const BUILD_TIMEOUT = 600;
-
     public function __invoke(
+        InputInterface $input,
         OutputInterface $output,
         SymfonyStyle $io,
         #[Option(description: 'Limit the build to one theme instead of all, as package/theme (e.g. --theme base/pharmacy)', name: 'theme', shortcut: 't')]
@@ -56,247 +34,11 @@ class FrontendThemeBuild extends BaseMahoCommand
         bool $watch = false,
         #[Option(description: 'Add an inline source map, so devtools show the src/ partials instead of the bundle', name: 'map')]
         bool $sourceMap = false,
+        #[Option(description: 'Do not compile the classes of the CMS, blog and catalog content into the copy that the store serves', name: 'no-content')]
+        bool $noContent = false,
+        #[Option(description: 'Install the Tailwind CSS toolchain with no question when it is missing', shortcut: 'f')]
+        bool $force = false,
     ): int {
-        $entries = $this->discoverEntries($themeFilter);
-        if (!$entries) {
-            if ($themeFilter !== null) {
-                $io->error([
-                    "No buildable sources found for theme '{$themeFilter}'.",
-                    'A buildable theme has ' . static::SKIN_PATH . "/{$themeFilter}/src/*.css files",
-                    'whose names do not start with an underscore.',
-                ]);
-                return Command::FAILURE;
-            }
-            $io->warning([
-                'Nothing to build: no theme sources found under ' . static::SKIN_PATH . '/*/*/src/.',
-                'Themes without a src/ directory need no build - their css/ files (theme.css, ...) are served as-is.',
-            ]);
-            return Command::SUCCESS;
-        }
-
-        $tailwind = $this->resolveTailwindBinary($io);
-        if ($tailwind === null) {
-            return Command::FAILURE;
-        }
-
-        if ($watch) {
-            return $this->watch($entries, $tailwind, $io, $output, $sourceMap);
-        }
-        return $this->build($entries, $tailwind, $io, $sourceMap);
-    }
-
-    /**
-     * Find build entries: every top-level src/*.css file of every theme skin,
-     * except the _-prefixed partials that the entries import or @reference.
-     *
-     * @return list<array{src: string, out: string, theme: string, bundle: string}>
-     */
-    private function discoverEntries(?string $themeFilter): array
-    {
-        $skinDir = MAHO_ROOT_DIR . '/' . static::SKIN_PATH;
-        $entries = [];
-
-        foreach (glob("{$skinDir}/*/*/src/*.css") ?: [] as $srcFile) {
-            $parts = explode('/', substr($srcFile, strlen($skinDir) + 1));
-            if (count($parts) !== 4) {
-                continue;
-            }
-            [$package, $theme] = $parts;
-
-            if ($themeFilter !== null && $themeFilter !== "{$package}/{$theme}") {
-                continue;
-            }
-
-            $name = basename($srcFile, '.css');
-            if (str_starts_with($name, '_')) {
-                continue;
-            }
-
-            $bundle = ($name === 'tailwind' ? 'styles' : $name) . '.css';
-            $entries[] = [
-                'src' => $srcFile,
-                'out' => dirname($srcFile, 2) . "/css/{$bundle}",
-                'theme' => "{$package}/{$theme}",
-                'bundle' => $bundle,
-            ];
-        }
-
-        return $entries;
-    }
-
-    /**
-     * Locate the Tailwind CLI binary, offering to install the toolchain when
-     * missing. Works both in the Maho repo and in child projects that use Maho
-     * as a Composer dependency (MAHO_ROOT_DIR is the project root in both
-     * cases, and every supported manager installs into its node_modules/).
-     */
-    private function resolveTailwindBinary(SymfonyStyle $io): ?string
-    {
-        $binary = MAHO_ROOT_DIR . '/' . Mage_Core_Model_Design_Content_Bundle::TAILWIND_BINARY;
-        if (is_file($binary)) {
-            return $binary;
-        }
-
-        $finder = new ExecutableFinder();
-        $installCommand = self::resolveInstallCommand(MAHO_ROOT_DIR, fn(string $name) => $finder->find($name));
-        if ($installCommand === null) {
-            $io->error([
-                'Compiling theme sources needs one of ' . implode(', ', array_keys(self::PACKAGE_MANAGERS)) . '.',
-                'Install Node.js from https://nodejs.org (or Bun from https://bun.sh) and run this command again.',
-                'This is only needed when editing src/*.css files: store-owner theming',
-                'via css/theme.css needs no build at all.',
-            ]);
-            return null;
-        }
-
-        $io->text('The Tailwind CSS toolchain is not installed in ' . MAHO_ROOT_DIR . '/node_modules.');
-        if (!$io->confirm('Run "' . implode(' ', $installCommand) . '" now?')) {
-            $io->text('Aborted. Install the toolchain, then run this command again.');
-            return null;
-        }
-
-        $process = new Process($installCommand, MAHO_ROOT_DIR, null, null, self::BUILD_TIMEOUT);
-        $process->run(function ($type, $buffer) use ($io) {
-            $io->write($buffer);
-        });
-        if (!$process->isSuccessful() || !is_file($binary)) {
-            $io->error($installCommand[0] . ' failed - see the output above.');
-            return null;
-        }
-
-        return $binary;
-    }
-
-    /**
-     * Pick the package manager to install with: the one whose lock file the
-     * project already carries, else the first one installed. A project that
-     * declares the toolchain in package.json gets a plain install, so the
-     * pinned versions win over the ones this command would name.
-     *
-     * @param callable(string): ?string $locate
-     * @return list<string>|null
-     */
-    public static function resolveInstallCommand(string $rootDir, callable $locate): ?array
-    {
-        $build = function (string $binary, string $manager) use ($rootDir): array {
-            $packageJson = $rootDir . '/package.json';
-            if (is_file($packageJson) && str_contains((string) file_get_contents($packageJson), '"@tailwindcss/cli"')) {
-                return [$binary, 'install'];
-            }
-            return [$binary, ...self::PACKAGE_MANAGERS[$manager], ...self::NPM_PACKAGES];
-        };
-
-        foreach (array_keys(self::PACKAGE_MANAGERS) as $manager) {
-            foreach (self::LOCK_FILES[$manager] as $lockFile) {
-                if (is_file($rootDir . '/' . $lockFile) && ($binary = $locate($manager)) !== null) {
-                    return $build($binary, $manager);
-                }
-            }
-        }
-
-        foreach (array_keys(self::PACKAGE_MANAGERS) as $manager) {
-            if (($binary = $locate($manager)) !== null) {
-                return $build($binary, $manager);
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * @param list<array{src: string, out: string, theme: string, bundle: string}> $entries
-     */
-    private function build(array $entries, string $tailwind, SymfonyStyle $io, bool $sourceMap): int
-    {
-        $failures = 0;
-        foreach ($entries as $entry) {
-            $args = [$tailwind, '-i', $entry['src'], '-o', $entry['out'], '--minify'];
-            if ($sourceMap) {
-                $args[] = '--map';
-            }
-            $process = new Process($args, MAHO_ROOT_DIR, null, null, self::BUILD_TIMEOUT);
-            $process->run();
-
-            if (!$process->isSuccessful()) {
-                $io->error([
-                    "Failed to compile {$this->relativePath($entry['src'])}:",
-                    trim($process->getErrorOutput() . "\n" . $process->getOutput()),
-                ]);
-                $failures++;
-                continue;
-            }
-
-            $io->text(sprintf(
-                '<info>✓</info> %s → %s',
-                $this->relativePath($entry['src']),
-                $this->relativePath($entry['out']),
-            ));
-        }
-
-        if ($failures > 0) {
-            $io->error("{$failures} of " . count($entries) . ' bundles failed to compile.');
-            return Command::FAILURE;
-        }
-
-        $themes = array_unique(array_column($entries, 'theme'));
-        $io->success(
-            'Compiled ' . count($entries) . ' CSS bundle(s) for ' . implode(', ', $themes)
-            . ($sourceMap
-                ? '. The source map is inline: rebuild without --map before committing.'
-                : '. The compiled css/ files are meant to be committed.'),
-        );
-        return Command::SUCCESS;
-    }
-
-    /**
-     * @param list<array{src: string, out: string, theme: string, bundle: string}> $entries
-     */
-    private function watch(
-        array $entries,
-        string $tailwind,
-        SymfonyStyle $io,
-        OutputInterface $output,
-        bool $sourceMap,
-    ): int {
-        $themes = array_unique(array_column($entries, 'theme'));
-        $io->text([
-            'Watching ' . count($entries) . ' source(s) of ' . implode(', ', $themes) . ' - press Ctrl+C to stop.',
-            '<comment>Watch output is unminified: run ' . $this->getName() . ' (without --watch) before committing.</comment>',
-            $sourceMap
-                ? '<comment>Source maps are inline: devtools list the src/ partials. Rebuild without --map before committing.</comment>'
-                : '<comment>Add --map to have devtools list the src/ partials instead of the bundle.</comment>',
-            '',
-        ]);
-
-        $processes = [];
-        foreach ($entries as $entry) {
-            // =always keeps the watcher alive when stdin is closed, which it is under Process
-            $args = [$tailwind, '-i', $entry['src'], '-o', $entry['out'], '--watch=always'];
-            if ($sourceMap) {
-                $args[] = '--map';
-            }
-            $label = "{$entry['theme']}:{$entry['bundle']}";
-            $process = new Process($args, MAHO_ROOT_DIR, null, null, null);
-            $process->start(function ($type, $buffer) use ($output, $label) {
-                foreach (preg_split('/\R/', trim($buffer)) ?: [] as $line) {
-                    if ($line !== '') {
-                        $output->writeln("[{$label}] {$line}");
-                    }
-                }
-            });
-            $processes[] = $process;
-        }
-
-        do {
-            usleep(200_000);
-            $running = array_filter($processes, fn(Process $process) => $process->isRunning());
-        } while ($running !== []);
-
-        return Command::SUCCESS;
-    }
-
-    private function relativePath(string $path): string
-    {
-        return str_replace(MAHO_ROOT_DIR . '/', '', $path);
+        return $this->compileThemes($input, $output, $io, $themeFilter, $watch, $sourceMap, !$noContent, $force);
     }
 }

@@ -282,7 +282,9 @@ that `src/tailwind.css` lists under `@source inline(...)`.
 On a server with the Tailwind CLI, the content build fills that gap. It reads the `class`
 attributes of the content, compiles a copy of `css/styles.css` for each theme that has a
 `src/tailwind.css`, and the page head links the copy. A theme with its own Tailwind build gets the
-same, from its own `src/tailwind.css`. The [Tailwind build of the content](../hosting/tailwind-content-build.md)
+same, from its own `src/tailwind.css`. `./maho dev:frontend:theme:build` runs the content build after it
+compiles the theme, so the store shows your change and the classes of the content at once. The
+[Tailwind build of the content](../hosting/tailwind-content-build.md)
 describes the requirements, the queue and the deploy step. The [user guide](../user-guide/content-html-and-classes.md)
 describes the source view of the editor, with its class completion.
 
