@@ -21,6 +21,9 @@ class EavAttributeForm {
         this.inputEl = document.getElementById('frontend_input');
         this.inputEl?.addEventListener('change', () => this.refresh());
         document.getElementById('is_required')?.addEventListener('change', () => this.updateRequiredOptions());
+        for (const id of ['is_visible', 'is_required']) {
+            document.getElementById(id)?.addEventListener('change', () => this.updateWebsiteDefaults());
+        }
         document.getElementById('is_wysiwyg_enabled')?.addEventListener('change', () => this.refresh());
         this.refresh();
     }
@@ -89,6 +92,30 @@ class EavAttributeForm {
         const required = document.getElementById('is_required');
         if (check && required) {
             check.classList.toggle('required-options-count', this.inputEl?.value === 'select' && required.value == 1);
+        }
+    }
+
+    /**
+     * Write the mode that Show in Forms and Values Required give into the "Use Default (...)"
+     * option of each website. The label of the mode comes from the option of that mode.
+     */
+    updateWebsiteDefaults() {
+        const visible = document.getElementById('is_visible');
+        if (!visible) {
+            return;
+        }
+        let mode = 'optional';
+        if (visible.value === '0') {
+            mode = 'hidden';
+        } else if (document.getElementById('is_required')?.value === '1') {
+            mode = 'required';
+        }
+        for (const select of document.querySelectorAll('select.website-mode')) {
+            const option = select.querySelector('option[value=""]');
+            const label = select.querySelector(`option[value="${mode}"]`)?.text;
+            if (option && label) {
+                option.text = option.text.replace(/\([^)]*\)$/, `(${label})`);
+            }
         }
     }
 

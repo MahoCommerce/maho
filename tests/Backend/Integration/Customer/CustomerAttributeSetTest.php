@@ -252,3 +252,25 @@ it('lists the system attributes of customers in the grid and not in the set edit
             ->and($sets)->not->toContain($systemCode);
     }
 });
+
+it('names the default mode in the website options of a customer attribute', function () {
+    if (count(Mage::app()->getWebsites()) < 2) {
+        $this->markTestSkipped('The store has one website, so the form shows no website options');
+    }
+    $attribute = $this->attributes[] = customerSetTestCreateAttribute('customer', 'pest_web_' . $this->suffix, null, ['customer_account_edit']);
+    $attribute->setIsRequired(true)->save();
+    $block = Mage::app()->getLayout()->createBlock('adminhtml/customer_attribute_edit_tab_main');
+    $prepare = new ReflectionMethod($block, '_prepareWebsiteFields');
+
+    $labels = function () use ($block, $prepare, $attribute): array {
+        $form = new \Maho\Data\Form();
+        $prepare->invoke($block, $form, Mage::getModel('customer/attribute')->load($attribute->getId()));
+        $websiteId = (int) array_key_first(Mage::app()->getWebsites());
+        return array_column($form->getElement("website_{$websiteId}")->getValues(), 'label', 'value');
+    };
+
+    expect($labels()[''])->toBe('Use Default (Required)');
+
+    $attribute->setIsVisible(false)->save();
+    expect($labels()[''])->toBe('Use Default (Hidden)');
+});

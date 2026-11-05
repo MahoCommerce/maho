@@ -91,7 +91,10 @@ The **Websites** part of an attribute can change the default for one website:
 - **Hidden**: the forms of the website do not show the field.
 - **Optional**: the forms show the field, and the customer can leave it empty.
 - **Required**: the forms show the field, and the customer must fill it in.
-- **Use Default**: the website uses **Show in Forms** and **Values Required** of the attribute.
+- **Use Default**: the website uses **Show in Forms** and **Values Required** of the attribute. The
+  option shows the result, for example **Use Default (Optional)**.
+
+A store with one website does not show the **Websites** part, because the default already decides.
 
 Use a website setting when the field depends on the website, and an attribute set when it depends
 on the customer group.

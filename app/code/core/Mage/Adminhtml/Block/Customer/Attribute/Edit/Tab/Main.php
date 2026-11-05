@@ -112,26 +112,31 @@ class Mage_Adminhtml_Block_Customer_Attribute_Edit_Tab_Main extends Mage_Eav_Blo
     }
 
     /**
-     * Add the website values: each website can show, hide or require the attribute.
+     * Add the website values: each website can show, hide or require the attribute. A store with
+     * one website and no saved value gets no section, because the default already decides.
      */
     protected function _prepareWebsiteFields(\Maho\Data\Form $form, Mage_Customer_Model_Attribute $attribute): void
     {
         $websites = Mage::app()->getWebsites();
-        if (!$websites) {
+        $values = $attribute->getId() ? $attribute->getResource()->getWebsiteValues((int) $attribute->getId()) : [];
+        $hasOverride = array_filter($values, fn(array $value): bool => $this->_getWebsiteMode($value) !== '') !== [];
+        if (!$websites || (count($websites) < 2 && !$hasOverride)) {
             return;
         }
         $helper = Mage::helper('customer');
-        $values = $attribute->getId() ? $attribute->getResource()->getWebsiteValues((int) $attribute->getId()) : [];
-        $options = [
-            ['value' => '', 'label' => $helper->__('Use Default')],
-            ['value' => 'hidden', 'label' => $helper->__('Hidden')],
-            ['value' => 'optional', 'label' => $helper->__('Optional')],
-            ['value' => 'required', 'label' => $helper->__('Required')],
+        $modes = [
+            'hidden' => $helper->__('Hidden'),
+            'optional' => $helper->__('Optional'),
+            'required' => $helper->__('Required'),
         ];
+        $options = [['value' => '', 'label' => $helper->__('Use Default (%s)', $modes[$this->_getDefaultMode($attribute)])]];
+        foreach ($modes as $value => $label) {
+            $options[] = ['value' => $value, 'label' => $label];
+        }
 
         $fieldset = $form->addFieldset('website_fieldset', [
             'legend' => $helper->__('Websites'),
-            'comment' => $helper->__('A website can hide, show or require the attribute in another way than the default.'),
+            'comment' => $helper->__('Change the default for one website. Use Default follows Show in Forms and Values Required.'),
         ]);
         foreach ($websites as $website) {
             $id = (int) $website->getId();
@@ -140,8 +145,24 @@ class Mage_Adminhtml_Block_Customer_Attribute_Edit_Tab_Main extends Mage_Eav_Blo
                 'label' => $website->getName(),
                 'values' => $options,
                 'value' => $this->_getWebsiteMode($values[$id] ?? null),
+                'class' => 'website-mode',
             ]);
         }
+    }
+
+    /**
+     * Return the mode that Show in Forms and Values Required give: hidden, optional or required.
+     */
+    protected function _getDefaultMode(Mage_Customer_Model_Attribute $attribute): string
+    {
+        if (!$attribute->getId()) {
+            return 'optional';
+        }
+        return match (true) {
+            !$attribute->getIsVisible() => 'hidden',
+            (bool) $attribute->getIsRequired() => 'required',
+            default => 'optional',
+        };
     }
 
     /**
