@@ -87,6 +87,42 @@ function createContentBlock(string $content): Mage_Cms_Model_Block
         ->save();
 }
 
+/**
+ * A bundle whose frontend skin directory is $skinDir.
+ */
+function skinDirContentBundle(string $skinDir): Mage_Core_Model_Design_Content_Bundle
+{
+    return new class ($skinDir) extends Mage_Core_Model_Design_Content_Bundle {
+        public function __construct(private readonly string $skinDir) {}
+
+        #[\Override]
+        protected function getSkinDir(): string
+        {
+            return $this->skinDir;
+        }
+    };
+}
+
+/**
+ * The rows of the admin inbox that tell that the content build of $theme failed.
+ */
+function contentBuildFailureMessages(string $theme): array
+{
+    $title = Mage::helper('core')->__('The Tailwind build of the content failed for the theme %s', $theme);
+    $adapter = queueAdapter();
+    return $adapter->fetchCol($adapter->select()
+        ->from(Mage::getSingleton('core/resource')->getTableName('adminnotification/inbox'), ['notification_id'])
+        ->where('title = ?', $title));
+}
+
+function deleteContentBuildFailureMessages(string $theme): void
+{
+    $ids = contentBuildFailureMessages($theme);
+    if ($ids !== []) {
+        queueAdapter()->delete(Mage::getSingleton('core/resource')->getTableName('adminnotification/inbox'), ['notification_id IN (?)' => $ids]);
+    }
+}
+
 beforeEach(function (): void {
     $this->blocks = [];
     deleteContentBuildRows();
@@ -141,6 +177,17 @@ describe('the queue of a build', function () {
         expect($rows)->toHaveCount(1)
             ->and((string) $rows[0]['dedupe_key'])->toBe(Mage_Core_Model_Design_Content_Bundle::QUEUE_NAME)
             ->and((string) $rows[0]['queue'])->toBe(Mage_Core_Model_Design_Content_Bundle::QUEUE_NAME);
+    });
+
+    it('waits a short time after a save', function (): void {
+        $block = createContentBlock('<div class="rotate-47"></div>');
+        $this->blocks[] = $block;
+
+        $rows = contentBuildRows();
+        $delay = strtotime((string) $rows[0]['available_at']) - strtotime((string) $rows[0]['created_at']);
+        // The queue reads the clock two times, so the delay can be one second longer
+        expect($delay)->toBeGreaterThanOrEqual(Mage_Core_Model_Design_Content_Bundle::SAVE_DELAY)
+            ->toBeLessThanOrEqual(Mage_Core_Model_Design_Content_Bundle::SAVE_DELAY + 1);
     });
 
     it('queues no build when a save changes another field', function (): void {
@@ -242,6 +289,68 @@ describe('the stylesheet in the page head', function () {
     });
 });
 
+describe('a styles.css that changes after the cache has the manifest', function () {
+    beforeEach(function (): void {
+        $this->skinDir = Mage::getBaseDir('tmp') . '/skin-' . bin2hex(random_bytes(4)) . '/frontend';
+        mkdir($this->skinDir . '/test/theme/css', 0777, true);
+        $this->styles = $this->skinDir . '/test/theme/css/styles.css';
+        file_put_contents($this->styles, 'a{}');
+        $this->mount = Mage::getStorage(Mage_Core_Model_Design_Content_Bundle::MOUNT);
+        $this->mount->write('theme/test-theme-copy.css', '.copy{}');
+        $this->copyUrl = $this->mount->publicUrl('theme/test-theme-copy.css');
+        Mage::getModel('core/flag', ['flag_code' => Mage_Core_Model_Design_Content_Bundle::FLAG_MANIFEST])->loadSelf()
+            ->setFlagData(['test/theme' => ['file' => 'theme/test-theme-copy.css', 'tokens' => 'x', 'styles' => hash_file('xxh128', $this->styles)]])
+            ->save();
+        Mage::app()->removeCache(Mage_Core_Model_Design_Content_Bundle::CACHE_ID);
+        // Each call of getUrl() on a new bundle is a new request, which reads the manifest from the cache
+        expect(skinDirContentBundle($this->skinDir)->getUrl($this->styles))->toBe($this->copyUrl);
+    });
+
+    afterEach(function (): void {
+        $this->mount->delete('theme/test-theme-copy.css');
+        unlink($this->styles);
+        rmdir(dirname($this->styles));
+        rmdir(dirname($this->styles, 2));
+        rmdir(dirname($this->styles, 3));
+        rmdir($this->skinDir);
+        rmdir(dirname($this->skinDir));
+    });
+
+    it('links the new styles.css with no flush of the cache', function (): void {
+        file_put_contents($this->styles, 'b{color:red}');
+
+        expect(skinDirContentBundle($this->skinDir)->getUrl($this->styles))->toBeNull();
+    });
+
+    it('keeps the copy when a copy of the same styles.css changes its time only', function (): void {
+        touch($this->styles, time() + 60);
+
+        expect(skinDirContentBundle($this->skinDir)->getUrl($this->styles))->toBe($this->copyUrl);
+        $cached = Mage::helper('core')->jsonDecode((string) Mage::app()->loadCache(Mage_Core_Model_Design_Content_Bundle::CACHE_ID));
+        expect($cached['test/theme']['stat'])->toStartWith((time() + 60) . '-');
+    });
+
+    it('links the new styles.css when a copy keeps the modification time and the size of the old one', function (): void {
+        $mtime = filemtime($this->styles);
+        // The change time has a resolution of one second
+        while (time() <= filectime($this->styles)) {
+            usleep(50_000);
+        }
+        file_put_contents($this->styles, 'b{}');
+        touch($this->styles, $mtime);
+
+        expect(skinDirContentBundle($this->skinDir)->getUrl($this->styles))->toBeNull();
+    });
+
+    it('links the copy again when styles.css goes back to the version of the copy', function (): void {
+        file_put_contents($this->styles, 'b{color:red}');
+        skinDirContentBundle($this->skinDir)->getUrl($this->styles);
+        file_put_contents($this->styles, 'a{}');
+
+        expect(skinDirContentBundle($this->skinDir)->getUrl($this->styles))->toBe($this->copyUrl);
+    });
+});
+
 describe('a manifest whose file is not on the mount', function () {
     beforeEach(function (): void {
         $styles = Mage::getBaseDir('skin') . '/frontend/base/default/css/styles.css';
@@ -259,6 +368,50 @@ describe('a manifest whose file is not on the mount', function () {
     it('makes the theme outdated, so the cron job queues a build', function (): void {
         expect(Mage::getModel('core/design_content_bundle')->getOutdatedThemes())->toContain('base/default');
     });
+
+    it('makes the cron job remove the manifest from the cache, so the head links the committed styles.css', function (): void {
+        $mount = Mage::getStorage(Mage_Core_Model_Design_Content_Bundle::MOUNT);
+        $mount->write('theme/missing-0000.css', '.copy{}');
+        expect(Mage::getModel('core/design_content_bundle')->getUrl($this->styles))->not->toBeNull();
+        $mount->delete('theme/missing-0000.css');
+
+        (new Mage_Core_Model_Design_Content_Observer())->queueOutdated();
+        deleteContentBuildRows();
+
+        expect(Mage::getModel('core/design_content_bundle')->getUrl($this->styles))->toBeNull();
+    });
+});
+
+describe('a build that saves its manifest while a request puts the manifest in the cache', function () {
+    afterEach(function (): void {
+        deleteContentFlags();
+    });
+
+    it('leaves no old manifest in the cache', function (): void {
+        Mage::getModel('core/flag', ['flag_code' => Mage_Core_Model_Design_Content_Bundle::FLAG_MANIFEST])->loadSelf()
+            ->setFlagData(['base/default' => ['file' => 'theme/old.css', 'tokens' => 'x', 'styles' => 'old']])
+            ->save();
+        Mage::app()->removeCache(Mage_Core_Model_Design_Content_Bundle::CACHE_ID);
+        $bundle = new class extends Mage_Core_Model_Design_Content_Bundle {
+            private bool $buildSaved = false;
+
+            #[\Override]
+            protected function loadManifest(): array
+            {
+                $manifest = parent::loadManifest();
+                if (!$this->buildSaved) {
+                    $this->buildSaved = true;
+                    // The build saves its manifest and removes the cache entry before the request writes it
+                    $this->saveManifest(['base/default' => ['file' => 'theme/new.css', 'tokens' => 'y', 'styles' => 'new']]);
+                }
+                return $manifest;
+            }
+        };
+
+        $bundle->getManifest();
+
+        expect(Mage::app()->loadCache(Mage_Core_Model_Design_Content_Bundle::CACHE_ID))->toBeFalsy();
+    });
 });
 
 describe('a build that fails', function () {
@@ -275,6 +428,16 @@ describe('a build that fails', function () {
 
     afterEach(function (): void {
         $this->mount->delete('theme/base-default-previous.css');
+        deleteContentBuildFailureMessages('base/default');
+    });
+
+    it('tells the administrators one time for each version of styles.css', function (): void {
+        deleteContentBuildFailureMessages('base/default');
+        $bundle = failingContentBundle();
+        $bundle->build();
+        $bundle->build();
+
+        expect(contentBuildFailureMessages('base/default'))->toHaveCount(1);
     });
 
     it('keeps the previous file in the head', function (): void {

@@ -116,11 +116,12 @@ the reference: open it in the editor to see how the blocks nest.
 The committed `css/styles.css` has the classes of the templates, plus the
 DaisyUI classes that `default/src/tailwind.css` lists under `@source inline(...)`.
 Any other class in content works when the server has Node.js and the Tailwind
-CLI (`npm install` in the Maho root):
+CLI (`npm install` in the Maho root, or `./maho theme:content:build`, which
+offers to install it):
 
 - A save of a CMS page, a CMS block, a blog post, a widget, a custom variable,
   a checkout agreement, a design footer field, or a WYSIWYG attribute of a
-  product or a category queues a build. The build runs one minute later in the
+  product or a category queues a build. The build runs 10 seconds later in the
   `slow` queue pool.
 - A queue worker must run the build. Cron starts one, or supervisord or systemd
   keeps `./maho queue:work` running. Without a worker, the build stays in the
@@ -132,9 +133,10 @@ CLI (`npm install` in the Maho root):
   `css/styles.css` with them, and writes it to `media/theme/`. The page head
   then links the copy instead of the committed file.
 - If the committed `css/styles.css` changes, for example after an upgrade, the
-  store serves the committed file again. A cron job queues a new build within
-  15 minutes. A deploy script can run the build at once with
-  `./maho theme:content:build`.
+  store serves the committed file again at once, with no cache flush. A cron
+  job queues a new build within 15 minutes. A deploy script can run the build
+  at once with `./maho theme:content:build`, and
+  `./maho dev:frontend:theme:build` runs it after it compiles a theme.
 - An import, from the admin or with `./maho import:*`, queues a build when it
   ends. A script of your own that writes content with SQL does not. Run the
   command after it.
@@ -532,6 +534,11 @@ CSS into each bundle. Reference `_theme.css`, never `tailwind.css`: the
 `@source` scan rules live in `tailwind.css`, and referencing a file that
 carries them rescans every matching path per bundle (40 seconds each) and
 throws the result away.
+
+Put `@tailwind utilities source(none);` below the reference. A reference does
+not carry the `source(none)` of `_theme.css`, so without this line Tailwind
+scans the whole project for each page bundle. The scan makes the build four
+times slower, and `--watch` rebuilds the bundle on each write under `var/`.
 
 Notes:
 
