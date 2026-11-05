@@ -110,9 +110,16 @@ controller, extend it: the router finds the subclass.
   phones and tablets
 - **Marketing**: customer segments, email automation, dynamic categories, gift cards, a blog, and
   product feeds for Google Shopping, Meta, Bing and Pinterest
-- **Payments and shipping**: PayPal v6 with Pay Later and saved cards, a
-  [Braintree module](https://github.com/MahoCommerce/module-braintree) for cards, Apple Pay and
-  Google Pay, external shipping rate APIs
+- **Payments**: PayPal v6 with Pay Later and saved cards in the core, and first-party modules for
+  [Braintree](https://github.com/MahoCommerce/module-braintree),
+  [Mollie](https://github.com/MahoCommerce/module-mollie),
+  [Klarna](https://github.com/MahoCommerce/module-klarna),
+  [Revolut](https://github.com/MahoCommerce/module-revolut),
+  [GNU Taler](https://github.com/MahoCommerce/module-taler),
+  [Przelewy24](https://github.com/MahoCommerce/module-przelewy24),
+  [PensoPay](https://github.com/MahoCommerce/module-pensopay) and
+  [Nexi Nets Easy](https://github.com/MahoCommerce/module-netseasy)
+- **Shipping**: rates from external shipping APIs
 - **Search engines and AI agents**: schema.org data, SEO rules for layered navigation, `llms.txt`
   and a markdown version of each page
 - **Compliance**: WCAG accessibility scans, EU VAT number checks, the EU revocation button
