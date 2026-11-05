@@ -397,21 +397,24 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Edit extends Mage_Adminhtml_Block_T
     }
 
     /**
-     * Return the configuration of the group dialog of the set editor: the store views, which can
-     * give a group its own label, and the texts of the dialog.
+     * Return the configuration of the group dialog of the set editor: the store views of each
+     * website, which can give a group its own label, and the texts of the dialog.
      */
     public function getGroupDialogJson(): string
     {
-        $stores = [];
-        foreach (Mage::app()->getStores() as $store) {
-            $stores[] = [
-                'id' => (int) $store->getId(),
-                'name' => $store->getWebsite()->getName() . ' / ' . $store->getName(),
-            ];
+        $websites = [];
+        foreach (Mage::app()->getWebsites() as $website) {
+            $stores = [];
+            foreach ($website->getStores() as $store) {
+                $stores[] = ['id' => (int) $store->getId(), 'name' => $store->getName()];
+            }
+            if ($stores) {
+                $websites[] = ['name' => $website->getName(), 'stores' => $stores];
+            }
         }
         $helper = Mage::helper('eav');
         return Mage::helper('core')->jsonEncode([
-            'stores' => $stores,
+            'websites' => $websites,
             'labels' => [
                 'addTitle' => $helper->__('Add Group'),
                 'renameTitle' => $helper->__('Rename Group'),

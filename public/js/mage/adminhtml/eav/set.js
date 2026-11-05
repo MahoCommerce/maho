@@ -23,8 +23,8 @@ class EavAttributeSetForm {
      * @param {function():boolean} [config.canDeleteSet] - callback to prompt user before deleting set
      * @param {function(MahoTreeNode):boolean|string} [config.canRemoveAttribute] - callback to determine if an attribute can be removed from set, return string for custom error message
      * @param {function(MahoTreeNode):boolean|string} [config.canDeleteGroup] - callback to determine if a group can be deleted, return string for custom error message
-     * @param {Object} [config.groupDialog] - the store views and the texts of the group dialog
-     * @param {{id: number, name: string}[]} config.groupDialog.stores - the store views that can give a group its own label
+     * @param {Object} [config.groupDialog] - the websites, their store views and the texts of the group dialog
+     * @param {{name: string, stores: {id: number, name: string}[]}[]} config.groupDialog.websites - the store views of each website, which can give a group its own label
      * @param {Object<string, string>} config.groupDialog.labels - the texts of the dialog
      */
     constructor(config) {
@@ -47,7 +47,7 @@ class EavAttributeSetForm {
             canDeleteSet: null,
             canRemoveAttribute: null,
             canDeleteGroup: null,
-            groupDialog: { stores: [], labels: {} },
+            groupDialog: { websites: [], labels: {} },
 
             ...config,
         };
@@ -227,14 +227,17 @@ class EavAttributeSetForm {
      */
     openGroupDialog(node = null) {
         const texts = this.config.groupDialog.labels;
-        const rows = [{ id: 0, name: texts.admin, required: true }, ...this.config.groupDialog.stores];
+        const row = (id, name, className = '', required = false) => `
+            <tr class="${className}">
+                <td class="label"><label for="group-label-${id}">${escapeHtml(name)}${required ? ' <span class="required">*</span>' : ''}</label></td>
+                <td class="value"><input type="text" id="group-label-${id}" data-store-id="${id}" class="input-text" maxlength="255"></td>
+            </tr>`;
         const html = `
             <table class="form-list group-labels"><tbody>
-                ${rows.map((row) => `
-                    <tr>
-                        <td class="label"><label for="group-label-${row.id}">${escapeHtml(row.name)}${row.required ? ' <span class="required">*</span>' : ''}</label></td>
-                        <td class="value"><input type="text" id="group-label-${row.id}" data-store-id="${row.id}" class="input-text" maxlength="255"></td>
-                    </tr>`).join('')}
+                ${row(0, texts.admin, '', true)}
+                ${this.config.groupDialog.websites.map((website) => `
+                    <tr class="website"><th colspan="2">${escapeHtml(website.name)}</th></tr>
+                    ${website.stores.map((store) => row(store.id, store.name, 'store-view')).join('')}`).join('')}
             </tbody></table>
             <p class="note">${escapeHtml(texts.note)}</p>
             <div class="validation-advice" hidden></div>`;
