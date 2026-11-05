@@ -114,6 +114,9 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
     #[\Override]
     protected function _initOldFieldsMap()
     {
+        $this->_oldFieldsMap = [
+            'base_shipping_hidden_tax_amount' => 'base_shipping_hidden_tax_amnt',
+        ];
         return $this;
     }
 
