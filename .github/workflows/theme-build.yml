@@ -33,7 +33,7 @@ jobs:
 
       - name: Rebuild the theme CSS
         run: |
-          ./maho dev:frontend:theme:build
+          ./maho dev:frontend:theme:build --no-content
           ./maho dev:admin:theme:build
 
       - name: Verify the compiled CSS is up to date
