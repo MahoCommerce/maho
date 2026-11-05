@@ -31,8 +31,8 @@ it at once, on the **Content** tab, below the fields of the blog. On a category,
    **Attribute Sets**.
 2. Click the set, for example **Default**.
 3. Drag the attribute to another group, or from **Unassigned Attributes** to a group. To add a
-   group, click **Add New**.
-4. Click **Save Attribute Set**.
+   group, click **Add** above the groups.
+4. Click **Save**.
 
 The attributes of the first group of the set show on the **Content** tab of a post and on the
 **General** tab of a category. Each other group that holds an attribute is a tab of its own, with
@@ -48,9 +48,20 @@ category. So the value of an attribute shows and stays only when the attribute i
 
 Set **Visible on Frontend** to **Yes** in the **Frontend Properties** of the attribute. The post
 page or the category page then shows the attribute and its value in a table. A post with no value
-for the attribute does not show it. The table follows the order of the set: first the order of
-the groups, then the order of the attributes in each group. To change the order, drag the
-attribute in the set.
+for the attribute does not show it.
+
+Each group of the set is a table of its own, in the order of the groups. The table of the first
+group has the title **Additional Information**. Each other table has the name of its group in the
+store view. In each table, the attributes follow the order of the group. To change the order,
+drag the attribute in the set.
+
+## Name a group for each store view
+
+1. On the set page, click a group and click **Rename**, or click **Add** to make a group.
+2. Enter the name in **Admin**. The admin uses it, and it must be unique in the set.
+3. To show another name in a store view, enter it in the row of that store view. A store view with
+   no name shows the Admin name.
+4. Click **Save** in the window, then click **Save** on the set page.
 
 The table shows HTML only when **Allow HTML Tags on Frontend** is **Yes**.
 

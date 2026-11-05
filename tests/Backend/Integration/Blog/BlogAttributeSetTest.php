@@ -38,9 +38,6 @@ function blogSetTestAttribute(string $entityTypeCode, string $code, array $extra
 }
 
 beforeEach(function () {
-    if (!Mage::helper('core')->isModuleEnabled('Maho_Blog')) {
-        $this->markTestSkipped('Maho_Blog is disabled');
-    }
     $this->suffix = substr(uniqid(), -6);
     $this->records = [];
 });

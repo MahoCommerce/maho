@@ -169,6 +169,7 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Edit extends Mage_Adminhtml_Block_T
                 'type'      => 'folder',
                 'allowDrop' => true,
                 'allowDrag' => true,
+                'store_labels' => (object) $node->getStoreLabels(),
             ];
 
             $nodeChildren = $this->_getAttributeCollection()
@@ -393,6 +394,32 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Edit extends Mage_Adminhtml_Block_T
         /** @var Mage_Eav_Model_Entity_Type $entityType */
         $entityType = Mage::getSingleton('eav/config')->getEntityType(Mage::registry('entityType'));
         return Mage::helper('eav')->getManagedAttributeCollection($entityType, forSets: true);
+    }
+
+    /**
+     * Return the configuration of the group dialog of the set editor: the store views, which can
+     * give a group its own label, and the texts of the dialog.
+     */
+    public function getGroupDialogJson(): string
+    {
+        $stores = [];
+        foreach (Mage::app()->getStores() as $store) {
+            $stores[] = [
+                'id' => (int) $store->getId(),
+                'name' => $store->getWebsite()->getName() . ' / ' . $store->getName(),
+            ];
+        }
+        $helper = Mage::helper('eav');
+        return Mage::helper('core')->jsonEncode([
+            'stores' => $stores,
+            'labels' => [
+                'addTitle' => $helper->__('Add Group'),
+                'renameTitle' => $helper->__('Rename Group'),
+                'admin' => $helper->__('Admin'),
+                'note' => $helper->__('A store view with no label shows the Admin name.'),
+                'ok' => $helper->__('Save'),
+            ],
+        ]);
     }
 
     /**

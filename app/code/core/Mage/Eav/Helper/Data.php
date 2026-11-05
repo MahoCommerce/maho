@@ -168,4 +168,59 @@ class Mage_Eav_Helper_Data extends Mage_Core_Helper_Abstract
         }
         return $attribute->setEntityTypeId((int) $entityType->getId())->getAdminPageSettings();
     }
+
+    /**
+     * Split $attributes by the groups of attribute set $setId, in the order of the groups. Each
+     * group keeps the order of $attributes.
+     *
+     * The first part holds the attributes of the first group and the attributes that are not in the
+     * set, with no label, because they join the fields that the page shows itself. Each other group
+     * that holds an attribute follows, with its label in $storeId.
+     *
+     * @template T of Mage_Eav_Model_Entity_Attribute_Abstract
+     * @param list<T> $attributes
+     * @return list<array{id: ?int, label: ?string, attributes: list<T>}>
+     */
+    public function groupAttributesBySet(array $attributes, ?int $setId, ?int $storeId = null): array
+    {
+        if (!$setId || !$attributes) {
+            return [['id' => null, 'label' => null, 'attributes' => $attributes]];
+        }
+
+        $resource = Mage::getSingleton('core/resource');
+        $adapter = $resource->getConnection('core_read');
+        $groupOf = $adapter->fetchPairs(
+            $adapter->select()
+                ->from($resource->getTableName('eav/entity_attribute'), ['attribute_id', 'attribute_group_id'])
+                ->where('attribute_set_id = ?', $setId),
+        );
+        $groups = Mage::getResourceModel('eav/entity_attribute_group_collection')
+            ->setAttributeSetFilter($setId)
+            ->setSortOrder()
+            ->addStoreLabel($storeId ?? (int) Mage::app()->getStore()->getId());
+
+        $firstGroupId = null;
+        $parts = [];
+        foreach ($groups as $group) {
+            $firstGroupId ??= (int) $group->getId();
+            $parts[(int) $group->getId()] = ['id' => (int) $group->getId(), 'label' => $group->getStoreLabel(), 'attributes' => []];
+        }
+        $first = ['id' => $firstGroupId, 'label' => null, 'attributes' => []];
+        foreach ($attributes as $attribute) {
+            $groupId = (int) ($groupOf[$attribute->getId()] ?? 0);
+            if ($groupId && $groupId !== $firstGroupId && isset($parts[$groupId])) {
+                $parts[$groupId]['attributes'][] = $attribute;
+            } else {
+                $first['attributes'][] = $attribute;
+            }
+        }
+
+        $result = $first['attributes'] ? [$first] : [];
+        foreach ($parts as $part) {
+            if ($part['attributes']) {
+                $result[] = $part;
+            }
+        }
+        return $result;
+    }
 }

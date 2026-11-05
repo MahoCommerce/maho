@@ -71,6 +71,42 @@ class Mage_Eav_Block_Frontend_Attributes extends Mage_Core_Block_Template
     }
 
     /**
+     * Return the rows of getAttributeValues() by group of the attribute set of the record, one
+     * table for each group. The first table takes the title of the block, or "Additional
+     * Information". Each other table takes the label of its group in the current store view.
+     *
+     * @return list<array{title: string, rows: list<array{label: string, value: string, code: string}>}>
+     */
+    public function getAttributeGroups(): array
+    {
+        $rows = $this->getAttributeValues();
+        if (!$rows) {
+            return [];
+        }
+        $entity = $this->getEntity();
+        $attributes = $entity->getAttributes();
+        $rowOf = [];
+        $list = [];
+        foreach ($rows as $row) {
+            $attribute = $attributes[$row['code']] ?? null;
+            if ($attribute instanceof Mage_Eav_Model_Entity_Attribute_Abstract) {
+                $rowOf[$row['code']] = $row;
+                $list[] = $attribute;
+            }
+        }
+
+        $setId = method_exists($entity, 'getAttributeSetId') ? (int) $entity->getAttributeSetId() : 0;
+        $tables = [];
+        foreach (Mage::helper('eav')->groupAttributesBySet($list, $setId ?: null) as $group) {
+            $tables[] = [
+                'title' => $group['label'] ?? (string) ($this->getTitle() ?: $this->__('Additional Information')),
+                'rows' => array_map(fn($attribute) => $rowOf[$attribute->getAttributeCode()], $group['attributes']),
+            ];
+        }
+        return $tables;
+    }
+
+    /**
      * Return the HTML of a value. HTML stays only when the attribute allows it on the storefront.
      */
     public function getValueHtml(array $row): string

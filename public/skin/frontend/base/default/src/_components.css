@@ -345,6 +345,16 @@
         }
     }
 
+    /* A group of custom attributes inside a form list (customer/form/attributes.phtml): a titled
+       part of the form that the attribute set of the customer group defines */
+    .form-list > li.attribute-group > .fieldset {
+        @apply mt-2 mb-0;
+
+        .legend {
+            @apply mb-3 text-base;
+        }
+    }
+
     label.required em,
     span.required em,
     .form-list .required em,

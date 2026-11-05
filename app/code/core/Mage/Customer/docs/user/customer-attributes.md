@@ -70,8 +70,23 @@ A form shows an attribute when the attribute is in the set of the group, or when
 So a new attribute shows to every group until you add it to a set.
 
 The set page lists only the attributes that you added. The fields of the platform, such as
-**First Name** and **Email**, are in every set, and you cannot remove them. The groups of a set do
-not change the forms: each form shows its fields in one list.
+**First Name** and **Email**, are in every set, and you cannot remove them.
+
+The groups of the set divide the forms:
+
+- The attributes of the first group of the set, and the attributes in no set, show with the fields
+  of the platform.
+- Each other group of the set that holds a field of the form shows as a part with its own title,
+  for example **Company Information**. The title is the name of the group in the store view of the
+  customer. The admin customer page shows each group as a part too, with its Admin name.
+
+## Name a group for each store view
+
+1. On the set page, click a group and click **Rename**, or click **Add** to make a group.
+2. Enter the name in **Admin**. The admin uses it, and it must be unique in the set.
+3. To show another name in a store view, enter it in the row of that store view. A store view with
+   no name shows the Admin name.
+4. Click **Save** in the window, then click **Save** on the set page.
 
 The store finds the group of a form in this order:
 

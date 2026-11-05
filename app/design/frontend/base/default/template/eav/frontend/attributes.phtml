@@ -7,13 +7,13 @@
 
 /** @var Mage_Eav_Block_Frontend_Attributes $this */
 ?>
-<?php if ($_rows = $this->getAttributeValues()): ?>
+<?php foreach ($this->getAttributeGroups() as $_table): ?>
     <table class="data-table attribute-specs-table">
-        <caption><?= $this->escapeHtml($this->getTitle() ?: $this->__('Additional Information')) ?></caption>
+        <caption><?= $this->escapeHtml($_table['title']) ?></caption>
         <col width="25%">
         <col>
         <tbody>
-        <?php foreach ($_rows as $_row): ?>
+        <?php foreach ($_table['rows'] as $_row): ?>
             <tr>
                 <th class="label"><?= $this->escapeHtml($_row['label']) ?></th>
                 <td class="data"><?= $this->getValueHtml($_row) ?></td>
@@ -21,4 +21,4 @@
         <?php endforeach ?>
         </tbody>
     </table>
-<?php endif ?>
+<?php endforeach ?>

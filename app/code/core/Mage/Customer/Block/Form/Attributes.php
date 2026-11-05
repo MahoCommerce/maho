@@ -58,6 +58,22 @@ class Mage_Customer_Block_Form_Attributes extends Mage_Core_Block_Template
     }
 
     /**
+     * Return the visible user-defined attributes of the form by group of the attribute set of the
+     * form. The first part has no label: its fields join the fields that the template shows itself.
+     * Each other group is a fieldset with its label in the current store view.
+     *
+     * @return list<array{id: ?int, label: ?string, attributes: list<Mage_Customer_Model_Attribute>}>
+     */
+    public function getAttributeGroups(): array
+    {
+        $attributes = $this->getAttributes();
+        if (!$attributes) {
+            return [];
+        }
+        return Mage::helper('eav')->groupAttributesBySet($attributes, $this->form?->getAttributeSetId());
+    }
+
+    /**
      * Return the value of an attribute: the posted value that the session kept, or the value of the entity.
      */
     public function getValue(Mage_Customer_Model_Attribute $attribute): mixed

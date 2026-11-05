@@ -60,8 +60,9 @@ of its own. The admin then cannot change anything about them on these pages, so 
 them.
 
 Set `sets_user_defined_only` when admins edit the properties of the system attributes in the grid,
-but the form of your entity does not use the groups of a set. The set editor refuses to remove a
-system attribute, so the editor hides entries that have no function there.
+but the storefront forms of your entity show the system attributes themselves, so a group does not
+move them. The set editor refuses to remove a system attribute, so the editor hides entries that
+have no function there.
 
 Set `add_to_default_set` when most stores use one set for your entity. A new attribute then shows on
 the edit page at once. Leave it off when an attribute in no set has a meaning of its own, or when
@@ -93,13 +94,39 @@ The reasons for each choice:
 - **Catalog categories** build their edit page from the groups of the set, so the set editor shows
   the system attributes: a move of `description` to another group moves it to another tab.
 - **Customers and customer addresses** show an attribute that is in no set to every customer group.
-  For that reason, a new attribute goes into no set. The customer form puts every field in one
-  fieldset and ignores the groups, so the set editor hides the system attributes.
+  For that reason, a new attribute goes into no set. The storefront templates show the system
+  attributes themselves, so the set editor hides them. Each later group of the set is a fieldset of
+  the forms.
 - **CMS pages** give every page every attribute. The type has a Default set because the EAV setup
   creates one, but no page picks it.
 - **Blog posts and blog categories** have a hard-coded edit form for the fields of the blog. The
   attributes of the first group of the set show on the main tab (**Content** for a post, **General**
   for a category). Each other group that holds an attribute adds a tab.
+
+## Group labels and storefront parts
+
+A group of a set has a name, which the admin uses, and an optional label for each store view in the
+`eav_attribute_group_label` table. The **Add** and **Rename** buttons of the set editor open one
+window with a row for each.
+
+- `Mage_Eav_Model_Entity_Attribute_Group::getStoreLabel($storeId)` returns the label of the store
+  view, or the group name as plain text.
+- `setStoreLabels()` replaces all labels on the next save. A save that does not set them keeps the
+  saved labels.
+- The `addStoreLabel($storeId)` method of the group collection joins the labels of one store view,
+  so a list of groups needs no query for each group.
+
+`Mage_Eav_Helper_Data::groupAttributesBySet($attributes, $setId, $storeId)` splits a list of
+attributes by the groups of a set, in the order of the groups. The first part has no label: it holds
+the attributes of the first group and the attributes that are not in the set, because they join the
+fields that the page shows itself. Each other group follows with its label. These callers use it:
+
+- `Mage_Customer_Block_Form_Attributes` shows each later group as a fieldset in the storefront
+  forms of customers and addresses.
+- The admin customer page shows each later group as a fieldset of the **Account Information** and
+  **Addresses** tabs, with the Admin name.
+- `Mage_Eav_Block_Frontend_Attributes` shows one table for each group on the storefront pages of
+  catalog categories, blog posts and blog categories.
 
 ## Sets and the nightly cleanup
 

@@ -47,6 +47,9 @@ SPDX-License-Identifier: AFL-3.0
                     <attribute_group>
                         <table>eav_attribute_group</table>
                     </attribute_group>
+                    <attribute_group_label>
+                        <table>eav_attribute_group_label</table>
+                    </attribute_group_label>
                     <attribute_option>
                         <table>eav_attribute_option</table>
                     </attribute_option>

@@ -43,7 +43,24 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Account extends Mage_Adminhtml_Bloc
         }
 
         $disableAutoGroupChangeAttributeName = 'disable_auto_group_change';
-        $this->_setFieldset($attributes, $fieldset, [$disableAutoGroupChangeAttributeName]);
+        // Each group of the attribute set after the first one gets its own fieldset
+        $groups = Mage::helper('eav')->groupAttributesBySet(
+            array_values($attributes),
+            $customerForm->getAttributeSetId(),
+            Mage_Core_Model_App::ADMIN_STORE_ID,
+        );
+        foreach ($groups as $group) {
+            if ($group['label'] === null) {
+                $this->_setFieldset($group['attributes'], $fieldset, [$disableAutoGroupChangeAttributeName]);
+            }
+        }
+        foreach ($groups as $group) {
+            if ($group['label'] !== null) {
+                $this->_setFieldset($group['attributes'], $form->addFieldset('attribute_group_' . $group['id'], [
+                    'legend' => $group['label'],
+                ]));
+            }
+        }
 
         $form->getElement('group_id')->setRenderer($this->getLayout()
             ->createBlock('adminhtml/customer_edit_renderer_attribute_group')

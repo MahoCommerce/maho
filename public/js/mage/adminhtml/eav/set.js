@@ -23,6 +23,9 @@ class EavAttributeSetForm {
      * @param {function():boolean} [config.canDeleteSet] - callback to prompt user before deleting set
      * @param {function(MahoTreeNode):boolean|string} [config.canRemoveAttribute] - callback to determine if an attribute can be removed from set, return string for custom error message
      * @param {function(MahoTreeNode):boolean|string} [config.canDeleteGroup] - callback to determine if a group can be deleted, return string for custom error message
+     * @param {Object} [config.groupDialog] - the store views and the texts of the group dialog
+     * @param {{id: number, name: string}[]} config.groupDialog.stores - the store views that can give a group its own label
+     * @param {Object<string, string>} config.groupDialog.labels - the texts of the dialog
      */
     constructor(config) {
 
@@ -44,6 +47,7 @@ class EavAttributeSetForm {
             canDeleteSet: null,
             canRemoveAttribute: null,
             canDeleteGroup: null,
+            groupDialog: { stores: [], labels: {} },
 
             ...config,
         };
@@ -150,7 +154,7 @@ class EavAttributeSetForm {
 
             const tree1 = this.tree1.rootNode.toObject();
             for (const [ i, group ] of Object.entries(tree1.children)) {
-                data.groups.push([ group.id, group.text, parseInt(i) + 1 ]);
+                data.groups.push([ group.id, group.text, parseInt(i) + 1, group.store_labels ?? {} ]);
                 for (const [ j, attr ] of Object.entries(group.children)) {
                     data.attributes.push([ attr.id, group.id, parseInt(j) + 1, attr.entity_id ]);
                 }
@@ -206,55 +210,82 @@ class EavAttributeSetForm {
     }
 
     addGroup() {
-        let groupName = prompt(Translator.translate('Please enter a new group name'));
-        if (groupName === null) {
-            return;
-        }
-
-        groupName = escapeHtml(groupName).trim();
-        if (groupName === '') {
-            return this.addGroup();
-        }
-
-        if (!this.validateGroupName(groupName)) {
-            alert(Translator.translate('Attribute group with the "%s" name already exists', groupName));
-            return;
-        }
-
-        const newNode = new MahoTreeNode(this.tree1, {
-            text: groupName,
-            type: 'folder',
-            allowDrop : true,
-            allowDrag : true,
-        });
-
-        this.tree1.rootNode.prependChild(newNode);
+        this.openGroupDialog();
     }
 
     renameGroup() {
         const selected = this.tree1.getChecked()[0];
-        if (!selected) {
-            return;
+        if (selected) {
+            this.openGroupDialog(selected);
         }
+    }
 
-        let groupName = prompt(Translator.translate('Please enter a new group name'), selected.text);
-        if (groupName === null) {
-            return;
-        }
+    /**
+     * Ask for the name of a group and its label in each store view. Without a node, the dialog adds a group.
+     *
+     * @param {MahoTreeNode} [node]
+     */
+    openGroupDialog(node = null) {
+        const texts = this.config.groupDialog.labels;
+        const rows = [{ id: 0, name: texts.admin, required: true }, ...this.config.groupDialog.stores];
+        const html = `
+            <table class="form-list group-labels"><tbody>
+                ${rows.map((row) => `
+                    <tr>
+                        <td class="label"><label for="group-label-${row.id}">${escapeHtml(row.name)}${row.required ? ' <span class="required">*</span>' : ''}</label></td>
+                        <td class="value"><input type="text" id="group-label-${row.id}" data-store-id="${row.id}" class="input-text" maxlength="255"></td>
+                    </tr>`).join('')}
+            </tbody></table>
+            <p class="note">${escapeHtml(texts.note)}</p>
+            <div class="validation-advice" hidden></div>`;
 
-        groupName = escapeHtml(groupName).trim();
+        Dialog.confirm(html, {
+            title: node ? texts.renameTitle : texts.addTitle,
+            okLabel: texts.ok,
+            width: 640,
+            onOpen: (dialog) => {
+                const labels = node?.attributes.store_labels ?? {};
+                for (const input of dialog.querySelectorAll('input[data-store-id]')) {
+                    const storeId = input.dataset.storeId;
+                    input.value = storeId === '0' ? unescapeHtml(node?.text ?? '') : (labels[storeId] ?? '');
+                }
+                dialog.querySelector('#group-label-0').focus();
+            },
+            onOk: (dialog) => {
+                const advice = dialog.querySelector('.validation-advice');
+                advice.hidden = true;
+                const name = escapeHtml(dialog.querySelector('#group-label-0').value.trim());
+                let error = '';
+                if (name === '') {
+                    error = Translator.translate('This is a required field.');
+                } else if (!this.validateGroupName(name, node?.id)) {
+                    error = Translator.translate('Attribute group with the "%s" name already exists', unescapeHtml(name));
+                }
+                if (error) {
+                    advice.textContent = error;
+                    advice.hidden = false;
+                    return false;
+                }
 
-        if (groupName === '') {
-            return this.renameGroup();
-        }
+                const storeLabels = {};
+                for (const input of dialog.querySelectorAll('input[data-store-id]')) {
+                    if (input.dataset.storeId !== '0' && input.value.trim() !== '') {
+                        storeLabels[input.dataset.storeId] = input.value.trim();
+                    }
+                }
 
-        if (!this.validateGroupName(groupName)) {
-            alert(Translator.translate('Attribute group with the "%s" name already exists', groupName));
-            return;
-        }
-
-        selected.updateAttributes({
-            text: groupName,
+                if (node) {
+                    node.updateAttributes({ text: name, store_labels: storeLabels });
+                } else {
+                    this.tree1.rootNode.prependChild(new MahoTreeNode(this.tree1, {
+                        text: name,
+                        type: 'folder',
+                        allowDrop: true,
+                        allowDrag: true,
+                        store_labels: storeLabels,
+                    }));
+                }
+            },
         });
     }
 

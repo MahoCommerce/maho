@@ -7,7 +7,14 @@
 
 /** @var Mage_Customer_Block_Form_Attributes $this */
 ?>
-<?php foreach ($this->getAttributes() as $_attribute): ?>
+<?php foreach ($this->getAttributeGroups() as $_group): ?>
+<?php if ($_group['label'] !== null): ?>
+    <li class="wide attribute-group">
+        <div class="fieldset">
+            <h2 class="legend"><?= $this->escapeHtml($_group['label']) ?></h2>
+            <ul class="form-list">
+<?php endif ?>
+<?php foreach ($_group['attributes'] as $_attribute): ?>
 <?php
     $_input = $_attribute->getFrontendInput();
     $_id = $this->escapeHtml($this->getFieldId($_attribute));
@@ -48,4 +55,10 @@
         <?php endif ?>
         </div>
     </li>
+<?php endforeach ?>
+<?php if ($_group['label'] !== null): ?>
+            </ul>
+        </div>
+    </li>
+<?php endif ?>
 <?php endforeach ?>

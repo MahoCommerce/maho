@@ -274,3 +274,44 @@ it('names the default mode in the website options of a customer attribute', func
     $attribute->setIsVisible(false)->save();
     expect($labels()[''])->toBe('Use Default (Hidden)');
 });
+
+it('puts the attributes of a later group of the set in a fieldset with the label of the store view', function () {
+    $storeId = (int) Mage::app()->getDefaultStoreView()->getId();
+    $set = $this->sets[] = customerSetTestCreateSet('customer', 'Pest Company ' . $this->suffix);
+    $group = Mage::getModel('eav/entity_attribute_group')
+        ->setAttributeSetId((int) $set->getId())
+        ->setAttributeGroupName('Company')
+        ->setSortOrder(900)
+        ->setStoreLabels([$storeId => 'Azienda']);
+    $group->save();
+    $inFirst = $this->attributes[] = customerSetTestCreateAttribute('customer', 'pest_first_' . $this->suffix, (int) $set->getId(), ['customer_account_edit']);
+    $inCompany = $this->attributes[] = customerSetTestCreateAttribute('customer', 'pest_company_' . $this->suffix, (int) $set->getId(), ['customer_account_edit']);
+    $inCompany->setAttributeSetId((int) $set->getId())->setAttributeGroupId((int) $group->getId())->save();
+    Mage::getSingleton('eav/config')->clear();
+
+    $customerGroup = $this->groups[] = Mage::getModel('customer/group')
+        ->setCode('Pest C ' . $this->suffix)
+        ->setTaxClassId(customerSetTestTaxClassId())
+        ->setCustomerAttributeSetId((int) $set->getId());
+    $customerGroup->save();
+    $customer = Mage::getModel('customer/customer')->setGroupId((int) $customerGroup->getId());
+
+    $previousStoreId = (int) Mage::app()->getStore()->getId();
+    Mage::app()->setCurrentStore($storeId);
+    try {
+        $groups = Mage::app()->getLayout()->createBlock('customer/form_attributes')
+            ->setCustomerForm('customer_account_edit', $customer)
+            ->getAttributeGroups();
+    } finally {
+        Mage::app()->setCurrentStore($previousStoreId);
+    }
+    $summary = array_map(fn(array $part) => [
+        $part['label'],
+        array_map(fn($attribute) => $attribute->getAttributeCode(), $part['attributes']),
+    ], $groups);
+
+    expect($summary)->toBe([
+        [null, [$inFirst->getAttributeCode()]],
+        ['Azienda', [$inCompany->getAttributeCode()]],
+    ]);
+});

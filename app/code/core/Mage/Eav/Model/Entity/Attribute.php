@@ -209,7 +209,7 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
      * - user_defined_only: the pages list only the attributes that an admin added, because the edit
      *   form of the entity shows the system attributes with fields of its own
      * - sets_user_defined_only: the same as user_defined_only, for the set editor only, because the
-     *   form of the entity does not use the groups of the set
+     *   storefront forms show the system attributes themselves, so a group does not move them
      * - add_to_default_set: a new attribute goes into the first group of the default set, unless
      *   the set page creates it
      *
