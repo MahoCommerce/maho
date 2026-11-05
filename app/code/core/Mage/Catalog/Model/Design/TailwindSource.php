@@ -54,7 +54,7 @@ class Mage_Catalog_Model_Design_TailwindSource
 
         $changed = array_any($this->getAttributes($entityType), fn(string $code): bool => $object->dataHasChangedFor($code));
         if ($changed) {
-            Mage::getSingleton('core/design_content_bundle')->queueBuild();
+            Mage::getSingleton('core/design_content_bundle')->queueBuild(Mage_Core_Model_Design_Content_Bundle::SAVE_DELAY);
         }
     }
 
@@ -76,7 +76,7 @@ class Mage_Catalog_Model_Design_TailwindSource
     {
         if ($this->updatesContent) {
             $this->updatesContent = false;
-            Mage::getSingleton('core/design_content_bundle')->queueBuild();
+            Mage::getSingleton('core/design_content_bundle')->queueBuild(Mage_Core_Model_Design_Content_Bundle::SAVE_DELAY);
         }
     }
 

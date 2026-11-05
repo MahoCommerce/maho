@@ -123,6 +123,8 @@ A theme without a `src/` directory needs no build. Its `css/` files are served a
 | `--theme package/theme` | `-t` | Build one theme instead of all |
 | `--watch` | `-w` | Rebuild on every change until you press Ctrl+C |
 | `--map` | | Add an inline source map, so the browser developer tools show the `src/` files |
+| `--no-content` | | Do not compile the classes of the content. See [The classes of the content](#the-classes-of-the-content) |
+| `--force` | `-f` | Install the Tailwind toolchain with no question when it is missing. See [The toolchain](#the-toolchain) |
 
 ```bash
 # Build one theme
@@ -134,15 +136,21 @@ A theme without a `src/` directory needs no build. Its `css/` files are served a
 
 Watch output is not minified. Run a plain build, without `--watch` and `--map`, before you commit.
 
-The admin skin has the same build, with `dev:admin:theme:build`. See [Admin theme](admin-theme.md#rebuild-the-admin-css).
+The admin skin has the same build, with `dev:admin:theme:build`. See [Admin theme](admin-theme.md#rebuild-the-admin-css). The admin build has no `--no-content` option, because the content build is for the storefront only.
+
+### The classes of the content
+
+After the bundles compile, the command also runs the [content build](#themecontentbuild), so the store shows your change and the classes of the content at once. You do not need `cache:flush` or a second command. With `--watch`, the content build runs one time at the start, and again each time a compiled `css/styles.css` changes.
+
+The command skips this step when Maho is not installed or the database is not available, for example in CI, and shows one line about it. Use `--no-content` to skip it in other cases.
 
 ### The toolchain
 
-The command looks for the Tailwind CLI in `node_modules/.bin/tailwindcss` in the project root. When it is missing, the command offers to install `tailwindcss`, `@tailwindcss/cli` and `daisyui` as dev dependencies. It picks the package manager whose lock file the project carries, from npm, bun, pnpm and yarn, and falls back to the first one installed. A project whose `package.json` already declares `@tailwindcss/cli` gets a plain install, so the pinned versions win.
+The command looks for the Tailwind CLI in `node_modules/.bin/tailwindcss` in the project root. When it is missing, the command offers to install `tailwindcss@^4`, `@tailwindcss/cli@^4` and `daisyui@^5` as dev dependencies. These are the majors that Maho uses. With `--force`, it installs them with no question. In a run with `-n` and no `--force`, the command does not install: it prints the install command and stops. It picks the package manager whose lock file the project carries, from npm, bun, pnpm and yarn, and falls back to the first one installed. A project whose `package.json` already declares `@tailwindcss/cli` gets a plain install, so the pinned versions win.
 
 The toolchain needs Node.js or Bun. Without either, the command stops with an error. Store owners never need it: the admin settings and plain CSS themes work without a build.
 
-This works the same when Maho is a Composer dependency of your project. The project root is the working directory in both cases, and the toolchain installs into the project's `node_modules/`.
+This works the same when Maho is a Composer dependency of your project. The project root is the working directory in both cases, and the toolchain installs into the project's `node_modules/`. Such a project has no `package.json` from Maho, so a plain `npm install` installs nothing: let the command install the toolchain, or run the install command that it prints.
 
 ### Commit the output
 
@@ -205,7 +213,7 @@ Compiles the Tailwind classes of the CMS, blog and catalog content into a copy o
 ./maho theme:content:build
 ```
 
-A save of the content queues the same build, so a store with a queue worker needs the command only in its deploy script and after a script that writes content with SQL. It takes no options. It lists the sources of the content, then one row for each theme: `built`, `unchanged`, `empty` or `failed`. It fails when the Tailwind CLI is missing from `node_modules/.bin/`, when another build runs, or when a theme fails to compile.
+A save of the content queues the same build, and `dev:frontend:theme:build` runs it too. So a store with a queue worker needs the command only in its deploy script and after a script that writes content with SQL. It lists the sources of the content, then one row for each theme: `built`, `unchanged`, `empty` or `failed`. When the Tailwind CLI is missing from `node_modules/.bin/`, it offers to install it, as `dev:frontend:theme:build` does. With `--force` (`-f`), it installs it with no question. It fails when the toolchain is not installed, when another build runs, or when a theme fails to compile.
 
 See [Tailwind build of the content](../hosting/tailwind-content-build.md) for the requirements on the server, and [Classes in CMS and catalog content](theme-development.md#classes-in-cms-and-catalog-content) for the content of your own module.
 
