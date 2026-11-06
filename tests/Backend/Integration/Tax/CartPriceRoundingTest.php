@@ -115,14 +115,14 @@ it('charges in the cart the price that the product page shows for a price withou
 it('takes the tax of a line with more than one unit from the unrounded price', function (string $algorithm, float $expectedTax): void {
     Mage::app()->getStore(1)->setConfig('tax/calculation/algorithm', $algorithm);
 
-    $quote = cartPriceRoundingQuote(2, 11.4754, $this->productClassId);
+    $quote = cartPriceRoundingQuote(3, 11.4754, $this->productClassId);
     $quote->collectTotals();
 
     expect(round((float) $quote->getShippingAddress()->getTaxAmount(), 2))->toBe($expectedTax);
 })->with([
-    'unit price' => [Mage_Tax_Model_Calculation::CALC_UNIT_BASE, 5.04],
-    'row total' => [Mage_Tax_Model_Calculation::CALC_ROW_BASE, 5.05],
-    'total' => [Mage_Tax_Model_Calculation::CALC_TOTAL_BASE, 5.05],
+    'unit price' => [Mage_Tax_Model_Calculation::CALC_UNIT_BASE, 7.56],
+    'row total' => [Mage_Tax_Model_Calculation::CALC_ROW_BASE, 7.57],
+    'total' => [Mage_Tax_Model_Calculation::CALC_TOTAL_BASE, 7.57],
 ]);
 
 it('adds no hidden tax when a discount takes the whole line', function (string $algorithm): void {
@@ -145,7 +145,9 @@ it('adds no hidden tax when a discount takes the whole line', function (string $
 
     expect(round((float) $address->getDiscountAmount(), 2))->toBe(-100.1)
         ->and(round((float) $address->getHiddenTaxAmount(), 2))->toBe(0.0)
-        ->and(round((float) $address->getGrandTotal(), 2))->toBe(0.0);
+        ->and(round((float) $address->getGrandTotal(), 2))->toBe(0.0)
+        ->and(round((float) $address->getBaseHiddenTaxAmount(), 2))->toBe(0.0)
+        ->and(round((float) $address->getBaseGrandTotal(), 2))->toBe(0.0);
 })->with([
     'unit price' => [Mage_Tax_Model_Calculation::CALC_UNIT_BASE],
     'row total' => [Mage_Tax_Model_Calculation::CALC_ROW_BASE],
