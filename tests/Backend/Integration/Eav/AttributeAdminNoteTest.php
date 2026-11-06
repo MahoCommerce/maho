@@ -191,9 +191,3 @@ it('names the forms, the customer groups and the websites of a customer attribut
         ->and($note)->toContain('Customer groups: all, because the attribute is in no set.')
         ->and($note)->toContain(Mage::app()->getWebsite(1)->getName() . ' (Optional)');
 });
-
-it('tells the admin that only a theme shows a CMS page attribute', function () {
-    $attribute = Mage::getModel('cms/attribute')->setData('attribute_code', 'pest_campaign');
-
-    expect((string) $attribute->getAttributeNote())->toContain("\$this->getPage()->getData('pest_campaign')");
-});

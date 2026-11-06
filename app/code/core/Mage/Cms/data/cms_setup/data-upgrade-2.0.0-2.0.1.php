@@ -9,7 +9,8 @@
 declare(strict_types=1);
 
 // The cms_page entity type holds the definitions of the custom attributes of CMS pages. Each one is
-// static, so its values are columns of cms_page and the type has no value tables.
+// static, so its values are columns of cms_page and the type has no value tables. cms_eav_attribute
+// holds the storefront settings of each attribute.
 $installer = new Mage_Eav_Model_Entity_Setup('cms_setup');
 $installer->startSetup();
 
@@ -18,6 +19,7 @@ if (!$installer->getEntityType(Mage_Cms_Model_Page::ENTITY, 'entity_type_id')) {
         'entity_model' => 'cms/page_entity',
         'attribute_model' => 'cms/attribute',
         'table' => 'cms/page',
+        'additional_attribute_table' => 'cms/eav_attribute',
         'entity_attribute_collection' => 'eav/entity_attribute_collection',
     ]);
     $installer->setDefaultSetToEntityType(Mage_Cms_Model_Page::ENTITY);

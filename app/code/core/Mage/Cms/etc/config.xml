@@ -114,6 +114,9 @@ SPDX-License-Identifier: AFL-3.0
                     <block_store>
                         <table>cms_block_store</table>
                     </block_store>
+                    <eav_attribute>
+                        <table>cms_eav_attribute</table>
+                    </eav_attribute>
                 </entities>
             </cms_resource>
         </models>

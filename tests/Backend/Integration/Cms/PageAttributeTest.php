@@ -179,3 +179,63 @@ it('shows the Attributes tab only when CMS pages have an attribute', function ()
         Mage::unregister('cms_page');
     }
 });
+
+it('stores the frontend properties of a field', function () {
+    $attribute = $this->attributes[] = pageAttributeTestAttribute([
+        'attribute_code' => $this->codes['text'],
+        'frontend_input' => 'text',
+        'is_visible_on_front' => 1,
+        'is_html_allowed_on_front' => 1,
+    ]);
+
+    $loaded = Mage::getSingleton('eav/config')->getAttribute(Mage_Cms_Model_Page::ENTITY, $this->codes['text']);
+    expect((int) $loaded->getData('is_visible_on_front'))->toBe(1)
+        ->and((int) $loaded->getData('is_html_allowed_on_front'))->toBe(1)
+        ->and($attribute->getAdminPageSettings()->mainTab)->toBe('adminhtml/cms_attribute_edit_tab_main')
+        ->and($attribute->getAttributeNote())->toBeNull();
+});
+
+it('shows the visible fields of a page below its content', function () {
+    $this->attributes[] = pageAttributeTestAttribute([
+        'attribute_code' => $this->codes['text'],
+        'frontend_label' => 'Pest Campaign',
+        'frontend_input' => 'text',
+        'is_visible_on_front' => 1,
+    ]);
+    $this->attributes[] = pageAttributeTestAttribute([
+        'attribute_code' => $this->codes['date'],
+        'frontend_label' => 'Pest Hidden',
+        'frontend_input' => 'text',
+    ]);
+    $this->codes['notes'] = 'pest_notes_' . substr(uniqid(), -6);
+    $this->attributes[] = pageAttributeTestAttribute([
+        'attribute_code' => $this->codes['notes'],
+        'frontend_label' => 'Pest Notes',
+        'frontend_input' => 'textarea',
+        'is_visible_on_front' => 1,
+        'is_html_allowed_on_front' => 1,
+    ]);
+    $page = $this->pages[] = pageAttributeTestPage([
+        $this->codes['text'] => 'SPRING<26>',
+        $this->codes['date'] => 'SECRET',
+        $this->codes['notes'] => '<strong>Bold</strong><script>alert(1)</script>',
+    ]);
+    $page->save();
+
+    $html = Mage::app()->getLayout()->createBlock('cms/page_attributes')
+        ->setEntity(Mage::getModel('cms/page')->load($page->getId()))
+        ->toHtml();
+
+    expect($html)->toContain('Pest Campaign')
+        ->and($html)->toContain('SPRING&lt;26&gt;')
+        ->and($html)->toContain('<strong>Bold</strong>')
+        ->and($html)->not->toContain('<script>')
+        ->and($html)->not->toContain('Pest Hidden')
+        ->and($html)->not->toContain('SECRET');
+});
+
+it('places the fields block in the content of every CMS page', function () {
+    $layout = file_get_contents(Mage::getBaseDir('design') . '/frontend/base/default/layout/cms.xml');
+
+    expect($layout)->toContain('<block type="cms/page_attributes" name="cms.page.attributes" after="cms_page"/>');
+});

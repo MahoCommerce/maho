@@ -75,8 +75,7 @@ The attribute model can also change the save and the texts of the set page:
 - `_getInputTypes()` gives the input types of the type. The event
   `eav_attribute_input_types_prepare` lets another module add or remove a type.
 - `getAttributeNote()` returns a text that the attribute page shows above the properties. The
-  customer types name the forms, the customer groups and the websites that show the attribute. CMS
-  pages say that only a theme shows the value.
+  customer types name the forms, the customer groups and the websites that show the attribute.
 - `getSetNote($set)` returns a text that the set page shows above the groups. The customer types
   use it to say that the customer group picks the set, and to name the groups that use the set.
 - `getSetDeleteQuestion($set)` returns the question before a set delete. By default, it names the
@@ -133,7 +132,8 @@ are not user-defined, because they join the fields that the page shows itself. E
 - The admin customer page shows each later group as a fieldset of the **Account Information** and
   **Addresses** tabs, with the Admin name.
 - `Mage_Eav_Block_Frontend_Attributes` shows one table for each group on the storefront pages of
-  catalog categories, blog posts and blog categories.
+  catalog categories, blog posts and blog categories. A CMS page has no sets, so its block shows one
+  table.
 
 ## The storefront table
 
@@ -146,6 +146,10 @@ entity type overrides the method:
   The save sanitizes a WYSIWYG value, as it does for the description.
 - `Maho_Blog_Block_Attributes` resolves the directives of a WYSIWYG value with the processor of the
   post content. `Maho_Blog_Helper_Data::sanitizeAttributeValues()` sanitizes the value on save.
+- `Mage_Cms_Block_Page_Attributes` keeps the method of the base block. A CMS page has no EAV
+  resource, so the block reads the attributes from `Mage_Cms_Model_Page::getAttributes()`. The
+  `cms_eav_attribute` table holds the **Visible on Frontend** and **Allow HTML Tags on Frontend**
+  flags of each attribute.
 
 ## The API
 

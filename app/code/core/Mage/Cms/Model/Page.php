@@ -49,6 +49,16 @@ class Mage_Cms_Model_Page extends Mage_Core_Model_Abstract
         $this->_init('cms/page');
     }
 
+    /**
+     * Return the custom attributes of CMS pages, keyed by code.
+     *
+     * @return array<string, Mage_Eav_Model_Entity_Attribute_Abstract>
+     */
+    public function getAttributes(): array
+    {
+        return $this->getResource()->getCustomAttributes();
+    }
+
     #[\Override]
     public function load($id, $field = null)
     {

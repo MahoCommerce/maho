@@ -1,5 +1,5 @@
 ---
-description: How to add an attribute to CMS pages - page attributes, their input types, required and unique values, the Attributes tab of a page, the import, the API, and how a theme shows a value.
+description: How to add an attribute to CMS pages - page attributes, their input types, required and unique values, the Attributes tab of a page, the import, the API, and how the storefront shows a value.
 admin_pages: [eav_attribute, cms_page]
 ---
 
@@ -19,9 +19,11 @@ not page attributes. CMS pages have no attribute sets: every page has all the pa
    cannot change the input type later.
 5. Set **Values Required** to **Yes** if each page must have a value. Set **Unique Value** to
    **Yes** if two pages cannot have the same value.
-6. On the **Manage Label / Options** tab, enter the label. For a Dropdown or a Multiple Select,
+6. To show the value on the page, set **Visible on Frontend** to **Yes** in **Frontend
+   Properties**.
+7. On the **Manage Label / Options** tab, enter the label. For a Dropdown or a Multiple Select,
    add the options.
-7. Click **Save**.
+8. Click **Save**.
 
 The code cannot be the name of a field of the platform, such as `title`, `identifier` or
 `content`. It also cannot be `stores` or `store_id`.
@@ -43,12 +45,22 @@ If you add an attribute with the same code again, the pages have no value for it
 
 ## Show a value on the storefront
 
-A page attribute does not show on the storefront by itself. The edit page of the attribute says this
-too. A developer adds it to the theme. In a
-template of the `Mage_Cms_Block_Page` block, `$this->getPage()->getData('your_code')` returns the
-value. A Dropdown returns the option ID, and a Multiple Select returns the option IDs separated by
-commas. The store does not sanitize the value, so escape it in the template, for example with
-`$this->escapeHtml()`.
+Set **Visible on Frontend** to **Yes** in the **Frontend Properties** of the attribute. The page
+then shows the attribute and its value in a table below its content, with the title **Additional
+Information**. A page with no value for the attribute does not show it. The attributes show in the
+order in which you added them.
+
+A **Text Area** value shows under the table, with the label of the attribute as its title, because a
+long text does not fit in a table.
+
+Set **Allow HTML Tags on Frontend** to **Yes** to keep the HTML of a value. The store removes unsafe
+HTML, such as a script, and it removes directives such as `{{store url=""}}`. With **No**, the
+page shows the tags as text.
+
+A theme can also show a value in another place. In a template of the `Mage_Cms_Block_Page` block,
+`$this->getPage()->getData('your_code')` returns the value. A Dropdown returns the option ID, and a
+Multiple Select returns the option IDs separated by commas. The store does not sanitize the value,
+so escape it in the template, for example with `$this->escapeHtml()`.
 
 ## Import
 
