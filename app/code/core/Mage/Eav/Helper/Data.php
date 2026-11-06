@@ -199,8 +199,9 @@ class Mage_Eav_Helper_Data extends Mage_Core_Helper_Abstract
      * group keeps the order of $attributes.
      *
      * The first part holds the attributes of the first group, the attributes that are not in the
-     * set and the attributes of the platform, with no label, because they join the fields that the page shows itself. Each other group
-     * that holds an attribute follows, with its label in $storeId.
+     * set and the attributes that are not user-defined, with no label, because they join the fields
+     * that the page shows itself. Each other group that holds an attribute follows, with its label
+     * in $storeId.
      *
      * @template T of Mage_Eav_Model_Entity_Attribute_Abstract
      * @param list<T> $attributes

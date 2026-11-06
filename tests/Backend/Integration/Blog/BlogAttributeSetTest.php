@@ -254,32 +254,35 @@ it('sanitizes an HTML attribute value of a blog category on save', function () {
 });
 
 it('sanitizes a stored value on the storefront when an admin allows HTML for its attribute later', function () {
-    $code = 'pest_late_html_' . $this->suffix;
-    $attribute = $this->records[] = blogSetTestAttribute(Maho_Blog_Model_Post::ENTITY, $code, [
+    $codes = ['html' => 'pest_late_html_' . $this->suffix, 'wysiwyg' => 'pest_late_wys_' . $this->suffix];
+    $attributes = array_map(fn(string $code) => $this->records[] = blogSetTestAttribute(Maho_Blog_Model_Post::ENTITY, $code, [
         'backend_type' => 'text',
         'frontend_input' => 'textarea',
         'is_visible_on_front' => 1,
-    ]);
+    ]), $codes);
     $post = Mage::getModel('blog/post')->setData([
         'title' => 'Pest Late ' . $this->suffix,
         'url_key' => 'pest-late-' . $this->suffix,
         'content' => '<p>Body</p>',
         'is_active' => 1,
         'stores' => [0],
-        $code => '<p>A</p><script>alert(1)</script>',
-    ]);
+    ] + array_fill_keys($codes, '<p>A</p><script>alert(1)</script>'));
     $post->save();
     $this->records[] = $post;
 
-    $attribute->setData('is_html_allowed_on_front', 1)->save();
+    $attributes['html']->setData('is_html_allowed_on_front', 1)->save();
+    $attributes['wysiwyg']->setData('is_html_allowed_on_front', 1)->setData('is_wysiwyg_enabled', 1)->save();
     Mage::getSingleton('eav/config')->clear();
+    Mage::getResourceSingleton('blog/post')->unsetAttributes();
     $block = Mage::app()->getLayout()->createBlock('blog/attributes')
         ->setData('entity', Mage::getModel('blog/post')->load($post->getId()));
     $rows = $block->getAttributeValues();
-    $html = $block->getValueHtml($rows[array_search($code, array_column($rows, 'code'), true)]);
+    $html = array_map(fn(string $code) => $block->getValueHtml($rows[array_search($code, array_column($rows, 'code'), true)]), $codes);
 
-    expect($html)->toContain('<p>A</p>')
-        ->and($html)->not->toContain('<script');
+    expect($html['html'])->toContain('<p>A</p>')
+        ->and($html['html'])->not->toContain('<script')
+        ->and($html['wysiwyg'])->toContain('<p>A</p>')
+        ->and($html['wysiwyg'])->not->toContain('<script');
 });
 
 it('sanitizes an HTML attribute value on save and resolves its directives on the storefront', function () {

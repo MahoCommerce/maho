@@ -38,6 +38,7 @@ class Maho_Blog_Helper_Data extends Mage_Core_Helper_Abstract
     {
         foreach (Mage::getSingleton('eav/config')->getAttributes($entityType) as $attribute) {
             if ($attribute->getIsUserDefined()
+                && in_array($attribute->getFrontendInput(), ['text', 'textarea'], true)
                 && ($attribute->getData('is_html_allowed_on_front') || $attribute->getData('is_wysiwyg_enabled'))
             ) {
                 $fields[] = (string) $attribute->getAttributeCode();

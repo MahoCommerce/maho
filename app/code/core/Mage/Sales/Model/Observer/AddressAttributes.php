@@ -119,16 +119,40 @@ class Mage_Sales_Model_Observer_AddressAttributes
     }
 
     /**
+     * Read the option labels again for each attribute whose value $address changed. The other
+     * attributes keep the labels that the customer saw.
+     */
+    public function refreshOptionLabels(Mage_Sales_Model_Order_Address $address): void
+    {
+        $labels = $address->getCustomAttributeLabels();
+        $fresh = $this->getOptionLabels($address, (int) $address->getOrder()->getStoreId());
+        foreach (array_keys($this->getAttributes()) as $code) {
+            if (static::asText($address->getData($code)) === static::asText($address->getOrigData($code))) {
+                continue;
+            }
+            unset($labels[$code]);
+            if (isset($fresh[$code])) {
+                $labels[$code] = $fresh[$code];
+            }
+        }
+        $address->setCustomAttributeLabels($labels);
+    }
+
+    protected static function asText(mixed $value): string
+    {
+        return is_array($value) ? implode(',', $value) : (string) $value;
+    }
+
+    /**
      * Return the option labels of the select, multiselect and boolean values of $address, in store $storeId.
      *
      * @return array<string, string|list<string>>
      */
-    public function getOptionLabels(\Maho\DataObject $address, int $storeId): array
+    protected function getOptionLabels(\Maho\DataObject $address, int $storeId): array
     {
         $labels = [];
         foreach ($this->getAttributes() as $code => $attribute) {
-            $value = $address->getData($code);
-            $value = is_array($value) ? implode(',', $value) : (string) $value;
+            $value = static::asText($address->getData($code));
             if ($value === '' || !static::hasOptions($attribute)) {
                 continue;
             }

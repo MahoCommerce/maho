@@ -159,7 +159,7 @@ it('splits attributes by group, with the first group and the attributes in no se
     ]);
 });
 
-it('keeps an attribute of the platform in the first part, also when its group is not the first group', function () {
+it('keeps an attribute that is not user-defined in the first part, also when its group is not the first group', function () {
     $setId = (int) Mage::getSingleton('eav/config')->getEntityType(Maho_Blog_Model_Post::ENTITY)->getDefaultAttributeSetId();
     $group = $this->records[] = groupLabelTestAddGroup($setId, 'Pest System ' . $this->suffix, 900);
     $attribute = $this->records[] = groupLabelTestAddAttribute('pest_system_' . $this->suffix, $setId, (int) $group->getId());

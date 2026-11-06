@@ -122,8 +122,8 @@ window with a row for each.
 
 `Mage_Eav_Helper_Data::groupAttributesBySet($attributes, $setId, $storeId)` splits a list of
 attributes by the groups of a set, in the order of the groups. The first part has no label: it holds
-the attributes of the first group and the attributes that are not in the set, because they join the
-fields that the page shows itself. Each other group follows with its label. These callers use it:
+the attributes of the first group, the attributes that are not in the set and the attributes that
+are not user-defined, because they join the fields that the page shows itself. Each other group follows with its label. These callers use it:
 
 - `Mage_Customer_Block_Form_Attributes` shows each later group as a fieldset in the storefront
   forms of customers and addresses.
