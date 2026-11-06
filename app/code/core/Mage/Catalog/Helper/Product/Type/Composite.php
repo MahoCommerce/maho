@@ -159,8 +159,10 @@ class Mage_Catalog_Helper_Product_Type_Composite extends Mage_Core_Helper_Abstra
                 false,
             );
         } else {
-            $_priceInclTax = Mage::helper('tax')->getPrice($product, $_finalPrice, true);
-            $_priceExclTax = Mage::helper('tax')->getPrice($product, $_finalPrice);
+            // The cart adds the tax to the price rounded to cents, as the price template does.
+            $_roundedFinalPrice = $product->getStore()->roundPrice($_finalPrice);
+            $_priceInclTax = Mage::helper('tax')->getPrice($product, $_roundedFinalPrice, true);
+            $_priceExclTax = Mage::helper('tax')->getPrice($product, $_roundedFinalPrice);
         }
         $_tierPrices = [];
         $_tierPricesInclTax = [];
@@ -176,13 +178,17 @@ class Mage_Catalog_Helper_Product_Type_Composite extends Mage_Core_Helper_Abstra
                 continue;
             }
 
+            $_tierPrice = (float) $tierPrice['website_price'];
+            if ($product->getTypeId() != Mage_Catalog_Model_Product_Type::TYPE_BUNDLE) {
+                $_tierPrice = $product->getStore()->roundPrice($_tierPrice);
+            }
             $_tierPrices[] = Mage::helper('core')->currency(
-                Mage::helper('tax')->getPrice($product, (float) $tierPrice['website_price'], false) - $_priceExclTax,
+                Mage::helper('tax')->getPrice($product, $_tierPrice, false) - $_priceExclTax,
                 false,
                 false,
             );
             $_tierPricesInclTax[] = Mage::helper('core')->currency(
-                Mage::helper('tax')->getPrice($product, (float) $tierPrice['website_price'], true) - $_priceInclTax,
+                Mage::helper('tax')->getPrice($product, $_tierPrice, true) - $_priceInclTax,
                 false,
                 false,
             );

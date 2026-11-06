@@ -61,17 +61,20 @@ $render = static function (string $blockAlias, string $template, Mage_Catalog_Mo
 $money = static fn(float $price): string => trim(strip_tags(Mage::helper('core')->formatPrice($price, false)));
 
 describe('catalog price templates tax rounding', function () use ($vatStore, $vatProduct, $render, $money) {
-    it('adds tax to the full 4-decimal price instead of the price rounded to 2 decimals', function () use ($vatStore, $vatProduct, $render, $money) {
+    it('adds the tax to the price rounded to cents, as the cart does', function (float $price, float $shown, float $notShown) use ($vatStore, $vatProduct, $render, $money) {
         $store = $vatStore();
         $product = $vatProduct($store, Mage_Catalog_Model_Product_Type::TYPE_SIMPLE, [
-            'price' => 10.6557,
-            'final_price' => 10.6557,
+            'price' => $price,
+            'final_price' => $price,
         ]);
 
         $html = $render('catalog/product_price', 'catalog/product/price.phtml', $product);
 
-        expect($html)->toContain($money(13.00))->not->toContain($money(13.01));
-    });
+        expect($html)->toContain($money($shown))->not->toContain($money($notShown));
+    })->with([
+        '10.6557 is charged as 10.66 + 2.35' => [10.6557, 13.01, 13.00],
+        '11.4754 is charged as 11.48 + 2.53' => [11.4754, 14.01, 14.00],
+    ]);
 
     it('keeps prices with 2 decimals unchanged', function () use ($vatStore, $vatProduct, $render, $money) {
         $store = $vatStore();
@@ -94,7 +97,7 @@ describe('catalog price templates tax rounding', function () use ($vatStore, $va
 
         $html = Mage::app()->getLayout()->createBlock('rss/catalog_new')->getPriceHtml($product);
 
-        expect($html)->toContain($money(13.00))->not->toContain($money(13.01));
+        expect($html)->toContain($money(13.01))->not->toContain($money(13.00));
     });
 
     it('applies the same rounding in the gift card price template', function () use ($vatStore, $vatProduct, $render, $money) {
@@ -106,7 +109,7 @@ describe('catalog price templates tax rounding', function () use ($vatStore, $va
 
         $html = $render('giftcard/catalog_product_price', 'maho/giftcard/catalog/product/price.phtml', $product);
 
-        expect($html)->toContain($money(13.00))->not->toContain($money(13.01));
+        expect($html)->toContain($money(13.01))->not->toContain($money(13.00));
     });
 
     it('rounds the price of a product without a tax class on a tax-inclusive store', function () {
@@ -138,6 +141,30 @@ describe('catalog price templates tax rounding', function () use ($vatStore, $va
     });
 });
 
+describe('prices outside the price template', function () use ($vatStore, $vatProduct) {
+    it('gives the structured data the price that the page shows', function () use ($vatStore, $vatProduct) {
+        $store = $vatStore();
+        $product = $vatProduct($store, Mage_Catalog_Model_Product_Type::TYPE_SIMPLE, []);
+
+        expect(Mage::helper('structureddata')->getDisplayPrice($product, 11.4754))->toBe(14.01);
+    });
+
+    it('gives the tier prices the tax of the price rounded to cents', function () use ($vatStore, $vatProduct) {
+        $store = $vatStore();
+        $product = $vatProduct($store, Mage_Catalog_Model_Product_Type::TYPE_SIMPLE, [
+            'price' => 20.00,
+            'final_price' => 20.00,
+            'tier_price' => [
+                ['website_id' => 0, 'cust_group' => 32000, 'price_qty' => 2, 'price' => 11.4754, 'website_price' => 11.4754],
+            ],
+        ]);
+
+        $tierPrices = Mage::app()->getLayout()->createBlock('catalog/product_view')->getTierPrices($product);
+
+        expect(strip_tags($tierPrices[0]['formated_price_incl_tax']))->toBe(trim(strip_tags(Mage::app()->getStore()->formatPrice(14.01))));
+    });
+});
+
 describe('catalog price templates minimal price visibility', function () use ($vatStore, $vatProduct, $render, $money) {
     it('hides the "From" price when it displays the same amount as the final price', function () use ($vatStore, $vatProduct, $render) {
         $store = $vatStore();
@@ -154,7 +181,7 @@ describe('catalog price templates minimal price visibility', function () use ($v
         expect($html)->not->toContain('minimal-price-link');
     });
 
-    it('shows the "From" price when it displays less, even though both amounts round alike before tax', function () use ($vatStore, $vatProduct, $render, $money) {
+    it('hides the "From" price when it rounds to the final price', function () use ($vatStore, $vatProduct, $render) {
         $store = $vatStore();
         $product = $vatProduct($store, Mage_Catalog_Model_Product_Type::TYPE_SIMPLE, [
             'price' => 10.66,
@@ -166,7 +193,7 @@ describe('catalog price templates minimal price visibility', function () use ($v
             'display_minimal_price' => true,
         ]);
 
-        expect($html)->toContain('minimal-price-link')->toContain($money(13.00))->toContain($money(13.01));
+        expect($html)->not->toContain('minimal-price-link');
     });
 
     it('shows the "From" price when it is genuinely lower', function () use ($vatStore, $vatProduct, $render) {
@@ -214,7 +241,7 @@ describe('catalog price templates minimal price visibility', function () use ($v
 
         $html = Mage::app()->getLayout()->createBlock('rss/catalog_new')->getPriceHtml($product, true);
 
-        expect($html)->toContain('minimal-price-link');
+        expect($html)->not->toContain('minimal-price-link');
     });
 });
 
@@ -228,8 +255,8 @@ describe('catalog price templates discount badge', function () use ($vatStore, $
 
         $html = $render('catalog/product_price', 'catalog/product/price.phtml', $product);
 
-        expect($html)->toContain($money(13.00))
-            ->not->toContain($money(13.01))
+        expect($html)->toContain($money(13.01))
+            ->not->toContain($money(13.00))
             ->not->toContain('old-price')
             ->not->toContain('discount-percent');
     });

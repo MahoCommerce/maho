@@ -30,12 +30,10 @@ $_store = $_product->getStore();
 $_id = $_product->getId();
 $_weeeSeparator = '';
 $_simplePricesTax = ($_taxHelper->displayPriceIncludingTax() || $_taxHelper->displayBothPrices());
-$_minimalPriceValue = $_product->getMinimalPrice();
-$_minimalPriceValue = $_store->convertPrice($_minimalPriceValue);
+// The cart adds the tax to the price rounded to cents, so the page rounds it first too.
+$_minimalPriceValue = $_store->roundPrice($_store->convertPrice($_product->getMinimalPrice()));
 $_minimalPrice = $_taxHelper->getPrice($_product, $_minimalPriceValue, $_simplePricesTax);
-$_convertedFinalPrice = $_store->convertPrice($_product->getFinalPrice());
-// Rounded copy for the visibility checks; the tax helper needs the full-precision value.
-$_minimalPriceRounded = $_store->roundPrice($_minimalPriceValue);
+$_convertedFinalPrice = $_store->roundPrice($_store->convertPrice($_product->getFinalPrice()));
 $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStoreLabel();
 ?>
 
@@ -50,7 +48,7 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
     <?php $_weeeTaxAmountInclTaxes = $_store->roundPrice($_store->convertPrice($_weeeTaxAmountInclTaxes)); ?>
 
     <div class="price-box">
-    <?php $_convertedPrice = $_store->convertPrice($_product->getPrice()); ?>
+    <?php $_convertedPrice = $_store->roundPrice($_store->convertPrice($_product->getPrice())); ?>
     <?php $_regularPrice = $_taxHelper->getPrice($_product, $_convertedPrice, $_simplePricesTax); ?>
     <?php $_finalPrice = $_taxHelper->getPrice($_product, $_convertedFinalPrice) ?>
     <?php $_finalPriceInclTax = $_taxHelper->getPrice($_product, $_convertedFinalPrice, true) ?>
@@ -369,7 +367,7 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
 
     <?php endif /* if ($_discountPercent <= 0): */ ?>
 
-    <?php if ($this->getDisplayMinimalPrice() && $_minimalPriceRounded && $_minimalPrice < $_finalPriceSimpleTax): ?>
+    <?php if ($this->getDisplayMinimalPrice() && $_minimalPriceValue && $_minimalPrice < $_finalPriceSimpleTax): ?>
 
         <?php $_minimalPriceDisplayValue = $_minimalPrice + ($_weeeInPrice ? $_weeeTaxAmountSimpleTax : 0); ?>
 
@@ -393,12 +391,12 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
 <?php else: /* if (!$_product->isGrouped()): */ ?>
     <?php
     $showMinPrice = $this->getDisplayMinimalPrice();
-    if ($showMinPrice && $_minimalPriceRounded) {
+    if ($showMinPrice && $_minimalPriceValue) {
         $_exclTax = $_taxHelper->getPrice($_product, $_minimalPriceValue);
         $_inclTax = $_taxHelper->getPrice($_product, $_minimalPriceValue, true);
-        $price = $_minimalPriceRounded;
+        $price = $_minimalPriceValue;
     } else {
-        $price = $_store->roundPrice($_convertedFinalPrice);
+        $price = $_convertedFinalPrice;
         $_exclTax = $_taxHelper->getPrice($_product, $_convertedFinalPrice);
         $_inclTax = $_taxHelper->getPrice($_product, $_convertedFinalPrice, true);
     }

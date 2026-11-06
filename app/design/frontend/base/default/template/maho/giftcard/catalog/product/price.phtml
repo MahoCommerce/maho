@@ -19,9 +19,9 @@ $_id = $_product->getId();
 $_minPrice = $this->getMinPrice();
 $_hasPriceRange = $this->hasPriceRange();
 
-// Apply store currency conversion
+// The cart adds the tax to the price rounded to cents, so the page rounds it first too.
 $_store = $_product->getStore();
-$_minPriceConverted = $_store->convertPrice($_minPrice);
+$_minPriceConverted = $_store->roundPrice($_store->convertPrice($_minPrice));
 
 // Calculate prices with/without tax
 $_minPriceTax = $_taxHelper->getPrice($_product, $_minPriceConverted);
