@@ -19,7 +19,7 @@ $_id = $_product->getId();
 $_minPrice = $this->getMinPrice();
 $_hasPriceRange = $this->hasPriceRange();
 
-// The cart adds the tax to the price rounded to cents, so the page rounds it first too.
+// The cart rounds the net price to cents before it adds the tax, so the page does the same.
 $_store = $_product->getStore();
 $_minPriceConverted = $_store->roundPrice($_store->convertPrice($_minPrice));
 

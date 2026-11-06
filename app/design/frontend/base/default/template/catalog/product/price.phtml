@@ -30,7 +30,7 @@ $_store = $_product->getStore();
 $_id = $_product->getId();
 $_weeeSeparator = '';
 $_simplePricesTax = ($_taxHelper->displayPriceIncludingTax() || $_taxHelper->displayBothPrices());
-// The cart adds the tax to the price rounded to cents, so the page rounds it first too.
+// The cart rounds the net price to cents before it adds the tax, so the page does the same.
 $_minimalPriceValue = $_store->roundPrice($_store->convertPrice($_product->getMinimalPrice()));
 $_minimalPrice = $_taxHelper->getPrice($_product, $_minimalPriceValue, $_simplePricesTax);
 $_convertedFinalPrice = $_store->roundPrice($_store->convertPrice($_product->getFinalPrice()));
