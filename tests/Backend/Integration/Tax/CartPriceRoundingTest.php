@@ -15,11 +15,30 @@ uses(Tests\MahoBackendTestCase::class);
  * the page adds the tax to the full price (see PriceTemplateTest). The cart must charge the same.
  */
 
+function cartPriceRoundingQuote(int $qty, float $price, int $productClassId): Mage_Sales_Model_Quote
+{
+    $product = Mage::getResourceModel('catalog/product_collection')
+        ->addAttributeToFilter('type_id', 'simple')
+        ->addAttributeToFilter('status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
+        ->addAttributeToSelect(['price', 'name'])
+        ->setPageSize(1)
+        ->getFirstItem();
+    $product = Mage::getModel('catalog/product')->setStoreId(1)->load($product->getId());
+    $product->setPrice($price)->setSpecialPrice(null)->setTierPrice([])->setTaxClassId($productClassId);
+
+    $quote = Mage::getModel('sales/quote')->setStoreId(1);
+    $quote->addProduct($product, $qty);
+    $quote->getShippingAddress()->setCountryId('IT')->setPostcode('00100')->setCollectShippingRates();
+
+    return $quote;
+}
+
 $taxConfigPaths = [
     'tax/calculation/price_includes_tax',
     'tax/calculation/algorithm',
     'tax/calculation/cross_border_trade_enabled',
     'tax/calculation/based_on',
+    'tax/calculation/apply_after_discount',
 ];
 
 beforeEach(function () use ($taxConfigPaths): void {
@@ -75,18 +94,7 @@ afterEach(function (): void {
 it('charges in the cart the price that the product page shows for a price without tax', function (string $algorithm): void {
     Mage::app()->getStore(1)->setConfig('tax/calculation/algorithm', $algorithm);
 
-    $product = Mage::getResourceModel('catalog/product_collection')
-        ->addAttributeToFilter('type_id', 'simple')
-        ->addAttributeToFilter('status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
-        ->addAttributeToSelect(['price', 'name'])
-        ->setPageSize(1)
-        ->getFirstItem();
-    $product = Mage::getModel('catalog/product')->setStoreId(1)->load($product->getId());
-    $product->setPrice(11.4754)->setSpecialPrice(null)->setTierPrice([])->setTaxClassId($this->productClassId);
-
-    $quote = Mage::getModel('sales/quote')->setStoreId(1);
-    $quote->addProduct($product, 1);
-    $quote->getShippingAddress()->setCountryId('IT')->setPostcode('00100')->setCollectShippingRates();
+    $quote = cartPriceRoundingQuote(1, 11.4754, $this->productClassId);
     $quote->collectTotals();
 
     $item = $quote->getAllVisibleItems()[0];
@@ -95,9 +103,50 @@ it('charges in the cart the price that the product page shows for a price withou
     expect(round((float) $item->getPriceInclTax(), 2))->toBe(14.0)
         ->and(round((float) $item->getRowTotalInclTax(), 2))->toBe(14.0)
         ->and(round((float) $address->getTaxAmount(), 2))->toBe(2.52)
-        ->and(round((float) $address->getGrandTotal(), 2))->toBe(14.0);
+        ->and(round((float) $address->getGrandTotal(), 2))->toBe(14.0)
+        ->and(round((float) $address->getBaseTaxAmount(), 2))->toBe(2.52)
+        ->and(round((float) $address->getBaseGrandTotal(), 2))->toBe(14.0);
 })->with([
     'unit price' => [Mage_Tax_Model_Calculation::CALC_UNIT_BASE],
     'row total' => [Mage_Tax_Model_Calculation::CALC_ROW_BASE],
     'total' => [Mage_Tax_Model_Calculation::CALC_TOTAL_BASE],
+]);
+
+it('takes the tax of a line with more than one unit from the unrounded price', function (string $algorithm, float $expectedTax): void {
+    Mage::app()->getStore(1)->setConfig('tax/calculation/algorithm', $algorithm);
+
+    $quote = cartPriceRoundingQuote(2, 11.4754, $this->productClassId);
+    $quote->collectTotals();
+
+    expect(round((float) $quote->getShippingAddress()->getTaxAmount(), 2))->toBe($expectedTax);
+})->with([
+    'unit price' => [Mage_Tax_Model_Calculation::CALC_UNIT_BASE, 5.04],
+    'row total' => [Mage_Tax_Model_Calculation::CALC_ROW_BASE, 5.05],
+    'total' => [Mage_Tax_Model_Calculation::CALC_TOTAL_BASE, 5.05],
+]);
+
+it('adds no hidden tax when a discount takes the whole line', function (string $algorithm): void {
+    Mage::app()->getStore(1)->setConfig('tax/calculation/algorithm', $algorithm);
+    Mage::app()->getStore(1)->setConfig('tax/calculation/apply_after_discount', '1');
+
+    $rule = Mage::getModel('salesrule/rule');
+    $rule->setName('Cart rounding full discount ' . uniqid())
+        ->setIsActive()
+        ->setWebsiteIds([1])
+        ->setCustomerGroupIds([0, 1, 2, 3])
+        ->setCouponType(Mage_SalesRule_Model_Rule::COUPON_TYPE_NO_COUPON)
+        ->setSimpleAction('by_percent')
+        ->setDiscountAmount(100)
+        ->save();
+
+    $quote = cartPriceRoundingQuote(10, 10.006, $this->productClassId);
+    $quote->collectTotals();
+    $address = $quote->getShippingAddress();
+
+    expect(round((float) $address->getDiscountAmount(), 2))->toBe(-100.1)
+        ->and(round((float) $address->getHiddenTaxAmount(), 2))->toBe(0.0)
+        ->and(round((float) $address->getGrandTotal(), 2))->toBe(0.0);
+})->with([
+    'unit price' => [Mage_Tax_Model_Calculation::CALC_UNIT_BASE],
+    'row total' => [Mage_Tax_Model_Calculation::CALC_ROW_BASE],
 ]);

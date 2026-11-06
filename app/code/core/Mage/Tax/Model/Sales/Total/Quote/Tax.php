@@ -598,9 +598,9 @@ class Mage_Tax_Model_Sales_Total_Quote_Tax extends Mage_Sales_Model_Quote_Addres
                         'base_value' => $baseHiddenTax,
                         'incl_tax' => $inclTax,
                     ];
-                } elseif ($discountAmount > $price) { // case with 100% discount on price incl. tax
-                    $hiddenTax = $discountAmount - $price;
-                    $baseHiddenTax = $baseDiscountAmount - $basePrice;
+                } elseif ($discountAmount > $this->_calculator->round($price)) { // case with 100% discount on price incl. tax
+                    $hiddenTax = $discountAmount - $this->_calculator->round($price);
+                    $baseHiddenTax = $baseDiscountAmount - $this->_calculator->round($basePrice);
                     $this->_hiddenTaxes[] = [
                         'rate_key' => $rateKey,
                         'qty' => $qty,
@@ -876,9 +876,9 @@ class Mage_Tax_Model_Sales_Total_Quote_Tax extends Mage_Sales_Model_Quote_Addres
                         'base_value' => $baseHiddenTax,
                         'incl_tax' => $inclTax,
                     ];
-                } elseif ($discountAmount > $subtotal) { // case with 100% discount on price incl. tax
-                    $hiddenTax = $discountAmount - $subtotal;
-                    $baseHiddenTax = $baseDiscountAmount - $baseSubtotal;
+                } elseif ($discountAmount > $item->getRowTotal()) { // case with 100% discount on price incl. tax
+                    $hiddenTax = $discountAmount - $item->getRowTotal();
+                    $baseHiddenTax = $baseDiscountAmount - $item->getBaseRowTotal();
                     $this->_hiddenTaxes[] = [
                         'rate_key' => $rateKey,
                         'qty' => 1,
