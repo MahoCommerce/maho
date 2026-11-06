@@ -184,6 +184,21 @@ it('copies the custom attributes of the addresses in the place-order body to the
     $attribute->save();
     Mage::app()->cleanCache();
     Mage::getSingleton('eav/config')->clear();
+    $ddlKey = 'SALES_FLAT_QUOTE_ADDRESS';
+    $cacheInfo = function () use ($ddlKey, $code): array {
+        $raw = Mage::app()->getCache()->load($ddlKey);
+        $data = $raw === false ? false : unserialize($raw, ['allowed_classes' => false]);
+        return [
+            'ddl_cached' => $raw !== false,
+            'ddl_has_column' => is_array($data) ? str_contains(json_encode($data), $code) : null,
+            'eav_keys' => count(glob(Mage::getBaseDir('cache') . '/*', GLOB_ONLYDIR) ?: []),
+        ];
+    };
+    fwrite(STDERR, 'DEBUGCACHE after-flush ' . json_encode($cacheInfo() + [
+        'dir' => Mage::getBaseDir('cache'),
+        'class' => get_class(Mage::app()->getCache()),
+        'ddl_allowed' => Mage::app()->useCache('db_ddl'),
+    ]) . "\n");
 
     try {
         $token = customerToken();
@@ -202,6 +217,18 @@ it('copies the custom attributes of the addresses in the place-order body to the
         expect($response['status'])->toBeIn([200, 201]);
         $order = Mage::getModel('sales/order')->loadByIncrementId((string) $response['json']['incrementId']);
         $this->orderIds[] = (int) $order->getId();
+        $dbg = Mage::getSingleton('core/resource')->getConnection('core_read');
+        fwrite(STDERR, 'DEBUGCACHE after-place ' . json_encode($cacheInfo()) . "\n");
+        fwrite(STDERR, 'DEBUGPLACE ' . json_encode([
+            'order_addr' => $dbg->fetchAll("SELECT address_type, {$code} AS v FROM " . Mage::getSingleton('core/resource')->getTableName('sales/order_address') . ' WHERE parent_id = ?', [(int) $order->getId()]),
+            'quote_addr' => $dbg->fetchAll("SELECT address_type, {$code} AS v FROM " . Mage::getSingleton('core/resource')->getTableName('sales/quote_address') . ' WHERE quote_id = ?', [$cartId]),
+            'order_quote_id' => $order->getQuoteId(),
+            'cart_id' => $cartId,
+            'customer_group' => $order->getCustomerGroupId(),
+            'response_shipping' => $response['json']['shippingAddress'] ?? null,
+        ]) . "\n");
+        $serverLog = Mage::getBaseDir('log') . '/pest-debug.log';
+        fwrite(STDERR, 'DEBUGSERVER ' . (is_file($serverLog) ? file_get_contents($serverLog) : 'no server log') . "\n");
 
         expect($refused['status'])->toBe(422)
             ->and($order->getShippingAddress()->getData($code))->toBe('4th')
