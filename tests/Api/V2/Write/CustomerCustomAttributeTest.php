@@ -194,6 +194,42 @@ describe('Address customAttributes (REST)', function (): void {
 
 });
 
+describe('Address customAttributes (GraphQL)', function (): void {
+
+    it('keeps a stored value when a customer updates an address and the attribute left the admin address form', function (): void {
+        $customerId = (int) customAttrTestCreateCustomer()['json']['id'];
+        $southId = $GLOBALS['_custom_attr_south_id'];
+        $created = apiPost(
+            "/api/rest/v2/customers/{$customerId}/addresses",
+            customAttrTestAddress(['customAttributes' => [CUSTOM_ATTR_ADDRESS_CODE => $southId]]),
+            adminToken(),
+        );
+        $addressId = (int) $created['json']['id'];
+
+        $attribute = Mage::getModel('customer/attribute')->loadByCode('customer_address', CUSTOM_ATTR_ADDRESS_CODE);
+        $attribute->setData('used_in_forms', ['customer_address_edit'])->save();
+        Mage::app()->cleanCache();
+        Mage::getSingleton('eav/config')->clear();
+
+        try {
+            $response = gqlQuery(
+                'mutation { updateAddress(input: {id: "' . $addressId . '", city: "Torino"}) { address { id city } } }',
+                [],
+                customerToken($customerId),
+            );
+        } finally {
+            $attribute->setData('used_in_forms', ['adminhtml_customer_address'])->save();
+            Mage::app()->cleanCache();
+            Mage::getSingleton('eav/config')->clear();
+        }
+
+        expect($response['json'])->not->toHaveKey('errors')
+            ->and($response['json']['data']['updateAddress']['address']['city'] ?? null)->toBe('Torino')
+            ->and((string) Mage::getModel('customer/address')->load($addressId)->getData(CUSTOM_ATTR_ADDRESS_CODE))->toBe($southId);
+    });
+
+});
+
 describe('Required customAttributes (REST)', function (): void {
 
     it('refuses a new customer with no value for a required attribute, and still registers an anonymous customer', function (): void {

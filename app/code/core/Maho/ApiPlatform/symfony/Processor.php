@@ -183,4 +183,17 @@ abstract class Processor implements ProcessorInterface
         $context['args']['input'] = $this->parseRequestBody($context['request'] ?? null);
     }
 
+    /**
+     * Return the ID in a GraphQL id argument: a plain ID ("5") or an IRI ("/api/rest/v2/addresses/5").
+     * Return 0 for any other value.
+     */
+    protected function parseGraphQlId(mixed $value): int
+    {
+        if (is_int($value)) {
+            return $value;
+        }
+
+        return is_string($value) && preg_match('#(?:^|/)(\d+)$#', $value, $matches) ? (int) $matches[1] : 0;
+    }
+
 }

@@ -407,3 +407,83 @@ describe('Customer address postcode', function (): void {
     });
 
 });
+
+describe('GraphQL address mutations', function (): void {
+
+    $createAddress = function (int $customerId): int {
+        $created = apiPost('/api/rest/v2/customers/me/addresses', [
+            'firstname' => 'Pest',
+            'lastname' => 'Writer',
+            'street' => ['Via Roma 3'],
+            'city' => 'Milano',
+            'postcode' => '20121',
+            'countryId' => 'IT',
+            'telephone' => '+39 02 7654321',
+        ], customerToken($customerId));
+        expect($created['status'])->toBeSuccessful();
+
+        return (int) $created['json']['id'];
+    };
+
+    it('updates an address that the id names as a plain ID', function () use ($createAddress): void {
+        [$create] = createTestCustomer();
+        $customerId = (int) $create['json']['id'];
+        $addressId = $createAddress($customerId);
+
+        $response = gqlQuery(
+            'mutation { updateAddress(input: {id: "' . $addressId . '", city: "Torino"}) { address { city } } }',
+            [],
+            customerToken($customerId),
+        );
+
+        expect($response['json']['errors'] ?? [])->toBeEmpty()
+            ->and($response['json']['data']['updateAddress']['address']['city'] ?? null)->toBe('Torino')
+            ->and(Mage::getModel('customer/address')->load($addressId)->getCity())->toBe('Torino');
+    });
+
+    it('updates an address that the id names as an IRI', function () use ($createAddress): void {
+        [$create] = createTestCustomer();
+        $customerId = (int) $create['json']['id'];
+        $addressId = $createAddress($customerId);
+
+        $response = gqlQuery(
+            'mutation { updateAddress(input: {id: "/api/rest/v2/addresses/' . $addressId . '", city: "Genova"}) { address { city } } }',
+            [],
+            customerToken($customerId),
+        );
+
+        expect($response['json']['errors'] ?? [])->toBeEmpty()
+            ->and($response['json']['data']['updateAddress']['address']['city'] ?? null)->toBe('Genova');
+    });
+
+    it('refuses to update the address of another customer', function () use ($createAddress): void {
+        [$owner] = createTestCustomer();
+        $addressId = $createAddress((int) $owner['json']['id']);
+        [$other] = createTestCustomer();
+
+        $response = gqlQuery(
+            'mutation { updateAddress(input: {id: "' . $addressId . '", city: "Torino"}) { address { city } } }',
+            [],
+            customerToken((int) $other['json']['id']),
+        );
+
+        expect($response['json']['errors'] ?? [])->not->toBeEmpty()
+            ->and(Mage::getModel('customer/address')->load($addressId)->getCity())->toBe('Milano');
+    });
+
+    it('deletes an address that the id names as an IRI', function () use ($createAddress): void {
+        [$create] = createTestCustomer();
+        $customerId = (int) $create['json']['id'];
+        $addressId = $createAddress($customerId);
+
+        $response = gqlQuery(
+            'mutation { deleteAddress(input: {id: "/api/rest/v2/addresses/' . $addressId . '"}) { address { id } } }',
+            [],
+            customerToken($customerId),
+        );
+
+        expect($response['json']['errors'] ?? [])->toBeEmpty()
+            ->and(Mage::getModel('customer/address')->load($addressId)->getId())->toBeNull();
+    });
+
+});

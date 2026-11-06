@@ -166,14 +166,17 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
                 'isDefaultBilling' => ['type' => 'Boolean'],
                 'isDefaultShipping' => ['type' => 'Boolean'],
             ],
-            description: 'Update an existing address',
+            description: 'Update an existing address. The id is the address ID or its IRI',
             security: "is_granted('ROLE_CUSTOMER') or is_granted('addresses/write')",
+            // The processor loads the address, so the id can be a plain ID and not only an IRI
+            read: false,
         ),
         new DeleteMutation(
             name: 'delete',
             args: ['id' => ['type' => 'ID!']],
-            description: 'Delete an address',
+            description: 'Delete an address. The id is the address ID or its IRI',
             security: "is_granted('ROLE_CUSTOMER') or is_granted('addresses/write')",
+            read: false,
         ),
     ],
 )]

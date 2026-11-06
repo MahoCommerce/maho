@@ -338,7 +338,7 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
     private function handleGraphQlUpdate(array $context): Address
     {
         $args = $context['args']['input'] ?? [];
-        $addressId = (int) ($args['id'] ?? 0);
+        $addressId = $this->parseGraphQlId($args['id'] ?? null);
 
         if (!$addressId) {
             throw new UnprocessableEntityHttpException('Address ID is required');
@@ -407,7 +407,7 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
     private function handleGraphQlDelete(array $context): void
     {
         $args = $context['args']['input'] ?? [];
-        $addressId = (int) ($args['id'] ?? 0);
+        $addressId = $this->parseGraphQlId($args['id'] ?? null);
 
         if (!$addressId) {
             throw new UnprocessableEntityHttpException('Address ID is required');
