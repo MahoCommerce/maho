@@ -157,6 +157,8 @@ Open **Sales → Revocation Requests** to manage incoming declarations. Two ACL 
 
 The grid lists every request with ID, received timestamp, store view, verified flag, customer name, email, order reference, matched order (linked when resolved), email-suppressed timestamp, processed status, and processed-at timestamp. It supports filtering, sorting, **CSV export**, and **mass actions** to mark selected requests Accepted or Rejected.
 
+Next to the **Search** button, the **All** and **Email Suppressed** buttons select which requests the grid shows. **Email Suppressed** shows only the requests whose receipt email was withheld, and its badge gives the number of these requests. The choice stays when you filter, sort, or change the page (**Reset Filter** does not clear it), and the CSV export contains the same requests.
+
 <figure markdown="span">
 ![The Revocation Requests grid in the admin panel](images/revocation-requests-grid.webp)
 <figcaption>The revocation queue under Sales > Revocation Requests</figcaption>
