@@ -285,6 +285,79 @@ it('sanitizes a stored value on the storefront when an admin allows HTML for its
         ->and($html['wysiwyg'])->not->toContain('<script');
 });
 
+it('keeps the output of a CMS block in a WYSIWYG value, because the value is sanitized before its directives resolve', function () {
+    $code = 'pest_embed_attr_' . $this->suffix;
+    $this->records[] = blogSetTestAttribute(Maho_Blog_Model_Post::ENTITY, $code, [
+        'backend_type' => 'text',
+        'frontend_input' => 'textarea',
+        'is_visible_on_front' => 1,
+        'is_html_allowed_on_front' => 1,
+        'is_wysiwyg_enabled' => 1,
+    ]);
+    $cmsBlock = Mage::getModel('cms/block')
+        ->setTitle('Pest embed')
+        ->setIdentifier('pest_embed_' . $this->suffix)
+        ->setIsActive(1)
+        ->setStores([0])
+        ->setContent('<p>x</p>');
+    $cmsBlock->save();
+    $this->records[] = $cmsBlock;
+    // The save of a CMS block removes the iframe, so the test writes it into the table
+    $resource = Mage::getSingleton('core/resource');
+    $resource->getConnection('core_write')->update(
+        $resource->getTableName('cms/block'),
+        ['content' => '<iframe src="https://www.youtube.com/embed/x"></iframe>'],
+        ['block_id = ?' => (int) $cmsBlock->getId()],
+    );
+    $post = Mage::getModel('blog/post')->setData([
+        'title' => 'Pest Embed ' . $this->suffix,
+        'url_key' => 'pest-embed-' . $this->suffix,
+        'content' => '<p>Body</p>',
+        'is_active' => 1,
+        'stores' => [0],
+        $code => '<p>A</p>{{block id="pest_embed_' . $this->suffix . '"}}',
+    ]);
+    $post->save();
+    $this->records[] = $post;
+
+    $block = Mage::app()->getLayout()->createBlock('blog/attributes')
+        ->setData('entity', Mage::getModel('blog/post')->load($post->getId()));
+    $rows = $block->getAttributeValues();
+    $html = $block->getValueHtml($rows[array_search($code, array_column($rows, 'code'), true)]);
+
+    expect($html)->toContain('<p>A</p>')
+        ->and($html)->toContain('<iframe src="https://www.youtube.com/embed/x"');
+});
+
+it('saves a multiselect attribute that allows HTML as a list of option IDs', function () {
+    $code = 'pest_multi_' . $this->suffix;
+    $attribute = $this->records[] = blogSetTestAttribute(Maho_Blog_Model_Post::ENTITY, $code, [
+        'frontend_input' => 'multiselect',
+        'backend_model' => 'eav/entity_attribute_backend_array',
+        'source_model' => 'eav/entity_attribute_source_table',
+        'is_html_allowed_on_front' => 1,
+        'option' => ['value' => ['o1' => ['One'], 'o2' => ['Two']], 'order' => ['o1' => 1, 'o2' => 2]],
+    ]);
+    $ids = array_column(
+        Mage::getModel('blog/resource_eav_attribute')->load($attribute->getId())->getSource()->getAllOptions(false),
+        'value',
+    );
+    expect($ids)->toHaveCount(2);
+
+    $post = Mage::getModel('blog/post')->setData([
+        'title' => 'Pest Multi ' . $this->suffix,
+        'url_key' => 'pest-multi-' . $this->suffix,
+        'content' => '<p>Body</p>',
+        'is_active' => 1,
+        'stores' => [0],
+        $code => $ids,
+    ]);
+    $post->save();
+    $this->records[] = $post;
+
+    expect((string) Mage::getModel('blog/post')->load($post->getId())->getData($code))->toBe(implode(',', $ids));
+});
+
 it('sanitizes an HTML attribute value on save and resolves its directives on the storefront', function () {
     $code = 'pest_html_' . $this->suffix;
     $this->records[] = blogSetTestAttribute(Maho_Blog_Model_Post::ENTITY, $code, [

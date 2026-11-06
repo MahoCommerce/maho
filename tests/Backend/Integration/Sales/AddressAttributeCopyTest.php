@@ -209,3 +209,27 @@ it('joins the posted ids of a multiselect when it reads the labels of an order a
 
     expect($address->getCustomAttributeLabels())->toBe([$this->selectCode => ['South Dock', 'North Dock']]);
 });
+
+it('keeps the label snapshot when a multiselect of an order address comes back in another order', function () {
+    $this->attributes[] = addressCopyTestAttribute([
+        'attribute_code' => $this->selectCode,
+        'backend_type' => 'varchar',
+        'frontend_input' => 'multiselect',
+        'source_model' => 'eav/entity_attribute_source_table',
+        'frontend_label' => 'Docks',
+        'option' => ['value' => ['o1' => ['North Dock'], 'o2' => ['South Dock']], 'order' => ['o1' => 1, 'o2' => 2]],
+    ]);
+    $attribute = Mage::getModel('customer/attribute')->loadByCode('customer_address', $this->selectCode);
+    $ids = array_map(fn(array $option) => (string) $option['value'], $attribute->getSource()->getAllOptions(false));
+    $order = Mage::getModel('sales/order')->setStoreId((int) Mage::app()->getDefaultStoreView()->getId());
+    $stored = [$this->selectCode => ['Old South Dock', 'Old North Dock']];
+    $address = Mage::getModel('sales/order_address')->setOrder($order)
+        ->setData([$this->selectCode => implode(',', array_reverse($ids))])
+        ->setOrigData()
+        ->setCustomAttributeLabels($stored);
+
+    $address->setData($this->selectCode, $ids);
+    Mage::getModel('sales/observer_addressAttributes')->refreshOptionLabels($address);
+
+    expect($address->getCustomAttributeLabels())->toBe($stored);
+});

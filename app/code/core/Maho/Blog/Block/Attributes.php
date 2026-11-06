@@ -13,9 +13,8 @@ declare(strict_types=1);
 class Maho_Blog_Block_Attributes extends Mage_Eav_Block_Frontend_Attributes
 {
     /**
-     * A value of a WYSIWYG attribute is sanitized again with its directives kept, and then resolves them
-     * with the processor of the post content, as the save and Maho_Blog_Model_Post::getFilteredContent() do.
-     * The flags of the attribute can change after the save.
+     * The flags of the attribute can change after the save, so sanitize the value again before the
+     * processor resolves its directives.
      */
     #[\Override]
     protected function renderHtmlValue(Mage_Eav_Model_Entity_Attribute $attribute, string $html): string

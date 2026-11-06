@@ -127,7 +127,7 @@ class Mage_Sales_Model_Observer_AddressAttributes
         $labels = $address->getCustomAttributeLabels();
         $fresh = $this->getOptionLabels($address, (int) $address->getOrder()->getStoreId());
         foreach (array_keys($this->getAttributes()) as $code) {
-            if (static::asText($address->getData($code)) === static::asText($address->getOrigData($code))) {
+            if (static::asSortedText($address->getData($code)) === static::asSortedText($address->getOrigData($code))) {
                 continue;
             }
             unset($labels[$code]);
@@ -141,6 +141,13 @@ class Mage_Sales_Model_Observer_AddressAttributes
     protected static function asText(mixed $value): string
     {
         return is_array($value) ? implode(',', $value) : (string) $value;
+    }
+
+    protected static function asSortedText(mixed $value): string
+    {
+        $ids = explode(',', static::asText($value));
+        sort($ids);
+        return implode(',', $ids);
     }
 
     /**
