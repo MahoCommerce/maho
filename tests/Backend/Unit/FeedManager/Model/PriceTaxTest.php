@@ -75,6 +75,14 @@ describe('Feed tax mode', function () {
         expect($adjuster->adjust(taxProduct(), 20.00))->toBe(24.40);
     });
 
+    it('adds tax to the price rounded to cents, as the cart does', function () {
+        Mage::app()->getStore(1)->setConfig('tax/calculation/price_includes_tax', 0);
+
+        $adjuster = new Maho_FeedManager_Model_Price_TaxAdjuster(taxFeed('incl'));
+
+        expect($adjuster->adjust(taxProduct(), 11.4754))->toBe(14.01);
+    });
+
     it('leaves the price alone when the feed asks for the mode the store already stores', function () {
         Mage::app()->getStore(1)->setConfig('tax/calculation/price_includes_tax', 0);
 

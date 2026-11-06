@@ -661,9 +661,11 @@ class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
     {
         /** @var Mage_Tax_Helper_Data $taxHelper */
         $taxHelper = Mage::helper('tax');
-        $displayPrice = (float) $taxHelper->getPrice($product, $price, $this->displayPriceIncludesTax($product->getStoreId()));
+        $store = Mage::app()->getStore($product->getStoreId());
+        // The cart adds the tax to the price rounded to cents, as the price template does.
+        $price = $store->roundPrice($store->convertPrice($price));
 
-        return (float) Mage::app()->getStore($product->getStoreId())->convertPrice($displayPrice);
+        return (float) $taxHelper->getPrice($product, $price, $this->displayPriceIncludesTax($product->getStoreId()));
     }
 
     /**
