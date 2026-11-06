@@ -390,6 +390,10 @@ class DataObject implements ArrayAccess, JsonSerializable
     public function setDataUsingMethod($key, $args = [])
     {
         $method = 'set' . $this->_camelize($key);
+        if (!method_exists($this, $method)) {
+            // __call would rebuild the key with _underscore(), which turns floor_2nd into floor2nd
+            return $this->setData($key, $args);
+        }
         $this->$method($args);
         return $this;
     }
@@ -404,6 +408,9 @@ class DataObject implements ArrayAccess, JsonSerializable
     public function getDataUsingMethod($key, $args = null)
     {
         $method = 'get' . $this->_camelize($key);
+        if (!method_exists($this, $method)) {
+            return $this->getData($key, $args);
+        }
         return $this->$method($args);
     }
 

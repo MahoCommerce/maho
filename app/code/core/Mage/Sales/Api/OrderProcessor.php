@@ -200,7 +200,6 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
             $this->cartService->collectAndVerifyTotals($quote);
         }
 
-        \Mage::log(['before-place', 'ship_oid' => spl_object_id($quote->getShippingAddress()), 'ship' => array_filter($quote->getShippingAddress()->getData(), fn($k) => str_starts_with((string) $k, 'pest_place'), ARRAY_FILTER_USE_KEY), 'args_keys' => array_keys($args['shippingAddress'] ?? [])], \Mage::LOG_DEBUG, 'pest-debug.log', true);
         $placeOrder = function () use ($quote, $paymentMethod, $shippingMethod, $guestEmail, $orderNote, $cashTendered, $employeeId): array {
             $quote->save();
 

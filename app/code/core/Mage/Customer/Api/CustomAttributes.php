@@ -92,7 +92,6 @@ final class CustomAttributes
             throw new \Symfony\Component\HttpKernel\Exception\BadRequestHttpException('customAttributes must be an object of attribute codes and values');
         }
         self::apply($address, 'customer_address_edit', $values ?? [], true);
-        \Mage::log(['type' => $address->getAddressType(), 'values' => $values, 'after' => array_intersect_key($address->getData(), (array) $values), 'oid' => spl_object_id($address)], \Mage::LOG_DEBUG, 'pest-debug.log', true);
     }
 
     /**
