@@ -47,12 +47,8 @@ final class CustomAttributes
         \Mage_Core_Model_Abstract $entity,
         string $formCode,
         array $values,
-        ?int $customerGroupId = null,
     ): void {
         $form = \Mage::getModel('customer/form');
-        if ($customerGroupId !== null) {
-            $form->setCustomerGroupId($customerGroupId);
-        }
         $form->setFormCode($formCode)
             ->setEntityType($entity instanceof \Mage_Customer_Model_Address_Abstract ? 'customer_address' : 'customer')
             ->setEntity($entity)
@@ -65,13 +61,7 @@ final class CustomAttributes
         $errors = new \Mage_Core_Exception_Input();
         $models = [];
         if (!$entity->getId()) {
-            foreach ($attributes as $code => $attribute) {
-                if ($attribute->getIsRequired() && !array_key_exists($code, $values)
-                    && (string) $attribute->getDefaultValue() === ''
-                ) {
-                    $errors->addError("customAttributes.{$code}", \Mage::helper('eav')->__('"%s" is a required value.', $code));
-                }
-            }
+            Values::addMissingRequired($errors, $attributes, $values);
         }
         foreach ($values as $code => $value) {
             $code = (string) $code;
@@ -87,7 +77,9 @@ final class CustomAttributes
                 $errors->addError("customAttributes.{$code}", \Mage::helper('eav')->__('The value of "%s" must be a string or a number.', $code));
                 continue;
             }
-            $message = self::checkOptions($attribute, $value);
+            $message = in_array($attribute->getFrontendInput(), ['select', 'multiselect', 'boolean'], true) && $value !== null && $value !== '' && $value !== []
+                ? Values::check($attribute, implode(',', (array) $value))
+                : null;
             if ($message !== null) {
                 $errors->addError("customAttributes.{$code}", $message);
                 continue;
@@ -108,24 +100,5 @@ final class CustomAttributes
         foreach ($models as [$model, $value]) {
             $model->compactValue($value);
         }
-    }
-
-    /**
-     * Return an error when a select, a multiselect or a boolean gets a value that is not one of its options.
-     */
-    private static function checkOptions(\Mage_Eav_Model_Attribute $attribute, mixed $value): ?string
-    {
-        if (!in_array($attribute->getFrontendInput(), ['select', 'multiselect', 'boolean'], true)
-            || $value === null || $value === '' || $value === []
-        ) {
-            return null;
-        }
-        $allowed = array_map(strval(...), array_column($attribute->getSource()->getAllOptions(), 'value'));
-        foreach (is_array($value) ? $value : explode(',', (string) $value) as $item) {
-            if (!is_scalar($item) || !in_array((string) $item, $allowed, true)) {
-                return \Mage::helper('customer')->__('"%s" is not an option of "%s".', is_scalar($item) ? (string) $item : '', $attribute->getAttributeCode());
-            }
-        }
-        return null;
     }
 }

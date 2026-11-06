@@ -228,6 +228,60 @@ it('saves every blog attribute with the global scope', function () {
     expect((int) $loaded->getData('is_global'))->toBe(Maho_Blog_Model_Resource_Eav_Attribute::SCOPE_GLOBAL);
 });
 
+it('sanitizes an HTML attribute value of a blog category on save', function () {
+    $code = 'pest_cat_html_' . $this->suffix;
+    $this->records[] = blogSetTestAttribute(Maho_Blog_Model_Category::ENTITY, $code, [
+        'backend_type' => 'text',
+        'frontend_input' => 'textarea',
+        'is_visible_on_front' => 1,
+        'is_html_allowed_on_front' => 1,
+    ]);
+    $category = Mage::getModel('blog/category')->setData([
+        'name' => 'Pest Html ' . $this->suffix,
+        'url_key' => 'pest-cat-html-' . $this->suffix,
+        'is_active' => 1,
+        'stores' => [0],
+        $code => '<p onclick="x()">A</p><script>alert(1)</script>',
+    ]);
+    $category->save();
+    $this->records[] = $category;
+
+    $saved = (string) Mage::getModel('blog/category')->load($category->getId())->getData($code);
+
+    expect($saved)->toContain('<p>A</p>')
+        ->and($saved)->not->toContain('<script')
+        ->and($saved)->not->toContain('onclick');
+});
+
+it('sanitizes a stored value on the storefront when an admin allows HTML for its attribute later', function () {
+    $code = 'pest_late_html_' . $this->suffix;
+    $attribute = $this->records[] = blogSetTestAttribute(Maho_Blog_Model_Post::ENTITY, $code, [
+        'backend_type' => 'text',
+        'frontend_input' => 'textarea',
+        'is_visible_on_front' => 1,
+    ]);
+    $post = Mage::getModel('blog/post')->setData([
+        'title' => 'Pest Late ' . $this->suffix,
+        'url_key' => 'pest-late-' . $this->suffix,
+        'content' => '<p>Body</p>',
+        'is_active' => 1,
+        'stores' => [0],
+        $code => '<p>A</p><script>alert(1)</script>',
+    ]);
+    $post->save();
+    $this->records[] = $post;
+
+    $attribute->setData('is_html_allowed_on_front', 1)->save();
+    Mage::getSingleton('eav/config')->clear();
+    $block = Mage::app()->getLayout()->createBlock('blog/attributes')
+        ->setData('entity', Mage::getModel('blog/post')->load($post->getId()));
+    $rows = $block->getAttributeValues();
+    $html = $block->getValueHtml($rows[array_search($code, array_column($rows, 'code'), true)]);
+
+    expect($html)->toContain('<p>A</p>')
+        ->and($html)->not->toContain('<script');
+});
+
 it('sanitizes an HTML attribute value on save and resolves its directives on the storefront', function () {
     $code = 'pest_html_' . $this->suffix;
     $this->records[] = blogSetTestAttribute(Maho_Blog_Model_Post::ENTITY, $code, [

@@ -154,3 +154,27 @@ it('shows the label snapshot of a dropdown in the address template of an order',
 
     expect($renderer->render($orderAddress, '{{var ' . $this->selectCode . '}}'))->toBe('North Dock');
 });
+
+it('reads the label of the new option when an admin edits the dropdown of an order address', function () {
+    $this->attributes[] = addressCopyTestAttribute([
+        'attribute_code' => $this->selectCode,
+        'backend_type' => 'int',
+        'frontend_input' => 'select',
+        'source_model' => 'eav/entity_attribute_source_table',
+        'frontend_label' => 'Dock',
+        'option' => ['value' => ['o1' => ['North Dock'], 'o2' => ['South Dock']], 'order' => ['o1' => 1, 'o2' => 2]],
+    ]);
+    $ids = [];
+    $attribute = Mage::getModel('customer/attribute')->loadByCode('customer_address', $this->selectCode);
+    foreach ($attribute->getSource()->getAllOptions(false) as $option) {
+        $ids[$option['label']] = (string) $option['value'];
+    }
+    $orderAddress = Mage::getModel('sales/order_address')->setData($this->selectCode, $ids['South Dock']);
+    $observer = Mage::getModel('sales/observer_addressAttributes');
+
+    expect($observer->getOptionLabels($orderAddress, 0))->toBe([$this->selectCode => 'South Dock']);
+
+    $orderAddress->setData($this->selectCode);
+
+    expect($observer->getOptionLabels($orderAddress, 0))->toBe([]);
+});

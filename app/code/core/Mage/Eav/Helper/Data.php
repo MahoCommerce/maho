@@ -198,8 +198,8 @@ class Mage_Eav_Helper_Data extends Mage_Core_Helper_Abstract
      * Split $attributes by the groups of attribute set $setId, in the order of the groups. Each
      * group keeps the order of $attributes.
      *
-     * The first part holds the attributes of the first group and the attributes that are not in the
-     * set, with no label, because they join the fields that the page shows itself. Each other group
+     * The first part holds the attributes of the first group, the attributes that are not in the
+     * set and the attributes of the platform, with no label, because they join the fields that the page shows itself. Each other group
      * that holds an attribute follows, with its label in $storeId.
      *
      * @template T of Mage_Eav_Model_Entity_Attribute_Abstract
@@ -233,7 +233,7 @@ class Mage_Eav_Helper_Data extends Mage_Core_Helper_Abstract
         $first = ['id' => $firstGroupId, 'label' => null, 'attributes' => []];
         foreach ($attributes as $attribute) {
             $groupId = (int) ($groupOf[$attribute->getId()] ?? 0);
-            if ($groupId && $groupId !== $firstGroupId && isset($parts[$groupId])) {
+            if ($groupId && $groupId !== $firstGroupId && isset($parts[$groupId]) && $attribute->getIsUserDefined()) {
                 $parts[$groupId]['attributes'][] = $attribute;
             } else {
                 $first['attributes'][] = $attribute;

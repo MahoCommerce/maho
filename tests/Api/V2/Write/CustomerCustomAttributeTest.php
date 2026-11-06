@@ -193,3 +193,32 @@ describe('Address customAttributes (REST)', function (): void {
     });
 
 });
+
+describe('Required customAttributes (REST)', function (): void {
+
+    it('refuses a new customer with no value for a required attribute, and still registers an anonymous customer', function (): void {
+        $attribute = Mage::getModel('customer/attribute')->loadByCode('customer', CUSTOM_ATTR_CUSTOMER_CODE);
+        $attribute->setIsRequired(1)->save();
+        Mage::app()->cleanCache();
+        Mage::getSingleton('eav/config')->clear();
+
+        try {
+            $admin = customAttrTestCreateCustomer();
+            $anonymous = apiPost('/api/rest/v2/customers', [
+                'email' => CUSTOM_ATTR_EMAIL_PREFIX . uniqid() . '@example.test',
+                'password' => 'PestWrite1234!',
+                'firstname' => 'Pest',
+                'lastname' => 'Anonymous',
+            ]);
+        } finally {
+            $attribute->setIsRequired(0)->save();
+            Mage::app()->cleanCache();
+            Mage::getSingleton('eav/config')->clear();
+        }
+
+        expect($admin['status'])->toBe(422)
+            ->and(array_column($admin['json']['details']['errors'] ?? [], 'field'))->toContain('customAttributes.' . CUSTOM_ATTR_CUSTOMER_CODE)
+            ->and($anonymous['status'])->toBeSuccessful();
+    });
+
+});

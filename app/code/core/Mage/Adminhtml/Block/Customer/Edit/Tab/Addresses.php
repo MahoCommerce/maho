@@ -132,14 +132,11 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Addresses extends Mage_Adminhtml_Bl
         foreach ($groups as $group) {
             if ($group['label'] === null) {
                 $this->_setFieldset($group['attributes'], $fieldset);
+                continue;
             }
-        }
-        foreach ($groups as $group) {
-            if ($group['label'] !== null) {
-                $this->_setFieldset($group['attributes'], $form->addFieldset('address_attribute_group_' . $group['id'], [
-                    'legend' => $group['label'],
-                ]));
-            }
+            $this->_setFieldset($group['attributes'], $form->addFieldset('address_attribute_group_' . $group['id'], [
+                'legend' => $group['label'],
+            ]));
         }
 
         $regionElement = $form->getElement('region');

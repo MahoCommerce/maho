@@ -148,6 +148,10 @@ return [
     'Currency' => [
         'code', 'exchangeRate', 'extensions', 'symbol',
     ],
+    'CustomAttribute' => [
+        'attributeSets', 'code', 'defaultValue', 'entityType', 'extensions', 'id', 'input', 'isRequired',
+        'isUnique', 'label', 'options', 'usedInForms',
+    ],
     'Customer' => [
         'addresses', 'createdAt', 'createdIn', 'defaultBillingAddress', 'defaultShippingAddress',
         'disableAutoGroupChange', 'dob', 'email', 'extensions', 'firstname', 'fullName', 'gender',

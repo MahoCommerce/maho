@@ -159,6 +159,18 @@ it('splits attributes by group, with the first group and the attributes in no se
     ]);
 });
 
+it('keeps an attribute of the platform in the first part, also when its group is not the first group', function () {
+    $setId = (int) Mage::getSingleton('eav/config')->getEntityType(Maho_Blog_Model_Post::ENTITY)->getDefaultAttributeSetId();
+    $group = $this->records[] = groupLabelTestAddGroup($setId, 'Pest System ' . $this->suffix, 900);
+    $attribute = $this->records[] = groupLabelTestAddAttribute('pest_system_' . $this->suffix, $setId, (int) $group->getId());
+    $attribute->setIsUserDefined(0);
+
+    $parts = Mage::helper('eav')->groupAttributesBySet([$attribute], $setId, $this->storeId);
+
+    expect($parts)->toHaveCount(1)
+        ->and($parts[0]['label'])->toBeNull();
+});
+
 it('shows one storefront table for each group of a blog post', function () {
     $setId = (int) Mage::getSingleton('eav/config')->getEntityType(Maho_Blog_Model_Post::ENTITY)->getDefaultAttributeSetId();
     $firstGroupId = (int) Mage::getResourceModel('eav/entity_attribute_group_collection')

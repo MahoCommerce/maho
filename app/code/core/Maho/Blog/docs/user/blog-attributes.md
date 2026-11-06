@@ -63,7 +63,7 @@ drag the attribute in the set.
    no name shows the Admin name.
 4. Click **Save** in the window, then click **Save** on the set page.
 
-The table shows HTML only when **Allow HTML Tags on Frontend** is **Yes**.
+The table shows HTML when **Allow HTML Tags on Frontend** or **Enable WYSIWYG** is **Yes**. It removes unsafe tags and attributes. A value shows the template directives, such as a store URL, only when both are **Yes**.
 
 ## Import
 

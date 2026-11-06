@@ -69,10 +69,7 @@ final class CustomAttributeProvider extends \Maho\ApiPlatform\Provider
      */
     private function listAttributes(\Mage_Eav_Model_Entity_Type $entityType): array
     {
-        $attributes = array_values(array_filter(
-            \Mage::getSingleton('eav/config')->getAttributes($entityType),
-            fn($attribute): bool => (bool) $attribute->getIsUserDefined(),
-        ));
+        $attributes = array_values(\Maho\ApiPlatform\Service\CustomAttributes::userDefined($entityType->getEntityTypeCode()));
         usort($attributes, fn($a, $b): int => strcmp((string) $a->getAttributeCode(), (string) $b->getAttributeCode()));
         $sets = $this->getSetsOf(array_map(fn($attribute): int => (int) $attribute->getId(), $attributes));
         return array_map(fn($attribute) => $this->toCustomAttribute($attribute, $sets), $attributes);

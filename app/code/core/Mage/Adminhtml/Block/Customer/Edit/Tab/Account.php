@@ -52,14 +52,11 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Account extends Mage_Adminhtml_Bloc
         foreach ($groups as $group) {
             if ($group['label'] === null) {
                 $this->_setFieldset($group['attributes'], $fieldset, [$disableAutoGroupChangeAttributeName]);
+                continue;
             }
-        }
-        foreach ($groups as $group) {
-            if ($group['label'] !== null) {
-                $this->_setFieldset($group['attributes'], $form->addFieldset('attribute_group_' . $group['id'], [
-                    'legend' => $group['label'],
-                ]));
-            }
+            $this->_setFieldset($group['attributes'], $form->addFieldset('attribute_group_' . $group['id'], [
+                'legend' => $group['label'],
+            ]));
         }
 
         $form->getElement('group_id')->setRenderer($this->getLayout()

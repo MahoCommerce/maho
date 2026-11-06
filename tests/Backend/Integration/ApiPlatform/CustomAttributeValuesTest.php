@@ -17,6 +17,7 @@ function customAttributeValuesTestAttribute(string $input, string $backendType):
 {
     return Mage::getModel('eav/entity_attribute')->setData([
         'attribute_code' => 'pest_' . $input,
+        'source_model' => $input === 'boolean' ? 'eav/entity_attribute_source_boolean' : null,
         'frontend_input' => $input,
         'backend_type' => $backendType,
         'frontend_label' => 'Pest ' . $input,

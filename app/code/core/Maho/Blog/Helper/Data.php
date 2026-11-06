@@ -36,11 +36,11 @@ class Maho_Blog_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function sanitizeAttributeValues(\Maho\DataObject $object, Mage_Eav_Model_Entity_Type $entityType, array $fields = []): void
     {
-        foreach (Mage::getSingleton('eav/config')->getAttributes($entityType) as $code => $attribute) {
+        foreach (Mage::getSingleton('eav/config')->getAttributes($entityType) as $attribute) {
             if ($attribute->getIsUserDefined()
                 && ($attribute->getData('is_html_allowed_on_front') || $attribute->getData('is_wysiwyg_enabled'))
             ) {
-                $fields[] = (string) $code;
+                $fields[] = (string) $attribute->getAttributeCode();
             }
         }
         // Links get target="_blank": blog content is article-style, so an outbound link does not

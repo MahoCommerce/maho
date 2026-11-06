@@ -123,11 +123,12 @@ class Mage_Sales_Model_Observer_AddressAttributes
      *
      * @return array<string, string|list<string>>
      */
-    protected function getOptionLabels(\Maho\DataObject $address, int $storeId): array
+    public function getOptionLabels(\Maho\DataObject $address, int $storeId): array
     {
         $labels = [];
         foreach ($this->getAttributes() as $code => $attribute) {
-            $value = (string) $address->getData($code);
+            $value = $address->getData($code);
+            $value = is_array($value) ? implode(',', $value) : (string) $value;
             if ($value === '' || !static::hasOptions($attribute)) {
                 continue;
             }

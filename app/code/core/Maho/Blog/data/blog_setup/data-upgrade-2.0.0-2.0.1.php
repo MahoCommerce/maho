@@ -32,10 +32,4 @@ foreach ($entities as $entityTypeCode => $table) {
     $connection->update($table, ['entity_type_id' => $entityTypeId], ['entity_type_id = ?' => 0]);
 }
 
-// The declarative pass keeps a column that schema.php no longer declares, so drop it here
-$attributeTable = $installer->getTable('blog/eav_attribute');
-if ($connection->tableColumnExists($attributeTable, 'position')) {
-    $connection->dropColumn($attributeTable, 'position');
-}
-
 $installer->endSetup();

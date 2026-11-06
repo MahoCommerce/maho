@@ -603,6 +603,39 @@ describe('Product Extended Fields (REST)', function (): void {
         }
     });
 
+    it('refuses a user-defined attribute that is not in the attribute set of the product', function (): void {
+        Tests\Helpers\ApiV2Helper::ensureMahoBootstrapped();
+
+        $code = 'pest_noset_' . substr(uniqid(), -6);
+        $setup = new \Mage_Catalog_Model_Resource_Setup('catalog_setup');
+        $setup->addAttribute(\Mage_Catalog_Model_Product::ENTITY, $code, [
+            'type' => 'varchar',
+            'label' => 'Pest No Set Attribute',
+            'input' => 'text',
+            'required' => false,
+            'user_defined' => true,
+            'global' => \Mage_Catalog_Model_Resource_Eav_Attribute::SCOPE_GLOBAL,
+        ]);
+        \Mage::app()->getCache()->cleanType('eav');
+
+        try {
+            $suffix = substr(uniqid(), -8);
+            $create = apiPost('/api/rest/v2/products', [
+                'sku' => "PEST-CATTR-NOSET-{$suffix}",
+                'name' => 'Pest Custom Attribute Outside Set',
+                'price' => 9.99,
+                'websiteIds' => [1],
+                'customAttributes' => [$code => 'pest-value'],
+            ], serviceToken(['products/write', 'products/delete']));
+
+            expect($create['status'])->toBe(422)
+                ->and(array_column($create['json']['details']['errors'] ?? [], 'field'))->toContain("customAttributes.{$code}");
+        } finally {
+            $setup->removeAttribute(\Mage_Catalog_Model_Product::ENTITY, $code);
+            \Mage::app()->getCache()->cleanType('eav');
+        }
+    });
+
     it('keeps cost visibility per caller regardless of who warms the response cache', function (): void {
         $type = costApplicableProductType();
         if ($type === null) {

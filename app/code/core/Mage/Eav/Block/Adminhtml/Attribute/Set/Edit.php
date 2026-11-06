@@ -173,6 +173,7 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Edit extends Mage_Adminhtml_Block_T
             ->load();
 
         $configurable = $this->_getConfigurableAttributeIds();
+        $systemAttributeIds = $this->getSystemAttributeIds((int) $setId);
 
         /** @var Mage_Eav_Model_Entity_Attribute_Group $node */
         foreach ($groups as $node) {
@@ -189,7 +190,7 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Edit extends Mage_Adminhtml_Block_T
                 ->setAttributeGroupFilter($node->getId())
                 ->load();
             $item['has_hidden_system_attributes'] = array_diff(
-                $this->getSystemAttributeIds((int) $node->getId()),
+                $systemAttributeIds[(int) $node->getId()] ?? [],
                 array_map(intval(...), $nodeChildren->getColumnValues('attribute_id')),
             ) !== [];
 
@@ -439,21 +440,26 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Edit extends Mage_Adminhtml_Block_T
     }
 
     /**
-     * Return the ids of the system attributes in group $groupId, with the attributes that the editor hides.
+     * Return the ids of the system attributes of set $setId for each group id, with the attributes that the editor hides.
      *
-     * @return list<int>
+     * @return array<int, list<int>>
      */
-    protected function getSystemAttributeIds(int $groupId): array
+    protected function getSystemAttributeIds(int $setId): array
     {
         $resource = Mage::getSingleton('core/resource');
         $adapter = $resource->getConnection('core_read');
-        return array_map(intval(...), $adapter->fetchCol(
+        $ids = [];
+        $rows = $adapter->fetchAll(
             $adapter->select()
-                ->from(['ea' => $resource->getTableName('eav/entity_attribute')], ['attribute_id'])
+                ->from(['ea' => $resource->getTableName('eav/entity_attribute')], ['attribute_group_id', 'attribute_id'])
                 ->join(['a' => $resource->getTableName('eav/attribute')], 'a.attribute_id = ea.attribute_id', [])
-                ->where('ea.attribute_group_id = ?', $groupId)
+                ->where('ea.attribute_set_id = ?', $setId)
                 ->where('a.is_user_defined = ?', 0),
-        ));
+        );
+        foreach ($rows as $row) {
+            $ids[(int) $row['attribute_group_id']][] = (int) $row['attribute_id'];
+        }
+        return $ids;
     }
 
     /**

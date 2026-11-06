@@ -359,6 +359,8 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
 
         // Build Address DTO from existing data + GraphQL args (partial update)
         $addressDto = Address::fromCustomerAddress($existingAddress, $customer);
+        // The stored values stay: apply() would check them against the form of the current group
+        $addressDto->customAttributes = null;
         if (isset($args['firstName'])) {
             $addressDto->firstname = $args['firstName'];
         }

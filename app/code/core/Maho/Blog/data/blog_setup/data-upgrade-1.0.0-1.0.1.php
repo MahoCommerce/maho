@@ -34,6 +34,7 @@ foreach ($attributeIds as $attributeId) {
         [
             'attribute_id' => $attributeId,
             'is_global'    => Maho_Blog_Model_Resource_Eav_Attribute::SCOPE_GLOBAL,
+            'position'     => 0,
         ],
     );
 }

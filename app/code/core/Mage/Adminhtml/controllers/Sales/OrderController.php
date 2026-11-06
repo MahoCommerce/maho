@@ -720,6 +720,9 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
         if ($data && $address->getId()) {
             // The form sends no region_id for a country without regions, so clear the old one
             $address->addData($data + ['region_id' => null]);
+            $address->setCustomAttributeLabels(
+                Mage::getModel('sales/observer_addressAttributes')->getOptionLabels($address, (int) $address->getOrder()->getStoreId()),
+            );
             try {
                 $address->implodeStreetAddress();
                 $errors = $address->getFormatErrors();

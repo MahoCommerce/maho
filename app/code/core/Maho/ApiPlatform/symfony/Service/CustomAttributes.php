@@ -93,14 +93,7 @@ final class CustomAttributes
         $errors = new \Mage_Core_Exception_Input();
         $checked = [];
         if ($isNew) {
-            foreach ($attributes as $code => $attribute) {
-                if ($attribute->getIsRequired() && !array_key_exists($code, $values)
-                    && ($allowed === null || in_array($code, $allowed, true))
-                    && (string) $attribute->getDefaultValue() === ''
-                ) {
-                    $errors->addError("customAttributes.{$code}", $helper->__('"%s" is a required value.', $code));
-                }
-            }
+            self::addMissingRequired($errors, $attributes, $values, $allowed);
         }
         foreach ($values as $code => $value) {
             $code = (string) $code;
@@ -142,6 +135,26 @@ final class CustomAttributes
 
         foreach ($checked as $code => $value) {
             $model->setData($code, $value);
+        }
+    }
+
+    /**
+     * Add an error for each required attribute of $attributes that has no default value and that $values
+     * leaves out. When $allowed is a list, an attribute that is not in it is skipped.
+     *
+     * @param array<string, \Mage_Eav_Model_Entity_Attribute_Abstract> $attributes
+     * @param array<string, mixed> $values
+     * @param list<string>|null $allowed
+     */
+    public static function addMissingRequired(\Mage_Core_Exception_Input $errors, array $attributes, array $values, ?array $allowed = null): void
+    {
+        foreach ($attributes as $code => $attribute) {
+            if ($attribute->getIsRequired() && !array_key_exists($code, $values)
+                && ($allowed === null || in_array($code, $allowed, true))
+                && (string) $attribute->getDefaultValue() === ''
+            ) {
+                $errors->addError("customAttributes.{$code}", \Mage::helper('eav')->__('"%s" is a required value.', $code));
+            }
         }
     }
 
