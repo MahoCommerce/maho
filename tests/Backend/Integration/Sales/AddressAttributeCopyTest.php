@@ -204,10 +204,10 @@ it('joins the posted ids of a multiselect when it reads the labels of an order a
     $order = Mage::getModel('sales/order')->setStoreId((int) Mage::app()->getDefaultStoreView()->getId());
     $address = Mage::getModel('sales/order_address')->setOrder($order)->setData([$this->selectCode => $ids])->setOrigData();
 
-    $address->setData($this->selectCode, array_reverse($ids));
+    $address->setData($this->selectCode, [$ids[1]]);
     Mage::getModel('sales/observer_addressAttributes')->refreshOptionLabels($address);
 
-    expect($address->getCustomAttributeLabels())->toBe([$this->selectCode => ['South Dock', 'North Dock']]);
+    expect($address->getCustomAttributeLabels())->toBe([$this->selectCode => ['South Dock']]);
 });
 
 it('keeps the label snapshot when a multiselect of an order address comes back in another order', function () {

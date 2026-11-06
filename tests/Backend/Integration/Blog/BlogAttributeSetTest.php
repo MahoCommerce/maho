@@ -297,7 +297,7 @@ it('keeps the output of a CMS block in a WYSIWYG value, because the value is san
     $cmsBlock = Mage::getModel('cms/block')
         ->setTitle('Pest embed')
         ->setIdentifier('pest_embed_' . $this->suffix)
-        ->setIsActive(1)
+        ->setIsActive(true)
         ->setStores([0])
         ->setContent('<p>x</p>');
     $cmsBlock->save();
