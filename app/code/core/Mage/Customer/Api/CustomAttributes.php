@@ -17,6 +17,49 @@ use Maho\ApiPlatform\Service\CustomAttributes as Values;
 final class CustomAttributes
 {
     /**
+     * The storefront forms of each entity type. A customer or a guest reads and writes only the
+     * attributes that these forms show.
+     */
+    public const STOREFRONT_FORMS = [
+        'customer' => ['customer_account_create', 'customer_account_edit', 'checkout_register'],
+        'customer_address' => ['customer_address_edit', 'customer_register_address'],
+    ];
+
+    /** @var array<string, list<string>> */
+    private static array $storefrontCodes = [];
+
+    /**
+     * Return the codes of the user-defined attributes of $entityType that a storefront form shows to
+     * a customer of $groupId on the website of the current store.
+     *
+     * @return list<string>
+     */
+    public static function storefrontCodes(string $entityType, int $groupId): array
+    {
+        $key = $entityType . '/' . $groupId . '/' . \Mage::app()->getStore()->getId();
+        if (isset(self::$storefrontCodes[$key])) {
+            return self::$storefrontCodes[$key];
+        }
+        $customer = \Mage::getModel('customer/customer')->setGroupId($groupId);
+        $entity = $entityType === 'customer_address'
+            ? \Mage::getModel('customer/address')->setCustomer($customer)
+            : $customer;
+        $codes = [];
+        foreach (self::STOREFRONT_FORMS[$entityType] ?? [] as $formCode) {
+            $form = \Mage::getModel('customer/form')
+                ->setFormCode($formCode)
+                ->setEntityType($entityType)
+                ->setEntity($entity);
+            foreach ($form->getUserAttributes() as $code => $attribute) {
+                if ($attribute->getIsVisible()) {
+                    $codes[$code] = true;
+                }
+            }
+        }
+        return self::$storefrontCodes[$key] = array_map(strval(...), array_keys($codes));
+    }
+
+    /**
      * Return the values of the user-defined customer_address attributes of $address, keyed by code.
      * $address is a customer, a quote or an order address.
      *
@@ -36,23 +79,42 @@ final class CustomAttributes
     }
 
     /**
+     * Validate $values against the Address Book and Checkout form, then set them on the cart address
+     * $address. The checkout sets the whole address at once, so each required attribute of the form
+     * must be in $values, as on the storefront. The order copies the values from the cart.
+     *
+     * @throws \Symfony\Component\HttpKernel\Exception\BadRequestHttpException when $values is not a map
+     * @throws \Mage_Core_Exception_Input
+     */
+    public static function applyToCartAddress(\Mage_Sales_Model_Quote_Address $address, mixed $values): void
+    {
+        if ($values !== null && !is_array($values)) {
+            throw new \Symfony\Component\HttpKernel\Exception\BadRequestHttpException('customAttributes must be an object of attribute codes and values');
+        }
+        self::apply($address, 'customer_address_edit', $values ?? [], true);
+    }
+
+    /**
      * Validate $values against the attributes of $formCode, then set them on $entity.
      * A code that is not a user-defined attribute of the form is an error, and so is a required
-     * attribute that a new $entity does not get.
+     * attribute that a new $entity does not get. A storefront form takes only the attributes that
+     * it shows on the website, and an admin form takes every attribute of the form.
      *
      * @param array<string, mixed> $values
+     * @param bool|null $isNew true when $values replace every value of $entity, null for a new $entity only
      * @throws \Mage_Core_Exception_Input
      */
     public static function apply(
         \Mage_Core_Model_Abstract $entity,
         string $formCode,
         array $values,
+        ?bool $isNew = null,
     ): void {
         $form = \Mage::getModel('customer/form');
         $form->setFormCode($formCode)
             ->setEntityType($entity instanceof \Mage_Customer_Model_Address_Abstract ? 'customer_address' : 'customer')
             ->setEntity($entity)
-            ->ignoreInvisible(false);
+            ->ignoreInvisible(!str_starts_with($formCode, 'adminhtml_'));
         $attributes = $form->getUserAttributes();
         $values = array_map(fn(mixed $value): mixed => is_bool($value) ? (int) $value : $value, $values);
         $request = $form->prepareRequest($values);
@@ -60,7 +122,7 @@ final class CustomAttributes
 
         $errors = new \Mage_Core_Exception_Input();
         $models = [];
-        if (!$entity->getId()) {
+        if ($isNew ?? !$entity->getId()) {
             Values::addMissingRequired($errors, $attributes, $values);
         }
         foreach ($values as $code => $value) {

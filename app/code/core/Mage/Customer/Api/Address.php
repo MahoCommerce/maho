@@ -145,6 +145,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
                 'company' => ['type' => 'String'],
                 'isDefaultBilling' => ['type' => 'Boolean'],
                 'isDefaultShipping' => ['type' => 'Boolean'],
+                'customAttributes' => ['type' => 'Iterable', 'description' => 'Values of the custom address attributes, keyed by attribute code'],
             ],
             description: 'Create a new address for the authenticated customer',
             security: "is_granted('ROLE_CUSTOMER') or is_granted('addresses/write')",
@@ -165,6 +166,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
                 'company' => ['type' => 'String'],
                 'isDefaultBilling' => ['type' => 'Boolean'],
                 'isDefaultShipping' => ['type' => 'Boolean'],
+                'customAttributes' => ['type' => 'Iterable', 'description' => 'Values of the custom address attributes, keyed by attribute code'],
             ],
             description: 'Update an existing address. The id is the address ID or its IRI',
             security: "is_granted('ROLE_CUSTOMER') or is_granted('addresses/write')",
@@ -269,11 +271,11 @@ class Address extends CrudResource
     public ?bool $isDefaultShipping = null;
 
     /** @var array<string, mixed>|null */
-    #[ApiProperty(description: 'Values of the user-defined address attributes, keyed by attribute code. A multiselect is a list of option IDs, a dropdown an option ID, a Yes/No a boolean, a date Y-m-d, a multiline a list of lines. A write is checked against the attributes of the Admin Customer Address form and the set of the customer group. GET /custom-attributes?entityType=customer_address lists the attributes and their options. Admin and API tokens only', security: "has_backend_access('addresses') or has_backend_access('orders')", extraProperties: [CustomAttributeSchema::KEY => 'customer_address'])]
+    #[ApiProperty(description: 'Values of the user-defined address attributes, keyed by attribute code. A multiselect is a list of option IDs, a dropdown an option ID, a Yes/No a boolean, a date Y-m-d, a multiline a list of lines. An admin or API token reads and writes the attributes of the Admin Customer Address form. A customer or a guest reads and writes the attributes of the Address Book and Checkout form. The set of the customer group and the mode of the website apply. GET /custom-attributes?entityType=customer_address lists the attributes and their options', extraProperties: [CustomAttributeSchema::KEY => 'customer_address'])]
     public ?array $customAttributes = null;
 
     /** @var array<string, string|list<string>>|null */
-    #[ApiProperty(description: 'Order addresses only: the option labels of the dropdown, multiselect and Yes/No values of customAttributes, keyed by attribute code, as the customer saw them when the order was placed. A multiselect has a list of labels. Admin and API tokens only', writable: false, security: "has_backend_access('orders')", extraProperties: ['computed' => true])]
+    #[ApiProperty(description: 'Order addresses only: the option labels of the dropdown, multiselect and Yes/No values of customAttributes, keyed by attribute code, as the customer saw them when the order was placed. A multiselect has a list of labels. A customer or a guest gets the attributes of the storefront address forms only', writable: false, extraProperties: ['computed' => true])]
     public ?array $customAttributeLabels = null;
 
     public static function afterLoad(self $dto, object $model): void
@@ -307,7 +309,9 @@ class Address extends CrudResource
      */
     public static function fromQuoteAddress(\Mage_Sales_Model_Quote_Address $address): self
     {
-        return self::fromGenericAddress($address);
+        $dto = self::fromGenericAddress($address);
+        $dto->customAttributes = CustomAttributes::readAddress($address);
+        return $dto;
     }
 
     /**

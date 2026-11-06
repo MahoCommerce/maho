@@ -233,3 +233,42 @@ it('keeps the label snapshot when a multiselect of an order address comes back i
 
     expect($address->getCustomAttributeLabels())->toBe($stored);
 });
+
+it('adds a custom address attribute that the address template does not name, and leaves out one of the admin form only', function () {
+    $this->attributes[] = addressCopyTestAttribute([
+        'attribute_code' => $this->textCode,
+        'backend_type' => 'varchar',
+        'frontend_input' => 'text',
+        'frontend_label' => 'Delivery Hours',
+        'used_in_forms' => ['customer_address_edit', 'adminhtml_customer_address'],
+    ]);
+    $this->attributes[] = addressCopyTestAttribute([
+        'attribute_code' => $this->selectCode,
+        'backend_type' => 'varchar',
+        'frontend_input' => 'text',
+        'frontend_label' => 'Internal Note',
+        'used_in_forms' => ['adminhtml_customer_address'],
+    ]);
+    Mage::unregister('_helper/customer/address');
+    $address = Mage::getModel('customer/address')->setData([
+        'firstname' => 'Pest',
+        'lastname' => 'Renderer',
+        'street' => 'Via Roma 1',
+        'city' => 'Milano',
+        'postcode' => '20121',
+        'country_id' => 'IT',
+        'telephone' => '021234567',
+        $this->textCode => '9-17',
+        $this->selectCode => 'pest-secret',
+    ]);
+    $config = Mage::getSingleton('customer/address_config');
+
+    $html = $config->getFormatByCode('html')->getRenderer()->render($address);
+    $oneline = $config->getFormatByCode('oneline')->getRenderer()->render($address);
+    $named = $config->getFormatByCode('html')->getRenderer()->render($address, '{{var firstname}} {{var ' . $this->textCode . '}}');
+
+    expect($html)->toContain('<br/>Delivery Hours: 9-17')
+        ->and($html)->not->toContain('pest-secret')
+        ->and($oneline)->toContain(', Delivery Hours: 9-17')
+        ->and($named)->toBe('Pest 9-17');
+});

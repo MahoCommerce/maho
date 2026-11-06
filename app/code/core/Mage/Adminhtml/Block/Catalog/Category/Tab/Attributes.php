@@ -44,25 +44,33 @@ class Mage_Adminhtml_Block_Catalog_Category_Tab_Attributes extends Mage_Adminhtm
 
     /**
      * Add the attribute set select when there is more than one category set.
+     * A change of the set reloads the form with the fields of the new set.
      */
     protected function _addAttributeSetField(\Maho\Data\Form\Element\Fieldset $fieldset): void
     {
-        if ($this->getCategory()->getId()) {
-            return;
-        }
+        $category = $this->getCategory();
         $sets = Mage::getResourceModel('eav/entity_attribute_set_collection')
-            ->setEntityTypeFilter((int) $this->getCategory()->getResource()->getTypeId())
+            ->setEntityTypeFilter((int) $category->getResource()->getTypeId())
             ->setOrder('attribute_set_name', 'asc')
             ->toOptionArray();
         if (count($sets) < 2) {
             return;
         }
+
+        $helper = Mage::helper('catalog');
+        $savedSetId = $category->getId() ? (int) $category->getOrigData('attribute_set_id') : 0;
+        $questions = Mage::helper('eav')->getSetChangeQuestions($savedSetId, $sets);
+
         $fieldset->addField('attribute_set_id', 'select', [
             'name' => 'attribute_set_id',
-            'label' => Mage::helper('catalog')->__('Attribute Set'),
-            'title' => Mage::helper('catalog')->__('Attribute Set'),
-            'note' => Mage::helper('catalog')->__('The fields of the set show after you save the category. You cannot change the set later.'),
+            'label' => $helper->__('Attribute Set'),
+            'title' => $helper->__('Attribute Set'),
+            'note' => $helper->__('The form shows the fields of the set that you select.'),
             'values' => $sets,
+            'onchange' => 'categoryChangeSet(this, ' . $this->escapeHtml(Mage::helper('core')->jsonEncode([
+                'savedValue' => $savedSetId ? (string) $savedSetId : null,
+                'questions' => (object) $questions,
+            ])) . ')',
         ]);
     }
 

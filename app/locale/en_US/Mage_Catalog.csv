@@ -715,7 +715,6 @@
 "The category has been deleted.","The category has been deleted."
 "The category has been saved.","The category has been saved."
 "The comparison list was cleared.","The comparison list was cleared."
-"The fields of the set show after you save the category. You cannot change the set later.","The fields of the set show after you save the category. You cannot change the set later."
 "The file claims to be an image but does not contain valid image data.","The file claims to be an image but does not contain valid image data."
 "The file content type ""%s"" is not allowed for security reasons.","The file content type ""%s"" is not allowed for security reasons."
 "The file was only partially uploaded. Please try again.","The file was only partially uploaded. Please try again."
@@ -860,3 +859,4 @@
 "You have no items to compare.","You have no items to compare."
 "You may also like","You may also like"
 "You saved the search term.","You saved the search term."
+"The form shows the fields of the set that you select.","The form shows the fields of the set that you select."

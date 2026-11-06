@@ -57,6 +57,18 @@ class Maho_Blog_Adminhtml_Blog_PostController extends Mage_Adminhtml_Controller_
             $model->setData($data);
         }
 
+        // The set select posts the form here, so the page shows the fields of the new set with the typed values
+        $setId = (int) $this->getRequest()->getParam('set');
+        $posted = $this->getRequest()->getPost();
+        if ($setId && is_array($posted)) {
+            $model->addData(array_diff_key($posted, array_flip(['id', 'form_key', 'attribute_set_id'])));
+            try {
+                $model->setAttributeSetId(Mage::helper('blog')->getValidAttributeSetId($setId, $model->getResource()->getEntityType()));
+            } catch (Mage_Core_Exception $e) {
+                Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
+            }
+        }
+
         Mage::register('blog_post', $model);
 
         $this->_initAction()
@@ -76,8 +88,6 @@ class Maho_Blog_Adminhtml_Blog_PostController extends Mage_Adminhtml_Controller_
 
             if ($id) {
                 $model->load($id);
-                // A record keeps its attribute set, as a product does
-                unset($data['attribute_set_id']);
             }
 
             try {

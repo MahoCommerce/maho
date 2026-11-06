@@ -78,14 +78,11 @@ abstract class Maho_Blog_Block_Adminhtml_Edit_Tabs extends Mage_Adminhtml_Block_
     }
 
     /**
-     * Add the attribute set select to $fieldset for a new record, when the entity type has more than
-     * one set. A record keeps its set after the first save, as a product does.
+     * Add the attribute set select to $fieldset, when the entity type has more than one set. A change
+     * of the set posts the form to the edit page, which shows the fields of the new set.
      */
     public static function addAttributeSetField(\Maho\Data\Form\Element\Fieldset $fieldset, Maho_Blog_Model_Post|Maho_Blog_Model_Category $entity): void
     {
-        if ($entity->getId()) {
-            return;
-        }
         $sets = Mage::getResourceModel('eav/entity_attribute_set_collection')
             ->setEntityTypeFilter((int) $entity->getResource()->getTypeId())
             ->setOrder('attribute_set_name', 'asc')
@@ -93,13 +90,35 @@ abstract class Maho_Blog_Block_Adminhtml_Edit_Tabs extends Mage_Adminhtml_Block_
         if (count($sets) < 2) {
             return;
         }
+        if (!$entity->getAttributeSetId()) {
+            $entity->setAttributeSetId((int) $entity->getResource()->getEntityType()->getDefaultAttributeSetId());
+        }
+        $savedSetId = $entity->getId() ? (int) $entity->getOrigData('attribute_set_id') : 0;
+        $options = Mage::helper('core')->jsonEncode([
+            'savedValue' => $savedSetId ? (string) $savedSetId : null,
+            'questions' => (object) Mage::helper('eav')->getSetChangeQuestions($savedSetId, $sets),
+            'url' => Mage::helper('adminhtml')->getUrl('*/*/edit', ['_current' => true]),
+        ]);
         $fieldset->addField('attribute_set_id', 'select', [
             'name' => 'attribute_set_id',
             'label' => Mage::helper('blog')->__('Attribute Set'),
             'title' => Mage::helper('blog')->__('Attribute Set'),
-            'note' => Mage::helper('blog')->__('The fields of the set show after you save. You cannot change the set later.'),
+            'note' => Mage::helper('blog')->__('The form shows the fields of the set that you select.'),
             'values' => $sets,
+            'onchange' => 'blogChangeAttributeSet(this, ' . Mage::helper('core')->escapeHtml($options) . ')',
+            'after_element_html' => <<<'HTML'
+                <script>
+                    function blogChangeAttributeSet(select, { savedValue = null, questions = {}, url }) {
+                        const question = questions[select.value];
+                        if (question && !confirm(question)) {
+                            select.value = [...select.options].find((option) => option.defaultSelected)?.value ?? savedValue;
+                            return;
+                        }
+                        select.form.action = setRouteParams(url, { set: select.value });
+                        select.form.submit();
+                    }
+                </script>
+                HTML,
         ]);
-        $entity->setAttributeSetId((int) $entity->getResource()->getEntityType()->getDefaultAttributeSetId());
     }
 }

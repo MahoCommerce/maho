@@ -17,6 +17,8 @@ declare(strict_types=1);
 const CUSTOM_ATTR_EMAIL_PREFIX = 'pest-custom-attr-';
 const CUSTOM_ATTR_CUSTOMER_CODE = 'pest_api_reg_no';
 const CUSTOM_ATTR_ADDRESS_CODE = 'pest_api_dock';
+const CUSTOM_ATTR_STOREFRONT_CODE = 'pest_api_vat_ref';
+const CUSTOM_ATTR_FLOOR_CODE = 'pest_api_floor';
 
 function customAttrTestCreateCustomer(array $extra = []): array
 {
@@ -71,6 +73,30 @@ beforeAll(function (): void {
         'used_in_forms' => ['adminhtml_customer_address'],
         'option' => ['value' => ['o1' => ['North Dock'], 'o2' => ['South Dock']], 'order' => ['o1' => 1, 'o2' => 2]],
     ])->save();
+
+    Mage::getModel('customer/attribute')->setData([
+        'entity_type_id' => (int) $eavConfig->getEntityType('customer')->getId(),
+        'attribute_code' => CUSTOM_ATTR_STOREFRONT_CODE,
+        'backend_type' => 'varchar',
+        'frontend_input' => 'text',
+        'frontend_label' => 'VAT Reference',
+        'is_user_defined' => 1,
+        'is_visible' => 1,
+        'is_system' => 0,
+        'used_in_forms' => ['customer_account_create', 'customer_account_edit', 'adminhtml_customer'],
+    ])->save();
+
+    Mage::getModel('customer/attribute')->setData([
+        'entity_type_id' => (int) $eavConfig->getEntityType('customer_address')->getId(),
+        'attribute_code' => CUSTOM_ATTR_FLOOR_CODE,
+        'backend_type' => 'varchar',
+        'frontend_input' => 'text',
+        'frontend_label' => 'Floor',
+        'is_user_defined' => 1,
+        'is_visible' => 1,
+        'is_system' => 0,
+        'used_in_forms' => ['customer_address_edit', 'adminhtml_customer_address'],
+    ])->save();
     Mage::app()->cleanCache();
     $eavConfig->clear();
 
@@ -88,7 +114,12 @@ afterAll(function (): void {
         $resource = Mage::getSingleton('core/resource');
         $write = $resource->getConnection('core_write');
         $write->delete($resource->getTableName('customer/entity'), ['email LIKE ?' => CUSTOM_ATTR_EMAIL_PREFIX . '%']);
-        foreach (['customer' => CUSTOM_ATTR_CUSTOMER_CODE, 'customer_address' => CUSTOM_ATTR_ADDRESS_CODE] as $type => $code) {
+        foreach ([
+            [CUSTOM_ATTR_CUSTOMER_CODE, 'customer'],
+            [CUSTOM_ATTR_STOREFRONT_CODE, 'customer'],
+            [CUSTOM_ATTR_ADDRESS_CODE, 'customer_address'],
+            [CUSTOM_ATTR_FLOOR_CODE, 'customer_address'],
+        ] as [$code, $type]) {
             $attribute = Mage::getModel('customer/attribute')->loadByCode($type, $code);
             if ($attribute->getId()) {
                 $attribute->delete();
@@ -96,8 +127,10 @@ afterAll(function (): void {
         }
         foreach (['sales/quote_address', 'sales/order_address'] as $table) {
             $table = $resource->getTableName($table);
-            if ($write->tableColumnExists($table, CUSTOM_ATTR_ADDRESS_CODE)) {
-                $write->dropColumn($table, CUSTOM_ATTR_ADDRESS_CODE);
+            foreach ([CUSTOM_ATTR_ADDRESS_CODE, CUSTOM_ATTR_FLOOR_CODE] as $code) {
+                if ($write->tableColumnExists($table, $code)) {
+                    $write->dropColumn($table, $code);
+                }
             }
             $write->resetDdlCache($table);
         }
@@ -137,7 +170,7 @@ describe('Customer customAttributes (REST)', function (): void {
         expect($response['status'])->toBe(422);
     });
 
-    it('ignores customAttributes on anonymous registration', function (): void {
+    it('refuses an attribute of the admin form on anonymous registration', function (): void {
         $response = apiPost('/api/rest/v2/customers', [
             'email' => CUSTOM_ATTR_EMAIL_PREFIX . uniqid() . '@example.test',
             'password' => 'PestWrite1234!',
@@ -145,20 +178,22 @@ describe('Customer customAttributes (REST)', function (): void {
             'lastname' => 'Anonymous',
             'customAttributes' => [CUSTOM_ATTR_CUSTOMER_CODE => 'RN-ANON'],
         ]);
-        expect($response['status'])->toBeSuccessful();
 
-        $read = apiGet('/api/rest/v2/customers/' . (int) $response['json']['id'], adminToken());
-        expect($read['status'])->toBe(200)
-            ->and($read['json']['customAttributes'] ?? [])->not->toHaveKey(CUSTOM_ATTR_CUSTOMER_CODE);
+        expect($response['status'])->toBe(422)
+            ->and(array_column($response['json']['details']['errors'] ?? [], 'field'))->toContain('customAttributes.' . CUSTOM_ATTR_CUSTOMER_CODE);
     });
 
-    it('hides customAttributes from the token of the customer', function (): void {
-        $create = customAttrTestCreateCustomer(['customAttributes' => [CUSTOM_ATTR_CUSTOMER_CODE => 'RN-789']]);
+    it('hides an attribute of the admin form from the token of the customer', function (): void {
+        $create = customAttrTestCreateCustomer(['customAttributes' => [
+            CUSTOM_ATTR_CUSTOMER_CODE => 'RN-789',
+            CUSTOM_ATTR_STOREFRONT_CODE => 'VR-789',
+        ]]);
         $id = (int) $create['json']['id'];
 
         $read = apiGet('/api/rest/v2/customers/me', customerToken($id));
         expect($read['status'])->toBe(200)
-            ->and($read['json']['customAttributes'] ?? null)->toBeNull();
+            ->and($read['json']['customAttributes'] ?? [])->not->toHaveKey(CUSTOM_ATTR_CUSTOMER_CODE)
+            ->and($read['json']['customAttributes'][CUSTOM_ATTR_STOREFRONT_CODE] ?? null)->toBe('VR-789');
     });
 
 });
@@ -255,6 +290,171 @@ describe('Required customAttributes (REST)', function (): void {
         expect($admin['status'])->toBe(422)
             ->and(array_column($admin['json']['details']['errors'] ?? [], 'field'))->toContain('customAttributes.' . CUSTOM_ATTR_CUSTOMER_CODE)
             ->and($anonymous['status'])->toBeSuccessful();
+    });
+
+});
+
+describe('Storefront customAttributes (REST)', function (): void {
+
+    it('registers a guest with an attribute of the registration form', function (): void {
+        $response = apiPost('/api/rest/v2/customers', [
+            'email' => CUSTOM_ATTR_EMAIL_PREFIX . uniqid() . '@example.test',
+            'password' => 'PestWrite1234!',
+            'firstname' => 'Pest',
+            'lastname' => 'Guest',
+            'customAttributes' => [CUSTOM_ATTR_STOREFRONT_CODE => 'VR-1'],
+        ]);
+        expect($response['status'])->toBeSuccessful()
+            ->and($response['json']['customAttributes'][CUSTOM_ATTR_STOREFRONT_CODE] ?? null)->toBe('VR-1');
+
+        $read = apiGet('/api/rest/v2/customers/' . (int) $response['json']['id'], adminToken());
+        expect($read['json']['customAttributes'][CUSTOM_ATTR_STOREFRONT_CODE] ?? null)->toBe('VR-1');
+    });
+
+    it('requires a required attribute of the registration form on registration', function (): void {
+        $attribute = Mage::getModel('customer/attribute')->loadByCode('customer', CUSTOM_ATTR_STOREFRONT_CODE);
+        $attribute->setIsRequired(1)->save();
+        Mage::app()->cleanCache();
+        Mage::getSingleton('eav/config')->clear();
+
+        try {
+            $response = apiPost('/api/rest/v2/customers', [
+                'email' => CUSTOM_ATTR_EMAIL_PREFIX . uniqid() . '@example.test',
+                'password' => 'PestWrite1234!',
+                'firstname' => 'Pest',
+                'lastname' => 'Guest',
+            ]);
+        } finally {
+            $attribute->setIsRequired(0)->save();
+            Mage::app()->cleanCache();
+            Mage::getSingleton('eav/config')->clear();
+        }
+
+        expect($response['status'])->toBe(422)
+            ->and(array_column($response['json']['details']['errors'] ?? [], 'field'))->toContain('customAttributes.' . CUSTOM_ATTR_STOREFRONT_CODE);
+    });
+
+    it('lets a customer update an attribute of the account form, and not one of the admin form', function (): void {
+        $id = (int) customAttrTestCreateCustomer()['json']['id'];
+
+        $update = apiPut('/api/rest/v2/customers/me', ['customAttributes' => [CUSTOM_ATTR_STOREFRONT_CODE => 'VR-2']], customerToken($id));
+        $refused = apiPut('/api/rest/v2/customers/me', ['customAttributes' => [CUSTOM_ATTR_CUSTOMER_CODE => 'RN-2']], customerToken($id));
+
+        expect($update['status'])->toBeSuccessful()
+            ->and($update['json']['customAttributes'][CUSTOM_ATTR_STOREFRONT_CODE] ?? null)->toBe('VR-2')
+            ->and($refused['status'])->toBe(422)
+            ->and(apiGet("/api/rest/v2/customers/{$id}", adminToken())['json']['customAttributes'][CUSTOM_ATTR_CUSTOMER_CODE] ?? null)->toBeNull();
+    });
+
+    it('lets a customer write an attribute of the address book on a new address', function (): void {
+        $id = (int) customAttrTestCreateCustomer()['json']['id'];
+
+        $created = apiPost(
+            '/api/rest/v2/customers/me/addresses',
+            customAttrTestAddress(['customAttributes' => [CUSTOM_ATTR_FLOOR_CODE => '3rd']]),
+            customerToken($id),
+        );
+        $refused = apiPost(
+            '/api/rest/v2/customers/me/addresses',
+            customAttrTestAddress(['customAttributes' => [CUSTOM_ATTR_ADDRESS_CODE => $GLOBALS['_custom_attr_south_id']]]),
+            customerToken($id),
+        );
+
+        expect($created['status'])->toBeSuccessful()
+            ->and($created['json']['customAttributes'][CUSTOM_ATTR_FLOOR_CODE] ?? null)->toBe('3rd')
+            ->and($created['json']['customAttributes'] ?? [])->not->toHaveKey(CUSTOM_ATTR_ADDRESS_CODE)
+            ->and($refused['status'])->toBe(422);
+    });
+
+    it('sets an address attribute on a guest cart and copies it with sameAsShipping', function (): void {
+        $create = apiPost('/api/rest/v2/guest-carts', []);
+        expect($create['status'])->toBeIn([200, 201]);
+        $maskedId = $create['json']['maskedId'];
+        trackCreated('quote', (int) $create['json']['id']);
+        $address = [
+            'firstName' => 'Pest',
+            'lastName' => 'Guest',
+            'street' => ['123 Setter St'],
+            'city' => 'Los Angeles',
+            'region' => 'California',
+            'postcode' => '90210',
+            'countryId' => 'US',
+            'telephone' => '5550100',
+        ];
+
+        $shipping = apiPut("/api/rest/v2/guest-carts/{$maskedId}/shipping-address", $address + ['customAttributes' => [CUSTOM_ATTR_FLOOR_CODE => '2nd']]);
+        $billing = apiPut("/api/rest/v2/guest-carts/{$maskedId}/billing-address", ['sameAsShipping' => true]);
+        $refused = apiPut("/api/rest/v2/guest-carts/{$maskedId}/shipping-address", $address + ['customAttributes' => [CUSTOM_ATTR_ADDRESS_CODE => $GLOBALS['_custom_attr_south_id']]]);
+
+        expect($shipping['status'])->toBe(200)
+            ->and($shipping['json']['shippingAddress']['customAttributes'][CUSTOM_ATTR_FLOOR_CODE] ?? null)->toBe('2nd')
+            ->and($billing['json']['billingAddress']['customAttributes'][CUSTOM_ATTR_FLOOR_CODE] ?? null)->toBe('2nd')
+            ->and($refused['status'])->toBe(422);
+    });
+
+    it('requires a required attribute of the checkout address form on a cart address', function (): void {
+        $attribute = Mage::getModel('customer/attribute')->loadByCode('customer_address', CUSTOM_ATTR_FLOOR_CODE);
+        $attribute->setIsRequired(1)->save();
+        Mage::app()->cleanCache();
+        Mage::getSingleton('eav/config')->clear();
+        $address = [
+            'firstName' => 'Pest',
+            'lastName' => 'Guest',
+            'street' => ['123 Setter St'],
+            'city' => 'Los Angeles',
+            'region' => 'California',
+            'postcode' => '90210',
+            'countryId' => 'US',
+            'telephone' => '5550100',
+        ];
+
+        try {
+            $create = apiPost('/api/rest/v2/guest-carts', []);
+            $maskedId = $create['json']['maskedId'];
+            trackCreated('quote', (int) $create['json']['id']);
+            $missing = apiPut("/api/rest/v2/guest-carts/{$maskedId}/shipping-address", $address);
+            $given = apiPut("/api/rest/v2/guest-carts/{$maskedId}/shipping-address", $address + ['customAttributes' => [CUSTOM_ATTR_FLOOR_CODE => '1st']]);
+        } finally {
+            $attribute->setIsRequired(0)->save();
+            Mage::app()->cleanCache();
+            Mage::getSingleton('eav/config')->clear();
+        }
+
+        expect($missing['status'])->toBe(422)
+            ->and(array_column($missing['json']['details']['errors'] ?? [], 'field'))->toContain('customAttributes.' . CUSTOM_ATTR_FLOOR_CODE)
+            ->and($given['status'])->toBe(200);
+    });
+
+});
+
+describe('Storefront customer forms', function (): void {
+
+    it('lists the fields of the registration form to a guest, without the attributes of the admin form', function (): void {
+        $response = apiGet('/api/rest/v2/customer-forms/customer_account_create');
+
+        expect($response['status'])->toBe(200);
+        $fields = array_merge(...array_column($response['json']['groups'] ?? [], 'fields'));
+        $codes = array_column($fields, 'code');
+        $field = $fields[array_search(CUSTOM_ATTR_STOREFRONT_CODE, $codes, true)] ?? [];
+        expect($codes)->toContain(CUSTOM_ATTR_STOREFRONT_CODE)
+            ->and($codes)->not->toContain(CUSTOM_ATTR_CUSTOMER_CODE)
+            ->and($field['label'] ?? null)->toBe('VAT Reference')
+            ->and($field['input'] ?? null)->toBe('text')
+            ->and($field['isRequired'] ?? null)->toBeFalse();
+    });
+
+    it('answers 404 for a form that is not a storefront form', function (): void {
+        expect(apiGet('/api/rest/v2/customer-forms/adminhtml_customer')['status'])->toBe(404);
+    });
+
+    it('serves the GraphQL customerForm query', function (): void {
+        $response = gqlQuery('{ customerForm(id: "/api/rest/v2/customer-forms/customer_address_edit") { entityType groups } }');
+
+        expect($response['json']['errors'] ?? [])->toBeEmpty()
+            ->and($response['json']['data']['customerForm']['entityType'] ?? null)->toBe('customer_address');
+        $codes = array_column(array_merge(...array_column($response['json']['data']['customerForm']['groups'] ?? [], 'fields')), 'code');
+        expect($codes)->toContain(CUSTOM_ATTR_FLOOR_CODE)
+            ->and($codes)->not->toContain(CUSTOM_ATTR_ADDRESS_CODE);
     });
 
 });

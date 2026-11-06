@@ -2561,6 +2561,23 @@
         }
     }
 
+    /* A Text Area value of eav/frontend/attributes.phtml: a titled text under the table */
+    .attribute-group-title {
+        @apply mt-10 mb-2 font-display text-lg font-semibold tracking-tight;
+    }
+
+    .attribute-text {
+        @apply mt-8 max-w-2xl;
+
+        h3 {
+            @apply mb-2 font-display text-base font-semibold tracking-tight;
+        }
+
+        .std {
+            @apply text-sm leading-relaxed;
+        }
+    }
+
     /* Product details as accordion rows in the buy column (Zalando pattern;
        markup in catalog/product/view.phtml) */
     .collateral-accordions {

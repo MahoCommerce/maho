@@ -208,6 +208,15 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
     }
 
     /**
+     * Return a text that the edit page of this attribute shows above the properties, or null for no text.
+     * Each line of the text is a paragraph.
+     */
+    public function getAttributeNote(): ?string
+    {
+        return null;
+    }
+
+    /**
      * Return a text that the edit page of $set shows above the groups, or null for no text.
      */
     public function getSetNote(Mage_Eav_Model_Entity_Attribute_Set $set): ?string
@@ -225,21 +234,9 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
     public function getSetDeleteQuestion(Mage_Eav_Model_Entity_Attribute_Set $set): string
     {
         $helper = Mage::helper('eav');
-        $resource = Mage::getSingleton('core/resource');
-        $adapter = $resource->getConnection('core_read');
-        $entityAttributeTable = $resource->getTableName('eav/entity_attribute');
-        $defaultSetId = (int) $this->getEntityType()->getDefaultAttributeSetId();
-        $labels = $adapter->fetchCol(
-            $adapter->select()
-                ->from(['ea' => $entityAttributeTable], [])
-                ->join(['a' => $resource->getTableName('eav/attribute')], 'a.attribute_id = ea.attribute_id', ['frontend_label'])
-                ->where('ea.attribute_set_id = ?', (int) $set->getId())
-                ->where(
-                    "NOT EXISTS (SELECT 1 FROM {$entityAttributeTable} d"
-                    . ' WHERE d.attribute_id = ea.attribute_id AND d.attribute_set_id = ?)',
-                    $defaultSetId,
-                )
-                ->order('a.frontend_label'),
+        $labels = Mage::getResourceSingleton('eav/entity_attribute_set')->getMissingAttributeLabels(
+            (int) $set->getId(),
+            (int) $this->getEntityType()->getDefaultAttributeSetId(),
         );
 
         $text = $helper->__('The records of this set will move to the default set.');

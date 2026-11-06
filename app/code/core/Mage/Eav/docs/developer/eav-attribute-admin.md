@@ -74,6 +74,9 @@ The attribute model can also change the save and the texts of the set page:
 - `saveAdminData()` saves the posted values that the attribute does not save itself.
 - `_getInputTypes()` gives the input types of the type. The event
   `eav_attribute_input_types_prepare` lets another module add or remove a type.
+- `getAttributeNote()` returns a text that the attribute page shows above the properties. The
+  customer types name the forms, the customer groups and the websites that show the attribute. CMS
+  pages say that only a theme shows the value.
 - `getSetNote($set)` returns a text that the set page shows above the groups. The customer types
   use it to say that the customer group picks the set, and to name the groups that use the set.
 - `getSetDeleteQuestion($set)` returns the question before a set delete. By default, it names the
@@ -156,6 +159,11 @@ same rules apply to every resource:
 - A write takes only the attributes of the set of the record. A new record must get each required
   attribute.
 - Each error names the field `customAttributes.<code>`.
+- Customers and addresses also serve the storefront. A customer token or a guest writes through the
+  storefront form of the action (`Mage\Customer\Api\CustomAttributes::STOREFRONT_FORMS`), and
+  `Mage\Customer\Api\CustomAttributesNormalizer` removes from a read the attributes that no
+  storefront form shows to the group of the caller. `GET /api/rest/v2/customer-forms/{form}` lists
+  the fields of a storefront form.
 - The property names its attributes with `extraProperties: [CustomAttributeSchema::KEY => '<type code>']`.
   `EnumSourceSchemaFactory` then lists each attribute as a typed property in the OpenAPI document and
   the MCP tools, with the option IDs of a dropdown as an enum.
@@ -170,7 +178,9 @@ attribute. `GET /api/rest/v2/custom-attributes/{id}` reads one. Product attribut
 The nightly `eav_clean_orphaned_records` cron deletes each value whose attribute is not in the set
 of its record. It reads the `attribute_set_id` column of the entity table. For that reason:
 
-- A record keeps its set after the first save in the admin.
+- A change of the set of a saved record asks first, and names the attributes that the new set does
+  not have. `Mage_Eav_Helper_Data::getSetChangeQuestions()` builds the questions, and
+  `Mage_Eav_Model_Resource_Entity_Attribute_Set::getMissingAttributeLabels()` finds the attributes.
 - The set page refuses to remove a system attribute from a set, and to delete a group that still
   holds one. `Mage_Adminhtml_Controller_Eav_Set::checkSystemAttributes()` makes the same check on
   the server. The check also covers the attributes that a `userDefinedOnly` setting hides.

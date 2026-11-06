@@ -115,6 +115,96 @@ class Mage_Customer_Model_Attribute extends Mage_Eav_Model_Attribute
     }
 
     /**
+     * Name the forms, the customer groups and the websites that show this attribute, because
+     * the three settings together decide if a customer sees the field.
+     */
+    #[\Override]
+    public function getAttributeNote(): ?string
+    {
+        $column = $this->getGroupSetColumn();
+        if ($column === null || !$this->getId()) {
+            return null;
+        }
+        $helper = Mage::helper('customer');
+        $forms = array_values(array_intersect_key($this->getFormCodes(), array_flip($this->getUsedInForms())));
+        if (!$forms) {
+            return $helper->__('No form shows this attribute. Select the forms in Used in Forms.');
+        }
+        $lines = [$helper->__('Forms that show the attribute: %s.', implode(', ', $forms))];
+
+        $adapter = $this->getResource()->getReadConnection();
+        $setIds = array_map(intval(...), $adapter->fetchCol(
+            $adapter->select()
+                ->from($this->getResource()->getTable('eav/entity_attribute'), ['attribute_set_id'])
+                ->where('attribute_id = ?', (int) $this->getId()),
+        ));
+        if (!$setIds) {
+            $lines[] = $helper->__('Customer groups: all, because the attribute is in no set.');
+        } else {
+            $defaultSetId = (int) $this->getEntityType()->getDefaultAttributeSetId();
+            $shown = [];
+            $hidden = [];
+            foreach (Mage::getResourceModel('customer/group_collection') as $group) {
+                $setId = (int) $group->getData($column) ?: $defaultSetId;
+                if (in_array($setId, $setIds, true)) {
+                    $shown[] = $group->getCustomerGroupCode();
+                } else {
+                    $hidden[] = $group->getCustomerGroupCode();
+                }
+            }
+            $lines[] = $helper->__('Customer groups whose set holds the attribute: %s.', $shown ? implode(', ', $shown) : $helper->__('none'));
+            if ($hidden) {
+                $lines[] = $helper->__('Customer groups that do not see the attribute: %s.', implode(', ', $hidden));
+            }
+        }
+
+        $modes = [
+            'hidden' => $helper->__('Hidden'),
+            'optional' => $helper->__('Optional'),
+            'required' => $helper->__('Required'),
+        ];
+        $websiteValues = $this->getResource()->getWebsiteValues((int) $this->getId());
+        $websites = [];
+        foreach (Mage::app()->getWebsites() as $website) {
+            $mode = self::getWebsiteModeOverride($websiteValues[(int) $website->getId()] ?? null) ?: $this->getDefaultWebsiteMode();
+            $websites[] = $website->getName() . ' (' . $modes[$mode] . ')';
+        }
+        if ($websites) {
+            $lines[] = $helper->__('Websites: %s.', implode(', ', $websites));
+        }
+
+        return implode("\n", $lines);
+    }
+
+    /**
+     * Return the mode that Show in Forms and Values Required give: hidden, optional or required.
+     */
+    public function getDefaultWebsiteMode(): string
+    {
+        return match (true) {
+            !$this->getId() => 'optional',
+            !$this->getIsVisible() => 'hidden',
+            (bool) $this->getIsRequired() => 'required',
+            default => 'optional',
+        };
+    }
+
+    /**
+     * Return the mode that the website values of one website set, or '' when the website uses the default.
+     *
+     * @param array{is_visible: ?int, is_required: ?int}|null $values a row of getWebsiteValues()
+     */
+    public static function getWebsiteModeOverride(?array $values): string
+    {
+        return match (true) {
+            $values === null || ($values['is_visible'] === null && $values['is_required'] === null) => '',
+            $values['is_visible'] === 0 => 'hidden',
+            $values['is_required'] === 1 => 'required',
+            default => 'optional',
+        };
+    }
+
+    /**
      * Return the column of customer_group that holds the set of this entity type.
      */
     protected function getGroupSetColumn(): ?string

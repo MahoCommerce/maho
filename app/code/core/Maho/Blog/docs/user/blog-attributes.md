@@ -38,8 +38,11 @@ The attributes of the first group of the set show on the **Content** tab of a po
 **General** tab of a category. Each other group that holds an attribute is a tab of its own, with
 the name of the group.
 
-When there is more than one set, a new post or category shows the **Attribute Set** field. Select
-the set before the first save. The admin does not change the set after the first save.
+When there is more than one set, a post or a category shows the **Attribute Set** field. When you
+select another set, the page shows the fields of that set at once, and keeps the values that you
+entered. When the new set of a saved post or category does not have some attributes of the old set,
+the page asks first and names them. When you save, the post or the category loses its values of
+these attributes.
 
 Every night, the store deletes the value of an attribute that is not in the set of its post or
 category. So the value of an attribute shows and stays only when the attribute is in the set.
@@ -49,6 +52,9 @@ category. So the value of an attribute shows and stays only when the attribute i
 Set **Visible on Frontend** to **Yes** in the **Frontend Properties** of the attribute. The post
 page or the category page then shows the attribute and its value in a table. A post with no value
 for the attribute does not show it.
+
+A **Text Area** value shows under the table, with the label of the attribute as its title, because a
+long text does not fit in a table.
 
 Each group of the set is a table of its own, in the order of the groups. The table of the first
 group has the title **Additional Information**. Each other table has the name of its group in the

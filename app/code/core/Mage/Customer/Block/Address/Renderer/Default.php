@@ -118,7 +118,45 @@ class Mage_Customer_Block_Address_Renderer_Default extends Mage_Core_Block_Abstr
         $formater->setVariables($data);
         $format ??= $this->_prepareAddressTemplateData($this->getFormat($address));
 
-        return $formater->filter($format);
+        return $formater->filter($format) . $this->_renderUnlistedAttributes($attributes, $data, $format);
+    }
+
+    /**
+     * Return a "Label: value" line for each custom attribute that has a value and that $format does not name.
+     * An attribute that only the admin forms show stays out, because the customer emails use this renderer.
+     *
+     * @param iterable<Mage_Customer_Model_Attribute> $attributes
+     * @param array<string, mixed> $data the template variables, escaped when the type escapes HTML
+     */
+    protected function _renderUnlistedAttributes(iterable $attributes, array $data, string $format): string
+    {
+        $separator = match ($this->getType()->getCode()) {
+            'html' => '<br/>',
+            'pdf' => '|',
+            'oneline' => ', ',
+            default => "\n",
+        };
+
+        $lines = [];
+        foreach ($attributes as $attribute) {
+            $code = $attribute->getAttributeCode();
+            if (!$attribute->getIsUserDefined()
+                || !$attribute->getIsVisible()
+                || !isset($data[$code])
+                || $data[$code] === ''
+                || preg_match('/\{\{(?:var|depend|if)\s+' . preg_quote($code, '/') . '\b/', $format)
+                || !array_filter($attribute->getUsedInForms(), fn($form) => !str_starts_with($form, 'adminhtml_'))
+            ) {
+                continue;
+            }
+            $label = $attribute->getStoreLabel();
+            if ($this->getType()->getHtmlEscape()) {
+                $label = $this->escapeHtml($label);
+            }
+            $lines[] = $label . ': ' . $data[$code];
+        }
+
+        return $lines ? $separator . implode($separator, $lines) : '';
     }
 
     /**

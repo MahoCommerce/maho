@@ -119,6 +119,20 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
         $data = Mage::getSingleton('adminhtml/session')->getCategoryData(true);
         $category->addData($data['general'] ?? []);
 
+        // The set select reloads the form with the fields of another set, and posts the values that the admin typed
+        $setId = (int) $this->getRequest()->getParam('set');
+        if ($setId) {
+            $posted = $this->getRequest()->getPost('general');
+            if (is_array($posted)) {
+                $category->addData(array_diff_key($posted, array_flip(['id', 'path', 'attribute_set_id'])));
+            }
+            try {
+                $category->assignAttributeSet($setId);
+            } catch (Mage_Core_Exception $e) {
+                Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
+            }
+        }
+
         $this->loadLayout();
 
         $this->_title($this->__('Catalog'))
@@ -234,11 +248,12 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
                     ->setPath($parent->getPath())
                     ->setStoreId(Mage_Core_Model_App::ADMIN_STORE_ID);
             }
-            // An existing category keeps its set, as a product does
-            if ($category->getId() && $category->getOrigData('attribute_set_id')) {
+            // Without a posted set, an existing category keeps its set
+            $setId = (int) ($data['general']['attribute_set_id'] ?? 0);
+            if (!$setId && $category->getId() && $category->getOrigData('attribute_set_id')) {
                 $category->setAttributeSetId((int) $category->getOrigData('attribute_set_id'));
             } else {
-                $category->assignAttributeSet((int) ($data['general']['attribute_set_id'] ?? 0) ?: null);
+                $category->assignAttributeSet($setId ?: null);
             }
 
             // Check "Use Default Value" checkboxes values

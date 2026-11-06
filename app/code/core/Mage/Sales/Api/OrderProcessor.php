@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Mage\Sales\Api;
 
 use Mage\Checkout\Api\CartRequest;
+use Mage\Customer\Api\CustomAttributes;
 use ApiPlatform\Metadata\Operation;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -139,9 +140,11 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         // together with the shipping method, and the final save persists them.
         if (isset($args['shippingAddress']) && is_array($args['shippingAddress'])) {
             $this->cartService->applyShippingAddress($quote, $this->cartService->mapAddressInput($args['shippingAddress']));
+            CustomAttributes::applyToCartAddress($quote->getShippingAddress(), $args['shippingAddress']['customAttributes'] ?? null);
         }
         if (isset($args['billingAddress']) && is_array($args['billingAddress'])) {
             $this->cartService->applyBillingAddress($quote, $this->cartService->mapAddressInput($args['billingAddress']));
+            CustomAttributes::applyToCartAddress($quote->getBillingAddress(), $args['billingAddress']['customAttributes'] ?? null);
         }
 
         // Set customer email from the body if provided (guest checkout)

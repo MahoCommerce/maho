@@ -292,9 +292,13 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
             }
         }
 
-        // A customer cannot send customAttributes, so only a backend caller that creates an address checks the required ones
-        if ($data->customAttributes !== null || (!$address->getId() && $this->hasBackendAccess('addresses'))) {
-            CustomAttributes::apply($address, 'adminhtml_customer_address', $data->customAttributes ?? []);
+        // A new address gets the required attributes of its form, as in the address book
+        if ($data->customAttributes !== null || !$address->getId()) {
+            CustomAttributes::apply(
+                $address,
+                $this->hasBackendAccess('addresses') ? 'adminhtml_customer_address' : 'customer_address_edit',
+                $data->customAttributes ?? [],
+            );
         }
     }
 
@@ -328,6 +332,7 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
         $addressDto->company = $args['company'] ?? null;
         $addressDto->isDefaultBilling = $args['isDefaultBilling'] ?? false;
         $addressDto->isDefaultShipping = $args['isDefaultShipping'] ?? false;
+        $addressDto->customAttributes = $args['customAttributes'] ?? null;
 
         return $this->createAddress($addressDto, $customer);
     }
@@ -359,8 +364,8 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
 
         // Build Address DTO from existing data + GraphQL args (partial update)
         $addressDto = Address::fromCustomerAddress($existingAddress, $customer);
-        // The stored values stay: apply() would check them against the form of the current group
-        $addressDto->customAttributes = null;
+        // Without the argument the stored values stay: apply() would check them against the form of the current group
+        $addressDto->customAttributes = $args['customAttributes'] ?? null;
         if (isset($args['firstName'])) {
             $addressDto->firstname = $args['firstName'];
         }

@@ -9,7 +9,8 @@
 declare(strict_types=1);
 
 /**
- * A table of the attributes of an EAV record that have "Visible on Front" set.
+ * The attributes of an EAV record that have "Visible on Front" set: a table for each group of the
+ * attribute set, and a titled text under the table for each value of a Text Area attribute.
  *
  * The layout names the record with the action setRegistryKey, for example current_category.
  */
@@ -30,8 +31,9 @@ class Mage_Eav_Block_Frontend_Attributes extends Mage_Core_Block_Template
 
     /**
      * Return the label, the value and the code of each visible attribute that has a value.
+     * A Text Area value is a text: it shows under the table, because a long value does not fit in a cell.
      *
-     * @return list<array{label: string, value: string, code: string}>
+     * @return list<array{label: string, value: string, code: string, text: bool}>
      */
     public function getAttributeValues(): array
     {
@@ -65,17 +67,18 @@ class Mage_Eav_Block_Frontend_Attributes extends Mage_Core_Block_Template
                 'label' => (string) $attribute->getStoreLabel(),
                 'value' => $value,
                 'code' => (string) $code,
+                'text' => $attribute->getFrontendInput() === 'textarea',
             ];
         }
         return $rows;
     }
 
     /**
-     * Return the rows of getAttributeValues() by group of the attribute set of the record, one
-     * table for each group. The first table takes the title of the block, or "Additional
-     * Information". Each other table takes the label of its group in the current store view.
+     * Return the values of getAttributeValues() by group of the attribute set of the record. A group
+     * has the rows of its table and its texts. The first group takes the title of the block, or
+     * "Additional Information". Each other group takes the label of its group in the current store view.
      *
-     * @return list<array{title: string, rows: list<array{label: string, value: string, code: string}>}>
+     * @return list<array{title: string, named: bool, rows: list<array>, texts: list<array>}>
      */
     public function getAttributeGroups(): array
     {
@@ -98,9 +101,12 @@ class Mage_Eav_Block_Frontend_Attributes extends Mage_Core_Block_Template
         $setId = method_exists($entity, 'getAttributeSetId') ? (int) $entity->getAttributeSetId() : 0;
         $tables = [];
         foreach (Mage::helper('eav')->groupAttributesBySet($list, $setId ?: null) as $group) {
+            $values = array_map(fn($attribute) => $rowOf[$attribute->getAttributeCode()], $group['attributes']);
             $tables[] = [
                 'title' => $group['label'] ?? (string) ($this->getTitle() ?: $this->__('Additional Information')),
-                'rows' => array_map(fn($attribute) => $rowOf[$attribute->getAttributeCode()], $group['attributes']),
+                'named' => isset($group['label']),
+                'rows' => array_values(array_filter($values, fn(array $row): bool => !$row['text'])),
+                'texts' => array_values(array_filter($values, fn(array $row): bool => $row['text'])),
             ];
         }
         return $tables;
@@ -111,14 +117,35 @@ class Mage_Eav_Block_Frontend_Attributes extends Mage_Core_Block_Template
      */
     public function getValueHtml(array $row): string
     {
-        $resource = $this->getEntity()?->getResource();
-        $attribute = $resource instanceof Mage_Eav_Model_Entity_Abstract ? $resource->getAttribute($row['code']) : null;
-        if (!$attribute instanceof Mage_Eav_Model_Entity_Attribute
-            || (!$attribute->getData('is_html_allowed_on_front') && !$attribute->getData('is_wysiwyg_enabled'))
-        ) {
+        $attribute = $this->getHtmlAttribute($row['code']);
+        if ($attribute === null) {
             return $this->escapeHtml($row['value']);
         }
         return $this->renderHtmlValue($attribute, $row['value']);
+    }
+
+    /**
+     * Return the HTML of a text of getAttributeGroups(). A value without HTML keeps its line breaks.
+     */
+    public function getTextHtml(array $row): string
+    {
+        $html = $this->getValueHtml($row);
+        return $this->getHtmlAttribute($row['code']) === null ? nl2br($html) : $html;
+    }
+
+    /**
+     * Return the attribute $code when it allows HTML or uses the WYSIWYG editor, or null.
+     */
+    protected function getHtmlAttribute(string $code): ?Mage_Eav_Model_Entity_Attribute
+    {
+        $resource = $this->getEntity()?->getResource();
+        $attribute = $resource instanceof Mage_Eav_Model_Entity_Abstract ? $resource->getAttribute($code) : null;
+        if (!$attribute instanceof Mage_Eav_Model_Entity_Attribute
+            || (!$attribute->getData('is_html_allowed_on_front') && !$attribute->getData('is_wysiwyg_enabled'))
+        ) {
+            return null;
+        }
+        return $attribute;
     }
 
     /**

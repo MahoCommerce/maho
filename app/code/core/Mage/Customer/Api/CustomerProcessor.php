@@ -133,6 +133,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             lastName: $data->lastname,
             email: $data->email !== '' ? $data->email : null,
             profile: $this->extractProfileFields($data),
+            customAttributes: $data->customAttributes,
         );
     }
 
@@ -226,10 +227,12 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             $customer->setData($field, $value);
         }
         $this->applyAdminOnlyFields($customer, $data);
-        // A registration cannot send customAttributes, so only a backend caller checks the required ones
-        if ($data->customAttributes !== null || $this->hasBackendAccess('customers')) {
-            CustomAttributes::apply($customer, 'adminhtml_customer', $data->customAttributes ?? []);
-        }
+        // A registration takes the attributes of the registration form, as the storefront does
+        CustomAttributes::apply(
+            $customer,
+            $isPrivileged ? 'adminhtml_customer' : 'customer_account_create',
+            $data->customAttributes ?? [],
+        );
         if ($data->isActive === null) {
             $customer->setData('is_active', 1);
         }
@@ -408,6 +411,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             firstName: $args['firstName'] ?? null,
             lastName: $args['lastName'] ?? null,
             email: $args['email'] ?? null,
+            customAttributes: $args['customAttributes'] ?? null,
         );
     }
 
@@ -429,9 +433,10 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
      *
      * @param array<string, mixed> $profile Optional name-part/gender/dob fields; a null
      *                                      value clears the attribute, an absent key is untouched
+     * @param array<string, mixed>|null $customAttributes the values of the Customer Account Edit form
      */
     private function doUpdateProfile(?string $firstName, ?string $lastName, #[\SensitiveParameter]
-        ?string $email, array $profile = []): Customer
+        ?string $email, array $profile = [], ?array $customAttributes = null): Customer
     {
         $customerId = $this->getAuthenticatedCustomerId();
         if (!$customerId) {
@@ -454,6 +459,9 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         }
         foreach ($profile as $field => $value) {
             $customer->setData($field, $value);
+        }
+        if ($customAttributes !== null) {
+            CustomAttributes::apply($customer, 'customer_account_edit', $customAttributes);
         }
 
         $customer = $this->customerService->save($customer);

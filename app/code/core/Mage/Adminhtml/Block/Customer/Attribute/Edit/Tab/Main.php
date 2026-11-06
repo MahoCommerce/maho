@@ -119,7 +119,7 @@ class Mage_Adminhtml_Block_Customer_Attribute_Edit_Tab_Main extends Mage_Eav_Blo
     {
         $websites = Mage::app()->getWebsites();
         $values = $attribute->getId() ? $attribute->getResource()->getWebsiteValues((int) $attribute->getId()) : [];
-        $hasOverride = array_filter($values, fn(array $value): bool => $this->_getWebsiteMode($value) !== '') !== [];
+        $hasOverride = array_filter($values, fn(array $value): bool => Mage_Customer_Model_Attribute::getWebsiteModeOverride($value) !== '') !== [];
         if (!$websites || (count($websites) < 2 && !$hasOverride)) {
             return;
         }
@@ -129,7 +129,7 @@ class Mage_Adminhtml_Block_Customer_Attribute_Edit_Tab_Main extends Mage_Eav_Blo
             'optional' => $helper->__('Optional'),
             'required' => $helper->__('Required'),
         ];
-        $options = [['value' => '', 'label' => $helper->__('Use Default (%s)', $modes[$this->_getDefaultMode($attribute)])]];
+        $options = [['value' => '', 'label' => $helper->__('Use Default (%s)', $modes[$attribute->getDefaultWebsiteMode()])]];
         foreach ($modes as $value => $label) {
             $options[] = ['value' => $value, 'label' => $label];
         }
@@ -144,37 +144,9 @@ class Mage_Adminhtml_Block_Customer_Attribute_Edit_Tab_Main extends Mage_Eav_Blo
                 'name' => "website_values[{$id}]",
                 'label' => $website->getName(),
                 'values' => $options,
-                'value' => $this->_getWebsiteMode($values[$id] ?? null),
+                'value' => Mage_Customer_Model_Attribute::getWebsiteModeOverride($values[$id] ?? null),
                 'class' => 'website-mode',
             ]);
         }
-    }
-
-    /**
-     * Return the mode that Show in Forms and Values Required give: hidden, optional or required.
-     */
-    protected function _getDefaultMode(Mage_Customer_Model_Attribute $attribute): string
-    {
-        if (!$attribute->getId()) {
-            return 'optional';
-        }
-        return match (true) {
-            !$attribute->getIsVisible() => 'hidden',
-            (bool) $attribute->getIsRequired() => 'required',
-            default => 'optional',
-        };
-    }
-
-    /**
-     * @param array{is_visible: ?int, is_required: ?int}|null $values
-     */
-    protected function _getWebsiteMode(?array $values): string
-    {
-        return match (true) {
-            $values === null || ($values['is_visible'] === null && $values['is_required'] === null) => '',
-            $values['is_visible'] === 0 => 'hidden',
-            $values['is_required'] === 1 => 'required',
-            default => 'optional',
-        };
     }
 }

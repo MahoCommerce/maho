@@ -390,3 +390,27 @@ it('sanitizes an HTML attribute value on save and resolves its directives on the
         ->and($html)->toContain('<a href="http')
         ->and($html)->not->toContain('{{');
 });
+
+it('shows a Text Area value as a text under the table, with its line breaks', function () {
+    $story = 'pest_story_' . $this->suffix;
+    $short = 'pest_short_' . $this->suffix;
+    $this->records[] = blogSetTestAttribute(Maho_Blog_Model_Post::ENTITY, $story, [
+        'backend_type' => 'text',
+        'frontend_input' => 'textarea',
+        'frontend_label' => 'Story',
+        'is_visible_on_front' => 1,
+    ]);
+    $this->records[] = blogSetTestAttribute(Maho_Blog_Model_Post::ENTITY, $short, ['is_visible_on_front' => 1]);
+    $post = Mage::getModel('blog/post')->setData(['entity_id' => 1, $story => "Line one\nLine <two>", $short => 'S']);
+
+    $block = Mage::app()->getLayout()->createBlock('eav/frontend_attributes')->setData('entity', $post);
+    $groups = $block->getAttributeGroups();
+    $rows = array_merge(...array_column($groups, 'rows'));
+    $texts = array_merge(...array_column($groups, 'texts'));
+    $text = $texts[array_search($story, array_column($texts, 'code'), true)] ?? [];
+
+    expect(array_column($rows, 'code'))->toContain($short)
+        ->and(array_column($rows, 'code'))->not->toContain($story)
+        ->and($text['label'] ?? null)->toBe('Story')
+        ->and($block->getTextHtml($text))->toBe("Line one<br />\nLine &lt;two&gt;");
+});

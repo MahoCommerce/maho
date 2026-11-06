@@ -22,8 +22,8 @@ declare(strict_types=1);
 
 return [
     'Address' => [
-        'addressType', 'city', 'company', 'countryId', 'createdAt', 'customerAddressId', 'customerId',
-        'email', 'extensions', 'fax', 'firstname', 'id', 'isDefaultBilling', 'isDefaultShipping',
+        'addressType', 'city', 'company', 'countryId', 'createdAt', 'customAttributeLabels', 'customAttributes',
+        'customerAddressId', 'customerId', 'email', 'extensions', 'fax', 'firstname', 'id', 'isDefaultBilling', 'isDefaultShipping',
         'lastname', 'middlename', 'postcode', 'prefix', 'region', 'regionId', 'street', 'suffix',
         'telephone', 'updatedAt', 'vatId',
     ],
@@ -153,10 +153,13 @@ return [
         'isUnique', 'label', 'options', 'usedInForms',
     ],
     'Customer' => [
-        'addresses', 'createdAt', 'createdIn', 'defaultBillingAddress', 'defaultShippingAddress',
+        'addresses', 'createdAt', 'createdIn', 'customAttributes', 'defaultBillingAddress', 'defaultShippingAddress',
         'disableAutoGroupChange', 'dob', 'email', 'extensions', 'firstname', 'fullName', 'gender',
         'groupId', 'id', 'isActive', 'isConfirmed', 'isSubscribed', 'lastname', 'middlename', 'prefix',
         'storeId', 'suffix', 'taxvat', 'updatedAt', 'websiteId',
+    ],
+    'CustomerForm' => [
+        'entityType', 'extensions', 'groups', 'id',
     ],
     'CustomerGroup' => [
         'code', 'customerAddressAttributeSetId', 'customerAttributeSetId', 'extensions', 'id', 'taxClassId',

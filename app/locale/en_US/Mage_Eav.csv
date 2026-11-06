@@ -170,3 +170,4 @@
 "Wrong entity ID","Wrong entity ID"
 "Yes","Yes"
 "Yes/No","Yes/No"
+"When you save, the values of these attributes are deleted, because the new set does not have them: %s. Change the set?","When you save, the values of these attributes are deleted, because the new set does not have them: %s. Change the set?"

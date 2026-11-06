@@ -51,10 +51,13 @@ and the **Default** set does not show them.
    attributes of that set.
 3. Click **Save**, then change the groups and the attributes.
 
-When a store has more than one category set, the first tab of a new category shows the
-**Attribute Set** field. A new category starts with the set of its parent. Select another set and
-save the category. The tabs of the set show after the save. The admin does not change the set of a
-category after the first save, the same as for a product.
+When a store has more than one category set, the first tab of a category shows the
+**Attribute Set** field. A new category starts with the set of its parent. When you select another
+set, the page shows the fields of that set at once, and keeps the values that you entered.
+
+You can also change the set of a saved category. When the new set does not have some attributes of
+the old set, the page asks first and names them. When you save, the category loses its values of
+these attributes.
 
 Every night, the store deletes the value of an attribute that is not in the set of its category. So
 the value of an attribute shows and stays only when the attribute is in the set.
@@ -67,6 +70,9 @@ set.
 Set **Visible on Category Page on Front-end** to **Yes** in the **Frontend Properties** of the
 attribute. The category page then shows the attribute and its value in a table under the category
 description. A category with no value for the attribute does not show it.
+
+A **Text Area** value shows under the table, with the label of the attribute as its title, because a
+long text does not fit in a table.
 
 Each group of the set is a table of its own, in the order of the groups. The table of the first
 group has the title **Additional Information**. Each other table has the name of its group in the

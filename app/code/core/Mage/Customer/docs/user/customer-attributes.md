@@ -43,6 +43,19 @@ The forms of an address attribute:
 **Show in Forms** set to **No** hides the field in every form. **Sort Order** sets the place of the
 field in a form.
 
+## Check where a field shows
+
+Three settings decide if a customer sees a field: the forms of the attribute, the attribute set of
+the customer group, and the mode of the website. The edit page of a saved attribute starts with a
+summary of the three:
+
+- The forms that show the attribute.
+- The customer groups whose set holds the attribute, and the groups that do not see it. An
+  attribute in no set shows to every group.
+- The mode of each website: **Hidden**, **Optional** or **Required**.
+
+When a customer does not see a field, read this summary first.
+
 ## Input rules
 
 The values that a customer enters must follow the **Input Rules** of the attribute:
@@ -129,15 +142,37 @@ an address attribute cannot be the name of a field that orders already have, suc
 delete an address attribute, the carts and the orders keep its values. So a new address attribute cannot
 use the code of a deleted one.
 
-An order email or an address template shows a value with `{{var attribute_code}}`.
+The order page in the admin, the order emails, the invoices and the other PDFs show each address
+attribute that has a value, as a line with its label, for example **Delivery Hours: 9-17**. An
+attribute that only the **Admin Customer Address** form shows stays out, because the emails go to the
+customer. To put a value in another place, add `{{var attribute_code}}` to the address template in
+**System > Configuration > Customers > Customer Configuration > Address Templates**. The store then
+does not add the line.
 
 ## The API
 
 The REST, GraphQL and MCP APIs read and write the values in `customAttributes`, keyed by attribute code.
-Only an admin token or an API token can see this field. A write follows the **Input Rules** of the
-attribute, and the attribute must be in the **Admin Customer** or the **Admin Customer Address** form.
 A **Dropdown** is an option ID, a **Multiple Select** a list of option IDs, and a **Yes/No** `true` or
-`false`. The order addresses return the option IDs too, and `customAttributeLabels` returns the labels
-that the customer saw. An admin token or an API token that creates a customer or an address must send
-each required attribute. A registration through the API does not, because it cannot send `customAttributes`. `GET /api/rest/v2/custom-attributes?entityType=customer` and
+`false`. A write follows the **Input Rules** of the attribute. The order addresses return the option IDs
+too, and `customAttributeLabels` returns the labels that the customer saw.
+
+An admin token or an API token reads and writes the attributes of the **Admin Customer** and the
+**Admin Customer Address** forms. `GET /api/rest/v2/custom-attributes?entityType=customer` and
 `?entityType=customer_address` list the attributes, their options and their attribute sets.
+
+A customer token, and a guest who registers or checks out, reads and writes only the attributes that
+the storefront forms show to the customer group on the website, as on the storefront:
+
+- A registration takes the attributes of **Customer Registration**, and must send each required one.
+- An update of the customer takes the attributes of **Customer Account Edit**.
+- An address of the address book and an address of the cart take the attributes of **Address Book and
+  Checkout**. A new address of the address book must send each required one.
+- A cart address, set with the address endpoints of the cart or in the body of the place-order
+  request, must send each required one, because the checkout sets the whole address at once. On the
+  cart, `sameAsShipping` copies the values of the shipping address to the billing address. The order
+  copies the values from the cart.
+
+`GET /api/rest/v2/customer-forms/{form}` and the GraphQL `customerForm` query list the fields of a
+storefront form for the customer group of the caller: the label in the store view, the input type, the
+options, the required flag and the group title. The form is `customer_account_create`,
+`customer_account_edit`, `checkout_register`, `customer_address_edit` or `customer_register_address`.

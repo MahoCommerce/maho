@@ -214,3 +214,4 @@
 "WYSIWYG Options","WYSIWYG Options"
 "YouTube Video","YouTube Video"
 "YouTube video player","YouTube video player"
+"The storefront does not show this value by itself. A theme reads it in a CMS page template with %s.","The storefront does not show this value by itself. A theme reads it in a CMS page template with %s."

@@ -164,6 +164,30 @@ class Mage_Eav_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * Return the question that the edit page of a record asks before it moves the record from set
+     * $savedSetId to each set of $sets, keyed by set ID. A set that holds every attribute of the saved
+     * set gets no question.
+     *
+     * @param list<array{value: int|string, label: string}> $sets the options of the set select
+     * @return array<string, string>
+     */
+    public function getSetChangeQuestions(int $savedSetId, array $sets): array
+    {
+        if (!$savedSetId) {
+            return [];
+        }
+        $resource = Mage::getResourceSingleton('eav/entity_attribute_set');
+        $questions = [];
+        foreach ($sets as $set) {
+            $labels = (int) $set['value'] === $savedSetId ? [] : $resource->getMissingAttributeLabels($savedSetId, (int) $set['value']);
+            if ($labels) {
+                $questions[(string) $set['value']] = $this->__('When you save, the values of these attributes are deleted, because the new set does not have them: %s. Change the set?', implode(', ', $labels));
+            }
+        }
+        return $questions;
+    }
+
+    /**
      * Return the text that the edit page of $set shows above the groups, or null for no text.
      */
     public function getSetNote(Mage_Eav_Model_Entity_Attribute_Set $set): ?string

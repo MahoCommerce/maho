@@ -36,6 +36,18 @@ class Mage_Cms_Model_Attribute extends Mage_Eav_Model_Entity_Attribute
         );
     }
 
+    /**
+     * Say that only a theme shows the value, because the category and blog attributes show by themselves.
+     */
+    #[\Override]
+    public function getAttributeNote(): ?string
+    {
+        return Mage::helper('cms')->__(
+            'The storefront does not show this value by itself. A theme reads it in a CMS page template with %s.',
+            '$this->getPage()->getData(\'' . ($this->getAttributeCode() ?: 'attribute_code') . '\')',
+        );
+    }
+
     #[\Override]
     public function getBackendTypeByInput($type)
     {
