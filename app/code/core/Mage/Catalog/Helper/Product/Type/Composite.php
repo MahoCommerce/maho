@@ -137,15 +137,15 @@ class Mage_Catalog_Helper_Product_Type_Composite extends Mage_Core_Helper_Abstra
         $_finalPrice = $product->getFinalPrice();
         $isBundle = $product->getTypeId() == Mage_Catalog_Model_Product_Type::TYPE_BUNDLE;
         $store = Mage::app()->getStore();
-        // A bundle price stays in the base currency until the end. The other prices are converted and
-        // rounded to cents before the tax, as the cart and the price template do.
+        // The cart rounds the price to cents before it adds the tax, as the price template does. A bundle
+        // calculates in the base currency, like its selections, and converts at the end.
         $toCurrentCurrency = static fn($price) => $isBundle ? Mage::helper('core')->currency($price, false, false) : $price;
         if ($isBundle) {
-            $_shownFinalPrice = $_finalPrice;
-            $_shownRegularPrice = $_regularPrice;
+            $_shownFinalPrice = $product->getStore()->roundPrice($_finalPrice);
+            $_shownRegularPrice = $product->getStore()->roundPrice($_regularPrice);
             $_priceInclTax = Mage::helper('tax')->getPrice(
                 $product,
-                $_finalPrice,
+                $_shownFinalPrice,
                 true,
                 null,
                 null,
@@ -156,7 +156,7 @@ class Mage_Catalog_Helper_Product_Type_Composite extends Mage_Core_Helper_Abstra
             );
             $_priceExclTax = Mage::helper('tax')->getPrice(
                 $product,
-                $_finalPrice,
+                $_shownFinalPrice,
                 false,
                 null,
                 null,

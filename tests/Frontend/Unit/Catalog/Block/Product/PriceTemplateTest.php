@@ -390,7 +390,29 @@ describe('bundle price template in the rss price block', function () use ($vatSt
         $html = $block->getPriceHtml($product);
 
         // The removed RSS copy applied the display tax twice: 10.6557 * 1.22 * 1.22 = 15.86.
-        expect($html)->toContain($money(13.00))->not->toContain($money(15.86));
+        // The cart rounds the price to cents before the tax: 10.66 + 2.35 = 13.01.
+        expect($html)->toContain($money(13.01))->not->toContain($money(13.00))->not->toContain($money(15.86));
+    });
+
+    it('adds the tax to the base price of a fixed bundle rounded to cents, as the cart does', function () use ($vatStore) {
+        $store = $vatStore();
+        $product = Mage::getModel('catalog/product')
+            ->setId(999999)
+            ->setTypeId(Mage_Catalog_Model_Product_Type::TYPE_BUNDLE)
+            ->setStoreId($store->getId())
+            ->setTaxPercent(22)
+            ->setAppliedRates([['percent' => 22]])
+            ->addData([
+                'price_type' => Mage_Bundle_Model_Product_Price::PRICE_TYPE_FIXED,
+                'price' => 11.4754,
+                'final_price' => 11.4754,
+                'tier_price' => [],
+            ]);
+
+        $config = Mage::helper('catalog/product_type_composite')->prepareJsonProductConfig($product);
+
+        expect((float) $config['productPrice'])->toBe(11.48)
+            ->and(round((float) $config['priceInclTax'], 2))->toBe(14.01);
     });
 });
 
