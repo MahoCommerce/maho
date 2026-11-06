@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace Mage\Catalog\Api;
 
+use Maho\ApiPlatform\Metadata\CustomAttributeSchema;
 use Maho\Config\ApiResource;
 use Maho\ApiPlatform\Metadata\EnumSource;
 use Maho\ApiPlatform\Metadata\ValueLists;
@@ -268,13 +269,9 @@ class Category extends CrudResource
     #[ApiProperty(description: 'Attribute set ID. A new category without one takes the set of its parent. Admin and API tokens only', security: "has_backend_access('categories')", extraProperties: [EnumSource::KEY => 'Maho\ApiPlatform\Metadata\ValueLists::categoryAttributeSets'])]
     public ?int $attributeSetId = null;
 
-    /** @var array<string, mixed>|null Arbitrary EAV attributes to set: {"attribute_code": value} (write only) */
-    #[ApiProperty(description: 'Arbitrary EAV attributes to set: {"attribute_code": value}', readable: false)]
-    public ?array $customAttributesWrite = null;
-
-    /** @var array<string, mixed>|null User-defined EAV attribute values keyed by attribute_code (read counterpart of customAttributesWrite) */
+    /** @var array<string, mixed>|null */
     #[Groups(['category:read'])]
-    #[ApiProperty(description: 'User-defined EAV attribute values keyed by attribute_code. Set only on single-category reads and write responses; only visible to admin and API tokens', writable: false, security: "has_backend_access('categories')", extraProperties: ['computed' => true])]
+    #[ApiProperty(description: 'Values of the user-defined attributes, keyed by attribute code, on a read of one category and in a write response. A write takes the attributes of the attribute set of the category. A multiselect is a list of option IDs, a dropdown an option ID, a Yes/No a boolean, a date Y-m-d. GET /custom-attributes?entityType=catalog_category lists the attributes and their options. Admin and API tokens only', security: "has_backend_access('categories')", extraProperties: [CustomAttributeSchema::KEY => 'catalog_category', 'computed' => true])]
     public ?array $customAttributes = null;
 
     /** @var array<int|string, int>|null Map of productId => position (write only, existing assignments) */

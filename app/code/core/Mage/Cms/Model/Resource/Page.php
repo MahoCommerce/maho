@@ -160,10 +160,11 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
     /**
      * Turn the custom attribute values of $page into column values, and check the required and unique attributes.
      * An attribute that $page does not hold keeps its stored value, and a new page gets its default value.
+     * Each error names the attribute code after $fieldPrefix, for example customAttributes. for the API.
      *
      * @throws Mage_Core_Exception_Input
      */
-    protected function prepareCustomAttributes(Mage_Core_Model_Abstract $page): void
+    public function prepareCustomAttributes(Mage_Core_Model_Abstract $page, string $fieldPrefix = ''): void
     {
         $helper = Mage::helper('eav');
         $errors = new Mage_Core_Exception_Input();
@@ -176,7 +177,7 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
                 $default = (string) $attribute->getDefaultValue();
                 if ($default === '') {
                     if ($attribute->getIsRequired()) {
-                        $errors->addError($code, $helper->__('"%s" is a required value.', $label));
+                        $errors->addError($fieldPrefix . $code, $helper->__('"%s" is a required value.', $label));
                     }
                     continue;
                 }
@@ -197,25 +198,25 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
                 try {
                     $value = Mage::app()->getLocale()->formatDateForDb($value, withTime: false);
                 } catch (Exception) {
-                    $errors->addError($code, $helper->__('The value of "%s" must be a date.', $label));
+                    $errors->addError($fieldPrefix . $code, $helper->__('The value of "%s" must be a date.', $label));
                     continue;
                 }
             }
             $length = $attribute->getColumnDefinition()['length'];
             if ($length === 255 && $value !== null && mb_strlen((string) $value) > $length) {
-                $errors->addError($code, $helper->__('"%s" length must be equal or less than %s characters.', $label, $length));
+                $errors->addError($fieldPrefix . $code, $helper->__('"%s" length must be equal or less than %s characters.', $label, $length));
                 continue;
             }
             $page->setData($code, $value);
 
             if ($value === null) {
                 if ($attribute->getIsRequired()) {
-                    $errors->addError($code, $helper->__('"%s" is a required value.', $label));
+                    $errors->addError($fieldPrefix . $code, $helper->__('"%s" is a required value.', $label));
                 }
                 continue;
             }
             if ($attribute->getIsUnique() && $this->isCustomAttributeValueUsed($code, $value, (int) $page->getId())) {
-                $errors->addError($code, $helper->__('The value of attribute "%s" must be unique', $label));
+                $errors->addError($fieldPrefix . $code, $helper->__('The value of attribute "%s" must be unique', $label));
             }
         }
         $errors->throwIfErrors();

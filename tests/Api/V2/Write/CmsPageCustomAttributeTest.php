@@ -89,7 +89,7 @@ describe('CMS page customAttributes (REST)', function (): void {
 
         $read = apiGet("/api/rest/v2/cms-pages/{$pageId}", $token);
         expect($read['json']['customAttributes'][CMS_FIELD_TEXT_CODE] ?? null)->toBe('SPRING26')
-            ->and((string) ($read['json']['customAttributes'][CMS_FIELD_MULTI_CODE] ?? ''))->toBe(implode(',', $seasons));
+            ->and($read['json']['customAttributes'][CMS_FIELD_MULTI_CODE] ?? null)->toBe(array_map(intval(...), $seasons));
 
         $update = apiPut("/api/rest/v2/cms-pages/{$pageId}", ['customAttributes' => [CMS_FIELD_TEXT_CODE => null]], $token);
         expect($update['status'])->toBe(200)

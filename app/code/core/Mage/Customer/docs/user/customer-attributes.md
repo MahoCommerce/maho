@@ -118,9 +118,10 @@ on the customer group.
 
 The checkout copies the values of the address attributes to the order:
 
-- The cart keeps the value that the customer selected.
-- The order keeps the label of a **Dropdown**, a **Multiple Select** or a **Yes/No** option. So the order
-  shows what the customer saw, also after you change or delete the option.
+- The cart and the order keep the value that the customer selected.
+- The order also keeps the label of a **Dropdown**, a **Multiple Select** or a **Yes/No** option, in the
+  language of the store view of the order. So the order shows what the customer saw, also after you
+  change or delete the option.
 - A reorder from the admin copies the values back to the new cart.
 
 Each address attribute adds a column with its **Attribute Code** to the order addresses. So the code of
@@ -135,3 +136,8 @@ An order email or an address template shows a value with `{{var attribute_code}}
 The REST, GraphQL and MCP APIs read and write the values in `customAttributes`, keyed by attribute code.
 Only an admin token or an API token can see this field. A write follows the **Input Rules** of the
 attribute, and the attribute must be in the **Admin Customer** or the **Admin Customer Address** form.
+A **Dropdown** is an option ID, a **Multiple Select** a list of option IDs, and a **Yes/No** `true` or
+`false`. The order addresses return the option IDs too, and `customAttributeLabels` returns the labels
+that the customer saw. An admin token or an API token that creates a customer or an address must send
+each required attribute. A registration through the API does not, because it cannot send `customAttributes`. `GET /api/rest/v2/custom-attributes?entityType=customer` and
+`?entityType=customer_address` list the attributes, their options and their attribute sets.

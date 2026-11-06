@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace Mage\Cms\Api;
 
+use Maho\ApiPlatform\Metadata\CustomAttributeSchema;
 use ApiPlatform\Metadata\ApiProperty;
 use Maho\ApiPlatform\Metadata\EnumSource;
 use Maho\ApiPlatform\Metadata\ValueLists;
@@ -141,7 +142,7 @@ class CmsPage extends CrudResource
     public ?string $updatedAt = null;
 
     /** @var array<string, mixed>|null */
-    #[ApiProperty(description: 'Values of the custom attributes of the page, keyed by attribute code. Admin and API tokens only', security: "has_backend_access('cms-pages')", extraProperties: ['computed' => true])]
+    #[ApiProperty(description: 'Values of the custom attributes of the page, keyed by attribute code. A multiselect is a list of option IDs, a dropdown an option ID, a Yes/No a boolean, a date Y-m-d. GET /custom-attributes?entityType=cms_page lists the attributes and their options. Admin and API tokens only', security: "has_backend_access('cms-pages')", extraProperties: [CustomAttributeSchema::KEY => 'cms_page', 'computed' => true])]
     public ?array $customAttributes = null;
 
     #[\Override]
@@ -157,20 +158,11 @@ class CmsPage extends CrudResource
 
         /** @var \Mage_Cms_Model_Resource_Page $resource */
         $resource = \Mage::getResourceSingleton('cms/page');
-        $attributes = $resource->getCustomAttributes();
-        $customAttributes ??= [];
-        if (!$model->getId()) {
-            $errors = new \Mage_Core_Exception_Input();
-            foreach ($attributes as $code => $attribute) {
-                if ($attribute->getIsRequired() && (string) $attribute->getDefaultValue() === '' && !array_key_exists($code, $customAttributes)) {
-                    $errors->addError("customAttributes.{$code}", \Mage::helper('eav')->__('"%s" is a required value.', $code));
-                }
-            }
-            $errors->throwIfErrors();
-        }
         if ($customAttributes) {
-            CustomAttributes::apply($model, $customAttributes, $attributes);
+            CustomAttributes::apply($model, $customAttributes, $resource->getCustomAttributes());
         }
+        // The save runs the same check, but its errors name the column, not the key of customAttributes
+        $resource->prepareCustomAttributes($model, 'customAttributes.');
     }
 
     /**

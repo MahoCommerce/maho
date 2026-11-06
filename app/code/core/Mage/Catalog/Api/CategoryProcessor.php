@@ -16,6 +16,7 @@ use Mage;
 use Mage_Catalog_Model_Category;
 use Mage_Core_Model_App;
 use Maho\ApiPlatform\Security\ApiUser;
+use Maho\ApiPlatform\Service\CustomAttributes;
 use Maho\ApiPlatform\Trait\ActivityLogTrait;
 use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -221,6 +222,8 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
         try {
             foreach ($category->getAttributes() as $code => $attribute) {
                 $value = $category->getData($code);
+                // The error of a user-defined attribute names its key in customAttributes
+                $field = $attribute->getIsUserDefined() ? "customAttributes.{$code}" : (string) $code;
                 // In a store view, false means that the store view uses the default value
                 if (!$isAdminScope && $value === false) {
                     continue;
@@ -228,19 +231,19 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
                 $required = Mage::helper('catalog')->__('Attribute "%s" is required.', (string) $attribute->getFrontend()->getLabel());
                 // isValueEmpty() accepts a blank string for a text attribute
                 if ($attribute->getIsRequired() && is_string($value) && trim($value) === '' && !in_array($code, $useConfig, true)) {
-                    $errors->addError((string) $code, $required);
+                    $errors->addError($field, $required);
                     continue;
                 }
                 try {
                     $result = $attribute->getBackend()->validate($category);
                 } catch (\Mage_Core_Exception $e) {
-                    $errors->addError((string) $code, $e->getMessage());
+                    $errors->addError($field, $e->getMessage());
                     continue;
                 }
                 if ($result === false) {
-                    $errors->addError((string) $code, $required);
+                    $errors->addError($field, $required);
                 } elseif (is_string($result)) {
-                    $errors->addError((string) $code, $result);
+                    $errors->addError($field, $result);
                 }
             }
         } finally {
@@ -312,8 +315,8 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
         if ($data->filterPriceRange !== null) {
             $category->setData('filter_price_range', $data->filterPriceRange > 0 ? $data->filterPriceRange : null);
         }
-        if (!empty($data->customAttributesWrite)) {
-            $this->applyCustomAttributes($category, $data->customAttributesWrite);
+        if (!empty($data->customAttributes)) {
+            $this->applyCustomAttributes($category, $data->customAttributes);
         }
         if (!empty($data->productPositions)) {
             if (!$category->getId()) {
@@ -328,7 +331,7 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
         // The sortby backend implodes an array on save and wipes any non-array
         // value to ''. The EAV backend explodes the stored string on load, so the
         // guard is a no-op on the load→save path; it protects values that reach
-        // the model as a comma string (customAttributesWrite).
+        // the model as a comma string.
         $availableSortBy = $category->getData('available_sort_by');
         if (is_string($availableSortBy) && $availableSortBy !== '') {
             $category->setData('available_sort_by', explode(',', $availableSortBy));
@@ -336,8 +339,7 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
     }
 
     /**
-     * Per-attribute validation shared by the dedicated DTO fields and the generic
-     * customAttributesWrite bag, so the bag cannot bypass it.
+     * Per-attribute validation of the dedicated DTO fields.
      */
     private function validateAttributeValue(string $code, mixed $value): mixed
     {
@@ -479,53 +481,21 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
     }
 
     /**
-     * Codes handled by dedicated DTO fields or structural/system columns. They
-     * must never be written through the generic customAttributesWrite bag.
-     */
-    private const PROTECTED_ATTRIBUTE_CODES = [
-        'entity_id', 'entity_type_id', 'attribute_set_id', 'parent_id', 'path',
-        'level', 'position', 'children_count', 'children', 'all_children',
-        'url_path', 'created_at', 'updated_at',
-    ];
-
-    /**
-     * Apply arbitrary EAV attribute values supplied via customAttributesWrite.
-     *
-     * Protected/system codes are rejected outright; unknown codes (not real
-     * catalog_category EAV attributes) are skipped silently so a typo can't
-     * inject an arbitrary column. Codes that have a validated dedicated DTO
-     * field run through the same validation, the bag is not a way around it.
+     * Apply the values of the customAttributes map: the user-defined attributes of the category. A
+     * user-defined attribute must be in the set of the category, because the nightly
+     * eav_clean_orphaned_records cron deletes a value whose attribute is not in the set.
      *
      * @param array<string, mixed> $attributes
+     * @throws \Mage_Core_Exception_Input
      */
     private function applyCustomAttributes(Mage_Catalog_Model_Category $category, array $attributes): void
     {
-        $eavConfig = Mage::getSingleton('eav/config');
-
-        foreach ($attributes as $code => $value) {
-            $code = (string) $code;
-
-            if (in_array($code, self::PROTECTED_ATTRIBUTE_CODES, true)) {
-                throw new UnprocessableEntityHttpException(
-                    "Attribute '{$code}' cannot be set via customAttributes; use the dedicated field.",
-                );
-            }
-
-            $attribute = $eavConfig->getAttribute(Mage_Catalog_Model_Category::ENTITY, $code);
-            if (!$attribute || !$attribute->getId()) {
-                // Unknown attribute, skip silently.
-                continue;
-            }
-
-            $value = $this->validateAttributeValue($code, $value);
-            // In a store view, false means "use the default value". In the default scope, it is No.
-            if ($value === false && $attribute->getFrontendInput() === 'boolean'
-                && (int) $category->getStoreId() === Mage_Core_Model_App::ADMIN_STORE_ID
-            ) {
-                $value = 0;
-            }
-            $category->setData($code, $value);
-        }
+        CustomAttributes::apply(
+            $category,
+            $attributes,
+            CustomAttributes::userDefined(Mage_Catalog_Model_Category::ENTITY),
+            array_keys($category->getAttributes()),
+        );
     }
 
     /**

@@ -95,6 +95,7 @@ class Maho_Blog_Model_Resource_Category extends Mage_Eav_Model_Entity_Abstract
             (int) $object->getData('attribute_set_id'),
             $this->getEntityType(),
         ));
+        Mage::helper('blog')->sanitizeAttributeValues($object, $this->getEntityType());
 
         // Strip HTML tags from string fields
         $stringFields = ['name', 'url_key', 'meta_title', 'meta_keywords', 'meta_description'];

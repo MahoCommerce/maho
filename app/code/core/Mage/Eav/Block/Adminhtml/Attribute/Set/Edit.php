@@ -117,6 +117,19 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Edit extends Mage_Adminhtml_Block_T
     }
 
     /**
+     * Return the text that the attribute model of the type shows above the groups, or null for no text.
+     */
+    public function getSetNote(): ?string
+    {
+        return Mage::helper('eav')->getSetNote($this->_getAttributeSet());
+    }
+
+    public function getDeleteQuestion(): string
+    {
+        return Mage::helper('eav')->getSetDeleteQuestion($this->_getAttributeSet());
+    }
+
+    /**
      * Retrieve Block Header Text
      *
      * @return string

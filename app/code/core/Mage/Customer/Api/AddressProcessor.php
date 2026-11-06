@@ -292,8 +292,9 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
             }
         }
 
-        if ($data->customAttributes !== null) {
-            CustomAttributes::apply($address, 'adminhtml_customer_address', $data->customAttributes);
+        // A customer cannot send customAttributes, so only a backend caller that creates an address checks the required ones
+        if ($data->customAttributes !== null || (!$address->getId() && $this->hasBackendAccess('addresses'))) {
+            CustomAttributes::apply($address, 'adminhtml_customer_address', $data->customAttributes ?? []);
         }
     }
 

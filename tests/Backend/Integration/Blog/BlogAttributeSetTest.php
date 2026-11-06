@@ -227,3 +227,36 @@ it('saves every blog attribute with the global scope', function () {
     $loaded = Mage::getModel('blog/resource_eav_attribute')->load($attribute->getId());
     expect((int) $loaded->getData('is_global'))->toBe(Maho_Blog_Model_Resource_Eav_Attribute::SCOPE_GLOBAL);
 });
+
+it('sanitizes an HTML attribute value on save and resolves its directives on the storefront', function () {
+    $code = 'pest_html_' . $this->suffix;
+    $this->records[] = blogSetTestAttribute(Maho_Blog_Model_Post::ENTITY, $code, [
+        'backend_type' => 'text',
+        'frontend_input' => 'textarea',
+        'is_visible_on_front' => 1,
+        'is_html_allowed_on_front' => 1,
+        'is_wysiwyg_enabled' => 1,
+    ]);
+    $post = Mage::getModel('blog/post')->setData([
+        'title' => 'Pest Html ' . $this->suffix,
+        'url_key' => 'pest-html-' . $this->suffix,
+        'content' => '<p>Body</p>',
+        'is_active' => 1,
+        'stores' => [0],
+        $code => '<p onclick="steal()">Visit <a href="{{store url=""}}">us</a></p><script>alert(1)</script>',
+    ]);
+    $post->save();
+    $this->records[] = $post;
+
+    $saved = (string) Mage::getModel('blog/post')->load($post->getId())->getData($code);
+    $block = Mage::app()->getLayout()->createBlock('blog/attributes')
+        ->setData('entity', Mage::getModel('blog/post')->load($post->getId()));
+    $rows = $block->getAttributeValues();
+    $html = $block->getValueHtml($rows[array_search($code, array_column($rows, 'code'), true)]);
+
+    expect($saved)->not->toContain('<script')
+        ->and($saved)->not->toContain('onclick')
+        ->and($saved)->toContain('{{store url=""}}')
+        ->and($html)->toContain('<a href="http')
+        ->and($html)->not->toContain('{{');
+});

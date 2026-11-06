@@ -85,7 +85,16 @@ Country listings live under [Directory](#directory) (`/countries`).
 | GET | `/attribute-sets` | Admin/API | List product attribute sets |
 | GET | `/attribute-sets/{id}` | Admin/API | Get an attribute set and its attribute codes |
 
-The product write endpoints additionally accept `attributeSetId`, `taxClassId`, and a generic `customAttributesWrite` map (`{attribute_code: value}`) for any catalog_product EAV attribute without a dedicated field; system columns (`sku`, `type_id`, `status`, …) are rejected.
+The product write endpoints additionally accept `attributeSetId`, `taxClassId`, and a `customAttributes` map (`{attribute_code: value}`) of the user-defined attributes without a dedicated field, in the attribute set of the product. A system attribute or an unknown code is a 422. A read returns the same map.
+
+**Custom attributes of other entity types** (read-only):
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/custom-attributes?entityType=…` | Admin/API | List the attributes that an admin added to `catalog_category`, `customer`, `customer_address`, `cms_page`, `blog_post` or `blog_category`: code, input type, options and the attribute sets that hold them |
+| GET | `/custom-attributes/{id}` | Admin/API | Get one custom attribute |
+
+The `customAttributes` field of products, categories, customers, addresses, CMS pages, blog posts and blog categories holds the user-defined attributes only, and a read returns the same shape that a write takes: a dropdown is an option ID, a multiselect a list of option IDs, a Yes/No a boolean, a number an integer or a float, and a date `Y-m-d`. An error of a value names the field `customAttributes.<code>`. The OpenAPI document and the MCP tools list each attribute of the entity type as a typed property of `customAttributes`, with the option IDs of a dropdown as an enum. An order address also has the read-only `customAttributeLabels`: the option labels that the customer saw.
 
 ---
 

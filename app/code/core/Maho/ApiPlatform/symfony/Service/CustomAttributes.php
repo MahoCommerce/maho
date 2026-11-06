@@ -31,7 +31,8 @@ final class CustomAttributes
     }
 
     /**
-     * Return the values that $model holds for $attributes, keyed by code. An empty value is left out.
+     * Return the values that $model holds for $attributes, keyed by code, in the shape that apply() takes.
+     * An empty value is left out.
      *
      * @param array<string, \Mage_Eav_Model_Entity_Attribute_Abstract> $attributes
      * @return array<string, mixed>
@@ -39,29 +40,68 @@ final class CustomAttributes
     public static function read(\Maho\DataObject $model, array $attributes): array
     {
         $values = [];
-        foreach (array_keys($attributes) as $code) {
+        foreach ($attributes as $code => $attribute) {
             $value = $model->getData($code);
-            if ($value !== null && $value !== '') {
-                $values[$code] = $value;
+            if ($value !== null && $value !== '' && $value !== []) {
+                $values[$code] = self::toApiValue($attribute, $value);
             }
         }
         return $values;
     }
 
     /**
+     * Return a stored value in its API shape: a list of option IDs for a multiselect, a list of lines
+     * for a multiline, a bool for a boolean, an int or a float for a number, Y-m-d for a date.
+     */
+    public static function toApiValue(\Mage_Eav_Model_Entity_Attribute_Abstract $attribute, mixed $value): mixed
+    {
+        $optionId = fn(mixed $id): int|string => is_numeric($id) ? (int) $id : (string) $id;
+        switch ($attribute->getFrontendInput()) {
+            case 'multiselect':
+                $items = is_array($value) ? $value : explode(',', (string) $value);
+                return array_values(array_map($optionId, array_filter($items, fn($item): bool => $item !== null && $item !== '')));
+            case 'multiline':
+                return is_array($value) ? array_values(array_map(strval(...), $value)) : explode("\n", (string) $value);
+            case 'boolean':
+                return (bool) (int) $value;
+            case 'select':
+                return $optionId($value);
+            case 'date':
+                $date = (string) $value;
+                return preg_match('/^\d{4}-\d{2}-\d{2}/', $date) ? substr($date, 0, 10) : $date;
+        }
+        return match ($attribute->getBackendType()) {
+            'int' => is_numeric($value) ? (int) $value : $value,
+            'decimal' => is_numeric($value) ? (float) $value : $value,
+            default => is_scalar($value) ? (string) $value : $value,
+        };
+    }
+
+    /**
      * Check $values and set them on $model. A code that is not in $attributes is an error, and so is
-     * a code that is not in $allowed when $allowed is a list.
+     * a code that is not in $allowed when $allowed is a list. For a new record ($isNew), a required
+     * attribute of $allowed with no default value that $values leaves out is an error too.
      *
      * @param array<string, mixed> $values
      * @param array<string, \Mage_Eav_Model_Entity_Attribute_Abstract> $attributes
      * @param list<string>|null $allowed
      * @throws \Mage_Core_Exception_Input
      */
-    public static function apply(\Maho\DataObject $model, array $values, array $attributes, ?array $allowed = null): void
+    public static function apply(\Maho\DataObject $model, array $values, array $attributes, ?array $allowed = null, bool $isNew = false): void
     {
         $helper = \Mage::helper('eav');
         $errors = new \Mage_Core_Exception_Input();
         $checked = [];
+        if ($isNew) {
+            foreach ($attributes as $code => $attribute) {
+                if ($attribute->getIsRequired() && !array_key_exists($code, $values)
+                    && ($allowed === null || in_array($code, $allowed, true))
+                    && (string) $attribute->getDefaultValue() === ''
+                ) {
+                    $errors->addError("customAttributes.{$code}", $helper->__('"%s" is a required value.', $code));
+                }
+            }
+        }
         foreach ($values as $code => $value) {
             $code = (string) $code;
             $field = "customAttributes.{$code}";

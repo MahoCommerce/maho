@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace Mage\Customer\Api;
 
+use Maho\ApiPlatform\Metadata\CustomAttributeSchema;
 use Maho\Config\ApiResource;
 use Maho\ApiPlatform\Metadata\EnumSource;
 use Maho\ApiPlatform\Metadata\ValueLists;
@@ -265,7 +266,7 @@ class Customer extends CrudResource
     public ?string $updatedAt = null;
 
     /** @var array<string, mixed>|null */
-    #[ApiProperty(description: 'Values of the user-defined customer attributes, keyed by attribute code. A write is checked against the attributes of the Admin Customer form. Admin and API tokens only', security: "has_backend_access('customers')")]
+    #[ApiProperty(description: 'Values of the user-defined customer attributes, keyed by attribute code. A multiselect is a list of option IDs, a dropdown an option ID, a Yes/No a boolean, a date Y-m-d. A write is checked against the attributes of the Admin Customer form and the set of the customer group. GET /custom-attributes?entityType=customer lists the attributes and their options. Admin and API tokens only', security: "has_backend_access('customers')", extraProperties: [CustomAttributeSchema::KEY => 'customer'])]
     public ?array $customAttributes = null;
 
     /** @var string|null Write-only password for registration */

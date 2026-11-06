@@ -578,7 +578,7 @@ describe('Product Extended Fields (REST)', function (): void {
                 'name' => 'Pest Custom Attributes Read Product',
                 'price' => 9.99,
                 'websiteIds' => [1],
-                'customAttributesWrite' => [$code => 'pest-value'],
+                'customAttributes' => [$code => 'pest-value'],
             ], $token);
             expect($create['status'])->toBeIn([200, 201]);
             $productId = $create['json']['id'];

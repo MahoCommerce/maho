@@ -82,7 +82,7 @@ it('adds the sales columns of a new address attribute, keeps them after a delete
         ->toThrow(Mage_Core_Exception::class);
 });
 
-it('copies address attribute values to the quote, to the order with labels, and back on reorder', function () {
+it('copies address attribute values to the quote, to the order with a label snapshot, and back on reorder', function () {
     $this->attributes[] = addressCopyTestAttribute([
         'attribute_code' => $this->textCode,
         'backend_type' => 'varchar',
@@ -95,13 +95,13 @@ it('copies address attribute values to the quote, to the order with labels, and 
         'frontend_input' => 'select',
         'source_model' => 'eav/entity_attribute_source_table',
         'frontend_label' => 'Dock',
-        'option' => ['value' => ['o1' => ['North Dock'], 'o2' => ['South Dock']], 'order' => ['o1' => 1, 'o2' => 2]],
+        'option' => ['value' => ['o1' => ['North Dock'], 'o2' => ['South Dock, Gate 2']], 'order' => ['o1' => 1, 'o2' => 2]],
     ]);
 
     $select = Mage::getModel('customer/attribute')->loadByCode('customer_address', $this->selectCode);
     $southId = null;
     foreach ($select->getSource()->getAllOptions(false) as $option) {
-        if ($option['label'] === 'South Dock') {
+        if ($option['label'] === 'South Dock, Gate 2') {
             $southId = (string) $option['value'];
         }
     }
@@ -112,21 +112,32 @@ it('copies address attribute values to the quote, to the order with labels, and 
         $this->textCode => '9-17',
         $this->selectCode => $southId,
     ]);
-    $quoteAddress = Mage::getModel('sales/quote_address')->importCustomerAddress($customerAddress);
+    $quote = Mage::getModel('sales/quote')->setStoreId((int) Mage::app()->getDefaultStoreView()->getId());
+    $quoteAddress = Mage::getModel('sales/quote_address')->setQuote($quote)->importCustomerAddress($customerAddress);
     $orderAddress = Mage::getModel('sales/convert_quote')->addressToOrderAddress($quoteAddress);
+
+    // A rename of the option after the order changes neither the snapshot nor the reorder
+    $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
+    $connection->update(
+        Mage::getSingleton('core/resource')->getTableName('eav/attribute_option_value'),
+        ['value' => 'South Dock, Gate 3'],
+        ['option_id = ?' => (int) $southId],
+    );
+
     $reorderAddress = Mage::getModel('sales/convert_order')->addressToQuoteAddress($orderAddress);
     $exported = $quoteAddress->exportCustomerAddress();
 
     expect($quoteAddress->getData($this->textCode))->toBe('9-17')
         ->and((string) $quoteAddress->getData($this->selectCode))->toBe($southId)
         ->and($orderAddress->getData($this->textCode))->toBe('9-17')
-        ->and($orderAddress->getData($this->selectCode))->toBe('South Dock')
+        ->and((string) $orderAddress->getData($this->selectCode))->toBe($southId)
+        ->and($orderAddress->getCustomAttributeLabels())->toBe([$this->selectCode => 'South Dock, Gate 2'])
         ->and((string) $reorderAddress->getData($this->selectCode))->toBe($southId)
         ->and((string) $exported->getData($this->selectCode))->toBe($southId)
         ->and($exported->getData($this->textCode))->toBe('9-17');
 });
 
-it('shows the label of a dropdown in the address template of an order', function () {
+it('shows the label snapshot of a dropdown in the address template of an order', function () {
     $this->attributes[] = addressCopyTestAttribute([
         'attribute_code' => $this->selectCode,
         'backend_type' => 'int',
@@ -136,7 +147,9 @@ it('shows the label of a dropdown in the address template of an order', function
         'option' => ['value' => ['o1' => ['North Dock']], 'order' => ['o1' => 1]],
     ]);
 
-    $orderAddress = Mage::getModel('sales/order_address')->setData($this->selectCode, 'North Dock');
+    $orderAddress = Mage::getModel('sales/order_address')
+        ->setData($this->selectCode, '999999')
+        ->setCustomAttributeLabels([$this->selectCode => 'North Dock']);
     $renderer = Mage::getModel('customer/address_config')->getFormatByCode('text')->getRenderer();
 
     expect($renderer->render($orderAddress, '{{var ' . $this->selectCode . '}}'))->toBe('North Dock');

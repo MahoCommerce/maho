@@ -57,5 +57,7 @@ one label with commas. An empty cell keeps the value that the page has.
 ## The API
 
 The CMS pages of the REST and GraphQL API have the `customAttributes` field: the values of the page
-attributes, by code. Only an admin and an API token can read and write it. A Dropdown takes the
-option ID. A Multiple Select takes a list of option IDs, or the IDs separated by commas.
+attributes, by code. Only an admin and an API token can read and write it. A Dropdown is the
+option ID, a Multiple Select a list of option IDs, and a Yes/No `true` or `false`.
+
+`GET /api/rest/v2/custom-attributes?entityType=cms_page` lists the attributes and their options.

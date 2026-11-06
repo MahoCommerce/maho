@@ -167,3 +167,6 @@
 "Wrong entity ID","Wrong entity ID"
 "Yes","Yes"
 "Yes/No","Yes/No"
+"The records of this set will move to the default set.","The records of this set will move to the default set."
+"They will lose their values of the attributes that are not in the default set: %s.","They will lose their values of the attributes that are not in the default set: %s."
+"Delete the set?","Delete the set?"

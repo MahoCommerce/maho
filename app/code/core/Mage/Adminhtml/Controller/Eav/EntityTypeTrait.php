@@ -16,8 +16,7 @@ declare(strict_types=1);
  */
 trait Mage_Adminhtml_Controller_Eav_EntityTypeTrait
 {
-    /** @var array{acl: string, title: string, sets_title: ?string, main_tab?: string, allowed_tags?: list<string>, user_defined_only?: bool, sets_user_defined_only?: bool, add_to_default_set?: bool}|false|null */
-    protected array|false|null $adminPageSettings = null;
+    protected Mage_Eav_Model_Entity_Attribute_AdminPageSettings|false|null $adminPageSettings = null;
 
     #[\Override]
     protected function getEntityTypeCode(): string
@@ -27,10 +26,8 @@ trait Mage_Adminhtml_Controller_Eav_EntityTypeTrait
 
     /**
      * Return the settings of the requested entity type, or null when System > Attributes does not manage it.
-     *
-     * @return array{acl: string, title: string, sets_title: ?string, main_tab?: string, allowed_tags?: list<string>, user_defined_only?: bool, sets_user_defined_only?: bool, add_to_default_set?: bool}|null
      */
-    protected function getAdminPageSettings(): ?array
+    protected function getAdminPageSettings(): ?Mage_Eav_Model_Entity_Attribute_AdminPageSettings
     {
         if ($this->adminPageSettings === null) {
             $this->adminPageSettings = false;
@@ -48,6 +45,14 @@ trait Mage_Adminhtml_Controller_Eav_EntityTypeTrait
         return $this->adminPageSettings ?: null;
     }
 
+    /**
+     * Return the settings of the requested entity type. _isAllowed() refuses a type without settings.
+     */
+    protected function getPageSettings(): Mage_Eav_Model_Entity_Attribute_AdminPageSettings
+    {
+        return $this->getAdminPageSettings() ?? throw new Mage_Core_Exception('System > Attributes does not manage this entity type.');
+    }
+
     #[\Override]
     protected function _isAllowed()
     {
@@ -57,13 +62,13 @@ trait Mage_Adminhtml_Controller_Eav_EntityTypeTrait
     protected function isEntityTypeAllowed(): bool
     {
         $settings = $this->getAdminPageSettings();
-        return $settings !== null && Mage::getSingleton('admin/session')->isAllowed($settings['acl']);
+        return $settings !== null && Mage::getSingleton('admin/session')->isAllowed($settings->acl);
     }
 
     #[\Override]
     protected function getActiveMenu(): string
     {
-        return (string) $this->getAdminPageSettings()['acl'];
+        return $this->getPageSettings()->acl;
     }
 
     /**

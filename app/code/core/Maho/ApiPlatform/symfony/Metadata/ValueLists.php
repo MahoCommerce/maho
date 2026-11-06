@@ -67,6 +67,23 @@ final class ValueLists
         return self::attributeSets('blog_category');
     }
 
+    /**
+     * The entity types that System > Attributes manages.
+     *
+     * @return list<string>
+     */
+    public static function customAttributeEntityTypes(): array
+    {
+        $codes = [];
+        foreach (\Mage::getResourceModel('eav/entity_type_collection') as $entityType) {
+            if (\Mage::helper('eav')->getAdminPageSettings($entityType)) {
+                $codes[] = (string) $entityType->getEntityTypeCode();
+            }
+        }
+        sort($codes);
+        return $codes;
+    }
+
     /** @return list<int> */
     private static function attributeSets(string $entityTypeCode): array
     {

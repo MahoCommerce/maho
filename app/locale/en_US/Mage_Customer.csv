@@ -593,3 +593,7 @@
 "ZIP","ZIP"
 "Zip/Postal Code","Zip/Postal Code"
 "ZIP/Post Code","ZIP/Post Code"
+"The customer group of a customer picks the set. Select the set of each group in Customers > Customer Groups. An attribute that is in no set shows to every customer group.","The customer group of a customer picks the set. Select the set of each group in Customers > Customer Groups. An attribute that is in no set shows to every customer group."
+"Customer groups that use this set: %s.","Customer groups that use this set: %s."
+"No customer group uses this set.","No customer group uses this set."
+"The customer groups of this set will use the default set. The values of the customers stay. Delete the set?","The customer groups of this set will use the default set. The values of the customers stay. Delete the set?"

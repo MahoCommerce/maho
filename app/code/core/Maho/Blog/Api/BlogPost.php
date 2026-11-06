@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace Maho\Blog\Api;
 
+use Maho\ApiPlatform\Metadata\CustomAttributeSchema;
 use ApiPlatform\Metadata\ApiProperty;
 use Maho\ApiPlatform\Metadata\EnumSource;
 use Maho\ApiPlatform\Metadata\ValueLists;
@@ -184,7 +185,7 @@ class BlogPost extends CrudResource
     public ?int $attributeSetId = null;
 
     /** @var array<string, mixed>|null */
-    #[ApiProperty(description: 'Values of the user-defined attributes, keyed by attribute code. Admin and API tokens only', security: "has_backend_access('blog-posts')", extraProperties: ['computed' => true])]
+    #[ApiProperty(description: 'Values of the user-defined attributes, keyed by attribute code. A multiselect is a list of option IDs, a dropdown an option ID, a Yes/No a boolean, a date Y-m-d. A write takes the attributes of the attribute set of the record. GET /custom-attributes?entityType=blog_post lists the attributes and their options. Admin and API tokens only', security: "has_backend_access('blog-posts')", extraProperties: [CustomAttributeSchema::KEY => 'blog_post', 'computed' => true])]
     public ?array $customAttributes = null;
 
     #[ApiProperty(writable: false)]
@@ -212,8 +213,8 @@ class BlogPost extends CrudResource
             $this->categoryIds = $categoryIds;
             $this->customAttributes = $customAttributes;
         }
-        if ($customAttributes !== null) {
-            CustomAttributes::apply($model, $customAttributes);
+        if ($customAttributes !== null || !$model->getId()) {
+            CustomAttributes::apply($model, $customAttributes ?? []);
         }
 
         if ($categoryIds !== null) {

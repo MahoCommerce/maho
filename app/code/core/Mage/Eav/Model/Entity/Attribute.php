@@ -201,23 +201,52 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
      *
      * The module of the entity type gives them, and declares the menu entry and the ACL resource
      * in its own adminhtml.xml.
-     * - acl: the ACL resource and the menu entry, below system/attributes
-     * - title: the title of the attribute grid
-     * - sets_title: the title of the set grid, or null when the type has no sets
-     * - main_tab: the block of the properties tab
-     * - allowed_tags: the HTML tags that an option label keeps when HTML is allowed on the storefront
-     * - user_defined_only: the pages list only the attributes that an admin added, because the edit
-     *   form of the entity shows the system attributes with fields of its own
-     * - sets_user_defined_only: the same as user_defined_only, for the set editor only, because the
-     *   storefront forms show the system attributes themselves, so a group does not move them
-     * - add_to_default_set: a new attribute goes into the first group of the default set, unless
-     *   the set page creates it
-     *
-     * @return array{acl: string, title: string, sets_title: ?string, main_tab?: string, allowed_tags?: list<string>, user_defined_only?: bool, sets_user_defined_only?: bool, add_to_default_set?: bool}|null
      */
-    public function getAdminPageSettings(): ?array
+    public function getAdminPageSettings(): ?Mage_Eav_Model_Entity_Attribute_AdminPageSettings
     {
         return null;
+    }
+
+    /**
+     * Return a text that the edit page of $set shows above the groups, or null for no text.
+     */
+    public function getSetNote(Mage_Eav_Model_Entity_Attribute_Set $set): ?string
+    {
+        return null;
+    }
+
+    /**
+     * Return the question that the edit page of $set asks before it deletes the set.
+     *
+     * The records of the set move to the default set. The nightly eav_clean_orphaned_records job
+     * then deletes their values of the attributes that are not in the default set, so the
+     * question names those attributes.
+     */
+    public function getSetDeleteQuestion(Mage_Eav_Model_Entity_Attribute_Set $set): string
+    {
+        $helper = Mage::helper('eav');
+        $resource = Mage::getSingleton('core/resource');
+        $adapter = $resource->getConnection('core_read');
+        $entityAttributeTable = $resource->getTableName('eav/entity_attribute');
+        $defaultSetId = (int) $this->getEntityType()->getDefaultAttributeSetId();
+        $labels = $adapter->fetchCol(
+            $adapter->select()
+                ->from(['ea' => $entityAttributeTable], [])
+                ->join(['a' => $resource->getTableName('eav/attribute')], 'a.attribute_id = ea.attribute_id', ['frontend_label'])
+                ->where('ea.attribute_set_id = ?', (int) $set->getId())
+                ->where(
+                    "NOT EXISTS (SELECT 1 FROM {$entityAttributeTable} d"
+                    . ' WHERE d.attribute_id = ea.attribute_id AND d.attribute_set_id = ?)',
+                    $defaultSetId,
+                )
+                ->order('a.frontend_label'),
+        );
+
+        $text = $helper->__('The records of this set will move to the default set.');
+        if ($labels) {
+            $text .= ' ' . $helper->__('They will lose their values of the attributes that are not in the default set: %s.', implode(', ', $labels));
+        }
+        return $text . ' ' . $helper->__('Delete the set?');
     }
 
     /**

@@ -315,3 +315,21 @@ it('puts the attributes of a later group of the set in a fieldset with the label
         ['Azienda', [$inCompany->getAttributeCode()]],
     ]);
 });
+
+it('names the customer groups of a set on its edit page, and keeps the values when the set goes', function () {
+    $set = $this->sets[] = customerSetTestCreateSet('customer', 'Pest Note ' . $this->suffix);
+    $group = $this->groups[] = Mage::getModel('customer/group')
+        ->setCode('Pest Note Group ' . $this->suffix)
+        ->setTaxClassId(customerSetTestTaxClassId())
+        ->setCustomerAttributeSetId((int) $set->getId());
+    $group->save();
+    $helper = Mage::helper('eav');
+
+    $defaultSet = Mage::getModel('eav/entity_attribute_set')
+        ->load((int) Mage::getSingleton('eav/config')->getEntityType('customer')->getDefaultAttributeSetId());
+
+    expect($helper->getSetNote($set))->toContain('Pest Note Group ' . $this->suffix)
+        ->and($helper->getSetNote($defaultSet))->toContain('General')
+        ->and($helper->getSetNote($defaultSet))->not->toContain('Pest Note Group ' . $this->suffix)
+        ->and($helper->getSetDeleteQuestion($set))->toContain('The values of the customers stay');
+});

@@ -38,28 +38,25 @@ class Maho_Blog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_Attri
     }
 
     #[\Override]
-    public function getAdminPageSettings(): ?array
+    public function getAdminPageSettings(): ?Mage_Eav_Model_Entity_Attribute_AdminPageSettings
     {
         $helper = Mage::helper('blog');
-        return match ($this->getEntityType()->getEntityTypeCode()) {
-            Maho_Blog_Model_Post::ENTITY => [
-                'acl' => 'system/attributes/blog_post',
-                'title' => $helper->__('Blog Post Attributes'),
-                'sets_title' => $helper->__('Blog Post Attribute Sets'),
-                'main_tab' => 'blog/adminhtml_attribute_edit_tab_main',
-                'user_defined_only' => true,
-                'add_to_default_set' => true,
-            ],
-            Maho_Blog_Model_Category::ENTITY => [
-                'acl' => 'system/attributes/blog_category',
-                'title' => $helper->__('Blog Category Attributes'),
-                'sets_title' => $helper->__('Blog Category Attribute Sets'),
-                'main_tab' => 'blog/adminhtml_attribute_edit_tab_main',
-                'user_defined_only' => true,
-                'add_to_default_set' => true,
-            ],
-            default => null,
+        [$title, $setsTitle] = match ($this->getEntityType()->getEntityTypeCode()) {
+            Maho_Blog_Model_Post::ENTITY => [$helper->__('Blog Post Attributes'), $helper->__('Blog Post Attribute Sets')],
+            Maho_Blog_Model_Category::ENTITY => [$helper->__('Blog Category Attributes'), $helper->__('Blog Category Attribute Sets')],
+            default => [null, null],
         };
+        if ($title === null) {
+            return null;
+        }
+        return new Mage_Eav_Model_Entity_Attribute_AdminPageSettings(
+            acl: 'system/attributes/' . $this->getEntityType()->getEntityTypeCode(),
+            title: $title,
+            setsTitle: $setsTitle,
+            mainTab: 'blog/adminhtml_attribute_edit_tab_main',
+            userDefinedOnly: true,
+            addToDefaultSet: true,
+        );
     }
 
     /**

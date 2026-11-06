@@ -155,7 +155,7 @@ describe('Blog customAttributes (REST)', function (): void {
         $categoryId = (int) $create['json']['id'];
 
         $read = apiGet("/api/rest/v2/blog-categories/{$categoryId}", $token);
-        expect((string) ($read['json']['customAttributes'][BLOG_ATTR_CATEGORY_CODE] ?? ''))->toBe($calm);
+        expect($read['json']['customAttributes'][BLOG_ATTR_CATEGORY_CODE] ?? null)->toBe((int) $calm);
 
         $bad = apiPost('/api/rest/v2/blog-categories', [
             'name' => BLOG_ATTR_CATEGORY_PREFIX . uniqid(),
@@ -174,6 +174,42 @@ describe('Blog customAttributes (REST)', function (): void {
         ], serviceToken(['blog-categories/write']));
 
         expect($response['status'])->toBeIn([400, 422]);
+    });
+
+    it('refuses a new post without a required attribute of its set', function (): void {
+        Tests\Helpers\ApiV2Helper::ensureMahoBootstrapped();
+        $code = 'pest_api_required_' . substr(uniqid(), -6);
+        $attribute = Mage::getModel('blog/resource_eav_attribute')->setData([
+            'entity_type_id' => (int) Mage::getSingleton('eav/config')->getEntityType(Maho_Blog_Model_Post::ENTITY)->getId(),
+            'attribute_code' => $code,
+            'backend_type' => 'varchar',
+            'frontend_input' => 'text',
+            'frontend_label' => 'Pest Required',
+            'is_user_defined' => 1,
+            'is_required' => 1,
+            'is_global' => 1,
+        ] + blogAttrTestDefaultGroup(Maho_Blog_Model_Post::ENTITY));
+        $attribute->save();
+        Mage::app()->cleanCache();
+        Mage::getSingleton('eav/config')->clear();
+
+        try {
+            $response = apiPost('/api/rest/v2/blog-posts', [
+                'title' => 'Pest Required Post',
+                'urlKey' => 'pest-required-' . uniqid(),
+                'content' => '<p>Body</p>',
+            ], serviceToken(['blog-posts/write']));
+            if (in_array($response['status'], [200, 201], true)) {
+                trackCreated('blog_post', (int) $response['json']['id']);
+            }
+
+            expect($response['status'])->toBe(422)
+                ->and(array_column($response['json']['details']['errors'] ?? [], 'field'))->toContain("customAttributes.{$code}");
+        } finally {
+            Tests\Helpers\ApiV2Helper::ensureMahoBootstrapped();
+            $attribute->delete();
+            Mage::app()->cleanCache();
+        }
     });
 
 });

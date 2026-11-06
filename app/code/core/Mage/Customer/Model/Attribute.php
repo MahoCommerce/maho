@@ -53,24 +53,75 @@ class Mage_Customer_Model_Attribute extends Mage_Eav_Model_Attribute
     }
 
     #[\Override]
-    public function getAdminPageSettings(): ?array
+    public function getAdminPageSettings(): ?Mage_Eav_Model_Entity_Attribute_AdminPageSettings
     {
         $helper = Mage::helper('customer');
         return match ($this->getEntityType()->getEntityTypeCode()) {
-            'customer' => [
-                'acl' => 'system/attributes/customer',
-                'title' => $helper->__('Customer Attributes'),
-                'sets_title' => $helper->__('Customer Attribute Sets'),
-                'main_tab' => 'adminhtml/customer_attribute_edit_tab_main',
-                'sets_user_defined_only' => true,
-            ],
-            'customer_address' => [
-                'acl' => 'system/attributes/customer_address',
-                'title' => $helper->__('Customer Address Attributes'),
-                'sets_title' => $helper->__('Customer Address Attribute Sets'),
-                'main_tab' => 'adminhtml/customer_attribute_edit_tab_main',
-                'sets_user_defined_only' => true,
-            ],
+            'customer' => new Mage_Eav_Model_Entity_Attribute_AdminPageSettings(
+                acl: 'system/attributes/customer',
+                title: $helper->__('Customer Attributes'),
+                setsTitle: $helper->__('Customer Attribute Sets'),
+                mainTab: 'adminhtml/customer_attribute_edit_tab_main',
+                setsUserDefinedOnly: true,
+            ),
+            'customer_address' => new Mage_Eav_Model_Entity_Attribute_AdminPageSettings(
+                acl: 'system/attributes/customer_address',
+                title: $helper->__('Customer Address Attributes'),
+                setsTitle: $helper->__('Customer Address Attribute Sets'),
+                mainTab: 'adminhtml/customer_attribute_edit_tab_main',
+                setsUserDefinedOnly: true,
+            ),
+            default => null,
+        };
+    }
+
+    /**
+     * Explain that the customer group picks the set, and name the groups that use $set.
+     */
+    #[\Override]
+    public function getSetNote(Mage_Eav_Model_Entity_Attribute_Set $set): ?string
+    {
+        $column = $this->getGroupSetColumn();
+        if ($column === null) {
+            return null;
+        }
+        $groups = Mage::getResourceModel('customer/group_collection');
+        if ((int) $set->getId() === (int) $this->getEntityType()->getDefaultAttributeSetId()) {
+            // A group without a set uses the default set
+            $groups->addFieldToFilter($column, [['eq' => (int) $set->getId()], ['null' => true]]);
+        } else {
+            $groups->addFieldToFilter($column, (int) $set->getId());
+        }
+        $names = array_map(strval(...), $groups->getColumnValues('customer_group_code'));
+
+        $helper = Mage::helper('customer');
+        $text = $helper->__('The customer group of a customer picks the set. Select the set of each group in Customers > Customer Groups. An attribute that is in no set shows to every customer group.');
+        return $text . ' ' . ($names
+            ? $helper->__('Customer groups that use this set: %s.', implode(', ', $names))
+            : $helper->__('No customer group uses this set.'));
+    }
+
+    /**
+     * The groups of $set move to the default set. The values of the customers stay, because the
+     * rows of customers and addresses do not hold a set.
+     */
+    #[\Override]
+    public function getSetDeleteQuestion(Mage_Eav_Model_Entity_Attribute_Set $set): string
+    {
+        if ($this->getGroupSetColumn() === null) {
+            return parent::getSetDeleteQuestion($set);
+        }
+        return Mage::helper('customer')->__('The customer groups of this set will use the default set. The values of the customers stay. Delete the set?');
+    }
+
+    /**
+     * Return the column of customer_group that holds the set of this entity type.
+     */
+    protected function getGroupSetColumn(): ?string
+    {
+        return match ($this->getEntityType()->getEntityTypeCode()) {
+            'customer' => 'customer_attribute_set_id',
+            'customer_address' => 'customer_address_attribute_set_id',
             default => null,
         };
     }

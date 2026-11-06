@@ -28,13 +28,12 @@ class Mage_Cms_Model_Attribute extends Mage_Eav_Model_Entity_Attribute
      * Every input type stores its values in a column of cms_page.
      */
     #[\Override]
-    public function getAdminPageSettings(): ?array
+    public function getAdminPageSettings(): ?Mage_Eav_Model_Entity_Attribute_AdminPageSettings
     {
-        return [
-            'acl' => 'system/attributes/cms_page',
-            'title' => Mage::helper('cms')->__('CMS Page Attributes'),
-            'sets_title' => null,
-        ];
+        return new Mage_Eav_Model_Entity_Attribute_AdminPageSettings(
+            acl: 'system/attributes/cms_page',
+            title: Mage::helper('cms')->__('CMS Page Attributes'),
+        );
     }
 
     #[\Override]

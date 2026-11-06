@@ -92,7 +92,10 @@ read them:
 - `attributeSetId`: the set of the category. A new category without one takes the set of its
   parent. An update can change the set, as for a product. The next night, the store deletes the
   values of the attributes that are not in the new set.
-- `customAttributes`: the values of the attributes that you added, by attribute code. To write
-  these values, use `customAttributesWrite`. Only a read of one category by its ID and the
-  response of a create or an update have this field. The list of categories, the children of a
-  category and a read by URL key do not have it.
+- `customAttributes`: the values of the attributes that you added, by attribute code. A write
+  takes only the attributes of the set of the category. A Dropdown is an option ID, a Multiple
+  Select a list of option IDs, and a Yes/No `true` or `false`. Only a
+  read of one category by its ID and the response of a create or an update have this field. The
+  list of categories, the children of a category and a read by URL key do not have it.
+
+To find the attribute codes and the option IDs, read `GET /api/rest/v2/custom-attributes?entityType=catalog_category`.

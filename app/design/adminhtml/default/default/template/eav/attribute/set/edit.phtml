@@ -16,6 +16,9 @@
         <?= $this->getSaveButtonHtml() ?>
     </p>
 </div>
+<?php if ($_note = $this->getSetNote()): ?>
+<div class="d-alert d-alert-info mb-4"><?= $this->escapeHtml($_note) ?></div>
+<?php endif ?>
 <div class="edit-attribute-set">
     <div>
         <?= $this->getSetFormHtml() ?>
@@ -48,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
         saveUrl: '<?= $this->getSaveUrl() ?>',
         deleteUrl: '<?= $this->getDeleteUrl() ?>',
         groupDialog: <?= $this->getGroupDialogJson() ?>,
-        canDeleteSet: () => confirm('<?= $this->jsQuoteEscape(Mage::helper('eav')->__('The records of this set will move to the default set. Delete the set?')) ?>'),
+        canDeleteSet: () => confirm(<?= Mage::helper('core')->jsonEncode($this->getDeleteQuestion()) ?>),
     });
 
     setForm.buildGroupTree(<?= $this->getGroupTreeJson() ?>);

@@ -226,8 +226,9 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             $customer->setData($field, $value);
         }
         $this->applyAdminOnlyFields($customer, $data);
-        if ($data->customAttributes !== null) {
-            CustomAttributes::apply($customer, 'adminhtml_customer', $data->customAttributes);
+        // A registration cannot send customAttributes, so only a backend caller checks the required ones
+        if ($data->customAttributes !== null || $this->hasBackendAccess('customers')) {
+            CustomAttributes::apply($customer, 'adminhtml_customer', $data->customAttributes ?? []);
         }
         if ($data->isActive === null) {
             $customer->setData('is_active', 1);

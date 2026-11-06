@@ -19,6 +19,7 @@ use Mage_Catalog_Model_Product_Type;
 use Mage_Catalog_Model_Product_Visibility;
 use Mage_CatalogInventory_Model_Stock_Item;
 use Mage_Core_Model_App;
+use Maho\ApiPlatform\Service\CustomAttributes;
 use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Trait\ActivityLogTrait;
 use Maho\ApiPlatform\Trait\ProductLoaderTrait;
@@ -447,8 +448,8 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         if ($data->pageLayout !== null) {
             $product->setData('page_layout', $data->pageLayout);
         }
-        if (!empty($data->customAttributesWrite)) {
-            $this->applyCustomAttributes($product, $data->customAttributesWrite);
+        if (!empty($data->customAttributes)) {
+            $this->applyCustomAttributes($product, $data->customAttributes);
         }
     }
 
@@ -575,45 +576,21 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
     }
 
     /**
-     * Codes handled by dedicated DTO fields (or otherwise protected). They must
-     * never be written through the generic customAttributesWrite bag.
-     */
-    private const PROTECTED_ATTRIBUTE_CODES = [
-        'entity_id', 'type_id', 'sku', 'attribute_set_id', 'tax_class_id',
-        'website_ids', 'stock_data', 'status', 'visibility',
-        'created_at', 'updated_at', 'entity_type_id',
-    ];
-
-    /**
-     * Apply arbitrary EAV attribute values supplied via customAttributesWrite.
-     *
-     * Protected/system codes are rejected outright; unknown codes (not real
-     * catalog_product EAV attributes) are skipped silently so a typo can't
-     * inject an arbitrary column.
+     * Apply the values of the customAttributes map: the user-defined attributes without a dedicated
+     * field. A user-defined attribute must be in the set of the product, because the nightly
+     * eav_clean_orphaned_records cron deletes a value whose attribute is not in the set.
      *
      * @param array<string, mixed> $attributes
+     * @throws \Mage_Core_Exception_Input
      */
     private function applyCustomAttributes(Mage_Catalog_Model_Product $product, array $attributes): void
     {
-        $eavConfig = Mage::getSingleton('eav/config');
-
-        foreach ($attributes as $code => $value) {
-            $code = (string) $code;
-
-            if (in_array($code, self::PROTECTED_ATTRIBUTE_CODES, true)) {
-                throw new UnprocessableEntityHttpException(
-                    "Attribute '{$code}' cannot be set via customAttributes; use the dedicated field.",
-                );
-            }
-
-            $attribute = $eavConfig->getAttribute(Mage_Catalog_Model_Product::ENTITY, $code);
-            if (!$attribute || !$attribute->getId()) {
-                // Unknown attribute, skip silently.
-                continue;
-            }
-
-            $product->setData($code, $value);
-        }
+        CustomAttributes::apply(
+            $product,
+            $attributes,
+            Product::customAttributeDefinitions(),
+            array_keys(Product::customAttributeDefinitions($product)),
+        );
     }
 
     private function assignCategories(Mage_Catalog_Model_Product $product, array $categoryIds): void

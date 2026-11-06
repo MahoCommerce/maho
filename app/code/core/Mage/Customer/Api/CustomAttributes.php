@@ -37,7 +37,8 @@ final class CustomAttributes
 
     /**
      * Validate $values against the attributes of $formCode, then set them on $entity.
-     * A code that is not a user-defined attribute of the form is an error.
+     * A code that is not a user-defined attribute of the form is an error, and so is a required
+     * attribute that a new $entity does not get.
      *
      * @param array<string, mixed> $values
      * @throws \Mage_Core_Exception_Input
@@ -63,6 +64,15 @@ final class CustomAttributes
 
         $errors = new \Mage_Core_Exception_Input();
         $models = [];
+        if (!$entity->getId()) {
+            foreach ($attributes as $code => $attribute) {
+                if ($attribute->getIsRequired() && !array_key_exists($code, $values)
+                    && (string) $attribute->getDefaultValue() === ''
+                ) {
+                    $errors->addError("customAttributes.{$code}", \Mage::helper('eav')->__('"%s" is a required value.', $code));
+                }
+            }
+        }
         foreach ($values as $code => $value) {
             $code = (string) $code;
             $attribute = $attributes[$code] ?? null;

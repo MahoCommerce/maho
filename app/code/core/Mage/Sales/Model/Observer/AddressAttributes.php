@@ -12,9 +12,10 @@ declare(strict_types=1);
 
 /**
  * Each user-defined customer address attribute has a column with its code in the quote address
- * table and in the order address table. A quote address keeps the raw value, as the customer
- * address does. An order address keeps the label of a select or a multiselect, so the order keeps
- * what the customer saw after an option changes.
+ * table and in the order address table. Both keep the raw value, as the customer address does, so
+ * a reorder copies the value back as it is. An order address also keeps the option labels in
+ * custom_attribute_labels, in the language of the store of the order, so the order shows what
+ * the customer saw after an option changes.
  */
 class Mage_Sales_Model_Observer_AddressAttributes
 {
@@ -65,10 +66,7 @@ class Mage_Sales_Model_Observer_AddressAttributes
         $comment = 'Address attribute ' . $code;
         $setup = new Mage_Sales_Model_Resource_Setup('sales_setup');
         $setup->addAttribute('quote_address', $code, ['type' => (string) $attribute->getBackendType(), 'comment' => $comment]);
-        $setup->addAttribute('order_address', $code, [
-            'type' => static::hasOptions($attribute) ? 'text' : (string) $attribute->getBackendType(),
-            'comment' => $comment,
-        ]);
+        $setup->addAttribute('order_address', $code, ['type' => (string) $attribute->getBackendType(), 'comment' => $comment]);
         $connection = $setup->getConnection();
         $connection->resetDdlCache($setup->getTable('sales/quote_address'));
         $connection->resetDdlCache($setup->getTable('sales/order_address'));
@@ -77,39 +75,33 @@ class Mage_Sales_Model_Observer_AddressAttributes
     #[Maho\Config\Observer('core_copy_fieldset_customer_address_to_quote_address', id: 'sales_address_attribute_copy')]
     public function copyCustomerToQuote(\Maho\Event\Observer $observer): void
     {
-        $this->copy($observer->getEvent()->getSource(), $observer->getEvent()->getTarget(), false);
+        $this->copy($observer->getEvent()->getSource(), $observer->getEvent()->getTarget());
     }
 
     #[Maho\Config\Observer('core_copy_fieldset_sales_convert_quote_address_to_customer_address', id: 'sales_address_attribute_copy')]
     public function copyQuoteToCustomer(\Maho\Event\Observer $observer): void
     {
-        $this->copy($observer->getEvent()->getSource(), $observer->getEvent()->getTarget(), false);
+        $this->copy($observer->getEvent()->getSource(), $observer->getEvent()->getTarget());
     }
 
     #[Maho\Config\Observer('core_copy_fieldset_sales_convert_quote_address_to_order_address', id: 'sales_address_attribute_copy')]
     public function copyQuoteToOrder(\Maho\Event\Observer $observer): void
     {
-        $this->copy($observer->getEvent()->getSource(), $observer->getEvent()->getTarget(), true);
+        $source = $observer->getEvent()->getSource();
+        $target = $observer->getEvent()->getTarget();
+        $this->copy($source, $target);
+        if ($source instanceof Mage_Sales_Model_Quote_Address && $target instanceof Mage_Sales_Model_Order_Address) {
+            $target->setCustomAttributeLabels($this->getOptionLabels($target, (int) $source->getQuote()?->getStoreId()));
+        }
     }
 
     #[Maho\Config\Observer('core_copy_fieldset_sales_convert_order_address_to_quote_address', id: 'sales_address_attribute_copy')]
     public function copyOrderToQuote(\Maho\Event\Observer $observer): void
     {
-        $source = $observer->getEvent()->getSource();
-        $target = $observer->getEvent()->getTarget();
-        if (!$source instanceof \Maho\DataObject || !$target instanceof \Maho\DataObject) {
-            return;
-        }
-        foreach ($this->getAttributes() as $code => $attribute) {
-            $value = $source->getData($code);
-            if ($value === null) {
-                continue;
-            }
-            $target->setData($code, static::hasOptions($attribute) ? $this->labelsToValue($attribute, (string) $value) : $value);
-        }
+        $this->copy($observer->getEvent()->getSource(), $observer->getEvent()->getTarget());
     }
 
-    protected function copy(mixed $source, mixed $target, bool $toOrder): void
+    protected function copy(mixed $source, mixed $target): void
     {
         if (!$source instanceof \Maho\DataObject || !$target instanceof \Maho\DataObject) {
             return;
@@ -122,11 +114,38 @@ class Mage_Sales_Model_Observer_AddressAttributes
             if (is_array($value)) {
                 $value = implode($attribute->getFrontendInput() === 'multiline' ? "\n" : ',', $value);
             }
-            if ($toOrder && $value !== null && static::hasOptions($attribute)) {
-                $value = $this->valueToLabels($attribute, (string) $value);
-            }
             $target->setData($code, $value);
         }
+    }
+
+    /**
+     * Return the option labels of the select, multiselect and boolean values of $address, in store $storeId.
+     *
+     * @return array<string, string|list<string>>
+     */
+    protected function getOptionLabels(\Maho\DataObject $address, int $storeId): array
+    {
+        $labels = [];
+        foreach ($this->getAttributes() as $code => $attribute) {
+            $value = (string) $address->getData($code);
+            if ($value === '' || !static::hasOptions($attribute)) {
+                continue;
+            }
+            // The attributes are shared, so the store of the labels is set for this read only
+            $previousStoreId = $attribute->getStoreId();
+            $attribute->setStoreId($storeId);
+            try {
+                $items = [];
+                foreach (explode(',', $value) as $id) {
+                    $label = $attribute->getSource()->getOptionText($id);
+                    $items[] = is_string($label) && $label !== '' ? $label : $id;
+                }
+            } finally {
+                $attribute->setStoreId($previousStoreId);
+            }
+            $labels[$code] = $attribute->getFrontendInput() === 'multiselect' ? $items : $items[0];
+        }
+        return $labels;
     }
 
     /**
@@ -155,31 +174,5 @@ class Mage_Sales_Model_Observer_AddressAttributes
     protected static function hasOptions(Mage_Eav_Model_Entity_Attribute $attribute): bool
     {
         return in_array($attribute->getFrontendInput(), ['select', 'multiselect', 'boolean'], true);
-    }
-
-    protected function valueToLabels(Mage_Eav_Model_Entity_Attribute $attribute, string $value): string
-    {
-        $labels = [];
-        foreach (explode(',', $value) as $id) {
-            $label = $attribute->getSource()->getOptionText($id);
-            $labels[] = is_string($label) && $label !== '' ? $label : $id;
-        }
-        return implode(', ', $labels);
-    }
-
-    protected function labelsToValue(Mage_Eav_Model_Entity_Attribute $attribute, string $labels): ?string
-    {
-        if ($attribute->getFrontendInput() !== 'multiselect') {
-            $id = $attribute->getSource()->getOptionId(trim($labels));
-            return $id !== null && $id !== '' ? (string) $id : null;
-        }
-        $ids = [];
-        foreach (array_map(trim(...), explode(',', $labels)) as $label) {
-            $id = $attribute->getSource()->getOptionId($label);
-            if ($id !== null && $id !== '') {
-                $ids[] = (string) $id;
-            }
-        }
-        return $ids ? implode(',', $ids) : null;
     }
 }

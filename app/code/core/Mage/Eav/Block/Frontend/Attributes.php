@@ -107,17 +107,32 @@ class Mage_Eav_Block_Frontend_Attributes extends Mage_Core_Block_Template
     }
 
     /**
-     * Return the HTML of a value. HTML stays only when the attribute allows it on the storefront.
+     * Return the HTML of a value. HTML stays only when the attribute allows HTML or uses the WYSIWYG editor.
      */
     public function getValueHtml(array $row): string
     {
         $resource = $this->getEntity()?->getResource();
         $attribute = $resource instanceof Mage_Eav_Model_Entity_Abstract ? $resource->getAttribute($row['code']) : null;
-        if ($attribute instanceof Mage_Eav_Model_Entity_Attribute && $attribute->getData('is_html_allowed_on_front')) {
-            $html = Mage::helper('cms')->getPageTemplateProcessor()->filter($row['value']);
-            return Mage::getSingleton('core/input_filter_maliciousCode')->filter($html);
+        if (!$attribute instanceof Mage_Eav_Model_Entity_Attribute
+            || (!$attribute->getData('is_html_allowed_on_front') && !$attribute->getData('is_wysiwyg_enabled'))
+        ) {
+            return $this->escapeHtml($row['value']);
         }
-        return $this->escapeHtml($row['value']);
+        return $this->renderHtmlValue($attribute, $row['value']);
+    }
+
+    /**
+     * Return the HTML of a value whose attribute allows HTML.
+     *
+     * This block does not know the template processor of the entity type, so it removes the
+     * directives and sanitizes the rest. A block for one entity type overrides this method: the
+     * save of its records sanitizes the value, and the block resolves the directives with the
+     * processor that the save used.
+     */
+    protected function renderHtmlValue(Mage_Eav_Model_Entity_Attribute $attribute, string $html): string
+    {
+        return (string) Mage::getSingleton('core/input_filter_maliciousCode')
+            ->filter(Mage_Core_Model_Input_Filter_MaliciousCode::stripDirectives($html));
     }
 
     /**

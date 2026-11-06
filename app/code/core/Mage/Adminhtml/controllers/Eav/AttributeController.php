@@ -23,37 +23,37 @@ class Mage_Adminhtml_Eav_AttributeController extends Mage_Adminhtml_Controller_E
     #[\Override]
     protected function getPageTitles(): array
     {
-        return [$this->__('System'), $this->__('Attributes'), (string) $this->getAdminPageSettings()['title']];
+        return [$this->__('System'), $this->__('Attributes'), $this->getPageSettings()->title];
     }
 
     #[\Override]
     protected function getMainTabBlock(): string
     {
-        return $this->getAdminPageSettings()['main_tab'] ?? parent::getMainTabBlock();
+        return $this->getPageSettings()->mainTab ?? parent::getMainTabBlock();
     }
 
     #[\Override]
     protected function getAllowedTags(): array
     {
-        return $this->getAdminPageSettings()['allowed_tags'] ?? [];
+        return $this->getPageSettings()->allowedTags;
     }
 
     #[\Override]
     protected function addsNewAttributeToDefaultSet(): bool
     {
-        return $this->getAdminPageSettings()['add_to_default_set'] ?? false;
+        return $this->getPageSettings()->addToDefaultSet;
     }
 
     #[\Override]
     #[Maho\Config\Route('/admin/eav_attribute/index')]
     public function indexAction(): void
     {
-        $settings = (array) $this->getAdminPageSettings();
+        $settings = $this->getPageSettings();
         $this->_initAction();
         $container = $this->getLayout()->createBlock($this->gridContainerBlock);
         assert($container instanceof Mage_Adminhtml_Block_Widget_Container);
-        $container->setHeaderText($settings['title']);
-        if ($settings['sets_title'] !== null) {
+        $container->setHeaderText($settings->title);
+        if ($settings->hasSets()) {
             $container->addButton('attribute_sets', [
                 'label' => $this->__('Attribute Sets'),
                 'onclick' => Mage::helper('core/js')->getSetLocationJs($this->getUrl('*/eav_set/')),

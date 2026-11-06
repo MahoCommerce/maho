@@ -23,13 +23,13 @@ class Mage_Adminhtml_Eav_SetController extends Mage_Adminhtml_Controller_Eav_Set
     #[\Override]
     protected function _isAllowed()
     {
-        return $this->isEntityTypeAllowed() && $this->getAdminPageSettings()['sets_title'] !== null;
+        return $this->isEntityTypeAllowed() && $this->getPageSettings()->hasSets();
     }
 
     #[\Override]
     protected function getPageTitles(): array
     {
-        return [$this->__('System'), $this->__('Attributes'), (string) $this->getAdminPageSettings()['sets_title']];
+        return [$this->__('System'), $this->__('Attributes'), (string) $this->getPageSettings()->setsTitle];
     }
 
     #[\Override]

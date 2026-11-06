@@ -85,4 +85,7 @@ and an API token can read and write them:
   attributes that are not in the new set.
 - `customAttributes`: the values of the attributes that you added, by attribute code. A write
   refuses a code that is not in the set of the record, and a value that is not an option of a
-  Dropdown.
+  Dropdown. A new record must get each required attribute. A Dropdown is an option ID, a Multiple
+  Select a list of option IDs, and a Yes/No `true` or `false`.
+
+`GET /api/rest/v2/custom-attributes?entityType=blog_post` (or `blog_category`) lists the attributes, their options and their sets.

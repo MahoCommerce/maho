@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace Mage\Customer\Api;
 
+use Maho\ApiPlatform\Metadata\CustomAttributeSchema;
 use Maho\Config\ApiResource;
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\Get;
@@ -265,8 +266,12 @@ class Address extends CrudResource
     public ?bool $isDefaultShipping = null;
 
     /** @var array<string, mixed>|null */
-    #[ApiProperty(description: 'Values of the user-defined address attributes, keyed by attribute code. A write is checked against the attributes of the Admin Customer Address form. An order address holds the option labels. Admin and API tokens only', security: "has_backend_access('addresses') or has_backend_access('orders')")]
+    #[ApiProperty(description: 'Values of the user-defined address attributes, keyed by attribute code. A multiselect is a list of option IDs, a dropdown an option ID, a Yes/No a boolean, a date Y-m-d, a multiline a list of lines. A write is checked against the attributes of the Admin Customer Address form and the set of the customer group. GET /custom-attributes?entityType=customer_address lists the attributes and their options. Admin and API tokens only', security: "has_backend_access('addresses') or has_backend_access('orders')", extraProperties: [CustomAttributeSchema::KEY => 'customer_address'])]
     public ?array $customAttributes = null;
+
+    /** @var array<string, string|list<string>>|null */
+    #[ApiProperty(description: 'Order addresses only: the option labels of the dropdown, multiselect and Yes/No values of customAttributes, keyed by attribute code, as the customer saw them when the order was placed. A multiselect has a list of labels. Admin and API tokens only', writable: false, security: "has_backend_access('orders')", extraProperties: ['computed' => true])]
+    public ?array $customAttributeLabels = null;
 
     public static function afterLoad(self $dto, object $model): void
     {
@@ -290,6 +295,7 @@ class Address extends CrudResource
     {
         $dto = self::fromGenericAddress($address);
         $dto->customAttributes = CustomAttributes::readAddress($address);
+        $dto->customAttributeLabels = $address->getCustomAttributeLabels();
         return $dto;
     }
 
