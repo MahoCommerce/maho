@@ -285,8 +285,8 @@ class Mage_Tax_Model_Sales_Total_Quote_Subtotal extends Mage_Sales_Model_Quote_A
                 $taxable = $origPrice;
                 $baseTaxable = $baseOrigPrice;
             } else {
-                $taxable = $price;
-                $baseTaxable = $basePrice;
+                $taxable = (float) $item->getCalculationPriceOriginal();
+                $baseTaxable = (float) $item->getBaseCalculationPriceOriginal();
             }
             $appliedRates = $this->_calculator->getAppliedRates($request);
             $taxes = [];
@@ -425,8 +425,8 @@ class Mage_Tax_Model_Sales_Total_Quote_Subtotal extends Mage_Sales_Model_Quote_A
                 $taxable = $origSubtotal;
                 $baseTaxable = $baseOrigSubtotal;
             } else {
-                $taxable = $subtotal;
-                $baseTaxable = $baseSubtotal;
+                $taxable = (float) $item->getCalculationPriceOriginal() * $qty;
+                $baseTaxable = (float) $item->getBaseCalculationPriceOriginal() * $qty;
             }
 
             $appliedRates = $this->_calculator->getAppliedRates($request);
@@ -580,8 +580,8 @@ class Mage_Tax_Model_Sales_Total_Quote_Subtotal extends Mage_Sales_Model_Quote_A
                 $taxable = $origSubtotal;
                 $baseTaxable = $baseOrigSubtotal;
             } else {
-                $taxable = $subtotal;
-                $baseTaxable = $baseSubtotal;
+                $taxable = (float) $item->getCalculationPriceOriginal() * $qty;
+                $baseTaxable = (float) $item->getBaseCalculationPriceOriginal() * $qty;
             }
             $appliedRates = $this->_calculator->getAppliedRates($request);
             $rowTaxes = [];
