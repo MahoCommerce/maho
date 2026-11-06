@@ -1,0 +1,28 @@
+<?php
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package default_default
+ */
+
+/** @var Mage_Adminhtml_Block_Template $this */
+
+/** @var Maho_Revocation_Block_Adminhtml_Request_Grid $grid */
+$grid = $this->getParentBlock();
+$helper = Mage::helper('revocation');
+$suppressedOnly = $grid->isSuppressedOnly();
+$jsObject = $grid->getJsObjectName();
+$showRequests = static fn(string $value): string => sprintf(
+    "%s.addVarToUrl('%s', 1); %s.reload(%s.addVarToUrl('%s', '%s'));",
+    $jsObject,
+    $grid->getVarNamePage(),
+    $jsObject,
+    $jsObject,
+    Maho_Revocation_Block_Adminhtml_Request_Grid::VAR_NAME_SUPPRESSED,
+    $value,
+);
+?>
+<span role="group" aria-label="<?= $this->quoteEscape($helper->__('Show Requests')) ?>">
+    <button type="button" class="d-btn d-btn-sm" aria-pressed="<?= $suppressedOnly ? 'false' : 'true' ?>" onclick="<?= $showRequests('0') ?>"><?= $this->escapeHtml($helper->__('All')) ?></button>
+    <button type="button" class="d-btn d-btn-sm" aria-pressed="<?= $suppressedOnly ? 'true' : 'false' ?>" onclick="<?= $showRequests('1') ?>"><?= $this->escapeHtml($helper->__('Email Suppressed')) ?> <span class="d-badge d-badge-sm"><?= $grid->getSuppressedCount() ?></span></button>
+</span>
