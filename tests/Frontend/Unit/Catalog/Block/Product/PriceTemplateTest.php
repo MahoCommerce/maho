@@ -141,7 +141,16 @@ describe('catalog price templates tax rounding', function () use ($vatStore, $va
     });
 });
 
-describe('prices outside the price template', function () use ($vatStore, $vatProduct) {
+/** Show the prices of $store in a second currency at $rate, without the rate table. */
+$secondCurrency = static function (Mage_Core_Model_Store $store, float $rate): void {
+    $base = $store->getBaseCurrencyCode();
+    $other = $base === 'USD' ? 'EUR' : 'USD';
+    $store->setData('available_currency_codes', [$base, $other]);
+    $store->setData('serveable_currency_rates', [$base => 1.0, $other => $rate]);
+    $store->setRequestedCurrencyCode($other);
+};
+
+describe('prices outside the price template', function () use ($vatStore, $vatProduct, $secondCurrency) {
     it('gives the structured data the price that the page shows', function () use ($vatStore, $vatProduct) {
         $store = $vatStore();
         $product = $vatProduct($store, Mage_Catalog_Model_Product_Type::TYPE_SIMPLE, []);
@@ -176,6 +185,43 @@ describe('prices outside the price template', function () use ($vatStore, $vatPr
         expect((float) $config['productPrice'])->toBe(11.48)
             ->and((float) $config['productOldPrice'])->toBe(11.48)
             ->and((float) $config['priceInclTax'])->toBe(14.01);
+    });
+
+    // At a rate of 1.5, 10.005 gives 15.01 + 22% = 18.31 when the store converts first, and 18.32 when it rounds first.
+    // 9.0034 gives 13.51 + 22% = 16.48 when the store converts first, and 9.00 + 22% = 10.98, converted to 16.47, when it rounds first.
+    it('converts the tier prices to the display currency before it rounds them', function () use ($vatStore, $vatProduct, $secondCurrency) {
+        $store = $vatStore();
+        $secondCurrency($store, 1.5);
+        $product = $vatProduct($store, Mage_Catalog_Model_Product_Type::TYPE_SIMPLE, [
+            'price' => 20.00,
+            'final_price' => 20.00,
+            'tier_price' => [
+                ['website_id' => 0, 'cust_group' => 32000, 'price_qty' => 2, 'price' => 9.0034, 'website_price' => 9.0034],
+            ],
+        ]);
+
+        $tierPrices = Mage::app()->getLayout()->createBlock('catalog/product_view')->getTierPrices($product);
+
+        expect(strip_tags($tierPrices[0]['formated_price_incl_tax']))->toBe(trim(strip_tags($store->formatPrice(16.48))));
+    });
+
+    it('converts the price script data to the display currency before it rounds it', function () use ($vatStore, $vatProduct, $secondCurrency) {
+        $store = $vatStore();
+        $secondCurrency($store, 1.5);
+        $product = $vatProduct($store, Mage_Catalog_Model_Product_Type::TYPE_SIMPLE, [
+            'price' => 10.005,
+            'final_price' => 10.005,
+            'group_price' => [],
+            'tier_price' => [
+                ['website_id' => 0, 'cust_group' => 32000, 'price_qty' => 2, 'price' => 9.0034, 'website_price' => 9.0034],
+            ],
+        ]);
+
+        $config = Mage::helper('catalog/product_type_composite')->prepareJsonProductConfig($product);
+
+        expect((float) $config['productPrice'])->toBe(15.01)
+            ->and((float) $config['priceInclTax'])->toBe(18.31)
+            ->and(round((float) $config['tierPricesInclTax'][0], 2))->toBe(round(16.48 - 18.31, 2));
     });
 });
 

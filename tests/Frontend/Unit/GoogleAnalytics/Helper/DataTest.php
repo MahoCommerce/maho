@@ -71,12 +71,21 @@ describe('getPriceInclTax', function () {
         ];
         $this->store->setConfig('tax/calculation/price_includes_tax', 0);
         $this->store->setConfig('tax/display/type', (string) Mage_Tax_Model_Config::DISPLAY_TYPE_INCLUDING_TAX);
+
+        // Show the prices in the base currency, so that no exchange rate changes the amount.
+        $base = $this->store->getBaseCurrencyCode();
+        $this->store->setData('available_currency_codes', [$base]);
+        $this->store->setData('serveable_currency_rates', [$base => 1.0]);
+        $this->store->setRequestedCurrencyCode($base);
     });
 
     afterEach(function () {
         foreach ($this->originalTaxConfig as $path => $value) {
             $this->store->setConfig($path, $value);
         }
+        $this->store->unsetData('available_currency_codes');
+        $this->store->clearCurrencyRateMemos();
+        $this->store->clearCurrentCurrency();
     });
 
     it('adds the tax to the price rounded to cents, as the cart does', function () {
