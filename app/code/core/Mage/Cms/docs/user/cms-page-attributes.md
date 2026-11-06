@@ -46,7 +46,8 @@ If you add an attribute with the same code again, the pages have no value for it
 A page attribute does not show on the storefront by itself. A developer adds it to the theme. In a
 template of the `Mage_Cms_Block_Page` block, `$this->getPage()->getData('your_code')` returns the
 value. A Dropdown returns the option ID, and a Multiple Select returns the option IDs separated by
-commas.
+commas. The store does not sanitize the value, so escape it in the template, for example with
+`$this->escapeHtml()`.
 
 ## Import
 
