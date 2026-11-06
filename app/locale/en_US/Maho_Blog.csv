@@ -72,6 +72,7 @@
 "Shown above the posts. Leave empty for no title.","Shown above the posts. Leave empty for no title."
 "Show the value in the list of details on the post or category page","Show the value in the list of details on the post or category page"
 "Template","Template"
+"The form shows the fields of the set that you select.","The form shows the fields of the set that you select."
 "The latest published blog posts, optionally from one category","The latest published blog posts, optionally from one category"
 "There are no blog posts in this category.","There are no blog posts in this category."
 "There are no blog posts to display.","There are no blog posts to display."
@@ -84,4 +85,3 @@
 "Update post","Update post"
 "URL Prefix","URL Prefix"
 "Visible on Frontend","Visible on Frontend"
-"The form shows the fields of the set that you select.","The form shows the fields of the set that you select."

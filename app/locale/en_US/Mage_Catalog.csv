@@ -721,6 +721,7 @@
 "The file you uploaded is larger than %s Megabytes allowed by server","The file you uploaded is larger than %s Megabytes allowed by server"
 "The filters must be an array.","The filters must be an array."
 "The following file extensions are not allowed for security reasons: %s","The following file extensions are not allowed for security reasons: %s"
+"The form shows the fields of the set that you select.","The form shows the fields of the set that you select."
 "The From Date value should be less than or equal to the To Date value.","The From Date value should be less than or equal to the To Date value."
 "The highest number of filter options that a visitor can select on one page. Each selected option counts, also inside one filter. A request with more options gets a 404 page. When a visitor reaches the limit, the filter options are hidden. 0 means no limit.","The highest number of filter options that a visitor can select on one page. Each selected option counts, also inside one filter. A request with more options gets a 404 page. When a visitor reaches the limit, the filter options are hidden. 0 means no limit."
 "The image contents is not valid base64 data.","The image contents is not valid base64 data."
@@ -859,4 +860,3 @@
 "You have no items to compare.","You have no items to compare."
 "You may also like","You may also like"
 "You saved the search term.","You saved the search term."
-"The form shows the fields of the set that you select.","The form shows the fields of the set that you select."

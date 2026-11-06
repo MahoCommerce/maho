@@ -201,6 +201,7 @@
 "The rich text editor cannot keep this HTML: %s. Maho keeps the plain HTML editor open so that nothing is lost.","The rich text editor cannot keep this HTML: %s. Maho keeps the plain HTML editor open so that nothing is lost."
 "The short form of this class is ""%s"".","The short form of this class is ""%s""."
 "The static block content cannot contain  directive with its self.","The static block content cannot contain  directive with its self."
+"The storefront does not show this value by itself. A theme reads it in a CMS page template with %s.","The storefront does not show this value by itself. A theme reads it in a CMS page template with %s."
 "This block no longer exists.","This block no longer exists."
 "This page no longer exists.","This page no longer exists."
 "Title","Title"
@@ -214,4 +215,3 @@
 "WYSIWYG Options","WYSIWYG Options"
 "YouTube Video","YouTube Video"
 "YouTube video player","YouTube video player"
-"The storefront does not show this value by itself. A theme reads it in a CMS page template with %s.","The storefront does not show this value by itself. A theme reads it in a CMS page template with %s."
