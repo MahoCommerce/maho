@@ -763,6 +763,19 @@ class Mage_Tax_Model_Sales_Total_Quote_Tax extends Mage_Sales_Model_Quote_Addres
     }
 
     /**
+     * Get the row amount that a discount must reach to take the whole line.
+     * The tax base keeps the cents of the catalog price, but the discount comes from the rounded price.
+     */
+    protected function _getRowDiscountLimit(Mage_Sales_Model_Quote_Item_Abstract $item, bool $base = false): float
+    {
+        $isOriginalPriceTaxed = !$this->_helper->applyTaxOnCustomPrice($this->_store) && $item->hasCustomPrice();
+        if ($isOriginalPriceTaxed) {
+            return $this->_calculator->round($base ? $item->getBaseTaxableAmount() : $item->getTaxableAmount());
+        }
+        return (float) ($base ? $item->getBaseRowTotal() : $item->getRowTotal());
+    }
+
+    /**
      * Calculate item tax amount based on row total
      *
      * @param   Mage_Sales_Model_Quote_Item_Abstract $item
@@ -817,13 +830,15 @@ class Mage_Tax_Model_Sales_Total_Quote_Tax extends Mage_Sales_Model_Quote_Addres
                     $baseDiscountAmount = $baseDiscountAmount - $item->getBaseWeeeDiscount();
                 }
 
+                $rowDiscountLimit = $this->_getRowDiscountLimit($item);
+                $baseRowDiscountLimit = $this->_getRowDiscountLimit($item, true);
                 $rowTax = $this->_calculator->calcTaxAmount(
-                    max($subtotal - $discountAmount, 0),
+                    !$inclTax && $discountAmount >= $rowDiscountLimit ? 0 : max($subtotal - $discountAmount, 0),
                     $rate,
                     $inclTax,
                 );
                 $baseRowTax = $this->_calculator->calcTaxAmount(
-                    max($baseSubtotal - $baseDiscountAmount, 0),
+                    !$inclTax && $baseDiscountAmount >= $baseRowDiscountLimit ? 0 : max($baseSubtotal - $baseDiscountAmount, 0),
                     $rate,
                     $inclTax,
                 );
@@ -876,9 +891,9 @@ class Mage_Tax_Model_Sales_Total_Quote_Tax extends Mage_Sales_Model_Quote_Addres
                         'base_value' => $baseHiddenTax,
                         'incl_tax' => $inclTax,
                     ];
-                } elseif ($discountAmount > $item->getRowTotal()) { // case with 100% discount on price incl. tax
-                    $hiddenTax = $discountAmount - $item->getRowTotal();
-                    $baseHiddenTax = $baseDiscountAmount - $item->getBaseRowTotal();
+                } elseif ($discountAmount > $rowDiscountLimit) { // case with 100% discount on price incl. tax
+                    $hiddenTax = $discountAmount - $rowDiscountLimit;
+                    $baseHiddenTax = $baseDiscountAmount - $baseRowDiscountLimit;
                     $this->_hiddenTaxes[] = [
                         'rate_key' => $rateKey,
                         'qty' => 1,
@@ -1129,8 +1144,8 @@ class Mage_Tax_Model_Sales_Total_Quote_Tax extends Mage_Sales_Model_Quote_Addres
                     $discount = $discount - $item->getWeeeDiscount();
                     $baseDiscount = $baseDiscount - $item->getBaseWeeeDiscount();
                 }
-                $taxSubtotal = max($subtotal - $discount, 0);
-                $baseTaxSubtotal = max($baseSubtotal - $baseDiscount, 0);
+                $taxSubtotal = !$inclTax && $discount >= $this->_getRowDiscountLimit($item) ? 0 : max($subtotal - $discount, 0);
+                $baseTaxSubtotal = !$inclTax && $baseDiscount >= $this->_getRowDiscountLimit($item, true) ? 0 : max($baseSubtotal - $baseDiscount, 0);
 
                 $rowTax = $this->_calculator->calcTaxAmount($taxSubtotal, $rate, $inclTax, false);
                 $baseRowTax = $this->_calculator->calcTaxAmount($baseTaxSubtotal, $rate, $inclTax, false);

@@ -125,7 +125,7 @@ it('takes the tax of a line with more than one unit from the unrounded price', f
     'total' => [Mage_Tax_Model_Calculation::CALC_TOTAL_BASE, 7.57],
 ]);
 
-it('adds no hidden tax when a discount takes the whole line', function (string $algorithm): void {
+it('adds no hidden tax when a discount takes the whole line', function (string $algorithm, float $price, float $expectedDiscount): void {
     Mage::app()->getStore(1)->setConfig('tax/calculation/algorithm', $algorithm);
     Mage::app()->getStore(1)->setConfig('tax/calculation/apply_after_discount', '1');
 
@@ -139,16 +139,20 @@ it('adds no hidden tax when a discount takes the whole line', function (string $
         ->setDiscountAmount(100)
         ->save();
 
-    $quote = cartPriceRoundingQuote(10, 10.006, $this->productClassId);
+    $quote = cartPriceRoundingQuote(10, $price, $this->productClassId);
     $quote->collectTotals();
     $address = $quote->getShippingAddress();
 
-    expect(round((float) $address->getDiscountAmount(), 2))->toBe(-100.1)
+    expect(round((float) $address->getDiscountAmount(), 2))->toBe($expectedDiscount)
+        ->and(round((float) $address->getTaxAmount(), 2))->toBe(0.0)
         ->and(round((float) $address->getHiddenTaxAmount(), 2))->toBe(0.0)
         ->and(round((float) $address->getGrandTotal(), 2))->toBe(0.0)
         ->and(round((float) $address->getBaseHiddenTaxAmount(), 2))->toBe(0.0)
         ->and(round((float) $address->getBaseGrandTotal(), 2))->toBe(0.0);
 })->with([
-    'unit price' => [Mage_Tax_Model_Calculation::CALC_UNIT_BASE],
-    'row total' => [Mage_Tax_Model_Calculation::CALC_ROW_BASE],
+    'unit price, price rounds up' => [Mage_Tax_Model_Calculation::CALC_UNIT_BASE, 10.006, -100.1],
+    'row total, price rounds up' => [Mage_Tax_Model_Calculation::CALC_ROW_BASE, 10.006, -100.1],
+    'unit price, price rounds down' => [Mage_Tax_Model_Calculation::CALC_UNIT_BASE, 10.004, -100.0],
+    'row total, price rounds down' => [Mage_Tax_Model_Calculation::CALC_ROW_BASE, 10.004, -100.0],
+    'total, price rounds down' => [Mage_Tax_Model_Calculation::CALC_TOTAL_BASE, 10.004, -100.0],
 ]);
