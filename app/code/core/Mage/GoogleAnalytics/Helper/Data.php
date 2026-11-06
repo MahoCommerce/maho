@@ -200,7 +200,9 @@ class Mage_GoogleAnalytics_Helper_Data extends Mage_Core_Helper_Abstract
         /** @var Mage_Tax_Helper_Data $taxHelper */
         $taxHelper = Mage::helper('tax');
         $store = Mage::app()->getStore();
-        $price = (float) $product->getFinalPrice();
+        // Catalog prices are in base currency; every event pairs this value with the current currency code.
+        // The cart adds the tax to the price rounded to cents, as the price template does.
+        $price = $store->roundPrice($store->convertPrice((float) $product->getFinalPrice()));
         if ($taxHelper->needPriceConversion($store)) {
             $price = (float) $taxHelper->getPrice($product, $price, true);
         } elseif ($price && $product->getTaxClassId()) {
@@ -212,7 +214,6 @@ class Mage_GoogleAnalytics_Helper_Data extends Mage_Core_Helper_Abstract
             );
             $price *= 1 + $rate / 100;
         }
-        // Catalog prices are in base currency; every event pairs this value with the current currency code
-        return $store->roundPrice($store->convertPrice($price));
+        return $store->roundPrice($price);
     }
 }
