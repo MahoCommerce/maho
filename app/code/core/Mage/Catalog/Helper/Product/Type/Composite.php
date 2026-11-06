@@ -135,7 +135,14 @@ class Mage_Catalog_Helper_Product_Type_Composite extends Mage_Core_Helper_Abstra
 
         $_regularPrice = $product->getPrice();
         $_finalPrice = $product->getFinalPrice();
-        if ($product->getTypeId() == Mage_Catalog_Model_Product_Type::TYPE_BUNDLE) {
+        $isBundle = $product->getTypeId() == Mage_Catalog_Model_Product_Type::TYPE_BUNDLE;
+        $store = Mage::app()->getStore();
+        // A bundle price stays in the base currency until the end. The other prices are converted and
+        // rounded to cents before the tax, as the cart and the price template do.
+        $toCurrentCurrency = static fn($price) => $isBundle ? Mage::helper('core')->currency($price, false, false) : $price;
+        if ($isBundle) {
+            $_shownFinalPrice = $_finalPrice;
+            $_shownRegularPrice = $_regularPrice;
             $_priceInclTax = Mage::helper('tax')->getPrice(
                 $product,
                 $_finalPrice,
@@ -159,10 +166,10 @@ class Mage_Catalog_Helper_Product_Type_Composite extends Mage_Core_Helper_Abstra
                 false,
             );
         } else {
-            // The cart adds the tax to the price rounded to cents, as the price template does.
-            $_roundedFinalPrice = $product->getStore()->roundPrice($_finalPrice);
-            $_priceInclTax = Mage::helper('tax')->getPrice($product, $_roundedFinalPrice, true);
-            $_priceExclTax = Mage::helper('tax')->getPrice($product, $_roundedFinalPrice);
+            $_shownFinalPrice = $store->roundPrice($store->convertPrice($_finalPrice));
+            $_shownRegularPrice = $store->roundPrice($store->convertPrice($_regularPrice));
+            $_priceInclTax = Mage::helper('tax')->getPrice($product, $_shownFinalPrice, true);
+            $_priceExclTax = Mage::helper('tax')->getPrice($product, $_shownFinalPrice);
         }
         $_tierPrices = [];
         $_tierPricesInclTax = [];
@@ -178,28 +185,23 @@ class Mage_Catalog_Helper_Product_Type_Composite extends Mage_Core_Helper_Abstra
                 continue;
             }
 
-            $_tierPrice = (float) $tierPrice['website_price'];
-            if ($product->getTypeId() != Mage_Catalog_Model_Product_Type::TYPE_BUNDLE) {
-                $_tierPrice = $product->getStore()->roundPrice($_tierPrice);
-            }
-            $_tierPrices[] = Mage::helper('core')->currency(
+            $_tierPrice = $isBundle
+                ? (float) $tierPrice['website_price']
+                : $store->roundPrice($store->convertPrice($tierPrice['website_price']));
+            $_tierPrices[] = $toCurrentCurrency(
                 Mage::helper('tax')->getPrice($product, $_tierPrice, false) - $_priceExclTax,
-                false,
-                false,
             );
-            $_tierPricesInclTax[] = Mage::helper('core')->currency(
+            $_tierPricesInclTax[] = $toCurrentCurrency(
                 Mage::helper('tax')->getPrice($product, $_tierPrice, true) - $_priceInclTax,
-                false,
-                false,
             );
         }
 
         return [
             'productId'           => $product->getId(),
-            'productPrice'        => Mage::helper('core')->currency($_finalPrice, false, false),
-            'productOldPrice'     => Mage::helper('core')->currency($_regularPrice, false, false),
-            'priceInclTax'        => Mage::helper('core')->currency($_priceInclTax, false, false),
-            'priceExclTax'        => Mage::helper('core')->currency($_priceExclTax, false, false),
+            'productPrice'        => $toCurrentCurrency($_shownFinalPrice),
+            'productOldPrice'     => $toCurrentCurrency($_shownRegularPrice),
+            'priceInclTax'        => $toCurrentCurrency($_priceInclTax),
+            'priceExclTax'        => $toCurrentCurrency($_priceExclTax),
             'defaultTax'          => $defaultTax,
             'currentTax'          => $currentTax,
             'tierPrices'          => $_tierPrices,

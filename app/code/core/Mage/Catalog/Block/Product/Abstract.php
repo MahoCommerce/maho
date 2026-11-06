@@ -408,16 +408,13 @@ abstract class Mage_Catalog_Block_Product_Abstract extends Mage_Core_Block_Templ
                 if ($price['price'] < $_productPrice) {
                     $price['savePercent'] = ceil(100 - round((100 / $_productPrice) * $price['price']));
 
-                    // The cart adds the tax to the price rounded to cents, as the price template does.
-                    $websitePrice = Mage::app()->getStore()->roundPrice($price['website_price']);
-                    $tierPrice = Mage::app()->getStore()->convertPrice(
-                        Mage::helper('tax')->getPrice($product, $websitePrice),
-                    );
-                    $price['formated_price'] = Mage::app()->getStore()->formatPrice($tierPrice);
-                    $price['formated_price_incl_tax'] = Mage::app()->getStore()->formatPrice(
-                        Mage::app()->getStore()->convertPrice(
-                            Mage::helper('tax')->getPrice($product, $websitePrice, true),
-                        ),
+                    // The cart converts the price, rounds it to cents and adds the tax, as the price template does.
+                    $store = Mage::app()->getStore();
+                    $shownPrice = $store->roundPrice($store->convertPrice($price['website_price']));
+                    $tierPrice = Mage::helper('tax')->getPrice($product, $shownPrice);
+                    $price['formated_price'] = $store->formatPrice($tierPrice);
+                    $price['formated_price_incl_tax'] = $store->formatPrice(
+                        Mage::helper('tax')->getPrice($product, $shownPrice, true),
                     );
 
                     if (Mage::helper('catalog')->canApplyMsrp($product)) {

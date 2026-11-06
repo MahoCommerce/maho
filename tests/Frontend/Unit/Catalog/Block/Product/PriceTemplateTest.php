@@ -163,9 +163,23 @@ describe('prices outside the price template', function () use ($vatStore, $vatPr
 
         expect(strip_tags($tierPrices[0]['formated_price_incl_tax']))->toBe(trim(strip_tags(Mage::app()->getStore()->formatPrice(14.01))));
     });
+
+    it('gives the price script the price rounded to cents, so a selected option keeps the page price', function () use ($vatStore, $vatProduct) {
+        $store = $vatStore();
+        $product = $vatProduct($store, Mage_Catalog_Model_Product_Type::TYPE_SIMPLE, [
+            'price' => 11.4754,
+            'final_price' => 11.4754,
+        ]);
+
+        $config = Mage::helper('catalog/product_type_composite')->prepareJsonProductConfig($product);
+
+        expect((float) $config['productPrice'])->toBe(11.48)
+            ->and((float) $config['productOldPrice'])->toBe(11.48)
+            ->and((float) $config['priceInclTax'])->toBe(14.01);
+    });
 });
 
-describe('catalog price templates minimal price visibility', function () use ($vatStore, $vatProduct, $render, $money) {
+describe('catalog price templates minimal price visibility', function () use ($vatStore, $vatProduct, $render) {
     it('hides the "From" price when it displays the same amount as the final price', function () use ($vatStore, $vatProduct, $render) {
         $store = $vatStore();
         $product = $vatProduct($store, Mage_Catalog_Model_Product_Type::TYPE_SIMPLE, [
