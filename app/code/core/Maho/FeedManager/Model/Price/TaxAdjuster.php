@@ -46,6 +46,8 @@ final class Maho_FeedManager_Model_Price_TaxAdjuster
         }
 
         $calculation = Mage::getSingleton('tax/calculation');
+        // The cart adds or removes the tax on the price rounded to cents, as the price template does.
+        $price = (float) $this->_store->roundPrice($price);
 
         if ($this->_wantIncludingTax) {
             $rate = $this->_resolveDestinationRate($product, $taxClassId);
