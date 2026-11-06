@@ -124,8 +124,10 @@ class Mage_ProductAlert_Model_Observer
                     $product->setCustomerGroupId($customer->getGroupId());
                     if ($alert->getPrice() > $product->getFinalPrice()) {
                         $productPrice = $product->getFinalPrice();
-                        $product->setFinalPrice(Mage::helper('tax')->getPrice($product, $productPrice));
-                        $product->setPrice(Mage::helper('tax')->getPrice($product, $product->getPrice()));
+                        // The cart rounds the price to cents before it adds the tax, as the price template does.
+                        $store = $website->getDefaultStore();
+                        $product->setFinalPrice(Mage::helper('tax')->getPrice($product, $store->roundPrice($productPrice)));
+                        $product->setPrice(Mage::helper('tax')->getPrice($product, $store->roundPrice($product->getPrice())));
                         $emailAlertModel->addPriceProduct($product);
 
                         $alert->setPrice($productPrice);
