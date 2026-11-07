@@ -61,16 +61,16 @@ it('reactivates a stored used card when a refund succeeds', function (): void {
         ->and($fresh->getHistoryCollection()->addFieldToFilter('action', Maho_Giftcard_Model_Giftcard::ACTION_REFUNDED)->getSize())->toBe(1);
 });
 
-it('uses the stored status instead of a stale used status when refunding', function (): void {
-    $this->refundCard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_USED)->setBalance(0.0)->save();
+it('uses the stored status instead of a stale status when refunding', function (): void {
     $stale = Mage::getModel('giftcard/giftcard')->load($this->refundCard->getId());
-    $this->refundCard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_DISABLED)->save();
+    $this->refundCard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_EXPIRED)->save();
+    Mage::app()->getStore(1)->setConfig('giftcard/general/refund_expiration_extension', '0');
 
-    $stale->refund(10.0);
+    $stale->refund(10.0, null, null, 1);
 
     $fresh = Mage::getModel('giftcard/giftcard')->load($this->refundCard->getId());
-    expect($fresh->getBalance())->toBe(10.0)
-        ->and($fresh->getStatus())->toBe(Maho_Giftcard_Model_Giftcard::STATUS_DISABLED);
+    expect($fresh->getBalance())->toBe(110.0)
+        ->and($fresh->getStatus())->toBe(Maho_Giftcard_Model_Giftcard::STATUS_EXPIRED);
 });
 
 it('rolls back the balance and reactivation when history cannot be written', function (): void {

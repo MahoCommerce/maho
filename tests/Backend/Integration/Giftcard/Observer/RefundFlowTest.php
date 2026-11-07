@@ -159,7 +159,7 @@ describe('Refund Flow - Single Gift Card', function () {
         expect((float) $reloadedCard->getBalance())->toBe(25.00);
     });
 
-    test('keeps a disabled gift card disabled on refund', function () {
+    test('reactivates a disabled gift card on refund', function () {
         $this->giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_DISABLED)->save();
 
         $creditmemo = Mage::getModel('sales/order_creditmemo');
@@ -176,7 +176,7 @@ describe('Refund Flow - Single Gift Card', function () {
         $this->observer->refundGiftcardBalance($eventObserver);
 
         $reloadedCard = Mage::getModel('giftcard/giftcard')->load($this->giftcard->getId());
-        expect($reloadedCard->getStatus())->toBe(Maho_Giftcard_Model_Giftcard::STATUS_DISABLED)
+        expect($reloadedCard->getStatus())->toBe(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE)
             ->and((float) $reloadedCard->getBalance())->toBe(25.00);
     });
 });

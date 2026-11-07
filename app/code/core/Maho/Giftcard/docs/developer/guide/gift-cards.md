@@ -172,10 +172,9 @@ Credit memos and order cancellations call `refund()` for each gift card of the o
 method reads the stored balance, status and expiry date with a row lock, then writes the credit
 and its history entry in one transaction. It then reloads the model.
 
-- A used card becomes active. A disabled card stays disabled.
+- The card becomes active, also when it was used or disabled.
 - When **Refund Expiration Extension** is above 0, a card that expires within that many days gets
-  an expiry date that many days from now, and an expired card becomes active. The history comment
-  records the extension.
+  an expiry date that many days from now. The history comment records the extension.
 - When the extension is 0, an expired card stays expired.
 
 `refund()` does not call `save()`, so the gift card model-save events do not run. The history

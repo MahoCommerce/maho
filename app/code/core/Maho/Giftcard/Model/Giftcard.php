@@ -371,10 +371,9 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
     /**
      * Add $baseAmount to the balance and record the refund in the history.
      *
-     * A used card becomes active. A disabled card stays disabled. When the refund expiration extension
-     * of $storeId is above 0, a card that expires within that many days gets an expiry date that many
-     * days from now, and an expired card becomes active. When the extension is 0, an expired card stays
-     * expired. A null $storeId reads the extension of the current store.
+     * The card becomes active. When the refund expiration extension of $storeId is above 0, a card that
+     * expires within that many days gets an expiry date that many days from now. When the extension is 0,
+     * an expired card stays expired. A null $storeId reads the extension of the current store.
      *
      * @throws Mage_Core_Exception when $baseAmount is not a positive number
      * @throws Mage_Core_Exception_NoSuchEntity when the card no longer exists
@@ -423,7 +422,7 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
                 }
             }
 
-            if ($stored['status'] === self::STATUS_USED || ($isExpired && $extensionDays > 0)) {
+            if (!$isExpired || $extensionDays > 0) {
                 $data['status'] = self::STATUS_ACTIVE;
             }
 
