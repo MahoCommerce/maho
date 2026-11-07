@@ -156,6 +156,7 @@ Build nested XML structures with full control over elements, attributes, CDATA, 
 ### CSV Column Builder
 
 Define columns, their order, and data sources. Configure delimiter (comma, tab, pipe) and text enclosure.
+With the enclosure "None", values have no quotes. A value must not hold the delimiter or a line break.
 
 !!! example "CSV Output"
     ```csv

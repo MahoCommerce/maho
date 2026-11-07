@@ -103,6 +103,28 @@ describe('Feed Generation - CSV', function () {
             cleanupTestFeed($feed);
         }
     });
+
+    test('validates the generated feed with its delimiter and enclosure', function (string $delimiter, string $enclosure, string $title): void {
+        $feed = createTestFeed('csv');
+
+        try {
+            $feed->setCsvDelimiter($delimiter)->setCsvEnclosure($enclosure)->save();
+            $mapping = Mage::getResourceModel('feedmanager/attributeMapping_collection')
+                ->addFieldToFilter('feed_id', $feed->getId())
+                ->addFieldToFilter('platform_attribute', 'title')
+                ->getFirstItem();
+            $mapping->setSourceType(Maho_FeedManager_Model_Mapper::SOURCE_TYPE_STATIC)->setSourceValue($title)->save();
+
+            $log = new Maho_FeedManager_Model_Generator()->generate($feed);
+
+            expect($log->getStatus())->not->toBe('failed');
+        } finally {
+            cleanupTestFeed($feed);
+        }
+    })->with([
+        'pipe delimiter' => ['|', '"', 'red,blue'],
+        'no enclosure' => [',', '', '"red'],
+    ]);
 });
 
 describe('Feed Generation - JSON', function () {
