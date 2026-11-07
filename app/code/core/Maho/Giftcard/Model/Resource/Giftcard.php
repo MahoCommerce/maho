@@ -84,6 +84,20 @@ class Maho_Giftcard_Model_Resource_Giftcard extends Mage_Core_Model_Resource_Db_
     }
 
     /**
+     * Leave out the balance of an existing card. Only use(), refund() and adjustBalance() change it,
+     * under a row lock, so a save of a card that was loaded earlier cannot replace a newer balance.
+     */
+    #[\Override]
+    protected function _prepareDataForSave(Mage_Core_Model_Abstract $object)
+    {
+        $data = parent::_prepareDataForSave($object);
+        if ($object->getId()) {
+            unset($data['balance']);
+        }
+        return $data;
+    }
+
+    /**
      * @param int[] $ids
      */
     protected function _validateWebsiteIds(Mage_Core_Model_Abstract $object, array $ids): void

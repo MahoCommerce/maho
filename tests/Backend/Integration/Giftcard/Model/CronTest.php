@@ -9,6 +9,31 @@ declare(strict_types=1);
 
 uses(Tests\MahoBackendTestCase::class);
 
+/**
+ * Changes the stored balance of one card when the cron first reads its ID, after the cron loaded the card.
+ */
+class CronTestStaleBalanceGiftcard extends Maho_Giftcard_Model_Giftcard
+{
+    public static ?int $cardId = null;
+    public static float $storedBalance = 0.0;
+
+    #[\Override]
+    public function getId(): ?int
+    {
+        $id = parent::getId();
+        if (self::$cardId !== null && (int) $id === self::$cardId) {
+            self::$cardId = null;
+            $resource = Mage::getSingleton('core/resource');
+            $resource->getConnection('core_write')->update(
+                $resource->getTableName('giftcard/giftcard'),
+                ['balance' => self::$storedBalance],
+                ['giftcard_id = ?' => $id],
+            );
+        }
+        return $id;
+    }
+}
+
 describe('Giftcard Cron Instantiation', function () {
     test('cron model can be instantiated', function () {
         $cron = Mage::getModel('giftcard/cron');
@@ -277,4 +302,33 @@ describe('Cron: Process Scheduled Emails', function () {
         $reloaded = Mage::getModel('giftcard/giftcard')->load($giftcard->getId());
         expect($reloaded->getEmailSentAt())->toBeNull();
     });
+});
+
+it('keeps the balance that a refund wrote after the cron loaded the card', function (): void {
+    $giftcard = Mage::getModel('giftcard/giftcard');
+    $giftcard->setCode(Mage::helper('giftcard')->generateCode());
+    $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
+    $giftcard->setWebsiteIds([1]);
+    $giftcard->setBalance(100.00);
+    $giftcard->setInitialBalance(100.00);
+    $giftcard->setExpiresAt(new DateTime('-1 day', new DateTimeZone('UTC'))->format('Y-m-d H:i:s'));
+    $giftcard->save();
+
+    $cache = new ReflectionProperty(Mage_Core_Model_Config::class, '_classNameCache');
+    $cache->setValue(Mage::getConfig(), []);
+    Mage::getConfig()->setNode('global/models/giftcard/rewrite/giftcard', CronTestStaleBalanceGiftcard::class);
+    CronTestStaleBalanceGiftcard::$cardId = (int) $giftcard->getId();
+    CronTestStaleBalanceGiftcard::$storedBalance = 150.00;
+
+    try {
+        Mage::getModel('giftcard/cron')->markExpiredGiftcards();
+    } finally {
+        CronTestStaleBalanceGiftcard::$cardId = null;
+        Mage::getConfig()->setNode('global/models/giftcard/rewrite/giftcard', '');
+        $cache->setValue(Mage::getConfig(), []);
+    }
+
+    $reloaded = Mage::getModel('giftcard/giftcard')->load($giftcard->getId());
+    expect($reloaded->getStatus())->toBe(Maho_Giftcard_Model_Giftcard::STATUS_EXPIRED)
+        ->and($reloaded->getBalance())->toBe(150.00);
 });

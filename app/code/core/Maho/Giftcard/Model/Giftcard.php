@@ -369,75 +369,149 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Refund amount back to gift card
+     * Add $baseAmount to the balance and record the refund in the history.
      *
-     * @param float $baseAmount Amount to refund (in base currency)
-     * @return $this
-     * @throws Mage_Core_Exception
+     * The card becomes active. When the refund expiration extension of $storeId is above 0, a card that
+     * expires within that many days gets an expiry date that many days from now. When the extension is 0,
+     * an expired card stays expired. A null $storeId reads the extension of the current store.
+     *
+     * @throws Mage_Core_Exception when $baseAmount is not a positive number
+     * @throws Mage_Core_Exception_NoSuchEntity when the card no longer exists
      */
-    public function refund(float $baseAmount, ?int $orderId = null, ?string $comment = null): self
+    public function refund(float $baseAmount, ?int $orderId = null, ?string $comment = null, ?int $storeId = null): self
     {
-        if ($baseAmount <= 0) {
+        if (!is_finite($baseAmount) || $baseAmount <= 0) {
             throw new Mage_Core_Exception('Amount must be greater than zero.');
         }
 
-        $balanceBefore = (float) $this->getBalance();
-        $balanceAfter = $balanceBefore + $baseAmount;
+        $resource = $this->getResource();
+        $table = $resource->getMainTable();
+        $extensionDays = (int) Mage::getStoreConfig('giftcard/general/refund_expiration_extension', $storeId);
 
-        // Update balance
-        $this->setBalance($balanceAfter);
+        $resource->beginTransaction();
+        // Resource reads use its writer while the transaction is open.
+        $write = $resource->getReadConnection();
+        $savepoint = null;
+        try {
+            // Adapter nesting counts transactions without creating savepoints.
+            if ($write->getTransactionLevel() > 1) {
+                $name = 'giftcard_refund_' . $write->getTransactionLevel();
+                $write->getConnection()->createSavepoint($name);
+                $savepoint = $name;
+            }
 
-        // Reactivate if was used
-        if ($this->getStatus() === self::STATUS_USED) {
-            $this->setStatus(self::STATUS_ACTIVE);
+            // The row lock stops two requests from adding to the same balance
+            $stored = $write->fetchRow(
+                $write->select()
+                    ->from($table, ['balance', 'status', 'expires_at'])
+                    ->where('giftcard_id = ?', $this->getId())
+                    ->forUpdate(),
+            );
+            if ($stored === false) {
+                throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('giftcard')->__('Gift card not found.'));
+            }
+
+            $balanceBefore = (float) $stored['balance'];
+            $balanceAfter = $balanceBefore + $baseAmount;
+            $data = [
+                'balance' => $balanceAfter,
+                'updated_at' => Mage::app()->getLocale()->formatDateForDb('now'),
+            ];
+
+            $isExpired = $stored['status'] === self::STATUS_EXPIRED;
+            if ($extensionDays > 0) {
+                $minimumExpiresAt = new DateTimeImmutable('now', new DateTimeZone('UTC'))->modify("+{$extensionDays} days");
+                $needsExtension = $stored['expires_at']
+                    ? new DateTimeImmutable($stored['expires_at'], new DateTimeZone('UTC')) < $minimumExpiresAt
+                    : $isExpired;
+                if ($needsExtension) {
+                    $data['expires_at'] = $minimumExpiresAt->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
+                    $extended = "expiration extended to {$extensionDays} days from now";
+                    $comment = $comment === null ? ucfirst($extended) : "{$comment} ({$extended})";
+                }
+            }
+
+            if (!$isExpired || $extensionDays > 0) {
+                $data['status'] = self::STATUS_ACTIVE;
+            }
+
+            $write->update($table, $data, ['giftcard_id = ?' => $this->getId()]);
+
+            $this->_addHistory(self::ACTION_REFUNDED, $baseAmount, $balanceBefore, $balanceAfter, $orderId, $comment);
+
+            $this->load($this->getId());
+            if ($savepoint !== null) {
+                $write->getConnection()->releaseSavepoint($savepoint);
+            }
+            $resource->commit();
+        } catch (\Throwable $e) {
+            // After a deadlock or a lock timeout the adapter has rolled back everything, and the savepoint is gone
+            if ($savepoint !== null && $write->getTransactionLevel() > 0) {
+                $write->getConnection()->rollbackSavepoint($savepoint);
+                $write->getConnection()->releaseSavepoint($savepoint);
+            }
+            $resource->rollBack();
+            throw $e;
         }
-
-        $this->save();
-
-        // Record history
-        $this->_addHistory(
-            self::ACTION_REFUNDED,
-            $baseAmount,
-            $balanceBefore,
-            $balanceAfter,
-            $orderId,
-            $comment,
-        );
 
         return $this;
     }
 
     /**
-     * Adjust balance (admin action)
+     * Set the balance to $newBalance and record the change in the history.
      *
-     * @param float $newBalance New balance (in base currency)
-     * @return $this
+     * A balance of 0 makes the card used, and a positive balance makes a used card active.
+     * Give $expectedBalance when the person saw a balance before they typed the new one:
+     * the method then refuses to replace a balance that changed since.
+     *
+     * @throws Mage_Core_Exception_Conflict when the stored balance is not $expectedBalance
+     * @throws Mage_Core_Exception_NoSuchEntity when the card no longer exists
      */
-    public function adjustBalance(float $newBalance, ?string $comment = null): self
+    public function adjustBalance(float $newBalance, ?string $comment = null, ?float $expectedBalance = null): self
     {
-        $balanceBefore = (float) $this->getBalance();
-        $amount = $newBalance - $balanceBefore;
+        $resource = $this->getResource();
+        $table = $resource->getMainTable();
 
-        $this->setBalance($newBalance);
+        $resource->beginTransaction();
+        try {
+            $write = $resource->getReadConnection();
+            $stored = $write->fetchRow(
+                $write->select()
+                    ->from($table, ['balance', 'status'])
+                    ->where('giftcard_id = ?', $this->getId())
+                    ->forUpdate(),
+            );
+            if ($stored === false) {
+                throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('giftcard')->__('Gift card not found.'));
+            }
 
-        // Update status based on new balance
-        if ($newBalance <= 0) {
-            $this->setStatus(self::STATUS_USED);
-        } elseif ($this->getStatus() === self::STATUS_USED) {
-            $this->setStatus(self::STATUS_ACTIVE);
+            $balanceBefore = (float) $stored['balance'];
+            if ($expectedBalance !== null && round($balanceBefore - $expectedBalance, 4) !== 0.0) {
+                throw new Mage_Core_Exception_Conflict(Mage::helper('giftcard')->__(
+                    'The balance of this gift card changed to %s while you edited it. Check the balance, then save again.',
+                    Mage::app()->getLocale()->formatCurrency($balanceBefore, $this->getCurrencyCode()),
+                ));
+            }
+
+            $data = [
+                'balance' => $newBalance,
+                'updated_at' => Mage::app()->getLocale()->formatDateForDb('now'),
+            ];
+            if ($newBalance <= 0) {
+                $data['status'] = self::STATUS_USED;
+            } elseif ($stored['status'] === self::STATUS_USED) {
+                $data['status'] = self::STATUS_ACTIVE;
+            }
+            $write->update($table, $data, ['giftcard_id = ?' => $this->getId()]);
+
+            $this->_addHistory(self::ACTION_ADJUSTED, $newBalance - $balanceBefore, $balanceBefore, $newBalance, null, $comment);
+
+            $this->load($this->getId());
+            $resource->commit();
+        } catch (\Throwable $e) {
+            $resource->rollBack();
+            throw $e;
         }
-
-        $this->save();
-
-        // Record history
-        $this->_addHistory(
-            self::ACTION_ADJUSTED,
-            $amount,
-            $balanceBefore,
-            $newBalance,
-            null,
-            $comment,
-        );
 
         return $this;
     }

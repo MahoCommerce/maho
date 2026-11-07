@@ -107,9 +107,14 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
 
         $this->_title($model->getId() ? $model->getCode() : Mage::helper('giftcard')->__('New Gift Card'));
 
+        $storedBalance = $model->getBalance();
         $data = Mage::getSingleton('adminhtml/session')->getFormData(true);
         if (is_array($data) && $data !== []) {
             $model->setData($data);
+        }
+        if ($model->getId()) {
+            // The save compares the posted balance with this one, also after a failed save
+            $model->setData('shown_balance', $storedBalance);
         }
 
         Mage::register('current_giftcard', $model);
@@ -140,24 +145,35 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
                 $websiteIds = $saveData['website_ids'] ?? null;
                 unset($saveData['website_ids']);
 
-                // If balance changed on existing card, record as adjustment
-                $oldBalance = (float) $model->getBalance();
-                $newBalance = isset($saveData['balance']) ? (float) $saveData['balance'] : $oldBalance;
-                $isBalanceAdjustment = $model->getId() && $oldBalance !== $newBalance;
-
+                // Compare with the balance that the form showed: a refund can change the stored one meanwhile
+                $shownBalance = isset($saveData['shown_balance']) && $saveData['shown_balance'] !== ''
+                    ? (float) $saveData['shown_balance']
+                    : (float) $model->getBalance();
+                $newBalance = isset($saveData['balance']) && $saveData['balance'] !== ''
+                    ? (float) $saveData['balance']
+                    : $shownBalance;
+                $isBalanceAdjustment = $model->getId() && round($newBalance - $shownBalance, 4) !== 0.0;
+                unset($saveData['shown_balance']);
                 if ($model->getId()) {
-                    // adjustBalance() below is the only writer of an existing card's balance
-                    $saveData['balance'] = $oldBalance;
+                    unset($saveData['balance']);
                 }
 
                 $model->setData($saveData);
                 if ($websiteIds !== null) {
                     $model->setWebsiteIds(is_array($websiteIds) ? $websiteIds : [$websiteIds]);
                 }
-                $model->save();
 
-                if ($isBalanceAdjustment) {
-                    $model->adjustBalance($newBalance, $saveData['comment'] ?? 'Admin adjustment');
+                $resource = $model->getResource();
+                $resource->beginTransaction();
+                try {
+                    $model->save();
+                    if ($isBalanceAdjustment) {
+                        $model->adjustBalance($newBalance, $saveData['comment'] ?? 'Admin adjustment', $shownBalance);
+                    }
+                    $resource->commit();
+                } catch (Exception $e) {
+                    $resource->rollBack();
+                    throw $e;
                 }
 
                 Mage::getSingleton('adminhtml/session')->addSuccess(

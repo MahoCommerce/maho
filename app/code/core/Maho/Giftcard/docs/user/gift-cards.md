@@ -323,7 +323,7 @@ Open any gift card from the grid to access the edit form.
 | **Status** | Gift card state | Active, Used, Disabled, or Expired |
 | **Websites** | Websites the card is valid on | <span class="version-badge">v26.9+</span> Multiselect, editable after creation. All selected websites must share one base currency, which is shown next to the field |
 | **Initial Balance** | Original amount | Display only for existing gift cards (shows historical reference) |
-| **Amount / Current Balance** | Gift card value | For new cards: sets initial amount; For existing cards: edit to manually adjust balance. <span class="version-badge">v26.9+</span> Shown to up to 4 decimals, so a balance left over from a partial redemption or a currency conversion is displayed exactly rather than rounded |
+| **Amount / Current Balance** | Gift card value | For new cards: sets initial amount; For existing cards: edit to manually adjust balance. If the balance changes while the form is open (for example, a credit memo refunds the card), the save stops with an error that shows the new balance. Check it and save again. <span class="version-badge">v26.9+</span> Shown to up to 4 decimals, so a balance left over from a partial redemption or a currency conversion is displayed exactly rather than rounded |
 | **Expires At** | Expiration date | Optional; leave empty for no expiration |
 | **Recipient Name** | Gift recipient name | Optional; used in emails |
 | **Recipient Email** | Recipient email address | Optional; required for sending notification emails |
@@ -468,7 +468,7 @@ When creating a credit memo:
 #### Orders Fully Paid with Gift Cards
 - Enter the refund amount in the **Refund to Gift Card** field
 - Amount is added back to the customer's gift card balance
-- Gift card status changes from "Used" back to "Active" if applicable
+- Gift card status changes from "Used" or "Disabled" back to "Active"
 
 #### Expiration Handling on Refunds
 When refunding to a gift card, the system automatically extends the expiration date if needed:
@@ -502,7 +502,7 @@ When refunding to a gift card, the system automatically extends the expiration d
 When an order paid with gift cards is canceled:
 
 - Gift card balance is automatically restored for the full amount
-- Gift card status changes from "Used" back to "Active" (if applicable)
+- Gift card status changes from "Used" or "Disabled" back to "Active"
 - Expiration handling follows the same rules as credit memo refunds:
   - If the gift card is expired or will expire within the configured extension period, the expiration is extended
   - The extension ensures the customer has at least the configured number of days (default: 30) to use the restored balance

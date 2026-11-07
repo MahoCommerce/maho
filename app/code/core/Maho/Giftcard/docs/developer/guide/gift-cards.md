@@ -163,20 +163,48 @@ $giftcard->use(
 $giftcard->refund(
     $baseAmount,
     $orderId,
-    'Refund for credit memo #456'
+    'Refund for credit memo #456',
+    $storeId               // Store whose refund expiration extension applies
 );
-// Automatically reverts status from "used" to "active" if applicable
 ```
+
+Credit memos and order cancellations call `refund()` for each gift card of the order. The
+method reads the stored balance, status and expiry date with a row lock, then writes the credit
+and its history entry on the resource's write connection in one transaction. It reloads the model
+from that connection before committing. Inside a caller's transaction, a savepoint rolls back a
+failed refund without discarding the caller's earlier changes. A successful refund stays in that
+transaction until the caller commits or rolls it back.
+
+- The card becomes active, also when it was used or disabled.
+- When **Refund Expiration Extension** is above 0, a card that expires within that many days gets
+  an expiry date that many days from now. The history comment records the extension.
+- When the extension is 0, an expired card stays expired.
+
+`refund()` does not call `save()`, so the gift card model-save events do not run. The history
+model-save events still run. Save other changes to the model before you call `refund()`.
 
 #### Admin Balance Adjustment
 
 ```php
 $giftcard->adjustBalance(
     $newBalance,
-    'Customer service adjustment'
+    'Customer service adjustment',
+    $shownBalance          // Optional: the balance that the person saw
 );
 // Creates history entry with admin user ID
 ```
+
+`adjustBalance()` reads the stored balance and status with a row lock, so the history entry
+records the change from the stored balance. A balance of 0 makes the card used, and a positive
+balance makes a used card active. When you give `$shownBalance` and the stored balance is
+different, the method throws `Mage_Core_Exception_Conflict` and changes nothing. The admin edit
+form uses this: a refund that runs while the form is open is not replaced.
+
+#### Who Writes the Balance
+
+Only `use()`, `useUpTo()`, `refund()` and `adjustBalance()` change the balance of a saved card.
+`save()` writes the balance of a new card only. For a saved card, it leaves the `balance` column
+out, so a save of a card that was loaded before a refund keeps the refund.
 
 ### Creating Gift Cards Programmatically
 
@@ -357,7 +385,7 @@ Executes on credit memo refund:
 - Uses row locking to prevent race conditions
 - Calculates proportional refund for partial gift card orders
 - For full coverage orders, refunds entire credit memo amount
-- Updates gift card status back to active if was "used"
+- Updates gift card status back to active if it was "used" or "disabled"
 - **Extends expiration** if the card is expired or will expire within the configured extension period:
     - Compares card's `expires_at` to `now + refund_expiration_extension` days
     - If card expires sooner, extends to the full extension period from now
@@ -371,7 +399,7 @@ Executes when an order is canceled:
 
 - Uses row locking to prevent race conditions
 - Restores the full gift card balance for all applied gift cards
-- Updates gift card status back to active if was "used"
+- Updates gift card status back to active if it was "used" or "disabled"
 - **Extends expiration** using the same logic as credit memo refunds:
     - Compares card's `expires_at` to `now + refund_expiration_extension` days
     - If card expires sooner, extends to the full extension period from now

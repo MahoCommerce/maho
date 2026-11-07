@@ -96,10 +96,10 @@ describe('Giftcard CRUD Operations', function () {
         $giftcard->setBalance(50.00);
         $giftcard->save();
 
-        // Reload and verify
+        // Reload and verify: only use(), refund() and adjustBalance() change the balance of a saved card
         $reloaded = Mage::getModel('giftcard/giftcard')->load($id);
         expect($reloaded->getMessage())->toBe('Updated message');
-        expect((float) $reloaded->getBalance())->toBe(50.00);
+        expect((float) $reloaded->getBalance())->toBe(100.00);
         expect((float) $reloaded->getInitialBalance())->toBe(100.00); // Unchanged
     });
 
