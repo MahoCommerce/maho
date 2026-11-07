@@ -102,7 +102,8 @@ it('batches child product counts in a single category response', function (): vo
 
     expect($item->productCount)->toBe(0)
         ->and(array_column($item->children, 'productCount'))->toBe([1, 1, 0])
-        ->and($this->counter->countQueries)->toBe(2);
+        ->and($this->counter->countQueries)->toBe(2)
+        ->and($this->counter->childrenQueries)->toBe(2);
 });
 
 it('does not count products for an empty category page', function (): void {

@@ -256,7 +256,7 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
         $collection->setCurPage($page);
 
         $total = (int) $collection->getSize();
-        $children = $this->loadCollectionMetadata($collection);
+        $children = $this->preloadCountsAndChildIds($collection);
 
         $categories = [];
         foreach ($collection as $mahoCategory) {
@@ -338,8 +338,8 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
 
         // Get children IDs
         if ($childrenIds === null) {
-            $children = $category->getChildren();
-            $childrenIds = $children ? array_map(intval(...), explode(',', $children)) : [];
+            $childrenList = $category->getChildren();
+            $childrenIds = $childrenList ? array_map(intval(...), explode(',', $childrenList)) : [];
         }
         $dto->childrenIds = $childrenIds;
 
@@ -354,9 +354,9 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
                 $childCollection->addAttributeToFilter('is_active', 1);
             }
 
-            $children = $this->loadCollectionMetadata($childCollection);
+            $childIdsByCategory = $this->preloadCountsAndChildIds($childCollection);
             foreach ($childCollection as $childCategory) {
-                $dto->children[] = $this->mapToDto($childCategory, false, childrenIds: $children[$childCategory->getId()] ?? null);
+                $dto->children[] = $this->mapToDto($childCategory, false, childrenIds: $childIdsByCategory[$childCategory->getId()] ?? null);
             }
         }
 
@@ -370,11 +370,12 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
     }
 
     /**
-     * Batch core categories only. Rewritten models, resources and collections keep their own getters.
+     * Set product_count on each item and return the active child IDs for each category ID.
+     * Return null when a model, resource or collection is rewritten: those keep their own getters.
      *
      * @return array<int, list<int>>|null
      */
-    private function loadCollectionMetadata(\Mage_Catalog_Model_Resource_Category_Collection $collection): ?array
+    private function preloadCountsAndChildIds(\Mage_Catalog_Model_Resource_Category_Collection $collection): ?array
     {
         $resource = \Mage::getResourceSingleton('catalog/category');
         if ($collection::class !== \Mage_Catalog_Model_Resource_Category_Collection::class

@@ -717,7 +717,7 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
         $backendTable = $this->getTable([$this->getEntityTablePrefix(), 'int']);
         $checkSql = $adapter->getCheckSql('c.value_id > 0', 'c.value', 'd.value');
 
-        // Bound the derived table below SQLite's compound SELECT limit, including large child collections.
+        // SQLite allows 500 SELECT terms in one UNION ALL. Use at most 100 categories in each query.
         foreach (array_chunk($categories, 100) as $batch) {
             $parents = [];
             foreach ($batch as $category) {
