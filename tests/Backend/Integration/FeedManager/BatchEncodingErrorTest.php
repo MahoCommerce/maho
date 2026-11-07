@@ -33,7 +33,7 @@ it('keeps product encoding errors when the batch exceeds its error threshold', f
     try {
         $job = $batch->initBatch($feed);
         $result = $batch->processBatch($job['job_id']);
-        $status = (new Maho_FeedManager_Model_Generator_Batch())->getStatus($job['job_id']);
+        $status = new Maho_FeedManager_Model_Generator_Batch()->getStatus($job['job_id']);
         $log = Mage::getModel('feedmanager/log')->load($job['log_id']);
 
         expect($result['message'])->toContain('Error threshold exceeded');
