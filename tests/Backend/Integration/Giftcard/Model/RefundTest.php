@@ -28,17 +28,41 @@ afterEach(function (): void {
     }
 });
 
+function giftcardRefundHistoryFailure(int $id): Maho_Giftcard_Model_Giftcard
+{
+    $card = new class extends Maho_Giftcard_Model_Giftcard {
+        #[\Override]
+        protected function _addHistory(
+            string $action,
+            float $baseAmount,
+            float $baseBalanceBefore,
+            float $baseBalanceAfter,
+            ?int $orderId = null,
+            ?string $comment = null,
+        ): void {
+            throw new RuntimeException('Test history failure');
+        }
+    };
+    return $card->load($id);
+}
+
 it('adds both refunds when two models loaded the same starting balance', function (): void {
     $first = Mage::getModel('giftcard/giftcard')->load($this->refundCard->getId());
     $second = Mage::getModel('giftcard/giftcard')->load($this->refundCard->getId());
 
     $first->refund(10.0);
+    $resource = Mage::getSingleton('core/resource');
+    $resource->getConnection('core_write')->update(
+        $resource->getTableName('giftcard/history'),
+        ['created_at' => '2000-01-01 00:00:00'],
+        ['giftcard_id = ?' => $first->getId()],
+    );
     $second->refund(10.0);
 
     $fresh = Mage::getModel('giftcard/giftcard')->load($this->refundCard->getId());
     $history = $fresh->getHistoryCollection()
         ->addFieldToFilter('action', Maho_Giftcard_Model_Giftcard::ACTION_REFUNDED)
-        ->setOrder('history_id', 'ASC');
+        ->unshiftOrder('history_id', 'ASC');
     $balances = [];
     foreach ($history as $entry) {
         $balances[] = [(float) $entry->getBalanceBefore(), (float) $entry->getBalanceAfter()];
@@ -75,20 +99,7 @@ it('uses the stored status instead of a stale status when refunding', function (
 
 it('rolls back the balance and reactivation when history cannot be written', function (): void {
     $this->refundCard->setBalance(0.0)->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_USED)->save();
-    $card = new class extends Maho_Giftcard_Model_Giftcard {
-        #[\Override]
-        protected function _addHistory(
-            string $action,
-            float $baseAmount,
-            float $baseBalanceBefore,
-            float $baseBalanceAfter,
-            ?int $orderId = null,
-            ?string $comment = null,
-        ): void {
-            throw new RuntimeException('Test history failure');
-        }
-    };
-    $card->load($this->refundCard->getId());
+    $card = giftcardRefundHistoryFailure($this->refundCard->getId());
 
     expect(fn() => $card->refund(25.0))->toThrow(RuntimeException::class, 'Test history failure');
 
@@ -130,6 +141,112 @@ it('reactivates an expired card only when the refund extension is above 0', func
     'extension of 30 days' => ['30', Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE],
     'no extension' => ['0', Maho_Giftcard_Model_Giftcard::STATUS_EXPIRED],
 ]);
+it('uses the resource writer for the credit, history, reload and rollback', function (bool $historyFails): void {
+    $core = Mage::getSingleton('core/resource');
+    $write = $core->createUnsharedConnection('core_write');
+    $originalCardResource = Mage::getResourceSingleton('giftcard/giftcard');
+    $originalHistoryResource = Mage::getResourceSingleton('giftcard/history');
+    $cardResource = new class ($write) extends Maho_Giftcard_Model_Resource_Giftcard {
+        public function __construct(Maho\Db\Adapter\AdapterInterface $write)
+        {
+            parent::__construct();
+            $this->_connections['write'] = $write;
+        }
+    };
+    $historyResource = new class ($write) extends Maho_Giftcard_Model_Resource_History {
+        public function __construct(Maho\Db\Adapter\AdapterInterface $write)
+        {
+            parent::__construct();
+            $this->_connections['write'] = $write;
+        }
+    };
+    Mage::unregister('_resource_singleton/giftcard/giftcard');
+    Mage::register('_resource_singleton/giftcard/giftcard', $cardResource);
+    Mage::unregister('_resource_singleton/giftcard/history');
+    Mage::register('_resource_singleton/giftcard/history', $historyResource);
+
+    try {
+        expect($cardResource->getReadConnection())->not->toBe($write);
+        if ($historyFails) {
+            expect(fn() => giftcardRefundHistoryFailure($this->refundCard->getId())->refund(25.0))
+                ->toThrow(RuntimeException::class, 'Test history failure');
+            expect(Mage::getModel('giftcard/giftcard')->load($this->refundCard->getId())->getBalance())->toBe(100.0)
+                ->and($write->getTransactionLevel())->toBe(0);
+            return;
+        }
+        $card = new class extends Maho_Giftcard_Model_Giftcard {
+            public ?Maho\Db\Adapter\AdapterInterface $reloadConnection = null;
+
+            #[\Override]
+            protected function _beforeLoad($id, $field = null): self
+            {
+                $this->reloadConnection = $this->getResource()->getReadConnection();
+                return parent::_beforeLoad($id, $field);
+            }
+        };
+        $card->setData($this->refundCard->getData());
+        $card->refund(10.0);
+
+        expect($card->reloadConnection)->toBe($write)
+            ->and($card->getBalance())->toBe(110.0)
+            ->and($card->getHistoryCollection()->addFieldToFilter('action', Maho_Giftcard_Model_Giftcard::ACTION_REFUNDED)->getSize())->toBe(1);
+    } finally {
+        Mage::unregister('_resource_singleton/giftcard/giftcard');
+        Mage::register('_resource_singleton/giftcard/giftcard', $originalCardResource);
+        Mage::unregister('_resource_singleton/giftcard/history');
+        Mage::register('_resource_singleton/giftcard/history', $originalHistoryResource);
+        $write->closeConnection();
+    }
+})->with([
+    'reload and history' => [false],
+    'history failure' => [true],
+]);
+
+it('rolls back a failed refund while the caller can commit its own transaction', function (): void {
+    $this->refundCard->setBalance(0.0)->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_USED)->save();
+    $card = giftcardRefundHistoryFailure($this->refundCard->getId());
+    $resource = Mage::getResourceSingleton('giftcard/giftcard');
+    $resource->beginTransaction();
+    $write = $resource->getReadConnection();
+
+    try {
+        $write->update($resource->getMainTable(), ['message' => 'Outer transaction'], ['giftcard_id = ?' => $card->getId()]);
+        expect(fn() => $card->refund(25.0))->toThrow(RuntimeException::class, 'Test history failure');
+        expect($write->getTransactionLevel())->toBe(1);
+        $resource->commit();
+
+        $fresh = Mage::getModel('giftcard/giftcard')->load($card->getId());
+        expect($fresh->getBalance())->toBe(0.0)
+            ->and($fresh->getStatus())->toBe(Maho_Giftcard_Model_Giftcard::STATUS_USED)
+            ->and($fresh->getMessage())->toBe('Outer transaction')
+            ->and($fresh->getHistoryCollection()->addFieldToFilter('action', Maho_Giftcard_Model_Giftcard::ACTION_REFUNDED)->getSize())->toBe(0);
+    } finally {
+        if ($write->getTransactionLevel() > 0) {
+            $resource->rollBack();
+        }
+    }
+});
+
+it('leaves a successful refund inside the caller transaction until its commit', function (): void {
+    $resource = Mage::getResourceSingleton('giftcard/giftcard');
+    $resource->beginTransaction();
+    $write = $resource->getReadConnection();
+
+    try {
+        $this->refundCard->refund(10.0);
+        expect($write->getTransactionLevel())->toBe(1)
+            ->and($this->refundCard->getBalance())->toBe(110.0);
+        $resource->rollBack();
+
+        $fresh = Mage::getModel('giftcard/giftcard')->load($this->refundCard->getId());
+        expect($fresh->getBalance())->toBe(100.0)
+            ->and($fresh->getHistoryCollection()->addFieldToFilter('action', Maho_Giftcard_Model_Giftcard::ACTION_REFUNDED)->getSize())->toBe(0);
+    } finally {
+        if ($write->getTransactionLevel() > 0) {
+            $resource->rollBack();
+        }
+    }
+});
 
 it('refuses a refund after the stored card has been deleted', function (): void {
     $stale = Mage::getModel('giftcard/giftcard')->load($this->refundCard->getId());

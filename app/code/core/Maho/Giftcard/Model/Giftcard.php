@@ -385,12 +385,21 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
         }
 
         $resource = $this->getResource();
-        $write = Mage::getSingleton('core/resource')->getConnection('core_write');
         $table = $resource->getMainTable();
         $extensionDays = (int) Mage::getStoreConfig('giftcard/general/refund_expiration_extension', $storeId);
 
         $resource->beginTransaction();
+        // Resource reads use its writer while the transaction is open.
+        $write = $resource->getReadConnection();
+        $savepoint = null;
         try {
+            // Adapter nesting counts transactions without creating savepoints.
+            if ($write->getTransactionLevel() > 1) {
+                $name = 'giftcard_refund_' . $write->getTransactionLevel();
+                $write->getConnection()->createSavepoint($name);
+                $savepoint = $name;
+            }
+
             // The row lock stops two requests from adding to the same balance
             $stored = $write->fetchRow(
                 $write->select()
@@ -430,13 +439,19 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
 
             $this->_addHistory(self::ACTION_REFUNDED, $baseAmount, $balanceBefore, $balanceAfter, $orderId, $comment);
 
+            $this->load($this->getId());
+            if ($savepoint !== null) {
+                $write->getConnection()->releaseSavepoint($savepoint);
+            }
             $resource->commit();
         } catch (\Throwable $e) {
+            if ($savepoint !== null) {
+                $write->getConnection()->rollbackSavepoint($savepoint);
+                $write->getConnection()->releaseSavepoint($savepoint);
+            }
             $resource->rollBack();
             throw $e;
         }
-
-        $this->load($this->getId());
 
         return $this;
     }

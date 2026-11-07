@@ -170,7 +170,10 @@ $giftcard->refund(
 
 Credit memos and order cancellations call `refund()` for each gift card of the order. The
 method reads the stored balance, status and expiry date with a row lock, then writes the credit
-and its history entry in one transaction. It then reloads the model.
+and its history entry on the resource's write connection in one transaction. It reloads the model
+from that connection before committing. Inside a caller's transaction, a savepoint rolls back a
+failed refund without discarding the caller's earlier changes. A successful refund stays in that
+transaction until the caller commits or rolls it back.
 
 - The card becomes active, also when it was used or disabled.
 - When **Refund Expiration Extension** is above 0, a card that expires within that many days gets
