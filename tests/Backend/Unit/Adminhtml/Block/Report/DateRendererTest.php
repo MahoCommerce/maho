@@ -23,9 +23,8 @@ it('formats each report date column with its own pattern', function (): void {
 });
 
 it('shows the calendar month and year for each report period', function (): void {
-    $row = new Maho\DataObject(['period' => '2018-12-31']);
-
-    foreach (['year' => '2018', 'month' => '2018-12'] as $period => $expected) {
+    foreach (['year' => ['2018', '2018'], 'month' => ['2018-12', '2018-12']] as $period => [$value, $expected]) {
+        $row = new Maho\DataObject(['period' => $value]);
         $renderer = new Mage_Adminhtml_Block_Report_Sales_Grid_Column_Renderer_Date();
         $renderer->setColumn(new Mage_Adminhtml_Block_Widget_Grid_Column(['index' => 'period', 'period_type' => $period]));
 

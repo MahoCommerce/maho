@@ -42,6 +42,10 @@ class Mage_Adminhtml_Block_Report_Sales_Grid_Column_Renderer_Date extends Mage_A
     {
         $column = $this->getColumn();
         if ($data = $row->getData($column->getIndex())) {
+            // A year period holds only the year. DateTime reads '2018' as a clock time.
+            if ($column->getPeriodType() === 'year' && !$column->getFormat()) {
+                return (string) $data;
+            }
             try {
                 $dateObj = ($column->getGmtoffset())
                     ? Mage::app()->getLocale()->utcToStore(null, $data)
