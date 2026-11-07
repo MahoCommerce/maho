@@ -17,7 +17,7 @@
     </p>
 </div>
 <?php if ($_note = $this->getSetNote()): ?>
-<div class="d-alert d-alert-info mb-4"><?= $this->escapeHtml($_note) ?></div>
+<div class="d-alert d-alert-info mb-4"><?= nl2br($this->escapeHtml($_note)) ?></div>
 <?php endif ?>
 <div class="edit-attribute-set">
     <div>

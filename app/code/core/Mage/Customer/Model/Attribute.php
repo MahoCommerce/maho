@@ -76,7 +76,8 @@ class Mage_Customer_Model_Attribute extends Mage_Eav_Model_Attribute
     }
 
     /**
-     * Explain that the customer group picks the set, and name the groups that use $set.
+     * Explain that the customer group picks the set, name the groups that use $set, and say how the
+     * groups of $set divide the forms.
      */
     #[\Override]
     public function getSetNote(Mage_Eav_Model_Entity_Attribute_Set $set): ?string
@@ -95,10 +96,20 @@ class Mage_Customer_Model_Attribute extends Mage_Eav_Model_Attribute
         $names = array_map(strval(...), $groups->getColumnValues('customer_group_code'));
 
         $helper = Mage::helper('customer');
-        $text = $helper->__('The customer group of a customer picks the set. Select the set of each group in Customers > Customer Groups. An attribute that is in no set shows to every customer group.');
-        return $text . ' ' . ($names
-            ? $helper->__('Customer groups that use this set: %s.', implode(', ', $names))
-            : $helper->__('No customer group uses this set.'));
+        $lines = [
+            $helper->__('The customer group of a customer picks the set. Select the set of each group in Customers > Customer Groups. An attribute that is in no set shows to every customer group.')
+            . ' ' . ($names
+                ? $helper->__('Customer groups that use this set: %s.', implode(', ', $names))
+                : $helper->__('No customer group uses this set.')),
+        ];
+        $firstGroup = Mage::getResourceModel('eav/entity_attribute_group_collection')
+            ->setAttributeSetFilter((int) $set->getId())
+            ->setSortOrder()
+            ->getFirstItem();
+        if ($firstGroup->getId()) {
+            $lines[] = $helper->__('The fields of the first group, %s, join the other fields of the form with no title. Each other group is a part of the form, with the name of the group as its title.', (string) $firstGroup->getAttributeGroupName());
+        }
+        return implode("\n", $lines);
     }
 
     /**

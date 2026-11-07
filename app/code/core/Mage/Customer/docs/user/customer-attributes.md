@@ -93,6 +93,8 @@ The groups of the set divide the forms:
   for example **Company Information**. The title is the name of the group in the store view of the
   customer. The admin customer page shows each group as a part too, with its Admin name.
 
+The set page says this too, and it names the first group of the set.
+
 ## Name a group for each store view
 
 1. On the set page, click a group and click **Rename**, or click **Add** to make a group.

@@ -218,6 +218,7 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
 
     /**
      * Return a text that the edit page of $set shows above the groups, or null for no text.
+     * Each line of the text is a paragraph.
      */
     public function getSetNote(Mage_Eav_Model_Entity_Attribute_Set $set): ?string
     {

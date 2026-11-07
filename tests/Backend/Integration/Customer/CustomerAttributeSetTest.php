@@ -331,5 +331,6 @@ it('names the customer groups of a set on its edit page, and keeps the values wh
     expect($helper->getSetNote($set))->toContain('Pest Note Group ' . $this->suffix)
         ->and($helper->getSetNote($defaultSet))->toContain('General')
         ->and($helper->getSetNote($defaultSet))->not->toContain('Pest Note Group ' . $this->suffix)
+        ->and($helper->getSetNote($set))->toContain('The fields of the first group, General, join the other fields of the form with no title.')
         ->and($helper->getSetDeleteQuestion($set))->toContain('The values of the customers stay');
 });

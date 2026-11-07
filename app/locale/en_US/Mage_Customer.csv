@@ -490,6 +490,7 @@
 "The customer ID and email did not match, skipping the record, line: %s","The customer ID and email did not match, skipping the record, line: %s"
 "The customer is currently assigned to Customer Group %s.","The customer is currently assigned to Customer Group %s."
 "The Date of Birth is required.","The Date of Birth is required."
+"The fields of the first group, %s, join the other fields of the form with no title. Each other group is a part of the form, with the name of the group as its title.","The fields of the first group, %s, join the other fields of the form with no title. Each other group is a part of the form, with the name of the group as its title."
 "The fields that the customers of this group fill in. Leave empty for the default set.","The fields that the customers of this group fill in. Leave empty for the default set."
 "The first name cannot be empty.","The first name cannot be empty."
 "The group ""%s"" cannot be deleted","The group ""%s"" cannot be deleted"
