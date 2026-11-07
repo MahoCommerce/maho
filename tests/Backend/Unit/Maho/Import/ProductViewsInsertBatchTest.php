@@ -19,12 +19,12 @@ class InsertSizeRecordingAdapter extends Sqlite
 {
     public array $insertSizes = [];
 
-    public ?int $firstInsertMemory = null;
+    public ?int $peakInsertMemory = null;
 
     #[\Override]
     public function insertMultiple(string|array|Select $table, array $data): int
     {
-        $this->firstInsertMemory ??= memory_get_usage();
+        $this->peakInsertMemory = max($this->peakInsertMemory ?? 0, memory_get_usage());
         $this->insertSizes[] = count($data);
 
         return parent::insertMultiple($table, $data);
@@ -121,10 +121,10 @@ it('adds only missing views and keeps each product and store separate', function
     expect((int) $this->adapter->fetchOne('SELECT COUNT(*) FROM memory_product_view_event'))->toBe(1010);
 });
 
-it('holds at most one batch of events in memory before the first insert', function () {
+it('holds at most one batch of events in memory at every insert', function () {
     $row = ['sku' => 'big', 'store_code' => 'owned-store', 'product_id' => 41, 'store_id' => 7, 'views' => '50000', 'days' => '3'];
     $start = memory_get_usage();
     $this->importer->writeRows($this->file, [$row]);
 
-    expect($this->adapter->firstInsertMemory - $start)->toBeLessThan(5 * 1024 * 1024);
+    expect($this->adapter->peakInsertMemory - $start)->toBeLessThan(5 * 1024 * 1024);
 });
