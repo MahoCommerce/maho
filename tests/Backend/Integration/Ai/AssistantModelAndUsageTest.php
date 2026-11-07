@@ -11,7 +11,7 @@ declare(strict_types=1);
 use Maho\Ai\Api\Chat\Assistant;
 use Symfony\AI\Platform\Exception\ModelNotFoundException;
 use Symfony\AI\Platform\Result\TextResult;
-use Symfony\AI\Platform\Test\InMemoryPlatform;
+use Symfony\AI\Platform\Test\MockPlatformFactory;
 use Symfony\AI\Platform\TokenUsage\TokenUsage;
 
 uses(Tests\MahoBackendTestCase::class);
@@ -71,11 +71,11 @@ it('counts the cached input tokens of Anthropic in the usage of a completion', f
     $result = new TextResult('ok');
     $result->getMetadata()->add('token_usage', new TokenUsage(promptTokens: 24, completionTokens: 500, cacheCreationTokens: 1000, cacheReadTokens: 8000));
 
-    $anthropic = new Maho_Ai_Model_Platform_Symfony(new InMemoryPlatform(fn(): TextResult => $result), Maho_Ai_Model_Platform::ANTHROPIC, 'claude-test');
+    $anthropic = new Maho_Ai_Model_Platform_Symfony(MockPlatformFactory::createPlatform(fn(): TextResult => $result), Maho_Ai_Model_Platform::ANTHROPIC, 'claude-test');
     $anthropic->complete([['role' => 'user', 'content' => 'Hi']]);
     expect($anthropic->getLastTokenUsage())->toBe(['input' => 9024, 'output' => 500]);
 
-    $openai = new Maho_Ai_Model_Platform_Symfony(new InMemoryPlatform(fn(): TextResult => $result), Maho_Ai_Model_Platform::OPENAI, 'gpt-test');
+    $openai = new Maho_Ai_Model_Platform_Symfony(MockPlatformFactory::createPlatform(fn(): TextResult => $result), Maho_Ai_Model_Platform::OPENAI, 'gpt-test');
     $openai->complete([['role' => 'user', 'content' => 'Hi']]);
     expect($openai->getLastTokenUsage())->toBe(['input' => 24, 'output' => 500]);
 });

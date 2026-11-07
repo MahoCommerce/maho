@@ -14,6 +14,7 @@ namespace Maho\Ai\Api\Agent;
 
 use Symfony\AI\Platform\Tool\ExecutionReference;
 use Symfony\AI\Platform\Tool\Tool;
+use Symfony\AI\Platform\Tool\ToolEffectHints;
 
 /**
  * A note is a lasting preference or fact the administrator stated: the language to answer
@@ -32,9 +33,15 @@ final class MemoryTool
         return $name === self::FORGET ? 'Forget a note' : 'Remember a note';
     }
 
+    /** The tool changes the memory of the assistant only, which is not store data. */
+    public static function effectHints(): ToolEffectHints
+    {
+        return new ToolEffectHints(readOnlyHint: true, destructiveHint: false, openWorldHint: false);
+    }
+
     public function rememberTool(): Tool
     {
-        return ToolDefinition::create(
+        return new Tool(
             new ExecutionReference(self::class, 'remember'),
             self::REMEMBER,
             'Keep a short note about the administrator for every later conversation: a lasting preference or fact they stated, such as the language to answer in, the store view they work on, or a rule for their content. Store it once, in one sentence, and never store a secret, a password or a record value you could read again.',
@@ -44,13 +51,13 @@ final class MemoryTool
                 'required' => ['note'],
                 'additionalProperties' => false,
             ],
-            ['title' => self::title(self::REMEMBER), 'read_only' => true, 'destructive' => false, 'local' => true],
+            effectHints: self::effectHints(),
         );
     }
 
     public function forgetTool(): Tool
     {
-        return ToolDefinition::create(
+        return new Tool(
             new ExecutionReference(self::class, 'forget'),
             self::FORGET,
             'Drop one of the notes listed in the prompt under what the administrator asked you to remember, by its number, when the administrator asks you to forget it or states the opposite.',
@@ -60,7 +67,7 @@ final class MemoryTool
                 'required' => ['note_id'],
                 'additionalProperties' => false,
             ],
-            ['title' => self::title(self::FORGET), 'read_only' => true, 'destructive' => false, 'local' => true],
+            effectHints: self::effectHints(),
         );
     }
 
