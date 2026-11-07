@@ -257,10 +257,11 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
 
         $total = (int) $collection->getSize();
         $this->loadProductCounts($collection);
+        $children = \Mage::getResourceSingleton('catalog/category')->getChildrenForCategories($collection->getItems());
 
         $categories = [];
         foreach ($collection as $mahoCategory) {
-            $categories[] = $this->mapToDto($mahoCategory, false);
+            $categories[] = $this->mapToDto($mahoCategory, false, childrenIds: $children[$mahoCategory->getId()]);
         }
 
         return new TraversablePaginator(new \ArrayIterator($categories), $page, $pageSize, $total);
@@ -269,8 +270,10 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
     /**
      * Map Maho category model to Category DTO. $withStoreOverrides fills storeOverrides
      * for backend callers; single-category reads and write responses set it.
+     *
+     * @param list<int>|null $childrenIds Preloaded active children, or null to query them.
      */
-    public function mapToDto(\Mage_Catalog_Model_Category $category, bool $includeChildren = false, bool $withStoreOverrides = false): Category
+    public function mapToDto(\Mage_Catalog_Model_Category $category, bool $includeChildren = false, bool $withStoreOverrides = false, ?array $childrenIds = null): Category
     {
         $dto = new Category();
         $dto->id = (int) $category->getId();
@@ -335,10 +338,11 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
         $dto->productCount = (int) $category->getProductCount();
 
         // Get children IDs
-        $childrenIds = $category->getChildren();
-        if ($childrenIds) {
-            $dto->childrenIds = array_map(intval(...), explode(',', $childrenIds));
+        if ($childrenIds === null) {
+            $children = $category->getChildren();
+            $childrenIds = $children ? array_map(intval(...), explode(',', $children)) : [];
         }
+        $dto->childrenIds = $childrenIds;
 
         // Include children categories if requested
         if ($includeChildren && !empty($dto->childrenIds)) {
@@ -352,8 +356,9 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
             }
 
             $this->loadProductCounts($childCollection);
+            $children = \Mage::getResourceSingleton('catalog/category')->getChildrenForCategories($childCollection->getItems());
             foreach ($childCollection as $childCategory) {
-                $dto->children[] = $this->mapToDto($childCategory, false);
+                $dto->children[] = $this->mapToDto($childCategory, false, childrenIds: $children[$childCategory->getId()]);
             }
         }
 

@@ -700,6 +700,66 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
     }
 
     /**
+     * Return active immediate children for each category, using its path, level and store scope.
+     *
+     * @param Mage_Catalog_Model_Category[] $categories
+     * @return array<int, list<int>>
+     */
+    public function getChildrenForCategories(array $categories): array
+    {
+        $children = [];
+        if ($categories === []) {
+            return $children;
+        }
+
+        $adapter = $this->_getReadAdapter();
+        $attributeId = (int) $this->_getIsActiveAttributeId();
+        $backendTable = $this->getTable([$this->getEntityTablePrefix(), 'int']);
+        $checkSql = $adapter->getCheckSql('c.value_id > 0', 'c.value', 'd.value');
+
+        // Bound the derived table below SQLite's compound SELECT limit, including large child collections.
+        foreach (array_chunk($categories, 100) as $batch) {
+            $parents = [];
+            foreach ($batch as $category) {
+                $id = (int) $category->getId();
+                $children[$id] = [];
+                $parents[] = (string) $adapter->select()->columns([
+                    'category_id' => new Maho\Db\Expr((string) $id),
+                    'child_path' => new Maho\Db\Expr($adapter->quote($category->getPath() . '/%')),
+                    'child_level' => new Maho\Db\Expr((string) ($category->getLevel() + 1)),
+                    'store_id' => new Maho\Db\Expr((string) (int) $category->getStoreId()),
+                ]);
+            }
+            $parentSelect = new Maho\Db\Expr('(' . implode(' UNION ALL ', $parents) . ')');
+            $select = $adapter->select()
+                ->from(['p' => $parentSelect], ['category_id'])
+                ->joinInner(
+                    ['m' => $this->getEntityTable()],
+                    'm.path LIKE p.child_path AND m.level <= p.child_level',
+                    ['entity_id'],
+                )
+                ->joinLeft(
+                    ['d' => $backendTable],
+                    "d.attribute_id = {$attributeId} AND d.store_id = 0 AND d.entity_id = m.entity_id",
+                    [],
+                )
+                ->joinLeft(
+                    ['c' => $backendTable],
+                    "c.attribute_id = {$attributeId} AND c.store_id = p.store_id AND c.entity_id = m.entity_id",
+                    [],
+                )
+                ->where($checkSql . ' = ?', 1)
+                ->order('m.position ASC');
+
+            foreach ($adapter->fetchAll($select) as $row) {
+                $children[(int) $row['category_id']][] = (int) $row['entity_id'];
+            }
+        }
+
+        return $children;
+    }
+
+    /**
      * Return IDs of category's children along with inactive categories.
      *
      * @param Mage_Catalog_Model_Category $category

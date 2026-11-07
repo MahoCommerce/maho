@@ -45,6 +45,7 @@ beforeEach(function (): void {
         }
         return Mage::getModel('catalog/category')->load($id);
     };
+    $this->makeCategory = $makeCategory;
     $this->parent = $makeCategory((int) $root->getId(), $root->getPath(), 2, 0);
     $this->categories = [];
     for ($i = 0; $i < 3; $i++) {
@@ -66,11 +67,15 @@ beforeEach(function (): void {
     }
     $this->counter = new class {
         public int $countQueries = 0;
+        public int $childrenQueries = 0;
 
         public function record($sql, $bind): void
         {
             if (str_contains((string) $sql, 'COUNT(') && str_contains((string) $sql, 'catalog_category_product')) {
                 $this->countQueries++;
+            }
+            if (str_contains((string) $sql, 'm.position ASC')) {
+                $this->childrenQueries++;
             }
         }
     };
@@ -88,7 +93,8 @@ it('loads direct product counts once for a category page including anchors and e
     ]));
 
     expect(array_column($items, 'productCount'))->toBe([1, 1, 0])
-        ->and($this->counter->countQueries)->toBe(1);
+        ->and($this->counter->countQueries)->toBe(1)
+        ->and($this->counter->childrenQueries)->toBe(1);
 });
 
 it('batches child product counts in a single category response', function (): void {
@@ -116,4 +122,83 @@ it('keeps pagination when loading product counts', function (): void {
     expect(array_column($items, 'id'))->toBe([(int) $this->categories[1]->getId()])
         ->and(array_column($items, 'productCount'))->toBe([1])
         ->and($this->counter->countQueries)->toBe(1);
+});
+
+it('preserves child activity overrides, path matching and complete DTOs in two stores', function (): void {
+    $store = Mage::app()->getStore();
+    $this->db->insert('core_store', [
+        'code' => 'category_batch_fixture',
+        'website_id' => $store->getWebsiteId(),
+        'group_id' => $store->getGroupId(),
+        'name' => 'Category batch fixture',
+        'sort_order' => 99,
+        'is_active' => 1,
+    ]);
+    $secondStoreId = (int) $this->db->lastInsertId();
+    Mage::app()->reinitStores();
+    $parent = $this->categories[1];
+    $child = ($this->makeCategory)((int) $parent->getId(), $parent->getPath(), 4, -1);
+    $inactive = ($this->makeCategory)((int) $parent->getId(), $parent->getPath(), 4, 2);
+    $activeAttribute = Mage::getSingleton('eav/config')->getAttribute('catalog_category', 'is_active');
+    $this->db->update($activeAttribute->getBackendTable(), ['value' => 0], [
+        'entity_id = ?' => $inactive->getId(),
+        'attribute_id = ?' => $activeAttribute->getId(),
+    ]);
+    foreach ([$child->getId() => 0, $inactive->getId() => 1] as $id => $value) {
+        $this->db->insert($activeAttribute->getBackendTable(), [
+            'entity_type_id' => $activeAttribute->getEntityTypeId(),
+            'attribute_id' => $activeAttribute->getId(),
+            'store_id' => $secondStoreId,
+            'entity_id' => $id,
+            'value' => $value,
+        ]);
+    }
+    // The existing method follows path and level even when parent_id disagrees.
+    $this->db->update('catalog_category_entity', ['parent_id' => $this->categories[0]->getId()], [
+        'entity_id = ?' => $this->grandchild->getId(),
+    ]);
+
+    foreach ([(int) $store->getId(), $secondStoreId] as $storeId) {
+        Mage::app()->setCurrentStore($storeId);
+        $categories = array_map(static fn($category) => (clone $category)->setStoreId($storeId), $this->categories);
+        $expected = [];
+        foreach ($categories as $category) {
+            $expected[(int) $category->getId()] = array_map(intval(...), $category->getResource()->getChildren($category, false));
+        }
+        $this->counter->childrenQueries = 0;
+        $actual = $parent->getResource()->getChildrenForCategories($categories);
+        expect($actual)->toBe($expected)
+            ->and($this->counter->childrenQueries)->toBe(1);
+        $expectedIds = $storeId === (int) $store->getId()
+            ? [(int) $child->getId(), (int) $this->grandchild->getId()]
+            : [(int) $this->grandchild->getId(), (int) $inactive->getId()];
+        expect($actual[(int) $parent->getId()])->toBe($expectedIds);
+
+        foreach ($categories as $category) {
+            $provider = new CategoryProvider();
+            $expectedDto = $provider->mapToDto(clone $category, true);
+            $actualDto = $provider->mapToDto(clone $category, true, childrenIds: $actual[(int) $category->getId()]);
+            expect(json_encode($actualDto, JSON_THROW_ON_ERROR))->toBe(json_encode($expectedDto, JSON_THROW_ON_ERROR));
+        }
+    }
+});
+
+it('uses the supplied category paths and bounds large batches', function (): void {
+    $categories = [];
+    $expected = [];
+    for ($i = 0; $i < 101; $i++) {
+        $category = clone $this->categories[0];
+        $category->setId(1000000 + $i);
+        $category->setPath($this->categories[1]->getPath());
+        $categories[] = $category;
+        $expected[(int) $category->getId()] = [(int) $this->grandchild->getId()];
+    }
+    $this->counter->childrenQueries = 0;
+    expect($this->parent->getResource()->getChildrenForCategories($categories))->toBe($expected)
+        ->and($this->counter->childrenQueries)->toBe(2);
+});
+
+it('skips child queries for an empty batch', function (): void {
+    expect($this->parent->getResource()->getChildrenForCategories([]))->toBe([])
+        ->and($this->counter->childrenQueries)->toBe(0);
 });
