@@ -349,7 +349,9 @@ it('keeps literal and wildcard path matching for noncanonical category paths', f
             'entity_id = ?' => $this->grandchild->getId(),
         ]);
         $expected = array_map(intval(...), $resource->getChildren($parent, false));
-        expect($resource->getChildrenForCategories([$parent]))->toBe([(int) $parent->getId() => $expected]);
+        $actual = $resource->getChildrenForCategories([$parent]);
+        expect(array_keys($actual))->toBe([(int) $parent->getId()])
+            ->and($actual[(int) $parent->getId()])->toEqualCanonicalizing($expected);
     }
 });
 

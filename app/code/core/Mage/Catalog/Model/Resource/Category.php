@@ -746,7 +746,7 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
                         [],
                     )
                     ->where($checkSql . ' = ?', 1);
-                // LIKE cannot use SQLite's binary path index. For numeric paths GLOB has the same prefix.
+                // SQLite uses the path index for GLOB but not for LIKE. For a numeric path, both match the same rows.
                 if ($adapter instanceof Maho\Db\Adapter\Pdo\Sqlite
                     && preg_match('~^[0-9]+(?:/[0-9]+)*$~D', (string) $category->getPath())
                 ) {
