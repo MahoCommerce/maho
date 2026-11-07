@@ -163,16 +163,23 @@ $giftcard->use(
 $giftcard->refund(
     $baseAmount,
     $orderId,
-    'Refund for credit memo #456'
+    'Refund for credit memo #456',
+    $storeId               // Store whose refund expiration extension applies
 );
-// Automatically reverts status from "used" to "active" if applicable
 ```
 
-`refund()` reads the current stored balance and status, then writes the credit and
-its history entry in one transaction. It reloads the model after success. Save any
-unrelated pending model changes separately before calling it. Like the debit path,
-it updates the balance directly, so gift card model-save events do not run. History
-model-save events still run.
+Credit memos and order cancellations call `refund()` for each gift card of the order. The
+method reads the stored balance, status and expiry date with a row lock, then writes the credit
+and its history entry in one transaction. It then reloads the model.
+
+- A used card becomes active. A disabled card stays disabled.
+- When **Refund Expiration Extension** is above 0, a card that expires within that many days gets
+  an expiry date that many days from now, and an expired card becomes active. The history comment
+  records the extension.
+- When the extension is 0, an expired card stays expired.
+
+`refund()` does not call `save()`, so the gift card model-save events do not run. The history
+model-save events still run. Save other changes to the model before you call `refund()`.
 
 #### Admin Balance Adjustment
 

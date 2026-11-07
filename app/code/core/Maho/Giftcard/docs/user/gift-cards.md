@@ -469,6 +469,7 @@ When creating a credit memo:
 - Enter the refund amount in the **Refund to Gift Card** field
 - Amount is added back to the customer's gift card balance
 - Gift card status changes from "Used" back to "Active" if applicable
+- A "Disabled" gift card stays disabled, but gets the balance back
 
 #### Expiration Handling on Refunds
 When refunding to a gift card, the system automatically extends the expiration date if needed:
@@ -503,6 +504,7 @@ When an order paid with gift cards is canceled:
 
 - Gift card balance is automatically restored for the full amount
 - Gift card status changes from "Used" back to "Active" (if applicable)
+- A "Disabled" gift card stays disabled, but gets the balance back
 - Expiration handling follows the same rules as credit memo refunds:
   - If the gift card is expired or will expire within the configured extension period, the expiration is extended
   - The extension ensures the customer has at least the configured number of days (default: 30) to use the restored balance

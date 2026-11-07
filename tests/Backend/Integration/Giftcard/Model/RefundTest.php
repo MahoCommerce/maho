@@ -11,6 +11,7 @@ declare(strict_types=1);
 uses(Tests\MahoBackendTestCase::class);
 
 beforeEach(function (): void {
+    $this->savedExtension = Mage::getStoreConfig('giftcard/general/refund_expiration_extension', 1);
     $this->refundCard = Mage::getModel('giftcard/giftcard')
         ->setCode('REFUND-' . bin2hex(random_bytes(8)))
         ->setWebsiteIds([1])
@@ -20,6 +21,7 @@ beforeEach(function (): void {
 });
 
 afterEach(function (): void {
+    Mage::app()->getStore(1)->setConfig('giftcard/general/refund_expiration_extension', $this->savedExtension);
     $card = Mage::getModel('giftcard/giftcard')->load($this->refundCard->getId());
     if ($card->getId()) {
         $card->delete();
@@ -95,6 +97,39 @@ it('rolls back the balance and reactivation when history cannot be written', fun
         ->and($fresh->getStatus())->toBe(Maho_Giftcard_Model_Giftcard::STATUS_USED)
         ->and($fresh->getHistoryCollection()->addFieldToFilter('action', Maho_Giftcard_Model_Giftcard::ACTION_REFUNDED)->getSize())->toBe(0);
 });
+
+it('extends the expiry date of a card that expires within the refund extension', function (): void {
+    $soon = new DateTimeImmutable('now', new DateTimeZone('UTC'))->modify('+5 days');
+    $this->refundCard->setExpiresAt($soon->format(Mage_Core_Model_Locale::DATETIME_FORMAT))->save();
+    Mage::app()->getStore(1)->setConfig('giftcard/general/refund_expiration_extension', '30');
+
+    $this->refundCard->refund(10.0, null, 'Goodwill', 1);
+
+    $expiresAt = new DateTimeImmutable($this->refundCard->getExpiresAt(), new DateTimeZone('UTC'));
+    $comment = $this->refundCard->getHistoryCollection()
+        ->addFieldToFilter('action', Maho_Giftcard_Model_Giftcard::ACTION_REFUNDED)
+        ->getFirstItem()
+        ->getComment();
+    expect($expiresAt > new DateTimeImmutable('now', new DateTimeZone('UTC'))->modify('+29 days'))->toBeTrue()
+        ->and($comment)->toBe('Goodwill (expiration extended to 30 days from now)');
+});
+
+it('reactivates an expired card only when the refund extension is above 0', function (string $extension, string $status): void {
+    $past = new DateTimeImmutable('now', new DateTimeZone('UTC'))->modify('-5 days');
+    $this->refundCard->setBalance(0.0)
+        ->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_EXPIRED)
+        ->setExpiresAt($past->format(Mage_Core_Model_Locale::DATETIME_FORMAT))
+        ->save();
+    Mage::app()->getStore(1)->setConfig('giftcard/general/refund_expiration_extension', $extension);
+
+    $this->refundCard->refund(10.0, null, null, 1);
+
+    expect($this->refundCard->getStatus())->toBe($status)
+        ->and($this->refundCard->getBalance())->toBe(10.0);
+})->with([
+    'extension of 30 days' => ['30', Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE],
+    'no extension' => ['0', Maho_Giftcard_Model_Giftcard::STATUS_EXPIRED],
+]);
 
 it('refuses a refund after the stored card has been deleted', function (): void {
     $stale = Mage::getModel('giftcard/giftcard')->load($this->refundCard->getId());

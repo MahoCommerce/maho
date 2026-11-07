@@ -369,13 +369,17 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Refund amount back to gift card
+     * Add $baseAmount to the balance and record the refund in the history.
      *
-     * @param float $baseAmount Amount to refund (in base currency)
-     * @return $this
-     * @throws Mage_Core_Exception
+     * A used card becomes active. A disabled card stays disabled. When the refund expiration extension
+     * of $storeId is above 0, a card that expires within that many days gets an expiry date that many
+     * days from now, and an expired card becomes active. When the extension is 0, an expired card stays
+     * expired. A null $storeId reads the extension of the current store.
+     *
+     * @throws Mage_Core_Exception when $baseAmount is not a positive number
+     * @throws Mage_Core_Exception_NoSuchEntity when the card no longer exists
      */
-    public function refund(float $baseAmount, ?int $orderId = null, ?string $comment = null): self
+    public function refund(float $baseAmount, ?int $orderId = null, ?string $comment = null, ?int $storeId = null): self
     {
         if (!is_finite($baseAmount) || $baseAmount <= 0) {
             throw new Mage_Core_Exception('Amount must be greater than zero.');
@@ -384,12 +388,14 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
         $resource = $this->getResource();
         $write = Mage::getSingleton('core/resource')->getConnection('core_write');
         $table = $resource->getMainTable();
+        $extensionDays = (int) Mage::getStoreConfig('giftcard/general/refund_expiration_extension', $storeId);
 
         $resource->beginTransaction();
         try {
+            // The row lock stops two requests from adding to the same balance
             $stored = $write->fetchRow(
                 $write->select()
-                    ->from($table, ['balance', 'status'])
+                    ->from($table, ['balance', 'status', 'expires_at'])
                     ->where('giftcard_id = ?', $this->getId())
                     ->forUpdate(),
             );
@@ -403,19 +409,27 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
                 'balance' => $balanceAfter,
                 'updated_at' => Mage::app()->getLocale()->formatDateForDb('now'),
             ];
-            if ($stored['status'] === self::STATUS_USED) {
+
+            $isExpired = $stored['status'] === self::STATUS_EXPIRED;
+            if ($extensionDays > 0) {
+                $minimumExpiresAt = new DateTimeImmutable('now', new DateTimeZone('UTC'))->modify("+{$extensionDays} days");
+                $needsExtension = $stored['expires_at']
+                    ? new DateTimeImmutable($stored['expires_at'], new DateTimeZone('UTC')) < $minimumExpiresAt
+                    : $isExpired;
+                if ($needsExtension) {
+                    $data['expires_at'] = $minimumExpiresAt->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
+                    $extended = "expiration extended to {$extensionDays} days from now";
+                    $comment = $comment === null ? ucfirst($extended) : "{$comment} ({$extended})";
+                }
+            }
+
+            if ($stored['status'] === self::STATUS_USED || ($isExpired && $extensionDays > 0)) {
                 $data['status'] = self::STATUS_ACTIVE;
             }
+
             $write->update($table, $data, ['giftcard_id = ?' => $this->getId()]);
 
-            $this->_addHistory(
-                self::ACTION_REFUNDED,
-                $baseAmount,
-                $balanceBefore,
-                $balanceAfter,
-                $orderId,
-                $comment,
-            );
+            $this->_addHistory(self::ACTION_REFUNDED, $baseAmount, $balanceBefore, $balanceAfter, $orderId, $comment);
 
             $resource->commit();
         } catch (\Throwable $e) {
