@@ -81,6 +81,7 @@ class ProductViews extends AbstractImporter
             }
             $span = (int) $row['days'] * 86400;
             $seed = crc32($row['sku'] . '@' . $row['store_code']);
+            // One insert binds 6 values for each view, and PostgreSQL accepts 65535 values at most.
             $events = [];
             for ($i = $have; $i < $want; $i++) {
                 $events[] = [
@@ -91,10 +92,13 @@ class ProductViews extends AbstractImporter
                     'subtype' => 1,
                     'store_id' => $row['store_id'],
                 ];
+                if (count($events) === 1000) {
+                    $write->insertMultiple($table, $events);
+                    $events = [];
+                }
             }
-            // One insert binds 6 values for each view, and PostgreSQL accepts 65535 values at most.
-            foreach (array_chunk($events, 1000) as $chunk) {
-                $write->insertMultiple($table, $chunk);
+            if ($events !== []) {
+                $write->insertMultiple($table, $events);
             }
             $have === 0 ? $result->created++ : $result->updated++;
         }
