@@ -83,12 +83,15 @@ final class ConfigurableSetupProcessor extends \Maho\ApiPlatform\Processor
         /** @var \Mage_Catalog_Model_Product_Type_Configurable $typeInstance */
         $typeInstance = $product->getTypeInstance(true);
 
+        $needsSave = false;
+
         // Set super attributes if provided and none exist yet
         $superAttributes = $body['superAttributes'] ?? $body['super_attributes'] ?? [];
         if (!empty($superAttributes)) {
             $existingAttrIds = $typeInstance->getConfigurableAttributeCollection($product)->getAllIds();
 
             if (empty($existingAttrIds)) {
+                $setAttributes = $typeInstance->getSetAttributes($product);
                 $superAttributeData = [];
                 $position = 0;
                 foreach ($superAttributes as $code) {
@@ -97,6 +100,13 @@ final class ConfigurableSetupProcessor extends \Maho\ApiPlatform\Processor
                     if (!$attribute || !$attribute->getId()) {
                         throw new UnprocessableEntityHttpException("Attribute not found: {$code}");
                     }
+                    // The configurable reads only the attributes of its attribute set that can be configurable
+                    $setAttribute = $setAttributes[$code] ?? null;
+                    if (!$setAttribute instanceof \Mage_Eav_Model_Entity_Attribute || !$typeInstance->canUseAttribute($setAttribute)) {
+                        throw new UnprocessableEntityHttpException(
+                            "Attribute {$code} cannot configure products of this attribute set",
+                        );
+                    }
                     $superAttributeData[] = [
                         'attribute_id' => $attribute->getId(),
                         'position' => $position++,
@@ -104,12 +114,10 @@ final class ConfigurableSetupProcessor extends \Maho\ApiPlatform\Processor
                 }
                 $product->setConfigurableAttributesData($superAttributeData);
                 $product->setCanSaveConfigurableAttributes(true);
-
-                $product->save();
+                $needsSave = true;
             }
         }
 
-        // Assign children via model save
         $childProductIds = $body['childProductIds'] ?? $body['child_product_ids'] ?? [];
         if (!empty($childProductIds)) {
             $childData = [];
@@ -118,7 +126,12 @@ final class ConfigurableSetupProcessor extends \Maho\ApiPlatform\Processor
                 $childData[$childId] = [];
             }
             $product->setConfigurableProductsData($childData);
-            $this->safeSave($product, 'assign configurable children');
+            $needsSave = true;
+        }
+
+        // One save: a second save of the same product would insert its super attributes again.
+        if ($needsSave) {
+            $this->safeSave($product, 'set up the configurable product');
         }
 
         return $this->provider->getSetup($this->loadProduct($productId, Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE));
