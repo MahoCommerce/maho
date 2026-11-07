@@ -155,6 +155,8 @@ it('saves a category when a required attribute is not in its set', function () {
         ->setAttributeSetId((int) $set->getId());
     $category->save();
     $this->records[] = $category;
+    // The admin save loads the parent, which is in the default set, so the shared resource holds the attribute
+    Mage::getModel('catalog/category')->load((int) Mage::app()->getStore(1)->getRootCategoryId());
 
     attributeAdminNoteRun(Mage_Adminhtml_Catalog_CategoryController::class, 'catalog_category', 'save', [
         'id' => $category->getId(),
