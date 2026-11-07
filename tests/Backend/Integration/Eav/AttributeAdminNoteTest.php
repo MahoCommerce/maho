@@ -143,6 +143,29 @@ it('keeps the set of a saved category when the admin save posts no set', functio
         ->and($saved->getAttributeSetId())->toBe((int) $set->getId());
 });
 
+it('saves a category when a required attribute is not in its set', function () {
+    [$set, $attribute] = attributeAdminNoteSetAndAttribute(Mage_Catalog_Model_Category::ENTITY, 'catalog/resource_eav_attribute', $this->suffix);
+    array_push($this->records, $set, $attribute);
+    $attribute->setIsRequired(1)->save();
+    Mage::getSingleton('eav/config')->clear();
+    $category = Mage::getModel('catalog/category')
+        ->setName('Pest Required ' . $this->suffix)
+        ->setIsActive(1)
+        ->setPath('1/' . Mage::app()->getStore(1)->getRootCategoryId())
+        ->setAttributeSetId((int) $set->getId());
+    $category->save();
+    $this->records[] = $category;
+
+    attributeAdminNoteRun(Mage_Adminhtml_Catalog_CategoryController::class, 'catalog_category', 'save', [
+        'id' => $category->getId(),
+        'store' => 0,
+        'general' => ['name' => 'Pest Required Renamed ' . $this->suffix, 'is_active' => 1],
+        'use_config' => ['available_sort_by', 'default_sort_by'],
+    ]);
+
+    expect(Mage::getModel('catalog/category')->setStoreId(0)->load($category->getId())->getName())->toBe('Pest Required Renamed ' . $this->suffix);
+});
+
 it('changes the set of a saved blog post from the admin save', function () {
     [$set, $attribute] = attributeAdminNoteSetAndAttribute(Maho_Blog_Model_Post::ENTITY, 'blog/resource_eav_attribute', $this->suffix);
     array_push($this->records, $set, $attribute);

@@ -411,6 +411,29 @@ describe('Storefront customAttributes (REST)', function (): void {
             ->and($refused['status'])->toBe(422);
     });
 
+    it('clears an address attribute when a new cart address write leaves it out', function (): void {
+        $create = apiPost('/api/rest/v2/guest-carts', []);
+        expect($create['status'])->toBeIn([200, 201]);
+        $maskedId = $create['json']['maskedId'];
+        trackCreated('quote', (int) $create['json']['id']);
+        $address = [
+            'firstName' => 'Pest',
+            'lastName' => 'Guest',
+            'street' => ['123 Setter St'],
+            'city' => 'Los Angeles',
+            'region' => 'California',
+            'postcode' => '90210',
+            'countryId' => 'US',
+            'telephone' => '5550100',
+        ];
+
+        apiPut("/api/rest/v2/guest-carts/{$maskedId}/shipping-address", $address + ['customAttributes' => [CUSTOM_ATTR_FLOOR_CODE => '2nd']]);
+        $cleared = apiPut("/api/rest/v2/guest-carts/{$maskedId}/shipping-address", $address);
+
+        expect($cleared['status'])->toBe(200)
+            ->and($cleared['json']['shippingAddress']['customAttributes'][CUSTOM_ATTR_FLOOR_CODE] ?? null)->toBeNull();
+    });
+
     it('requires a required attribute of the checkout address form on a cart address', function (): void {
         $attribute = Mage::getModel('customer/attribute')->loadByCode('customer_address', CUSTOM_ATTR_FLOOR_CODE);
         $attribute->setIsRequired(1)->save();

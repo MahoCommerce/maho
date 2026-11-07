@@ -391,7 +391,7 @@ class DataObject implements ArrayAccess, JsonSerializable
     {
         $method = 'set' . $this->_camelize($key);
         if (!method_exists($this, $method)) {
-            // __call would rebuild the key with _underscore(), which turns floor_2nd into floor2nd
+            // __call builds the key from the camelized method name, which drops the underscore in floor_2nd
             return $this->setData($this->_underscore($key), $args);
         }
         $this->$method($args);

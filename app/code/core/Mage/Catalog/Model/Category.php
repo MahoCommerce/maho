@@ -1033,14 +1033,15 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
     }
 
     /**
-     * Validate attribute values
+     * Validate the values of the attributes of the attribute set of the category
      *
      * @throws Mage_Eav_Model_Entity_Attribute_Exception
      * @return true|array
      */
     public function validate()
     {
-        return $this->_getResource()->validate($this);
+        $result = $this->_getResource()->validate($this);
+        return $result === true ? true : (array_intersect_key($result, $this->getAttributes()) ?: true);
     }
 
     /**

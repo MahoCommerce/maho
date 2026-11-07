@@ -152,6 +152,8 @@ it('uses the address set of the group of the quote for a quote address', functio
         ->setCustomerAddressAttributeSetId((int) $set->getId());
     $group->save();
 
+    expect(\Mage\Customer\Api\CustomAttributes::storefrontCodes('customer_address', (int) $group->getId()))->toContain($code);
+
     $b2bAddress = Mage::getModel('sales/quote_address')
         ->setQuote(Mage::getModel('sales/quote')->setCustomerGroupId((int) $group->getId()));
     $guestAddress = Mage::getModel('sales/quote_address')
