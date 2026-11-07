@@ -18,7 +18,7 @@ class CronTestStaleBalanceGiftcard extends Maho_Giftcard_Model_Giftcard
     public static float $storedBalance = 0.0;
 
     #[\Override]
-    public function getId()
+    public function getId(): ?int
     {
         $id = parent::getId();
         if (self::$cardId !== null && (int) $id === self::$cardId) {
