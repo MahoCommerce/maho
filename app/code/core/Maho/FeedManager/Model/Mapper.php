@@ -1835,6 +1835,7 @@ class Maho_FeedManager_Model_Mapper
             // Build XML element
             $valueStr = (string) ($value ?? '');
             if ($cdata) {
+                $valueStr = str_replace(']]>', ']]]]><![CDATA[>', $valueStr);
                 $xml .= $indentStr . '<' . $tag . '><![CDATA[' . $valueStr . ']]></' . $tag . ">\n";
             } else {
                 $xml .= $indentStr . '<' . $tag . '>' . htmlspecialchars($valueStr) . '</' . $tag . ">\n";
