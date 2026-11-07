@@ -14,6 +14,7 @@ namespace Maho\Ai\Api\Agent;
 
 use Symfony\AI\Platform\Tool\ExecutionReference;
 use Symfony\AI\Platform\Tool\Tool;
+use Symfony\AI\Platform\Tool\ToolEffectHints;
 
 /**
  * The panel sends the text fields of the open form with each message, with the changes that
@@ -49,9 +50,15 @@ final class FormTool
         return $name === self::EDIT_NAME ? 'Correct text in the form' : 'Read the form';
     }
 
+    /** The tool acts on the open form of the administrator, who then saves it. The tool itself changes no store data. */
+    public static function effectHints(): ToolEffectHints
+    {
+        return new ToolEffectHints(readOnlyHint: true, destructiveHint: false, openWorldHint: false);
+    }
+
     public function readTool(): Tool
     {
-        return ToolDefinition::create(
+        return new Tool(
             new ExecutionReference(self::class, 'read'),
             self::READ_NAME,
             'Read the text fields that are not empty in the form that the administrator has open, with the changes that are not saved. It does not read dropdowns or checkboxes. A get tool gives the saved record, which can be older. Use it before you check or correct the text of this form.',
@@ -64,15 +71,16 @@ final class FormTool
                         'items' => ['type' => 'string'],
                     ],
                 ],
+                'required' => [],
                 'additionalProperties' => false,
             ],
-            ['title' => self::title(self::READ_NAME), 'read_only' => true, 'destructive' => false, 'local' => true],
+            effectHints: self::effectHints(),
         );
     }
 
     public function editTool(): Tool
     {
-        return ToolDefinition::create(
+        return new Tool(
             new ExecutionReference(self::class, 'edit'),
             self::EDIT_NAME,
             'Correct text in the form that the administrator has open, after you answer. Each edit replaces one short piece of the current value of a field, as admin_read_form gives it, HTML included. The find text must occur exactly once in the field: add the words around it when it does not. The panel makes the corrections and does not save: the administrator checks the form and saves it.',
@@ -98,7 +106,7 @@ final class FormTool
                 'required' => ['edits'],
                 'additionalProperties' => false,
             ],
-            ['title' => self::title(self::EDIT_NAME), 'read_only' => true, 'destructive' => false, 'local' => true],
+            effectHints: self::effectHints(),
         );
     }
 

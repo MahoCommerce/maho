@@ -41,7 +41,7 @@ class Maho_Ai_Model_Chat_MessageBagBuilder
             $content = (string) $message->getContent();
 
             if ($role === Maho_Ai_Model_Conversation_Message::ROLE_USER) {
-                $bag->add(Message::ofUser($content, ...$this->images($message, $adminId)));
+                $bag = $bag->with(Message::ofUser($content, ...$this->images($message, $adminId)));
                 continue;
             }
 
@@ -52,14 +52,14 @@ class Maho_Ai_Model_Chat_MessageBagBuilder
                 }
                 $toolCalls = $message->getToolCalls();
                 if ($toolCalls === []) {
-                    $bag->add(Message::ofAssistant($content));
+                    $bag = $bag->with(Message::ofAssistant($content));
                     continue;
                 }
                 $parts = $content === '' ? [] : [new Text($content)];
                 foreach ($toolCalls as $call) {
                     $parts[] = $this->toolCall($call);
                 }
-                $bag->add(new AssistantMessage(...$parts));
+                $bag = $bag->with(new AssistantMessage(...$parts));
                 continue;
             }
 
@@ -69,7 +69,7 @@ class Maho_Ai_Model_Chat_MessageBagBuilder
                     (string) $message->getToolName(),
                     $message->getToolArguments(),
                 );
-                $bag->add(Message::ofToolCall($toolCall, $this->toolContent($message)));
+                $bag = $bag->with(Message::ofToolCall($toolCall, $this->toolContent($message)));
             }
         }
 

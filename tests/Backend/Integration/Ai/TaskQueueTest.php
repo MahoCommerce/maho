@@ -1,11 +1,11 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
  */
+
+declare(strict_types=1);
 
 uses(Tests\MahoBackendTestCase::class);
 
@@ -172,3 +172,48 @@ it('finds the next run of a schedule in the time zone of the store, across a day
 it('refuses a cron expression that is not five readable fields', function (string $expr): void {
     expect(fn() => Maho_Ai_Model_Task_Schedule::validateCronExpr($expr))->toThrow(Mage_Core_Exception::class);
 })->with(['0 8 * *', '61 * * * *', '0 8 * * * *', 'every day']);
+
+/** Make every chat call of the task runner throw $error. */
+function aiTaskQueueFailWith(\Throwable $error): void
+{
+    Mage::unregister('_singleton/ai/platform_factory');
+    Mage::register('_singleton/ai/platform_factory', new class ($error) extends Maho_Ai_Model_Platform_Factory {
+        public function __construct(private readonly \Throwable $error) {}
+
+        #[\Override]
+        public function create(?string $platformCode = null, ?int $storeId = null): Maho_Ai_Model_Platform_ProviderInterface
+        {
+            $error = $this->error;
+
+            return new Maho_Ai_Model_Platform_Symfony(
+                \Symfony\AI\Platform\Test\MockPlatformFactory::createPlatform(static fn() => throw $error),
+                Maho_Ai_Model_Platform::OPENAI,
+                'gpt-test',
+            );
+        }
+    });
+}
+
+it('retries a task after an error that can pass on the next attempt, and fails it at once after any other error', function (\Throwable $error, string $status, int $retries): void {
+    aiTaskQueueConfigure(false);
+    aiTaskQueueFailWith($error);
+    $taskId = Mage::helper('ai')->submitTask(['consumer' => 'pest_task_queue', 'max_retries' => 3, 'messages' => [['role' => 'user', 'content' => 'Hello']]]);
+
+    try {
+        new Maho_Ai_Model_TaskRunner()->processTask($taskId);
+    } finally {
+        Mage::unregister('_singleton/ai/platform_factory');
+    }
+
+    $task = Mage::getModel('ai/task')->load($taskId);
+    expect($task->getData('status'))->toBe($status);
+    expect((int) $task->getData('retries'))->toBe($retries);
+    expect($task->getData('error_message'))->toContain($error->getMessage());
+})->with([
+    'a rate limit' => [fn() => new \Symfony\AI\Platform\Exception\RateLimitExceededException(), Maho_Ai_Model_Task::STATUS_PENDING, 1],
+    'a server error' => [fn() => new \Symfony\AI\Platform\Exception\ServerException(503, 'The provider is overloaded.'), Maho_Ai_Model_Task::STATUS_PENDING, 1],
+    'a lost connection' => [fn() => new \Symfony\Component\HttpClient\Exception\TransportException('Connection timed out.'), Maho_Ai_Model_Task::STATUS_PENDING, 1],
+    'a wrong API key' => [fn() => new \Symfony\AI\Platform\Exception\AuthenticationException('Invalid API key.'), Maho_Ai_Model_Task::STATUS_FAILED, 0],
+    'a blocked prompt' => [fn() => new \Symfony\AI\Platform\Exception\ContentFilterException('The prompt was blocked.'), Maho_Ai_Model_Task::STATUS_FAILED, 0],
+    'a missing setting' => [fn() => new Mage_Core_Exception('No chat model configured.'), Maho_Ai_Model_Task::STATUS_FAILED, 0],
+]);

@@ -14,6 +14,7 @@ namespace Maho\Ai\Api\Agent;
 
 use Symfony\AI\Platform\Tool\ExecutionReference;
 use Symfony\AI\Platform\Tool\Tool;
+use Symfony\AI\Platform\Tool\ToolEffectHints;
 
 /**
  * A request over many records cannot run inside one chat turn. The tool is a write, so the
@@ -26,9 +27,15 @@ final class BackgroundTaskTool
     public const NAME = 'run_in_background';
     public const TITLE = 'Run in the background';
 
+    /** The tool starts a job that runs the store tools. */
+    public static function effectHints(): ToolEffectHints
+    {
+        return new ToolEffectHints(readOnlyHint: false, destructiveHint: false);
+    }
+
     public function tool(): Tool
     {
-        return ToolDefinition::create(
+        return new Tool(
             new ExecutionReference(self::class, 'start'),
             self::NAME,
             'Run a long job in the background: a change over many records, a text for every product of a category, a check over a whole catalog. Give a complete instruction, with the records, the scope and the exact change, as if to a colleague who cannot ask back. The administrator confirms it once; every read and every update of one record in the job is then approved in advance. Any other write, such as a create, a delete, a cancel or a refund, waits in the job conversation for the administrator. The job runs in a new conversation that the administrator can open to follow it.',
@@ -41,7 +48,7 @@ final class BackgroundTaskTool
                 'required' => ['title', 'instruction'],
                 'additionalProperties' => false,
             ],
-            ['title' => self::TITLE, 'read_only' => false, 'destructive' => false, 'local' => true],
+            effectHints: self::effectHints(),
         );
     }
 
