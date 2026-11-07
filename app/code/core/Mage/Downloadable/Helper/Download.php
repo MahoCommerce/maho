@@ -86,7 +86,7 @@ class Mage_Downloadable_Helper_Download extends Mage_Core_Helper_Abstract
                     $target = new \Maho\Security\OutboundUrl()
                         ->validate($this->_resourceFile, $this->getLinkUrlAllowedPrefixes());
                 } catch (\Maho\Security\OutboundUrlException $e) {
-                    Mage::log(sprintf('Refused download URL on host %s: %s', parse_url($this->_resourceFile, PHP_URL_HOST), $e->getMessage()), Mage::LOG_WARNING);
+                    Mage::log('Refused download URL: ' . $e->getMessage(), Mage::LOG_WARNING);
                     Mage::throwException(Mage::helper('downloadable')->__('The download URL is not allowed.'));
                 }
 
@@ -344,6 +344,23 @@ class Mage_Downloadable_Helper_Download extends Mage_Core_Helper_Abstract
     {
         $prefixes = preg_split('/\R/', (string) Mage::getStoreConfig(self::XML_PATH_LINK_URL_ALLOWED_PREFIXES, $store)) ?: [];
         return array_values(array_filter(array_map(trim(...), $prefixes)));
+    }
+
+    /**
+     * Check the form of a link or sample URL before it is saved, with no DNS lookup.
+     *
+     * @throws Mage_Core_Exception
+     */
+    public static function checkUrl(?string $url): void
+    {
+        if ($url === null || $url === '') {
+            return;
+        }
+        try {
+            \Maho\Security\OutboundUrl::parse($url);
+        } catch (\Maho\Security\OutboundUrlException $e) {
+            Mage::throwException(Mage::helper('downloadable')->__('The URL of a link or a sample is not valid: %s', $e->getMessage()));
+        }
     }
 
     /**

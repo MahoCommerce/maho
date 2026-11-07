@@ -165,12 +165,13 @@ class Mage_Core_Model_Url_Rewrite extends Mage_Core_Model_Abstract implements Ma
             if (!is_numeric($k)) {
                 $t = $k . '=' . $t;
             }
-            if ($key = array_search($t, $curTags)) {
+            $key = array_search($t, $curTags);
+            if ($key !== false) {
                 unset($curTags[$key]);
             }
         }
 
-        $this->setTags(',', $curTags);
+        $this->setTags($curTags);
 
         return $this;
     }

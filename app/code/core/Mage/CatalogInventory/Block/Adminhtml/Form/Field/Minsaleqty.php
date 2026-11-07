@@ -51,7 +51,6 @@ class Mage_CatalogInventory_Block_Adminhtml_Form_Field_Minsaleqty extends Mage_A
             'style' => 'width:100px',
         ]);
         $this->_addAfter = false;
-        $this->_addButtonLabel = Mage::helper('cataloginventory')->__('Add Minimum Qty');
     }
 
     /**

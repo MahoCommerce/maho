@@ -39,7 +39,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit extends Mage_Adminhtml_Bl
             $this->_addButton(
                 'save_and_edit_button',
                 [
-                    'label'     => Mage::helper('widget')->__('Save and Continue Edit'),
+                    'label'     => Mage::helper('widget')->__('Save and Continue'),
                     'class'     => 'save',
                     'onclick'   => 'saveAndContinueEdit()',
                 ],

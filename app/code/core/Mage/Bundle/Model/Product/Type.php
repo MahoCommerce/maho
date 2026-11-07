@@ -446,7 +446,7 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
      *
      * @param mixed $qty
      * @param Mage_Catalog_Model_Product $product
-     * @return int
+     * @return float
      */
     #[\Override]
     public function prepareQuoteItemQty($qty, $product = null)

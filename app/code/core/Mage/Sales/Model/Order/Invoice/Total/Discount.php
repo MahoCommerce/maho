@@ -29,7 +29,7 @@ class Mage_Sales_Model_Order_Invoice_Total_Discount extends Mage_Sales_Model_Ord
          */
         $addShippingDicount = true;
         foreach ($invoice->getOrder()->getInvoiceCollection() as $previusInvoice) {
-            if ($previusInvoice->getDiscountAmount()) {
+            if ($previusInvoice->getDiscountAmount() && !$previusInvoice->isCanceled()) {
                 $addShippingDicount = false;
             }
         }

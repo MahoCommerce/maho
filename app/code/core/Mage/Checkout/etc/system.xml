@@ -22,8 +22,9 @@ SPDX-License-Identifier: AFL-3.0
                     <show_in_website>1</show_in_website>
                     <show_in_store>1</show_in_store>
                     <fields>
-                        <onepage_checkout_enabled translate="label">
+                        <onepage_checkout_enabled translate="label comment">
                             <label>Enable Onepage Checkout</label>
+                            <comment>The checkout of the store, on one page. When No, customers cannot check out: the cart has no Proceed to Checkout button, and the checkout page sends the customer back to the cart with "The onepage checkout is disabled."</comment>
                             <frontend_type>boolean</frontend_type>
                             <sort_order>5</sort_order>
                             <show_in_default>1</show_in_default>

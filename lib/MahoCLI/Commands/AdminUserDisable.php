@@ -10,12 +10,11 @@ declare(strict_types=1);
 namespace MahoCLI\Commands;
 
 use Mage;
+use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\Ask;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Helper\QuestionHelper;
-use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Question\Question;
 
 #[AsCommand(
     name: 'admin:user:disable',
@@ -23,15 +22,15 @@ use Symfony\Component\Console\Question\Question;
 )]
 class AdminUserDisable extends BaseMahoCommand
 {
-    public function __invoke(InputInterface $input, OutputInterface $output): int
-    {
+    public function __invoke(
+        OutputInterface $output,
+        #[Argument(description: 'The username of the admin user')]
+        #[Ask('Username:')]
+        #[\SensitiveParameter]
+        string $username,
+    ): int {
         $this->initMaho();
 
-        /** @var QuestionHelper $questionHelper */
-        $questionHelper = $this->getHelper('question');
-
-        $question = new Question('username: ', '');
-        $username = $questionHelper->ask($input, $output, $question);
         $username = trim($username);
         if (!strlen($username)) {
             $output->writeln('<error>Username cannot be empty</error>');

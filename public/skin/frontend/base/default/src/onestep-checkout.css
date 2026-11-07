@@ -1,4 +1,4 @@
-/*
+/*!
  * One-step checkout for the maho theme, compiled with Tailwind CSS against the shared
  * theme (see tailwind.css). Loaded only on the pages that need it; the file
  * name shadows the legacy base/default stylesheet via the skin fallback.
@@ -9,6 +9,8 @@
 
 @reference "./_theme.css";
 @import "./_checkout-forms.css";
+/* Scan no project files: this file only uses @apply. See the README of public/skin/frontend */
+@tailwind utilities source(none);
 
 @layer components {
     /* ============================================

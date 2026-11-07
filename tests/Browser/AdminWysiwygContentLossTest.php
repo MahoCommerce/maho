@@ -306,7 +306,7 @@ it('keeps unsupported markup through a save that changes nothing', function () {
     $block = createWysiwygLossBlock('<p>Lead</p>' . WYSIWYG_LOSS_UNSUPPORTED);
     $page = visitWysiwygLossBlock($block);
 
-    $page->click('Save Block')->wait(2);
+    $page->click('button[title="Save"]')->wait(2);
     waitForPageLoad($page, '#cmsBlockGrid');
 
     $saved = Mage::getModel('cms/block')->load($block->getId())->getContent();

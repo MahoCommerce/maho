@@ -26,7 +26,7 @@ Product.Gallery = class {
         this.images = JSON.parse(this.getElement('save').value);
         this.imagesValues = JSON.parse(this.getElement('save_image').value);
         this.template = (vars) => {
-            let html = '<tr id="' + vars.id + '" class="preview">' + this.getElement('template').innerHTML + '</tr>';
+            let html = '<li id="' + vars.id + '" class="preview d-card d-card-border d-card-sm bg-base-100" data-file="' + escapeHtml(vars.file, true) + '">' + this.getElement('template').innerHTML + '</li>';
             Object.entries(vars).forEach(([key, value]) => {
                 const regex = new RegExp('__' + key + '__', 'g');
                 html = html.replace(regex, value);
@@ -35,7 +35,59 @@ Product.Gallery = class {
         };
         this.fixParentTable();
         this.updateImages();
+        this.initSorting();
+        this.getElement('list').addEventListener('keydown', (event) => {
+            // The Space key on a checked radio fires no click, so it cannot clear the role without this
+            if (event.key === ' ' && event.target.matches('.gallery-role input:checked')) {
+                event.preventDefault();
+                event.target.click();
+            }
+        });
         varienGlobalEvents.attachEventHandler('moveTab', this.onImageTabMove.bind(this));
+    }
+    /** A card moves by drag and drop on its handle, or by the arrow keys while its handle has the focus */
+    initSorting() {
+        const list = this.getElement('list');
+        if (list.dataset.readonly) {
+            return;
+        }
+        this.sortable = new Sortable(list, {
+            draggable: '.preview',
+            handle: '.gallery-handle',
+            animation: 150,
+            onEnd: () => this.updatePositions(),
+        });
+        list.addEventListener('keydown', (event) => {
+            const handle = event.target.closest('.gallery-handle');
+            if (!handle || this.sortable.option('disabled')) {
+                return;
+            }
+            const card = handle.closest('.preview');
+            if (['ArrowLeft', 'ArrowUp'].includes(event.key) && card.previousElementSibling?.matches('.preview')) {
+                card.previousElementSibling.before(card);
+            } else if (['ArrowRight', 'ArrowDown'].includes(event.key) && card.nextElementSibling?.matches('.preview')) {
+                card.nextElementSibling.after(card);
+            } else {
+                return;
+            }
+            event.preventDefault();
+            handle.focus();
+            this.updatePositions();
+        });
+        this.lockSorting();
+    }
+    /** The order of the cards becomes the sort order of the images */
+    updatePositions() {
+        this.getElement('list').querySelectorAll('.preview').forEach((card, index) => {
+            this.getFileElement(card.dataset.file, 'cell-position input').value = index + 1;
+            this.updateImage(card.dataset.file);
+        });
+    }
+    /** A store view that uses the default sort order cannot change it */
+    lockSorting() {
+        const locked = !!document.getElementById('use_default_position')?.checked;
+        this.sortable?.option('disabled', locked);
+        this.getElement('list').classList.toggle('is-locked', locked);
     }
     _checkCurrentContainer(child) {
         return document.getElementById(this.containerId).querySelector('#' + child);
@@ -99,9 +151,11 @@ Product.Gallery = class {
         Object.entries(this.imageTypes).forEach(function (pair) {
             this.getFileElement('no_selection', 'cell-' + pair[0] + ' input').checked = true;
         }.bind(this));
-        this.images.forEach(function (row) {
+        const byPosition = [...this.images].sort((a, b) => (parseInt(a.position) || 0) - (parseInt(b.position) || 0));
+        byPosition.forEach(function (row) {
             if (!document.getElementById(this.prepareId(row.file))) {
                 this.createImageRow(row);
+                this.loadImage(row.file);
             }
             this.updateVisualisation(row.file);
         }.bind(this));
@@ -166,9 +220,18 @@ Product.Gallery = class {
     }
     loadImage(file) {
         var image = this.getImageByFile(file);
-        this.getFileElement(file, 'cell-image img').src = image.url;
-        this.getFileElement(file, 'cell-image img').style.display = '';
-        this.getFileElement(file, 'cell-image .place-holder').style.display = 'none';
+        // An upload that is not saved yet has no thumbnail
+        const url = new URL(image.thumbnail_url ?? image.url, document.baseURI);
+        if (url.protocol === 'https:' || url.protocol === 'http:') {
+            this.getFileElement(file, 'gallery-image img').src = url.href;
+        }
+    }
+    toggleProductImage(file, type) {
+        if (this.imagesValues[type] === file) {
+            this.getFileElement('no_selection', 'cell-' + type + ' input').checked = true;
+            file = 'no_selection';
+        }
+        this.setProductImages(file);
     }
     setProductImages(file) {
         Object.entries(this.imageTypes)
@@ -243,7 +306,7 @@ Product.Gallery = class {
         return index;
     }
     updateUseDefault(el) {
-        var inputs = document.querySelectorAll('#' + this.containerId + '_default td input');
+        var inputs = document.querySelectorAll('#' + this.containerId + '_default input');
         for (var i=0; i<inputs.length; i++) {
             var input = inputs[i];
             var radios = document.querySelectorAll('#' + this.containerId + '_list .preview .cell-' + input.value + ' input');
@@ -258,6 +321,7 @@ Product.Gallery = class {
                 this.updateImage(row.file);
             }.bind(this));
         }
+        this.lockSorting();
 
         if (arguments.length == 0) {
             this.container.setHasChanges();

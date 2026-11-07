@@ -110,9 +110,8 @@ class Mage_Catalog_Block_Category_View extends Mage_Core_Block_Template
         // robots, so they are noindexed even when the category is explicitly indexable.
         /** @var Mage_Catalog_Helper_Category $helper */
         $helper = $this->helper('catalog/category');
-        if (!$helper->isLayeredNavigationLandingPage()
-            && (($helper->canUseNoindexForFilteredPages() && $this->hasActiveFilters())
-                || ($helper->canUseNoindexForPaginatedPages() && $this->isPaginated()))
+        if (($helper->shouldAddNoindexToFilteredPages() && $this->hasActiveFilters())
+            || ($helper->shouldAddNoindexToPaginatedPages() && $this->isPaginated())
         ) {
             return $this->_forcedRobots = 'NOINDEX,FOLLOW';
         }
@@ -133,8 +132,7 @@ class Mage_Catalog_Block_Category_View extends Mage_Core_Block_Template
 
         /** @var Mage_Catalog_Helper_Category $helper */
         $helper = $this->helper('catalog/category');
-        return $helper->canUseCanonicalTag()
-            && !$helper->isLayeredNavigationLandingPage();
+        return $helper->shouldAddCanonicalTagToCategoryPages();
     }
 
     /**

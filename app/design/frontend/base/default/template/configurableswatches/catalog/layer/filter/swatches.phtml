@@ -16,6 +16,7 @@ $_swatchInnerWidth = $_dimHelper->getInnerWidth(Mage_ConfigurableSwatches_Helper
 $_swatchInnerHeight = $_dimHelper->getInnerHeight(Mage_ConfigurableSwatches_Helper_Swatchdimensions::AREA_LAYER);
 $_swatchOuterWidth = $_dimHelper->getOuterWidth(Mage_ConfigurableSwatches_Helper_Swatchdimensions::AREA_LAYER);
 $_swatchOuterHeight = $_dimHelper->getOuterHeight(Mage_ConfigurableSwatches_Helper_Swatchdimensions::AREA_LAYER);
+$addNofollow = $this->helper('catalog/category')->shouldAddNofollowToFilterLinks();
 ?>
 
 <ol class="configurable-swatch-list">
@@ -28,7 +29,7 @@ $_swatchOuterHeight = $_dimHelper->getOuterHeight(Mage_ConfigurableSwatches_Help
         ?>
         <li>
             <?php if ($_hasItems): ?>
-                <a href="<?= $this->escapeUrl($_item->getUrl()) ?>" class="swatch-link" title="<?= $this->escapeHtml($_label) ?>">
+                <a href="<?= $this->escapeUrl($_item->getUrl()) ?>" class="swatch-link" title="<?= $this->escapeHtml($_label) ?>"<?php if ($addNofollow): ?> rel="nofollow"<?php endif ?>>
             <?php else: ?>
                 <span class="swatch-link">
             <?php endif ?>

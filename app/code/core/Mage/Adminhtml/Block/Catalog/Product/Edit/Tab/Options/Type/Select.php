@@ -28,9 +28,10 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Type_Select extends 
             'add_select_row_button',
             $this->getLayout()->createBlock('adminhtml/widget_button')
                 ->setData([
-                    'label' => Mage::helper('catalog')->__('Add New Row'),
+                    'label' => Mage::helper('catalog')->__('Add'),
                     'class' => 'add add-select-row',
                     'id'    => 'add_select_row_button_{{option_id}}',
+                    'aria_labelledby' => 'product_option_{{option_id}}_title',
                 ]),
         );
 
@@ -38,7 +39,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Type_Select extends 
             'delete_select_row_button',
             $this->getLayout()->createBlock('adminhtml/widget_button')
                 ->setData([
-                    'label' => Mage::helper('catalog')->__('Delete Row'),
+                    'label' => Mage::helper('catalog')->__('Delete'),
                     'class' => 'delete delete-select-row icon-btn',
                     'id'    => 'delete_select_row_button',
                 ]),

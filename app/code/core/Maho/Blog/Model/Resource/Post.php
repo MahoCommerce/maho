@@ -326,4 +326,15 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
             }
         }
     }
+
+    /**
+     * The content and the short content of every blog post, for the Tailwind build.
+     *
+     * @return iterable<string>
+     */
+    #[Maho\Config\TailwindSource('blog_post', model: Maho_Blog_Model_Post::class, fields: ['content', 'short_content'])]
+    public function getTailwindContent(): iterable
+    {
+        return Mage::getResourceSingleton('core/design_content')->readColumns($this->getEntityTable(), $this->getEntityIdField(), ['content', 'short_content']);
+    }
 }

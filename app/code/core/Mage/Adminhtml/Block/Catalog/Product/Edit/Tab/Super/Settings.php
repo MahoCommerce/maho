@@ -77,7 +77,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Super_Settings extends Mage_
         $productType = $product->getTypeInstance(true);
 
         foreach ($attributes as $attribute) {
-            if ($productType->canUseAttribute($attribute, $product)) {
+            if ($productType->canUseAttribute($attribute)) {
                 $hasAttributes = true;
                 $fieldset->addField('attribute_' . $attribute->getAttributeId(), 'checkbox', [
                     'label' => $attribute->getFrontend()->getLabel(),

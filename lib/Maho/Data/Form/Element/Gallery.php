@@ -37,7 +37,7 @@ class Gallery extends AbstractElement
         $buttonHtml = $widgetButton->createBlock('adminhtml/widget_button')
                 ->setData(
                     [
-                        'label'     => 'Add New Image',
+                        'label'     => 'Add',
                         'onclick'   => 'addNewImg()',
                         'class'     => 'add'],
                 )

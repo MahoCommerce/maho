@@ -23,7 +23,7 @@ class Mage_Adminhtml_Block_System_Currency extends Mage_Adminhtml_Block_Template
             'save_button',
             $this->getLayout()->createBlock('adminhtml/widget_button')
                 ->setData([
-                    'label'     => Mage::helper('adminhtml')->__('Save Currency Rates'),
+                    'label'     => Mage::helper('adminhtml')->__('Save'),
                     'onclick'   => 'currencyForm.submit();',
                     'class'     => 'save',
                 ]),

@@ -511,6 +511,7 @@ class Mage_Catalog_Model_Product_Type_Configurable extends Mage_Catalog_Model_Pr
             foreach ($attributesInfo as $attributeId => $attributeValue) {
                 $productCollection->addAttributeToFilter($attributeId, $attributeValue);
             }
+            /** @var Mage_Catalog_Model_Product $productObject */
             $productObject = $productCollection->getFirstItem();
             if ($productObject->getId()) {
                 return $productObject;

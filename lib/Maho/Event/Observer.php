@@ -42,7 +42,7 @@ class Observer extends \Maho\DataObject
 
         $profilerKey = 'OBSERVER: ' . (is_object($callback[0]) ? $callback[0]::class : (string) $callback[0]) . ' -> ' . $callback[1];
         Profiler::start($profilerKey);
-        call_user_func($callback, $this);
+        $callback($this);
         Profiler::stop($profilerKey);
 
         return $this;

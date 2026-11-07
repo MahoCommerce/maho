@@ -10,12 +10,11 @@ declare(strict_types=1);
 namespace MahoCLI\Commands;
 
 use Mage;
+use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\Ask;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Helper\QuestionHelper;
-use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Question\Question;
 
 #[AsCommand(
     name: 'admin:user:create',
@@ -23,8 +22,27 @@ use Symfony\Component\Console\Question\Question;
 )]
 class AdminUserCreate extends BaseMahoCommand
 {
-    public function __invoke(InputInterface $input, OutputInterface $output): int
-    {
+    public function __invoke(
+        OutputInterface $output,
+        #[Argument(description: 'The username of the admin user')]
+        #[Ask('Username:')]
+        #[\SensitiveParameter]
+        string $username,
+        #[Argument(description: 'The password of the admin user')]
+        #[Ask('Password:', hidden: true)]
+        #[\SensitiveParameter]
+        string $password,
+        #[Argument(description: 'The email of the admin user')]
+        #[Ask('Email:')]
+        #[\SensitiveParameter]
+        string $email,
+        #[Argument(description: 'The first name of the admin user')]
+        #[Ask('Firstname:')]
+        string $firstname,
+        #[Argument(description: 'The last name of the admin user')]
+        #[Ask('Lastname:')]
+        string $lastname,
+    ): int {
         $this->initMaho();
 
         $role = Mage::getModel('admin/roles')->getCollection()
@@ -37,43 +55,30 @@ class AdminUserCreate extends BaseMahoCommand
             return Command::FAILURE;
         }
 
-        /** @var QuestionHelper $questionHelper */
-        $questionHelper = $this->getHelper('question');
-
-        $question = new Question('Username: ', '');
-        $username = $questionHelper->ask($input, $output, $question);
         $username = trim($username);
         if (!strlen($username)) {
             $output->writeln('<error>Username cannot be empty</error>');
             return Command::INVALID;
         }
 
-        $question = new Question('Password: ', '');
-        $password = $questionHelper->ask($input, $output, $question);
         $password = trim($password);
         if (!strlen($password)) {
             $output->writeln('<error>Password cannot be empty</error>');
             return Command::INVALID;
         }
 
-        $question = new Question('Email: ', '');
-        $email = $questionHelper->ask($input, $output, $question);
         $email = trim($email);
         if (!strlen($email)) {
             $output->writeln('<error>Email cannot be empty</error>');
             return Command::INVALID;
         }
 
-        $question = new Question('Firstname: ', '');
-        $firstname = $questionHelper->ask($input, $output, $question);
         $firstname = trim($firstname);
         if (!strlen($firstname)) {
             $output->writeln('<error>Firstname cannot be empty</error>');
             return Command::INVALID;
         }
 
-        $question = new Question('Lastname: ', '');
-        $lastname = $questionHelper->ask($input, $output, $question);
         $lastname = trim($lastname);
         if (!strlen($lastname)) {
             $output->writeln('<error>Lastname cannot be empty</error>');

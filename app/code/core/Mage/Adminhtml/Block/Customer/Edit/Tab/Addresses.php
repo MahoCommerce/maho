@@ -34,7 +34,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Addresses extends Mage_Adminhtml_Bl
             'delete_button',
             $this->getLayout()->createBlock('adminhtml/widget_button')
                 ->setData([
-                    'label'  => Mage::helper('customer')->__('Delete Address'),
+                    'label'  => Mage::helper('customer')->__('Delete'),
                     'name'   => 'delete_address',
                     'element_name' => 'delete_address',
                     'disabled' => $this->isReadonly(),
@@ -45,7 +45,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Addresses extends Mage_Adminhtml_Bl
             'add_address_button',
             $this->getLayout()->createBlock('adminhtml/widget_button')
                 ->setData([
-                    'label'  => Mage::helper('customer')->__('Add New Address'),
+                    'label'  => Mage::helper('customer')->__('Add'),
                     'id'     => 'add_address_button',
                     'name'   => 'add_address_button',
                     'element_name' => 'add_address_button',

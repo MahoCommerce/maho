@@ -3,7 +3,6 @@
 "%s is available for purchase in increments of %s only.","%s is available for purchase in increments of %s only."
 "%s is not a correct comparsion method.","%s is not a correct comparsion method."
 "<strong>Note</strong> that these settings are applicable to cart line items, not the whole cart.","<strong>Note</strong> that these settings are applicable to cart line items, not the whole cart."
-"Add Minimum Qty","Add Minimum Qty"
 "Allow Qty Below 0","Allow Qty Below 0"
 "Allow Qty Below 0 and Notify Customer","Allow Qty Below 0 and Notify Customer"
 "Automatically Return Credit Memo Item to Stock","Automatically Return Credit Memo Item to Stock"

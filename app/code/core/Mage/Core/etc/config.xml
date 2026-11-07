@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!--
 SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
-SPDX-FileCopyrightText: 2017-2025 The OpenMage Contributors <https://openmage.org>
+SPDX-FileCopyrightText: 2017-2026 The OpenMage Contributors <https://openmage.org>
 SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
 SPDX-License-Identifier: AFL-3.0
 -->
@@ -12,6 +12,9 @@ SPDX-License-Identifier: AFL-3.0
         </Mage_Core>
     </modules>
     <global>
+        <docs>
+            <sysadmin>docs/sysadmin</sysadmin>
+        </docs>
         <!-- Named lock backend: "file" or "db" (see local.xml.template) -->
         <lock>
             <backend>file</backend>
@@ -441,6 +444,7 @@ SPDX-License-Identifier: AFL-3.0
                 <use_http_via>0</use_http_via>
                 <use_http_x_forwarded_for>0</use_http_x_forwarded_for>
                 <use_http_user_agent>0</use_http_user_agent>
+                <lazy>1</lazy>
             </session>
         </web>
         <admin>
@@ -496,8 +500,9 @@ SPDX-License-Identifier: AFL-3.0
                     <pl>pl</pl>
                     <!-- Python script file extension -->
                     <py>py</py>
-                    <!-- Active Server Page script file extension -->
+                    <!-- Active Server Page script file extensions -->
                     <asp>asp</asp>
+                    <aspx>aspx</aspx>
                     <!-- UNIX command prompt file extension -->
                     <sh>sh</sh>
                     <!-- Common Gateway Interface script extension type -->

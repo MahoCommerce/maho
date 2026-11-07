@@ -68,6 +68,7 @@ it('creates a set, attributes with options and swatches, assigns them, and rerun
     ]);
     $result = (new Attributes())->import($attributes, [Attributes::OPTION_OPTIONS_CSV => $options]);
     expect($result->created)->toBe(4);
+    expect($result->notices)->toBe([]);
 
     $finish = Mage::getModel('catalog/resource_eav_attribute')->loadByCode('catalog_product', 'imp_finish');
     expect($finish->getFrontendInput())->toBe('select');
@@ -109,6 +110,51 @@ it('creates a set, attributes with options and swatches, assigns them, and rerun
     unlink($attributes);
     unlink($options);
 });
+
+it('orders the options without a sort_order as in the file, after the options already there', function (): void {
+    $attributes = attributesCsv([['code', 'label', 'input'], ['imp_finish', 'Finish', 'select']]);
+    $first = attributesCsv([['attribute_code', 'label'], ['imp_finish', 'Matte'], ['imp_finish', 'Gloss']]);
+    $second = attributesCsv([['attribute_code', 'label'], ['imp_finish', 'Satin'], ['imp_finish', 'Brushed']]);
+    $labels = function (): array {
+        $finish = Mage::getModel('catalog/resource_eav_attribute')->loadByCode('catalog_product', 'imp_finish');
+        return array_column($finish->getSource()->getAllOptions(false), 'label');
+    };
+
+    (new Attributes())->import($attributes, [Attributes::OPTION_OPTIONS_CSV => $first]);
+    expect($labels())->toBe(['Matte', 'Gloss']);
+
+    (new Attributes())->import($attributes, [Attributes::OPTION_OPTIONS_CSV => $second]);
+    expect($labels())->toBe(['Matte', 'Gloss', 'Satin', 'Brushed']);
+
+    unlink($attributes);
+    unlink($first);
+    unlink($second);
+});
+
+it('imports the options of an attribute when Configurable Swatches is disabled', function (array $options, array $notices): void {
+    Mage::getConfig()->setNode('modules/Mage_ConfigurableSwatches/active', 'false');
+    foreach (['configurableswatches', 'configurableswatches/productimg'] as $alias) {
+        Mage::unregister("_helper/{$alias}");
+        Mage::register("_helper/{$alias}", false);
+    }
+    $attributes = attributesCsv([['code', 'label', 'input'], ['imp_finish', 'Finish', 'select']]);
+    $optionsCsv = attributesCsv($options);
+
+    $result = (new Attributes())->import($attributes, [Attributes::OPTION_OPTIONS_CSV => $optionsCsv]);
+
+    $finish = Mage::getModel('catalog/resource_eav_attribute')->loadByCode('catalog_product', 'imp_finish');
+    expect(array_column($finish->getSource()->getAllOptions(false), 'label'))->toBe(['Matte', 'Gloss']);
+    expect($result->notices)->toBe($notices);
+
+    unlink($attributes);
+    unlink($optionsCsv);
+})->with([
+    'without swatches' => [[['attribute_code', 'label'], ['imp_finish', 'Matte'], ['imp_finish', 'Gloss']], []],
+    'with swatches' => [
+        [['attribute_code', 'label', 'swatch'], ['imp_finish', 'Matte', '#333333'], ['imp_finish', 'Gloss', '']],
+        ['imp_finish: the Configurable Swatches module is disabled, its swatches were skipped'],
+    ],
+]);
 
 it('rejects unknown inputs, sets and bad swatches before writing', function (): void {
     $importer = new Attributes();

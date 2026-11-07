@@ -76,7 +76,7 @@ final class NotifyTool
             return ['ok' => false, 'text' => sprintf('This run already sent %d notifications. Put the rest in your final answer.', self::MAX_PER_RUN)];
         }
         $title = trim(mb_substr((string) ($arguments['title'] ?? ''), 0, 120));
-        $text = trim(mb_substr((string) ($arguments['text'] ?? ''), 0, 2000));
+        $text = \Maho_Ai_Model_Chat_StoreTime::toStore(trim(mb_substr((string) ($arguments['text'] ?? ''), 0, 2000)), $this->conversation->getStoreId());
         $severity = \Maho_Ai_Model_Chat_Notifier::SEVERITIES[(string) ($arguments['severity'] ?? '')] ?? \Maho_Ai_Model_Chat_Notifier::SEVERITIES['notice'];
         if ($title === '') {
             return ['ok' => false, 'text' => 'The title is empty.'];

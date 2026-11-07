@@ -14,7 +14,6 @@ class Mage_Adminhtml_Block_Permissions_Block extends Mage_Adminhtml_Block_Widget
     {
         $this->_controller = 'permissions_block';
         $this->_headerText = Mage::helper('adminhtml')->__('Blocks');
-        $this->_addButtonLabel = Mage::helper('adminhtml')->__('Add New Block');
         parent::__construct();
     }
 

@@ -66,6 +66,18 @@ class Maho_Ai_Model_Conversation_Message extends Mage_Core_Model_Abstract
         return $this->setData('content', $value);
     }
 
+    /** The answer as the administrator sees it, with admin links and store times, or the content of a message without it. The model reads getContent(). */
+    public function getDisplayContent(): ?string
+    {
+        $value = $this->getData('display_content') ?? $this->getData('content');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setDisplayContent(?string $value): static
+    {
+        return $this->setData('display_content', $value);
+    }
+
     /**
      * @return list<array{id: string, name: string, arguments: array<string, mixed>, signature?: ?string}>
      */

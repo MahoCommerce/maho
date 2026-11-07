@@ -80,7 +80,7 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
-                            <comment>Guest checkout will only work with shareable.</comment>
+                            <comment>When Yes, a cart with a downloadable product needs a customer account. When No, a guest can buy it, but can download only the links that are Shareable.</comment>
                         </disable_guest_checkout>
                         <link_url_allowed_prefixes translate="label comment">
                             <label>Link URL Prefixes Allowed on Non-Public Hosts</label>

@@ -148,6 +148,15 @@ class Mage_Cms_Helper_Page extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * Tell if $page is the CMS No Route Page of the current store.
+     */
+    public function isNoRoutePage(Mage_Cms_Model_Page $page): bool
+    {
+        $identifier = $this->getConfigPageIdentifier(self::XML_PATH_NO_ROUTE_PAGE);
+        return $identifier !== '' && $page->getIdentifier() === $identifier;
+    }
+
+    /**
      * Return the page identifier that the setting at $path holds, without the "|page_id" part.
      * The admin saves "identifier|page_id" when two pages share the identifier.
      */

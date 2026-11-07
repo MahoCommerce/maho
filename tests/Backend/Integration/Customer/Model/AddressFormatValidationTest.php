@@ -38,6 +38,20 @@ it('accepts an empty postcode for a country with an optional postcode', function
         ->toBeTrue();
 });
 
+it('rejects an address without a state/province when the country requires one', function () {
+    $store = Mage::app()->getStore();
+    $statesRequired = $store->getConfig(Mage_Directory_Helper_Data::XML_PATH_STATES_REQUIRED);
+    $store->setConfig(Mage_Directory_Helper_Data::XML_PATH_STATES_REQUIRED, 'US');
+
+    try {
+        $errors = addressFormatAddress('customer/address', ['country_id' => 'US', 'postcode' => '94105'])->validate();
+    } finally {
+        $store->setConfig(Mage_Directory_Helper_Data::XML_PATH_STATES_REQUIRED, $statesRequired);
+    }
+
+    expect($errors)->toBe(['Please enter the state/province.']);
+});
+
 it('rejects a region of another country', function () {
     $californiaId = (int) Mage::getModel('directory/region')->loadByCode('CA', 'US')->getId();
     expect($californiaId)->toBeGreaterThan(0);

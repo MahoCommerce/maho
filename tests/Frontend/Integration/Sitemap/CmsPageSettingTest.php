@@ -11,7 +11,7 @@ uses(Tests\MahoFrontendTestCase::class);
 
 /**
  * The admin saves "identifier|page_id" in a CMS page setting when two pages share the identifier.
- * The sitemap and llms.txt must still find the home page.
+ * The sitemap and llms.txt must still find the home page and the no-route page.
  */
 function cmsPageSettingCreatePage(): Mage_Cms_Model_Page
 {
@@ -81,4 +81,17 @@ it('does not list the home page in llms.txt', function () {
 
     $store->setConfig(Mage_Cms_Helper_Page::XML_PATH_HOME_PAGE, 'no-such-page');
     expect($pageLinks())->toContain($this->page->getTitle());
+});
+
+it('does not list the no-route page in the sitemap', function () {
+    $noRoute = cmsPageSettingCreatePage();
+    $saved = $this->store->getConfig(Mage_Cms_Helper_Page::XML_PATH_NO_ROUTE_PAGE);
+    $this->store->setConfig(Mage_Cms_Helper_Page::XML_PATH_NO_ROUTE_PAGE, $noRoute->getIdentifier() . '|' . $noRoute->getId());
+
+    try {
+        expect(cmsPageSettingSitemapUrls((int) $this->store->getId()))->not->toContain($noRoute->getIdentifier());
+    } finally {
+        $this->store->setConfig(Mage_Cms_Helper_Page::XML_PATH_NO_ROUTE_PAGE, $saved);
+        $noRoute->delete();
+    }
 });

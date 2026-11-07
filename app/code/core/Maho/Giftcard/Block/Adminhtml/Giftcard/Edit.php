@@ -18,11 +18,8 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit extends Mage_Adminhtml_Block_W
         $this->_blockGroup = 'giftcard';
         $this->_controller = 'adminhtml_giftcard';
 
-        $this->_updateButton('save', 'label', Mage::helper('giftcard')->__('Save Gift Card'));
-        $this->_updateButton('delete', 'label', Mage::helper('giftcard')->__('Delete Gift Card'));
-
         $this->_addButton('saveandcontinue', [
-            'label'   => Mage::helper('adminhtml')->__('Save And Continue Edit'),
+            'label'   => Mage::helper('adminhtml')->__('Save and Continue'),
             'onclick' => 'saveAndContinueEdit()',
             'class'   => 'save',
         ], -100);

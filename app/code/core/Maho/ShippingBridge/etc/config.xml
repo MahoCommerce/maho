@@ -10,6 +10,9 @@ SPDX-License-Identifier: AFL-3.0
         </Maho_ShippingBridge>
     </modules>
     <global>
+        <docs>
+            <user>docs/user</user>
+        </docs>
         <models>
             <shippingbridge>
                 <class>Maho_ShippingBridge_Model</class>

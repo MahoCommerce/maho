@@ -94,7 +94,7 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
             if ($imageData === false) {
                 throw new UnprocessableEntityHttpException('Failed to download image from URL');
             }
-            $ext = $this->sanitizeImageExtension(pathinfo(parse_url($imageUrl, PHP_URL_PATH) ?: '', PATHINFO_EXTENSION));
+            $ext = $this->sanitizeImageExtension(pathinfo($target->path, PATHINFO_EXTENSION));
             $tmpPath = $this->writeTempImage($imageData, $ext);
         } else {
             throw new UnprocessableEntityHttpException('Either base64, imageData, or imageUrl is required');

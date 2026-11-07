@@ -11,6 +11,9 @@ SPDX-License-Identifier: OSL-3.0
     </modules>
 
     <global>
+        <docs>
+            <user>docs/user</user>
+        </docs>
         <!-- Batch state shared by the feed workers; the public feed files live under the media mount -->
         <storage>
             <mounts>

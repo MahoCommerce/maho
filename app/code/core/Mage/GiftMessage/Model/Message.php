@@ -46,7 +46,7 @@ class Mage_GiftMessage_Model_Message extends Mage_Core_Model_Abstract
      * Return model from entity type
      *
      * @param string $type
-     * @return Mage_Eav_Model_Entity_Abstract
+     * @return Mage_Core_Model_Abstract
      */
     public function getEntityModelByType($type)
     {

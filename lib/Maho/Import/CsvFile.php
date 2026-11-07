@@ -45,7 +45,7 @@ final class CsvFile implements \IteratorAggregate
         }
         $duplicates = array_diff_assoc($this->columns, array_unique($this->columns));
         if ($duplicates !== []) {
-            throw new RowException($path, 1, 'duplicate column ' . reset($duplicates));
+            throw new RowException($path, 1, 'duplicate column ' . array_first($duplicates));
         }
         $missing = array_diff($required, $this->columns);
         if ($missing !== []) {

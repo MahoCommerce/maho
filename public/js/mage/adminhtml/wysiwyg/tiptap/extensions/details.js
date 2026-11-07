@@ -1,9 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
 // SPDX-License-Identifier: AFL-3.0
 
-import { Node, mergeAttributes } from 'https://esm.sh/@tiptap/core@3.31.3';
-import { Details, DetailsSummary, DetailsContent } from 'https://esm.sh/@tiptap/extension-details@3.31.3';
-import { Plugin, PluginKey } from 'https://esm.sh/@tiptap/pm@3.31.3/state';
+import { Node, mergeAttributes, Details, DetailsSummary, DetailsContent, Plugin, PluginKey } from '../../../../../tiptap.js';
 import { createBadge, setBadgeLabel, findParentNodeOfType } from './grid-utils.js';
 
 export { DetailsSummary, DetailsContent };
@@ -170,7 +168,7 @@ export const MahoAccordion = Node.create({
                 for (const button of bubbleMenu.querySelectorAll('[data-accordion-style]')) {
                     button.classList.toggle('is-active', button.dataset.accordionStyle === node.attrs.accordionStyle);
                 }
-            });
+            }, getPos, 'Delete Accordion');
             dom.append(badge);
 
             const contentDOM = document.createElement('div');
@@ -269,21 +267,6 @@ export const MahoAccordion = Node.create({
                         editor.storage[this.name].activePos = null;
                     }
                     tr.delete(target.pos, target.pos + target.node.nodeSize);
-                    dispatch(tr);
-                }
-
-                return true;
-            },
-
-            deleteAccordion: () => ({ editor, state, tr, dispatch }) => {
-                const accordion = findAccordion(editor, state);
-                if (!accordion) {
-                    return false;
-                }
-
-                if (dispatch) {
-                    editor.storage[this.name].activePos = null;
-                    tr.delete(accordion.pos, accordion.pos + accordion.node.nodeSize);
                     dispatch(tr);
                 }
 

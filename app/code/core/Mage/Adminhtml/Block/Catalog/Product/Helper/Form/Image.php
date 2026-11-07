@@ -10,6 +10,12 @@
 
 class Mage_Adminhtml_Block_Catalog_Product_Helper_Form_Image extends \Maho\Data\Form\Element\Image
 {
+    public function __construct($data)
+    {
+        parent::__construct($data);
+        $this->setData('image_entity', Mage_Catalog_Model_Product_Image_Provider::ENTITY);
+    }
+
     #[\Override]
     protected function _getUrl()
     {

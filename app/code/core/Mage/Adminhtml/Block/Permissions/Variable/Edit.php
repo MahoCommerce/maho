@@ -16,9 +16,6 @@ class Mage_Adminhtml_Block_Permissions_Variable_Edit extends Mage_Adminhtml_Bloc
         $this->_controller = 'permissions_variable';
 
         parent::__construct();
-
-        $this->_updateButton('save', 'label', Mage::helper('adminhtml')->__('Save Variable'));
-        $this->_updateButton('delete', 'label', Mage::helper('adminhtml')->__('Delete Variable'));
     }
 
     /**

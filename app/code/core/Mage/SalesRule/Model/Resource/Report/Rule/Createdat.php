@@ -54,7 +54,7 @@ class Mage_SalesRule_Model_Resource_Report_Rule_Createdat extends Mage_Reports_M
 
         try {
             if ($from !== null || $to !== null) {
-                $subSelect = $this->_getTableDateRangeSelect($sourceTable, 'created_at', 'updated_at', $from, $to);
+                $subSelect = $this->_getTableDateRangeSelect($sourceTable, $aggregationField, 'updated_at', $from, $to);
             } else {
                 $subSelect = null;
             }
@@ -63,7 +63,7 @@ class Mage_SalesRule_Model_Resource_Report_Rule_Createdat extends Mage_Reports_M
 
             // convert dates from UTC to current admin timezone
             $periodExpr = $adapter->getDatePartSql(
-                $this->getStoreTZOffsetQuery($sourceTable, $aggregationField, $from, $to),
+                $this->getStoreTZOffsetQuery($sourceTable, $aggregationField),
             );
 
             $columns = [
@@ -110,13 +110,9 @@ class Mage_SalesRule_Model_Resource_Report_Rule_Createdat extends Mage_Reports_M
             $select->from(['source_table' => $sourceTable], $columns)
                  ->where("coupon_code <> ''");
 
-            // Filter by date range directly on source column (WHERE is evaluated before GROUP BY,
-            // so we can't use the 'period' alias here - it doesn't exist yet)
-            if ($from !== null) {
-                $select->where('source_table.' . $aggregationField . ' >= ?', $from);
-            }
-            if ($to !== null) {
-                $select->where('source_table.' . $aggregationField . ' <= ?', $to);
+            // The clear step deleted whole periods: rebuild every one of them, not only rows since $from
+            if ($subSelect !== null) {
+                $select->where($this->_makeConditionFromDateRangeSelect($subSelect, $periodExpr));
             }
 
             $select->group([

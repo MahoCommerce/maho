@@ -17,7 +17,9 @@ class Maho_Blog_Block_Adminhtml_Post_Grid_Renderer_Image extends Mage_Adminhtml_
             return '';
         }
 
-        $imageUrl = Mage::getBaseUrl('media') . 'blog/' . $value;
+        $storeId = (int) Mage::app()->getDefaultStoreView()?->getId();
+        $imageUrl = Mage::helper('core/image')->init(Maho_Blog_Model_Post_Image::ENTITY, (string) $value, $storeId)?->getUrl(100)
+            ?? Mage::getBaseUrl('media') . 'blog/' . $value;
 
         return sprintf(
             '<img src="%s" alt="%s" style="width: 50px; height: 50px; object-fit: cover;">',

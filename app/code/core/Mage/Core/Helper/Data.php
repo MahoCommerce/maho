@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2016-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2016-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Core
@@ -24,7 +24,15 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
     public const XML_PATH_CACHE_BETA_TYPES             = 'global/cache/betatypes';
     public const XML_PATH_MIME_TYPES                   = 'global/mime/types';
 
-    /** @deprecated since 26.9 Only ipRateLimiter() uses it. */
+    /**
+     * Extensions that stay protected when a saved general/file/protected_extensions value leaves them out.
+     */
+    public const PROTECTED_FILE_EXTENSIONS_MINIMUM = [
+        'php', 'php3', 'php4', 'php5', 'php7', 'php8', 'phtml', 'pht', 'phar', 'phps',
+        'pl', 'py', 'cgi', 'sh', 'asp', 'aspx', 'jsp', 'htaccess', 'shtml',
+    ];
+
+    #[\Deprecated(message: 'only ipRateLimiter() uses it', since: '26.9')]
     public const RATE_LIMIT_TIMEFRAME                  = 30;
 
     public const CHARS_LOWERS                          = 'abcdefghijklmnopqrstuvwxyz';
@@ -782,14 +790,28 @@ XML;
     }
 
     /**
-     * Return list with protected file extensions
+     * Return the protected file extensions in lower case, with PROTECTED_FILE_EXTENSIONS_MINIMUM always included.
      *
-     * @param Mage_Core_Model_Store|string|int $store
-     * @return array
+     * The configured value is a list of nodes, or a comma-separated string when a store saved its own value.
+     *
+     * @return list<string>
      */
-    public function getProtectedFileExtensions($store = null)
+    public function getProtectedFileExtensions(Mage_Core_Model_Store|string|int|null $store = null): array
     {
-        return Mage::getStoreConfig(self::XML_PATH_PROTECTED_FILE_EXTENSIONS, $store);
+        $configured = Mage::getStoreConfig(self::XML_PATH_PROTECTED_FILE_EXTENSIONS, $store);
+        $configured = is_array($configured) ? $configured : explode(',', (string) $configured);
+
+        $extensions = [];
+        foreach ($configured as $extension) {
+            if (is_scalar($extension)) {
+                $extensions[] = strtolower(trim((string) $extension));
+            }
+        }
+
+        return array_values(array_unique(array_filter(
+            array_merge(self::PROTECTED_FILE_EXTENSIONS_MINIMUM, $extensions),
+            fn(string $extension): bool => $extension !== '',
+        )));
     }
 
     /**
@@ -991,9 +1013,8 @@ XML;
      * IP limiter fixed at one request per RATE_LIMIT_TIMEFRAME seconds. Returns null when the
      * client IP is unknown; callers treat null as "not limited". The store-config keys that
      * governed it (system/rate_limit/active and /timeframe) are gone, so the values are fixed.
-     *
-     * @deprecated since 26.9 Use rateLimiter() with a per-endpoint system/rate_limit/<key> budget.
      */
+    #[\Deprecated(message: 'use rateLimiter() with a per-endpoint system/rate_limit/<key> budget', since: '26.9')]
     public function ipRateLimiter(): ?\Maho\Security\RateLimiter
     {
         $ip = Mage::helper('core/http')->getRemoteAddr();

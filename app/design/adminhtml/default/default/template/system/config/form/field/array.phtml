@@ -34,7 +34,7 @@ $_colspan = $_colspan > 1 ? 'colspan="' . $_colspan . '"' : '';
             <tr id="addRow<?= $_htmlId ?>">
                 <td colspan="<?= count($this->getColumns()) ?>"></td>
                 <td <?= $_colspan ?>>
-                    <button style="" onclick="" class="scalable add" type="button" id="addToEndBtn<?= $_htmlId ?>">
+                    <button style="" onclick="" class="scalable add" type="button" id="addToEndBtn<?= $_htmlId ?>" aria-labelledby="addToEndBtn<?= $_htmlId ?> <?= $this->getElement()->getHtmlId() ?>-label">
                         <span><?= $this->getAddButtonLabel() ?></span>
                     </button>
                 </td>
@@ -45,7 +45,7 @@ $_colspan = $_colspan > 1 ? 'colspan="' . $_colspan . '"' : '';
     <input type="hidden" name="<?= $this->getElement()->getName() ?>[__empty]" value="">
 </div>
 <div id="empty<?= $_htmlId ?>">
-    <button style="" onclick="" class="scalable add" type="button" id="emptyAddBtn<?= $_htmlId ?>">
+    <button style="" onclick="" class="scalable add" type="button" id="emptyAddBtn<?= $_htmlId ?>" aria-labelledby="emptyAddBtn<?= $_htmlId ?> <?= $this->getElement()->getHtmlId() ?>-label">
         <span><?= $this->getAddButtonLabel() ?></span>
     </button>
 </div>

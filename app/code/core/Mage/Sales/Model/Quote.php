@@ -1071,6 +1071,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
         }
 
         if ($resultItem->getParentItem()) {
+            /** @var Mage_Sales_Model_Quote_Item $resultItem */
             $resultItem = $resultItem->getParentItem();
         }
 
@@ -1645,7 +1646,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
     /**
      * Check quote for virtual product only
      *
-     * @return bool
+     * @return int
      */
     public function getIsVirtual()
     {

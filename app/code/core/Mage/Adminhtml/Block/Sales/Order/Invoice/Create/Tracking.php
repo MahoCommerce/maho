@@ -28,7 +28,7 @@ class Mage_Adminhtml_Block_Sales_Order_Invoice_Create_Tracking extends Mage_Admi
             'add_button',
             $this->getLayout()->createBlock('adminhtml/widget_button')
                 ->setData([
-                    'label'   => Mage::helper('sales')->__('Add Tracking Number'),
+                    'label'   => Mage::helper('sales')->__('Add'),
                     'class'   => '',
                     'onclick' => 'trackingControl.add()',
                 ]),

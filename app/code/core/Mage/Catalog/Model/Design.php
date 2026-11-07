@@ -59,7 +59,7 @@ class Mage_Catalog_Model_Design extends Mage_Core_Model_Abstract
 
         $category = null;
         if ($currentCategory) {
-            $category = $currentCategory->getParentDesignCategory($currentCategory);
+            $category = $currentCategory->getParentDesignCategory();
         }
 
         if ($object instanceof Mage_Catalog_Model_Product) {

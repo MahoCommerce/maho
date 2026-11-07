@@ -47,13 +47,13 @@ class Mage_Catalog_Block_Widget_Link extends Mage_Core_Block_Html_Link implement
      */
     public function getHref()
     {
-        if (!$this->_href) {
-            if ($this->hasStoreId()) {
-                $store = Mage::app()->getStore($this->getStoreId());
-            } else {
-                $store = Mage::app()->getStore();
-            }
+        if ($this->hasStoreId()) {
+            $store = Mage::app()->getStore($this->getStoreId());
+        } else {
+            $store = Mage::app()->getStore();
+        }
 
+        if (!$this->_href) {
             $idPath = explode('/', (string) $this->_getData('id_path'));
 
             if (isset($idPath[0]) && isset($idPath[1]) && $idPath[0] == 'product') {

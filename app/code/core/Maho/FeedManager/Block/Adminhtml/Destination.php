@@ -15,7 +15,6 @@ class Maho_FeedManager_Block_Adminhtml_Destination extends Mage_Adminhtml_Block_
         $this->_controller = 'adminhtml_destination';
         $this->_blockGroup = 'feedmanager';
         $this->_headerText = Mage::helper('feedmanager')->__('Upload Destinations');
-        $this->_addButtonLabel = Mage::helper('feedmanager')->__('Add New Destination');
         parent::__construct();
     }
 }

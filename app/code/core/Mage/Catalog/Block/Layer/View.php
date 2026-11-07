@@ -178,6 +178,11 @@ class Mage_Catalog_Block_Layer_View extends Mage_Core_Block_Template
      */
     public function canShowOptions()
     {
+        // One more value would exceed the limit, and the request would get a 404.
+        if ($this->getLayer()->isFilterLimitReached()) {
+            return false;
+        }
+
         foreach ($this->getFilters() as $filter) {
             if ($filter->getItemsCount()) {
                 return true;

@@ -27,6 +27,7 @@
             <xsd:complexType name="mahoInfoEntity">
                 <xsd:sequence>
                     <xsd:element minOccurs="1" maxOccurs="1" name="maho_version" type="xsd:string" />
+                    <xsd:element minOccurs="1" maxOccurs="1" name="maho_build" type="xsd:string" />
                 </xsd:sequence>
             </xsd:complexType>
             <xsd:element name="storeListRequestParam">

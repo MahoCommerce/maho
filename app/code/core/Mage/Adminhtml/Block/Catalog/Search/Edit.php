@@ -16,9 +16,6 @@ class Mage_Adminhtml_Block_Catalog_Search_Edit extends Mage_Adminhtml_Block_Widg
         $this->_controller = 'catalog_search';
 
         parent::__construct();
-
-        $this->_updateButton('save', 'label', Mage::helper('catalog')->__('Save Search'));
-        $this->_updateButton('delete', 'label', Mage::helper('catalog')->__('Delete Search'));
     }
 
     /**

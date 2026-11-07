@@ -220,7 +220,7 @@ class Select implements \Stringable
     protected function _uniqueCorrelation($name)
     {
         if (is_array($name)) {
-            $name = end($name);
+            $name = array_last($name);
         }
 
         // Extract just the table name if it includes a Expr or Select (subquery)
@@ -592,8 +592,7 @@ class Select implements \Stringable
     public function columns(array|string|Expr $cols = '*', ?string $correlationName = null): self
     {
         if ($correlationName === null && count($this->_parts[self::FROM])) {
-            $correlationNameKeys = array_keys($this->_parts[self::FROM]);
-            $correlationName = current($correlationNameKeys);
+            $correlationName = array_key_first($this->_parts[self::FROM]);
         }
 
         if (!is_array($cols)) {
@@ -740,7 +739,7 @@ class Select implements \Stringable
                     }
                 }
                 foreach ($this->_parts[self::WHERE] as $where) {
-                    $whereCond = is_array($where) ? current($where) : $where;
+                    $whereCond = is_array($where) ? array_first($where) : $where;
                     if ($this->_findTableInCond($tableId, $whereCond)
                         || $this->_findTableInCond($tableProp['tableName'], $whereCond)
                     ) {

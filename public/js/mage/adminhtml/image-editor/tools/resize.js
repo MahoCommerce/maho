@@ -17,6 +17,7 @@ export class ResizeTool {
         this._dragging = null;
         this._dragStart = null;
         this._startSize = null;
+        this._base = null;
     }
 
     get name() { return 'resize'; }
@@ -26,6 +27,7 @@ export class ResizeTool {
     }
 
     activate() {
+        this._base = this.editor.baseCanvas;
         this.width = this.editor.baseCanvas.width;
         this.height = this.editor.baseCanvas.height;
         this.aspectRatio = this.width / this.height;
@@ -33,6 +35,7 @@ export class ResizeTool {
 
     deactivate() {
         this._dragging = null;
+        this._apply();
     }
 
     onPointerDown(ix, iy, e) {
@@ -160,6 +163,8 @@ export class ResizeTool {
     }
 
     renderOptions() {
+        // Undo and redo replace the base canvas, so the size in the inputs must follow it
+        if (this._base !== this.editor.baseCanvas) this.activate();
         const el = document.createElement('div');
         el.className = 'maho-ie-options-group';
 
@@ -240,13 +245,18 @@ export class ResizeTool {
         if (this._heightInput) this._heightInput.value = this.height;
     }
 
+    /** Apply the size in the inputs, which the preview already shows. Return false when the size is too large. */
+    applyPending() {
+        return this._apply();
+    }
+
     _apply() {
         if (this.width === this.editor.baseCanvas.width && this.height === this.editor.baseCanvas.height) {
-            return;
+            return true;
         }
         if (this.width * this.height > MAX_PIXELS) {
             alert(`Image dimensions too large (${this.width}×${this.height}). Maximum is ${MAX_PIXELS.toLocaleString()} total pixels.`);
-            return;
+            return false;
         }
         this.editor.pushUndo();
         const src = this.editor.baseCanvas;
@@ -273,9 +283,11 @@ export class ResizeTool {
         }
 
         this.editor.replaceBase(canvas);
+        this._base = canvas;
         this.width = canvas.width;
         this.height = canvas.height;
         this._syncInputs();
+        return true;
     }
 
     _canvasCoords(e) {

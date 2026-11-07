@@ -487,3 +487,36 @@ describe('Category list of every root tree (?scope=all)', function (): void {
         expect(apiGet('/api/rest/v2/categories?scope=all', customerToken())['status'])->toBe(403);
     });
 });
+
+describe('Category read by ID in another root tree', function (): void {
+
+    $childId = function (): int {
+        ApiV2Helper::ensureMahoBootstrapped();
+
+        return (int) Mage::getModel('catalog/category')->getCollection()
+            ->addAttributeToFilter('name', 'API Scope All Child')->getFirstItem()->getId();
+    };
+
+    it('gives a backend caller the category without a store parameter', function () use ($childId): void {
+        $read = apiGet('/api/rest/v2/categories/' . $childId(), serviceToken(['categories/write']));
+
+        expect($read['status'])->toBe(200);
+        expect($read['json']['name'])->toBe('API Scope All Child');
+    });
+
+    it('keeps the category of another root tree hidden from guests', function () use ($childId): void {
+        expect(apiGet('/api/rest/v2/categories/' . $childId())['status'])->toBe(404);
+    });
+
+    it('gives a store-restricted token only the trees of its store views', function () use ($childId): void {
+        $id = $childId();
+        $defaultStoreId = (int) Mage::app()->getDefaultStoreView()->getId();
+        // The request runs in the default store view, so each token must allow it.
+        $own = serviceToken(['categories/write'], [$defaultStoreId, catRestrictStoreId()]);
+        $other = serviceToken(['categories/write'], [$defaultStoreId]);
+
+        expect(apiGet('/api/rest/v2/categories/' . $id, $own)['status'])->toBe(200);
+        expect(apiGet('/api/rest/v2/categories/' . $id, $other)['status'])->toBe(404);
+    });
+
+});

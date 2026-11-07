@@ -84,9 +84,9 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
     /**
      * Return real file path
      *
-     * @deprecated since 26.11 the file is on the sitemaps mount, use getStoragePath()
      * @return string
      */
+    #[\Deprecated(message: 'the file is on the sitemaps mount, use getStoragePath()', since: '26.11')]
     protected function getPath()
     {
         $this->_filePath ??= str_replace('//', '/', Mage::getBaseDir('public') . '/'
@@ -97,9 +97,9 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
     /**
      * Return full file name with path
      *
-     * @deprecated since 26.11 the file is on the sitemaps mount, use getStoragePath()
      * @return string
      */
+    #[\Deprecated(message: 'the file is on the sitemaps mount, use getStoragePath()', since: '26.11')]
     public function getPreparedFilename()
     {
         return $this->getPath() . $this->getSitemapFilename();
@@ -152,6 +152,20 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
         $file = $this->openFile($filename);
         $file->write(Mage_Sitemap_Model_File::URLSET_HEADER);
         return $file;
+    }
+
+    /**
+     * Queue generateXml(). A second request for this sitemap is dropped while the first one waits or
+     * runs. The result goes to the inbox of $adminUserId.
+     */
+    public function queueGenerate(?int $adminUserId = null): void
+    {
+        $message = new Mage_Sitemap_Model_GenerateMessage((int) $this->getId(), $adminUserId);
+        \Maho\Queue\QueueManager::dispatch(
+            $message,
+            queue: Mage_Sitemap_Model_GenerateMessage::QUEUE_NAME,
+            dedupeKey: $message->getDedupeKey(),
+        );
     }
 
     /**

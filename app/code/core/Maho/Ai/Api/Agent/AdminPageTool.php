@@ -43,6 +43,16 @@ final class AdminPageTool
     /** Enough for a comment form: the text, two checkboxes and the submit button. */
     public const MAX_STEPS = 5;
 
+    /**
+     * Whether the steps of a page action click a button. Opening a tab or a grid row and setting a field save nothing.
+     *
+     * @param array<string, mixed> $arguments
+     */
+    public static function clicks(array $arguments): bool
+    {
+        return array_any((array) ($arguments['steps'] ?? []), fn($step) => is_array($step) && ($step['action'] ?? null) === 'click');
+    }
+
     public static function title(string $name): string
     {
         return match ($name) {
@@ -62,13 +72,13 @@ final class AdminPageTool
         return new Tool(
             new ExecutionReference(self::class, 'act'),
             self::ACTION_NAME,
-            'Act on the admin page the administrator has open, after you answer: open a tab by its name, set a form field by its label or name, click a button by its label (for example "Save Page" when the administrator says "save"), or open a grid row by its number in the row list (target "3" for "the third one"). Use the buttons, tabs, fields and rows listed under what the administrator sees; never guess a label. Up to ' . self::MAX_STEPS . ' steps in order, in one call, and a click or an open_row must be the last step because the page may reload. The next message shows you the result.',
+            'Act on the admin page the administrator has open, after you answer: open a tab or a closed group of a configuration page by its name, set a form field by its label or name, click a button by its label (for example "Save" when the administrator says "save"), or open a grid row by its number in the row list (target "3" for "the third one"). Use the buttons, tabs, fields and rows listed under what the administrator sees; never guess a label. Up to ' . self::MAX_STEPS . ' steps in order, in one call, and a click or an open_row must be the last step because the page may reload. A call with a click waits for the confirmation of the administrator, like a write: say in one sentence what the click does before you call it. The next message shows you the result.',
             [
                 'type' => 'object',
                 'properties' => [
                     'steps' => [
                         'type' => 'array',
-                        'description' => 'The steps, in order. Example: set the Comment field, then click Submit Comment.',
+                        'description' => 'The steps, in order. Example: set the Comment field, then click Submit.',
                         'minItems' => 1,
                         'maxItems' => self::MAX_STEPS,
                         'items' => [
@@ -274,7 +284,7 @@ final class AdminPageTool
             }
         }
 
-        $url = \Mage::helper('ai')->adminUrl($route, $params);
+        $url = \Mage::helper('adminnotification')->getAdminUrl($route, $params);
 
         return ['ok' => true, 'text' => sprintf('The browser opens %s when you finish your answer. Tell the administrator in one sentence.', $url), 'url' => $url];
     }
@@ -439,7 +449,7 @@ final class AdminPageTool
                 if ($record !== null) {
                     [$route, $idParam] = $record;
 
-                    return \Mage::helper('ai')->adminUrl($route, [$idParam => $this->cleanValue($id)]);
+                    return \Mage::helper('adminnotification')->getAdminUrl($route, [$idParam => $this->cleanValue($id)]);
                 }
             }
         }

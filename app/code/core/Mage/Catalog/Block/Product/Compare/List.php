@@ -78,7 +78,7 @@ class Mage_Catalog_Block_Product_Compare_List extends Mage_Catalog_Block_Product
     {
         if (is_null($this->_items)) {
             $this->_items = Mage::getResourceModel('catalog/product_compare_item_collection')
-                ->useProductItem(true)
+                ->useProductItem()
                 ->setStoreId(Mage::app()->getStore()->getId());
 
             if (Mage::getSingleton('customer/session')->isLoggedIn()) {

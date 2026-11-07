@@ -234,27 +234,15 @@ class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Per-attribute option price deltas ([attribute_code][value_index] => delta). Checkout charges
-     * the parent price plus these deltas, never the child's own price.
-     *
      * @param array<int, array<string, mixed>> $attributesInfo from getConfigurableAttributesAsArray()
      * @return array<string, array<string, float>>
      */
+    #[\Deprecated(message: 'use Mage_Catalog_Model_Product_Type_Configurable_Price::getVariantPriceDeltas()', since: '26.11')]
     public function getVariantPriceDeltas(array $attributesInfo, float $basePrice): array
     {
         /** @var Mage_Catalog_Model_Product_Type_Configurable_Price $priceModel */
         $priceModel = Mage_Catalog_Model_Product_Type::priceFactory(Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE);
-        $deltas = [];
-        foreach ($attributesInfo as $attribute) {
-            $code = (string) $attribute['attribute_code'];
-            foreach ($attribute['values'] ?? [] as $value) {
-                if ((float) ($value['pricing_value'] ?? 0) == 0.0) {
-                    continue;
-                }
-                $deltas[$code][(string) $value['value_index']] = $priceModel->calcSelectionPrice($value, $basePrice);
-            }
-        }
-        return $deltas;
+        return $priceModel->getVariantPriceDeltas($attributesInfo, $basePrice);
     }
 
     public function getConditionAttribute(int|string|null $store = null): string
@@ -673,9 +661,11 @@ class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
     {
         /** @var Mage_Tax_Helper_Data $taxHelper */
         $taxHelper = Mage::helper('tax');
-        $displayPrice = (float) $taxHelper->getPrice($product, $price, $this->displayPriceIncludesTax($product->getStoreId()));
+        $store = Mage::app()->getStore($product->getStoreId());
+        // The cart adds the tax to the price rounded to cents, as the price template does.
+        $price = $store->roundPrice($store->convertPrice($price));
 
-        return (float) Mage::app()->getStore($product->getStoreId())->convertPrice($displayPrice);
+        return (float) $taxHelper->getPrice($product, $price, $this->displayPriceIncludesTax($product->getStoreId()));
     }
 
     /**

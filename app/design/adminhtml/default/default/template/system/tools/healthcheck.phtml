@@ -84,6 +84,10 @@ $checks = $this->getHealthChecks();
                 <td><?= $this->escapeHtml($this->getMahoVersion()) ?></td>
             </tr>
             <tr>
+                <td>Build</td>
+                <td><span title="<?= $this->escapeHtml((string) $this->getMahoBuildCommit()) ?>"><?= $this->escapeHtml($this->getMahoBuild()) ?></span></td>
+            </tr>
+            <tr>
                 <td>Cache Backend</td>
                 <td><?= $this->escapeHtml($this->getCacheBackend()) ?></td>
             </tr>

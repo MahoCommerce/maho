@@ -30,7 +30,7 @@ class Mage_Adminhtml_Block_System_Variable_Edit extends Mage_Adminhtml_Block_Wid
     protected function _prepareLayout()
     {
         $this->_addButton('save_and_edit', [
-            'label'     => Mage::helper('adminhtml')->__('Save and Continue Edit'),
+            'label'     => Mage::helper('adminhtml')->__('Save and Continue'),
             'class'     => 'save',
             'onclick'   => 'editForm.submit(\'' . $this->getSaveAndContinueUrl() . '\');',
         ], 100);

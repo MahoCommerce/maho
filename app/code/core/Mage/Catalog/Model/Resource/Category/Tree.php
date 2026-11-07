@@ -229,7 +229,7 @@ class Mage_Catalog_Model_Resource_Category_Tree extends \Maho\Data\Tree\Dbp
         foreach ($allIds as $id) {
             $parents = $this->getNodeById($id)->getPath();
             foreach ($parents as $parent) {
-                if (!$this->_getItemIsActive($parent->getId(), $storeId)) {
+                if (!$this->_getItemIsActive($parent->getId())) {
                     $disabledIds[] = $id;
                     continue;
                 }

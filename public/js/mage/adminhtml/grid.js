@@ -170,18 +170,12 @@ class varienGrid {
         }
     }
     reload(url) {
-        if (!this.reloadParams) {
-            this.reloadParams = {form_key: FORM_KEY};
-        }
-        else {
-            this.reloadParams.form_key = FORM_KEY;
-        }
         url = url || this.url;
         if(this.useAjax && this.useAjax !== '0' && this.useAjax !== 'false'){
             const ajaxUrl = url + (url.includes('?') ? '&ajax=true' : '?ajax=true');
             const formData = new FormData();
 
-            Object.entries(this.reloadParams || {}).forEach(([key, value]) => {
+            Object.entries({...this.reloadParams, form_key: FORM_KEY}).forEach(([key, value]) => {
                 if (Array.isArray(value)) {
                     value.forEach(v => formData.append(key, v));
                 } else {
@@ -231,14 +225,21 @@ class varienGrid {
     }
 
     _addVarToUrl(url, varName, varValue) {
-        const re = new RegExp('\\/' + varName + '\\/.*?\\/');
-        const parts = url.split(/\?/);
-        url = parts[0].replace(re, '/');
-        url += encodeURIComponent(varName) + '/' + encodeURIComponent(varValue) + '/';
-        if(parts.length > 1) {
-            url += '?' + parts[1];
+        const queryStart = url.indexOf('?');
+        const query = new URLSearchParams(queryStart === -1 ? '' : url.slice(queryStart + 1));
+        let path = queryStart === -1 ? url : url.slice(0, queryStart);
+        path = path.replace(new RegExp('\\/' + varName + '\\/.*?\\/'), '/');
+        query.delete(varName);
+
+        const value = encodeURIComponent(varValue);
+        // A web server can merge the "//" of an empty path value, which shifts every later key and value
+        if (value === '') {
+            query.set(varName, '');
+        } else {
+            path += encodeURIComponent(varName) + '/' + value + '/';
         }
-        return url;
+        const queryString = query.toString();
+        return queryString ? path + '?' + queryString : path;
     }
 
     addVarToUrl(varName, varValue) {

@@ -200,4 +200,15 @@ class Mage_Cms_Model_Resource_Block extends Mage_Core_Model_Resource_Db_Abstract
 
         return $adapter->fetchCol($select, $binds);
     }
+
+    /**
+     * The content of every CMS block, for the Tailwind build.
+     *
+     * @return iterable<string>
+     */
+    #[Maho\Config\TailwindSource('cms_block', model: Mage_Cms_Model_Block::class, fields: ['content'])]
+    public function getTailwindContent(): iterable
+    {
+        return Mage::getResourceSingleton('core/design_content')->readColumns($this->getMainTable(), $this->getIdFieldName(), ['content']);
+    }
 }

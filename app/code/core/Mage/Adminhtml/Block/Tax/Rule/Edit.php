@@ -17,11 +17,8 @@ class Mage_Adminhtml_Block_Tax_Rule_Edit extends Mage_Adminhtml_Block_Widget_For
 
         parent::__construct();
 
-        $this->_updateButton('save', 'label', Mage::helper('tax')->__('Save Rule'));
-        $this->_updateButton('delete', 'label', Mage::helper('tax')->__('Delete Rule'));
-
         $this->_addButton('save_and_continue', [
-            'label'     => Mage::helper('tax')->__('Save and Continue Edit'),
+            'label'     => Mage::helper('tax')->__('Save and Continue'),
             'onclick'   => 'saveAndContinueEdit()',
             'class' => 'save',
         ], 10);

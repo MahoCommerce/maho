@@ -151,6 +151,23 @@ class Maho_ApiPlatform_Model_Observer
     }
 
     /**
+     * Revoke the OAuth grants of an admin user that a save deactivates, so that a reactivation
+     * of the account does not bring the connected applications back.
+     */
+    #[Maho\Config\Observer('admin_user_save_after')]
+    public function revokeGrantsOfDeactivatedAdmin(\Maho\Event\Observer $observer): void
+    {
+        $user = $observer->getEvent()->getObject();
+        if (!$user instanceof Mage_Admin_Model_User || !$user->getId() || $user->getIsActive() !== false) {
+            return;
+        }
+
+        /** @var Maho_ApiPlatform_Model_Resource_Oauth_Token $resource */
+        $resource = Mage::getResourceSingleton('apiplatform/oauth_token');
+        $resource->revokeAdminGrants((int) $user->getId());
+    }
+
+    /**
      * Show the connected applications of the admin below the My Account form. The
      * controller adds the form after the layout loads, so a layout block would sit above it.
      */

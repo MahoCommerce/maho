@@ -46,7 +46,7 @@ class Mage_ImportExport_Model_Export_Adapter_Csv extends Mage_ImportExport_Model
     protected $_fileHandler;
 
     /**
-     * Close file handler on shutdown
+     * Close file handler
      */
     #[\Override]
     public function destruct()

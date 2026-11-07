@@ -270,11 +270,11 @@ class Mage_Eav_Model_Resource_Entity_Attribute extends Mage_Core_Model_Resource_
             $adapter            = $this->_getWriteAdapter();
             $optionTable        = $this->getTable('eav/attribute_option');
             $optionValueTable   = $this->getTable('eav/attribute_option_value');
-            $optionSwatchTable  = $this->getTable('eav/attribute_option_swatch');
 
             $stores = Mage::app()->getStores(true);
             if (isset($option['value'])) {
                 $attributeDefaultValue = [];
+                $savedOptions = [];
                 if (!is_array($object->getDefault())) {
                     $object->setDefault([]);
                 }
@@ -284,7 +284,6 @@ class Mage_Eav_Model_Resource_Entity_Attribute extends Mage_Core_Model_Resource_
                     if (!empty($option['delete'][$optionId])) {
                         if ($intOptionId) {
                             $adapter->delete($optionTable, ['option_id = ?' => $intOptionId]);
-                            $adapter->delete($optionSwatchTable, ['option_id = ?' => $intOptionId]);
                         }
                         continue;
                     }
@@ -331,30 +330,45 @@ class Mage_Eav_Model_Resource_Entity_Attribute extends Mage_Core_Model_Resource_
                         }
                     }
 
-                    // Swatch Value
-                    if (isset($option['swatch'][$optionId])) {
-                        if ($option['swatch'][$optionId]) {
-                            $data = [
-                                'option_id' => $intOptionId,
-                                'value'     => $option['swatch'][$optionId],
-                                'filename'  => Mage::helper('configurableswatches')->getHyphenatedString($values[0]) . Mage_ConfigurableSwatches_Helper_Productimg::getSwatchFileExt(),
-                            ];
-                            $adapter->insertOnDuplicate($optionSwatchTable, $data);
-                        } else {
-                            $adapter->delete($optionSwatchTable, ['option_id = ?' => $intOptionId]);
-                        }
-                    }
+                    $savedOptions[$optionId] = [(int) $intOptionId, (string) $values[0]];
                 }
                 $bind  = ['default_value' => implode(',', $attributeDefaultValue)];
                 $where = ['attribute_id =?' => $object->getId()];
                 $adapter->update($this->getMainTable(), $bind, $where);
-            }
-            if (isset($option['swatch'])) {
-                Mage::helper('configurableswatches/productimg')->clearSwatchesCache();
+                $this->saveOptionSwatches($option['swatch'] ?? [], $savedOptions);
             }
         }
 
         return $this;
+    }
+
+    /**
+     * @param array<int|string, string> $swatches color by option key, empty to remove the swatch
+     * @param array<int|string, array{int, string}> $savedOptions option id and admin label by option key
+     */
+    private function saveOptionSwatches(array $swatches, array $savedOptions): void
+    {
+        $swatches = array_intersect_key($swatches, $savedOptions);
+        if ($swatches === [] || !Mage::helper('core')->isModuleEnabled('Mage_ConfigurableSwatches')) {
+            return;
+        }
+
+        $adapter = $this->_getWriteAdapter();
+        $table = $this->getTable('eav/attribute_option_swatch');
+        $swatchHelper = Mage::helper('configurableswatches');
+        foreach ($swatches as $key => $swatch) {
+            [$optionId, $adminLabel] = $savedOptions[$key];
+            if (!$swatch) {
+                $adapter->delete($table, ['option_id = ?' => $optionId]);
+                continue;
+            }
+            $adapter->insertOnDuplicate($table, [
+                'option_id' => $optionId,
+                'value' => $swatch,
+                'filename' => $swatchHelper->getHyphenatedString($adminLabel) . Mage_ConfigurableSwatches_Helper_Productimg::getSwatchFileExt(),
+            ]);
+        }
+        Mage::helper('configurableswatches/productimg')->clearSwatchesCache();
     }
 
     /**

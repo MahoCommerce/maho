@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
 // SPDX-License-Identifier: AFL-3.0
 
-import { Node, mergeAttributes } from 'https://esm.sh/@tiptap/core@3.31.3';
+import { Node, mergeAttributes } from '../../../../../tiptap.js';
 import { findParentNodeOfType, createGridNodeView, createCellNodeView, backgroundAttribute, setBackgroundAttr, bleedAttribute, setBleedAttr, setNodeAttrCommand, syncGridMenu } from './grid-utils.js';
 import { syncCellMenu } from './columns.js';
 
@@ -304,6 +304,7 @@ export const MahoBentoGrid = Node.create({
             storageName: 'mahoBentoGrid',
             dataType: 'maho-bento',
             badgeLabel: 'Bento',
+            deleteTitle: 'Delete Bento Grid',
             layoutAttr: 'columns',
 
             setDataAttrs(dom, node) {
@@ -441,21 +442,6 @@ export const MahoBentoGrid = Node.create({
                         ...bentoNode.node.attrs,
                         gridStyle: style,
                     });
-                    dispatch(tr);
-                }
-
-                return true;
-            },
-
-            deleteBentoGrid: () => ({ editor, state, tr, dispatch }) => {
-                const bentoNode = findParentNodeOfType(state.schema.nodes.mahoBentoGrid)(state.selection);
-
-                if (!bentoNode) {
-                    return false;
-                }
-
-                if (dispatch) {
-                    tr.delete(bentoNode.pos, bentoNode.pos + bentoNode.node.nodeSize);
                     dispatch(tr);
                 }
 

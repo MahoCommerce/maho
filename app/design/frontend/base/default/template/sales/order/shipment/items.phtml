@@ -36,6 +36,8 @@
                 foreach ($tracks as $track): ?>
                 <?php if ($track->isCustom()): ?>
                     <?= $this->escapeHtml($track->getNumber()) ?>
+                <?php elseif ($trackingUrl = $track->getTrackingUrl()): ?>
+                    <a href="<?= $this->escapeHtml($trackingUrl) ?>" target="_blank" rel="noopener"><?= $this->escapeHtml($track->getNumber()) ?></a>
                 <?php else: ?>
                     <a href="#" onclick="popWin('<?= $this->helper('shipping')->getTrackingPopupUrlBySalesModel($track) ?>','trackorder','width=800,height=600,left=0,top=0,resizable=yes,scrollbars=yes')" ><?= $this->escapeHtml($track->getNumber()) ?></a>
                 <?php endif ?>

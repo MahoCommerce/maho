@@ -15,7 +15,6 @@ class Mage_Directory_Block_Adminhtml_Region extends Mage_Adminhtml_Block_Widget_
         $this->_blockGroup = 'directory';
         $this->_controller = 'adminhtml_region';
         $this->_headerText = Mage::helper('directory')->__('Manage Regions');
-        $this->_addButtonLabel = Mage::helper('directory')->__('Add New Region');
 
         $this->_addButton('import', [
             'label' => Mage::helper('directory')->__('Import Regions'),

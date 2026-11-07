@@ -32,7 +32,7 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Options_Abstract extends 
             'add_button',
             $this->getLayout()->createBlock('adminhtml/widget_button')
                 ->setData([
-                    'label' => Mage::helper('eav')->__('Add Option'),
+                    'label' => Mage::helper('eav')->__('Add'),
                     'class' => 'add',
                     'id'    => 'add_new_option_button',
                 ]),

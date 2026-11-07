@@ -11,8 +11,8 @@
 ?>
 
 <?php if ($websites = $this->getWebsites()): ?>
-<label for="store_switcher"><?= $this->__('Choose Store View:') ?></label>
-<select name="store_switcher" id="store_switcher">
+<label class="d-select switcher-select"><span class="d-label" title="<?= $this->quoteEscape(rtrim($this->__('Choose Store View:'), ' :')) ?>"><?= $this->getIconSvg('building-store') ?></span>
+<select name="store_switcher" id="store_switcher" aria-label="<?= $this->quoteEscape(rtrim($this->__('Choose Store View:'), ' :')) ?>">
     <?php foreach ($websites as $website): ?>
         <?php $showWebsite = false; ?>
         <?php foreach ($website->getGroups() as $group): ?>
@@ -33,7 +33,7 @@
             <?php endif ?>
         <?php endforeach ?>
     <?php endforeach ?>
-</select>
+</select></label>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const storeSwitcher = document.getElementById('store_switcher');

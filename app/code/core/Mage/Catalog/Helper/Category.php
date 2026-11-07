@@ -195,6 +195,38 @@ class Mage_Catalog_Helper_Category extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * Tell if a filtered category page gets NOINDEX,FOLLOW on the current page.
+     */
+    public function shouldAddNoindexToFilteredPages(): bool
+    {
+        return $this->canUseNoindexForFilteredPages() && !$this->isLayeredNavigationLandingPage();
+    }
+
+    /**
+     * Tell if a category page after the first one gets NOINDEX,FOLLOW on the current page.
+     */
+    public function shouldAddNoindexToPaginatedPages(): bool
+    {
+        return $this->canUseNoindexForPaginatedPages() && !$this->isLayeredNavigationLandingPage();
+    }
+
+    /**
+     * Tell if an indexable category page gets <link rel="canonical"> on the current page.
+     */
+    public function shouldAddCanonicalTagToCategoryPages(): bool
+    {
+        return $this->canUseCanonicalTag() && !$this->isLayeredNavigationLandingPage();
+    }
+
+    /**
+     * Tell if a layered-navigation template adds rel="nofollow" to its filter links on the current page.
+     */
+    public function shouldAddNofollowToFilterLinks(): bool
+    {
+        return $this->canUseNofollowForFilterLinks() && !$this->isLayeredNavigationLandingPage();
+    }
+
+    /**
      * Whether the current request is being served as an indexable facet landing
      * page. A future facet-landing-page feature (see discussion #971) registers
      * REGISTRY_LN_LANDING_PAGE to opt the view out of the layered-navigation

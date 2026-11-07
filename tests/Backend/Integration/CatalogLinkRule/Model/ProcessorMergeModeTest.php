@@ -17,6 +17,7 @@ class Maho_CatalogLinkRule_Test_StubRule extends Maho_CatalogLinkRule_Model_Rule
 {
     public array $sourceIds = [];
     public array $targetIds = [];
+    public array $websiteIdsBySource = [];
 
     #[\Override]
     public function getMatchingSourceProductIds(): array
@@ -25,8 +26,9 @@ class Maho_CatalogLinkRule_Test_StubRule extends Maho_CatalogLinkRule_Model_Rule
     }
 
     #[\Override]
-    public function getMatchingTargetProductIds(?Mage_Catalog_Model_Product $sourceProduct = null): array
+    public function getMatchingTargetProductIds(?Mage_Catalog_Model_Product $sourceProduct = null, ?array $websiteIds = null): array
     {
+        $this->websiteIdsBySource[] = $websiteIds;
         return $this->targetIds;
     }
 }
@@ -222,6 +224,18 @@ describe('CatalogLinkRule processor merge modes', function () {
         expect($links)->not->toHaveKey($first);
     });
 
+    test('the target scan gets the websites of the source product', function () use ($linkType) {
+        $source = clrCreateProduct('clr-src-' . uniqid());
+
+        $rule = new Maho_CatalogLinkRule_Test_StubRule();
+        $rule->sourceIds = [$source];
+
+        (new Maho_CatalogLinkRule_Test_Processor())->runLinkType($linkType, [$rule]);
+
+        expect($rule->websiteIdsBySource)->toHaveCount(1)
+            ->and(array_map(intval(...), $rule->websiteIdsBySource[0]))->toBe([1]);
+    });
+
     test('deleting a rule removes its generated links but keeps manual ones', function () use ($linkType) {
         $source = clrCreateProduct('clr-src-' . uniqid());
         $manual = clrCreateProduct('clr-man-' . uniqid());
@@ -273,6 +287,61 @@ describe('CatalogLinkRule processor merge modes', function () {
         $links = clrReadLinks($source, $linkType);
         expect($links)->toHaveKey($manual);
         expect($links)->not->toHaveKey($ruleTarget);
+    });
+
+    test('changing the link type of a rule removes its links of the former type only', function () use ($linkType) {
+        $upsell = Mage_Catalog_Model_Product_Link::LINK_TYPE_UPSELL;
+        $source = clrCreateProduct('clr-src-' . uniqid());
+        $manual = clrCreateProduct('clr-man-' . uniqid());
+        $ruleTarget = clrCreateProduct('clr-tgt-' . uniqid());
+
+        $rule = Mage::getModel('cataloglinkrule/rule');
+        $rule->setName('clr-type-' . uniqid());
+        $rule->setLinkTypeId($linkType);
+        $rule->setIsActive(true);
+        $rule->setPriority(0);
+        $rule->setSortOrder('random');
+        $rule->save();
+        $ruleId = (int) $rule->getId();
+
+        clrInsertLink($source, $manual, $linkType, 1);                  // manual (rule_id NULL)
+        clrInsertLink($source, $ruleTarget, $linkType, 2, $ruleId);     // rule-generated, former type
+        clrInsertLink($source, $ruleTarget, $upsell, 1, $ruleId);       // rule-generated, new type
+
+        $rule = Mage::getModel('cataloglinkrule/rule')->load($ruleId);
+        $rule->setLinkTypeId($upsell)->save();
+
+        $related = clrReadLinks($source, $linkType);
+        $upsells = clrReadLinks($source, $upsell);
+        $rule->delete();
+
+        expect($related)->toHaveKey($manual)
+            ->and($related)->not->toHaveKey($ruleTarget)
+            ->and($upsells)->toHaveKey($ruleTarget);
+    });
+
+    test('a second save of the same rule removes the links of the link type it leaves', function () use ($linkType) {
+        $upsell = Mage_Catalog_Model_Product_Link::LINK_TYPE_UPSELL;
+        $source = clrCreateProduct('clr-src-' . uniqid());
+        $ruleTarget = clrCreateProduct('clr-tgt-' . uniqid());
+
+        $rule = Mage::getModel('cataloglinkrule/rule');
+        $rule->setName('clr-twice-' . uniqid());
+        $rule->setLinkTypeId($linkType);
+        $rule->setIsActive(true);
+        $rule->setPriority(0);
+        $rule->setSortOrder('random');
+        $rule->save();
+
+        $rule = Mage::getModel('cataloglinkrule/rule')->load($rule->getId());
+        $rule->setLinkTypeId($upsell)->save();
+        clrInsertLink($source, $ruleTarget, $upsell, 1, (int) $rule->getId());
+        $rule->setLinkTypeId($linkType)->save();
+
+        $upsells = clrReadLinks($source, $upsell);
+        $rule->delete();
+
+        expect($upsells)->not->toHaveKey($ruleTarget);
     });
 
     test('merge mode removes rule links for products no longer matched, keeping manual links', function () use ($linkType) {

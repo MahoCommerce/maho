@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -84,7 +85,7 @@ class Mage_Catalog_Model_Product_Compare_List extends \Maho\DataObject
      */
     protected function _addVisitorToItem($item)
     {
-        $item->addVisitorId(Mage::getSingleton('log/visitor')->getId());
+        $item->addVisitorId(Mage::getSingleton('log/visitor')->getVisitorId());
         if (Mage::getSingleton('customer/session')->isLoggedIn()) {
             $item->addCustomerData(Mage::getSingleton('customer/session')->getCustomer());
         }

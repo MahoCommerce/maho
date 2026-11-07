@@ -14,7 +14,6 @@ class Mage_Adminhtml_Block_Permissions_User extends Mage_Adminhtml_Block_Widget_
     {
         $this->_controller = 'permissions_user';
         $this->_headerText = Mage::helper('adminhtml')->__('Users');
-        $this->_addButtonLabel = Mage::helper('adminhtml')->__('Add New User');
         parent::__construct();
     }
 

@@ -54,6 +54,9 @@ return [
         'isActive', 'metaDescription', 'metaKeywords', 'metaRobots', 'metaTitle', 'publishDate',
         'shortContent', 'status', 'stores', 'title', 'updatedAt', 'urlKey',
     ],
+    'BuildInfo' => [
+        'build', 'extensions', 'version',
+    ],
     'BundleOption' => [
         'extensions', 'id', 'position', 'required', 'selections', 'title', 'type',
     ],

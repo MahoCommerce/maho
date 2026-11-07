@@ -44,11 +44,18 @@ class Mage_Api2_Model_Auth_User_Customer extends Mage_Api2_Model_Auth_User_Abstr
      * Retrieve user role
      *
      * @return int
+     * @throws Mage_Api2_Exception
      */
     #[\Override]
     public function getRole()
     {
         if (!$this->_role) {
+            // An OAuth token outlives the deactivation of its customer, so check the account on each request
+            $customer = Mage::getModel('customer/customer')->load((int) $this->getUserId());
+            if (!$customer->getId() || !$customer->getIsActive()) {
+                throw new Mage_Api2_Exception('Customer is not active', Mage_Api2_Model_Server::HTTP_UNAUTHORIZED);
+            }
+
             /** @var Mage_Api2_Model_Acl_Global_Role $role */
             $role = Mage::getModel('api2/acl_global_role')->load(Mage_Api2_Model_Acl_Global_Role::ROLE_CUSTOMER_ID);
             if (!$role->getId()) {

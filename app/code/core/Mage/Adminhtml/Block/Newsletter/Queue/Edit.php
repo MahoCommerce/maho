@@ -82,7 +82,7 @@ class Mage_Adminhtml_Block_Newsletter_Queue_Edit extends Mage_Adminhtml_Block_Te
             'save_button',
             $this->getLayout()->createBlock('adminhtml/widget_button')
                 ->setData([
-                    'label'     => Mage::helper('newsletter')->__('Save Newsletter'),
+                    'label'     => Mage::helper('newsletter')->__('Save'),
                     'onclick'   => 'queueControl.save()',
                     'class'     => 'save',
                 ]),

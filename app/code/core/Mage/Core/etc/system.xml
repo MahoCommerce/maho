@@ -1984,6 +1984,15 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
                         </use_http_user_agent>
+                        <lazy translate="label comment">
+                            <label>Lazy Storefront Sessions</label>
+                            <comment>Save a session only when the visitor stores data in it, such as a cart or a message. Crawlers then create no session records.</comment>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>50</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </lazy>
                     </fields>
                 </session>
             </groups>

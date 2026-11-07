@@ -110,7 +110,9 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
     public function getCountryCollection()
     {
         if (!$this->_countryCollection) {
-            $this->_countryCollection = $this->_factory->getModel('directory/country')->getResourceCollection();
+            /** @var Mage_Directory_Model_Resource_Country_Collection $collection */
+            $collection = $this->_factory->getModel('directory/country')->getResourceCollection();
+            $this->_countryCollection = $collection;
         }
         return $this->_countryCollection;
     }

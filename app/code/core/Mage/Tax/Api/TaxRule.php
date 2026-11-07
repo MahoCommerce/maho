@@ -34,10 +34,12 @@ use Maho\ApiPlatform\CrudResource;
         new Get(
             uriTemplate: '/tax-rules/{id}',
             security: "is_granted('ROLE_ADMIN') or is_granted('tax-rules/read')",
+            description: 'Get a tax rule by ID. A rule applies to the products of its product tax classes, for the customers of its customer tax classes. It uses the first of its tax rates that matches the address. The rates of rules with the same priority add up. A rule with a higher priority value is calculated on the price plus the tax of the lower ones, unless calculateSubtotal is true',
         ),
         new GetCollection(
             uriTemplate: '/tax-rules',
             security: "is_granted('ROLE_ADMIN') or is_granted('tax-rules/read')",
+            description: 'Get the tax rules. Each rule gives tax rates to pairs of a customer tax class and a product tax class',
         ),
         new Post(
             uriTemplate: '/tax-rules',
@@ -61,12 +63,12 @@ use Maho\ApiPlatform\CrudResource;
     graphQlOperations: [
         new Query(
             name: 'item_query',
-            description: 'Get a tax rule by ID',
+            description: 'Get a tax rule by ID. A rule applies to the products of its product tax classes, for the customers of its customer tax classes. It uses the first of its tax rates that matches the address. The rates of rules with the same priority add up. A rule with a higher priority value is calculated on the price plus the tax of the lower ones, unless calculateSubtotal is true',
             security: "is_granted('ROLE_ADMIN') or is_granted('tax-rules/read')",
         ),
         new QueryCollection(
             name: 'collection_query',
-            description: 'Get tax rules',
+            description: 'Get the tax rules. Each rule gives tax rates to pairs of a customer tax class and a product tax class',
             security: "is_granted('ROLE_ADMIN') or is_granted('tax-rules/read')",
             extraArgs: [
                 'search' => ['type' => 'String', 'description' => 'Partial match on the rule code'],

@@ -369,7 +369,7 @@ abstract class AbstractPdoAdapter implements AdapterInterface
         $stmt = $this->query($sql, $bind);
         $data = [];
         while ($row = $stmt->getResult()->fetchAssociative()) {
-            $data[current($row)] = $row;
+            $data[array_first($row)] = $row;
         }
         return $data;
     }
@@ -499,7 +499,7 @@ abstract class AbstractPdoAdapter implements AdapterInterface
      */
     protected function _getConflictColumns(string|array|Select $table, array $insertCols, array $updateFields, bool $allowRetry = true): array
     {
-        $tableName = is_array($table) ? (string) reset($table) : (string) $table;
+        $tableName = is_array($table) ? (string) array_first($table) : (string) $table;
 
         $updateColNames = [];
         foreach ($updateFields as $k => $v) {
@@ -540,7 +540,7 @@ abstract class AbstractPdoAdapter implements AdapterInterface
 
         uasort($candidates, fn(array $a, array $b): int => [$a['overlap'], $a['size']] <=> [$b['overlap'], $b['size']]);
 
-        return reset($candidates)['columns'];
+        return array_first($candidates)['columns'];
     }
 
     /**
@@ -633,7 +633,7 @@ abstract class AbstractPdoAdapter implements AdapterInterface
             ($where) ? " WHERE $where" : '',
         );
 
-        $tableName = is_array($table) ? (string) reset($table) : (string) $table;
+        $tableName = is_array($table) ? (string) array_first($table) : (string) $table;
         $params = $this->_prepareBoundParams($tableName, $boundColumns, $params);
         $stmt = $this->query($sql, $params);
         return $stmt->rowCount();

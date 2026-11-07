@@ -114,7 +114,7 @@ class Mage_Sales_Model_Observer
             $product = Mage::getModel('catalog/product')->load($product);
         }
         if ($product instanceof Mage_Catalog_Model_Product) {
-            $childrenProductList = Mage::getSingleton('catalog/product_type')->factory($product)
+            $childrenProductList = $product->getTypeInstance(true)
                 ->getChildrenIds($product->getId(), false);
 
             $productIdList = [$product->getId()];

@@ -22,7 +22,6 @@ class Mage_Index_Block_Adminhtml_Process_Edit extends Mage_Adminhtml_Block_Widge
 
         parent::__construct();
 
-        $this->_updateButton('save', 'label', Mage::helper('cms')->__('Save Process'));
         $this->_addButton('reindex', [
             'label'     => Mage::helper('index')->__('Reindex Data'),
             'onclick'   => 'indexReindexProcess(' . (int) Mage::registry('current_index_process')->getId() . ')',

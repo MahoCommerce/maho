@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
 // SPDX-License-Identifier: AFL-3.0
 
-import { Node, mergeAttributes } from 'https://esm.sh/@tiptap/core@3.31.3';
+import { Node, mergeAttributes } from '../../../../../tiptap.js';
 import { findParentNodeOfType, createGridNodeView, createCellNodeView, backgroundAttribute, setBackgroundAttr, bleedAttribute, setBleedAttr, setNodeAttrCommand, syncGridMenu } from './grid-utils.js';
 
 /**
@@ -215,6 +215,7 @@ export const MahoColumns = Node.create({
             storageName: 'mahoColumns',
             dataType: 'maho-columns',
             badgeLabel: 'Columns',
+            deleteTitle: 'Delete Columns',
             layoutAttr: 'layout',
 
             setDataAttrs(dom, node) {
@@ -328,21 +329,6 @@ export const MahoColumns = Node.create({
                         ...columnsNode.node.attrs,
                         gridStyle: style,
                     });
-                    dispatch(tr);
-                }
-
-                return true;
-            },
-
-            deleteColumns: () => ({ editor, state, tr, dispatch }) => {
-                const columnsNode = findParentNodeOfType(state.schema.nodes.mahoColumns)(state.selection);
-
-                if (!columnsNode) {
-                    return false;
-                }
-
-                if (dispatch) {
-                    tr.delete(columnsNode.pos, columnsNode.pos + columnsNode.node.nodeSize);
                     dispatch(tr);
                 }
 

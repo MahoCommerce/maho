@@ -15,7 +15,6 @@ class Maho_FeedManager_Block_Adminhtml_Dynamicrule extends Mage_Adminhtml_Block_
         $this->_controller = 'adminhtml_dynamicrule';
         $this->_blockGroup = 'feedmanager';
         $this->_headerText = Mage::helper('feedmanager')->__('Dynamic Attribute Rules');
-        $this->_addButtonLabel = Mage::helper('feedmanager')->__('Add New Rule');
         parent::__construct();
     }
 }

@@ -420,23 +420,6 @@ class Maho_Ai_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * An admin URL without a store code. The API and the queue workers run in a frontend store,
-     * whose code would end up in the path, so the URL is built in the admin store.
-     *
-     * @param array<string, mixed> $params
-     */
-    public function adminUrl(string $route, array $params = []): string
-    {
-        $code = Mage::app()->getStore()->getCode();
-        Mage::app()->setCurrentStore(Mage_Core_Model_Store::ADMIN_CODE);
-        try {
-            return Mage::helper('adminhtml')->getUrl($route, $params);
-        } finally {
-            Mage::app()->setCurrentStore($code);
-        }
-    }
-
-    /**
      * The editor guide the panel generated in the browser, kept in the cache per version of
      * the editor script, so the browser sends it once and not with every message.
      */
@@ -476,6 +459,7 @@ class Maho_Ai_Helper_Data extends Mage_Core_Helper_Abstract
             'admin_read_form' => $this->__('Read the form'),
             'admin_edit_text' => $this->__('Correct text in the form'),
             'admin_content_guide' => $this->__('Content editor guide'),
+            'docs_read' => $this->__('Read the user guide'),
             'enable_tools' => $this->__('Load tools'),
             'remember' => $this->__('Remember a note'),
             'forget' => $this->__('Forget a note'),

@@ -553,13 +553,14 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
      *
      * @param   int|Mage_Sales_Model_Quote_Item $item
      * @param   string $moveTo
-     * @param   int $qty
+     * @param   int|float|null $qty null moves the full quantity of the item
      * @return  Mage_Adminhtml_Model_Sales_Order_Create
      */
-    public function moveQuoteItem($item, $moveTo, $qty)
+    public function moveQuoteItem($item, $moveTo, $qty = null)
     {
         $item = $this->_getQuoteItem($item);
         if ($item) {
+            $qty ??= $item->getQty();
             $removeItem = false;
             $moveTo = explode('_', $moveTo);
             switch ($moveTo[0]) {
@@ -1232,10 +1233,9 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
     }
 
     /**
-     * @param array|Mage_Sales_Model_Quote_Address $address
      * @return $this
      */
-    public function setBillingAddress($address)
+    public function setBillingAddress(array|Mage_Sales_Model_Quote_Address $address)
     {
         if (is_array($address)) {
             $address['save_in_address_book'] = isset($address['save_in_address_book']) ? 1 : 0;
@@ -1244,7 +1244,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
                 ->setAddressType(Mage_Sales_Model_Quote_Address::TYPE_BILLING);
             $this->_setQuoteAddress($billingAddress, $address);
             $billingAddress->implodeStreetAddress();
-        } elseif ($address instanceof Mage_Sales_Model_Quote_Address) {
+        } else {
             $billingAddress = $address;
         }
 

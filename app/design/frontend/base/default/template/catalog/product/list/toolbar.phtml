@@ -39,12 +39,12 @@
                             <?php if ($this->isModeActive($_code)): ?>
                                 <strong title="<?= $_label ?>" class="<?= strtolower($_code) ?>">
                                     <?= $this->getIconSvg("layout-{$_code}") ?>
-                                    <?= $_label ?>
+                                    <span><?= $_label ?></span>
                                 </strong>
                             <?php else: ?>
                                 <a href="<?= $this->getModeUrl($_code) ?>" title="<?= $_label ?>" class="<?= strtolower($_code) ?>">
                                     <?= $this->getIconSvg("layout-{$_code}") ?>
-                                    <?= $_label ?>
+                                    <span><?= $_label ?></span>
                                 </a>
                             <?php endif ?>
                         <?php endforeach ?>

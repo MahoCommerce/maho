@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2022-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2022-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Adminhtml
@@ -321,7 +321,7 @@ class Mage_Adminhtml_Tax_RateController extends Mage_Adminhtml_Controller_Action
                     Mage::getSingleton('adminhtml/session')->addError(Mage::helper('tax')->__('Invalid file upload attempt'));
                 }
 
-                $country = Mage::getModel('directory/country')->loadByCode($v[1], 'iso2_code');
+                $country = Mage::getModel('directory/country')->loadByCode($v[1]);
                 if (!$country->getId()) {
                     Mage::getSingleton('adminhtml/session')->addError(Mage::helper('tax')->__('One of the country has invalid code.'));
                     continue;
@@ -440,7 +440,7 @@ class Mage_Adminhtml_Tax_RateController extends Mage_Adminhtml_Controller_Action
     {
         $action = strtolower($this->getRequest()->getActionName());
         return match ($action) {
-            'importexport' => Mage::getSingleton('admin/session')->isAllowed('sales/tax/import_export'),
+            'importexport', 'importpost', 'exportpost' => Mage::getSingleton('admin/session')->isAllowed('sales/tax/import_export'),
             default => Mage::getSingleton('admin/session')->isAllowed('sales/tax/rates'),
         };
     }

@@ -9,14 +9,13 @@ declare(strict_types=1);
 
 namespace MahoCLI\Commands;
 
-use Mage;
+use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\Ask;
+use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Helper\QuestionHelper;
-use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Question\Question;
+use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
     name: 'customer:delete',
@@ -24,76 +23,45 @@ use Symfony\Component\Console\Question\Question;
 )]
 class CustomerDelete extends BaseMahoCommand
 {
-    public function __invoke(InputInterface $input, OutputInterface $output): int
-    {
+    use CustomerLookupTrait;
+
+    public function __invoke(
+        InputInterface $input,
+        SymfonyStyle $io,
+        #[Argument(description: 'The email of the customer')]
+        #[Ask('Email:')]
+        #[\SensitiveParameter]
+        string $email,
+        #[Option(description: 'The code of the website, when customers of more websites have the email')]
+        ?string $website = null,
+        #[Option(description: 'Delete every customer that has the email')]
+        bool $all = false,
+    ): int {
         $this->initMaho();
 
-        /** @var QuestionHelper $questionHelper */
-        $questionHelper = $this->getHelper('question');
-
-        $question = new Question('email: ', '');
-        $email = $questionHelper->ask($input, $output, $question);
         $email = trim($email);
         if (!strlen($email)) {
-            $output->writeln('<error>Email cannot be empty</error>');
+            $io->writeln('<error>Email cannot be empty</error>');
             return Command::INVALID;
         }
 
-        $customerAttributes = ['entity_id', 'website_id', 'email', 'firstname', 'lastname'];
-        $customers = Mage::getResourceModel('customer/customer_collection')
-            ->addAttributeToSelect($customerAttributes)
-            ->addAttributeToFilter('email', ['eq' => $email]);
-
-        if ($customers->getSize() == 0) {
-            $output->writeln('<error>Customer not found.</error>');
+        $customers = $this->findCustomersByEmail($email, $website);
+        if (!$customers) {
+            $io->writeln('<error>Customer not found.</error>');
             return Command::FAILURE;
         }
 
-        if ($customers->getSize() == 1) {
-            foreach ($customers as $customer) {
-                $customer->delete();
-                $output->writeln("<info>Customer $email deleted.</info>");
-                return Command::SUCCESS;
+        if (!$all) {
+            $customers = $this->pickCustomers($input, $io, $customers, true);
+            if (!$customers) {
+                return Command::FAILURE;
             }
         }
-
-        $output->writeln('');
-        $output->writeln('<comment>More than one customer matches your search:</comment>');
-        $table = new Table($output);
-        $table->setHeaders($customerAttributes);
 
         foreach ($customers as $customer) {
-            $table->addRow([
-                $customer->getEntityId(),
-                $customer->getWebsiteId(),
-                $customer->getEmail(),
-                $customer->getFirstname(),
-                $customer->getLastname(),
-            ]);
+            $customer->delete();
         }
-        $table->render();
-
-        $question = new Question('Type the ID of the customer you wish to delete (or "A" to delete all): ', '');
-        $customerId = $questionHelper->ask($input, $output, $question);
-        $customerId = trim($customerId);
-
-        if ($customerId === 'A') {
-            foreach ($customers as $customer) {
-                $customer->delete();
-            }
-            $output->writeln('<info>Customers deleted.</info>');
-            return Command::SUCCESS;
-        }
-
-        $customer = Mage::getModel('customer/customer')
-            ->load($customerId);
-        if (!$customer->getId()) {
-            $output->writeln('<error>Customer not found.</error>');
-            return Command::FAILURE;
-        }
-
-        $customer->delete();
-        $output->writeln("<info>Customer $email deleted.</info>");
+        $io->writeln(count($customers) === 1 ? "<info>Customer $email deleted.</info>" : '<info>Customers deleted.</info>');
         return Command::SUCCESS;
     }
 }

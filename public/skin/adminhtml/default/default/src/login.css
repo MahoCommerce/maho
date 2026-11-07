@@ -1,0 +1,151 @@
+/*!
+ * Maho admin theme - the pages outside the admin frame: login, forgot password,
+ * reset password and the OAuth consent. They load this bundle alone, without styles.css.
+ *
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ */
+
+@import "./_theme.css";
+@import "tailwindcss/preflight.css" layer(base);
+
+@source "../../../../../../app/design/adminhtml/*/*/template/{login,forgotpassword,resetforgottenpassword}.phtml";
+@source "../../../../../../app/design/adminhtml/*/*/template/apiplatform/oauth/consent.phtml";
+@source "../../../../../../vendor/*/*/app/design/adminhtml/*/*/template/{login,forgotpassword,resetforgottenpassword}.phtml";
+@source "../../../../../../vendor/*/*/app/design/adminhtml/*/*/template/apiplatform/oauth/consent.phtml";
+
+@layer base {
+    /* These pages are not dense: they keep the DaisyUI default sizes */
+    :root {
+        --size-field: 0.25rem;
+        --size-selector: 0.25rem;
+    }
+
+    body {
+        font-family: var(--font-sans);
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+    }
+}
+
+/* Classes that scripts add: they must win over the d-input and layout classes in the markup */
+@layer utilities {
+    .no-display {
+        display: none;
+    }
+
+    input.validation-failed {
+        @apply d-input-error;
+    }
+}
+
+@layer components {
+    .login-page {
+        @apply flex min-h-dvh items-center justify-center bg-neutral p-4 text-base-content sm:p-6;
+        background-image: radial-gradient(ellipse at top, color-mix(in oklab, var(--color-accent) 12%, transparent), transparent 60%);
+    }
+
+    .login-box {
+        @apply w-full max-w-sm;
+    }
+
+    /* The card stays light in both schemes, so the full-color wordmark always reads */
+    .login-card {
+        @apply d-card bg-base-100 text-base-content shadow-2xl;
+        color-scheme: light;
+    }
+
+    .login-card .d-card-body {
+        @apply gap-5 p-6 sm:p-8;
+    }
+
+    .login-logo {
+        @apply mx-auto h-11 w-auto;
+    }
+
+    .login-title {
+        @apply text-center text-lg leading-snug font-semibold tracking-tight text-balance;
+    }
+
+    .login-field {
+        @apply flex flex-col gap-1.5;
+
+        & label {
+            @apply text-sm font-medium;
+        }
+
+        & .required {
+            @apply not-italic text-error;
+        }
+
+        & .note {
+            @apply text-xs text-base-content/60;
+        }
+    }
+
+    .login-actions {
+        @apply flex flex-col gap-3;
+    }
+
+    .login-link {
+        @apply d-link d-link-hover self-center text-center text-sm text-base-content/70;
+    }
+
+    .login-legal {
+        @apply mt-5 text-center text-xs text-neutral-content/50;
+    }
+
+    .validation-advice {
+        @apply text-xs text-error;
+    }
+
+    /* The messages block, or plain text from a failed AJAX step */
+    #messages {
+        @apply text-sm text-error empty:hidden;
+
+        & ul {
+            @apply list-none;
+        }
+
+        & > ul > li {
+            @apply d-alert d-alert-error d-alert-soft mb-2;
+        }
+
+        & > ul > li.success-msg {
+            @apply d-alert-success;
+        }
+
+        & > ul > li.warning-msg {
+            @apply d-alert-warning;
+        }
+
+        & > ul > li.notice-msg {
+            @apply d-alert-info;
+        }
+    }
+
+    /* The OAuth consent page */
+    .consent-lead {
+        @apply text-center text-base-content/80;
+    }
+
+    .consent-details {
+        @apply grid grid-cols-1 gap-x-4 text-sm sm:grid-cols-[auto_1fr] sm:gap-y-2;
+
+        & dt {
+            @apply text-base-content/60 not-first:mt-3 sm:not-first:mt-0;
+        }
+
+        & dd {
+            @apply min-w-0 wrap-anywhere;
+        }
+    }
+
+    .consent-heading {
+        @apply mb-2 font-medium;
+    }
+
+    .consent-grants {
+        @apply list-disc space-y-1 pl-5 text-base-content/80;
+    }
+}

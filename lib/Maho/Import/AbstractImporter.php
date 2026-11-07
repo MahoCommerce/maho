@@ -12,6 +12,8 @@ declare(strict_types=1);
 
 namespace Maho\Import;
 
+use Mage;
+
 abstract class AbstractImporter implements ImporterInterface
 {
     public function __construct(protected readonly Resolver $resolver = new Resolver()) {}
@@ -29,7 +31,10 @@ abstract class AbstractImporter implements ImporterInterface
         $file = CsvFile::open($csvPath, $this->requiredColumns());
         $options = $this->normalize($file, $options);
         $rows = $this->prepare($file, $options);
-        return $this->write($file, $rows, $options, $reporter ?? new NullReporter());
+        $result = $this->write($file, $rows, $options, $reporter ?? new NullReporter());
+        // An importer can write with SQL, so no save queues the build of the content classes
+        Mage::getSingleton('core/design_content_bundle')->queueBuild();
+        return $result;
     }
 
     /**

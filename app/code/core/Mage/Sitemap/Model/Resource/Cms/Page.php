@@ -25,6 +25,7 @@ class Mage_Sitemap_Model_Resource_Cms_Page extends Mage_Core_Model_Resource_Db_A
     public function getCollection($storeId)
     {
         $pages = [];
+        $noRoute = Mage::helper('cms/page')->getConfigPageIdentifier(Mage_Cms_Helper_Page::XML_PATH_NO_ROUTE_PAGE, (int) $storeId);
 
         $select = $this->_getWriteAdapter()->select()
             ->from(['main_table' => $this->getMainTable()], [$this->getIdFieldName(), 'identifier AS url'])
@@ -37,7 +38,7 @@ class Mage_Sitemap_Model_Resource_Cms_Page extends Mage_Core_Model_Resource_Db_A
             ->where('store_table.store_id IN(?)', [0, $storeId]);
         $query = $this->_getWriteAdapter()->query($select);
         while ($row = $query->fetch()) {
-            if ($row['url'] == Mage_Cms_Model_Page::NOROUTE_PAGE_ID) {
+            if ($row['url'] == Mage_Cms_Model_Page::NOROUTE_PAGE_ID || $row['url'] === $noRoute) {
                 continue;
             }
             $page = $this->_prepareObject($row);

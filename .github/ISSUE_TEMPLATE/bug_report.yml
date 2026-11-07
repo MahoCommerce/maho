@@ -1,0 +1,59 @@
+name: Bug report
+description: Something in Maho does not work as it should.
+type: Bug
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for the report. Do not report a security vulnerability here: use a
+        [security advisory](https://github.com/MahoCommerce/maho/security/advisories/new).
+  - type: input
+    id: version
+    attributes:
+      label: Maho version
+      description: Run `./maho --version` to read it.
+      placeholder: "26.11.0"
+    validations:
+      required: true
+  - type: input
+    id: php
+    attributes:
+      label: PHP version
+      placeholder: "8.5.1"
+    validations:
+      required: true
+  - type: dropdown
+    id: database
+    attributes:
+      label: Database
+      options:
+        - MySQL
+        - MariaDB
+        - PostgreSQL
+        - SQLite
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: The steps that show the problem, one per line, on a store with sample data if you can.
+      placeholder: |
+        1. Open ...
+        2. Click ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected result
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual result
+      description: What happens instead. Add the error message, the log lines from `var/log`, or a screenshot.
+    validations:
+      required: true

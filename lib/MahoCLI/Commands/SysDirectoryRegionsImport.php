@@ -346,7 +346,7 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
                 }
                 // Use first available translation as last resort
                 elseif (!empty($translations)) {
-                    $localizedNames[$code] = reset($translations);
+                    $localizedNames[$code] = array_first($translations);
                 }
             }
 

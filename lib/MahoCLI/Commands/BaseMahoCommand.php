@@ -35,8 +35,18 @@ abstract class BaseMahoCommand extends Command
      */
     protected bool $traceWholeCommand = true;
 
+    private bool $mahoInitialized = false;
+
+    /**
+     * Boot Maho in the admin store. An #[Interact] method can call it before __invoke(), so it runs once.
+     */
     protected function initMaho(): void
     {
+        if ($this->mahoInitialized) {
+            return;
+        }
+        $this->mahoInitialized = true;
+
         Mage::register('isSecureArea', true, true);
         Mage::app('admin');
 

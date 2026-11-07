@@ -87,14 +87,13 @@ class File extends \Maho\Io
      */
     public const ALLOWED_IMAGES_EXTENSIONS = ['webp', 'avif', 'jpg', 'jpeg', 'png', 'gif', 'bmp'];
 
-    public function __construct()
+    public function __destruct()
     {
-        // Initialize shutdown function
-        register_shutdown_function([$this, 'destruct']);
+        $this->destruct();
     }
 
     /**
-     * stream close on shutdown
+     * Close the stream
      */
     public function destruct(): void
     {

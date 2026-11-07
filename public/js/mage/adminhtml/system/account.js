@@ -21,7 +21,7 @@ class MahoAdminhtmlSystemAccountController
         window.editForm.submit();
         if (document.querySelector('input[name=current_password].validation-failed')) {
             setMessagesDiv(
-                Translator.translate('Enter current password and press "Save Account" to confirm passkey change.'), 'notice'
+                Translator.translate('Enter current password and press "Save" to confirm passkey change.'), 'notice'
             );
         }
     }

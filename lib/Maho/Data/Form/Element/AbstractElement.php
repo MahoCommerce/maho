@@ -17,7 +17,7 @@ use Maho\Data\Form\Element\Renderer\RendererInterface;
 
 /**
  * @method Form getForm()
- * @method string getValue()
+ * @method string getValue(string|null $index = null)
  * @method $this unsCanUseDefaultValue()
  * @method $this unsCanUseWebsiteValue()
  * @method $this unsScope()

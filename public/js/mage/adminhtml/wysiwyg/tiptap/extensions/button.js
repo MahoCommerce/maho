@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
 // SPDX-License-Identifier: OSL-3.0
 
-import { Extension } from 'https://esm.sh/@tiptap/core@3.31.3';
-import { Plugin, PluginKey } from 'https://esm.sh/@tiptap/pm@3.31.3/state';
+import { Extension, Plugin, PluginKey } from '../../../../../tiptap.js';
 
 /**
  * The daisyUI classes of a storefront button. tailwind.css builds every one of them,

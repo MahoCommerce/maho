@@ -16,11 +16,8 @@ class Mage_Payment_Block_Adminhtml_Payment_Restriction_Edit extends Mage_Adminht
         $this->_blockGroup = 'payment';
         $this->_controller = 'adminhtml_payment_restriction';
 
-        $this->_updateButton('save', 'label', Mage::helper('payment')->__('Save Restriction'));
-        $this->_updateButton('delete', 'label', Mage::helper('payment')->__('Delete Restriction'));
-
         $this->_addButton('saveandcontinue', [
-            'label'     => Mage::helper('adminhtml')->__('Save and Continue Edit'),
+            'label'     => Mage::helper('adminhtml')->__('Save and Continue'),
             'onclick'   => 'saveAndContinueEdit()',
             'class'     => 'save',
         ], -100);

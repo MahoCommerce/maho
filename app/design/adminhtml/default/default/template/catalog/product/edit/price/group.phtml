@@ -18,7 +18,7 @@ $_priceValueValidation = $this->getPriceValidation('validate-zero-or-greater');
 $_showWebsite = $this->isMultiWebsites();
 ?>
 <tr>
-    <td class="label"><?= $this->getElement()->getLabel() ?></td>
+    <td class="label" id="<?= $_htmlId ?>-label"><?= $this->getElement()->getLabel() ?></td>
     <td colspan="10" class="grid tier">
     <table cellspacing="0" class="data border" id="group_prices_table">
         <?php if ($_showWebsite): ?>
@@ -60,7 +60,7 @@ var groupPriceRowTemplate = '<tr>'
     + '<td><input class="<?= $_htmlClass ?> required-entry <?= $_priceValueValidation ?>" type="text" name="<?= $_htmlName ?>[{{index}}][price]" value="{{price}}" id="group_price_row_{{index}}_price">'
     + '<input type="hidden" name="<?= $_htmlName ?>[{{index}}][is_percent]" value="<?php if ($this->getIsPercent()): ?>1<?php else: ?>0<?php endif ?>" id="group_price_row_{{index}}_is_percent"></td>'
     + '<td class="last"><input type="hidden" name="<?= $_htmlName ?>[{{index}}][delete]" class="delete" value="" id="group_price_row_{{index}}_delete">'
-    + '<button title="<?= $this->jsQuoteEscape(Mage::helper('catalog')->__('Delete Group Price')) ?>" type="button" class="scalable delete icon-btn delete-product-option" id="group_price_row_{{index}}_delete_button" onclick="return groupPriceControl.deleteItem(event);">'
+    + '<button title="<?= $this->jsQuoteEscape(Mage::helper('catalog')->__('Delete')) ?>" type="button" class="scalable delete icon-btn delete-product-option" id="group_price_row_{{index}}_delete_button" onclick="return groupPriceControl.deleteItem(event);">'
     + '<?= $this->jsQuoteEscape(Mage::helper('catalog')->__('Delete')) ?></button></td>'
     + '</tr>';
 

@@ -91,7 +91,7 @@ class Maho_Ai_Model_Chat_ToolExecutor implements ToolExecutorInterface
             $seen[self::payloadKey($toolCall)] = $id;
             $name = $toolCall->getName();
             // A job approves in advance only the update of one record. Every other write waits for the administrator.
-            if (!$this->toolbox->isReadOnly($name) && !($this->toolbox->mode()->approvesWrites() && $this->toolbox->isRecordUpdate($name))) {
+            if ($this->toolbox->needsConfirmation($toolCall) && !($this->toolbox->mode()->approvesWrites() && $this->toolbox->isRecordUpdate($name))) {
                 $pending[] = $toolCall;
                 continue;
             }

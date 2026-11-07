@@ -32,6 +32,8 @@ class Mage_SalesRule_Model_Quote_Freeshipping extends Mage_Sales_Model_Quote_Add
     public function collect(Mage_Sales_Model_Quote_Address $address)
     {
         parent::collect($address);
+        $this->_calculator->reset($address);
+        $address->collectWeight();
         $quote = $address->getQuote();
         $store = Mage::app()->getStore($quote->getStoreId());
 

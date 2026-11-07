@@ -23,7 +23,7 @@ class varienForm {
     }
 
     validate() {
-        varienGlobalEvents?.fireEvent('formValidate', this.formId);
+        window.varienGlobalEvents?.fireEvent('formValidate', this.formId);
         if(this.validator && this.validator.validate()){
             if(this.validationUrl){
                 this._validate();
@@ -34,7 +34,7 @@ class varienForm {
     }
 
     submit(url) {
-        varienGlobalEvents?.fireEvent('formSubmit', this.formId);
+        window.varienGlobalEvents?.fireEvent('formSubmit', this.formId);
         this.errorSections = new Map();
         this.canShowError = true;
         this.submitUrl = url;
@@ -68,7 +68,7 @@ class varienForm {
     }
 
     _processValidationResult(response) {
-        varienGlobalEvents?.fireEvent('formValidateAjaxComplete', response);
+        window.varienGlobalEvents?.fireEvent('formValidateAjaxComplete', response);
         if(response.error){
             setMessagesDivHtml(response.message);
         }
@@ -704,6 +704,15 @@ function setPostcodeOptional(zipElement, country) {
     }
 }
 
-varienGlobalEvents?.attachEventHandler("address_country_changed", onAddressCountryChanged);
+window.varienGlobalEvents?.attachEventHandler("address_country_changed", onAddressCountryChanged);
+
+// Highlight a file input while a file is dragged over it. The browser itself takes the dropped file.
+for (const type of ['dragenter', 'dragleave', 'drop']) {
+    document.addEventListener(type, (event) => {
+        if (event.target instanceof HTMLInputElement && event.target.type === 'file') {
+            event.target.classList.toggle('is-dragover', type === 'dragenter');
+        }
+    });
+}
 
 // Classes are now global by default with lowercase naming matching original prototypejs

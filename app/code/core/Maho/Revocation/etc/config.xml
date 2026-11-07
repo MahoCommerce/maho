@@ -10,6 +10,9 @@ SPDX-License-Identifier: OSL-3.0
         </Maho_Revocation>
     </modules>
     <global>
+        <docs>
+            <user>docs/user</user>
+        </docs>
         <models>
             <revocation>
                 <class>Maho_Revocation_Model</class>

@@ -47,7 +47,7 @@ SPDX-License-Identifier: AFL-3.0
 
     <script path="mage/adminhtml/system/account.js" module="adminhtml">
         <confirm-current-password translate="message">
-            <message>Enter current password and press "Save Account" to confirm passkey change.</message>
+            <message>Enter current password and press "Save" to confirm passkey change.</message>
         </confirm-current-password>
         <passkey-registered translate="message">
             <message>Passkey will be registered upon saving.</message>

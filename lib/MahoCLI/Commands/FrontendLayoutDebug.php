@@ -234,7 +234,7 @@ class FrontendLayoutDebug extends BaseMahoCommand
         }
 
         // Always ends with base/default if not already there
-        if (end($chain) !== 'base/default') {
+        if (array_last($chain) !== 'base/default') {
             $chain[] = 'base/default';
         }
 

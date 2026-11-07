@@ -18,10 +18,8 @@ class Maho_ApiPlatform_Block_Adminhtml_Apiplatform_User_Edit extends Mage_Adminh
 
         parent::__construct();
 
-        $this->_updateButton('save', 'label', $this->__('Save API User'));
-        $this->_updateButton('delete', 'label', $this->__('Delete API User'));
         $this->_addButton('saveandcontinue', [
-            'label'   => $this->__('Save and Continue Edit'),
+            'label'   => $this->__('Save and Continue'),
             'onclick' => 'saveAndContinueEdit()',
             'class'   => 'save',
         ], -100);

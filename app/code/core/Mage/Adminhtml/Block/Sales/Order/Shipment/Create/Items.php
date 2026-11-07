@@ -51,7 +51,7 @@ class Mage_Adminhtml_Block_Sales_Order_Shipment_Create_Items extends Mage_Adminh
         $this->setChild(
             'submit_button',
             $this->getLayout()->createBlock('adminhtml/widget_button')->setData([
-                'label'     => Mage::helper('sales')->__('Submit Shipment'),
+                'label'     => Mage::helper('sales')->__('Submit'),
                 'class'     => 'save submit-button',
                 'onclick'   => 'submitShipment(this);',
             ]),

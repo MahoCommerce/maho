@@ -16,7 +16,7 @@
 """%s"" length must be equal or less than %s characters.","""%s"" length must be equal or less than %s characters."
 """%s"" width exceeds allowed value of %s px.","""%s"" width exceeds allowed value of %s px."
 ". Do not use ""event"" for an attribute code, it is a reserved keyword.",". Do not use ""event"" for an attribute code, it is a reserved keyword."
-"Add Option","Add Option"
+"Add","Add"
 "A joint field with this alias (%s) is already declared","A joint field with this alias (%s) is already declared"
 "An error occurred while loading a record, aborting. Error: %s","An error occurred while loading a record, aborting. Error: %s"
 "An error occurred while loading the collection, aborting. Error: %s","An error occurred while loading the collection, aborting. Error: %s"

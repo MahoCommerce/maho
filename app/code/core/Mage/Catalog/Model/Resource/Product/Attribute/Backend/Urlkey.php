@@ -42,7 +42,7 @@ class Mage_Catalog_Model_Resource_Product_Attribute_Backend_Urlkey extends Mage_
     public function afterSave($object)
     {
         if ($object->dataHasChangedFor($this->getAttribute()->getName())) {
-            Mage::getSingleton('catalog/url')->refreshProductRewrites(null, $object, true);
+            Mage::getSingleton('catalog/url')->refreshProductRewrite((int) $object->getId());
         }
         return $this;
     }

@@ -17,14 +17,15 @@ $errorMessage = $this->getErrorMessage();
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#121212">
     <title><?= $this->escapeHtml($this->__('Authorize Application')) ?></title>
-    <link type="text/css" rel="stylesheet" href="<?= $this->getSkinUrl('login.css') ?>" media="all">
+    <link type="text/css" rel="stylesheet" href="<?= $this->getSkinUrl('css/login.css') ?>" media="all">
     <?= Mage::helper('page')->getFaviconHtml() ?>
 </head>
-<body id="page-login">
-    <div class="login-container">
-        <div class="login-box">
-            <div class="login-form consent">
-                <h2><?= $this->escapeHtml($this->__('Authorize Application')) ?></h2>
+<body id="page-login" class="login-page">
+    <main class="login-box">
+        <div class="login-card">
+            <div class="login-form consent d-card-body">
+                <img src="<?= $this->getSkinUrl('images/logo.svg') ?>" alt="Maho" width="170" height="46" class="login-logo">
+                <h1 class="login-title"><?= $this->escapeHtml($this->__('Authorize Application')) ?></h1>
 
                 <?php if ($errorMessage !== null): ?>
                     <div id="messages">
@@ -63,14 +64,14 @@ $errorMessage = $this->getErrorMessage();
 
                     <form action="<?= $this->escapeUrl($this->getFormActionUrl()) ?>" method="post">
                         <input name="form_key" type="hidden" value="<?= $this->getFormKey() ?>">
-                        <div class="form-buttons">
-                            <button type="submit" name="decision" value="approve" class="form-button primary"><?= $this->escapeHtml($this->__('Approve')) ?></button>
-                            <button type="submit" name="decision" value="deny" class="form-button"><?= $this->escapeHtml($this->__('Deny')) ?></button>
+                        <div class="login-actions">
+                            <button type="submit" name="decision" value="approve" class="d-btn d-btn-accent d-btn-block"><?= $this->escapeHtml($this->__('Approve')) ?></button>
+                            <button type="submit" name="decision" value="deny" class="d-btn d-btn-block"><?= $this->escapeHtml($this->__('Deny')) ?></button>
                         </div>
                     </form>
                 <?php endif ?>
             </div>
         </div>
-    </div>
+    </main>
 </body>
 </html>

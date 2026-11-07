@@ -64,10 +64,18 @@ describe('Mapper default mappings', function () {
 describe('One resolver for every output engine', function () {
     function firstSimpleProduct(): Mage_Catalog_Model_Product
     {
+        // A child of a configurable product takes the prices of its parent
+        $resource = Mage::getSingleton('core/resource');
+        $adapter = $resource->getConnection('core_read');
+        $childIds = $adapter->fetchCol(
+            $adapter->select()->from($resource->getTableName('catalog/product_super_link'), ['product_id']),
+        );
+
         $product = Mage::getResourceModel('catalog/product_collection')
             ->setStoreId(1)
             ->addAttributeToSelect('*')
             ->addFieldToFilter('type_id', 'simple')
+            ->addFieldToFilter('entity_id', ['nin' => $childIds ?: [0]])
             ->addPriceData()
             ->setPageSize(1)
             ->getFirstItem();

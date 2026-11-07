@@ -47,7 +47,7 @@ class Mage_CurrencySymbol_Block_Adminhtml_System_Currencysymbol extends Mage_Adm
     {
         $block = $this->getLayout()->createBlock('adminhtml/widget_button');
         $block->setData([
-            'label'     => Mage::helper('currencysymbol')->__('Save Currency Symbols'),
+            'label'     => Mage::helper('currencysymbol')->__('Save'),
             'onclick'   => 'currencySymbolsForm.submit();',
             'class'     => 'save',
         ]);

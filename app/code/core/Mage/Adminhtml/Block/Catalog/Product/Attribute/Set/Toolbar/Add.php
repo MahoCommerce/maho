@@ -23,7 +23,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Attribute_Set_Toolbar_Add extends Mag
             'save_button',
             $this->getLayout()->createBlock('adminhtml/widget_button')
                 ->setData([
-                    'label'     => Mage::helper('catalog')->__('Save Attribute Set'),
+                    'label'     => Mage::helper('catalog')->__('Save'),
                     'onclick'   => 'if (addSet.submit()) disableElements(\'save\');',
                     'class' => 'save',
                 ]),

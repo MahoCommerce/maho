@@ -60,7 +60,7 @@ class Mage_Rss_Model_Rss
             // Add channel metadata
             $this->addTextElement($dom, $channel, 'title', $feed['title'] ?? '');
             $this->addTextElement($dom, $channel, 'link', $feed['link'] ?? '');
-            $this->addTextElement($dom, $channel, 'description', $feed['description'] ?? '', true);
+            $this->addTextElement($dom, $channel, 'description', $feed['description'] ?? '');
 
             if (!empty($feed['language'])) {
                 // Convert locale code (en_US) to ISO-639 language code (en)

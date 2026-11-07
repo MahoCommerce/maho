@@ -10,6 +10,11 @@ declare(strict_types=1);
 
 class Maho_Revocation_Block_Adminhtml_Request_Grid extends Mage_Adminhtml_Block_Widget_Grid
 {
+    /**
+     * Grid parameter of the suppression chip: "1" shows only the requests with a suppressed receipt email.
+     */
+    public const VAR_NAME_SUPPRESSED = 'suppressed';
+
     public function __construct()
     {
         parent::__construct();
@@ -21,9 +26,53 @@ class Maho_Revocation_Block_Adminhtml_Request_Grid extends Mage_Adminhtml_Block_
     }
 
     #[\Override]
+    protected function _prepareLayout()
+    {
+        $this->setChild(
+            'suppression_filter',
+            $this->getLayout()->createBlock('adminhtml/template')
+                ->setTemplate('revocation/request/grid/suppression-filter.phtml'),
+        );
+        return parent::_prepareLayout();
+    }
+
+    #[\Override]
+    public function getMainButtonsHtml(): string
+    {
+        return $this->getChildHtml('suppression_filter') . parent::getMainButtonsHtml();
+    }
+
+    public function isSuppressedOnly(): bool
+    {
+        return (string) $this->getParam(self::VAR_NAME_SUPPRESSED) === '1';
+    }
+
+    public function getSuppressedCount(): int
+    {
+        return $this->_addSuppressedFilter(Mage::getResourceModel('revocation/request_collection'))->getSize();
+    }
+
+    #[\Override]
+    public function resetSavedParametersInSession(): void
+    {
+        parent::resetSavedParametersInSession();
+        Mage::getSingleton('adminhtml/session')->unsetData($this->getId() . self::VAR_NAME_SUPPRESSED);
+    }
+
+    protected function _addSuppressedFilter(
+        Maho_Revocation_Model_Resource_Request_Collection $collection,
+    ): Maho_Revocation_Model_Resource_Request_Collection {
+        $collection->addFieldToFilter('suppressed_at', ['notnull' => true]);
+        return $collection;
+    }
+
+    #[\Override]
     protected function _prepareCollection()
     {
         $collection = Mage::getResourceModel('revocation/request_collection');
+        if ($this->isSuppressedOnly()) {
+            $this->_addSuppressedFilter($collection);
+        }
         $this->setCollection($collection);
         return parent::_prepareCollection();
     }

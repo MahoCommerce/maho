@@ -21,6 +21,7 @@ composer test:pgsql                # Same, against PostgreSQL (also: test:sqlite
 ./maho db:query "QUERY"            # One-shot SQL query
 
 ./maho dev:frontend:theme:build    # Compile the Tailwind skins (--theme, --watch)
+./maho dev:admin:theme:build       # Compile the Tailwind admin skin (--watch)
 ./maho dev:frontend:theme:create   # Scaffold a new theme
 ./maho dev:frontend:theme:export   # Write the admin theme settings out as a theme.css
 npm install                        # Build toolchain, also copies the pinned JS libs into public/js
@@ -39,6 +40,10 @@ npm install                        # Build toolchain, also copies the pinned JS 
 - `lib/MahoCLI/Commands/`: `./maho` CLI commands
 - `public/skin/frontend/`: Tailwind theme sources under `base/default/src/`, compiled bundles
   committed next to them; see the README in that folder
+- `public/skin/adminhtml/default/default/src/`: Tailwind and daisyUI sources of the admin skin; see
+  Admin theme below
+- `.claude/skills/`: project skills, such as `assistant-benchmark`, which measures the answers of the
+  admin assistant before and after a change to its prompt, its tools or the docs
 
 ### Database access (Doctrine DBAL)
 
@@ -141,8 +146,8 @@ public function setIsActive(?bool $value = true): static
 
 ### Configuration via PHP attributes
 
-Observers, cron jobs, routes, message handlers, and API resources are declared with PHP
-attributes in `lib/Maho/Config/`, **not** in XML. They are compiled into
+Observers, cron jobs, routes, message handlers, Tailwind sources, and API resources are declared
+with PHP attributes in `lib/Maho/Config/`, **not** in XML. They are compiled into
 `vendor/composer/maho_*.php`, so **run `composer dump-autoload` after any change**. See each
 attribute class's docblock for the full parameter list.
 
@@ -158,6 +163,10 @@ public function runJob(Mage_Cron_Model_Schedule $schedule) {}
 
 #[Maho\Config\MessageHandler]
 public function __invoke(My_Module_Model_SomeMessage $message): void {}
+
+// Storefront HTML in the database, whose classes the Tailwind content build compiles
+#[Maho\Config\TailwindSource('my_entity', model: My_Module_Model_Entity::class, fields: ['content'])]
+public function getTailwindContent(): iterable {}
 ```
 
 - Prefer the global area (default, omit `area:`) unless the observer must be area-restricted
@@ -248,6 +257,12 @@ class My_Module_Checkout_CartController extends Mage_Checkout_CartController { /
       #[Option(description: 'Unlock every schedule', name: 'all')] bool $unlockAll = false,
   ): int {
   ```
+
+  Every input of a command is an argument or an option, so that a script runs it in one line with `-n`. A
+  person in a terminal gets a question for each required argument that is missing: put `#[Ask]` on a typed
+  value (`hidden: true` for a password), and ask a choice from the store in an `#[Interact]` method that
+  calls `initMaho()` first. `__invoke()` asks only a question that depends on the data it loaded, and only
+  when `$input->isInteractive()`. A confirmation before a change takes `--force` (`-f`).
 - **Async queue**: `\Maho\Queue\QueueManager::dispatch($messageDto)` queues a flat DTO for a
   `#[Maho\Config\MessageHandler]` method (message class inferred from the first parameter type);
   cron keeps a detached `queue:work` worker alive per pool, with retries/backoff and an admin
@@ -301,6 +316,23 @@ class My_Module_Checkout_CartController extends Mage_Checkout_CartController { /
   reads the request (a path, a body, the API Platform context) stays in the transport, as
   `Mage\Checkout\Api\CartRequest` does. `tests/Backend/Unit/Maho/ServiceLayoutTest.php` enforces the
   layout
+- **Docs**: a module keeps the pages about its feature in its own folder and declares them in its
+  `config.xml`, one folder for each audience: `<global><docs><user>docs/user</user></docs></global>`.
+  `user` is the person who works in the admin, `developer` writes code, `sysadmin` runs the
+  server, and `api` calls the API of the store. Maho stores the declaration under the module name when it loads the module, so a disabled
+  module has no pages. A page is a `.md` file with a `description:` in its front matter and one `#`
+  title, in the format of mahocommerce.com. An `admin_pages: [catalog_product/edit, cms_page]` line in
+  the front matter names the admin pages that the page explains, as `controller/action` or as a
+  controller for all its actions: on those pages, the admin assistant names the page to the model. The admin assistant reads the `user` and `sysadmin`
+  pages through `docs_read`, so a page gives the rules, the order in which the store picks a value,
+  and the labels of the admin. A change to a documented feature updates its page in the same pull
+  request. `Maho\Docs\Library` lists the pages. A page that no single module owns goes in
+  `docs/user-guide`, `docs/developer`, `docs/api` or `docs/hosting`. mahocommerce.com builds these
+  folders and the module folders from `main`: it puts a `user` page in `user-guide/`, a `developer`
+  page in `developer/`, a `sysadmin` page in `hosting/` and an `api` page in `api/`. So write each link as a path on the
+  site, list each new page in the `.nav.yml` of its site folder, and put an image in an `images/`
+  folder next to the page. The Docs workflow builds the site with `--strict`, so a broken link or
+  a page that is not in a `.nav.yml` fails the check
 - **Errors**: `Mage::throwException()` for user-facing errors (`Mage_Core_Exception`),
   `Mage::log()` / `Mage::logException()` for logging
 
@@ -339,10 +371,30 @@ All Zend Framework and Varien components have been deleted:
 - Before committing, ensure new translatable strings (`$this->__()`,
   `Mage::helper()->__()`) exist in `app/locale/en_US/`
 
+### Admin theme (Tailwind 4 + daisyUI 5)
+
+- `./maho dev:admin:theme:build` compiles `src/` into `css/styles.css`, which is committed. Rebuild
+  after you change a source or a template.
+- daisyUI classes carry the `d-` prefix (`d-btn`, `d-select`), because the admin markup already
+  uses `.grid`, `.label`, `.tabs` and other Tailwind names.
+- New admin markup uses daisyUI classes directly. Older markup keeps its classes, which
+  `_components.css` maps onto daisyUI with `@apply`.
+- daisyUI puts the classes that markup uses in the utilities layer. A rule that adjusts them goes in
+  the `@layer utilities` block at the end of `_components.css`.
+- `base.css` and `form.css` are outside the cascade layers, so they win over every layered rule.
+  Delete or narrow the legacy rule when you restyle an element. Use a layered `!important` only
+  when the legacy rule must stay for other pages, with a comment that says so.
+- Tailwind scans the admin templates, layouts and scripts, not `app/code`. A class that only PHP
+  writes needs `@source inline()` in `tailwind.css`.
+- Button labels are short and generic: "Save", "Delete", "Add", "Submit", "Save and Continue".
+  Keep the noun only when one page has two buttons with the same verb. Give a button whose label
+  repeats on the page an `aria_labelledby` that names its field.
+
 ### File headers (SPDX)
 
-Dual-licensed: source code (PHP, JS, CSS) under `OSL-3.0`; templates, config, and assets
-(PHTML, XML, HTML) under `AFL-3.0`.
+Dual-licensed, as in Magento: all PHP under `OSL-3.0`, including the attribute classes in
+`lib/Maho/Config/`; PHTML templates, XML configuration and front-end assets (HTML, JS, CSS)
+under `AFL-3.0`.
 
 New PHP files get a single `SPDX-FileCopyrightText` line with the current year and Maho as
 holder. Add a short class description on the first line ending with a period (it becomes the

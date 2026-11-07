@@ -25,6 +25,7 @@ class MahoAiAssistant {
         this.conversationId = null;
         this.abortController = null;
         this.pendingCard = null;
+        this.pageCallIds = new Set();
         this.changedFields = new Set();
         this.setupChat();
         this.trackChanges();
@@ -285,6 +286,10 @@ class MahoAiAssistant {
                 history.push({ role: 'ai', html: this.renderWorking(data.conversation.queued ? this.labels.queued : this.labels.running) });
             }
             this.chat.history = history;
+            // The steps of a page action are for the page where the model wrote them: deny them on any other page.
+            if (!this.abortController && pending.some((call) => call.name === 'admin_page_action' && !this.pageCallIds.has(call.id))) {
+                this.onDeny();
+            }
             setTimeout(() => this.updateIntro(history.length > 0), 100);
             setTimeout(() => this.chat.scrollToBottom(), 50);
             this.watchBackground(data.conversation.running ? id : null);
@@ -601,7 +606,7 @@ class MahoAiAssistant {
             case 'replace':
                 if (state.textIndex !== null) {
                     state.text = data.text ?? '';
-                    this.chat.updateMessage({ text: state.text }, state.textIndex);
+                    this.updateStreamed({ text: state.text }, state.textIndex);
                 }
                 break;
             case 'tool_call': {
@@ -615,7 +620,7 @@ class MahoAiAssistant {
                 const step = state.steps.get(data.id);
                 if (step) {
                     const status = data.denied ? 'denied' : (data.ok ? 'done' : 'error');
-                    this.chat.updateMessage({ html: this.renderStep(step.call, { status, preview: data.preview, undo: data.undo ?? null, recordUrl: data.record_url ?? null }) }, step.index);
+                    this.updateStreamed({ html: this.renderStep(step.call, { status, preview: data.preview, undo: data.undo ?? null, recordUrl: data.record_url ?? null }) }, step.index);
                 } else if (data.denied) {
                     this.chat.addMessage({ html: this.renderStep({ id: data.id, name: '', title: '', arguments: {} }, { status: 'denied' }), role: 'ai' });
                 }
@@ -652,14 +657,15 @@ class MahoAiAssistant {
                 if (data.conversation_id) {
                     this.rememberConversation(data.conversation_id);
                 }
-                if (state.textEdits.length > 0 && data.state === 'complete') {
+                if (state.textEdits.length > 0 && (data.state === 'complete' || data.state === 'awaiting_confirmation')) {
                     const edits = state.textEdits;
                     setTimeout(() => this.applyTextEdits(edits), 800);
                 }
                 if (state.navigateTo && data.state === 'complete') {
                     const { url, fields } = state.navigateTo;
                     setTimeout(() => this.navigate(url, fields), 800);
-                } else if (state.pageAction && data.state === 'complete') {
+                } else if (state.pageAction && (data.state === 'complete' || data.state === 'awaiting_confirmation')) {
+                    // A turn that waits for a click applies the steps that already ran: the click comes after the approval.
                     const steps = state.pageAction;
                     setTimeout(() => this.performPageActions(steps), 800);
                 } else if (data.state === 'complete' && state.changedRecords.some((url) => this.samePage(url, window.location.href))) {
@@ -679,7 +685,17 @@ class MahoAiAssistant {
             this.chat.addMessage({ text: state.text, role: 'ai' });
             state.textIndex = this.lastIndex();
         } else {
-            this.chat.updateMessage({ text: state.text }, state.textIndex);
+            this.updateStreamed({ text: state.text }, state.textIndex);
+        }
+    }
+
+    /** deep-chat does not scroll on updateMessage(), so the panel follows the answer while the administrator is at the bottom. */
+    updateStreamed(message, index) {
+        const messages = this.chat.shadowRoot?.querySelector('#messages');
+        const atBottom = messages && messages.scrollHeight - messages.clientHeight - messages.scrollTop < 80;
+        this.chat.updateMessage(message, index);
+        if (atBottom) {
+            messages.scrollTop = messages.scrollHeight;
         }
     }
 
@@ -730,6 +746,14 @@ class MahoAiAssistant {
         return guide;
     }
 
+    /** The header links of the configuration groups that are closed. */
+    closedGroups() {
+        return [...document.querySelectorAll('.entry-edit-head.collapseable a[id$="-head"]')].filter((link) => {
+            const group = document.getElementById(link.id.slice(0, -'-head'.length));
+            return !!group && group.getClientRects().length === 0;
+        });
+    }
+
     screenDigest() {
         const lines = [];
         const text = (node) => (node?.textContent ?? '').replace(/\s+/g, ' ').trim();
@@ -751,9 +775,22 @@ class MahoAiAssistant {
             scope = (active && document.getElementById(active.id + '_content')) || document;
         }
 
+        const closed = this.closedGroups().filter(visible).map((link) => text(link));
+        if (closed.length > 0) {
+            lines.push('Closed groups, whose fields are not listed (open one with open_tab): ' + closed.join(', '));
+        }
+
         const fields = [];
+        let fieldCount = 0;
         for (const element of scope.querySelectorAll('input, select, textarea')) {
-            if (fields.length >= 40 || !visible(element) || ['hidden', 'password', 'submit', 'button', 'file'].includes(element.type) || element.closest('.grid, #ai-chat-panel')) {
+            if (!visible(element) || ['hidden', 'password', 'submit', 'button', 'file'].includes(element.type) || element.closest('.grid, #ai-chat-panel')) {
+                continue;
+            }
+            if (element.type === 'radio' && !element.checked) {
+                continue;
+            }
+            fieldCount++;
+            if (fields.length >= 40) {
                 continue;
             }
             const label = this.fieldLabel(element);
@@ -764,9 +801,6 @@ class MahoAiAssistant {
                 // An unchecked box is listed too: the model needs its label to check it.
                 value = element.checked ? 'checked' : 'not checked';
             } else if (element.type === 'radio') {
-                if (!element.checked) {
-                    continue;
-                }
                 value = 'checked';
             } else {
                 value = element.value;
@@ -775,7 +809,8 @@ class MahoAiAssistant {
             fields.push(`${clip(label, 40)} = ${clip(String(value ?? ''), editor ? 400 : 80)}${editor ? ' (rich text editor)' : ''}`);
         }
         if (fields.length > 0) {
-            lines.push('Fields: ' + fields.join('; '));
+            const cut = fieldCount > fields.length ? ` (the first ${fields.length} of ${fieldCount}, the others are not listed)` : '';
+            lines.push(`Fields${cut}: ` + fields.join('; '));
         }
         const changed = [...this.changedFields].map((id) => document.getElementById(id)).filter(Boolean).map((element) => this.fieldLabel(element));
         if (changed.length > 0) {
@@ -789,7 +824,7 @@ class MahoAiAssistant {
 
         const buttons = [...document.querySelectorAll('button, a.button, input[type="submit"]')]
             .filter((b) => visible(b) && !b.closest('.tiptap-toolbar, .grid, #ai-chat-panel'))
-            .map((b) => text(b) || b.title || b.value).filter(Boolean);
+            .map((b) => this.buttonName(b)).filter(Boolean);
         if (buttons.length > 0) {
             lines.push('Page buttons: ' + [...new Set(buttons)].slice(0, 40).join(', '));
         }
@@ -814,9 +849,38 @@ class MahoAiAssistant {
         return clip(lines.join('\n'), 6000);
     }
 
+    /** The name that a screen reader reads: the elements in aria-labelledby, else the text, title or value of the button. */
+    buttonName(button) {
+        const parts = (button.getAttribute('aria-labelledby') ?? '').split(/\s+/).map((id) => document.getElementById(id)).filter(Boolean)
+            .map((node) => (node.matches('input, textarea, select') ? node.value : node.textContent));
+        const name = parts.length > 0 ? parts.join(' ') : (button.textContent || button.title || button.value);
+        return String(name ?? '').replace(/\s+/g, ' ').trim();
+    }
+
     fieldLabel(element) {
         const text = (node) => (node?.textContent ?? '').replace(/\s+/g, ' ').trim().replace(/\s*\*$/, '');
-        return text(element.id ? document.querySelector(`label[for="${CSS.escape(element.id)}"]`) : null) || text(element.closest('tr')?.querySelector('td.label, th')) || element.name || element.id;
+        const cell = element.closest('td');
+        return text(element.id ? document.querySelector(`label[for="${CSS.escape(element.id)}"]`) : null) || text(element.closest('tr')?.querySelector('td.label, th')) || text(cell ? this.columnHeader(cell) : null) || element.name || element.id;
+    }
+
+    /** The header cell above a table cell. Columns count by colspan, so a wide cell before it does not shift the match. */
+    columnHeader(cell) {
+        const headers = cell.closest('table')?.tHead?.rows[0]?.cells ?? [];
+        let column = 0;
+        for (const previous of cell.parentElement.cells) {
+            if (previous === cell) {
+                break;
+            }
+            column += previous.colSpan;
+        }
+        let start = 0;
+        for (const header of headers) {
+            start += header.colSpan;
+            if (column < start) {
+                return header;
+            }
+        }
+        return null;
     }
 
     // --- form text --------------------------------------------------------------------
@@ -832,7 +896,7 @@ class MahoAiAssistant {
             const element = event.target;
             const field = ['INPUT', 'TEXTAREA', 'SELECT'].includes(element.tagName)
                 ? element
-                : [...(window.tiptapEditors?.values() ?? [])].find((editor) => editor.wrapper?.contains(element))?.textarea;
+                : [...(window.tiptapEditors?.values() ?? [])].find((editor) => editor.wrapper?.contains(element) || editor.codeEditor?.contains(element))?.textarea;
             if (field?.id && !field.closest('#ai-chat-panel')) {
                 this.changedFields.add(field.id);
             }
@@ -952,7 +1016,7 @@ class MahoAiAssistant {
         };
         if (action.action === 'click') {
             const buttons = [...document.querySelectorAll('button, a.button, input[type="submit"], .tiptap-toolbar button[title]')].filter(visible);
-            const button = matches(buttons, (b) => b.textContent || b.title || b.value);
+            const button = matches(buttons, (b) => this.buttonName(b));
             return button ? { ok: true, click: button } : { ok: false };
         }
         if (action.action === 'open_row') {
@@ -964,7 +1028,8 @@ class MahoAiAssistant {
             return cell ? { ok: true, click: cell } : { ok: false };
         }
         if (action.action === 'open_tab') {
-            const tabs = [...document.querySelectorAll('a.tab-item-link')].filter(visible);
+            // A tab, or a closed group of a configuration page: the screen digest lists both.
+            const tabs = [...document.querySelectorAll('a.tab-item-link'), ...this.closedGroups()].filter(visible);
             const tab = matches(tabs, (t) => t.textContent);
             if (tab) {
                 tab.click();
@@ -1264,6 +1329,7 @@ class MahoAiAssistant {
     }
 
     showConfirmCard(calls) {
+        calls.forEach((call) => this.pageCallIds.add(call.id));
         this.chat.addMessage({ html: this.renderConfirmCard(calls), role: 'ai' });
         this.pendingCard = { index: this.lastIndex(), calls };
         setTimeout(() => this.chat.scrollToBottom(), 50);

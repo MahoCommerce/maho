@@ -117,6 +117,9 @@ class Mage_CatalogIndex_Model_Data_Abstract extends Mage_Core_Model_Abstract
                 $idField = $settings['parent_field'];
                 $whereField = $settings['child_field'];
                 break;
+
+            default:
+                throw new InvalidArgumentException("Unknown link type {$type}.");
         }
 
         $additional = [];
@@ -133,7 +136,7 @@ class Mage_CatalogIndex_Model_Data_Abstract extends Mage_Core_Model_Abstract
      * @param array $product
      * @param Mage_Core_Model_Store $store
      * @param Mage_Customer_Model_Group $group
-     * @return float
+     * @return float|false
      */
     public function getFinalPrice($product, $store, $group)
     {

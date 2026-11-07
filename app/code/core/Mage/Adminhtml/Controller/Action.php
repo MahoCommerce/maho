@@ -23,6 +23,7 @@ class Mage_Adminhtml_Controller_Action extends Mage_Core_Controller_Varien_Actio
      */
     public const SESSION_NAMESPACE = 'maho_admin_session';
     public const SESSION_MIN_LIFETIME = 60;
+    public const SESSION_DEFAULT_LIFETIME = 60 * 60;
     public const SESSION_MAX_LIFETIME = 60 * 60 * 24 * 400;
 
     /**
@@ -72,7 +73,7 @@ class Mage_Adminhtml_Controller_Action extends Mage_Core_Controller_Varien_Actio
     /**
      * Retrieve adminhtml session model object
      *
-     * @return Mage_Adminhtml_Model_Session
+     * @return Mage_Core_Model_Session_Abstract
      */
     protected function _getSession()
     {
@@ -82,7 +83,7 @@ class Mage_Adminhtml_Controller_Action extends Mage_Core_Controller_Varien_Actio
     /**
      * Retrieve base admihtml helper
      *
-     * @return Mage_Adminhtml_Helper_Data
+     * @return Mage_Core_Helper_Abstract
      */
     protected function _getHelper()
     {

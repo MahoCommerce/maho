@@ -88,25 +88,19 @@ class Mage_Catalog_Model_Product_Compare_Item extends Mage_Core_Model_Abstract
 
     /**
      * Add customer data from customer object
-     *
-     * @return $this
      */
-    public function addCustomerData(Mage_Customer_Model_Customer $customer)
+    public function addCustomerData(Mage_Customer_Model_Customer $customer): static
     {
-        $this->setCustomerId($customer->getId());
-        return $this;
+        $customerId = $customer->getId();
+        return $this->setCustomerId($customerId === null ? null : (int) $customerId);
     }
 
     /**
      * Set visitor
-     *
-     * @param int $visitorId
-     * @return $this
      */
-    public function addVisitorId($visitorId)
+    public function addVisitorId(?int $visitorId): static
     {
-        $this->setVisitorId($visitorId);
-        return $this;
+        return $this->setVisitorId($visitorId);
     }
 
     /**
@@ -188,7 +182,7 @@ class Mage_Catalog_Model_Product_Compare_Item extends Mage_Core_Model_Abstract
      */
     public function clean()
     {
-        $this->_getResource()->clean($this);
+        $this->_getResource()->clean();
         return $this;
     }
 
@@ -214,7 +208,7 @@ class Mage_Catalog_Model_Product_Compare_Item extends Mage_Core_Model_Abstract
     public function getVisitorId()
     {
         if (!$this->hasData('visitor_id')) {
-            $visitorId = Mage::getSingleton('log/visitor')->getId();
+            $visitorId = Mage::getSingleton('log/visitor')->getVisitorId();
             $this->setData('visitor_id', $visitorId);
         }
         return $this->getData('visitor_id');

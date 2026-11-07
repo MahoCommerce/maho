@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2019-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Adminhtml
@@ -48,7 +48,7 @@ class Mage_Adminhtml_Report_ProductController extends Mage_Adminhtml_Controller_
     public function exportSoldCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_product_sold_grid');
-        $this->_prepareDownloadResponse(...$grid->getCsv('products_ordered.csv', -1));
+        $this->_prepareDownloadResponse('products_ordered.csv', $grid->getCsv(), 'text/csv');
     }
 
     /**
@@ -58,7 +58,7 @@ class Mage_Adminhtml_Report_ProductController extends Mage_Adminhtml_Controller_
     public function exportSoldExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_product_sold_grid');
-        $this->_prepareDownloadResponse(...$grid->getExcel('products_ordered.xml', -1));
+        $this->_prepareDownloadResponse('products_ordered.xml', $grid->getExcel('products_ordered.xml'), 'application/vnd.ms-excel');
     }
 
     /**
@@ -132,7 +132,7 @@ class Mage_Adminhtml_Report_ProductController extends Mage_Adminhtml_Controller_
     public function exportLowstockCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_product_lowstock_grid');
-        $this->_prepareDownloadResponse(...$grid->getCsv('products_lowstock.csv', -1));
+        $this->_prepareDownloadResponse(...$grid->getCsvFile('products_lowstock.csv', -1));
     }
 
     /**
@@ -142,7 +142,7 @@ class Mage_Adminhtml_Report_ProductController extends Mage_Adminhtml_Controller_
     public function exportLowstockExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_product_lowstock_grid');
-        $this->_prepareDownloadResponse(...$grid->getExcel('products_lowstock.xml', -1));
+        $this->_prepareDownloadResponse(...$grid->getExcelFile('products_lowstock.xml', -1));
     }
 
     /**
@@ -169,7 +169,7 @@ class Mage_Adminhtml_Report_ProductController extends Mage_Adminhtml_Controller_
     public function exportDownloadsCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_product_downloads_grid');
-        $this->_prepareDownloadResponse(...$grid->getCsv('products_downloads.csv', -1));
+        $this->_prepareDownloadResponse(...$grid->getCsvFile('products_downloads.csv', -1));
     }
 
     /**
@@ -179,7 +179,7 @@ class Mage_Adminhtml_Report_ProductController extends Mage_Adminhtml_Controller_
     public function exportDownloadsExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_product_downloads_grid');
-        $this->_prepareDownloadResponse(...$grid->getExcel('products_downloads.xml', -1));
+        $this->_prepareDownloadResponse(...$grid->getExcelFile('products_downloads.xml', -1));
     }
 
     #[\Override]
@@ -187,7 +187,10 @@ class Mage_Adminhtml_Report_ProductController extends Mage_Adminhtml_Controller_
     {
         $action = strtolower($this->getRequest()->getActionName());
         return match ($action) {
-            'lowstock', 'sold', 'viewed' => Mage::getSingleton('admin/session')->isAllowed("report/products/$action"),
+            'sold', 'exportsoldcsv', 'exportsoldexcel' => Mage::getSingleton('admin/session')->isAllowed('report/products/sold'),
+            'viewed', 'exportviewedcsv', 'exportviewedexcel' => Mage::getSingleton('admin/session')->isAllowed('report/products/viewed'),
+            'lowstock', 'exportlowstockcsv', 'exportlowstockexcel' => Mage::getSingleton('admin/session')->isAllowed('report/products/lowstock'),
+            'downloads', 'exportdownloadscsv', 'exportdownloadsexcel' => Mage::getSingleton('admin/session')->isAllowed('report/products/downloads'),
             default => Mage::getSingleton('admin/session')->isAllowed('report/products'),
         };
     }

@@ -1578,6 +1578,8 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
             $id = (int) $object;
         } elseif ($object instanceof \Maho\DataObject) {
             $id = (int) $object->getId();
+        } else {
+            throw new InvalidArgumentException('delete() takes an entity ID or a data object.');
         }
 
         $this->_beforeDelete($object);

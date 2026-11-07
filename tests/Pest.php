@@ -501,7 +501,7 @@ function adminLoginAndVisit(string $username, string $password, string $path, st
     $page = visit(MahoServer::baseUrl() . '/admin')
         ->fill('#username', $username)
         ->fill('#login', $password)
-        ->click('#step1 input[type="submit"]');
+        ->click('#step1 [type="submit"]');
 
     waitForPageLoad($page, '.nav-bar:visible');
     $page->navigate(MahoServer::baseUrl() . adminPathWithSecretKey($page, $path));
@@ -881,4 +881,23 @@ function orderStateForStatus(string $status): string
         return (string) $state->getState();
     }
     throw new InvalidArgumentException("No order state has the status \"$status\" assigned");
+}
+
+/**
+ * Run $call with the E_USER_DEPRECATED notices silenced, for a test that calls a deprecated
+ * method on purpose. Developer mode turns the notice of #[\Deprecated] into an exception.
+ *
+ * @template T
+ * @param callable(): T $call
+ * @return T
+ */
+function withoutDeprecations(callable $call): mixed
+{
+    $level = error_reporting(error_reporting() & ~E_USER_DEPRECATED);
+
+    try {
+        return $call();
+    } finally {
+        error_reporting($level);
+    }
 }

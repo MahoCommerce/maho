@@ -7,6 +7,9 @@
     </modules>
 
     <global>
+        <docs>
+            <developer>docs/developer</developer>
+        </docs>
         <!-- Files that administrators attach to a chat message. They are private: no public URL. -->
         <storage>
             <mounts>

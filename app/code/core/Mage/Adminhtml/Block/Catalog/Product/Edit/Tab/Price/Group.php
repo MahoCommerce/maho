@@ -52,7 +52,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Price_Group extends Mage_Adm
     /**
      * Prepare global layout
      *
-     * Add "Add Group Price" button to layout
+     * Add the "Add" button to layout
      *
      * @return $this
      */
@@ -61,7 +61,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Price_Group extends Mage_Adm
     {
         $button = $this->getLayout()->createBlock('adminhtml/widget_button')
             ->setData([
-                'label' => Mage::helper('catalog')->__('Add Group Price'),
+                'label' => Mage::helper('catalog')->__('Add'),
                 'onclick' => 'return groupPriceControl.addItem()',
                 'class' => 'add',
             ]);

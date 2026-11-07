@@ -29,6 +29,7 @@
                     const indicator = document.getElementById('global_search_indicator');
                     const searchUrl = '<?= $this->getUrl('adminhtml/index/globalSearch') ?>?isAjax=true';
                     let active = -1;
+                    let pending = null;
 
                     const options = () => Array.from(box.querySelectorAll('li'));
 
@@ -62,6 +63,10 @@
 
                     function render(html) {
                         box.innerHTML = html;
+                        if (!options().length) {
+                            close();
+                            return;
+                        }
                         box.style.display = 'block';
                         input.setAttribute('aria-expanded', 'true');
                         input.removeAttribute('aria-activedescendant');
@@ -77,15 +82,21 @@
 
                     input.addEventListener('input', function() {
                         const query = this.value;
+                        // An older response must not replace or close the results of a newer query.
+                        pending?.abort();
+                        pending = null;
                         if (query.length < 2) {
+                            indicator.style.display = 'none';
                             close();
                             return;
                         }
                         indicator.style.display = 'inline-block';
+                        pending = new AbortController();
                         fetch(searchUrl, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                            body: new URLSearchParams({ query: query, form_key: FORM_KEY })
+                            body: new URLSearchParams({ query: query, form_key: FORM_KEY }),
+                            signal: pending.signal
                         })
                         .then(response => response.text())
                         .then(html => {
@@ -93,6 +104,9 @@
                             indicator.style.display = 'none';
                         })
                         .catch(error => {
+                            if (error.name === 'AbortError') {
+                                return;
+                            }
                             indicator.style.display = 'none';
                             console.error(error);
                         });

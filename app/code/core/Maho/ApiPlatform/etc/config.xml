@@ -10,6 +10,9 @@ SPDX-License-Identifier: AFL-3.0
         </Maho_ApiPlatform>
     </modules>
     <global>
+        <docs>
+            <api>docs/api</api>
+        </docs>
         <helpers>
             <apiplatform>
                 <class>Maho_ApiPlatform_Helper</class>

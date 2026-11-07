@@ -69,6 +69,7 @@ export class MahoPreviewPane {
             this.storeId = Number(this.storeSelect.value);
             setRenderStore(this.setup, this.storeId);
             this.fillContextSelect();
+            this.fitBar();
             this.refresh();
         });
         bar.append(this.storeSelect);
@@ -104,7 +105,19 @@ export class MahoPreviewPane {
         });
         this.reloadButton = this.button('reload', t('Reload'), () => this.refresh());
         this.popoutButton = this.button('external-link', t('Open in a new window'), () => this.openPopout());
-        bar.append(this.syncButton, this.reloadButton, this.popoutButton);
+
+        // The tools that do not fit on the line move into a menu at its end, the last one first
+        this.bar = bar;
+        this.tools = [devices, this.syncButton, this.reloadButton, this.popoutButton];
+        this.more = document.createElement('div');
+        this.more.className = 'tiptap-preview-more';
+        this.more.hidden = true;
+        this.moreMenu = document.createElement('div');
+        this.moreMenu.className = 'tiptap-preview-more-menu';
+        // A hover opens the menu. A click opens it on a touch screen.
+        this.more.append(this.button('hamburger', t('More'), () => this.more.classList.toggle('is-open')), this.moreMenu);
+        bar.append(this.syncButton, this.reloadButton, this.popoutButton, this.more);
+        this.onOutsideClick = (event) => this.more.contains(event.target) || this.more.classList.remove('is-open');
 
         this.status = document.createElement('div');
         this.status.className = 'tiptap-preview-status';
@@ -207,6 +220,7 @@ export class MahoPreviewPane {
         this.form?.addEventListener('change', this.onChange);
         window.addEventListener('message', this.onMessage);
         document.addEventListener('visibilitychange', this.onVisibility);
+        document.addEventListener('click', this.onOutsideClick);
         this.scroller()?.addEventListener('scroll', this.onEditorScroll, { passive: true });
         // The server forgets a draft after its lifetime, and the frame or the window of the
         // preview would then show a 404 on a reload. A third of the lifetime leaves time for a retry
@@ -228,6 +242,7 @@ export class MahoPreviewPane {
         this.form?.removeEventListener('change', this.onChange);
         window.removeEventListener('message', this.onMessage);
         document.removeEventListener('visibilitychange', this.onVisibility);
+        document.removeEventListener('click', this.onOutsideClick);
         this.scroller()?.removeEventListener('scroll', this.onEditorScroll);
         this.splitter.remove();
         this.pane.remove();
@@ -254,6 +269,21 @@ export class MahoPreviewPane {
             frame.style.transform = `translateX(-50%) scale(${scale.toFixed(3)})`;
         }
         this.paintButtons();
+        this.fitBar();
+    }
+
+    /** Put each tool back on the line, then move the last ones into the menu until the line fits. */
+    fitBar() {
+        this.more.before(...this.tools);
+        this.more.hidden = true;
+        this.more.classList.remove('is-open');
+        if (this.bar.scrollWidth <= this.bar.clientWidth) {
+            return;
+        }
+        this.more.hidden = false;
+        for (let i = this.tools.length - 1; i >= 0 && this.bar.scrollWidth > this.bar.clientWidth; i--) {
+            this.moreMenu.prepend(this.tools[i]);
+        }
     }
 
     /** Send the form now: a store or a page change, or the reload button. */
@@ -329,7 +359,8 @@ export class MahoPreviewPane {
                 data.delete(name);
             }
         }
-        data.set(this.setup.textarea.name, this.setup.convertToPlain(this.editor.getHTML()));
+        // In the source view, the textarea holds the content
+        data.set(this.setup.textarea.name, this.setup.isTiptapActive() ? this.setup.convertToPlain(this.editor.getHTML()) : this.setup.textarea.value);
         data.set('preview_entity', this.config.entity);
         data.set('preview_store', String(this.storeId));
         data.set('preview_context', this.contextId);

@@ -14,7 +14,7 @@
 <?php $_htmlName    = $this->getElement()->getName() ?>
 <?php $_multiWebsite = $this->isMultiWebsites(); ?>
 <tr>
-    <td class="label"><?= $this->getElement()->getLabel() ?></td>
+    <td class="label" id="<?= $_htmlId ?>-label"><?= $this->getElement()->getLabel() ?></td>
     <td colspan="10" class="grid weee">
     <table cellspacing="0" class="data border" id="<?= $_htmlId ?>_table">
         <?php if ($_multiWebsite): ?>

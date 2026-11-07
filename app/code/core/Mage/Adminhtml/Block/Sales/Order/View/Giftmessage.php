@@ -99,7 +99,7 @@ class Mage_Adminhtml_Block_Sales_Order_View_Giftmessage extends Mage_Adminhtml_B
     public function getEntity()
     {
         if (is_null($this->_entity)) {
-            $this->setEntity(Mage::getModel('giftmessage/message')->getEntityModelByType('order'));
+            $this->setEntity(Mage::getModel('sales/order'));
             $this->getEntity()->load($this->getRequest()->getParam('entity'));
         }
         return $this->_entity;

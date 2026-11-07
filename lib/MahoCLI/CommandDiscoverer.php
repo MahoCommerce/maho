@@ -46,12 +46,8 @@ class CommandDiscoverer
                     continue;
                 }
 
-                if (str_ends_with($path, 'BaseMahoCommand.php')) {
-                    continue;
-                }
-
                 $className = $this->getFullyQualifiedClassName($path);
-                if (is_subclass_of($className, Command::class)) {
+                if (is_subclass_of($className, Command::class) && !new \ReflectionClass($className)->isAbstract()) {
                     $commands[] = new $className();
                 }
             }
@@ -69,7 +65,7 @@ class CommandDiscoverer
         );
 
         $parts = explode('lib\\MahoCLI\\Commands\\', $className);
-        $className = end($parts);
+        $className = array_last($parts);
 
         return $this->namespace . $className;
     }

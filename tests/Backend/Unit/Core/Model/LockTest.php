@@ -44,6 +44,33 @@ it('rejects re-acquiring a lock the process already holds', function () {
     expect($manager->isHeld('core_lock_test'))->toBeFalse();
 });
 
+it('waits for a lock that another process holds, and gives up after the limit', function () {
+    $path = Mage::getConfig()->getVarDir('locks') . DS . 'core_lock_within.lock';
+    $child = proc_open(
+        [PHP_BINARY, '-r', '$h = fopen($argv[1], "c"); flock($h, LOCK_EX); echo "locked\n"; sleep(3);', $path],
+        [1 => ['pipe', 'w']],
+        $pipes,
+    );
+    expect(trim((string) fgets($pipes[1])))->toBe('locked');
+
+    /** @var Mage_Core_Model_Lock $manager */
+    $manager = Mage::getModel('core/lock');
+    try {
+        $gaveUp = !$manager->acquireWithin('core_lock_within', 0);
+        $startedAt = microtime(true);
+        $acquired = $manager->acquireWithin('core_lock_within', 30);
+        $waited = microtime(true) - $startedAt;
+    } finally {
+        $manager->release('core_lock_within');
+        fclose($pipes[1]);
+        proc_close($child);
+    }
+
+    expect($gaveUp)->toBeTrue()
+        ->and($acquired)->toBeTrue()
+        ->and($waited)->toBeGreaterThan(1.0);
+});
+
 it('sanitizes lock names containing external input', function () {
     /** @var Mage_Core_Model_Lock $manager */
     $manager = Mage::getModel('core/lock');

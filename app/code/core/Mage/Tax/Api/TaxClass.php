@@ -34,10 +34,12 @@ use Maho\ApiPlatform\CrudResource;
         new Get(
             uriTemplate: '/tax-classes/{id}',
             security: "is_granted('ROLE_ADMIN') or is_granted('tax-classes/read')",
+            description: 'Get a tax class by ID. A PRODUCT class is set on a product, and a CUSTOMER class on a customer group. A tax rule gives tax rates to a pair of a customer class and a product class',
         ),
         new GetCollection(
             uriTemplate: '/tax-classes',
             security: "is_granted('ROLE_ADMIN') or is_granted('tax-classes/read')",
+            description: 'Get the tax classes. Give classType to get only the PRODUCT or only the CUSTOMER classes',
         ),
         new Post(
             uriTemplate: '/tax-classes',
@@ -61,12 +63,12 @@ use Maho\ApiPlatform\CrudResource;
     graphQlOperations: [
         new Query(
             name: 'item_query',
-            description: 'Get a tax class by ID',
+            description: 'Get a tax class by ID. A PRODUCT class is set on a product, and a CUSTOMER class on a customer group. A tax rule gives tax rates to a pair of a customer class and a product class',
             security: "is_granted('ROLE_ADMIN') or is_granted('tax-classes/read')",
         ),
         new QueryCollection(
             name: 'collection_query',
-            description: 'Get tax classes',
+            description: 'Get the tax classes. Give classType to get only the PRODUCT or only the CUSTOMER classes',
             security: "is_granted('ROLE_ADMIN') or is_granted('tax-classes/read')",
             extraArgs: [
                 'search' => ['type' => 'String', 'description' => 'Partial match on the class name'],

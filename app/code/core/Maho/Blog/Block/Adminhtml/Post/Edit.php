@@ -18,11 +18,8 @@ class Maho_Blog_Block_Adminhtml_Post_Edit extends Mage_Adminhtml_Block_Widget_Fo
         $this->_blockGroup = 'blog';
         $this->_controller = 'adminhtml_post';
 
-        $this->_updateButton('save', 'label', Mage::helper('blog')->__('Save Post'));
-        $this->_updateButton('delete', 'label', Mage::helper('blog')->__('Delete Post'));
-
         $this->_addButton('saveandcontinue', [
-            'label'     => Mage::helper('adminhtml')->__('Save and Continue Edit'),
+            'label'     => Mage::helper('adminhtml')->__('Save and Continue'),
             'onclick'   => Mage::helper('core/js')->getSaveAndContinueEditJs($this->_getSaveAndContinueUrl()),
             'class'     => 'save',
         ], -100);
@@ -58,8 +55,8 @@ class Maho_Blog_Block_Adminhtml_Post_Edit extends Mage_Adminhtml_Block_Widget_Fo
             $tabsBlockJsObject = $tabsBlock->getJsObjectName();
             $tabsBlockPrefix   = $tabsBlock->getId() . '_';
         } else {
-            $tabsBlockJsObject = 'blog_post_tabsJsTabs';
-            $tabsBlockPrefix   = 'blog_post_tabs_';
+            $tabsBlockJsObject = 'post_tabsJsTabs';
+            $tabsBlockPrefix   = 'post_tabs_';
         }
 
         $this->_formScripts[] = '

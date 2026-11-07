@@ -18,11 +18,14 @@ class Maho_CatalogLinkRule_Block_Adminhtml_Rule_Edit extends Mage_Adminhtml_Bloc
         $this->_blockGroup = 'cataloglinkrule';
         $this->_controller = 'adminhtml_rule';
 
-        $this->_updateButton('save', 'label', Mage::helper('cataloglinkrule')->__('Save Rule'));
-        $this->_updateButton('delete', 'label', Mage::helper('cataloglinkrule')->__('Delete Rule'));
+        $this->_addButton('save_apply', [
+            'label'     => Mage::helper('cataloglinkrule')->__('Save and Apply'),
+            'onclick'   => "editForm.submit(document.getElementById('edit_form').action + 'apply/1/')",
+            'class'     => 'save',
+        ], -100);
 
         $this->_addButton('saveandcontinue', [
-            'label'     => Mage::helper('cataloglinkrule')->__('Save and Continue Edit'),
+            'label'     => Mage::helper('cataloglinkrule')->__('Save and Continue'),
             'onclick'   => 'saveAndContinueEdit()',
             'class'     => 'save',
         ], -100);

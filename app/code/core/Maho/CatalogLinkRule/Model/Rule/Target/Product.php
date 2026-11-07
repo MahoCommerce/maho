@@ -8,7 +8,7 @@
 
 declare(strict_types=1);
 
-class Maho_CatalogLinkRule_Model_Rule_Target_Product extends Mage_CatalogRule_Model_Rule_Condition_Product
+class Maho_CatalogLinkRule_Model_Rule_Target_Product extends Maho_CatalogLinkRule_Model_Rule_Source_Product
 {
     /**
      * Operators that compare the target product against the source product instead of a fixed
@@ -21,17 +21,6 @@ class Maho_CatalogLinkRule_Model_Rule_Target_Product extends Mage_CatalogRule_Mo
     {
         parent::__construct();
         $this->setType('cataloglinkrule/rule_target_product');
-    }
-
-    /**
-     * Add status and visibility to special attributes for target products
-     */
-    #[\Override]
-    protected function _addSpecialAttributes(array &$attributes): void
-    {
-        parent::_addSpecialAttributes($attributes);
-        $attributes['status'] = Mage::helper('cataloglinkrule')->__('Status');
-        $attributes['visibility'] = Mage::helper('cataloglinkrule')->__('Visibility');
     }
 
     /**

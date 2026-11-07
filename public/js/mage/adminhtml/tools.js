@@ -91,7 +91,9 @@ function imagePreview(element){
     const el = typeof element === 'string' ? document.getElementById(element) : element;
     if (!el) return;
 
-    Dialog.info(`<img src="${el.src}" style="max-width: 100%; margin: 0 auto;">`, {
+    // The preview can be a small size of the image: its link has the original
+    const src = el.closest('a')?.href ?? el.src;
+    Dialog.info(`<img src="${escapeHtml(src, true)}" style="max-width: 100%; margin: 0 auto;">`, {
         title: Translator.translate('Image Preview'),
         className: 'image-preview-dialog'
     });
@@ -201,7 +203,9 @@ function syncOnchangeValue(baseElem, distElem){
 
 // Insert some content to the cursor position of input element
 function updateElementAtCursor(el, value) {
-    if (el.selectionStart !== null) {
+    if (el.mahoCodeEditor) {
+        el.mahoCodeEditor.insert(value);
+    } else if (el.selectionStart !== null) {
         el.setRangeText(value, el.selectionStart, el.selectionEnd);
     } else {
         el.value += value;

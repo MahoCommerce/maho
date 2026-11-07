@@ -87,7 +87,7 @@ abstract class Mage_Dataflow_Model_Convert_Profile_Abstract implements Mage_Data
     public function importXml(\Maho\Simplexml\Element $profileNode)
     {
         foreach ($profileNode->action as $actionNode) {
-            $action = $profile->addAction();
+            $action = $this->addAction();
             $action->importXml($actionNode);
         }
 

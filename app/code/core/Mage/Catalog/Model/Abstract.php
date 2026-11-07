@@ -229,7 +229,7 @@ abstract class Mage_Catalog_Model_Abstract extends Mage_Core_Model_Abstract
      */
     public function getWebsiteStoreIds()
     {
-        return $this->getStore()->getWebsite()->getStoreIds(true);
+        return $this->getStore()->getWebsite()->getStoreIds();
     }
 
     /**

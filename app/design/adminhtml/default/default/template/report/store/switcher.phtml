@@ -10,8 +10,8 @@
 /** @var Mage_Adminhtml_Block_Store_Switcher $this */
 ?>
 <?php if ($this->isShow()): ?>
-<p class="switcher"><label for="store_switcher"><?= $this->__('Show Report For:') ?></label>
-<select name="store_switcher" id="store_switcher" onchange="return switchStore(this);">
+<p class="switcher"><label class="d-select switcher-select"><span class="d-label" title="<?= $this->quoteEscape(rtrim($this->__('Show Report For:'), ' :')) ?>"><?= $this->getIconSvg('building-store') ?></span>
+<select name="store_switcher" id="store_switcher" onchange="return switchStore(this);" aria-label="<?= $this->quoteEscape(rtrim($this->__('Show Report For:'), ' :')) ?>">
     <option value=""><?= $this->__('All Websites') ?></option>
     <?php foreach ($this->getWebsiteCollection() as $_website): ?>
         <?php $showWebsite = false; ?>
@@ -34,7 +34,7 @@
             <?php endif ?>
         <?php endforeach ?>
     <?php endforeach ?>
-</select>
+</select></label>
 </p>
 <script>
     function switchStore(obj){

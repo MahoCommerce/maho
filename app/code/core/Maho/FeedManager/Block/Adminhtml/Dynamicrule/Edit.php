@@ -18,19 +18,15 @@ class Maho_FeedManager_Block_Adminhtml_Dynamicrule_Edit extends Mage_Adminhtml_B
 
         parent::__construct();
 
-        $this->_updateButton('save', 'label', $this->__('Save Rule'));
-
         $rule = $this->_getRule();
 
         // Only show delete button for non-system rules
         if ($rule->getId() && $rule->getIsSystem()) {
             $this->_removeButton('delete');
-        } else {
-            $this->_updateButton('delete', 'label', $this->__('Delete Rule'));
         }
 
         $this->_addButton('saveandcontinue', [
-            'label' => $this->__('Save and Continue Edit'),
+            'label' => $this->__('Save and Continue'),
             'onclick' => 'saveAndContinueEdit()',
             'class' => 'save',
         ], -100);

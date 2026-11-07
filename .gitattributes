@@ -1,4 +1,5 @@
 # Make packagist / composer download smaller
+/.claude export-ignore
 /.editorconfig export-ignore
 /.env.testing.dist export-ignore
 /.github export-ignore
@@ -14,6 +15,8 @@
 /phpunit.xml export-ignore
 /README.md export-ignore
 /SECURITY.md export-ignore
+/docs/*/images/** export-ignore
+/app/code/core/*/*/docs/*/images/** export-ignore
 
 # Enforce checkout with linux lf
 *.html text eol=lf

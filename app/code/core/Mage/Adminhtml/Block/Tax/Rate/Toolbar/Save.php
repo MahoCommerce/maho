@@ -46,7 +46,7 @@ class Mage_Adminhtml_Block_Tax_Rate_Toolbar_Save extends Mage_Adminhtml_Block_Te
             'saveButton',
             $this->getLayout()->createBlock('adminhtml/widget_button')
                 ->setData([
-                    'label'     => Mage::helper('tax')->__('Save Rate'),
+                    'label'     => Mage::helper('tax')->__('Save'),
                     'onclick'   => 'wigetForm.submit();return false;',
                     'class'     => 'save',
                 ]),
@@ -56,7 +56,7 @@ class Mage_Adminhtml_Block_Tax_Rate_Toolbar_Save extends Mage_Adminhtml_Block_Te
             'deleteButton',
             $this->getLayout()->createBlock('adminhtml/widget_button')
                 ->setData([
-                    'label'     => Mage::helper('tax')->__('Delete Rate'),
+                    'label'     => Mage::helper('tax')->__('Delete'),
                     'onclick'   => Mage::helper('core/js')->getDeleteConfirmJs(
                         $this->getUrl('*/*/delete', ['rate' => $this->getRequest()->getParam('rate')]),
                     ),

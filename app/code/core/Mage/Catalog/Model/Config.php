@@ -120,7 +120,7 @@ class Mage_Catalog_Model_Config extends Mage_Eav_Model_Config
     }
 
     /**
-     * @param int $entityTypeId
+     * @param int|string $entityTypeId
      * @param string $name
      * @return bool|string
      */
@@ -175,7 +175,7 @@ class Mage_Catalog_Model_Config extends Mage_Eav_Model_Config
         $this->loadAttributeGroups();
 
         if (!is_numeric($attributeSetId)) {
-            $attributeSetId = $this->getAttributeSetId($attributeSetId);
+            $attributeSetId = $this->getAttributeSetId(Mage_Catalog_Model_Product::ENTITY, $attributeSetId);
         }
         return $this->_attributeGroupsById[$attributeSetId][$id] ?? false;
     }
@@ -194,7 +194,7 @@ class Mage_Catalog_Model_Config extends Mage_Eav_Model_Config
         $this->loadAttributeGroups();
 
         if (!is_numeric($attributeSetId)) {
-            $attributeSetId = $this->getAttributeSetId($attributeSetId);
+            $attributeSetId = $this->getAttributeSetId(Mage_Catalog_Model_Product::ENTITY, $attributeSetId);
         }
         $name = strtolower($name);
         return $this->_attributeGroupsByName[$attributeSetId][$name] ?? false;

@@ -89,6 +89,7 @@ Default layout, loads most of the pages
     <cms_preview_view>
         <reference name="head">
             <action method="addJs"><script>mage/cms/preview-frame.js</script></action>
+            <block type="cms/preview_tailwind" name="cms_preview_tailwind"/>
         </reference>
         <reference name="before_body_end">
             <block type="core/template" name="cms_preview_badge" template="cms/preview/badge.phtml"/>

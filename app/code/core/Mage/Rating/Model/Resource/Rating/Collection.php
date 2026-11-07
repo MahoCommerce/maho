@@ -9,7 +9,7 @@
  */
 
 /**
- * @method Mage_Rating_Model_Rating getItemById()
+ * @method Mage_Rating_Model_Rating|null getItemById(int|string $idValue)
  */
 class Mage_Rating_Model_Resource_Rating_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract
 {

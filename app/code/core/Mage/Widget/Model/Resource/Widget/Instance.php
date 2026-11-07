@@ -246,4 +246,33 @@ class Mage_Widget_Model_Resource_Widget_Instance extends Mage_Core_Model_Resourc
         $storeIds = $adapter->fetchOne($select);
         return $storeIds ? explode(',', $storeIds) : [];
     }
+
+    /**
+     * The text values in the parameters of every widget instance, for the Tailwind build.
+     *
+     * @return Generator<int, string>
+     */
+    #[Maho\Config\TailwindSource('widget_instance', model: Mage_Widget_Model_Widget_Instance::class, fields: ['widget_parameters'])]
+    public function getTailwindContent(): Generator
+    {
+        $rows = Mage::getResourceSingleton('core/design_content')
+            ->readColumns($this->getMainTable(), $this->getIdFieldName(), ['widget_parameters']);
+        foreach ($rows as $value) {
+            try {
+                $parameters = Mage::helper('core/unserializeArray')->unserialize($value);
+            } catch (Exception) {
+                continue;
+            }
+            if (!is_array($parameters)) {
+                continue;
+            }
+            $strings = [];
+            array_walk_recursive($parameters, function (mixed $parameter) use (&$strings): void {
+                if (is_string($parameter)) {
+                    $strings[] = $parameter;
+                }
+            });
+            yield from $strings;
+        }
+    }
 }

@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2022-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Adminhtml
@@ -46,7 +46,7 @@ class Mage_Adminhtml_Report_CustomerController extends Mage_Adminhtml_Controller
     public function exportAccountsCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_customer_accounts_grid');
-        $this->_prepareDownloadResponse(...$grid->getCsv('new_accounts.csv', -1));
+        $this->_prepareDownloadResponse('new_accounts.csv', $grid->getCsv(), 'text/csv');
     }
 
     /**
@@ -56,7 +56,7 @@ class Mage_Adminhtml_Report_CustomerController extends Mage_Adminhtml_Controller
     public function exportAccountsExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_customer_accounts_grid');
-        $this->_prepareDownloadResponse(...$grid->getExcel('accounts.xml', -1));
+        $this->_prepareDownloadResponse('accounts.xml', $grid->getExcel('accounts.xml'), 'application/vnd.ms-excel');
     }
 
     #[Maho\Config\Route('/admin/report_customer/orders')]
@@ -83,7 +83,7 @@ class Mage_Adminhtml_Report_CustomerController extends Mage_Adminhtml_Controller
     public function exportOrdersCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_customer_orders_grid');
-        $this->_prepareDownloadResponse(...$grid->getCsv('customers_orders.csv', -1));
+        $this->_prepareDownloadResponse('customers_orders.csv', $grid->getCsv(), 'text/csv');
     }
 
     /**
@@ -93,7 +93,7 @@ class Mage_Adminhtml_Report_CustomerController extends Mage_Adminhtml_Controller
     public function exportOrdersExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_customer_orders_grid');
-        $this->_prepareDownloadResponse(...$grid->getExcel('customers_orders.xml', -1));
+        $this->_prepareDownloadResponse('customers_orders.xml', $grid->getExcel('customers_orders.xml'), 'application/vnd.ms-excel');
     }
 
     #[Maho\Config\Route('/admin/report_customer/totals')]
@@ -120,7 +120,7 @@ class Mage_Adminhtml_Report_CustomerController extends Mage_Adminhtml_Controller
     public function exportTotalsCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_customer_totals_grid');
-        $this->_prepareDownloadResponse(...$grid->getCsv('cuatomer_totals.csv', -1));
+        $this->_prepareDownloadResponse('customer_totals.csv', $grid->getCsv(), 'text/csv');
     }
 
     /**
@@ -130,7 +130,7 @@ class Mage_Adminhtml_Report_CustomerController extends Mage_Adminhtml_Controller
     public function exportTotalsExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_customer_totals_grid');
-        $this->_prepareDownloadResponse(...$grid->getExcel('customer_totals.xml', -1));
+        $this->_prepareDownloadResponse('customer_totals.xml', $grid->getExcel('customer_totals.xml'), 'application/vnd.ms-excel');
     }
 
     #[\Override]
@@ -138,9 +138,9 @@ class Mage_Adminhtml_Report_CustomerController extends Mage_Adminhtml_Controller
     {
         $action = strtolower($this->getRequest()->getActionName());
         return match ($action) {
-            'accounts' => Mage::getSingleton('admin/session')->isAllowed('report/customers/accounts'),
-            'orders' => Mage::getSingleton('admin/session')->isAllowed('report/customers/orders'),
-            'totals' => Mage::getSingleton('admin/session')->isAllowed('report/customers/totals'),
+            'accounts', 'exportaccountscsv', 'exportaccountsexcel' => Mage::getSingleton('admin/session')->isAllowed('report/customers/accounts'),
+            'orders', 'exportorderscsv', 'exportordersexcel' => Mage::getSingleton('admin/session')->isAllowed('report/customers/orders'),
+            'totals', 'exporttotalscsv', 'exporttotalsexcel' => Mage::getSingleton('admin/session')->isAllowed('report/customers/totals'),
             default => Mage::getSingleton('admin/session')->isAllowed('report/customers'),
         };
     }

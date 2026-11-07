@@ -27,7 +27,6 @@ const FeedMappingPresets = {
 function initFeedMappingTab() {
     initFormatPresets();
     initFormatSwitching();
-    initCodeEditors();
     initTransformerModalOverrides();
 }
 
@@ -84,126 +83,6 @@ function initFormatSwitching() {
 
     updateContentMode();
     fileFormatSelect.addEventListener('change', updateContentMode);
-}
-
-/**
- * Initialize code editors with syntax highlighting
- */
-function initCodeEditors() {
-    const textareaIds = ['mapping_xml_header', 'mapping_xml_footer'];
-
-    textareaIds.forEach(function(id) {
-        const textarea = document.getElementById(id);
-        if (!textarea) return;
-
-        // Wrap in code editor container
-        const wrapper = document.createElement('div');
-        wrapper.className = 'code-editor-wrapper';
-        textarea.parentNode.insertBefore(wrapper, textarea);
-        wrapper.appendChild(textarea);
-
-        // Create syntax-highlighted backdrop
-        const backdrop = document.createElement('div');
-        backdrop.className = 'code-highlight-backdrop';
-        backdrop.id = id + '_backdrop';
-        wrapper.insertBefore(backdrop, textarea);
-
-        // Update backdrop on input
-        textarea.addEventListener('input', function() {
-            updateSyntaxHighlight(textarea, backdrop);
-        });
-
-        // Sync scroll position
-        textarea.addEventListener('scroll', function() {
-            backdrop.scrollTop = textarea.scrollTop;
-            backdrop.scrollLeft = textarea.scrollLeft;
-        });
-
-        // Initial highlight
-        updateSyntaxHighlight(textarea, backdrop);
-
-        // Handle resize - sync backdrop to textarea
-        if (typeof ResizeObserver !== 'undefined') {
-            const resizeObserver = new ResizeObserver(function() {
-                backdrop.style.height = textarea.offsetHeight + 'px';
-            });
-            resizeObserver.observe(textarea);
-        }
-    });
-}
-
-/**
- * Update syntax highlighting in backdrop
- */
-function updateSyntaxHighlight(textarea, backdrop) {
-    backdrop.innerHTML = highlightXML(textarea.value);
-}
-
-/**
- * Highlight XML code with syntax colors
- */
-function highlightXML(code) {
-    // Escape HTML entities
-    let escaped = code
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
-
-    // Highlight field configurations {type="..." value="..." ...}
-    escaped = escaped.replace(
-        /\{([^}]+)\}/g,
-        function(match, inner) {
-            const highlighted = inner.replace(
-                /(\w+)(=&quot;)([^&]*?)(&quot;)/g,
-                '<span class="field-key">$1</span>$2<span class="field-value">$3</span>$4'
-            );
-            return '<span class="field-brace">{</span>' + highlighted + '<span class="field-brace">}</span>';
-        }
-    );
-
-    // Highlight template variables {{...}}
-    escaped = escaped.replace(
-        /\{\{([^}]+)\}\}/g,
-        '<span class="template-var">{{$1}}</span>'
-    );
-
-    // Highlight XML comments
-    escaped = escaped.replace(
-        /&lt;!--([\s\S]*?)--&gt;/g,
-        '<span class="xml-comment">&lt;!--$1--&gt;</span>'
-    );
-
-    // Highlight CDATA sections
-    escaped = escaped.replace(
-        /&lt;!\[CDATA\[/g,
-        '<span class="xml-cdata">&lt;![CDATA[</span>'
-    );
-    escaped = escaped.replace(
-        /\]\]&gt;/g,
-        '<span class="xml-cdata">]]&gt;</span>'
-    );
-
-    // Highlight XML declaration
-    escaped = escaped.replace(
-        /&lt;\?(xml[^?]*)\?&gt;/gi,
-        '&lt;?<span class="xml-tag">$1</span>?&gt;'
-    );
-
-    // Highlight XML tags and attributes
-    escaped = escaped.replace(
-        /&lt;(\/?)([\w:-]+)((?:\s+[\w:-]+(?:=&quot;[^&]*&quot;)?)*)\s*(\/?)\s*&gt;/g,
-        function(match, leadingSlash, tagName, attrs, trailingSlash) {
-            const highlightedAttrs = attrs.replace(
-                /([\w:-]+)(=&quot;)([^&]*)(&quot;)/g,
-                ' <span class="xml-attr-name">$1</span>$2<span class="xml-attr-value">$3</span>$4'
-            );
-            return '&lt;' + leadingSlash + '<span class="xml-tag">' + tagName + '</span>' +
-                   highlightedAttrs + trailingSlash + '&gt;';
-        }
-    );
-
-    return escaped;
 }
 
 /**

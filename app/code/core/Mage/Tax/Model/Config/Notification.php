@@ -38,7 +38,9 @@ class Mage_Tax_Model_Config_Notification extends Mage_Core_Model_Config_Data
      */
     protected function _getConfig()
     {
-        return $this->_factory->getModel('core/config_data');
+        /** @var Mage_Core_Model_Config_Data $config */
+        $config = $this->_factory->getModel('core/config_data');
+        return $config;
     }
 
     /**

@@ -54,6 +54,6 @@ class Mage_Adminhtml_Block_Newsletter_Subscriber_Grid_Filter_Website extends Mag
 
         $website = Mage::app()->getWebsite($id);
 
-        return ['in' => $website->getStoresIds(true)];
+        return ['in' => $website->getStoreIds()];
     }
 }

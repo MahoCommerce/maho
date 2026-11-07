@@ -25,6 +25,7 @@
             <complexType name="mahoInfoEntity">
                 <all>
                     <element name="maho_version" type="xsd:string" />
+                    <element name="maho_build" type="xsd:string" />
                 </all>
             </complexType>
         </schema>

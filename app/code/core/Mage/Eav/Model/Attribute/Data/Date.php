@@ -18,8 +18,7 @@ class Mage_Eav_Model_Attribute_Data_Date extends Mage_Eav_Model_Attribute_Data_A
     #[\Override]
     public function extractValue(Mage_Core_Controller_Request_Http $request)
     {
-        $value = $this->_getRequestValue($request);
-        return $value ? $this->_applyInputFilter($value) : false;
+        return $this->_applyInputFilter($this->_getRequestValue($request));
     }
 
     /**
@@ -90,11 +89,9 @@ class Mage_Eav_Model_Attribute_Data_Date extends Mage_Eav_Model_Attribute_Data_A
     #[\Override]
     public function compactValue($value)
     {
-        if ($value !== false && empty($value)) {
-            $value = null;
+        if ($value !== false) {
+            $this->getEntity()->setDataUsingMethod($this->getAttribute()->getAttributeCode(), $value ?: null);
         }
-        $this->getEntity()->setDataUsingMethod($this->getAttribute()->getAttributeCode(), $value);
-
         return $this;
     }
 

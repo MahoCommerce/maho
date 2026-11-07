@@ -23,37 +23,37 @@
             </li>
         </ul>
     <?php endif ?>
-    <div class="store-scope">
-        <div class="tree-store-scope">
-            <?php foreach ($this->getWebsiteCollection() as $_website): ?>
-            <div class="website-name">
-                <input name="product[website_ids][]" value="<?= $_website->getId() ?>" <?php if ($this->isReadonly()): ?> disabled="disabled"<?php endif ?> class="checkbox website-checkbox" id="product_website_<?= $_website->getId() ?>" type="checkbox"<?php if ($this->hasWebsite($_website->getId())): ?> checked="checked"<?php endif ?>>
-                <big><strong><label for="product_website_<?= $_website->getId() ?>"><?= $this->escapeHtml($_website->getName()) ?></label></strong></big>
-            </div>
-            <div class="webiste-groups" id="product_website_<?= $_website->getId() ?>_data">
-            <?php foreach ($this->getGroupCollection($_website) as $_group): ?>
-                <h4><?= $this->escapeHtml($_group->getName()) ?></h4>
-                <div class="group-stores">
-                <table>
-                <?php foreach ($this->getStoreCollection($_group) as $_store): ?>
-                    <tr>
-                        <td><?= $this->escapeHtml($_store->getName()) ?></td>
-                        <td>
-                        <?php if ($this->getWebsites() && !$this->hasWebsite($_website->getId())): ?>
-                            <span class="website-<?= $_website->getId() ?>-select" style="display:none">
-                            <?= Mage::helper('catalog')->__('(Copy data from: %s)', $this->getChooseFromStoreHtml($_store)) ?>
-                            </span>
-                        <?php endif ?>
-                        </td>
-                    </tr>
-                <?php endforeach ?>
-                </table>
+    <ul class="product-websites">
+        <?php foreach ($this->getWebsiteCollection() as $_website): ?>
+            <li class="d-card d-card-border d-card-sm bg-base-100">
+                <div class="d-card-body">
+                <label class="d-card-title" for="product_website_<?= $_website->getId() ?>">
+                    <input name="product[website_ids][]" value="<?= $_website->getId() ?>" <?php if ($this->isReadonly()): ?> disabled="disabled"<?php endif ?> class="checkbox website-checkbox" id="product_website_<?= $_website->getId() ?>" type="checkbox"<?php if ($this->hasWebsite($_website->getId())): ?> checked="checked"<?php endif ?>>
+                    <?= $this->escapeHtml($_website->getName()) ?>
+                </label>
+                <div class="product-website-groups" id="product_website_<?= $_website->getId() ?>_data">
+                    <?php foreach ($this->getGroupCollection($_website) as $_group): ?>
+                        <div class="product-website-group">
+                            <span class="product-website-group-name"><?= $this->escapeHtml($_group->getName()) ?></span>
+                            <ul class="product-website-stores">
+                                <?php foreach ($this->getStoreCollection($_group) as $_store): ?>
+                                    <li>
+                                        <span class="d-badge d-badge-sm"><?= $this->escapeHtml($_store->getName()) ?></span>
+                                        <?php if ($this->getWebsites() && !$this->hasWebsite($_website->getId())): ?>
+                                            <span class="website-<?= $_website->getId() ?>-select" style="display:none">
+                                                <?= Mage::helper('catalog')->__('(Copy data from: %s)', $this->getChooseFromStoreHtml($_store)) ?>
+                                            </span>
+                                        <?php endif ?>
+                                    </li>
+                                <?php endforeach ?>
+                            </ul>
+                        </div>
+                    <?php endforeach ?>
                 </div>
-            <?php endforeach ?>
-            </div>
-            <?php endforeach ?>
-        </div>
-    </div>
+                </div>
+            </li>
+        <?php endforeach ?>
+    </ul>
     </fieldset>
 </div>
 <script>

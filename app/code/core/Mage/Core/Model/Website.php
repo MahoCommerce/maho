@@ -601,11 +601,6 @@ class Mage_Core_Model_Website extends Mage_Core_Model_Abstract
         return $this->setData('store_id', $value);
     }
 
-    public function getStoresIds(): ?array
-    {
-        return $this->getData('stores_ids');
-    }
-
     public function getWebsiteId(): ?int
     {
         $value = $this->getData('website_id');

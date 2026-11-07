@@ -32,6 +32,7 @@ class Excel extends AbstractParser
         $dom->loadXML($this->getData());
 
         $worksheets = $dom->getElementsByTagName('Worksheet');
+        $data = [];
         /** @var DOMElement $worksheet */
         foreach ($worksheets as $worksheet) {
             $wsName = $worksheet->getAttribute('ss:Name');

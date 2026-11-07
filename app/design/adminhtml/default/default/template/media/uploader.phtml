@@ -10,10 +10,20 @@
 /** @var Mage_Adminhtml_Block_Uploader_Multiple|Mage_Adminhtml_Block_Uploader_Single $this */
 ?>
 <div id="<?= $this->getHtmlId() ?>" class="uploader">
+<?php if ($this->getMiscConfig()->getAutoUpload()): ?>
+    <button type="button" id="<?= $this->getElementId(Mage_Adminhtml_Block_Uploader_Abstract::DROP_ZONE_ID_SUFFIX) ?>" class="uploader-dropzone d-card d-card-dash">
+        <?= $this->getIconSvg('upload') ?>
+        <span><?= $this->__('Drop files here, or click to choose them') ?></span>
+        <?php if ($_note = $this->getMiscConfig()->getDropZoneNote()): ?>
+            <span class="uploader-dropzone-note">(<?= $this->escapeHtml($_note) ?>)</span>
+        <?php endif ?>
+    </button>
+<?php else: ?>
     <div class="buttons a-right">
         <?= $this->getBrowseButtonHtml() ?>
         <?= $this->getUploadButtonHtml() ?>
     </div>
+<?php endif ?>
 </div>
 <div class="no-display" id="<?= $this->getElementId('template') ?>">
     <div id="{{id}}-container" class="file-row">
@@ -25,6 +35,6 @@
 </div>
 <script type="module">
     const uploader = new Uploader(<?= $this->getJsonConfig() ?>);
-    varienGlobalEvents?.attachEventHandler('tabChangeBefore', uploader.onContainerHideBefore);
+    window.varienGlobalEvents?.attachEventHandler('tabChangeBefore', uploader.onContainerHideBefore);
 </script>
 <?= $this->getChildHtml('additional_scripts') ?>

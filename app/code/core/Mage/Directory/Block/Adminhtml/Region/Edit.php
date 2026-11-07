@@ -18,11 +18,8 @@ class Mage_Directory_Block_Adminhtml_Region_Edit extends Mage_Adminhtml_Block_Wi
 
         parent::__construct();
 
-        $this->_updateButton('save', 'label', Mage::helper('directory')->__('Save Region'));
-        $this->_updateButton('delete', 'label', Mage::helper('directory')->__('Delete Region'));
-
         $this->_addButton('save_and_continue', [
-            'label' => Mage::helper('adminhtml')->__('Save and Continue Edit'),
+            'label' => Mage::helper('adminhtml')->__('Save and Continue'),
             'onclick' => 'DirectoryEditForm.saveAndContinueEdit()',
             'class' => 'save',
         ], -100);

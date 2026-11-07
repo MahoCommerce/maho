@@ -12,33 +12,25 @@ class Mage_Adminhtml_Block_System_Store_Edit extends Mage_Adminhtml_Block_Widget
 {
     public function __construct()
     {
-        $saveLabel = $deleteLabel = $deleteUrl = '';
+        $deleteUrl = '';
         switch (Mage::registry('store_type')) {
             case 'website':
                 $this->_objectId = 'website_id';
-                $saveLabel   = Mage::helper('core')->__('Save Website');
-                $deleteLabel = Mage::helper('core')->__('Delete Website');
-                $deleteUrl   = $this->_getDeleteUrl(Mage::registry('store_type'));
+                $deleteUrl = $this->_getDeleteUrl(Mage::registry('store_type'));
                 break;
             case 'group':
                 $this->_objectId = 'group_id';
-                $saveLabel   = Mage::helper('core')->__('Save Store');
-                $deleteLabel = Mage::helper('core')->__('Delete Store');
-                $deleteUrl   = $this->_getDeleteUrl(Mage::registry('store_type'));
+                $deleteUrl = $this->_getDeleteUrl(Mage::registry('store_type'));
                 break;
             case 'store':
                 $this->_objectId = 'store_id';
-                $saveLabel   = Mage::helper('core')->__('Save Store View');
-                $deleteLabel = Mage::helper('core')->__('Delete Store View');
-                $deleteUrl   = $this->_getDeleteUrl(Mage::registry('store_type'));
+                $deleteUrl = $this->_getDeleteUrl(Mage::registry('store_type'));
                 break;
         }
         $this->_controller = 'system_store';
 
         parent::__construct();
 
-        $this->_updateButton('save', 'label', $saveLabel);
-        $this->_updateButton('delete', 'label', $deleteLabel);
         $this->_updateButton('delete', 'onclick', Mage::helper('core/js')->getConfirmSetLocationJs($deleteUrl));
 
         if (!Mage::registry('store_data')->isCanDelete()) {

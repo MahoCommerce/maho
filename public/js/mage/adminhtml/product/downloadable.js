@@ -107,7 +107,7 @@ Downloadable.FileUploader = class {
             );
 
             Downloadable.setUploaderObj(type, key, uploader);
-            varienGlobalEvents?.attachEventHandler('tabChangeBefore', uploader.onContainerHideBefore);
+            window.varienGlobalEvents?.attachEventHandler('tabChangeBefore', uploader.onContainerHideBefore);
             new Downloadable.FileList(idName, uploader, fileValue);
         }
     }

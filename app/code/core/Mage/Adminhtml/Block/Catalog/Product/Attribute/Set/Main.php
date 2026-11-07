@@ -80,7 +80,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Attribute_Set_Main extends Mage_Admin
             'save_button',
             $this->getLayout()->createBlock('adminhtml/widget_button')->setData([
                 'id'        => 'save-button',
-                'label'     => Mage::helper('catalog')->__('Save Attribute Set'),
+                'label'     => Mage::helper('catalog')->__('Save'),
                 'class'     => 'save',
             ]),
         );
@@ -89,7 +89,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Attribute_Set_Main extends Mage_Admin
             'delete_button',
             $this->getLayout()->createBlock('adminhtml/widget_button')->setData([
                 'id'        => 'delete-button',
-                'label'     => Mage::helper('catalog')->__('Delete Attribute Set'),
+                'label'     => Mage::helper('catalog')->__('Delete'),
                 'class'     => 'delete',
             ]),
         );

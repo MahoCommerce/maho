@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <!--
-SPDX-FileCopyrightText: 2016-2023 The OpenMage Contributors <https://openmage.org>
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+SPDX-FileCopyrightText: 2016-2026 The OpenMage Contributors <https://openmage.org>
 SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
 SPDX-License-Identifier: AFL-3.0
 -->
@@ -11,6 +12,9 @@ SPDX-License-Identifier: AFL-3.0
         </Mage_Sales>
     </modules>
     <global>
+        <docs>
+            <user>docs/user</user>
+        </docs>
         <fieldsets>
             <sales_copy_order>
                 <customer_email>
@@ -1102,6 +1106,12 @@ SPDX-License-Identifier: AFL-3.0
                     <type>html</type>
                 </sales_email_shipment_comment_guest_template>
             </email>
+            <email_layout_handles>
+                <sales_email_order_items/>
+                <sales_email_order_invoice_items/>
+                <sales_email_order_shipment_items/>
+                <sales_email_order_creditmemo_items/>
+            </email_layout_handles>
         </template>
         <resources>
             <sales_setup>
@@ -1295,16 +1305,19 @@ SPDX-License-Identifier: AFL-3.0
                     </subtotal>
                     <shipping>
                         <class>sales/order_creditmemo_total_shipping</class>
-                        <after>subtotal,discount</after>
+                        <after>subtotal</after>
                         <before>grand_total,tax</before>
                     </shipping>
                     <tax>
                         <class>sales/order_creditmemo_total_tax</class>
                         <after>subtotal</after>
                     </tax>
+                    <!-- The shipping total sets the shipping refund, and the discount total takes a share of it.
+                         The tax total uses the rounding that the discount total leaves. -->
                     <discount>
                         <class>sales/order_creditmemo_total_discount</class>
-                        <after>subtotal</after>
+                        <after>subtotal,shipping</after>
+                        <before>tax</before>
                     </discount>
                     <grand_total>
                         <class>sales/order_creditmemo_total_grand</class>

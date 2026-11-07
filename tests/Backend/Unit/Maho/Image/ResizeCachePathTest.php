@@ -24,6 +24,12 @@ describe('Maho::buildImageResizeCachePath', function () {
             '_destinationSubdir' => 'image',
             '_angle' => 0,
         ];
+        // The subject is the deprecated method itself. Developer mode turns its notice into an exception.
+        $this->errorLevel = error_reporting(error_reporting() & ~E_USER_DEPRECATED);
+    });
+
+    afterEach(function () {
+        error_reporting($this->errorLevel);
     });
 
     it('gives a different cache path to two source files that differ only by extension', function () {

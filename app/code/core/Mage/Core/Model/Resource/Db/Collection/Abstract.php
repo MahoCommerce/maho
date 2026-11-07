@@ -527,11 +527,8 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends \Maho\Dat
     public function join($table, $cond, $cols = '*')
     {
         if (is_array($table)) {
-            foreach ($table as $k => $v) {
-                $alias = $k;
-                $table = $v;
-                break;
-            }
+            $alias = array_key_first($table);
+            $table = $table[$alias];
         } else {
             $alias = $table;
         }

@@ -17,6 +17,9 @@ use ApiPlatform\State\Processor\ObjectMapperInputProcessor;
 use ApiPlatform\State\Processor\ObjectMapperOutputProcessor;
 use ApiPlatform\State\ProcessorInterface;
 use Maho\ApiPlatform\Mcp\SourceOperationResolver;
+use Mcp\Schema\Content\TextContent;
+use Mcp\Schema\Result\CallToolResult;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\ObjectMapper\ObjectMapperInterface;
 
 /**
@@ -30,6 +33,9 @@ use Symfony\Component\ObjectMapper\ObjectMapperInterface;
  * The MCP chain of API Platform has no object mapper steps, so a resource that maps
  * to a model gets them here: the body goes into the model before the write, and the
  * written model comes back as the resource after it.
+ *
+ * A provider or a processor that returns a Symfony response gives the tool its body:
+ * the serializer would otherwise turn the response object itself into the result.
  *
  * @implements ProcessorInterface<mixed, mixed>
  */
@@ -49,11 +55,20 @@ final class McpWriteProcessor implements ProcessorInterface
     {
         $operation = $this->operationResolver->resolve($operation);
         if ($this->objectMapper === null || !$operation->canMap()) {
-            return $this->decorated->process($data, $operation, $uriVariables, $context);
+            return $this->toolResult($this->decorated->process($data, $operation, $uriVariables, $context));
         }
 
         $data = new ObjectMapperInputProcessor($this->objectMapper)->process($data, $operation, $uriVariables, $context);
         $data = $this->decorated->process($data, $operation, $uriVariables, $context);
-        return new ObjectMapperOutputProcessor($this->objectMapper)->process($data, $operation, $uriVariables, $context);
+        return $this->toolResult(new ObjectMapperOutputProcessor($this->objectMapper)->process($data, $operation, $uriVariables, $context));
+    }
+
+    private function toolResult(mixed $result): mixed
+    {
+        if (!$result instanceof Response) {
+            return $result;
+        }
+
+        return new CallToolResult([new TextContent((string) $result->getContent())], $result->getStatusCode() >= 400);
     }
 }

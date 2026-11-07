@@ -1,14 +1,21 @@
 // SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
 // SPDX-License-Identifier: AFL-3.0
 
-export function buildFilterString(adjustments) {
-    const parts = [];
-    if (adjustments.brightness !== 100) parts.push(`brightness(${adjustments.brightness}%)`);
-    if (adjustments.contrast !== 100) parts.push(`contrast(${adjustments.contrast}%)`);
-    if (adjustments.hue !== 0) parts.push(`hue-rotate(${adjustments.hue}deg)`);
-    if (adjustments.saturation !== 100) parts.push(`saturate(${adjustments.saturation}%)`);
-    if (adjustments.warmth > 0) parts.push(`sepia(${adjustments.warmth}%)`);
-    return parts.length ? parts.join(' ') : 'none';
+import { applyAdjustments, isNeutral } from './adjust-engine.js';
+
+/** Return a new canvas with the adjustments applied, scaled down so that its longest side is at most maxSide. */
+export function adjustCanvas(source, adjustments, maxSide = Infinity) {
+    const ratio = Math.min(1, maxSide / Math.max(source.width, source.height));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(source.width * ratio));
+    canvas.height = Math.max(1, Math.round(source.height * ratio));
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    ctx.drawImage(source, 0, 0, canvas.width, canvas.height);
+    if (!isNeutral(adjustments)) {
+        const image = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        ctx.putImageData(applyAdjustments(image, adjustments), 0, 0);
+    }
+    return canvas;
 }
 
 export function renderToCanvas(baseCanvas, state, targetWidth, targetHeight) {
@@ -31,10 +38,13 @@ export function renderToCanvas(baseCanvas, state, targetWidth, targetHeight) {
     ctx.translate(pad.left, pad.top);
 
     // Base image with adjustments
-    const filter = buildFilterString(state.adjustments);
-    ctx.filter = filter;
-    ctx.drawImage(baseCanvas, 0, 0, targetWidth, targetHeight);
-    ctx.filter = 'none';
+    if (isNeutral(state.adjustments)) {
+        ctx.drawImage(baseCanvas, 0, 0, targetWidth, targetHeight);
+    } else {
+        const adjusted = adjustCanvas(baseCanvas, state.adjustments);
+        ctx.drawImage(adjusted, 0, 0, targetWidth, targetHeight);
+        adjusted.width = 0;
+    }
 
     // Redactions (destructive)
     for (const r of state.redactions) {

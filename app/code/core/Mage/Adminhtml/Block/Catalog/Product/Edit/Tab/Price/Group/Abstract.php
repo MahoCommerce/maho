@@ -239,6 +239,7 @@ abstract class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Price_Group_Abstrac
      */
     public function getAddButtonHtml()
     {
+        $this->getChild('add_button')->setData('aria_labelledby', $this->getElement()->getHtmlId() . '-label');
         return $this->getChildHtml('add_button');
     }
 

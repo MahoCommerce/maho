@@ -600,7 +600,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      * Load cached data by identifier
      *
      * @param   string $id
-     * @return  string
+     * @return  string|false
      */
     #[\Override]
     protected function _loadCache($id)
@@ -615,12 +615,13 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      * @param   string $id
      * @param   array $tags
      * @param   false|int $lifetime
-     * @return  Mage_Core_Model_App
+     * @return  bool
      */
     #[\Override]
     protected function _saveCache($data, $id, $tags = [], $lifetime = false)
     {
-        return Mage::app()->saveCache($data, $id, $tags, $lifetime);
+        Mage::app()->saveCache($data, $id, $tags, $lifetime);
+        return true;
     }
 
     /**
@@ -1023,6 +1024,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
                         $this->_makeEventsLowerCase(Mage_Core_Model_App_Area::AREA_GLOBAL, $mergeModel);
                         $this->_makeEventsLowerCase(Mage_Core_Model_App_Area::AREA_FRONTEND, $mergeModel);
                         $this->_makeEventsLowerCase(Mage_Core_Model_App_Area::AREA_ADMINHTML, $mergeModel);
+                        $this->_moveDocsUnderModule($mergeModel, $modName);
 
                         $mergeToObject->extend($mergeModel, true);
                     }
@@ -1264,7 +1266,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
 
         $classArr = explode('/', trim($classAlias));
         $group = $classArr[0];
-        $class = empty($classArr[1]) ? null : $classArr[1];
+        $class = empty($classArr[1]) ? '' : $classArr[1];
 
         if (isset($this->_classNameCache[$groupRootNode][$group][$class])) {
             return $this->_classNameCache[$groupRootNode][$group][$class];
@@ -1781,6 +1783,26 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
                     unset($events->$oldName);
                 }
             }
+        }
+    }
+
+    /**
+     * Move the docs folders that a module declares under global/docs to global/docs/<module>.
+     * Without the move, two modules that declare the same audience replace each other in the merge.
+     */
+    protected function _moveDocsUnderModule(\Maho\Simplexml\Config $mergeModel, string $moduleName): void
+    {
+        $docs = $mergeModel->getNode('global/docs');
+        if ($docs === false || !$docs->hasChildren()) {
+            return;
+        }
+        $folders = [];
+        foreach ($docs->children() as $audience => $path) {
+            $folders[$audience] = (string) $path;
+        }
+        unset($mergeModel->getNode('global')->docs);
+        foreach ($folders as $audience => $path) {
+            $mergeModel->setNode("global/docs/$moduleName/$audience", $path);
         }
     }
 

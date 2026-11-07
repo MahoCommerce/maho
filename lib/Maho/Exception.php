@@ -11,28 +11,4 @@ declare(strict_types=1);
 
 namespace Maho;
 
-class Exception extends \Exception
-{
-    /**
-     * Check PCRE PREG error and throw exception
-     *
-     * @throws Exception
-     */
-    public static function processPcreError(): void
-    {
-        if (preg_last_error() != PREG_NO_ERROR) {
-            switch (preg_last_error()) {
-                case PREG_INTERNAL_ERROR:
-                    throw new Exception('PCRE PREG internal error');
-                case PREG_BACKTRACK_LIMIT_ERROR:
-                    throw new Exception('PCRE PREG Backtrack limit error');
-                case PREG_RECURSION_LIMIT_ERROR:
-                    throw new Exception('PCRE PREG Recursion limit error');
-                case PREG_BAD_UTF8_ERROR:
-                    throw new Exception('PCRE PREG Bad UTF-8 error');
-                case PREG_BAD_UTF8_OFFSET_ERROR:
-                    throw new Exception('PCRE PREG Bad UTF-8 offset error');
-            }
-        }
-    }
-}
+class Exception extends \Exception {}

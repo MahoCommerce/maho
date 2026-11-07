@@ -374,7 +374,7 @@
         "Tests\\Backend\\Unit\\MahoCLI\\Commands\\CreateApiResourceTest": 0.4351,
         "Tests\\Backend\\Unit\\MahoCLI\\Commands\\CronUnlockTest": 0.1315,
         "Tests\\Backend\\Unit\\MahoCLI\\Commands\\DBQueryTest": 0.1146,
-        "Tests\\Backend\\Unit\\MahoCLI\\Commands\\FrontendThemeBuildTest": 0.0625,
+        "Tests\\Backend\\Unit\\MahoCLI\\Helper\\TailwindToolchainTest": 0.0625,
         "Tests\\Backend\\Unit\\MahoCLI\\Commands\\FrontendThemeCreateTest": 0.0709,
         "Tests\\Backend\\Unit\\MahoCLI\\Commands\\HealthCheckCronTest": 10.5021,
         "Tests\\Backend\\Unit\\MahoCLI\\Commands\\HealthCheckEncryptionTest": 0.6481,

@@ -48,7 +48,7 @@ class Mage_Cms_Block_Page extends Mage_Core_Block_Abstract
         if (Mage::getStoreConfig('web/default/show_cms_breadcrumbs')
             && ($breadcrumbs = $this->getLayout()->getBlock('breadcrumbs'))
             && !Mage::helper('cms/page')->isHomePage($page)
-            && ($page->getIdentifier() !== Mage::helper('cms/page')->getConfigPageIdentifier(Mage_Cms_Helper_Page::XML_PATH_NO_ROUTE_PAGE))
+            && !Mage::helper('cms/page')->isNoRoutePage($page)
         ) {
             $breadcrumbsArray[] = [
                 'crumbName' => 'home',

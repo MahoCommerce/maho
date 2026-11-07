@@ -11,9 +11,33 @@ declare(strict_types=1);
 
 namespace Maho\Security;
 
+use Uri\WhatWg\Url;
+
 final class OutboundUrl
 {
     public const SCHEMES = ['http', 'https'];
+
+    /**
+     * Special-purpose ranges that FILTER_FLAG_NO_RES_RANGE accepts. A host on a NAT64,
+     * a cloud or a lab network can route them to an internal service.
+     */
+    private const NON_PUBLIC_RANGES = [
+        '100.64.0.0/10',
+        '192.0.0.0/24',
+        '192.0.2.0/24',
+        '198.18.0.0/15',
+        '198.51.100.0/24',
+        '203.0.113.0/24',
+        '224.0.0.0/3',
+        '64:ff9b:1::/48',
+        '100::/64',
+        '100:0:0:1::/64',
+        '2001::/23',
+        '2001:db8::/32',
+        '3fff::/20',
+        'fec0::/10',
+        'ff00::/8',
+    ];
 
     /** @var \Closure(string): list<string> */
     private \Closure $resolver;
@@ -35,21 +59,13 @@ final class OutboundUrl
      */
     public function validate(string $url, array $allowedPrefixes = []): OutboundTarget
     {
-        $parts = parse_url($url);
-        if ($parts === false) {
-            throw new OutboundUrlException('The URL is malformed.');
-        }
-        $scheme = strtolower($parts['scheme'] ?? '');
-        if (!in_array($scheme, self::SCHEMES, true)) {
-            throw new OutboundUrlException('The URL must use the http or https scheme.');
-        }
-        $host = trim($parts['host'] ?? '', '[]');
-        if ($host === '') {
-            throw new OutboundUrlException('The URL has no host.');
-        }
-        $port = $parts['port'] ?? ($scheme === 'https' ? 443 : 80);
-        $path = ($parts['path'] ?? '') === '' ? '/' : $parts['path'];
-        $query = $parts['query'] ?? null;
+        $uri = self::parse($url);
+        $url = $uri->toAsciiString();
+        $scheme = $uri->getScheme();
+        $host = trim((string) $uri->getAsciiHost(), '[]');
+        $port = $uri->getPort() ?? ($scheme === 'https' ? 443 : 80);
+        $path = $uri->getPath();
+        $query = $uri->getQuery();
 
         if (self::matchesPrefix($scheme, $host, $port, $path, $allowedPrefixes)) {
             return new OutboundTarget($url, $scheme, $host, $port, $path, $query, null);
@@ -68,6 +84,24 @@ final class OutboundUrl
         return new OutboundTarget($url, $scheme, $host, $port, $path, $query, $addresses[0]);
     }
 
+    /**
+     * Read the URL as a browser does, with no DNS lookup.
+     *
+     * @throws OutboundUrlException
+     */
+    public static function parse(string $url): Url
+    {
+        // The parser removes a tab, a CR or an LF with no error, which changes the URL
+        $uri = preg_match('/[\x00-\x1F\x7F]/', $url) ? null : Url::parse($url);
+        if ($uri === null) {
+            throw new OutboundUrlException('The URL is malformed.');
+        }
+        if (!in_array($uri->getScheme(), self::SCHEMES, true)) {
+            throw new OutboundUrlException('The URL must use the http or https scheme.');
+        }
+        return $uri;
+    }
+
     public static function isPublicAddress(string $address): bool
     {
         if (filter_var($address, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
@@ -77,20 +111,42 @@ final class OutboundUrl
         if ($packed === false) {
             return false;
         }
-        if (strlen($packed) === 4) {
-            $first = ord($packed[0]);
-            $second = ord($packed[1]);
-            // 100.64.0.0/10 shared address space, 224.0.0.0/4 multicast and everything above
-            return $first < 224 && !($first === 100 && ($second & 0xC0) === 0x40);
+        foreach (self::NON_PUBLIC_RANGES as $range) {
+            if (self::isInRange($packed, $range)) {
+                return false;
+            }
         }
-        // NAT64 (64:ff9b::/96) and 6to4 (2002::/16) embed an IPv4 address that must be public too
-        if (str_starts_with($packed, "\x00\x64\xff\x9b" . str_repeat("\x00", 8))) {
+        if (strlen($packed) === 4) {
+            return true;
+        }
+        // IPv4-compatible (::/96), NAT64 (64:ff9b::/96) and 6to4 (2002::/16) embed an IPv4 address that must be public too
+        if (str_starts_with($packed, str_repeat("\x00", 12)) || str_starts_with($packed, "\x00\x64\xff\x9b" . str_repeat("\x00", 8))) {
             return self::isPublicAddress(inet_ntop(substr($packed, 12)) ?: '');
         }
         if (str_starts_with($packed, "\x20\x02")) {
             return self::isPublicAddress(inet_ntop(substr($packed, 2, 4)) ?: '');
         }
-        return ord($packed[0]) !== 0xff;
+        return true;
+    }
+
+    private static function isInRange(string $packed, string $range): bool
+    {
+        [$network, $bits] = explode('/', $range);
+        $packedNetwork = inet_pton($network);
+        if ($packedNetwork === false || strlen($packedNetwork) !== strlen($packed)) {
+            return false;
+        }
+        $bits = (int) $bits;
+        $bytes = intdiv($bits, 8);
+        if (substr($packed, 0, $bytes) !== substr($packedNetwork, 0, $bytes)) {
+            return false;
+        }
+        $rest = $bits % 8;
+        if ($rest === 0) {
+            return true;
+        }
+        $mask = (0xFF << (8 - $rest)) & 0xFF;
+        return (ord($packed[$bytes]) & $mask) === (ord($packedNetwork[$bytes]) & $mask);
     }
 
     /**
@@ -98,16 +154,21 @@ final class OutboundUrl
      */
     private static function matchesPrefix(string $scheme, string $host, int $port, string $path, array $prefixes): bool
     {
+        // Some servers decode %2F or %5C to a slash, or remove a ";" parameter, before they remove "..", so the path can leave the prefix
+        if (preg_match('/%(2F|5C)|;/i', $path)) {
+            return false;
+        }
         foreach ($prefixes as $prefix) {
-            $parts = parse_url(trim($prefix));
-            if ($parts === false || !isset($parts['scheme'], $parts['host'])) {
+            $uri = Url::parse(trim($prefix));
+            $prefixScheme = $uri?->getScheme();
+            $prefixHost = trim($uri?->getAsciiHost() ?? '', '[]');
+            if ($prefixScheme === null || $prefixHost === '') {
                 continue;
             }
-            $prefixScheme = strtolower($parts['scheme']);
-            $prefixPort = $parts['port'] ?? ($prefixScheme === 'https' ? 443 : 80);
-            $prefixPath = ($parts['path'] ?? '') === '' ? '/' : $parts['path'];
+            $prefixPort = $uri->getPort() ?? ($prefixScheme === 'https' ? 443 : 80);
+            $prefixPath = $uri->getPath();
             if ($prefixScheme === $scheme
-                && strtolower(trim($parts['host'], '[]')) === strtolower($host)
+                && $prefixHost === $host
                 && $prefixPort === $port
                 && str_starts_with($path, $prefixPath)
             ) {

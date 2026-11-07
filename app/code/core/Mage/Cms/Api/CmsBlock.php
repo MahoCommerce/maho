@@ -31,8 +31,8 @@ use Maho\ApiPlatform\CrudResource;
     provider: CmsBlockProvider::class,
     processor: CmsBlockProcessor::class,
     operations: [
-        new Get(uriTemplate: '/cms-blocks/{id}', security: 'true'),
-        new GetCollection(uriTemplate: '/cms-blocks', security: 'true'),
+        new Get(uriTemplate: '/cms-blocks/{id}', security: 'true', description: 'Get a CMS block by ID. A guest or a customer gets an enabled block of the store view. Admin and API tokens with CMS block access also get disabled blocks and the blocks of other store views'),
+        new GetCollection(uriTemplate: '/cms-blocks', security: 'true', description: 'Get CMS blocks. A guest or a customer gets the enabled blocks of the store view. With identifier, it returns the one block that the store view shows. With scope "all", admin and API tokens get the blocks of every store view, the disabled ones too'),
         new Post(
             uriTemplate: '/cms-blocks',
             processor: CmsBlockProcessor::class,
@@ -53,17 +53,17 @@ use Maho\ApiPlatform\CrudResource;
         ),
     ],
     graphQlOperations: [
-        new Query(name: 'item_query', description: 'Get a CMS block by ID', security: 'true'),
+        new Query(name: 'item_query', description: 'Get a CMS block by ID. A guest or a customer gets an enabled block of the store view. Admin and API tokens with CMS block access also get disabled blocks and the blocks of other store views', security: 'true'),
         new QueryCollection(
             name: 'collection_query',
-            description: 'Get CMS blocks',
+            description: 'Get CMS blocks. A guest or a customer gets the enabled blocks of the store view. With identifier, it returns the one block that the store view shows. With scope "all", admin and API tokens get the blocks of every store view, the disabled ones too',
             security: 'true',
             extraArgs: [
                 'createdFrom' => ['type' => 'String', 'description' => 'Created at or after this UTC date or datetime; a bare date means from 00:00:00'],
                 'createdTo' => ['type' => 'String', 'description' => 'Created at or before this UTC date or datetime; a bare date includes the whole day'],
                 'updatedSince' => ['type' => 'String', 'description' => 'Updated at or after this UTC date or datetime'],
-                'identifier' => ['type' => 'String', 'description' => 'Exact identifier lookup (returns 0 or 1 block)'],
-                'search' => ['type' => 'String', 'description' => 'Partial match on the block title or identifier'],
+                'identifier' => ['type' => 'String', 'description' => 'Exact identifier lookup. Returns one block, or with scope "all", every block with this identifier'],
+                'search' => ['type' => 'String', 'description' => 'Partial match on the block title, content or identifier'],
                 'scope' => ['type' => 'String', 'description' => 'Give "all" to list the records of every store view, the disabled and unpublished ones too, as the admin grid does. It needs backend access. Without it, the list holds only the published records of the current store view'],
             ],
         ),

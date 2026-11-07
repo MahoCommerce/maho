@@ -35,8 +35,6 @@ class Mage_Adminhtml_Block_Dashboard_Grids extends Mage_Adminhtml_Block_Widget_T
     #[\Override]
     protected function _prepareLayout()
     {
-        $visitorLogEnabled = Mage::helper('log')->isVisitorLogEnabled();
-
         // Tabs in alphabetical order
         $this->addTab('ordered_products', [
             'label'     => $this->__('Bestsellers'),
@@ -50,32 +48,6 @@ class Mage_Adminhtml_Block_Dashboard_Grids extends Mage_Adminhtml_Block_Widget_T
             'class'     => 'ajax',
         ]);
 
-        if ($visitorLogEnabled) {
-            $this->addTab('devices_browsers', [
-                'label'     => $this->__('Devices & Browsers'),
-                'url'       => $this->getUrl('*/*/devices', ['_current' => true]),
-                'class'     => 'ajax',
-            ]);
-
-            $this->addTab('engagement', [
-                'label'     => $this->__('Engagement'),
-                'url'       => $this->getUrl('*/*/engagement', ['_current' => true]),
-                'class'     => 'ajax',
-            ]);
-
-            $this->addTab('entry_exit_pages', [
-                'label'     => $this->__('Entry & Exit Pages'),
-                'url'       => $this->getUrl('*/*/entryExit', ['_current' => true]),
-                'class'     => 'ajax',
-            ]);
-
-            $this->addTab('languages', [
-                'label'     => $this->__('Languages'),
-                'url'       => $this->getUrl('*/*/languages', ['_current' => true]),
-                'class'     => 'ajax',
-            ]);
-        }
-
         $this->addTab('reviewed_products', [
             'label'     => $this->__('Most Viewed Products'),
             'url'       => $this->getUrl('*/*/productsViewed', ['_current' => true]),
@@ -87,20 +59,6 @@ class Mage_Adminhtml_Block_Dashboard_Grids extends Mage_Adminhtml_Block_Widget_T
             'url'       => $this->getUrl('*/*/customersNewest', ['_current' => true]),
             'class'     => 'ajax',
         ]);
-
-        if ($visitorLogEnabled) {
-            $this->addTab('top_pages', [
-                'label'     => $this->__('Top Pages'),
-                'url'       => $this->getUrl('*/*/topPages', ['_current' => true]),
-                'class'     => 'ajax',
-            ]);
-
-            $this->addTab('traffic_sources', [
-                'label'     => $this->__('Traffic Sources'),
-                'url'       => $this->getUrl('*/*/trafficSources', ['_current' => true]),
-                'class'     => 'ajax',
-            ]);
-        }
 
         return parent::_prepareLayout();
     }

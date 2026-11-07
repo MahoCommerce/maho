@@ -57,7 +57,7 @@ class Mage_Adminhtml_Block_Widget_Form_Element_Gallery extends Mage_Adminhtml_Bl
             'add_button',
             $this->getLayout()->createBlock('adminhtml/widget_button')
                 ->setData([
-                    'label'     => Mage::helper('adminhtml')->__('Add New Image'),
+                    'label'     => Mage::helper('adminhtml')->__('Add'),
                     'onclick'   => 'addNewImage()',
                     'class' => 'add',
                 ]),
