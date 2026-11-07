@@ -153,7 +153,7 @@ final class UrlResolverProvider extends \Maho\ApiPlatform\Provider
         if ($options === 'RP' || $options === 'R') {
             $result->type = 'redirect';
             $result->redirectUrl = $targetPath;
-            $result->redirectType = 301;
+            $result->redirectType = $options === 'R' ? 302 : 301;
             return $result;
         }
 
