@@ -68,7 +68,7 @@ class Mage_Reports_Helper_Data extends Mage_Core_Helper_Abstract
         }
 
         if ($period == self::REPORT_PERIOD_TYPE_YEAR) {
-            $dateStart = new DateTime($start->format('Y'));
+            $dateStart = new DateTime($start->format('Y-01-01'));
         }
 
         if (!$period || !$dateStart) {
