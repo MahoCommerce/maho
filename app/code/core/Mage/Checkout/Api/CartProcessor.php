@@ -14,6 +14,7 @@ use ApiPlatform\Metadata\Operation;
 use Maho\ApiPlatform\Security\ApiUser;
 use Symfony\Bundle\SecurityBundle\Security;
 use Maho\ApiPlatform\Service\StoreContext;
+use Maho\ApiPlatform\Http\RequestInput;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -204,8 +205,9 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     private function addItemToCart(array $context, array $uriVariables): Cart
     {
         $args = $context['args']['input'] ?? [];
-        $sku = $args['sku'] ?? '';
-        $qty = (float) ($args['qty'] ?? 1);
+        $input = RequestInput::of($args);
+        $sku = $input->string('sku') ?? '';
+        $qty = $input->float('qty') ?? 1.0;
 
         // Build buy request options
         $buyOptions = [];
@@ -321,8 +323,9 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     private function updateCartItem(array $context, array $uriVariables): Cart
     {
         $args = $context['args']['input'] ?? [];
-        $itemId = $args['itemId'] ?? $uriVariables['itemId'] ?? null;
-        $qty = isset($args['qty']) ? (float) $args['qty'] : null;
+        $input = RequestInput::of($args);
+        $itemId = $input->int('itemId') ?? $uriVariables['itemId'] ?? null;
+        $qty = $input->float('qty');
         $customPrice = $this->extractCustomPrice($args);
 
         if (!$itemId) {
@@ -341,7 +344,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     private function removeItemFromCart(array $context, array $uriVariables): Cart
     {
         $args = $context['args']['input'] ?? [];
-        $itemId = $args['itemId'] ?? $uriVariables['itemId'] ?? null;
+        $itemId = RequestInput::of($args)->int('itemId') ?? $uriVariables['itemId'] ?? null;
 
         if (!$itemId) {
             throw new UnprocessableEntityHttpException('Item ID is required');
@@ -362,7 +365,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $args = $context['args']['input'] ?? [];
         // Accept both field names: GraphQL/authenticated callers send couponCode,
         // the guest REST body uses code.
-        $couponCode = $args['couponCode'] ?? $args['code'] ?? '';
+        $couponCode = RequestInput::of($args)->string('couponCode', 'code') ?? '';
 
         if (!$couponCode) {
             throw new UnprocessableEntityHttpException('Coupon code is required');
@@ -517,9 +520,10 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     private function assignCustomerToCart(array $context): Cart
     {
         $args = $context['args']['input'] ?? [];
-        $cartId = $args['cartId'] ?? null;
-        $maskedId = $args['maskedId'] ?? null;
-        $requestedCustomerId = $args['customerId'] ?? null;
+        $input = RequestInput::of($args);
+        $cartId = $input->int('cartId');
+        $maskedId = $input->string('maskedId');
+        $requestedCustomerId = $input->int('customerId');
 
         // Admin/POS users can assign any customer to any cart
         if ($this->isPrivilegedCartActor()) {
@@ -563,7 +567,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     private function applyGiftcardToCart(array $context, array $uriVariables): Cart
     {
         $args = $context['args']['input'] ?? [];
-        $giftcardCode = trim($args['giftcardCode'] ?? '');
+        $giftcardCode = trim(RequestInput::of($args)->string('giftcardCode') ?? '');
 
         // Throttle anonymous/customer callers by IP: applying a gift card to a
         // cart is otherwise an oracle for enumerating gift card codes, which
@@ -585,7 +589,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     private function removeGiftcardFromCart(array $context, array $uriVariables): Cart
     {
         $args = $context['args']['input'] ?? [];
-        $giftcardCode = trim($args['giftcardCode'] ?? '');
+        $giftcardCode = trim(RequestInput::of($args)->string('giftcardCode') ?? '');
 
         $quote = $this->resolveAndVerify($context, $uriVariables);
         $quote = $this->cartService->removeGiftcard($quote, $giftcardCode);
@@ -600,10 +604,11 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     private function setGiftMessage(array $context, array $uriVariables): Cart
     {
         $args = $context['args']['input'] ?? [];
+        $input = RequestInput::of($args);
         $itemId = $this->resolveGiftMessageItemId($args, $uriVariables);
-        $sender = trim((string) ($args['sender'] ?? ''));
-        $recipient = trim((string) ($args['recipient'] ?? ''));
-        $message = (string) ($args['message'] ?? '');
+        $sender = trim($input->string('sender') ?? '');
+        $recipient = trim($input->string('recipient') ?? '');
+        $message = $input->string('message') ?? '';
 
         $quote = $this->resolveAndVerify($context, $uriVariables);
         $quote = $this->cartService->setGiftMessage($quote, $itemId, $sender, $recipient, $message);
@@ -632,7 +637,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
      */
     private function resolveGiftMessageItemId(array $args, array $uriVariables): ?int
     {
-        $itemId = $args['itemId'] ?? $uriVariables['itemId'] ?? null;
+        $itemId = ($args['itemId'] ?? '') === '' ? $uriVariables['itemId'] ?? null : RequestInput::of($args)->int('itemId');
         return $itemId !== null && $itemId !== '' ? (int) $itemId : null;
     }
 

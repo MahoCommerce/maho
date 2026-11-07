@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Mage\Sales\Api;
 
 use ApiPlatform\Metadata\Operation;
+use Maho\ApiPlatform\Http\RequestInput;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -43,7 +44,8 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
     private function createCreditMemo(array $uriVariables, array $context): CreditMemo
     {
         $args = $context['args']['input'] ?? [];
-        $orderId = (int) ($uriVariables['orderId'] ?? $args['orderId'] ?? 0);
+        $input = RequestInput::of($args);
+        $orderId = (int) ($uriVariables['orderId'] ?? $input->int('orderId') ?? 0);
         if (!$orderId) {
             throw new UnprocessableEntityHttpException('Order ID is required');
         }
@@ -53,7 +55,7 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
             throw new BadRequestHttpException('Items must be a list of {orderItemId, qty} objects');
         }
 
-        $shippingAmount = isset($args['shippingAmount']) ? (float) $args['shippingAmount'] : null;
+        $shippingAmount = $input->float('shippingAmount');
         if ($shippingAmount !== null && $shippingAmount < 0) {
             throw new UnprocessableEntityHttpException('Shipping amount must be >= 0');
         }
@@ -61,11 +63,11 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
         return $this->doCreateCreditMemo(
             $orderId,
             $items,
-            $args['comment'] ?? null,
-            isset($args['adjustmentPositive']) ? (float) $args['adjustmentPositive'] : null,
-            isset($args['adjustmentNegative']) ? (float) $args['adjustmentNegative'] : null,
+            $input->string('comment'),
+            $input->float('adjustmentPositive'),
+            $input->float('adjustmentNegative'),
             $shippingAmount,
-            (bool) ($args['offlineRefund'] ?? true),
+            $input->bool('offlineRefund') ?? true,
         );
     }
 

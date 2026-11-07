@@ -16,6 +16,7 @@ use ApiPlatform\Metadata\DeleteOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use Maho\ApiPlatform\Exception\ValidationException;
 use Maho\ApiPlatform\Security\ApiUser;
+use Maho\ApiPlatform\Http\RequestInput;
 use Maho\DataObject;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -41,8 +42,9 @@ final class ConfigSettingProcessor extends \Maho\ApiPlatform\Processor
         $user = $this->requireUser();
         $body = $operation instanceof DeleteOperationInterface ? [] : $this->parseRequestBody($context['request'] ?? null);
         $params = $body + $this->provider->requestFilters($context);
+        $input = RequestInput::of($params);
 
-        $path = (string) ($uriVariables['path'] ?? $params['path'] ?? '');
+        $path = (string) ($uriVariables['path'] ?? $input->string('path') ?? '');
         $field = $this->provider->field($path);
         if ($field === null) {
             throw new NotFoundHttpException("'$path' is not a system configuration field");
@@ -50,8 +52,8 @@ final class ConfigSettingProcessor extends \Maho\ApiPlatform\Processor
 
         $scopeInBody = array_key_exists('scope', $body) || array_key_exists('scopeCode', $body);
         $scope = $this->provider->resolveScope(
-            isset($params['scope']) ? (string) $params['scope'] : ConfigSetting::SCOPE_DEFAULT,
-            isset($params['scopeCode']) ? (string) $params['scopeCode'] : null,
+            $input->string('scope') ?? ConfigSetting::SCOPE_DEFAULT,
+            $input->string('scopeCode'),
             $scopeInBody,
         );
         if (!$this->provider->isShownAtScope($field, $scope['scope'])) {

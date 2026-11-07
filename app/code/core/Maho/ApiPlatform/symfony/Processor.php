@@ -22,6 +22,7 @@ use Maho\ApiPlatform\Trait\RawResponseTrait;
 use Maho\ApiPlatform\Trait\StoreAccessTrait;
 use Maho\ApiPlatform\Trait\StoreRestrictionTrait;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\HttpFoundation\Exception\JsonException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
@@ -142,8 +143,9 @@ abstract class Processor implements ProcessorInterface
      * Decode a JSON request body into an array.
      *
      * Returns an empty array when there is no request or no body, and throws
-     * a 400 when the body is present but not valid JSON. Single decode path for
-     * every processor that reads a raw REST payload.
+     * a 400 when the body is present but not a JSON object or array. Single
+     * decode path for every processor that reads a raw REST payload; read its
+     * values with Maho\ApiPlatform\Http\RequestInput.
      *
      * @return array<mixed>
      */
@@ -153,18 +155,11 @@ abstract class Processor implements ProcessorInterface
             return [];
         }
 
-        $content = $request->getContent();
-        if ($content === '') {
-            return [];
-        }
-
         try {
-            $body = \Mage::helper('core')->jsonDecode($content);
-        } catch (\JsonException) {
+            return $request->getPayload()->all();
+        } catch (JsonException) {
             throw new BadRequestHttpException('Invalid JSON in request body');
         }
-
-        return is_array($body) ? $body : [];
     }
 
     /**

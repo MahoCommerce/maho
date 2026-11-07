@@ -15,11 +15,14 @@ use Mage\Customer\Api\GraphQL\CustomerQueryHandler;
 use Mage\Sales\Api\GraphQL\OrderMutationHandler;
 use Mage\Catalog\Api\GraphQL\ProductQueryHandler;
 use Maho\ApiPlatform\Security\SameOriginGuard;
+use Maho\ApiPlatform\Http\RequestInput;
+use Symfony\Component\HttpFoundation\Exception\JsonException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Serializer\Exception\NotNormalizableValueException;
 
 /**
  * Admin GraphQL Controller.
@@ -64,15 +67,22 @@ class AdminGraphQlController
         SameOriginGuard::assert($request);
 
         // Parse request
-        $content = $request->getContent();
         try {
-            $input = (array) \Mage::helper('core')->jsonDecode($content ?: '[]');
-        } catch (\JsonException) {
-            $input = [];
+            $input = RequestInput::of($request->getPayload()->all());
+        } catch (JsonException) {
+            $input = RequestInput::of([]);
         }
 
-        $query = $input['query'] ?? '';
-        $variables = $input['variables'] ?? null;
+        try {
+            $query = $input->string('query') ?? '';
+            $variables = $input->array('variables');
+            $operationName = $input->string('operationName');
+            $requestedStoreId = RequestInput::of($variables ?? [])->int('storeId');
+        } catch (NotNormalizableValueException $e) {
+            return new JsonResponse([
+                'errors' => [['message' => $e->getMessage()]],
+            ], Response::HTTP_BAD_REQUEST);
+        }
 
         if (empty($query)) {
             return new JsonResponse([
@@ -83,7 +93,7 @@ class AdminGraphQlController
         try {
             // Authentication handled by Symfony firewall (AdminSessionAuthenticator)
             // $_SERVER context vars are set by the authenticator
-            $storeId = (int) ($_SERVER['MAHO_STORE_ID'] ?? $input['variables']['storeId'] ?? 1);
+            $storeId = (int) ($_SERVER['MAHO_STORE_ID'] ?? $requestedStoreId ?? 1);
             $adminUserId = (int) ($_SERVER['MAHO_ADMIN_USER_ID'] ?? 0);
 
             $context = [
@@ -92,7 +102,6 @@ class AdminGraphQlController
                 'admin_user_id' => $adminUserId,
             ];
 
-            $operationName = $input['operationName'] ?? null;
             $result = $this->executeQuery($query, $variables, $context, $operationName);
 
             // Admin API always uses camelCase (GraphQL standard)

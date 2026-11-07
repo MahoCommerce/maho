@@ -14,6 +14,7 @@ use ApiPlatform\Metadata\DeleteOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Post;
 use Maho\ApiPlatform\Trait\ProductLoaderTrait;
+use Maho\ApiPlatform\Http\RequestInput;
 use Maho\Security\OutboundUrl;
 use Maho\Security\OutboundUrlException;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -47,7 +48,7 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
         $body = $this->parseRequestBody($request);
 
         if ($operation instanceof DeleteOperationInterface) {
-            $valueId = (int) ($body['valueId'] ?? $body['value_id'] ?? $body['id'] ?? 0);
+            $valueId = RequestInput::of($body)->int('valueId', 'value_id', 'id') ?? 0;
             if ($valueId <= 0) {
                 $valueId = (int) ($request?->query->get('valueId') ?? 0);
             }
@@ -63,17 +64,20 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
 
     private function handleUpload(int $productId, array $body): ProductMedia
     {
+        $input = RequestInput::of($body);
         $product = $this->loadProductForWrite($productId, $this->requireUser());
 
         // Support base64-encoded image data
-        $base64 = $body['base64'] ?? $body['imageData'] ?? $body['image_data'] ?? null;
-        $imageUrl = $body['imageUrl'] ?? $body['image_url'] ?? null;
-        $filename = $body['filename'] ?? 'upload.jpg';
-        $types = \Mage_Catalog_Helper_Image::mapDeprecatedRoles((array) ($body['types'] ?? []));
-        $label = $body['label'] ?? null;
+        $base64 = $input->string('base64', 'imageData', 'image_data');
+        $imageUrl = $input->string('imageUrl', 'image_url');
+        $filename = $input->string('filename') ?? 'upload.jpg';
+        // A single role may come as a string
+        $types = is_string($body['types'] ?? null) ? [$body['types']] : $input->stringList('types');
+        $types = \Mage_Catalog_Helper_Image::mapDeprecatedRoles($types ?? []);
+        $label = $input->string('label');
 
-        $position = $body['position'] ?? null;
-        $disabled = $body['disabled'] ?? null;
+        $position = $input->int('position');
+        $disabled = $input->bool('disabled');
 
         if ($base64 !== null) {
             // Decode base64 to temp file
@@ -187,9 +191,10 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
 
     private function handleUpdate(int $productId, array $body): array
     {
+        $input = RequestInput::of($body);
         $product = $this->loadProductForWrite($productId, $this->requireUser());
 
-        $valueId = (int) ($body['valueId'] ?? $body['value_id'] ?? $body['id'] ?? 0);
+        $valueId = $input->int('valueId', 'value_id', 'id') ?? 0;
         if ($valueId <= 0) {
             throw new UnprocessableEntityHttpException('valueId is required');
         }
@@ -212,14 +217,17 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
 
         // Use the gallery backend API to update image attributes
         $updateData = [];
-        if (isset($body['label'])) {
-            $updateData['label'] = $body['label'];
+        $label = $input->string('label');
+        if ($label !== null) {
+            $updateData['label'] = $label;
         }
-        if (isset($body['position'])) {
-            $updateData['position'] = (int) $body['position'];
+        $position = $input->int('position');
+        if ($position !== null) {
+            $updateData['position'] = $position;
         }
-        if (isset($body['disabled'])) {
-            $updateData['disabled'] = $body['disabled'] ? 1 : 0;
+        $disabled = $input->bool('disabled');
+        if ($disabled !== null) {
+            $updateData['disabled'] = $disabled ? 1 : 0;
         }
         if (!empty($updateData)) {
             /** @var \Mage_Catalog_Model_Product_Attribute_Backend_Media $backend */
@@ -228,8 +236,8 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
         }
 
         // Update role assignments
-        $types = $body['types'] ?? null;
-        if (is_array($types) && in_array('image', \Mage_Catalog_Helper_Image::mapDeprecatedRoles($types), true)) {
+        $types = $input->stringList('types');
+        if ($types !== null && in_array('image', \Mage_Catalog_Helper_Image::mapDeprecatedRoles($types), true)) {
             $product->setData('image', $file);
         }
 

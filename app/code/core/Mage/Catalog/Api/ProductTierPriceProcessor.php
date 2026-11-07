@@ -13,6 +13,7 @@ namespace Mage\Catalog\Api;
 use ApiPlatform\Metadata\DeleteOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use Maho\ApiPlatform\Trait\ProductLoaderTrait;
+use Maho\ApiPlatform\Http\RequestInput;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -76,27 +77,27 @@ final class ProductTierPriceProcessor extends \Maho\ApiPlatform\Processor
         }
 
         $tierPrices = [];
-        foreach ($body as $tp) {
+        foreach ($body as $index => $tp) {
             if (!is_array($tp)) {
                 throw new BadRequestHttpException('Each tier price must be an object');
             }
+            $input = RequestInput::of($tp, "[{$index}]");
 
-            $groupId = $tp['customerGroupId'] ?? $tp['customer_group_id'] ?? 'all';
-            if ($groupId === 'all') {
-                $groupId = \Mage_Customer_Model_Group::CUST_GROUP_ALL;
-            }
+            $groupId = ($tp['customerGroupId'] ?? $tp['customer_group_id'] ?? 'all') === 'all'
+                ? \Mage_Customer_Model_Group::CUST_GROUP_ALL
+                : $input->int('customerGroupId', 'customer_group_id');
 
-            $price = (float) ($tp['price'] ?? 0);
+            $price = $input->float('price') ?? 0.0;
             if ($price < 0) {
                 throw new UnprocessableEntityHttpException('Price must not be negative');
             }
 
-            $qty = (float) ($tp['qty'] ?? 1);
+            $qty = $input->float('qty') ?? 1.0;
             if ($qty <= 0) {
                 throw new UnprocessableEntityHttpException('Quantity must be greater than 0');
             }
 
-            $websiteId = (int) ($tp['websiteId'] ?? $tp['website_id'] ?? 0);
+            $websiteId = $input->int('websiteId', 'website_id') ?? 0;
             if ($allowedWebsiteIds !== null && !in_array($websiteId, $allowedWebsiteIds, true)) {
                 throw new AccessDeniedHttpException('Access denied for the requested tier-price website');
             }

@@ -16,6 +16,7 @@ use ApiPlatform\Metadata\Post;
 use Mage;
 use Mage_Catalog_Model_Product_Type;
 use Maho\ApiPlatform\Trait\ProductLoaderTrait;
+use Maho\ApiPlatform\Http\RequestInput;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
@@ -56,7 +57,7 @@ final class BundleOptionProcessor extends \Maho\ApiPlatform\Processor
         }
 
         if ($operation instanceof DeleteOperationInterface) {
-            $optionId = (int) ($uriVariables['id'] ?? $body['optionId'] ?? $body['option_id'] ?? 0) ?: $pathOptionId;
+            $optionId = (int) ($uriVariables['id'] ?? RequestInput::of($body)->int('optionId', 'option_id') ?? 0) ?: $pathOptionId;
             return $this->handleDelete($productId, $optionId);
         }
 
@@ -69,13 +70,39 @@ final class BundleOptionProcessor extends \Maho\ApiPlatform\Processor
 
     private function handleCreate(int $productId, array $body): BundleOption
     {
+        $input = RequestInput::of($body);
         $product = $this->loadProduct($productId, Mage_Catalog_Model_Product_Type::TYPE_BUNDLE);
 
-        $title = (string) ($body['title'] ?? '');
-        $type = (string) ($body['type'] ?? 'select');
-        $required = (bool) ($body['required'] ?? true);
-        $position = (int) ($body['position'] ?? 0);
-        $selections = $body['selections'] ?? [];
+        $title = $input->string('title') ?? '';
+        $type = $input->string('type') ?? 'select';
+        $required = $input->bool('required') ?? true;
+        $position = $input->int('position') ?? 0;
+        // Read every selection before saving anything, so a bad one keeps no option
+        $selectionRows = [];
+        foreach ($input->rows('selections') ?? [] as $selection) {
+            $selProductId = $selection->int('productId', 'product_id') ?? 0;
+            if ($selProductId <= 0) {
+                continue;
+            }
+            $this->authorizeAssociatedProductWebsites($selProductId);
+            $qty = $selection->float('qty') ?? 1.0;
+            if ($qty <= 0) {
+                throw new UnprocessableEntityHttpException('Quantity must be greater than 0');
+            }
+            $price = $selection->float('price') ?? 0.0;
+            if ($price < 0) {
+                throw new UnprocessableEntityHttpException('Price must not be negative');
+            }
+            $selectionRows[] = [
+                'product_id' => $selProductId,
+                'qty' => $qty,
+                'price' => $price,
+                'can_change_qty' => $selection->bool('canChangeQty', 'can_change_qty') ?? true,
+                'is_default' => $selection->bool('isDefault', 'is_default') ?? false,
+                'price_type' => ($selection->string('priceType', 'price_type') ?? 'fixed') === 'percent' ? 1 : 0,
+                'position' => $selection->int('position') ?? 0,
+            ];
+        }
 
         if ($title === '') {
             throw new UnprocessableEntityHttpException('title is required');
@@ -110,34 +137,18 @@ final class BundleOptionProcessor extends \Maho\ApiPlatform\Processor
 
         try {
             // Add selections
-            foreach ($selections as $sel) {
-                $selProductId = (int) ($sel['productId'] ?? $sel['product_id'] ?? 0);
-                if ($selProductId <= 0) {
-                    continue;
-                }
-
-                $this->authorizeAssociatedProductWebsites($selProductId);
-
-                $qty = (float) ($sel['qty'] ?? 1);
-                if ($qty <= 0) {
-                    throw new UnprocessableEntityHttpException('Quantity must be greater than 0');
-                }
-                $price = (float) ($sel['price'] ?? 0);
-                if ($price < 0) {
-                    throw new UnprocessableEntityHttpException('Price must not be negative');
-                }
-
+            foreach ($selectionRows as $row) {
                 /** @var \Mage_Bundle_Model_Selection $selection */
                 $selection = Mage::getModel('bundle/selection');
                 $selection->setOptionId($option->getId());
                 $selection->setParentProductId($productId);
-                $selection->setProductId($selProductId);
-                $selection->setSelectionQty($qty);
-                $selection->setSelectionCanChangeQty((bool) ($sel['canChangeQty'] ?? $sel['can_change_qty'] ?? 1));
-                $selection->setIsDefault((bool) ($sel['isDefault'] ?? $sel['is_default'] ?? 0));
-                $selection->setSelectionPriceType(($sel['priceType'] ?? $sel['price_type'] ?? 'fixed') === 'percent' ? 1 : 0);
-                $selection->setSelectionPriceValue($price);
-                $selection->setPosition((int) ($sel['position'] ?? 0));
+                $selection->setProductId($row['product_id']);
+                $selection->setSelectionQty($row['qty']);
+                $selection->setSelectionCanChangeQty($row['can_change_qty']);
+                $selection->setIsDefault($row['is_default']);
+                $selection->setSelectionPriceType($row['price_type']);
+                $selection->setSelectionPriceValue($row['price']);
+                $selection->setPosition($row['position']);
 
                 $this->safeSave($selection, 'create selection');
             }
@@ -155,16 +166,17 @@ final class BundleOptionProcessor extends \Maho\ApiPlatform\Processor
         $dto->type = $type;
         $dto->required = $required;
         $dto->position = $position;
-        $dto->selections = $selections;
+        $dto->selections = $body['selections'] ?? [];
 
         return $dto;
     }
 
     private function handleUpdate(int $productId, array $body, int $pathOptionId = 0): array
     {
+        $input = RequestInput::of($body);
         $this->loadProduct($productId, Mage_Catalog_Model_Product_Type::TYPE_BUNDLE);
 
-        $optionId = (int) ($body['optionId'] ?? $body['option_id'] ?? $body['id'] ?? 0) ?: $pathOptionId;
+        $optionId = ($input->int('optionId', 'option_id', 'id') ?? 0) ?: $pathOptionId;
         if ($optionId <= 0) {
             throw new UnprocessableEntityHttpException('optionId is required');
         }
@@ -175,22 +187,26 @@ final class BundleOptionProcessor extends \Maho\ApiPlatform\Processor
             throw new NotFoundHttpException('Bundle option not found');
         }
 
-        if (isset($body['title'])) {
-            $option->setTitle($body['title']);
-            $option->setDefaultTitle($body['title']);
+        $title = $input->string('title');
+        if ($title !== null) {
+            $option->setTitle($title);
+            $option->setDefaultTitle($title);
         }
-        if (isset($body['type'])) {
+        $type = $input->string('type');
+        if ($type !== null) {
             $validTypes = ['select', 'radio', 'checkbox', 'multi'];
-            if (!in_array($body['type'], $validTypes, true)) {
-                throw new UnprocessableEntityHttpException("Invalid type: {$body['type']}. Valid: " . implode(', ', $validTypes));
+            if (!in_array($type, $validTypes, true)) {
+                throw new UnprocessableEntityHttpException("Invalid type: {$type}. Valid: " . implode(', ', $validTypes));
             }
-            $option->setType($body['type']);
+            $option->setType($type);
         }
-        if (isset($body['required'])) {
-            $option->setRequired((bool) $body['required']);
+        $required = $input->bool('required');
+        if ($required !== null) {
+            $option->setRequired($required);
         }
-        if (isset($body['position'])) {
-            $option->setPosition((int) $body['position']);
+        $position = $input->int('position');
+        if ($position !== null) {
+            $option->setPosition($position);
         }
 
         $this->safeSave($option, 'update option');

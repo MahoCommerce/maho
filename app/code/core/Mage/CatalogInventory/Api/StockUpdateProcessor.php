@@ -13,6 +13,8 @@ namespace Mage\CatalogInventory\Api;
 use ApiPlatform\Metadata\Operation;
 use Maho\ApiPlatform\Trait\ProductLoaderTrait;
 use Maho\ApiPlatform\Trait\StockWriterTrait;
+use Maho\ApiPlatform\Http\RequestInput;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
@@ -40,38 +42,42 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
     private function handleRestRequest(Operation $operation, array $context): StockUpdate
     {
         $operationName = $operation->getName();
-        $body = $context['request']?->toArray() ?? [];
+        $body = $this->parseRequestBody($context['request'] ?? null);
 
         if (str_contains($operationName, 'bulk')) {
-            return $this->doBulkUpdate($body['items'] ?? []);
+            return $this->doBulkUpdate(RequestInput::of($body)->list('items') ?? []);
         }
 
-        return $this->doSingleUpdate(
-            $body['sku'] ?? '',
-            isset($body['qty']) ? (float) $body['qty'] : null,
-            isset($body['isInStock']) ? (bool) $body['isInStock'] : null,
-            isset($body['manageStock']) ? (bool) $body['manageStock'] : null,
-            $this->extractExtendedStockColumns($body),
-        );
+        return $this->doSingleUpdate(...$this->readStockFields($body), extended: $this->extractExtendedStockColumns($body));
     }
 
     private function updateStockFromGraphQl(array $context): StockUpdate
     {
         $args = $context['args']['input'] ?? [];
 
-        return $this->doSingleUpdate(
-            $args['sku'] ?? '',
-            isset($args['qty']) ? (float) $args['qty'] : null,
-            isset($args['isInStock']) ? (bool) $args['isInStock'] : null,
-            isset($args['manageStock']) ? (bool) $args['manageStock'] : null,
-            $this->extractExtendedStockColumns($args),
-        );
+        return $this->doSingleUpdate(...$this->readStockFields($args), extended: $this->extractExtendedStockColumns($args));
     }
 
     private function updateStockBulkFromGraphQl(array $context): StockUpdate
     {
         $args = $context['args']['input'] ?? [];
-        return $this->doBulkUpdate($args['items'] ?? []);
+        return $this->doBulkUpdate(RequestInput::of($args)->list('items') ?? []);
+    }
+
+    /**
+     * @param array<array-key, mixed> $data
+     * @param string $path where $data sits in the request, for its errors
+     * @return array{sku: string, qty: ?float, isInStock: ?bool, manageStock: ?bool}
+     */
+    private function readStockFields(array $data, string $path = ''): array
+    {
+        $input = RequestInput::of($data, $path);
+        return [
+            'sku' => $input->string('sku') ?? '',
+            'qty' => $input->float('qty'),
+            'isInStock' => $input->bool('isInStock'),
+            'manageStock' => $input->bool('manageStock'),
+        ];
     }
 
     /**
@@ -181,14 +187,19 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
         $productResource = \Mage::getResourceSingleton('catalog/product');
         $skuToProductId = [];
         $extendedByIndex = [];
+        $fieldsByIndex = [];
 
         foreach ($items as $index => $item) {
-            $sku = $item['sku'] ?? '';
+            if (!is_array($item)) {
+                throw new BadRequestHttpException("Item at index {$index} must be an object");
+            }
+            $fieldsByIndex[$index] = $this->readStockFields($item, "items[{$index}]");
+            $sku = $fieldsByIndex[$index]['sku'];
             if (empty($sku)) {
                 throw new UnprocessableEntityHttpException("Item at index {$index}: SKU is required");
             }
-            if (isset($item['qty'])) {
-                $this->validateStockQty((float) $item['qty']);
+            if ($fieldsByIndex[$index]['qty'] !== null) {
+                $this->validateStockQty($fieldsByIndex[$index]['qty']);
             }
             // Extract (and thereby validate) before the transaction opens, so a
             // rejected value 400s cleanly instead of aborting a partial write.
@@ -210,11 +221,8 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
 
         $write->beginTransaction();
         try {
-            foreach ($items as $index => $item) {
-                $sku = $item['sku'];
-                $qty = isset($item['qty']) ? (float) $item['qty'] : null;
-                $isInStock = isset($item['isInStock']) ? (bool) $item['isInStock'] : null;
-                $manageStock = isset($item['manageStock']) ? (bool) $item['manageStock'] : null;
+            foreach (array_keys($items) as $index) {
+                ['sku' => $sku, 'qty' => $qty, 'isInStock' => $isInStock, 'manageStock' => $manageStock] = $fieldsByIndex[$index];
                 $extended = $extendedByIndex[$index];
                 $productId = $skuToProductId[$sku];
 

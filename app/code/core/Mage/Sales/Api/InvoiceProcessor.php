@@ -13,6 +13,7 @@ declare(strict_types=1);
 namespace Mage\Sales\Api;
 
 use ApiPlatform\Metadata\Operation;
+use Maho\ApiPlatform\Http\RequestInput;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
@@ -61,10 +62,7 @@ final class InvoiceProcessor extends \Maho\ApiPlatform\Processor
             throw new BadRequestHttpException('Comment must be a string');
         }
 
-        $notifyCustomer = $args['notifyCustomer'] ?? false;
-        if (!is_scalar($notifyCustomer)) {
-            throw new BadRequestHttpException('notifyCustomer must be a boolean');
-        }
+        $notifyCustomer = RequestInput::of($args)->bool('notifyCustomer') ?? false;
 
         $order = \Mage::getModel('sales/order')->load($orderId);
         if (!$order->getId()) {
@@ -79,7 +77,7 @@ final class InvoiceProcessor extends \Maho\ApiPlatform\Processor
             $qtys[(int) $entry['item']->getId()] = $entry['qty'];
         }
 
-        $invoice = \Mage::getService('sales/order')->invoice($order, $qtys, $captureCase, $comment, (bool) $notifyCustomer);
+        $invoice = \Mage::getService('sales/order')->invoice($order, $qtys, $captureCase, $comment, $notifyCustomer);
 
         return Invoice::fromModel($invoice);
     }

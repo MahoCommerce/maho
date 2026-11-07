@@ -14,6 +14,7 @@ namespace Mage\Catalog\Api;
 
 use ApiPlatform\Metadata\DeleteOperationInterface;
 use ApiPlatform\Metadata\Operation;
+use Maho\ApiPlatform\Http\RequestInput;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -231,7 +232,7 @@ final class ProductAttributeProcessor extends \Maho\ApiPlatform\Processor
         }
 
         if (array_key_exists('isFilterable', $body)) {
-            $value = $this->readInteger($body['isFilterable']);
+            $value = RequestInput::toInt($body['isFilterable']);
             if ($value === null || $value < 0 || $value > 2) {
                 $this->addError('isFilterable', 'isFilterable must be 0 (no), 1 (filterable with results) or 2 (filterable no results)');
             } else {
@@ -240,7 +241,7 @@ final class ProductAttributeProcessor extends \Maho\ApiPlatform\Processor
         }
 
         if (array_key_exists('position', $body)) {
-            $value = $this->readInteger($body['position']);
+            $value = RequestInput::toInt($body['position']);
             if ($value === null || $value < 0) {
                 $this->addError('position', 'position must be an integer of 0 or more');
             } else {
@@ -320,7 +321,7 @@ final class ProductAttributeProcessor extends \Maho\ApiPlatform\Processor
 
         $fromFlag = null;
         if (array_key_exists('isGlobal', $body)) {
-            $fromFlag = $this->readInteger($body['isGlobal']);
+            $fromFlag = RequestInput::toInt($body['isGlobal']);
             if ($fromFlag === null || !in_array($fromFlag, self::SCOPES, true)) {
                 $this->addError('isGlobal', 'isGlobal must be 0 (store view), 1 (global) or 2 (website)');
                 return;
@@ -425,7 +426,7 @@ final class ProductAttributeProcessor extends \Maho\ApiPlatform\Processor
         }
 
         if (array_key_exists('sortOrder', $body)) {
-            $order = $this->readInteger($body['sortOrder']);
+            $order = RequestInput::toInt($body['sortOrder']);
             if ($order === null || $order < 0) {
                 $this->addError('sortOrder', 'sortOrder must be an integer of 0 or more');
             } else {
@@ -601,14 +602,6 @@ final class ProductAttributeProcessor extends \Maho\ApiPlatform\Processor
         }
     }
 
-    private function readInteger(mixed $value): ?int
-    {
-        if (is_bool($value) || !is_scalar($value)) {
-            return null;
-        }
-        $number = filter_var($value, FILTER_VALIDATE_INT);
-        return $number === false ? null : $number;
-    }
 
     private function addError(string $field, string $message): void
     {

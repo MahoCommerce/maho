@@ -14,6 +14,7 @@ use ApiPlatform\Metadata\Operation;
 use Maho\ApiPlatform\Service\JwtService;
 use Maho\ApiPlatform\Service\StoreContext;
 use Maho\ApiPlatform\Service\TokenBlacklist;
+use Maho\ApiPlatform\Http\RequestInput;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -74,8 +75,9 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
 
     private function handleCustomerGrant(array $data): AuthToken
     {
-        $email = $data['email'] ?? $data['username'] ?? '';
-        $password = $data['password'] ?? '';
+        $input = RequestInput::of($data);
+        $email = $input->string('email', 'username') ?? '';
+        $password = $input->string('password') ?? '';
 
         $coreHelper = \Mage::helper('core');
 
@@ -209,8 +211,9 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
 
     private function handleClientCredentialsGrant(array $data): AuthToken
     {
-        $clientId = $data['client_id'] ?? '';
-        $clientSecret = $data['client_secret'] ?? '';
+        $input = RequestInput::of($data);
+        $clientId = $input->string('client_id') ?? '';
+        $clientSecret = $input->string('client_secret') ?? '';
 
         if (empty($clientId) || empty($clientSecret)) {
             throw new BadRequestHttpException('client_id and client_secret are required', null, 0, ['X-Api-Error-Code' => 'invalid_request']);
@@ -253,8 +256,9 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
 
     private function handleApiUserGrant(array $data): AuthToken
     {
-        $username = $data['username'] ?? '';
-        $apiKey = $data['api_key'] ?? '';
+        $input = RequestInput::of($data);
+        $username = $input->string('username') ?? '';
+        $apiKey = $input->string('api_key') ?? '';
 
         if (empty($username) || empty($apiKey)) {
             throw new BadRequestHttpException('username and api_key are required', null, 0, ['X-Api-Error-Code' => 'invalid_request']);

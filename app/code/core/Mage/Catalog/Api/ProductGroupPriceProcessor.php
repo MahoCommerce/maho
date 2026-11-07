@@ -13,6 +13,7 @@ namespace Mage\Catalog\Api;
 use ApiPlatform\Metadata\DeleteOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use Maho\ApiPlatform\Trait\ProductLoaderTrait;
+use Maho\ApiPlatform\Http\RequestInput;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -73,22 +74,22 @@ final class ProductGroupPriceProcessor extends \Maho\ApiPlatform\Processor
         }
 
         $groupPrices = [];
-        foreach ($body as $gp) {
+        foreach ($body as $index => $gp) {
             if (!is_array($gp)) {
                 throw new BadRequestHttpException('Each group price must be an object');
             }
+            $input = RequestInput::of($gp, "[{$index}]");
 
-            $groupId = $gp['customerGroupId'] ?? $gp['customer_group_id'] ?? 'all';
-            if ($groupId === 'all') {
-                $groupId = \Mage_Customer_Model_Group::CUST_GROUP_ALL;
-            }
+            $groupId = ($gp['customerGroupId'] ?? $gp['customer_group_id'] ?? 'all') === 'all'
+                ? \Mage_Customer_Model_Group::CUST_GROUP_ALL
+                : $input->int('customerGroupId', 'customer_group_id');
 
-            $price = (float) ($gp['price'] ?? 0);
+            $price = $input->float('price') ?? 0.0;
             if ($price < 0) {
                 throw new UnprocessableEntityHttpException('Price must not be negative');
             }
 
-            $websiteId = (int) ($gp['websiteId'] ?? $gp['website_id'] ?? 0);
+            $websiteId = $input->int('websiteId', 'website_id') ?? 0;
             if ($allowedWebsiteIds !== null && !in_array($websiteId, $allowedWebsiteIds, true)) {
                 throw new AccessDeniedHttpException('Access denied for the requested group-price website');
             }

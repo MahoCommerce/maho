@@ -15,6 +15,7 @@ namespace Maho\Ai\Api\Chat;
 use Mage_Admin_Model_User;
 use Maho\ApiPlatform\Security\SameOriginGuard;
 use Maho\ApiPlatform\Service\StoreContext;
+use Maho\ApiPlatform\Http\RequestInput;
 use Maho_Ai_Model_Chat_AgentRunner;
 use Maho_Ai_Model_Chat_Attachment;
 use Maho_Ai_Model_Chat_ClientGone as ClientGone;
@@ -53,7 +54,7 @@ final class ChatController
         $input = $this->guard($request);
         $admin = $this->admin();
 
-        $message = trim((string) ($input['message'] ?? ''));
+        $message = trim(RequestInput::of($input)->string('message') ?? '');
         if ($message === '') {
             throw new UnprocessableEntityHttpException('The message is empty.');
         }
@@ -145,7 +146,7 @@ final class ChatController
     public function removeUpload(Request $request): Response
     {
         $input = $this->guard($request);
-        $removed = Maho_Ai_Model_Chat_Attachment::delete((int) $this->admin()->getId(), (string) ($input['id'] ?? ''));
+        $removed = Maho_Ai_Model_Chat_Attachment::delete((int) $this->admin()->getId(), RequestInput::of($input)->string('id') ?? '');
 
         return new JsonResponse(['removed' => $removed]);
     }
@@ -179,7 +180,7 @@ final class ChatController
         }
         $conversation = $this->conversation($input, $admin, $this->context($input), create: false);
         /** @var \Maho_Ai_Model_Task $task */
-        $task = \Mage::getModel('ai/task')->load((int) ($input['task_id'] ?? 0));
+        $task = \Mage::getModel('ai/task')->load(RequestInput::of($input)->int('task_id') ?? 0);
         if (!$task->isAgent() || $task->getConversationId() !== (int) $conversation->getId() || (int) $task->getData('admin_user_id') !== (int) $admin->getId()) {
             throw new UnprocessableEntityHttpException('The task does not belong to this conversation.');
         }
@@ -210,7 +211,7 @@ final class ChatController
         $input = $this->guard($request);
         $admin = $this->admin();
         $conversation = $this->conversation($input, $admin, $this->context($input), create: false);
-        $messageId = (int) ($input['message_id'] ?? 0);
+        $messageId = RequestInput::of($input)->int('message_id') ?? 0;
         if ($messageId <= 0) {
             throw new UnprocessableEntityHttpException('The message id is missing.');
         }
@@ -239,7 +240,7 @@ final class ChatController
             throw new BadRequestHttpException('The request body is not valid JSON.');
         }
 
-        if (!\Mage::getSingleton('core/session')->validateFormKey((string) ($input['form_key'] ?? ''))) {
+        if (!\Mage::getSingleton('core/session')->validateFormKey(is_string($input['form_key'] ?? null) ? $input['form_key'] : '')) {
             throw new AccessDeniedHttpException('Invalid form key.');
         }
 
@@ -327,7 +328,7 @@ final class ChatController
     {
         /** @var Maho_Ai_Model_Conversation $conversation */
         $conversation = \Mage::getModel('ai/conversation');
-        $id = (int) ($input['conversation_id'] ?? 0);
+        $id = RequestInput::of($input)->int('conversation_id') ?? 0;
         if ($id > 0) {
             $conversation->load($id);
             if (!$conversation->isOwnedBy((int) $admin->getId())) {

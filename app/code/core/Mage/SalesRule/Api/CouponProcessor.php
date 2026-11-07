@@ -44,8 +44,8 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
             $operationName === 'validate' => $this->validateFromGraphQl($context),
             $operation instanceof Delete => $this->doDelete((int) ($uriVariables['id'] ?? 0)),
             str_contains($operationName, 'validate') => $this->doValidateFromRest($context),
-            isset($uriVariables['id']) => $this->doUpdate((int) $uriVariables['id'], $context['request']?->toArray() ?? []),
-            default => $this->doCreate($context['request']?->toArray() ?? []),
+            isset($uriVariables['id']) => $this->doUpdate((int) $uriVariables['id'], $this->parseRequestBody($context['request'] ?? null)),
+            default => $this->doCreate($this->parseRequestBody($context['request'] ?? null)),
         };
     }
 
@@ -82,7 +82,7 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
 
     private function doValidateFromRest(array $context): Coupon
     {
-        $body = $context['request']?->toArray() ?? [];
+        $body = $this->parseRequestBody($context['request'] ?? null);
         return $this->doValidate(
             $body['code'] ?? '',
             isset($body['cartId']) ? (int) $body['cartId'] : null,

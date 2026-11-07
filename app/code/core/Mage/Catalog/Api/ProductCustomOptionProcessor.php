@@ -16,6 +16,7 @@ use ApiPlatform\Metadata\Post;
 use Mage;
 use Mage_Catalog_Model_Product_Option;
 use Maho\ApiPlatform\Trait\ProductLoaderTrait;
+use Maho\ApiPlatform\Http\RequestInput;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
@@ -65,53 +66,55 @@ final class ProductCustomOptionProcessor extends \Maho\ApiPlatform\Processor
 
     private function handleCreate(int $productId, array $body): ProductCustomOption
     {
+        $input = RequestInput::of($body);
         $product = $this->loadProduct($productId);
-        $this->validateOptionData($body);
+        [$title, $type] = $this->validateOptionData($body);
 
         /** @var Mage_Catalog_Model_Product_Option $option */
         $option = Mage::getModel('catalog/product_option');
         $option->setProduct($product);
         $option->setProductId((string) $productId);
         $option->setStoreId(0);
-        $option->setTitle($body['title']);
-        $option->setType($body['type']);
-        $option->setIsRequire(!empty($body['required']));
-        $option->setSortOrder((int) ($body['sortOrder'] ?? $body['sort_order'] ?? 0));
+        $option->setTitle($title);
+        $option->setType($type);
+        $option->setIsRequire($input->bool('required') ?? false);
+        $option->setSortOrder($input->int('sortOrder', 'sort_order') ?? 0);
 
-        if (in_array($body['type'], self::SELECT_TYPES)) {
-            $values = $body['values'] ?? [];
+        if (in_array($type, self::SELECT_TYPES)) {
+            $values = $input->list('values') ?? [];
             if (empty($values)) {
                 throw new UnprocessableEntityHttpException('Select-type options require at least one value');
             }
             $cleanValues = $this->prepareValues($values);
             $option->setData('values', $cleanValues);
         } else {
-            if (isset($body['price'])) {
-                $price = (float) $body['price'];
+            $price = $input->float('price');
+            if ($price !== null) {
                 if ($price < 0) {
                     throw new UnprocessableEntityHttpException('Price must not be negative');
                 }
                 $option->setPrice($price);
             }
-            $option->setPriceType($body['priceType'] ?? $body['price_type'] ?? 'fixed');
-            if (isset($body['sku'])) {
-                $option->setSku($body['sku']);
+            $option->setPriceType($input->string('priceType', 'price_type') ?? 'fixed');
+            $sku = $input->string('sku');
+            if ($sku !== null) {
+                $option->setSku($sku);
             }
-            $maxChars = $body['maxCharacters'] ?? $body['max_characters'] ?? null;
+            $maxChars = $input->int('maxCharacters', 'max_characters');
             if ($maxChars !== null) {
-                $option->setMaxCharacters((int) $maxChars);
+                $option->setMaxCharacters($maxChars);
             }
-            $fileExt = $body['fileExtensions'] ?? $body['file_extensions'] ?? null;
+            $fileExt = $input->string('fileExtensions', 'file_extensions');
             if ($fileExt !== null) {
                 $option->setFileExtension($fileExt);
             }
-            $imageSizeX = $body['imageSizeX'] ?? $body['image_size_x'] ?? null;
+            $imageSizeX = $input->int('imageSizeX', 'image_size_x');
             if ($imageSizeX !== null) {
-                $option->setImageSizeX((int) $imageSizeX);
+                $option->setImageSizeX($imageSizeX);
             }
-            $imageSizeY = $body['imageSizeY'] ?? $body['image_size_y'] ?? null;
+            $imageSizeY = $input->int('imageSizeY', 'image_size_y');
             if ($imageSizeY !== null) {
-                $option->setImageSizeY((int) $imageSizeY);
+                $option->setImageSizeY($imageSizeY);
             }
         }
 
@@ -130,6 +133,7 @@ final class ProductCustomOptionProcessor extends \Maho\ApiPlatform\Processor
 
     private function handleUpdate(int $productId, int $optionId, array $body): ProductCustomOption
     {
+        $input = RequestInput::of($body);
         $this->loadProduct($productId);
 
         /** @var Mage_Catalog_Model_Product_Option $option */
@@ -144,34 +148,45 @@ final class ProductCustomOptionProcessor extends \Maho\ApiPlatform\Processor
 
         // Update main option table fields
         $optionUpdate = [];
-        if (isset($body['type'])) {
-            if (!in_array($body['type'], self::VALID_TYPES)) {
-                throw new UnprocessableEntityHttpException('Invalid option type: ' . $body['type']);
+        $newType = $input->string('type');
+        if ($newType !== null) {
+            if (!in_array($newType, self::VALID_TYPES)) {
+                throw new UnprocessableEntityHttpException('Invalid option type: ' . $newType);
             }
-            $optionUpdate['type'] = $body['type'];
+            $optionUpdate['type'] = $newType;
         }
-        if (isset($body['required'])) {
-            $optionUpdate['is_require'] = $body['required'] ? 1 : 0;
+        $required = $input->bool('required');
+        if ($required !== null) {
+            $optionUpdate['is_require'] = $required ? 1 : 0;
         }
-        $sortOrder = $body['sortOrder'] ?? $body['sort_order'] ?? null;
+        $sortOrder = $input->int('sortOrder', 'sort_order');
         if ($sortOrder !== null) {
-            $optionUpdate['sort_order'] = (int) $sortOrder;
+            $optionUpdate['sort_order'] = $sortOrder;
         }
-        if (isset($body['sku'])) {
-            $optionUpdate['sku'] = $body['sku'];
+        $sku = $input->string('sku');
+        if ($sku !== null) {
+            $optionUpdate['sku'] = $sku;
         }
-        if (isset($body['maxCharacters']) || isset($body['max_characters'])) {
-            $optionUpdate['max_characters'] = (int) ($body['maxCharacters'] ?? $body['max_characters']);
+        $maxChars = $input->int('maxCharacters', 'max_characters');
+        if ($maxChars !== null) {
+            $optionUpdate['max_characters'] = $maxChars;
         }
-        if (isset($body['fileExtensions']) || isset($body['file_extensions'])) {
-            $optionUpdate['file_extension'] = $body['fileExtensions'] ?? $body['file_extensions'];
+        $fileExt = $input->string('fileExtensions', 'file_extensions');
+        if ($fileExt !== null) {
+            $optionUpdate['file_extension'] = $fileExt;
         }
-        if (isset($body['imageSizeX']) || isset($body['image_size_x'])) {
-            $optionUpdate['image_size_x'] = (int) ($body['imageSizeX'] ?? $body['image_size_x']);
+        $imageSizeX = $input->int('imageSizeX', 'image_size_x');
+        if ($imageSizeX !== null) {
+            $optionUpdate['image_size_x'] = $imageSizeX;
         }
-        if (isset($body['imageSizeY']) || isset($body['image_size_y'])) {
-            $optionUpdate['image_size_y'] = (int) ($body['imageSizeY'] ?? $body['image_size_y']);
+        $imageSizeY = $input->int('imageSizeY', 'image_size_y');
+        if ($imageSizeY !== null) {
+            $optionUpdate['image_size_y'] = $imageSizeY;
         }
+        $title = $input->string('title');
+        $price = $input->float('price');
+        $priceType = $input->string('priceType', 'price_type');
+        $values = $input->list('values');
 
         if (!empty($optionUpdate)) {
             $write->update(
@@ -182,18 +197,18 @@ final class ProductCustomOptionProcessor extends \Maho\ApiPlatform\Processor
         }
 
         // Update title via catalog_product_option_title table
-        if (isset($body['title'])) {
+        if ($title !== null) {
             $titleTable = $resource->getTableName('catalog/product_option_title');
             $write->insertOnDuplicate($titleTable, [
                 'option_id' => $optionId,
                 'store_id' => 0,
-                'title' => $body['title'],
+                'title' => $title,
             ], ['title']);
         }
 
         // Clean up orphan rows when the type category changes (select <-> non-select)
         $oldType = $option->getType();
-        $type = $body['type'] ?? $oldType;
+        $type = $newType ?? $oldType;
         $oldIsSelect = in_array($oldType, self::SELECT_TYPES);
         $newIsSelect = in_array($type, self::SELECT_TYPES);
         if ($oldIsSelect && !$newIsSelect) {
@@ -213,14 +228,12 @@ final class ProductCustomOptionProcessor extends \Maho\ApiPlatform\Processor
         // Update price for non-select types
         if (!in_array($type, self::SELECT_TYPES)) {
             $priceUpdate = [];
-            if (isset($body['price'])) {
-                $price = (float) $body['price'];
+            if ($price !== null) {
                 if ($price < 0) {
                     throw new UnprocessableEntityHttpException('Price must not be negative');
                 }
                 $priceUpdate['price'] = $price;
             }
-            $priceType = $body['priceType'] ?? $body['price_type'] ?? null;
             if ($priceType !== null) {
                 $priceUpdate['price_type'] = $priceType;
             }
@@ -237,7 +250,7 @@ final class ProductCustomOptionProcessor extends \Maho\ApiPlatform\Processor
         }
 
         // Update select-type values
-        if (in_array($type, self::SELECT_TYPES) && isset($body['values'])) {
+        if (in_array($type, self::SELECT_TYPES) && $values !== null) {
             // Delete existing values and re-create
             $typeValueTable = $resource->getTableName('catalog/product_option_type_value');
             $write->delete($typeValueTable, ['option_id = ?' => $optionId]);
@@ -246,7 +259,7 @@ final class ProductCustomOptionProcessor extends \Maho\ApiPlatform\Processor
             $product = Mage::getModel('catalog/product')->load($productId);
             $option->setProduct($product);
             $option->setStoreId(0);
-            $cleanValues = $this->prepareValues($body['values']);
+            $cleanValues = $this->prepareValues($values);
             $option->setData('values', $cleanValues);
             $this->safeSave($option, 'update option values');
         }
@@ -278,17 +291,24 @@ final class ProductCustomOptionProcessor extends \Maho\ApiPlatform\Processor
         return null;
     }
 
-    private function validateOptionData(array $body): void
+    /**
+     * @return array{0: string, 1: string} the title and the type
+     */
+    private function validateOptionData(array $body): array
     {
-        if (empty($body['title'])) {
+        $input = RequestInput::of($body);
+        $title = $input->string('title');
+        if ($title === null || $title === '') {
             throw new UnprocessableEntityHttpException('Title is required');
         }
-        if (empty($body['type'])) {
+        $type = $input->string('type');
+        if ($type === null || $type === '') {
             throw new UnprocessableEntityHttpException('Type is required');
         }
-        if (!in_array($body['type'], self::VALID_TYPES)) {
-            throw new UnprocessableEntityHttpException('Invalid option type: ' . $body['type']);
+        if (!in_array($type, self::VALID_TYPES)) {
+            throw new UnprocessableEntityHttpException('Invalid option type: ' . $type);
         }
+        return [$title, $type];
     }
 
     /**
@@ -298,15 +318,20 @@ final class ProductCustomOptionProcessor extends \Maho\ApiPlatform\Processor
     {
         $cleanValues = [];
         foreach ($values as $i => $value) {
-            if (!is_array($value) || empty($value['title'])) {
+            if (!is_array($value)) {
+                throw new UnprocessableEntityHttpException("Value at index {$i} must have a title");
+            }
+            $input = RequestInput::of($value, "values[{$i}]");
+            $title = $input->string('title');
+            if ($title === null || $title === '') {
                 throw new UnprocessableEntityHttpException("Value at index {$i} must have a title");
             }
             $cleanValues[] = [
-                'title' => $value['title'],
-                'price' => (float) ($value['price'] ?? 0),
-                'price_type' => $value['priceType'] ?? $value['price_type'] ?? 'fixed',
-                'sku' => $value['sku'] ?? '',
-                'sort_order' => (int) ($value['sortOrder'] ?? $value['sort_order'] ?? $i),
+                'title' => $title,
+                'price' => $input->float('price') ?? 0.0,
+                'price_type' => $input->string('priceType', 'price_type') ?? 'fixed',
+                'sku' => $input->string('sku') ?? '',
+                'sort_order' => $input->int('sortOrder', 'sort_order') ?? $i,
             ];
         }
         return $cleanValues;

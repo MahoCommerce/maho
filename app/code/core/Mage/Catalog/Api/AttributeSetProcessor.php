@@ -15,6 +15,7 @@ namespace Mage\Catalog\Api;
 use ApiPlatform\Metadata\DeleteOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use Maho\ApiPlatform\Exception\ValidationException;
+use Maho\ApiPlatform\Http\RequestInput;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -71,7 +72,7 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
         $entityTypeId = $this->productEntityTypeId();
         $skeletonId = $this->defaultSetId();
         if (array_key_exists('skeletonId', $body) && $body['skeletonId'] !== null) {
-            $skeletonId = $this->readInteger($body['skeletonId']) ?? 0;
+            $skeletonId = RequestInput::toInt($body['skeletonId']) ?? 0;
             if ($this->setEntityTypeId($skeletonId) !== $entityTypeId) {
                 $this->addError('skeletonId', 'skeletonId must be the ID of a product attribute set');
             }
@@ -222,7 +223,7 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
         $attribute = \Mage::getModel('catalog/resource_eav_attribute');
 
         if (array_key_exists('attributeId', $body) && $body['attributeId'] !== null) {
-            $attributeId = $this->readInteger($body['attributeId']);
+            $attributeId = RequestInput::toInt($body['attributeId']);
             if ($attributeId === null || $attributeId <= 0) {
                 $this->addError('attributeId', 'attributeId must be a positive integer');
                 return $attribute;
@@ -254,7 +255,7 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
         $collection = \Mage::getResourceModel('eav/entity_attribute_group_collection')->setAttributeSetFilter($setId);
 
         if (array_key_exists('groupId', $body) && $body['groupId'] !== null) {
-            $groupId = $this->readInteger($body['groupId']);
+            $groupId = RequestInput::toInt($body['groupId']);
             if ($groupId === null || $groupId <= 0) {
                 $this->addError('groupId', 'groupId must be a positive integer');
                 return 0;
@@ -307,7 +308,7 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
         if (!array_key_exists('sortOrder', $body) || $body['sortOrder'] === null) {
             return 0;
         }
-        $value = $this->readInteger($body['sortOrder']);
+        $value = RequestInput::toInt($body['sortOrder']);
         if ($value === null || $value < 0) {
             $this->addError('sortOrder', 'sortOrder must be an integer of 0 or more');
             return 0;
@@ -368,14 +369,6 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
         }
     }
 
-    private function readInteger(mixed $value): ?int
-    {
-        if (is_bool($value) || !is_scalar($value)) {
-            return null;
-        }
-        $number = filter_var($value, FILTER_VALIDATE_INT);
-        return $number === false ? null : $number;
-    }
 
     private function addError(string $field, string $message): void
     {

@@ -15,6 +15,7 @@ use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Service\StoreContext;
+use Maho\ApiPlatform\Http\RequestInput;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
@@ -701,9 +702,10 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
     {
         StoreContext::ensureStore();
         $args = $context['args']['input'] ?? [];
-        $email = $args['email'] ?? '';
-        $resetToken = $args['resetToken'] ?? '';
-        $newPassword = $args['newPassword'] ?? '';
+        $input = RequestInput::of($args);
+        $email = $input->string('email') ?? '';
+        $resetToken = $input->string('resetToken') ?? '';
+        $newPassword = $input->string('newPassword') ?? '';
 
         if (empty($email) || empty($resetToken) || empty($newPassword)) {
             throw new UnprocessableEntityHttpException('Email, reset token, and new password are required');
@@ -724,9 +726,10 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
     private function createAccountFromOrder(array $context): Customer
     {
         $args = $context['args']['input'] ?? [];
+        $input = RequestInput::of($args);
 
-        $accountToken = $args['accountToken'] ?? '';
-        $password = $args['password'] ?? '';
+        $accountToken = $input->string('accountToken') ?? '';
+        $password = $input->string('password') ?? '';
 
         if (!$accountToken || !$password) {
             throw new UnprocessableEntityHttpException('Account token and password are required.');

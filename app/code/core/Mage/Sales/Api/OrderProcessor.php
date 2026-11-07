@@ -12,6 +12,7 @@ namespace Mage\Sales\Api;
 
 use Mage\Checkout\Api\CartRequest;
 use ApiPlatform\Metadata\Operation;
+use Maho\ApiPlatform\Http\RequestInput;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -70,8 +71,9 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
     private function resolveManagedOrder(array $context, array $uriVariables): \Mage_Sales_Model_Order
     {
         $args = $context['args']['input'] ?? [];
-        $orderId = $uriVariables['id'] ?? $args['orderId'] ?? null;
-        $incrementId = $args['incrementId'] ?? null;
+        $input = RequestInput::of($args);
+        $orderId = $uriVariables['id'] ?? $input->int('orderId');
+        $incrementId = $input->string('incrementId');
 
         $order = match (true) {
             (int) $orderId > 0 => $this->orderService->getById((int) $orderId),
@@ -106,15 +108,16 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
     private function placeOrder(array $uriVariables, array $context): Order
     {
         $args = $context['args']['input'] ?? $context['request_data'] ?? [];
-        $guestEmail = $args['guestEmail'] ?? $args['email'] ?? null;
-        $orderNote = $args['orderNote'] ?? null;
+        $input = RequestInput::of($args);
+        $guestEmail = $input->string('guestEmail', 'email');
+        $orderNote = $input->string('orderNote');
         // POS-only fields: only trust them from admin/api callers so a guest
         // cannot stamp an arbitrary employee id or cash amount onto the order.
         $isPrivileged = $this->isPrivilegedOrderActor();
-        $cashTendered = ($isPrivileged && isset($args['cashTendered'])) ? (float) $args['cashTendered'] : null;
-        $employeeId = ($isPrivileged && isset($args['employeeId'])) ? (int) $args['employeeId'] : null;
-        $paymentMethod = $args['paymentMethod'] ?? null;
-        $shippingMethod = $args['shippingMethod'] ?? null;
+        $cashTendered = $isPrivileged ? $input->float('cashTendered') : null;
+        $employeeId = $isPrivileged ? $input->int('employeeId') : null;
+        $paymentMethod = $input->string('paymentMethod');
+        $shippingMethod = $input->string('shippingMethod');
         // Scope, not authorization: a caller in the admin scope (store 0) places a backend
         // order, while a service token naming a real store is a storefront flow.
         $isAdminOrder = \Mage::app()->getStore()->isAdmin();
@@ -243,7 +246,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
     private function cancelOrder(array $context, array $uriVariables = []): Order
     {
         $args = $context['args']['input'] ?? [];
-        $reason = $args['reason'] ?? null;
+        $reason = RequestInput::of($args)->string('reason');
 
         $order = $this->resolveManagedOrder($context, $uriVariables);
         $order = $this->orderService->cancel($order, $reason);
@@ -256,7 +259,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
      */
     private function holdOrder(array $context, array $uriVariables = []): Order
     {
-        $reason = $context['args']['input']['reason'] ?? null;
+        $reason = RequestInput::of($context['args']['input'] ?? [])->string('reason');
 
         $order = $this->resolveManagedOrder($context, $uriVariables);
         $order = $this->orderService->hold($order, $reason);
@@ -269,7 +272,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
      */
     private function unholdOrder(array $context, array $uriVariables = []): Order
     {
-        $reason = $context['args']['input']['reason'] ?? null;
+        $reason = RequestInput::of($context['args']['input'] ?? [])->string('reason');
 
         $order = $this->resolveManagedOrder($context, $uriVariables);
         $order = $this->orderService->unhold($order, $reason);
@@ -286,12 +289,13 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
     private function addOrderComment(array $context, array $uriVariables = []): Order
     {
         $args = $context['args']['input'] ?? [];
-        $comment = trim((string) ($args['comment'] ?? $args['note'] ?? ''));
+        $input = RequestInput::of($args);
+        $comment = trim($input->string('comment', 'note') ?? '');
         if ($comment === '') {
             throw new UnprocessableEntityHttpException('Comment text is required');
         }
-        $notifyCustomer = (bool) ($args['notifyCustomer'] ?? false);
-        $visibleOnFront = (bool) ($args['visibleOnFront'] ?? false);
+        $notifyCustomer = $input->bool('notifyCustomer') ?? false;
+        $visibleOnFront = $input->bool('visibleOnFront') ?? false;
         $status = $args['status'] ?? null;
         if ($status !== null && !is_string($status)) {
             throw new BadRequestHttpException('Status must be a string');

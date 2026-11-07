@@ -14,6 +14,7 @@ use Mage\Checkout\Api\CartRequest;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Delete;
 use Maho\ApiPlatform\Service\StoreContext;
+use Maho\ApiPlatform\Http\RequestInput;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -83,16 +84,16 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
 
         if ($operationName === 'move_to_cart') {
             $itemId = (int) ($uriVariables['id'] ?? 0);
-            $body = $context['request']?->toArray() ?? [];
-            $qty = (int) ($body['qty'] ?? $data->qty);
+            $input = RequestInput::of($this->parseRequestBody($context['request'] ?? null));
+            $qty = $input->int('qty') ?? (int) $data->qty;
             // JSON numbers arrive as int; moveToCart types $cartId as ?string.
-            $cartId = isset($body['cartId']) ? (string) $body['cartId'] : null;
+            $cartId = $input->string('cartId');
             return $this->moveToCart($itemId, $qty, $cartId);
         }
 
         if ($operationName === 'sync_wishlist') {
-            $body = $context['request']?->toArray() ?? [];
-            $addedItems = $this->syncWishlist($body['productIds'] ?? []);
+            $input = RequestInput::of($this->parseRequestBody($context['request'] ?? null));
+            $addedItems = $this->syncWishlist($input->intList('productIds') ?? []);
             // REST POST expects single resource, return first added or first existing
             if (!empty($addedItems)) {
                 return $addedItems[0];

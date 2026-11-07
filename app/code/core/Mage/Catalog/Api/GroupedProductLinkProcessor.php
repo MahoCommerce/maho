@@ -16,6 +16,7 @@ use ApiPlatform\Metadata\Post;
 use Mage_Catalog_Model_Product;
 use Mage_Catalog_Model_Product_Type;
 use Maho\ApiPlatform\Trait\ProductLoaderTrait;
+use Maho\ApiPlatform\Http\RequestInput;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
@@ -82,18 +83,19 @@ final class GroupedProductLinkProcessor extends \Maho\ApiPlatform\Processor
         $product = $this->loadProductForWrite($productId, $this->requireUser(), Mage_Catalog_Model_Product_Type::TYPE_GROUPED);
 
         $linkData = [];
-        foreach ($body as $link) {
+        foreach ($body as $index => $link) {
             if (!is_array($link)) {
                 throw new BadRequestHttpException('Each link must be an object');
             }
-            $childId = (int) ($link['childProductId'] ?? $link['child_product_id'] ?? 0);
+            $input = RequestInput::of($link, "[{$index}]");
+            $childId = $input->int('childProductId', 'child_product_id') ?? 0;
             if ($childId <= 0) {
                 throw new UnprocessableEntityHttpException('childProductId is required and must be positive');
             }
             $this->authorizeAssociatedProductWebsites($childId);
             $linkData[$childId] = [
-                'qty' => (float) ($link['qty'] ?? 1),
-                'position' => (int) ($link['position'] ?? 0),
+                'qty' => $input->float('qty') ?? 1.0,
+                'position' => $input->int('position') ?? 0,
             ];
         }
 
@@ -106,9 +108,10 @@ final class GroupedProductLinkProcessor extends \Maho\ApiPlatform\Processor
 
     private function handleAdd(int $productId, array $body): array
     {
+        $input = RequestInput::of($body);
         $product = $this->loadProductForWrite($productId, $this->requireUser(), Mage_Catalog_Model_Product_Type::TYPE_GROUPED);
 
-        $childId = (int) ($body['childProductId'] ?? $body['child_product_id'] ?? 0);
+        $childId = $input->int('childProductId', 'child_product_id') ?? 0;
         if ($childId <= 0) {
             throw new UnprocessableEntityHttpException('childProductId is required and must be positive');
         }
@@ -118,8 +121,8 @@ final class GroupedProductLinkProcessor extends \Maho\ApiPlatform\Processor
         // Get existing links
         $existing = $this->getExistingLinkData($product);
         $existing[$childId] = [
-            'qty' => (float) ($body['qty'] ?? 1),
-            'position' => (int) ($body['position'] ?? 0),
+            'qty' => $input->float('qty') ?? 1.0,
+            'position' => $input->int('position') ?? 0,
         ];
 
         $product->setGroupedLinkData($existing);

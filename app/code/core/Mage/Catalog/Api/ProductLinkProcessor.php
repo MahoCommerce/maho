@@ -16,6 +16,7 @@ use ApiPlatform\Metadata\Post;
 use Mage;
 use Mage_Catalog_Model_Product;
 use Maho\ApiPlatform\Trait\ProductLoaderTrait;
+use Maho\ApiPlatform\Http\RequestInput;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -82,16 +83,17 @@ final class ProductLinkProcessor extends \Maho\ApiPlatform\Processor
         $product = $this->loadProductForWrite($productId, $this->requireUser());
 
         $linkData = [];
-        foreach ($body as $link) {
+        foreach ($body as $index => $link) {
             if (!is_array($link)) {
                 throw new BadRequestHttpException('Each link must be an object with linkedProductId');
             }
-            $linkedId = (int) ($link['linkedProductId'] ?? $link['linked_product_id'] ?? 0);
+            $input = RequestInput::of($link, "[{$index}]");
+            $linkedId = $input->int('linkedProductId', 'linked_product_id') ?? 0;
             if ($linkedId <= 0) {
                 throw new UnprocessableEntityHttpException('linkedProductId is required and must be positive');
             }
             $this->authorizeAssociatedProductWebsites($linkedId);
-            $linkData[$linkedId] = ['position' => (int) ($link['position'] ?? 0)];
+            $linkData[$linkedId] = ['position' => $input->int('position') ?? 0];
         }
 
         $setter = self::LINK_SETTER_MAP[$linkType];
@@ -104,9 +106,10 @@ final class ProductLinkProcessor extends \Maho\ApiPlatform\Processor
 
     private function handleAddLink(int $productId, string $linkType, array $body): ProductLink
     {
+        $input = RequestInput::of($body);
         $product = $this->loadProductForWrite($productId, $this->requireUser());
 
-        $linkedId = (int) ($body['linkedProductId'] ?? $body['linked_product_id'] ?? 0);
+        $linkedId = $input->int('linkedProductId', 'linked_product_id') ?? 0;
         if ($linkedId <= 0) {
             throw new UnprocessableEntityHttpException('linkedProductId is required and must be positive');
         }
@@ -115,7 +118,7 @@ final class ProductLinkProcessor extends \Maho\ApiPlatform\Processor
 
         // Get existing links
         $existingLinks = $this->getExistingLinkData($product, $linkType);
-        $position = (int) ($body['position'] ?? 0);
+        $position = $input->int('position') ?? 0;
         $existingLinks[$linkedId] = ['position' => $position];
 
         $setter = self::LINK_SETTER_MAP[$linkType];

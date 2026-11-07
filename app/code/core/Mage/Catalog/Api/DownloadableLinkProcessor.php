@@ -16,6 +16,7 @@ use ApiPlatform\Metadata\Post;
 use Mage;
 use Mage_Downloadable_Model_Product_Type;
 use Maho\ApiPlatform\Trait\ProductLoaderTrait;
+use Maho\ApiPlatform\Http\RequestInput;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
@@ -47,7 +48,7 @@ final class DownloadableLinkProcessor extends \Maho\ApiPlatform\Processor
         $body = $this->parseRequestBody($request);
 
         if ($operation instanceof DeleteOperationInterface) {
-            $linkId = (int) ($body['linkId'] ?? $body['link_id'] ?? 0);
+            $linkId = RequestInput::of($body)->int('linkId', 'link_id') ?? 0;
             if ($linkId <= 0) {
                 $linkId = (int) ($request?->query->get('linkId') ?? 0);
             }
@@ -63,19 +64,20 @@ final class DownloadableLinkProcessor extends \Maho\ApiPlatform\Processor
 
     private function handleCreate(int $productId, array $body): DownloadableLink
     {
+        $input = RequestInput::of($body);
         $this->loadProduct($productId, Mage_Downloadable_Model_Product_Type::TYPE_DOWNLOADABLE);
 
-        $title = (string) ($body['title'] ?? '');
+        $title = $input->string('title') ?? '';
         if ($title === '') {
             throw new UnprocessableEntityHttpException('title is required');
         }
 
-        $linkType = (string) ($body['linkType'] ?? $body['link_type'] ?? 'url');
+        $linkType = $input->string('linkType', 'link_type') ?? 'url';
         if (!in_array($linkType, ['url', 'file'], true)) {
             throw new UnprocessableEntityHttpException("Invalid linkType: {$linkType}. Valid: url, file");
         }
 
-        $price = (float) ($body['price'] ?? 0);
+        $price = $input->float('price') ?? 0.0;
         if ($price < 0) {
             throw new UnprocessableEntityHttpException('Price must not be negative');
         }
@@ -86,15 +88,15 @@ final class DownloadableLinkProcessor extends \Maho\ApiPlatform\Processor
         $link->setStoreId(0);
         $link->setTitle($title);
         $link->setPrice($price);
-        $link->setSortOrder((int) ($body['sortOrder'] ?? $body['sort_order'] ?? 0));
-        $link->setNumberOfDownloads((int) ($body['numberOfDownloads'] ?? $body['number_of_downloads'] ?? 0));
+        $link->setSortOrder($input->int('sortOrder', 'sort_order') ?? 0);
+        $link->setNumberOfDownloads($input->int('numberOfDownloads', 'number_of_downloads') ?? 0);
         $link->setLinkType($linkType);
         $link->setIsShareable($this->validateIsShareable(
-            $body['isShareable'] ?? $body['is_shareable'] ?? \Mage_Downloadable_Model_Link::LINK_SHAREABLE_CONFIG,
+            $input->int('isShareable', 'is_shareable') ?? \Mage_Downloadable_Model_Link::LINK_SHAREABLE_CONFIG,
         ));
 
         if ($linkType === 'url') {
-            $linkUrl = (string) ($body['linkUrl'] ?? $body['link_url'] ?? '');
+            $linkUrl = $input->string('linkUrl', 'link_url') ?? '';
             if ($linkUrl === '') {
                 throw new UnprocessableEntityHttpException('linkUrl is required for url type links');
             }
@@ -102,10 +104,10 @@ final class DownloadableLinkProcessor extends \Maho\ApiPlatform\Processor
         }
 
         // Sample
-        $sampleType = $body['sampleType'] ?? $body['sample_type'] ?? null;
+        $sampleType = $input->string('sampleType', 'sample_type');
         if ($sampleType === 'url') {
             $link->setSampleType('url');
-            $link->setSampleUrl($body['sampleUrl'] ?? $body['sample_url'] ?? '');
+            $link->setSampleUrl($input->string('sampleUrl', 'sample_url') ?? '');
         }
 
         $this->safeSave($link, 'create link');
@@ -127,9 +129,10 @@ final class DownloadableLinkProcessor extends \Maho\ApiPlatform\Processor
 
     private function handleUpdate(int $productId, array $body): array
     {
+        $input = RequestInput::of($body);
         $this->loadProduct($productId, Mage_Downloadable_Model_Product_Type::TYPE_DOWNLOADABLE);
 
-        $linkId = (int) ($body['linkId'] ?? $body['link_id'] ?? $body['id'] ?? 0);
+        $linkId = $input->int('linkId', 'link_id', 'id') ?? 0;
         if ($linkId <= 0) {
             throw new UnprocessableEntityHttpException('linkId is required');
         }
@@ -140,29 +143,34 @@ final class DownloadableLinkProcessor extends \Maho\ApiPlatform\Processor
             throw new NotFoundHttpException('Downloadable link not found');
         }
 
-        if (isset($body['title'])) {
-            $link->setTitle($body['title']);
+        $title = $input->string('title');
+        if ($title !== null) {
+            $link->setTitle($title);
         }
-        if (isset($body['price'])) {
-            $price = (float) $body['price'];
+        $price = $input->float('price');
+        if ($price !== null) {
             if ($price < 0) {
                 throw new UnprocessableEntityHttpException('Price must not be negative');
             }
             $link->setPrice($price);
         }
-        if (isset($body['sortOrder']) || isset($body['sort_order'])) {
-            $link->setSortOrder((int) ($body['sortOrder'] ?? $body['sort_order']));
+        $sortOrder = $input->int('sortOrder', 'sort_order');
+        if ($sortOrder !== null) {
+            $link->setSortOrder($sortOrder);
         }
-        if (isset($body['numberOfDownloads']) || isset($body['number_of_downloads'])) {
-            $link->setNumberOfDownloads((int) ($body['numberOfDownloads'] ?? $body['number_of_downloads']));
+        $numberOfDownloads = $input->int('numberOfDownloads', 'number_of_downloads');
+        if ($numberOfDownloads !== null) {
+            $link->setNumberOfDownloads($numberOfDownloads);
         }
-        if (isset($body['linkUrl']) || isset($body['link_url'])) {
-            $link->setLinkUrl($body['linkUrl'] ?? $body['link_url']);
+        $linkUrl = $input->string('linkUrl', 'link_url');
+        if ($linkUrl !== null) {
+            $link->setLinkUrl($linkUrl);
         }
-        if (isset($body['isShareable']) || isset($body['is_shareable'])) {
-            $link->setIsShareable($this->validateIsShareable($body['isShareable'] ?? $body['is_shareable']));
+        $isShareable = $input->int('isShareable', 'is_shareable');
+        if ($isShareable !== null) {
+            $link->setIsShareable($this->validateIsShareable($isShareable));
         }
-        $sampleUrl = $body['sampleUrl'] ?? $body['sample_url'] ?? null;
+        $sampleUrl = $input->string('sampleUrl', 'sample_url');
         if ($sampleUrl !== null) {
             if ($sampleUrl === '') {
                 $link->setData('sample_type');
@@ -197,9 +205,8 @@ final class DownloadableLinkProcessor extends \Maho\ApiPlatform\Processor
         return null;
     }
 
-    private function validateIsShareable(mixed $value): int
+    private function validateIsShareable(int $isShareable): int
     {
-        $isShareable = (int) $value;
         if (!in_array($isShareable, [
             \Mage_Downloadable_Model_Link::LINK_SHAREABLE_NO,
             \Mage_Downloadable_Model_Link::LINK_SHAREABLE_YES,

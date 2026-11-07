@@ -12,7 +12,7 @@ namespace Mage\Contacts\Api;
 
 use ApiPlatform\Metadata\Operation;
 use Maho\ApiPlatform\Service\StoreContext;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Maho\ApiPlatform\Http\RequestInput;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
@@ -40,17 +40,8 @@ class ContactFormProcessor extends \Maho\ApiPlatform\Processor
         $storeId = StoreContext::getStoreId();
 
         $request = $context['request'] ?? null;
-        $body = [];
-        if ($request) {
-            $content = $request->getContent();
-            if ($content !== '') {
-                try {
-                    $body = (array) \Mage::helper('core')->jsonDecode($content);
-                } catch (\JsonException) {
-                    throw new BadRequestHttpException('Invalid JSON body');
-                }
-            }
-        }
+        $body = $this->parseRequestBody($request);
+        $input = RequestInput::of($body);
 
         if (!\Mage::getStoreConfigFlag(self::CONFIG_ENABLED, $storeId)) {
             throw new NotFoundHttpException('Contact form is not available');
@@ -62,10 +53,10 @@ class ContactFormProcessor extends \Maho\ApiPlatform\Processor
             return $this->successResponse();
         }
 
-        $name = $this->sanitize($body['name'] ?? '', 255);
-        $email = $this->sanitize($body['email'] ?? '', 255);
-        $message = $this->sanitize($body['comment'] ?? $body['message'] ?? '', 5000);
-        $phone = $this->sanitize($body['telephone'] ?? $body['phone'] ?? '', 50);
+        $name = $this->sanitize($input->string('name') ?? '', 255);
+        $email = $this->sanitize($input->string('email') ?? '', 255);
+        $message = $this->sanitize($input->string('comment', 'message') ?? '', 5000);
+        $phone = $this->sanitize($input->string('telephone', 'phone') ?? '', 50);
 
         if (!\Mage::helper('core')->isValidNotBlank($name)) {
             throw new UnprocessableEntityHttpException('Name is required');
