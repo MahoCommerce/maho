@@ -28,6 +28,24 @@ SPDX-License-Identifier: AFL-3.0
         <invalid-slide-length translate="message">
             <message>Please add at least one image to the slideshow</message>
         </invalid-slide-length>
+        <add-mobile-image translate="message">
+            <message>Add mobile image</message>
+        </add-mobile-image>
+        <mobile-image translate="message">
+            <message>Mobile image</message>
+        </mobile-image>
+        <breakpoint-px translate="message">
+            <message>Breakpoint (px)</message>
+        </breakpoint-px>
+        <remove-mobile-image translate="message">
+            <message>Remove mobile image</message>
+        </remove-mobile-image>
+        <invalid-slide-breakpoint translate="message">
+            <message>The breakpoint must be a whole number between 1 and 9999</message>
+        </invalid-slide-breakpoint>
+        <duplicate-slide-breakpoint translate="message">
+            <message>Two images in a slide need different breakpoints</message>
+        </duplicate-slide-breakpoint>
         <insert-image translate="message">
             <message>Insert Image...</message>
         </insert-image>

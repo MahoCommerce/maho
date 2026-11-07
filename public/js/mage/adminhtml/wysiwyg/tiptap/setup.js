@@ -223,7 +223,13 @@ class tiptapWysiwygSetup {
         sections.push(snapshot('Slideshow', () => editor.commands.insertContent({
             type: 'mahoSlideshow',
             attrs: { slides: [
-                { src: '{{media url="wysiwyg/slide-1.jpg"}}', alt: 'First slide', href: '{{store url="sale"}}' },
+                {
+                    src: '{{media url="wysiwyg/slide-1.jpg"}}',
+                    alt: 'First slide',
+                    href: '{{store url="sale"}}',
+                    // An alternative under a max-width breakpoint, as the editor writes it in a <picture>
+                    sources: [{ src: '{{media url="wysiwyg/slide-1-mobile.jpg"}}', breakpoint: 768 }],
+                },
                 { src: '{{media url="wysiwyg/slide-2.jpg"}}', alt: 'Second slide' },
             ] },
         })));
