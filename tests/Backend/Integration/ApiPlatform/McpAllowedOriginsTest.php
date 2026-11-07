@@ -13,8 +13,36 @@ use Nyholm\Psr7\Factory\Psr17Factory;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\Filesystem\Filesystem;
 
 uses(Tests\MahoBackendTestCase::class);
+
+final class McpOriginsKernel extends Kernel
+{
+    public static string $cacheDir = '';
+
+    #[\Override]
+    public function getCacheDir(): string
+    {
+        return self::$cacheDir;
+    }
+
+    #[\Override]
+    protected function build(ContainerBuilder $container): void
+    {
+        parent::build($container);
+
+        $container->addCompilerPass(new class implements CompilerPassInterface {
+            #[\Override]
+            public function process(ContainerBuilder $container): void
+            {
+                $container->getDefinition('mcp.server.maho.middleware_factory')->setPublic(true);
+            }
+        });
+    }
+}
 
 /**
  * Send a request with an Origin header to the MCP endpoint of the default store view, through the
@@ -22,9 +50,9 @@ uses(Tests\MahoBackendTestCase::class);
  */
 function mcpOriginStatus(string $origin): int
 {
-    $kernel = (new ReflectionClass(Kernel::class))->newInstanceWithoutConstructor();
-    $hosts = (new ReflectionMethod(Kernel::class, 'mcpAllowedHosts'))->invoke($kernel);
-    $origins = (new ReflectionMethod(Kernel::class, 'mcpAllowedOrigins'))->invoke($kernel);
+    $kernel = new ReflectionClass(Kernel::class)->newInstanceWithoutConstructor();
+    $hosts = new ReflectionMethod(Kernel::class, 'mcpAllowedHosts')->invoke($kernel);
+    $origins = new ReflectionMethod(Kernel::class, 'mcpAllowedOrigins')->invoke($kernel);
     $factory = new Psr17Factory();
     $middleware = new DnsRebindingProtectionMiddleware($hosts ?? [], $origins, $factory, $factory);
 
@@ -33,8 +61,8 @@ function mcpOriginStatus(string $origin): int
         ->withHeader('Host', (string) parse_url($url, PHP_URL_HOST))
         ->withHeader('Origin', $origin);
 
-    $handler = new class ($factory) implements RequestHandlerInterface {
-        public function __construct(private readonly Psr17Factory $factory) {}
+    $handler = new readonly class ($factory) implements RequestHandlerInterface {
+        public function __construct(private Psr17Factory $factory) {}
 
         #[\Override]
         public function handle(ServerRequestInterface $request): ResponseInterface
@@ -64,5 +92,27 @@ it('accepts a request to the MCP endpoint from the origin of another store base 
             $store->setConfig($path, $value);
         }
         (fn() => $this->_baseUrlCache = [])->call($store);
+    }
+});
+
+it('gives the MCP bundle the origins of the store base URLs', function (): void {
+    if (!Mage::helper('apiplatform')->isMcpAvailable()) {
+        test()->markTestSkipped('symfony/mcp-bundle and a PSR-17 factory are not installed');
+    }
+
+    McpOriginsKernel::$cacheDir = sys_get_temp_dir() . '/maho-mcp-origins-' . bin2hex(random_bytes(6));
+
+    try {
+        $kernel = new McpOriginsKernel('test', true);
+        $kernel->boot();
+        $factory = $kernel->getContainer()->get('mcp.server.maho.middleware_factory');
+        $origins = new ReflectionProperty($factory, 'allowedOrigins')->getValue($factory);
+
+        $baseUrl = Mage::app()->getDefaultStoreView()->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB, false);
+        expect($origins)->not->toBe([]);
+        expect($origins)->toContain(Maho\ApiPlatform\Security\SameOriginGuard::originOf($baseUrl));
+        $kernel->shutdown();
+    } finally {
+        new Filesystem()->remove(McpOriginsKernel::$cacheDir);
     }
 });

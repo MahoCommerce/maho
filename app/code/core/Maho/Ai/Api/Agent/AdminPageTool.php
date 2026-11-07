@@ -63,17 +63,17 @@ final class AdminPageTool
         };
     }
 
-    /**
-     * The page action tool: one click, tab switch, field change or grid row on the page the
-     * administrator has open, performed by the panel after the answer. The panel resolves
-     * the target against the visible elements only, the ones the screen digest listed.
-     */
     /** The tool acts in the browser of the administrator, who then saves the change. The tool itself changes no store data. */
     public static function effectHints(): ToolEffectHints
     {
         return new ToolEffectHints(readOnlyHint: true, destructiveHint: false, openWorldHint: false);
     }
 
+    /**
+     * The page action tool: one click, tab switch, field change or grid row on the page the
+     * administrator has open, performed by the panel after the answer. The panel resolves
+     * the target against the visible elements only, the ones the screen digest listed.
+     */
     public function actionTool(): Tool
     {
         return new Tool(

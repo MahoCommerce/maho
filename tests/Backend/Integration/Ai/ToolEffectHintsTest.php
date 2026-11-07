@@ -24,13 +24,13 @@ use Symfony\AI\Platform\Result\ToolCall;
 uses(Tests\MahoBackendTestCase::class);
 
 /** A toolbox for local tool names only: those never reach the MCP catalog. */
-function localToolbox(): McpToolbox
+function aiToolEffectHintsToolbox(): McpToolbox
 {
     return new ReflectionClass(McpToolbox::class)->newInstanceWithoutConstructor();
 }
 
 it('asks the administrator before a local tool that costs money or runs the store tools', function (string $name): void {
-    $toolbox = localToolbox();
+    $toolbox = aiToolEffectHintsToolbox();
 
     expect(McpToolbox::isLocal($name))->toBeTrue();
     expect($toolbox->isReadOnly($name))->toBeFalse();
@@ -39,7 +39,7 @@ it('asks the administrator before a local tool that costs money or runs the stor
 })->with([ImageTool::NAME, BackgroundTaskTool::NAME]);
 
 it('runs every other local tool without asking, since it changes no store data', function (string $name): void {
-    $toolbox = localToolbox();
+    $toolbox = aiToolEffectHintsToolbox();
 
     expect(McpToolbox::isLocal($name))->toBeTrue();
     expect($toolbox->isReadOnly($name))->toBeTrue();

@@ -300,7 +300,7 @@ class Maho_Ai_Model_Platform_Symfony implements
         $dispatcher = new \Symfony\Component\EventDispatcher\EventDispatcher();
         $dispatcher->addListener(
             \Symfony\AI\Platform\Event\InvocationEvent::class,
-            // In the bridge, a max_tokens wins over the canonical limit that mapChatOptions() sends.
+            // Do not add max_tokens here. The bridge prefers it, so it replaces the limit of the caller.
             static fn(\Symfony\AI\Platform\Event\InvocationEvent $event) => $event->setOptions($event->getOptions() + [PlatformOptions::MAX_OUTPUT_TOKENS => 32000]),
         );
         return $dispatcher;

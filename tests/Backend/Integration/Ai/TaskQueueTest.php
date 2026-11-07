@@ -1,11 +1,11 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
  */
+
+declare(strict_types=1);
 
 uses(Tests\MahoBackendTestCase::class);
 
@@ -211,7 +211,7 @@ it('retries a task after an error that can pass on the next attempt, and fails i
     expect($task->getData('error_message'))->toContain($error->getMessage());
 })->with([
     'a rate limit' => [fn() => new \Symfony\AI\Platform\Exception\RateLimitExceededException(), Maho_Ai_Model_Task::STATUS_PENDING, 1],
-    'a server error' => [fn() => new \Symfony\AI\Platform\Exception\ServerException('The provider is overloaded.'), Maho_Ai_Model_Task::STATUS_PENDING, 1],
+    'a server error' => [fn() => new \Symfony\AI\Platform\Exception\ServerException(503, 'The provider is overloaded.'), Maho_Ai_Model_Task::STATUS_PENDING, 1],
     'a lost connection' => [fn() => new \Symfony\Component\HttpClient\Exception\TransportException('Connection timed out.'), Maho_Ai_Model_Task::STATUS_PENDING, 1],
     'a wrong API key' => [fn() => new \Symfony\AI\Platform\Exception\AuthenticationException('Invalid API key.'), Maho_Ai_Model_Task::STATUS_FAILED, 0],
     'a blocked prompt' => [fn() => new \Symfony\AI\Platform\Exception\ContentFilterException('The prompt was blocked.'), Maho_Ai_Model_Task::STATUS_FAILED, 0],
