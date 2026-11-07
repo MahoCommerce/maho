@@ -134,6 +134,7 @@
 "Show Barcode (Code128)","Show Barcode (Code128)"
 "Show QR Code","Show QR Code"
 "Status","Status"
+"The balance of this gift card changed to %s while you edited it. Check the balance, then save again.","The balance of this gift card changed to %s while you edited it. Check the balance, then save again."
 "The gift card has been deleted.","The gift card has been deleted."
 "The gift card has been saved.","The gift card has been saved."
 "This gift card is in %s, which cannot be converted to %s.","This gift card is in %s, which cannot be converted to %s."

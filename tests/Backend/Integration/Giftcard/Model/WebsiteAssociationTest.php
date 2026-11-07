@@ -93,12 +93,12 @@ describe('Giftcard Website Associations (junction)', function () {
         $reloaded = Mage::getModel('giftcard/giftcard')->load($card->getId());
         // A read followed by an unrelated save must not count as "associations were set"
         expect($reloaded->getWebsiteIds())->toBe([1]);
-        $reloaded->setBalance(25.00);
+        $reloaded->setMessage('Unrelated change');
         $reloaded->save();
 
         $again = Mage::getModel('giftcard/giftcard')->load($card->getId());
         expect($again->getWebsiteIds())->toBe([1]);
-        expect((float) $again->getBalance())->toBe(25.00);
+        expect($again->getMessage())->toBe('Unrelated change');
 
         $card->delete();
     });

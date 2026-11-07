@@ -811,9 +811,7 @@ describe('Observer: Refund Gift Card on Order Cancel', function (): void {
         $order->setGiftcardCodes(json_encode([$code => 50.00]));
         $order->save();
 
-        // Simulate order placement to deduct balance
-        $giftcard->setBalance(50.00);
-        $giftcard->save();
+        $giftcard->use(50.00);
 
         // Verify balance was deducted
         $giftcard = Mage::getModel('giftcard/giftcard')->loadByCode($code);
@@ -887,11 +885,8 @@ describe('Observer: Refund Gift Card on Order Cancel', function (): void {
         ]));
         $order->save();
 
-        // Deduct balances
-        $giftcard1->setBalance(20.00);
-        $giftcard1->save();
-        $giftcard2->setBalance(35.00);
-        $giftcard2->save();
+        $giftcard1->use(80.00);
+        $giftcard2->use(40.00);
 
         // Verify balances were deducted
         $giftcard1 = Mage::getModel('giftcard/giftcard')->loadByCode($code1);
@@ -966,9 +961,7 @@ describe('Observer: Refund Gift Card on Order Cancel', function (): void {
         $order->setGiftcardCodes(json_encode([$code => 50.00]));
         $order->save();
 
-        // Deduct balance
-        $giftcard->setBalance(50.00);
-        $giftcard->save();
+        $giftcard->use(50.00);
 
         // Set extension days config (default is 30 days)
         $originalExtension = Mage::getStoreConfig('giftcard/general/refund_expiration_extension');

@@ -458,36 +458,60 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Adjust balance (admin action)
+     * Set the balance to $newBalance and record the change in the history.
      *
-     * @param float $newBalance New balance (in base currency)
-     * @return $this
+     * A balance of 0 makes the card used, and a positive balance makes a used card active.
+     * Give $expectedBalance when the person saw a balance before they typed the new one:
+     * the method then refuses to replace a balance that changed since.
+     *
+     * @throws Mage_Core_Exception_Conflict when the stored balance is not $expectedBalance
+     * @throws Mage_Core_Exception_NoSuchEntity when the card no longer exists
      */
-    public function adjustBalance(float $newBalance, ?string $comment = null): self
+    public function adjustBalance(float $newBalance, ?string $comment = null, ?float $expectedBalance = null): self
     {
-        $balanceBefore = (float) $this->getBalance();
-        $amount = $newBalance - $balanceBefore;
+        $resource = $this->getResource();
+        $table = $resource->getMainTable();
 
-        $this->setBalance($newBalance);
+        $resource->beginTransaction();
+        try {
+            $write = $resource->getReadConnection();
+            $stored = $write->fetchRow(
+                $write->select()
+                    ->from($table, ['balance', 'status'])
+                    ->where('giftcard_id = ?', $this->getId())
+                    ->forUpdate(),
+            );
+            if ($stored === false) {
+                throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('giftcard')->__('Gift card not found.'));
+            }
 
-        // Update status based on new balance
-        if ($newBalance <= 0) {
-            $this->setStatus(self::STATUS_USED);
-        } elseif ($this->getStatus() === self::STATUS_USED) {
-            $this->setStatus(self::STATUS_ACTIVE);
+            $balanceBefore = (float) $stored['balance'];
+            if ($expectedBalance !== null && round($balanceBefore - $expectedBalance, 4) !== 0.0) {
+                throw new Mage_Core_Exception_Conflict(Mage::helper('giftcard')->__(
+                    'The balance of this gift card changed to %s while you edited it. Check the balance, then save again.',
+                    Mage::app()->getLocale()->formatCurrency($balanceBefore, $this->getCurrencyCode()),
+                ));
+            }
+
+            $data = [
+                'balance' => $newBalance,
+                'updated_at' => Mage::app()->getLocale()->formatDateForDb('now'),
+            ];
+            if ($newBalance <= 0) {
+                $data['status'] = self::STATUS_USED;
+            } elseif ($stored['status'] === self::STATUS_USED) {
+                $data['status'] = self::STATUS_ACTIVE;
+            }
+            $write->update($table, $data, ['giftcard_id = ?' => $this->getId()]);
+
+            $this->_addHistory(self::ACTION_ADJUSTED, $newBalance - $balanceBefore, $balanceBefore, $newBalance, null, $comment);
+
+            $this->load($this->getId());
+            $resource->commit();
+        } catch (\Throwable $e) {
+            $resource->rollBack();
+            throw $e;
         }
-
-        $this->save();
-
-        // Record history
-        $this->_addHistory(
-            self::ACTION_ADJUSTED,
-            $amount,
-            $balanceBefore,
-            $newBalance,
-            null,
-            $comment,
-        );
 
         return $this;
     }

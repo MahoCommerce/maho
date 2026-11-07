@@ -44,10 +44,7 @@ describe('Refund Flow - Single Gift Card', function () {
         $this->order->setGiftcardCodes(json_encode([$this->giftcard->getCode() => 100.00]));
         $this->order->save();
 
-        // Simulate the gift card was used (deduct balance)
-        $this->giftcard->setBalance(0.00);
-        $this->giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_USED);
-        $this->giftcard->save();
+        $this->giftcard->use(100.00);
     });
 
     test('restores full gift card balance on full refund', function () {
@@ -227,14 +224,8 @@ describe('Refund Flow - Multiple Gift Cards', function () {
         ]));
         $this->order->save();
 
-        // Simulate both cards were used
-        $this->giftcard1->setBalance(0.00);
-        $this->giftcard1->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_USED);
-        $this->giftcard1->save();
-
-        $this->giftcard2->setBalance(0.00);
-        $this->giftcard2->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_USED);
-        $this->giftcard2->save();
+        $this->giftcard1->use(30.00);
+        $this->giftcard2->use(70.00);
     });
 
     test('refunds proportionally to multiple gift cards', function () {
@@ -422,10 +413,7 @@ describe('Refund Flow - Multiple Credit Memos', function () {
         $this->order->setGiftcardCodes(json_encode([$this->giftcard->getCode() => 100.00]));
         $this->order->save();
 
-        // Simulate card was used
-        $this->giftcard->setBalance(0.00);
-        $this->giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_USED);
-        $this->giftcard->save();
+        $this->giftcard->use(100.00);
     });
 
     test('handles sequential refunds correctly', function () {
@@ -714,9 +702,7 @@ describe('Refund Flow - Order Fully Paid by Gift Card', function () {
         $this->order->setGiftcardCodes(json_encode([$this->giftcard->getCode() => 120.00]));
         $this->order->save();
 
-        // Simulate card was used
-        $this->giftcard->setBalance(30.00); // 150 - 120 = 30 remaining
-        $this->giftcard->save();
+        $this->giftcard->use(120.00);
     });
 
     test('restores correct amount for fully gift-card-paid order', function () {
