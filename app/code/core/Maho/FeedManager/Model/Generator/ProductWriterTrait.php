@@ -917,7 +917,9 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
     protected function _validateAndPublish(string $tempPath, array &$errors): string
     {
         $validator = new Maho_FeedManager_Model_Validator();
-        if (!$validator->validate($tempPath, $this->_feed->getFileFormat())) {
+        $format = $this->_feed->getFileFormat();
+        $csv = $this->_writer instanceof Maho_FeedManager_Model_Writer_Csv ? $this->_writer : null;
+        if (!$validator->validate($tempPath, $format, $csv?->getDelimiter(), $csv?->getEnclosure())) {
             $errors = array_merge($errors, $validator->getErrors());
             throw new RuntimeException('Feed validation failed: ' . implode(', ', $validator->getErrors()));
         }
