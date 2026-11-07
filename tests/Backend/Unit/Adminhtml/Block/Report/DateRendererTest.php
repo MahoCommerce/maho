@@ -22,13 +22,14 @@ it('formats each report date column with its own pattern', function (): void {
         ->and($year->render($row))->toBe('2026');
 });
 
-it('shows the calendar month and year for each report period', function (string $period, string $value): void {
+it('shows the calendar month and year for each report period', function (string $period, string $value, string $expected): void {
     $row = new Maho\DataObject(['period' => $value]);
     $renderer = new Mage_Adminhtml_Block_Report_Sales_Grid_Column_Renderer_Date();
     $renderer->setColumn(new Mage_Adminhtml_Block_Widget_Grid_Column(['index' => 'period', 'period_type' => $period]));
 
-    expect($renderer->render($row))->toBe($value);
+    expect($renderer->render($row))->toBe($expected);
 })->with([
-    'year' => ['year', '2018'],
-    'month' => ['month', '2018-12'],
+    'year' => ['year', '2018', '2018'],
+    'month' => ['month', '2018-12', '2018-12'],
+    'month full date' => ['month', '2026-11-07', '2026-11'],
 ]);
