@@ -735,7 +735,12 @@ class Mage_Catalog_Model_Url
             $regularExpression = '#(?P<prefix>(.*/)?' . preg_quote($urlKey, '#') . ')(-(?P<increment>[0-9]+))?(?P<suffix>'
                 . preg_quote($suffix, '#') . ')?$#i';
             if (!preg_match($regularExpression, $requestPath, $match)) {
-                return $this->getUnusedPathByUrlKey($storeId, '-', $idPath, $urlKey);
+                // Leave room for the suffix; numeric increments use the overflow allowance.
+                $prefixLength = max(1, self::MAX_REQUEST_PATH_LENGTH - strlen($suffix));
+                $match = [
+                    'prefix' => substr($urlKey !== '' ? $urlKey : '-', 0, $prefixLength),
+                    'suffix' => $suffix,
+                ];
             }
             $match['prefix'] = $match['prefix'] . '-';
             $match['suffix'] ??= '';
