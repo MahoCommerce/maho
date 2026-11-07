@@ -71,9 +71,7 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
         $base64 = $input->string('base64', 'imageData', 'image_data');
         $imageUrl = $input->string('imageUrl', 'image_url');
         $filename = $input->string('filename') ?? 'upload.jpg';
-        // A single role may come as a string
-        $types = is_string($body['types'] ?? null) ? [$body['types']] : $input->stringList('types');
-        $types = \Mage_Catalog_Helper_Image::mapDeprecatedRoles($types ?? []);
+        $types = \Mage_Catalog_Helper_Image::mapDeprecatedRoles(self::roles($body) ?? []);
         $label = $input->string('label');
 
         $position = $input->int('position');
@@ -236,7 +234,7 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
         }
 
         // Update role assignments
-        $types = $input->stringList('types');
+        $types = self::roles($body);
         if ($types !== null && in_array('image', \Mage_Catalog_Helper_Image::mapDeprecatedRoles($types), true)) {
             $product->setData('image', $file);
         }
@@ -332,4 +330,17 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
             throw new UnprocessableEntityHttpException('Uploaded data is not a valid JPEG, PNG, GIF, WEBP or AVIF image');
         }
     }
+
+    /**
+     * The image roles of the request: a list, or a single role as a string.
+     *
+     * @param array<array-key, mixed> $body
+     * @return list<string>|null
+     */
+    private static function roles(array $body): ?array
+    {
+        $role = $body['types'] ?? null;
+        return is_string($role) ? [$role] : RequestInput::of($body)->stringList('types');
+    }
+
 }

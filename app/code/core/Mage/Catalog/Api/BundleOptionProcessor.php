@@ -77,7 +77,8 @@ final class BundleOptionProcessor extends \Maho\ApiPlatform\Processor
         $type = $input->string('type') ?? 'select';
         $required = $input->bool('required') ?? true;
         $position = $input->int('position') ?? 0;
-        // Read every selection before saving anything, so a bad one keeps no option
+        // Read and check every selection before saving anything, so a selection of a wrong type or out of
+        // range keeps no option; the saves below are not one transaction
         $selectionRows = [];
         foreach ($input->rows('selections') ?? [] as $selection) {
             $selProductId = $selection->int('productId', 'product_id') ?? 0;

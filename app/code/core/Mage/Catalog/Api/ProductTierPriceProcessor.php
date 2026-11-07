@@ -62,19 +62,8 @@ final class ProductTierPriceProcessor extends \Maho\ApiPlatform\Processor
         // null means unrestricted (any website, including 0 = all).
         $allowedWebsiteIds = $this->getAllowedWebsiteIds($user);
 
-        // This endpoint takes a top-level JSON array of tier prices (not the
-        // object-with-fields shape parseRequestBody() normalises for), and must
-        // reject a non-array body rather than silently treat it as empty.
-        $request = $context['request'] ?? null;
-        try {
-            $body = $request ? \Mage::helper('core')->jsonDecode($request->getContent() ?: '[]') : [];
-        } catch (\JsonException) {
-            throw new BadRequestHttpException('Invalid JSON in request body');
-        }
-
-        if (!is_array($body)) {
-            throw new BadRequestHttpException('Request body must be an array of tier prices');
-        }
+        // The body is a JSON list of tier prices
+        $body = $this->parseRequestBody($context['request'] ?? null);
 
         $tierPrices = [];
         foreach ($body as $index => $tp) {

@@ -12,10 +12,12 @@ namespace Maho\ApiPlatform\EventListener;
 
 use Mage_Core_Model_App_Area;
 use Mage_Core_Model_Store_Exception;
+use Maho\ApiPlatform\Http\RequestInput;
 use Maho\ApiPlatform\Security\AdminSessionAuthenticator;
 use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
@@ -55,8 +57,9 @@ class AdminBridgeListener
         }
 
         try {
-            $input = (array) \Mage::helper('core')->jsonDecode($request->getContent() ?: '[]');
-        } catch (\JsonException) {
+            $input = RequestInput::decode($request);
+        } catch (BadRequestHttpException) {
+            // The controller answers a body that does not decode
             $input = [];
         }
 

@@ -16,7 +16,6 @@ use Mage\Sales\Api\GraphQL\OrderMutationHandler;
 use Mage\Catalog\Api\GraphQL\ProductQueryHandler;
 use Maho\ApiPlatform\Security\SameOriginGuard;
 use Maho\ApiPlatform\Http\RequestInput;
-use Symfony\Component\HttpFoundation\Exception\JsonException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -68,8 +67,9 @@ class AdminGraphQlController
 
         // Parse request
         try {
-            $input = RequestInput::of($request->getPayload()->all());
-        } catch (JsonException) {
+            $input = RequestInput::of(RequestInput::decode($request));
+        } catch (BadRequestHttpException) {
+            // Answered below as a GraphQL error, like a body without a query
             $input = RequestInput::of([]);
         }
 
@@ -77,7 +77,8 @@ class AdminGraphQlController
             $query = $input->string('query') ?? '';
             $variables = $input->array('variables');
             $operationName = $input->string('operationName');
-            $requestedStoreId = RequestInput::of($variables ?? [])->int('storeId');
+            // A storeId that is not an integer is left to the store the admin bridge chose
+            $requestedStoreId = RequestInput::toInt($variables['storeId'] ?? null);
         } catch (NotNormalizableValueException $e) {
             return new JsonResponse([
                 'errors' => [['message' => $e->getMessage()]],

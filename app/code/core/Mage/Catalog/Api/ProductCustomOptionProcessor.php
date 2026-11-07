@@ -188,6 +188,15 @@ final class ProductCustomOptionProcessor extends \Maho\ApiPlatform\Processor
         $priceType = $input->string('priceType', 'price_type');
         $values = $input->list('values');
 
+        // Check all of the input before the first write: the writes below are not one transaction
+        $oldType = $option->getType();
+        $type = $newType ?? $oldType;
+        $isSelect = in_array($type, self::SELECT_TYPES);
+        if (!$isSelect && $price !== null && $price < 0) {
+            throw new UnprocessableEntityHttpException('Price must not be negative');
+        }
+        $cleanValues = $isSelect && $values !== null ? $this->prepareValues($values) : null;
+
         if (!empty($optionUpdate)) {
             $write->update(
                 $resource->getTableName('catalog/product_option'),
@@ -207,17 +216,14 @@ final class ProductCustomOptionProcessor extends \Maho\ApiPlatform\Processor
         }
 
         // Clean up orphan rows when the type category changes (select <-> non-select)
-        $oldType = $option->getType();
-        $type = $newType ?? $oldType;
         $oldIsSelect = in_array($oldType, self::SELECT_TYPES);
-        $newIsSelect = in_array($type, self::SELECT_TYPES);
-        if ($oldIsSelect && !$newIsSelect) {
+        if ($oldIsSelect && !$isSelect) {
             // Select -> non-select: drop now-orphaned option value rows
             $write->delete(
                 $resource->getTableName('catalog/product_option_type_value'),
                 ['option_id = ?' => $optionId],
             );
-        } elseif (!$oldIsSelect && $newIsSelect) {
+        } elseif (!$oldIsSelect && $isSelect) {
             // Non-select -> select: drop the now-orphaned price row
             $write->delete(
                 $resource->getTableName('catalog/product_option_price'),
@@ -226,12 +232,9 @@ final class ProductCustomOptionProcessor extends \Maho\ApiPlatform\Processor
         }
 
         // Update price for non-select types
-        if (!in_array($type, self::SELECT_TYPES)) {
+        if (!$isSelect) {
             $priceUpdate = [];
             if ($price !== null) {
-                if ($price < 0) {
-                    throw new UnprocessableEntityHttpException('Price must not be negative');
-                }
                 $priceUpdate['price'] = $price;
             }
             if ($priceType !== null) {
@@ -250,7 +253,7 @@ final class ProductCustomOptionProcessor extends \Maho\ApiPlatform\Processor
         }
 
         // Update select-type values
-        if (in_array($type, self::SELECT_TYPES) && $values !== null) {
+        if ($cleanValues !== null) {
             // Delete existing values and re-create
             $typeValueTable = $resource->getTableName('catalog/product_option_type_value');
             $write->delete($typeValueTable, ['option_id = ?' => $optionId]);
@@ -259,7 +262,6 @@ final class ProductCustomOptionProcessor extends \Maho\ApiPlatform\Processor
             $product = Mage::getModel('catalog/product')->load($productId);
             $option->setProduct($product);
             $option->setStoreId(0);
-            $cleanValues = $this->prepareValues($values);
             $option->setData('values', $cleanValues);
             $this->safeSave($option, 'update option values');
         }

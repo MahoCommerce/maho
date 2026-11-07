@@ -173,11 +173,7 @@ final class ChatController
             throw new NotFoundHttpException('Not found.');
         }
         $admin = $this->admin();
-        try {
-            $input = (array) \Mage::helper('core')->jsonDecode($request->getContent() ?: '[]');
-        } catch (\JsonException) {
-            throw new BadRequestHttpException('The request body is not valid JSON.');
-        }
+        $input = RequestInput::decode($request);
         $conversation = $this->conversation($input, $admin, $this->context($input), create: false);
         /** @var \Maho_Ai_Model_Task $task */
         $task = \Mage::getModel('ai/task')->load(RequestInput::of($input)->int('task_id') ?? 0);
@@ -234,11 +230,7 @@ final class ChatController
             throw new AccessDeniedHttpException('Your admin role does not grant access to the assistant.');
         }
 
-        try {
-            $input = (array) \Mage::helper('core')->jsonDecode($request->getContent() ?: '[]');
-        } catch (\JsonException) {
-            throw new BadRequestHttpException('The request body is not valid JSON.');
-        }
+        $input = RequestInput::decode($request);
 
         if (!\Mage::getSingleton('core/session')->validateFormKey(is_string($input['form_key'] ?? null) ? $input['form_key'] : '')) {
             throw new AccessDeniedHttpException('Invalid form key.');

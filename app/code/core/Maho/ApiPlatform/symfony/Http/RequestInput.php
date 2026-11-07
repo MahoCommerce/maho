@@ -10,6 +10,9 @@ declare(strict_types=1);
 
 namespace Maho\ApiPlatform\Http;
 
+use Symfony\Component\HttpFoundation\Exception\JsonException;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Serializer\Exception\NotNormalizableValueException;
 
 /**
@@ -36,6 +39,38 @@ final class RequestInput
     public static function of(array $input, string $path = ''): self
     {
         return new self($input, $path);
+    }
+
+    /**
+     * The JSON body of $request: [] when there is none, a 400 when it is not a JSON object or array.
+     * Reads the content whatever the content type says, as Request::toArray() does, so a JSON body sent
+     * with a form content type still reads.
+     *
+     * @return array<array-key, mixed>
+     * @throws BadRequestHttpException
+     */
+    public static function decode(?Request $request): array
+    {
+        if ($request === null || $request->getContent() === '') {
+            return [];
+        }
+        try {
+            return $request->toArray();
+        } catch (JsonException) {
+            throw new BadRequestHttpException('Invalid JSON in request body');
+        }
+    }
+
+    /**
+     * A string, or a number as its string. Shared with the readers that report a wrong type their own way.
+     */
+    public static function toString(mixed $value): ?string
+    {
+        return match (true) {
+            is_string($value) => $value,
+            is_int($value), is_float($value) => (string) $value,
+            default => null,
+        };
     }
 
     /**
@@ -73,13 +108,7 @@ final class RequestInput
         if ($key === null) {
             return null;
         }
-        if (is_string($value)) {
-            return $value;
-        }
-        if (is_int($value) || is_float($value)) {
-            return (string) $value;
-        }
-        throw $this->invalid($key, $value, 'string');
+        return self::toString($value) ?? throw $this->invalid($key, $value, 'string');
     }
 
     /**
@@ -149,7 +178,7 @@ final class RequestInput
         if ($key === null) {
             return null;
         }
-        return is_array($value) && array_is_list($value) ? $value : throw $this->invalid($key, $value, 'array');
+        return is_array($value) && array_is_list($value) ? $value : throw $this->invalid($key, $value, 'list');
     }
 
     /**
@@ -160,7 +189,7 @@ final class RequestInput
      */
     public function stringList(string ...$keys): ?array
     {
-        return $this->mapList($keys, fn(self $item): ?string => $item->string('0'));
+        return $this->mapList($keys, 'string', fn(self $item): ?string => $item->string('0'));
     }
 
     /**
@@ -171,7 +200,7 @@ final class RequestInput
      */
     public function intList(string ...$keys): ?array
     {
-        return $this->mapList($keys, fn(self $item): ?int => $item->int('0'));
+        return $this->mapList($keys, 'int', fn(self $item): ?int => $item->int('0'));
     }
 
     /**
@@ -187,7 +216,7 @@ final class RequestInput
             return null;
         }
         if (!is_array($value) || !array_is_list($value)) {
-            throw $this->invalid($key, $value, 'array');
+            throw $this->invalid($key, $value, 'list');
         }
         return self::rowsOf($value, $this->pathOf($key));
     }
@@ -214,22 +243,25 @@ final class RequestInput
 
     /**
      * @param array<string> $keys
+     * @param string $type the type of an entry, for the error of a null one
      * @param \Closure(self): T $read reads key "0" of a one-entry input
      * @template T
      * @return list<T>|null
      */
-    private function mapList(array $keys, \Closure $read): ?array
+    private function mapList(array $keys, string $type, \Closure $read): ?array
     {
         [$key, $value] = $this->find($keys);
         if ($key === null) {
             return null;
         }
         if (!is_array($value) || !array_is_list($value)) {
-            throw $this->invalid($key, $value, 'array');
+            throw $this->invalid($key, $value, 'list');
         }
         $items = [];
         foreach ($value as $index => $item) {
-            $items[] = $read(new self(['0' => $item], $this->pathOf($key) . "[{$index}]"));
+            $entry = new self(['0' => $item], $this->pathOf($key) . "[{$index}]");
+            // A null entry has a wrong type too, where a null field only means that it is not given
+            $items[] = $read($entry) ?? throw self::invalidAt($entry->path, null, $type);
         }
         return $items;
     }

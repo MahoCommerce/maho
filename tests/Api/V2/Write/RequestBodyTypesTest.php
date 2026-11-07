@@ -71,7 +71,7 @@ describe('Request body types', function (): void {
         'an image URL that is a list' => ['POST', '/api/rest/v2/products/{id}/media', ['imageUrl' => ['x']], ['products/write'], 'imageUrl', 'The type of the "imageUrl" attribute must be "string", "array" given.'],
         'a linked product id that is a list' => ['POST', '/api/rest/v2/products/{id}/links/related', ['linked_product_id' => [1]], ['products/write'], 'linked_product_id', 'The type of the "linked_product_id" attribute must be "int", "array" given.'],
         'a bulk stock quantity that is a word' => ['PUT', '/api/rest/v2/inventory/bulk', ['items' => [['sku' => '{sku}', 'qty' => 'abc']]], ['inventory/write'], 'items[0].qty', 'The type of the "items[0].qty" attribute must be "float", "string" given.'],
-        'bulk stock items that are not a list' => ['PUT', '/api/rest/v2/inventory/bulk', ['items' => 'x'], ['inventory/write'], 'items', 'The type of the "items" attribute must be "array", "string" given.'],
+        'bulk stock items that are not a list' => ['PUT', '/api/rest/v2/inventory/bulk', ['items' => 'x'], ['inventory/write'], 'items', 'The type of the "items" attribute must be "list", "string" given.'],
     ]);
 
     it('answers a field of a resource of the wrong type the same way', function (): void {
@@ -96,7 +96,7 @@ describe('Request body types', function (): void {
         expect(requestBodyTypesIsInStock($this->productId))->toBe(0);
     });
 
-    it('answers a client secret that is not a string with 400', function (): void {
+    it('answers a client secret that is not a string with the invalid_request error of OAuth', function (): void {
         $response = apiPost('/api/rest/v2/auth/token', [
             'grant_type' => 'client_credentials',
             'client_id' => 'pest-unknown-client',
@@ -104,6 +104,31 @@ describe('Request body types', function (): void {
         ]);
 
         expect($response['status'])->toBe(400);
+        expect($response['json']['error'] ?? null)->toBe('invalid_request');
+    });
+
+    it('keeps the values of a select option when an update is rejected', function (): void {
+        $token = serviceToken(['products/write', 'products/delete']);
+        $path = "/api/rest/v2/products/{$this->productId}/custom-options";
+        $create = apiPost($path, [
+            'title' => 'Pest body types option',
+            'type' => 'drop_down',
+            'values' => [['title' => 'Kept', 'price' => 1]],
+        ], $token);
+        expect($create['status'])->toBeIn([200, 201]);
+        $optionId = (int) $create['json']['id'];
+
+        $update = apiPut("{$path}/{$optionId}", ['values' => [['title' => 'New', 'price' => 'abc']]], $token);
+        expect($update['status'])->toBe(400);
+        expect($update['json']['details']['errors'][0]['field'] ?? null)->toBe('values[0].price');
+
+        $titles = [];
+        foreach (getItems(apiGet($path)) as $option) {
+            if ((int) $option['id'] === $optionId) {
+                $titles = array_column($option['values'], 'title');
+            }
+        }
+        expect($titles)->toBe(['Kept']);
     });
 
     it('takes a password sent as a number as its string', function (): void {

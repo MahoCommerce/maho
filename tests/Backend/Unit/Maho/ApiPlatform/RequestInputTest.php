@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 use Maho\ApiPlatform\Http\RequestInput;
 use Symfony\Component\HttpFoundation\InputBag;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Serializer\Exception\NotNormalizableValueException;
 
 uses(Tests\MahoBackendTestCase::class);
@@ -70,7 +72,27 @@ describe('RequestInput', function (): void {
         expect(array_map(fn(RequestInput $row): ?int => $row->int('qty'), $input->rows('rows')))->toBe([1, 2]);
     });
 
-    it('converts like the shared integer reader', function (): void {
+    it('decodes the JSON content whatever the content type says', function (): void {
+        $json = Request::create('/', 'PUT', [], [], [], ['CONTENT_TYPE' => 'application/json'], '{"value":"1"}');
+        $form = Request::create('/', 'PUT', [], [], [], ['CONTENT_TYPE' => 'application/x-www-form-urlencoded'], '{"value":"1"}');
+
+        expect(RequestInput::decode($json))->toBe(['value' => '1']);
+        expect(RequestInput::decode($form))->toBe(['value' => '1']);
+        expect(RequestInput::decode(Request::create('/', 'PUT', [], [], [], [], '[1,2]')))->toBe([1, 2]);
+        expect(RequestInput::decode(Request::create('/', 'PUT')))->toBe([]);
+        expect(RequestInput::decode(null))->toBe([]);
+    });
+
+    it('answers 400 for a body that is not a JSON object or array', function (string $content): void {
+        expect(fn() => RequestInput::decode(Request::create('/', 'PUT', [], [], [], [], $content)))
+            ->toThrow(BadRequestHttpException::class, 'Invalid JSON in request body');
+    })->with(['not JSON' => ['{oops'], 'a string' => ['"abc"'], 'a number' => ['12'], 'null' => ['null']]);
+
+    it('converts like the shared readers', function (): void {
+        expect(RequestInput::toString('a'))->toBe('a');
+        expect(RequestInput::toString(5))->toBe('5');
+        expect(RequestInput::toString(true))->toBeNull();
+        expect(RequestInput::toString(['a']))->toBeNull();
         expect(RequestInput::toInt('12'))->toBe(12);
         expect(RequestInput::toInt(true))->toBeNull();
         expect(RequestInput::toInt('1.5'))->toBeNull();
@@ -97,8 +119,8 @@ describe('RequestInput', function (): void {
         'a number as a word' => ['float', 'abc', 'float', 'string'],
         'a boolean as a word' => ['bool', 'maybe', 'bool', 'string'],
         'a boolean as 2' => ['bool', 2, 'bool', 'integer'],
-        'a list as a string' => ['list', 'a', 'array', 'string'],
-        'a list as an object' => ['list', ['k' => 1], 'array', 'array'],
+        'a list as a string' => ['list', 'a', 'list', 'string'],
+        'a list as an object' => ['list', ['k' => 1], 'list', 'array'],
         'an object as a string' => ['array', 'a', 'array', 'string'],
     ]);
 
@@ -110,6 +132,10 @@ describe('RequestInput', function (): void {
         ]);
 
         expect(fn() => $input->intList('ids'))->toThrow(NotNormalizableValueException::class, 'The type of the "ids[1]" attribute');
+        expect(fn() => RequestInput::of(['ids' => [1, null]])->intList('ids'))
+            ->toThrow(NotNormalizableValueException::class, 'The type of the "ids[1]" attribute must be "int", "NULL" given.');
+        expect(fn() => RequestInput::of(['roles' => [null, 'image']])->stringList('roles'))
+            ->toThrow(NotNormalizableValueException::class, 'The type of the "roles[0]" attribute must be "string", "NULL" given.');
 
         $rows = $input->rows('rows');
         expect(fn() => $rows[1]->int('qty'))->toThrow(NotNormalizableValueException::class, 'The type of the "rows[1].qty" attribute');

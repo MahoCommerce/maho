@@ -12,8 +12,8 @@ declare(strict_types=1);
 
 namespace Mage\Checkout\Api;
 
+use Maho\ApiPlatform\Http\RequestInput;
 use Maho\ApiPlatform\Service\StoreContext;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 final class CartRequest
 {
@@ -45,14 +45,7 @@ final class CartRequest
 
         // Bridge REST request body for Provider context (Processor does this later, but Provider runs first)
         if (empty($args) && $request instanceof \Symfony\Component\HttpFoundation\Request) {
-            try {
-                $body = \Mage::helper('core')->jsonDecode($request->getContent() ?: '[]');
-            } catch (\JsonException) {
-                throw new BadRequestHttpException('Invalid JSON in request body');
-            }
-            if (is_array($body)) {
-                $args = $body;
-            }
+            $args = RequestInput::decode($request);
         }
 
         // On a guest-carts route the path segment is the identifier, so it wins

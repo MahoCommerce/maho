@@ -13,6 +13,7 @@ namespace Maho\ApiPlatform;
 use ApiPlatform\Metadata\DeleteOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
+use Maho\ApiPlatform\Http\RequestInput;
 use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Trait\ActivityLogTrait;
 use Maho\ApiPlatform\Trait\AuthenticationTrait;
@@ -22,9 +23,7 @@ use Maho\ApiPlatform\Trait\RawResponseTrait;
 use Maho\ApiPlatform\Trait\StoreAccessTrait;
 use Maho\ApiPlatform\Trait\StoreRestrictionTrait;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\HttpFoundation\Exception\JsonException;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
  * Base class for all API state processors.
@@ -151,15 +150,7 @@ abstract class Processor implements ProcessorInterface
      */
     protected function parseRequestBody(?Request $request): array
     {
-        if (!$request instanceof Request) {
-            return [];
-        }
-
-        try {
-            return $request->getPayload()->all();
-        } catch (JsonException) {
-            throw new BadRequestHttpException('Invalid JSON in request body');
-        }
+        return RequestInput::decode($request);
     }
 
     /**
