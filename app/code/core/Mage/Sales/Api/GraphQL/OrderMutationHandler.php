@@ -245,7 +245,7 @@ class OrderMutationHandler
             $order,
             $creditmemoData,
             $comment,
-            offlineRefund: false,
+            offlineRefund: true,
         );
 
         return ['processReturn' => [

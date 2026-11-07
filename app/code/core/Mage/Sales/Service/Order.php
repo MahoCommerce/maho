@@ -888,6 +888,13 @@ class Mage_Sales_Service_Order
                 \Mage::throwException('Cannot create credit memo: no items to refund');
             }
 
+            // The payment refunds online only against the invoice of the capture. Without
+            // one it refunds nothing at the gateway, yet the order would count the memo
+            // as refunded online.
+            if (!$offlineRefund && !$creditmemo->getInvoice()) {
+                \Mage::throwException('Cannot refund online: the credit memo has no invoice. Refund it offline.');
+            }
+
             // Cap the refund at what the order can still refund, so an inflated
             // adjustment cannot over-refund or mint excess store credit.
             $refundable = (float) $order->getBaseTotalPaid() - (float) $order->getBaseTotalRefunded();
