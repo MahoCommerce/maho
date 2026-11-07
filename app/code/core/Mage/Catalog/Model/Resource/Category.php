@@ -700,6 +700,73 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
     }
 
     /**
+     * Return active immediate children for each category, using its path, level and store scope.
+     *
+     * @param Mage_Catalog_Model_Category[] $categories
+     * @return array<int, list<int>>
+     */
+    public function getChildrenForCategories(array $categories): array
+    {
+        $children = [];
+        if ($categories === []) {
+            return $children;
+        }
+
+        $adapter = $this->_getReadAdapter();
+        $attributeId = (int) $this->_getIsActiveAttributeId();
+        $backendTable = $this->getTable([$this->getEntityTablePrefix(), 'int']);
+        $checkSql = $adapter->getCheckSql('c.value_id > 0', 'c.value', 'd.value');
+
+        $uniqueCategories = [];
+        foreach ($categories as $category) {
+            $id = (int) $category->getId();
+            $key = serialize([$id, $category->getPath(), $category->getLevel(), $category->getStoreId()]);
+            $uniqueCategories[$key] = $category;
+        }
+
+        // SQLite allows 500 SELECT terms in one UNION ALL. Use at most 100 categories in each query.
+        foreach (array_chunk($uniqueCategories, 100) as $batch) {
+            $selects = [];
+            foreach ($batch as $category) {
+                $children[(int) $category->getId()] = [];
+                $storeId = (int) $category->getStoreId();
+                $select = $this->_getChildrenIdSelect($category, false)
+                    ->columns([
+                        'category_id' => new Maho\Db\Expr((string) (int) $category->getId()),
+                        'position' => 'm.position',
+                    ])
+                    ->joinLeft(
+                        ['d' => $backendTable],
+                        "d.attribute_id = {$attributeId} AND d.store_id = 0 AND d.entity_id = m.entity_id",
+                        [],
+                    )
+                    ->joinLeft(
+                        ['c' => $backendTable],
+                        "c.attribute_id = {$attributeId} AND c.store_id = {$storeId} AND c.entity_id = m.entity_id",
+                        [],
+                    )
+                    ->where($checkSql . ' = ?', 1);
+                // SQLite uses the path index for GLOB but not for LIKE. For a numeric path, both match the same rows.
+                if ($adapter instanceof Maho\Db\Adapter\Pdo\Sqlite
+                    && preg_match('~^[0-9]+(?:/[0-9]+)*$~D', (string) $category->getPath())
+                ) {
+                    $select->where('m.path GLOB ?', $category->getPath() . '/*');
+                }
+                $selects[] = (string) $select;
+            }
+            $select = $adapter->select()
+                ->from(['m' => new Maho\Db\Expr('(' . implode(' UNION ALL ', $selects) . ')')], ['category_id', 'entity_id'])
+                ->order('m.position ASC');
+
+            foreach ($adapter->fetchAll($select) as $row) {
+                $children[(int) $row['category_id']][] = (int) $row['entity_id'];
+            }
+        }
+
+        return $children;
+    }
+
+    /**
      * Return IDs of category's children along with inactive categories.
      *
      * @param Mage_Catalog_Model_Category $category

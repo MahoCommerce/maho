@@ -256,10 +256,11 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
         $collection->setCurPage($page);
 
         $total = (int) $collection->getSize();
+        $children = $this->preloadCountsAndChildIds($collection);
 
         $categories = [];
         foreach ($collection as $mahoCategory) {
-            $categories[] = $this->mapToDto($mahoCategory, false);
+            $categories[] = $this->mapToDto($mahoCategory, false, childrenIds: $children[$mahoCategory->getId()] ?? null);
         }
 
         return new TraversablePaginator(new \ArrayIterator($categories), $page, $pageSize, $total);
@@ -268,8 +269,10 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
     /**
      * Map Maho category model to Category DTO. $withStoreOverrides fills storeOverrides
      * for backend callers; single-category reads and write responses set it.
+     *
+     * @param list<int>|null $childrenIds Preloaded active children, or null to query them.
      */
-    public function mapToDto(\Mage_Catalog_Model_Category $category, bool $includeChildren = false, bool $withStoreOverrides = false): Category
+    public function mapToDto(\Mage_Catalog_Model_Category $category, bool $includeChildren = false, bool $withStoreOverrides = false, ?array $childrenIds = null): Category
     {
         $dto = new Category();
         $dto->id = (int) $category->getId();
@@ -334,10 +337,11 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
         $dto->productCount = (int) $category->getProductCount();
 
         // Get children IDs
-        $childrenIds = $category->getChildren();
-        if ($childrenIds) {
-            $dto->childrenIds = array_map(intval(...), explode(',', $childrenIds));
+        if ($childrenIds === null) {
+            $childrenList = $category->getChildren();
+            $childrenIds = $childrenList ? array_map(intval(...), explode(',', $childrenList)) : [];
         }
+        $dto->childrenIds = $childrenIds;
 
         // Include children categories if requested
         if ($includeChildren && !empty($dto->childrenIds)) {
@@ -350,8 +354,9 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
                 $childCollection->addAttributeToFilter('is_active', 1);
             }
 
+            $childIdsByCategory = $this->preloadCountsAndChildIds($childCollection);
             foreach ($childCollection as $childCategory) {
-                $dto->children[] = $this->mapToDto($childCategory, false);
+                $dto->children[] = $this->mapToDto($childCategory, false, childrenIds: $childIdsByCategory[$childCategory->getId()] ?? null);
             }
         }
 
@@ -362,6 +367,62 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
         \Mage::dispatchEvent('api_category_dto_build', ['category' => $category, 'dto' => $dto]);
 
         return $dto;
+    }
+
+    /**
+     * Set product_count on each item and return the active child IDs for each category ID.
+     * Return null when a model, resource or collection is rewritten: those keep their own getters.
+     *
+     * @return array<int, list<int>>|null
+     */
+    private function preloadCountsAndChildIds(\Mage_Catalog_Model_Resource_Category_Collection $collection): ?array
+    {
+        $resource = \Mage::getResourceSingleton('catalog/category');
+        if ($collection::class !== \Mage_Catalog_Model_Resource_Category_Collection::class
+            || $collection->getResource()::class !== \Mage_Catalog_Model_Resource_Category::class
+            || $resource::class !== \Mage_Catalog_Model_Resource_Category::class
+        ) {
+            return null;
+        }
+
+        $items = $collection->getItems();
+        foreach ($items as $category) {
+            if ($category::class !== \Mage_Catalog_Model_Category::class
+                || $category->getResource()::class !== \Mage_Catalog_Model_Resource_Category::class
+            ) {
+                return null;
+            }
+        }
+
+        $this->loadProductCounts($collection);
+        return $resource->getChildrenForCategories($items);
+    }
+
+    /**
+     * Load direct product assignments, matching Category::getProductCount() for every store and anchor.
+     */
+    private function loadProductCounts(\Mage_Catalog_Model_Resource_Category_Collection $collection): void
+    {
+        $items = $collection->getItems();
+        if ($items === []) {
+            return;
+        }
+
+        $connection = $collection->getConnection();
+        $select = $connection->select()
+            ->from($collection->getTable('catalog/category_product'), [
+                'category_id',
+                'product_count' => new \Maho\Db\Expr('COUNT(product_id)'),
+            ])
+            ->where('category_id IN (?)', array_keys($items))
+            ->group('category_id');
+        $counts = $connection->fetchPairs($select);
+
+        foreach ($items as $category) {
+            if (!$category->hasProductCount()) {
+                $category->setData('product_count', (int) ($counts[$category->getId()] ?? 0));
+            }
+        }
     }
 
     /**
