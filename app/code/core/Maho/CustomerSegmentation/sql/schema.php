@@ -202,6 +202,33 @@ return function (SchemaEditor $schema): void {
             ->create(),
     );
 
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('customer_segment_coupon')
+            ->addColumn(Schema::column('coupon_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('customer_id', Types::INTEGER, unsigned: true))
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('coupon_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('customer_id'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('coupon_id')
+                    ->setUnquotedReferencedTableName('salesrule_coupon')
+                    ->setUnquotedReferencedColumnNames('coupon_id')
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('customer_id')
+                    ->setUnquotedReferencedTableName('customer_entity')
+                    ->setUnquotedReferencedColumnNames('entity_id')
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('Customer Segment Coupon Recipients')
+            ->create(),
+    );
+
     // CustomerSegmentation columns grafted onto newsletter_queue, kept here so module removal stays one delete.
     $schema->modifyTableByUnquotedName('newsletter_queue', static function (TableEditor $queue): void {
         $queue->addColumn(Schema::column('customer_segment_ids', Types::STRING, length: 255, notNull: false, comment: 'Customer Segment IDs (comma-separated)'));
