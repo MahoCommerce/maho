@@ -61,7 +61,7 @@ class Mage_Api_Model_Resource_Roles extends Mage_Core_Model_Resource_Db_Abstract
                 'pid' => (int) $role->getPid(),
             ];
 
-            $treeLevel = $this->_getReadAdapter()->fetchOne($select, $binds);
+            $treeLevel = (int) $this->_getReadAdapter()->fetchOne($select, $binds);
         } else {
             $treeLevel = 0;
         }
