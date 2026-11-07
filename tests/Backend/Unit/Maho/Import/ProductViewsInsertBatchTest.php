@@ -3,6 +3,7 @@
 /**
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
+ * @package Maho
  */
 
 declare(strict_types=1);
@@ -14,20 +15,23 @@ use Maho\Import\Importer\ProductViews;
 use Maho\Import\NullReporter;
 use Maho\Import\Result;
 
-class ProductViewsMemoryAdapter extends Sqlite
+class InsertSizeRecordingAdapter extends Sqlite
 {
     public array $insertSizes = [];
+
+    public ?int $firstInsertMemory = null;
 
     #[\Override]
     public function insertMultiple(string|array|Select $table, array $data): int
     {
+        $this->firstInsertMemory ??= memory_get_usage();
         $this->insertSizes[] = count($data);
 
         return parent::insertMultiple($table, $data);
     }
 }
 
-class ProductViewsMemoryImporter extends ProductViews
+class ProductViewsTestImporter extends ProductViews
 {
     public function writeRows(CsvFile $file, array $rows): Result
     {
@@ -38,7 +42,7 @@ class ProductViewsMemoryImporter extends ProductViews
 beforeEach(function () {
     $this->oldResource = Mage::registry('_singleton/core/resource');
     Mage::unregister('_singleton/core/resource');
-    $this->adapter = new ProductViewsMemoryAdapter(['path' => ':memory:']);
+    $this->adapter = new InsertSizeRecordingAdapter(['path' => ':memory:']);
     $this->adapter->query('CREATE TABLE memory_product_view_event (event_id INTEGER PRIMARY KEY AUTOINCREMENT, logged_at TEXT NOT NULL, event_type_id INTEGER NOT NULL, object_id INTEGER NOT NULL, subject_id INTEGER NOT NULL, subtype INTEGER NOT NULL, store_id INTEGER NOT NULL)');
     Mage::register('_singleton/core/resource', new readonly class ($this->adapter) {
         public function __construct(private Sqlite $adapter) {}
@@ -56,7 +60,7 @@ beforeEach(function () {
     $this->csvPath = tempnam(sys_get_temp_dir(), 'product_view_memory_');
     file_put_contents($this->csvPath, "sku,store_code,views\n");
     $this->file = CsvFile::open($this->csvPath);
-    $this->importer = new ProductViewsMemoryImporter();
+    $this->importer = new ProductViewsTestImporter();
 });
 
 afterEach(function () {
@@ -115,4 +119,12 @@ it('adds only missing views and keeps each product and store separate', function
     expect($result->created)->toBe(0)->and($result->updated)->toBe(1);
     expect($this->adapter->insertSizes)->toBe([2, 3, 4, 1000, 1]);
     expect((int) $this->adapter->fetchOne('SELECT COUNT(*) FROM memory_product_view_event'))->toBe(1010);
+});
+
+it('holds at most one batch of events in memory before the first insert', function () {
+    $row = ['sku' => 'big', 'store_code' => 'owned-store', 'product_id' => 41, 'store_id' => 7, 'views' => '50000', 'days' => '3'];
+    $start = memory_get_usage();
+    $this->importer->writeRows($this->file, [$row]);
+
+    expect($this->adapter->firstInsertMemory - $start)->toBeLessThan(5 * 1024 * 1024);
 });
