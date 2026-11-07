@@ -13,7 +13,6 @@ declare(strict_types=1);
 namespace Maho\ApiPlatform\Trait;
 
 use Maho\ApiPlatform\Exception\ValidationException;
-use Maho\ApiPlatform\Http\RequestInput;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 trait PriceRuleFieldsTrait
@@ -71,13 +70,5 @@ trait PriceRuleFieldsTrait
         }
 
         return array_values(array_unique($ids));
-    }
-
-    /**
-     * Return $value as an integer, or null when it is not an integer or a text of an integer.
-     */
-    protected function readInteger(mixed $value): ?int
-    {
-        return RequestInput::toInt($value);
     }
 }

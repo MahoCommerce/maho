@@ -13,6 +13,7 @@ namespace Mage\CatalogRule\Api;
 use ApiPlatform\Metadata\DeleteOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use Maho\ApiPlatform\Exception\ValidationException;
+use Maho\ApiPlatform\Http\RequestInput;
 use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Trait\PriceRuleFieldsTrait;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -207,7 +208,7 @@ final class CatalogPriceRuleProcessor extends \Maho\ApiPlatform\Processor
         }
 
         if (array_key_exists('sortOrder', $body)) {
-            $value = $this->readInteger($body['sortOrder']);
+            $value = RequestInput::toInt($body['sortOrder']);
             if ($value === null || $value < 0) {
                 $this->addError('sortOrder', 'sortOrder must be an integer of 0 or more');
             } else {

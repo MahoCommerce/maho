@@ -13,6 +13,7 @@ namespace Mage\SalesRule\Api;
 use ApiPlatform\Metadata\DeleteOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use Maho\ApiPlatform\Exception\ValidationException;
+use Maho\ApiPlatform\Http\RequestInput;
 use Maho\ApiPlatform\Security\ApiUser;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -201,7 +202,7 @@ final class CartPriceRuleProcessor extends \Maho\ApiPlatform\Processor
 
         foreach (self::COUNT_FIELDS as $field => $setter) {
             if (array_key_exists($field, $body)) {
-                $value = $this->readInteger($body[$field]);
+                $value = RequestInput::toInt($body[$field]);
                 if ($value === null || $value < 0) {
                     $this->addError($field, "{$field} must be an integer of 0 or more");
                 } else {

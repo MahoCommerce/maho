@@ -12,6 +12,7 @@ namespace Mage\SalesRule\Api;
 
 use ApiPlatform\Metadata\Operation;
 use Maho\ApiPlatform\Exception\ValidationException;
+use Maho\ApiPlatform\Http\RequestInput;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
@@ -116,12 +117,12 @@ final class CartPriceRuleCouponProcessor extends \Maho\ApiPlatform\Processor
 
         $errors = [];
 
-        $qty = $this->readInteger($body['qty'] ?? null);
+        $qty = RequestInput::toInt($body['qty'] ?? null);
         if ($qty === null || $qty < 1 || $qty > self::MAX_GENERATE_QTY) {
             $errors[] = ['field' => 'qty', 'message' => sprintf('qty must be an integer from 1 to %d', self::MAX_GENERATE_QTY)];
         }
 
-        $length = array_key_exists('length', $body) ? $this->readInteger($body['length']) : max(1, (int) $helper->getDefaultLength());
+        $length = array_key_exists('length', $body) ? RequestInput::toInt($body['length']) : max(1, (int) $helper->getDefaultLength());
         if ($length === null || $length < 1 || $length > self::MAX_CODE_LENGTH) {
             $errors[] = ['field' => 'length', 'message' => sprintf('length must be an integer from 1 to %d', self::MAX_CODE_LENGTH)];
         }
@@ -140,7 +141,7 @@ final class CartPriceRuleCouponProcessor extends \Maho\ApiPlatform\Processor
             }
         }
 
-        $dash = array_key_exists('dash', $body) ? $this->readInteger($body['dash']) : (int) $helper->getDefaultDashInterval();
+        $dash = array_key_exists('dash', $body) ? RequestInput::toInt($body['dash']) : (int) $helper->getDefaultDashInterval();
         if ($dash === null || $dash < 0 || ($length !== null && $dash > $length)) {
             $errors[] = ['field' => 'dash', 'message' => 'dash must be an integer from 0 to length'];
         }
@@ -187,7 +188,7 @@ final class CartPriceRuleCouponProcessor extends \Maho\ApiPlatform\Processor
         }
         $couponIds = [];
         foreach ($ids as $index => $id) {
-            $couponId = $this->readInteger($id);
+            $couponId = RequestInput::toInt($id);
             if ($couponId === null || $couponId < 1) {
                 throw new ValidationException('Each ID must be a positive integer', "ids[{$index}]");
             }
