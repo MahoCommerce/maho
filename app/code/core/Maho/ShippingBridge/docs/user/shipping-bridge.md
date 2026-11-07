@@ -65,7 +65,7 @@ Navigate to **System > Configuration > Sales > Shipping Methods > Shipping Bridg
 | **Authentication Type** | `None`, `Bearer Token`, or `Custom Header` | Website |
 | **Auth Token** | Token value (encrypted in database) | Website |
 | **Custom Header Name** | Header name when using Custom Header auth (e.g. `X-Api-Key`) | Website |
-| **Request Timeout** | Seconds to wait for a response (max 60) | Website |
+| **Request Timeout** | Idle timeout in seconds, clamped to 1–60 (empty or 0 uses 10) | Website |
 | **Additional Product Attributes** | Extra product attributes to include in the request payload | Website |
 | **Debug Mode** | Log full request/response to `var/log/shipping_bridge.log` | Website |
 | **Sort Order** | Position among other shipping methods | Website |
@@ -193,6 +193,8 @@ Maho sends an HTTP **POST** with `Content-Type: application/json`.
 ### Response
 
 Your API must return JSON with a `methods` array. Each method needs `code`, `title`, and `price`. Optional fields: `cost`, `description`, `logo`.
+
+The price must be a finite, non-negative number. Numeric strings such as `"5.99"` are accepted, and `0` means free shipping. A method with an invalid price is skipped and logged in `var/log/shipping_bridge.log`; other valid methods in the same response remain available.
 
 ```json
 {

@@ -59,7 +59,7 @@ class Maho_ShippingBridge_Model_Carrier extends Mage_Shipping_Model_Carrier_Abst
                 }
             }
 
-            $timeout = min((int) $this->getConfigData('timeout') ?: 10, 60);
+            $timeout = max(1, min((int) $this->getConfigData('timeout') ?: 10, 60));
 
             if ($this->getConfigFlag('debug')) {
                 Mage::log(
@@ -423,6 +423,14 @@ class Maho_ShippingBridge_Model_Carrier extends Mage_Shipping_Model_Carrier_Abst
             if (empty($method['code']) || empty($method['title']) || !isset($method['price'])) {
                 Mage::log(
                     "Shipping Bridge: Method at index {$i} missing required fields (code, title, price)",
+                    Mage::LOG_WARNING,
+                    'shipping_bridge.log',
+                );
+                continue;
+            }
+            if (!is_numeric($method['price']) || !is_finite((float) $method['price']) || (float) $method['price'] < 0) {
+                Mage::log(
+                    "Shipping Bridge: Method at index {$i} has an invalid price",
                     Mage::LOG_WARNING,
                     'shipping_bridge.log',
                 );
