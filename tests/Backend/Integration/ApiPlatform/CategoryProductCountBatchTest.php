@@ -330,3 +330,49 @@ it('keeps the original loading path for inherited category collections', functio
         ->and($this->counter->countQueries)->toBe(3)
         ->and($this->counter->childrenQueries)->toBe(3);
 });
+
+it('keeps literal and wildcard path matching for noncanonical category paths', function (): void {
+    $resource = $this->parent->getResource();
+    foreach ([
+        ['1/2/123', '1/2/123/child'],
+        ['1/2/123', '1/2/1234/child'],
+        ['Custom/Branch', 'custom/branch/child'],
+        ['1/2/%', '1/2/anything/child'],
+        ['1/2/_', '1/2/a/child'],
+        ['1/2/*', '1/2/*/child'],
+        ['1//2', '1//2/child'],
+        ["1/2\n", "1/2\n/child"],
+    ] as [$path, $childPath]) {
+        $parent = clone $this->categories[1];
+        $parent->setPath($path);
+        $this->db->update('catalog_category_entity', ['path' => $childPath], [
+            'entity_id = ?' => $this->grandchild->getId(),
+        ]);
+        $expected = array_map(intval(...), $resource->getChildren($parent, false));
+        expect($resource->getChildrenForCategories([$parent]))->toBe([(int) $parent->getId() => $expected]);
+    }
+});
+
+it('keeps position ordering and the same children when positions tie', function (): void {
+    $parent = $this->categories[1];
+    $early = ($this->makeCategory)((int) $parent->getId(), $parent->getPath(), 4, -1);
+    $tied = ($this->makeCategory)((int) $parent->getId(), $parent->getPath(), 4, 0);
+    $late = ($this->makeCategory)((int) $parent->getId(), $parent->getPath(), 4, 1);
+    $resource = $parent->getResource();
+    $actual = $resource->getChildrenForCategories([$parent])[(int) $parent->getId()];
+    $expected = array_map(intval(...), $resource->getChildren($parent, false));
+
+    expect($actual)->toEqualCanonicalizing($expected)
+        ->and($actual[0])->toBe((int) $early->getId())
+        ->and($actual[3])->toBe((int) $late->getId())
+        ->and(array_slice($actual, 1, 2))->toEqualCanonicalizing([(int) $this->grandchild->getId(), (int) $tied->getId()]);
+});
+
+it('loads identical repeated parent inputs once even across batch boundaries', function (): void {
+    $parent = $this->categories[1];
+    $expected = [(int) $parent->getId() => [(int) $this->grandchild->getId()]];
+    $this->counter->childrenQueries = 0;
+
+    expect($parent->getResource()->getChildrenForCategories(array_fill(0, 101, $parent)))->toBe($expected)
+        ->and($this->counter->childrenQueries)->toBe(1);
+});

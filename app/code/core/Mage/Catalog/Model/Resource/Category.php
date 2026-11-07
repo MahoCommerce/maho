@@ -717,38 +717,45 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
         $backendTable = $this->getTable([$this->getEntityTablePrefix(), 'int']);
         $checkSql = $adapter->getCheckSql('c.value_id > 0', 'c.value', 'd.value');
 
+        $uniqueCategories = [];
+        foreach ($categories as $category) {
+            $id = (int) $category->getId();
+            $key = serialize([$id, $category->getPath(), $category->getLevel(), $category->getStoreId()]);
+            $uniqueCategories[$key] = $category;
+        }
+
         // SQLite allows 500 SELECT terms in one UNION ALL. Use at most 100 categories in each query.
-        foreach (array_chunk($categories, 100) as $batch) {
-            $parents = [];
+        foreach (array_chunk($uniqueCategories, 100) as $batch) {
+            $selects = [];
             foreach ($batch as $category) {
-                $id = (int) $category->getId();
-                $children[$id] = [];
-                $parents[] = (string) $adapter->select()->columns([
-                    'category_id' => new Maho\Db\Expr((string) $id),
-                    'child_path' => new Maho\Db\Expr($adapter->quote($category->getPath() . '/%')),
-                    'child_level' => new Maho\Db\Expr((string) ($category->getLevel() + 1)),
-                    'store_id' => new Maho\Db\Expr((string) (int) $category->getStoreId()),
-                ]);
+                $children[(int) $category->getId()] = [];
+                $storeId = (int) $category->getStoreId();
+                $select = $this->_getChildrenIdSelect($category, false)
+                    ->columns([
+                        'category_id' => new Maho\Db\Expr((string) (int) $category->getId()),
+                        'position' => 'm.position',
+                    ])
+                    ->joinLeft(
+                        ['d' => $backendTable],
+                        "d.attribute_id = {$attributeId} AND d.store_id = 0 AND d.entity_id = m.entity_id",
+                        [],
+                    )
+                    ->joinLeft(
+                        ['c' => $backendTable],
+                        "c.attribute_id = {$attributeId} AND c.store_id = {$storeId} AND c.entity_id = m.entity_id",
+                        [],
+                    )
+                    ->where($checkSql . ' = ?', 1);
+                // LIKE cannot use SQLite's binary path index. For numeric paths GLOB has the same prefix.
+                if ($adapter instanceof Maho\Db\Adapter\Pdo\Sqlite
+                    && preg_match('~^[0-9]+(?:/[0-9]+)*$~D', (string) $category->getPath())
+                ) {
+                    $select->where('m.path GLOB ?', $category->getPath() . '/*');
+                }
+                $selects[] = (string) $select;
             }
-            $parentSelect = new Maho\Db\Expr('(' . implode(' UNION ALL ', $parents) . ')');
             $select = $adapter->select()
-                ->from(['p' => $parentSelect], ['category_id'])
-                ->joinInner(
-                    ['m' => $this->getEntityTable()],
-                    'm.path LIKE p.child_path AND m.level <= p.child_level',
-                    ['entity_id'],
-                )
-                ->joinLeft(
-                    ['d' => $backendTable],
-                    "d.attribute_id = {$attributeId} AND d.store_id = 0 AND d.entity_id = m.entity_id",
-                    [],
-                )
-                ->joinLeft(
-                    ['c' => $backendTable],
-                    "c.attribute_id = {$attributeId} AND c.store_id = p.store_id AND c.entity_id = m.entity_id",
-                    [],
-                )
-                ->where($checkSql . ' = ?', 1)
+                ->from(['m' => new Maho\Db\Expr('(' . implode(' UNION ALL ', $selects) . ')')], ['category_id', 'entity_id'])
                 ->order('m.position ASC');
 
             foreach ($adapter->fetchAll($select) as $row) {
