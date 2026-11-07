@@ -146,6 +146,7 @@ class Maho_FeedManager_Model_Generator_Batch
     public function processBatch(string $jobId): array
     {
         $this->_jobId = $jobId;
+        $this->_errors = [];
 
         // Acquire exclusive lock to prevent concurrent batch processing
         if (!$this->_acquireStateLock()) {
@@ -235,6 +236,10 @@ class Maho_FeedManager_Model_Generator_Batch
                     : "Processed batch {$this->_state['batches_processed']}/{$this->_state['batches_total']}",
             ];
         } catch (\Throwable $e) {
+            if ($this->_errors !== []) {
+                $this->_state['errors'] = $this->_errors;
+                $this->_state['error_count'] = $this->_errorCount;
+            }
             return $this->_failWithError($e->getMessage());
         } finally {
             if ($tempPath !== null) {
