@@ -17,6 +17,7 @@ use Symfony\AI\Agent\Toolbox\ToolboxInterface;
 use Symfony\AI\Agent\Toolbox\ToolResult;
 use Symfony\AI\Platform\Tool\ExecutionReference;
 use Symfony\AI\Platform\Tool\Tool;
+use Symfony\AI\Platform\Tool\ToolEffectHints;
 use Symfony\AI\Platform\Result\ToolCall;
 
 /**
@@ -194,7 +195,7 @@ final class McpToolbox implements ToolboxInterface
             $lines[] = sprintf('%s (%s): %s', $section, $state, implode(', ', $names));
         }
 
-        return ToolDefinition::create(
+        return new Tool(
             new ExecutionReference(self::class, 'execute'),
             self::ENABLE_NAME,
             'Load the tools of one or more sections. The store tools are grouped in sections and only the loaded sections are callable. Call this first when the tool you need is not loaded, then continue. Sections and their tools: ' . implode('; ', $lines) . '.',
@@ -210,7 +211,7 @@ final class McpToolbox implements ToolboxInterface
                 'required' => ['sections'],
                 'additionalProperties' => false,
             ],
-            ['title' => 'Load tools', 'read_only' => true, 'destructive' => false, 'local' => true],
+            effectHints: self::enableEffectHints(),
         );
     }
 
@@ -236,8 +237,31 @@ final class McpToolbox implements ToolboxInterface
     /** A tool that runs in this process, outside the MCP catalog. */
     public static function isLocal(string $name): bool
     {
-        return in_array($name, [self::ENABLE_NAME, ContentGuideTool::NAME, DocsTool::NAME, BackgroundTaskTool::NAME, AttachmentTool::NAME, ImageTool::NAME, NotifyTool::NAME], true)
-            || in_array($name, AdminPageTool::NAMES, true) || in_array($name, MemoryTool::NAMES, true) || in_array($name, FormTool::NAMES, true);
+        return self::localEffectHints($name) !== null;
+    }
+
+    /** The tool that loads sections changes no store data. */
+    private static function enableEffectHints(): ToolEffectHints
+    {
+        return new ToolEffectHints(readOnlyHint: true, destructiveHint: false, openWorldHint: false);
+    }
+
+    /** The effect hints of a local tool, from the class that builds it. Null for a tool of the MCP catalog. */
+    private static function localEffectHints(string $name): ?ToolEffectHints
+    {
+        return match (true) {
+            $name === self::ENABLE_NAME => self::enableEffectHints(),
+            $name === ContentGuideTool::NAME => ContentGuideTool::effectHints(),
+            $name === DocsTool::NAME => DocsTool::effectHints(),
+            $name === BackgroundTaskTool::NAME => BackgroundTaskTool::effectHints(),
+            $name === AttachmentTool::NAME => AttachmentTool::effectHints(),
+            $name === ImageTool::NAME => ImageTool::effectHints(),
+            $name === NotifyTool::NAME => NotifyTool::effectHints(),
+            in_array($name, AdminPageTool::NAMES, true) => AdminPageTool::effectHints(),
+            in_array($name, MemoryTool::NAMES, true) => MemoryTool::effectHints(),
+            in_array($name, FormTool::NAMES, true) => FormTool::effectHints(),
+            default => null,
+        };
     }
 
     #[\Override]
@@ -548,10 +572,15 @@ final class McpToolbox implements ToolboxInterface
         return is_scalar($id) && (string) $id !== '' ? $this->adminPageTool->recordUrl($resource, (string) $id) : null;
     }
 
-    /** A tool that never changes data, so it runs without the administrator's confirmation. */
+    /**
+     * A tool that changes no store data, so it runs without the administrator's confirmation.
+     * The memory of the assistant, a notification and the browser of the administrator are not store data.
+     */
     public function isReadOnly(string $name): bool
     {
-        return $name !== BackgroundTaskTool::NAME && $name !== ImageTool::NAME && (self::isLocal($name) || $this->catalog->isReadOnly($name));
+        $hints = self::localEffectHints($name);
+
+        return $hints !== null ? $hints->readOnlyHint === true : $this->catalog->isReadOnly($name);
     }
 
     /**
@@ -570,7 +599,9 @@ final class McpToolbox implements ToolboxInterface
 
     public function isDestructive(string $name): bool
     {
-        return !self::isLocal($name) && $this->catalog->isDestructive($name);
+        $hints = self::localEffectHints($name);
+
+        return $hints !== null ? $hints->destructiveHint === true : $this->catalog->isDestructive($name);
     }
 
     /** A write that changes one record that the API can read back, so the panel can show and undo it. */
