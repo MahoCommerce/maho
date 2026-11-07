@@ -268,3 +268,23 @@ it('rejects an invalid refund amount without changing the balance or history', f
     'positive infinity' => [INF],
     'negative infinity' => [-INF],
 ]);
+
+it('reads the refund extension of the given store, not of the current store', function (): void {
+    $past = new DateTimeImmutable('now', new DateTimeZone('UTC'))->modify('-5 days');
+    $this->refundCard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_EXPIRED)
+        ->setExpiresAt($past->format(Mage_Core_Model_Locale::DATETIME_FORMAT))
+        ->save();
+    Mage::app()->getStore(1)->setConfig('giftcard/general/refund_expiration_extension', '0');
+    $currentStore = Mage::app()->getStore()->getId();
+    Mage::app()->setCurrentStore(Mage_Core_Model_App::ADMIN_STORE_ID);
+
+    try {
+        $this->refundCard->refund(10.0, null, null, 1);
+    } finally {
+        Mage::app()->setCurrentStore($currentStore);
+    }
+
+    $fresh = Mage::getModel('giftcard/giftcard')->load($this->refundCard->getId());
+    expect($fresh->getStatus())->toBe(Maho_Giftcard_Model_Giftcard::STATUS_EXPIRED)
+        ->and($fresh->getBalance())->toBe(110.0);
+});

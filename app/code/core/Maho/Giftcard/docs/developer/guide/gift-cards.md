@@ -372,7 +372,7 @@ Executes on credit memo refund:
 - Uses row locking to prevent race conditions
 - Calculates proportional refund for partial gift card orders
 - For full coverage orders, refunds entire credit memo amount
-- Updates gift card status back to active if was "used"
+- Updates gift card status back to active if it was "used" or "disabled"
 - **Extends expiration** if the card is expired or will expire within the configured extension period:
     - Compares card's `expires_at` to `now + refund_expiration_extension` days
     - If card expires sooner, extends to the full extension period from now
@@ -386,7 +386,7 @@ Executes when an order is canceled:
 
 - Uses row locking to prevent race conditions
 - Restores the full gift card balance for all applied gift cards
-- Updates gift card status back to active if was "used"
+- Updates gift card status back to active if it was "used" or "disabled"
 - **Extends expiration** using the same logic as credit memo refunds:
     - Compares card's `expires_at` to `now + refund_expiration_extension` days
     - If card expires sooner, extends to the full extension period from now

@@ -325,6 +325,68 @@ describe('Refund Flow - Multiple Gift Cards', function () {
         expect($history2->getId())->not->toBeNull();
         expect((float) $history2->getBaseAmount())->toBe(70.00);
     });
+
+    test('refunds no gift card when the refund of one card fails', function () {
+        $fake = new class extends Maho_Giftcard_Model_Resource_History {
+            public int $failOn = 0;
+
+            #[\Override]
+            public function save(Mage_Core_Model_Abstract $object)
+            {
+                if ((int) $object->getGiftcardId() === $this->failOn) {
+                    throw new RuntimeException('Test history failure');
+                }
+                return parent::save($object);
+            }
+        };
+        $fake->failOn = (int) $this->giftcard2->getId();
+        $key = '_resource_singleton/giftcard/history';
+        $original = Mage::registry($key);
+        Mage::unregister($key);
+        Mage::register($key, $fake);
+
+        $creditmemo = Mage::getModel('sales/order_creditmemo');
+        $creditmemo->setOrder($this->order);
+        $creditmemo->setBaseGiftcardAmount(-100.00);
+        $creditmemo->setGiftcardAmount(-100.00);
+        $event = new Maho\Event();
+        $event->setCreditmemo($creditmemo);
+        $eventObserver = new Maho\Event\Observer();
+        $eventObserver->setEvent($event);
+
+        try {
+            expect(fn() => $this->observer->refundGiftcardBalance($eventObserver))
+                ->toThrow(RuntimeException::class, 'Test history failure');
+        } finally {
+            Mage::unregister($key);
+            if ($original) {
+                Mage::register($key, $original);
+            }
+        }
+
+        $card1 = Mage::getModel('giftcard/giftcard')->load($this->giftcard1->getId());
+        expect((float) $card1->getBalance())->toBe(0.0)
+            ->and($card1->getStatus())->toBe(Maho_Giftcard_Model_Giftcard::STATUS_USED)
+            ->and($card1->getHistoryCollection()->addFieldToFilter('action', Maho_Giftcard_Model_Giftcard::ACTION_REFUNDED)->getSize())->toBe(0);
+    });
+
+    test('gives the share of a deleted gift card to the other cards', function () {
+        $this->giftcard2->delete();
+
+        $creditmemo = Mage::getModel('sales/order_creditmemo');
+        $creditmemo->setOrder($this->order);
+        $creditmemo->setBaseGiftcardAmount(-50.00);
+        $creditmemo->setGiftcardAmount(-50.00);
+        $event = new Maho\Event();
+        $event->setCreditmemo($creditmemo);
+        $eventObserver = new Maho\Event\Observer();
+        $eventObserver->setEvent($event);
+
+        $this->observer->refundGiftcardBalance($eventObserver);
+
+        $card1 = Mage::getModel('giftcard/giftcard')->load($this->giftcard1->getId());
+        expect((float) $card1->getBalance())->toBe(50.00);
+    });
 });
 
 describe('Refund Flow - Multiple Credit Memos', function () {
