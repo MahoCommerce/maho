@@ -156,6 +156,16 @@ class Maho_FeedManager_Model_Writer_Csv implements Maho_FeedManager_Model_Writer
         return $this;
     }
 
+    public function getDelimiter(): string
+    {
+        return $this->_delimiter;
+    }
+
+    public function getEnclosure(): string
+    {
+        return $this->_enclosure;
+    }
+
     /**
      * Set enclosure character
      */

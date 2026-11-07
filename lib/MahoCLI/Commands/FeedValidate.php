@@ -59,7 +59,8 @@ class FeedValidate extends BaseMahoCommand
 
         // Validate the file
         $validator = new \Maho_FeedManager_Model_Validator();
-        $isValid = $validator->validateStoredFile($mount, $path, $format);
+        $csv = $format === 'csv' ? new \Maho_FeedManager_Model_Writer_Csv()->configureFromFeed($feed) : null;
+        $isValid = $validator->validateStoredFile($mount, $path, $format, $csv?->getDelimiter(), $csv?->getEnclosure());
 
         $errors = $validator->getErrors();
         $warnings = $validator->getWarnings();

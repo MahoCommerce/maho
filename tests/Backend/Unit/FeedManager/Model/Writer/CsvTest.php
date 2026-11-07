@@ -40,3 +40,26 @@ it('writes quotes after backslashes so CSV readers recover every field', functio
     'comma and newline' => ["A product, with\na second line"],
     'quotes' => ['A "quoted" product'],
 ]);
+
+it('validates a feed with the delimiter and the enclosure of the feed', function (string $delimiter, string $enclosure): void {
+    $path = tempnam(sys_get_temp_dir(), 'feed-csv-');
+    $writer = new Maho_FeedManager_Model_Writer_Csv()->setDelimiter($delimiter)->setEnclosure($enclosure);
+
+    try {
+        $writer->open($path);
+        $writer->writeProduct(['title' => 'Shoes,red', 'sku' => 'next-column']);
+        $writer->writeProduct(['title' => "It's red", 'sku' => 'next-column']);
+        $writer->close();
+
+        $validator = new Maho_FeedManager_Model_Validator();
+        expect($validator->validate($path, 'csv', $delimiter, $enclosure))->toBeTrue()
+            ->and($validator->getWarnings())->toBe([]);
+    } finally {
+        $writer->close();
+        unlink($path);
+    }
+})->with([
+    'pipe' => ['|', '"'],
+    'semicolon' => [';', '"'],
+    'single quote' => [',', "'"],
+]);

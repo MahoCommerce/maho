@@ -23,9 +23,11 @@ class Maho_FeedManager_Model_Validator
      *
      * @param string $filePath Path to the feed file
      * @param string $format File format (xml, csv, json)
+     * @param string|null $csvDelimiter Delimiter of a CSV file. Null guesses tab or comma.
+     * @param string|null $csvEnclosure Enclosure of a CSV file. Null is a double quote, an empty string is none.
      * @return bool True if valid
      */
-    public function validate(string $filePath, string $format): bool
+    public function validate(string $filePath, string $format, ?string $csvDelimiter = null, ?string $csvEnclosure = null): bool
     {
         $this->_errors = [];
         $this->_warnings = [];
@@ -43,7 +45,7 @@ class Maho_FeedManager_Model_Validator
 
         return match ($format) {
             'xml' => $this->_validateXml($filePath),
-            'csv' => $this->_validateCsv($filePath),
+            'csv' => $this->_validateCsv($filePath, $csvDelimiter, $csvEnclosure ?? '"'),
             'json' => $this->_validateJson($filePath),
             'jsonl' => $this->_validateJsonl($filePath),
             default => true,
@@ -56,7 +58,7 @@ class Maho_FeedManager_Model_Validator
      * @param string $format File format (xml, csv, json)
      * @return bool True if valid
      */
-    public function validateStoredFile(\Maho\Storage\Mount $mount, string $path, string $format): bool
+    public function validateStoredFile(\Maho\Storage\Mount $mount, string $path, string $format, ?string $csvDelimiter = null, ?string $csvEnclosure = null): bool
     {
         if (!$mount->fileExists($path)) {
             $this->_errors = ["File not found: {$path}"];
@@ -64,7 +66,7 @@ class Maho_FeedManager_Model_Validator
             return false;
         }
 
-        return $mount->withLocalFile($path, fn(string $localPath): bool => $this->validate($localPath, $format));
+        return $mount->withLocalFile($path, fn(string $localPath): bool => $this->validate($localPath, $format, $csvDelimiter, $csvEnclosure));
     }
 
     /**
@@ -140,7 +142,7 @@ class Maho_FeedManager_Model_Validator
     /**
      * Validate CSV file structure
      */
-    protected function _validateCsv(string $filePath): bool
+    protected function _validateCsv(string $filePath, ?string $delimiter, string $enclosure): bool
     {
         $handle = fopen($filePath, 'r');
         if (!$handle) {
@@ -153,13 +155,13 @@ class Maho_FeedManager_Model_Validator
         $validLines = 0;
         $invalidLines = [];
 
-        // Detect delimiter (tab or comma)
-        $firstLine = fgets($handle);
-        rewind($handle);
+        if ($delimiter === null) {
+            $firstLine = (string) fgets($handle);
+            rewind($handle);
+            $delimiter = str_contains($firstLine, "\t") ? "\t" : ',';
+        }
 
-        $delimiter = str_contains($firstLine, "\t") ? "\t" : ',';
-
-        while (($row = fgetcsv($handle, 0, $delimiter, escape: '')) !== false) {
+        while (($row = $this->_readCsvRow($handle, $delimiter, $enclosure)) !== false) {
             $lineNumber++;
 
             if ($lineNumber === 1) {
@@ -202,6 +204,21 @@ class Maho_FeedManager_Model_Validator
         }
 
         return empty($this->_errors);
+    }
+
+    /**
+     * Read one row. Without an enclosure, the row is the line split at each delimiter, as the writer writes it.
+     *
+     * @param resource $handle
+     */
+    protected function _readCsvRow($handle, string $delimiter, string $enclosure): array|false
+    {
+        if ($enclosure !== '') {
+            return fgetcsv($handle, 0, $delimiter, $enclosure, escape: '');
+        }
+
+        $line = fgets($handle);
+        return $line === false ? false : explode($delimiter, rtrim($line, "\r\n"));
     }
 
     /**
