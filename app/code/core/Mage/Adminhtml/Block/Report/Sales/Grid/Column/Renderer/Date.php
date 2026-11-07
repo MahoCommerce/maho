@@ -10,36 +10,24 @@
 
 class Mage_Adminhtml_Block_Report_Sales_Grid_Column_Renderer_Date extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Date
 {
-    protected static ?string $_format = null;
-    #[\Override]
-    protected static ?IntlDateFormatter $_formatter = null;
-
     protected function _getFormat(): string
     {
         $column = $this->getColumn();
-        $format = $column->getFormat();
-        if (!$format) {
-            self::$_format ??= Mage::app()->getLocale()->getDateFormatByPeriodType($column->getPeriodType());
-            $format = self::$_format;
-        }
-        return $format;
+        return $column->getFormat()
+            ?: Mage::app()->getLocale()->getDateFormatByPeriodType($column->getPeriodType());
     }
 
     #[\Override]
     protected function _getFormatter(): IntlDateFormatter
     {
-        if (is_null(self::$_formatter)) {
-            $icuPattern = $this->_getFormat();
-            self::$_formatter = new IntlDateFormatter(
-                Mage::app()->getLocale()->getLocaleCode(),
-                IntlDateFormatter::NONE,
-                IntlDateFormatter::NONE,
-                null,
-                null,
-                $icuPattern,
-            );
-        }
-        return self::$_formatter;
+        return $this->_formatter ??= new IntlDateFormatter(
+            Mage::app()->getLocale()->getLocaleCode(),
+            IntlDateFormatter::NONE,
+            IntlDateFormatter::NONE,
+            null,
+            null,
+            $this->_getFormat(),
+        );
     }
 
     #[\Override]
@@ -47,6 +35,10 @@ class Mage_Adminhtml_Block_Report_Sales_Grid_Column_Renderer_Date extends Mage_A
     {
         $column = $this->getColumn();
         if ($data = $row->getData($column->getIndex())) {
+            // A year period holds only the year. DateTime reads '2018' as a clock time.
+            if ($column->getPeriodType() === 'year' && !$column->getFormat()) {
+                return (string) $data;
+            }
             try {
                 $dateObj = ($column->getGmtoffset())
                     ? Mage::app()->getLocale()->utcToStore(null, $data)
