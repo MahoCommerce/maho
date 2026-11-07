@@ -188,7 +188,7 @@ final class ProductCustomOptionProcessor extends \Maho\ApiPlatform\Processor
         $priceType = $input->string('priceType', 'price_type');
         $values = $input->list('values');
 
-        // Check all of the input before the first write: the writes below are not one transaction
+        // Check all of the input before the first write
         $oldType = $option->getType();
         $type = $newType ?? $oldType;
         $isSelect = in_array($type, self::SELECT_TYPES);
@@ -197,73 +197,82 @@ final class ProductCustomOptionProcessor extends \Maho\ApiPlatform\Processor
         }
         $cleanValues = $isSelect && $values !== null ? $this->prepareValues($values) : null;
 
-        if (!empty($optionUpdate)) {
-            $write->update(
-                $resource->getTableName('catalog/product_option'),
-                $optionUpdate,
-                ['option_id = ?' => $optionId],
-            );
-        }
-
-        // Update title via catalog_product_option_title table
-        if ($title !== null) {
-            $titleTable = $resource->getTableName('catalog/product_option_title');
-            $write->insertOnDuplicate($titleTable, [
-                'option_id' => $optionId,
-                'store_id' => 0,
-                'title' => $title,
-            ], ['title']);
-        }
-
-        // Clean up orphan rows when the type category changes (select <-> non-select)
-        $oldIsSelect = in_array($oldType, self::SELECT_TYPES);
-        if ($oldIsSelect && !$isSelect) {
-            // Select -> non-select: drop now-orphaned option value rows
-            $write->delete(
-                $resource->getTableName('catalog/product_option_type_value'),
-                ['option_id = ?' => $optionId],
-            );
-        } elseif (!$oldIsSelect && $isSelect) {
-            // Non-select -> select: drop the now-orphaned price row
-            $write->delete(
-                $resource->getTableName('catalog/product_option_price'),
-                ['option_id = ?' => $optionId],
-            );
-        }
-
-        // Update price for non-select types
-        if (!$isSelect) {
-            $priceUpdate = [];
-            if ($price !== null) {
-                $priceUpdate['price'] = $price;
+        // One transaction, so an update that fails part way keeps the option as it was
+        $write->beginTransaction();
+        try {
+            if (!empty($optionUpdate)) {
+                $write->update(
+                    $resource->getTableName('catalog/product_option'),
+                    $optionUpdate,
+                    ['option_id = ?' => $optionId],
+                );
             }
-            if ($priceType !== null) {
-                $priceUpdate['price_type'] = $priceType;
-            }
-            if (!empty($priceUpdate)) {
-                $priceTable = $resource->getTableName('catalog/product_option_price');
-                // Only the value columns may be updated on conflict; the
-                // identity columns (option_id, store_id) form the unique key
-                // and must not appear in the ON DUPLICATE/CONFLICT update list.
-                $updateFields = array_keys($priceUpdate);
-                $priceUpdate['option_id'] = $optionId;
-                $priceUpdate['store_id'] = 0;
-                $write->insertOnDuplicate($priceTable, $priceUpdate, $updateFields);
-            }
-        }
 
-        // Update select-type values
-        if ($cleanValues !== null) {
-            // Delete existing values and re-create
-            $typeValueTable = $resource->getTableName('catalog/product_option_type_value');
-            $write->delete($typeValueTable, ['option_id = ?' => $optionId]);
-            // Re-create via model (reload option, set values, save)
-            $option = Mage::getModel('catalog/product_option')->load($optionId);
-            $product = Mage::getModel('catalog/product')->load($productId);
-            $option->setProduct($product);
-            $option->setStoreId(0);
-            $option->setData('values', $cleanValues);
-            $this->safeSave($option, 'update option values');
+            // Update title via catalog_product_option_title table
+            if ($title !== null) {
+                $titleTable = $resource->getTableName('catalog/product_option_title');
+                $write->insertOnDuplicate($titleTable, [
+                    'option_id' => $optionId,
+                    'store_id' => 0,
+                    'title' => $title,
+                ], ['title']);
+            }
+
+            // Clean up orphan rows when the type category changes (select <-> non-select)
+            $oldIsSelect = in_array($oldType, self::SELECT_TYPES);
+            if ($oldIsSelect && !$isSelect) {
+                // Select -> non-select: drop now-orphaned option value rows
+                $write->delete(
+                    $resource->getTableName('catalog/product_option_type_value'),
+                    ['option_id = ?' => $optionId],
+                );
+            } elseif (!$oldIsSelect && $isSelect) {
+                // Non-select -> select: drop the now-orphaned price row
+                $write->delete(
+                    $resource->getTableName('catalog/product_option_price'),
+                    ['option_id = ?' => $optionId],
+                );
+            }
+
+            // Update price for non-select types
+            if (!$isSelect) {
+                $priceUpdate = [];
+                if ($price !== null) {
+                    $priceUpdate['price'] = $price;
+                }
+                if ($priceType !== null) {
+                    $priceUpdate['price_type'] = $priceType;
+                }
+                if (!empty($priceUpdate)) {
+                    $priceTable = $resource->getTableName('catalog/product_option_price');
+                    // Only the value columns may be updated on conflict; the
+                    // identity columns (option_id, store_id) form the unique key
+                    // and must not appear in the ON DUPLICATE/CONFLICT update list.
+                    $updateFields = array_keys($priceUpdate);
+                    $priceUpdate['option_id'] = $optionId;
+                    $priceUpdate['store_id'] = 0;
+                    $write->insertOnDuplicate($priceTable, $priceUpdate, $updateFields);
+                }
+            }
+
+            // Update select-type values
+            if ($cleanValues !== null) {
+                // Delete existing values and re-create
+                $typeValueTable = $resource->getTableName('catalog/product_option_type_value');
+                $write->delete($typeValueTable, ['option_id = ?' => $optionId]);
+                // Re-create via model (reload option, set values, save)
+                $option = Mage::getModel('catalog/product_option')->load($optionId);
+                $product = Mage::getModel('catalog/product')->load($productId);
+                $option->setProduct($product);
+                $option->setStoreId(0);
+                $option->setData('values', $cleanValues);
+                $this->safeSave($option, 'update option values');
+            }
+
+            $write->commit();
+        } catch (\Throwable $e) {
+            $write->rollBack();
+            throw $e;
         }
 
         $this->syncProductOptionFlags($productId);

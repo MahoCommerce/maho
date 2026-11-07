@@ -17,7 +17,6 @@ use Maho\ApiPlatform\Security\AdminSessionAuthenticator;
 use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
@@ -56,12 +55,8 @@ class AdminBridgeListener
             return;
         }
 
-        try {
-            $input = RequestInput::decode($request);
-        } catch (BadRequestHttpException) {
-            // The controller answers a body that does not decode
-            $input = [];
-        }
+        // The controller answers a body that does not decode
+        $input = RequestInput::tryDecode($request) ?? [];
 
         $_SERVER['MAHO_ADMIN_USER_ID'] = $adminUser->getId();
         $_SERVER['MAHO_ADMIN_USERNAME'] = $adminUser->getUsername();

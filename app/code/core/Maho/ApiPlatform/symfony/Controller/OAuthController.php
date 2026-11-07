@@ -27,7 +27,6 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 
 class OAuthController
@@ -142,9 +141,8 @@ class OAuthController
             return $this->error(OauthException::ERROR_INVALID_REQUEST, 'Too many registration requests', 429);
         }
 
-        try {
-            $metadata = RequestInput::decode($request);
-        } catch (BadRequestHttpException) {
+        $metadata = RequestInput::tryDecode($request);
+        if ($metadata === null) {
             return $this->error(OauthException::ERROR_INVALID_CLIENT_METADATA, 'Request body must be JSON');
         }
 
@@ -259,11 +257,7 @@ class OAuthController
             return $request->request->all();
         }
 
-        try {
-            return RequestInput::decode($request);
-        } catch (BadRequestHttpException) {
-            return [];
-        }
+        return RequestInput::tryDecode($request) ?? [];
     }
 
     /**

@@ -243,12 +243,8 @@ class IdempotencyListener
             return $path;
         }
 
-        try {
-            $envelope = RequestInput::decode($request);
-        } catch (BadRequestHttpException) {
-            return $path;
-        }
-        if ($envelope === []) {
+        $envelope = RequestInput::tryDecode($request);
+        if ($envelope === null || $envelope === []) {
             return $path;
         }
 

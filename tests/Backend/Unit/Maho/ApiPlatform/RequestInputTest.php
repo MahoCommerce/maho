@@ -83,9 +83,11 @@ describe('RequestInput', function (): void {
         expect(RequestInput::decode(null))->toBe([]);
     });
 
-    it('answers 400 for a body that is not a JSON object or array', function (string $content): void {
-        expect(fn() => RequestInput::decode(Request::create('/', 'PUT', [], [], [], [], $content)))
-            ->toThrow(BadRequestHttpException::class, 'Invalid JSON in request body');
+    it('answers 400 for a body that is not a JSON object or array, or null when asked to try', function (string $content): void {
+        $request = Request::create('/', 'PUT', [], [], [], [], $content);
+
+        expect(fn() => RequestInput::decode($request))->toThrow(BadRequestHttpException::class, 'Invalid JSON in request body');
+        expect(RequestInput::tryDecode($request))->toBeNull();
     })->with(['not JSON' => ['{oops'], 'a string' => ['"abc"'], 'a number' => ['12'], 'null' => ['null']]);
 
     it('converts like the shared readers', function (): void {

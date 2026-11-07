@@ -59,8 +59,11 @@ final class ProductGroupPriceProcessor extends \Maho\ApiPlatform\Processor
         // null means unrestricted (any website, including 0 = all).
         $allowedWebsiteIds = $this->getAllowedWebsiteIds($user);
 
-        // The body is a JSON list of group prices
+        // The body is a JSON list of group prices; an object would be taken as rows under its keys
         $body = $this->parseRequestBody($context['request'] ?? null);
+        if (!array_is_list($body)) {
+            throw new BadRequestHttpException('Request body must be an array of group prices');
+        }
 
         $groupPrices = [];
         foreach ($body as $index => $gp) {

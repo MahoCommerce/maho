@@ -51,11 +51,7 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
         StoreContext::ensureStore();
 
         // A body that does not decode reads as empty, so it gets the invalid_request error of the grant
-        try {
-            $body = RequestInput::decode($context['request'] ?? null);
-        } catch (BadRequestHttpException) {
-            $body = [];
-        }
+        $body = RequestInput::tryDecode($context['request'] ?? null) ?? [];
 
         $this->checkRateLimitByIp('auth_token', 'auth_token_ip', 60);
 

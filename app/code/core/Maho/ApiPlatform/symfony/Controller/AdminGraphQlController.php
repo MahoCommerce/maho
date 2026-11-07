@@ -66,12 +66,13 @@ class AdminGraphQlController
         SameOriginGuard::assert($request);
 
         // Parse request
-        try {
-            $input = RequestInput::of(RequestInput::decode($request));
-        } catch (BadRequestHttpException) {
-            // Answered below as a GraphQL error, like a body without a query
-            $input = RequestInput::of([]);
+        $body = RequestInput::tryDecode($request);
+        if ($body === null) {
+            return new JsonResponse([
+                'errors' => [['message' => 'Invalid JSON in request body']],
+            ], Response::HTTP_BAD_REQUEST);
         }
+        $input = RequestInput::of($body);
 
         try {
             $query = $input->string('query') ?? '';

@@ -51,13 +51,24 @@ final class RequestInput
      */
     public static function decode(?Request $request): array
     {
+        return self::tryDecode($request) ?? throw new BadRequestHttpException('Invalid JSON in request body');
+    }
+
+    /**
+     * As decode(), but null for a body that is not a JSON object or array, for a reader that answers it its
+     * own way or not at all.
+     *
+     * @return array<array-key, mixed>|null
+     */
+    public static function tryDecode(?Request $request): ?array
+    {
         if ($request === null || $request->getContent() === '') {
             return [];
         }
         try {
             return $request->toArray();
         } catch (JsonException) {
-            throw new BadRequestHttpException('Invalid JSON in request body');
+            return null;
         }
     }
 
@@ -242,8 +253,9 @@ final class RequestInput
     }
 
     /**
+     * Reads each entry of a list with $read; $type names the type of an entry in the error of a null one.
+     *
      * @param array<string> $keys
-     * @param string $type the type of an entry, for the error of a null one
      * @param \Closure(self): T $read reads key "0" of a one-entry input
      * @template T
      * @return list<T>|null

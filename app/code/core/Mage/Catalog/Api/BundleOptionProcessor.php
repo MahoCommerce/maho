@@ -77,8 +77,7 @@ final class BundleOptionProcessor extends \Maho\ApiPlatform\Processor
         $type = $input->string('type') ?? 'select';
         $required = $input->bool('required') ?? true;
         $position = $input->int('position') ?? 0;
-        // Read and check every selection before saving anything, so a selection of a wrong type or out of
-        // range keeps no option; the saves below are not one transaction
+        // Read and check every selection before saving anything
         $selectionRows = [];
         foreach ($input->rows('selections') ?? [] as $selection) {
             $selProductId = $selection->int('productId', 'product_id') ?? 0;
@@ -124,8 +123,35 @@ final class BundleOptionProcessor extends \Maho\ApiPlatform\Processor
         $option->setRequired((bool) $required);
         $option->setPosition($position);
 
-        $this->safeSave($option, 'create bundle option');
+        // One transaction, so a selection that fails to save keeps no option
+        $write = Mage::getSingleton('core/resource')->getConnection('core_write');
+        $write->beginTransaction();
+        try {
+            $this->safeSave($option, 'create bundle option');
+            $this->saveSelections($product, (int) $option->getId(), $productId, $selectionRows);
+            $write->commit();
+        } catch (\Throwable $e) {
+            $write->rollBack();
+            throw $e;
+        }
 
+        // Return the created option
+        $dto = new BundleOption();
+        $dto->id = (int) $option->getId();
+        $dto->title = $title;
+        $dto->type = $type;
+        $dto->required = $required;
+        $dto->position = $position;
+        $dto->selections = $body['selections'] ?? [];
+
+        return $dto;
+    }
+
+    /**
+     * @param list<array{product_id: int, qty: float, price: float, can_change_qty: bool, is_default: bool, price_type: int, position: int}> $selectionRows
+     */
+    private function saveSelections(\Mage_Catalog_Model_Product $product, int $optionId, int $productId, array $selectionRows): void
+    {
         // Register product in Mage registry, Selection::_afterSave() requires it.
         // Force the correct product (a stale entry from a prior operation in the
         // same process would otherwise leak the wrong store scope into the
@@ -141,7 +167,7 @@ final class BundleOptionProcessor extends \Maho\ApiPlatform\Processor
             foreach ($selectionRows as $row) {
                 /** @var \Mage_Bundle_Model_Selection $selection */
                 $selection = Mage::getModel('bundle/selection');
-                $selection->setOptionId($option->getId());
+                $selection->setOptionId($optionId);
                 $selection->setParentProductId($productId);
                 $selection->setProductId($row['product_id']);
                 $selection->setSelectionQty($row['qty']);
@@ -159,17 +185,6 @@ final class BundleOptionProcessor extends \Maho\ApiPlatform\Processor
                 Mage::register('product', $previousProduct);
             }
         }
-
-        // Return the created option
-        $dto = new BundleOption();
-        $dto->id = (int) $option->getId();
-        $dto->title = $title;
-        $dto->type = $type;
-        $dto->required = $required;
-        $dto->position = $position;
-        $dto->selections = $body['selections'] ?? [];
-
-        return $dto;
     }
 
     private function handleUpdate(int $productId, array $body, int $pathOptionId = 0): array
