@@ -66,11 +66,7 @@ class Maho_FeedManager_Model_Writer_Json implements Maho_FeedManager_Model_Write
             $flags |= JSON_PRETTY_PRINT;
         }
 
-        $json = json_encode($productData, $flags);
-        if ($json === false) {
-            Mage::log('FeedManager: json_encode failed: ' . json_last_error_msg(), Mage::LOG_WARNING);
-            return;
-        }
+        $json = json_encode($productData, $flags | JSON_THROW_ON_ERROR);
 
         // Add comma separator if not first product
         if (!$this->_firstProduct) {

@@ -53,11 +53,7 @@ class Maho_FeedManager_Model_Writer_Jsonl implements Maho_FeedManager_Model_Writ
             throw new RuntimeException('Writer not opened');
         }
 
-        $json = json_encode($productData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
-        if ($json === false) {
-            Mage::log('FeedManager: json_encode failed: ' . json_last_error_msg(), Mage::LOG_WARNING);
-            return;
-        }
+        $json = json_encode($productData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE | JSON_THROW_ON_ERROR);
 
         fwrite($this->_handle, $json . "\n");
     }
