@@ -155,6 +155,19 @@ class Mage_Eav_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * Throw an exception when the attribute set $setId is not a set of $entityType.
+     *
+     * @throws Mage_Core_Exception
+     */
+    public function assertSetOfType(int $setId, Mage_Eav_Model_Entity_Type $entityType): void
+    {
+        $set = Mage::getModel('eav/entity_attribute_set')->load($setId);
+        if ((int) $set->getEntityTypeId() !== (int) $entityType->getId()) {
+            Mage::throwException($this->__('Attribute set %d is not a set of the entity type %s.', $setId, $entityType->getEntityTypeCode()));
+        }
+    }
+
+    /**
      * Return the settings of the admin attribute pages of $entityType, or null when System > Attributes
      * does not manage the type. See Mage_Eav_Model_Entity_Attribute::getAdminPageSettings().
      */

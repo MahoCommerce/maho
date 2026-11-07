@@ -48,3 +48,11 @@ it('stores a Text attribute value under its own code', function () {
     expect($address->getData('floor_2nd'))->toBe('upper')
         ->and($address->hasData('floor2nd'))->toBeFalse();
 });
+
+it('stores a camelCase key under its underscore key, as the magic setter does', function () {
+    $object = new DataObject();
+    $object->setDataUsingMethod('myValue', 'x');
+
+    expect($object->getData('my_value'))->toBe('x')
+        ->and($object->getDataUsingMethod('myValue'))->toBe('x');
+});

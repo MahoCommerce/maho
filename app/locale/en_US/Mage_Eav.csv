@@ -40,6 +40,7 @@
 "Attribute Label","Attribute Label"
 "Attribute object is undefined","Attribute object is undefined"
 "Attribute Properties","Attribute Properties"
+"Attribute set %d is not a set of the entity type %s.","Attribute set %d is not a set of the entity type %s."
 "Attribute set with the ""%s"" name already exists.","Attribute set with the ""%s"" name already exists."
 "Attribute with the same code","Attribute with the same code"
 "Attribute with the same code already exists","Attribute with the same code already exists"

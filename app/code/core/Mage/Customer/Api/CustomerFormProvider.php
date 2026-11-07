@@ -35,7 +35,7 @@ final class CustomerFormProvider extends \Maho\ApiPlatform\Provider
 
         $customer = $this->getCustomer($formCode);
         $entity = $entityType === 'customer_address'
-            ? \Mage::getModel('customer/address')->setCustomer($customer)
+            ? CustomAttributes::groupEntity($entityType, (int) $customer->getGroupId())
             : $customer;
         $form = \Mage::getModel('customer/form')
             ->setFormCode($formCode)

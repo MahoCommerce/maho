@@ -140,13 +140,8 @@ class Mage_Customer_Model_Group extends Mage_Core_Model_Abstract
      */
     protected function validateAttributeSet(?int $setId, string $entityTypeCode): void
     {
-        if (!$setId) {
-            return;
-        }
-        $set = Mage::getModel('eav/entity_attribute_set')->load($setId);
-        $typeId = (int) Mage::getSingleton('eav/config')->getEntityType($entityTypeCode)->getId();
-        if ((int) $set->getEntityTypeId() !== $typeId) {
-            Mage::throwException(Mage::helper('customer')->__('Attribute set %d is not a set of the entity type %s.', $setId, $entityTypeCode));
+        if ($setId) {
+            Mage::helper('eav')->assertSetOfType($setId, Mage::getSingleton('eav/config')->getEntityType($entityTypeCode));
         }
     }
 

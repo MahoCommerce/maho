@@ -169,6 +169,86 @@ it('changes the set of a saved blog post from the admin save', function () {
     expect(Mage::getModel('blog/post')->load($post->getId())->getAttributeSetId())->toBe((int) $set->getId());
 });
 
+it('changes the set of a saved blog category from the admin save', function () {
+    [$set, $attribute] = attributeAdminNoteSetAndAttribute(Maho_Blog_Model_Category::ENTITY, 'blog/resource_eav_attribute', $this->suffix);
+    array_push($this->records, $set, $attribute);
+    $category = Mage::getModel('blog/category')->setData([
+        'name' => 'Pest Set Change ' . $this->suffix,
+        'url_key' => 'pest-set-change-' . $this->suffix,
+        'is_active' => 1,
+        'stores' => [0],
+    ]);
+    $category->save();
+    $this->records[] = $category;
+
+    attributeAdminNoteRun(Maho_Blog_Adminhtml_Blog_CategoryController::class, 'blog_category', 'save', [
+        'id' => $category->getId(),
+        'category' => [
+            'name' => 'Pest Set Change ' . $this->suffix,
+            'url_key' => 'pest-set-change-' . $this->suffix,
+            'is_active' => 1,
+            'stores' => [0],
+            'attribute_set_id' => (int) $set->getId(),
+        ],
+    ]);
+
+    expect(Mage::getModel('blog/category')->load($category->getId())->getAttributeSetId())->toBe((int) $set->getId());
+});
+
+it('shows the new set and keeps the typed values when the admin selects another set of a category', function () {
+    [$set, $attribute] = attributeAdminNoteSetAndAttribute(Mage_Catalog_Model_Category::ENTITY, 'catalog/resource_eav_attribute', $this->suffix);
+    array_push($this->records, $set, $attribute);
+    $category = Mage::getModel('catalog/category')
+        ->setName('Pest Set Edit ' . $this->suffix)
+        ->setIsActive(1)
+        ->setPath('1/' . Mage::app()->getStore(1)->getRootCategoryId());
+    $category->assignAttributeSet(null)->save();
+    $this->records[] = $category;
+
+    try {
+        attributeAdminNoteRun(Mage_Adminhtml_Catalog_CategoryController::class, 'catalog_category', 'edit', [
+            'id' => $category->getId(),
+            'set' => (int) $set->getId(),
+            'general' => ['name' => 'Pest Typed ' . $this->suffix],
+        ]);
+        $shown = Mage::registry('category');
+
+        expect($shown->getAttributeSetId())->toBe((int) $set->getId())
+            ->and($shown->getName())->toBe('Pest Typed ' . $this->suffix);
+    } finally {
+        Mage::unregister('category');
+        Mage::unregister('current_category');
+    }
+});
+
+it('shows the new set and keeps the typed values when the admin selects another set of a blog post', function () {
+    [$set, $attribute] = attributeAdminNoteSetAndAttribute(Maho_Blog_Model_Post::ENTITY, 'blog/resource_eav_attribute', $this->suffix);
+    array_push($this->records, $set, $attribute);
+    $post = Mage::getModel('blog/post')->setData([
+        'title' => 'Pest Set Edit ' . $this->suffix,
+        'url_key' => 'pest-set-edit-' . $this->suffix,
+        'content' => '<p>Body</p>',
+        'is_active' => 1,
+        'stores' => [0],
+    ]);
+    $post->save();
+    $this->records[] = $post;
+
+    try {
+        attributeAdminNoteRun(Maho_Blog_Adminhtml_Blog_PostController::class, 'blog_post', 'edit', [
+            'id' => $post->getId(),
+            'set' => (int) $set->getId(),
+            'title' => 'Pest Typed ' . $this->suffix,
+        ]);
+        $shown = Mage::registry('blog_post');
+
+        expect($shown->getAttributeSetId())->toBe((int) $set->getId())
+            ->and($shown->getTitle())->toBe('Pest Typed ' . $this->suffix);
+    } finally {
+        Mage::unregister('blog_post');
+    }
+});
+
 it('names the forms, the customer groups and the websites of a customer attribute', function () {
     $type = Mage::getSingleton('eav/config')->getEntityType('customer');
     $attribute = Mage::getModel('customer/attribute')->setData([

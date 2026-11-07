@@ -366,6 +366,25 @@ describe('Storefront customAttributes (REST)', function (): void {
             ->and($refused['status'])->toBe(422);
     });
 
+    it('hides an admin only address attribute from the customer who owns the address', function (): void {
+        $customerId = (int) customAttrTestCreateCustomer()['json']['id'];
+        $created = apiPost(
+            "/api/rest/v2/customers/{$customerId}/addresses",
+            customAttrTestAddress(['customAttributes' => [
+                CUSTOM_ATTR_ADDRESS_CODE => $GLOBALS['_custom_attr_south_id'],
+                CUSTOM_ATTR_FLOOR_CODE => '3rd',
+            ]]),
+            adminToken(),
+        );
+        expect($created['status'])->toBeSuccessful();
+
+        $read = apiGet('/api/rest/v2/customers/me/addresses/' . (int) $created['json']['id'], customerToken($customerId));
+
+        expect($read['status'])->toBe(200)
+            ->and($read['json']['customAttributes'] ?? [])->not->toHaveKey(CUSTOM_ATTR_ADDRESS_CODE)
+            ->and($read['json']['customAttributes'][CUSTOM_ATTR_FLOOR_CODE] ?? null)->toBe('3rd');
+    });
+
     it('sets an address attribute on a guest cart and copies it with sameAsShipping', function (): void {
         $create = apiPost('/api/rest/v2/guest-carts', []);
         expect($create['status'])->toBeIn([200, 201]);

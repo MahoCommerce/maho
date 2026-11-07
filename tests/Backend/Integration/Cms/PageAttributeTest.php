@@ -234,6 +234,28 @@ it('shows the visible fields of a page below its content', function () {
         ->and($html)->not->toContain('SECRET');
 });
 
+it('shows the visible attributes of the page that the request shows', function () {
+    $this->codes['text'] = 'pest_single_' . substr(uniqid(), -6);
+    $this->attributes[] = pageAttributeTestAttribute([
+        'attribute_code' => $this->codes['text'],
+        'frontend_label' => 'Pest Singleton',
+        'frontend_input' => 'text',
+        'is_visible_on_front' => 1,
+    ]);
+    $page = $this->pages[] = pageAttributeTestPage([$this->codes['text'] => 'FROM-SINGLETON']);
+    $page->save();
+
+    try {
+        Mage::getSingleton('cms/page')->load($page->getId());
+        $html = Mage::app()->getLayout()->createBlock('cms/page_attributes')->toHtml();
+
+        expect($html)->toContain('Pest Singleton')
+            ->and($html)->toContain('FROM-SINGLETON');
+    } finally {
+        Mage::unregister('_singleton/cms/page');
+    }
+});
+
 it('places the fields block in the content of every CMS page', function () {
     $layout = file_get_contents(Mage::getBaseDir('design') . '/frontend/base/default/layout/cms.xml');
 

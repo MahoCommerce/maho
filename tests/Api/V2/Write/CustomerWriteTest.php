@@ -471,6 +471,21 @@ describe('GraphQL address mutations', function (): void {
             ->and(Mage::getModel('customer/address')->load($addressId)->getCity())->toBe('Milano');
     });
 
+    it('refuses to delete the address of another customer', function () use ($createAddress): void {
+        [$owner] = createTestCustomer();
+        $addressId = $createAddress((int) $owner['json']['id']);
+        [$other] = createTestCustomer();
+
+        $response = gqlQuery(
+            'mutation { deleteAddress(input: {id: "' . $addressId . '"}) { address { id } } }',
+            [],
+            customerToken((int) $other['json']['id']),
+        );
+
+        expect($response['json']['errors'] ?? [])->not->toBeEmpty()
+            ->and(Mage::getModel('customer/address')->load($addressId)->getId())->not->toBeNull();
+    });
+
     it('deletes an address that the id names as an IRI', function () use ($createAddress): void {
         [$create] = createTestCustomer();
         $customerId = (int) $create['json']['id'];

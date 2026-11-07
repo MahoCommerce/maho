@@ -21,10 +21,7 @@ class Maho_Blog_Helper_Data extends Mage_Core_Helper_Abstract
         if (!$setId) {
             return (int) $entityType->getDefaultAttributeSetId();
         }
-        $set = Mage::getModel('eav/entity_attribute_set')->load($setId);
-        if ((int) $set->getEntityTypeId() !== (int) $entityType->getId()) {
-            Mage::throwException($this->__('Attribute set %d is not a set of the entity type %s.', $setId, $entityType->getEntityTypeCode()));
-        }
+        Mage::helper('eav')->assertSetOfType($setId, $entityType);
         return $setId;
     }
 

@@ -302,7 +302,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
 
             $validate = $category->validate();
             if ($validate !== true) {
-                foreach ($validate as $code => $error) {
+                foreach (array_intersect_key($validate, $category->getAttributes()) as $code => $error) {
                     if ($error === true) {
                         $attributeLabel = $category->getResource()->getAttribute($code)->getFrontend()->getLabel();
                         Mage::throwException(Mage::helper('catalog')->__('Attribute "%s" is required.', $attributeLabel));

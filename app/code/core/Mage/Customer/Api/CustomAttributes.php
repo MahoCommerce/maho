@@ -40,10 +40,7 @@ final class CustomAttributes
         if (isset(self::$storefrontCodes[$key])) {
             return self::$storefrontCodes[$key];
         }
-        $customer = \Mage::getModel('customer/customer')->setGroupId($groupId);
-        $entity = $entityType === 'customer_address'
-            ? \Mage::getModel('customer/address')->setCustomer($customer)
-            : $customer;
+        $entity = self::groupEntity($entityType, $groupId);
         $codes = [];
         foreach (self::STOREFRONT_FORMS[$entityType] ?? [] as $formCode) {
             $form = \Mage::getModel('customer/form')
@@ -57,6 +54,18 @@ final class CustomAttributes
             }
         }
         return self::$storefrontCodes[$key] = array_map(strval(...), array_keys($codes));
+    }
+
+    /**
+     * Return an empty customer or cart address of the customer group $groupId, as the entity of a storefront form.
+     */
+    public static function groupEntity(string $entityType, int $groupId): \Mage_Core_Model_Abstract
+    {
+        if ($entityType === 'customer_address') {
+            return \Mage::getModel('sales/quote_address')
+                ->setQuote(\Mage::getModel('sales/quote')->setCustomerGroupId($groupId));
+        }
+        return \Mage::getModel('customer/customer')->setGroupId($groupId);
     }
 
     /**
@@ -92,6 +101,9 @@ final class CustomAttributes
             throw new \Symfony\Component\HttpKernel\Exception\BadRequestHttpException('customAttributes must be an object of attribute codes and values');
         }
         self::apply($address, 'customer_address_edit', $values ?? [], true);
+        foreach (array_keys(array_diff_key(Values::userDefined('customer_address'), $values ?? [])) as $code) {
+            $address->setData($code);
+        }
     }
 
     /**

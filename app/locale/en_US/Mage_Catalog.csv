@@ -710,7 +710,6 @@
 "The attribute code '%s' is reserved by system. Please try another attribute code","The attribute code '%s' is reserved by system. Please try another attribute code"
 "The attribute model is not defined","The attribute model is not defined"
 "The attribute set has been saved.","The attribute set has been saved."
-"The attribute set is not a category attribute set.","The attribute set is not a category attribute set."
 "The base directory to upload file is not specified.","The base directory to upload file is not specified."
 "The category has been deleted.","The category has been deleted."
 "The category has been saved.","The category has been saved."

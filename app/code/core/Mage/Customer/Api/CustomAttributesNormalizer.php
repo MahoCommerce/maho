@@ -12,7 +12,6 @@ declare(strict_types=1);
 
 namespace Mage\Customer\Api;
 
-use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Security\BackendAccess;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Serializer\Normalizer\NormalizerAwareInterface;
@@ -30,8 +29,6 @@ final class CustomAttributesNormalizer implements NormalizerInterface, Normalize
 
     private const NORMALIZED = 'maho_customer_custom_attributes';
 
-    private ?int $callerGroupId = null;
-
     public function __construct(private readonly Security $security) {}
 
     #[\Override]
@@ -47,10 +44,10 @@ final class CustomAttributesNormalizer implements NormalizerInterface, Normalize
         $context[self::NORMALIZED][spl_object_id($data)] = true;
 
         if ($data instanceof Customer && !$this->hasBackendAccess(['customers'])) {
-            $codes = array_flip(CustomAttributes::storefrontCodes('customer', $data->groupId ?? $this->getCallerGroupId()));
+            $codes = array_flip(CustomAttributes::storefrontCodes('customer', $data->groupId ?? \Mage::helper('customer')->getCurrentGroupId()));
             $data->customAttributes = $data->customAttributes === null ? null : array_intersect_key($data->customAttributes, $codes);
         } elseif ($data instanceof Address && !$this->hasBackendAccess(['addresses', 'orders'])) {
-            $codes = array_flip(CustomAttributes::storefrontCodes('customer_address', $this->getCallerGroupId()));
+            $codes = array_flip(CustomAttributes::storefrontCodes('customer_address', \Mage::helper('customer')->getCurrentGroupId()));
             $data->customAttributes = $data->customAttributes === null ? null : array_intersect_key($data->customAttributes, $codes);
             $data->customAttributeLabels = $data->customAttributeLabels === null ? null : array_intersect_key($data->customAttributeLabels, $codes);
         }
@@ -70,20 +67,5 @@ final class CustomAttributesNormalizer implements NormalizerInterface, Normalize
     private function hasBackendAccess(array $resourceIds): bool
     {
         return array_any($resourceIds, fn($resourceId) => BackendAccess::isGrantedBy($this->security->isGranted(...), $resourceId));
-    }
-
-    /**
-     * Return the customer group of the customer of the token, or the group of a guest.
-     */
-    private function getCallerGroupId(): int
-    {
-        if ($this->callerGroupId === null) {
-            $user = $this->security->getUser();
-            $customerId = $user instanceof ApiUser ? $user->getCustomerId() : null;
-            $this->callerGroupId = $customerId
-                ? (int) \Mage::getModel('customer/customer')->load($customerId)->getGroupId()
-                : \Mage_Customer_Model_Group::NOT_LOGGED_IN_ID;
-        }
-        return $this->callerGroupId;
     }
 }

@@ -1094,14 +1094,12 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
     /**
      * Set the attribute set $setId. Without $setId, a category with no set takes the set of its parent.
      *
-     * @throws Mage_Core_Exception when $setId is not a category attribute set
+     * @throws Mage_Core_Exception when $setId is a set of another entity type
      */
     public function assignAttributeSet(?int $setId): static
     {
         if ($setId) {
-            if ((int) Mage::getModel('eav/entity_attribute_set')->load($setId)->getEntityTypeId() !== (int) $this->getResource()->getTypeId()) {
-                Mage::throwException(Mage::helper('catalog')->__('The attribute set is not a category attribute set.'));
-            }
+            Mage::helper('eav')->assertSetOfType($setId, $this->getResource()->getEntityType());
             return $this->setAttributeSetId($setId);
         }
         if ($this->getAttributeSetId()) {
