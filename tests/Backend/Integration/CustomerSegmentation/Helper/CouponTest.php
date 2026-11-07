@@ -11,7 +11,7 @@ uses(Tests\MahoBackendTestCase::class);
 
 beforeEach(function () {
     $this->rule = Mage::getModel('salesrule/rule')
-        ->setName('Automation coupon owner ' . uniqid())
+        ->setName('Automation coupon recipient ' . uniqid())
         ->setIsActive()
         ->setWebsiteIds([1])
         ->setCustomerGroupIds([0, 1])
@@ -44,7 +44,7 @@ test('a customer gets back their own unused coupon and never the coupon of anoth
         ->and($codeB)->not->toBe($codeA);
 });
 
-test('an automation coupon with no recorded owner is not given to a customer', function () {
+test('an automation coupon with no recorded recipient is not given to a customer', function () {
     $legacyCode = 'LEGACY' . $this->customerB . strtoupper(bin2hex(random_bytes(3)));
     Mage::getModel('salesrule/coupon')
         ->setRuleId((int) $this->rule->getId())
@@ -59,4 +59,13 @@ test('an automation coupon with no recorded owner is not given to a customer', f
 
     expect($code)->not->toBeNull()
         ->and($code)->not->toBe($legacyCode);
+});
+
+test('no coupon stays on the rule when its recipient cannot be recorded', function () {
+    $ruleId = (int) $this->rule->getId();
+
+    $code = Mage::helper('customersegmentation/coupon')->generateCustomerCoupon(999999, $ruleId, 'OWN', 30);
+
+    expect($code)->toBeNull()
+        ->and(Mage::getResourceModel('salesrule/coupon_collection')->addFieldToFilter('rule_id', $ruleId)->getSize())->toBe(0);
 });
