@@ -8,6 +8,8 @@
 
 declare(strict_types=1);
 
+uses(Tests\MahoBackendTestCase::class);
+
 it('preserves the root name and product list in generated JSON', function (?string $rootKey, string $expectedKey, bool $prettyPrint, array $products): void {
     $path = tempnam(sys_get_temp_dir(), 'feed-json-root-');
     $writer = new Maho_FeedManager_Model_Writer_Json();

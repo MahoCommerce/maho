@@ -8,6 +8,8 @@
 
 declare(strict_types=1);
 
+uses(Tests\MahoBackendTestCase::class);
+
 class XmlTextMapper extends Maho_FeedManager_Model_Mapper
 {
     public function __construct() {}
