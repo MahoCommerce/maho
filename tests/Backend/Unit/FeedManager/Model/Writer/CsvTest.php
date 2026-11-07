@@ -17,6 +17,10 @@ it('writes quotes after backslashes so CSV readers recover every field', functio
         $writer->writeProduct(['title' => $value, 'sku' => 'next-column']);
         $writer->close();
 
+        $validator = new Maho_FeedManager_Model_Validator();
+        expect($validator->validate($path, 'csv'))->toBeTrue()
+            ->and($validator->getWarnings())->toBe([]);
+
         $stream = fopen($path, 'r');
         try {
             expect(fgetcsv($stream, escape: ''))->toBe(['title', 'sku'])
@@ -31,6 +35,7 @@ it('writes quotes after backslashes so CSV readers recover every field', functio
     }
 })->with([
     'quote after backslash' => ['A \\"quoted" product'],
+    'quote after backslash followed by comma' => ['A \\"quoted" product, with comma'],
     'backslash at the end' => ['C:\\catalog\\'],
     'comma and newline' => ["A product, with\na second line"],
     'quotes' => ['A "quoted" product'],
