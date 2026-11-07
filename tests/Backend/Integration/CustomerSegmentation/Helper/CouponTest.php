@@ -69,3 +69,24 @@ test('no coupon stays on the rule when its recipient cannot be recorded', functi
     expect($code)->toBeNull()
         ->and(Mage::getResourceModel('salesrule/coupon_collection')->addFieldToFilter('rule_id', $ruleId)->getSize())->toBe(0);
 });
+
+test('a used or expired coupon of the customer is not given again', function () {
+    $helper = Mage::helper('customersegmentation/coupon');
+    $ruleId = (int) $this->rule->getId();
+
+    $usedCode = $helper->generateCustomerCoupon($this->customerA, $ruleId, 'OWN', 30);
+    Mage::getModel('salesrule/coupon')->loadByCode((string) $usedCode)->setTimesUsed(1)->save();
+
+    $expiredCode = $helper->generateCustomerCoupon($this->customerA, $ruleId, 'OWN', 30);
+    Mage::getModel('salesrule/coupon')->loadByCode((string) $expiredCode)
+        ->setExpirationDate(Mage::app()->getLocale()->formatDateForDb('-1 day'))
+        ->save();
+
+    $newCode = $helper->generateCustomerCoupon($this->customerA, $ruleId, 'OWN', 30);
+
+    expect($expiredCode)->not->toBeNull()
+        ->and($expiredCode)->not->toBe($usedCode)
+        ->and($newCode)->not->toBeNull()
+        ->and($newCode)->not->toBe($usedCode)
+        ->and($newCode)->not->toBe($expiredCode);
+});
