@@ -918,7 +918,7 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
     {
         $validator = new Maho_FeedManager_Model_Validator();
         $format = $this->_feed->getFileFormat();
-        $csv = $format === 'csv' ? new Maho_FeedManager_Model_Writer_Csv()->configureFromFeed($this->_feed) : null;
+        $csv = $this->_writer instanceof Maho_FeedManager_Model_Writer_Csv ? $this->_writer : null;
         if (!$validator->validate($tempPath, $format, $csv?->getDelimiter(), $csv?->getEnclosure())) {
             $errors = array_merge($errors, $validator->getErrors());
             throw new RuntimeException('Feed validation failed: ' . implode(', ', $validator->getErrors()));
