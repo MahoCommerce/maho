@@ -445,7 +445,8 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
             }
             $resource->commit();
         } catch (\Throwable $e) {
-            if ($savepoint !== null) {
+            // After a deadlock or a lock timeout the adapter has rolled back everything, and the savepoint is gone
+            if ($savepoint !== null && $write->getTransactionLevel() > 0) {
                 $write->getConnection()->rollbackSavepoint($savepoint);
                 $write->getConnection()->releaseSavepoint($savepoint);
             }
