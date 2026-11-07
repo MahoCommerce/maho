@@ -37,13 +37,11 @@ class Mage_Api2_Model_Renderer_Xml implements Mage_Api2_Model_Renderer_Interface
     ];
 
     /**
-     * Chars for replacement in the tag value
+     * Optional replacements before the writer escapes XML text
      *
      * @var array
      */
-    protected $_replacementInTagValue = [
-        '&' => '&amp;', // replace "&" with HTML entity, because by default not replaced
-    ];
+    protected $_replacementInTagValue = [];
 
     /**
      * Protected pattern for check chars in the begin of tag name
