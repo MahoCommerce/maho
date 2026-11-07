@@ -475,30 +475,12 @@ class Maho_Giftcard_Model_Observer
             return;
         }
 
-        $comment = "Refund for order #{$order->getIncrementId()}";
-        $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
-
-        // Refund proportionally to each gift card, all of them or none
-        $adapter->beginTransaction();
-        try {
-            foreach ($codes as $code => $appliedAmount) {
-                if ($appliedAmount <= 0) {
-                    continue;
-                }
-
-                $giftcard = Mage::getModel('giftcard/giftcard')->loadByCode((string) $code);
-                if (!$giftcard->getId()) {
-                    continue;
-                }
-
-                $refundAmount = ($appliedAmount / $totalApplied) * $baseGiftcardAmount;
-                $giftcard->refund($refundAmount, (int) $order->getId(), $comment, (int) $order->getStoreId());
-            }
-            $adapter->commit();
-        } catch (\Throwable $e) {
-            $adapter->rollBack();
-            throw $e;
-        }
+        $this->_refundGiftcards(
+            array_filter($codes, fn($amount) => $amount > 0),
+            $baseGiftcardAmount,
+            $order,
+            "Refund for order #{$order->getIncrementId()}",
+        );
     }
 
     /**
@@ -540,9 +522,18 @@ class Maho_Giftcard_Model_Observer
             return;
         }
 
+        $this->_refundGiftcards($applied, $baseRestoreAmount, $order, "Refund for canceled order #{$order->getIncrementId()}");
+    }
+
+    /**
+     * Give $baseAmount back to the gift cards of an order, in the ratio of $applied (code => amount), all or none.
+     *
+     * @param array<string, float|int|string> $applied
+     */
+    protected function _refundGiftcards(array $applied, float $baseAmount, Mage_Sales_Model_Order $order, string $comment): void
+    {
         $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
         $giftcardTable = Mage::getSingleton('core/resource')->getTableName('giftcard/giftcard');
-        $comment = "Refund for canceled order #{$order->getIncrementId()}";
 
         // A row lock holds only inside a transaction, and the cancel of an order runs outside one
         $adapter->beginTransaction();
@@ -560,13 +551,13 @@ class Maho_Giftcard_Model_Observer
             $applied = array_intersect_key($applied, $ids);
             $totalApplied = array_sum($applied);
 
-            $restoreLeft = $baseRestoreAmount;
+            $restoreLeft = $baseAmount;
             $lastCode = array_key_last($applied);
             foreach ($applied as $code => $appliedAmount) {
-                // The last card gets the rest, so the cards get back exactly $baseRestoreAmount
+                // The last card gets the rest, so the cards get back exactly $baseAmount
                 $restoreAmount = $code === $lastCode
                     ? $restoreLeft
-                    : min($restoreLeft, round($appliedAmount / $totalApplied * $baseRestoreAmount, 2));
+                    : min($restoreLeft, round($appliedAmount / $totalApplied * $baseAmount, 2));
                 $restoreLeft -= $restoreAmount;
                 if ($restoreAmount <= 0) {
                     continue;
