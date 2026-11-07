@@ -210,7 +210,7 @@ class Element extends SimpleXMLElement
 
         if ($attributes = $this->attributes()) {
             foreach ($attributes as $key => $value) {
-                $out .= ' ' . $key . '="' . str_replace('"', '\"', (string) $value) . '"';
+                $out .= ' ' . $key . '="' . $this->xmlentities($value) . '"';
             }
         }
 
@@ -287,7 +287,7 @@ class Element extends SimpleXMLElement
 
         $attributes = $source->attributes();
         foreach ($attributes as $key => $value) {
-            $child->addAttribute($key, $this->xmlentities($value));
+            $child->addAttribute($key, (string) $value);
         }
 
         foreach ($source->children() as $sourceChild) {
@@ -354,7 +354,7 @@ class Element extends SimpleXMLElement
             $targetChild = $this->addChild($sourceName, $source->xmlentities());
             $targetChild->setParent($this);
             foreach ($source->attributes() as $key => $value) {
-                $targetChild->addAttribute($key, $this->xmlentities($value));
+                $targetChild->addAttribute($key, (string) $value);
             }
             return $this;
         }
@@ -368,7 +368,7 @@ class Element extends SimpleXMLElement
             $targetChild = $this->addChild($sourceName);
             $targetChild->setParent($this);
             foreach ($source->attributes() as $key => $value) {
-                $targetChild->addAttribute($key, $this->xmlentities($value));
+                $targetChild->addAttribute($key, (string) $value);
             }
         }
 
