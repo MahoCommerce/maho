@@ -1,0 +1,136 @@
+<?php
+
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ */
+
+declare(strict_types=1);
+
+namespace Maho\Db\Sql;
+
+/**
+ * Splits SQL at statement terminators outside quoted values and comments.
+ * This is a bounded splitter, not a SQL parser.
+ */
+final class StatementSplitter
+{
+    /** @return list<string> */
+    public static function split(string $sql, string $engine): array
+    {
+        $statements = [];
+        $statement = '';
+        $hasSql = false;
+        $length = strlen($sql);
+        $i = 0;
+
+        while ($i < $length) {
+            $char = $sql[$i];
+            $next = $sql[$i + 1] ?? '';
+
+            if ($char === ';') {
+                if ($hasSql) {
+                    $statements[] = trim($statement);
+                }
+                $statement = '';
+                $hasSql = false;
+                $i++;
+                continue;
+            }
+
+            // SQL line comments. MySQL additionally accepts # comments.
+            $dashComment = $char === '-' && $next === '-'
+                && ($engine !== 'mysql' || ($i + 2 >= $length) || ctype_space($sql[$i + 2]));
+            if ($dashComment || ($engine === 'mysql' && $char === '#')) {
+                // PostgreSQL also ends a line comment at a carriage return.
+                $lineLength = strcspn($sql, $engine === 'pgsql' ? "\r\n" : "\n", $i);
+                $end = min($length, $i + $lineLength + 1);
+                $statement .= substr($sql, $i, $end - $i);
+                $i = $end;
+                continue;
+            }
+
+            // Keep comment text in its statement, but do not treat its semicolons as delimiters.
+            if ($char === '/' && $next === '*') {
+                $executableMysqlComment = $engine === 'mysql'
+                    && (substr($sql, $i, 3) === '/*!' || substr($sql, $i, 4) === '/*M!');
+                $depth = 1;
+                $end = $i + 2;
+                while ($end < $length && $depth > 0) {
+                    if ($engine === 'pgsql' && substr($sql, $end, 2) === '/*') {
+                        $depth++;
+                        $end += 2;
+                    } elseif (substr($sql, $end, 2) === '*/') {
+                        $depth--;
+                        $end += 2;
+                    } else {
+                        $end++;
+                    }
+                }
+                $statement .= substr($sql, $i, $end - $i);
+                $hasSql = $hasSql || $executableMysqlComment;
+                $i = $end;
+                continue;
+            }
+
+            // PostgreSQL dollar-quoted strings, including tagged forms.
+            if ($engine === 'pgsql' && $char === '$'
+                && ($i === 0 || !preg_match('/[A-Za-z0-9_$\x80-\xff]/', $sql[$i - 1]))
+                && preg_match('/\G\$([A-Za-z_\x80-\xff][A-Za-z_0-9\x80-\xff]*)?\$/', $sql, $match, 0, $i)
+            ) {
+                $delimiter = $match[0];
+                $end = strpos($sql, $delimiter, $i + strlen($delimiter));
+                $end = $end === false ? $length : $end + strlen($delimiter);
+                $statement .= substr($sql, $i, $end - $i);
+                $hasSql = true;
+                $i = $end;
+                continue;
+            }
+
+            if ($char === "'" || $char === '"' || $char === '`' || ($engine === 'sqlite' && $char === '[')) {
+                $closingQuote = $char === '[' ? ']' : $char;
+                $start = $i;
+                $backslashEscapes = $engine === 'mysql' && $char !== '`';
+                // PostgreSQL only gives backslashes escape meaning in E'...' strings.
+                if ($engine === 'pgsql' && $char === "'" && $i > 0
+                    && ($sql[$i - 1] === 'E' || $sql[$i - 1] === 'e')
+                    && ($i < 2 || !preg_match('/[A-Za-z_0-9$\x80-\xff]/', $sql[$i - 2]))
+                ) {
+                    $backslashEscapes = true;
+                }
+
+                $i++;
+                while ($i < $length) {
+                    if ($backslashEscapes && $sql[$i] === '\\' && $i + 1 < $length) {
+                        $i += 2;
+                        continue;
+                    }
+                    if ($sql[$i] === $closingQuote) {
+                        if ($closingQuote !== ']' && ($sql[$i + 1] ?? '') === $closingQuote) {
+                            $i += 2;
+                            continue;
+                        }
+                        $i++;
+                        break;
+                    }
+                    $i++;
+                }
+                $statement .= substr($sql, $start, $i - $start);
+                $hasSql = true;
+                continue;
+            }
+
+            $statement .= $char;
+            if (!ctype_space($char)) {
+                $hasSql = true;
+            }
+            $i++;
+        }
+
+        if ($hasSql) {
+            $statements[] = trim($statement);
+        }
+
+        return $statements;
+    }
+}

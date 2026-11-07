@@ -87,9 +87,9 @@ trait DatabaseCliTrait
     /**
      * Whether the SQL string contains more than one statement.
      */
-    private function containsMultipleStatements(string $sql): bool
+    private function containsMultipleStatements(string $sql, string $engine = 'mysql'): bool
     {
-        return count($this->splitSqlStatements($sql)) > 1;
+        return count($this->splitSqlStatements($sql, $engine)) > 1;
     }
 
     /**
@@ -98,77 +98,9 @@ trait DatabaseCliTrait
      *
      * @return list<string>
      */
-    private function splitSqlStatements(string $sql): array
+    private function splitSqlStatements(string $sql, string $engine): array
     {
-        $statements = [];
-        $current = '';
-        $length = strlen($sql);
-        $i = 0;
-
-        while ($i < $length) {
-            $char = $sql[$i];
-            $next = $sql[$i + 1] ?? '';
-
-            // Line comment: "# ..." or "-- ..." (the latter requires whitespace/EOL after --).
-            $dashComment = $char === '-' && $next === '-' && (($i + 2 >= $length) || ctype_space($sql[$i + 2]));
-            if ($char === '#' || $dashComment) {
-                $newline = strpos($sql, "\n", $i);
-                $i = $newline === false ? $length : $newline + 1;
-                continue;
-            }
-
-            // Block comment: /* ... */
-            if ($char === '/' && $next === '*') {
-                $end = strpos($sql, '*/', $i + 2);
-                $i = $end === false ? $length : $end + 2;
-                continue;
-            }
-
-            // Quoted string ('...', "...") or quoted identifier (`...`).
-            if ($char === "'" || $char === '"' || $char === '`') {
-                $current .= $char;
-                $i++;
-                while ($i < $length) {
-                    $c = $sql[$i];
-                    $current .= $c;
-                    // Backslash escape (MySQL string literals; not for backtick identifiers).
-                    if ($c === '\\' && $char !== '`' && $i + 1 < $length) {
-                        $current .= $sql[$i + 1];
-                        $i += 2;
-                        continue;
-                    }
-                    if ($c === $char) {
-                        // A doubled quote is an escaped quote, not a terminator.
-                        if (($sql[$i + 1] ?? '') === $char) {
-                            $current .= $char;
-                            $i += 2;
-                            continue;
-                        }
-                        $i++;
-                        break;
-                    }
-                    $i++;
-                }
-                continue;
-            }
-
-            if ($char === ';') {
-                $statements[] = $current;
-                $current = '';
-                $i++;
-                continue;
-            }
-
-            $current .= $char;
-            $i++;
-        }
-
-        $statements[] = $current;
-
-        return array_values(array_filter(
-            array_map(trim(...), $statements),
-            static fn(string $statement): bool => $statement !== '',
-        ));
+        return \Maho\Db\Sql\StatementSplitter::split($sql, $engine);
     }
 
     private function createTempMySQLConfig(

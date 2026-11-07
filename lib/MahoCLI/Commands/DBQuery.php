@@ -64,7 +64,7 @@ class DBQuery extends BaseMahoCommand
                     $binary !== '' ? $binary : $engine,
                 ));
             }
-            return $this->executeViaAdapter($output, $query, $this->isClientBinaryAvailable($engine));
+            return $this->executeViaAdapter($output, $query, $engine, $this->isClientBinaryAvailable($engine));
         }
 
         return match ($engine) {
@@ -75,12 +75,16 @@ class DBQuery extends BaseMahoCommand
         };
     }
 
-    private function executeViaAdapter(OutputInterface $output, string $query, bool $clientAvailable): int
-    {
+    private function executeViaAdapter(
+        OutputInterface $output,
+        string $query,
+        string $engine,
+        bool $clientAvailable,
+    ): int {
         // query() runs a single statement, so trailing statements in a multi-statement string
         // would be silently dropped. Refuse them and point to a path that actually works here:
         // the native client only when its binary exists, otherwise one statement per call.
-        if ($this->containsMultipleStatements($query)) {
+        if ($this->containsMultipleStatements($query, $engine)) {
             $hint = $clientAvailable
                 ? 'run them with --driver=client or db:connect.'
                 : 'run each statement in a separate db:query call '

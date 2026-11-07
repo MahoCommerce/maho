@@ -1289,53 +1289,7 @@ class Sqlite extends AbstractPdoAdapter
      */
     protected function _splitMultiQuery(string $sql): array
     {
-        $parts = preg_split(
-            '#(;|\'|"|\\\\|//|--|\n|/\*|\*/)#',
-            $sql,
-            -1,
-            PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE,
-        );
-
-        $q = false;
-        $c = false;
-        $stmts = [];
-        $s = '';
-
-        foreach ($parts as $i => $part) {
-            if (($part === "'" || $part === '"') && ($i === 0 || $parts[$i - 1] !== '\\')) {
-                if ($q === false) {
-                    $q = $part;
-                } elseif ($q === $part) {
-                    $q = false;
-                }
-            }
-
-            if (($part === '//' || $part === '--') && ($i === 0 || $parts[$i - 1] === "\n")) {
-                $c = $part;
-            } elseif ($part === "\n" && ($c === '//' || $c === '--')) {
-                $c = false;
-            }
-
-            if ($part === '/*' && $c === false) {
-                $c = '/*';
-            } elseif ($part === '*/' && $c === '/*') {
-                $c = false;
-            }
-
-            if ($part === ';' && $q === false && $c === false) {
-                if (trim($s) !== '') {
-                    $stmts[] = trim($s);
-                    $s = '';
-                }
-            } else {
-                $s .= $part;
-            }
-        }
-        if (trim($s) !== '') {
-            $stmts[] = trim($s);
-        }
-
-        return $stmts;
+        return \Maho\Db\Sql\StatementSplitter::split($sql, 'sqlite');
     }
 
     /**
