@@ -261,6 +261,18 @@ describe('Configurable Setup, Setup', function (): void {
         expect($same['json']['childProductIds'])->toEqualCanonicalizing($this->childIds);
     });
 
+    it('rejects a malformed setup request', function (string $key, mixed $value): void {
+        $response = apiPut("/api/rest/v2/products/{$this->configurableId}/configurable", [$key => $value], $this->token);
+
+        expect($response['status'])->toBe(400);
+        expect(configurableSetupSuperAttributeRows($this->configurableId))->toBe(0);
+    })->with([
+        'a super attribute that is not a code' => ['superAttributes', [['color']]],
+        'super attributes that are not a list' => ['super_attributes', 'color'],
+        'a child id that is not a number' => ['childProductIds', ['abc']],
+        'child ids that are not a list' => ['child_product_ids', 'x'],
+    ]);
+
     it('saves no super attribute when the children cannot be assigned', function (): void {
         $response = apiPut("/api/rest/v2/products/{$this->configurableId}/configurable", [
             'superAttributes' => [$this->code],

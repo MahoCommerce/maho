@@ -13,11 +13,11 @@ namespace Mage\Catalog\Api;
 use ApiPlatform\Metadata\DeleteOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Post;
-use Mage;
 use Mage_Catalog_Model_Product;
 use Mage_Catalog_Model_Product_Type;
 use Maho\ApiPlatform\Trait\ProductLoaderTrait;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
@@ -80,41 +80,18 @@ final class ConfigurableSetupProcessor extends \Maho\ApiPlatform\Processor
     private function handleSetup(int $productId, array $body): ConfigurableSetup
     {
         $product = $this->loadProductForWrite($productId, $this->requireUser(), Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE);
-        /** @var \Mage_Catalog_Model_Product_Type_Configurable $typeInstance */
-        $typeInstance = $product->getTypeInstance(true);
 
         $needsSave = false;
 
         // Set super attributes if provided and none exist yet
         $superAttributes = $body['superAttributes'] ?? $body['super_attributes'] ?? [];
         if (!empty($superAttributes)) {
-            $attributeIds = [];
-            foreach ($superAttributes as $code) {
-                $attribute = Mage::getSingleton('eav/config')
-                    ->getAttribute('catalog_product', $code);
-                if (!$attribute || !$attribute->getId()) {
-                    throw new UnprocessableEntityHttpException("Attribute not found: {$code}");
-                }
-                $attributeIds[$code] = (int) $attribute->getId();
-            }
-
-            $existingAttributeIds = array_map(
-                intval(...),
-                $typeInstance->getConfigurableAttributeCollection($product)->getColumnValues('attribute_id'),
-            );
-
-            if (empty($existingAttributeIds)) {
-                $setAttributes = $typeInstance->getSetAttributes($product);
+            $attributeIds = ConfigurableSuperAttributes::resolve($product, $superAttributes);
+            $savedIds = ConfigurableSuperAttributes::saved($product);
+            if ($savedIds === []) {
                 $superAttributeData = [];
                 $position = 0;
-                foreach ($attributeIds as $code => $attributeId) {
-                    // The configurable reads only the attributes of its attribute set that can be configurable
-                    $setAttribute = $setAttributes[$code] ?? null;
-                    if (!$setAttribute instanceof \Mage_Eav_Model_Entity_Attribute || !$typeInstance->canUseAttribute($setAttribute)) {
-                        throw new UnprocessableEntityHttpException(
-                            "Attribute {$code} cannot configure products of this attribute set",
-                        );
-                    }
+                foreach ($attributeIds as $attributeId) {
                     $superAttributeData[] = [
                         'attribute_id' => $attributeId,
                         'position' => $position++,
@@ -124,22 +101,14 @@ final class ConfigurableSetupProcessor extends \Maho\ApiPlatform\Processor
                 $product->setCanSaveConfigurableAttributes(true);
                 $needsSave = true;
             } else {
-                // As in the admin, the super attributes of a configurable product cannot change once saved
-                $requested = array_values($attributeIds);
-                sort($requested);
-                sort($existingAttributeIds);
-                if ($requested !== $existingAttributeIds) {
-                    throw new UnprocessableEntityHttpException(
-                        'The configurable product already has other super attributes, which cannot be changed',
-                    );
-                }
+                ConfigurableSuperAttributes::assertUnchanged($attributeIds, $savedIds);
             }
         }
 
         $childProductIds = $body['childProductIds'] ?? $body['child_product_ids'] ?? [];
         if (!empty($childProductIds)) {
             $childData = [];
-            foreach (array_map(intval(...), $childProductIds) as $childId) {
+            foreach (self::childIds($childProductIds) as $childId) {
                 $this->authorizeAssociatedProductWebsites($childId);
                 $childData[$childId] = [];
             }
@@ -192,6 +161,26 @@ final class ConfigurableSetupProcessor extends \Maho\ApiPlatform\Processor
         $this->safeSave($product, 'remove configurable child');
 
         return null;
+    }
+
+    /**
+     * @return list<int>
+     * @throws BadRequestHttpException when $ids is not a list of product ids
+     */
+    private static function childIds(mixed $ids): array
+    {
+        if (!is_array($ids) || !array_is_list($ids)) {
+            throw new BadRequestHttpException('childProductIds must be a list of product ids');
+        }
+        $childIds = [];
+        foreach ($ids as $id) {
+            $childId = filter_var($id, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+            if ($childId === false) {
+                throw new BadRequestHttpException('childProductIds must be a list of product ids');
+            }
+            $childIds[] = $childId;
+        }
+        return $childIds;
     }
 
     /**
