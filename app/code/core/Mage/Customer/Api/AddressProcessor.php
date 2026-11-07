@@ -291,6 +291,15 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
                 $address->setData($field, $value === '' ? null : $value);
             }
         }
+
+        // A new address gets the required attributes of its form, as in the address book
+        if ($data->customAttributes !== null || !$address->getId()) {
+            CustomAttributes::apply(
+                $address,
+                $this->hasBackendAccess('addresses') ? 'adminhtml_customer_address' : 'customer_address_edit',
+                $data->customAttributes ?? [],
+            );
+        }
     }
 
     /**
@@ -323,6 +332,7 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
         $addressDto->company = $args['company'] ?? null;
         $addressDto->isDefaultBilling = $args['isDefaultBilling'] ?? false;
         $addressDto->isDefaultShipping = $args['isDefaultShipping'] ?? false;
+        $addressDto->customAttributes = $args['customAttributes'] ?? null;
 
         return $this->createAddress($addressDto, $customer);
     }
@@ -333,7 +343,7 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
     private function handleGraphQlUpdate(array $context): Address
     {
         $args = $context['args']['input'] ?? [];
-        $addressId = (int) ($args['id'] ?? 0);
+        $addressId = $this->parseGraphQlId($args['id'] ?? null);
 
         if (!$addressId) {
             throw new UnprocessableEntityHttpException('Address ID is required');
@@ -354,6 +364,8 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
 
         // Build Address DTO from existing data + GraphQL args (partial update)
         $addressDto = Address::fromCustomerAddress($existingAddress, $customer);
+        // Without the argument the stored values stay: apply() would check them against the form of the current group
+        $addressDto->customAttributes = $args['customAttributes'] ?? null;
         if (isset($args['firstName'])) {
             $addressDto->firstname = $args['firstName'];
         }
@@ -400,7 +412,7 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
     private function handleGraphQlDelete(array $context): void
     {
         $args = $context['args']['input'] ?? [];
-        $addressId = (int) ($args['id'] ?? 0);
+        $addressId = $this->parseGraphQlId($args['id'] ?? null);
 
         if (!$addressId) {
             throw new UnprocessableEntityHttpException('Address ID is required');

@@ -107,6 +107,8 @@
                 </div>
             </li>
             <?php endif ?>
+            <?= $this->getLayout()->createBlock('customer/form_attributes')
+                ->setCustomerForm('customer_address_edit', $this->getAddress())->toHtml() ?>
             <li<?php if ($this->canSetAsDefaultBilling()) {
             echo ' class="control"';
             } ?>>

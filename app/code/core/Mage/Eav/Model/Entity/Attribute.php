@@ -196,6 +196,106 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
     }
 
     /**
+     * Return the settings of the admin pages that manage the attributes of this entity type,
+     * or null when System > Attributes does not manage the type.
+     *
+     * The module of the entity type gives them, and declares the menu entry and the ACL resource
+     * in its own adminhtml.xml.
+     */
+    public function getAdminPageSettings(): ?Mage_Eav_Model_Entity_Attribute_AdminPageSettings
+    {
+        return null;
+    }
+
+    /**
+     * Return a text that the edit page of this attribute shows above the properties, or null for no text.
+     * Each line of the text is a paragraph.
+     */
+    public function getAttributeNote(): ?string
+    {
+        return null;
+    }
+
+    /**
+     * Return a text that the edit page of $set shows above the groups, or null for no text.
+     * Each line of the text is a paragraph.
+     */
+    public function getSetNote(Mage_Eav_Model_Entity_Attribute_Set $set): ?string
+    {
+        return null;
+    }
+
+    /**
+     * Return the question that the edit page of $set asks before it deletes the set.
+     *
+     * The records of the set move to the default set. The nightly eav_clean_orphaned_records job
+     * then deletes their values of the attributes that are not in the default set, so the
+     * question names those attributes.
+     */
+    public function getSetDeleteQuestion(Mage_Eav_Model_Entity_Attribute_Set $set): string
+    {
+        $helper = Mage::helper('eav');
+        $labels = Mage::getResourceSingleton('eav/entity_attribute_set')->getMissingAttributeLabels(
+            (int) $set->getId(),
+            (int) $this->getEntityType()->getDefaultAttributeSetId(),
+        );
+
+        $text = $helper->__('The records of this set will move to the default set.');
+        if ($labels) {
+            $text .= ' ' . $helper->__('They will lose their values of the attributes that are not in the default set: %s.', implode(', ', $labels));
+        }
+        return $text . ' ' . $helper->__('Delete the set?');
+    }
+
+    /**
+     * Turn the posted values of the admin attribute form into the data of this attribute.
+     * The attribute is loaded when it exists.
+     */
+    public function prepareAdminData(array $data): array
+    {
+        return $data;
+    }
+
+    /**
+     * Save the posted values of the admin attribute form that the attribute does not save itself.
+     */
+    public function saveAdminData(array $data): void {}
+
+    /**
+     * Return the input types that the admin offers for the entity type of this attribute.
+     *
+     * The key is the input code. Each type has a label, and can name a backend_model, a
+     * source_model and a frontend_model. The event eav_attribute_input_types_prepare lets a
+     * module add or remove a type.
+     *
+     * @return array<string, array{label: string, backend_model?: string, source_model?: string, frontend_model?: string}>
+     */
+    public function getInputTypes(): array
+    {
+        $types = new \Maho\DataObject($this->_getInputTypes());
+        Mage::dispatchEvent('eav_attribute_input_types_prepare', [
+            'attribute' => $this,
+            'entity_type_code' => $this->getEntityType()->getEntityTypeCode(),
+            'types' => $types,
+        ]);
+        return $types->getData();
+    }
+
+    /**
+     * @return array<string, array{label: string, backend_model?: string, source_model?: string, frontend_model?: string}>
+     */
+    protected function _getInputTypes(): array
+    {
+        $types = [];
+        foreach (Mage::getModel('eav/adminhtml_system_config_source_inputtype')->toOptionArray() as $option) {
+            $types[$option['value']] = ['label' => $option['label']];
+        }
+        $types['boolean']['source_model'] = 'eav/entity_attribute_source_boolean';
+        $types['multiselect']['backend_model'] = 'eav/entity_attribute_backend_array';
+        return $types;
+    }
+
+    /**
      * Detect backend storage type using frontend input type
      *
      * @return string backend_type field value
@@ -206,7 +306,7 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
         $field = null;
         $field = match ($type) {
             'text', 'gallery', 'media_image', 'file' => 'varchar',
-            'image', 'textarea', 'multiselect' => 'text',
+            'image', 'textarea', 'multiselect', 'multiline' => 'text',
             'date' => 'datetime',
             'select', 'boolean' => 'int',
             'price' => 'decimal',

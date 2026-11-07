@@ -167,3 +167,56 @@ it('places a customer cart with the account email that the customer changed afte
         Mage::unregister('isSecureArea');
     }
 });
+
+it('copies the custom attributes of the addresses in the place-order body to the order', function (): void {
+    $code = 'pest_place_floor_2' . substr(uniqid(), -5);
+    $attribute = Mage::getModel('customer/attribute')->setData([
+        'entity_type_id' => (int) Mage::getSingleton('eav/config')->getEntityType('customer_address')->getId(),
+        'attribute_code' => $code,
+        'backend_type' => 'varchar',
+        'frontend_input' => 'text',
+        'frontend_label' => 'Floor',
+        'is_user_defined' => 1,
+        'is_visible' => 1,
+        'is_system' => 0,
+        'used_in_forms' => ['customer_address_edit', 'adminhtml_customer_address'],
+    ]);
+    $attribute->save();
+    Mage::app()->cleanCache();
+    Mage::getSingleton('eav/config')->clear();
+
+    try {
+        $token = customerToken();
+        $cartId = (int) apiPost('/api/rest/v2/carts', [], $token)['json']['id'];
+        trackCreated('quote', $cartId);
+        expect(apiPost("/api/rest/v2/carts/{$cartId}/items", ['sku' => $this->sku, 'qty' => 1], $token)['status'])->toBeIn([200, 201]);
+
+        $refusedBody = guestPlaceBody();
+        $refusedBody['shippingAddress']['customAttributes'] = ['pest_not_an_attribute' => 'x'];
+        $refused = apiPost("/api/rest/v2/carts/{$cartId}/place-order", $refusedBody, $token);
+
+        $body = guestPlaceBody();
+        $body['shippingAddress']['customAttributes'] = [$code => '4th'];
+        $body['billingAddress']['customAttributes'] = [$code => 'Ground'];
+        $response = apiPost("/api/rest/v2/carts/{$cartId}/place-order", $body, $token);
+        expect($response['status'])->toBeIn([200, 201]);
+        $order = Mage::getModel('sales/order')->loadByIncrementId((string) $response['json']['incrementId']);
+        $this->orderIds[] = (int) $order->getId();
+
+        expect($refused['status'])->toBe(422)
+            ->and($order->getShippingAddress()->getData($code))->toBe('4th')
+            ->and($order->getBillingAddress()->getData($code))->toBe('Ground');
+    } finally {
+        $attribute->delete();
+        $resource = Mage::getSingleton('core/resource');
+        $write = $resource->getConnection('core_write');
+        foreach (['sales/quote_address', 'sales/order_address'] as $table) {
+            $table = $resource->getTableName($table);
+            if ($write->tableColumnExists($table, $code)) {
+                $write->dropColumn($table, $code);
+            }
+            $write->resetDdlCache($table);
+        }
+        Mage::app()->cleanCache();
+    }
+});

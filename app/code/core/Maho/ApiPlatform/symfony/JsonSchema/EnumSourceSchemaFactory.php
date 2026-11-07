@@ -1,7 +1,8 @@
 <?php
 
 /**
- * Fills the enum of every property that names an EnumSource, in the JSON and MCP schemas.
+ * Fills the enum of every property that names an EnumSource, and the attributes of every
+ * customAttributes map that names a CustomAttributeSchema source, in the JSON and MCP schemas.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -18,6 +19,7 @@ use ApiPlatform\JsonSchema\SchemaFactoryInterface;
 use ApiPlatform\Metadata\Exception\PropertyNotFoundException;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Property\Factory\PropertyMetadataFactoryInterface;
+use Maho\ApiPlatform\Metadata\CustomAttributeSchema;
 use Maho\ApiPlatform\Metadata\EnumSource;
 
 /**
@@ -133,6 +135,12 @@ final class EnumSourceSchemaFactory implements SchemaFactoryInterface, SchemaFac
     private function withEnums(string $class, array|\ArrayObject $properties): array|\ArrayObject
     {
         foreach ($properties as $property => $propertySchema) {
+            $customAttributes = $this->customAttributeSchemaFor($class, (string) $property);
+            if ($customAttributes !== null) {
+                $description = ($propertySchema instanceof \ArrayObject ? $propertySchema->getArrayCopy() : (array) $propertySchema)['description'] ?? null;
+                $properties[$property] = $customAttributes + ($description === null ? [] : ['description' => $description]);
+                continue;
+            }
             $values = $this->enumFor($class, (string) $property);
             if ($values === null) {
                 continue;
@@ -217,6 +225,26 @@ final class EnumSourceSchemaFactory implements SchemaFactoryInterface, SchemaFac
         }
 
         return $this->enums[$key];
+    }
+
+    /** @var array<string, array<string, mixed>|null> */
+    private array $customAttributeSchemas = [];
+
+    /**
+     * @return array<string, mixed>|null null when the property names no CustomAttributeSchema source
+     */
+    private function customAttributeSchemaFor(string $class, string $property): ?array
+    {
+        $key = $class . '::' . $property;
+        if (!array_key_exists($key, $this->customAttributeSchemas)) {
+            try {
+                $source = $this->propertyMetadataFactory->create($class, $property)->getExtraProperties()[CustomAttributeSchema::KEY] ?? null;
+            } catch (PropertyNotFoundException) {
+                $source = null;
+            }
+            $this->customAttributeSchemas[$key] = is_string($source) ? CustomAttributeSchema::schema($source) : null;
+        }
+        return $this->customAttributeSchemas[$key];
     }
 
     /**

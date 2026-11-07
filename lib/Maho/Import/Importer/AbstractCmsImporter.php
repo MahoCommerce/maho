@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Shared handling of store lists and content files for CMS pages, CMS blocks and blog posts.
+ * Shared handling of store lists, content files and custom field values for CMS pages, CMS blocks and blog posts.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -57,5 +57,36 @@ abstract class AbstractCmsImporter extends AbstractImporter
         $ids = $this->at($file, $line, fn() => $this->resolver->storeIds($row['stores'] ?? ''));
         sort($ids);
         return array_values(array_unique($ids));
+    }
+
+    /**
+     * Return the stored value of $value, checked as the API checks it. A select, a multiselect or a
+     * boolean takes option labels, and a multiselect separates them with commas.
+     */
+    protected function customValue(CsvFile $file, int $line, \Mage_Eav_Model_Entity_Attribute_Abstract $attribute, string $value): string
+    {
+        if (in_array($attribute->getFrontendInput(), ['select', 'multiselect', 'boolean'], true)) {
+            $ids = [];
+            foreach (array_map(trim(...), explode(',', $value)) as $label) {
+                $id = $attribute->getSource()->getOptionId($label);
+                if ($id === null || $id === '') {
+                    $this->fail($file, $line, "'$label' is not an option of {$attribute->getAttributeCode()}");
+                }
+                $ids[] = (string) $id;
+            }
+            $value = implode(',', $ids);
+        } elseif ($attribute->getFrontendInput() === 'date') {
+            // The page save takes any date that the locale reads, so the file can too
+            try {
+                $value = (string) \Mage::app()->getLocale()->formatDateForDb($value, withTime: false);
+            } catch (\Exception) {
+                $this->fail($file, $line, "'$value' is not a date for {$attribute->getAttributeCode()}");
+            }
+        }
+        $message = \Maho\ApiPlatform\Service\CustomAttributes::check($attribute, $value);
+        if ($message !== null) {
+            $this->fail($file, $line, $message);
+        }
+        return $value;
     }
 }

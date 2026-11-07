@@ -93,3 +93,56 @@ it('rejects a bad url key, a missing store list and a bad date', function (): vo
     expect(fn() => $importer->validate($path))->toThrow(RowException::class, 'publish_date');
     unlink($path);
 });
+
+it('imports a user-defined attribute by option label and the attribute set by name', function (): void {
+    $type = Mage::getSingleton('eav/config')->getEntityType(Maho_Blog_Model_Post::ENTITY);
+    $code = 'imp_level_' . substr(uniqid(), -6);
+    $setId = (int) $type->getDefaultAttributeSetId();
+    $attribute = Mage::getModel('blog/resource_eav_attribute')->setData([
+        'entity_type_id' => (int) $type->getId(),
+        'attribute_set_id' => $setId,
+        'attribute_group_id' => (int) Mage::getResourceModel('eav/entity_attribute_group_collection')
+            ->setAttributeSetFilter($setId)
+            ->getFirstItem()
+            ->getId(),
+        'attribute_code' => $code,
+        'backend_type' => 'int',
+        'frontend_input' => 'select',
+        'source_model' => 'eav/entity_attribute_source_table',
+        'frontend_label' => 'Level',
+        'is_user_defined' => 1,
+        'is_global' => 1,
+        'option' => ['value' => ['o1' => ['Beginner'], 'o2' => ['Expert']], 'order' => ['o1' => 1, 'o2' => 2]],
+    ]);
+    $attribute->save();
+    Mage::getSingleton('eav/config')->clear();
+
+    $store = Mage::app()->getStore(1)->getCode();
+    $contentDir = sys_get_temp_dir() . '/imp-blog-' . uniqid();
+    mkdir($contentDir);
+    file_put_contents($contentDir . '/post.html', '<p>Body</p>');
+    $options = [AbstractCmsImporter::OPTION_CONTENT_DIR => $contentDir];
+    $path = blogCsv([
+        ['url_key', 'stores', 'title', 'content_file', 'attribute_set', $code],
+        ['imp-level', $store, 'Imp Level', 'post.html', 'Default', 'Expert'],
+    ]);
+    $badPath = blogCsv([
+        ['url_key', 'stores', 'title', 'content_file', $code],
+        ['imp-level-bad', $store, 'Imp Bad', 'post.html', 'Master'],
+    ]);
+
+    try {
+        expect((new BlogPosts())->import($path, $options)->created)->toBe(1);
+        $post = Mage::getModel('blog/post')->load(Mage::getModel('blog/post')->getPostIdByUrlKey('imp-level', 1));
+        expect($attribute->getSource()->getOptionText($post->getData($code)))->toBe('Expert')
+            ->and($post->getAttributeSetId())->toBe((int) $type->getDefaultAttributeSetId())
+            ->and(fn() => (new BlogPosts())->validate($badPath, $options))->toThrow(RowException::class);
+    } finally {
+        $attribute->delete();
+        Mage::getSingleton('eav/config')->clear();
+        unlink($path);
+        unlink($badPath);
+        unlink($contentDir . '/post.html');
+        rmdir($contentDir);
+    }
+});

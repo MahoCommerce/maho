@@ -284,6 +284,7 @@ return function (SchemaEditor $schema): void {
             ->addColumn(Schema::column('vat_request_id', Types::TEXT, length: 65535, notNull: false))
             ->addColumn(Schema::column('vat_request_date', Types::TEXT, length: 65535, notNull: false))
             ->addColumn(Schema::column('vat_request_success', Types::SMALLINT, notNull: false))
+            ->addColumn(Schema::column('custom_attribute_labels', Types::TEXT, length: 65535, notNull: false, comment: 'Labels of the custom address attribute options, as JSON'))
             ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create())
             ->addIndex(Index::editor()->setUnquotedColumnNames('parent_id'))
             ->addForeignKeyConstraint(

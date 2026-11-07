@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace Mage\Catalog\Api;
 
+use Maho\ApiPlatform\Metadata\CustomAttributeSchema;
 use ApiPlatform\Metadata\ApiProperty;
 use Maho\ApiPlatform\Metadata\EnumSource;
 use Maho\ApiPlatform\Metadata\ValueLists;
@@ -496,13 +497,9 @@ class Product extends CrudResource
     #[ApiProperty(description: 'Tax class ID', extraProperties: [EnumSource::KEY => 'tax/class_source_product', 'modelField' => 'tax_class_id'])]
     public ?int $taxClassId = null;
 
-    /** @var array<string, mixed>|null Arbitrary EAV attributes to set: {"attribute_code": value} (write only) */
-    #[ApiProperty(description: 'Arbitrary EAV attributes to set: {"attribute_code": value}', readable: false)]
-    public ?array $customAttributesWrite = null;
-
-    /** @var array<string, mixed>|null User-defined EAV attribute values keyed by attribute_code (read counterpart of customAttributesWrite) */
+    /** @var array<string, mixed>|null EAV attribute values keyed by attribute_code */
     #[Groups(['product:detail'])]
-    #[ApiProperty(description: 'User-defined EAV attribute values keyed by attribute_code; only visible to admin and API tokens', writable: false, security: "has_backend_access('products')", extraProperties: ['computed' => true])]
+    #[ApiProperty(description: 'Values of the user-defined attributes without a dedicated field, keyed by attribute code. A write takes the attributes of the attribute set of the product. A multiselect is a list of option IDs, a dropdown an option ID, a Yes/No a boolean, a date Y-m-d. GET /product-attributes lists the attributes and their options. Admin and API tokens only', security: "has_backend_access('products')", extraProperties: [CustomAttributeSchema::KEY => 'Mage\Catalog\Api\Product::customAttributeDefinitions', 'computed' => true])]
     public ?array $customAttributes = null;
 
     /** @var array<string, mixed>|null Full inventory settings keyed by cataloginventory_stock_item column */
@@ -635,6 +632,26 @@ class Product extends CrudResource
             }
         }
         return $codes;
+    }
+
+    /**
+     * Return the attributes of customAttributes: the user-defined product attributes without a
+     * dedicated field, keyed by code. With $product, only those of its attribute set.
+     *
+     * @return array<string, \Mage_Eav_Model_Entity_Attribute_Abstract>
+     */
+    public static function customAttributeDefinitions(?\Mage_Catalog_Model_Product $product = null): array
+    {
+        $dedicated = self::dedicatedAttributeCodes();
+        $attributes = $product ? $product->getAttributes() : \Mage::getSingleton('eav/config')->getAttributes(\Mage_Catalog_Model_Product::ENTITY);
+        $result = [];
+        foreach ($attributes as $attribute) {
+            $code = (string) $attribute->getAttributeCode();
+            if ($attribute->getIsUserDefined() && !isset($dedicated[$code])) {
+                $result[$code] = $attribute;
+            }
+        }
+        return $result;
     }
 
     /**

@@ -722,6 +722,7 @@
 "The address total model should be extended from Mage_Sales_Model_Quote_Address_Total_Abstract.","The address total model should be extended from Mage_Sales_Model_Quote_Address_Total_Abstract."
 "The billing agreement ""%s"" has been canceled.","The billing agreement ""%s"" has been canceled."
 "The billing agreement ""%s"" has been created.","The billing agreement ""%s"" has been created."
+"The code ""%s"" is a column of the order addresses. Use another code.","The code ""%s"" is a column of the order addresses. Use another code."
 "The coupon code has been accepted.","The coupon code has been accepted."
 "the credit memo email is not sent","the credit memo email is not sent"
 "the credit memo email was sent","the credit memo email was sent"
