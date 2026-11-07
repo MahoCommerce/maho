@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace Maho\ApiPlatform\EventListener;
 
+use Maho\ApiPlatform\Http\RequestInput;
 use Maho\ApiPlatform\Security\ApiUser;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\Request;
@@ -243,8 +244,11 @@ class IdempotencyListener
         }
 
         try {
-            $envelope = (array) \Mage::helper('core')->jsonDecode((string) $request->getContent());
-        } catch (\JsonException) {
+            $envelope = RequestInput::decode($request);
+        } catch (BadRequestHttpException) {
+            return $path;
+        }
+        if ($envelope === []) {
             return $path;
         }
 

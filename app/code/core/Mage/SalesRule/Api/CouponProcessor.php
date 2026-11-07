@@ -12,6 +12,7 @@ namespace Mage\SalesRule\Api;
 
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Operation;
+use Maho\ApiPlatform\Http\RequestInput;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
@@ -82,11 +83,8 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
 
     private function doValidateFromRest(array $context): Coupon
     {
-        $body = $this->parseRequestBody($context['request'] ?? null);
-        return $this->doValidate(
-            $body['code'] ?? '',
-            isset($body['cartId']) ? (int) $body['cartId'] : null,
-        );
+        $input = RequestInput::of($this->parseRequestBody($context['request'] ?? null));
+        return $this->doValidate($input->string('code') ?? '', $input->int('cartId'));
     }
 
     private function doCreate(array $data): Coupon

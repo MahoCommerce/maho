@@ -18,6 +18,7 @@ declare(strict_types=1);
 namespace Maho\ApiPlatform\Controller;
 
 use Mage;
+use Maho\ApiPlatform\Http\RequestInput;
 use Maho_ApiPlatform_Model_Oauth_Exception as OauthException;
 use Maho_ApiPlatform_Model_Oauth_Server as OauthServer;
 use Maho\ApiPlatform\Security\AdminSessionAuthenticator;
@@ -26,6 +27,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 
 class OAuthController
@@ -110,7 +112,7 @@ class OAuthController
         $params += $this->readBasicAuth($request);
 
         try {
-            $result = match ((string) ($params['grant_type'] ?? '')) {
+            $result = match ($this->stringParam($params, 'grant_type')) {
                 \Maho_ApiPlatform_Model_Oauth_Client::GRANT_AUTHORIZATION_CODE => $this->server()->exchangeAuthorizationCode($params),
                 \Maho_ApiPlatform_Model_Oauth_Client::GRANT_REFRESH_TOKEN => $this->server()->exchangeRefreshToken($params),
                 default => throw new OauthException(
@@ -141,8 +143,8 @@ class OAuthController
         }
 
         try {
-            $metadata = (array) Mage::helper('core')->jsonDecode($request->getContent() ?: '{}');
-        } catch (\JsonException) {
+            $metadata = RequestInput::decode($request);
+        } catch (BadRequestHttpException) {
             return $this->error(OauthException::ERROR_INVALID_CLIENT_METADATA, 'Request body must be JSON');
         }
 
@@ -258,12 +260,10 @@ class OAuthController
         }
 
         try {
-            $decoded = Mage::helper('core')->jsonDecode($request->getContent() ?: '{}');
-        } catch (\JsonException) {
+            return RequestInput::decode($request);
+        } catch (BadRequestHttpException) {
             return [];
         }
-
-        return is_array($decoded) ? $decoded : [];
     }
 
     /**
@@ -297,15 +297,13 @@ class OAuthController
     /**
      * A query string can carry an array where a string belongs (`?state[]=x`),
      * and casting one to string raises a warning that developer mode turns into
-     * an exception.
+     * an exception. Anything but a string or a number is simply absent.
      *
      * @param array<string, mixed> $params
      */
     private function stringParam(array $params, string $key): string
     {
-        $value = $params[$key] ?? null;
-
-        return is_scalar($value) ? (string) $value : '';
+        return RequestInput::toString($params[$key] ?? null) ?? '';
     }
 
     private function error(string $error, string $description, int $status = 400): JsonResponse

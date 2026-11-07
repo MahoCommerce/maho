@@ -128,7 +128,7 @@ final class ConfigurableSetupProcessor extends \Maho\ApiPlatform\Processor
     {
         $product = $this->loadProductForWrite($productId, $this->requireUser(), Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE);
 
-        $childId = (int) ($body['childProductId'] ?? $body['child_product_id'] ?? $body['childId'] ?? 0);
+        $childId = \Maho\ApiPlatform\Http\RequestInput::of($body)->int('childProductId', 'child_product_id', 'childId') ?? 0;
         if ($childId <= 0) {
             throw new UnprocessableEntityHttpException('childProductId is required and must be positive');
         }

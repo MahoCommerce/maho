@@ -71,6 +71,7 @@ describe('Request body types', function (): void {
         'an image URL that is a list' => ['POST', '/api/rest/v2/products/{id}/media', ['imageUrl' => ['x']], ['products/write'], 'imageUrl', 'The type of the "imageUrl" attribute must be "string", "array" given.'],
         'a linked product id that is a list' => ['POST', '/api/rest/v2/products/{id}/links/related', ['linked_product_id' => [1]], ['products/write'], 'linked_product_id', 'The type of the "linked_product_id" attribute must be "int", "array" given.'],
         'a bulk stock quantity that is a word' => ['PUT', '/api/rest/v2/inventory/bulk', ['items' => [['sku' => '{sku}', 'qty' => 'abc']]], ['inventory/write'], 'items[0].qty', 'The type of the "items[0].qty" attribute must be "float", "string" given.'],
+        'a coupon cart id that is a list' => ['POST', '/api/rest/v2/coupons/validate', ['code' => 'PEST-NONE', 'cartId' => [1]], [], 'cartId', 'The type of the "cartId" attribute must be "int", "array" given.'],
         'bulk stock items that are not a list' => ['PUT', '/api/rest/v2/inventory/bulk', ['items' => 'x'], ['inventory/write'], 'items', 'The type of the "items" attribute must be "list", "string" given.'],
     ]);
 

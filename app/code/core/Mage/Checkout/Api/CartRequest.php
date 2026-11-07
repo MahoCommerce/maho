@@ -72,7 +72,7 @@ final class CartRequest
         // caller.
         $cartId = null;
         if (!$isGuestCartRoute) {
-            $cartId = isset($args['cartId']) ? (int) $args['cartId'] : null;
+            $cartId = RequestInput::toInt($args['cartId'] ?? null);
             if (!$cartId && !$maskedId && isset($uriVariables['id'])) {
                 $cartId = (int) $uriVariables['id'];
             }
