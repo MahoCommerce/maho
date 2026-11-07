@@ -168,6 +168,12 @@ $giftcard->refund(
 // Automatically reverts status from "used" to "active" if applicable
 ```
 
+`refund()` reads the current stored balance and status, then writes the credit and
+its history entry in one transaction. It reloads the model after success. Save any
+unrelated pending model changes separately before calling it. Like the debit path,
+it updates the balance directly, so gift card model-save events do not run. History
+model-save events still run.
+
 #### Admin Balance Adjustment
 
 ```php

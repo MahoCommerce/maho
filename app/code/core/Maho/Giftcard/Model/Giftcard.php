@@ -377,32 +377,53 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
      */
     public function refund(float $baseAmount, ?int $orderId = null, ?string $comment = null): self
     {
-        if ($baseAmount <= 0) {
+        if (!is_finite($baseAmount) || $baseAmount <= 0) {
             throw new Mage_Core_Exception('Amount must be greater than zero.');
         }
 
-        $balanceBefore = (float) $this->getBalance();
-        $balanceAfter = $balanceBefore + $baseAmount;
+        $resource = $this->getResource();
+        $write = Mage::getSingleton('core/resource')->getConnection('core_write');
+        $table = $resource->getMainTable();
 
-        // Update balance
-        $this->setBalance($balanceAfter);
+        $resource->beginTransaction();
+        try {
+            $stored = $write->fetchRow(
+                $write->select()
+                    ->from($table, ['balance', 'status'])
+                    ->where('giftcard_id = ?', $this->getId())
+                    ->forUpdate(),
+            );
+            if ($stored === false) {
+                throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('giftcard')->__('Gift card not found.'));
+            }
 
-        // Reactivate if was used
-        if ($this->getStatus() === self::STATUS_USED) {
-            $this->setStatus(self::STATUS_ACTIVE);
+            $balanceBefore = (float) $stored['balance'];
+            $balanceAfter = $balanceBefore + $baseAmount;
+            $data = [
+                'balance' => $balanceAfter,
+                'updated_at' => Mage::app()->getLocale()->formatDateForDb('now'),
+            ];
+            if ($stored['status'] === self::STATUS_USED) {
+                $data['status'] = self::STATUS_ACTIVE;
+            }
+            $write->update($table, $data, ['giftcard_id = ?' => $this->getId()]);
+
+            $this->_addHistory(
+                self::ACTION_REFUNDED,
+                $baseAmount,
+                $balanceBefore,
+                $balanceAfter,
+                $orderId,
+                $comment,
+            );
+
+            $resource->commit();
+        } catch (\Throwable $e) {
+            $resource->rollBack();
+            throw $e;
         }
 
-        $this->save();
-
-        // Record history
-        $this->_addHistory(
-            self::ACTION_REFUNDED,
-            $baseAmount,
-            $balanceBefore,
-            $balanceAfter,
-            $orderId,
-            $comment,
-        );
+        $this->load($this->getId());
 
         return $this;
     }
