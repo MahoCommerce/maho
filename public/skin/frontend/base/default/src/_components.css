@@ -3240,9 +3240,19 @@
             @apply block h-full;
         }
 
+        picture {
+            @apply block;
+        }
+
         img {
             /* Fills the slide when CMS CSS fixes its height; intrinsic ratio otherwise */
             @apply block h-full w-full max-w-none object-cover;
+        }
+
+        /* The image the browser picks among the alternatives keeps its own ratio, so the desktop,
+           tablet and mobile versions of a slide are never cropped into one another's shape */
+        picture img {
+            @apply h-auto w-full max-w-none;
         }
     }
 

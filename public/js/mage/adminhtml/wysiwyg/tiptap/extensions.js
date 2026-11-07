@@ -520,7 +520,74 @@ export const MahoImage = Image.extend({
 
 
 /**
- * Parse a `<div class="slideshow">` node into an array of slides `[{ src, alt, href }, ...]`
+ * Breakpoint bounds of the alternative images. A slide writes `(max-width: Npx)`, so the first
+ * matching <source> wins and the smallest breakpoint must come first in the <picture>.
+ */
+const BREAKPOINT_DEFAULT = 768;
+const BREAKPOINT_MIN = 1;
+const BREAKPOINT_MAX = 9999;
+
+/**
+ * Read the max-width breakpoint of a `<source>`. Returns null when `media` is not a max-width
+ * query, so a variant that the browser would read differently is dropped instead of rewritten.
+ */
+const parseBreakpoint = (media) => {
+    const match = /\(\s*max-width\s*:\s*(\d+)\s*px\s*\)/i.exec(media ?? '');
+    const value = match ? Number(match[1]) : NaN;
+    return Number.isInteger(value) && value >= BREAKPOINT_MIN && value <= BREAKPOINT_MAX ? value : null;
+};
+
+const renderMedia = (breakpoint) => `(max-width: ${breakpoint}px)`;
+
+/**
+ * The URL of a `<source>`. A `srcset` with `x`/`w` descriptors keeps only the first candidate;
+ * a directive is a candidate of its own, spaces included, so it is read up to its closing braces.
+ */
+const sourceUrl = (source) => {
+    const value = (source.getAttribute('srcset') ?? '').trim();
+    if (value.startsWith('{{')) {
+        const end = value.indexOf('}}');
+        return end === -1 ? value : value.slice(0, end + 2);
+    }
+    return value.split(/\s+/)[0];
+};
+
+/** Read a breakpoint as the slide stores it: a whole number in range, or null. */
+const toBreakpoint = (value) => {
+    const number = typeof value === 'string' && value.trim() === '' ? NaN : Number(value);
+    return Number.isInteger(number) && number >= BREAKPOINT_MIN && number <= BREAKPOINT_MAX ? number : null;
+};
+
+/** The breakpoint of a new alternative: the default, or the first free one from a common ladder. */
+const nextBreakpoint = (slide) => {
+    const used = new Set((slide.sources ?? []).map((source) => toBreakpoint(source.breakpoint)));
+    const candidate = [BREAKPOINT_DEFAULT, 480, 991, 1200, 360, 1600].find((value) => !used.has(value));
+    if (candidate !== undefined) {
+        return candidate;
+    }
+    let value = BREAKPOINT_MIN;
+    while (used.has(value)) {
+        value++;
+    }
+    return value;
+};
+
+/**
+ * Read the image that the media browser returns, as a slide stores it: null when the dialog gave
+ * no image back.
+ */
+const parseBrowserImage = (returnValue) => {
+    const src = /src="({{.*?}})"/.exec(returnValue ?? '')?.[1];
+    if (!src) {
+        return null;
+    }
+    const alt = unescapeHtml(/alt="(.*?)"/.exec(returnValue ?? '')?.[1]);
+    return { src, alt, directiveObj: parseDirective(src) };
+};
+
+/**
+ * Parse a `<div class="slideshow">` node into an array of slides
+ * `[{ src, alt, href, directiveObj, sources }, ...]`
  */
 const parseSlides = (div) => {
     // Parse each <li> child and add to our array if it's a valid slide, i.e. contains an image
@@ -529,11 +596,23 @@ const parseSlides = (div) => {
         const img = li.querySelector('img');
         const link = li.querySelector('a');
         if (img) {
+            // The alternatives live in the <source> elements of a <picture> around the fallback <img>
+            const sources = [];
+            for (const source of li.querySelectorAll(':scope > a > picture > source, :scope > picture > source')) {
+                const src = sourceUrl(source);
+                const breakpoint = parseBreakpoint(source.getAttribute('media'));
+                if (src && breakpoint !== null) {
+                    sources.push({ src, breakpoint });
+                }
+            }
+            sources.sort((a, b) => a.breakpoint - b.breakpoint);
+
             slides.push({
                 src: img.getAttribute('src') ?? '',
                 alt: img.getAttribute('alt') ?? '',
                 href: link?.getAttribute('href'),
                 directiveObj: parseDirective(img.getAttribute('src')),
+                sources,
             });
         }
     }
@@ -541,15 +620,29 @@ const parseSlides = (div) => {
 };
 
 /**
- * Render array of slides into a TipTap node object
+ * Render array of slides into a TipTap node object.
+ *
+ * A slide without alternatives renders the same `<li><a><img></a></li>` as before, so existing
+ * content saves byte for byte. With alternatives the `<img>` stays as the fallback for a browser
+ * that ignores `<picture>`.
  */
 const renderSlides = (slides) => {
     return slides.map((slide) => {
-        const { src, alt, href } = slide;
-        const content = href
-              ? ['a', { href }, ['img', { src, alt }]]
-              : ['img', { src, alt }];
+        const { src, alt, href, sources = [] } = slide;
 
+        let media;
+        if (sources.length) {
+            const picture = ['picture', {}];
+            for (const source of [...sources].sort((a, b) => a.breakpoint - b.breakpoint)) {
+                picture.push(['source', { media: renderMedia(source.breakpoint), srcset: source.src }]);
+            }
+            picture.push(['img', { src, alt }]);
+            media = picture;
+        } else {
+            media = ['img', { src, alt }];
+        }
+
+        const content = href ? ['a', { href }, media] : media;
         return ['li', {}, content];
     });
 }
@@ -598,6 +691,9 @@ export const MahoSlideshow = Node.create({
             dom.contentEditable = 'false';
             dom.title = editor.options.wysiwygSetup.translate('Double-click to edit');
 
+            // The preview keeps showing the desktop image only; the flag marks the slides that have alternatives
+            dom.dataset.hasMobile = slides.some((slide) => slide.sources?.length) ? 'true' : 'false';
+
             // Create slide container and show the first slide if it exists
             const slideshow = dom.appendChild(document.createElement('div'));
             slideshow.className = 'slideshow';
@@ -633,7 +729,11 @@ export const MahoSlideshow = Node.create({
         return {
             insertMahoSlideshow: (node) => ({ editor, state }) => {
                 const { from, to } = state.selection;
-                let slides = Array.from(node?.attrs?.slides ?? []);
+                // Deep copy, so that cancelling the dialog leaves the content as it is
+                let slides = (node?.attrs?.slides ?? []).map((slide) => ({
+                    ...slide,
+                    sources: (slide.sources ?? []).map((source) => ({ ...source })),
+                }));
                 let sortableInstance;
 
                 // Create slideshow editor dialog content
@@ -642,6 +742,7 @@ export const MahoSlideshow = Node.create({
                         <ul class="slides-list"></ul>
                     </div>
                 `;
+                const translate = (string) => editor.options.wysiwygSetup.translate(string);
                 const slideTemplate = `
                     <div class="slide-handle">
                         ${editor.options.wysiwygSetup.getIcon('hamburger')}
@@ -652,8 +753,24 @@ export const MahoSlideshow = Node.create({
                     <div class="slide-controls">
                         <input type="text" class="slide-alt" placeholder="Alt text">
                         <input type="text" class="slide-href" placeholder="Link URL (optional)">
+                        <div class="slide-sources"></div>
+                        <button type="button" class="add-source">
+                            ${editor.options.wysiwygSetup.getIcon('plus')}
+                            <span>${translate('Add mobile image')}</span>
+                        </button>
                     </div>
                     <button type="button" class="remove-slide" title="Remove slide">
+                        ${editor.options.wysiwygSetup.getIcon('trash')}
+                    </button>
+                `;
+                const sourceTemplate = `
+                    <img class="source-preview" src="" alt="" title="${translate('Mobile image')}">
+                    <label class="source-breakpoint">
+                        <span>${translate('Breakpoint (px)')}</span>
+                        <input type="number" class="source-breakpoint-input"
+                               min="${BREAKPOINT_MIN}" max="${BREAKPOINT_MAX}" step="1">
+                    </label>
+                    <button type="button" class="remove-source" title="${translate('Remove mobile image')}">
                         ${editor.options.wysiwygSetup.getIcon('trash')}
                     </button>
                 `;
@@ -672,10 +789,29 @@ export const MahoSlideshow = Node.create({
                         const container = dialog.querySelector('.slideshow-editor');
                         const slidesList = container.querySelector('.slides-list');
 
-                        // Render existing slides
-                        const renderSlides = () => {
+                        const addSource = (slide) => {
+                            MediabrowserUtility.openDialog(this.options.browserUrl, null, null, null, {
+                                ok: false, // Disable OK button - use Insert File button or double-click instead
+                                onClose: (dialog) => {
+                                    const image = parseBrowserImage(dialog.returnValue);
+                                    if (!image) {
+                                        if (dialog.returnValue) {
+                                            console.error('Could not parse image from:', dialog.returnValue);
+                                        }
+                                        return;
+                                    }
+                                    slide.sources ??= [];
+                                    slide.sources.push({ src: image.src, breakpoint: nextBreakpoint(slide) });
+                                    renderSlideRows();
+                                },
+                            });
+                        };
+
+                        // Render existing slides. Named apart from the module-level renderSlides,
+                        // which builds the TipTap node.
+                        const renderSlideRows = () => {
                             slidesList.innerHTML = '';
-                            for (const [index, slide] of Object.entries(slides)) {
+                            slides.forEach((slide, index) => {
                                 const li = slidesList.appendChild(document.createElement('li'));
                                 li.className = 'slide-item';
                                 li.dataset.index = index;
@@ -685,18 +821,37 @@ export const MahoSlideshow = Node.create({
                                 li.querySelector('.slide-preview img').src =
                                     renderDirectiveImageUrl(slide.src, slide.directiveObj, this.options.directivesUrl);
 
+                                const sourcesList = li.querySelector('.slide-sources');
+                                (slide.sources ?? []).forEach((source, sourceIndex) => {
+                                    const row = sourcesList.appendChild(document.createElement('div'));
+                                    row.className = 'slide-source';
+                                    row.innerHTML = sourceTemplate;
+                                    row.querySelector('.source-preview').src =
+                                        renderDirectiveImageUrl(source.src, parseDirective(source.src), this.options.directivesUrl);
+                                    row.querySelector('.source-breakpoint-input').value = source.breakpoint ?? '';
+
+                                    row.querySelector('.source-breakpoint-input').addEventListener('change', (event) => {
+                                        slide.sources[sourceIndex].breakpoint = event.target.value;
+                                    });
+                                    row.querySelector('.remove-source').addEventListener('click', () => {
+                                        slide.sources.splice(sourceIndex, 1);
+                                        renderSlideRows();
+                                    });
+                                });
+
                                 // Attach event listeners
                                 li.querySelector('.slide-alt').addEventListener('change', (event) => {
-                                    slides[index].alt = event.target.value
+                                    slide.alt = event.target.value
                                 });
                                 li.querySelector('.slide-href').addEventListener('change', (event) => {
-                                    slides[index].href = event.target.value
+                                    slide.href = event.target.value
                                 });
+                                li.querySelector('.add-source').addEventListener('click', () => addSource(slide));
                                 li.querySelector('.remove-slide').addEventListener('click', () => {
                                     slides.splice(index, 1);
-                                    renderSlides();
+                                    renderSlideRows();
                                 });
-                            }
+                            });
                         };
 
                         // Initialize SortableJS for drag and drop
@@ -713,7 +868,7 @@ export const MahoSlideshow = Node.create({
                                         newSlides.push(slides[oldIndex]);
                                     }
                                     slides = newSlides;
-                                    renderSlides();
+                                    renderSlideRows();
                                 }
                             });
                         };
@@ -723,28 +878,15 @@ export const MahoSlideshow = Node.create({
                                 ok: false, // Disable OK button - use Insert File button or double-click instead
                                 onClose: (dialog) => {
                                     // Handle the actual image insertion after the dialog closes with returnValue
-                                    const returnValue = dialog.returnValue || '';
-
-                                    if (!returnValue) {
-                                        // Dialog was cancelled or no image selected
+                                    const image = parseBrowserImage(dialog.returnValue);
+                                    if (!image) {
+                                        if (dialog.returnValue) {
+                                            console.error('Could not parse image from:', dialog.returnValue);
+                                        }
                                         return;
                                     }
-
-                                    //  Parse out the directive and alt text
-                                    let match;
-                                    match = returnValue.match(/src="({{.*?}})"/);
-                                    const src = match?.[1];
-                                    const directiveObj = parseDirective(src);
-
-                                    match = returnValue.match(/alt="(.*?)"/);
-                                    const alt = unescapeHtml(match?.[1]);
-
-                                    if (src) {
-                                        slides.push({ directiveObj, src, alt });
-                                        renderSlides();
-                                    } else {
-                                        console.error('Could not parse image from:', dialog.returnValue);
-                                    }
+                                    slides.push({ directiveObj: image.directiveObj, src: image.src, alt: image.alt, sources: [] });
+                                    renderSlideRows();
                                 },
                                 onCancel: () => {
                                     // If this was the initial add and user cancelled, close the slideshow dialog too
@@ -758,11 +900,11 @@ export const MahoSlideshow = Node.create({
                             });
                         };
 
-                        // Add slide button handler
-                        dialog.querySelector('.add-slide-btn').addEventListener('click', addSlide);
+                        // Add slide button handler. The click event must not reach isInitialAdd as a truthy value
+                        dialog.querySelector('.add-slide-btn').addEventListener('click', () => addSlide());
 
                         // Initial render
-                        renderSlides();
+                        renderSlideRows();
                         bindSortable();
 
                         // If this is a new slideshow (no slides), automatically open the image browser
@@ -772,13 +914,36 @@ export const MahoSlideshow = Node.create({
                     },
                     onOk: (dialog) => {
                         if (slides.length === 0) {
-                            alert(editor.options.wysiwygSetup.translate('Please add at least one image to the slideshow'));
+                            alert(translate('Please add at least one image to the slideshow'));
                             return false;
+                        }
+
+                        // The variants become numbers in range and grow by breakpoint, because in a
+                        // <picture> the first matching <source> wins
+                        const normalized = [];
+                        for (const slide of slides) {
+                            const sources = [];
+                            for (const source of slide.sources ?? []) {
+                                const breakpoint = toBreakpoint(source.breakpoint);
+                                if (breakpoint === null) {
+                                    alert(translate('The breakpoint must be a whole number between 1 and 9999'));
+                                    return false;
+                                }
+                                if (sources.some((item) => item.breakpoint === breakpoint)) {
+                                    alert(translate('Two images in a slide need different breakpoints'));
+                                    return false;
+                                }
+                                sources.push({ src: source.src, breakpoint });
+                            }
+                            normalized.push({
+                                ...slide,
+                                sources: sources.sort((a, b) => a.breakpoint - b.breakpoint),
+                            });
                         }
 
                         editor.commands.insertContentAt({ from, to }, {
                             type: this.name,
-                            attrs: { slides },
+                            attrs: { slides: normalized },
                         });
                         return true;
                     },
