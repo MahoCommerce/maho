@@ -63,3 +63,23 @@ it('validates a feed with the delimiter and the enclosure of the feed', function
     'semicolon' => [';', '"'],
     'single quote' => [',', "'"],
 ]);
+
+it('writes a feed with no enclosure', function (): void {
+    $path = tempnam(sys_get_temp_dir(), 'feed-csv-');
+    $writer = new Maho_FeedManager_Model_Writer_Csv()->setDelimiter('|')->setEnclosure('');
+
+    try {
+        $writer->open($path);
+        $writer->writeProduct(['title' => 'A "quoted" product, red', 'sku' => 'next-column']);
+        $writer->close();
+
+        expect(file_get_contents($path))->toBe("title|sku\nA \"quoted\" product, red|next-column\n");
+
+        $validator = new Maho_FeedManager_Model_Validator();
+        expect($validator->validate($path, 'csv', '|', ''))->toBeTrue()
+            ->and($validator->getWarnings())->toBe([]);
+    } finally {
+        $writer->close();
+        unlink($path);
+    }
+});
