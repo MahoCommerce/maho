@@ -566,6 +566,10 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
         } elseif ($isUserPasswordChanged) {
             $this->getSession()->setUserPasswordChanged(false);
         }
+        // A disabled user loses the sessions that it opened before
+        if (!$this->getIsActive()) {
+            $this->setId(null);
+        }
         return $this;
     }
 
@@ -679,7 +683,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
             $errors->append(Mage::helper('adminhtml')->__('Last Name is required field.'));
         }
 
-        if (!Mage::helper('core')->isValidEmail($this->getEmail())) {
+        if (!Mage::helper('core')->isValidNotBlank($this->getEmail()) || !Mage::helper('core')->isValidEmail($this->getEmail())) {
             $errors->append(Mage::helper('adminhtml')->__('Please enter a valid email.'));
         }
 

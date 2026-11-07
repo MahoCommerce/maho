@@ -383,6 +383,47 @@ class Mage_Catalog_Model_Product_Type_Configurable extends Mage_Catalog_Model_Pr
     }
 
     /**
+     * Check what the save adds: each new super attribute must be in the attribute set of the product and pass
+     * canUseAttribute(), and each new child must exist and have an allowed type.
+     *
+     * @throws Mage_Core_Exception_Input
+     */
+    protected function _validateNewAttributesAndChildren(Mage_Catalog_Model_Product $product): void
+    {
+        $errors = new Mage_Core_Exception_Input();
+        if ($product->getCanSaveConfigurableAttributes()) {
+            foreach ((array) $product->getConfigurableAttributesData() as $attributeData) {
+                if (!empty($attributeData['id']) || !isset($attributeData['attribute_id'])) {
+                    continue;
+                }
+                $attribute = $this->getAttributeById($attributeData['attribute_id'], $product);
+                if (!$attribute) {
+                    $errors->addError('super_attributes', Mage::helper('catalog')->__(
+                        'Attribute %s is not in the attribute set of the product.',
+                        $attributeData['attribute_id'],
+                    ));
+                } elseif (!$attribute instanceof Mage_Eav_Model_Entity_Attribute || !$this->canUseAttribute($attribute)) {
+                    $errors->addError('super_attributes', Mage::helper('catalog')->__(
+                        'Attribute "%s" cannot be used for a configurable product: it must have the global scope, a list of options and "Use To Create Configurable Product".',
+                        $attribute->getAttributeCode(),
+                    ));
+                }
+            }
+        }
+        $errors->throwIfErrors();
+
+        $data = $product->getConfigurableProductsData();
+        if (is_array($data)) {
+            $existing = $product->getId() ? ($this->getChildrenIds($product->getId(), false)[0] ?? []) : [];
+            $this->_validateChildProducts(
+                array_values(array_diff(array_map(intval(...), array_keys($data)), array_map(intval(...), $existing))),
+                array_keys((array) Mage::getConfig()->getNode(Mage_Catalog_Helper_Product_Configuration::XML_PATH_CONFIGURABLE_ALLOWED_TYPES)?->asArray()),
+                'child_product_ids',
+            );
+        }
+    }
+
+    /**
      * Before save process
      *
      * @param  Mage_Catalog_Model_Product $product
@@ -392,6 +433,7 @@ class Mage_Catalog_Model_Product_Type_Configurable extends Mage_Catalog_Model_Pr
     public function beforeSave($product = null)
     {
         parent::beforeSave($product);
+        $this->_validateNewAttributesAndChildren($this->getProduct($product));
 
         $this->getProduct($product)->canAffectOptions(false);
 

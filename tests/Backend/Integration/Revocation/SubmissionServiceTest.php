@@ -69,6 +69,11 @@ function revocation_submit_input(array $overrides = []): \Maho\DataObject
     ], $overrides));
 }
 
+function revocation_submit(\Maho\DataObject $input): ?Maho_Revocation_Model_Request
+{
+    return Mage::getService('revocation/request')->submit($input, Maho_Revocation_Model_Channel::Web);
+}
+
 describe('Revocation submission service', function () {
     beforeEach(function () {
         $store = Mage::app()->getStore();
@@ -77,7 +82,10 @@ describe('Revocation submission service', function () {
         $store->setConfig('trans_email/ident_general/name', 'Test Shop');
         // No MTA on CI runners: disable the transport so send() reports success without dispatching.
         $store->setConfig('system/smtp/enabled', '');
-        $this->service = Mage::getService('revocation/request');
+        // The input has no render token, so the web channel must not require one. The tests share one client IP.
+        Mage::app()->getStore(1)->setConfig('revocation/general/enabled', '1');
+        Mage::app()->getStore(1)->setConfig(Maho_Revocation_Helper_Data::XML_PATH_MIN_SUBMIT_SECONDS, '0');
+        Mage::app()->cleanCache([\Maho\Security\RateLimiter::CACHE_TAG]);
         $this->createdRequests = [];
         $this->createdOrders = [];
         $this->createdCustomers = [];
@@ -97,7 +105,7 @@ describe('Revocation submission service', function () {
 
     it('writes a revocation request row when the public form is submitted', function () {
         $input = revocation_submit_input();
-        $request = $this->service->submit($input);
+        $request = revocation_submit($input);
         $this->createdRequests[] = $request;
 
         expect($request->getId())->toBeGreaterThan(0);
@@ -117,7 +125,7 @@ describe('Revocation submission service', function () {
     });
 
     it('captures received_at in UTC from the submit moment', function () {
-        $request = $this->service->submit(revocation_submit_input([
+        $request = revocation_submit(revocation_submit_input([
             'received_at_microtime' => 1781000000.123456,
         ]));
         $this->createdRequests[] = $request;
@@ -126,7 +134,7 @@ describe('Revocation submission service', function () {
     });
 
     it('sends both the receipt and merchant emails on submit', function () {
-        $request = $this->service->submit(revocation_submit_input());
+        $request = revocation_submit(revocation_submit_input());
         $this->createdRequests[] = $request;
 
         expect($request->getData('receipt_email_sent'))->toBeTrue();
@@ -140,7 +148,7 @@ describe('Revocation submission service', function () {
         $stateBefore = $order->getState();
         $statusBefore = $order->getStatus();
 
-        $request = $this->service->submit(revocation_submit_input([
+        $request = revocation_submit(revocation_submit_input([
             'email' => $order->getCustomerEmail(),
             'order_reference' => $order->getIncrementId(),
             'customer_name' => 'Max Mustermann',
@@ -159,7 +167,7 @@ describe('Revocation submission service', function () {
         $order = revocation_create_order();
         $this->createdOrders[] = $order;
 
-        $request = $this->service->submit(revocation_submit_input([
+        $request = revocation_submit(revocation_submit_input([
             'email' => 'someone-else-' . uniqid() . '@example.com',
             'order_reference' => $order->getIncrementId(),
             'customer_name' => 'Max Mustermann',
@@ -174,7 +182,7 @@ describe('Revocation submission service', function () {
         $order = revocation_create_order();
         $this->createdOrders[] = $order;
 
-        $request = $this->service->submit(revocation_submit_input([
+        $request = revocation_submit(revocation_submit_input([
             'email' => $order->getCustomerEmail(),
             'order_reference' => $order->getIncrementId(),
             'customer_name' => 'Completely Different',
@@ -185,7 +193,7 @@ describe('Revocation submission service', function () {
     });
 
     it('writes a row with order_id NULL when the order number does not exist', function () {
-        $request = $this->service->submit(revocation_submit_input([
+        $request = revocation_submit(revocation_submit_input([
             'order_reference' => 'DOES-NOT-EXIST-' . uniqid(),
         ]));
         $this->createdRequests[] = $request;
@@ -202,7 +210,7 @@ describe('Revocation submission service', function () {
         $stateBefore = $order->getState();
         $statusBefore = $order->getStatus();
 
-        $request = $this->service->submit(revocation_submit_input([
+        $request = revocation_submit(revocation_submit_input([
             'email' => $order->getCustomerEmail(),
             'order_reference' => $order->getIncrementId(),
             'customer_id' => (int) $customer->getId(),
@@ -230,7 +238,7 @@ describe('Revocation submission service', function () {
         $order = revocation_create_order(['customer_id' => (int) $owner->getId()]);
         $this->createdOrders[] = $order;
 
-        $request = $this->service->submit(revocation_submit_input([
+        $request = revocation_submit(revocation_submit_input([
             'email' => 'attacker-' . uniqid() . '@example.com',
             'customer_name' => 'Someone Else',
             'customer_id' => (int) $owner->getId() + 1,
@@ -245,12 +253,12 @@ describe('Revocation submission service', function () {
     it('writes the row and merchant email but suppresses the customer email when the per-recipient rate limit is exceeded', function () {
         $email = 'limited-' . uniqid() . '@example.com';
 
-        $first = $this->service->submit(revocation_submit_input(['email' => $email]));
+        $first = revocation_submit(revocation_submit_input(['email' => $email]));
         $this->createdRequests[] = $first;
         expect($first->getSuppressedAt())->toBeNull();
         expect($first->getData('receipt_email_sent'))->toBeTrue();
 
-        $second = $this->service->submit(revocation_submit_input(['email' => $email]));
+        $second = revocation_submit(revocation_submit_input(['email' => $email]));
         $this->createdRequests[] = $second;
 
         expect($second->getId())->toBeGreaterThan(0);
@@ -263,9 +271,9 @@ describe('Revocation submission service', function () {
     it('rejects submissions with missing required fields without writing a row', function () {
         $countBefore = Mage::getResourceModel('revocation/request_collection')->getSize();
 
-        expect(fn() => $this->service->submit(revocation_submit_input(['customer_name' => '  '])))
+        expect(fn() => revocation_submit(revocation_submit_input(['customer_name' => '  '])))
             ->toThrow(Mage_Core_Exception::class);
-        expect(fn() => $this->service->submit(revocation_submit_input(['email' => 'not-an-email'])))
+        expect(fn() => revocation_submit(revocation_submit_input(['email' => 'not-an-email'])))
             ->toThrow(Mage_Core_Exception::class);
 
         expect(Mage::getResourceModel('revocation/request_collection')->getSize())->toBe($countBefore);

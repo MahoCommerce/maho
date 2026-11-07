@@ -56,28 +56,16 @@ final class BlogCategoryProvider extends CrudProvider
     #[\Override]
     protected function provideItem(int|string $id): ?Resource
     {
-        $category = \Mage::getModel('blog/category')->load($id);
-
-        if (!$category->getId()) {
+        /** @var \Maho_Blog_Service_Category $service */
+        $service = \Mage::getService('blog/category');
+        try {
+            $category = $this->isBackendReader() ? $service->getById((int) $id) : $service->getVisibleById((int) $id, StoreContext::getStoreId());
+        } catch (\Mage_Core_Exception_NoSuchEntity) {
             return null;
         }
-
         if ($this->isBackendReader()) {
             $this->assertReadableStores($category->getStores(), 'category');
-
-            return $this->toDto($category);
         }
-
-        if (!$category->getIsActive()) {
-            return null;
-        }
-
-        $storeId = StoreContext::getStoreId();
-        $stores = $category->getStores();
-        if (!StoreContext::isAvailableForStore($stores, $storeId)) {
-            return null;
-        }
-
         return $this->toDto($category);
     }
 
@@ -86,7 +74,11 @@ final class BlogCategoryProvider extends CrudProvider
     {
         parent::applyCollectionFilters($collection, $filters);
 
-        if (!$this->isScopeAll($filters)) {
+        if (!$this->isBackendReader()) {
+            /** @var \Maho_Blog_Service_Category $service */
+            $service = \Mage::getService('blog/category');
+            $service->addVisibleFilter($collection, StoreContext::getStoreId());
+        } elseif (!$this->isScopeAll($filters)) {
             $collection->addActiveFilter();
         }
 
@@ -103,15 +95,8 @@ final class BlogCategoryProvider extends CrudProvider
             return $this->getCategoryByUrlKeyBackend($urlKey);
         }
 
-        $storeId = StoreContext::getStoreId();
-        $model = \Mage::getModel('blog/category');
-        $categoryId = $model->getCategoryIdByUrlKey($urlKey, $storeId);
-
-        if (!$categoryId) {
-            return null;
-        }
-
-        return $this->provideItem($categoryId);
+        $categoryId = \Mage::getModel('blog/category')->getCategoryIdByUrlKey($urlKey, StoreContext::getStoreId());
+        return $categoryId ? $this->provideItem($categoryId) : null;
     }
 
     /**

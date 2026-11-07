@@ -50,6 +50,7 @@ Navigate to **System > Configuration > Sales > Gift Cards** to configure the mod
 | **Code Prefix** | Prefix added to all codes, e.g., "GC" | Global |
 | **Default Expiry (days)** | Days until expiration, 0 = never expires | Store View |
 | **Refund Expiration Extension (days)** | When refunding to a gift card that is expired or will expire soon, extend expiration by this many days (default: 30). Set to 0 to disable extension. | Store View |
+| **Maximum Balance** | The highest balance, in the base currency, that an admin, the API or an import gives a card (default: 10,000). A purchased card and a refund have no limit. Leave it empty or set 0 for no limit. A card of several websites gets the lowest limit of them. | Website |
 | **Allow Gift Message** | Enable personalized messages on gift cards | Store View |
 | **Show QR Code** | Display QR codes on gift cards and emails | Store View |
 | **Show Barcode** | Display Code128 barcodes (requires barcode library) | Store View |
@@ -220,7 +221,9 @@ Customers can check their gift card balance without applying it:
 3. View current balance and expiration date
 
 !!! warning "Rate Limiting"
-    Balance checks are rate-limited to 10 attempts per minute to prevent code enumeration attacks.
+    Balance checks are rate-limited to prevent code enumeration attacks. The limit is 10 checks per minute for one
+    visitor by default, and the checkout box, the My Account page and the API share it. Set it in
+    **System > Configuration > Advanced > System > Rate limit > Gift card balance check**.
 
 ### Check Balance From My Account <span class="version-badge">v26.9+</span>
 
@@ -238,10 +241,9 @@ The page is deliberately cautious about what it reveals:
 - The code is never placed in the address bar, so it does not reach browser
   history or server referer logs.
 - Failed lookups are limited to 10 per hour, per customer. Successful lookups do
-  not count, so a customer holding several cards is not penalised.
-
-This page is separate from the checkout balance check described above, and has
-its own limit.
+  not count, so a customer holding several cards is not penalised. This limit
+  applies to every balance check of a logged-in customer, on top of the limit
+  per minute described above.
 
 ### Partial Redemption
 
@@ -306,7 +308,7 @@ Administrators can create gift cards without a purchase:
    - **Code**: Leave blank for auto-generation or enter custom code
    - **Status**: Set to Active for immediate use
    - **Websites**: Select one or more websites the card is valid on. They must share one base currency <span class="version-badge">v26.9+</span>
-   - **Balance**: Enter the gift card value
+   - **Balance**: Enter the gift card value. It must be more than 0 and at most the **Maximum Balance** setting. A card from a purchase has no upper limit. When you lower the setting, a card with a higher balance keeps it, and you can still change its other fields
    - **Recipient/Sender Info**: Optional delivery details
    - **Expiration Date**: Optional expiration
    - **Comment**: Internal note for audit trail

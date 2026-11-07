@@ -60,6 +60,11 @@ SPDX-License-Identifier: AFL-3.0
                 </entities>
             </blog_resource>
         </models>
+        <services>
+            <blog>
+                <class>Maho_Blog_Service</class>
+            </blog>
+        </services>
         <blocks>
             <blog>
                 <class>Maho_Blog_Block</class>

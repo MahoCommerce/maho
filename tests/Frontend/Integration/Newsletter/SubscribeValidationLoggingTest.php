@@ -75,7 +75,7 @@ it('shows the error but logs nothing when the subscribe form carries an invalid 
         'form_key' => Mage::getSingleton('core/session')->getFormKey(),
     ], 'POST');
 
-    expect(newsletterSessionMessages())->toContain('Please enter a valid email address.');
+    expect(newsletterSessionMessages())->toContain('Invalid email address');
     expect(newsletterExceptionLogSize())->toBe($sizeBefore);
 });
 

@@ -4555,12 +4555,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/Catalog/ProductController.php
 
 		-
-			rawMessage: 'Method Mage_Adminhtml_Catalog_ProductController::_validateMassStatus() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Catalog/ProductController.php
-
-		-
 			rawMessage: 'Method Mage_Adminhtml_Catalog_SearchController::_initAction() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -4789,12 +4783,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/Sales/Order/ShipmentController.php
 
 		-
-			rawMessage: 'Method Mage_Adminhtml_System_ConfigController::_saveAdvanced() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/System/ConfigController.php
-
-		-
 			rawMessage: 'Method Mage_Adminhtml_System_ConfigController::_saveSection() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -4829,12 +4817,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Adminhtml/controllers/TagController.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Tax_RateController::_importRates() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Tax/RateController.php
 
 		-
 			rawMessage: 'Method Mage_Adminhtml_Tax_RuleController::saveAction() has no return type specified.'
@@ -8906,12 +8888,6 @@ parameters:
 
 		-
 			rawMessage: 'Method Mage_Customer_AccountController::_addSessionError() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Customer/controllers/AccountController.php
-
-		-
-			rawMessage: 'Method Mage_Customer_AccountController::_dispatchRegisterSuccess() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Customer/controllers/AccountController.php

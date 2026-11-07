@@ -631,6 +631,39 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
     }
 
     /**
+     * Check that each product of $productIds exists and has one of the types $allowedTypes, so that it can be
+     * a child of the product. Each problem is an error of $field.
+     *
+     * @param array<int> $productIds
+     * @param list<string> $allowedTypes
+     * @throws Mage_Core_Exception_Input
+     */
+    protected function _validateChildProducts(array $productIds, array $allowedTypes, string $field): void
+    {
+        if ($productIds === []) {
+            return;
+        }
+        $types = [];
+        foreach (Mage::getResourceModel('catalog/product_collection')->addIdFilter($productIds) as $child) {
+            $types[(int) $child->getId()] = (string) $child->getTypeId();
+        }
+        $errors = new Mage_Core_Exception_Input();
+        foreach ($productIds as $productId) {
+            if (!isset($types[$productId])) {
+                $errors->addError($field, Mage::helper('catalog')->__('Product %s does not exist.', $productId));
+            } elseif (!in_array($types[$productId], $allowedTypes, true)) {
+                $errors->addError($field, Mage::helper('catalog')->__(
+                    'Product %s is a %s product. Allowed types: %s',
+                    $productId,
+                    $types[$productId],
+                    implode(', ', $allowedTypes),
+                ));
+            }
+        }
+        $errors->throwIfErrors();
+    }
+
+    /**
      * Check if product is composite (grouped, configurable, etc)
      *
      * @param Mage_Catalog_Model_Product $product

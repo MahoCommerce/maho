@@ -389,6 +389,71 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
     }
 
     /**
+     * Add an error to $errors for each problem of the name, the websites, the customer groups and the dates.
+     * A new rule must have all of them. A website or a group that the rule had before passes, because an admin
+     * can delete it after the save.
+     */
+    protected function _validateScope(Mage_Core_Exception_Input $errors): void
+    {
+        $helper = Mage::helper('rule');
+        if (!$this->getId() || $this->hasData('name')) {
+            $name = trim((string) $this->getData('name'));
+            if ($name === '' || mb_strlen($name) > 255) {
+                $this->_addRecordError($errors, 'name', $helper->__('The rule name must have 1 to 255 characters.'));
+            }
+        }
+
+        $scopes = [
+            'website_ids' => [array_keys(Mage::app()->getWebsites()), 'Websites must be specified.', 'Unknown website ID: %s.'],
+            'customer_group_ids' => [Mage::getResourceModel('customer/group_collection')->getAllIds(), 'Customer Groups must be specified.', 'Unknown customer group ID: %s.'],
+        ];
+        foreach ($scopes as $field => [$knownIds, $requiredMessage, $unknownMessage]) {
+            if ($this->getId() && !$this->hasData($field)) {
+                continue;
+            }
+            $ids = $this->getData($field);
+            $ids = is_string($ids) ? explode(',', $ids) : (array) $ids;
+            if ($ids === []) {
+                $this->_addRecordError($errors, $field, $helper->__($requiredMessage));
+            }
+            $storedIds = $this->getOrigData($field);
+            $storedIds = is_string($storedIds) ? explode(',', $storedIds) : (array) $storedIds;
+            $knownIds = array_map(strval(...), [...$knownIds, ...$storedIds]);
+            foreach ($ids as $id) {
+                if (!in_array((string) $id, $knownIds, true)) {
+                    $this->_addRecordError($errors, $field, $helper->__($unknownMessage, $id));
+                }
+            }
+        }
+
+        $dates = [];
+        foreach (['from_date', 'to_date'] as $field) {
+            $date = $this->getData($field);
+            $date = $date instanceof DateTimeInterface ? $date->format(Mage_Core_Model_Locale::DATE_FORMAT) : trim((string) $date);
+            $dates[$field] = $date === '' ? null : substr($date, 0, 10);
+            if ($dates[$field] !== null && !Mage::helper('core')->isValidDate($dates[$field])) {
+                $this->_addRecordError($errors, $field, $helper->__('The date "%s" is not valid. Use the format Y-m-d.', $date));
+                $dates[$field] = null;
+            }
+            $this->setData($field, $dates[$field]);
+        }
+        if ($dates['from_date'] !== null && $dates['to_date'] !== null && $dates['from_date'] > $dates['to_date']) {
+            $this->_addRecordError($errors, 'to_date', $helper->__('End Date must be greater than Start Date.'));
+        }
+    }
+
+    /**
+     * Add $message to $errors, unless $errors already has an error of $field: a transport that could not read a
+     * value reports it first.
+     */
+    protected function _addRecordError(Mage_Core_Exception_Input $errors, string $field, string $message): void
+    {
+        if (!in_array($field, array_column($errors->getErrors(), 'field'), true)) {
+            $errors->addError($field, $message);
+        }
+    }
+
+    /**
      * Check availability to delete rule
      *
      * @return bool

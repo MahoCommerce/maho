@@ -70,6 +70,8 @@ Country listings live under [Directory](#directory) (`/countries`).
 | DELETE | `/products/{productId}/links/up-sell/{linkedProductId}` | Admin/API | Remove an up-sell link |
 | GET / POST | `/products/{productId}/reviews` | GET=None, POST=Customer | Reviews for a product |
 
+The product sub-resources and the admin product page use the same rules. A tier price or a group price needs a price of 0 or more, a website and a customer group that exist, and one row for each website, group and quantity. A tier price needs a quantity above 0. An uploaded image goes through the checks of the admin upload: a known image type, the maximum size of `catalog/product_image/max_dimension`, and a new copy of the pixels. A grouped child, a configurable child and a bundle selection need a product of an allowed type. A super attribute needs the global scope, a list of options and "Use To Create Configurable Product", and it must be in the attribute set of the product. A problem in the body gives a 422 with `details.errors`. A DELETE of a link, a grouped child or a configurable child that does not exist gives a 404. A token restricted to some stores keeps the prices of the other websites when it replaces or deletes tier prices or group prices.
+
 **Layered navigation:**
 
 | Method | Endpoint | Auth | Description |
@@ -388,7 +390,8 @@ There is no standalone collection endpoint or write endpoint for invoices, they 
 
 ### Inventory / Stock Updates
 
-Fast direct-SQL stock updates, no model overhead, no observers.
+Stock updates by SKU. They save the stock item as the admin product page does, so the store applies
+the same stock rules (see the Stock Status page of the user guide).
 
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
@@ -435,10 +438,14 @@ curl -X PUT /api/rest/v2/inventory/bulk \
 ```
 
 **Notes:**
-- `isInStock` auto-sets to `qty > 0` if not provided.
-- `manageStock` defaults to `true` if not provided.
-- Qty must be 0-99,999,999.
+- `isInStock` auto-sets to `qty > 0` if not provided. The store then applies its own rules: a product at or
+  below its out-of-stock threshold goes out of stock, and **Sync Stock Availability with Qty** puts a
+  product above the threshold back in stock.
+- A field such as `manageStock` or `minQty` sent without its `useConfig...` flag stops the product from
+  taking the store-wide value.
+- Qty must be 0-99,999,999.9999.
 - Bulk limit: 100 items per request (validated upfront, executed in a DB transaction).
+- A stock change updates the Stock Status index when the index runs on save.
 
 ---
 
@@ -567,6 +574,13 @@ REST `GET /giftcards/{id}` is **admin-only and keyed by numeric ID**. A public *
 | GET | `/blog-categories` | None | List blog categories |
 | GET | `/blog-categories/{id}` | None | Get blog category |
 
+A read without a backend token follows the storefront. It gives 404 when the output of `Maho_Blog` is
+disabled for the store view (System > Configuration > Advanced > Advanced). A category read also gives 404
+when "Enable Categories" is off for the store view. An admin token, or a token with read or write access
+to the resource, reads every post and category, so the admin can manage the blog while the storefront
+blog is off. The same rule applies to the GraphQL queries `blogPost`, `blogPosts`, `blogCategory` and
+`blogCategories`.
+
 ---
 
 ### Media
@@ -633,12 +647,14 @@ curl -X PUT /api/rest/v2/revocation-requests/1234 \
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
 | POST | `/newsletter/subscribe` | None | Subscribe to newsletter (gated by `newsletter/subscription/allow_guest_subscribe`) |
-| POST | `/newsletter/unsubscribe` | None | Unsubscribe by email |
+| POST | `/newsletter/unsubscribe` | Customer | Unsubscribe the address of the customer |
 | GET | `/newsletter/status` | Customer/API | Get subscription status |
 
 **Guest subscription control:** Guest (unauthenticated) subscribe is controlled by the Maho config flag `newsletter/subscription/allow_guest_subscribe` (**System > Config > Newsletter > Subscription Options > Allow Guest Subscription**). When disabled, only authenticated customers can subscribe, and a guest subscribe returns `403`. Recommended: set to **No** for API use to prevent abuse.
 
-**Confirmation emails:** When `newsletter/subscription/confirm` is enabled, new subscriptions receive a confirmation email and remain inactive until confirmed (double opt-in).
+**Confirmation emails:** When `newsletter/subscription/confirm` is enabled, new subscriptions receive a confirmation email and remain inactive until confirmed (double opt-in). A customer token subscribes the address of the account, which needs no confirmation.
+
+The API, the footer form and the newsletter page of the customer account use the same rules. An empty or invalid `email` gives a 422 with an entry in `details.errors`. A guest gets the same answer for an address that is already subscribed as for a new one. The limit `system/rate_limit/newsletter_subscribe` counts the subscriptions of one client and of one address on the API and the footer form together, and `system/rate_limit/newsletter_unsubscribe` counts the unsubscriptions of the API and the account page. A client over a limit gets a 429 with a `Retry-After` header. A customer token for a customer that does not exist gives a 404.
 
 ---
 
@@ -664,6 +680,8 @@ curl -X PUT /api/rest/v2/revocation-requests/1234 \
 `captchaProvider` is one of `none`, `turnstile`, `recaptcha_v3` (or anything an installed third-party module registers). `captchaSiteKey` is `null` when the provider is `none`. Frontends use these two fields to load the matching widget client-side; for richer per-provider config the helper-based event flow described under [CAPTCHA](captcha.md) is used instead.
 
 The `honeypotField` value is **deterministic per install** (derived from the encryption key) and **opaque** to the frontend, render it as a hidden input and don't expose its value, e.g. `<input type="text" name="{honeypotField}" style="display:none" tabindex="-1" autocomplete="off" />`. If a request body arrives with a non-empty value in that field, the API silently treats it as spam (returns success without sending the email). When honeypot is disabled in admin, `honeypotField` is `null` and the frontend can skip it.
+
+`POST /contact` and the storefront contact form use the same rules. A field that is not valid gives a 422, with one entry for each field in `details.errors` (`name`, `email`, `comment`, `captchaToken`). A client or an email address over its limit gets a 429 with a `Retry-After` header. The email limit (`system/rate_limit/contact`) counts the messages of the storefront form and of the API together. A disabled contact API gives a 404.
 
 ---
 

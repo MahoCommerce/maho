@@ -24,7 +24,7 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
     }
 
     /**
-     * @throws Mage_Core_Exception
+     * @throws Mage_Core_Exception_Conflict when the configuration uses the page
      */
     #[\Override]
     protected function _beforeDelete(Mage_Core_Model_Abstract $object)
@@ -34,12 +34,10 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
             if ($isUsedInConfig->count()) {
                 // prevent delete
                 $object->setId(null);
-                Mage::throwException(
-                    Mage::helper('cms')->__(
-                        'Cannot delete page, it is used in "%s".',
-                        implode(', ', $isUsedInConfig->getColumnValues('path')),
-                    ),
-                );
+                throw new Mage_Core_Exception_Conflict(Mage::helper('cms')->__(
+                    'Cannot delete page, it is used in "%s".',
+                    implode(', ', $isUsedInConfig->getColumnValues('path')),
+                ));
             }
         }
 
@@ -53,8 +51,13 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
     }
 
     /**
+     * Check the identifier, the layouts, the layout updates and the robots value. Check a layout, a layout update
+     * and a robots value only when the save changes it, so that a stored value from before the check does not block a save.
+     *
      * @param Mage_Cms_Model_Page $object
-     * @throws Mage_Core_Exception
+     * @throws Mage_Core_Exception_Input with one error for each invalid field
+     * @throws Mage_Core_Exception_Conflict when the save disables a page that the configuration uses, or when a page
+     *                                      of a store view of the page has the identifier
      */
     #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $object)
@@ -85,16 +88,13 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
             $object->setData('identifier', $urlkey);
         }
 
-        if (!$object->getIsActive()) {
+        if ($object->getId() && $object->getOrigData('is_active') && $object->getIsActive() === false) {
             $isUsedInConfig = $this->getUsedInStoreConfigCollection($object);
             if ($isUsedInConfig->count()) {
-                $object->setIsActive();
-                Mage::getSingleton('adminhtml/session')->addWarning(
-                    Mage::helper('cms')->__(
-                        'Cannot disable page, it is used in configuration "%s".',
-                        implode(', ', $isUsedInConfig->getColumnValues('path')),
-                    ),
-                );
+                throw new Mage_Core_Exception_Conflict(Mage::helper('cms')->__(
+                    'Cannot disable page, it is used in configuration "%s".',
+                    implode(', ', $isUsedInConfig->getColumnValues('path')),
+                ));
             }
         }
 
@@ -108,16 +108,41 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
             renderer: Mage::helper('cms')->getPageTemplateProcessor(),
         );
 
+        $errors = new Mage_Core_Exception_Input();
+        $identifierError = $this->getIdentifierError((string) $object->getData('identifier'));
+        if ($identifierError !== null) {
+            $errors->addError('identifier', $identifierError);
+        }
+        foreach (['layout_update_xml', 'custom_layout_update_xml'] as $field) {
+            $xml = (string) $object->getData($field);
+            if ($xml === '' || !$object->dataHasChangedFor($field)) {
+                continue;
+            }
+            /** @var Mage_Adminhtml_Model_LayoutUpdate_Validator $validator */
+            $validator = Mage::getModel('adminhtml/layoutUpdate_validator');
+            if (!$validator->isValid($xml)) {
+                foreach ($validator->getMessages() as $message) {
+                    $errors->addError($field, (string) $message);
+                }
+            }
+        }
+        $layouts = array_keys(Mage::getSingleton('page/source_layout')->getOptions());
+        $options = [
+            'root_template' => $layouts,
+            'custom_root_template' => $layouts,
+            'meta_robots' => array_column(Mage::getSingleton('page/source_robots')->getAllOptions(), 'value'),
+        ];
+        foreach ($options as $field => $values) {
+            $value = (string) $object->getData($field);
+            $values = array_map(strval(...), $values);
+            if ($value !== '' && $object->dataHasChangedFor($field) && !in_array($value, $values, true)) {
+                $errors->addError($field, Mage::helper('cms')->__('The value must be one of: %s', implode(', ', array_filter($values))));
+            }
+        }
+        $errors->throwIfErrors();
+
         if (!$this->getIsUniquePageToStores($object)) {
-            Mage::throwException(Mage::helper('cms')->__('A page URL key for specified store already exists.'));
-        }
-
-        if (!$this->isValidPageIdentifier($object)) {
-            Mage::throwException(Mage::helper('cms')->__('The page URL key contains capital letters or disallowed symbols.'));
-        }
-
-        if ($this->isNumericPageIdentifier($object)) {
-            Mage::throwException(Mage::helper('cms')->__('The page URL key cannot consist only of numbers.'));
+            throw new Mage_Core_Exception_Conflict(Mage::helper('cms')->__('A page URL key for specified store already exists.'));
         }
 
         // modify create / update dates
@@ -278,23 +303,17 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
     }
 
     /**
-     *  Check whether page identifier is numeric
-     *
-     * @return int|false
+     * Return the problem of $identifier as the URL key of a page, or null when it has none.
      */
-    protected function isNumericPageIdentifier(Mage_Core_Model_Abstract $object)
+    public function getIdentifierError(string $identifier): ?string
     {
-        return preg_match('/^[0-9]+$/', $object->getData('identifier'));
-    }
-
-    /**
-     *  Check whether page identifier is valid
-     *
-     * @return   int|false
-     */
-    protected function isValidPageIdentifier(Mage_Core_Model_Abstract $object)
-    {
-        return preg_match('/^[a-z0-9][a-z0-9_\/-]+(\.[a-z0-9_-]+)?$/', $object->getData('identifier'));
+        $helper = Mage::helper('cms');
+        return match (true) {
+            $identifier === '' => $helper->__('Identifier is required.'),
+            !preg_match('/^[a-z0-9][a-z0-9_\/-]+(\.[a-z0-9_-]+)?$/', $identifier) => $helper->__('The page URL key contains capital letters or disallowed symbols.'),
+            (bool) preg_match('/^[0-9]+$/', $identifier) => $helper->__('The page URL key cannot consist only of numbers.'),
+            default => null,
+        };
     }
 
     public function getUsedInStoreConfigCollection(Mage_Cms_Model_Page $page, ?array $paths = []): Mage_Core_Model_Resource_Db_Collection_Abstract

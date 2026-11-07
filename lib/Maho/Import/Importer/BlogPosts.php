@@ -37,7 +37,7 @@ class BlogPosts extends AbstractCmsImporter
         foreach ($file as $line => $row) {
             $urlKey = $this->requireValue($file, $line, $row, 'url_key');
             $this->requireValue($file, $line, $row, 'stores');
-            if (!preg_match('/^[a-z0-9]+(-[a-z0-9]+)*$/', $urlKey)) {
+            if (!preg_match(\Maho_Blog_Model_Post::URL_KEY_PATTERN, $urlKey)) {
                 $this->fail($file, $line, "url_key '$urlKey' must be lowercase letters, digits and dashes");
             }
             $row['store_ids'] = $this->storeIds($file, $line, $row);
@@ -71,12 +71,14 @@ class BlogPosts extends AbstractCmsImporter
             $result->notices[] = 'the blog module is disabled, ' . basename($file->getPath()) . ' was skipped';
             return $result;
         }
+        /** @var \Maho_Blog_Service_Post $service */
+        $service = Mage::getService('blog/post');
         foreach ($rows as $row) {
-            $post = Mage::getModel('blog/post');
             if ($row['post_id'] !== null) {
-                $post->load($row['post_id']);
+                $post = $service->getById($row['post_id']);
                 $result->updated++;
             } else {
+                $post = $service->newPost();
                 $result->created++;
             }
             $post->setUrlKey($row['url_key'])->setIsActive($row['is_active'] ? 1 : 0)->setStores($row['store_ids']);
@@ -91,7 +93,7 @@ class BlogPosts extends AbstractCmsImporter
             if ($row['body'] !== null) {
                 $post->setContent($row['body']);
             }
-            $post->save();
+            $service->save($post);
         }
         $reporter->info(count($rows) . ' posts');
         return $result;

@@ -16,6 +16,11 @@ SPDX-License-Identifier: AFL-3.0
                 <class>Mage_SalesRule_Helper</class>
             </salesrule>
         </helpers>
+        <services>
+            <salesrule>
+                <class>Mage_SalesRule_Service</class>
+            </salesrule>
+        </services>
         <models>
             <salesrule>
                 <class>Mage_SalesRule_Model</class>

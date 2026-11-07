@@ -209,6 +209,10 @@ Mage::getModel('giftcard/history')->setData([
 ])->save();
 ```
 
+`save()` refuses a new card, or a changed balance, above `getMaxBalance()` with a `Mage_Core_Exception_Input`.
+The limit comes from `giftcard/general/max_balance` of the websites of the card. A card with a
+`purchase_order_id` and a save from `refund()` have no limit.
+
 ### Working with Collections
 
 ```php
@@ -610,11 +614,12 @@ Mage::getModel('giftcard/history')->setData([
 
 ### Rate Limiting
 
-Frontend balance checks are rate-limited:
+`Maho_Giftcard_Service_Giftcard::checkBalance()` holds the rules of a balance check, for the checkout box,
+the My Account page and the `checkBalance` GraphQL query:
 
-- 10 attempts per 60-second window
-- Session-based bucket tracking
-- Prevents brute-force code discovery
+- 10 attempts per 60-second window for one client (`system/rate_limit/giftcard_balance`), keyed by IP
+- 10 failed lookups per hour for one logged-in customer
+- An unknown, expired, disabled or foreign card gives the same `Mage_Core_Exception_NoSuchEntity`
 
 ### Transaction Safety
 

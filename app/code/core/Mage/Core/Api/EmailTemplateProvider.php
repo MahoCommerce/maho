@@ -12,9 +12,8 @@ namespace Mage\Core\Api;
 
 use ApiPlatform\State\Pagination\TraversablePaginator;
 use Maho\ApiPlatform\CrudProvider;
-use Maho\ApiPlatform\Exception\ValidationException;
+use Maho\ApiPlatform\Resource;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 final class EmailTemplateProvider extends CrudProvider
 {
@@ -29,6 +28,16 @@ final class EmailTemplateProvider extends CrudProvider
             'get_default_email_template' => $this->getDefault((string) ($uriVariables['code'] ?? '')),
             default => null,
         };
+    }
+
+    #[\Override]
+    protected function provideItem(int|string $id): ?Resource
+    {
+        try {
+            return $this->toDto(\Mage::getService('core/email_template')->getById((int) $id));
+        } catch (\Mage_Core_Exception_NoSuchEntity) {
+            return null;
+        }
     }
 
     #[\Override]
@@ -75,7 +84,7 @@ final class EmailTemplateProvider extends CrudProvider
     private function getDefault(string $code): EmailTemplate
     {
         if (!isset(\Mage_Core_Model_Email_Template::getDefaultTemplates()[$code])) {
-            throw new NotFoundHttpException("Default email template '{$code}' not found");
+            throw new \Mage_Core_Exception_NoSuchEntity("Default email template '{$code}' not found");
         }
 
         return $this->defaultToDto($code);

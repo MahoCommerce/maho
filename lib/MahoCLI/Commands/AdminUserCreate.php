@@ -22,6 +22,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class AdminUserCreate extends BaseMahoCommand
 {
+    use AdminUserCommandTrait;
+
     public function __invoke(
         OutputInterface $output,
         #[Argument(description: 'The username of the admin user')]
@@ -45,6 +47,7 @@ class AdminUserCreate extends BaseMahoCommand
     ): int {
         $this->initMaho();
 
+        // A new user gets the first top-level role, which an install names Administrators
         $role = Mage::getModel('admin/roles')->getCollection()
             ->addFieldToFilter('role_type', 'G')
             ->addFieldToFilter('tree_level', 1)
@@ -55,51 +58,18 @@ class AdminUserCreate extends BaseMahoCommand
             return Command::FAILURE;
         }
 
-        $username = trim($username);
-        if (!strlen($username)) {
-            $output->writeln('<error>Username cannot be empty</error>');
-            return Command::INVALID;
-        }
-
-        $password = trim($password);
-        if (!strlen($password)) {
-            $output->writeln('<error>Password cannot be empty</error>');
-            return Command::INVALID;
-        }
-
-        $email = trim($email);
-        if (!strlen($email)) {
-            $output->writeln('<error>Email cannot be empty</error>');
-            return Command::INVALID;
-        }
-
-        $firstname = trim($firstname);
-        if (!strlen($firstname)) {
-            $output->writeln('<error>Firstname cannot be empty</error>');
-            return Command::INVALID;
-        }
-
-        $lastname = trim($lastname);
-        if (!strlen($lastname)) {
-            $output->writeln('<error>Lastname cannot be empty</error>');
-            return Command::INVALID;
-        }
-
         $user = Mage::getModel('admin/user')
-            ->setUsername($username)
-            ->setPassword($password)
-            ->setEmail($email)
-            ->setFirstname($firstname)
-            ->setLastname($lastname)
-            ->setIsActive()
-            ->save();
+            ->setUsername(trim($username))
+            ->setPassword(trim($password))
+            ->setEmail(trim($email))
+            ->setFirstname(trim($firstname))
+            ->setLastname(trim($lastname))
+            ->setIsActive();
 
-        $user
-            ->setRoleIds([$role->getId()])
-            ->setRoleUserId($user->getId())
-            ->saveRelations();
-
-        $output->writeln("<info>User {$username} created with {$role->getName()} role</info>");
-        return Command::SUCCESS;
+        return $this->runUserAction(
+            $output,
+            fn(\Mage_Admin_Service_User $service) => $service->save($user, (int) $role->getId()),
+            "User {$user->getUsername()} created with {$role->getName()} role",
+        );
     }
 }

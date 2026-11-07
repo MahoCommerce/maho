@@ -43,37 +43,59 @@ class Mage_Tax_Model_Calculation_Rate extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Prepare location settings and tax postcode before save rate
+     * Check the fields, and prepare the location settings and the tax postcode. The resource model refuses a code that another rate uses.
      *
      * @return $this
+     * @throws Mage_Core_Exception_Input with one error for each invalid field
      */
     #[\Override]
     protected function _beforeSave()
     {
-        if ($this->getCode() === '' || $this->getTaxCountryId() === '' || $this->getData('rate') === ''
-            || $this->getZipIsRange() && ($this->getData('zip_from') === '' || $this->getData('zip_to') === '')
-        ) {
-            Mage::throwException(Mage::helper('tax')->__('Please fill all required fields with valid information.'));
+        $helper = Mage::helper('tax');
+        $errors = new Mage_Core_Exception_Input();
+        if (trim((string) $this->getCode()) === '') {
+            $errors->addError('code', $helper->__('Tax rate code is required.'));
         }
-
-        if (!is_numeric($this->getRate()) || $this->getRate() < 0) {
-            Mage::throwException(Mage::helper('tax')->__('Rate Percent should be a positive number.'));
+        $country = (string) $this->getTaxCountryId();
+        if ($country === '') {
+            $errors->addError('tax_country_id', $helper->__('Tax country is required.'));
+        } elseif (!Mage::getModel('directory/country')->loadByCode($country)->getId()) {
+            $errors->addError('tax_country_id', $helper->__('One of the country has invalid code.'));
         }
+        $rate = $this->getData('rate');
+        if ($rate === null || $rate === '') {
+            $errors->addError('rate', $helper->__('Rate is required.'));
+        } elseif (!is_numeric($rate) || $rate < 0) {
+            $errors->addError('rate', $helper->__('Rate Percent should be a positive number.'));
+        }
+        foreach (array_keys($this->getTitle() ?? []) as $storeId) {
+            if (!array_key_exists((int) $storeId, Mage::app()->getStores())) {
+                $errors->addError('title', $helper->__('Unknown store ID: %s', $storeId));
+            }
+        }
+        if ($this->getZipIsRange()) {
+            foreach (['zip_from', 'zip_to'] as $field) {
+                if ((string) $this->getData($field) === '') {
+                    $errors->addError($field, $helper->__('Please fill all required fields with valid information.'));
+                }
+            }
+        }
+        $errors->throwIfErrors();
 
         if ($this->getZipIsRange()) {
-            $zipFrom = $this->getZipFrom();
-            $zipTo = $this->getZipTo();
+            $zipFrom = $this->getData('zip_from');
+            $zipTo = $this->getData('zip_to');
 
             if (strlen((string) $zipFrom) > 9 || strlen((string) $zipTo) > 9) {
-                Mage::throwException(Mage::helper('tax')->__('Maximum zip code length is 9.'));
+                throw new Mage_Core_Exception_Input()->addError('zip_from', $helper->__('Maximum zip code length is 9.'));
             }
 
-            if (!is_numeric($zipFrom) || !is_numeric($zipTo) || $zipFrom < 0 || $zipTo < 0) {
-                Mage::throwException(Mage::helper('tax')->__('Zip code should not contain characters other than digits.'));
+            if (!ctype_digit((string) $zipFrom) || !ctype_digit((string) $zipTo)) {
+                throw new Mage_Core_Exception_Input()->addError('zip_from', $helper->__('Zip code should not contain characters other than digits.'));
             }
 
-            if ($zipFrom > $zipTo) {
-                Mage::throwException(Mage::helper('tax')->__('Range To should be equal or greater than Range From.'));
+            if ((int) $zipFrom > (int) $zipTo) {
+                throw new Mage_Core_Exception_Input()->addError('zip_to', $helper->__('Range To should be equal or greater than Range From.'));
             }
 
             $this->setTaxPostcode($zipFrom . '-' . $zipTo);
@@ -107,7 +129,10 @@ class Mage_Tax_Model_Calculation_Rate extends Mage_Core_Model_Abstract
     #[\Override]
     protected function _afterSave()
     {
-        $this->saveTitles();
+        // A save without titles keeps the stored ones
+        if ($this->getTitle() !== null) {
+            $this->saveTitles();
+        }
         Mage::dispatchEvent('tax_settings_change_after');
         return parent::_afterSave();
     }
@@ -116,13 +141,13 @@ class Mage_Tax_Model_Calculation_Rate extends Mage_Core_Model_Abstract
      * Processing object before delete data
      *
      * @return Mage_Core_Model_Abstract
-     * @throws Mage_Core_Exception
+     * @throws Mage_Core_Exception_Conflict when a tax rule uses the rate
      */
     #[\Override]
     protected function _beforeDelete()
     {
         if ($this->_isInRule()) {
-            Mage::throwException(Mage::helper('tax')->__('Tax rate cannot be removed. It exists in tax rule'));
+            throw new Mage_Core_Exception_Conflict(Mage::helper('tax')->__('Tax rate cannot be removed. It exists in tax rule'));
         }
         return parent::_beforeDelete();
     }

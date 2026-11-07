@@ -121,3 +121,5 @@ POST /api/customers/social-auth
 ```
 
 The response contains the JWT (`token`, `token_type`, `expires_in`), the customer info, and the customer cart. Customers with 2FA enabled must also send `twofaCode`.
+
+The API does not use **Failed Attempts Allowed per IP per Hour**. It counts every attempt in one minute against **Auth-token endpoint (per IP)** in **System → Configuration → Advanced → System → Rate limit**, on a counter of its own. Over the limit, it answers 429 with a `Retry-After` header.

@@ -138,8 +138,8 @@ SPDX-License-Identifier: AFL-3.0
                 <rate_limit>
                     <fields>
                         <reports_refresh translate="label comment" module="reports">
-                            <label>Report statistics refresh (API)</label>
-                            <comment>Per API caller. Default 10 per minute. 0 to disable.</comment>
+                            <label>Report statistics refresh</label>
+                            <comment>Per admin user or API caller. Default 10 per minute. 0 to disable.</comment>
                             <sort_order>320</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>

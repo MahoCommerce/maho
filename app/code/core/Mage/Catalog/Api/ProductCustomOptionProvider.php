@@ -116,14 +116,9 @@ final class ProductCustomOptionProvider extends \Maho\ApiPlatform\Provider
 
     private function getOption(Mage_Catalog_Model_Product $product, int $optionId): ProductCustomOption
     {
-        /** @var Mage_Catalog_Model_Product_Option $option */
-        $option = Mage::getModel('catalog/product_option')->load($optionId);
-
-        if (!$option->getId() || (int) $option->getProductId() !== (int) $product->getId()) {
-            throw new NotFoundHttpException('Option not found');
-        }
-
-        return $this->mapOption($option);
+        /** @var \Mage_Catalog_Service_Product_Option $service */
+        $service = Mage::getService('catalog/product_option');
+        return $this->mapOption($service->getById($product, $optionId));
     }
 
     private function mapOption(Mage_Catalog_Model_Product_Option $option, bool $valuesPreloaded = false): ProductCustomOption

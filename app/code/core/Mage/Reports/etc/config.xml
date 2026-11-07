@@ -44,6 +44,11 @@ SPDX-License-Identifier: AFL-3.0
                 </entities>
             </reports_resource>
         </models>
+        <services>
+            <reports>
+                <class>Mage_Reports_Service</class>
+            </reports>
+        </services>
         <queue>
             <routing>
                 <reports>slow</reports>

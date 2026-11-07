@@ -566,7 +566,7 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
      * Check for unique values existence
      *
      * @return $this
-     * @throws Mage_Core_Exception
+     * @throws Mage_Core_Exception_Conflict
      */
     protected function _checkUnique(Mage_Core_Model_Abstract $object)
     {
@@ -614,7 +614,7 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
             } else {
                 $error = Mage::helper('core')->__('%s already exist.', implode(', ', $existent));
             }
-            Mage::throwException($error);
+            throw new Mage_Core_Exception_Conflict($error);
         }
         return $this;
     }

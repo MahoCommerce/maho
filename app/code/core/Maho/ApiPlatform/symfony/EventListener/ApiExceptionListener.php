@@ -281,18 +281,22 @@ class ApiExceptionListener implements EventSubscriberInterface
             }
             $data = [
                 'error' => match ($statusCode) {
+                    403 => 'forbidden',
                     404 => 'not_found',
                     409 => 'conflict',
+                    429 => 'too_many_requests',
                     default => 'unprocessable_entity',
                 },
                 'message' => $exception->getMessage(),
                 'code' => $statusCode,
             ];
             if ($exception instanceof \Mage_Core_Exception_Input) {
-                $data['details'] = ['errors' => array_map(
+                $errors = array_map(
                     fn(array $error): array => ['field' => self::apiFieldName($error['field']), 'message' => $error['message']],
                     $exception->getErrors(),
-                )];
+                );
+                // The first field, as ValidationException gives it
+                $data['details'] = ['field' => $errors[0]['field'] ?? null, 'errors' => $errors];
             }
 
             if ($this->showDebug()) {
@@ -302,7 +306,8 @@ class ApiExceptionListener implements EventSubscriberInterface
                 ];
             }
 
-            return new JsonResponse($data, $statusCode);
+            $retryAfter = $exception instanceof \Mage_Core_Exception_TooManyRequests ? $exception->getRetryAfter() : null;
+            return new JsonResponse($data, $statusCode, $retryAfter === null ? [] : ['Retry-After' => (string) $retryAfter]);
         }
 
         // Handle generic exceptions
@@ -334,8 +339,10 @@ class ApiExceptionListener implements EventSubscriberInterface
     public static function mageExceptionStatus(\Mage_Core_Exception $exception): int
     {
         return match (true) {
+            $exception instanceof \Mage_Core_Exception_Forbidden => 403,
             $exception instanceof \Mage_Core_Exception_NoSuchEntity => 404,
             $exception instanceof \Mage_Core_Exception_Conflict => 409,
+            $exception instanceof \Mage_Core_Exception_TooManyRequests => 429,
             default => 422,
         };
     }

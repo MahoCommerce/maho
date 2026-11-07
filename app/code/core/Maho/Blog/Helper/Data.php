@@ -13,7 +13,9 @@ class Maho_Blog_Helper_Data extends Mage_Core_Helper_Abstract
 
     public function isEnabled(): bool
     {
-        return $this->isModuleEnabled() && $this->isModuleOutputEnabled();
+        /** @var Maho_Blog_Service_Post $service */
+        $service = Mage::getService('blog/post');
+        return $service->isEnabled((int) Mage::app()->getStore()->getId());
     }
 
     public function shouldShowInNavigation(): bool
@@ -51,7 +53,9 @@ class Maho_Blog_Helper_Data extends Mage_Core_Helper_Abstract
 
     public function areCategoriesEnabled(): bool
     {
-        return $this->isEnabled() && Mage::getStoreConfigFlag('blog/general/enable_categories');
+        /** @var Maho_Blog_Service_Category $service */
+        $service = Mage::getService('blog/category');
+        return $service->isEnabled((int) Mage::app()->getStore()->getId());
     }
 
     public function getCategoryUrlPrefix(): string

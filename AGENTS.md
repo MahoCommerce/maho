@@ -307,7 +307,10 @@ class My_Module_Checkout_CartController extends Mage_Checkout_CartController { /
   `Mage_Core_Exception_NoSuchEntity` (404) when the record that the URL names does not exist,
   `Mage_Core_Exception_Conflict` (409) when the current state of the record does not allow the action
   (an order that is already canceled, an email that another customer uses, a lock that another request
-  holds), `Mage_Core_Exception_Input` (422 with `details.errors`) for errors of named fields, and a
+  holds), `Mage_Core_Exception_Forbidden` (403) when the store does not allow this client to do the action
+  (a guest where only customers can subscribe), `Mage_Core_Exception_Input` (422 with `details.errors`)
+  for errors of named fields,
+  `Mage_Core_Exception_TooManyRequests` (429 with `Retry-After`) when a rate limit refuses the client, and a
   plain `Mage_Core_Exception` (422) for any other content that the service cannot accept, such as an
   unknown SKU in the body. 400 is for a malformed request only, which the transport detects. A
   `\RuntimeException` is a server fault (500), so a transport never turns it into a client error, and
@@ -315,7 +318,9 @@ class My_Module_Checkout_CartController extends Mage_Checkout_CartController { /
   `ApiExceptionListener` maps these for REST and `MageExceptionNormalizer` for GraphQL. Code that
   reads the request (a path, a body, the API Platform context) stays in the transport, as
   `Mage\Checkout\Api\CartRequest` does. `tests/Backend/Unit/Maho/ServiceLayoutTest.php` enforces the
-  layout
+  layout. `LayeringConventionTest.php` beside it fails on an HTTP exception outside the API, on the
+  request or the session in a service, and on a rate limit or a honeypot check in a transport. Its
+  allowlist only shrinks: the pull request that fixes a file lowers or removes the entry of that file
 - **Docs**: a module keeps the pages about its feature in its own folder and declares them in its
   `config.xml`, one folder for each audience: `<global><docs><user>docs/user</user></docs></global>`.
   `user` is the person who works in the admin, `developer` writes code, `sysadmin` runs the

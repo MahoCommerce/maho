@@ -53,15 +53,12 @@ class Mage_Adminhtml_Permissions_UserController extends Mage_Adminhtml_Controlle
              ->_title($this->__('Users'));
 
         $id = $this->getRequest()->getParam('user_id');
-        $model = Mage::getModel('admin/user');
-
-        if ($id) {
-            $model->load($id);
-            if (!$model->getId()) {
-                Mage::getSingleton('adminhtml/session')->addError($this->__('This user no longer exists.'));
-                $this->_redirect('*/*/');
-                return;
-            }
+        try {
+            $model = $id ? $this->getService()->getById((int) $id) : Mage::getModel('admin/user');
+        } catch (Mage_Core_Exception_NoSuchEntity $e) {
+            Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
+            $this->_redirect('*/*/');
+            return;
         }
 
         $this->_title($model->getId() ? $model->getName() : $this->__('New User'));
@@ -91,116 +88,96 @@ class Mage_Adminhtml_Permissions_UserController extends Mage_Adminhtml_Controlle
     #[Maho\Config\Route('/admin/permissions_user/save')]
     public function saveAction()
     {
-        if ($data = $this->getRequest()->getPost()) {
-            $id = $this->getRequest()->getParam('user_id');
-            $model = Mage::getModel('admin/user')->load($id);
-            // @var $isNew flag for detecting new admin user creation.
-            $isNew = $model->getId() ? false : true;
-            if (!$model->getId() && $id) {
-                Mage::getSingleton('adminhtml/session')->addError($this->__('This user no longer exists.'));
-                $this->_redirect('*/*/');
-                return;
-            }
+        $data = $this->getRequest()->getPost();
+        if (!$data) {
+            $this->_redirect('*/*/');
+            return;
+        }
+        $session = Mage::getSingleton('adminhtml/session');
+        $id = $this->getRequest()->getParam('user_id');
+        try {
+            $model = $id ? $this->getService()->getById((int) $id) : Mage::getModel('admin/user');
+        } catch (Mage_Core_Exception_NoSuchEntity $e) {
+            $session->addError($e->getMessage());
+            $this->_redirect('*/*/');
+            return;
+        }
 
-            //Validate current admin password
-            $currentPassword = $this->getRequest()->getParam('current_password');
-            $this->getRequest()->setParam('current_password', null);
-            unset($data['current_password']);
-            $result = $this->_validateCurrentPassword($currentPassword);
+        $currentPassword = $this->getRequest()->getParam('current_password');
+        $this->getRequest()->setParam('current_password', null);
+        unset($data['current_password']);
+        $result = $this->_validateCurrentPassword($currentPassword);
 
-            $model->setData($data);
+        $model->setData($data);
+        // A blank password field keeps the current password
+        if ($model->hasNewPassword() && $model->getNewPassword() === '') {
+            $model->unsNewPassword();
+        }
+        if ($model->hasPasswordConfirmation() && $model->getPasswordConfirmation() === '') {
+            $model->unsPasswordConfirmation();
+        }
 
-            /*
-             * Unsetting new password and password confirmation if they are blank
-             */
-            if ($model->hasNewPassword() && $model->getNewPassword() === '') {
-                $model->unsNewPassword();
-            }
-            if ($model->hasPasswordConfirmation() && $model->getPasswordConfirmation() === '') {
-                $model->unsPasswordConfirmation();
-            }
-
-            if (!is_array($result)) {
-                $result = $model->validate();
-            }
-            if (is_array($result)) {
-                Mage::getSingleton('adminhtml/session')->setUserData($data);
-                foreach ($result as $message) {
-                    Mage::getSingleton('adminhtml/session')->addError($message);
-                }
-                $this->_redirect('*/*/edit', ['_current' => true]);
-                return $this;
-            }
-
+        $errors = is_array($result) ? $result : [];
+        if ($errors === []) {
+            $roles = $this->getRequest()->getParam('roles');
             try {
-                $model->save();
-                // Send notification to General and additional contacts (if declared) that a new admin user was created.
-                if (Mage::getStoreConfigFlag('admin/security/crate_admin_user_notification') && $isNew) {
-                    Mage::getModel('admin/user')->sendAdminNotification($model);
-                }
-                if ($uRoles = $this->getRequest()->getParam('roles', false)) {
-                    if (is_array($uRoles) && (count($uRoles) >= 1)) {
-                        // with fix for previous multi-roles logic
-                        $model->setRoleIds(array_slice($uRoles, 0, 1))
-                            ->setRoleUserId($model->getUserId())
-                            ->saveRelations();
-                    }
-                }
-                Mage::getSingleton('adminhtml/session')->addSuccess($this->__('The user has been saved.'));
-                Mage::getSingleton('adminhtml/session')->setUserData(false);
+                // The role grid sends a list, and a user has one role
+                $this->getService()->save($model, is_array($roles) && $roles !== [] ? (int) reset($roles) : null);
+                $session->addSuccess($this->__('The user has been saved.'));
+                $session->setUserData(false);
                 $this->_redirect('*/*/');
                 return;
             } catch (Mage_Core_Exception $e) {
-                Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
-                Mage::getSingleton('adminhtml/session')->setUserData($data);
-                $this->_redirect('*/*/edit', ['user_id' => $model->getUserId()]);
-                return;
+                $errors = explode("\n", $e->getMessage());
             }
         }
-        $this->_redirect('*/*/');
+        foreach ($errors as $message) {
+            $session->addError($message);
+        }
+        $session->setUserData($data);
+        $this->_redirect('*/*/edit', ['_current' => true]);
     }
 
     #[Maho\Config\Route('/admin/permissions_user/delete')]
     public function deleteAction(): void
     {
-        $id = $this->getRequest()->getParam('user_id');
+        $session = Mage::getSingleton('adminhtml/session');
+        $id = (int) $this->getRequest()->getParam('user_id');
 
-        //Validate current admin password
         $currentPassword = $this->getRequest()->getParam('current_password');
         $this->getRequest()->setParam('current_password', null);
         $result = $this->_validateCurrentPassword($currentPassword);
-
         if (is_array($result)) {
             foreach ($result as $error) {
-                $this->_getSession()->addError($error);
+                $session->addError($error);
             }
             $this->_redirect('*/*/edit', ['user_id' => $id]);
             return;
         }
 
-        $currentUser = Mage::getSingleton('admin/session')->getUser();
-
-        if ($id = $this->getRequest()->getParam('user_id')) {
-            if ($currentUser->getId() == $id) {
-                Mage::getSingleton('adminhtml/session')->addError($this->__('You cannot delete your own account.'));
-                $this->_redirect('*/*/edit', ['user_id' => $id]);
-                return;
-            }
-            try {
-                $model = Mage::getModel('admin/user');
-                $model->setId($id);
-                $model->delete();
-                Mage::getSingleton('adminhtml/session')->addSuccess($this->__('The user has been deleted.'));
-                $this->_redirect('*/*/');
-                return;
-            } catch (Exception $e) {
-                Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
-                $this->_redirect('*/*/edit', ['user_id' => $this->getRequest()->getParam('user_id')]);
-                return;
-            }
+        if (!$id) {
+            $session->addError($this->__('Unable to find a user to delete.'));
+            $this->_redirect('*/*/');
+            return;
         }
-        Mage::getSingleton('adminhtml/session')->addError($this->__('Unable to find a user to delete.'));
-        $this->_redirect('*/*/');
+        if (Mage::getSingleton('admin/session')->getUser()->getId() == $id) {
+            $session->addError($this->__('You cannot delete your own account.'));
+            $this->_redirect('*/*/edit', ['user_id' => $id]);
+            return;
+        }
+
+        try {
+            $this->getService()->delete($this->getService()->getById($id));
+            $session->addSuccess($this->__('The user has been deleted.'));
+            $this->_redirect('*/*/');
+            return;
+        } catch (Mage_Core_Exception $e) {
+            $session->addError($e->getMessage());
+        } catch (Throwable $e) {
+            Mage::logException($e);
+            $session->addError($this->__('An error occurred while deleting this user.'));
+        }
+        $this->_redirect('*/*/edit', ['user_id' => $id]);
     }
 
     #[Maho\Config\Route('/admin/permissions_user/rolesGrid')]
@@ -228,5 +205,11 @@ class Mage_Adminhtml_Permissions_UserController extends Mage_Adminhtml_Controlle
             ->setBody($this->getLayout()
             ->createBlock('adminhtml/permissions_user_grid')
             ->toHtml());
+    }
+
+    protected function getService(): Mage_Admin_Service_User
+    {
+        /** @var Mage_Admin_Service_User */
+        return Mage::getService('admin/user');
     }
 }

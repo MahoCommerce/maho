@@ -34,7 +34,7 @@ Available commands:
  admin
   admin:user:change-password    Change password of an admin users
   admin:user:create             Create an admin user
-  admin:user:disable            Enable an admin user
+  admin:user:disable            Disable an admin user
   admin:user:enable             Enable an admin user
   admin:user:list               List all admin users
   admin:user:twofa-reset        Remove the two-factor authentication of an admin user who lost their device

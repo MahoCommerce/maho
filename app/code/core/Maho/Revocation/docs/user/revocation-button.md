@@ -106,7 +106,7 @@ All settings live under **System → Configuration → Sales → Revocation Butt
 | **Enabled** | Master switch. Does not by itself display the button, you must place the widget. | Store View | No |
 | **Button Label** | Text for the storefront button. Leave empty for the translated default ("Revoke contract" / "Vertrag widerrufen"). | Store View | (empty) |
 | **Merchant Notification Email** | Where merchant notifications are sent. Leave empty to use the General Contact email. | Store View | (empty) |
-| **Cooling-Off Period (Days)** | Gates the my-account shortcut only, never the public form. The statutory period is 14 days. | Store View | 14 |
+| **Cooling-Off Period (Days)** | Gates the my-account shortcut and the API, never the public form. The statutory period is 14 days. | Store View | 14 |
 
 The cooling-off window is measured from the latest shipment date when available, falling back to the order date. Setting it to `0` always shows the my-account link. It never restricts the public `/revocation` form, which must remain open.
 
@@ -141,7 +141,7 @@ This form must stay frictionless, so only **invisible** background measures are 
 
 - **Honeypot**: a hidden field humans never see. Bots that fill it get the *normal success page* so they receive no signal that a trap exists. No row is written, no email is sent.
 - **Submit timing**: the form embeds an encrypted render timestamp; a submit faster than the minimum is treated as a bot and silently dropped (also shown the normal success page). Under full page cache a stale token only ever inflates the measured time, so the gate "degrades open" and never blocks a real user.
-- **IP rate limit**: over-limit submissions are refused with a soft error asking the customer to retry later or contact you directly.
+- **IP rate limit**: over-limit submissions are refused with a soft error asking the customer to retry later or contact you directly. The form and the API count the submissions of one IP together.
 - **Recipient rate limit**: protects a victimized third party from email-bombing. The declaration is still recorded and the merchant is still notified; only the courtesy email to that address is withheld, and an admin can resend it.
 
 Rate limits are rolling-window counters kept on the cache backend. They are a soft throttle for abuse mitigation, not a hard atomic guarantee.
@@ -198,7 +198,7 @@ Every submission is written to the `revocation_request` table. Key fields:
 | `customer_name`, `email`, `reason` | The declaration content (reason is optional). |
 | `verified` | 1 only for authenticated my-account submissions. |
 | `ip`, `user_agent`, `locale` | Context captured for the audit record. |
-| `processed_status`, `processed_at`, `admin_note` | The merchant's triage decisions and notes. |
+| `processed_status`, `processed_at`, `admin_note` | The merchant's triage decisions and notes. `processed_at` is the time of the last change of the status. |
 | `suppressed_at`, `suppressed_reason` | Set when a receipt email was withheld (e.g. rate limit). |
 
 Declaration fields are never edited after insert, the row is the legal receipt.

@@ -68,6 +68,9 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     public const DEFAULT_CODE                    = 'default';
     public const ADMIN_CODE                      = 'admin';
 
+    /** A store view code: letters (a-z), digits (0-9), underscores and dashes, starting with a letter. */
+    public const CODE_PATTERN                    = '/^[a-z]+[a-z0-9_\-]*$/';
+
     /**
      * Cache tag
      */

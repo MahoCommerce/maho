@@ -10,14 +10,25 @@ declare(strict_types=1);
 
 use Maho\ApiPlatform\Trait\DateRangeFilterTrait;
 use Maho\ApiPlatform\Trait\FilterValueTrait;
+use Maho\Security\RateLimitScope;
+use Mage_Sales_Model_Order as Order;
+use Mage_Sales_Model_Order_Creditmemo as Creditmemo;
+use Mage_Sales_Model_Order_Invoice as Invoice;
+use Mage_Sales_Model_Order_Shipment as Shipment;
 
 /**
- * Places orders from carts, finds orders, and cancels, holds, invoices, ships and refunds them.
+ * Places orders from carts, finds orders, and cancels, holds, invoices, ships and refunds them, for the admin,
+ * the storefront and the API.
  */
 class Mage_Sales_Service_Order
 {
     use DateRangeFilterTrait;
     use FilterValueTrait;
+
+    public const XML_PATH_GUEST_LOOKUP_RATE_LIMIT = 'system/rate_limit/guest_order_lookup';
+    public const GUEST_LOOKUP_WINDOW = 3600;
+
+    public const CAPTURE_CASES = [Invoice::CAPTURE_ONLINE, Invoice::CAPTURE_OFFLINE, Invoice::NOT_CAPTURE];
 
     /**
      * Place order from quote
@@ -215,26 +226,205 @@ class Mage_Sales_Service_Order
     }
 
     /**
-     * Get guest order by increment ID and access token
+     * Load the order $orderId. With $customerId, only an order of that customer exists for the caller.
      *
-     * @param string $incrementId Order increment ID
-     * @param string $accessToken Guest access token
+     * @throws Mage_Core_Exception_NoSuchEntity
      */
-    public function getForGuest(string $incrementId, string $accessToken): ?\Mage_Sales_Model_Order
+    public function requireById(int $orderId, ?int $customerId = null): Order
     {
-        $order = \Mage::getModel('sales/order')->loadByIncrementId($incrementId);
+        return $this->requireOwned($orderId > 0 ? $this->getById($orderId) : null, $customerId);
+    }
 
-        if (!$order->getId()) {
-            return null;
+    /**
+     * Load the order $incrementId. With $customerId, only an order of that customer exists for the caller.
+     *
+     * @throws Mage_Core_Exception_NoSuchEntity
+     */
+    public function requireByIncrementId(string $incrementId, ?int $customerId = null): Order
+    {
+        return $this->requireOwned($incrementId !== '' ? $this->getByIncrementId($incrementId) : null, $customerId);
+    }
+
+    /**
+     * Return true when the customer $customerId may see the order $order on the storefront: the order is theirs, and
+     * its state is visible on the storefront.
+     */
+    public function isVisibleToCustomer(Order $order, ?int $customerId): bool
+    {
+        return $order->getId() && $this->isOwner($order, $customerId)
+            && in_array($order->getState(), Mage::getSingleton('sales/order_config')->getVisibleOnFrontStates(), true);
+    }
+
+    /**
+     * Load the invoice $invoiceId. With $orderId, only an invoice of that order exists.
+     *
+     * @throws Mage_Core_Exception_NoSuchEntity
+     */
+    public function requireInvoice(int $invoiceId, ?int $orderId = null): Invoice
+    {
+        return $this->requireDocument(Mage::getModel('sales/order_invoice'), $invoiceId, $orderId, 'Invoice not found');
+    }
+
+    /**
+     * @throws Mage_Core_Exception_NoSuchEntity
+     */
+    public function requireShipment(int $shipmentId): Shipment
+    {
+        return $this->requireDocument(Mage::getModel('sales/order_shipment'), $shipmentId, null, 'Shipment not found');
+    }
+
+    /**
+     * @throws Mage_Core_Exception_NoSuchEntity
+     */
+    public function requireCreditmemo(int $creditmemoId): Creditmemo
+    {
+        return $this->requireDocument(Mage::getModel('sales/order_creditmemo'), $creditmemoId, null, 'Credit memo not found');
+    }
+
+    /**
+     * Get the guest order $incrementId whose one-time access token is $accessToken. Count each call against the
+     * limit of the client.
+     *
+     * @throws Mage_Core_Exception_TooManyRequests when the client is over the limit
+     */
+    public function getForGuest(string $incrementId, string $accessToken): ?Order
+    {
+        $limit = (int) Mage::getStoreConfig(self::XML_PATH_GUEST_LOOKUP_RATE_LIMIT);
+        if (!Mage::helper('core')->rateLimiter('guest_order_token', $limit, self::GUEST_LOOKUP_WINDOW, RateLimitScope::Ip)->attempt()) {
+            throw new Mage_Core_Exception_TooManyRequests('Too many requests. Please try again later.', self::GUEST_LOOKUP_WINDOW);
         }
 
-        // Verify access token matches
-        $storedToken = $order->getData('guest_access_token');
-        if (!$storedToken || !hash_equals($storedToken, $accessToken)) {
+        $order = $incrementId !== '' ? $this->getByIncrementId($incrementId) : null;
+        $storedToken = (string) $order?->getData('guest_access_token');
+
+        return $storedToken !== '' && hash_equals($storedToken, $accessToken) ? $order : null;
+    }
+
+    /**
+     * Clear the one-time access token of the guest order $order, so that the token cannot show the order again.
+     * Return a token to create an account for the email of the order when no customer of its website has the email.
+     */
+    public function consumeGuestToken(Order $order): ?string
+    {
+        $resource = Mage::getSingleton('core/resource');
+        $resource->getConnection('core_write')->update(
+            $resource->getTableName('sales/order'),
+            ['guest_access_token' => null],
+            ['entity_id = ?' => $order->getId()],
+        );
+
+        $email = (string) $order->getCustomerEmail();
+        if ($email === '') {
             return null;
         }
+        $customer = Mage::getModel('customer/customer')
+            ->setWebsiteId(Mage::app()->getStore($order->getStoreId())->getWebsiteId())
+            ->loadByEmail($email);
 
+        return $customer->getId() ? null : Mage::helper('sales/accountToken')->generate((int) $order->getId(), $email);
+    }
+
+    /**
+     * Find the guest order $incrementId for the guest order form. The billing last name must match, and the email or
+     * the billing postcode, whichever is given. Count each failed lookup against the limit of the client.
+     *
+     * @throws Mage_Core_Exception_TooManyRequests when the client is over the limit
+     * @throws Mage_Core_Exception_NoSuchEntity when no guest order matches
+     * @throws Mage_Core_Exception_Forbidden when the order belongs to a customer, who must log in to see it
+     */
+    public function findForGuest(
+        string $incrementId,
+        string $lastname,
+        #[\SensitiveParameter]
+        string $email = '',
+        string $postcode = '',
+    ): Order {
+        return $this->lookUpForGuest(function () use ($incrementId, $lastname, $email, $postcode): ?Order {
+            $order = $incrementId !== '' && $lastname !== '' && ($email !== '' || $postcode !== '')
+                ? $this->getByIncrementId($incrementId)
+                : null;
+            $billing = $order?->getBillingAddress();
+            if (!$billing
+                || strtolower($lastname) !== strtolower((string) $billing->getLastname())
+                || ($email !== '' && strtolower($email) !== strtolower((string) $order->getCustomerEmail()))
+                || ($postcode !== '' && strtolower($postcode) !== strtolower((string) $billing->getPostcode()))
+            ) {
+                return null;
+            }
+            return $order;
+        });
+    }
+
+    /**
+     * Find the guest order $incrementId whose protect code is $protectCode, for the cookie of the guest order form.
+     *
+     * @throws Mage_Core_Exception_TooManyRequests when the client is over the limit
+     * @throws Mage_Core_Exception_NoSuchEntity when no guest order matches
+     * @throws Mage_Core_Exception_Forbidden when the order belongs to a customer, who must log in to see it
+     */
+    public function findForGuestByProtectCode(string $incrementId, string $protectCode): Order
+    {
+        return $this->lookUpForGuest(function () use ($incrementId, $protectCode): ?Order {
+            $order = $incrementId !== '' && $protectCode !== '' ? $this->getByIncrementId($incrementId) : null;
+            return $order && hash_equals((string) $order->getProtectCode(), $protectCode) ? $order : null;
+        });
+    }
+
+    /**
+     * @param callable(): ?Order $find
+     */
+    private function lookUpForGuest(callable $find): Order
+    {
+        $limiter = Mage::helper('core')->rateLimiter(
+            'guest_order_lookup',
+            (int) Mage::getStoreConfig(self::XML_PATH_GUEST_LOOKUP_RATE_LIMIT),
+            self::GUEST_LOOKUP_WINDOW,
+            RateLimitScope::Ip,
+        );
+        if ($limiter->tooManyAttempts()) {
+            throw new Mage_Core_Exception_TooManyRequests(
+                Mage::helper('sales')->__('Too Soon: You are trying to perform this operation too frequently. Please wait a few seconds and try again.'),
+                self::GUEST_LOOKUP_WINDOW,
+            );
+        }
+
+        $order = $find();
+        if ($order && $order->getCustomerId() === null) {
+            return $order;
+        }
+        $limiter->hit();
+        throw $order
+            ? new Mage_Core_Exception_Forbidden(Mage::helper('sales')->__('Please log in to view your order details.'))
+            : new Mage_Core_Exception_NoSuchEntity(Mage::helper('sales')->__('Entered data is incorrect. Please try again.'));
+    }
+
+    private function isOwner(Order $order, ?int $customerId): bool
+    {
+        return $customerId > 0 && (int) $order->getCustomerId() === $customerId;
+    }
+
+    private function requireOwned(?Order $order, ?int $customerId): Order
+    {
+        if (!$order || ($customerId !== null && !$this->isOwner($order, $customerId))) {
+            throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('sales')->__('Order not found'));
+        }
         return $order;
+    }
+
+    /**
+     * @template T of Mage_Sales_Model_Abstract
+     * @param T $document an empty document model
+     * @return T
+     */
+    private function requireDocument(Mage_Sales_Model_Abstract $document, int $id, ?int $orderId, string $notFound): Mage_Sales_Model_Abstract
+    {
+        if ($id > 0) {
+            $document->load($id);
+        }
+        if (!$document->getId() || ($orderId !== null && (int) $document->getOrderId() !== $orderId)) {
+            throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('sales')->__($notFound));
+        }
+        return $document;
     }
 
     /**
@@ -477,113 +667,91 @@ class Mage_Sales_Service_Order
     }
 
     /**
-     * Cancel order
+     * Cancel the order $order. Add $reason to the history of the order.
      *
-     * @param \Mage_Sales_Model_Order $order Order
-     * @param string|null $reason Cancellation reason
+     * @throws Mage_Core_Exception_Conflict when the order cannot be canceled, or another request holds the order lock
      */
-    public function cancel(\Mage_Sales_Model_Order $order, ?string $reason = null): \Mage_Sales_Model_Order
+    public function cancel(Order $order, ?string $reason = null): Order
     {
-        return $this->withOrderLock((int) $order->getId(), function () use ($order, $reason) {
-            // Re-read under the lock so canCancel() sees live state: a concurrent
-            // invoice/ship/cancel may have transitioned the order while we waited.
-            $order->load((int) $order->getId());
-            if (!$order->canCancel()) {
-                throw new \Mage_Core_Exception_Conflict('Order cannot be cancelled');
-            }
-
-            try {
-                $order->cancel();
-
-                if ($reason) {
-                    $order->addStatusHistoryComment('Order cancelled: ' . $reason, false)
-                        ->setIsCustomerNotified(true);
-                }
-
-                $order->save();
-
-                return $order;
-            } catch (\Exception $e) {
-                \Mage::logException($e);
-                throw new \RuntimeException('Failed to cancel order');
-            }
-        });
+        return $this->changeState($order, 'cancel', $reason);
     }
 
     /**
-     * Put an order on hold. Serialized with the other state transitions through
-     * the cross-request order lock so a hold can't race an invoice/ship/cancel.
-     */
-    public function hold(\Mage_Sales_Model_Order $order, ?string $reason = null): \Mage_Sales_Model_Order
-    {
-        return $this->withOrderLock((int) $order->getId(), function () use ($order, $reason) {
-            $order->load((int) $order->getId());
-            if (!$order->canHold()) {
-                throw new \Mage_Core_Exception_Conflict('Order cannot be held');
-            }
-
-            try {
-                $order->hold();
-                if ($reason) {
-                    $order->addStatusHistoryComment('Order held: ' . $reason, false);
-                }
-                $order->save();
-
-                return $order;
-            } catch (\Exception $e) {
-                \Mage::logException($e);
-                throw new \RuntimeException('Failed to hold order');
-            }
-        });
-    }
-
-    /**
-     * Release an order from hold.
-     */
-    public function unhold(\Mage_Sales_Model_Order $order, ?string $reason = null): \Mage_Sales_Model_Order
-    {
-        return $this->withOrderLock((int) $order->getId(), function () use ($order, $reason) {
-            $order->load((int) $order->getId());
-            if (!$order->canUnhold()) {
-                throw new \Mage_Core_Exception_Conflict('Order is not on hold');
-            }
-
-            try {
-                $order->unhold();
-                if ($reason) {
-                    $order->addStatusHistoryComment('Order released from hold: ' . $reason, false);
-                }
-                $order->save();
-
-                return $order;
-            } catch (\Exception $e) {
-                \Mage::logException($e);
-                throw new \RuntimeException('Failed to unhold order');
-            }
-        });
-    }
-
-    /**
-     * Add order note
+     * Put the order $order on hold. Add $reason to the history of the order.
      *
-     * @param \Mage_Sales_Model_Order $order Order
-     * @param string $note Note text
-     * @param bool $notifyCustomer Notify customer
-     * @param bool $visibleOnFront Visible on frontend
+     * @throws Mage_Core_Exception_Conflict when the order cannot be held, or another request holds the order lock
+     */
+    public function hold(Order $order, ?string $reason = null): Order
+    {
+        return $this->changeState($order, 'hold', $reason);
+    }
+
+    /**
+     * Release the order $order from hold. Add $reason to the history of the order.
+     *
+     * @throws Mage_Core_Exception_Conflict when the order is not on hold, or another request holds the order lock
+     */
+    public function unhold(Order $order, ?string $reason = null): Order
+    {
+        return $this->changeState($order, 'unhold', $reason);
+    }
+
+    /**
+     * @param 'cancel'|'hold'|'unhold' $action
+     */
+    private function changeState(Order $order, string $action, ?string $reason): Order
+    {
+        return $this->withOrderLock((int) $order->getId(), function () use ($order, $action, $reason): Order {
+            // Re-read under the lock, so that the check sees what another request changed while this one waited
+            $order->load((int) $order->getId());
+            [$allowed, $refusal, $prefix] = match ($action) {
+                'cancel' => [$order->canCancel(), 'Order cannot be cancelled', 'Order cancelled: '],
+                'hold' => [$order->canHold(), 'Order cannot be held', 'Order held: '],
+                'unhold' => [$order->canUnhold(), 'Order is not on hold', 'Order released from hold: '],
+            };
+            if (!$allowed) {
+                throw new Mage_Core_Exception_Conflict(Mage::helper('sales')->__($refusal));
+            }
+
+            $order->{$action}();
+            if ($reason) {
+                $history = $order->addStatusHistoryComment($prefix . $reason, false);
+                if ($action === 'cancel') {
+                    $history->setIsCustomerNotified(true);
+                }
+            }
+            $order->save();
+            return $order;
+        });
+    }
+
+    /**
+     * Add the comment $note to the history of the order $order, and email it to the customer when $notifyCustomer is
+     * true. A comment without text must set a new status.
+     *
      * @param string|null $status New order status; the order refuses one not assigned to its current state
+     * @throws Mage_Core_Exception_Conflict when the order does not take comments
+     * @throws Mage_Core_Exception when the comment is empty, or the status is not valid
      */
     public function addNote(
-        \Mage_Sales_Model_Order $order,
+        Order $order,
         string $note,
         bool $notifyCustomer = false,
         bool $visibleOnFront = false,
         ?string $status = null,
-    ): \Mage_Sales_Model_Order {
+    ): Order {
+        if (!$order->canComment()) {
+            throw new Mage_Core_Exception_Conflict(Mage::helper('sales')->__('This order does not accept comments'));
+        }
+        if (trim($note) === '' && ($status === null || $status === $order->getStatus())) {
+            throw new Mage_Core_Exception(Mage::helper('sales')->__('Comment text is required'));
+        }
+
         $order->addStatusHistoryComment($note, $status ?? false)
             ->setIsCustomerNotified($notifyCustomer)
-            ->setIsVisibleOnFront((bool) $visibleOnFront);
-
+            ->setIsVisibleOnFront($visibleOnFront);
         $order->save();
+        $this->sendSafely(fn() => $order->sendOrderUpdateEmail($notifyCustomer, trim(strip_tags($note))));
 
         return $order;
     }
@@ -658,72 +826,115 @@ class Mage_Sales_Service_Order
     }
 
     /**
-     * Invoice an order and email the invoice to the customer when $notifyCustomer is true.
+     * Prepare an invoice of the order $order, which nothing saves yet.
      *
-     * @param array<int, float> $qtys Order item id => qty to invoice. An empty map invoices every item.
-     * @param string|null $captureCase One of the Mage_Sales_Model_Order_Invoice::CAPTURE_* and NOT_CAPTURE constants.
-     * @throws \Mage_Core_Exception_Conflict When the order cannot be invoiced, or another request holds the order lock.
-     * @throws \Mage_Core_Exception When a qty is not valid, or the invoice has no items.
+     * @param array<int, float|string> $qtys Order item id => qty to invoice. An empty map invoices every item.
+     * @throws Mage_Core_Exception_Conflict when the order cannot be invoiced
+     * @throws Mage_Core_Exception when a qty is not valid, or the invoice has no items
+     */
+    public function prepareInvoice(Order $order, array $qtys = []): Invoice
+    {
+        if (!$order->canInvoice()) {
+            throw new Mage_Core_Exception_Conflict(Mage::helper('sales')->__('Order cannot be invoiced (already fully invoiced or not in an invoiceable state)'));
+        }
+
+        /** @var Mage_Sales_Model_Service_Order $service */
+        $service = Mage::getModel('sales/service_order', $order);
+        $service->updateLocaleNumbers($qtys);
+        foreach ($qtys as $orderItemId => $qty) {
+            $orderItem = $order->getItemById($orderItemId);
+            // Dummy (bundle/configurable parent) items take their qty from the order, so neither check applies to them
+            if (!$orderItem || $orderItem->isDummy()) {
+                continue;
+            }
+            if (!$orderItem->getIsQtyDecimal() && fmod((float) $qty, 1.0) !== 0.0) {
+                throw new Mage_Core_Exception(Mage::helper('sales')->__('Order item %s does not accept a fractional qty', $orderItemId));
+            }
+            if ((float) $qty > (float) $orderItem->getQtyToInvoice()) {
+                throw new Mage_Core_Exception(Mage::helper('sales')->__('Qty to invoice for order item %s exceeds the qty available to invoice', $orderItemId));
+            }
+        }
+
+        $invoice = $service->prepareInvoice($qtys);
+        if (!$invoice->getTotalQty()) {
+            throw new Mage_Core_Exception(Mage::helper('sales')->__('Cannot create invoice: no items to invoice'));
+        }
+        return $invoice;
+    }
+
+    /**
+     * Invoice an order. Email the invoice when $sendEmail is true, which is $notifyCustomer when null, and put the
+     * comment in the email when $notifyCustomer is true. With $ship, or when the payment of the order forces it,
+     * ship the same items with the $tracks in the same transaction.
+     *
+     * @param array<int, float|string> $qtys Order item id => qty to invoice. An empty map invoices every item.
+     * @param string|null $captureCase One of self::CAPTURE_CASES.
+     * @param list<\Mage_Sales_Model_Order_Shipment_Track> $tracks Tracking numbers of the shipment.
+     * @throws Mage_Core_Exception_Conflict When the order cannot be invoiced, or another request holds the order lock.
+     * @throws Mage_Core_Exception When a qty or the capture mode is not valid, or the invoice has no items.
      */
     public function invoice(
-        \Mage_Sales_Model_Order $order,
+        Order $order,
         array $qtys = [],
         ?string $captureCase = null,
         ?string $comment = null,
         bool $notifyCustomer = false,
-    ): \Mage_Sales_Model_Order_Invoice {
-        $invoice = $this->withOrderLock((int) $order->getId(), function () use ($order, $qtys, $captureCase, $comment, $notifyCustomer) {
+        bool $visibleOnFront = false,
+        ?bool $sendEmail = null,
+        bool $ship = false,
+        array $tracks = [],
+    ): Invoice {
+        if ($captureCase !== null && !in_array($captureCase, self::CAPTURE_CASES, true)) {
+            throw new Mage_Core_Exception(Mage::helper('sales')->__('Invalid capture mode; expected one of: %s', implode(', ', self::CAPTURE_CASES)));
+        }
+        $sendEmail ??= $notifyCustomer;
+
+        [$invoice, $shipment] = $this->withOrderLock((int) $order->getId(), function () use ($order, $qtys, $captureCase, $comment, $notifyCustomer, $visibleOnFront, $sendEmail, $ship, $tracks): array {
             // Re-read under the lock so canInvoice() reflects any invoice another
             // request created while we waited, otherwise both would register one.
             $order->load((int) $order->getId());
-            if (!$order->canInvoice()) {
-                throw new \Mage_Core_Exception_Conflict('Order cannot be invoiced (already fully invoiced or not in an invoiceable state)');
-            }
+            $invoice = $this->prepareInvoice($order, $qtys);
 
-            foreach ($qtys as $orderItemId => $qty) {
-                $orderItem = $order->getItemById($orderItemId);
-                // Dummy (bundle/configurable parent) items take their qty from the
-                // order, so neither check applies to them.
-                if (!$orderItem || $orderItem->isDummy()) {
-                    continue;
-                }
-                if (!$orderItem->getIsQtyDecimal() && fmod($qty, 1.0) !== 0.0) {
-                    throw new \Mage_Core_Exception("Order item {$orderItemId} does not accept a fractional qty");
-                }
-                if ($qty > (float) $orderItem->getQtyToInvoice()) {
-                    throw new \Mage_Core_Exception("Qty to invoice for order item {$orderItemId} exceeds the qty available to invoice");
-                }
-            }
-
-            $invoice = \Mage::getModel('sales/service_order', $order)->prepareInvoice($qtys);
-            if (!$invoice->getTotalQty()) {
-                throw new \Mage_Core_Exception('Cannot create invoice: no items to invoice');
-            }
-
-            if ($captureCase === \Mage_Sales_Model_Order_Invoice::CAPTURE_ONLINE && !$invoice->canCapture()) {
-                throw new \Mage_Core_Exception('The order\'s payment method does not support online capture');
+            if ($captureCase === Invoice::CAPTURE_ONLINE && !$invoice->canCapture()) {
+                throw new Mage_Core_Exception(Mage::helper('sales')->__('The order\'s payment method does not support online capture'));
             }
             if ($captureCase !== null) {
                 $invoice->setRequestedCaptureCase($captureCase);
             }
-
             if ($comment) {
-                $invoice->addComment($comment, $notifyCustomer);
+                $invoice->addComment($comment, $notifyCustomer, $visibleOnFront);
             }
 
             $invoice->register();
-            $invoice->getOrder()->setIsInProcess();
-
-            \Mage::getModel('core/resource_transaction')
+            if ($sendEmail) {
+                $invoice->setEmailSent();
+            }
+            $invoice->getOrder()->setCustomerNoteNotify($sendEmail)->setIsInProcess();
+            $transaction = Mage::getModel('core/resource_transaction')
                 ->addObject($invoice)
-                ->addObject($invoice->getOrder())
-                ->save();
+                ->addObject($invoice->getOrder());
 
-            return $invoice;
+            $shipment = null;
+            if ($ship || $order->getForcedDoShipmentWithInvoice()) {
+                $shipment = Mage::getModel('sales/service_order', $invoice->getOrder())->prepareShipment($qtys);
+                if ($shipment->getTotalQty()) {
+                    $shipment->register();
+                    foreach ($tracks as $track) {
+                        $shipment->addTrack($track);
+                    }
+                    $transaction->addObject($shipment->setEmailSent($invoice->getEmailSent()));
+                } else {
+                    $shipment = null;
+                }
+            }
+            $transaction->save();
+
+            return [$invoice, $shipment];
         });
 
-        if ($notifyCustomer) {
-            $invoice->sendEmail(true, $comment ?? '');
+        $this->sendSafely(fn() => $invoice->sendEmail($sendEmail, $notifyCustomer ? (string) $comment : ''));
+        if ($shipment) {
+            $this->sendSafely(fn() => $shipment->sendEmail($sendEmail));
         }
 
         return $invoice;
@@ -734,7 +945,7 @@ class Mage_Sales_Service_Order
      *
      * @throws \Mage_Core_Exception_Conflict When the invoice cannot be captured, or another request holds the order lock.
      */
-    public function captureInvoice(\Mage_Sales_Model_Order_Invoice $invoice): \Mage_Sales_Model_Order_Invoice
+    public function captureInvoice(Invoice $invoice): Invoice
     {
         return $this->changeInvoice($invoice, 'capture');
     }
@@ -744,7 +955,7 @@ class Mage_Sales_Service_Order
      *
      * @throws \Mage_Core_Exception_Conflict When the invoice cannot be voided, or another request holds the order lock.
      */
-    public function voidInvoice(\Mage_Sales_Model_Order_Invoice $invoice): \Mage_Sales_Model_Order_Invoice
+    public function voidInvoice(Invoice $invoice): Invoice
     {
         return $this->changeInvoice($invoice, 'void');
     }
@@ -754,7 +965,7 @@ class Mage_Sales_Service_Order
      *
      * @throws \Mage_Core_Exception_Conflict When the invoice cannot be canceled, or another request holds the order lock.
      */
-    public function cancelInvoice(\Mage_Sales_Model_Order_Invoice $invoice): \Mage_Sales_Model_Order_Invoice
+    public function cancelInvoice(Invoice $invoice): Invoice
     {
         return $this->changeInvoice($invoice, 'cancel');
     }
@@ -762,31 +973,26 @@ class Mage_Sales_Service_Order
     /**
      * @param 'capture'|'void'|'cancel' $action
      */
-    private function changeInvoice(\Mage_Sales_Model_Order_Invoice $invoice, string $action): \Mage_Sales_Model_Order_Invoice
+    private function changeInvoice(Invoice $invoice, string $action): Invoice
     {
         // Capture, void and cancel change the order totals, so they take the order lock too.
         return $this->withOrderLock((int) $invoice->getOrderId(), function () use ($invoice, $action) {
             // Re-read under the lock so the can*() checks reflect the live state.
             $invoice->load((int) $invoice->getId());
 
-            $allowed = match ($action) {
-                'capture' => $invoice->canCapture(),
-                'void' => $invoice->canVoid(),
-                'cancel' => $invoice->canCancel(),
+            [$allowed, $refusal] = match ($action) {
+                'capture' => [$invoice->canCapture(), 'The invoice cannot be captured in its current state'],
+                'void' => [$invoice->canVoid(), 'The invoice cannot be voided in its current state'],
+                'cancel' => [$invoice->canCancel(), 'The invoice cannot be canceled in its current state'],
             };
             if (!$allowed) {
-                $past = match ($action) {
-                    'capture' => 'captured',
-                    'void' => 'voided',
-                    'cancel' => 'canceled',
-                };
-                throw new \Mage_Core_Exception_Conflict("The invoice cannot be {$past} in its current state");
+                throw new Mage_Core_Exception_Conflict(Mage::helper('sales')->__($refusal));
             }
 
             $invoice->{$action}();
             $invoice->getOrder()->setIsInProcess();
 
-            \Mage::getModel('core/resource_transaction')
+            Mage::getModel('core/resource_transaction')
                 ->addObject($invoice)
                 ->addObject($invoice->getOrder())
                 ->save();
@@ -796,49 +1002,76 @@ class Mage_Sales_Service_Order
     }
 
     /**
-     * Ship an order and email the shipment to the customer when $notifyCustomer is true.
+     * Prepare a shipment of the order $order with the tracking numbers $tracks, which nothing saves yet.
      *
-     * @param array<int, float> $qtys Order item id => qty to ship. An empty map ships every item.
+     * @param array<int, float|string> $qtys Order item id => qty to ship. An empty map ships every item.
+     * @param list<\Mage_Sales_Model_Order_Shipment_Track> $tracks
+     * @throws Mage_Core_Exception_Conflict when the order cannot be shipped, or only with its invoice
+     * @throws Mage_Core_Exception when the shipment has no items
+     */
+    public function prepareShipment(Order $order, array $qtys = [], array $tracks = []): Shipment
+    {
+        if ($order->getForcedDoShipmentWithInvoice()) {
+            throw new Mage_Core_Exception_Conflict(Mage::helper('sales')->__('Cannot do shipment for the order separately from invoice.'));
+        }
+        if (!$order->canShip()) {
+            throw new Mage_Core_Exception_Conflict(Mage::helper('sales')->__('Order cannot be shipped (already fully shipped or not in a shippable state)'));
+        }
+
+        $shipment = Mage::getModel('sales/service_order', $order)->prepareShipment($qtys);
+        if (!$shipment->getTotalQty()) {
+            throw new Mage_Core_Exception(Mage::helper('sales')->__('Cannot create shipment: no items to ship'));
+        }
+        foreach ($tracks as $track) {
+            $shipment->addTrack($track);
+        }
+        return $shipment;
+    }
+
+    /**
+     * Ship an order. Email the shipment when $sendEmail is true, which is $notifyCustomer when null, and put the
+     * comment in the email when $notifyCustomer is true. With $packages, ask the carrier for the shipping labels.
+     *
+     * @param array<int, float|string> $qtys Order item id => qty to ship. An empty map ships every item.
      * @param list<\Mage_Sales_Model_Order_Shipment_Track> $tracks Tracking numbers to add to the shipment.
+     * @param array<int, array<string, mixed>>|null $packages The packages of the admin packaging form.
      * @throws \Mage_Core_Exception_Conflict When the order cannot be shipped, or another request holds the order lock.
-     * @throws \Mage_Core_Exception When the shipment has no items.
+     * @throws \Mage_Core_Exception When the shipment has no items, a tracking number is empty, or the carrier refuses a label.
      */
     public function ship(
-        \Mage_Sales_Model_Order $order,
+        Order $order,
         array $qtys = [],
         array $tracks = [],
         ?string $comment = null,
         bool $notifyCustomer = false,
-    ): \Mage_Sales_Model_Order_Shipment {
-        $shipment = $this->withOrderLock((int) $order->getId(), function () use ($order, $qtys, $tracks, $comment, $notifyCustomer) {
+        bool $visibleOnFront = false,
+        ?bool $sendEmail = null,
+        ?array $packages = null,
+    ): Shipment {
+        $sendEmail ??= $notifyCustomer;
+        $shipment = $this->withOrderLock((int) $order->getId(), function () use ($order, $qtys, $tracks, $comment, $notifyCustomer, $visibleOnFront, $sendEmail, $packages): Shipment {
             // Re-read under the lock so canShip() reflects any shipment another
             // request created while we waited, otherwise both would register one
             // and decrement inventory twice.
             $order->load((int) $order->getId());
-            if (!$order->canShip()) {
-                throw new \Mage_Core_Exception_Conflict('Order cannot be shipped (already fully shipped or not in a shippable state)');
-            }
-
-            $shipment = \Mage::getModel('sales/service_order', $order)->prepareShipment($qtys ?: null);
-            if (!$shipment || !$shipment->getTotalQty()) {
-                throw new \Mage_Core_Exception('Cannot create shipment: no items to ship');
-            }
-
-            foreach ($tracks as $track) {
-                $shipment->addTrack($track);
-            }
-
+            $shipment = $this->prepareShipment($order, $qtys, $tracks);
             if ($comment) {
-                $shipment->addComment($comment, $notifyCustomer);
+                $shipment->addComment($comment, $notifyCustomer, $visibleOnFront);
             }
 
             $shipment->register();
+            if ($sendEmail) {
+                $shipment->setEmailSent();
+            }
+            if ($packages !== null) {
+                $this->createShippingLabel($shipment, $packages);
+            }
 
             // Without a change on the order itself its save() short-circuits, so the
             // qty_shipped that register() put on the items never persists.
-            $shipment->getOrder()->setIsInProcess();
+            $shipment->getOrder()->setCustomerNoteNotify($sendEmail)->setIsInProcess();
 
-            \Mage::getModel('core/resource_transaction')
+            Mage::getModel('core/resource_transaction')
                 ->addObject($shipment)
                 ->addObject($shipment->getOrder())
                 ->save();
@@ -846,87 +1079,303 @@ class Mage_Sales_Service_Order
             return $shipment;
         });
 
-        if ($notifyCustomer) {
-            $shipment->sendEmail(true, $comment ?? '');
-        }
+        $this->sendSafely(fn() => $shipment->sendEmail($sendEmail, $notifyCustomer ? (string) $comment : ''));
 
         return $shipment;
     }
 
     /**
-     * Create a credit memo for an order.
+     * Add the tracking number $track to the shipment $shipment. The track checks its number and its carrier.
      *
-     * Both admin API paths refund through this method, so the money rules stay
-     * in one place: the refund never exceeds the order's refundable balance, and
-     * a memo that refunds nothing is not a refund.
+     * @throws Mage_Core_Exception_Input when the number or the carrier is empty
+     */
+    public function addTrack(Shipment $shipment, Mage_Sales_Model_Order_Shipment_Track $track): Shipment
+    {
+        $shipment->addTrack($track)->save();
+        return $shipment;
+    }
+
+    /**
+     * Remove the tracking number $trackId from the shipment $shipment.
+     *
+     * @throws Mage_Core_Exception_NoSuchEntity when the shipment has no such track
+     */
+    public function removeTrack(Shipment $shipment, int $trackId): Shipment
+    {
+        $track = Mage::getModel('sales/order_shipment_track');
+        if ($trackId > 0) {
+            $track->load($trackId);
+        }
+        if (!$track->getId() || $track->getParentId() !== (int) $shipment->getId()) {
+            throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('sales')->__('Tracking entry not found for this shipment'));
+        }
+        $track->delete();
+        return $shipment;
+    }
+
+    /**
+     * Ask the carrier of the order of $shipment for the labels of $packages. Put the labels and their tracking numbers
+     * on the shipment, which the caller saves. Return false when the carrier makes no label.
+     *
+     * @param array<int, array<string, mixed>> $packages
+     * @throws Mage_Core_Exception when the carrier returns an error
+     */
+    public function createShippingLabel(Shipment $shipment, array $packages): bool
+    {
+        $carrier = $shipment->getOrder()->getShippingCarrier();
+        if (!$carrier->isShippingLabelsAvailable()) {
+            return false;
+        }
+        $shipment->setPackages($packages);
+        $response = Mage::getModel('shipping/shipping')->requestToShipment($shipment);
+        if ($response->hasErrors()) {
+            Mage::throwException($response->getErrors());
+        }
+
+        $labels = [];
+        $trackingNumbers = [];
+        foreach ($response->hasInfo() ? $response->getInfo() : [] as $info) {
+            if (!empty($info['tracking_number']) && !empty($info['label_content'])) {
+                $labels[sprintf('label_%s_package_%d.pdf', $shipment->getIncrementId(), count($labels) + 1)] = $info['label_content'];
+                $trackingNumbers[] = (string) $info['tracking_number'];
+            }
+        }
+        if ($labels === []) {
+            return false;
+        }
+
+        try {
+            $shipment->setShippingLabel(count($labels) === 1 ? reset($labels) : $this->zipShippingLabels($labels, 'shipping_label_'));
+        } catch (Mage_Core_Exception $e) {
+            // The shipment saves without its labels, as before: the admin can create them again
+            Mage::logException($e);
+            return false;
+        }
+        foreach ($trackingNumbers as $trackingNumber) {
+            $shipment->addTrack(Mage::getModel('sales/order_shipment_track')
+                ->setNumber($trackingNumber)
+                ->setCarrierCode($carrier->getCarrierCode())
+                ->setTitle((string) Mage::getStoreConfig('carriers/' . $carrier->getCarrierCode() . '/title', $shipment->getStoreId())));
+        }
+        return true;
+    }
+
+    /**
+     * Return a ZIP archive of $files, which maps a file name to its content.
+     *
+     * @param array<string, string> $files
+     * @throws Mage_Core_Exception when the archive cannot be written
+     */
+    public function zipShippingLabels(array $files, string $tempFilePrefix = 'shipping_labels_'): string
+    {
+        $tempFile = tempnam(Mage::getBaseDir('var') . DS . 'tmp', $tempFilePrefix);
+        if ($tempFile === false) {
+            throw new Mage_Core_Exception(Mage::helper('sales')->__('Cannot create temporary file for shipping labels archive.'));
+        }
+
+        try {
+            $zip = new ZipArchive();
+            $result = $zip->open($tempFile, ZipArchive::CREATE | ZipArchive::OVERWRITE);
+            if ($result !== true) {
+                throw new Mage_Core_Exception(Mage::helper('sales')->__('Cannot create ZIP archive for shipping labels. Error code: %s', $result));
+            }
+            foreach ($files as $filename => $content) {
+                $zip->addFromString($filename, $content);
+            }
+            $zip->close();
+
+            $zipContent = file_get_contents($tempFile);
+            if ($zipContent === false) {
+                throw new Mage_Core_Exception(Mage::helper('sales')->__('Cannot read created ZIP archive.'));
+            }
+            return $zipContent;
+        } finally {
+            @unlink($tempFile);
+        }
+    }
+
+    /**
+     * Add the comment $comment to the invoice, the shipment or the credit memo $document. Email it to the customer when
+     * $notifyCustomer is true.
+     *
+     * @template T of Invoice|Shipment|Creditmemo
+     * @param T $document
+     * @return T
+     * @throws Mage_Core_Exception when the comment is empty
+     */
+    public function addComment(
+        Invoice|Shipment|Creditmemo $document,
+        string $comment,
+        bool $notifyCustomer = false,
+        bool $visibleOnFront = false,
+    ): Invoice|Shipment|Creditmemo {
+        $comment = trim($comment);
+        if ($comment === '') {
+            throw new Mage_Core_Exception(Mage::helper('sales')->__('Comment text is required'));
+        }
+
+        // Save the comments only: a save of the credit memo itself would register it again
+        $document->addComment($comment, $notifyCustomer, $visibleOnFront);
+        $document->getCommentsCollection()->save();
+        $this->sendSafely(fn() => $document->sendUpdateEmail($notifyCustomer, $comment));
+
+        return $document;
+    }
+
+    /**
+     * Prepare a credit memo of the order $order, or of its invoice $invoice, which nothing saves yet. Return to stock
+     * the items in $backToStockItemIds and the children of an item in it. With null, return every item when the store
+     * returns refunded items to stock.
+     *
+     * @param array<string, mixed> $data Credit memo data for prepareCreditmemo(): qtys, shipping_amount, adjustment_positive, adjustment_negative
+     * @param array<int, bool>|null $backToStockItemIds Order item id => true.
+     * @throws Mage_Core_Exception_Conflict when the state of the order does not allow a refund
+     * @throws Mage_Core_Exception when the shipping amount is negative, or the credit memo has no items
+     */
+    public function prepareCreditmemo(Order $order, array $data, ?array $backToStockItemIds = null, ?Invoice $invoice = null): Creditmemo
+    {
+        if (!$order->canCreditmemo()) {
+            throw new Mage_Core_Exception_Conflict(Mage::helper('sales')->__('Order cannot be refunded (already fully refunded or not in a refundable state)'));
+        }
+        if (isset($data['shipping_amount']) && (float) $data['shipping_amount'] < 0) {
+            throw new Mage_Core_Exception(Mage::helper('sales')->__('Shipping amount must be >= 0'));
+        }
+
+        /** @var Mage_Sales_Model_Service_Order $service */
+        $service = Mage::getModel('sales/service_order', $order);
+        $creditmemo = $invoice ? $service->prepareInvoiceCreditmemo($invoice, $data) : $service->prepareCreditmemo($data);
+        if (!$creditmemo) {
+            throw new Mage_Core_Exception(Mage::helper('sales')->__('Cannot create credit memo: no items to refund'));
+        }
+
+        $autoReturn = Mage::helper('cataloginventory')->isAutoReturnEnabled();
+        foreach ($creditmemo->getAllItems() as $creditmemoItem) {
+            $orderItem = $creditmemoItem->getOrderItem();
+            $creditmemoItem->setBackToStock($backToStockItemIds === null
+                ? $autoReturn
+                : isset($backToStockItemIds[(int) $orderItem->getId()]) || isset($backToStockItemIds[(int) $orderItem->getParentItemId()]));
+        }
+
+        return $creditmemo;
+    }
+
+    /**
+     * Create a credit memo for an order, or for its invoice $invoice. Email it when $sendEmail is true, and put the
+     * comment in the email when $notifyCustomer is true.
+     *
+     * The money rules stay in one place: the refund never exceeds the order's refundable balance,
+     * and a memo that refunds nothing is not a refund.
      *
      * @param array<string, mixed> $data Credit memo data for prepareCreditmemo().
-     * @param array<int, bool> $backToStockItemIds Order item ids to return to stock.
+     * @param array<int, bool>|null $backToStockItemIds Order item ids to return to stock, see prepareCreditmemo().
      * @throws \Mage_Core_Exception_Conflict When the state of the order does not allow a refund, or another request holds the order lock.
      * @throws \Mage_Core_Exception When the refund breaks a money rule.
      * @throws \Exception When the refund itself fails, for example at the payment gateway.
      */
     public function refund(
-        \Mage_Sales_Model_Order $order,
+        Order $order,
         array $data,
         ?string $comment = null,
         bool $offlineRefund = true,
-        array $backToStockItemIds = [],
-    ): \Mage_Sales_Model_Order_Creditmemo {
-        return $this->withOrderLock((int) $order->getId(), function () use ($order, $data, $comment, $offlineRefund, $backToStockItemIds) {
+        ?array $backToStockItemIds = null,
+        bool $notifyCustomer = false,
+        bool $visibleOnFront = false,
+        bool $sendEmail = false,
+        ?Invoice $invoice = null,
+    ): Creditmemo {
+        $creditmemo = $this->withOrderLock((int) $order->getId(), function () use ($order, $data, $comment, $offlineRefund, $backToStockItemIds, $notifyCustomer, $visibleOnFront, $sendEmail, $invoice): Creditmemo {
             // Re-read under the lock so canCreditmemo() sees the live
             // total_refunded, not a value another request changed while we waited.
             $order->load((int) $order->getId());
-            if (!$order->canCreditmemo()) {
-                throw new \Mage_Core_Exception_Conflict('Order cannot be refunded (already fully refunded or not in a refundable state)');
-            }
-
-            /** @var \Mage_Sales_Model_Service_Order $service */
-            $service = \Mage::getModel('sales/service_order', $order);
-            $creditmemo = $service->prepareCreditmemo($data);
-            if (!$creditmemo) {
-                \Mage::throwException('Cannot create credit memo: no items to refund');
-            }
-
-            // Cap the refund at what the order can still refund, so an inflated
-            // adjustment cannot over-refund or mint excess store credit.
-            $refundable = (float) $order->getBaseTotalPaid() - (float) $order->getBaseTotalRefunded();
-            if ((float) $creditmemo->getBaseGrandTotal() > $refundable + 0.0001) {
-                \Mage::throwException('Refund amount exceeds the order\'s refundable balance');
-            }
-
-            // Same rule as the admin form. A free order opts out through the flag.
-            if ((float) $creditmemo->getBaseGrandTotal() <= 0 && !$creditmemo->getAllowZeroGrandTotal()) {
-                \Mage::throwException('Credit memo total must be greater than zero');
-            }
-
-            foreach ($creditmemo->getAllItems() as $creditmemoItem) {
-                if (isset($backToStockItemIds[(int) $creditmemoItem->getOrderItemId()])) {
-                    $creditmemoItem->setBackToStock();
-                }
-            }
-
-            if ($offlineRefund) {
-                $creditmemo->setOfflineRequested(true);
-            }
-            $creditmemo->setPaymentRefundDisallowed($offlineRefund ? 1.0 : 0.0);
-
-            // Add the comment before register/save so it is persisted with the
-            // credit memo. A separate save after the commit would re-trigger the
-            // post-save observers on an already-refunded memo.
-            if ($comment) {
-                $creditmemo->addComment($comment, false);
-            }
-
-            $creditmemo->register();
-
-            \Mage::getModel('core/resource_transaction')
-                ->addObject($creditmemo)
-                ->addObject($order)
-                ->save();
-
-            return $creditmemo;
+            $creditmemo = $this->prepareCreditmemo($order, $data, $backToStockItemIds, $invoice);
+            return $this->registerCreditmemo($creditmemo, $comment, $offlineRefund, $notifyCustomer, $visibleOnFront, $sendEmail);
         });
+        $this->sendSafely(fn() => $creditmemo->sendEmail($sendEmail, $notifyCustomer ? (string) $comment : ''));
+
+        return $creditmemo;
+    }
+
+    /**
+     * Save the credit memo $creditmemo that prepareCreditmemo() returned, for a transport that changes it first.
+     * See refund().
+     *
+     * @throws \Mage_Core_Exception_Conflict When the state of the order does not allow a refund, or another request holds the order lock.
+     * @throws \Mage_Core_Exception When the refund breaks a money rule.
+     * @throws \Exception When the refund itself fails, for example at the payment gateway.
+     */
+    public function saveCreditmemo(
+        Creditmemo $creditmemo,
+        ?string $comment = null,
+        bool $offlineRefund = true,
+        bool $notifyCustomer = false,
+        bool $visibleOnFront = false,
+        bool $sendEmail = false,
+    ): Creditmemo {
+        $this->withOrderLock((int) $creditmemo->getOrderId(), function () use ($creditmemo, $comment, $offlineRefund, $notifyCustomer, $visibleOnFront, $sendEmail): Creditmemo {
+            if (!$creditmemo->getOrder()->canCreditmemo()) {
+                throw new Mage_Core_Exception_Conflict(Mage::helper('sales')->__('Order cannot be refunded (already fully refunded or not in a refundable state)'));
+            }
+            return $this->registerCreditmemo($creditmemo, $comment, $offlineRefund, $notifyCustomer, $visibleOnFront, $sendEmail);
+        });
+        $this->sendSafely(fn() => $creditmemo->sendEmail($sendEmail, $notifyCustomer ? (string) $comment : ''));
+
+        return $creditmemo;
+    }
+
+    private function registerCreditmemo(
+        Creditmemo $creditmemo,
+        ?string $comment,
+        bool $offlineRefund,
+        bool $notifyCustomer,
+        bool $visibleOnFront,
+        bool $sendEmail,
+    ): Creditmemo {
+        $order = $creditmemo->getOrder();
+        // Cap the refund at what the order can still refund, so an inflated
+        // adjustment cannot over-refund or mint excess store credit.
+        $refundable = (float) $order->getBaseTotalPaid() - (float) $order->getBaseTotalRefunded();
+        if ((float) $creditmemo->getBaseGrandTotal() > $refundable + 0.0001) {
+            throw new Mage_Core_Exception(Mage::helper('sales')->__('Refund amount exceeds the order\'s refundable balance'));
+        }
+        // A free order opts out through the flag.
+        if ((float) $creditmemo->getBaseGrandTotal() <= 0 && !$creditmemo->getAllowZeroGrandTotal()) {
+            throw new Mage_Core_Exception(Mage::helper('sales')->__('Credit memo total must be greater than zero'));
+        }
+
+        // Add the comment before register/save so it is persisted with the
+        // credit memo. A separate save after the commit would re-trigger the
+        // post-save observers on an already-refunded memo.
+        if ($comment) {
+            $creditmemo->addComment($comment, $notifyCustomer, $visibleOnFront);
+        }
+        $creditmemo->setOfflineRequested($offlineRefund);
+        $creditmemo->register();
+        if ($sendEmail) {
+            $creditmemo->setEmailSent();
+        }
+        $order->setCustomerNoteNotify($sendEmail);
+
+        $transaction = Mage::getModel('core/resource_transaction')
+            ->addObject($creditmemo)
+            ->addObject($order);
+        if ($creditmemo->getInvoice()) {
+            $transaction->addObject($creditmemo->getInvoice());
+        }
+        $transaction->save();
+
+        return $creditmemo;
+    }
+
+    /**
+     * Run $send, an email that follows a saved change. A failure is logged, so that a retry does not repeat the change.
+     */
+    private function sendSafely(callable $send): void
+    {
+        try {
+            $send();
+        } catch (Exception $e) {
+            Mage::logException($e);
+        }
     }
 
     /**

@@ -25,15 +25,11 @@ class Mage_Index_Adminhtml_ProcessController extends Mage_Adminhtml_Controller_A
      */
     protected function _initProcess()
     {
-        $processId = $this->getRequest()->getParam('process');
-        if ($processId) {
-            /** @var Mage_Index_Model_Process $process */
-            $process = Mage::getModel('index/process')->load($processId);
-            if ($process->getId() && $process->getIndexer()->isVisible()) {
-                return $process;
-            }
+        try {
+            return $this->processService()->getById((int) $this->getRequest()->getParam('process'));
+        } catch (Mage_Core_Exception_NoSuchEntity) {
+            return false;
         }
-        return false;
     }
 
     /**
@@ -87,11 +83,10 @@ class Mage_Index_Adminhtml_ProcessController extends Mage_Adminhtml_Controller_A
         $process = $this->_initProcess();
         if ($process) {
             $mode = $this->getRequest()->getPost('mode');
-            if ($mode) {
-                $process->setMode($mode);
-            }
             try {
-                $process->save();
+                if ($mode) {
+                    $this->processService()->setMode($process, (string) $mode);
+                }
                 $this->_getSession()->addSuccess(
                     Mage::helper('index')->__('The index has been saved.'),
                 );
@@ -200,7 +195,7 @@ class Mage_Index_Adminhtml_ProcessController extends Mage_Adminhtml_Controller_A
     {
         /** @var Mage_Index_Model_Runner $runner */
         $runner = Mage::getModel('index/runner');
-        $queue = $runner->buildQueue($processIds);
+        $queue = $this->processService()->getQueue($processIds);
 
         if (!$queue) {
             $this->getResponse()->setBodyJson([
@@ -277,14 +272,15 @@ class Mage_Index_Adminhtml_ProcessController extends Mage_Adminhtml_Controller_A
         } else {
             try {
                 $counter = 0;
-                $mode = $this->getRequest()->getParam('index_mode');
+                $mode = (string) $this->getRequest()->getParam('index_mode');
                 foreach ($processIds as $processId) {
-                    /** @var Mage_Index_Model_Process $process */
-                    $process = Mage::getModel('index/process')->load($processId);
-                    if ($process->getId() && $process->getIndexer()->isVisible()) {
-                        $process->setMode($mode)->save();
-                        $counter++;
+                    try {
+                        $process = $this->processService()->getById((int) $processId);
+                    } catch (Mage_Core_Exception_NoSuchEntity) {
+                        continue;
                     }
+                    $this->processService()->setMode($process, $mode);
+                    $counter++;
                 }
                 $this->_getSession()->addSuccess(
                     Mage::helper('index')->__('Total of %d index(es) have changed index mode.', $counter),
@@ -298,5 +294,10 @@ class Mage_Index_Adminhtml_ProcessController extends Mage_Adminhtml_Controller_A
 
         // The grid posts mass-actions over ajax, so the messages are picked up on the reload
         $this->getResponse()->setBodyJson(['success' => true]);
+    }
+
+    protected function processService(): Mage_Index_Service_Process
+    {
+        return Mage::getService('index/process');
     }
 }

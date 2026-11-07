@@ -92,7 +92,7 @@ class UrlRewrite extends CrudResource
     /** Admin ACL gate. Mirrors backend Mage_Adminhtml_UrlrewriteController. */
     public const ADMIN_RESOURCE = \Mage_Adminhtml_UrlrewriteController::ADMIN_RESOURCE;
 
-    public const OPTIONS = ['', 'R', 'RP'];
+    public const OPTIONS = \Mage_Core_Model_Url_Rewrite::OPTIONS;
 
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;
@@ -112,7 +112,7 @@ class UrlRewrite extends CrudResource
     #[ApiProperty(writable: false, description: 'True for a rewrite the catalog URL indexer generated. System rewrites are read-only.')]
     public ?bool $isSystem = null;
 
-    #[ApiProperty(description: 'Redirect type: "" for an internal rewrite, "R" for a 302 temporary redirect, "RP" for a 301 permanent redirect', extraProperties: [EnumSource::KEY => ['', 'R', 'RP']])]
+    #[ApiProperty(description: 'Redirect type: "" for an internal rewrite, "R" for a 302 temporary redirect, "RP" for a 301 permanent redirect', extraProperties: [EnumSource::KEY => \Mage_Core_Model_Url_Rewrite::OPTIONS])]
     public ?string $options = null;
 
     #[ApiProperty(description: 'Free-text note shown in the admin grid')]

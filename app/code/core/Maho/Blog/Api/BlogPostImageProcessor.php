@@ -16,8 +16,6 @@ use ApiPlatform\Metadata\DeleteOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use Maho\ApiPlatform\Processor;
 use Maho\ApiPlatform\Service\ImageUpload;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
  * The file goes through Maho_Blog_Model_Post_Attribute_Backend_Image, so an upload gets
@@ -31,26 +29,25 @@ final class BlogPostImageProcessor extends Processor
     {
         $user = $this->requireUser();
 
-        $post = \Mage::getModel('blog/post')->load((int) ($uriVariables['id'] ?? 0));
-        if (!$post->getId()) {
-            throw new NotFoundHttpException('BlogPost not found');
-        }
+        /** @var \Maho_Blog_Service_Post $service */
+        $service = \Mage::getService('blog/post');
+        $post = $service->getById((int) ($uriVariables['id'] ?? 0));
         $this->validateEntityStoreAccess($post->getStores(), $user, 'BlogPost');
         $oldData = $post->getData();
 
         if ($operation instanceof DeleteOperationInterface) {
             // The same value as the "Delete Image" checkbox of the admin form
             $post->setImage(['delete' => 1]);
-            $this->safeSave($post, 'delete the image of the BlogPost');
+            $service->save($post);
             $this->logApiActivity('blog_post', 'update', $oldData, $post);
             return null;
         }
 
         $this->uploadImage($post, $this->parseRequestBody($context['request'] ?? null));
-        $this->safeSave($post, 'update BlogPost');
+        $service->save($post);
         $this->logApiActivity('blog_post', 'update', $oldData, $post);
 
-        return BlogPost::fromModel(\Mage::getModel('blog/post')->load($post->getId()));
+        return BlogPost::fromModel($service->getById((int) $post->getId()));
     }
 
     /**
@@ -61,7 +58,7 @@ final class BlogPostImageProcessor extends Processor
         $attribute = \Mage::getResourceSingleton('blog/post')->getAttribute('image');
         $backend = $attribute ? $attribute->getBackend() : null;
         if (!$backend instanceof \Maho_Blog_Model_Post_Attribute_Backend_Image) {
-            throw new UnprocessableEntityHttpException('The image attribute of blog posts is not available');
+            throw new \RuntimeException('The image attribute of blog posts is not available');
         }
 
         ImageUpload::save(

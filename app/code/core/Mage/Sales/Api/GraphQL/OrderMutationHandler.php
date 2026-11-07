@@ -14,7 +14,6 @@ use Mage\Sales\Api\CreditMemo;
 use Mage\Sales\Api\Order;
 use Mage\Sales\Api\OrderCurrency;
 use Mage\Sales\Api\OrderProvider;
-use Maho\ApiPlatform\Exception\NotFoundException;
 use Maho\ApiPlatform\Exception\ValidationException;
 use Maho\ApiPlatform\Security\AdminAcl;
 use Maho\ApiPlatform\Trait\AdminQuoteTrait;
@@ -109,12 +108,7 @@ class OrderMutationHandler
             throw ValidationException::requiredField('incrementId');
         }
 
-        $order = $this->orderService->getByIncrementId($incrementId);
-        if (!$order) {
-            throw NotFoundException::order();
-        }
-
-        return ['lookupOrder' => $this->mapOrder($order)];
+        return ['lookupOrder' => $this->mapOrder($this->orderService->requireByIncrementId((string) $incrementId))];
     }
 
     /**
@@ -205,12 +199,7 @@ class OrderMutationHandler
             throw ValidationException::invalidValue('refundToStoreCredit', 'store credit refunds are not supported');
         }
 
-        $order = \Mage::getModel('sales/order')->load($orderId);
-        if (!$order->getId()) {
-            throw NotFoundException::order();
-        }
-
-        return $this->buildProcessReturn($order, $items, $comment, $adjustmentPositive, $adjustmentNegative);
+        return $this->buildProcessReturn($this->orderService->requireById((int) $orderId), $items, $comment, $adjustmentPositive, $adjustmentNegative);
     }
 
     /**

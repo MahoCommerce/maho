@@ -28,22 +28,10 @@ class Maho_Blog_IndexController extends Mage_Core_Controller_Front_Action
     public function categoryAction(): void
     {
         $helper = Mage::helper('blog');
-        if (!$helper->isEnabled() || !$helper->areCategoriesEnabled()) {
-            $this->_forward('noRoute');
-            return;
-        }
-
-        $categoryId = $this->getRequest()->getParam('category_id');
-        $category = Mage::getModel('blog/category')->load($categoryId);
-        if (!$category->getId() || !$category->getIsActive()) {
-            $this->_forward('noRoute');
-            return;
-        }
-
-        // Verify category is assigned to the current store
-        $storeId = (int) Mage::app()->getStore()->getId();
-        $categoryStores = $category->getStores();
-        if (!in_array(0, $categoryStores) && !in_array($storeId, $categoryStores)) {
+        try {
+            $category = Mage::getService('blog/category')
+                ->getVisibleById((int) $this->getRequest()->getParam('category_id'), (int) Mage::app()->getStore()->getId());
+        } catch (Mage_Core_Exception_NoSuchEntity) {
             $this->_forward('noRoute');
             return;
         }
@@ -60,14 +48,10 @@ class Maho_Blog_IndexController extends Mage_Core_Controller_Front_Action
     #[Maho\Config\Route('/blog/index/view', methods: ['GET'])]
     public function viewAction(): void
     {
-        if (!Mage::helper('blog')->isEnabled()) {
-            $this->_forward('noRoute');
-            return;
-        }
-
-        $postId = $this->getRequest()->getParam('post_id');
-        $post = Mage::getModel('blog/post')->load($postId);
-        if (!$post->getId()) {
+        try {
+            $post = Mage::getService('blog/post')
+                ->getVisibleById((int) $this->getRequest()->getParam('post_id'), (int) Mage::app()->getStore()->getId());
+        } catch (Mage_Core_Exception_NoSuchEntity) {
             $this->_forward('noRoute');
             return;
         }

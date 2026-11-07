@@ -14,14 +14,9 @@ use ApiPlatform\Metadata\DeleteOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Post;
 use Maho\ApiPlatform\Trait\ProductLoaderTrait;
-use Maho\Security\OutboundUrl;
-use Maho\Security\OutboundUrlException;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
-/**
- */
 final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
 {
     use ProductLoaderTrait;
@@ -38,290 +33,70 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
     {
         $user = $this->requireUser();
         $productId = (int) ($uriVariables['productId'] ?? 0);
-
-        // Enforce website scope for store-restricted API users on every
-        // sub-resource write/delete (mirrors ProductProcessor's main CRUD check).
         $this->assertProductWebsitesAllowed($this->loadProduct($productId), $user);
+        $product = $this->loadProductForWrite($productId, $user);
 
         $request = $context['request'] ?? null;
         $body = $this->parseRequestBody($request);
+        $valueId = (int) ($body['valueId'] ?? $body['value_id'] ?? $body['id'] ?? 0);
+        $label = isset($body['label']) ? (string) $body['label'] : null;
+        $position = isset($body['position']) ? (int) $body['position'] : null;
+        $disabled = isset($body['disabled']) ? (bool) $body['disabled'] : null;
+        /** @var \Mage_Catalog_Service_Product_Media $service */
+        $service = \Mage::getService('catalog/product_media');
 
         if ($operation instanceof DeleteOperationInterface) {
-            $valueId = (int) ($body['valueId'] ?? $body['value_id'] ?? $body['id'] ?? 0);
-            if ($valueId <= 0) {
-                $valueId = (int) ($request?->query->get('valueId') ?? 0);
-            }
-            return $this->handleDelete($productId, $valueId);
+            $service->removeImage($product, $valueId ?: (int) ($request?->query->get('valueId') ?? 0));
+            return null;
         }
 
-        if ($operation instanceof Post) {
-            return $this->handleUpload($productId, $body);
+        if (!$operation instanceof Post) {
+            $types = isset($body['types']) && is_array($body['types']) ? array_values($body['types']) : null;
+            $service->updateImage($product, $valueId, $label, $position, $disabled, $types);
+            return $this->provider->getMediaGallery($this->loadProduct($productId));
         }
 
-        return $this->handleUpdate($productId, $body);
-    }
-
-    private function handleUpload(int $productId, array $body): ProductMedia
-    {
-        $product = $this->loadProductForWrite($productId, $this->requireUser());
-
-        // Support base64-encoded image data
+        $types = array_values((array) ($body['types'] ?? []));
         $base64 = $body['base64'] ?? $body['imageData'] ?? $body['image_data'] ?? null;
         $imageUrl = $body['imageUrl'] ?? $body['image_url'] ?? null;
-        $filename = $body['filename'] ?? 'upload.jpg';
-        $types = \Mage_Catalog_Helper_Image::mapDeprecatedRoles((array) ($body['types'] ?? []));
-        $label = $body['label'] ?? null;
-
-        $position = $body['position'] ?? null;
-        $disabled = $body['disabled'] ?? null;
-
         if ($base64 !== null) {
-            // Decode base64 to temp file
-            $decoded = base64_decode($base64, true);
-            if ($decoded === false) {
-                throw new UnprocessableEntityHttpException('Invalid base64 image data');
-            }
-            $ext = $this->sanitizeImageExtension(pathinfo($filename, PATHINFO_EXTENSION));
-            $tmpPath = $this->writeTempImage($decoded, $ext);
-        } elseif ($imageUrl !== null) {
-            try {
-                $target = new OutboundUrl()->validate($imageUrl);
-            } catch (OutboundUrlException $e) {
-                throw new UnprocessableEntityHttpException('Invalid imageUrl: ' . $e->getMessage());
-            }
-            $context = stream_context_create($target->streamContextOptions(10));
-            $imageData = @file_get_contents($target->pinnedUrl(), false, $context);
+            $imageData = base64_decode((string) $base64, true);
             if ($imageData === false) {
-                throw new UnprocessableEntityHttpException('Failed to download image from URL');
+                throw new BadRequestHttpException('Invalid base64 image data');
             }
-            $ext = $this->sanitizeImageExtension(pathinfo($target->path, PATHINFO_EXTENSION));
-            $tmpPath = $this->writeTempImage($imageData, $ext);
+            $service->addImageFromData($product, $imageData, (string) ($body['filename'] ?? 'upload.jpg'), $types, $label, $position, $disabled);
+        } elseif ($imageUrl !== null) {
+            $service->addImageFromUrl($product, (string) $imageUrl, $types, $label, $position, $disabled);
         } else {
-            throw new UnprocessableEntityHttpException('Either base64, imageData, or imageUrl is required');
+            throw new \Mage_Core_Exception_Input()->addError('base64', \Mage::helper('catalog')->__('Either base64, imageData, or imageUrl is required'));
         }
-
-        // The gallery backend only checks the extension; verify the bytes are
-        // actually a supported image so a renamed non-image can't be stored.
-        $this->assertImageFile($tmpPath);
-
-        try {
-            // Unset stock_data to prevent saving stock when we only want media
-            $product->unsetData('stock_data');
-            $product->addImageToMediaGallery(
-                $tmpPath,
-                empty($types) ? null : $types,
-                false,
-                false,
-            );
-
-            // Apply label/position/disabled to the just-added image via the
-            // gallery backend API
-            $updateData = [];
-            if ($label !== null) {
-                $updateData['label'] = $label;
-            }
-            if ($position !== null) {
-                $updateData['position'] = (int) $position;
-            }
-            if ($disabled !== null) {
-                $updateData['disabled'] = $disabled ? 1 : 0;
-            }
-            if (!empty($updateData)) {
-                $gallery = $product->getData('media_gallery');
-                if (!empty($gallery['images'])) {
-                    $lastImage = end($gallery['images']);
-                    $file = $lastImage['file'] ?? null;
-                    if ($file) {
-                        /** @var \Mage_Catalog_Model_Product_Attribute_Backend_Media $backend */
-                        $backend = $product->getResource()->getAttribute('media_gallery')->getBackend();
-                        $backend->updateImage($product, $file, $updateData);
-                    }
-                }
-            }
-
-            $product->save();
-        } finally {
-            if (file_exists($tmpPath)) {
-                @unlink($tmpPath);
-            }
-        }
-
         return $this->mapNewestGalleryImage($this->loadProduct($productId));
     }
 
     /**
-     * Map the most recently inserted gallery row (highest value_id) to a DTO.
-     *
-     * Works from the raw media_gallery data instead of getMediaGalleryImages()
-     * so an image uploaded with disabled=true is still returned, and a custom
-     * position can't make end() pick the wrong entry.
+     * Map the gallery row with the highest value_id, so an image uploaded with disabled=true is returned too.
      */
     private function mapNewestGalleryImage(\Mage_Catalog_Model_Product $product): ProductMedia
     {
         $newest = null;
-        $gallery = $product->getData('media_gallery');
-        foreach ($gallery['images'] ?? [] as $image) {
+        foreach ($product->getData('media_gallery')['images'] ?? [] as $image) {
             if ($newest === null || (int) ($image['value_id'] ?? 0) > (int) ($newest['value_id'] ?? 0)) {
                 $newest = $image;
             }
         }
 
         $dto = new ProductMedia();
+        $dto->id = (int) ($newest['value_id'] ?? 0);
         if ($newest === null) {
-            $dto->id = 0;
             return $dto;
         }
-
         $file = (string) ($newest['file'] ?? '');
-        $dto->id = (int) ($newest['value_id'] ?? 0);
         $dto->file = $file;
         $dto->url = $file !== '' ? (string) $product->getMediaConfig()->getMediaUrl($file) : null;
         $dto->label = ($newest['label'] ?? null) ?: null;
         $dto->position = (int) ($newest['position'] ?? 0);
         $dto->disabled = (bool) ($newest['disabled'] ?? false);
-
         $dto->types = $product->getImage() === $file ? ['image'] : [];
-
         return $dto;
-    }
-
-    private function handleUpdate(int $productId, array $body): array
-    {
-        $product = $this->loadProductForWrite($productId, $this->requireUser());
-
-        $valueId = (int) ($body['valueId'] ?? $body['value_id'] ?? $body['id'] ?? 0);
-        if ($valueId <= 0) {
-            throw new UnprocessableEntityHttpException('valueId is required');
-        }
-
-        // Find the image file path by value_id
-        $gallery = $product->getData('media_gallery');
-        $images = $gallery['images'] ?? [];
-        $file = null;
-
-        foreach ($images as $image) {
-            if ((int) ($image['value_id'] ?? 0) === $valueId) {
-                $file = $image['file'] ?? null;
-                break;
-            }
-        }
-
-        if ($file === null) {
-            throw new NotFoundHttpException('Gallery image not found');
-        }
-
-        // Use the gallery backend API to update image attributes
-        $updateData = [];
-        if (isset($body['label'])) {
-            $updateData['label'] = $body['label'];
-        }
-        if (isset($body['position'])) {
-            $updateData['position'] = (int) $body['position'];
-        }
-        if (isset($body['disabled'])) {
-            $updateData['disabled'] = $body['disabled'] ? 1 : 0;
-        }
-        if (!empty($updateData)) {
-            /** @var \Mage_Catalog_Model_Product_Attribute_Backend_Media $backend */
-            $backend = $product->getResource()->getAttribute('media_gallery')->getBackend();
-            $backend->updateImage($product, $file, $updateData);
-        }
-
-        // Update role assignments
-        $types = $body['types'] ?? null;
-        if (is_array($types) && in_array('image', \Mage_Catalog_Helper_Image::mapDeprecatedRoles($types), true)) {
-            $product->setData('image', $file);
-        }
-
-        $product->unsetData('stock_data');
-        $product->save();
-
-        return $this->provider->getMediaGallery($this->loadProduct($productId));
-    }
-
-    private function handleDelete(int $productId, int $valueId): null
-    {
-        $product = $this->loadProductForWrite($productId, $this->requireUser());
-
-        if ($valueId <= 0) {
-            throw new UnprocessableEntityHttpException('valueId is required');
-        }
-
-        $gallery = $product->getData('media_gallery');
-        $images = $gallery['images'] ?? [];
-        $found = false;
-
-        foreach ($images as &$image) {
-            if ((int) ($image['value_id'] ?? 0) === $valueId) {
-                $image['removed'] = 1;
-                $found = true;
-                break;
-            }
-        }
-        unset($image);
-
-        if (!$found) {
-            throw new NotFoundHttpException('Gallery image not found');
-        }
-
-        $gallery['images'] = $images;
-        $product->setData('media_gallery', $gallery);
-
-        $product->unsetData('stock_data');
-        $product->save();
-
-        return null;
-    }
-
-    /**
-     * Reject anything that isn't a supported raster image. Deletes the temp
-     * file on rejection so a failed upload leaves nothing behind.
-     */
-    /**
-     * Constrain a user-supplied extension to a known image allowlist.
-     *
-     * The temp file is named with this extension before the magic-byte check in
-     * assertImageFile() runs, so an untrusted filename/URL must never be able to
-     * give the temp file an executable suffix (e.g. .php). Anything outside the
-     * allowlist falls back to 'jpg'.
-     */
-    /**
-     * Write image bytes to a temp file named with the given extension.
-     *
-     * Uses tempnam() to create the file, then atomically renames it to the
-     * extension-suffixed name (the gallery backend keys off the extension). If
-     * the rename fails the bare tempnam file is unlinked before throwing so no
-     * temp file leaks. Returns the final, extension-suffixed path.
-     */
-    private function writeTempImage(string $data, string $ext): string
-    {
-        $tmpPath = tempnam(\Mage::getBaseDir('tmp'), 'maho_media_');
-        if ($tmpPath === false) {
-            throw new UnprocessableEntityHttpException('Failed to create temporary file for upload');
-        }
-        file_put_contents($tmpPath, $data);
-        $newPath = $tmpPath . '.' . $ext;
-        if (!rename($tmpPath, $newPath)) {
-            @unlink($tmpPath);
-            throw new UnprocessableEntityHttpException('Failed to prepare uploaded image');
-        }
-        return $newPath;
-    }
-
-    private function sanitizeImageExtension(string $ext): string
-    {
-        $ext = strtolower($ext);
-        $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif'];
-        return in_array($ext, $allowed, true) ? $ext : 'jpg';
-    }
-
-    private function assertImageFile(string $path): void
-    {
-        $info = @\Maho\Io::getImageSize($path);
-        $allowed = [IMAGETYPE_JPEG, IMAGETYPE_PNG, IMAGETYPE_GIF, IMAGETYPE_WEBP, IMAGETYPE_AVIF];
-        if ($info === false || !in_array($info[2], $allowed, true)) {
-            @unlink($path);
-            throw new UnprocessableEntityHttpException('Uploaded data is not a valid JPEG, PNG, GIF, WEBP or AVIF image');
-        }
     }
 }

@@ -103,7 +103,7 @@ class CatalogPriceRule extends \Maho\ApiPlatform\Resource
 
     public const ROOT_CONDITIONS = 'catalogrule/rule_condition_combine';
 
-    public const SIMPLE_ACTIONS = ['by_percent', 'by_fixed', 'to_percent', 'to_fixed'];
+    public const SIMPLE_ACTIONS = \Mage_CatalogRule_Model_Rule::SIMPLE_ACTIONS;
 
     private const TREE_SCHEMA = [
         'type' => 'object',

@@ -13,15 +13,10 @@ namespace Mage\Catalog\Api;
 use ApiPlatform\Metadata\DeleteOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Post;
-use Mage;
-use Mage_Catalog_Model_Product;
 use Mage_Catalog_Model_Product_Type;
 use Maho\ApiPlatform\Trait\ProductLoaderTrait;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
-/**
- */
 final class ConfigurableSetupProcessor extends \Maho\ApiPlatform\Processor
 {
     use ProductLoaderTrait;
@@ -38,158 +33,30 @@ final class ConfigurableSetupProcessor extends \Maho\ApiPlatform\Processor
     {
         $user = $this->requireUser();
         $productId = (int) ($uriVariables['productId'] ?? 0);
-
-        // Enforce website scope for store-restricted API users on every
-        // sub-resource write/delete (mirrors ProductProcessor's main CRUD check).
         $this->assertProductWebsitesAllowed($this->loadProduct($productId), $user);
+        $product = $this->loadProductForWrite($productId, $user, Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE);
+
+        /** @var \Mage_Catalog_Service_Product_Configurable $service */
+        $service = \Mage::getService('catalog/product_configurable');
+        $websiteIds = $this->getAllowedWebsiteIds($user);
 
         if ($operation instanceof DeleteOperationInterface) {
-            $childId = self::extractChildId($context);
-            return $this->handleRemoveChild($productId, $childId);
+            $path = ($context['request'] ?? null)?->getPathInfo() ?? '';
+            $service->removeChild($product, preg_match('#/configurable/children/(\d+)#', $path, $matches) ? (int) $matches[1] : 0);
+            return null;
         }
 
-        $request = $context['request'] ?? null;
-        $body = $this->parseRequestBody($request);
-
+        $body = $this->parseRequestBody($context['request'] ?? null);
         if ($operation instanceof Post) {
-            return $this->handleAddChild($productId, $body);
-        }
-
-        return $this->handleSetup($productId, $body);
-    }
-
-    /**
-     * Extract childId from request path since API Platform only
-     * populates declared Link uriVariables.
-     */
-    private static function extractChildId(array $context): int
-    {
-        $request = $context['request'] ?? null;
-        if (!$request) {
-            return 0;
-        }
-
-        $path = $request->getPathInfo();
-        if (preg_match('#/configurable/children/(\d+)#', $path, $matches)) {
-            return (int) $matches[1];
-        }
-
-        return 0;
-    }
-
-    private function handleSetup(int $productId, array $body): ConfigurableSetup
-    {
-        $product = $this->loadProductForWrite($productId, $this->requireUser(), Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE);
-        /** @var \Mage_Catalog_Model_Product_Type_Configurable $typeInstance */
-        $typeInstance = $product->getTypeInstance(true);
-
-        // Set super attributes if provided and none exist yet
-        $superAttributes = $body['superAttributes'] ?? $body['super_attributes'] ?? [];
-        if (!empty($superAttributes)) {
-            $existingAttrIds = $typeInstance->getConfigurableAttributeCollection($product)->getAllIds();
-
-            if (empty($existingAttrIds)) {
-                $superAttributeData = [];
-                $position = 0;
-                foreach ($superAttributes as $code) {
-                    $attribute = Mage::getSingleton('eav/config')
-                        ->getAttribute('catalog_product', $code);
-                    if (!$attribute || !$attribute->getId()) {
-                        throw new UnprocessableEntityHttpException("Attribute not found: {$code}");
-                    }
-                    $superAttributeData[] = [
-                        'attribute_id' => $attribute->getId(),
-                        'position' => $position++,
-                    ];
-                }
-                $product->setConfigurableAttributesData($superAttributeData);
-                $product->setCanSaveConfigurableAttributes(true);
-
-                $product->save();
+            $service->addChild($product, (int) ($body['childProductId'] ?? $body['child_product_id'] ?? $body['childId'] ?? 0), $websiteIds);
+        } else {
+            $service->setSuperAttributes($product, array_values((array) ($body['superAttributes'] ?? $body['super_attributes'] ?? [])));
+            $childIds = array_map(intval(...), array_values((array) ($body['childProductIds'] ?? $body['child_product_ids'] ?? [])));
+            if ($childIds !== []) {
+                $service->setChildren($product, $childIds, $websiteIds);
             }
-        }
-
-        // Assign children via model save
-        $childProductIds = $body['childProductIds'] ?? $body['child_product_ids'] ?? [];
-        if (!empty($childProductIds)) {
-            $childData = [];
-            foreach (array_map(intval(...), $childProductIds) as $childId) {
-                $this->authorizeAssociatedProductWebsites($childId);
-                $childData[$childId] = [];
-            }
-            $product->setConfigurableProductsData($childData);
-            $this->safeSave($product, 'assign configurable children');
         }
 
         return $this->provider->getSetup($this->loadProduct($productId, Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE));
     }
-
-    private function handleAddChild(int $productId, array $body): ConfigurableSetup
-    {
-        $product = $this->loadProductForWrite($productId, $this->requireUser(), Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE);
-
-        $childId = (int) ($body['childProductId'] ?? $body['child_product_id'] ?? $body['childId'] ?? 0);
-        if ($childId <= 0) {
-            throw new UnprocessableEntityHttpException('childProductId is required and must be positive');
-        }
-
-        $this->authorizeAssociatedProductWebsites($childId);
-
-        // Build data array with existing children + new one
-        $existingChildren = $this->getExistingChildIds($product);
-        $existingChildren[$childId] = [];
-        $product->setConfigurableProductsData($existingChildren);
-        $this->safeSave($product, 'add configurable child');
-
-        return $this->provider->getSetup($this->loadProduct($productId, Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE));
-    }
-
-    private function handleRemoveChild(int $productId, int $childId): null
-    {
-        // Without this guard a failed child-id extraction (0) makes unset() a
-        // no-op, so the product saves unchanged and the caller gets a misleading
-        // 200 "removed". Mirrors the validation in handleAddChild().
-        if ($childId <= 0) {
-            throw new UnprocessableEntityHttpException('childProductId is required and must be positive');
-        }
-
-        $product = $this->loadProductForWrite($productId, $this->requireUser(), Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE);
-
-        $existingChildren = $this->getExistingChildIds($product);
-        unset($existingChildren[$childId]);
-        $product->setConfigurableProductsData($existingChildren);
-        $this->safeSave($product, 'remove configurable child');
-
-        return null;
-    }
-
-    /**
-     * @return array<int, array<string, mixed>>
-     */
-    private function getExistingChildIds(Mage_Catalog_Model_Product $product): array
-    {
-        /** @var \Mage_Catalog_Model_Product_Type_Configurable $typeInstance */
-        $typeInstance = $product->getTypeInstance(true);
-        $children = $typeInstance->getUsedProducts(null, $product);
-        $data = [];
-        foreach ($children as $child) {
-            $data[(int) $child->getId()] = [];
-        }
-        return $data;
-    }
-
-    /**
-     * Guard against pulling a foreign-website product into the configurable set:
-     * a store-restricted token may only associate children within its own
-     * website scope. No-op for unrestricted users (skips the child load).
-     */
-    private function authorizeAssociatedProductWebsites(int $childId): void
-    {
-        $user = $this->requireUser();
-        if ($this->getAllowedWebsiteIds($user) === null) {
-            return;
-        }
-        $this->assertProductWebsitesAllowed($this->loadProduct($childId), $user);
-    }
-
 }

@@ -38,8 +38,11 @@ class Mage_Core_Model_Resource_Website extends Mage_Core_Model_Resource_Db_Abstr
     #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $object)
     {
-        if (!preg_match('/^[a-z]+[a-z0-9_]*$/', $object->getCode())) {
-            Mage::throwException(Mage::helper('core')->__('Website code may only contain letters (a-z), numbers (0-9) or underscore(_), the first character must be a letter'));
+        if (!preg_match(Mage_Core_Model_Website::CODE_PATTERN, (string) $object->getCode())) {
+            throw new Mage_Core_Exception_Input()->addError(
+                'code',
+                Mage::helper('core')->__('Website code may only contain letters (a-z), numbers (0-9) or underscore(_), the first character must be a letter'),
+            );
         }
 
         return parent::_beforeSave($object);

@@ -200,8 +200,8 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
             );
         }
 
-        if (Mage::getStoreConfigFlag('customer/password/allow_2fa') && $this->getTwofaEnabled()) {
-            if (!Mage::helper('core/security')->verifyTotpCode($this->getTwofaSecret() ?? '', $twofaVerificationCode ?? '')) {
+        if ($this->isTwofaRequired()) {
+            if (!$this->verifyTwofaCode($twofaVerificationCode ?? '')) {
                 throw Mage::exception(
                     'Mage_Core',
                     Mage::helper('customer')->__('2FA verification code is invalid.'),
@@ -216,6 +216,19 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
         ]);
 
         return true;
+    }
+
+    /**
+     * Return whether the store asks this customer for a 2FA code at login.
+     */
+    public function isTwofaRequired(): bool
+    {
+        return Mage::getStoreConfigFlag('customer/password/allow_2fa') && (bool) $this->getTwofaEnabled();
+    }
+
+    public function verifyTwofaCode(#[\SensitiveParameter] string $code): bool
+    {
+        return Mage::helper('core/security')->verifyTotpCode($this->getTwofaSecret() ?? '', $code);
     }
 
     /**
