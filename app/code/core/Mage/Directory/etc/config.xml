@@ -19,6 +19,10 @@ SPDX-License-Identifier: AFL-3.0
                         <name>Frankfurter (no API key)</name>
                         <model>directory/currency_import_frankfurter</model>
                     </frankfurter>
+                    <allratestoday>
+                        <name>AllRatesToday</name>
+                        <model>directory/currency_import_allratestoday</model>
+                    </allratestoday>
                     <exchangerateapi>
                         <name>ExchangeRate-API (no API key)</name>
                         <model>directory/currency_import_exchangerateapi</model>
@@ -127,6 +131,13 @@ SPDX-License-Identifier: AFL-3.0
                 <active>0</active>
                 <sort_order>10</sort_order>
             </frankfurter>
+            <allratestoday>
+                <timeout>100</timeout>
+                <active>0</active>
+                <sort_order>15</sort_order>
+                <bank></bank>
+                <api_key backend_model="adminhtml/system_config_backend_encrypted"/>
+            </allratestoday>
             <exchangerateapi>
                 <timeout>100</timeout>
                 <active>0</active>
