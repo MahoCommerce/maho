@@ -95,3 +95,14 @@ it('preserves CDATA text from static and array values while retaining optional e
         unlink($path);
     }
 });
+
+it('removes control characters that XML does not allow', function (bool $cdata): void {
+    $mapper = new XmlTextMapper();
+    $product = new Mage_Catalog_Model_Product();
+    $product->setDescription("before\x0B\x0Cafter");
+    $structure = [['tag' => 'description', 'source_type' => 'attribute', 'source_value' => 'description', 'cdata' => $cdata]];
+
+    $document = new DOMDocument();
+    expect($document->loadXML('<feed>' . $mapper->mapProductToXmlStructure($product, $structure) . '</feed>'))->toBeTrue();
+    expect($document->getElementsByTagName('description')->item(0)->textContent)->toBe('beforeafter');
+})->with([true, false]);

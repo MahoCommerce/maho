@@ -1833,7 +1833,7 @@ class Maho_FeedManager_Model_Mapper
             }
 
             // Build XML element
-            $valueStr = (string) ($value ?? '');
+            $valueStr = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', (string) ($value ?? ''));
             if ($cdata) {
                 $valueStr = str_replace(']]>', ']]]]><![CDATA[>', $valueStr);
                 $xml .= $indentStr . '<' . $tag . '><![CDATA[' . $valueStr . ']]></' . $tag . ">\n";
