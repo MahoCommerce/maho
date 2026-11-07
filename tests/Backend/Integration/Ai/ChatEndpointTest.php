@@ -866,7 +866,7 @@ it('runs a read tool at once, streams the answer and stores the conversation', f
         }
         // A property with an EnumSource and the store argument reach the model as closed lists.
         expect(AiChatScript::$offeredSchemas[0]['catalog_products_list']['properties']['store']['enum'])->toContain(Mage::app()->getDefaultStoreView()->getCode());
-        // Gemini refuses a schema keyword outside its subset, such as writeOnly or format.
+        // Only the common core of JSON Schema reaches the model.
         $allowed = ['type', 'description', 'enum', 'properties', 'required', 'items', 'anyOf', 'oneOf', 'minimum', 'maximum', 'minLength', 'maxLength', 'minItems', 'maxItems', 'additionalProperties'];
         $check = function (array $schema, string $path) use (&$check, $allowed): void {
             foreach (array_keys($schema) as $key) {
@@ -1861,7 +1861,7 @@ it('hands the opening of a grid row to the browser by its number', function (): 
     }
 });
 
-it('offers every closed list as strings and every array with its items, as Gemini requires', function (): void {
+it('offers every closed list in the type of its property, and every array with its items', function (): void {
     $admin = aiChatAdmin('ai_chat_enum', ['all']);
     try {
         aiChatLogin($admin);
@@ -1875,9 +1875,8 @@ it('offers every closed list as strings and every array with its items, as Gemin
         expect($result['status'])->toBe(200);
         $schemas = AiChatScript::$offeredSchemas[1];
         $rule = $schemas['sales_cart_price_rules_create']['properties'] ?? [];
-        expect($rule['websiteIds']['items'])->toMatchArray(['type' => 'string']);
-        expect($rule['websiteIds']['items']['enum'])->toContain((string) Mage::app()->getDefaultStoreView()->getWebsiteId());
-        expect($rule['simpleFreeShipping'])->toMatchArray(['type' => 'string', 'enum' => ['0', '1', '2']]);
+        expect(array_map(strval(...), $rule['websiteIds']['items']['enum']))->toContain((string) Mage::app()->getDefaultStoreView()->getWebsiteId());
+        expect($rule['simpleFreeShipping'])->toMatchArray(['type' => 'integer', 'enum' => [0, 1, 2]]);
         // Street is string[]|string: the array variant of the union keeps its items.
         $streets = array_filter(array_map(static fn(array $schema): ?array => $schema['properties']['street'] ?? null, $schemas));
         expect($streets)->not->toBeEmpty();
@@ -1888,11 +1887,8 @@ it('offers every closed list as strings and every array with its items, as Gemin
             if (($schema['type'] ?? null) === 'array') {
                 expect($schema['items'] ?? null)->toBeArray("An array without items at $path");
             }
-            if (isset($schema['enum'])) {
-                expect($schema['type'] ?? null)->toBe('string', "An enum on a type other than string at $path");
-            }
             foreach ($schema['enum'] ?? [] as $value) {
-                expect($value)->toBeString("A value that is not a string in the enum at $path");
+                expect(get_debug_type($value))->toBe(($schema['type'] ?? null) === 'integer' ? 'int' : 'string', "A value of another type than its property in the enum at $path");
             }
             foreach ($schema['properties'] ?? [] as $name => $child) {
                 $check($child, "$path.$name");
@@ -1910,7 +1906,7 @@ it('offers every closed list as strings and every array with its items, as Gemin
     }
 });
 
-it('turns the string that the model picks from an integer enum back into the integer', function (): void {
+it('turns a string that the model sends for an integer enum back into the integer', function (): void {
     $admin = aiChatAdmin('ai_chat_enum_value', ['all']);
     $taxClassId = (string) Mage::getModel('tax/class_source_customer')->getAllOptions()[0]['value'];
     try {
@@ -1919,7 +1915,7 @@ it('turns the string that the model picks from an integer enum back into the int
             new ToolCallResult([new ToolCall('call_g1', 'customers_customer_groups_create', ['code' => 'ai_chat_enum_value', 'taxClassId' => $taxClassId])]),
         );
         $first = aiChatRequest('/api/admin/ai/chat', ['message' => 'Create a customer group', 'context' => ['route' => 'customer_group/index']]);
-        expect(AiChatScript::$offeredSchemas[0]['customers_customer_groups_create']['properties']['taxClassId']['enum'] ?? null)->toContain($taxClassId);
+        expect(AiChatScript::$offeredSchemas[0]['customers_customer_groups_create']['properties']['taxClassId']['enum'] ?? null)->toContain((int) $taxClassId);
         $conversationId = (int) aiChatEvents($first['events'], 'confirm')[0]['conversation_id'];
 
         AiChatScript::reset(new TextResult('Created.'));
