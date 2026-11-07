@@ -10,14 +10,19 @@ declare(strict_types=1);
 
 uses(Tests\MahoBackendTestCase::class);
 
-beforeEach(function (): void {
-    $this->savedExtension = Mage::getStoreConfig('giftcard/general/refund_expiration_extension', 1);
-    $this->refundCard = Mage::getModel('giftcard/giftcard')
+function giftcardRefundCard(float $balance = 100.0): Maho_Giftcard_Model_Giftcard
+{
+    return Mage::getModel('giftcard/giftcard')
         ->setCode('REFUND-' . bin2hex(random_bytes(8)))
         ->setWebsiteIds([1])
-        ->setBalance(100.0)
+        ->setBalance($balance)
         ->setExpiresAt(null)
         ->save();
+}
+
+beforeEach(function (): void {
+    $this->savedExtension = Mage::getStoreConfig('giftcard/general/refund_expiration_extension', 1);
+    $this->refundCard = giftcardRefundCard();
 });
 
 afterEach(function (): void {
@@ -74,7 +79,9 @@ it('adds both refunds when two models loaded the same starting balance', functio
 });
 
 it('reactivates a stored used card when a refund succeeds', function (): void {
-    $this->refundCard->setBalance(0.0)->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_USED)->save();
+    $this->refundCard->delete();
+    $this->refundCard = giftcardRefundCard(0.0);
+    $this->refundCard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_USED)->save();
 
     $this->refundCard->refund(25.0);
 
@@ -98,7 +105,9 @@ it('uses the stored status instead of a stale status when refunding', function (
 });
 
 it('rolls back the balance and reactivation when history cannot be written', function (): void {
-    $this->refundCard->setBalance(0.0)->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_USED)->save();
+    $this->refundCard->delete();
+    $this->refundCard = giftcardRefundCard(0.0);
+    $this->refundCard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_USED)->save();
     $card = giftcardRefundHistoryFailure($this->refundCard->getId());
 
     expect(fn() => $card->refund(25.0))->toThrow(RuntimeException::class, 'Test history failure');
@@ -127,7 +136,9 @@ it('extends the expiry date of a card that expires within the refund extension',
 
 it('reactivates an expired card only when the refund extension is above 0', function (string $extension, string $status): void {
     $past = new DateTimeImmutable('now', new DateTimeZone('UTC'))->modify('-5 days');
-    $this->refundCard->setBalance(0.0)
+    $this->refundCard->delete();
+    $this->refundCard = giftcardRefundCard(0.0);
+    $this->refundCard
         ->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_EXPIRED)
         ->setExpiresAt($past->format(Mage_Core_Model_Locale::DATETIME_FORMAT))
         ->save();
@@ -203,7 +214,9 @@ it('uses the resource writer for the credit, history, reload and rollback', func
 ]);
 
 it('rolls back a failed refund while the caller can commit its own transaction', function (): void {
-    $this->refundCard->setBalance(0.0)->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_USED)->save();
+    $this->refundCard->delete();
+    $this->refundCard = giftcardRefundCard(0.0);
+    $this->refundCard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_USED)->save();
     $card = giftcardRefundHistoryFailure($this->refundCard->getId());
     $resource = Mage::getResourceSingleton('giftcard/giftcard');
     $resource->beginTransaction();
