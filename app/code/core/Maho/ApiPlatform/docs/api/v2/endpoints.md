@@ -369,7 +369,7 @@ Omit `items` to ship every remaining item on the order. Each track entry needs a
 - `comment`, Optional refund note.
 - `adjustmentPositive`, Additional positive adjustment (add to refund).
 - `adjustmentNegative`, Negative adjustment (reduce refund).
-- `offlineRefund`, `true` (default) for offline refund, `false` to trigger payment gateway refund.
+- `offlineRefund`, `true` (default) for offline refund. An online refund needs the invoice of the capture, which the API cannot name yet, so `false` is refused with a 422 asking for an offline refund.
 
 ---
 
