@@ -427,10 +427,11 @@ describe('Storefront customAttributes (REST)', function (): void {
             'telephone' => '5550100',
         ];
 
-        apiPut("/api/rest/v2/guest-carts/{$maskedId}/shipping-address", $address + ['customAttributes' => [CUSTOM_ATTR_FLOOR_CODE => '2nd']]);
+        $first = apiPut("/api/rest/v2/guest-carts/{$maskedId}/shipping-address", $address + ['customAttributes' => [CUSTOM_ATTR_FLOOR_CODE => '2nd']]);
         $cleared = apiPut("/api/rest/v2/guest-carts/{$maskedId}/shipping-address", $address);
 
-        expect($cleared['status'])->toBe(200)
+        expect($first['json']['shippingAddress']['customAttributes'][CUSTOM_ATTR_FLOOR_CODE] ?? null)->toBe('2nd')
+            ->and($cleared['status'])->toBe(200)
             ->and($cleared['json']['shippingAddress']['customAttributes'][CUSTOM_ATTR_FLOOR_CODE] ?? null)->toBeNull();
     });
 

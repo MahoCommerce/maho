@@ -163,7 +163,11 @@ it('saves a category when a required attribute is not in its set', function () {
         'use_config' => ['available_sort_by', 'default_sort_by'],
     ]);
 
-    expect(Mage::getModel('catalog/category')->setStoreId(0)->load($category->getId())->getName())->toBe('Pest Required Renamed ' . $this->suffix);
+    $saved = Mage::getModel('catalog/category')->setStoreId(0)->load($category->getId());
+    $errors = $saved->validate();
+
+    expect($saved->getName())->toBe('Pest Required Renamed ' . $this->suffix)
+        ->and(is_array($errors) ? $errors : [])->not->toHaveKey((string) $attribute->getAttributeCode());
 });
 
 it('changes the set of a saved blog post from the admin save', function () {
