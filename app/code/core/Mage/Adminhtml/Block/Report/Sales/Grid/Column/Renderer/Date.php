@@ -10,9 +10,6 @@
 
 class Mage_Adminhtml_Block_Report_Sales_Grid_Column_Renderer_Date extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Date
 {
-    /** @var array<string, IntlDateFormatter> */
-    protected static array $_formatters = [];
-
     protected function _getFormat(): string
     {
         $column = $this->getColumn();
@@ -23,17 +20,13 @@ class Mage_Adminhtml_Block_Report_Sales_Grid_Column_Renderer_Date extends Mage_A
     #[\Override]
     protected function _getFormatter(): IntlDateFormatter
     {
-        $locale = Mage::app()->getLocale()->getLocaleCode();
-        $icuPattern = $this->_getFormat();
-        $key = $locale . ':' . $icuPattern;
-
-        return self::$_formatters[$key] ??= new IntlDateFormatter(
-            $locale,
+        return $this->_formatter ??= new IntlDateFormatter(
+            Mage::app()->getLocale()->getLocaleCode(),
             IntlDateFormatter::NONE,
             IntlDateFormatter::NONE,
             null,
             null,
-            $icuPattern,
+            $this->_getFormat(),
         );
     }
 
