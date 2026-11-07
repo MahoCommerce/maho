@@ -22,6 +22,7 @@ use ApiPlatform\Metadata\Resource\Factory\ResourceMetadataCollectionFactoryInter
 use ApiPlatform\Metadata\Resource\Factory\ResourceNameCollectionFactoryInterface;
 use Symfony\AI\Platform\Tool\ExecutionReference;
 use Symfony\AI\Platform\Tool\Tool;
+use Symfony\AI\Platform\Tool\ToolEffectHints;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
@@ -80,12 +81,7 @@ final class McpToolCatalog
                 $this->describe($mcp),
                 // @phpstan-ignore argument.type (API Platform builds the schema at runtime, so PHPStan cannot know its shape)
                 self::stringEnums($this->parameters($mcp)),
-                [
-                    'mcp_name' => $name,
-                    'title' => (string) ($mcp->getTitle() ?? $name),
-                    'read_only' => $this->isReadOnly($name),
-                    'destructive' => $this->isDestructive($name),
-                ],
+                effectHints: $this->effectHints($name),
             );
         }
 
@@ -175,12 +171,26 @@ final class McpToolCatalog
     /** A tool the model may run without asking the administrator. Unknown tools are never read-only. */
     public function isReadOnly(string $nameOrAlias): bool
     {
-        return ($this->annotations($nameOrAlias)['readOnlyHint'] ?? false) === true;
+        return $this->effectHints($nameOrAlias)->readOnlyHint === true;
     }
 
     public function isDestructive(string $nameOrAlias): bool
     {
-        return ($this->annotations($nameOrAlias)['destructiveHint'] ?? false) === true;
+        return $this->effectHints($nameOrAlias)->destructiveHint === true;
+    }
+
+    /** The MCP annotations of a tool, which use the same hint names. An unknown tool gets no hint. */
+    private function effectHints(string $nameOrAlias): ToolEffectHints
+    {
+        $annotations = $this->annotations($nameOrAlias);
+        $hint = static fn(string $key): ?bool => is_bool($annotations[$key] ?? null) ? $annotations[$key] : null;
+
+        return new ToolEffectHints(
+            readOnlyHint: $hint('readOnlyHint'),
+            destructiveHint: $hint('destructiveHint'),
+            idempotentHint: $hint('idempotentHint'),
+            openWorldHint: $hint('openWorldHint'),
+        );
     }
 
     /**

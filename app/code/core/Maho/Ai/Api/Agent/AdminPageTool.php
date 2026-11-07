@@ -18,6 +18,7 @@ use ApiPlatform\Metadata\Resource\Factory\ResourceNameCollectionFactoryInterface
 use Maho\Routing\RouteCollectionBuilder;
 use Symfony\AI\Platform\Tool\ExecutionReference;
 use Symfony\AI\Platform\Tool\Tool;
+use Symfony\AI\Platform\Tool\ToolEffectHints;
 
 /**
  * Not an MCP tool: it has no REST twin. The panel receives a `navigate` event when it
@@ -67,6 +68,12 @@ final class AdminPageTool
      * administrator has open, performed by the panel after the answer. The panel resolves
      * the target against the visible elements only, the ones the screen digest listed.
      */
+    /** The tool acts in the browser of the administrator, who then saves the change. The tool itself changes no store data. */
+    public static function effectHints(): ToolEffectHints
+    {
+        return new ToolEffectHints(readOnlyHint: true, destructiveHint: false, openWorldHint: false);
+    }
+
     public function actionTool(): Tool
     {
         return new Tool(
@@ -95,7 +102,7 @@ final class AdminPageTool
                 'required' => ['steps'],
                 'additionalProperties' => false,
             ],
-            ['title' => self::title(self::ACTION_NAME), 'read_only' => true, 'destructive' => false, 'local' => true],
+            effectHints: self::effectHints(),
         );
     }
 
@@ -173,7 +180,7 @@ final class AdminPageTool
                 'required' => ['page'],
                 'additionalProperties' => false,
             ],
-            ['title' => 'Open admin page', 'read_only' => true, 'destructive' => false, 'local' => true],
+            effectHints: self::effectHints(),
         );
     }
 
@@ -198,7 +205,7 @@ final class AdminPageTool
                 'required' => ['page', 'fields'],
                 'additionalProperties' => false,
             ],
-            ['title' => self::title(self::FILL_NAME), 'read_only' => true, 'destructive' => false, 'local' => true],
+            effectHints: self::effectHints(),
         );
     }
 

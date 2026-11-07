@@ -14,6 +14,7 @@ namespace Maho\Ai\Api\Agent;
 
 use Symfony\AI\Platform\Tool\ExecutionReference;
 use Symfony\AI\Platform\Tool\Tool;
+use Symfony\AI\Platform\Tool\ToolEffectHints;
 
 /**
  * The guide is not a file in the repository: the editor script builds it in the browser from
@@ -47,6 +48,12 @@ final class ContentGuideTool
         return $this->guide() !== '';
     }
 
+    /** The tool reads a guide. It changes no store data. */
+    public static function effectHints(): ToolEffectHints
+    {
+        return new ToolEffectHints(readOnlyHint: true, destructiveHint: false, openWorldHint: false);
+    }
+
     public function tool(): Tool
     {
         return new Tool(
@@ -54,7 +61,7 @@ final class ContentGuideTool
             self::NAME,
             'The HTML the content editor of this admin writes for its layouts: columns, bento grids, accordion, tabs, slideshow, table, images, widgets and variables. Read it before you write page, block or template content that has a layout or an image, and use the same HTML so the administrator can keep editing the layout in the editor.',
             null,
-            ['title' => self::TITLE, 'read_only' => true, 'destructive' => false, 'local' => true],
+            effectHints: self::effectHints(),
         );
     }
 

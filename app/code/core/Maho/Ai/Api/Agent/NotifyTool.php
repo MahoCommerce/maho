@@ -14,6 +14,7 @@ namespace Maho\Ai\Api\Agent;
 
 use Symfony\AI\Platform\Tool\ExecutionReference;
 use Symfony\AI\Platform\Tool\Tool;
+use Symfony\AI\Platform\Tool\ToolEffectHints;
 
 /**
  * Only a run without a browser offers it: in the chat, the answer itself reaches the
@@ -43,6 +44,12 @@ final class NotifyTool
         return $this->conversation !== null;
     }
 
+    /** The tool sends a notification to the administrator. It changes no store data. */
+    public static function effectHints(): ToolEffectHints
+    {
+        return new ToolEffectHints(readOnlyHint: true, destructiveHint: false, openWorldHint: false);
+    }
+
     public function tool(): Tool
     {
         return new Tool(
@@ -59,7 +66,7 @@ final class NotifyTool
                 'required' => ['title', 'text', 'severity'],
                 'additionalProperties' => false,
             ],
-            ['title' => 'Send a notification', 'read_only' => true, 'destructive' => false, 'local' => true],
+            effectHints: self::effectHints(),
         );
     }
 

@@ -14,6 +14,7 @@ namespace Maho\Ai\Api\Agent;
 
 use Symfony\AI\Platform\Tool\ExecutionReference;
 use Symfony\AI\Platform\Tool\Tool;
+use Symfony\AI\Platform\Tool\ToolEffectHints;
 
 /**
  * The tool exists only when image generation is on in the AI configuration. It is a write,
@@ -33,6 +34,12 @@ final class ImageTool
             && \Mage::getSingleton('admin/session')->isAllowed('cms/media_gallery');
     }
 
+    /** The tool calls an image provider, which costs money, and stores the image. */
+    public static function effectHints(): ToolEffectHints
+    {
+        return new ToolEffectHints(readOnlyHint: false, destructiveHint: false, openWorldHint: true);
+    }
+
     public function tool(): Tool
     {
         return new Tool(
@@ -50,7 +57,7 @@ final class ImageTool
                 'required' => ['prompt', 'file_name'],
                 'additionalProperties' => false,
             ],
-            ['title' => self::TITLE, 'read_only' => false, 'destructive' => false, 'local' => true],
+            effectHints: self::effectHints(),
         );
     }
 

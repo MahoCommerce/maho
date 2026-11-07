@@ -16,6 +16,7 @@ use Maho\Docs\Library;
 use Maho\Docs\Page;
 use Symfony\AI\Platform\Tool\ExecutionReference;
 use Symfony\AI\Platform\Tool\Tool;
+use Symfony\AI\Platform\Tool\ToolEffectHints;
 
 /**
  * The pages come from the files of this installation, so a store reads the guide of its own
@@ -32,6 +33,12 @@ final class DocsTool
     public function hasPages(): bool
     {
         return $this->pages() !== [];
+    }
+
+    /** The tool reads the user guide. It changes no store data. */
+    public static function effectHints(): ToolEffectHints
+    {
+        return new ToolEffectHints(readOnlyHint: true, destructiveHint: false, openWorldHint: false);
     }
 
     public function tool(): Tool
@@ -51,7 +58,7 @@ final class DocsTool
                 'required' => [],
                 'additionalProperties' => false,
             ],
-            ['title' => self::TITLE, 'read_only' => true, 'destructive' => false, 'local' => true],
+            effectHints: self::effectHints(),
         );
     }
 

@@ -14,11 +14,18 @@ namespace Maho\Ai\Api\Agent;
 
 use Symfony\AI\Platform\Tool\ExecutionReference;
 use Symfony\AI\Platform\Tool\Tool;
+use Symfony\AI\Platform\Tool\ToolEffectHints;
 
 final class AttachmentTool
 {
     public const NAME = 'attachment_read';
     public const TITLE = 'Read an attachment';
+
+    /** The tool reads a file that the administrator attached. It changes no store data. */
+    public static function effectHints(): ToolEffectHints
+    {
+        return new ToolEffectHints(readOnlyHint: true, destructiveHint: false, openWorldHint: false);
+    }
 
     public function tool(): Tool
     {
@@ -35,7 +42,7 @@ final class AttachmentTool
                 'required' => ['id'],
                 'additionalProperties' => false,
             ],
-            ['title' => self::TITLE, 'read_only' => true, 'destructive' => false, 'local' => true],
+            effectHints: self::effectHints(),
         );
     }
 

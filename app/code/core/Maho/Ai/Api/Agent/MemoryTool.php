@@ -14,6 +14,7 @@ namespace Maho\Ai\Api\Agent;
 
 use Symfony\AI\Platform\Tool\ExecutionReference;
 use Symfony\AI\Platform\Tool\Tool;
+use Symfony\AI\Platform\Tool\ToolEffectHints;
 
 /**
  * A note is a lasting preference or fact the administrator stated: the language to answer
@@ -32,6 +33,12 @@ final class MemoryTool
         return $name === self::FORGET ? 'Forget a note' : 'Remember a note';
     }
 
+    /** The tool changes the memory of the assistant only, which is not store data. */
+    public static function effectHints(): ToolEffectHints
+    {
+        return new ToolEffectHints(readOnlyHint: true, destructiveHint: false, openWorldHint: false);
+    }
+
     public function rememberTool(): Tool
     {
         return new Tool(
@@ -44,7 +51,7 @@ final class MemoryTool
                 'required' => ['note'],
                 'additionalProperties' => false,
             ],
-            ['title' => self::title(self::REMEMBER), 'read_only' => true, 'destructive' => false, 'local' => true],
+            effectHints: self::effectHints(),
         );
     }
 
@@ -60,7 +67,7 @@ final class MemoryTool
                 'required' => ['note_id'],
                 'additionalProperties' => false,
             ],
-            ['title' => self::title(self::FORGET), 'read_only' => true, 'destructive' => false, 'local' => true],
+            effectHints: self::effectHints(),
         );
     }
 

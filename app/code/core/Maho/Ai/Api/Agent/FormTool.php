@@ -14,6 +14,7 @@ namespace Maho\Ai\Api\Agent;
 
 use Symfony\AI\Platform\Tool\ExecutionReference;
 use Symfony\AI\Platform\Tool\Tool;
+use Symfony\AI\Platform\Tool\ToolEffectHints;
 
 /**
  * The panel sends the text fields of the open form with each message, with the changes that
@@ -49,6 +50,12 @@ final class FormTool
         return $name === self::EDIT_NAME ? 'Correct text in the form' : 'Read the form';
     }
 
+    /** The tool acts on the open form of the administrator, who then saves it. The tool itself changes no store data. */
+    public static function effectHints(): ToolEffectHints
+    {
+        return new ToolEffectHints(readOnlyHint: true, destructiveHint: false, openWorldHint: false);
+    }
+
     public function readTool(): Tool
     {
         return new Tool(
@@ -67,7 +74,7 @@ final class FormTool
                 'required' => [],
                 'additionalProperties' => false,
             ],
-            ['title' => self::title(self::READ_NAME), 'read_only' => true, 'destructive' => false, 'local' => true],
+            effectHints: self::effectHints(),
         );
     }
 
@@ -99,7 +106,7 @@ final class FormTool
                 'required' => ['edits'],
                 'additionalProperties' => false,
             ],
-            ['title' => self::title(self::EDIT_NAME), 'read_only' => true, 'destructive' => false, 'local' => true],
+            effectHints: self::effectHints(),
         );
     }
 

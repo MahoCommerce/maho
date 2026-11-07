@@ -14,6 +14,7 @@ namespace Maho\Ai\Api\Agent;
 
 use Symfony\AI\Platform\Tool\ExecutionReference;
 use Symfony\AI\Platform\Tool\Tool;
+use Symfony\AI\Platform\Tool\ToolEffectHints;
 
 /**
  * A request over many records cannot run inside one chat turn. The tool is a write, so the
@@ -25,6 +26,12 @@ final class BackgroundTaskTool
 {
     public const NAME = 'run_in_background';
     public const TITLE = 'Run in the background';
+
+    /** The tool starts a job that runs the store tools. */
+    public static function effectHints(): ToolEffectHints
+    {
+        return new ToolEffectHints(readOnlyHint: false, destructiveHint: false);
+    }
 
     public function tool(): Tool
     {
@@ -41,7 +48,7 @@ final class BackgroundTaskTool
                 'required' => ['title', 'instruction'],
                 'additionalProperties' => false,
             ],
-            ['title' => self::TITLE, 'read_only' => false, 'destructive' => false, 'local' => true],
+            effectHints: self::effectHints(),
         );
     }
 
