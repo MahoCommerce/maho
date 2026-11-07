@@ -494,8 +494,8 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
     public function getDateFormatByPeriodType(?string $period = null): string
     {
         return match ($period) {
-            'month' => 'Y-m',     // Simple year-month format
-            'year' => 'Y',        // Just year
+            'month' => 'yyyy-MM',
+            'year' => 'yyyy',
             default => $this->getDateFormat(self::FORMAT_TYPE_MEDIUM),
         };
     }
