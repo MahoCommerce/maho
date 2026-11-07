@@ -238,6 +238,29 @@ describe('Configurable Setup, Setup', function (): void {
         expect(configurableSetupSuperAttributeRows($this->configurableId))->toBe(0);
     });
 
+    it('rejects other super attributes than the saved ones, and accepts the same ones again', function (): void {
+        $first = apiPut("/api/rest/v2/products/{$this->configurableId}/configurable", [
+            'superAttributes' => [$this->code],
+            'childProductIds' => [$this->childIds[0]],
+        ], $this->token);
+        expect($first['status'])->toBe(200);
+
+        $this->otherAttribute = configurableSetupCreateAttribute();
+        $other = apiPut("/api/rest/v2/products/{$this->configurableId}/configurable", [
+            'superAttributes' => [(string) $this->otherAttribute->getAttributeCode()],
+            'childProductIds' => $this->childIds,
+        ], $this->token);
+        expect($other['status'])->toBe(422);
+
+        $same = apiPut("/api/rest/v2/products/{$this->configurableId}/configurable", [
+            'superAttributes' => [$this->code],
+            'childProductIds' => $this->childIds,
+        ], $this->token);
+        expect($same['status'])->toBe(200);
+        expect($same['json']['superAttributes'])->toBe([$this->code]);
+        expect($same['json']['childProductIds'])->toEqualCanonicalizing($this->childIds);
+    });
+
     it('saves no super attribute when the children cannot be assigned', function (): void {
         $response = apiPut("/api/rest/v2/products/{$this->configurableId}/configurable", [
             'superAttributes' => [$this->code],

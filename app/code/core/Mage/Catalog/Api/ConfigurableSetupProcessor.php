@@ -88,18 +88,26 @@ final class ConfigurableSetupProcessor extends \Maho\ApiPlatform\Processor
         // Set super attributes if provided and none exist yet
         $superAttributes = $body['superAttributes'] ?? $body['super_attributes'] ?? [];
         if (!empty($superAttributes)) {
-            $existingAttrIds = $typeInstance->getConfigurableAttributeCollection($product)->getAllIds();
+            $attributeIds = [];
+            foreach ($superAttributes as $code) {
+                $attribute = Mage::getSingleton('eav/config')
+                    ->getAttribute('catalog_product', $code);
+                if (!$attribute || !$attribute->getId()) {
+                    throw new UnprocessableEntityHttpException("Attribute not found: {$code}");
+                }
+                $attributeIds[$code] = (int) $attribute->getId();
+            }
 
-            if (empty($existingAttrIds)) {
+            $existingAttributeIds = array_map(
+                intval(...),
+                $typeInstance->getConfigurableAttributeCollection($product)->getColumnValues('attribute_id'),
+            );
+
+            if (empty($existingAttributeIds)) {
                 $setAttributes = $typeInstance->getSetAttributes($product);
                 $superAttributeData = [];
                 $position = 0;
-                foreach ($superAttributes as $code) {
-                    $attribute = Mage::getSingleton('eav/config')
-                        ->getAttribute('catalog_product', $code);
-                    if (!$attribute || !$attribute->getId()) {
-                        throw new UnprocessableEntityHttpException("Attribute not found: {$code}");
-                    }
+                foreach ($attributeIds as $code => $attributeId) {
                     // The configurable reads only the attributes of its attribute set that can be configurable
                     $setAttribute = $setAttributes[$code] ?? null;
                     if (!$setAttribute instanceof \Mage_Eav_Model_Entity_Attribute || !$typeInstance->canUseAttribute($setAttribute)) {
@@ -108,13 +116,23 @@ final class ConfigurableSetupProcessor extends \Maho\ApiPlatform\Processor
                         );
                     }
                     $superAttributeData[] = [
-                        'attribute_id' => $attribute->getId(),
+                        'attribute_id' => $attributeId,
                         'position' => $position++,
                     ];
                 }
                 $product->setConfigurableAttributesData($superAttributeData);
                 $product->setCanSaveConfigurableAttributes(true);
                 $needsSave = true;
+            } else {
+                // As in the admin, the super attributes of a configurable product cannot change once saved
+                $requested = array_values($attributeIds);
+                sort($requested);
+                sort($existingAttributeIds);
+                if ($requested !== $existingAttributeIds) {
+                    throw new UnprocessableEntityHttpException(
+                        'The configurable product already has other super attributes, which cannot be changed',
+                    );
+                }
             }
         }
 
