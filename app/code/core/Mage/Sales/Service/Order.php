@@ -892,7 +892,7 @@ class Mage_Sales_Service_Order
             // one it refunds nothing at the gateway, yet the order would count the memo
             // as refunded online.
             if (!$offlineRefund && !$creditmemo->getInvoice()) {
-                \Mage::throwException('Cannot refund online: the credit memo is not created from an invoice, so refund it offline');
+                \Mage::throwException('Cannot refund online: the credit memo has no invoice. Refund it offline.');
             }
 
             // Cap the refund at what the order can still refund, so an inflated
