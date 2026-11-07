@@ -34,6 +34,9 @@ SPDX-License-Identifier: AFL-3.0
                     <sequenceProgress>
                         <table>customer_segment_sequence_progress</table>
                     </sequenceProgress>
+                    <coupon>
+                        <table>customer_segment_coupon</table>
+                    </coupon>
                 </entities>
             </customersegmentation_resource>
         </models>
