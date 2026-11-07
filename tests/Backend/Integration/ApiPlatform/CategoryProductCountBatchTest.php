@@ -202,3 +202,130 @@ it('skips child queries for an empty batch', function (): void {
     expect($this->parent->getResource()->getChildrenForCategories([]))->toBe([])
         ->and($this->counter->childrenQueries)->toBe(0);
 });
+
+class CategoryBatchRewrittenModel extends Mage_Catalog_Model_Category
+{
+    public static int $countCalls = 0;
+    public static int $childrenCalls = 0;
+
+    #[\Override]
+    public function getProductCount()
+    {
+        self::$countCalls++;
+        return 701;
+    }
+
+    #[\Override]
+    public function getChildren()
+    {
+        self::$childrenCalls++;
+        return '';
+    }
+}
+
+class CategoryBatchRewrittenResource extends Mage_Catalog_Model_Resource_Category
+{
+    public static int $countCalls = 0;
+    public static int $childrenCalls = 0;
+
+    #[\Override]
+    public function getProductCount($category)
+    {
+        self::$countCalls++;
+        return 702;
+    }
+
+    #[\Override]
+    public function getChildren($category, $recursive = true)
+    {
+        self::$childrenCalls++;
+        return parent::getChildren($category, $recursive);
+    }
+}
+
+class CategoryBatchRewrittenChildrenSelect extends Mage_Catalog_Model_Resource_Category
+{
+    public static int $selectCalls = 0;
+
+    #[\Override]
+    protected function _getChildrenIdSelect($category, $recursive = true)
+    {
+        self::$selectCalls++;
+        return parent::_getChildrenIdSelect($category, $recursive)->where('1 = 0');
+    }
+}
+
+class CategoryBatchRewrittenCollection extends Mage_Catalog_Model_Resource_Category_Collection {}
+
+function categoryBatchRewrite(string $group, string $model, string $class): void
+{
+    $config = Mage::getConfig();
+    $config->setNode("global/models/$group/rewrite/$model", $class);
+    new ReflectionProperty(Mage_Core_Model_Config::class, '_classNameCache')->setValue($config, []);
+    if ($group === 'catalog_resource' && $model === 'category') {
+        Mage::unregister('_resource_singleton/catalog/category');
+    }
+}
+
+it('keeps rewritten category model getters in collection responses', function (): void {
+    categoryBatchRewrite('catalog', 'category', CategoryBatchRewrittenModel::class);
+    CategoryBatchRewrittenModel::$countCalls = 0;
+    CategoryBatchRewrittenModel::$childrenCalls = 0;
+    $items = iterator_to_array(new CategoryProvider()->provide(new GetCollection(), [], [
+        'filters' => ['parentId' => $this->parent->getId()],
+    ]));
+
+    expect(array_column($items, 'productCount'))->toBe([701, 701, 701])
+        ->and(array_column($items, 'childrenIds'))->toBe([[], [], []])
+        ->and(CategoryBatchRewrittenModel::$countCalls)->toBe(3)
+        ->and(CategoryBatchRewrittenModel::$childrenCalls)->toBe(3)
+        ->and($this->counter->countQueries)->toBe(0);
+});
+
+it('keeps rewritten resource getters for collection and nested child responses', function (): void {
+    categoryBatchRewrite('catalog_resource', 'category', CategoryBatchRewrittenResource::class);
+    CategoryBatchRewrittenResource::$countCalls = 0;
+    CategoryBatchRewrittenResource::$childrenCalls = 0;
+    $provider = new CategoryProvider();
+    $items = iterator_to_array($provider->provide(new GetCollection(), [], [
+        'filters' => ['parentId' => $this->parent->getId()],
+    ]));
+    expect(array_column($items, 'productCount'))->toBe([702, 702, 702])
+        ->and(array_column($items, 'childrenIds'))->toBe([[], [(int) $this->grandchild->getId()], []])
+        ->and(CategoryBatchRewrittenResource::$countCalls)->toBe(3)
+        ->and(CategoryBatchRewrittenResource::$childrenCalls)->toBe(3)
+        ->and($this->counter->countQueries)->toBe(0);
+
+    CategoryBatchRewrittenResource::$countCalls = 0;
+    CategoryBatchRewrittenResource::$childrenCalls = 0;
+    $item = $provider->provide(new Get(), ['id' => $this->parent->getId()]);
+    expect($item->productCount)->toBe(702)
+        ->and(array_column($item->children, 'productCount'))->toBe([702, 702, 702])
+        ->and(CategoryBatchRewrittenResource::$countCalls)->toBe(4)
+        ->and(CategoryBatchRewrittenResource::$childrenCalls)->toBe(4);
+});
+
+it('keeps rewritten child-select predicates', function (): void {
+    categoryBatchRewrite('catalog_resource', 'category', CategoryBatchRewrittenChildrenSelect::class);
+    CategoryBatchRewrittenChildrenSelect::$selectCalls = 0;
+    $items = iterator_to_array(new CategoryProvider()->provide(new GetCollection(), [], [
+        'filters' => ['parentId' => $this->parent->getId()],
+    ]));
+
+    expect(array_column($items, 'productCount'))->toBe([1, 1, 0])
+        ->and(array_column($items, 'childrenIds'))->toBe([[], [], []])
+        ->and(CategoryBatchRewrittenChildrenSelect::$selectCalls)->toBe(3)
+        ->and($this->counter->countQueries)->toBe(3);
+});
+
+it('keeps the original loading path for inherited category collections', function (): void {
+    categoryBatchRewrite('catalog_resource', 'category_collection', CategoryBatchRewrittenCollection::class);
+    $items = iterator_to_array(new CategoryProvider()->provide(new GetCollection(), [], [
+        'filters' => ['parentId' => $this->parent->getId()],
+    ]));
+
+    expect(array_column($items, 'productCount'))->toBe([1, 1, 0])
+        ->and(array_column($items, 'childrenIds'))->toBe([[], [(int) $this->grandchild->getId()], []])
+        ->and($this->counter->countQueries)->toBe(3)
+        ->and($this->counter->childrenQueries)->toBe(3);
+});

@@ -256,12 +256,11 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
         $collection->setCurPage($page);
 
         $total = (int) $collection->getSize();
-        $this->loadProductCounts($collection);
-        $children = \Mage::getResourceSingleton('catalog/category')->getChildrenForCategories($collection->getItems());
+        $children = $this->loadCollectionMetadata($collection);
 
         $categories = [];
         foreach ($collection as $mahoCategory) {
-            $categories[] = $this->mapToDto($mahoCategory, false, childrenIds: $children[$mahoCategory->getId()]);
+            $categories[] = $this->mapToDto($mahoCategory, false, childrenIds: $children[$mahoCategory->getId()] ?? null);
         }
 
         return new TraversablePaginator(new \ArrayIterator($categories), $page, $pageSize, $total);
@@ -355,10 +354,9 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
                 $childCollection->addAttributeToFilter('is_active', 1);
             }
 
-            $this->loadProductCounts($childCollection);
-            $children = \Mage::getResourceSingleton('catalog/category')->getChildrenForCategories($childCollection->getItems());
+            $children = $this->loadCollectionMetadata($childCollection);
             foreach ($childCollection as $childCategory) {
-                $dto->children[] = $this->mapToDto($childCategory, false, childrenIds: $children[$childCategory->getId()]);
+                $dto->children[] = $this->mapToDto($childCategory, false, childrenIds: $children[$childCategory->getId()] ?? null);
             }
         }
 
@@ -369,6 +367,34 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
         \Mage::dispatchEvent('api_category_dto_build', ['category' => $category, 'dto' => $dto]);
 
         return $dto;
+    }
+
+    /**
+     * Batch core categories only. Rewritten models, resources and collections keep their own getters.
+     *
+     * @return array<int, list<int>>|null
+     */
+    private function loadCollectionMetadata(\Mage_Catalog_Model_Resource_Category_Collection $collection): ?array
+    {
+        $resource = \Mage::getResourceSingleton('catalog/category');
+        if ($collection::class !== \Mage_Catalog_Model_Resource_Category_Collection::class
+            || $collection->getResource()::class !== \Mage_Catalog_Model_Resource_Category::class
+            || $resource::class !== \Mage_Catalog_Model_Resource_Category::class
+        ) {
+            return null;
+        }
+
+        $items = $collection->getItems();
+        foreach ($items as $category) {
+            if ($category::class !== \Mage_Catalog_Model_Category::class
+                || $category->getResource()::class !== \Mage_Catalog_Model_Resource_Category::class
+            ) {
+                return null;
+            }
+        }
+
+        $this->loadProductCounts($collection);
+        return $resource->getChildrenForCategories($items);
     }
 
     /**
