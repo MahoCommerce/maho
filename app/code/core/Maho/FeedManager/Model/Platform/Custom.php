@@ -163,11 +163,9 @@ class Maho_FeedManager_Model_Platform_Custom extends Maho_FeedManager_Model_Plat
     #[\Override]
     public function transformProductData(array $productData): array
     {
-        // Basic sanitization only
         foreach ($productData as $key => $value) {
             if (is_string($value)) {
-                // Remove control characters but preserve formatting
-                $productData[$key] = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $value);
+                $productData[$key] = Maho_FeedManager_Model_Mapper::removeControlCharacters($value);
             }
         }
 
