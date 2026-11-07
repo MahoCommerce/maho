@@ -256,6 +256,7 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
         $collection->setCurPage($page);
 
         $total = (int) $collection->getSize();
+        $this->loadProductCounts($collection);
 
         $categories = [];
         foreach ($collection as $mahoCategory) {
@@ -350,6 +351,7 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
                 $childCollection->addAttributeToFilter('is_active', 1);
             }
 
+            $this->loadProductCounts($childCollection);
             foreach ($childCollection as $childCategory) {
                 $dto->children[] = $this->mapToDto($childCategory, false);
             }
@@ -362,6 +364,33 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
         \Mage::dispatchEvent('api_category_dto_build', ['category' => $category, 'dto' => $dto]);
 
         return $dto;
+    }
+
+    /**
+     * Load direct product assignments, matching Category::getProductCount() for every store and anchor.
+     */
+    private function loadProductCounts(\Mage_Catalog_Model_Resource_Category_Collection $collection): void
+    {
+        $items = $collection->getItems();
+        if ($items === []) {
+            return;
+        }
+
+        $connection = $collection->getConnection();
+        $select = $connection->select()
+            ->from($collection->getTable('catalog/category_product'), [
+                'category_id',
+                'product_count' => new \Maho\Db\Expr('COUNT(product_id)'),
+            ])
+            ->where('category_id IN (?)', array_keys($items))
+            ->group('category_id');
+        $counts = $connection->fetchPairs($select);
+
+        foreach ($items as $category) {
+            if (!$category->hasProductCount()) {
+                $category->setData('product_count', (int) ($counts[$category->getId()] ?? 0));
+            }
+        }
     }
 
     /**
