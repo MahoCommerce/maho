@@ -75,8 +75,15 @@ jobs:
           HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
           marker='<!-- docs-preview -->'
+          base="https://pr-$NUMBER.maho-docs-preview.pages.dev/"
+          # The pull request writes changed.json, so only paths of letters, digits and / - _ . reach the comment.
+          pages=$(jq -j --arg base "$base" '
+            def safe: select(type == "string" and test("^[a-z0-9][a-z0-9_./-]*/$") and (contains("..") | not));
+            ([.changed[]? | safe | "- \($base)\(.)"] | if length > 0 then "\n\nChanged pages:\n" + join("\n") else "\n\nNo page changed." end),
+            ([.removed[]? | safe | "- `\(.)`"] | if length > 0 then "\n\nRemoved pages:\n" + join("\n") else "" end)
+          ' preview/_preview/changed.json)
           body="$marker
-          The docs of this pull request are at https://pr-$NUMBER.maho-docs-preview.pages.dev (commit ${HEAD_SHA:0:7})."
+          The docs of this pull request are at $base (commit ${HEAD_SHA:0:7}).$pages"
           id=$(gh api --paginate "repos/$REPOSITORY/issues/$NUMBER/comments" \
             --jq ".[] | select(.user.login == \"github-actions[bot]\" and (.body | startswith(\"$marker\"))) | .id" | head -n 1)
           if [ -n "$id" ]; then

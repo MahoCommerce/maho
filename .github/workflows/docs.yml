@@ -12,6 +12,7 @@ on:
       - 'app/code/core/*/*/docs/**'
       - 'app/code/core/*/*/etc/config.xml'
       - '.github/workflows/docs.yml'
+      - '.github/docs-preview/**'
   push:
     branches:
       - main
@@ -35,6 +36,8 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           path: maho
+          # For a pull request, HEAD^1 of the merge commit is the base, so the preview lists the changed pages.
+          fetch-depth: 2
           persist-credentials: false
 
       - name: Checkout the website
@@ -53,6 +56,15 @@ jobs:
       - name: Install dependencies
         run: pip install -r site/requirements.txt
 
+      # The privacy plugin downloads each external asset and the social plugin draws each card.
+      # Without the cache, every build repeats this work and fails when a remote host is slow.
+      - name: Cache the plugin files
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: site/.cache/plugin
+          key: mkdocs-plugins-${{ hashFiles('site/requirements.txt') }}-${{ github.run_id }}
+          restore-keys: mkdocs-plugins-${{ hashFiles('site/requirements.txt') }}-
+
       # A broken link, a broken anchor or a page that is missing from a .nav.yml fails the build.
       - name: Build
         working-directory: site
@@ -66,7 +78,14 @@ jobs:
         if: github.event_name == 'pull_request'
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
         run: |
+          mkdir site/site/_preview
+          git -C maho diff --name-status --no-renames HEAD^1 HEAD \
+            | python maho/.github/docs-preview/changed_pages.py maho site/hooks/maho_docs.py site/site "$PR_NUMBER" "$REPOSITORY" \
+            > site/site/_preview/changed.json
+          cp maho/.github/docs-preview/preview.js site/site/_preview/
+          find site/site -name '*.html' -exec sed -i 's#</body>#<script src="/_preview/preview.js" defer></script></body>#' {} +
           printf '/*\n  X-Robots-Tag: noindex\n' > site/site/_headers
           echo "$PR_NUMBER" > site/site/pr-number.txt
 
