@@ -2,7 +2,8 @@ name: Docs
 
 # mahocommerce.com builds its user guide, developer docs, API docs and hosting docs from this
 # repository. This workflow builds the site with the docs of the pull request. After a push to main,
-# or when you run it by hand on main, it starts a deploy of the site.
+# or when you run it by hand on main, it starts a deploy of the site. For a pull request, it uploads
+# the site as an artifact, and docs-preview.yml publishes it.
 
 on:
   pull_request:
@@ -59,6 +60,23 @@ jobs:
           MAHO_DOCS_SOURCE: ${{ github.workspace }}/maho
           DISABLE_MKDOCS_2_WARNING: 'true'
         run: mkdocs build --strict
+
+      # The pull request number is in the artifact because workflow_run has no pull request for a fork.
+      - name: Prepare the preview
+        if: github.event_name == 'pull_request'
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          printf '/*\n  X-Robots-Tag: noindex\n' > site/site/_headers
+          echo "$PR_NUMBER" > site/site/pr-number.txt
+
+      - name: Upload the preview
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: docs-preview
+          path: site/site
+          retention-days: 1
 
   deploy:
     name: Deploy mahocommerce.com
