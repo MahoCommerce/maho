@@ -23,7 +23,7 @@
     $_class = $this->escapeHtml($this->getValidationClass($_attribute));
     $_value = $this->getValue($_attribute);
 ?>
-    <li class="<?= $_input === 'textarea' || $_input === 'multiline' ? 'wide' : '' ?>">
+    <li class="custom-attribute<?= $_input === 'textarea' || $_input === 'multiline' ? ' wide' : '' ?>">
         <label for="<?= $_id ?>"<?php if ($_required): ?> class="required"<?php endif ?>><?= $_label ?></label>
         <div class="input-box">
         <?php if ($_input === 'textarea'): ?>

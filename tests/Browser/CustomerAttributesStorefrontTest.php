@@ -118,6 +118,7 @@ afterEach(function () {
     }
 
     Mage::getModel('core/config')->deleteConfig('customer/create_account/confirm');
+    Mage::getModel('core/config')->deleteConfig('checkout/options/onestep_checkout_enabled');
     Mage::getSingleton('eav/config')->clear();
     Mage::app()->getStore()->resetConfig();
     Mage::app()->cleanCache();
@@ -202,12 +203,17 @@ function customerAttributesCustomer(): ?Mage_Customer_Model_Customer
     return $customer->getId() ? $customer : null;
 }
 
-it('keeps the custom customer and address fields of a guest checkout on the order', function () {
+it('keeps the custom customer and address fields of a guest checkout on the order', function (bool $oneStep) {
+    if (!$oneStep) {
+        Mage::getModel('core/config')->saveConfig('checkout/options/onestep_checkout_enabled', '0');
+        Mage::app()->getStore()->resetConfig();
+        Mage::app()->cleanCache();
+    }
     $page = visit(MahoServer::baseUrl() . customerAttributesProductUrl())
         ->click('Add to Cart')
         ->waitForText('Cart Subtotal')
         ->navigate(MahoServer::baseUrl() . '/checkout/onepage');
-    waitForPageLoad($page, '#onestep-checkout');
+    waitForPageLoad($page, $oneStep ? '#onestep-checkout' : '#co-billing-form');
 
     $page->assertPresent("#billing\\:{$this->businessCode}")
         ->assertPresent("#billing\\:{$this->hoursCode}")
@@ -222,12 +228,22 @@ it('keeps the custom customer and address fields of a guest checkout on the orde
         ->fill('#billing\\:postcode', '95014')
         ->fill('#billing\\:telephone', '5551234567')
         ->select("#billing\\:{$this->businessCode}", 'Wholesaler')
-        ->fill("#billing\\:{$this->hoursCode}", '9:00-17:00')
-        ->assertDontSee('Waiting for address')
-        ->assertDontSee('Waiting for shipping method')
-        ->assertSee('Check / Money order')
-        ->click('Check / Money order')
-        ->click('Place Order');
+        ->fill("#billing\\:{$this->hoursCode}", '9:00-17:00');
+
+    if ($oneStep) {
+        $page->assertDontSee('Waiting for address')
+            ->assertDontSee('Waiting for shipping method')
+            ->assertSee('Check / Money order')
+            ->click('Check / Money order')
+            ->click('Place Order');
+    } else {
+        // Each step opens when the server accepts the step before it
+        $page->click('#billing-buttons-container button')
+            ->click('#shipping-method-buttons-container button')
+            ->click('Check / Money order')
+            ->click('#payment-buttons-container button')
+            ->click('Place Order');
+    }
 
     $order = waitForCustomerAttributesRecord(function (): ?Mage_Sales_Model_Order {
         $order = Mage::getResourceModel('sales/order_collection')
@@ -241,7 +257,7 @@ it('keeps the custom customer and address fields of a guest checkout on the orde
         ->and($order->getCustomerAttributeLabels())->toBe([$this->businessCode => 'Wholesaler'])
         ->and($order->getBillingAddress()->getData($this->hoursCode))->toBe('9:00-17:00')
         ->and($order->getShippingAddress()->getData($this->hoursCode))->toBe('9:00-17:00');
-});
+})->with(['one-step checkout' => [true], 'accordion checkout' => [false]]);
 
 it('saves the custom fields of the registration, the account page and the address book', function () {
     $page = visit(MahoServer::baseUrl() . '/customer/account/create');
