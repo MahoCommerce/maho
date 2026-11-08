@@ -508,6 +508,16 @@ Select a preset to quickly configure decimal and thousands separators, or choose
 | Price Thousands Separator | Character for thousands grouping (or empty for none) | (empty) |
 | Append Currency to Prices | Add currency code suffix to prices (e.g., "295.00 AUD") | Yes |
 
+### Google Default Prices
+
+The Google defaults export the current native product price. When that price is lower than the regular price, `price` contains the regular price and `sale_price` contains the current price. Otherwise, `price` contains the current price and `sale_price` is empty. Expired or future special-price attributes do not activate a sale on their own.
+
+These defaults use the **Google Price** transformer with the combined source `["{{regular_price}}","{{final_price}}"]`. Select **Price** or **Sale Price** for the output field. The transformer compares the amounts at the two decimal places it exports. It uses a decimal point, no thousands separator, and the feed currency code, including when the feed's regional settings use another number format. Missing or invalid current amounts leave the field empty.
+
+The default `sale_price_effective_date` is empty. Regenerate the feed when prices or promotions change, including at the start and end of a promotion. A generated file keeps its prices until it is replaced.
+
+Existing saved columns, XML structures and custom mappings keep their configuration. To adopt the new defaults, review the `price`, `sale_price` and `sale_price_effective_date` mappings. Loading a preset replaces the whole set of columns or XML structure, so preserve other custom mappings before doing so.
+
 !!! example "Google Shopping (Australia)"
     Google requires prices in the format `XX.XX CUR`:
 

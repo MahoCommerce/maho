@@ -30,7 +30,7 @@ describe('Transformer Factory', function () {
             ->and($available)->toContain('capitalise')
             ->and($available)->toContain('relative_date_range')
             ->and($available)->toContain('currency_convert')
-            ->and($available)->toHaveCount(17);
+            ->and($available)->toHaveCount(18);
     });
 
     test('getTransformer returns correct instance', function () {
@@ -749,7 +749,7 @@ describe('RelativeDateRange Transformer', function () {
         ]);
         expect($result)->toContain('/');
         [$start, $end] = explode('/', $result);
-        $days = (new DateTime($start))->diff(new DateTime($end))->days;
+        $days = new DateTime($start)->diff(new DateTime($end))->days;
         expect($days)->toBe(90);
     });
 
@@ -773,7 +773,7 @@ describe('RelativeDateRange Transformer', function () {
         ]);
         [$start, $end] = explode('/', $result);
         expect((new DateTime($start)) < (new DateTime($end)))->toBeTrue();
-        $days = (new DateTime($start))->diff(new DateTime($end))->days;
+        $days = new DateTime($start)->diff(new DateTime($end))->days;
         expect($days)->toBe(7);
     });
 
