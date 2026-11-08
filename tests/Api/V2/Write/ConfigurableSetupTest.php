@@ -126,9 +126,9 @@ describe('Configurable Setup, Child Management', function (): void {
 });
 
 /**
- * A configurable select attribute with two options, in the default attribute set unless $inSet is false
+ * A select attribute with two options, in the default attribute set unless $inSet is false, usable to configure products unless $configurable is false
  */
-function configurableSetupCreateAttribute(bool $inSet = true): Mage_Catalog_Model_Resource_Eav_Attribute
+function configurableSetupCreateAttribute(bool $inSet = true, bool $configurable = true): Mage_Catalog_Model_Resource_Eav_Attribute
 {
     $productType = Mage::getSingleton('eav/config')->getEntityType(Mage_Catalog_Model_Product::ENTITY);
     $setId = (int) $productType->getDefaultAttributeSetId();
@@ -139,7 +139,7 @@ function configurableSetupCreateAttribute(bool $inSet = true): Mage_Catalog_Mode
         'backend_type' => 'int',
         'frontend_label' => ['Pest configurable setup'],
         'is_global' => Mage_Catalog_Model_Resource_Eav_Attribute::SCOPE_GLOBAL,
-        'is_configurable' => 1,
+        'is_configurable' => (int) $configurable,
         'is_user_defined' => 1,
         'option' => ['value' => ['first' => ['First'], 'second' => ['Second']]],
     ];
@@ -250,7 +250,7 @@ describe('Configurable Setup, Setup', function (): void {
             'superAttributes' => [(string) $this->otherAttribute->getAttributeCode()],
             'childProductIds' => $this->childIds,
         ], $this->token);
-        expect($other['status'])->toBe(422);
+        expect($other['status'])->toBe(409);
 
         $same = apiPut("/api/rest/v2/products/{$this->configurableId}/configurable", [
             'superAttributes' => [$this->code],
@@ -259,6 +259,35 @@ describe('Configurable Setup, Setup', function (): void {
         expect($same['status'])->toBe(200);
         expect($same['json']['superAttributes'])->toBe([$this->code]);
         expect($same['json']['childProductIds'])->toEqualCanonicalizing($this->childIds);
+    });
+
+    it('rejects a super attribute that cannot configure products', function (): void {
+        $this->otherAttribute = configurableSetupCreateAttribute(true, false);
+
+        $response = apiPut("/api/rest/v2/products/{$this->configurableId}/configurable", [
+            'superAttributes' => [(string) $this->otherAttribute->getAttributeCode()],
+        ], $this->token);
+
+        expect($response['status'])->toBe(422);
+        expect(configurableSetupSuperAttributeRows($this->configurableId))->toBe(0);
+    });
+
+    it('assigns children when the saved super attribute can no longer configure products', function (): void {
+        $first = apiPut("/api/rest/v2/products/{$this->configurableId}/configurable", [
+            'superAttributes' => [$this->code],
+            'childProductIds' => [$this->childIds[0]],
+        ], $this->token);
+        expect($first['status'])->toBe(200);
+
+        Mage::getModel('catalog/resource_eav_attribute')->load((int) $this->attribute->getId())->setIsConfigurable(0)->save();
+        Mage::getSingleton('eav/config')->clear();
+
+        $second = apiPut("/api/rest/v2/products/{$this->configurableId}/configurable", [
+            'superAttributes' => [$this->code],
+            'childProductIds' => $this->childIds,
+        ], $this->token);
+        expect($second['status'])->toBe(200);
+        expect($second['json']['childProductIds'])->toEqualCanonicalizing($this->childIds);
     });
 
     it('rejects a malformed setup request', function (string $key, mixed $value): void {
@@ -271,6 +300,7 @@ describe('Configurable Setup, Setup', function (): void {
         'super attributes that are not a list' => ['super_attributes', 'color'],
         'a child id that is not a number' => ['childProductIds', ['abc']],
         'child ids that are not a list' => ['child_product_ids', 'x'],
+        'a child id that is a boolean' => ['childProductIds', [true]],
     ]);
 
     it('saves no super attribute when the children cannot be assigned', function (): void {

@@ -15,9 +15,12 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Post;
 use Mage_Catalog_Model_Product;
 use Mage_Catalog_Model_Product_Type;
+use Mage_Catalog_Model_Product_Type_Configurable;
+use Mage_Eav_Model_Entity_Attribute;
 use Maho\ApiPlatform\Trait\ProductLoaderTrait;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
@@ -83,25 +86,21 @@ final class ConfigurableSetupProcessor extends \Maho\ApiPlatform\Processor
 
         $needsSave = false;
 
-        // Set super attributes if provided and none exist yet
         $superAttributes = $body['superAttributes'] ?? $body['super_attributes'] ?? [];
         if (!empty($superAttributes)) {
-            $attributeIds = ConfigurableSuperAttributes::resolve($product, $superAttributes);
-            $savedIds = ConfigurableSuperAttributes::saved($product);
-            if ($savedIds === []) {
-                $superAttributeData = [];
-                $position = 0;
-                foreach ($attributeIds as $attributeId) {
-                    $superAttributeData[] = [
-                        'attribute_id' => $attributeId,
-                        'position' => $position++,
-                    ];
-                }
-                $product->setConfigurableAttributesData($superAttributeData);
+            $codes = self::attributeCodes($superAttributes);
+            /** @var Mage_Catalog_Model_Product_Type_Configurable $typeInstance */
+            $typeInstance = $product->getTypeInstance(true);
+            $savedCodes = array_map(
+                fn(Mage_Eav_Model_Entity_Attribute $attribute) => (string) $attribute->getAttributeCode(),
+                array_values($typeInstance->getUsedProductAttributes($product)),
+            );
+            if ($savedCodes === []) {
+                $product->setConfigurableAttributesData(self::superAttributeData($typeInstance, $product, $codes));
                 $product->setCanSaveConfigurableAttributes(true);
                 $needsSave = true;
             } else {
-                ConfigurableSuperAttributes::assertUnchanged($attributeIds, $savedIds);
+                self::assertSameAttributes($codes, $savedCodes);
             }
         }
 
@@ -164,6 +163,66 @@ final class ConfigurableSetupProcessor extends \Maho\ApiPlatform\Processor
     }
 
     /**
+     * @return list<string>
+     * @throws BadRequestHttpException when $codes is not a list of attribute codes
+     */
+    private static function attributeCodes(mixed $codes): array
+    {
+        if (!is_array($codes) || !array_is_list($codes)) {
+            throw new BadRequestHttpException('superAttributes must be a list of attribute codes');
+        }
+        foreach ($codes as $code) {
+            if (!is_string($code) || $code === '') {
+                throw new BadRequestHttpException('superAttributes must be a list of attribute codes');
+            }
+        }
+
+        return array_values(array_unique($codes));
+    }
+
+    /**
+     * An attribute must be in the attribute set of the product and usable to configure products, as in the admin.
+     * The configurable product reads no other attribute.
+     *
+     * @param list<string> $codes
+     * @return list<array{attribute_id: int, position: int}>
+     * @throws UnprocessableEntityHttpException when an attribute cannot be used
+     */
+    private static function superAttributeData(
+        Mage_Catalog_Model_Product_Type_Configurable $typeInstance,
+        Mage_Catalog_Model_Product $product,
+        array $codes,
+    ): array {
+        $setAttributes = $typeInstance->getSetAttributes($product);
+        $data = [];
+        foreach ($codes as $position => $code) {
+            $attribute = $setAttributes[$code] ?? null;
+            if (!$attribute instanceof Mage_Eav_Model_Entity_Attribute || !$typeInstance->canUseAttribute($attribute)) {
+                throw new UnprocessableEntityHttpException("Attribute {$code} cannot configure products of this attribute set");
+            }
+            $data[] = ['attribute_id' => (int) $attribute->getId(), 'position' => $position];
+        }
+
+        return $data;
+    }
+
+    /**
+     * As in the admin, the super attributes of a configurable product cannot change once saved.
+     *
+     * @param list<string> $codes
+     * @param list<string> $savedCodes
+     * @throws ConflictHttpException when $codes are not the saved ones
+     */
+    private static function assertSameAttributes(array $codes, array $savedCodes): void
+    {
+        sort($codes);
+        sort($savedCodes);
+        if ($codes !== $savedCodes) {
+            throw new ConflictHttpException('The configurable product already has other super attributes, which cannot be changed');
+        }
+    }
+
+    /**
      * @return list<int>
      * @throws BadRequestHttpException when $ids is not a list of product ids
      */
@@ -172,15 +231,21 @@ final class ConfigurableSetupProcessor extends \Maho\ApiPlatform\Processor
         if (!is_array($ids) || !array_is_list($ids)) {
             throw new BadRequestHttpException('childProductIds must be a list of product ids');
         }
-        $childIds = [];
-        foreach ($ids as $id) {
-            $childId = filter_var($id, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
-            if ($childId === false) {
-                throw new BadRequestHttpException('childProductIds must be a list of product ids');
-            }
-            $childIds[] = $childId;
+
+        return array_map(self::childId(...), $ids);
+    }
+
+    /**
+     * @throws BadRequestHttpException when $id is not a positive integer
+     */
+    private static function childId(mixed $id): int
+    {
+        $childId = is_int($id) || (is_string($id) && ctype_digit($id)) ? (int) $id : 0;
+        if ($childId < 1) {
+            throw new BadRequestHttpException('A child product id must be a positive integer');
         }
-        return $childIds;
+
+        return $childId;
     }
 
     /**
