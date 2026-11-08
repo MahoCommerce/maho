@@ -12,20 +12,16 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Date extends Mage_Adminht
 {
     #[\Override]
     protected $_defaultWidth = 160;
-    protected static ?IntlDateFormatter $_formatter = null;
+    protected ?IntlDateFormatter $_formatter = null;
 
     protected function _getFormatter(): IntlDateFormatter
     {
-        if (is_null(self::$_formatter)) {
-            $timezone = Mage::app()->getStore()->getConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE);
-            self::$_formatter = new IntlDateFormatter(
-                Mage::app()->getLocale()->getLocaleCode(),
-                IntlDateFormatter::MEDIUM,
-                IntlDateFormatter::NONE,
-                $timezone,
-            );
-        }
-        return self::$_formatter;
+        return $this->_formatter ??= new IntlDateFormatter(
+            Mage::app()->getLocale()->getLocaleCode(),
+            IntlDateFormatter::MEDIUM,
+            IntlDateFormatter::NONE,
+            Mage::app()->getStore()->getConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE),
+        );
     }
 
     /**
