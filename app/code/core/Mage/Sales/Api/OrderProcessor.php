@@ -147,6 +147,13 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
             CustomAttributes::applyToCartAddress($quote->getBillingAddress(), $args['billingAddress']['customAttributes'] ?? null);
         }
 
+        // A guest sends the fields of the Checkout Registration form, which a customer order takes from the account
+        if (!$quote->getCustomerId()) {
+            CustomAttributes::applyToGuestQuote($quote, $args['customerCustomAttributes'] ?? null, $isAdminOrder);
+        } elseif (isset($args['customerCustomAttributes'])) {
+            throw new UnprocessableEntityHttpException('customerCustomAttributes is for a guest order. A customer order takes the values of the customer account');
+        }
+
         // Set customer email from the body if provided (guest checkout)
         if ($guestEmail && !$quote->getCustomerId() && \Mage::helper('core')->isValidEmail($guestEmail)) {
             $quote->setCustomerEmail($guestEmail);

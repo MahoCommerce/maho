@@ -46,7 +46,7 @@ function guestPlaceCart(string $sku): array
     return [$maskedId, $quoteId];
 }
 
-function guestPlaceBody(string $email = 'pest-guest-place@example.com'): array
+function guestPlaceBody(#[\SensitiveParameter] string $email = 'pest-guest-place@example.com'): array
 {
     return [
         'shippingAddress' => GUEST_PLACE_ADDRESS,
@@ -216,6 +216,76 @@ it('copies the custom attributes of the addresses in the place-order body to the
                 $write->dropColumn($table, $code);
             }
             $write->resetDdlCache($table);
+        }
+        Mage::app()->cleanCache();
+    }
+});
+
+it('takes the Checkout Registration fields of a guest in customerCustomAttributes, and refuses them for a customer order', function (): void {
+    $suffix = substr(uniqid(), -6);
+    $typeId = (int) Mage::getSingleton('eav/config')->getEntityType('customer')->getId();
+    $attributes = [];
+    $attributes[] = $business = Mage::getModel('customer/attribute')->setData([
+        'entity_type_id' => $typeId, 'attribute_code' => 'pest_place_business_' . $suffix, 'backend_type' => 'int',
+        'frontend_input' => 'select', 'source_model' => 'eav/entity_attribute_source_table', 'frontend_label' => 'Business Type',
+        'is_user_defined' => 1, 'is_visible' => 1, 'is_system' => 0, 'is_required' => 1,
+        'used_in_forms' => ['checkout_register', 'adminhtml_customer'],
+        'option' => ['value' => ['o1' => ['Retailer'], 'o2' => ['Wholesaler']], 'order' => ['o1' => 1, 'o2' => 2]],
+    ]);
+    $business->save();
+    $attributes[] = $internal = Mage::getModel('customer/attribute')->setData([
+        'entity_type_id' => $typeId, 'attribute_code' => 'pest_place_internal_' . $suffix, 'backend_type' => 'varchar',
+        'frontend_input' => 'text', 'frontend_label' => 'Internal Code',
+        'is_user_defined' => 1, 'is_visible' => 1, 'is_system' => 0,
+        'used_in_forms' => ['adminhtml_customer'],
+    ]);
+    $internal->save();
+    Mage::app()->cleanCache();
+    Mage::getSingleton('eav/config')->clear();
+    $businessCode = (string) $business->getAttributeCode();
+    $wholesaler = (int) array_column(Mage::getModel('customer/attribute')->load($business->getId())->getSource()->getAllOptions(), 'value', 'label')['Wholesaler'];
+    guestPlaceSetGuestCheckout('1');
+
+    try {
+        [$maskedId] = guestPlaceCart($this->sku);
+        $missing = apiPost("/api/rest/v2/guest-carts/{$maskedId}/place-order", guestPlaceBody());
+        $adminOnly = apiPost("/api/rest/v2/guest-carts/{$maskedId}/place-order", guestPlaceBody() + [
+            'customerCustomAttributes' => [$businessCode => $wholesaler, (string) $internal->getAttributeCode() => 'X-1'],
+        ]);
+        $placed = apiPost("/api/rest/v2/guest-carts/{$maskedId}/place-order", guestPlaceBody() + [
+            'customerCustomAttributes' => [$businessCode => $wholesaler],
+        ]);
+        expect($placed['status'])->toBeIn([200, 201]);
+        $order = Mage::getModel('sales/order')->loadByIncrementId((string) $placed['json']['incrementId']);
+        $this->orderIds[] = (int) $order->getId();
+
+        $token = customerToken();
+        $cartId = (int) apiPost('/api/rest/v2/carts', [], $token)['json']['id'];
+        trackCreated('quote', $cartId);
+        expect(apiPost("/api/rest/v2/carts/{$cartId}/items", ['sku' => $this->sku, 'qty' => 1], $token)['status'])->toBeIn([200, 201]);
+        $customerOrder = apiPost("/api/rest/v2/carts/{$cartId}/place-order", guestPlaceBody() + [
+            'customerCustomAttributes' => [$businessCode => $wholesaler],
+        ], $token);
+
+        expect($missing['status'])->toBe(422)
+            ->and(array_column($missing['json']['details']['errors'] ?? [], 'field'))->toContain('customerCustomAttributes.' . $businessCode)
+            // The Internal Code is in the admin form only, so a guest cannot send it
+            ->and($adminOnly['status'])->toBe(422)
+            ->and((int) $order->getData('customer_' . $businessCode))->toBe($wholesaler)
+            ->and($order->getCustomerAttributeLabels())->toBe([$businessCode => 'Wholesaler'])
+            ->and($customerOrder['status'])->toBe(422);
+    } finally {
+        $resource = Mage::getSingleton('core/resource');
+        $write = $resource->getConnection('core_write');
+        foreach ($attributes as $attribute) {
+            $attribute->delete();
+            foreach (['sales/quote', 'sales/order'] as $table) {
+                $table = $resource->getTableName($table);
+                if ($write->tableColumnExists($table, 'customer_' . $attribute->getAttributeCode())) {
+                    $write->dropColumn($table, 'customer_' . $attribute->getAttributeCode());
+                }
+                $write->resetDdlCache($table);
+            }
         }
         Mage::app()->cleanCache();
     }

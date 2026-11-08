@@ -140,20 +140,21 @@ final class CustomAttributes
 
     /**
      * Add an error for each required attribute of $attributes that has no default value and that $values
-     * leaves out. When $allowed is a list, an attribute that is not in it is skipped.
+     * leaves out. When $allowed is a list, an attribute that is not in it is skipped. Each error names
+     * the field $field.<code>.
      *
      * @param array<string, \Mage_Eav_Model_Entity_Attribute_Abstract> $attributes
      * @param array<string, mixed> $values
      * @param list<string>|null $allowed
      */
-    public static function addMissingRequired(\Mage_Core_Exception_Input $errors, array $attributes, array $values, ?array $allowed = null): void
+    public static function addMissingRequired(\Mage_Core_Exception_Input $errors, array $attributes, array $values, ?array $allowed = null, string $field = 'customAttributes'): void
     {
         foreach ($attributes as $code => $attribute) {
             if ($attribute->getIsRequired() && !array_key_exists($code, $values)
                 && ($allowed === null || in_array($code, $allowed, true))
                 && (string) $attribute->getDefaultValue() === ''
             ) {
-                $errors->addError("customAttributes.{$code}", \Mage::helper('eav')->__('"%s" is a required value.', $code));
+                $errors->addError("{$field}.{$code}", \Mage::helper('eav')->__('"%s" is a required value.', $code));
             }
         }
     }

@@ -230,6 +230,9 @@ the storefront forms show to the customer group on the website, as on the storef
   request, must send each required one, because the checkout sets the whole address at once. On the
   cart, `sameAsShipping` copies the values of the shipping address to the billing address. The order
   copies the values from the cart.
+- A guest order takes the attributes of **Checkout Registration** in `customerCustomAttributes` of the
+  place-order body, and must send each required one, as the storefront checkout does. A customer
+  order takes the values of the customer account, so its body must not send `customerCustomAttributes`.
 
 `GET /api/rest/v2/customer-forms/{form}` and the GraphQL `customerForm` query list the fields of a
 storefront form for the customer group of the caller: the label in the store view, the input type, the

@@ -123,6 +123,33 @@ final class CustomAttributes
     }
 
     /**
+     * Validate the customer values of a guest order against a form, then put them in the
+     * customer_<code> columns of $quote, from which the order copies them. A storefront order uses
+     * the Checkout Registration form and, as in the storefront checkout, must send each required
+     * attribute of it. An order in the admin scope uses the Admin Order Creation form, and sends only
+     * the values that it has.
+     *
+     * @throws \Symfony\Component\HttpKernel\Exception\BadRequestHttpException when $values is not a map
+     * @throws \Mage_Core_Exception_Input
+     */
+    public static function applyToGuestQuote(\Mage_Sales_Model_Quote $quote, mixed $values, bool $isAdminOrder = false): void
+    {
+        if ($values !== null && !is_array($values)) {
+            throw new \Symfony\Component\HttpKernel\Exception\BadRequestHttpException('customerCustomAttributes must be an object of attribute codes and values');
+        }
+        if ($isAdminOrder && $values === null) {
+            return;
+        }
+        $customer = \Mage::getModel('customer/customer')->setStoreId((int) $quote->getStoreId());
+        self::apply($customer, $isAdminOrder ? 'adminhtml_checkout' : 'checkout_register', $values ?? [], !$isAdminOrder, 'customerCustomAttributes');
+        foreach (array_keys(Values::userDefined('customer')) as $code) {
+            $value = $customer->getData($code);
+            $value = is_array($value) ? implode(',', $value) : $value;
+            $quote->setData(\Mage_Sales_Model_Observer_CustomerAttributes::COLUMN_PREFIX . $code, $value === '' ? null : $value);
+        }
+    }
+
+    /**
      * Validate $values against the attributes of $formCode, then set them on $entity.
      * A code that is not a user-defined attribute of the form is an error, and so is a required
      * attribute that a new $entity does not get. A storefront form takes only the attributes that
@@ -130,6 +157,7 @@ final class CustomAttributes
      *
      * @param array<string, mixed> $values
      * @param bool|null $isNew true when $values replace every value of $entity, null for a new $entity only
+     * @param string $field the field that each error names, as $field.<code>
      * @throws \Mage_Core_Exception_Input
      */
     public static function apply(
@@ -137,6 +165,7 @@ final class CustomAttributes
         string $formCode,
         array $values,
         ?bool $isNew = null,
+        string $field = 'customAttributes',
     ): void {
         $form = \Mage::getModel('customer/form');
         $form->setFormCode($formCode)
@@ -151,27 +180,27 @@ final class CustomAttributes
         $errors = new \Mage_Core_Exception_Input();
         $models = [];
         if ($isNew ?? !$entity->getId()) {
-            Values::addMissingRequired($errors, $attributes, $values);
+            Values::addMissingRequired($errors, $attributes, $values, field: $field);
         }
         foreach ($values as $code => $value) {
             $code = (string) $code;
             $attribute = $attributes[$code] ?? null;
             if ($attribute === null) {
-                $errors->addError("customAttributes.{$code}", $helper->__('"%s" is not a custom attribute of this form.', $code));
+                $errors->addError("{$field}.{$code}", $helper->__('"%s" is not a custom attribute of this form.', $code));
                 continue;
             }
             // Only a multiselect and a multiline take a list, and a list holds only strings and numbers
             $isList = in_array($attribute->getFrontendInput(), ['multiselect', 'multiline'], true);
             $items = $isList && is_array($value) ? $value : [$value];
             if (array_filter($items, fn(mixed $item): bool => $item !== null && !is_scalar($item)) !== []) {
-                $errors->addError("customAttributes.{$code}", \Mage::helper('eav')->__('The value of "%s" must be a string or a number.', $code));
+                $errors->addError("{$field}.{$code}", \Mage::helper('eav')->__('The value of "%s" must be a string or a number.', $code));
                 continue;
             }
             $message = in_array($attribute->getFrontendInput(), ['select', 'multiselect', 'boolean'], true) && $value !== null && $value !== '' && $value !== []
                 ? Values::check($attribute, implode(',', (array) $value))
                 : null;
             if ($message !== null) {
-                $errors->addError("customAttributes.{$code}", $message);
+                $errors->addError("{$field}.{$code}", $message);
                 continue;
             }
             $model = \Mage_Eav_Model_Attribute_Data::factory($attribute, $entity);
@@ -179,7 +208,7 @@ final class CustomAttributes
             $result = $model->validateValue($value);
             if (is_array($result)) {
                 foreach ($result as $message) {
-                    $errors->addError("customAttributes.{$code}", (string) $message);
+                    $errors->addError("{$field}.{$code}", (string) $message);
                 }
                 continue;
             }
