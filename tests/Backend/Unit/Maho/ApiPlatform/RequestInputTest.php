@@ -133,7 +133,7 @@ describe('RequestInput', function (): void {
             'notRows' => ['x'],
         ]);
 
-        expect(fn() => $input->intList('ids'))->toThrow(NotNormalizableValueException::class, 'The type of the "ids[1]" attribute');
+        expect(fn() => $input->intList('ids'))->toThrow(NotNormalizableValueException::class, 'The type of the "ids[1]" attribute must be "int", "string" given.');
         expect(fn() => RequestInput::of(['ids' => [1, null]])->intList('ids'))
             ->toThrow(NotNormalizableValueException::class, 'The type of the "ids[1]" attribute must be "int", "NULL" given.');
         expect(fn() => RequestInput::of(['roles' => [null, 'image']])->stringList('roles'))

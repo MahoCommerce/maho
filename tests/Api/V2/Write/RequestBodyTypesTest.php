@@ -130,6 +130,10 @@ describe('Request body types', function (): void {
         expect($update['status'])->toBe(400);
         expect($update['json']['details']['errors'][0]['field'] ?? null)->toBe('values[0].price');
 
+        $notObject = apiPut("{$path}/{$optionId}", ['values' => ['Red']], $token);
+        expect($notObject['status'])->toBe(400);
+        expect($notObject['json']['details']['errors'][0]['field'] ?? null)->toBe('values[0]');
+
         $titles = [];
         foreach (getItems(apiGet($path)) as $option) {
             if ((int) $option['id'] === $optionId) {
