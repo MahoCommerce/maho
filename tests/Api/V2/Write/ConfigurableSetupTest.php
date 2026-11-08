@@ -303,6 +303,17 @@ describe('Configurable Setup, Setup', function (): void {
         'a child id that is a boolean' => ['childProductIds', [true]],
     ]);
 
+    it('rejects a malformed child id when one child is added', function (mixed $childId): void {
+        $response = apiPost("/api/rest/v2/products/{$this->configurableId}/configurable/children", [
+            'childProductId' => $childId,
+        ], $this->token);
+
+        expect($response['status'])->toBe(400);
+    })->with([
+        'an array' => [[5]],
+        'text' => ['abc'],
+    ]);
+
     it('saves no super attribute when the children cannot be assigned', function (): void {
         $response = apiPut("/api/rest/v2/products/{$this->configurableId}/configurable", [
             'superAttributes' => [$this->code],
