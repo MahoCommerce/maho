@@ -179,3 +179,18 @@ it('refuses the token of another quote', function () {
 
     expect($response->getHttpResponseCode())->toBe(422);
 });
+
+it('refuses a token after the encryption key changes', function () {
+    $helper = Mage::helper('paypal');
+    $token = shippingCallbackToken($helper->getShippingCallbackUrl($this->quote));
+    $key = Mage::getEncryptionKeyAsHex();
+
+    try {
+        Mage::getConfig()->setNode('global/crypt/key', Mage::generateEncryptionKeyAsHex());
+        expect($helper->isValidShippingCallbackToken($this->quote, $token))->toBeFalse();
+    } finally {
+        Mage::getConfig()->setNode('global/crypt/key', $key);
+    }
+
+    expect($helper->isValidShippingCallbackToken($this->quote, $token))->toBeTrue();
+});
