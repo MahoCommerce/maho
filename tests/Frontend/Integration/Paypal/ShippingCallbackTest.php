@@ -14,6 +14,19 @@ use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 
 uses(Tests\MahoFrontendTestCase::class)->group('frontend', 'paypal');
 
+class ShippingCallbackTestClient extends Maho_Paypal_Model_Api_Client
+{
+    /** @var array<string, mixed> */
+    public static array $orderRequest = [];
+
+    #[\Override]
+    public function createOrder(array $orderRequest): array
+    {
+        self::$orderRequest = $orderRequest;
+        return ['id' => 'CALLBACKCREATED'];
+    }
+}
+
 /**
  * Save an active quote with one simple product, linked to a PayPal order.
  */
@@ -98,6 +111,39 @@ afterEach(function () {
     }
     unset($_SESSION['checkout']);
     Mage::unregister('_singleton/checkout/session');
+});
+
+it('sends PayPal the shipping callback URL with the token of the quote', function () {
+    $cache = new ReflectionProperty(Mage_Core_Model_Config::class, '_classNameCache');
+    $cache->setValue(Mage::getConfig(), []);
+    Mage::getConfig()->setNode('global/models/paypal/rewrite/api_client', ShippingCallbackTestClient::class);
+    Mage::getSingleton('checkout/session')->setQuoteId((int) $this->quote->getId());
+
+    try {
+        $request = new Mage_Core_Controller_Request_Http(
+            SymfonyRequest::create('/paypal/checkout/createOrder', 'POST', [
+                'method' => Maho_Paypal_Model_Config::METHOD_STANDARD_CHECKOUT,
+                'form_key' => Mage::getSingleton('core/session')->getFormKey(),
+            ]),
+        );
+        $request->setRouteName('paypal')
+            ->setControllerName('checkout')
+            ->setActionName('createOrder')
+            ->setDispatched(true);
+        Mage::app()->setRequest($request);
+        $controller = new Maho_Paypal_CheckoutController($request, new Mage_Core_Controller_Response_Http());
+        $controller->dispatch('createOrder');
+    } finally {
+        Mage::getConfig()->setNode('global/models/paypal/rewrite/api_client', '');
+        $cache->setValue(Mage::getConfig(), []);
+    }
+
+    $result = Mage::helper('core')->jsonDecode($controller->getResponse()->getBody());
+    expect($result['success'])->toBeTrue();
+    $callbackUrl = ShippingCallbackTestClient::$orderRequest['body']['payment_source']['paypal']['experience_context']
+        ['order_update_callback_config']['callback_url'];
+    parse_str((string) parse_url($callbackUrl, PHP_URL_QUERY), $params);
+    expect(Mage::helper('paypal')->isValidShippingCallbackToken($this->quote, (string) ($params['token'] ?? '')))->toBeTrue();
 });
 
 it('puts a token in the shipping callback URL', function () {
