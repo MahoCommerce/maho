@@ -694,7 +694,8 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
                 [],
             )
             ->where($checkSql . ' = ?', 1)
-            ->order('m.position ASC');
+            ->order('m.position ASC')
+            ->order('m.entity_id ASC');
 
         return $adapter->fetchCol($select, $bind);
     }
@@ -756,7 +757,8 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
             }
             $select = $adapter->select()
                 ->from(['m' => new Maho\Db\Expr('(' . implode(' UNION ALL ', $selects) . ')')], ['category_id', 'entity_id'])
-                ->order('m.position ASC');
+                ->order('m.position ASC')
+                ->order('m.entity_id ASC');
 
             foreach ($adapter->fetchAll($select) as $row) {
                 $children[(int) $row['category_id']][] = (int) $row['entity_id'];

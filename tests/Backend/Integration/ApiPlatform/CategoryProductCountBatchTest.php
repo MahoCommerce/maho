@@ -349,13 +349,11 @@ it('keeps literal and wildcard path matching for noncanonical category paths', f
             'entity_id = ?' => $this->grandchild->getId(),
         ]);
         $expected = array_map(intval(...), $resource->getChildren($parent, false));
-        $actual = $resource->getChildrenForCategories([$parent]);
-        expect(array_keys($actual))->toBe([(int) $parent->getId()])
-            ->and($actual[(int) $parent->getId()])->toEqualCanonicalizing($expected);
+        expect($resource->getChildrenForCategories([$parent]))->toBe([(int) $parent->getId() => $expected]);
     }
 });
 
-it('keeps position ordering and the same children when positions tie', function (): void {
+it('orders children with equal positions by ID', function (): void {
     $parent = $this->categories[1];
     $early = ($this->makeCategory)((int) $parent->getId(), $parent->getPath(), 4, -1);
     $tied = ($this->makeCategory)((int) $parent->getId(), $parent->getPath(), 4, 0);
@@ -364,10 +362,8 @@ it('keeps position ordering and the same children when positions tie', function 
     $actual = $resource->getChildrenForCategories([$parent])[(int) $parent->getId()];
     $expected = array_map(intval(...), $resource->getChildren($parent, false));
 
-    expect($actual)->toEqualCanonicalizing($expected)
-        ->and($actual[0])->toBe((int) $early->getId())
-        ->and($actual[3])->toBe((int) $late->getId())
-        ->and(array_slice($actual, 1, 2))->toEqualCanonicalizing([(int) $this->grandchild->getId(), (int) $tied->getId()]);
+    expect($actual)->toBe($expected)
+        ->and($actual)->toBe([(int) $early->getId(), (int) $this->grandchild->getId(), (int) $tied->getId(), (int) $late->getId()]);
 });
 
 it('loads identical repeated parent inputs once even across batch boundaries', function (): void {
