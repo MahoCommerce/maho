@@ -52,11 +52,24 @@ function shippingCallbackQuote(string $paypalOrderId): ?Mage_Sales_Model_Quote
     return $quote;
 }
 
-function shippingCallbackToken(Mage_Sales_Model_Quote $quote): string
+function shippingCallbackToken(string $url): string
 {
-    $query = (string) parse_url(Mage::helper('paypal')->getShippingCallbackUrl($quote), PHP_URL_QUERY);
-    parse_str($query, $params);
-    return (string) $params['token'];
+    parse_str((string) parse_url($url, PHP_URL_QUERY), $params);
+    return (string) ($params['token'] ?? '');
+}
+
+function shippingCallbackController(string $action, SymfonyRequest $symfonyRequest): Mage_Core_Controller_Response_Http
+{
+    $request = new Mage_Core_Controller_Request_Http($symfonyRequest);
+    $request->setRouteName('paypal')
+        ->setControllerName('checkout')
+        ->setActionName($action)
+        ->setDispatched(true);
+    Mage::app()->setRequest($request);
+
+    $controller = new Maho_Paypal_CheckoutController($request, new Mage_Core_Controller_Response_Http());
+    $controller->dispatch($action);
+    return $controller->getResponse();
 }
 
 /**
@@ -68,23 +81,12 @@ function shippingCallbackDispatch(string $paypalOrderId, array $query): Mage_Cor
         'id' => $paypalOrderId,
         'shipping_address' => ['country_code' => 'US', 'admin_area_1' => 'CA', 'admin_area_2' => 'Los Angeles', 'postal_code' => '90001'],
     ]);
-    $request = new Mage_Core_Controller_Request_Http(
-        SymfonyRequest::create(
-            '/paypal/checkout/shippingCallback?' . http_build_query($query),
-            'POST',
-            server: ['CONTENT_TYPE' => 'application/json'],
-            content: $body,
-        ),
-    );
-    $request->setRouteName('paypal')
-        ->setControllerName('checkout')
-        ->setActionName('shippingCallback')
-        ->setDispatched(true);
-    Mage::app()->setRequest($request);
-
-    $controller = new Maho_Paypal_CheckoutController($request, new Mage_Core_Controller_Response_Http());
-    $controller->dispatch('shippingCallback');
-    return $controller->getResponse();
+    return shippingCallbackController('shippingCallback', SymfonyRequest::create(
+        '/paypal/checkout/shippingCallback?' . http_build_query($query),
+        'POST',
+        server: ['CONTENT_TYPE' => 'application/json'],
+        content: $body,
+    ));
 }
 
 beforeEach(function () {
@@ -120,41 +122,32 @@ it('sends PayPal the shipping callback URL with the token of the quote', functio
     Mage::getSingleton('checkout/session')->setQuoteId((int) $this->quote->getId());
 
     try {
-        $request = new Mage_Core_Controller_Request_Http(
-            SymfonyRequest::create('/paypal/checkout/createOrder', 'POST', [
-                'method' => Maho_Paypal_Model_Config::METHOD_STANDARD_CHECKOUT,
-                'form_key' => Mage::getSingleton('core/session')->getFormKey(),
-            ]),
-        );
-        $request->setRouteName('paypal')
-            ->setControllerName('checkout')
-            ->setActionName('createOrder')
-            ->setDispatched(true);
-        Mage::app()->setRequest($request);
-        $controller = new Maho_Paypal_CheckoutController($request, new Mage_Core_Controller_Response_Http());
-        $controller->dispatch('createOrder');
+        $response = shippingCallbackController('createOrder', SymfonyRequest::create('/paypal/checkout/createOrder', 'POST', [
+            'method' => Maho_Paypal_Model_Config::METHOD_STANDARD_CHECKOUT,
+            'form_key' => Mage::getSingleton('core/session')->getFormKey(),
+        ]));
     } finally {
         Mage::getConfig()->setNode('global/models/paypal/rewrite/api_client', '');
         $cache->setValue(Mage::getConfig(), []);
     }
 
-    $result = Mage::helper('core')->jsonDecode($controller->getResponse()->getBody());
+    $result = Mage::helper('core')->jsonDecode($response->getBody());
     expect($result['success'])->toBeTrue();
     $callbackUrl = ShippingCallbackTestClient::$orderRequest['body']['payment_source']['paypal']['experience_context']
         ['order_update_callback_config']['callback_url'];
-    parse_str((string) parse_url($callbackUrl, PHP_URL_QUERY), $params);
-    expect(Mage::helper('paypal')->isValidShippingCallbackToken($this->quote, (string) ($params['token'] ?? '')))->toBeTrue();
+    expect(Mage::helper('paypal')->isValidShippingCallbackToken($this->quote, shippingCallbackToken($callbackUrl)))->toBeTrue();
 });
 
 it('puts a token in the shipping callback URL', function () {
     $url = Mage::helper('paypal')->getShippingCallbackUrl($this->quote);
 
     expect($url)->toContain('paypal/checkout/shippingCallback')
-        ->and(shippingCallbackToken($this->quote))->toMatch('/^[0-9a-f]{64}$/');
+        ->and(shippingCallbackToken($url))->toMatch('/^[0-9a-f]{64}$/');
 });
 
 it('answers a callback that carries the token of the quote', function () {
-    $response = shippingCallbackDispatch($this->paypalOrderId, ['token' => shippingCallbackToken($this->quote)]);
+    $token = shippingCallbackToken(Mage::helper('paypal')->getShippingCallbackUrl($this->quote));
+    $response = shippingCallbackDispatch($this->paypalOrderId, ['token' => $token]);
 
     expect($response->getHttpResponseCode())->toBe(200);
     $result = Mage::helper('core')->jsonDecode($response->getBody());
@@ -181,7 +174,8 @@ it('refuses a callback without the token, or with a wrong one, and leaves the qu
 it('refuses the token of another quote', function () {
     $otherQuote = Mage::getModel('sales/quote')->setId((int) $this->quote->getId() + 1);
 
-    $response = shippingCallbackDispatch($this->paypalOrderId, ['token' => shippingCallbackToken($otherQuote)]);
+    $token = shippingCallbackToken(Mage::helper('paypal')->getShippingCallbackUrl($otherQuote));
+    $response = shippingCallbackDispatch($this->paypalOrderId, ['token' => $token]);
 
     expect($response->getHttpResponseCode())->toBe(422);
 });
