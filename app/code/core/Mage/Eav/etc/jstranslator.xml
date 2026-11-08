@@ -29,5 +29,11 @@ SPDX-License-Identifier: AFL-3.0
         <error-cannot-unassign-system-attribute translate="message">
             <message>Cannot unassign system attribute</message>
         </error-cannot-unassign-system-attribute>
+        <save-set-title translate="message">
+            <message>Save the Set</message>
+        </save-set-title>
+        <save-set-ok translate="message">
+            <message>Save</message>
+        </save-set-ok>
     </script>
 </jstranslator>

@@ -133,28 +133,67 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
     }
 
     /**
-     * Return the custom attributes of CMS pages that have a column, keyed by code.
+     * Return the custom attributes of CMS pages that have a column and that the attribute set of the
+     * pages holds, keyed by code, in the order of the set. Every page uses the default set.
      *
      * @return array<string, Mage_Eav_Model_Entity_Attribute_Abstract>
      */
     public function getCustomAttributes(): array
     {
+        $attributes = [];
+        foreach ($this->getCustomAttributeGroups() as ['attributes' => $groupAttributes]) {
+            foreach ($groupAttributes as $attribute) {
+                $attributes[(string) $attribute->getAttributeCode()] = $attribute;
+            }
+        }
+        return $attributes;
+    }
+
+    /**
+     * Return the groups of the attribute set of the pages in the order of the set, each with its
+     * custom attributes in the order of the group.
+     *
+     * @return list<array{group: Mage_Eav_Model_Entity_Attribute_Group, attributes: list<Mage_Eav_Model_Entity_Attribute_Abstract>}>
+     */
+    public function getCustomAttributeGroups(): array
+    {
         try {
+            $setId = (int) Mage::getSingleton('eav/config')->getEntityType(Mage_Cms_Model_Page::ENTITY)->getDefaultAttributeSetId();
             $all = Mage::getSingleton('eav/config')->getAttributes(Mage_Cms_Model_Page::ENTITY);
         } catch (Mage_Core_Exception) {
             // The install saves pages before the cms_setup upgrade adds the entity type
             return [];
         }
+        if (!$setId) {
+            return [];
+        }
         $columns = $this->_getReadAdapter()->describeTable($this->getMainTable());
-        $attributes = [];
+        $byId = [];
         foreach ($all as $attribute) {
-            $code = (string) $attribute->getAttributeCode();
-            if ($attribute->getIsUserDefined() && isset($columns[$code])) {
-                $attributes[$code] = $attribute;
+            if ($attribute->getIsUserDefined() && isset($columns[(string) $attribute->getAttributeCode()])) {
+                $byId[(int) $attribute->getId()] = $attribute;
             }
         }
-        uasort($attributes, fn($a, $b): int => (int) $a->getId() <=> (int) $b->getId());
-        return $attributes;
+
+        $adapter = $this->_getReadAdapter();
+        $rows = $adapter->fetchAll(
+            $adapter->select()
+                ->from($this->getTable('eav/entity_attribute'), ['attribute_id', 'attribute_group_id'])
+                ->where('attribute_set_id = ?', $setId)
+                ->order(['sort_order', 'attribute_id']),
+        );
+        $byGroup = [];
+        foreach ($rows as $row) {
+            if (isset($byId[(int) $row['attribute_id']])) {
+                $byGroup[(int) $row['attribute_group_id']][] = $byId[(int) $row['attribute_id']];
+            }
+        }
+
+        $groups = [];
+        foreach (Mage::getResourceModel('eav/entity_attribute_group_collection')->setAttributeSetFilter($setId)->setSortOrder() as $group) {
+            $groups[] = ['group' => $group, 'attributes' => $byGroup[(int) $group->getId()] ?? []];
+        }
+        return $groups;
     }
 
     /**

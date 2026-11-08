@@ -161,23 +161,61 @@ it('refuses the value of a unique field that another page uses', function () {
         ->toThrow(Mage_Core_Exception_Input::class);
 });
 
-it('shows the Attributes tab only when CMS pages have an attribute', function () {
-    Mage::register('cms_page', Mage::getModel('cms/page'), true);
-    $tab = fn() => Mage::app()->getLayout()->createBlock('adminhtml/cms_page_edit_tab_attributes');
-
-    expect($tab()->canShowTab())->toBe(Mage::getResourceSingleton('cms/page')->getCustomAttributes() !== []);
-
+it('shows the first group on the Page Information tab and each later group as a tab of its own', function () {
+    $setId = (int) Mage::getSingleton('eav/config')->getEntityType(Mage_Cms_Model_Page::ENTITY)->getDefaultAttributeSetId();
+    $group = Mage::getModel('eav/entity_attribute_group')
+        ->setAttributeSetId($setId)
+        ->setAttributeGroupName('Pest Campaign ' . substr(uniqid(), -6))
+        ->setSortOrder(900);
+    $group->save();
+    $this->attributes[] = $group;
     $this->attributes[] = pageAttributeTestAttribute(['attribute_code' => $this->codes['text'], 'frontend_input' => 'text']);
+    $this->attributes[] = pageAttributeTestAttribute([
+        'attribute_code' => $this->codes['date'],
+        'frontend_input' => 'date',
+        'attribute_set_id' => $setId,
+        'attribute_group_id' => (int) $group->getId(),
+    ]);
+
+    Mage::register('cms_page', Mage::getModel('cms/page'), true);
     $design = Mage::getDesign();
     [$area, $package, $theme] = [$design->getArea(), $design->getPackageName(), $design->getTheme('template')];
     $design->setArea('adminhtml')->setPackageName('default')->setTheme('default');
     try {
-        expect($tab()->canShowTab())->toBeTrue()
-            ->and($tab()->toHtml())->toContain('page_' . $this->codes['text']);
+        $layout = Mage::app()->getLayout();
+        $main = $layout->createBlock('adminhtml/cms_page_edit_tab_main')->toHtml();
+        $tabs = $layout->createBlock('adminhtml/cms_page_edit_tabs');
+        $tabs->toHtml();
+        $tab = $tabs->getTab('attribute_group_' . $group->getId());
+
+        expect($main)->toContain('page_' . $this->codes['text'])
+            ->and($main)->not->toContain('page_' . $this->codes['date'])
+            ->and($tab)->toBeInstanceOf(Mage_Adminhtml_Block_Cms_Page_Edit_Tab_Attributes::class)
+            ->and($tab->getTabLabel())->toBe($group->getAttributeGroupName())
+            ->and($tab->toHtml())->toContain('page_' . $this->codes['date']);
     } finally {
         $design->setArea($area)->setPackageName($package)->setTheme($theme);
         Mage::unregister('cms_page');
     }
+});
+
+it('gives a page only the attributes of the set, in the order of the set', function () {
+    $first = $this->attributes[] = pageAttributeTestAttribute(['attribute_code' => $this->codes['text'], 'frontend_input' => 'text']);
+    $second = $this->attributes[] = pageAttributeTestAttribute(['attribute_code' => $this->codes['date'], 'frontend_input' => 'date']);
+    $resource = Mage::getSingleton('core/resource');
+    $table = $resource->getTableName('eav/entity_attribute');
+    $this->connection->update($table, ['sort_order' => 1], ['attribute_id = ?' => (int) $second->getId()]);
+    $this->connection->update($table, ['sort_order' => 2], ['attribute_id = ?' => (int) $first->getId()]);
+
+    $codes = array_keys(Mage::getResourceSingleton('cms/page')->getCustomAttributes());
+    expect(array_values(array_intersect($codes, [$this->codes['text'], $this->codes['date']])))
+        ->toBe([$this->codes['date'], $this->codes['text']]);
+
+    $this->connection->delete($table, ['attribute_id = ?' => (int) $first->getId()]);
+
+    expect(Mage::getResourceSingleton('cms/page')->getCustomAttributes())->not->toHaveKey($this->codes['text'])
+        ->and(Mage::getModel('cms/page')->getAttributeSetId())
+        ->toBe((int) Mage::getSingleton('eav/config')->getEntityType(Mage_Cms_Model_Page::ENTITY)->getDefaultAttributeSetId());
 });
 
 it('stores the frontend properties of a field', function () {

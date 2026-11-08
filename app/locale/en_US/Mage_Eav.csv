@@ -18,6 +18,7 @@
 """%s"" length must be equal or greater than %s characters.","""%s"" length must be equal or greater than %s characters."
 """%s"" length must be equal or less than %s characters.","""%s"" length must be equal or less than %s characters."
 """%s"" width exceeds allowed value of %s px.","""%s"" width exceeds allowed value of %s px."
+%s (records with a value: %d),%s (records with a value: %d)
 ". Do not use ""event"" for an attribute code, it is a reserved keyword.",". Do not use ""event"" for an attribute code, it is a reserved keyword."
 "Add","Add"
 "Add Group","Add Group"
@@ -135,6 +136,7 @@
 "Save","Save"
 "Save and Continue","Save and Continue"
 "Saved %d record(s).","Saved %d record(s)."
+Save the Set,Save the Set
 "Set Name","Set Name"
 "Source model ""%s"" not found for attribute ""%s""","Source model ""%s"" not found for attribute ""%s"""
 "System","System"
@@ -145,6 +147,7 @@
 "The attribute set has been saved.","The attribute set has been saved."
 "The records of this set will move to the default set.","The records of this set will move to the default set."
 "The records of this set will move to the default set. Delete the set?","The records of this set will move to the default set. Delete the set?"
+These attributes leave the set: %s.,These attributes leave the set: %s.
 "The value of ""%s"" is too large.","The value of ""%s"" is too large."
 "The value of ""%s"" must be a date.","The value of ""%s"" must be a date."
 "The value of ""%s"" must be a number.","The value of ""%s"" must be a number."
@@ -160,6 +163,8 @@
 "This attribute is used in configurable products","This attribute is used in configurable products"
 "This attribute no longer exists.","This attribute no longer exists."
 "This attribute set no longer exists.","This attribute set no longer exists."
+This entity type has one attribute set.,This entity type has one attribute set.
+"Tonight, the store deletes their values in the records of this set. Save the set?","Tonight, the store deletes their values in the records of this set. Save the set?"
 "Unable to find an attribute to delete.","Unable to find an attribute to delete."
 "Unassigned Attributes","Unassigned Attributes"
 "Unique Value","Unique Value"

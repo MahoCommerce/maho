@@ -29,7 +29,6 @@
 "Admin Order Creation","Admin Order Creation"
 "All","All"
 "All countries","All countries"
-"All customer groups","All customer groups"
 "ALL GROUPS","ALL GROUPS"
 "Allow customers to login via a secure link sent to their email instead of using a password.","Allow customers to login via a secure link sent to their email instead of using a password."
 "Allow Two-Factor Authentication","Allow Two-Factor Authentication"
@@ -73,7 +72,7 @@
 "Change Password","Change Password"
 "Change password","Change password"
 "Change Shipping Address","Change Shipping Address"
-"Change the default for one website. Use Default follows Show in Forms and Values Required.","Change the default for one website. Use Default follows Show in Forms and Values Required."
+Change the default for one website. Use Default follows the Default field.,Change the default for one website. Use Default follows the Default field.
 "Checkout Registration","Checkout Registration"
 "City","City"
 "Click here","Click here"
@@ -144,6 +143,7 @@
 "Day","Day"
 "Days in Wishlist","Days in Wishlist"
 "DD","DD"
+Default,Default
 "Default Addresses","Default Addresses"
 "Default Billing Address","Default Billing Address"
 "Default Email Domain","Default Email Domain"
@@ -213,6 +213,7 @@
 "Guest","Guest"
 "Hello, %s!","Hello, %s!"
 "Hidden","Hidden"
+Hidden: no form shows the field. Optional: the customer can leave it empty. Required: the customer must fill it in.,Hidden: no form shows the field. Optional: the customer can leave it empty. Required: the customer must fill it in.
 "How long the magic link remains valid. Default: 10 minutes.","How long the magic link remains valid. Default: 10 minutes."
 "How long to cache VIES validation results. Set to 0 to disable caching.","How long to cache VIES validation results. Set to 0 to disable caching."
 "HTML","HTML"
@@ -441,7 +442,6 @@
 "Shopping Cart of %1$s - %2$d item(s)","Shopping Cart of %1$s - %2$d item(s)"
 "Show Date of Birth","Show Date of Birth"
 "Show Gender","Show Gender"
-"Show in Forms","Show in Forms"
 "Show Middle Name (initial)","Show Middle Name (initial)"
 "Show Prefix","Show Prefix"
 "Show Suffix","Show Suffix"
@@ -478,13 +478,14 @@
 "The address does not belong to this customer.","The address does not belong to this customer."
 "The address has been deleted.","The address has been deleted."
 "The address has been saved.","The address has been saved."
-"The attribute is in no set, so it shows to every customer group.","The attribute is in no set, so it shows to every customer group."
+"The attribute is in no set, so no customer group sees it. Add it to a set in Attribute Sets.","The attribute is in no set, so no customer group sees it. Add it to a set in Attribute Sets."
+The Customer Configuration shows or hides this field.,The Customer Configuration shows or hides this field.
 "The customer does not have default billing address.","The customer does not have default billing address."
 "The customer email (%s) already exists, skipping the record, line: %s","The customer email (%s) already exists, skipping the record, line: %s"
 "The customer group has been deleted.","The customer group has been deleted."
 "The customer group has been saved.","The customer group has been saved."
-"The customer group of a customer picks the set. Select the set of each group in Customers > Customer Groups. An attribute that is in no set shows to every customer group.","The customer group of a customer picks the set. Select the set of each group in Customers > Customer Groups. An attribute that is in no set shows to every customer group."
-"The customer group of the customer decides the attribute set. The form shows the attribute when it is in that set, or in no set.","The customer group of the customer decides the attribute set. The form shows the attribute when it is in that set, or in no set."
+The customer group of a customer picks the set. Select the set of each group in Customers > Customer Groups. A form shows an attribute only to the customer groups whose set holds it.,The customer group of a customer picks the set. Select the set of each group in Customers > Customer Groups. A form shows an attribute only to the customer groups whose set holds it.
+The customer group of the customer decides the attribute set. The form shows the attribute only when it is in that set.,The customer group of the customer decides the attribute set. The form shows the attribute only when it is in that set.
 "The customer groups of this set will use the default set. The values of the customers stay. Delete the set?","The customer groups of this set will use the default set. The values of the customers stay. Delete the set?"
 "The customer ID and email did not match, skipping the record, line: %s","The customer ID and email did not match, skipping the record, line: %s"
 "The customer is currently assigned to Customer Group %s.","The customer is currently assigned to Customer Group %s."
@@ -492,6 +493,7 @@
 "The fields of the first group, %s, join the other fields of the form with no title. Each other group is a part of the form, with the name of the group as its title.","The fields of the first group, %s, join the other fields of the form with no title. Each other group is a part of the form, with the name of the group as its title."
 "The fields that the customers of this group fill in. Leave empty for the default set.","The fields that the customers of this group fill in. Leave empty for the default set."
 "The first name cannot be empty.","The first name cannot be empty."
+The forms stop showing these fields to the customer groups of this set: %s. The values of the customers stay. Save the set?,The forms stop showing these fields to the customer groups of this set: %s. The values of the customers stay. Save the set?
 "The group ""%s"" cannot be deleted","The group ""%s"" cannot be deleted"
 "The last name cannot be empty.","The last name cannot be empty."
 "The minimum password length is %s","The minimum password length is %s"
@@ -510,6 +512,7 @@
 "The VAT ID entered (%s) is not a valid VAT ID.","The VAT ID entered (%s) is not a valid VAT ID."
 "The VAT ID entered (%s) is not a valid VAT ID. The customer would belong to Customer Group %s.","The VAT ID entered (%s) is not a valid VAT ID. The customer would belong to Customer Group %s."
 "The VAT ID is valid. The current Customer Group will be used.","The VAT ID is valid. The current Customer Group will be used."
+The Websites section can change it for one website.,The Websites section can change it for one website.
 "This account is not active.","This account is not active."
 "This account is not confirmed.","This account is not confirmed."
 "This account is not confirmed. %s to resend confirmation email.","This account is not confirmed. %s to resend confirmation email."

@@ -220,6 +220,18 @@ class Mage_Eav_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * Return the question that the edit page of $set asks before a save takes $attributes out of
+     * the set, or null for no question.
+     *
+     * @param list<Mage_Eav_Model_Entity_Attribute_Abstract> $attributes
+     */
+    public function getSetRemoveQuestion(Mage_Eav_Model_Entity_Attribute_Set $set, array $attributes): ?string
+    {
+        $entityType = Mage::getSingleton('eav/config')->getEntityType((int) $set->getEntityTypeId());
+        return $this->getAdminAttributeModel($entityType)?->getSetRemoveQuestion($set, $attributes);
+    }
+
+    /**
      * Return an empty attribute model of $entityType, which gives the rules of the admin attribute pages.
      */
     protected function getAdminAttributeModel(Mage_Eav_Model_Entity_Type $entityType): ?Mage_Eav_Model_Entity_Attribute

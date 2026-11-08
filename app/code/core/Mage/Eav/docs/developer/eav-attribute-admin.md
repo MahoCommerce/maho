@@ -53,7 +53,8 @@ A type without settings gets "Access denied" on the pages.
 | `allowedTags` | list of strings | The HTML tags that an option label keeps when the attribute allows HTML on the storefront. |
 | `userDefinedOnly` | bool | The grid and the set editor list only the attributes that an admin added. |
 | `setsUserDefinedOnly` | bool | The set editor lists only the attributes that an admin added. The grid lists all attributes. |
-| `addToDefaultSet` | bool | A new attribute goes into the first group of the default set, unless the set page creates it. |
+| `addToDefaultSet` | bool | A new attribute that names no set goes into the first group of the default set. The rule is in `Mage_Eav_Model_Entity_Attribute::_beforeSave()`, so it applies to the admin, an import and code. |
+| `singleSet` | bool | Every record uses the default set. **Attribute Set** opens that set, and the pages cannot add or delete a set. |
 
 Set `userDefinedOnly` when the edit form of your entity shows the system attributes with fields
 of its own. The admin then cannot change anything about them on these pages, so the pages hide
@@ -65,8 +66,14 @@ move them. The set editor refuses to remove a system attribute, so the editor hi
 have no function there.
 
 Set `addToDefaultSet` when most stores use one set for your entity. A new attribute then shows on
-the edit page at once. Leave it off when an attribute in no set has a meaning of its own, or when
-stores usually have many sets.
+the edit page at once. Leave it off when stores usually have many sets, as for products. A module
+that creates an attribute in code for such a type must add it to a set itself.
+
+Set `singleSet` when the records of your entity have no set of their own. The groups of the default
+set still give the order of the fields, the tabs and the storefront tables.
+
+On every type, a record shows an attribute only when its set holds the attribute. An attribute in
+no set shows nowhere.
 
 The attribute model can also change the save and the texts of the set page:
 
@@ -84,6 +91,10 @@ The attribute model can also change the save and the texts of the set page:
   the forms.
 - `getSetDeleteQuestion($set)` returns the question before a set delete. By default, it names the
   attributes whose values the records lose, because the records move to the default set.
+- `getSetRemoveQuestion($set, $attributes)` returns the question before a save of the set page
+  takes user-defined attributes out of the set, or `null` for no question. By default, it names
+  each attribute and the number of records of the set that have a value. The customer types say
+  that the values stay, and CMS pages say that the pages keep their values.
 
 ## How the core entity types use them
 
@@ -91,9 +102,9 @@ The attribute model can also change the save and the texts of the set page:
 |---|---|---|---|---|---|
 | Products | EAV value tables | Each product | Not managed here | Not managed here | Not managed here |
 | Catalog categories | EAV value tables | Each category | No | No | Yes |
-| Customers | EAV value tables | The customer group | No | Yes | No |
-| Customer addresses | EAV value tables | The customer group | No | Yes | No |
-| CMS pages | A static column of `cms_page` for each attribute | No sets | No | No | No |
+| Customers | EAV value tables | The customer group | No | Yes | Yes |
+| Customer addresses | EAV value tables | The customer group | No | Yes | Yes |
+| CMS pages | A static column of `cms_page` for each attribute | The default set, for every page (`singleSet`) | No | No | Yes |
 | Blog posts | EAV value tables | Each post | Yes | Not needed | Yes |
 | Blog categories | EAV value tables | Each category | Yes | Not needed | Yes |
 
@@ -103,12 +114,15 @@ The reasons for each choice:
   into no set, and the admin picks the sets.
 - **Catalog categories** build their edit page from the groups of the set, so the set editor shows
   the system attributes: a move of `description` to another group moves it to another tab.
-- **Customers and customer addresses** show an attribute that is in no set to every customer group.
-  For that reason, a new attribute goes into no set. The storefront templates show the system
-  attributes themselves, so the set editor hides them. Each later group of the set is a fieldset of
-  the forms.
-- **CMS pages** give every page every attribute. The type has a Default set because the EAV setup
-  creates one, but no page picks it.
+- **Customers and customer addresses** take the set of the customer group. A group without a set
+  uses the default set, so a new attribute in the default set shows to all these groups at once. The
+  storefront templates show the system attributes themselves, so the set editor hides them. Each
+  later group of the set is a fieldset of the forms. The `data-upgrade-2.0.4-2.0.5.php` script of
+  `Mage_Customer` puts each form attribute that was in no set into the default set.
+- **CMS pages** have no set column. `Mage_Cms_Model_Page::getAttributeSetId()` returns the default
+  set, and `Mage_Cms_Model_Resource_Page::getCustomAttributes()` returns only its attributes, in the
+  order of the set. The attributes of the first group show on the **Page Information** tab, and each
+  other group that holds an attribute adds a tab.
 - **Blog posts and blog categories** have a hard-coded edit form for the fields of the blog. The
   attributes of the first group of the set show on the main tab (**Content** for a post, **General**
   for a category). Each other group that holds an attribute adds a tab.
@@ -136,8 +150,7 @@ are not user-defined, because they join the fields that the page shows itself. E
 - The admin customer page shows each later group as a fieldset of the **Account Information** and
   **Addresses** tabs, with the Admin name.
 - `Mage_Eav_Block_Frontend_Attributes` shows one table for each group on the storefront pages of
-  catalog categories, blog posts and blog categories. A CMS page has no sets, so its block shows one
-  table.
+  catalog categories, CMS pages, blog posts and blog categories.
 
 ## The storefront table
 
@@ -151,7 +164,7 @@ entity type overrides the method:
 - `Maho_Blog_Block_Attributes` resolves the directives of a WYSIWYG value with the processor of the
   post content. `Maho_Blog_Helper_Data::sanitizeAttributeValues()` sanitizes the value on save.
 - `Mage_Cms_Block_Page_Attributes` keeps the method of the base block. A CMS page has no EAV
-  resource, so the block reads the attributes from `Mage_Cms_Model_Page::getAttributes()`. The
+  resource, so the block reads the attributes of the set from `Mage_Cms_Model_Page::getAttributes()`. The
   `cms_eav_attribute` table holds the **Visible on Frontend** and **Allow HTML Tags on Frontend**
   flags of each attribute.
 
@@ -191,6 +204,9 @@ attribute. `GET /api/rest/v2/custom-attributes/{id}` reads one. Product attribut
 The nightly `eav_clean_orphaned_records` cron deletes each value whose attribute is not in the set
 of its record. It reads the `attribute_set_id` column of the entity table. For that reason:
 
+- A save of the set page that takes a user-defined attribute out of the set asks first.
+  `Mage_Adminhtml_Controller_Eav_Set::saveAction()` answers `{"confirm": "<question>"}`, and the
+  set editor posts again with `confirmed=1` when the admin accepts.
 - A change of the set of a saved record asks first, and names the attributes that the new set does
   not have. `Mage_Eav_Helper_Data::getSetChangeQuestions()` builds the questions, and
   `Mage_Eav_Model_Resource_Entity_Attribute_Set::getMissingAttributeLabels()` finds the attributes.

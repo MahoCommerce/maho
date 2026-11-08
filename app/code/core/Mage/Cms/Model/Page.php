@@ -50,13 +50,26 @@ class Mage_Cms_Model_Page extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Return the custom attributes of CMS pages, keyed by code.
+     * Return the custom attributes of CMS pages, keyed by code, in the order of the attribute set.
      *
      * @return array<string, Mage_Eav_Model_Entity_Attribute_Abstract>
      */
     public function getAttributes(): array
     {
         return $this->getResource()->getCustomAttributes();
+    }
+
+    /**
+     * Return the attribute set of the custom attributes. Every page uses the default set of the
+     * cms_page entity type, so the groups of the set split the storefront table.
+     */
+    public function getAttributeSetId(): ?int
+    {
+        try {
+            return (int) Mage::getSingleton('eav/config')->getEntityType(self::ENTITY)->getDefaultAttributeSetId() ?: null;
+        } catch (Mage_Core_Exception) {
+            return null;
+        }
     }
 
     #[\Override]

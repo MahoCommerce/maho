@@ -45,8 +45,8 @@ The groups of the set are the tabs of the category page. A group with no attribu
 
 ## Use more than one set
 
-Make a set for each kind of category. For example, a **Brand** set adds a logo and a brand story,
-and the **Default** set does not show them.
+Make a set for each kind of category. For example, a **Brand** set adds a country of origin and a
+brand story, and the **Default** set does not show them.
 
 1. Go to **System > Attributes > Categories**, click **Attribute Sets**, and click **Add**.
 2. Enter the name, and select the set in **Based On**. The new set starts with the groups and the
@@ -63,15 +63,16 @@ You can also change the set of a saved category. When the new set does not have 
 the old set, the page asks first and names them. When you save, the category loses its values of
 these attributes.
 
-Every night, the store deletes the value of an attribute that is not in the set of its category. So
-the value of an attribute shows and stays only when the attribute is in the set.
+Do not take an attribute out of a set by mistake. Every night, the store deletes the value of an
+attribute that is not in the set of its category. When a save of the set page takes an attribute
+out, the page asks first, and names the number of categories that have a value.
 
 You cannot delete the default set. When you delete another set, its categories move to the default
 set.
 
 ## Show the attribute on the category page
 
-Set **Visible on Category Page on Front-end** to **Yes** in the **Frontend Properties** of the
+Set **Visible on Frontend** to **Yes** in the **Frontend Properties** of the
 attribute. The category page then shows the attribute and its value in a table under the category
 description. A category with no value for the attribute does not show it.
 
@@ -86,7 +87,8 @@ the order, drag the attribute in the set.
 ![A category page with the Additional Information table, the Collection Details table and the Collection Story text](images/category-attributes-storefront.webp)
 
 The table shows HTML only when **Allow HTML Tags on Frontend** or **Enable WYSIWYG** is **Yes**.
-It does not show Image attributes.
+It does not show Image attributes. To show an image, such as a brand logo, a developer adds it to
+the category template of the theme.
 
 ## Translate the name of a group
 

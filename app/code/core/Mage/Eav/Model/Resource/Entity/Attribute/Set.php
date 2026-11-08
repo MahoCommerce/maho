@@ -166,4 +166,34 @@ class Mage_Eav_Model_Resource_Entity_Attribute_Set extends Mage_Core_Model_Resou
                 ->order('a.frontend_label'),
         );
     }
+
+    /**
+     * Return the number of records of set $setId that have a value of $attribute, or null when the
+     * records of the entity type have no set or the attribute has no value table.
+     */
+    public function countRecordsWithValue(int $setId, Mage_Eav_Model_Entity_Attribute_Abstract $attribute): ?int
+    {
+        if ($attribute->isStatic()) {
+            return null;
+        }
+        $entityType = $attribute->getEntityType();
+        $adapter = $this->_getReadAdapter();
+        try {
+            $entityTable = $this->getTable((string) $entityType->getEntityTable());
+            $valueTable = (string) $attribute->getBackendTable();
+        } catch (Mage_Core_Exception) {
+            return null;
+        }
+        if (!$adapter->isTableExists($valueTable) || !$adapter->tableColumnExists($entityTable, 'attribute_set_id')) {
+            return null;
+        }
+        $idField = (string) ($entityType->getEntityIdField() ?: 'entity_id');
+        return (int) $adapter->fetchOne(
+            $adapter->select()
+                ->from(['v' => $valueTable], [new Maho\Db\Expr('COUNT(DISTINCT v.entity_id)')])
+                ->join(['e' => $entityTable], "e.{$idField} = v.entity_id", [])
+                ->where('v.attribute_id = ?', (int) $attribute->getId())
+                ->where('e.attribute_set_id = ?', $setId),
+        );
+    }
 }

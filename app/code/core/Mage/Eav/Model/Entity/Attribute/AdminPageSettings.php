@@ -26,7 +26,9 @@ final readonly class Mage_Eav_Model_Entity_Attribute_AdminPageSettings
      *                              because the edit form of the entity shows the system attributes with fields of its own
      * @param bool $setsUserDefinedOnly the set editor lists only the attributes that an admin added, because
      *                                  the storefront forms show the system attributes themselves
-     * @param bool $addToDefaultSet a new attribute goes into the first group of the default set, unless the set page creates it
+     * @param bool $addToDefaultSet a new attribute that names no set goes into the first group of the default set,
+     *                              whether the admin, an import or code saves it
+     * @param bool $singleSet every record uses the default set, so the set pages edit it and cannot add or delete a set
      */
     public function __construct(
         public string $acl,
@@ -37,6 +39,7 @@ final readonly class Mage_Eav_Model_Entity_Attribute_AdminPageSettings
         public bool $userDefinedOnly = false,
         public bool $setsUserDefinedOnly = false,
         public bool $addToDefaultSet = false,
+        public bool $singleSet = false,
     ) {}
 
     public function hasSets(): bool

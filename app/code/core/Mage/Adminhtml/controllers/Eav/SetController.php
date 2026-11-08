@@ -27,6 +27,12 @@ class Mage_Adminhtml_Eav_SetController extends Mage_Adminhtml_Controller_Eav_Set
     }
 
     #[\Override]
+    protected function canManageSets(): bool
+    {
+        return !$this->getPageSettings()->singleSet;
+    }
+
+    #[\Override]
     protected function getPageTitles(): array
     {
         return [$this->__('System'), $this->__('Attributes'), (string) $this->getPageSettings()->setsTitle];

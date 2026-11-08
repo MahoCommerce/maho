@@ -39,12 +39,6 @@ class Mage_Adminhtml_Eav_AttributeController extends Mage_Adminhtml_Controller_E
     }
 
     #[\Override]
-    protected function addsNewAttributeToDefaultSet(): bool
-    {
-        return $this->getPageSettings()->addToDefaultSet;
-    }
-
-    #[\Override]
     #[Maho\Config\Route('/admin/eav_attribute/index')]
     public function indexAction(): void
     {
@@ -55,7 +49,7 @@ class Mage_Adminhtml_Eav_AttributeController extends Mage_Adminhtml_Controller_E
         $container->setHeaderText($settings->title);
         if ($settings->hasSets()) {
             $container->addButton('attribute_sets', [
-                'label' => $this->__('Attribute Sets'),
+                'label' => $settings->singleSet ? $this->__('Attribute Set') : $this->__('Attribute Sets'),
                 'onclick' => Mage::helper('core/js')->getSetLocationJs($this->getUrl('*/eav_set/')),
             ]);
         }

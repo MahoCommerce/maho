@@ -18,9 +18,13 @@ registration number for business customers, or delivery hours for an address.
    address attribute can also use **Multiple Lines**, with the number of lines in **Lines Count**.
 4. In **Used in Forms**, select the forms that show the field. Hold the Ctrl or Cmd key to select
    more than one form.
-5. On the **Manage Label / Options** tab, enter the label, and the options of a Dropdown or a
+5. In **Default**, select **Hidden**, **Optional** or **Required**.
+6. On the **Manage Label / Options** tab, enter the label, and the options of a Dropdown or a
    Multiple Select.
-6. Click **Save**.
+7. Click **Save**.
+
+A new attribute goes into the first group of the **Default** set. So it shows at once to every
+customer group that uses the default set.
 
 The forms of a customer attribute:
 
@@ -40,8 +44,17 @@ The forms of an address attribute:
 | Address Book and Checkout | The address book of the customer account, and the billing and shipping steps of the checkout |
 | Customer Registration | The address section of the registration page, when the store asks for an address there |
 
-**Show in Forms** set to **No** hides the field in every form. **Sort Order** sets the place of the
-field in a form.
+The **Default** field applies to all the forms:
+
+- **Hidden**: no form shows the field.
+- **Optional**: the forms show the field, and the customer can leave it empty.
+- **Required**: the forms show the field, and the customer must fill it in.
+
+A standard field, such as **Date of Birth**, gets its **Hidden** setting from **System >
+Configuration > Customers > Customer Configuration**. So its **Default** field offers only
+**Optional** and **Required**.
+
+**Sort Order** sets the place of the field in a form.
 
 ## Check where a field shows
 
@@ -51,7 +64,7 @@ the section **Where the Field Shows**, which lists the three:
 
 - **Forms**: every form. A form that does not show the attribute has a line through it.
 - **Customer Groups**: every customer group. A group whose set does not hold the attribute has a
-  line through it. An attribute in no set shows to every group.
+  line through it. An attribute in no set shows to no group.
 - **Websites**: the setting of each website: **Hidden**, **Optional** or **Required**. When all the
   websites use one setting, the row shows **All websites** and the setting.
 
@@ -75,27 +88,29 @@ set. A group with no set uses the default set.
 
 For example, wholesale customers give a company registration number, and retail customers do not:
 
-1. Go to **System > Attributes > Customers**, click **Attribute Sets**, and click **Add**.
-2. Enter **Wholesale**, select **Default** in **Based On**, and click **Save**.
-3. Drag the new attribute from **Unassigned Attributes** to a group of the **Wholesale** set, and
-   click **Save**.
-4. Go to **Customers > Customer Groups** and open the **Wholesale** group.
-5. Select **Wholesale** in **Customer Attribute Set**, and click **Save**.
+1. Add the attribute, as in [Add an attribute](#add-an-attribute). It goes into the **Default** set.
+2. Go to **System > Attributes > Customers**, click **Attribute Sets**, and click **Add**.
+3. Enter **Wholesale**, select **Default** in **Based On**, and click **Save**. The new set holds the
+   attribute too.
+4. Open the **Default** set. Drag the attribute to **Unassigned Attributes**, and click **Save**.
+   The page asks first, because the retail groups stop seeing the field.
+5. Go to **Customers > Customer Groups** and open the **Wholesale** group.
+6. Select **Wholesale** in **Customer Attribute Set**, and click **Save**.
 
 ![The Wholesale set, with the Company Information group and its two attributes](images/customer-attribute-set.webp)
 
 ![The Wholesale customer group, with the Wholesale set in Customer Attribute Set](images/customer-group-attribute-set.webp)
 
-A form shows an attribute when the attribute is in the set of the group, or when it is in no set.
-So a new attribute shows to every group until you add it to a set.
+A form shows an attribute only when the set of the group holds it. An attribute in no set shows
+to no group. When you take an attribute out of a set, the values of the customers stay in the
+database, and the field shows again when you put it back.
 
 The set page lists only the attributes that you added. The standard fields, such as
 **First Name** and **Email**, are in every set, and you cannot remove them.
 
 The groups of the set split a form into sections:
 
-- The attributes of the first group of the set, and the attributes in no set, show with the
-  standard fields.
+- The attributes of the first group of the set show with the standard fields.
 - Each other group that has a field of the form is a section with its own title, for example
   **Company Information**. The title is the name of the group, in the language of the store view.
   The customer page in the admin also shows each group as a section, with the **Admin** name.
@@ -136,8 +151,8 @@ The **Websites** section of an attribute can change the default for one website:
 - **Hidden**: the forms of the website do not show the field.
 - **Optional**: the forms show the field, and the customer can leave it empty.
 - **Required**: the forms show the field, and the customer must fill it in.
-- **Use Default**: the website uses **Show in Forms** and **Values Required** of the attribute. The
-  option shows the result, for example **Use Default (Optional)**.
+- **Use Default**: the website uses the **Default** field of the attribute. The option shows the
+  result, for example **Use Default (Optional)**.
 
 A store with one website does not show the **Websites** section, because the default already decides.
 

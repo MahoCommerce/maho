@@ -25,7 +25,7 @@ class Mage_Cms_Model_Attribute extends Mage_Eav_Model_Entity_Attribute
     protected $_eventPrefix = 'cms_page_attribute';
 
     /**
-     * Every input type stores its values in a column of cms_page.
+     * Every page uses the default set, whose groups give the order and the titles of the fields.
      */
     #[\Override]
     public function getAdminPageSettings(): ?Mage_Eav_Model_Entity_Attribute_AdminPageSettings
@@ -33,8 +33,38 @@ class Mage_Cms_Model_Attribute extends Mage_Eav_Model_Entity_Attribute
         return new Mage_Eav_Model_Entity_Attribute_AdminPageSettings(
             acl: 'system/attributes/cms_page',
             title: Mage::helper('cms')->__('CMS Page Attributes'),
+            setsTitle: Mage::helper('cms')->__('CMS Page Attribute Set'),
             mainTab: 'adminhtml/cms_attribute_edit_tab_main',
+            addToDefaultSet: true,
+            singleSet: true,
         );
+    }
+
+    #[\Override]
+    public function getSetNote(Mage_Eav_Model_Entity_Attribute_Set $set): ?string
+    {
+        $helper = Mage::helper('cms');
+        $lines = [$helper->__('Every CMS page uses this set. A page shows only the attributes of the set.')];
+        $firstGroup = Mage::getResourceModel('eav/entity_attribute_group_collection')
+            ->setAttributeSetFilter((int) $set->getId())
+            ->setSortOrder()
+            ->getFirstItem();
+        if ($firstGroup->getId()) {
+            $lines[] = $helper->__('The fields of the first group, %s, show on the Page Information tab. Each other group is a tab of its own. On the storefront, each group is a table.', (string) $firstGroup->getAttributeGroupName());
+        }
+        return implode("\n", $lines);
+    }
+
+    /**
+     * The values are columns of cms_page, which the nightly cleanup does not read, so the pages keep them.
+     */
+    #[\Override]
+    public function getSetRemoveQuestion(Mage_Eav_Model_Entity_Attribute_Set $set, array $attributes): ?string
+    {
+        if (!$attributes) {
+            return null;
+        }
+        return Mage::helper('cms')->__('The CMS pages stop showing these fields: %s. The pages keep their values. Save the set?', self::getQuestionLabels($attributes));
     }
 
     #[\Override]

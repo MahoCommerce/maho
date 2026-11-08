@@ -112,7 +112,7 @@ class EavAttributeSetForm {
     }
 
     bindEventListeners() {
-        this.ui.saveBtn?.addEventListener('click', this.saveSet.bind(this));
+        this.ui.saveBtn?.addEventListener('click', () => this.saveSet());
         this.ui.deleteBtn?.addEventListener('click', this.deleteSet.bind(this));
         this.ui.addGroupBtn?.addEventListener('click', this.addGroup.bind(this));
         this.ui.deleteGroupBtn?.addEventListener('click', this.deleteGroup.bind(this));
@@ -128,7 +128,13 @@ class EavAttributeSetForm {
         this.tree2.setRootNode(data);
     }
 
-    async saveSet() {
+    /**
+     * Save the set. When the save takes attributes out of the set, the server answers with a
+     * question first, and the save runs again after the admin confirms.
+     *
+     * @param {boolean} [confirmed=false] - the admin confirmed the question of the server
+     */
+    async saveSet(confirmed = false) {
         const validator = new Validation(this.formEl, { onSubmit: false });
         if (!validator.validate()) {
             return;
@@ -169,11 +175,27 @@ class EavAttributeSetForm {
 
             data.removeGroups = this.removeGroups;
             formData.set('data', JSON.stringify(data));
+            if (confirmed) {
+                formData.set('confirmed', '1');
+            }
 
             const result = await mahoFetch(this.config.saveUrl, {
                 method: 'POST',
                 body: formData,
             });
+
+            if (result.confirm) {
+                hideLoader();
+                Dialog.confirm(`<p>${escapeHtml(result.confirm)}</p>`, {
+                    title: Translator.translate('Save the Set'),
+                    okLabel: Translator.translate('Save'),
+                    cancel: true,
+                    onOk: () => {
+                        this.saveSet(true);
+                    },
+                });
+                return;
+            }
 
             setLocation(result.url);
 

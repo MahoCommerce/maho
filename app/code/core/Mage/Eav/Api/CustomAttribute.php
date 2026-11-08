@@ -93,7 +93,7 @@ class CustomAttribute extends \Maho\ApiPlatform\Resource
     public array $options = [];
 
     /** @var list<array{id: int, name: string, groupId: int, groupName: string}> */
-    #[ApiProperty(description: 'The attribute sets that hold the attribute, with the group in each set. A record accepts the attribute only when its set holds it. For customers and addresses, an attribute in no set applies to every customer group')]
+    #[ApiProperty(description: 'The attribute sets that hold the attribute, with the group in each set. A record accepts the attribute only when its set holds it. For customers and addresses, the customer group picks the set')]
     public array $attributeSets = [];
 
     /** @var list<string>|null */

@@ -46,8 +46,9 @@ entered. When the new set of a saved post or category does not have some attribu
 the page asks first and names them. When you save, the post or the category loses its values of
 these attributes.
 
-Every night, the store deletes the value of an attribute that is not in the set of its post or
-category. So the value of an attribute shows and stays only when the attribute is in the set.
+Do not take an attribute out of a set by mistake. Every night, the store deletes the value of an
+attribute that is not in the set of its post or category. When a save of the set page takes an
+attribute out, the page asks first, and names the number of posts or categories that have a value.
 
 ## Show the attribute on the storefront
 

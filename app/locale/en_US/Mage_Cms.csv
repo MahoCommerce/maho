@@ -13,7 +13,6 @@
 "A page URL key for specified store already exists.","A page URL key for specified store already exists."
 "Are you sure you want to delete current folder?","Are you sure you want to delete current folder?"
 "Are you sure you want to delete the selected file?","Are you sure you want to delete the selected file?"
-"Attributes","Attributes"
 "Bento Grid","Bento Grid"
 "Block","Block"
 "Block Content","Block Content"
@@ -35,6 +34,7 @@
 "CMS No Route Page","CMS No Route Page"
 "CMS Page","CMS Page"
 "CMS Page Attributes","CMS Page Attributes"
+CMS Page Attribute Set,CMS Page Attribute Set
 "CMS Page Link","CMS Page Link"
 "CMS Page Link Block Template","CMS Page Link Block Template"
 "CMS Page Link Inline Template","CMS Page Link Inline Template"
@@ -87,6 +87,7 @@
 "Enabled by Default","Enabled by Default"
 "Enable WYSIWYG Editor","Enable WYSIWYG Editor"
 "Enter a label and a link.","Enter a label and a link."
+Every CMS page uses this set. A page shows only the attributes of the set.,Every CMS page uses this set. A page shows only the attributes of the set.
 "Exit Fullscreen Page Builder","Exit Fullscreen Page Builder"
 "Expand All","Expand All"
 "Extra Large","Extra Large"
@@ -193,8 +194,10 @@
 "Text","Text"
 "The block has been deleted.","The block has been deleted."
 "The block has been saved.","The block has been saved."
+The CMS pages stop showing these fields: %s. The pages keep their values. Save the set?,The CMS pages stop showing these fields: %s. The pages keep their values. Save the set?
 "The code ""%s"" is already used by CMS pages. Use another code.","The code ""%s"" is already used by CMS pages. Use another code."
 "The directory %s is not writable by server.","The directory %s is not writable by server."
+"The fields of the first group, %s, show on the Page Information tab. Each other group is a tab of its own. On the storefront, each group is a table.","The fields of the first group, %s, show on the Page Information tab. Each other group is a tab of its own. On the storefront, each group is a table."
 "The page has been deleted.","The page has been deleted."
 "The page has been saved.","The page has been saved."
 "The page URL key cannot consist only of numbers.","The page URL key cannot consist only of numbers."

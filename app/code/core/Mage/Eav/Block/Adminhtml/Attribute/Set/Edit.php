@@ -69,7 +69,7 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Edit extends Mage_Adminhtml_Block_T
             'back_button',
             $this->getLayout()->createBlock('adminhtml/widget_button')->setData([
                 'label'     => Mage::helper('eav')->__('Back'),
-                'onclick'   => Mage::helper('core/js')->getSetLocationJs($this->getUrl('*/*/')),
+                'onclick'   => Mage::helper('core/js')->getSetLocationJs($this->getBackUrl()),
                 'class'     => 'back',
             ]),
         );
@@ -137,6 +137,18 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Edit extends Mage_Adminhtml_Block_T
     protected function _getHeader()
     {
         return Mage::helper('eav')->__("Edit Attribute Set '%s'", $this->_getAttributeSet()->getAttributeSetName());
+    }
+
+    /**
+     * Return the set grid, or the attribute grid when the type has one set and so no set grid.
+     */
+    public function getBackUrl(): string
+    {
+        $entityType = Mage::getSingleton('eav/config')->getEntityType((int) $this->_getAttributeSet()->getEntityTypeId());
+        if (Mage::helper('eav')->getAdminPageSettings($entityType)?->singleSet) {
+            return $this->getUrl('*/eav_attribute/');
+        }
+        return $this->getUrl('*/*/');
     }
 
     /**

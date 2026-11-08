@@ -182,7 +182,31 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
             }
         }
 
+        if (!$this->getId() && !$this->getAttributeSetId() && $this->getEntityTypeId()
+            && $this->getAdminPageSettings()?->addToDefaultSet
+        ) {
+            $this->assignFirstGroupOfDefaultSet();
+        }
+
         return parent::_beforeSave();
+    }
+
+    /**
+     * Put this attribute in the first group of the default set of its entity type, so that the
+     * records show it at once. The save writes the set and the group.
+     */
+    protected function assignFirstGroupOfDefaultSet(): void
+    {
+        $setId = (int) $this->getEntityType()->getDefaultAttributeSetId();
+        $groupId = (int) Mage::getResourceModel('eav/entity_attribute_group_collection')
+            ->setAttributeSetFilter($setId)
+            ->setSortOrder()
+            ->getFirstItem()
+            ->getId();
+        if ($setId && $groupId) {
+            $this->setAttributeSetId($setId);
+            $this->setAttributeGroupId($groupId);
+        }
     }
 
     /**
@@ -249,6 +273,54 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
             $text .= ' ' . $helper->__('They will lose their values of the attributes that are not in the default set: %s.', implode(', ', $labels));
         }
         return $text . ' ' . $helper->__('Delete the set?');
+    }
+
+    /**
+     * Return the question that the edit page of $set asks before a save takes $attributes out of
+     * the set, or null for no question.
+     *
+     * The nightly eav_clean_orphaned_records job deletes the values of an attribute that is not in
+     * the set of the record, so the question names each attribute and its number of records with a value.
+     *
+     * @param list<Mage_Eav_Model_Entity_Attribute_Abstract> $attributes
+     */
+    public function getSetRemoveQuestion(Mage_Eav_Model_Entity_Attribute_Set $set, array $attributes): ?string
+    {
+        if (!$attributes) {
+            return null;
+        }
+        $helper = Mage::helper('eav');
+        $resource = Mage::getResourceSingleton('eav/entity_attribute_set');
+        $names = [];
+        foreach ($attributes as $attribute) {
+            $label = self::getQuestionLabel($attribute);
+            $count = $resource->countRecordsWithValue((int) $set->getId(), $attribute);
+            $names[] = $count ? $helper->__('%s (records with a value: %d)', $label, $count) : $label;
+        }
+        return $helper->__('These attributes leave the set: %s.', implode(', ', $names))
+            . ' ' . $helper->__('Tonight, the store deletes their values in the records of this set. Save the set?');
+    }
+
+    /**
+     * Return the label of $attribute for a question, or its code when it has no label.
+     */
+    protected static function getQuestionLabel(Mage_Eav_Model_Entity_Attribute_Abstract $attribute): string
+    {
+        return (string) ($attribute->getFrontendLabel() ?: $attribute->getAttributeCode());
+    }
+
+    /**
+     * Return the labels of $attributes for a question, separated by commas.
+     *
+     * @param list<Mage_Eav_Model_Entity_Attribute_Abstract> $attributes
+     */
+    protected static function getQuestionLabels(array $attributes): string
+    {
+        $labels = [];
+        foreach ($attributes as $attribute) {
+            $labels[] = self::getQuestionLabel($attribute);
+        }
+        return implode(', ', $labels);
     }
 
     /**

@@ -49,8 +49,8 @@ class Mage_Adminhtml_Block_Catalog_Category_Attribute_Edit_Tab_Main extends Mage
 
         $front->addField('is_visible_on_front', 'select', [
             'name' => 'is_visible_on_front',
-            'label' => $helper->__('Visible on Category Page on Front-end'),
-            'title' => $helper->__('Visible on Category Page on Front-end'),
+            'label' => $helper->__('Visible on Frontend'),
+            'title' => $helper->__('Visible on Frontend'),
             'values' => $yesno,
         ]);
     }

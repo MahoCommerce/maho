@@ -25,7 +25,7 @@ function customerSetTestCreateSet(string $entityTypeCode, string $name): Mage_Ea
 }
 
 /**
- * A user-defined text attribute in the first group of a set, or in no set when $setId is null.
+ * A user-defined text attribute in the first group of a set, or of the default set when $setId is null.
  */
 function customerSetTestCreateAttribute(string $entityTypeCode, string $code, ?int $setId, array $forms): Mage_Customer_Model_Attribute
 {
@@ -164,7 +164,21 @@ it('uses the address set of the group of the quote for a quote address', functio
         ->and(customerSetTestFormCodes('customer_address_edit', $guestAddress))->toContain('city');
 });
 
-it('shows an attribute that is in no set to every group', function () {
+it('puts a new attribute that names no set into the default set, which every group without a set uses', function () {
+    $code = 'pest_default_' . $this->suffix;
+    $attribute = $this->attributes[] = customerSetTestCreateAttribute('customer', $code, null, ['customer_account_edit']);
+    $defaultSetId = (int) Mage::getSingleton('eav/config')->getEntityType('customer')->getDefaultAttributeSetId();
+
+    $adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
+    $setIds = array_map(intval(...), $adapter->fetchCol($adapter->select()
+        ->from(Mage::getSingleton('core/resource')->getTableName('eav/entity_attribute'), ['attribute_set_id'])
+        ->where('attribute_id = ?', (int) $attribute->getId())));
+
+    expect($setIds)->toBe([$defaultSetId])
+        ->and(customerSetTestFormCodes('customer_account_edit', Mage::getModel('customer/customer')->setGroupId(1)))->toContain($code);
+});
+
+it('hides an attribute that is in no set from every group', function () {
     $code = 'pest_loose_' . $this->suffix;
     $this->attributes[] = customerSetTestCreateAttribute('customer', $code, null, ['customer_account_edit']);
     Mage::getSingleton('core/resource')->getConnection('core_write')->delete(
@@ -174,7 +188,28 @@ it('shows an attribute that is in no set to every group', function () {
 
     $customer = Mage::getModel('customer/customer')->setGroupId(1);
 
-    expect(customerSetTestFormCodes('customer_account_edit', $customer))->toContain($code);
+    expect(customerSetTestFormCodes('customer_account_edit', $customer))->not->toContain($code)
+        ->and(customerSetTestFormCodes('customer_account_edit', $customer))->toContain('email');
+});
+
+it('puts each form attribute that is in no set into the default set during the upgrade', function () {
+    $code = 'pest_upgrade_' . $this->suffix;
+    $attribute = $this->attributes[] = customerSetTestCreateAttribute('customer_address', $code, null, ['customer_address_edit']);
+    $resource = Mage::getSingleton('core/resource');
+    $table = $resource->getTableName('eav/entity_attribute');
+    $resource->getConnection('core_write')->delete($table, ['attribute_id = ?' => (int) $attribute->getId()]);
+
+    $setup = new Mage_Customer_Model_Resource_Setup('customer_setup');
+    (function (): void {
+        include Mage::getModuleDir('data', 'Mage_Customer') . '/customer_setup/data-upgrade-2.0.4-2.0.5.php';
+    })->call($setup);
+
+    $adapter = $resource->getConnection('core_read');
+    $setIds = array_map(intval(...), $adapter->fetchCol($adapter->select()
+        ->from($table, ['attribute_set_id'])
+        ->where('attribute_id = ?', (int) $attribute->getId())));
+
+    expect($setIds)->toBe([(int) Mage::getSingleton('eav/config')->getEntityType('customer_address')->getDefaultAttributeSetId()]);
 });
 
 it('refuses a group set of another entity type', function () {
@@ -197,6 +232,7 @@ it('saves the forms, the rules and the website modes of a new customer attribute
         'used_in_forms' => ['customer_account_create', 'not_a_form'],
         'max_text_length' => '20',
         'input_validation' => 'alphanumeric',
+        'default_mode' => 'hidden',
         'website_values' => [$websiteId => 'required'],
     ]);
 
@@ -209,6 +245,8 @@ it('saves the forms, the rules and the website modes of a new customer attribute
     expect($attribute->getId())->not->toBeNull()
         ->and($attribute->getUsedInForms())->toBe(['customer_account_create'])
         ->and($attribute->getValidateRules())->toBe(['max_text_length' => 20, 'input_validation' => 'alphanumeric'])
+        ->and((int) $attribute->getIsVisible())->toBe(0)
+        ->and((int) $attribute->getIsRequired())->toBe(0)
         ->and($attribute->getResource()->getWebsiteValues((int) $attribute->getId()))
         ->toBe([$websiteId => ['is_visible' => 1, 'is_required' => 1]]);
 });
@@ -253,6 +291,21 @@ it('lists the system attributes of customers in the grid and not in the set edit
         expect($grid)->toContain($systemCode)
             ->and($sets)->not->toContain($systemCode);
     }
+});
+
+it('turns the Default field into is_visible and is_required, and keeps is_visible of a platform attribute', function () {
+    $new = Mage::getModel('customer/attribute')
+        ->setEntityTypeId((int) Mage::getSingleton('eav/config')->getEntityType('customer')->getId());
+    $dob = Mage::getModel('customer/attribute')->loadByCode('customer', 'dob');
+
+    $required = $new->prepareAdminData(['default_mode' => 'required']);
+    $platform = $dob->prepareAdminData(['default_mode' => 'required']);
+
+    expect($required)->toMatchArray(['is_visible' => 1, 'is_required' => 1])
+        ->and($required)->not->toHaveKey('default_mode')
+        ->and($new->prepareAdminData(['default_mode' => 'optional']))->toMatchArray(['is_visible' => 1, 'is_required' => 0])
+        ->and($platform)->not->toHaveKey('is_visible')
+        ->and($platform['is_required'])->toBe(1);
 });
 
 it('names the default mode in the website options of a customer attribute', function () {

@@ -127,18 +127,14 @@ class Mage_Eav_Model_Resource_Form_Attribute_Collection extends Mage_Core_Model_
     }
 
     /**
-     * Keep the attributes of an attribute set, and the attributes that are in no set of the entity type.
-     *
-     * An attribute in no set is one that a module added without a group, so it applies to every set.
+     * Keep only the attributes of attribute set $setId.
      */
     public function addAttributeSetFilter(int $setId): static
     {
         $entityAttributeTable = $this->getTable('eav/entity_attribute');
         $this->getSelect()->where(
             "EXISTS (SELECT 1 FROM {$entityAttributeTable} eea_set"
-            . ' WHERE eea_set.attribute_id = main_table.attribute_id AND eea_set.attribute_set_id = ?)'
-            . " OR NOT EXISTS (SELECT 1 FROM {$entityAttributeTable} eea_any"
-            . ' WHERE eea_any.attribute_id = main_table.attribute_id)',
+            . ' WHERE eea_set.attribute_id = main_table.attribute_id AND eea_set.attribute_set_id = ?)',
             $setId,
         );
         return $this;

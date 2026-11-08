@@ -1,7 +1,7 @@
 <?php
 
 /**
- * The tab of the custom attributes of a CMS page.
+ * A tab with the custom attributes of one group of the attribute set of CMS pages.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -12,40 +12,34 @@ declare(strict_types=1);
 
 class Mage_Adminhtml_Block_Cms_Page_Edit_Tab_Attributes extends Mage_Adminhtml_Block_Widget_Form implements Mage_Adminhtml_Block_Widget_Tab_Interface
 {
+    use Mage_Adminhtml_Block_Cms_Page_Edit_AttributeFieldsTrait;
+
+    public function getGroup(): Mage_Eav_Model_Entity_Attribute_Group
+    {
+        return $this->getData('group');
+    }
+
     /**
-     * @return array<string, Mage_Eav_Model_Entity_Attribute_Abstract>
+     * @return list<Mage_Eav_Model_Entity_Attribute_Abstract>
      */
     public function getAttributes(): array
     {
-        return Mage::getResourceSingleton('cms/page')->getCustomAttributes();
+        return $this->getData('attributes') ?? [];
     }
 
     #[\Override]
     protected function _prepareForm()
     {
+        /** @var Mage_Cms_Model_Page $page */
+        $page = Mage::registry('cms_page');
         $form = new \Maho\Data\Form();
         $form->setHtmlIdPrefix('page_');
-        $fieldset = $form->addFieldset('attributes_fieldset', [
+        $fieldset = $form->addFieldset('group_fields_' . $this->getGroup()->getId(), [
             'legend' => $this->getTabLabel(),
             'class' => 'fieldset-wide',
         ]);
-        $this->_setFieldset($this->getAttributes(), $fieldset);
-
-        if (!Mage::getSingleton('admin/session')->isAllowed('cms/page/save')) {
-            foreach ($fieldset->getElements() as $element) {
-                $element->setDisabled(true);
-            }
-        }
-
-        /** @var Mage_Cms_Model_Page $page */
-        $page = Mage::registry('cms_page');
-        $values = $page->getData();
-        if (!$page->getId()) {
-            foreach ($this->getAttributes() as $code => $attribute) {
-                $values[$code] ??= $attribute->getDefaultValue();
-            }
-        }
-        $form->setValues($values);
+        $this->addAttributeFields($fieldset, $this->getAttributes(), $page);
+        $form->setValues($page->getData());
         $this->setForm($form);
         return parent::_prepareForm();
     }
@@ -53,7 +47,7 @@ class Mage_Adminhtml_Block_Cms_Page_Edit_Tab_Attributes extends Mage_Adminhtml_B
     #[\Override]
     public function getTabLabel()
     {
-        return Mage::helper('cms')->__('Attributes');
+        return (string) $this->getGroup()->getAttributeGroupName();
     }
 
     #[\Override]
@@ -65,7 +59,7 @@ class Mage_Adminhtml_Block_Cms_Page_Edit_Tab_Attributes extends Mage_Adminhtml_B
     #[\Override]
     public function canShowTab()
     {
-        return $this->getAttributes() !== [];
+        return true;
     }
 
     #[\Override]

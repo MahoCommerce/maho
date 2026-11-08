@@ -50,7 +50,7 @@ beforeAll(function (): void {
         'is_global' => 1,
     ] + blogAttrTestDefaultGroup(Maho_Blog_Model_Post::ENTITY))->save();
 
-    Mage::getModel('blog/resource_eav_attribute')->setData([
+    $loose = Mage::getModel('blog/resource_eav_attribute')->setData([
         'entity_type_id' => (int) $eavConfig->getEntityType(Maho_Blog_Model_Post::ENTITY)->getId(),
         'attribute_code' => BLOG_ATTR_LOOSE_CODE,
         'backend_type' => 'varchar',
@@ -58,7 +58,13 @@ beforeAll(function (): void {
         'frontend_label' => 'In No Set',
         'is_user_defined' => 1,
         'is_global' => 1,
-    ])->save();
+    ]);
+    $loose->save();
+    // A new blog attribute goes into the default set, so take this one out
+    Mage::getSingleton('core/resource')->getConnection('core_write')->delete(
+        Mage::getSingleton('core/resource')->getTableName('eav/entity_attribute'),
+        ['attribute_id = ?' => (int) $loose->getId()],
+    );
 
     Mage::getModel('blog/resource_eav_attribute')->setData([
         'entity_type_id' => (int) $eavConfig->getEntityType(Maho_Blog_Model_Category::ENTITY)->getId(),

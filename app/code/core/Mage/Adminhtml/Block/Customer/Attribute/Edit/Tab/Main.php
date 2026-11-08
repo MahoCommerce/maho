@@ -21,7 +21,6 @@ class Mage_Adminhtml_Block_Customer_Attribute_Edit_Tab_Main extends Mage_Eav_Blo
         $helper = Mage::helper('customer');
         $attribute = $this->getAttributeObject();
         $isAddress = $attribute->getEntityType()->getEntityTypeCode() === 'customer_address';
-        $yesno = Mage::getModel('adminhtml/system_config_source_yesno')->toOptionArray();
         $rules = $attribute->getValidateRules();
 
         $forms = [];
@@ -37,20 +36,14 @@ class Mage_Adminhtml_Block_Customer_Attribute_Edit_Tab_Main extends Mage_Eav_Blo
             'name' => 'used_in_forms[]',
             'label' => $helper->__('Used in Forms'),
             'title' => $helper->__('Used in Forms'),
-            'note' => $helper->__('The customer group of the customer decides the attribute set. The form shows the attribute when it is in that set, or in no set.'),
+            'note' => $helper->__('The customer group of the customer decides the attribute set. The form shows the attribute only when it is in that set.'),
             'values' => $forms,
             'value' => $usedInForms,
             'size' => count($forms),
             'disabled' => (bool) $attribute->getIsSystem(),
         ]);
-        $front->addField('is_visible', 'select', [
-            'name' => 'is_visible',
-            'label' => $helper->__('Show in Forms'),
-            'title' => $helper->__('Show in Forms'),
-            'values' => $yesno,
-            'value' => $attribute->getId() ? null : 1,
-            'disabled' => $attribute->getId() && !$attribute->getIsUserDefined(),
-        ]);
+        $fieldset->removeField('is_required');
+        $front->addField('default_mode', 'select', $this->getDefaultModeConfig($attribute));
         $front->addField('sort_order', 'text', [
             'name' => 'sort_order',
             'label' => $helper->__('Sort Order'),
@@ -112,17 +105,73 @@ class Mage_Adminhtml_Block_Customer_Attribute_Edit_Tab_Main extends Mage_Eav_Blo
     }
 
     /**
-     * Add the website values: each website can show, hide or require the attribute. A store with
-     * one website and no saved value gets no section, because the default already decides.
+     * Return the field that replaces Show in Forms and Values Required: hidden, optional or required
+     * in every form. The Customer Configuration shows or hides an attribute of the platform, so its
+     * field offers only optional and required, and a hidden one cannot change.
+     *
+     * @return array<string, mixed>
+     */
+    protected function getDefaultModeConfig(Mage_Customer_Model_Attribute $attribute): array
+    {
+        $helper = Mage::helper('customer');
+        $modes = [
+            'hidden' => $helper->__('Hidden'),
+            'optional' => $helper->__('Optional'),
+            'required' => $helper->__('Required'),
+        ];
+        $mode = $attribute->getDefaultWebsiteMode();
+        $isPlatform = $attribute->getId() && !$attribute->getIsUserDefined();
+        if ($isPlatform) {
+            $modes = $mode === 'hidden' ? ['hidden' => $modes['hidden']] : array_diff_key($modes, ['hidden' => true]);
+        }
+        $options = [];
+        foreach ($modes as $value => $label) {
+            $options[] = ['value' => $value, 'label' => $label];
+        }
+        $notes = [$helper->__('Hidden: no form shows the field. Optional: the customer can leave it empty. Required: the customer must fill it in.')];
+        if ($isPlatform) {
+            $notes[] = $helper->__('The Customer Configuration shows or hides this field.');
+        }
+        if ($this->hasWebsiteFields($attribute)) {
+            $notes[] = $helper->__('The Websites section can change it for one website.');
+        }
+        return [
+            'name' => 'default_mode',
+            'label' => $helper->__('Default'),
+            'title' => $helper->__('Default'),
+            'note' => implode(' ', $notes),
+            'values' => $options,
+            'value' => $mode,
+            'disabled' => $isPlatform && $mode === 'hidden',
+        ];
+    }
+
+    /**
+     * A store with one website and no saved value gets no Websites section, because the default
+     * already decides.
+     */
+    protected function hasWebsiteFields(Mage_Customer_Model_Attribute $attribute): bool
+    {
+        $websites = Mage::app()->getWebsites();
+        if (count($websites) > 1) {
+            return true;
+        }
+        if (!$websites || !$attribute->getId()) {
+            return false;
+        }
+        $values = $attribute->getResource()->getWebsiteValues((int) $attribute->getId());
+        return array_filter($values, fn(array $value): bool => Mage_Customer_Model_Attribute::getWebsiteModeOverride($value) !== '') !== [];
+    }
+
+    /**
+     * Add the website values: each website can show, hide or require the attribute.
      */
     protected function _prepareWebsiteFields(\Maho\Data\Form $form, Mage_Customer_Model_Attribute $attribute): void
     {
-        $websites = Mage::app()->getWebsites();
-        $values = $attribute->getId() ? $attribute->getResource()->getWebsiteValues((int) $attribute->getId()) : [];
-        $hasOverride = array_filter($values, fn(array $value): bool => Mage_Customer_Model_Attribute::getWebsiteModeOverride($value) !== '') !== [];
-        if (!$websites || (count($websites) < 2 && !$hasOverride)) {
+        if (!$this->hasWebsiteFields($attribute)) {
             return;
         }
+        $values = $attribute->getId() ? $attribute->getResource()->getWebsiteValues((int) $attribute->getId()) : [];
         $helper = Mage::helper('customer');
         $modes = [
             'hidden' => $helper->__('Hidden'),
@@ -136,9 +185,9 @@ class Mage_Adminhtml_Block_Customer_Attribute_Edit_Tab_Main extends Mage_Eav_Blo
 
         $fieldset = $form->addFieldset('website_fieldset', [
             'legend' => $helper->__('Websites'),
-            'comment' => $helper->__('Change the default for one website. Use Default follows Show in Forms and Values Required.'),
+            'comment' => $helper->__('Change the default for one website. Use Default follows the Default field.'),
         ]);
-        foreach ($websites as $website) {
+        foreach (Mage::app()->getWebsites() as $website) {
             $id = (int) $website->getId();
             $fieldset->addField("website_{$id}", 'select', [
                 'name' => "website_values[{$id}]",

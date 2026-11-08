@@ -63,6 +63,7 @@ class Mage_Customer_Model_Attribute extends Mage_Eav_Model_Attribute
                 setsTitle: $helper->__('Customer Attribute Sets'),
                 mainTab: 'adminhtml/customer_attribute_edit_tab_main',
                 setsUserDefinedOnly: true,
+                addToDefaultSet: true,
             ),
             'customer_address' => new Mage_Eav_Model_Entity_Attribute_AdminPageSettings(
                 acl: 'system/attributes/customer_address',
@@ -70,6 +71,7 @@ class Mage_Customer_Model_Attribute extends Mage_Eav_Model_Attribute
                 setsTitle: $helper->__('Customer Address Attribute Sets'),
                 mainTab: 'adminhtml/customer_attribute_edit_tab_main',
                 setsUserDefinedOnly: true,
+                addToDefaultSet: true,
             ),
             default => null,
         };
@@ -97,7 +99,7 @@ class Mage_Customer_Model_Attribute extends Mage_Eav_Model_Attribute
 
         $helper = Mage::helper('customer');
         $lines = [
-            $helper->__('The customer group of a customer picks the set. Select the set of each group in Customers > Customer Groups. An attribute that is in no set shows to every customer group.')
+            $helper->__('The customer group of a customer picks the set. Select the set of each group in Customers > Customer Groups. A form shows an attribute only to the customer groups whose set holds it.')
             . ' ' . ($names
                 ? $helper->__('Customer groups that use this set: %s.', implode(', ', $names))
                 : $helper->__('No customer group uses this set.')),
@@ -123,6 +125,19 @@ class Mage_Customer_Model_Attribute extends Mage_Eav_Model_Attribute
             return parent::getSetDeleteQuestion($set);
         }
         return Mage::helper('customer')->__('The customer groups of this set will use the default set. The values of the customers stay. Delete the set?');
+    }
+
+    /**
+     * The forms of the customer groups of $set stop showing $attributes. The values of the customers
+     * stay, because the rows of customers and addresses do not hold a set.
+     */
+    #[\Override]
+    public function getSetRemoveQuestion(Mage_Eav_Model_Entity_Attribute_Set $set, array $attributes): ?string
+    {
+        if ($this->getGroupSetColumn() === null || !$attributes) {
+            return parent::getSetRemoveQuestion($set, $attributes);
+        }
+        return Mage::helper('customer')->__('The forms stop showing these fields to the customer groups of this set: %s. The values of the customers stay. Save the set?', self::getQuestionLabels($attributes));
     }
 
     /**
@@ -157,25 +172,19 @@ class Mage_Customer_Model_Attribute extends Mage_Eav_Model_Attribute
                 ->from($this->getResource()->getTable('eav/entity_attribute'), ['attribute_set_id'])
                 ->where('attribute_id = ?', (int) $this->getId()),
         ));
-        if (!$setIds) {
-            $rows[] = [
-                'label' => $helper->__('Customer Groups'),
-                'items' => [['label' => $helper->__('All customer groups'), 'shown' => true]],
-                'note' => $helper->__('The attribute is in no set, so it shows to every customer group.'),
-            ];
-        } else {
-            $defaultSetId = (int) $this->getEntityType()->getDefaultAttributeSetId();
-            $groups = [];
-            foreach (Mage::getResourceModel('customer/group_collection') as $group) {
-                $setId = (int) $group->getData($column) ?: $defaultSetId;
-                $groups[] = ['label' => (string) $group->getCustomerGroupCode(), 'shown' => in_array($setId, $setIds, true)];
-            }
-            $rows[] = [
-                'label' => $helper->__('Customer Groups'),
-                'items' => self::sortShownFirst($groups),
-                'note' => $helper->__('A customer group shows the attribute when its set holds the attribute.'),
-            ];
+        $defaultSetId = (int) $this->getEntityType()->getDefaultAttributeSetId();
+        $groups = [];
+        foreach (Mage::getResourceModel('customer/group_collection') as $group) {
+            $setId = (int) $group->getData($column) ?: $defaultSetId;
+            $groups[] = ['label' => (string) $group->getCustomerGroupCode(), 'shown' => in_array($setId, $setIds, true)];
         }
+        $rows[] = [
+            'label' => $helper->__('Customer Groups'),
+            'items' => self::sortShownFirst($groups),
+            'note' => $setIds
+                ? $helper->__('A customer group shows the attribute when its set holds the attribute.')
+                : $helper->__('The attribute is in no set, so no customer group sees it. Add it to a set in Attribute Sets.'),
+        ];
 
         $modes = [
             'hidden' => $helper->__('Hidden'),
@@ -220,7 +229,7 @@ class Mage_Customer_Model_Attribute extends Mage_Eav_Model_Attribute
     }
 
     /**
-     * Return the mode that Show in Forms and Values Required give: hidden, optional or required.
+     * Return the mode of the Default field, from is_visible and is_required: hidden, optional or required.
      */
     public function getDefaultWebsiteMode(): string
     {
@@ -260,11 +269,19 @@ class Mage_Customer_Model_Attribute extends Mage_Eav_Model_Attribute
     }
 
     /**
-     * Keep only the known forms and input rules. A system attribute keeps its forms.
+     * Turn the Default field into is_visible and is_required, and keep only the known forms and
+     * input rules. A system attribute keeps its forms.
      */
     #[\Override]
     public function prepareAdminData(array $data): array
     {
+        $mode = $data['default_mode'] ?? null;
+        unset($data['default_mode']);
+        if (in_array($mode, ['hidden', 'optional', 'required'], true)) {
+            $data['is_visible'] = $mode === 'hidden' ? 0 : 1;
+            $data['is_required'] = $mode === 'required' ? 1 : 0;
+        }
+
         if ($this->getId() && $this->getIsSystem()) {
             unset($data['used_in_forms']);
         } else {

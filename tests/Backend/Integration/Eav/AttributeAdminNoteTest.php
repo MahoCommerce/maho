@@ -148,7 +148,8 @@ it('keeps the set of a saved category when the admin save posts no set', functio
 
 it('saves a category when a required attribute is not in its set', function () {
     [$set, $attribute] = attributeAdminNoteSetAndAttribute(Mage_Catalog_Model_Category::ENTITY, 'catalog/resource_eav_attribute', $this->suffix);
-    array_push($this->records, $set, $attribute);
+    $this->records[] = $set;
+    $this->records[] = $attribute;
     $attribute->setIsRequired(1)->save();
     Mage::getSingleton('eav/config')->clear();
     $category = Mage::getModel('catalog/category')
@@ -204,7 +205,8 @@ it('changes the set of a saved blog post from the admin save', function () {
 
 it('changes the set of a saved blog category from the admin save', function () {
     [$set, $attribute] = attributeAdminNoteSetAndAttribute(Maho_Blog_Model_Category::ENTITY, 'blog/resource_eav_attribute', $this->suffix);
-    array_push($this->records, $set, $attribute);
+    $this->records[] = $set;
+    $this->records[] = $attribute;
     $category = Mage::getModel('blog/category')->setData([
         'name' => 'Pest Set Change ' . $this->suffix,
         'url_key' => 'pest-set-change-' . $this->suffix,
@@ -230,7 +232,8 @@ it('changes the set of a saved blog category from the admin save', function () {
 
 it('shows the new set and keeps the typed values when the admin selects another set of a category', function () {
     [$set, $attribute] = attributeAdminNoteSetAndAttribute(Mage_Catalog_Model_Category::ENTITY, 'catalog/resource_eav_attribute', $this->suffix);
-    array_push($this->records, $set, $attribute);
+    $this->records[] = $set;
+    $this->records[] = $attribute;
     $category = Mage::getModel('catalog/category')
         ->setName('Pest Set Edit ' . $this->suffix)
         ->setIsActive(1)
@@ -256,7 +259,8 @@ it('shows the new set and keeps the typed values when the admin selects another 
 
 it('shows the new set and keeps the typed values when the admin selects another set of a blog post', function () {
     [$set, $attribute] = attributeAdminNoteSetAndAttribute(Maho_Blog_Model_Post::ENTITY, 'blog/resource_eav_attribute', $this->suffix);
-    array_push($this->records, $set, $attribute);
+    $this->records[] = $set;
+    $this->records[] = $attribute;
     $post = Mage::getModel('blog/post')->setData([
         'title' => 'Pest Set Edit ' . $this->suffix,
         'url_key' => 'pest-set-edit-' . $this->suffix,
@@ -304,7 +308,8 @@ it('names the forms, the customer groups and the websites of a customer attribut
 
     expect($shown('Forms'))->toBe(['Admin Customer', 'Customer Registration'])
         ->and($rows['Forms']['items'])->toContain(['label' => 'Customer Account Edit', 'shown' => false])
-        ->and($rows['Customer Groups']['items'])->toBe([['label' => 'All customer groups', 'shown' => true]])
+        ->and($shown('Customer Groups'))->toContain('General')
+        ->and(array_filter($rows['Customer Groups']['items'], fn(array $item): bool => !$item['shown']))->toBeEmpty()
         ->and($shown('Websites'))->not->toBeEmpty()
         ->and(array_filter($rows['Websites']['items'], fn(array $item): bool => !$item['shown']))->toBeEmpty();
 });
