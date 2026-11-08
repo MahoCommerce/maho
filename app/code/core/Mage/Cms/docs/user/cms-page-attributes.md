@@ -3,7 +3,7 @@ description: How to add an attribute to CMS pages - page attributes, their input
 admin_pages: [eav_attribute, eav_set, cms_page]
 ---
 
-# CMS Page Attributes
+# CMS Page Attributes <span class="version-badge">v27.1+</span>
 
 A page attribute is a field that you add to every CMS page, for example a campaign code, an
 audience or a review date. The standard fields, such as **Title** and **Content**, are not page

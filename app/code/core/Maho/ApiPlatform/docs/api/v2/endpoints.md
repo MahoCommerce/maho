@@ -87,7 +87,7 @@ Country listings live under [Directory](#directory) (`/countries`).
 
 The product write endpoints additionally accept `attributeSetId`, `taxClassId`, and a `customAttributes` map (`{attribute_code: value}`) of the user-defined attributes without a dedicated field, in the attribute set of the product. A system attribute or an unknown code is a 422. A read returns the same map.
 
-**Custom attributes of other entity types** (read-only):
+**Custom attributes of other entity types** (read-only) <span class="version-badge">v27.1+</span>:
 
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|

@@ -3,7 +3,7 @@ description: How to add a field to blog posts and blog categories - blog attribu
 admin_pages: [eav_attribute, eav_set, blog_post, blog_category]
 ---
 
-# Blog Attributes and Attribute Sets
+# Blog Attributes and Attribute Sets <span class="version-badge">v27.1+</span>
 
 A blog attribute is a field of a blog post or a blog category, for example a reading time or an
 author. An attribute set is a list of attributes in groups. Each post and each category uses one

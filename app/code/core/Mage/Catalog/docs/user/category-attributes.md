@@ -3,7 +3,7 @@ description: How to add a field to categories - category attributes, category at
 admin_pages: [eav_attribute, eav_set, catalog_category]
 ---
 
-# Category Attributes and Attribute Sets
+# Category Attributes and Attribute Sets <span class="version-badge">v27.1+</span>
 
 A category attribute is a field of a category, such as **Name** or **Description**. You can add
 your own attributes, for example a brand story or a season. An attribute set is a list of

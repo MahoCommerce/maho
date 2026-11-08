@@ -231,7 +231,7 @@ category_path,_store,name,custom_field,special_attribute
 electronics,,Electronics,custom_value,special_value
 ```
 
-### Attribute Sets
+### Attribute Sets <span class="version-badge">v27.1+</span> { #attribute-sets }
 
 The `_attribute_set` column holds the name of the attribute set of the category. The export writes
 it on the row of each category with an empty `_store`.

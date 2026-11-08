@@ -3,7 +3,7 @@ description: How to add a field to customers and customer addresses - customer a
 admin_pages: [eav_attribute, eav_set, customer_group]
 ---
 
-# Customer and Address Attributes
+# Customer and Address Attributes <span class="version-badge">v27.1+</span>
 
 A customer attribute is a field of a customer, such as **Date of Birth**. An address attribute is a
 field of an address, such as **Company**. You can add your own attributes, for example a company
