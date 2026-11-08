@@ -1,0 +1,60 @@
+name: Docs preview cleanup
+
+# Deletes the docs preview of a pull request from Cloudflare Pages when the pull request closes, with
+# or without a merge. It uses pull_request_target to get the secrets for a fork, and it checks out no
+# code. A pull request without the comment of docs-preview.yml has no preview, so the job stops.
+
+on:
+  pull_request_target:
+    types: [closed]
+
+permissions:
+  contents: read
+
+jobs:
+  cleanup:
+    name: Delete the preview
+    if: github.repository == 'MahoCommerce/maho'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+
+    steps:
+      - name: Delete the preview
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          NUMBER: ${{ github.event.pull_request.number }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          marker='<!-- docs-preview -->'
+          comment=$(gh api --paginate "repos/$REPOSITORY/issues/$NUMBER/comments" \
+            --jq ".[] | select(.user.login == \"github-actions[bot]\" and (.body | startswith(\"$marker\"))) | .id" | head -n 1)
+          if [ -z "$comment" ]; then
+            echo "Pull request $NUMBER has no docs preview."
+            exit 0
+          fi
+
+          api="https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/maho-docs-preview/deployments"
+          auth="Authorization: Bearer $CLOUDFLARE_API_TOKEN"
+          # Collect all the IDs first: a delete during the listing moves the next page.
+          ids=()
+          page=1
+          while :; do
+            response=$(curl --fail --silent --show-error --header "$auth" "$api?env=preview&page=$page")
+            [ "$(jq '.result | length' <<< "$response")" -eq 0 ] && break
+            mapfile -t found < <(jq -r --arg branch "pr-$NUMBER" '.result[] | select(.deployment_trigger.metadata.branch == $branch) | .id' <<< "$response")
+            ids+=("${found[@]}")
+            page=$((page + 1))
+          done
+
+          # force=true is necessary for the deployment that the pr-<number> alias points to.
+          for id in "${ids[@]}"; do
+            curl --fail --silent --show-error --request DELETE --header "$auth" "$api/$id?force=true" > /dev/null
+          done
+          echo "Deleted ${#ids[@]} deployments of pr-$NUMBER."
+
+          gh api --method PATCH "repos/$REPOSITORY/issues/comments/$comment" \
+            -f body="$marker
+          The pull request is closed, so its docs preview is deleted." > /dev/null
