@@ -52,12 +52,14 @@ $connection->dropColumn($installer->getTable('core/resource'), 'maho_version');
 // every created_at-style column.
 if ($connection instanceof \Maho\Db\Adapter\Pdo\Mysql) {
     $columns = $connection->fetchAll(
-        'SELECT TABLE_NAME, COLUMN_NAME, IS_NULLABLE, COLUMN_DEFAULT, COLUMN_COMMENT, EXTRA '
-        . 'FROM INFORMATION_SCHEMA.COLUMNS '
-        . 'WHERE TABLE_SCHEMA = DATABASE() AND DATA_TYPE = \'timestamp\' '
-        . 'AND EXTRA NOT LIKE \'%VIRTUAL GENERATED%\' '
-        . 'AND EXTRA NOT LIKE \'%STORED GENERATED%\' '
-        . 'ORDER BY TABLE_NAME, ORDINAL_POSITION',
+        'SELECT c.TABLE_NAME, c.COLUMN_NAME, c.IS_NULLABLE, c.COLUMN_DEFAULT, c.COLUMN_COMMENT, c.EXTRA '
+        . 'FROM INFORMATION_SCHEMA.COLUMNS c '
+        . 'INNER JOIN INFORMATION_SCHEMA.TABLES t '
+        . 'ON t.TABLE_SCHEMA = c.TABLE_SCHEMA AND t.TABLE_NAME = c.TABLE_NAME '
+        . 'WHERE c.TABLE_SCHEMA = DATABASE() AND t.TABLE_TYPE = \'BASE TABLE\' AND c.DATA_TYPE = \'timestamp\' '
+        . 'AND c.EXTRA NOT LIKE \'%VIRTUAL GENERATED%\' '
+        . 'AND c.EXTRA NOT LIKE \'%STORED GENERATED%\' '
+        . 'ORDER BY c.TABLE_NAME, c.ORDINAL_POSITION',
     );
 
     foreach ($columns as $col) {
