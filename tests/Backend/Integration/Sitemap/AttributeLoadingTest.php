@@ -10,7 +10,7 @@ declare(strict_types=1);
 uses(Tests\MahoBackendTestCase::class);
 
 beforeEach(function (): void {
-    $this->connection = Mage::getSingleton('core/resource')->getConnection('core_write');
+    $this->connection = Mage::getSingleton('core/resource')->getConnection('catalog_read');
     $this->connection->beginTransaction();
 });
 

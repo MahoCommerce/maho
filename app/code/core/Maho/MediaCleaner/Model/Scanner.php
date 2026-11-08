@@ -170,7 +170,9 @@ class Maho_MediaCleaner_Model_Scanner
 
         $db->delete($table, ['type = ?' => $type]);
         // Bound both the UNION terms and the bind parameters for every supported database.
-        foreach (array_chunk($unusedImages, 100) as $paths) {
+        $unusedCount = count($unusedImages);
+        for ($offset = 0; $offset < $unusedCount; $offset += 100) {
+            $paths = array_slice($unusedImages, $offset, 100);
             if (count($paths) === 1) {
                 $db->insertIgnore($table, ['type' => $type, 'path' => $paths[0]]);
                 continue;

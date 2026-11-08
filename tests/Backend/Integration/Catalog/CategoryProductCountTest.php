@@ -130,6 +130,7 @@ it('retains custom model and resource results and exceptions', function (string 
             public bool $throws = false;
             public int $calls = 0;
 
+            #[\Override]
             public function getAllChildren($asArray = false)
             {
                 $this->calls++;
@@ -143,6 +144,7 @@ it('retains custom model and resource results and exceptions', function (string 
         public bool $throws = false;
         public int $calls = 0;
 
+        #[\Override]
         public function getAllChildren($category)
         {
             $this->calls++;
