@@ -13,12 +13,17 @@ beforeEach(function (): void {
     $this->connection = Mage::getSingleton('core/resource')->getConnection('core_write');
     $this->entityTable = null;
     $this->entityIds = [];
+    $this->fixturePrefix = 'sitemap-attributes-' . bin2hex(random_bytes(8));
+    $this->entityMarkers = [];
+    $this->markerColumn = null;
 });
 
 afterEach(function (): void {
     if ($this->entityIds !== []) {
         $this->connection->delete($this->entityTable . '_varchar', ['entity_id IN (?)' => $this->entityIds]);
-        $this->connection->delete($this->entityTable, ['entity_id IN (?)' => $this->entityIds]);
+    }
+    if ($this->entityMarkers !== []) {
+        $this->connection->delete($this->entityTable, [$this->markerColumn . ' IN (?)' => $this->entityMarkers]);
     }
 });
 
@@ -29,6 +34,7 @@ it('preserves sitemap attribute fallback and ordered entity keys', function (str
     $resource = Mage::getResourceModel('sitemap/catalog_' . $type);
     $table = $resource->getMainTable();
     $this->entityTable = $table;
+    $this->markerColumn = $type === 'product' ? 'sku' : 'path';
     $attributes = [];
     foreach (['name', 'image'] as $code) {
         $attributes[$code] = (int) Mage::getSingleton('eav/config')->getAttribute('catalog_' . $type, $code)->getId();
@@ -37,15 +43,17 @@ it('preserves sitemap attribute fallback and ordered entity keys', function (str
     $ids = [];
     $expected = [];
     foreach (['default', 'override', 'empty', 'null', 'store_only', 'missing', 'zero'] as $case) {
+        $marker = $this->fixturePrefix . '-' . $case;
         $entity = [
             'entity_type_id' => $entityType->getId(),
             'attribute_set_id' => $entityType->getDefaultAttributeSetId(),
         ];
         if ($type === 'product') {
-            $entity += ['sku' => 'sitemap-attributes-' . $case];
+            $entity += ['sku' => $marker];
         } else {
-            $entity += ['path' => '1', 'position' => 0, 'children_count' => 0];
+            $entity += ['path' => $marker, 'position' => 0, 'children_count' => 0];
         }
+        $this->entityMarkers[] = $marker;
         $connection->insert($table, $entity);
         $id = (int) $connection->lastInsertId($table);
         $this->entityIds[] = $id;
