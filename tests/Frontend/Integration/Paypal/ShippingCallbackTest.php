@@ -58,7 +58,7 @@ function shippingCallbackToken(string $url): string
     return (string) ($params['token'] ?? '');
 }
 
-function shippingCallbackController(string $action, SymfonyRequest $symfonyRequest): Mage_Core_Controller_Response_Http
+function dispatchPaypalCheckoutAction(string $action, SymfonyRequest $symfonyRequest): Mage_Core_Controller_Response_Http
 {
     $request = new Mage_Core_Controller_Request_Http($symfonyRequest);
     $request->setRouteName('paypal')
@@ -81,7 +81,7 @@ function shippingCallbackDispatch(string $paypalOrderId, array $query): Mage_Cor
         'id' => $paypalOrderId,
         'shipping_address' => ['country_code' => 'US', 'admin_area_1' => 'CA', 'admin_area_2' => 'Los Angeles', 'postal_code' => '90001'],
     ]);
-    return shippingCallbackController('shippingCallback', SymfonyRequest::create(
+    return dispatchPaypalCheckoutAction('shippingCallback', SymfonyRequest::create(
         '/paypal/checkout/shippingCallback?' . http_build_query($query),
         'POST',
         server: ['CONTENT_TYPE' => 'application/json'],
@@ -122,7 +122,7 @@ it('sends PayPal the shipping callback URL with the token of the quote', functio
     Mage::getSingleton('checkout/session')->setQuoteId((int) $this->quote->getId());
 
     try {
-        $response = shippingCallbackController('createOrder', SymfonyRequest::create('/paypal/checkout/createOrder', 'POST', [
+        $response = dispatchPaypalCheckoutAction('createOrder', SymfonyRequest::create('/paypal/checkout/createOrder', 'POST', [
             'method' => Maho_Paypal_Model_Config::METHOD_STANDARD_CHECKOUT,
             'form_key' => Mage::getSingleton('core/session')->getFormKey(),
         ]));
