@@ -37,7 +37,9 @@ it('gives typed page settings for a managed entity type and none for products', 
         ->and($category->addToDefaultSet)->toBeTrue()
         ->and($category->hasSets())->toBeTrue()
         ->and($customer->setsUserDefinedOnly)->toBeTrue()
-        ->and($cms->hasSets())->toBeFalse()
+        ->and($category->singleSet)->toBeFalse()
+        ->and($cms->hasSets())->toBeTrue()
+        ->and($cms->singleSet)->toBeTrue()
         ->and($helper->getAdminPageSettings($config->getEntityType(Mage_Catalog_Model_Product::ENTITY)))->toBeNull();
 });
 

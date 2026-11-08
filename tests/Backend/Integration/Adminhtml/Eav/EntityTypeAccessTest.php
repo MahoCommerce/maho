@@ -18,11 +18,15 @@ uses(Tests\MahoBackendTestCase::class);
  */
 function entityTypeAccessAllowed(string $class, string $entityType): bool
 {
+    return (fn(): bool => (bool) $this->_isAllowed())->call(entityTypeAccessController($class, $entityType));
+}
+
+function entityTypeAccessController(string $class, string $entityType): Mage_Core_Controller_Varien_Action
+{
     $request = new Mage_Core_Controller_Request_Http(
         SymfonyRequest::create('/index.php/admin/eav_attribute/index', 'GET', ['entity_type' => $entityType]),
     );
-    $controller = new $class($request, new Mage_Core_Controller_Response_Http());
-    return (fn(): bool => (bool) $this->_isAllowed())->call($controller);
+    return new $class($request, new Mage_Core_Controller_Response_Http());
 }
 
 afterEach(function () {
@@ -44,9 +48,13 @@ it('refuses an entity type that has no admin page settings, even for a full admi
     expect(entityTypeAccessAllowed(Mage_Adminhtml_Eav_AttributeController::class, $entityType))->toBeFalse();
 })->with(['catalog_product', 'order', '1', 'not_a_type', '']);
 
-it('refuses the set pages of an entity type without sets', function () {
+it('opens the one set of CMS pages, and lets only the other entity types add or delete a set', function () {
     $this->user = AdminRoleFixture::login(['all']);
+    $canManageSets = fn(string $entityType): bool => (fn(): bool => $this->canManageSets())
+        ->call(entityTypeAccessController(Mage_Adminhtml_Eav_SetController::class, $entityType));
 
-    expect(entityTypeAccessAllowed(Mage_Adminhtml_Eav_SetController::class, 'cms_page'))->toBeFalse()
-        ->and(entityTypeAccessAllowed(Mage_Adminhtml_Eav_SetController::class, 'customer'))->toBeTrue();
+    expect(entityTypeAccessAllowed(Mage_Adminhtml_Eav_SetController::class, 'cms_page'))->toBeTrue()
+        ->and(entityTypeAccessAllowed(Mage_Adminhtml_Eav_SetController::class, 'customer'))->toBeTrue()
+        ->and($canManageSets('cms_page'))->toBeFalse()
+        ->and($canManageSets('customer'))->toBeTrue();
 });

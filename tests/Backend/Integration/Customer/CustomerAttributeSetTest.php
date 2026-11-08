@@ -245,8 +245,9 @@ it('saves the forms, the rules and the website modes of a new customer attribute
     expect($attribute->getId())->not->toBeNull()
         ->and($attribute->getUsedInForms())->toBe(['customer_account_create'])
         ->and($attribute->getValidateRules())->toBe(['max_text_length' => 20, 'input_validation' => 'alphanumeric'])
-        ->and((int) $attribute->getIsVisible())->toBe(0)
-        ->and((int) $attribute->getIsRequired())->toBe(0)
+        // The getters give the mode of the current website, so the Default mode is the raw data
+        ->and((int) $attribute->getData('is_visible'))->toBe(0)
+        ->and((int) $attribute->getData('is_required'))->toBe(0)
         ->and($attribute->getResource()->getWebsiteValues((int) $attribute->getId()))
         ->toBe([$websiteId => ['is_visible' => 1, 'is_required' => 1]]);
 });
