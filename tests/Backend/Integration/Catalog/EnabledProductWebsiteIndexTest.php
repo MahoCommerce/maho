@@ -142,16 +142,31 @@ it('refreshes only enabled products assigned to the store website', function (st
     'empty selection, website B' => ['b', 'empty'],
 ]);
 
-it('preserves the explicit store and scalar product refresh', function (string $store) {
-    $productId = $this->productIds['a'];
+it('preserves the explicit store and scalar product refresh', function (string $product, string $store, int $visibility) {
+    $productId = $this->productIds[$product];
     $storeId = $this->storeIds[$store];
+    $readIndex = function (): array {
+        $rows = $this->adapter->fetchAll(
+            $this->adapter->select()
+                ->from($this->tables['catalog/product_enabled_index'], ['product_id', 'store_id', 'visibility'])
+                ->where('product_id IN (?)', array_values($this->productIds))
+                ->where('store_id IN (?)', array_values($this->storeIds))
+                ->order(['product_id', 'store_id']),
+        );
+        $index = [];
+        foreach ($rows as $row) {
+            $index[$row['product_id'] . ':' . $row['store_id']] = (int) $row['visibility'];
+        }
+        return $index;
+    };
+    $expected = $readIndex();
+    $expected[$productId . ':' . $storeId] = $visibility;
+
     expect($this->productResource->refreshEnabledIndex(Mage::app()->getStore($storeId), $productId))
         ->toBe($this->productResource);
-    $visibility = $this->adapter->fetchOne(
-        $this->adapter->select()
-            ->from($this->tables['catalog/product_enabled_index'], ['visibility'])
-            ->where('product_id = ?', $productId)
-            ->where('store_id = ?', $storeId),
-    );
-    expect((int) $visibility)->toBe(4);
-})->with(['a', 'b']);
+    expect($readIndex())->toBe($expected);
+})->with([
+    'assigned store' => ['a', 'a', 4],
+    'unassigned store' => ['a', 'b', 4],
+    'store visibility override' => ['both', 'b', 2],
+]);
