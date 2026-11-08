@@ -231,6 +231,26 @@ category_path,_store,name,custom_field,special_attribute
 electronics,,Electronics,custom_value,special_value
 ```
 
+### Attribute Sets
+
+The `_attribute_set` column holds the name of the attribute set of the category. The export writes
+it on the row of each category with an empty `_store`.
+
+- A new category with an empty `_attribute_set` takes the set of its parent category.
+- A saved category with an empty `_attribute_set` keeps its set.
+- A row that names another set moves the category to that set.
+
+The import refuses a value of an attribute that is not in the set of the category. Every night, the
+store deletes such a value, so the import does not save it:
+
+```csv
+_root,_path,name,_attribute_set,brand_story
+Default Category,brands,Brands,Brand,
+Default Category,brands/aurelie,Aurelie,,Hand-made since 1987
+```
+
+The second row takes the **Brand** set of its parent, so it can hold a **Brand Story**.
+
 ## Error Handling
 
 ### Common Errors

@@ -242,8 +242,8 @@ return [
     ],
     'Order' => [
         'accessToken', 'accountToken', 'appliedRuleIds', 'baseCurrencyCode', 'billingAddress',
-        'changeAmount', 'couponCode', 'couponRuleName', 'createdAt', 'currency', 'customerDob',
-        'customerEmail', 'customerFirstname', 'customerGender', 'customerGroupId', 'customerId',
+        'changeAmount', 'couponCode', 'couponRuleName', 'createdAt', 'currency',
+        'customerCustomAttributeLabels', 'customerCustomAttributes', 'customerDob', 'customerEmail', 'customerFirstname', 'customerGender', 'customerGroupId', 'customerId',
         'customerIsGuest', 'customerLastname', 'customerMiddlename', 'customerNote', 'customerPrefix',
         'customerSuffix', 'customerTaxvat', 'discountDescription', 'emailSent', 'extCustomerId',
         'extOrderId', 'extensions', 'giftcardCodes', 'globalCurrencyCode', 'holdBeforeState',

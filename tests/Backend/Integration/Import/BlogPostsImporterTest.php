@@ -57,7 +57,7 @@ it('creates a post from a content file and updates it on rerun', function (): vo
         ['imp-post', $store, 'Imp Post', '2026-02-03', 'post.html', 'imp/pic.webp', 'Imp Meta'],
     ]);
 
-    expect((new BlogPosts())->import($path, $options)->created)->toBe(1);
+    expect(new BlogPosts()->import($path, $options)->created)->toBe(1);
     $post = Mage::getModel('blog/post')->load(Mage::getModel('blog/post')->getPostIdByUrlKey('imp-post', 1));
     expect($post->getTitle())->toBe('Imp Post');
     expect($post->getContent())->toBe('<p>Post body</p>');
@@ -66,7 +66,7 @@ it('creates a post from a content file and updates it on rerun', function (): vo
     expect(substr((string) $post->getPublishDate(), 0, 10))->toBe('2026-02-03');
 
     file_put_contents($contentDir . '/post.html', '<p>New body</p>');
-    $again = (new BlogPosts())->import($path, $options);
+    $again = new BlogPosts()->import($path, $options);
     expect($again->created)->toBe(0)->and($again->updated)->toBe(1);
     expect(Mage::getModel('blog/post')->getCollection()->addAttributeToFilter('url_key', 'imp-post')->count())->toBe(1);
     expect(Mage::getModel('blog/post')->load($post->getId())->getContent())->toBe('<p>New body</p>');
@@ -123,7 +123,7 @@ it('imports a user-defined attribute by option label and the attribute set by na
     file_put_contents($contentDir . '/post.html', '<p>Body</p>');
     $options = [AbstractCmsImporter::OPTION_CONTENT_DIR => $contentDir];
     $path = blogCsv([
-        ['url_key', 'stores', 'title', 'content_file', 'attribute_set', $code],
+        ['url_key', 'stores', 'title', 'content_file', '_attribute_set', $code],
         ['imp-level', $store, 'Imp Level', 'post.html', 'Default', 'Expert'],
     ]);
     $badPath = blogCsv([
@@ -132,11 +132,11 @@ it('imports a user-defined attribute by option label and the attribute set by na
     ]);
 
     try {
-        expect((new BlogPosts())->import($path, $options)->created)->toBe(1);
+        expect(new BlogPosts()->import($path, $options)->created)->toBe(1);
         $post = Mage::getModel('blog/post')->load(Mage::getModel('blog/post')->getPostIdByUrlKey('imp-level', 1));
         expect($attribute->getSource()->getOptionText($post->getData($code)))->toBe('Expert')
             ->and($post->getAttributeSetId())->toBe((int) $type->getDefaultAttributeSetId())
-            ->and(fn() => (new BlogPosts())->validate($badPath, $options))->toThrow(RowException::class);
+            ->and(fn() => new BlogPosts()->validate($badPath, $options))->toThrow(RowException::class);
     } finally {
         $attribute->delete();
         Mage::getSingleton('eav/config')->clear();

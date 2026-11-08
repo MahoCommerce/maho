@@ -86,7 +86,7 @@ storefront. You can give the table a different title in each language.
 
 The blog post import reads two more kinds of columns:
 
-- `attribute_set`: the name of the set of the post.
+- `_attribute_set`: the name of the set of the post, as in the product import.
 - A column with the code of an attribute that you added. A Dropdown or a Yes/No takes the label of
   the option. A Multiple Select takes labels with commas between them.
 

@@ -12,6 +12,7 @@ namespace Mage\Sales\Api;
 
 use Maho\Config\ApiResource;
 use Maho\ApiPlatform\Metadata\EnumSource;
+use Maho\ApiPlatform\Metadata\CustomAttributeSchema;
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
@@ -298,6 +299,14 @@ class Order extends CrudResource
 
     #[ApiProperty(writable: false, description: 'Whether the order was placed as a guest')]
     public bool $customerIsGuest = false;
+
+    /** @var array<string, mixed>|null */
+    #[ApiProperty(writable: false, description: 'Values of the user-defined customer attributes when the order was placed, keyed by attribute code, in the shape of customAttributes of a customer. A customer or a guest gets the attributes of the storefront customer forms only', extraProperties: [CustomAttributeSchema::KEY => 'customer'])]
+    public ?array $customerCustomAttributes = null;
+
+    /** @var array<string, string|list<string>>|null */
+    #[ApiProperty(writable: false, description: 'The option labels of the dropdown, multiselect and Yes/No values of customerCustomAttributes, keyed by attribute code, as the customer saw them when the order was placed. A multiselect has a list of labels', extraProperties: ['computed' => true])]
+    public ?array $customerCustomAttributeLabels = null;
 
     #[ApiProperty(writable: false, description: 'Customer note captured at checkout (orderNote at placement)')]
     public ?string $customerNote = null;

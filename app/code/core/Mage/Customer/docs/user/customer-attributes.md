@@ -159,6 +159,25 @@ A store with one website does not show the **Websites** section, because the def
 Use a website setting when the field depends on the website, and an attribute set when it depends
 on the customer group.
 
+## Customer attributes on orders
+
+The checkout copies the values of the customer attributes to the order, so the order keeps what was
+true when the customer bought, also after the customer changes the value:
+
+- The order keeps the value, and the label of a **Dropdown**, a **Multiple Select** or a **Yes/No**
+  option in the language of the store view of the order.
+- A customer who registers at checkout gets the values of the **Checkout Registration** form.
+- A reorder from the admin copies the values to the new cart.
+
+The **Account Information** part of the order page in the admin shows each customer attribute that
+has a value. The invoice, shipment and credit memo PDFs show only the attributes that a form of the
+storefront shows, because the documents go to the customer.
+
+Each customer attribute adds a column `customer_` + its **Attribute Code** to the carts and the orders.
+So the code of a customer attribute cannot make the name of a field that orders already have, such
+as `note` for `customer_note`. When you delete a customer attribute, the orders keep its values, so a
+new customer attribute cannot use the code of a deleted one.
+
 ## Address attributes on orders
 
 The checkout copies the values of the address attributes to the order:
@@ -181,9 +200,17 @@ customer. To put a value in another place, add `{{var attribute_code}}` to the a
 **System > Configuration > Customers > Customer Configuration > Address Templates**. The store then
 does not add the line.
 
+## Customer segments
+
+The conditions **Customer Personal Information** and **Customer Address** of a customer segment
+list your customer and address attributes too. For example, a segment can hold the customers whose
+**Business Type** is **Wholesaler**.
+
 ## The API
 
 The REST, GraphQL and MCP APIs read and write the values in `customAttributes`, by attribute code.
+An order returns the customer values in `customerCustomAttributes`, and their labels in
+`customerCustomAttributeLabels`.
 A **Dropdown** is an option ID, a **Multiple Select** a list of option IDs, and a **Yes/No** `true` or
 `false`. A write follows the **Input Rules** of the attribute. The order addresses return the option IDs
 too, and `customAttributeLabels` returns the labels that the customer saw.

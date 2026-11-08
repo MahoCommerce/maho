@@ -21,6 +21,7 @@ class Mage_ImportExport_Model_Export_Entity_Category extends Mage_ImportExport_M
     public const COL_PATH = '_path';
     public const COL_CATEGORY_ID = 'category_id';
     public const COL_PARENT_ID = 'parent_id';
+    public const COL_ATTRIBUTE_SET = '_attribute_set';
 
     /**
      * Category parent relationships cache.
@@ -197,7 +198,7 @@ class Mage_ImportExport_Model_Export_Entity_Category extends Mage_ImportExport_M
         $validAttrCodes = $this->_getExportAttrCodes();
 
         $writer->setHeaderCols(array_merge(
-            [self::COL_CATEGORY_ID, self::COL_PARENT_ID, self::COL_STORE, self::COL_ROOT, self::COL_PATH],
+            [self::COL_CATEGORY_ID, self::COL_PARENT_ID, self::COL_STORE, self::COL_ROOT, self::COL_PATH, self::COL_ATTRIBUTE_SET],
             $validAttrCodes,
         ));
 
@@ -232,6 +233,9 @@ class Mage_ImportExport_Model_Export_Entity_Category extends Mage_ImportExport_M
         $validAttrCodes = $this->_getExportAttrCodes();
         $writer = $this->getWriter();
         $defaultStoreId = Mage_Catalog_Model_Abstract::DEFAULT_STORE_ID;
+        $setNames = Mage::getResourceModel('eav/entity_attribute_set_collection')
+            ->setEntityTypeFilter((int) Mage::getSingleton('eav/config')->getEntityType(Mage_Catalog_Model_Category::ENTITY)->getId())
+            ->toOptionHash();
 
         // Get category IDs for batch processing
         $categoryIds = [];
@@ -255,6 +259,7 @@ class Mage_ImportExport_Model_Export_Entity_Category extends Mage_ImportExport_M
                 self::COL_STORE => '',
                 self::COL_ROOT => $rootName,
                 self::COL_PATH => $path,
+                self::COL_ATTRIBUTE_SET => (string) ($setNames[(int) $category->getAttributeSetId()] ?? ''),
             ];
 
             // Add attribute values for default store
@@ -285,6 +290,7 @@ class Mage_ImportExport_Model_Export_Entity_Category extends Mage_ImportExport_M
                     self::COL_STORE => $storeCode,
                     self::COL_ROOT => $rootName,
                     self::COL_PATH => $path,
+                    self::COL_ATTRIBUTE_SET => '',
                 ];
 
                 $hasStoreSpecificData = false;

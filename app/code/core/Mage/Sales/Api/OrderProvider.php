@@ -269,6 +269,8 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
         $dto->customerGender = $order->getCustomerGender() !== null ? (int) $order->getCustomerGender() : null;
         $dto->customerGroupId = $order->getCustomerGroupId() !== null ? (int) $order->getCustomerGroupId() : null;
         $dto->customerIsGuest = (bool) $order->getCustomerIsGuest();
+        $dto->customerCustomAttributes = \Mage\Customer\Api\CustomAttributes::readOrderCustomer($order);
+        $dto->customerCustomAttributeLabels = $order->getCustomerAttributeLabels();
         $dto->customerNote = $order->getCustomerNote();
         $dto->status = $order->getStatus();
         $dto->state = $order->getState();

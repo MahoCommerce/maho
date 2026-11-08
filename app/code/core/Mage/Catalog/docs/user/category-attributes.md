@@ -102,6 +102,13 @@ category page. You can give the table a different title in each language.
    row empty, the store view shows the **Admin** name.
 4. Click **Save** in the window, then click **Save** on the set page.
 
+## Import
+
+The category import file can set the set of each category in the `_attribute_set` column. A new
+category without a value takes the set of its parent. The import refuses a value of an attribute
+that is not in the set of the category. [Category Import/Export](category-import-export.md) has
+the details.
+
 ## The API
 
 The categories of the REST and GraphQL API have two more fields. Only an admin and an API token can

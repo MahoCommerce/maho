@@ -67,7 +67,7 @@ class BlogPosts extends AbstractCmsImporter
             if ($row['post_id'] === null && ($row['title'] ?? '') === '') {
                 $this->fail($file, $line, 'title is required for a new post');
             }
-            $row['attribute_set_id'] = ($row['attribute_set'] ?? '') !== '' ? $this->attributeSetId($file, $line, $row['attribute_set']) : null;
+            $row['attribute_set_id'] = ($row['_attribute_set'] ?? '') !== '' ? $this->attributeSetId($file, $line, $row['_attribute_set']) : null;
             $row['custom'] = [];
             $setCodes = null;
             foreach ($this->customAttributes() as $code => $attribute) {
@@ -151,7 +151,7 @@ class BlogPosts extends AbstractCmsImporter
             ->getFirstItem()
             ->getId();
         if (!$id) {
-            $this->fail($file, $line, "attribute_set '$name' is not a set of blog posts");
+            $this->fail($file, $line, "_attribute_set '$name' is not a set of blog posts");
         }
         return $id;
     }

@@ -63,6 +63,11 @@ Target customers by their profile data:
 | **Days Since Registration** | Numeric | New customer onboarding (< 30 days) |
 | **Days Until Birthday** | Numeric | Birthday promotions (0-7 days) |
 
+The list also has each customer attribute that you added in **System > Attributes > Customers**,
+with its label. A Dropdown or a Yes/No uses **is** and **is not** with its options. A Multiple
+Select uses **contains** and **does not contain** with one option. A Date and a text use the
+operators of their type. A File, an Image and a Multiple Lines attribute are not in the list.
+
 **Example**: Birthday Campaign
 ```
 Conditions:
@@ -83,6 +88,10 @@ Segment by billing or shipping address:
 | **City** | Local store pickup campaigns |
 | **Postal Code** | ZIP code targeting |
 | **Street Address** | (Rarely used) |
+
+The list also has each address attribute that you added in **System > Attributes > Customer
+Addresses**, with the same rules as the customer attributes. A customer matches when one of their
+addresses matches.
 
 **Example**: Free Shipping to California
 ```

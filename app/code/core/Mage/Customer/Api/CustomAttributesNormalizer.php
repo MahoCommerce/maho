@@ -12,6 +12,7 @@ declare(strict_types=1);
 
 namespace Mage\Customer\Api;
 
+use Mage\Sales\Api\Order;
 use Maho\ApiPlatform\Security\BackendAccess;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Serializer\Normalizer\NormalizerAwareInterface;
@@ -21,7 +22,8 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 /**
  * A customer, an address, a cart or an order can reach a customer or a guest. For such a caller,
  * customAttributes and customAttributeLabels keep only the attributes that a storefront form shows
- * to the customer group of the caller. The DTO then goes to the next normalizer.
+ * to the customer group of the caller, and so do customerCustomAttributes and
+ * customerCustomAttributeLabels of an order, for the customer group of the order. The DTO then goes to the next normalizer.
  */
 final class CustomAttributesNormalizer implements NormalizerInterface, NormalizerAwareInterface
 {
@@ -34,7 +36,7 @@ final class CustomAttributesNormalizer implements NormalizerInterface, Normalize
     #[\Override]
     public function supportsNormalization(mixed $data, ?string $format = null, array $context = []): bool
     {
-        return ($data instanceof Customer || $data instanceof Address)
+        return ($data instanceof Customer || $data instanceof Address || $data instanceof Order)
             && !isset($context[self::NORMALIZED][spl_object_id($data)]);
     }
 
@@ -50,6 +52,10 @@ final class CustomAttributesNormalizer implements NormalizerInterface, Normalize
             $codes = array_flip(CustomAttributes::storefrontCodes('customer_address', \Mage::helper('customer')->getCurrentGroupId()));
             $data->customAttributes = $data->customAttributes === null ? null : array_intersect_key($data->customAttributes, $codes);
             $data->customAttributeLabels = $data->customAttributeLabels === null ? null : array_intersect_key($data->customAttributeLabels, $codes);
+        } elseif ($data instanceof Order && !$this->hasBackendAccess(['orders'])) {
+            $codes = array_flip(CustomAttributes::storefrontCodes('customer', $data->customerGroupId ?? \Mage::helper('customer')->getCurrentGroupId()));
+            $data->customerCustomAttributes = $data->customerCustomAttributes === null ? null : array_intersect_key($data->customerCustomAttributes, $codes);
+            $data->customerCustomAttributeLabels = $data->customerCustomAttributeLabels === null ? null : array_intersect_key($data->customerCustomAttributeLabels, $codes);
         }
 
         return $this->normalizer->normalize($data, $format, $context);
@@ -58,7 +64,7 @@ final class CustomAttributesNormalizer implements NormalizerInterface, Normalize
     #[\Override]
     public function getSupportedTypes(?string $format): array
     {
-        return [Customer::class => false, Address::class => false];
+        return [Customer::class => false, Address::class => false, Order::class => false];
     }
 
     /**

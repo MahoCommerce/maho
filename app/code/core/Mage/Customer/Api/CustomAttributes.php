@@ -88,6 +88,22 @@ final class CustomAttributes
     }
 
     /**
+     * Return the values of the user-defined customer attributes that $order keeps in its
+     * customer_<code> columns, keyed by code.
+     *
+     * @return array<string, mixed>
+     */
+    public static function readOrderCustomer(\Mage_Sales_Model_Order $order): array
+    {
+        $attributes = Values::userDefined('customer');
+        $values = new \Maho\DataObject();
+        foreach (array_keys($attributes) as $code) {
+            $values->setData($code, $order->getData(\Mage_Sales_Model_Observer_CustomerAttributes::COLUMN_PREFIX . $code));
+        }
+        return Values::read($values, $attributes);
+    }
+
+    /**
      * Validate $values against the Address Book and Checkout form, then set them on the cart address
      * $address. The checkout sets the whole address at once, so each required attribute of the form
      * must be in $values, as on the storefront. The order copies the values from the cart.
