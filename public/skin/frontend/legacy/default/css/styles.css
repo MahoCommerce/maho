@@ -1860,6 +1860,11 @@ span.weee {
   line-height: 1.4;
   text-transform: uppercase;
 }
+/* A Text Area value, and the title of a group with no table, start a section of their own */
+.attribute-text,
+.attribute-group-title {
+  margin-top: 1.5rem;
+}
 
 .pager-no-toolbar {
   margin-bottom: 10px;
