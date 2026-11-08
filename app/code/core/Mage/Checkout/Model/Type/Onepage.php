@@ -319,23 +319,22 @@ class Mage_Checkout_Model_Type_Onepage
      */
     protected function _validateCustomerData(array $data)
     {
+        $quote = $this->getQuote();
+        // The billing form shows no customer fields to a logged-in customer, who could not fix an error
+        if ($quote->getCustomerId()) {
+            return true;
+        }
+
         /** @var Mage_Customer_Model_Form $customerForm */
         $customerForm = Mage::getModel('customer/form');
         $customerForm->setFormCode('checkout_register')
             ->setIsAjaxRequest(Mage::app()->getRequest()->isAjax());
 
-        $quote = $this->getQuote();
-        if ($quote->getCustomerId()) {
-            $customer = $quote->getCustomer();
-            $customerForm->setEntity($customer);
-            $customerData = $quote->getCustomer()->getData();
-        } else {
-            /** @var Mage_Customer_Model_Customer $customer */
-            $customer = Mage::getModel('customer/customer');
-            $customerForm->setEntity($customer);
-            $customerRequest = $customerForm->prepareRequest($data);
-            $customerData = $customerForm->extractData($customerRequest);
-        }
+        /** @var Mage_Customer_Model_Customer $customer */
+        $customer = Mage::getModel('customer/customer');
+        $customerForm->setEntity($customer);
+        $customerRequest = $customerForm->prepareRequest($data);
+        $customerData = $customerForm->extractData($customerRequest);
 
         $customerErrors = $customerForm->validateData($customerData);
         if ($customerErrors !== true) {
@@ -343,10 +342,6 @@ class Mage_Checkout_Model_Type_Onepage
                 'error'     => -1,
                 'message'   => implode(', ', $customerErrors),
             ];
-        }
-
-        if ($quote->getCustomerId()) {
-            return true;
         }
 
         $customerForm->compactData($customerData);
