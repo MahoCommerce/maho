@@ -273,7 +273,13 @@ class Mage_Catalog_Model_Resource_Category_Collection extends Mage_Catalog_Model
         if ($countAnchor) {
             // Retrieve Anchor categories product counts
             foreach ($anchor as $item) {
-                if ($item->getAllChildren()) {
+                // Core categories include their own ID in getAllChildren().
+                $hasOwnId = static::class === self::class
+                    && $item::class === Mage_Catalog_Model_Category::class
+                    && ((is_int($item->getId()) && $item->getId() > 0)
+                        || (is_string($item->getId()) && preg_match('/^[1-9][0-9]*$/D', $item->getId())))
+                    && $item->getResource()::class === Mage_Catalog_Model_Resource_Category::class;
+                if ($hasOwnId || $item->getAllChildren()) {
                     $bind = [
                         'entity_id' => $item->getId(),
                         'c_path'    => $item->getPath() . '/%',

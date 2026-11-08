@@ -169,8 +169,30 @@ class Maho_MediaCleaner_Model_Scanner
         $table = $resource->getTableName('mediacleaner/image');
 
         $db->delete($table, ['type = ?' => $type]);
-        foreach ($unusedImages as $path) {
-            $db->insertIgnore($table, ['type' => $type, 'path' => $path]);
+        // Bound both the UNION terms and the bind parameters for every supported database.
+        foreach (array_chunk($unusedImages, 100) as $paths) {
+            if (count($paths) === 1) {
+                $db->insertIgnore($table, ['type' => $type, 'path' => $paths[0]]);
+                continue;
+            }
+
+            $selects = [];
+            $bind = [];
+            foreach ($paths as $path) {
+                $selects[] = $db->select()->columns([
+                    'type' => new Maho\Db\Expr('?'),
+                    'path' => new Maho\Db\Expr('?'),
+                ])->assemble();
+                $bind[] = $type;
+                $bind[] = $path;
+            }
+            $select = $db->select()->union($selects, Maho\Db\Select::SQL_UNION_ALL);
+            $db->query($db->insertFromSelect(
+                $select,
+                $table,
+                ['type', 'path'],
+                Maho\Db\Adapter\AdapterInterface::INSERT_IGNORE,
+            ), $bind);
         }
     }
 }

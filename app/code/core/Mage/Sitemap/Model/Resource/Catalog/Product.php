@@ -89,11 +89,11 @@ class Mage_Sitemap_Model_Resource_Catalog_Product extends Mage_Sitemap_Model_Res
             ->where('attr.store_id IN (?)', [0, $storeId])
             ->order(['entity_id ASC', 'attribute_id ASC', $storeOrder]);
 
-        $results = $read->fetchAll($select);
+        $query = $read->query($select);
         $attributes = [];
 
         // Process results with store fallback logic
-        foreach ($results as $row) {
+        while ($row = $query->fetch()) {
             $entityId = $row['entity_id'];
             $attributeCode = $attributeMap[$row['attribute_id']];
 
