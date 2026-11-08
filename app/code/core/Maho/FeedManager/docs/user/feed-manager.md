@@ -421,7 +421,9 @@ Chain transformers using the pipe character: `transformer1|transformer2:option=v
     strip_tags|truncate:max_length=5000,suffix=...
     ```
 
-    This removes HTML tags and limits to 5000 characters with "..." suffix.
+    This removes HTML tags and limits the result to 5000 characters, including the "..." suffix.
+
+    If the suffix is longer than the maximum length, it is omitted and the text is truncated to the limit. A zero or negative maximum length produces an empty string.
 
 !!! example "Format Price for Google Shopping"
     Format a price with 2 decimals and currency suffix:
