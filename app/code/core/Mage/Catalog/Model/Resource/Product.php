@@ -382,14 +382,6 @@ class Mage_Catalog_Model_Resource_Product extends Mage_Catalog_Model_Resource_Ab
                 $adapter->getCheckSql('t_v.value_id > 0', 't_v.value', 't_v_default.value'),
             ];
 
-            $select->joinInner(
-                ['w' => $this->getTable('catalog/product_website')],
-                $adapter->quoteInto(
-                    'w.product_id = t_v_default.entity_id AND w.website_id = ?',
-                    $websiteId,
-                ),
-                [],
-            );
         } elseif ($store === null) {
             foreach ($product->getStoreIds() as $storeId) {
                 $store = Mage::app()->getStore($storeId);
@@ -417,6 +409,17 @@ class Mage_Catalog_Model_Resource_Product extends Mage_Catalog_Model_Resource_Ab
         $adapter->delete($indexTable, $condition);
 
         $select->from(['t_v_default' => $visibilityTable], $selectFields);
+
+        if ($product === null || is_array($product)) {
+            $select->joinInner(
+                ['w' => $this->getTable('catalog/product_website')],
+                $adapter->quoteInto(
+                    'w.product_id = t_v_default.entity_id AND w.website_id = ?',
+                    $websiteId,
+                ),
+                [],
+            );
+        }
 
         $visibilityTableJoinCond = [
             't_v.entity_id = t_v_default.entity_id',
