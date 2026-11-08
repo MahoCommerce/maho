@@ -2561,6 +2561,11 @@
         }
     }
 
+    /* The product list of a category follows the attributes */
+    .attribute-groups {
+        @apply mb-10;
+    }
+
     /* A Text Area value of eav/frontend/attributes.phtml: a titled text under the table */
     .attribute-group-title {
         @apply mt-10 mb-2 font-display text-lg font-semibold tracking-tight;

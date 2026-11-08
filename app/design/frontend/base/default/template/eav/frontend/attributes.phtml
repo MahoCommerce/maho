@@ -7,7 +7,10 @@
 
 /** @var Mage_Eav_Block_Frontend_Attributes $this */
 ?>
-<?php foreach ($this->getAttributeGroups() as $_group): ?>
+<?php $_groups = $this->getAttributeGroups() ?>
+<?php if ($_groups): ?>
+<div class="attribute-groups">
+<?php foreach ($_groups as $_group): ?>
     <?php if ($_group['rows']): ?>
     <table class="data-table attribute-specs-table">
         <caption><?= $this->escapeHtml($_group['title']) ?></caption>
@@ -32,3 +35,5 @@
     </section>
     <?php endforeach ?>
 <?php endforeach ?>
+</div>
+<?php endif ?>
