@@ -203,6 +203,7 @@ describe('Configurable Setup, Setup', function (): void {
         $this->configurableId = configurableSetupCreateProduct(Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE);
         $this->token = serviceToken(['products/write', 'products/read']);
         $this->otherAttribute = null;
+        $this->emptySet = null;
     });
 
     afterEach(function (): void {
@@ -211,6 +212,9 @@ describe('Configurable Setup, Setup', function (): void {
             if ($attribute) {
                 Mage::getModel('catalog/resource_eav_attribute')->load((int) $attribute->getId())->delete();
             }
+        }
+        if ($this->emptySet) {
+            $this->emptySet->delete();
         }
         Mage::getSingleton('eav/config')->clear();
     });
@@ -290,6 +294,33 @@ describe('Configurable Setup, Setup', function (): void {
         expect($second['json']['childProductIds'])->toEqualCanonicalizing($this->childIds);
     });
 
+    it('rejects other super attributes when a saved one is not in the attribute set of the product', function (): void {
+        $first = apiPut("/api/rest/v2/products/{$this->configurableId}/configurable", [
+            'superAttributes' => [$this->code],
+            'childProductIds' => [$this->childIds[0]],
+        ], $this->token);
+        expect($first['status'])->toBe(200);
+
+        $this->otherAttribute = configurableSetupCreateAttribute();
+        $this->emptySet = Mage::getModel('eav/entity_attribute_set')
+            ->setEntityTypeId((int) $this->attribute->getEntityTypeId())
+            ->setAttributeSetName('pest_cfg_setup_' . uniqid())
+            ->save();
+        $resource = Mage::getSingleton('core/resource');
+        $resource->getConnection('core_write')->update(
+            $resource->getTableName('catalog/product'),
+            ['attribute_set_id' => (int) $this->emptySet->getId()],
+            ['entity_id = ?' => $this->configurableId],
+        );
+
+        $second = apiPut("/api/rest/v2/products/{$this->configurableId}/configurable", [
+            'superAttributes' => [(string) $this->otherAttribute->getAttributeCode()],
+        ], $this->token);
+
+        expect($second['status'])->toBe(409);
+        expect(configurableSetupSuperAttributeRows($this->configurableId))->toBe(1);
+    });
+
     it('rejects a malformed setup request', function (string $key, mixed $value): void {
         $response = apiPut("/api/rest/v2/products/{$this->configurableId}/configurable", [$key => $value], $this->token);
 
@@ -313,6 +344,12 @@ describe('Configurable Setup, Setup', function (): void {
         'an array' => [[5]],
         'text' => ['abc'],
     ]);
+
+    it('rejects a missing child id when one child is added', function (): void {
+        $response = apiPost("/api/rest/v2/products/{$this->configurableId}/configurable/children", [], $this->token);
+
+        expect($response['status'])->toBe(422);
+    });
 
     it('saves no super attribute when the children cannot be assigned', function (): void {
         $response = apiPut("/api/rest/v2/products/{$this->configurableId}/configurable", [

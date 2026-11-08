@@ -95,7 +95,7 @@ final class ConfigurableSetupProcessor extends \Maho\ApiPlatform\Processor
                 fn(Mage_Eav_Model_Entity_Attribute $attribute) => (string) $attribute->getAttributeCode(),
                 array_values($typeInstance->getUsedProductAttributes($product)),
             );
-            if ($savedCodes === []) {
+            if (count($typeInstance->getConfigurableAttributes($product)) === 0) {
                 $product->setConfigurableAttributesData(self::superAttributeData($typeInstance, $product, $codes));
                 $product->setCanSaveConfigurableAttributes(true);
                 $needsSave = true;
@@ -127,7 +127,7 @@ final class ConfigurableSetupProcessor extends \Maho\ApiPlatform\Processor
     {
         $product = $this->loadProductForWrite($productId, $this->requireUser(), Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE);
 
-        $childId = self::childId($body['childProductId'] ?? $body['child_product_id'] ?? $body['childId'] ?? null);
+        $childId = self::childId($body['childProductId'] ?? $body['child_product_id'] ?? $body['childId'] ?? 0);
 
         $this->authorizeAssociatedProductWebsites($childId);
 
@@ -233,13 +233,17 @@ final class ConfigurableSetupProcessor extends \Maho\ApiPlatform\Processor
     }
 
     /**
-     * @throws BadRequestHttpException when $id is not a positive integer
+     * @throws BadRequestHttpException when $id is not an integer
+     * @throws UnprocessableEntityHttpException when $id is below 1
      */
     private static function childId(mixed $id): int
     {
-        $childId = is_int($id) || (is_string($id) && ctype_digit($id)) ? (int) $id : 0;
+        if (!is_int($id) && !(is_string($id) && ctype_digit($id))) {
+            throw new BadRequestHttpException('A child product id must be an integer');
+        }
+        $childId = (int) $id;
         if ($childId < 1) {
-            throw new BadRequestHttpException('A child product id must be a positive integer');
+            throw new UnprocessableEntityHttpException('A child product id must be positive');
         }
 
         return $childId;
