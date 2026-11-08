@@ -304,7 +304,7 @@ describe('Configurable Setup, Setup', function (): void {
         $this->otherAttribute = configurableSetupCreateAttribute();
         $this->emptySet = Mage::getModel('eav/entity_attribute_set')
             ->setEntityTypeId((int) $this->attribute->getEntityTypeId())
-            ->setAttributeSetName('pest_cfg_setup_' . uniqid())
+            ->setAttributeSetName('pest_cfg_setup_' . bin2hex(random_bytes(8)))
             ->save();
         $resource = Mage::getSingleton('core/resource');
         $resource->getConnection('core_write')->update(
