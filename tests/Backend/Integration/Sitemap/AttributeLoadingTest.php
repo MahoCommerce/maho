@@ -10,12 +10,16 @@ declare(strict_types=1);
 uses(Tests\MahoBackendTestCase::class);
 
 beforeEach(function (): void {
-    $this->connection = Mage::getSingleton('core/resource')->getConnection('catalog_read');
-    $this->connection->beginTransaction();
+    $this->connection = Mage::getSingleton('core/resource')->getConnection('core_write');
+    $this->entityTable = null;
+    $this->entityIds = [];
 });
 
 afterEach(function (): void {
-    $this->connection->rollBack();
+    if ($this->entityIds !== []) {
+        $this->connection->delete($this->entityTable . '_varchar', ['entity_id IN (?)' => $this->entityIds]);
+        $this->connection->delete($this->entityTable, ['entity_id IN (?)' => $this->entityIds]);
+    }
 });
 
 it('preserves sitemap attribute fallback and ordered entity keys', function (string $type, bool $defaultStore): void {
@@ -24,6 +28,7 @@ it('preserves sitemap attribute fallback and ordered entity keys', function (str
     $entityType = Mage::getSingleton('eav/config')->getEntityType('catalog_' . $type);
     $resource = Mage::getResourceModel('sitemap/catalog_' . $type);
     $table = $resource->getMainTable();
+    $this->entityTable = $table;
     $attributes = [];
     foreach (['name', 'image'] as $code) {
         $attributes[$code] = (int) Mage::getSingleton('eav/config')->getAttribute('catalog_' . $type, $code)->getId();
@@ -43,6 +48,7 @@ it('preserves sitemap attribute fallback and ordered entity keys', function (str
         }
         $connection->insert($table, $entity);
         $id = (int) $connection->lastInsertId($table);
+        $this->entityIds[] = $id;
         $ids[] = $id;
         foreach ($attributes as $code => $attributeId) {
             $values = [];

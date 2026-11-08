@@ -189,12 +189,36 @@ class Maho_MediaCleaner_Model_Scanner
                 $bind[] = $path;
             }
             $select = $db->select()->union($selects, Maho\Db\Select::SQL_UNION_ALL);
-            $db->query($db->insertFromSelect(
+            $sql = $db->insertFromSelect(
                 $select,
                 $table,
                 ['type', 'path'],
                 Maho\Db\Adapter\AdapterInterface::INSERT_IGNORE,
-            ), $bind);
+            );
+            $connection = $db->getConnection();
+            $native = $connection->getNativeConnection();
+            $canRetry = $db->getTransactionLevel() === 0 && !$connection->isTransactionActive()
+                && $native instanceof PDO && !$native->inTransaction();
+            try {
+                $db->query($sql, $bind);
+            } catch (Doctrine\DBAL\Exception\DriverException $exception) {
+                if (!$canRetry) {
+                    throw $exception;
+                }
+                $connection = $db->getConnection();
+                $native = $connection->getNativeConnection();
+                if ($db->getTransactionLevel() !== 0 || $connection->isTransactionActive()
+                    || !($native instanceof PDO) || $native->inTransaction()
+                ) {
+                    throw $exception;
+                }
+                // Recover the old valid prefix, stopping at the first rejected path.
+                foreach ($paths as $path) {
+                    $db->insertIgnore($table, ['type' => $type, 'path' => $path]);
+                }
+                // A batch-only failure must still reach the caller when every row retry succeeds.
+                throw $exception;
+            }
         }
     }
 }
