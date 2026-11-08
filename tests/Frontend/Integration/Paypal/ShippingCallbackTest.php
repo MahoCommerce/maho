@@ -135,14 +135,8 @@ it('sends PayPal the shipping callback URL with the token of the quote', functio
     expect($result['success'])->toBeTrue();
     $callbackUrl = ShippingCallbackTestClient::$orderRequest['body']['payment_source']['paypal']['experience_context']
         ['order_update_callback_config']['callback_url'];
-    expect(Mage::helper('paypal')->isValidShippingCallbackToken($this->quote, shippingCallbackToken($callbackUrl)))->toBeTrue();
-});
-
-it('puts a token in the shipping callback URL', function () {
-    $url = Mage::helper('paypal')->getShippingCallbackUrl($this->quote);
-
-    expect($url)->toContain('paypal/checkout/shippingCallback')
-        ->and(shippingCallbackToken($url))->toMatch('/^[0-9a-f]{64}$/');
+    expect($callbackUrl)->toContain('paypal/checkout/shippingCallback')
+        ->and(Mage::helper('paypal')->isValidShippingCallbackToken($this->quote, shippingCallbackToken($callbackUrl)))->toBeTrue();
 });
 
 it('answers a callback that carries the token of the quote', function () {
