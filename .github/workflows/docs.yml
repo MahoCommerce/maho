@@ -56,6 +56,15 @@ jobs:
       - name: Install dependencies
         run: pip install -r site/requirements.txt
 
+      # The privacy plugin downloads each external asset and the social plugin draws each card.
+      # Without the cache, every build repeats this work and fails when a remote host is slow.
+      - name: Cache the plugin files
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: site/.cache/plugin
+          key: mkdocs-plugins-${{ hashFiles('site/requirements.txt') }}-${{ github.run_id }}
+          restore-keys: mkdocs-plugins-${{ hashFiles('site/requirements.txt') }}-
+
       # A broken link, a broken anchor or a page that is missing from a .nav.yml fails the build.
       - name: Build
         working-directory: site
