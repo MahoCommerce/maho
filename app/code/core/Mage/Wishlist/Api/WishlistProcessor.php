@@ -86,7 +86,6 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
             $itemId = (int) ($uriVariables['id'] ?? 0);
             $input = RequestInput::of($this->parseRequestBody($context['request'] ?? null));
             $qty = $input->int('qty') ?? (int) $data->qty;
-            // JSON numbers arrive as int; moveToCart types $cartId as ?string.
             $cartId = $input->string('cartId');
             return $this->moveToCart($itemId, $qty, $cartId);
         }

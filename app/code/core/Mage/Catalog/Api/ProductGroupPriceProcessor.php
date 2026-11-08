@@ -66,13 +66,8 @@ final class ProductGroupPriceProcessor extends \Maho\ApiPlatform\Processor
         }
 
         $groupPrices = [];
-        foreach ($body as $index => $gp) {
-            if (!is_array($gp)) {
-                throw new BadRequestHttpException('Each group price must be an object');
-            }
-            $input = RequestInput::of($gp, "[{$index}]");
-
-            $groupId = ($gp['customerGroupId'] ?? $gp['customer_group_id'] ?? 'all') === 'all'
+        foreach (RequestInput::rowsOf($body) as $input) {
+            $groupId = ($input->string('customerGroupId', 'customer_group_id') ?? 'all') === 'all'
                 ? \Mage_Customer_Model_Group::CUST_GROUP_ALL
                 : $input->int('customerGroupId', 'customer_group_id');
 

@@ -328,11 +328,7 @@ final class ProductCustomOptionProcessor extends \Maho\ApiPlatform\Processor
     private function prepareValues(array $values): array
     {
         $cleanValues = [];
-        foreach ($values as $i => $value) {
-            if (!is_array($value)) {
-                throw new UnprocessableEntityHttpException("Value at index {$i} must have a title");
-            }
-            $input = RequestInput::of($value, "values[{$i}]");
+        foreach (RequestInput::rowsOf($values, 'values') as $i => $input) {
             $title = $input->string('title');
             if ($title === null || $title === '') {
                 throw new UnprocessableEntityHttpException("Value at index {$i} must have a title");

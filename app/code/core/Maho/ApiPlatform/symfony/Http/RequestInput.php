@@ -55,8 +55,8 @@ final class RequestInput
     }
 
     /**
-     * As decode(), but null for a body that is not a JSON object or array, for a reader that answers it its
-     * own way or not at all.
+     * Return null when the body is not a JSON object or array. Use it when the caller reports that error
+     * itself, or ignores it.
      *
      * @return array<array-key, mixed>|null
      */
@@ -200,7 +200,7 @@ final class RequestInput
      */
     public function stringList(string ...$keys): ?array
     {
-        return $this->mapList($keys, 'string', fn(self $item): ?string => $item->string('0'));
+        return $this->mapList($keys, 'string', self::toString(...));
     }
 
     /**
@@ -211,7 +211,7 @@ final class RequestInput
      */
     public function intList(string ...$keys): ?array
     {
-        return $this->mapList($keys, 'int', fn(self $item): ?int => $item->int('0'));
+        return $this->mapList($keys, 'int', self::toInt(...));
     }
 
     /**
@@ -256,7 +256,7 @@ final class RequestInput
      * Reads each entry of a list with $read; $type names the type of an entry in the error of a null one.
      *
      * @param array<string> $keys
-     * @param \Closure(self): T $read reads key "0" of a one-entry input
+     * @param \Closure(mixed): ?T $read
      * @template T
      * @return list<T>|null
      */
@@ -271,9 +271,7 @@ final class RequestInput
         }
         $items = [];
         foreach ($value as $index => $item) {
-            $entry = new self(['0' => $item], $this->pathOf($key) . "[{$index}]");
-            // A null entry has a wrong type too, where a null field only means that it is not given
-            $items[] = $read($entry) ?? throw self::invalidAt($entry->path, null, $type);
+            $items[] = $read($item) ?? throw self::invalidAt($this->pathOf($key) . "[{$index}]", $item, $type);
         }
         return $items;
     }
@@ -297,7 +295,6 @@ final class RequestInput
     {
         return match (true) {
             $this->path === '' => $key,
-            $key === '0' => $this->path,
             default => "{$this->path}.{$key}",
         };
     }

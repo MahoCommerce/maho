@@ -12,7 +12,6 @@ namespace Mage\Sales\Api;
 
 use ApiPlatform\Metadata\Operation;
 use Maho\ApiPlatform\Http\RequestInput;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
@@ -202,11 +201,7 @@ final class ShipmentProcessor extends \Maho\ApiPlatform\Processor
         }
 
         $trackModels = [];
-        foreach ($tracks as $index => $trackData) {
-            if (!is_array($trackData)) {
-                throw new BadRequestHttpException('Each tracking entry must be an object');
-            }
-            $input = RequestInput::of($trackData, "tracks[{$index}]");
+        foreach (RequestInput::rowsOf($tracks, 'tracks') as $input) {
             $carrierCode = $input->string('carrierCode') ?? 'custom';
             $trackNumber = $input->string('trackNumber') ?? '';
             if (empty($trackNumber)) {

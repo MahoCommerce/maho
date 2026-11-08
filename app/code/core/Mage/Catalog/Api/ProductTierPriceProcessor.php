@@ -69,13 +69,8 @@ final class ProductTierPriceProcessor extends \Maho\ApiPlatform\Processor
         }
 
         $tierPrices = [];
-        foreach ($body as $index => $tp) {
-            if (!is_array($tp)) {
-                throw new BadRequestHttpException('Each tier price must be an object');
-            }
-            $input = RequestInput::of($tp, "[{$index}]");
-
-            $groupId = ($tp['customerGroupId'] ?? $tp['customer_group_id'] ?? 'all') === 'all'
+        foreach (RequestInput::rowsOf($body) as $input) {
+            $groupId = ($input->string('customerGroupId', 'customer_group_id') ?? 'all') === 'all'
                 ? \Mage_Customer_Model_Group::CUST_GROUP_ALL
                 : $input->int('customerGroupId', 'customer_group_id');
 
