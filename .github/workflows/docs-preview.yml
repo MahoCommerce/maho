@@ -84,10 +84,9 @@ jobs:
           ' preview/_preview/changed.json)
           body="$marker
           The docs of this pull request are at $base (commit ${HEAD_SHA:0:7}).$pages"
-          id=$(gh api --paginate "repos/$REPOSITORY/issues/$NUMBER/comments" \
-            --jq ".[] | select(.user.login == \"github-actions[bot]\" and (.body | startswith(\"$marker\"))) | .id" | head -n 1)
-          if [ -n "$id" ]; then
-            gh api --method PATCH "repos/$REPOSITORY/issues/comments/$id" -f body="$body" > /dev/null
-          else
-            gh api "repos/$REPOSITORY/issues/$NUMBER/comments" -f body="$body" > /dev/null
-          fi
+          # A new comment for each commit puts the link below the commits in the timeline.
+          for id in $(gh api --paginate "repos/$REPOSITORY/issues/$NUMBER/comments" \
+            --jq ".[] | select(.user.login == \"github-actions[bot]\" and (.body | startswith(\"$marker\"))) | .id"); do
+            gh api --method DELETE "repos/$REPOSITORY/issues/comments/$id" > /dev/null
+          done
+          gh api "repos/$REPOSITORY/issues/$NUMBER/comments" -f body="$body" > /dev/null
