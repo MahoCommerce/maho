@@ -192,7 +192,7 @@ it('stores the frontend properties of a field', function () {
     expect((int) $loaded->getData('is_visible_on_front'))->toBe(1)
         ->and((int) $loaded->getData('is_html_allowed_on_front'))->toBe(1)
         ->and($attribute->getAdminPageSettings()->mainTab)->toBe('adminhtml/cms_attribute_edit_tab_main')
-        ->and($attribute->getAttributeNote())->toBeNull();
+        ->and($attribute->getAttributeSummary())->toBeNull();
 });
 
 it('shows the visible fields of a page below its content', function () {

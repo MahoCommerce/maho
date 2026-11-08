@@ -86,7 +86,8 @@ afterEach(function () {
 
 it('names the attributes whose values a change of the set deletes', function () {
     [$set, $attribute] = attributeAdminNoteSetAndAttribute(Mage_Catalog_Model_Category::ENTITY, 'catalog/resource_eav_attribute', $this->suffix);
-    array_push($this->records, $set, $attribute);
+    $this->records[] = $set;
+    $this->records[] = $attribute;
     $defaultSetId = (int) Mage::getSingleton('eav/config')->getEntityType(Mage_Catalog_Model_Category::ENTITY)->getDefaultAttributeSetId();
 
     $questions = Mage::helper('eav')->getSetChangeQuestions($defaultSetId, [
@@ -102,7 +103,8 @@ it('names the attributes whose values a change of the set deletes', function () 
 
 it('changes the set of a saved category from the admin save', function () {
     [$set, $attribute] = attributeAdminNoteSetAndAttribute(Mage_Catalog_Model_Category::ENTITY, 'catalog/resource_eav_attribute', $this->suffix);
-    array_push($this->records, $set, $attribute);
+    $this->records[] = $set;
+    $this->records[] = $attribute;
     $category = Mage::getModel('catalog/category')
         ->setName('Pest Set Change ' . $this->suffix)
         ->setIsActive(1)
@@ -122,7 +124,8 @@ it('changes the set of a saved category from the admin save', function () {
 
 it('keeps the set of a saved category when the admin save posts no set', function () {
     [$set, $attribute] = attributeAdminNoteSetAndAttribute(Mage_Catalog_Model_Category::ENTITY, 'catalog/resource_eav_attribute', $this->suffix);
-    array_push($this->records, $set, $attribute);
+    $this->records[] = $set;
+    $this->records[] = $attribute;
     $category = Mage::getModel('catalog/category')
         ->setName('Pest Set Keep ' . $this->suffix)
         ->setIsActive(1)
@@ -174,7 +177,8 @@ it('saves a category when a required attribute is not in its set', function () {
 
 it('changes the set of a saved blog post from the admin save', function () {
     [$set, $attribute] = attributeAdminNoteSetAndAttribute(Maho_Blog_Model_Post::ENTITY, 'blog/resource_eav_attribute', $this->suffix);
-    array_push($this->records, $set, $attribute);
+    $this->records[] = $set;
+    $this->records[] = $attribute;
     $post = Mage::getModel('blog/post')->setData([
         'title' => 'Pest Set Change ' . $this->suffix,
         'url_key' => 'pest-set-change-' . $this->suffix,
@@ -294,9 +298,13 @@ it('names the forms, the customer groups and the websites of a customer attribut
     $attribute->save();
     $this->records[] = $attribute;
 
-    $note = (string) Mage::getModel('customer/attribute')->load($attribute->getId())->getAttributeNote();
+    $summary = Mage::getModel('customer/attribute')->load($attribute->getId())->getAttributeSummary();
+    $rows = array_column($summary['rows'], null, 'label');
+    $shown = fn(string $row): array => array_column(array_filter($rows[$row]['items'], fn(array $item): bool => $item['shown']), 'label');
 
-    expect($note)->toContain('Forms that show the attribute: Admin Customer, Customer Registration.')
-        ->and($note)->toContain('Customer groups: all, because the attribute is in no set.')
-        ->and($note)->toContain(Mage::app()->getWebsite(1)->getName() . ' (Optional)');
+    expect($shown('Forms'))->toBe(['Admin Customer', 'Customer Registration'])
+        ->and($rows['Forms']['items'])->toContain(['label' => 'Customer Account Edit', 'shown' => false])
+        ->and($rows['Customer Groups']['items'])->toBe([['label' => 'All customer groups', 'shown' => true]])
+        ->and($shown('Websites'))->not->toBeEmpty()
+        ->and(array_filter($rows['Websites']['items'], fn(array $item): bool => !$item['shown']))->toBeEmpty();
 });

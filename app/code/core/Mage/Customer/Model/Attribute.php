@@ -130,18 +130,26 @@ class Mage_Customer_Model_Attribute extends Mage_Eav_Model_Attribute
      * the three settings together decide if a customer sees the field.
      */
     #[\Override]
-    public function getAttributeNote(): ?string
+    public function getAttributeSummary(): ?array
     {
         $column = $this->getGroupSetColumn();
         if ($column === null || !$this->getId()) {
             return null;
         }
         $helper = Mage::helper('customer');
-        $forms = array_values(array_intersect_key($this->getFormCodes(), array_flip($this->getUsedInForms())));
-        if (!$forms) {
-            return $helper->__('No form shows this attribute. Select the forms in Used in Forms.');
+
+        $usedInForms = (array) $this->getUsedInForms();
+        $forms = [];
+        foreach ($this->getFormCodes() as $code => $label) {
+            $forms[] = ['label' => $label, 'shown' => in_array($code, $usedInForms, true)];
         }
-        $lines = [$helper->__('Forms that show the attribute: %s.', implode(', ', $forms))];
+        $rows = [[
+            'label' => $helper->__('Forms'),
+            'items' => self::sortShownFirst($forms),
+            'note' => in_array(true, array_column($forms, 'shown'), true)
+                ? null
+                : $helper->__('No form shows this attribute. Select the forms in Used in Forms.'),
+        ]];
 
         $adapter = $this->getResource()->getReadConnection();
         $setIds = array_map(intval(...), $adapter->fetchCol(
@@ -150,23 +158,23 @@ class Mage_Customer_Model_Attribute extends Mage_Eav_Model_Attribute
                 ->where('attribute_id = ?', (int) $this->getId()),
         ));
         if (!$setIds) {
-            $lines[] = $helper->__('Customer groups: all, because the attribute is in no set.');
+            $rows[] = [
+                'label' => $helper->__('Customer Groups'),
+                'items' => [['label' => $helper->__('All customer groups'), 'shown' => true]],
+                'note' => $helper->__('The attribute is in no set, so it shows to every customer group.'),
+            ];
         } else {
             $defaultSetId = (int) $this->getEntityType()->getDefaultAttributeSetId();
-            $shown = [];
-            $hidden = [];
+            $groups = [];
             foreach (Mage::getResourceModel('customer/group_collection') as $group) {
                 $setId = (int) $group->getData($column) ?: $defaultSetId;
-                if (in_array($setId, $setIds, true)) {
-                    $shown[] = $group->getCustomerGroupCode();
-                } else {
-                    $hidden[] = $group->getCustomerGroupCode();
-                }
+                $groups[] = ['label' => (string) $group->getCustomerGroupCode(), 'shown' => in_array($setId, $setIds, true)];
             }
-            $lines[] = $helper->__('Customer groups whose set holds the attribute: %s.', $shown ? implode(', ', $shown) : $helper->__('none'));
-            if ($hidden) {
-                $lines[] = $helper->__('Customer groups that do not see the attribute: %s.', implode(', ', $hidden));
-            }
+            $rows[] = [
+                'label' => $helper->__('Customer Groups'),
+                'items' => self::sortShownFirst($groups),
+                'note' => $helper->__('A customer group shows the attribute when its set holds the attribute.'),
+            ];
         }
 
         $modes = [
@@ -175,16 +183,40 @@ class Mage_Customer_Model_Attribute extends Mage_Eav_Model_Attribute
             'required' => $helper->__('Required'),
         ];
         $websiteValues = $this->getResource()->getWebsiteValues((int) $this->getId());
-        $websites = [];
+        $websiteModes = [];
         foreach (Mage::app()->getWebsites() as $website) {
             $mode = self::getWebsiteModeOverride($websiteValues[(int) $website->getId()] ?? null) ?: $this->getDefaultWebsiteMode();
-            $websites[] = $website->getName() . ' (' . $modes[$mode] . ')';
+            $websiteModes[] = [(string) $website->getName(), $mode];
+        }
+        $usedModes = array_values(array_unique(array_column($websiteModes, 1)));
+        if (count($websiteModes) > 1 && count($usedModes) === 1) {
+            $websites = [['label' => $helper->__('All websites (%s)', $modes[$usedModes[0]]), 'shown' => $usedModes[0] !== 'hidden']];
+        } else {
+            $websites = [];
+            foreach ($websiteModes as [$name, $mode]) {
+                $websites[] = ['label' => $name . ' (' . $modes[$mode] . ')', 'shown' => $mode !== 'hidden'];
+            }
         }
         if ($websites) {
-            $lines[] = $helper->__('Websites: %s.', implode(', ', $websites));
+            $rows[] = ['label' => $helper->__('Websites'), 'items' => self::sortShownFirst($websites), 'note' => null];
         }
 
-        return implode("\n", $lines);
+        return [
+            'comment' => $helper->__('A customer sees the field only on a form, in a customer group and on a website that show it.'),
+            'rows' => $rows,
+        ];
+    }
+
+    /**
+     * Put the items that show the attribute before the items that do not, and keep the order in each part.
+     *
+     * @param list<array{label: string, shown: bool}> $items
+     * @return list<array{label: string, shown: bool}>
+     */
+    private static function sortShownFirst(array $items): array
+    {
+        usort($items, fn(array $a, array $b): int => $b['shown'] <=> $a['shown']);
+        return $items;
     }
 
     /**

@@ -46,13 +46,14 @@ field in a form.
 ## Check where a field shows
 
 Three settings decide if a customer sees a field: the forms of the attribute, the attribute set of
-the customer group, and the mode of the website. The edit page of a saved attribute starts with a
-summary of the three:
+the customer group, and the mode of the website. The edit page of a saved attribute starts with the
+section **Where the Field Shows**, which lists the three:
 
-- The forms that show the attribute.
-- The customer groups whose set holds the attribute, and the groups that do not see it. An
-  attribute in no set shows to every group.
-- The mode of each website: **Hidden**, **Optional** or **Required**.
+- **Forms**: every form. A form that does not show the attribute has a line through it.
+- **Customer Groups**: every customer group. A group whose set does not hold the attribute has a
+  line through it. An attribute in no set shows to every group.
+- **Websites**: the mode of each website: **Hidden**, **Optional** or **Required**. When all the
+  websites use one mode, the row shows **All websites** and the mode.
 
 When a customer does not see a field, read this summary first.
 

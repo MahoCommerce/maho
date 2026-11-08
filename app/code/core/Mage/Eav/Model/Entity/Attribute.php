@@ -208,10 +208,14 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
     }
 
     /**
-     * Return a text that the edit page of this attribute shows above the properties, or null for no text.
-     * Each line of the text is a paragraph.
+     * Return the summary that the edit page of this attribute shows above the properties, or null for no summary.
+     *
+     * Each row names one setting and lists its values. A value that does not show the attribute has
+     * shown false. A row note explains the row.
+     *
+     * @return array{comment: string, rows: list<array{label: string, items: list<array{label: string, shown: bool}>, note: ?string}>}|null
      */
-    public function getAttributeNote(): ?string
+    public function getAttributeSummary(): ?array
     {
         return null;
     }

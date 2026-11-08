@@ -74,8 +74,10 @@ The attribute model can also change the save and the texts of the set page:
 - `saveAdminData()` saves the posted values that the attribute does not save itself.
 - `_getInputTypes()` gives the input types of the type. The event
   `eav_attribute_input_types_prepare` lets another module add or remove a type.
-- `getAttributeNote()` returns a text that the attribute page shows above the properties. The
-  customer types name the forms, the customer groups and the websites that show the attribute.
+- `getAttributeSummary()` returns a summary that the attribute page shows above the properties,
+  in a section of its own. Each row names a setting and lists its values as badges. A value that
+  does not show the attribute has a line through it. The customer types list the forms, the
+  customer groups and the websites.
 - `getSetNote($set)` returns a text that the set page shows above the groups. Each line of the text
   is a paragraph. The customer types use it to say that the customer group picks the set, to name
   the groups that use the set, and to say that only the groups after the first one have a title in

@@ -49,10 +49,16 @@ class Mage_Eav_Block_Adminhtml_Attribute_Edit_Tab_Main extends Mage_Eav_Block_Ad
         $fieldset = $form->getElement('base_fieldset');
         $this->_prepareEntityFields($form, $fieldset);
 
-        $note = $attribute->getAttributeNote();
-        if ($note !== null) {
-            $fieldset->addField('attribute_note', 'note', [
-                'text' => '<div class="d-alert d-alert-info">' . nl2br($this->escapeHtml($note)) . '</div>',
+        $summary = $attribute->getAttributeSummary();
+        if ($summary !== null) {
+            $form->addFieldset('summary_fieldset', [
+                'legend' => $helper->__('Where the Field Shows'),
+                'class' => 'fieldset-wide',
+                'comment' => $summary['comment'],
+                'html_content' => $this->getLayout()->createBlock('core/template')
+                    ->setTemplate('eav/attribute/summary.phtml')
+                    ->setRows($summary['rows'])
+                    ->toHtml(),
             ], '^');
         }
 
