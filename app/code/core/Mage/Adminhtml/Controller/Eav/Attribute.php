@@ -105,7 +105,7 @@ abstract class Mage_Adminhtml_Controller_Eav_Attribute extends Mage_Adminhtml_Co
                 $this->_redirect('*/*/');
                 return;
             }
-            if ((int) $model->getEntityTypeId() !== (int) $this->getEntityType()->getId()) {
+            if ((int) $model->getEntityTypeId() !== (int) $this->getEntityType()->getId() || !$this->canEditAttribute($model)) {
                 $this->_getSession()->addError(Mage::helper('eav')->__('This attribute cannot be edited.'));
                 $this->_redirect('*/*/');
                 return;
@@ -124,6 +124,14 @@ abstract class Mage_Adminhtml_Controller_Eav_Attribute extends Mage_Adminhtml_Co
         $this->_title($id ? (string) (is_array($label) ? reset($label) : $label) : $this->__('New Attribute'));
         $this->prepareEditLayout();
         $this->renderLayout();
+    }
+
+    /**
+     * Return true when the edit and save actions accept $model, a saved attribute of the entity type.
+     */
+    protected function canEditAttribute(Mage_Eav_Model_Entity_Attribute $model): bool
+    {
+        return true;
     }
 
     /**
@@ -209,7 +217,7 @@ abstract class Mage_Adminhtml_Controller_Eav_Attribute extends Mage_Adminhtml_Co
                 $this->_redirect('*/*/');
                 return;
             }
-            if ((int) $model->getEntityTypeId() !== (int) $this->getEntityType()->getId()) {
+            if ((int) $model->getEntityTypeId() !== (int) $this->getEntityType()->getId() || !$this->canEditAttribute($model)) {
                 $session->addError(Mage::helper('eav')->__('This attribute cannot be updated.'));
                 $this->_redirect('*/*/');
                 return;

@@ -353,3 +353,13 @@ it('gives a category the attributes of its own set', function () {
         ->and($inSet->getAttributes())->toHaveKey('name')
         ->and($inDefault->getAttributes())->not->toHaveKey($this->code);
 });
+
+it('keeps the system attributes of categories off System > Attributes, is_dynamic included', function () {
+    $type = Mage::getSingleton('eav/config')->getEntityType(Mage_Catalog_Model_Category::ENTITY);
+
+    $codes = Mage::helper('eav')->getManagedAttributeCollection($type)->getColumnValues('attribute_code');
+
+    expect($codes)->not->toContain('name')
+        ->and($codes)->not->toContain('is_dynamic')
+        ->and(Mage::getSingleton('eav/config')->getAttribute(Mage_Catalog_Model_Category::ENTITY, 'is_dynamic')->getIsUserDefined())->toBeFalse();
+});

@@ -28,8 +28,8 @@ one attribute set.
 A new attribute goes into the first group of the **Default** set, so the category page shows it
 at once. To move it to another tab or to add it to another set, edit the set.
 
-You can delete only the attributes that you added. The standard attributes show **Yes** in the
-**System** column of the grid.
+The grid lists only the attributes that you added. The standard fields of a category, such as
+**Name** and **Description**, keep their place on the category page.
 
 ## Put the attribute on a tab
 

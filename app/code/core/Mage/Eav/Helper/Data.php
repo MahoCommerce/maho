@@ -129,26 +129,19 @@ class Mage_Eav_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Return the attributes of an entity type that the admin attribute pages show.
-     *
-     * The collection leaves out the attributes that the platform hides: those with is_visible = 0
-     * in a catalog table, and in a customer table the hidden system attributes and the attributes
-     * with is_visible = 0 that no admin created. An admin sets is_visible = 0 with "Show in Forms".
-     * When the type sets userDefinedOnly, or setsUserDefinedOnly for the set editor ($forSets),
-     * the collection holds only the attributes that an admin added.
+     * Return the attributes of an entity type that the pages of System > Attributes show: the
+     * attributes that an admin added. The edit pages and the storefront templates of these types
+     * place the system attributes themselves, so these pages have nothing to change on them.
+     * A catalog type also leaves out the attributes with is_visible = 0.
      */
-    public function getManagedAttributeCollection(Mage_Eav_Model_Entity_Type $entityType, bool $forSets = false): Mage_Eav_Model_Resource_Entity_Attribute_Collection
+    public function getManagedAttributeCollection(Mage_Eav_Model_Entity_Type $entityType): Mage_Eav_Model_Resource_Entity_Attribute_Collection
     {
         /** @var Mage_Eav_Model_Resource_Entity_Attribute_Collection $collection */
         $collection = Mage::getResourceModel($entityType->getEntityAttributeCollection());
-        $collection->setEntityTypeFilter((int) $entityType->getId());
-        $settings = $this->getAdminPageSettings($entityType);
-        if ($settings?->userDefinedOnly || ($forSets && $settings?->setsUserDefinedOnly)) {
-            $collection->addFieldToFilter('main_table.is_user_defined', 1);
-        }
-        if ($collection instanceof Mage_Eav_Model_Resource_Attribute_Collection) {
-            $collection->addSystemHiddenFilter()->addFieldToFilter(['is_visible', 'is_user_defined'], [1, 1]);
-        } elseif (method_exists($collection, 'addVisibleFilter')) {
+        $collection->setEntityTypeFilter((int) $entityType->getId())
+            ->addFieldToFilter('main_table.is_user_defined', 1);
+        // A customer attribute with is_visible = 0 is one that the admin set to Hidden, so it stays
+        if (!$collection instanceof Mage_Eav_Model_Resource_Attribute_Collection && method_exists($collection, 'addVisibleFilter')) {
             $collection->addVisibleFilter();
         }
         return $collection;

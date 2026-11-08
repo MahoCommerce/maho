@@ -479,7 +479,6 @@ Hidden: no form shows the field. Optional: the customer can leave it empty. Requ
 "The address has been deleted.","The address has been deleted."
 "The address has been saved.","The address has been saved."
 "The attribute is in no set, so no customer group sees it. Add it to a set in Attribute Sets.","The attribute is in no set, so no customer group sees it. Add it to a set in Attribute Sets."
-The Customer Configuration shows or hides this field.,The Customer Configuration shows or hides this field.
 "The customer does not have default billing address.","The customer does not have default billing address."
 "The customer email (%s) already exists, skipping the record, line: %s","The customer email (%s) already exists, skipping the record, line: %s"
 "The customer group has been deleted.","The customer group has been deleted."

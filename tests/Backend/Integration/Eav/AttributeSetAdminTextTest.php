@@ -36,7 +36,7 @@ it('gives typed page settings for a managed entity type and none for products', 
         ->and($category->acl)->toBe('system/attributes/catalog_category')
         ->and($category->addToDefaultSet)->toBeTrue()
         ->and($category->hasSets())->toBeTrue()
-        ->and($customer->setsUserDefinedOnly)->toBeTrue()
+        ->and($customer->addToDefaultSet)->toBeTrue()
         ->and($category->singleSet)->toBeFalse()
         ->and($cms->hasSets())->toBeTrue()
         ->and($cms->singleSet)->toBeTrue()

@@ -62,7 +62,6 @@ class Mage_Customer_Model_Attribute extends Mage_Eav_Model_Attribute
                 title: $helper->__('Customer Attributes'),
                 setsTitle: $helper->__('Customer Attribute Sets'),
                 mainTab: 'adminhtml/customer_attribute_edit_tab_main',
-                setsUserDefinedOnly: true,
                 addToDefaultSet: true,
             ),
             'customer_address' => new Mage_Eav_Model_Entity_Attribute_AdminPageSettings(
@@ -70,7 +69,6 @@ class Mage_Customer_Model_Attribute extends Mage_Eav_Model_Attribute
                 title: $helper->__('Customer Address Attributes'),
                 setsTitle: $helper->__('Customer Address Attribute Sets'),
                 mainTab: 'adminhtml/customer_attribute_edit_tab_main',
-                setsUserDefinedOnly: true,
                 addToDefaultSet: true,
             ),
             default => null,
@@ -270,7 +268,7 @@ class Mage_Customer_Model_Attribute extends Mage_Eav_Model_Attribute
 
     /**
      * Turn the Default field into is_visible and is_required, and keep only the known forms and
-     * input rules. A system attribute keeps its forms.
+     * input rules.
      */
     #[\Override]
     public function prepareAdminData(array $data): array
@@ -282,20 +280,13 @@ class Mage_Customer_Model_Attribute extends Mage_Eav_Model_Attribute
             $data['is_required'] = $mode === 'required' ? 1 : 0;
         }
 
-        if ($this->getId() && $this->getIsSystem()) {
-            unset($data['used_in_forms']);
-        } else {
-            $allowed = array_keys($this->getFormCodes());
-            $data['used_in_forms'] = array_values(array_intersect((array) ($data['used_in_forms'] ?? []), $allowed));
-        }
+        $allowed = array_keys($this->getFormCodes());
+        $data['used_in_forms'] = array_values(array_intersect((array) ($data['used_in_forms'] ?? []), $allowed));
         if (!$this->getId()) {
             $data['is_system'] = 0;
-        } elseif (!$this->getIsUserDefined()) {
-            // The Customer Configuration shows or hides the attributes of the platform, such as dob
-            unset($data['is_visible']);
         }
 
-        // A filter or a rule that the form does not offer, such as the date rule of dob, stays as it is
+        // A filter or a rule that the form does not offer, such as one that a module set, stays as it is
         $filters = ['striptags', 'escapehtml'];
         $storedFilter = (string) $this->getInputFilter();
         $data['input_filter'] = in_array($data['input_filter'] ?? '', $filters, true) ? $data['input_filter']

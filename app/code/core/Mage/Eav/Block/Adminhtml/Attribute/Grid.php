@@ -18,4 +18,15 @@ class Mage_Eav_Block_Adminhtml_Attribute_Grid extends Mage_Eav_Block_Adminhtml_A
         $this->setCollection(Mage::helper('eav')->getManagedAttributeCollection($entityType));
         return parent::_prepareCollection();
     }
+
+    /**
+     * The grid lists only the attributes that an admin added, so the System column is always No.
+     */
+    #[\Override]
+    protected function _prepareColumns()
+    {
+        parent::_prepareColumns();
+        $this->removeColumn('is_user_defined');
+        return $this;
+    }
 }

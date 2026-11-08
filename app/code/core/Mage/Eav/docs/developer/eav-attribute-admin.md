@@ -34,13 +34,18 @@ public function getAdminPageSettings(): ?Mage_Eav_Model_Entity_Attribute_AdminPa
         acl: 'system/attributes/my_entity',
         title: Mage::helper('mymodule')->__('My Entity Attributes'),
         setsTitle: Mage::helper('mymodule')->__('My Entity Attribute Sets'),
-        userDefinedOnly: true,
         addToDefaultSet: true,
     );
 }
 ```
 
 A type without settings gets "Access denied" on the pages.
+
+The grid and the set editor list only the attributes that an admin added. The edit, save and
+delete actions refuse a system attribute. The edit pages and the storefront templates of these
+types place their system attributes themselves, so the attribute pages have nothing useful to
+change on them. A new set copies the system attributes from the set it is based on. Products keep
+the Magento behavior under **Catalog > Attributes**.
 
 ## The settings
 
@@ -51,19 +56,8 @@ A type without settings gets "Access denied" on the pages.
 | `setsTitle` | string or `null` | The title of the set grid. With `null` (the default), the pages show no **Attribute Sets** button. |
 | `mainTab` | string or `null` | The block of the **Properties** tab of the attribute edit page. |
 | `allowedTags` | list of strings | The HTML tags that an option label keeps when the attribute allows HTML on the storefront. |
-| `userDefinedOnly` | bool | The grid and the set editor list only the attributes that an admin added. |
-| `setsUserDefinedOnly` | bool | The set editor lists only the attributes that an admin added. The grid lists all attributes. |
 | `addToDefaultSet` | bool | A new attribute that names no set goes into the first group of the default set. The rule is in `Mage_Eav_Model_Entity_Attribute::_beforeSave()`, so it applies to the admin, an import and code. |
 | `singleSet` | bool | Every record uses the default set. **Attribute Set** opens that set, and the pages cannot add or delete a set. |
-
-Set `userDefinedOnly` when the edit form of your entity shows the system attributes with fields
-of its own. The admin then cannot change anything about them on these pages, so the pages hide
-them.
-
-Set `setsUserDefinedOnly` when admins edit the properties of the system attributes in the grid,
-but the storefront forms of your entity show the system attributes themselves, so a group does not
-move them. The set editor refuses to remove a system attribute, so the editor hides entries that
-have no function there.
 
 Set `addToDefaultSet` when most stores use one set for your entity. A new attribute then shows on
 the edit page at once. Leave it off when stores usually have many sets, as for products. A module
@@ -98,25 +92,24 @@ The attribute model can also change the save and the texts of the set page:
 
 ## How the core entity types use them
 
-| Entity type | Values stored in | What picks the set | `userDefinedOnly` | `setsUserDefinedOnly` | `addToDefaultSet` |
-|---|---|---|---|---|---|
-| Products | EAV value tables | Each product | Not managed here | Not managed here | Not managed here |
-| Catalog categories | EAV value tables | Each category | No | No | Yes |
-| Customers | EAV value tables | The customer group | No | Yes | Yes |
-| Customer addresses | EAV value tables | The customer group | No | Yes | Yes |
-| CMS pages | A static column of `cms_page` for each attribute | The default set, for every page (`singleSet`) | No | No | Yes |
-| Blog posts | EAV value tables | Each post | Yes | Not needed | Yes |
-| Blog categories | EAV value tables | Each category | Yes | Not needed | Yes |
+| Entity type | Values stored in | What picks the set | `addToDefaultSet` |
+|---|---|---|---|
+| Products | EAV value tables | Each product | Not managed here |
+| Catalog categories | EAV value tables | Each category | Yes |
+| Customers | EAV value tables | The customer group | Yes |
+| Customer addresses | EAV value tables | The customer group | Yes |
+| CMS pages | A static column of `cms_page` for each attribute | The default set, for every page (`singleSet`) | Yes |
+| Blog posts | EAV value tables | Each post | Yes |
+| Blog categories | EAV value tables | Each category | Yes |
 
 The reasons for each choice:
 
 - **Products** keep the Magento behavior. Stores have many product sets, so a new attribute goes
   into no set, and the admin picks the sets.
-- **Catalog categories** build their edit page from the groups of the set, so the set editor shows
-  the system attributes: a move of `description` to another group moves it to another tab.
+- **Catalog categories** build their edit page from the groups of the set. A new attribute in a
+  group shows on the tab of that group.
 - **Customers and customer addresses** take the set of the customer group. A group without a set
-  uses the default set, so a new attribute in the default set shows to all these groups at once. The
-  storefront templates show the system attributes themselves, so the set editor hides them. Each
+  uses the default set, so a new attribute in the default set shows to all these groups at once. Each
   later group of the set is a fieldset of the forms. The `data-upgrade-2.0.4-2.0.5.php` script of
   `Mage_Customer` puts each form attribute that was in no set into the default set.
 - **CMS pages** have no set column. `Mage_Cms_Model_Page::getAttributeSetId()` returns the default
@@ -212,6 +205,6 @@ of its record. It reads the `attribute_set_id` column of the entity table. For t
   `Mage_Eav_Model_Resource_Entity_Attribute_Set::getMissingAttributeLabels()` finds the attributes.
 - The set page refuses to remove a system attribute from a set, and to delete a group that still
   holds one. `Mage_Adminhtml_Controller_Eav_Set::checkSystemAttributes()` makes the same check on
-  the server. The check also covers the attributes that a `userDefinedOnly` setting hides.
+  the server. The check also covers the system attributes that the editor hides.
 - Customers and customer addresses keep `attribute_set_id` 0 in their rows, so the cron does not
   delete their values.

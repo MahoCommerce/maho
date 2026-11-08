@@ -40,7 +40,6 @@ class Mage_Adminhtml_Block_Customer_Attribute_Edit_Tab_Main extends Mage_Eav_Blo
             'values' => $forms,
             'value' => $usedInForms,
             'size' => count($forms),
-            'disabled' => (bool) $attribute->getIsSystem(),
         ]);
         $fieldset->removeField('is_required');
         $front->addField('default_mode', 'select', $this->getDefaultModeConfig($attribute));
@@ -106,8 +105,7 @@ class Mage_Adminhtml_Block_Customer_Attribute_Edit_Tab_Main extends Mage_Eav_Blo
 
     /**
      * Return the field that replaces Show in Forms and Values Required: hidden, optional or required
-     * in every form. The Customer Configuration shows or hides an attribute of the platform, so its
-     * field offers only optional and required, and a hidden one cannot change.
+     * in every form.
      *
      * @return array<string, mixed>
      */
@@ -119,19 +117,11 @@ class Mage_Adminhtml_Block_Customer_Attribute_Edit_Tab_Main extends Mage_Eav_Blo
             'optional' => $helper->__('Optional'),
             'required' => $helper->__('Required'),
         ];
-        $mode = $attribute->getDefaultWebsiteMode();
-        $isPlatform = $attribute->getId() && !$attribute->getIsUserDefined();
-        if ($isPlatform) {
-            $modes = $mode === 'hidden' ? ['hidden' => $modes['hidden']] : array_diff_key($modes, ['hidden' => true]);
-        }
         $options = [];
         foreach ($modes as $value => $label) {
             $options[] = ['value' => $value, 'label' => $label];
         }
         $notes = [$helper->__('Hidden: no form shows the field. Optional: the customer can leave it empty. Required: the customer must fill it in.')];
-        if ($isPlatform) {
-            $notes[] = $helper->__('The Customer Configuration shows or hides this field.');
-        }
         if ($this->hasWebsiteFields($attribute)) {
             $notes[] = $helper->__('The Websites section can change it for one website.');
         }
@@ -141,8 +131,7 @@ class Mage_Adminhtml_Block_Customer_Attribute_Edit_Tab_Main extends Mage_Eav_Blo
             'title' => $helper->__('Default'),
             'note' => implode(' ', $notes),
             'values' => $options,
-            'value' => $mode,
-            'disabled' => $isPlatform && $mode === 'hidden',
+            'value' => $attribute->getDefaultWebsiteMode(),
         ];
     }
 

@@ -282,31 +282,36 @@ it('keeps a filter and a rule that the admin form does not offer', function () {
     }
 });
 
-it('lists the system attributes of customers in the grid and not in the set editor', function () {
-    foreach (['customer' => 'firstname', 'customer_address' => 'city'] as $entityTypeCode => $systemCode) {
-        $type = Mage::getSingleton('eav/config')->getEntityType($entityTypeCode);
+it('lists only the attributes that an admin added on the pages of System > Attributes', function (string $entityTypeCode, string $systemCode) {
+    $code = 'pest_list_' . $this->suffix;
+    $this->attributes[] = customerSetTestCreateAttribute($entityTypeCode, $code, null, []);
+    $type = Mage::getSingleton('eav/config')->getEntityType($entityTypeCode);
 
-        $grid = Mage::helper('eav')->getManagedAttributeCollection($type)->getColumnValues('attribute_code');
-        $sets = Mage::helper('eav')->getManagedAttributeCollection($type, forSets: true)->getColumnValues('attribute_code');
+    $codes = Mage::helper('eav')->getManagedAttributeCollection($type)->getColumnValues('attribute_code');
 
-        expect($grid)->toContain($systemCode)
-            ->and($sets)->not->toContain($systemCode);
-    }
+    expect($codes)->toContain($code)
+        ->and($codes)->not->toContain($systemCode);
+})->with([['customer', 'firstname'], ['customer', 'created_in'], ['customer_address', 'city']]);
+
+it('lists a customer attribute that the admin set to Hidden', function () {
+    $code = 'pest_hidden_' . $this->suffix;
+    $attribute = $this->attributes[] = customerSetTestCreateAttribute('customer', $code, null, []);
+    $attribute->setData('is_visible', 0)->save();
+    $type = Mage::getSingleton('eav/config')->getEntityType('customer');
+
+    expect(Mage::helper('eav')->getManagedAttributeCollection($type)->getColumnValues('attribute_code'))->toContain($code);
 });
 
-it('turns the Default field into is_visible and is_required, and keeps is_visible of a platform attribute', function () {
+it('turns the Default field into is_visible and is_required', function () {
     $new = Mage::getModel('customer/attribute')
         ->setEntityTypeId((int) Mage::getSingleton('eav/config')->getEntityType('customer')->getId());
-    $dob = Mage::getModel('customer/attribute')->loadByCode('customer', 'dob');
 
     $required = $new->prepareAdminData(['default_mode' => 'required']);
-    $platform = $dob->prepareAdminData(['default_mode' => 'required']);
 
     expect($required)->toMatchArray(['is_visible' => 1, 'is_required' => 1])
         ->and($required)->not->toHaveKey('default_mode')
         ->and($new->prepareAdminData(['default_mode' => 'optional']))->toMatchArray(['is_visible' => 1, 'is_required' => 0])
-        ->and($platform)->not->toHaveKey('is_visible')
-        ->and($platform['is_required'])->toBe(1);
+        ->and($new->prepareAdminData(['default_mode' => 'hidden']))->toMatchArray(['is_visible' => 0, 'is_required' => 0]);
 });
 
 it('names the default mode in the website options of a customer attribute', function () {
@@ -327,7 +332,7 @@ it('names the default mode in the website options of a customer attribute', func
 
     expect($labels()[''])->toBe('Use Default (Required)');
 
-    $attribute->setIsVisible(false)->save();
+    $attribute->setData('is_visible', 0)->save();
     expect($labels()[''])->toBe('Use Default (Hidden)');
 });
 

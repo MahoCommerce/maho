@@ -419,7 +419,7 @@ class Mage_Eav_Block_Adminhtml_Attribute_Set_Edit extends Mage_Adminhtml_Block_T
     {
         /** @var Mage_Eav_Model_Entity_Type $entityType */
         $entityType = Mage::getSingleton('eav/config')->getEntityType(Mage::registry('entityType'));
-        return Mage::helper('eav')->getManagedAttributeCollection($entityType, forSets: true);
+        return Mage::helper('eav')->getManagedAttributeCollection($entityType);
     }
 
     /**

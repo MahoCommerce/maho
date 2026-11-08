@@ -54,7 +54,6 @@ class Maho_Blog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_Attri
             title: $title,
             setsTitle: $setsTitle,
             mainTab: 'blog/adminhtml_attribute_edit_tab_main',
-            userDefinedOnly: true,
             addToDefaultSet: true,
         );
     }

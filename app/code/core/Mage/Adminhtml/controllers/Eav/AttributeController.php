@@ -32,6 +32,15 @@ class Mage_Adminhtml_Eav_AttributeController extends Mage_Adminhtml_Controller_E
         return $this->getPageSettings()->mainTab ?? parent::getMainTabBlock();
     }
 
+    /**
+     * The grid lists only the attributes that an admin added, so a system attribute is not editable here.
+     */
+    #[\Override]
+    protected function canEditAttribute(Mage_Eav_Model_Entity_Attribute $model): bool
+    {
+        return (bool) $model->getIsUserDefined();
+    }
+
     #[\Override]
     protected function getAllowedTags(): array
     {

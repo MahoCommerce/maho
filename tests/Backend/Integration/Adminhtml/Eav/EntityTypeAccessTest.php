@@ -58,3 +58,13 @@ it('opens the one set of CMS pages, and lets only the other entity types add or 
         ->and($canManageSets('cms_page'))->toBeFalse()
         ->and($canManageSets('customer'))->toBeTrue();
 });
+
+it('refuses to edit a system attribute on System > Attributes, and keeps it editable on Catalog > Attributes', function () {
+    $canEdit = fn(string $class, string $entityType, string $code): bool => (fn(): bool => $this->canEditAttribute(
+        Mage::getSingleton('eav/config')->getAttribute($entityType, $code),
+    ))->call(entityTypeAccessController($class, $entityType));
+
+    expect($canEdit(Mage_Adminhtml_Eav_AttributeController::class, 'customer', 'firstname'))->toBeFalse()
+        ->and($canEdit(Mage_Adminhtml_Eav_AttributeController::class, Mage_Catalog_Model_Category::ENTITY, 'name'))->toBeFalse()
+        ->and($canEdit(Mage_Adminhtml_Catalog_Product_AttributeController::class, Mage_Catalog_Model_Product::ENTITY, 'name'))->toBeTrue();
+});
