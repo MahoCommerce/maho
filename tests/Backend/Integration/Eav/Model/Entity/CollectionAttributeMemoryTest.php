@@ -55,17 +55,47 @@ afterEach(function () {
     Mage::getSingleton('eav/config')->clear();
 });
 
-it('bounds temporary attribute memory while loading successive backend tables', function () {
-    Mage::getResourceModel('catalog/product_collection')->setStoreId(0)
-        ->addIdFilter($this->productIds[0])->addAttributeToSelect($this->attributeCodes)->load();
-    $collection = Mage::getResourceModel('catalog/product_collection')->setStoreId(0)
-        ->addIdFilter($this->productIds)->addAttributeToSelect($this->attributeCodes);
+it('releases consumed attribute rows before fetching the next backend table', function () {
+    $connection = Mage::getSingleton('core/resource')->getConnection('core_read');
+    $adapter = $this->createMock(Maho\Db\Adapter\AdapterInterface::class);
+    foreach (new ReflectionClass(Maho\Db\Adapter\AdapterInterface::class)->getMethods() as $method) {
+        if ($method->getName() !== 'fetchAll') {
+            $adapter->method($method->getName())->willReturnCallback($connection->{$method->getName()}(...));
+        }
+    }
+    $sentinels = [];
+    $releasedBeforeFetch = [];
+    $adapter->method('fetchAll')->willReturnCallback(function (...$arguments) use ($connection, &$sentinels, &$releasedBeforeFetch): array {
+        $previousReleased = $sentinels === [] || end($sentinels)->get() === null;
+        $rows = $connection->fetchAll(...$arguments);
+        if (count($rows) > 1 && isset($rows[0]['attribute_id'])) {
+            if ($sentinels !== []) {
+                $releasedBeforeFetch[] = $previousReleased;
+            }
+            // The last row can remain in the foreach variable after its result array is released.
+            // An ignored field in the first row tracks the result array without changing values.
+            $sentinel = new stdClass();
+            $rows[0]['_lifetime_sentinel'] = $sentinel;
+            $sentinels[] = WeakReference::create($sentinel);
+        }
+        return $rows;
+    });
+    $collection = new class extends Mage_Catalog_Model_Resource_Product_Collection {
+        public ?Maho\Db\Adapter\AdapterInterface $attributeAdapter = null;
 
-    memory_reset_peak_usage();
+        #[\Override]
+        public function getConnection(): Maho\Db\Adapter\AdapterInterface
+        {
+            return $this->attributeAdapter ?? parent::getConnection();
+        }
+    };
+    $collection->attributeAdapter = $adapter;
+    $collection->setStoreId(0)->addIdFilter($this->productIds)->addAttributeToSelect($this->attributeCodes);
     $collection->load();
-    $temporaryPeak = memory_get_peak_usage() - memory_get_usage();
 
-    expect($temporaryPeak)->toBeLessThan(4 * 1024 * 1024);
+    expect($sentinels)->toHaveCount(2)
+        ->and($releasedBeforeFetch)->toBe([true])
+        ->and(array_map(static fn(WeakReference $sentinel): ?object => $sentinel->get(), $sentinels))->toBe([null, null]);
     expect($collection->count())->toBe(1000);
     foreach ($collection as $product) {
         $expected = [];
