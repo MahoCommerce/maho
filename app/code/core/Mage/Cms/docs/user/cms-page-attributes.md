@@ -33,6 +33,8 @@ The code cannot be the name of a field of the platform, such as `title`, `identi
 Go to **CMS > Pages** and open a page. The **Attributes** tab shows all the page attributes. The
 tab does not show when there are no page attributes.
 
+![The Attributes tab of a CMS page, with a text, a dropdown and a date attribute](images/cms-page-attributes-tab.webp)
+
 A new page gets the **Default Value** of each attribute. A page attribute has one value for all the
 store views of the page.
 
@@ -49,6 +51,8 @@ Set **Visible on Frontend** to **Yes** in the **Frontend Properties** of the att
 then shows the attribute and its value in a table below its content, with the title **Additional
 Information**. A page with no value for the attribute does not show it. The attributes show in the
 order in which you added them.
+
+![A CMS page with the Additional Information table below its content](images/cms-page-attributes-storefront.webp)
 
 A **Text Area** value shows under the table, with the label of the attribute as its title, because a
 long text does not fit in a table.

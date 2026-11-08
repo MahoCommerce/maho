@@ -25,6 +25,8 @@ A new attribute goes into the first group of the **Default** set. The edit page 
 it at once, on the **Content** tab, below the fields of the blog. On a category, it shows on the
 **General** tab.
 
+![The Content tab of a blog post, with two attributes below the content](images/blog-post-attributes.webp)
+
 ## Move the attribute in a set
 
 1. Go to **System > Attributes > Blog Posts**, or to **Blog Categories**, and click
@@ -52,6 +54,8 @@ category. So the value of an attribute shows and stays only when the attribute i
 Set **Visible on Frontend** to **Yes** in the **Frontend Properties** of the attribute. The post
 page or the category page then shows the attribute and its value in a table. A post with no value
 for the attribute does not show it.
+
+![A blog post with the Additional Information table below the content](images/blog-attributes-storefront.webp)
 
 A **Text Area** value shows under the table, with the label of the attribute as its title, because a
 long text does not fit in a table.

@@ -39,6 +39,8 @@ the **System** column of the grid.
    above the groups.
 4. Click **Save**.
 
+![The Collection set, with the Collection Details group and its three attributes](images/category-attribute-set.webp)
+
 The groups of the set are the tabs of the category page. A group with no attributes shows no tab.
 
 ## Use more than one set
@@ -54,6 +56,8 @@ and the **Default** set does not show them.
 When a store has more than one category set, the first tab of a category shows the
 **Attribute Set** field. A new category starts with the set of its parent. When you select another
 set, the page shows the fields of that set at once, and keeps the values that you entered.
+
+![A category with the Collection set. The Collection Details group is a tab](images/category-attribute-set-field.webp)
 
 You can also change the set of a saved category. When the new set does not have some attributes of
 the old set, the page asks first and names them. When you save, the category loses its values of
@@ -78,6 +82,8 @@ Each group of the set is a table of its own, in the order of the groups. The tab
 group has the title **Additional Information**. Each other table has the name of its group in the
 store view. In each table, the attributes follow the order of the group. To change the order,
 drag the attribute in the set.
+
+![A category page with the Additional Information table, the Collection Details table and the Collection Story text](images/category-attributes-storefront.webp)
 
 ## Name a group for each store view
 

@@ -55,6 +55,8 @@ section **Where the Field Shows**, which lists the three:
 - **Websites**: the mode of each website: **Hidden**, **Optional** or **Required**. When all the
   websites use one mode, the row shows **All websites** and the mode.
 
+![The Where the Field Shows section of a customer attribute. Two forms and three customer groups have a line through them](images/customer-attribute-summary.webp)
+
 When a customer does not see a field, read this summary first.
 
 ## Input rules
@@ -80,6 +82,10 @@ For example, wholesale customers give a company registration number, and retail 
 4. Go to **Customers > Customer Groups** and open the **Wholesale** group.
 5. Select **Wholesale** in **Customer Attribute Set**, and click **Save**.
 
+![The Wholesale set, with the Company Information group and its two attributes](images/customer-attribute-set.webp)
+
+![The Wholesale customer group, with the Wholesale set in Customer Attribute Set](images/customer-group-attribute-set.webp)
+
 A form shows an attribute when the attribute is in the set of the group, or when it is in no set.
 So a new attribute shows to every group until you add it to a set.
 
@@ -94,6 +100,8 @@ The groups of the set divide the forms:
   for example **Company Information**. The title is the name of the group in the store view of the
   customer. The admin customer page shows each group as a part too, with its Admin name.
 
+![The account edit page of a wholesale customer. The Company Information part comes after the fields of the platform](images/customer-account-edit.webp)
+
 The set page says this too, and it names the first group of the set.
 
 ## Name a group for each store view
@@ -103,6 +111,8 @@ The set page says this too, and it names the first group of the set.
 3. To show another name in a store view, enter it in the row of that store view. A store view with
    no name shows the Admin name.
 4. Click **Save** in the window, then click **Save** on the set page.
+
+![The Rename Group window, with a name for the French, German and Italian store views](images/customer-group-labels.webp)
 
 The store finds the group of a form in this order:
 
