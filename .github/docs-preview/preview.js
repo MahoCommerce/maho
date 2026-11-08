@@ -54,9 +54,20 @@
             return;
         }
         const changed = preview.changed.map((path) => `/${path}`);
-        const navLinks = [...document.querySelectorAll('.md-nav__link[href]')];
-        for (const link of navLinks) {
-            link.classList.toggle('docs-preview-changed', changed.includes(pathOf(link)));
+        // The table of contents uses the same class, with #anchor links to the current page.
+        const navLinks = [...document.querySelectorAll('.md-nav__link[href]')]
+            .filter((link) => new URL(link.href, location.href).hash === '');
+        for (const node of document.querySelectorAll('.docs-preview-changed')) {
+            node.classList.remove('docs-preview-changed');
+        }
+        for (const link of navLinks.filter((link) => changed.includes(pathOf(link)))) {
+            link.classList.add('docs-preview-changed');
+            // Mark each section that holds the page, so that a collapsed section shows it too.
+            let section = link.closest('.md-nav__item--nested');
+            while (section) {
+                section.querySelector(':scope > .md-nav__link')?.classList.add('docs-preview-changed');
+                section = section.parentElement.closest('.md-nav__item--nested');
+            }
         }
 
         document.querySelector('.docs-preview-banner')?.remove();

@@ -103,7 +103,7 @@ It should definitely speed things up in production, so you should enable it.
 
 When using the optimized autoloader in developer mode, a warning message will be displayed in the admin panel if class conflicts are detected. This message will show which classes conflict and which one will be used:
 
-<img src="https://github.com/user-attachments/assets/02672a48-ec04-4f3d-8658-4c9b83f22166">
+![The admin warning that lists the class conflicts](images/composer-plugin-class-conflicts.webp)
 
 ### Breaking Changes from Legacy Autoloading
 
