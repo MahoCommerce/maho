@@ -28,10 +28,10 @@ one attribute set.
 A new attribute goes into the first group of the **Default** set, so the category page shows it
 at once. To move it to another tab or to add it to another set, edit the set.
 
-You can delete only the attributes that you added. The attributes of the platform show **Yes** in
-the **System** column of the grid.
+You can delete only the attributes that you added. The standard attributes show **Yes** in the
+**System** column of the grid.
 
-## Move the attribute in a set
+## Put the attribute on a tab
 
 1. Go to **System > Attributes > Categories** and click **Attribute Sets**.
 2. Click the set, for example **Default**.
@@ -79,22 +79,26 @@ A **Text Area** value shows under the table, with the label of the attribute as 
 long text does not fit in a table.
 
 Each group of the set is a table of its own, in the order of the groups. The table of the first
-group has the title **Additional Information**. Each other table has the name of its group in the
-store view. In each table, the attributes follow the order of the group. To change the order,
-drag the attribute in the set.
+group has the title **Additional Information**. Each other table has the name of its group, in the
+language of the store view. In each table, the attributes follow the order of the group. To change
+the order, drag the attribute in the set.
 
 ![A category page with the Additional Information table, the Collection Details table and the Collection Story text](images/category-attributes-storefront.webp)
 
-## Name a group for each store view
-
-1. On the set page, click a group and click **Rename**, or click **Add** to make a group.
-2. Enter the name in **Admin**. The admin uses it, and it must be unique in the set.
-3. To show another name in a store view, enter it in the row of that store view. A store view with
-   no name shows the Admin name.
-4. Click **Save** in the window, then click **Save** on the set page.
-
 The table shows HTML only when **Allow HTML Tags on Frontend** or **Enable WYSIWYG** is **Yes**.
 It does not show Image attributes.
+
+## Translate the name of a group
+
+The name of a group is the title of its tab in the admin, and the title of its table on the
+category page. You can give the table a different title in each language.
+
+1. On the set page, click the group, then click **Rename**. To make a new group, click **Add**.
+2. In **Admin**, enter the name that the admin shows. Two groups of one set cannot have the same
+   name.
+3. In the row of each store view, enter the name in the language of that store view. If you leave a
+   row empty, the store view shows the **Admin** name.
+4. Click **Save** in the window, then click **Save** on the set page.
 
 ## The API
 

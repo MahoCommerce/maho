@@ -6,8 +6,8 @@ admin_pages: [eav_attribute, cms_page]
 # CMS Page Attributes
 
 A page attribute is a field that you add to every CMS page, for example a hero image URL, a
-campaign code or a review date. The fields of the platform, such as **Title** and **Content**, are
-not page attributes. CMS pages have no attribute sets: every page has all the page attributes.
+campaign code or a review date. The standard fields, such as **Title** and **Content**, are not
+page attributes. CMS pages have no attribute sets: every page has all the page attributes.
 
 ## Add an attribute
 
@@ -25,8 +25,7 @@ not page attributes. CMS pages have no attribute sets: every page has all the pa
    add the options.
 8. Click **Save**.
 
-The code cannot be the name of a field of the platform, such as `title`, `identifier` or
-`content`. It also cannot be `stores` or `store_id`.
+The code cannot be the name of a standard field, such as `title`, `identifier` or `content`. It also cannot be `stores` or `store_id`.
 
 ## Fill in the attribute
 
@@ -58,13 +57,12 @@ A **Text Area** value shows under the table, with the label of the attribute as 
 long text does not fit in a table.
 
 Set **Allow HTML Tags on Frontend** to **Yes** to keep the HTML of a value. The store removes unsafe
-HTML, such as a script, and it removes directives such as `{{store url=""}}`. With **No**, the
-page shows the tags as text.
+HTML, such as a script. It also removes codes in braces, such as `{{store url=""}}`. With **No**,
+the page shows the tags as text.
 
-A theme can also show a value in another place. In a template of the `Mage_Cms_Block_Page` block,
-`$this->getPage()->getData('your_code')` returns the value. A Dropdown returns the option ID, and a
-Multiple Select returns the option IDs separated by commas. The store does not sanitize the value,
-so escape it in the template, for example with `$this->escapeHtml()`.
+A theme can also show a value in another place of the page. The
+[attribute admin pages](../developer/eav-attribute-admin.md#the-storefront-table) page tells a
+developer how.
 
 ## Import
 

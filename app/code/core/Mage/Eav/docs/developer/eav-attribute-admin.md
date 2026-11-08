@@ -155,6 +155,11 @@ entity type overrides the method:
   `cms_eav_attribute` table holds the **Visible on Frontend** and **Allow HTML Tags on Frontend**
   flags of each attribute.
 
+To show a page attribute in another place, read it in a template of the `Mage_Cms_Block_Page`
+block: `$this->getPage()->getData('your_code')`. A Dropdown returns the option ID, and a Multiple
+Select returns the option IDs separated by commas. The value is not sanitized, so escape it, for
+example with `$this->escapeHtml()`.
+
 ## The API
 
 Each resource of an entity type has a `customAttributes` map of the user-defined attributes. The
