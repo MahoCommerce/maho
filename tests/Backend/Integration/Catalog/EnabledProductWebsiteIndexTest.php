@@ -142,9 +142,9 @@ it('refreshes only enabled products assigned to the store website', function (st
     'empty selection, website B' => ['b', 'empty'],
 ]);
 
-it('preserves the explicit store and scalar product refresh', function () {
+it('preserves the explicit store and scalar product refresh', function (string $store) {
     $productId = $this->productIds['a'];
-    $storeId = $this->storeIds['a'];
+    $storeId = $this->storeIds[$store];
     expect($this->productResource->refreshEnabledIndex(Mage::app()->getStore($storeId), $productId))
         ->toBe($this->productResource);
     $visibility = $this->adapter->fetchOne(
@@ -154,4 +154,4 @@ it('preserves the explicit store and scalar product refresh', function () {
             ->where('store_id = ?', $storeId),
     );
     expect((int) $visibility)->toBe(4);
-});
+})->with(['a', 'b']);
