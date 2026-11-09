@@ -432,8 +432,7 @@ it('still reports a colspan that is not the default value', function () {
 });
 
 it('keeps the text of title, alt and class attributes through the editor', function () {
-    // The old filter checked every attribute as a URL. It wrote "unsafe:" before a value with an
-    // ampersand, or with a space before a colon, such as a Tailwind class list with a variant.
+    // An ampersand, or a space before a colon, in an attribute value stays as it is.
     $page = visitWysiwygLossBlock(createWysiwygLossBlock(
         '<p class="text-sm md:text-lg"><a href="/sale" title="Tom &amp; Jerry" target="_blank">Sale</a>'
         . '<img src="/media/a.jpg" alt="Big Sale: 50%"></p>',
@@ -453,11 +452,20 @@ it('keeps the text of title, alt and class attributes through the editor', funct
 });
 
 it('does not turn escaped text into markup', function () {
-    // The old filter returned the text of a text node without escaping it again.
     $page = visitWysiwygLossBlock(createWysiwygLossBlock(WYSIWYG_LOSS_RICH_TEXT));
 
     expect($page->script('xssFilter("&lt;img src=x onerror=alert(1)&gt;")'))
         ->toBe('&lt;img src=x onerror=alert(1)&gt;')
         ->and($page->script('xssFilter("<a href=\'javascript:alert(1)\'>x</a><img src=x onerror=alert(1)>")'))
         ->toBe('<a>x</a><img src="x">');
+});
+
+it('keeps an id that is also a property of the document', function () {
+    $page = visitWysiwygLossBlock(createWysiwygLossBlock('<div id="location"><p>Our shop</p></div><p><a href="#location">Find us</a></p>'));
+
+    expect($page->script('window.tiptapEditors.get("block_content").isTiptapActive() ? 1 : 0'))->toBe(1);
+
+    $page->script('window.tiptapEditors.get("block_content").turnOff();');
+
+    expect($page->script('document.getElementById("block_content").value'))->toContain('id="location"');
 });
