@@ -332,6 +332,7 @@
 "Drag to reorder","Drag to reorder"
 "Drop-down","Drop-down"
 "Drop files here, or click to choose them","Drop files here, or click to choose them"
+"Each breakpoint must be wider than the breakpoint above it.","Each breakpoint must be wider than the breakpoint above it."
 "Edit","Edit"
 "Edit Block","Edit Block"
 "Edit Block '%s'","Edit Block '%s'"

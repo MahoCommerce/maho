@@ -227,8 +227,11 @@ class tiptapWysiwygSetup {
                     src: '{{media url="wysiwyg/slide-1.jpg"}}',
                     alt: 'First slide',
                     href: '{{store url="sale"}}',
-                    // An alternative under a max-width breakpoint, as the editor writes it in a <picture>
-                    sources: [{ src: '{{media url="wysiwyg/slide-1-mobile.jpg"}}', breakpoint: 768 }],
+                    // Alternatives in a <picture>: one for a breakpoint preset of the store, one for a custom max-width
+                    sources: [
+                        { srcset: '{{media url="wysiwyg/slide-1-mobile.jpg"}}', preset: 'mobile', breakpoint: null },
+                        { srcset: '{{media url="wysiwyg/slide-1-tablet.jpg"}}', preset: null, breakpoint: 1100 },
+                    ],
                 },
                 { src: '{{media url="wysiwyg/slide-2.jpg"}}', alt: 'Second slide' },
             ] },
@@ -633,6 +636,7 @@ class tiptapWysiwygSetup {
                 TiptapModules.MahoSpan,
                 ...(this.config.add_slideshows !== false ? [TiptapModules.MahoSlideshow.configure({
                     directivesUrl: this.config.directives_url,
+                    breakpoints: this.config.breakpoints ?? [],
                     browserUrl: setRouteParams(this.config.files_browser_window_url, {
                         store: this.storeId,
                         filetype: 'image',

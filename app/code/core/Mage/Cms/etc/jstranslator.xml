@@ -34,14 +34,14 @@ SPDX-License-Identifier: AFL-3.0
         <mobile-image translate="message">
             <message>Mobile image</message>
         </mobile-image>
-        <breakpoint-px translate="message">
-            <message>Breakpoint (px)</message>
-        </breakpoint-px>
+        <breakpoint translate="message">
+            <message>Breakpoint</message>
+        </breakpoint>
         <remove-mobile-image translate="message">
             <message>Remove mobile image</message>
         </remove-mobile-image>
         <invalid-slide-breakpoint translate="message">
-            <message>The breakpoint must be a whole number between 1 and 9999</message>
+            <message>Select a breakpoint from the list, or enter a whole number between 1 and 9999</message>
         </invalid-slide-breakpoint>
         <duplicate-slide-breakpoint translate="message">
             <message>Two images in a slide need different breakpoints</message>

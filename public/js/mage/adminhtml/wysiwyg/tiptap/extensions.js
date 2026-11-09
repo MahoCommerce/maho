@@ -520,25 +520,44 @@ export const MahoImage = Image.extend({
 
 
 /**
- * Breakpoint bounds of the alternative images. A slide writes `(max-width: Npx)`, so the first
- * matching <source> wins and the smallest breakpoint must come first in the <picture>.
+ * Bounds of a custom breakpoint, in pixels. A `<source>` applies up to its max-width and the first
+ * matching `<source>` wins, so the narrowest breakpoint must come first in the `<picture>`.
  */
-const BREAKPOINT_DEFAULT = 768;
 const BREAKPOINT_MIN = 1;
 const BREAKPOINT_MAX = 9999;
 
-/**
- * Read the max-width breakpoint of a `<source>`. Returns null when `media` is not one max-width
- * query and nothing else, so a variant that the browser would read differently is dropped
- * instead of rewritten.
- */
-const parseBreakpoint = (media) => {
-    const match = /^\s*\(\s*max-width\s*:\s*(\d+)\s*px\s*\)\s*$/i.exec(media ?? '');
-    const value = match ? Number(match[1]) : NaN;
-    return Number.isInteger(value) && value >= BREAKPOINT_MIN && value <= BREAKPOINT_MAX ? value : null;
+/** Read a custom breakpoint: a whole number in range, or null. */
+const toBreakpoint = (value) => {
+    const number = typeof value === 'string' && value.trim() === '' ? NaN : Number(value ?? NaN);
+    return Number.isInteger(number) && number >= BREAKPOINT_MIN && number <= BREAKPOINT_MAX ? number : null;
 };
 
-const renderMedia = (breakpoint) => `(max-width: ${breakpoint}px)`;
+/**
+ * Read the breakpoint of a `<source>`: `{{breakpoint code=mobile}}` gives a preset that the store
+ * knows, and one max-width query with nothing else gives a custom breakpoint. Any other `media`
+ * returns null, so a variant that the browser would read differently is dropped instead of rewritten.
+ */
+const parseBreakpoint = (media, presets) => {
+    const preset = /^\s*\{\{\s*breakpoint\s+code\s*=\s*(["']?)([a-z0-9_]+)\1\s*\}\}\s*$/i.exec(media ?? '')?.[2];
+    if (preset !== undefined) {
+        return presets.some((item) => item.code === preset) ? { preset, breakpoint: null } : null;
+    }
+    const breakpoint = toBreakpoint(/^\s*\(\s*max-width\s*:\s*(\d+)\s*px\s*\)\s*$/i.exec(media ?? '')?.[1]);
+    return breakpoint === null ? null : { preset: null, breakpoint };
+};
+
+/** The `media` of a source. A preset stays a directive, so the storefront reads its current width. */
+const renderMedia = (source) => source.preset
+    ? `{{breakpoint code=${source.preset}}}`
+    : `(max-width: ${source.breakpoint}px)`;
+
+/** The width in pixels up to which a source applies: the width of its preset, or its custom breakpoint. */
+const sourceWidth = (source, presets) => source.preset
+    ? presets.find((item) => item.code === source.preset)?.width ?? null
+    : toBreakpoint(source.breakpoint);
+
+const sortSources = (sources, presets) =>
+    [...sources].sort((a, b) => (sourceWidth(a, presets) ?? 0) - (sourceWidth(b, presets) ?? 0));
 
 /**
  * The URL of the first candidate in a `srcset`, for the preview. A directive is a candidate of its
@@ -553,24 +572,33 @@ const firstCandidate = (srcset) => {
     return value.split(/\s+/)[0];
 };
 
-/** Read a breakpoint as the slide stores it: a whole number in range, or null. */
-const toBreakpoint = (value) => {
-    const number = typeof value === 'string' && value.trim() === '' ? NaN : Number(value);
-    return Number.isInteger(number) && number >= BREAKPOINT_MIN && number <= BREAKPOINT_MAX ? number : null;
+/** The breakpoint of a new alternative: the first preset that the slide does not use, else a free width. */
+const nextBreakpoint = (slide, presets) => {
+    const sources = slide.sources ?? [];
+    const preset = presets.find((item) => !sources.some((source) => source.preset === item.code));
+    if (preset) {
+        return { preset: preset.code, breakpoint: null };
+    }
+    const used = new Set(sources.map((source) => sourceWidth(source, presets)));
+    let breakpoint = [768, 480, 991, 1200, 360, 1600].find((value) => !used.has(value)) ?? BREAKPOINT_MIN;
+    while (used.has(breakpoint)) {
+        breakpoint++;
+    }
+    return { preset: null, breakpoint };
 };
 
-/** The breakpoint of a new alternative: the default, or the first free one from a common ladder. */
-const nextBreakpoint = (slide) => {
-    const used = new Set((slide.sources ?? []).map((source) => toBreakpoint(source.breakpoint)));
-    const candidate = [BREAKPOINT_DEFAULT, 480, 991, 1200, 360, 1600].find((value) => !used.has(value));
-    if (candidate !== undefined) {
-        return candidate;
+/**
+ * Read the text of the breakpoint field: a preset by its label or its code, or a width such as
+ * `900` or `900px`. Returns null for any other text.
+ */
+const parseBreakpointInput = (text, presets) => {
+    const value = (text ?? '').trim().toLowerCase();
+    const preset = presets.find((item) => item.label.toLowerCase() === value || item.code === value);
+    if (preset) {
+        return { preset: preset.code, breakpoint: null };
     }
-    let value = BREAKPOINT_MIN;
-    while (used.has(value)) {
-        value++;
-    }
-    return value;
+    const breakpoint = toBreakpoint(/^(\d+)\s*(?:px)?$/.exec(value)?.[1]);
+    return breakpoint === null ? null : { preset: null, breakpoint };
 };
 
 /**
@@ -588,9 +616,9 @@ const parseBrowserImage = (returnValue) => {
 
 /**
  * Parse a `<div class="slideshow">` node into an array of slides
- * `[{ src, alt, href, directiveObj, sources }, ...]`
+ * `[{ src, alt, href, directiveObj, sources: [{ srcset, preset, breakpoint }] }, ...]`
  */
-const parseSlides = (div) => {
+const parseSlides = (div, presets) => {
     // Parse each <li> child and add to our array if it's a valid slide, i.e. contains an image
     const slides = [];
     for (const li of div.querySelectorAll(':scope > ul > li')) {
@@ -601,19 +629,18 @@ const parseSlides = (div) => {
             const sources = [];
             for (const source of li.querySelectorAll(':scope > a > picture > source, :scope > picture > source')) {
                 const srcset = (source.getAttribute('srcset') ?? '').trim();
-                const breakpoint = parseBreakpoint(source.getAttribute('media'));
+                const breakpoint = parseBreakpoint(source.getAttribute('media'), presets);
                 if (srcset && breakpoint !== null) {
-                    sources.push({ srcset, breakpoint });
+                    sources.push({ srcset, ...breakpoint });
                 }
             }
-            sources.sort((a, b) => a.breakpoint - b.breakpoint);
 
             slides.push({
                 src: img.getAttribute('src') ?? '',
                 alt: img.getAttribute('alt') ?? '',
                 href: link?.getAttribute('href'),
                 directiveObj: parseDirective(img.getAttribute('src')),
-                sources,
+                sources: sortSources(sources, presets),
             });
         }
     }
@@ -627,15 +654,15 @@ const parseSlides = (div) => {
  * content saves byte for byte. With alternatives the `<img>` stays as the fallback for a browser
  * that ignores `<picture>`.
  */
-const renderSlides = (slides) => {
+const renderSlides = (slides, presets) => {
     return slides.map((slide) => {
         const { src, alt, href, sources = [] } = slide;
 
         let media;
         if (sources.length) {
             const picture = ['picture', {}];
-            for (const source of [...sources].sort((a, b) => a.breakpoint - b.breakpoint)) {
-                picture.push(['source', { media: renderMedia(source.breakpoint), srcset: source.srcset }]);
+            for (const source of sortSources(sources, presets)) {
+                picture.push(['source', { media: renderMedia(source), srcset: source.srcset }]);
             }
             picture.push(['img', { src, alt }]);
             media = picture;
@@ -672,14 +699,14 @@ export const MahoSlideshow = Node.create({
         return [{
             tag: 'div.slideshow',
             getAttrs: (div) => {
-                const slides = parseSlides(div);
+                const slides = parseSlides(div, this.options.breakpoints ?? []);
                 return { slides };
             },
         }];
     },
 
     renderHTML({ node }) {
-        const slides = renderSlides(node.attrs.slides);
+        const slides = renderSlides(node.attrs.slides, this.options.breakpoints ?? []);
         return ['div', { class: 'slideshow' }, ['ul', {}, ...slides]];
     },
 
@@ -738,9 +765,13 @@ export const MahoSlideshow = Node.create({
                 let sortableInstance;
 
                 // Create slideshow editor dialog content
+                const presets = this.options.breakpoints ?? [];
                 const dialogContent = `
                     <div class="slideshow-editor">
                         <ul class="slides-list"></ul>
+                        <datalist id="slideshow-breakpoint-presets">
+                            ${presets.map((preset) => `<option value="${escapeHtml(preset.label, true)}">${preset.width} px</option>`).join('')}
+                        </datalist>
                     </div>
                 `;
                 const translate = (string) => editor.options.wysiwygSetup.translate(string);
@@ -757,7 +788,7 @@ export const MahoSlideshow = Node.create({
                         <div class="slide-sources"></div>
                         <button type="button" class="add-source">
                             ${editor.options.wysiwygSetup.getIcon('plus')}
-                            <span>${escapeHtml(translate('%s'), true)}</span>
+                            <span>${escapeHtml(translate('Add mobile image'), true)}</span>
                         </button>
                     </div>
                     <button type="button" class="remove-slide" title="Remove slide">
@@ -765,13 +796,13 @@ export const MahoSlideshow = Node.create({
                     </button>
                 `;
                 const sourceTemplate = `
-                    <img class="source-preview" src="" alt="" title="${escapeHtml(translate('%s'), true)}">
+                    <img class="source-preview" src="" alt="" title="${escapeHtml(translate('Mobile image'), true)}">
                     <label class="source-breakpoint">
-                        <span>${escapeHtml(translate('%s'), true)}</span>
-                        <input type="number" class="source-breakpoint-input"
-                               min="${BREAKPOINT_MIN}" max="${BREAKPOINT_MAX}" step="1">
+                        <span>${escapeHtml(translate('Breakpoint'), true)}</span>
+                        <input type="text" class="source-breakpoint-input" list="slideshow-breakpoint-presets" autocomplete="off">
+                        <span class="source-breakpoint-unit"></span>
                     </label>
-                    <button type="button" class="remove-source" title="${escapeHtml(translate('%s'), true)}">
+                    <button type="button" class="remove-source" title="${escapeHtml(translate('Remove mobile image'), true)}">
                         ${editor.options.wysiwygSetup.getIcon('trash')}
                     </button>
                 `;
@@ -802,7 +833,7 @@ export const MahoSlideshow = Node.create({
                                         return;
                                     }
                                     slide.sources ??= [];
-                                    slide.sources.push({ srcset: image.src, breakpoint: nextBreakpoint(slide) });
+                                    slide.sources.push({ srcset: image.src, ...nextBreakpoint(slide, presets) });
                                     renderSlideRows();
                                 },
                             });
@@ -830,10 +861,44 @@ export const MahoSlideshow = Node.create({
                                     const previewUrl = firstCandidate(source.srcset);
                                     row.querySelector('.source-preview').src =
                                         renderDirectiveImageUrl(previewUrl, parseDirective(previewUrl), this.options.directivesUrl);
-                                    row.querySelector('.source-breakpoint-input').value = source.breakpoint ?? '';
+                                    const input = row.querySelector('.source-breakpoint-input');
+                                    const unit = row.querySelector('.source-breakpoint-unit');
+                                    const showUnit = () => {
+                                        const width = source.invalid === undefined ? sourceWidth(source, presets) : null;
+                                        unit.textContent = source.preset && width !== null ? `${width} px` : 'px';
+                                    };
+                                    const showValue = () => {
+                                        input.value = source.preset
+                                            ? presets.find((item) => item.code === source.preset)?.label ?? source.preset
+                                            : source.breakpoint ?? '';
+                                        showUnit();
+                                    };
+                                    showValue();
 
-                                    row.querySelector('.source-breakpoint-input').addEventListener('change', (event) => {
-                                        slide.sources[sourceIndex].breakpoint = event.target.value;
+                                    // The datalist only lists the presets that match the text, so the
+                                    // field is empty while it has the focus and shows its value as a hint
+                                    input.addEventListener('focus', () => {
+                                        input.placeholder = input.value;
+                                        input.value = '';
+                                    });
+                                    input.addEventListener('blur', () => {
+                                        input.placeholder = '';
+                                        if (input.value.trim() === '') {
+                                            delete source.invalid;
+                                        }
+                                        if (source.invalid === undefined) {
+                                            showValue();
+                                        }
+                                    });
+                                    input.addEventListener('input', () => {
+                                        const parsed = parseBreakpointInput(input.value, presets);
+                                        if (parsed) {
+                                            Object.assign(source, parsed);
+                                            delete source.invalid;
+                                        } else {
+                                            source.invalid = input.value;
+                                        }
+                                        showUnit();
                                     });
                                     row.querySelector('.remove-source').addEventListener('click', () => {
                                         slide.sources.splice(sourceIndex, 1);
@@ -920,27 +985,26 @@ export const MahoSlideshow = Node.create({
                             return false;
                         }
 
-                        // The variants become numbers in range and grow by breakpoint, because in a
+                        // Each variant gets a width in range, and the variants grow by width, because in a
                         // <picture> the first matching <source> wins
                         const normalized = [];
                         for (const slide of slides) {
                             const sources = [];
                             for (const source of slide.sources ?? []) {
-                                const breakpoint = toBreakpoint(source.breakpoint);
-                                if (breakpoint === null) {
-                                    alert(translate('The breakpoint must be a whole number between 1 and 9999'));
+                                const width = source.invalid === undefined ? sourceWidth(source, presets) : null;
+                                if (width === null) {
+                                    alert(translate('Select a breakpoint from the list, or enter a whole number between 1 and 9999'));
                                     return false;
                                 }
-                                if (sources.some((item) => item.breakpoint === breakpoint)) {
+                                if (sources.some((item) => sourceWidth(item, presets) === width)) {
                                     alert(translate('Two images in a slide need different breakpoints'));
                                     return false;
                                 }
-                                sources.push({ srcset: source.srcset, breakpoint });
+                                sources.push(source.preset
+                                    ? { srcset: source.srcset, preset: source.preset, breakpoint: null }
+                                    : { srcset: source.srcset, preset: null, breakpoint: width });
                             }
-                            normalized.push({
-                                ...slide,
-                                sources: sources.sort((a, b) => a.breakpoint - b.breakpoint),
-                            });
+                            normalized.push({ ...slide, sources: sortSources(sources, presets) });
                         }
 
                         editor.commands.insertContentAt({ from, to }, {
