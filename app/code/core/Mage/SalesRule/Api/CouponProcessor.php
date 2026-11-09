@@ -73,7 +73,7 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
         $rule->setCustomerGroupIds(\Mage::getResourceModel('customer/group_collection')->getAllIds())
             ->setWebsiteIds([(int) \Maho\ApiPlatform\Service\StoreContext::getStore()->getWebsiteId()]);
         $this->readFields($rule, $data + ['discountType' => ''], $errors);
-        $this->readDiscountAmount($rule, $data['discountAmount'] ?? 0, $errors);
+        $rule->setDiscountAmount((float) ($data['discountAmount'] ?? 0));
 
         /** @var \Mage_SalesRule_Model_Coupon $coupon */
         $coupon = \Mage::getModel('salesrule/coupon');
@@ -100,7 +100,7 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
         }
         $this->readFields($rule, $data, $errors);
         if (isset($data['discountAmount'])) {
-            $this->readDiscountAmount($rule, $data['discountAmount'], $errors);
+            $rule->setDiscountAmount((float) $data['discountAmount']);
         }
         if (isset($data['code'])) {
             $coupon->setCode((string) $data['code']);
@@ -179,17 +179,6 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
         if (isset($data['minimumSubtotal'])) {
             $this->setMinimumSubtotalCondition($rule, (float) $data['minimumSubtotal']);
         }
-    }
-
-    /**
-     * A coupon of this resource always gives a discount.
-     */
-    private function readDiscountAmount(\Mage_SalesRule_Model_Rule $rule, mixed $amount, \Mage_Core_Exception_Input $errors): void
-    {
-        if ((float) $amount <= 0) {
-            $errors->addError('discount_amount', 'Discount amount must be greater than 0');
-        }
-        $rule->setDiscountAmount((float) $amount);
     }
 
     /**

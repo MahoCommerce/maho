@@ -239,6 +239,41 @@ describe('Coupon rule-level knobs', function (): void {
 
 });
 
+describe('Coupon discount amount', function (): void {
+
+    it('creates a free shipping coupon with no discount, as the admin does', function (): void {
+        $token = adminToken();
+        $code = 'PestFreeShip' . substr(uniqid(), -6);
+
+        $create = apiPost('/api/rest/v2/coupons', [
+            'code' => $code,
+            'discountType' => 'fixed',
+            'discountAmount' => 0,
+            'simpleFreeShipping' => 1,
+        ], $token);
+
+        expect($create['status'])->toBeSuccessful();
+        $id = (int) $create['json']['id'];
+        expect((float) $create['json']['discountAmount'])->toBe(0.0);
+        expect(apiGet("/api/rest/v2/coupons/{$id}", $token)['json']['simpleFreeShipping'])->toBe(1);
+
+        expect(apiDelete("/api/rest/v2/coupons/{$id}", $token)['status'])->toBeIn([200, 204]);
+    });
+
+    it('refuses a negative amount and a percent above 100 with the messages of the admin', function (): void {
+        $token = adminToken();
+
+        $negative = apiPost('/api/rest/v2/coupons', ['code' => 'PestNeg' . substr(uniqid(), -6), 'discountType' => 'fixed', 'discountAmount' => -5], $token);
+        $percent = apiPost('/api/rest/v2/coupons', ['code' => 'PestPct' . substr(uniqid(), -6), 'discountType' => 'percent', 'discountAmount' => 150], $token);
+
+        expect($negative['status'])->toBe(422);
+        expect($negative['json']['details']['errors'][0]['message'])->toBe('The discount amount must be 0 or more.');
+        expect($percent['status'])->toBe(422);
+        expect($percent['json']['details']['errors'][0]['message'])->toBe('The discount amount must not be more than 100 for a percent discount.');
+    });
+
+});
+
 describe('Coupon minimum subtotal', function (): void {
 
     it('saves, changes and removes the minimum subtotal condition', function (): void {
