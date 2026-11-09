@@ -74,7 +74,7 @@ it('routes each PDO adapter multiQuery splitter through its engine grammar witho
     ];
 
     foreach ($adapters as $engine => $adapterClass) {
-        $adapter = (new ReflectionClass($adapterClass))->newInstanceWithoutConstructor();
+        $adapter = new ReflectionClass($adapterClass)->newInstanceWithoutConstructor();
         $split = new ReflectionMethod($adapterClass, '_splitMultiQuery');
         $fixture = $engine === 'pgsql' ? 'SELECT $$a;b$$; SELECT 2' : 'SELECT 1; SELECT 2';
         expect($split->invoke($adapter, $fixture))->toHaveCount(2)
@@ -113,4 +113,9 @@ it('keeps PostgreSQL escape string prefixes separate from non-ASCII identifiers'
         ->toBe(["SELECT ée'a\\'", 'SELECT 2'])
         ->and(StatementSplitter::split("SELECT E'a\\';b'; SELECT 2", 'pgsql'))
         ->toBe(["SELECT E'a\\';b'", 'SELECT 2']);
+});
+
+it('rejects an engine that it has no grammar for', function () {
+    expect(fn() => StatementSplitter::split('SELECT 1', 'postgres'))
+        ->toThrow(InvalidArgumentException::class, 'Unsupported database engine: postgres');
 });

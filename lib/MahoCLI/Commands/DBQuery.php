@@ -81,6 +81,10 @@ class DBQuery extends BaseMahoCommand
         string $engine,
         bool $clientAvailable,
     ): int {
+        if (!in_array($engine, \Maho\Db\Sql\StatementSplitter::ENGINES, true)) {
+            return $this->handleUnsupportedEngine($engine);
+        }
+
         // query() runs a single statement, so trailing statements in a multi-statement string
         // would be silently dropped. Refuse them and point to a path that actually works here:
         // the native client only when its binary exists, otherwise one statement per call.

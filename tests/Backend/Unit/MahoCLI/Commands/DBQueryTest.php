@@ -102,14 +102,14 @@ it('refuses a result set with duplicate column names instead of dropping a colum
 });
 
 it('detects multiple statements while ignoring literals, identifiers, and comments', function () {
-    expect(dbQueryReflect('containsMultipleStatements', 'SELECT 1'))->toBeFalse()
-        ->and(dbQueryReflect('containsMultipleStatements', 'SELECT 1;'))->toBeFalse()
-        ->and(dbQueryReflect('containsMultipleStatements', 'SELECT 1; SELECT 2'))->toBeTrue()
-        ->and(dbQueryReflect('containsMultipleStatements', "SELECT 'a;b'"))->toBeFalse()
-        ->and(dbQueryReflect('containsMultipleStatements', 'SELECT "x;y"'))->toBeFalse()
-        ->and(dbQueryReflect('containsMultipleStatements', 'SELECT `a;b`'))->toBeFalse()
-        ->and(dbQueryReflect('containsMultipleStatements', 'SELECT 1 /* ; */ , 2'))->toBeFalse()
-        ->and(dbQueryReflect('containsMultipleStatements', 'UPDATE a SET x=1; UPDATE b SET y=2'))->toBeTrue();
+    expect(dbQueryReflect('containsMultipleStatements', 'SELECT 1', 'mysql'))->toBeFalse()
+        ->and(dbQueryReflect('containsMultipleStatements', 'SELECT 1;', 'mysql'))->toBeFalse()
+        ->and(dbQueryReflect('containsMultipleStatements', 'SELECT 1; SELECT 2', 'mysql'))->toBeTrue()
+        ->and(dbQueryReflect('containsMultipleStatements', "SELECT 'a;b'", 'mysql'))->toBeFalse()
+        ->and(dbQueryReflect('containsMultipleStatements', 'SELECT "x;y"', 'mysql'))->toBeFalse()
+        ->and(dbQueryReflect('containsMultipleStatements', 'SELECT `a;b`', 'mysql'))->toBeFalse()
+        ->and(dbQueryReflect('containsMultipleStatements', 'SELECT 1 /* ; */ , 2', 'mysql'))->toBeFalse()
+        ->and(dbQueryReflect('containsMultipleStatements', 'UPDATE a SET x=1; UPDATE b SET y=2', 'mysql'))->toBeTrue();
 });
 
 it('splits MySQL strings by quote escaping and only recognizes comments outside quotes', function () {
@@ -155,7 +155,7 @@ it('does not emit ordinary trailing comments as adapter statements', function ()
     ];
 
     foreach ($adapters as $adapterClass) {
-        $adapter = (new ReflectionClass($adapterClass))->newInstanceWithoutConstructor();
+        $adapter = new ReflectionClass($adapterClass)->newInstanceWithoutConstructor();
         $split = new ReflectionMethod($adapterClass, '_splitMultiQuery');
         expect($split->invoke($adapter, 'SELECT 1; /* trailing comment */'))->toBe(['SELECT 1'])
             ->and($split->invoke($adapter, '/* comment only */'))->toBe([]);
@@ -187,4 +187,11 @@ it('maps each engine to its client binary name', function () {
 
 it('reports no client binary for an unknown engine', function () {
     expect(dbQueryReflect('isClientBinaryAvailable', 'unknown-engine'))->toBeFalse();
+});
+
+it('refuses an unsupported engine on the framework connection', function () {
+    $output = new Symfony\Component\Console\Output\BufferedOutput();
+    $status = dbQueryReflect('executeViaAdapter', $output, 'SELECT 1', 'postgres', false);
+
+    expect($status)->toBe(Symfony\Component\Console\Command\Command::FAILURE);
 });

@@ -87,7 +87,7 @@ trait DatabaseCliTrait
     /**
      * Whether the SQL string contains more than one statement.
      */
-    private function containsMultipleStatements(string $sql, string $engine = 'mysql'): bool
+    private function containsMultipleStatements(string $sql, string $engine): bool
     {
         return count($this->splitSqlStatements($sql, $engine)) > 1;
     }

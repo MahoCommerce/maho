@@ -3,6 +3,7 @@
 /**
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
+ * @package Maho
  */
 
 declare(strict_types=1);
@@ -15,9 +16,18 @@ namespace Maho\Db\Sql;
  */
 final class StatementSplitter
 {
-    /** @return list<string> */
+    public const array ENGINES = ['mysql', 'pgsql', 'sqlite'];
+
+    /**
+     * @return list<string>
+     * @throws \InvalidArgumentException if $engine is not in ENGINES
+     */
     public static function split(string $sql, string $engine): array
     {
+        if (!in_array($engine, self::ENGINES, true)) {
+            throw new \InvalidArgumentException("Unsupported database engine: {$engine}");
+        }
+
         $statements = [];
         $statement = '';
         $hasSql = false;
