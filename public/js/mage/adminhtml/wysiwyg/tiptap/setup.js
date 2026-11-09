@@ -106,7 +106,8 @@ class tiptapWysiwygSetup {
 
         // Convert any <span> widget into <div> if they only have other <div> parents
         const blockTags = ['DIV'];
-        const doc = new DOMParser().parseFromString(xssFilter(content), 'text/html');
+        // The parser makes a separate document, so an id such as "location" cannot clobber the admin page.
+        const doc = new DOMParser().parseFromString(xssFilter(content, { SANITIZE_DOM: false }), 'text/html');
 
         for (const widget of doc.body.querySelectorAll('span[data-type=maho-widget]')) {
             let ref = widget.parentElement;
@@ -333,10 +334,9 @@ class tiptapWysiwygSetup {
                 dropped.add(`<${tag}>`);
                 continue;
             }
-            for (const { name, value } of element.attributes) {
+            for (const { name } of element.attributes) {
                 const key = `${tag} ${name}`;
-                if (tiptapWysiwygSetup.normalizedAttributes.includes(key)
-                    || tiptapWysiwygSetup.isDefaultAttributeValue(name, value)) {
+                if (tiptapWysiwygSetup.normalizedAttributes.includes(key)) {
                     continue;
                 }
                 if ((after.attributes.get(key) ?? 0) < before.attributes.get(key)) {

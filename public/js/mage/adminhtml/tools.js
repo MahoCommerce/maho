@@ -610,8 +610,8 @@ function debounce(func, delay) {
  * Remove the scripts, the event handlers and the unsafe URLs from the HTML in str. Return HTML.
  * The save keeps `target` on a link, so the filter keeps it too.
  */
-function xssFilter(str) {
-    return DOMPurify.sanitize(str, { ADD_ATTR: ['target'] });
+function xssFilter(str, config = {}) {
+    return DOMPurify.sanitize(str, { ADD_ATTR: ['target'], ...config });
 }
 
 async function validateHtmlContent(textareaId, url) {
