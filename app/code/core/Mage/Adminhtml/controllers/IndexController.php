@@ -103,47 +103,32 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
     #[Maho\Config\Route('/admin/index/globalSearch')]
     public function globalSearchAction(): void
     {
-        $searchModules = Mage::getConfig()->getNode('adminhtml/global_search');
+        $session = Mage::getSingleton('admin/session');
         $items = [];
-
-        if (!Mage::getStoreConfigFlag('admin/global_search/enable') || !Mage::getSingleton('admin/session')->isAllowed('admin/global_search')) {
+        $error = $this->__('You have not enough permissions to use this functionality.');
+        if ($session->isAllowed('admin/global_search')) {
+            $query = $this->getRequest()->getParam('query');
+            $limit = $this->getRequest()->getParam('limit');
+            try {
+                $rows = Mage::getService('adminhtml/globalSearch')->search(
+                    is_string($query) ? $query : '',
+                    is_numeric($limit) ? (int) $limit : null,
+                    fn(string $acl): bool => $acl === '' || $session->isAllowed($acl),
+                );
+                $items = array_column($rows, 'result');
+                $error = null;
+            } catch (Mage_Core_Exception $e) {
+                $error = $e->getMessage();
+            }
+        }
+        if ($error !== null) {
             $items[] = [
                 'id' => 'error',
-                'type' => Mage::helper('adminhtml')->__('Error'),
-                'name' => Mage::helper('adminhtml')->__('Access Denied'),
-                'description' => Mage::helper('adminhtml')->__('You have not enough permissions to use this functionality.'),
+                'type' => $this->__('Error'),
+                'name' => $this->__('Access Denied'),
+                'description' => $error,
+                'url' => '',
             ];
-        } else {
-            if (empty($searchModules)) {
-                $items[] = [
-                    'id' => 'error',
-                    'type' => Mage::helper('adminhtml')->__('Error'),
-                    'name' => Mage::helper('adminhtml')->__('No search modules were registered'),
-                    'description' => Mage::helper('adminhtml')->__('Please make sure that all global admin search modules are installed and activated.'),
-                ];
-            } else {
-                $start = $this->getRequest()->getParam('start', 1);
-                $limit = $this->getRequest()->getParam('limit', 10);
-                $query = $this->getRequest()->getParam('query', '');
-                foreach ($searchModules->children() as $searchConfig) {
-                    if ($searchConfig->acl && !Mage::getSingleton('admin/session')->isAllowed((string) $searchConfig->acl)) {
-                        continue;
-                    }
-
-                    $className = $searchConfig->getClassName();
-
-                    if (empty($className)) {
-                        continue;
-                    }
-                    $searchInstance = new $className();
-                    $results = $searchInstance->setStart($start)
-                        ->setLimit($limit)
-                        ->setQuery($query)
-                        ->load()
-                        ->getResults();
-                    $items = array_merge_recursive($items, $results);
-                }
-            }
         }
 
         $block = $this->getLayout()->createBlock('adminhtml/template')

@@ -31,6 +31,11 @@ SPDX-License-Identifier: AFL-3.0
                 <class>Mage_Adminhtml_Helper</class>
             </adminhtml>
         </helpers>
+        <services>
+            <adminhtml>
+                <class>Mage_Adminhtml_Service</class>
+            </adminhtml>
+        </services>
         <template>
             <email>
                 <admin_emails_forgot_email_template translate="label" module="adminhtml">
