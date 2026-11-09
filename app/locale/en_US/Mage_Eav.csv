@@ -176,7 +176,6 @@ These attributes leave the set: %s.,These attributes leave the set: %s.
 "This attribute cannot be updated.","This attribute cannot be updated."
 "This attribute is used in configurable products","This attribute is used in configurable products"
 "This attribute no longer exists.","This attribute no longer exists."
-"This attribute set no longer exists.","This attribute set no longer exists."
 This entity type has one attribute set.,This entity type has one attribute set.
 "Tonight, the store deletes their values in the records of this set. Save the set?","Tonight, the store deletes their values in the records of this set. Save the set?"
 "Unable to find an attribute to delete.","Unable to find an attribute to delete."

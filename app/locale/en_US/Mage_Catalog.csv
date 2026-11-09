@@ -789,7 +789,6 @@
 "This attribute cannot be edited.","This attribute cannot be edited."
 "This attribute cannot be updated.","This attribute cannot be updated."
 "This attribute is used in configurable products.","This attribute is used in configurable products."
-"This attribute set no longer exists.","This attribute set no longer exists."
 "This category no longer exists.","This category no longer exists."
 "This evaluates the rules against every product in the catalog and can take a while on a large one. Continue?","This evaluates the rules against every product in the catalog and can take a while on a large one. Continue?"
 "This installation has %d price row(s) scoped to a store or website, counting product prices, custom option prices and downloadable link prices. They now count as prices you set yourself and no longer follow the currency rate, including any that an earlier version wrote for you when the product was created. Run ""%s"" to list them, and delete the ones you did not set.","This installation has %d price row(s) scoped to a store or website, counting product prices, custom option prices and downloadable link prices. They now count as prices you set yourself and no longer follow the currency rate, including any that an earlier version wrote for you when the product was created. Run ""%s"" to list them, and delete the ones you did not set."
