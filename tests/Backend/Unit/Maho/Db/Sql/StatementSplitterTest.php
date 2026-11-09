@@ -104,6 +104,11 @@ it('keeps PostgreSQL escape string prefixes separate from non-ASCII identifiers'
         ->toBe(["SELECT E'a\\';b'", 'SELECT 2']);
 });
 
+it('does not read a backtick as a quote in PostgreSQL', function () {
+    expect(StatementSplitter::split('SELECT a ` b; SELECT 2', 'pgsql'))->toBe(['SELECT a ` b', 'SELECT 2'])
+        ->and(StatementSplitter::split('SELECT `a;b`; SELECT 2', 'mysql'))->toBe(['SELECT `a;b`', 'SELECT 2']);
+});
+
 it('rejects an engine that it has no grammar for', function () {
     expect(fn() => StatementSplitter::split('SELECT 1', 'postgres'))
         ->toThrow(InvalidArgumentException::class, 'Unsupported database engine: postgres');
@@ -180,6 +185,9 @@ it('keeps the BEGIN ... END body of a SQLite trigger in one statement', function
         ->toBe(["/* a */ SELECT '*/ CREATE TRIGGER'", 'SELECT 2'])
         ->and(StatementSplitter::split("CREATE TRIGGER a AFTER INSERT ON t BEGIN SELECT 1; END\v; SELECT 2; END; SELECT 3", 'sqlite'))
         ->toBe(["CREATE TRIGGER a AFTER INSERT ON t BEGIN SELECT 1; END\v; SELECT 2; END", 'SELECT 3'])
+        ->and(StatementSplitter::split('CREATE /* c */ TEMP -- d' . "\n" . 'TRIGGER a AFTER INSERT ON t BEGIN SELECT 1; END; SELECT 2', 'sqlite'))
+        ->toBe(['CREATE /* c */ TEMP -- d' . "\n" . 'TRIGGER a AFTER INSERT ON t BEGIN SELECT 1; END', 'SELECT 2'])
+        ->and(StatementSplitter::split('CREATETRIGGER a; SELECT 2', 'sqlite'))->toHaveCount(2)
         ->and(StatementSplitter::split('CREATE TABLE t (a INT); SELECT 1', 'sqlite'))->toHaveCount(2)
         ->and(StatementSplitter::split("{$trigger}; SELECT 1", 'pgsql'))->toHaveCount(4);
 });

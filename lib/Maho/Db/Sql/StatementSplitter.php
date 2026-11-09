@@ -25,7 +25,7 @@ final class StatementSplitter
      */
     private const array SPECIAL_CHARS = [
         'mysql' => "'\"`-/#",
-        'pgsql' => "'\"`-/\$",
+        'pgsql' => "'\"-/\$",
         'sqlite' => "'\"`-/[",
     ];
 
@@ -147,7 +147,7 @@ final class StatementSplitter
                 continue;
             }
 
-            if ($char === "'" || $char === '"' || $char === '`' || ($engine === 'sqlite' && $char === '[')) {
+            if ($char === "'" || $char === '"' || ($char === '`' && $engine !== 'pgsql') || ($engine === 'sqlite' && $char === '[')) {
                 $closingQuote = $char === '[' ? ']' : $char;
                 $start = $i;
                 $backslashEscapes = $engine === 'mysql' && !$noBackslashEscapes
@@ -203,12 +203,13 @@ final class StatementSplitter
      */
     private static function isOpenSqliteTrigger(string $statement, int $bodyStatementStart): bool
     {
-        if (!preg_match('#^(?:[ \t\n\r\f]+|--[^\n]*\n?|(?>/\*.*?\*/))*CREATE[ \t\n\r\f]+(?:TEMP(?:ORARY)?[ \t\n\r\f]+)?TRIGGER\b#is', $statement)) {
+        $skip = '(?:[ \t\n\r\f]++|--[^\n]*(?:\n|$)|(?>/\*.*?\*/))';
+        $trigger = "#^{$skip}*CREATE{$skip}+(?:TEMP(?:ORARY)?{$skip}+)?TRIGGER\\b#is";
+        if (!preg_match($trigger, $statement)) {
             return false;
         }
 
-        $skip = '(?:[ \t\n\r\f]|--[^\n]*(?:\n|$)|(?>/\*.*?\*/))*';
         return $bodyStatementStart === 0
-            || preg_match("#^{$skip}END{$skip}$#is", substr($statement, $bodyStatementStart)) !== 1;
+            || preg_match("#^{$skip}*END{$skip}*$#is", substr($statement, $bodyStatementStart)) !== 1;
     }
 }
