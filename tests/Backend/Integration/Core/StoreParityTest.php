@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Post;
+use Mage\Core\Api\StoreConfigProvider;
 use Mage\Core\Api\StoreProcessor;
 use Mage\Core\Api\StoreProvider;
 use Maho\Import\Importer\Stores;
@@ -146,9 +147,12 @@ it('shows only the active store views in the API', function (): void {
     $item = TransportParity::api(fn() => $provider->provide(new Get(), ['id' => (int) $store->getId()]));
     $switch = TransportParity::api(fn() => new StoreProcessor(TransportParity::adminSecurity())
         ->process(null, new Post(), ['storeCode' => STORE_PARITY_WEBSITE]));
+    $config = TransportParity::api(fn() => new StoreConfigProvider(TransportParity::adminSecurity())
+        ->provide(new Get(), ['storeCode' => STORE_PARITY_WEBSITE]));
 
     expect($codes)->not->toContain(STORE_PARITY_WEBSITE)
         ->and($codes)->toContain(Mage::app()->getDefaultStoreView()->getCode())
         ->and($item)->toMatchArray(['status' => 404, 'message' => 'Store not found'])
-        ->and($switch)->toMatchArray(['status' => 404, 'message' => "Store with code '" . STORE_PARITY_WEBSITE . "' not found"]);
+        ->and($switch)->toMatchArray(['status' => 404, 'message' => "Store with code '" . STORE_PARITY_WEBSITE . "' not found"])
+        ->and($config)->toMatchArray(['status' => 404, 'message' => "Store with code '" . STORE_PARITY_WEBSITE . "' not found"]);
 });
