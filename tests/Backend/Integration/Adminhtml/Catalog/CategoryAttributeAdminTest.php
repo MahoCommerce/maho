@@ -283,11 +283,15 @@ it('moves the categories of a deleted set to the default set', function () {
 it('refuses to delete the default category set or a product set', function () {
     $productSetId = (int) Mage::getSingleton('eav/config')->getEntityType(Mage_Catalog_Model_Product::ENTITY)->getDefaultAttributeSetId();
 
-    foreach ([categoryAttributeAdminDefaultSetId(), $productSetId] as $setId) {
+    $cases = [
+        categoryAttributeAdminDefaultSetId() => 'The default attribute set cannot be deleted.',
+        $productSetId => 'Attribute set not found',
+    ];
+    foreach ($cases as $setId => $message) {
         categoryAttributeAdminRun(Mage_Adminhtml_Eav_SetController::class, 'eav_set', 'delete', [
             'id' => $setId,
         ]);
-        expect(categoryAttributeAdminMessages()['errors'])->toBe(['This attribute set cannot be deleted.'])
+        expect(categoryAttributeAdminMessages()['errors'])->toBe([$message])
             ->and(Mage::getModel('eav/entity_attribute_set')->load($setId)->getId())->not->toBeNull();
     }
 });
