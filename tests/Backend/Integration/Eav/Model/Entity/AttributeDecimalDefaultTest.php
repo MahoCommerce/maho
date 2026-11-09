@@ -11,6 +11,8 @@ uses(Tests\MahoBackendTestCase::class);
 
 it('keeps the decimals of the default value of a decimal attribute', function () {
     $attribute = Mage::getModel('eav/entity_attribute')
+        ->setAttributeCode('test_decimal_default')
+        ->setFrontendLabel('Test Decimal Default')
         ->setBackendType('decimal')
         ->setDefaultValue('1.5');
 
@@ -21,6 +23,8 @@ it('keeps the decimals of the default value of a decimal attribute', function ()
 
 it('rejects a default value of a decimal attribute that is not a number', function () {
     $attribute = Mage::getModel('eav/entity_attribute')
+        ->setAttributeCode('test_decimal_default')
+        ->setFrontendLabel('Test Decimal Default')
         ->setBackendType('decimal')
         ->setDefaultValue('abc');
 
