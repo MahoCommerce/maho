@@ -88,6 +88,8 @@ afterEach(function () {
     }
     Mage::getSingleton('eav/config')->clear();
     AdminRoleFixture::delete($this->user);
+    // A message that an action left in the admin session is not an outcome of the next test
+    Mage::getSingleton('adminhtml/session')->getMessages(true);
 });
 
 it('asks before a save takes an attribute out of a category set, and names the categories with a value', function () {
@@ -192,6 +194,10 @@ it('opens the one set of CMS pages instead of a set grid, and refuses a new set'
         'attribute_set_name' => 'Pest Second ' . $this->suffix,
         'skeleton_set' => $setId,
     ]);
+    $errors = array_map(
+        fn(Mage_Core_Model_Message_Abstract $message): string => $message->getText(),
+        Mage::getSingleton('adminhtml/session')->getMessages(true)->getErrors(),
+    );
 
     $location = '';
     foreach ($index->getHeaders() as $header) {
@@ -201,5 +207,6 @@ it('opens the one set of CMS pages instead of a set grid, and refuses a new set'
     }
     expect($location)->toContain('/eav_set/edit/')
         ->and($location)->toContain('/id/' . $setId . '/')
-        ->and($sets())->toBe($before);
+        ->and($sets())->toBe($before)
+        ->and($errors)->toBe([Mage::helper('eav')->__('This entity type has one attribute set.')]);
 });
