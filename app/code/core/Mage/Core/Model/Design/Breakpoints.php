@@ -24,7 +24,7 @@ class Mage_Core_Model_Design_Breakpoints
     /** A media query that matches no device. */
     public const NO_MATCH = 'not all';
 
-    /** @var array<int, array<string, int|null>> */
+    /** @var array<string, array<string, int|null>> the widths by store view and skin theme */
     protected array $widths = [];
 
     /**
@@ -41,8 +41,8 @@ class Mage_Core_Model_Design_Breakpoints
     }
 
     /**
-     * The width of each preset in the theme of $store, from the <breakpoints> node of theme.xml. A
-     * theme without a valid value takes the value of its parent theme. A preset that no theme of the
+     * The width of each preset in the skin theme of $store, from the <breakpoints> node of theme.xml.
+     * A theme without a valid value takes the value of its parent theme. A preset that no theme of the
      * chain gives has the width null.
      *
      * @return array<string, int|null>
@@ -50,11 +50,13 @@ class Mage_Core_Model_Design_Breakpoints
     public function getWidths(Mage_Core_Model_Store|int|string|null $store = null): array
     {
         $storeId = (int) Mage::app()->getStore($store)->getId();
-        if (isset($this->widths[$storeId])) {
-            return $this->widths[$storeId];
+        [$package, $theme] = $this->getSkinTheme($storeId);
+        $key = "{$storeId}/{$package}/{$theme}";
+        if (isset($this->widths[$key])) {
+            return $this->widths[$key];
         }
 
-        $nodes = $this->getThemeNodes($storeId);
+        $nodes = $this->getThemeNodes($storeId, $package, $theme);
         $widths = [];
         foreach (array_keys(self::PRESETS) as $code) {
             $widths[$code] = null;
@@ -65,7 +67,7 @@ class Mage_Core_Model_Design_Breakpoints
                 }
             }
         }
-        return $this->widths[$storeId] = $widths;
+        return $this->widths[$key] = $widths;
     }
 
     /**
@@ -95,10 +97,28 @@ class Mage_Core_Model_Design_Breakpoints
     }
 
     /**
+     * The package and the skin theme of the store view. For the store view of the storefront page that
+     * renders, this is the active skin theme, so a design change gives the widths of the CSS that the
+     * page loads. Else it is the theme in the store config.
+     *
+     * @return array{0: string, 1: string}
+     */
+    protected function getSkinTheme(int $storeId): array
+    {
+        $design = Mage::getDesign();
+        if ($design->getArea() === Mage_Core_Model_Design_Package::DEFAULT_AREA
+            && (int) Mage::app()->getStore($design->getStore())->getId() === $storeId
+        ) {
+            return [(string) $design->getPackageName(), (string) $design->getTheme('skin')];
+        }
+        return Mage::getSingleton('core/design_config')->getStoreSkinTheme($storeId);
+    }
+
+    /**
      * @return list<\Maho\Simplexml\Element>
      */
-    protected function getThemeNodes(int $storeId): array
+    protected function getThemeNodes(int $storeId, string $package, string $theme): array
     {
-        return Mage::getSingleton('core/design_config')->getThemeNodes('breakpoints', $storeId);
+        return Mage::getSingleton('core/design_config')->getThemeNodes('breakpoints', $storeId, $package, $theme);
     }
 }

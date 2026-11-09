@@ -58,21 +58,36 @@ class Mage_Core_Model_Design_Config extends \Maho\Simplexml\Config
     }
 
     /**
-     * The $name nodes of theme.xml for the skin theme of the store view and for its parents, child
-     * first, up to and with base/default. As in the design fallback, when the theme declares no
-     * parent, only the default theme of the store view and then the default theme of the package
-     * come before base/default. A design change, a user agent exception or the custom design of a
-     * category or a product does not change the theme here.
+     * The package and the skin theme in the store config of the store view. A design change, a user
+     * agent exception or the custom design of a category or a product does not change them.
+     *
+     * @return array{0: string, 1: string}
+     */
+    public function getStoreSkinTheme(int $storeId): array
+    {
+        return [
+            (string) Mage::getStoreConfig('design/package/name', $storeId) ?: Mage_Core_Model_Design_Package::DEFAULT_PACKAGE,
+            (string) Mage::getStoreConfig('design/theme/skin', $storeId)
+                ?: (string) Mage::getStoreConfig('design/theme/default', $storeId)
+                ?: Mage_Core_Model_Design_Package::DEFAULT_THEME,
+        ];
+    }
+
+    /**
+     * The $name nodes of theme.xml for the skin theme $package/$theme and for its parents, child
+     * first, up to and with base/default. Without $package and $theme, the theme is the one in the
+     * store config of the store view. As in the design fallback, when the theme declares no parent,
+     * only the default theme of the store view and then the default theme of the package come before
+     * base/default.
      *
      * @return list<\Maho\Simplexml\Element>
      */
-    public function getThemeNodes(string $name, int $storeId): array
+    public function getThemeNodes(string $name, int $storeId, ?string $package = null, ?string $theme = null): array
     {
         $area = Mage_Core_Model_Design_Package::DEFAULT_AREA;
-        $package = (string) Mage::getStoreConfig('design/package/name', $storeId) ?: Mage_Core_Model_Design_Package::DEFAULT_PACKAGE;
-        $theme = (string) Mage::getStoreConfig('design/theme/skin', $storeId)
-            ?: (string) Mage::getStoreConfig('design/theme/default', $storeId)
-            ?: Mage_Core_Model_Design_Package::DEFAULT_THEME;
+        if ($package === null || $theme === null) {
+            [$package, $theme] = $this->getStoreSkinTheme($storeId);
+        }
 
         $steps = [
             ...Mage::getModel('core/design_fallback', ['config' => $this])->setStore($storeId)->getFallbackScheme($area, $package, $theme),

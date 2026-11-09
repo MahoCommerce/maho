@@ -22,7 +22,7 @@ function designBreakpoints(string ...$themes): Mage_Core_Model_Design_Breakpoint
         public function __construct(private array $nodes) {}
 
         #[\Override]
-        protected function getThemeNodes(int $storeId): array
+        protected function getThemeNodes(int $storeId, string $package, string $theme): array
         {
             return $this->nodes;
         }
@@ -98,25 +98,52 @@ it('gives the editor the presets that have a valid width, from the narrowest', f
     expect(array_column(designBreakpoints('<tablet>1023</tablet>')->getEditorPresets(), 'code'))->toBe(['tablet']);
 });
 
-it('gives each core theme presets in order, and gives a store view the presets of its theme', function () {
-    $base = themeBreakpoints('base/default');
-    $legacy = themeBreakpoints('legacy/default');
-    expect($base)->toBe(['mobile' => 770, 'tablet' => 1023]);
-    expect($legacy)->toBe(['mobile' => 770, 'tablet' => 979]);
+it('gives each core theme presets in order', function () {
+    expect(themeBreakpoints('base/default'))->toBe(['mobile' => 770, 'tablet' => 1023]);
+    expect(themeBreakpoints('legacy/default'))->toBe(['mobile' => 770, 'tablet' => 979]);
+});
 
-    $store = Mage::app()->getDefaultStoreView();
+it('takes the presets of the active skin theme for the page that renders, also after a change of the theme', function () {
+    $design = Mage::getDesign();
+    $previous = [$design->getPackageName(), $design->getTheme('skin')];
+    $model = new Mage_Core_Model_Design_Breakpoints();
+    try {
+        $design->setPackageName('base')->setTheme('skin', 'default');
+        expect($model->getWidths()['tablet'])->toBe(1023);
+        $design->setPackageName('legacy')->setTheme('skin', 'default');
+        expect($model->getWidths()['tablet'])->toBe(979);
+    } finally {
+        $design->setPackageName($previous[0])->setTheme('skin', $previous[1]);
+    }
+});
+
+it('takes the presets of the theme in the store config for another store view', function () {
+    $store = Mage::app()->getStore(Mage_Core_Model_App::ADMIN_STORE_ID);
     $paths = ['design/package/name' => 'legacy', 'design/theme/skin' => 'default', 'design/theme/default' => 'default'];
-    $restore = array_map(fn(string $path) => $store->getConfig($path), array_combine(array_keys($paths), array_keys($paths)));
+    $restore = [];
+    foreach (array_keys($paths) as $path) {
+        $restore[$path] = $store->getConfig($path);
+    }
     try {
         foreach ($paths as $path => $value) {
             $store->setConfig($path, $value);
         }
-        expect(new Mage_Core_Model_Design_Breakpoints()->getWidths($store))->toBe($legacy);
+        expect(new Mage_Core_Model_Design_Breakpoints()->getWidths($store)['tablet'])->toBe(979);
     } finally {
         foreach ($restore as $path => $value) {
             $store->setConfig($path, $value);
         }
     }
+});
+
+it('writes the presets before the scripts of the head, for app.js', function () {
+    useBreakpoints(designBreakpoints('<mobile>770</mobile><tablet>979</tablet>'));
+    $html = Mage::app()->getLayout()->createBlock('page/html_head')
+        ->addItem('skin_js', 'js/app.js')
+        ->getCssJsHtml();
+
+    expect($html)->toContain('<script>var BREAKPOINTS = {"mobile":770,"tablet":979};</script>');
+    expect(strpos($html, 'BREAKPOINTS'))->toBeLessThan(strpos($html, '<script src'));
 });
 
 it('keeps the nav breakpoint of the base theme CSS one pixel above the mobile preset', function () {

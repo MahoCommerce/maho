@@ -7,7 +7,7 @@
 // Primary Break Points
 // =============================================
 
-// medium and large are the mobile and tablet breakpoints in theme.xml, which head.phtml writes
+// medium and large are the mobile and tablet breakpoints in theme.xml, which the head block writes
 var bp = {
     xsmall: 479,
     small: 599,

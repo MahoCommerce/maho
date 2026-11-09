@@ -51,12 +51,17 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
     }
 
     /**
-     * The breakpoint presets of the theme as JSON, such as `{"mobile":770,"tablet":1023}`. app.js
-     * reads them, so its layout changes at the same widths as the CSS and the content images.
+     * A script that sets BREAKPOINTS to the breakpoint presets of the skin theme, such as
+     * `{"mobile":770,"tablet":1023}`. app.js reads them, so its layout changes at the same widths as
+     * the CSS and the content images. The admin gets no script.
      */
-    public function getBreakpointsJson(): string
+    public function getBreakpointsScript(): string
     {
-        return Mage::helper('core')->jsonEncode(Mage::getSingleton('core/design_breakpoints')->getWidths());
+        if (Mage::getDesign()->getArea() !== Mage_Core_Model_Design_Package::DEFAULT_AREA) {
+            return '';
+        }
+        $json = Mage::helper('core')->jsonEncode(Mage::getSingleton('core/design_breakpoints')->getWidths());
+        return '<script>var BREAKPOINTS = ' . $json . ';</script>' . PHP_EOL;
     }
 
     /**
@@ -221,6 +226,9 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
             empty($items['js_css']) ? [] : $items['js_css'],
             empty($items['skin_css']) ? [] : $items['skin_css'],
         );
+
+        // Before the scripts, also when a theme has its own head template
+        $html .= $this->getBreakpointsScript();
 
         // static and skin javascripts
         $html .= $this->_prepareStaticAndSkinElements(

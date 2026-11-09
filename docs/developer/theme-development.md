@@ -476,15 +476,19 @@ Three parts of the store read these values:
 - CMS content names a preset with `{{breakpoint code=mobile}}`, such as the mobile image of a
   slideshow slide (see [Slideshow images](../user-guide/slideshow-images.md)). The store writes
   `(max-width: 770px)` in its place.
-- `head.phtml` writes them as `BREAKPOINTS`, and `app.js` reads `mobile` as `bp.medium` and `tablet`
-  as `bp.large`.
+- The head block writes them as `BREAKPOINTS` before the scripts, in `getCssJsHtml()`, so a theme
+  with its own `head.phtml` gets them too. `app.js` reads `mobile` as `bp.medium` and `tablet` as
+  `bp.large`.
 - The content editor shows the width of each preset, from the theme of the store view of the page or
   the block.
 
 The CSS of the theme is compiled, so it cannot read `theme.xml`. Keep the two in step: in
 `base/default`, the `nav:` variant starts at 771px and the desktop rules at 1024px. A theme that
-does not set a value takes the value of its parent theme. `tablet` must be wider than `mobile`. As
-for the image slots, only the theme in the store config of a store view gives these values.
+does not set a value takes the value of its parent theme. `tablet` must be wider than `mobile`.
+
+On the storefront, the values come from the active skin theme, so a design change or the custom
+design of a page also changes them. The content editor uses the theme in the store config of the
+store view.
 
 ## Adding your own setting
 
