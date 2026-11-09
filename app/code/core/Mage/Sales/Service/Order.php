@@ -282,22 +282,21 @@ class Mage_Sales_Service_Order
     }
 
     /**
-     * Get the guest order $incrementId whose one-time access token is $accessToken. Count each call against the
-     * limit of the client.
+     * Get the guest order $incrementId whose one-time access token is $accessToken. Count a failed lookup against the
+     * limit of the client, which the guest order form shares.
      *
      * @throws Mage_Core_Exception_TooManyRequests when the client is over the limit
      */
     public function getForGuest(string $incrementId, string $accessToken): ?Order
     {
-        $limit = (int) Mage::getStoreConfig(self::XML_PATH_GUEST_LOOKUP_RATE_LIMIT);
-        if (!Mage::helper('core')->rateLimiter('guest_order_token', $limit, self::GUEST_LOOKUP_WINDOW, RateLimitScope::Ip)->attempt()) {
-            throw new Mage_Core_Exception_TooManyRequests('Too many requests. Please try again later.', self::GUEST_LOOKUP_WINDOW);
-        }
-
+        $limiter = $this->guestLookupLimiter();
         $order = $incrementId !== '' ? $this->getByIncrementId($incrementId) : null;
         $storedToken = (string) $order?->getData('guest_access_token');
-
-        return $storedToken !== '' && hash_equals($storedToken, $accessToken) ? $order : null;
+        if ($storedToken !== '' && hash_equals($storedToken, $accessToken)) {
+            return $order;
+        }
+        $limiter->hit();
+        return null;
     }
 
     /**
@@ -371,9 +370,11 @@ class Mage_Sales_Service_Order
     }
 
     /**
-     * @param callable(): ?Order $find
+     * Return the limiter of the guest order lookups of the client, which counts only the failed lookups.
+     *
+     * @throws Mage_Core_Exception_TooManyRequests when the client is over the limit
      */
-    private function lookUpForGuest(callable $find): Order
+    private function guestLookupLimiter(): \Maho\Security\RateLimiter
     {
         $limiter = Mage::helper('core')->rateLimiter(
             'guest_order_lookup',
@@ -383,11 +384,19 @@ class Mage_Sales_Service_Order
         );
         if ($limiter->tooManyAttempts()) {
             throw new Mage_Core_Exception_TooManyRequests(
-                Mage::helper('sales')->__('Too Soon: You are trying to perform this operation too frequently. Please wait a few seconds and try again.'),
+                Mage::helper('sales')->__('Too many requests. Please try again later.'),
                 self::GUEST_LOOKUP_WINDOW,
             );
         }
+        return $limiter;
+    }
 
+    /**
+     * @param callable(): ?Order $find
+     */
+    private function lookUpForGuest(callable $find): Order
+    {
+        $limiter = $this->guestLookupLimiter();
         $order = $find();
         if ($order && $order->getCustomerId() === null) {
             return $order;
