@@ -78,6 +78,9 @@ page.
 
 Write the code of the preset without quotes, as in the example. If the store does not know the
 code, the browser never uses that image. It uses the next image that matches the screen, or the
-default image. The content editor removes a `<source>`
-whose `media` is not a preset or one `(max-width: ...px)` value, and it shows a message before it
-removes it.
+default image.
+
+The content editor removes a `<source>` whose `media` is not a preset or one `(max-width: ...px)`
+value. When the editor opens the field, or when you leave the source view, it shows a message
+before it removes the `<source>`. HTML that you paste into the editor gets no message, so write a
+slideshow with alternative images in the source view.
