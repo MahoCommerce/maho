@@ -80,10 +80,7 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPOSITORY: ${{ github.repository }}
         run: |
-          mkdir site/site/_preview
-          git -C maho diff --name-status --no-renames HEAD^1 HEAD \
-            | python maho/.github/docs-preview/changed_pages.py maho site/hooks/maho_docs.py site/site "$PR_NUMBER" "$REPOSITORY" \
-            > site/site/_preview/changed.json
+          python maho/.github/docs-preview/changed_pages.py maho site/hooks/maho_docs.py site/site "$PR_NUMBER" "$REPOSITORY"
           cp maho/.github/docs-preview/preview.js site/site/_preview/
           find site/site -name '*.html' -exec sed -i 's#</body>#<script src="/_preview/preview.js" defer></script></body>#' {} +
           printf '/*\n  X-Robots-Tag: noindex\n' > site/site/_headers
