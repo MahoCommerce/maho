@@ -204,7 +204,7 @@ class Review extends CrudResource
                 ->load();
         }
 
-        $rating = 0;
+        $rating = null;
         $ratings = [];
         if ($ratingVotes && count($ratingVotes) > 0) {
             $totalPercent = 0;
@@ -216,10 +216,10 @@ class Review extends CrudResource
                     'percent' => (float) $vote->getPercent(),
                 ];
             }
-            $rating = (int) round(($totalPercent / count($ratingVotes)) / 20);
+            $rating = max(1, min(5, (int) round(($totalPercent / count($ratingVotes)) / 20)));
         }
         $dto->ratings = $ratings;
-        $dto->rating = max(1, min(5, $rating));
+        $dto->rating = $rating;
 
         $stores = $model->getData('stores');
         if (!is_array($stores)) {
