@@ -120,7 +120,6 @@
 "Store View Specific Labels","Store View Specific Labels"
 "Subtotal","Subtotal"
 "Subtotal Amount","Subtotal Amount"
-"The %s must have at most %d characters of A-Z, a-z, 0-9, _ and -.","The %s must have at most %d characters of A-Z, a-z, 0-9, _ and -."
 "The action must be one of: %s.","The action must be one of: %s."
 "The code format must be one of: %s.","The code format must be one of: %s."
 "The code length must be from 1 to %d.","The code length must be from 1 to %d."

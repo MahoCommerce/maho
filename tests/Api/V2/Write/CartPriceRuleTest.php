@@ -189,7 +189,7 @@ describe('Cart price rule fields', function (): void {
         expect($duplicate['status'])->toBe(409);
 
         expect(cprwFields(cprwCreate(['couponType' => 'specific'])))->toBe(['couponCode'])
-            ->and(cprwFields(cprwCreate(['couponType' => 'specific', 'couponCode' => str_repeat('A', 256)])))->toBe(['code'])
+            ->and(cprwFields(cprwCreate(['couponType' => 'specific', 'couponCode' => str_repeat('A', 256)])))->toBe(['couponCode'])
             ->and(cprwFields(cprwCreate(['couponType' => 'none', 'couponCode' => cprwCode()])))->toBe(['couponCode']);
 
         $auto = apiPut(CPRW_PATH . "/{$id}", ['couponType' => 'auto'], $token);
