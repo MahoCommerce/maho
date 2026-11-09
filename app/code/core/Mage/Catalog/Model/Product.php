@@ -1903,7 +1903,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     /**
      *  Check whether attribute reserved or not
      *
-     *  @param Mage_Catalog_Model_Entity_Attribute $attribute Attribute model object
+     *  @param Mage_Eav_Model_Entity_Attribute_Abstract $attribute Attribute model object
      *  @return bool
      */
     public function isReservedAttribute($attribute)

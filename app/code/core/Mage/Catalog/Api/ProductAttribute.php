@@ -48,8 +48,8 @@ use Maho\Config\ApiResource;
             uriTemplate: '/product-attributes',
             deserialize: false,
             security: "is_granted('ROLE_ADMIN') or is_granted('product-attributes/write')",
-            description: 'Create a product attribute. Required: attributeCode (letters a-z, digits and underscores, starts with a letter, at most 30 characters) and frontendLabel. '
-                . 'frontendInput is text, textarea, date, boolean, select, multiselect or price (default text) and sets the storage type. '
+            description: 'Create a product attribute. Required: attributeCode (letters a-z, digits and underscores, starts with a letter, 2 to 64 characters) and frontendLabel. '
+                . 'frontendInput is one of the input types of the admin, such as text, textarea, date, boolean, select, multiselect, price, media_image or file (default text), and sets the storage type. '
                 . 'scope is global, website or store (default global). The attribute is user defined and belongs to no attribute set until POST /attribute-sets/{id}/attributes assigns it. '
                 . 'Options of a select or multiselect attribute: POST /product-attributes/{id}/options',
         ),
@@ -59,7 +59,7 @@ use Maho\Config\ApiResource;
             deserialize: false,
             security: "is_granted('ROLE_ADMIN') or is_granted('product-attributes/write')",
             description: 'Update a product attribute. Only the fields in the body change. attributeCode and frontendInput cannot change after creation. '
-                . 'A system attribute accepts only its storefront and admin flags',
+                . 'A system attribute keeps its unique flag and the fields that the store locks, such as the scope of sku',
         ),
         new Delete(
             uriTemplate: '/product-attributes/{id}',
@@ -123,13 +123,13 @@ class ProductAttribute extends CrudResource
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;
 
-    #[ApiProperty(description: 'Attribute code. Set on create only: letters a-z, digits and underscores, starts with a letter, at most 30 characters')]
+    #[ApiProperty(description: 'Attribute code. Set on create only: letters a-z, digits and underscores, starts with a letter, 2 to 64 characters')]
     public ?string $attributeCode = null;
 
     #[ApiProperty(description: 'Admin label, required on create')]
     public ?string $frontendLabel = null;
 
-    #[ApiProperty(description: 'Input type, set on create only: text, textarea, date, boolean, select, multiselect or price', extraProperties: [EnumSource::KEY => ['text', 'textarea', 'date', 'boolean', 'select', 'multiselect', 'price']])]
+    #[ApiProperty(description: 'Input type, set on create only', extraProperties: [EnumSource::KEY => self::class . '::inputTypes'])]
     public ?string $frontendInput = null;
 
     #[ApiProperty(writable: false, description: 'Storage type, derived from frontendInput (varchar, int, text, decimal, datetime, static)')]
@@ -211,6 +211,18 @@ class ProductAttribute extends CrudResource
      */
     #[ApiProperty(writable: false, description: 'Options of a select or multiselect attribute: [{label, value}], value is the option ID. Managed through /product-attributes/{id}/options', extraProperties: ['computed' => true])]
     public array $options = [];
+
+    /**
+     * Return the input types that a product attribute can have.
+     *
+     * @return list<string>
+     */
+    public static function inputTypes(): array
+    {
+        /** @var \Mage_Eav_Service_Attribute $service */
+        $service = \Mage::getService('eav/attribute');
+        return array_keys($service->newAttribute(\Mage_Catalog_Model_Product::ENTITY)->getInputTypes());
+    }
 
     /**
      * Derive the human-readable scope from the catalog is_global flag and the
