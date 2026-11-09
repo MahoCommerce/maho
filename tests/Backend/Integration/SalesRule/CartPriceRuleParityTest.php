@@ -138,11 +138,11 @@ it('refuses the same rule with the same message on both transports', function (a
         'customerGroupIds',
         'Unknown customer group ID: 999999.',
     ],
-    'a coupon code with a space' => [
-        ['coupon_type' => (string) Mage_SalesRule_Model_Rule::COUPON_TYPE_SPECIFIC, 'coupon_code' => 'BAD CODE'],
-        ['couponType' => 'specific', 'couponCode' => 'BAD CODE'],
+    'a coupon code longer than the cart accepts' => [
+        ['coupon_type' => (string) Mage_SalesRule_Model_Rule::COUPON_TYPE_SPECIFIC, 'coupon_code' => str_repeat('A', 256)],
+        ['couponType' => 'specific', 'couponCode' => str_repeat('A', 256)],
         'couponCode',
-        'The coupon code must have 3 to 64 characters of A-Z, a-z, 0-9, _ and -.',
+        'The coupon code must have at most 255 characters.',
     ],
     'a specific coupon without a code' => [
         ['coupon_type' => (string) Mage_SalesRule_Model_Rule::COUPON_TYPE_SPECIFIC],
@@ -151,6 +151,18 @@ it('refuses the same rule with the same message on both transports', function (a
         'The coupon code is required for a specific coupon.',
     ],
 ]);
+
+it('saves a coupon code with a space and a dot on both transports', function (): void {
+    $code = 'SUMMER 2026.' . cartRuleParityCode();
+    expect(cartRuleParityAdmin(['coupon_type' => (string) Mage_SalesRule_Model_Rule::COUPON_TYPE_SPECIFIC, 'coupon_code' => $code])['errors'])->toBe([])
+        ->and(Mage::getModel('salesrule/coupon')->loadByCode($code)->getCode())->toBe($code);
+    cartRuleParityCleanup();
+
+    $api = cartRuleParityApi(['couponType' => 'specific', 'couponCode' => $code]);
+    expect($api['status'])->toBe(200)
+        ->and($api['result']->couponCode)->toBe($code)
+        ->and(Mage::getModel('salesrule/coupon')->loadByCode($code)->getCode())->toBe($code);
+});
 
 it('refuses a coupon code that another coupon has in other letter case on both transports', function (): void {
     $code = cartRuleParityCode();
@@ -190,9 +202,19 @@ it('generates coupons with the same settings and refuses the same settings on bo
     expect($codes)->toHaveCount(4)
         ->and(preg_grep('/^P[AB]-\d{6}$/', $codes))->toHaveCount(4);
 
-    $message = 'The code length must be from 1 to 32.';
-    expect($adminGenerate(['qty' => '1', 'length' => '33', 'format' => 'num']))->toBe(['error' => $message])
-        ->and($apiGenerate(['qty' => 1, 'length' => 33, 'format' => 'num']))->toMatchArray(['status' => 422, 'fields' => ['length'], 'errors' => [$message]]);
+    // The admin accepts any character in the prefix and the suffix
+    expect($adminGenerate(['qty' => '1', 'length' => '4', 'format' => 'num', 'prefix' => 'SUMMER 2026.', 'suffix' => ' A.B', 'dash' => '0']))->not->toHaveKey('error')
+        ->and($apiGenerate(['qty' => 1, 'length' => 4, 'format' => 'num', 'prefix' => 'WINTER 2026.', 'suffix' => ' A.B', 'dash' => 0])['status'])->toBe(200);
+    $codes = Mage::getResourceModel('salesrule/coupon_collection')->addRuleToFilter($rule)->getColumnValues('code');
+    expect(preg_grep('/^(SUMMER|WINTER) 2026\.\d{4} A\.B$/', $codes))->toHaveCount(2);
+
+    $message = 'The code length must be from 1 to 255.';
+    expect($adminGenerate(['qty' => '1', 'length' => '256', 'format' => 'num']))->toBe(['error' => $message])
+        ->and($apiGenerate(['qty' => 1, 'length' => 256, 'format' => 'num']))->toMatchArray(['status' => 422, 'fields' => ['length'], 'errors' => [$message]]);
+
+    $message = 'The coupon code must have at most 255 characters.';
+    expect($adminGenerate(['qty' => '1', 'length' => '250', 'format' => 'num', 'prefix' => 'PREFIX', 'dash' => '0']))->toBe(['error' => $message])
+        ->and($apiGenerate(['qty' => 1, 'length' => 250, 'format' => 'num', 'prefix' => 'PREFIX', 'dash' => 0]))->toMatchArray(['status' => 422, 'fields' => ['code'], 'errors' => [$message]]);
 });
 
 it('deletes only the generated coupons of the rule from the admin coupon grid', function (): void {

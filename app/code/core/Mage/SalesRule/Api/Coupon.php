@@ -172,6 +172,7 @@ class Coupon extends CrudResource
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;
 
+    #[ApiProperty(description: 'The code, at most 255 characters')]
     public ?string $code = null;
 
     #[ApiProperty(writable: false)]

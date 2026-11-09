@@ -124,7 +124,7 @@ class CartPriceRule extends \Maho\ApiPlatform\Resource
     #[ApiProperty(description: 'none, specific (one code in couponCode) or auto (generated codes)', extraProperties: [EnumSource::KEY => ['none', 'specific', 'auto']])]
     public string $couponType = self::COUPON_TYPE_NONE;
 
-    #[ApiProperty(description: 'The code of a rule with couponType "specific"')]
+    #[ApiProperty(description: 'The code of a rule with couponType "specific", at most 255 characters')]
     public ?string $couponCode = null;
 
     #[ApiProperty(description: 'Uses of each coupon, 0 for no limit')]

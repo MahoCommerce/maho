@@ -23,7 +23,6 @@ final class CartPriceRuleCouponProcessor extends \Maho\ApiPlatform\Processor
     /** One request generates at most this many coupons */
     public const MAX_GENERATE_QTY = 1000;
     public const MAX_CODE_LENGTH = \Mage_SalesRule_Service_Rule::MAX_CODE_LENGTH;
-    public const MAX_AFFIX_LENGTH = \Mage_SalesRule_Service_Rule::MAX_AFFIX_LENGTH;
     public const MAX_DELETE_IDS = 1000;
 
     private const GENERATE_FIELDS = ['qty', 'length', 'format', 'prefix', 'suffix', 'dash'];

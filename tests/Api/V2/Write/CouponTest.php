@@ -274,6 +274,59 @@ describe('Coupon discount amount', function (): void {
 
 });
 
+describe('Coupon code', function (): void {
+
+    it('saves a code with a space and a dot, as the admin does', function (): void {
+        $token = adminToken();
+        $code = 'SUMMER 2026.' . substr(uniqid(), -6);
+
+        $create = apiPost('/api/rest/v2/coupons', ['code' => $code, 'discountType' => 'percent', 'discountAmount' => 10], $token);
+        expect($create['status'])->toBeSuccessful()
+            ->and($create['json']['code'])->toBe($code);
+        $id = (int) $create['json']['id'];
+
+        $newCode = 'WINTER 2026.' . substr(uniqid(), -6);
+        expect(apiPut("/api/rest/v2/coupons/{$id}", ['code' => $newCode], $token)['status'])->toBe(200)
+            ->and(apiGet("/api/rest/v2/coupons/{$id}", $token)['json']['code'])->toBe($newCode);
+
+        expect(apiDelete("/api/rest/v2/coupons/{$id}", $token)['status'])->toBeIn([200, 204]);
+    });
+
+    it('saves a code of 255 characters and refuses a longer one, also for a generated coupon', function (): void {
+        $token = adminToken();
+        $message = 'The coupon code must have at most 255 characters.';
+        $long = str_repeat('A', 256);
+
+        $max = apiPost('/api/rest/v2/coupons', ['code' => str_repeat('B', 249) . substr(uniqid(), -6), 'discountType' => 'percent', 'discountAmount' => 10], $token);
+        expect($max['status'])->toBeSuccessful()
+            ->and(strlen($max['json']['code']))->toBe(255)
+            ->and(apiDelete("/api/rest/v2/coupons/{$max['json']['id']}", $token)['status'])->toBeIn([200, 204]);
+
+        $create = apiPost('/api/rest/v2/coupons', ['code' => $long, 'discountType' => 'percent', 'discountAmount' => 10], $token);
+        expect($create['status'])->toBe(422)
+            ->and(array_column($create['json']['details']['errors'], 'field'))->toBe(['code'])
+            ->and(array_column($create['json']['details']['errors'], 'message'))->toBe([$message]);
+
+        $rule = apiPost('/api/rest/v2/cart-price-rules', [
+            'name' => 'Pest long code ' . substr(uniqid(), -6),
+            'websiteIds' => [1],
+            'customerGroupIds' => [1],
+            'couponType' => 'auto',
+        ], $token);
+        $ruleId = (int) $rule['json']['id'];
+        $coupon = apiPost("/api/rest/v2/cart-price-rules/{$ruleId}/coupons/generate", ['qty' => 1], $token)['json']['coupons'][0];
+
+        $update = apiPut("/api/rest/v2/coupons/{$coupon['id']}", ['code' => $long], $token);
+        expect($update['status'])->toBe(422)
+            ->and(array_column($update['json']['details']['errors'], 'field'))->toBe(['code'])
+            ->and(array_column($update['json']['details']['errors'], 'message'))->toBe([$message])
+            ->and(apiGet("/api/rest/v2/coupons/{$coupon['id']}", $token)['json']['code'])->toBe($coupon['code']);
+
+        expect(apiDelete("/api/rest/v2/cart-price-rules/{$ruleId}", $token)['status'])->toBe(204);
+    });
+
+});
+
 describe('Coupon minimum subtotal', function (): void {
 
     it('saves, changes and removes the minimum subtotal condition', function (): void {

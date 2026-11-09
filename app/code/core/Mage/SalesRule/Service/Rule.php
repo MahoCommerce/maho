@@ -16,8 +16,7 @@ use Mage_SalesRule_Model_Rule as Rule;
 
 class Mage_SalesRule_Service_Rule
 {
-    public const MAX_CODE_LENGTH = 32;
-    public const MAX_AFFIX_LENGTH = 32;
+    public const MAX_CODE_LENGTH = Mage_Checkout_Helper_Cart::COUPON_CODE_MAX_LENGTH;
     public const XML_PATH_CHECK_RATE_LIMIT = 'system/rate_limit/coupon_validate';
     public const CHECK_RATE_LIMIT_WINDOW = 60;
 
@@ -133,11 +132,6 @@ class Mage_SalesRule_Service_Rule
         if (!in_array($format, $formats, true)) {
             $errors->addError('format', $helper->__('The code format must be one of: %s.', implode(', ', $formats)));
         }
-        foreach ($affixes as $field => $affix) {
-            if (!preg_match('/^[A-Za-z0-9_-]{0,' . self::MAX_AFFIX_LENGTH . '}$/', $affix)) {
-                $errors->addError($field, $helper->__('The %s must have at most %d characters of A-Z, a-z, 0-9, _ and -.', $field, self::MAX_AFFIX_LENGTH));
-            }
-        }
         if ($dash < 0 || $dash > $length) {
             $errors->addError('dash', $helper->__('The dash interval must be from 0 to the code length.'));
         }
@@ -243,9 +237,6 @@ class Mage_SalesRule_Service_Rule
     {
         if ($coupon->getIsPrimary()) {
             $rule->setCouponType(Rule::COUPON_TYPE_SPECIFIC)->setUseAutoGeneration(false)->setCouponCode($coupon->getCode());
-        } elseif ($coupon->dataHasChangedFor('code') && !preg_match(Rule::COUPON_CODE_PATTERN, (string) $coupon->getCode())) {
-            $inputErrors ??= new Mage_Core_Exception_Input();
-            $inputErrors->addError('code', Mage::helper('salesrule')->__('The coupon code must have 3 to 64 characters of A-Z, a-z, 0-9, _ and -.'));
         }
 
         $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
