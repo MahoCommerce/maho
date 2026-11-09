@@ -16,8 +16,6 @@ use Mage_Catalog_Model_Product;
 use Mage_Catalog_Model_Product_Option;
 use Maho\ApiPlatform\Trait\ProductLoaderTrait;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\HttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 final class ProductCustomOptionProvider extends \Maho\ApiPlatform\Provider
 {
@@ -58,28 +56,9 @@ final class ProductCustomOptionProvider extends \Maho\ApiPlatform\Provider
             $key = $m[2];
         }
 
-        $option = Mage::getModel('sales/quote_item_option')->load($optionId);
-        if (!$option->getId()) {
-            throw new NotFoundHttpException('File not found');
-        }
-
-        $value = Mage::helper('core/unserializeArray')->unserialize($option->getValue());
-        if (!isset($value['secret_key']) || !hash_equals($value['secret_key'], $key)) {
-            // Deliberate 403: this public endpoint authenticates via the URL
-            // secret key, not a Bearer token, so a wrong key is "forbidden", not
-            // "authenticate". The X-Api-Error-Code marker tells ApiExceptionListener
-            // to keep the 403 rather than downgrading it to 401 (its usual
-            // no-Bearer heuristic).
-            throw new HttpException(403, 'Invalid key', null, ['X-Api-Error-Code' => 'forbidden']);
-        }
-
-        $file = Mage::getModel('catalog/product_option_type_file')->openStoredFile($value);
-        if ($file === null) {
-            throw new NotFoundHttpException('File not found on disk');
-        }
-
-        $mimeType = $value['type'] ?? 'application/octet-stream';
-        $fileName = $value['title'] ?? 'file';
+        /** @var \Mage_Catalog_Service_Product_Option $service */
+        $service = Mage::getService('catalog/product_option');
+        $file = $service->openUploadedFile($optionId, $key);
 
         $content = (string) stream_get_contents($file['stream']);
         fclose($file['stream']);
@@ -88,8 +67,8 @@ final class ProductCustomOptionProvider extends \Maho\ApiPlatform\Provider
             $content,
             Response::HTTP_OK,
             [
-                'Content-Type' => $mimeType,
-                'Content-Disposition' => 'attachment; filename="' . addslashes($fileName) . '"',
+                'Content-Type' => $file['type'],
+                'Content-Disposition' => 'attachment; filename="' . addslashes($file['title']) . '"',
                 'Content-Length' => (string) strlen($content),
                 'Cache-Control' => 'private, max-age=3600',
             ],
