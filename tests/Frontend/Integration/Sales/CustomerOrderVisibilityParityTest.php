@@ -9,7 +9,10 @@ declare(strict_types=1);
 
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\GraphQl\Mutation;
+use ApiPlatform\Metadata\Post;
 use Mage\Sales\Api\InvoiceProvider;
+use Mage\Sales\Api\OrderProcessor;
 use Mage\Sales\Api\OrderProvider;
 use Maho\ApiPlatform\Security\ApiUser;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -56,6 +59,10 @@ function orderVisibilityOrder(int $customerId, string $state): Mage_Sales_Model_
         ->setSubtotal(0)->setGrandTotal(0)->setTotalQtyOrdered(0)
         ->setData('state', $state)
         ->setData('status', $state);
+    $order->addItem(Mage::getModel('sales/order_item')->setData([
+        'product_type' => 'simple', 'sku' => 'visibility', 'name' => 'Visibility item', 'qty_ordered' => 1,
+    ]));
+    $order->setPayment(Mage::getModel('sales/order_payment')->setMethod('checkmo'));
     $order->save();
     return $order;
 }
@@ -154,6 +161,22 @@ function orderVisibilityApiInvoices(Security $security, int $orderId, string $op
         ->provide(new GetCollection(name: $operationName), ['orderId' => $orderId], ['request' => $request]));
 }
 
+/**
+ * Cancel the order $orderId with POST /orders/{id}/cancel. With $incrementId, cancel it with the GraphQL cancelOrder
+ * mutation instead.
+ *
+ * @return array{status: int, result: mixed, errors: list<string>, fields: list<string>}
+ */
+function orderVisibilityApiCancel(Security $security, int $orderId, ?string $incrementId = null): array
+{
+    $request = AdminApiParity::jsonRequest('POST', "/api/rest/v2/orders/{$orderId}/cancel");
+    [$operation, $uriVariables, $context] = $incrementId === null
+        ? [new Post(name: 'order_cancel'), ['id' => $orderId], ['request' => $request]]
+        : [new Mutation(name: 'cancel'), [], ['request' => $request, 'args' => ['input' => ['incrementId' => $incrementId]]]];
+
+    return AdminApiParity::api($request, fn() => new OrderProcessor($security)->process(null, $operation, $uriVariables, $context));
+}
+
 beforeEach(function (): void {
     Mage::unregister(Mage_Core_Model_Session_Abstract::REGISTRY_KEY);
     $session = new Session(new MockArraySessionStorage());
@@ -218,4 +241,21 @@ it('shows a Pending Payment order and its invoices to an admin token', function 
 
     expect(orderVisibilityApiView($admin, $hiddenId))->toBe($hiddenId)
         ->and(orderVisibilityApiInvoices($admin, $hiddenId, 'order_invoices'))->toMatchArray(['status' => 200, 'result' => []]);
+});
+
+it('finds no Pending Payment order to cancel, as for an order of another customer, in the API', function (): void {
+    $hidden = orderVisibilityApiCancel($this->security, (int) $this->hidden->getId());
+
+    expect($hidden)->toMatchArray(['status' => 404, 'errors' => ['Order not found']])
+        ->and(orderVisibilityApiCancel($this->security, (int) $this->hidden->getId(), (string) $this->hidden->getIncrementId()))->toBe($hidden)
+        ->and(orderVisibilityApiCancel($this->security, (int) $this->foreign->getId()))->toBe($hidden)
+        ->and(orderVisibilityApiCancel($this->security, 99999999))->toBe($hidden)
+        ->and(Mage::getModel('sales/order')->load($this->hidden->getId())->getState())->toBe(Mage_Sales_Model_Order::STATE_PENDING_PAYMENT);
+});
+
+it('lets an admin token cancel a Pending Payment order', function (): void {
+    $admin = orderVisibilityApiCancel(AdminApiParity::adminSecurity(), (int) $this->hidden->getId());
+
+    expect($admin['status'])->toBe(200)
+        ->and(Mage::getModel('sales/order')->load($this->hidden->getId())->getState())->toBe(Mage_Sales_Model_Order::STATE_CANCELED);
 });

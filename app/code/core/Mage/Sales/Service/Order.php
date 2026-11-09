@@ -227,23 +227,23 @@ class Mage_Sales_Service_Order
     }
 
     /**
-     * Load the order $orderId. With $customerId, only an order of that customer exists for the caller.
+     * Load the order $orderId.
      *
      * @throws Mage_Core_Exception_NoSuchEntity
      */
-    public function requireById(int $orderId, ?int $customerId = null): Order
+    public function requireById(int $orderId): Order
     {
-        return $this->requireOwned($orderId > 0 ? $this->getById($orderId) : null, $customerId);
+        return $this->requireFound($orderId > 0 ? $this->getById($orderId) : null);
     }
 
     /**
-     * Load the order $incrementId. With $customerId, only an order of that customer exists for the caller.
+     * Load the order $incrementId.
      *
      * @throws Mage_Core_Exception_NoSuchEntity
      */
-    public function requireByIncrementId(string $incrementId, ?int $customerId = null): Order
+    public function requireByIncrementId(string $incrementId): Order
     {
-        return $this->requireOwned($incrementId !== '' ? $this->getByIncrementId($incrementId) : null, $customerId);
+        return $this->requireFound($incrementId !== '' ? $this->getByIncrementId($incrementId) : null);
     }
 
     /**
@@ -257,17 +257,24 @@ class Mage_Sales_Service_Order
     }
 
     /**
-     * Load the order $orderId when the customer $customerId may see it. See isVisibleToCustomer().
+     * Load the order $orderId when the customer $customerId may see it. Every read and every action of a customer
+     * finds the order here, so a hidden, a foreign and a missing order give the same answer. See isVisibleToCustomer().
      *
      * @throws Mage_Core_Exception_NoSuchEntity
      */
     public function requireVisibleToCustomer(int $orderId, ?int $customerId): Order
     {
-        $order = $orderId > 0 ? $this->getById($orderId) : null;
-        if (!$order || !$this->isVisibleToCustomer($order, $customerId)) {
-            throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('sales')->__('Order not found'));
-        }
-        return $order;
+        return $this->requireVisible($orderId > 0 ? $this->getById($orderId) : null, $customerId);
+    }
+
+    /**
+     * Load the order $incrementId when the customer $customerId may see it. See requireVisibleToCustomer().
+     *
+     * @throws Mage_Core_Exception_NoSuchEntity
+     */
+    public function requireVisibleToCustomerByIncrementId(string $incrementId, ?int $customerId): Order
+    {
+        return $this->requireVisible($incrementId !== '' ? $this->getByIncrementId($incrementId) : null, $customerId);
     }
 
     /**
@@ -445,12 +452,14 @@ class Mage_Sales_Service_Order
         return $customerId > 0 && (int) $order->getCustomerId() === $customerId;
     }
 
-    private function requireOwned(?Order $order, ?int $customerId): Order
+    private function requireFound(?Order $order): Order
     {
-        if (!$order || ($customerId !== null && !$this->isOwner($order, $customerId))) {
-            throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('sales')->__('Order not found'));
-        }
-        return $order;
+        return $order ?? throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('sales')->__('Order not found'));
+    }
+
+    private function requireVisible(?Order $order, ?int $customerId): Order
+    {
+        return $order && $this->isVisibleToCustomer($order, $customerId) ? $order : $this->requireFound(null);
     }
 
     /**

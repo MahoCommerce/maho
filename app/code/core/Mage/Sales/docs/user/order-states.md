@@ -50,8 +50,8 @@ already have a shipment for some items: open it and check the **Shipments** tab.
 
 A customer sees their orders in **My Account > My Orders** on the storefront, except a Pending
 Payment order: its payment is not confirmed. The API gives the customer the same orders. The list
-of the customer leaves out a Pending Payment order, and a read of it, or of its invoices, answers
-that the order does not exist. An administrator and an API user see every order.
+of the customer leaves out a Pending Payment order. A read of it or of its invoices, and a cancel by
+the customer, answer that the order does not exist. An administrator and an API user see every order.
 
 ## What the store refuses
 
