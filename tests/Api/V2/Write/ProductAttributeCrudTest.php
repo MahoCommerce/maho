@@ -172,26 +172,35 @@ describe('Product attribute lifecycle', function (): void {
         $wrong = pattrCreate([
             'attributeCode' => 'Bad-Code',
             'frontendInput' => 'wysiwyg',
-            'isSearchable' => 'yes',
             'isFilterable' => 7,
-            'scope' => 'planet',
             'applyTo' => ['car'],
             'frontendClass' => 'validate-nothing',
         ]);
         expect($wrong['status'])->toBe(422)
             ->and(pattrFields($wrong))->toEqualCanonicalizing([
-                'attributeCode', 'frontendInput', 'isSearchable', 'isFilterable', 'scope', 'applyTo', 'frontendClass',
+                'attributeCode', 'frontendInput', 'isFilterable', 'applyTo', 'frontendClass',
             ]);
+
+        // A value of a wrong type makes the request malformed
+        expect(pattrCreate(['isSearchable' => 'yes'])['status'])->toBe(400);
+
+        $scope = pattrCreate(['scope' => 'planet']);
+        expect($scope['status'])->toBe(422)
+            ->and(pattrFields($scope))->toBe(['scope']);
 
         $unknown = pattrCreate(['unknownField' => 1, 'isSearchable' => 'yes']);
         expect($unknown['status'])->toBe(400)
             ->and(pattrFields($unknown))->toBe(['unknownField']);
     });
 
-    it('refuses a reserved code, a used code and a code of more than 30 characters', function (): void {
+    it('refuses a reserved code, a used code and a code of more than 64 characters', function (): void {
         expect(pattrFields(pattrCreate(['attributeCode' => 'sku'])))->toBe(['attributeCode']);
         expect(pattrFields(pattrCreate(['attributeCode' => 'name'])))->toBe(['attributeCode']);
-        expect(pattrFields(pattrCreate(['attributeCode' => str_repeat('a', 31)])))->toBe(['attributeCode']);
+        expect(pattrFields(pattrCreate(['attributeCode' => str_repeat('a', 65)])))->toBe(['attributeCode']);
+
+        $code = pattrCode();
+        expect(pattrCreate(['attributeCode' => $code])['status'])->toBe(201)
+            ->and(pattrCreate(['attributeCode' => $code])['status'])->toBe(409);
     });
 
     it('refuses to delete a system attribute', function (): void {
@@ -252,9 +261,13 @@ describe('Product attribute options', function (): void {
         $labels = $read->fetchPairs('SELECT store_id, value FROM eav_attribute_option_value WHERE option_id = ?', [$redId]);
         expect($labels)->toBe([0 => 'Dark red']);
 
-        $wrong = apiPut(PATTR_PATH . "/{$id}/options/{$redId}", ['label' => '', 'storeLabels' => ['no_such_store' => 'x']], $token);
+        $wrong = apiPut(PATTR_PATH . "/{$id}/options/{$redId}", ['storeLabels' => ['no_such_store' => 'x']], $token);
         expect($wrong['status'])->toBe(422)
-            ->and(pattrFields($wrong))->toEqualCanonicalizing(['label', 'storeLabels.no_such_store']);
+            ->and(pattrFields($wrong))->toBe(['storeLabels.no_such_store']);
+
+        $blank = apiPut(PATTR_PATH . "/{$id}/options/{$redId}", ['label' => ''], $token);
+        expect($blank['status'])->toBe(422)
+            ->and(pattrFields($blank))->toBe(['label']);
 
         $unknown = apiPut(PATTR_PATH . "/{$id}/options/{$redId}", ['label' => 'x', 'other' => 1], $token);
         expect($unknown['status'])->toBe(400)
