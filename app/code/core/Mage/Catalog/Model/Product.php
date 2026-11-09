@@ -588,6 +588,8 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
             $options = $this->getProductOptions();
             if (is_array($options)) {
                 $this->setIsCustomOptionChanged();
+                // The list of the product replaces a list that a failed save left in the option singleton
+                $this->getOptionInstance()->unsetOptions();
                 foreach ($this->getProductOptions() as $option) {
                     $this->getOptionInstance()->addOption($option);
                     if ((!isset($option['is_delete'])) || $option['is_delete'] != '1') {

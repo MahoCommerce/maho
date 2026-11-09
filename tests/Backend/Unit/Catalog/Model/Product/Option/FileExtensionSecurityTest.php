@@ -21,6 +21,12 @@ describe('Product Option File Extension Security Validation', function () {
         $this->validateMethod->setAccessible(true);
     });
 
+    afterEach(function () {
+        if ($this->option->getId()) {
+            $this->option->delete();
+        }
+    });
+
     describe('validateFileExtensions method', function () {
         it('allows safe file extensions without throwing exceptions', function () {
             expect(fn() => $this->validateMethod->invoke($this->option, 'jpg,png,pdf,txt'))
