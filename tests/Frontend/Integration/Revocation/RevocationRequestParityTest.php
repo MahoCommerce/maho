@@ -144,8 +144,13 @@ beforeEach(function () {
     $session = new Session(new MockArraySessionStorage());
     $session->start();
     Mage::register(Mage_Core_Model_Session_Abstract::REGISTRY_KEY, $session);
+    // A message that an earlier test left in the session is not an outcome of this test
+    Mage::getSingleton('core/session')->getMessages(true);
+    Mage::getSingleton('customer/session')->getMessages(true);
 
     Mage::app()->setCurrentStore(Mage::app()->getDefaultStoreView());
+    // The customer of the test logs in without the confirmation email
+    Mage::app()->getStore()->setConfig(Mage_Customer_Model_Customer::XML_PATH_IS_CONFIRM, '0');
     $store = Mage::app()->getStore();
     $store->setConfig(Maho_Revocation_Helper_Data::XML_PATH_ENABLED, '1');
     $store->setConfig(Maho_Revocation_Helper_Data::XML_PATH_COOLING_OFF_DAYS, '14');
@@ -160,6 +165,8 @@ beforeEach(function () {
 
 afterEach(function () {
     Mage::getSingleton('customer/session')->logout();
+    // A refused form keeps its values in the session for the next form, which is not the form of another test
+    Mage::getSingleton('core/session')->getRevocationFormData(true);
     Mage::register('isSecureArea', true, true);
     foreach (array_reverse($GLOBALS['revocationParityCreated']) as $model) {
         $model->delete();

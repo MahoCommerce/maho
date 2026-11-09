@@ -21,6 +21,9 @@ use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use Symfony\Component\Security\Core\Authorization\AccessDecisionManager;
+use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
+use Symfony\Component\Security\Core\Authorization\Voter\RoleVoter;
 use Tests\Helpers\TransportParity;
 
 uses(Tests\MahoFrontendTestCase::class);
@@ -72,13 +75,15 @@ function customerParitySecurity(int $customerId): Security
         #[\Override]
         public function get(string $id): mixed
         {
-            return $this->storage;
+            return $id === 'security.authorization_checker'
+                ? new AuthorizationChecker($this->storage, new AccessDecisionManager([new RoleVoter()]))
+                : $this->storage;
         }
 
         #[\Override]
         public function has(string $id): bool
         {
-            return $id === 'security.token_storage';
+            return in_array($id, ['security.token_storage', 'security.authorization_checker'], true);
         }
     });
 }
@@ -144,6 +149,8 @@ beforeEach(function () {
     $session->start();
     Mage::register(Mage_Core_Model_Session_Abstract::REGISTRY_KEY, $session);
     Mage::getSingleton('customer/session')->logout();
+    // A message that an earlier test left in the session is not an outcome of this test
+    Mage::getSingleton('customer/session')->getMessages(true);
 
     $store = Mage::app()->getStore();
     $store->setConfig('customer/account/enabled_in_frontend', '1');
@@ -316,7 +323,7 @@ describe('addresses', function () {
         }
 
         $reloaded = customerParityReload($customer);
-        $addressIds = array_map(fn($address) => (int) $address->getId(), $reloaded->getAddresses());
+        $addressIds = array_values(array_map(fn($address) => (int) $address->getId(), $reloaded->getAddresses()));
         expect($addressIds)->toHaveCount(1)
             ->and((int) $reloaded->getDefaultBilling())->toBe($addressIds[0])
             ->and((int) $reloaded->getDefaultShipping())->toBe($addressIds[0]);
