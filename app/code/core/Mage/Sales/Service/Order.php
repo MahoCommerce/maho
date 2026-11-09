@@ -15,6 +15,7 @@ use Mage_Sales_Model_Order as Order;
 use Mage_Sales_Model_Order_Creditmemo as Creditmemo;
 use Mage_Sales_Model_Order_Invoice as Invoice;
 use Mage_Sales_Model_Order_Shipment as Shipment;
+use Mage_Sales_Model_Resource_Order_Collection as OrderCollection;
 
 /**
  * Places orders from carts, finds orders, and cancels, holds, invoices, ships and refunds them, for the admin,
@@ -226,23 +227,23 @@ class Mage_Sales_Service_Order
     }
 
     /**
-     * Load the order $orderId. With $customerId, only an order of that customer exists for the caller.
+     * Load the order $orderId.
      *
      * @throws Mage_Core_Exception_NoSuchEntity
      */
-    public function requireById(int $orderId, ?int $customerId = null): Order
+    public function requireById(int $orderId): Order
     {
-        return $this->requireOwned($orderId > 0 ? $this->getById($orderId) : null, $customerId);
+        return $this->requireFound($orderId > 0 ? $this->getById($orderId) : null);
     }
 
     /**
-     * Load the order $incrementId. With $customerId, only an order of that customer exists for the caller.
+     * Load the order $incrementId.
      *
      * @throws Mage_Core_Exception_NoSuchEntity
      */
-    public function requireByIncrementId(string $incrementId, ?int $customerId = null): Order
+    public function requireByIncrementId(string $incrementId): Order
     {
-        return $this->requireOwned($incrementId !== '' ? $this->getByIncrementId($incrementId) : null, $customerId);
+        return $this->requireFound($incrementId !== '' ? $this->getByIncrementId($incrementId) : null);
     }
 
     /**
@@ -252,7 +253,46 @@ class Mage_Sales_Service_Order
     public function isVisibleToCustomer(Order $order, ?int $customerId): bool
     {
         return $order->getId() && $this->isOwner($order, $customerId)
-            && in_array($order->getState(), Mage::getSingleton('sales/order_config')->getVisibleOnFrontStates(), true);
+            && in_array($order->getState(), $this->getVisibleOnFrontStates(), true);
+    }
+
+    /**
+     * Load the order $orderId when the customer $customerId may see it. Every read and every action of a customer
+     * finds the order here, so a hidden, a foreign and a missing order give the same answer. See isVisibleToCustomer().
+     *
+     * @throws Mage_Core_Exception_NoSuchEntity
+     */
+    public function requireVisibleToCustomer(int $orderId, ?int $customerId): Order
+    {
+        return $this->requireVisible($orderId > 0 ? $this->getById($orderId) : null, $customerId);
+    }
+
+    /**
+     * Load the order $incrementId when the customer $customerId may see it. See requireVisibleToCustomer().
+     *
+     * @throws Mage_Core_Exception_NoSuchEntity
+     */
+    public function requireVisibleToCustomerByIncrementId(string $incrementId, ?int $customerId): Order
+    {
+        return $this->requireVisible($incrementId !== '' ? $this->getByIncrementId($incrementId) : null, $customerId);
+    }
+
+    /**
+     * Keep in $collection only the orders that the customer $customerId may see. See isVisibleToCustomer().
+     */
+    public function addVisibleToCustomerFilter(OrderCollection $collection, ?int $customerId): OrderCollection
+    {
+        return $collection
+            ->addFieldToFilter('main_table.customer_id', $customerId > 0 ? $customerId : -1)
+            ->addFieldToFilter('main_table.state', ['in' => $this->getVisibleOnFrontStates()]);
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function getVisibleOnFrontStates(): array
+    {
+        return Mage::getSingleton('sales/order_config')->getVisibleOnFrontStates();
     }
 
     /**
@@ -412,12 +452,14 @@ class Mage_Sales_Service_Order
         return $customerId > 0 && (int) $order->getCustomerId() === $customerId;
     }
 
-    private function requireOwned(?Order $order, ?int $customerId): Order
+    private function requireFound(?Order $order): Order
     {
-        if (!$order || ($customerId !== null && !$this->isOwner($order, $customerId))) {
-            throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('sales')->__('Order not found'));
-        }
-        return $order;
+        return $order ?? throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('sales')->__('Order not found'));
+    }
+
+    private function requireVisible(?Order $order, ?int $customerId): Order
+    {
+        return $order && $this->isVisibleToCustomer($order, $customerId) ? $order : $this->requireFound(null);
     }
 
     /**
@@ -494,7 +536,8 @@ class Mage_Sales_Service_Order
     }
 
     /**
-     * Get customer orders with billing address joined (no N+1 queries).
+     * Get every order of a customer with billing address joined (no N+1 queries), for the admin.
+     * getListVisibleToCustomer() gets the orders that the customer sees.
      *
      * @param int $customerId Customer ID
      * @param int $page Page number
@@ -511,6 +554,26 @@ class Mage_Sales_Service_Order
         ?string $since = null,
     ): array {
         $collection = $this->buildOrderCollection($customerId, ['status' => $status, 'since' => $since]);
+
+        return $this->paginateAndPreload($collection, $page, $pageSize);
+    }
+
+    /**
+     * Get the orders that the customer $customerId may see, as getListForCustomer() does. See isVisibleToCustomer().
+     *
+     * @return array{orders: array, total: int}
+     */
+    public function getListVisibleToCustomer(
+        int $customerId,
+        int $page = 1,
+        int $pageSize = 20,
+        ?string $status = null,
+        ?string $since = null,
+    ): array {
+        $collection = $this->addVisibleToCustomerFilter(
+            $this->buildOrderCollection(null, ['status' => $status, 'since' => $since]),
+            $customerId,
+        );
 
         return $this->paginateAndPreload($collection, $page, $pageSize);
     }
@@ -1272,8 +1335,8 @@ class Mage_Sales_Service_Order
      * Create a credit memo for an order, or for its invoice $invoice. Email it when $sendEmail is true, and put the
      * comment in the email when $notifyCustomer is true.
      *
-     * The money rules stay in one place: the refund never exceeds the order's refundable balance,
-     * and a memo that refunds nothing is not a refund.
+     * A memo that refunds nothing is not a refund. The credit memo model refuses a refund above the refundable balance
+     * of the order.
      *
      * @param array<string, mixed> $data Credit memo data for prepareCreditmemo().
      * @param array<int, bool>|null $backToStockItemIds Order item ids to return to stock, see prepareCreditmemo().
@@ -1344,12 +1407,6 @@ class Mage_Sales_Service_Order
         // nothing, but the order counts the credit memo as refunded online.
         if (!$offlineRefund && !$creditmemo->getInvoice()) {
             throw new Mage_Core_Exception(Mage::helper('sales')->__('Cannot refund online: the credit memo has no invoice. Refund it offline.'));
-        }
-        // Cap the refund at what the order can still refund, so an inflated
-        // adjustment cannot over-refund or mint excess store credit.
-        $refundable = (float) $order->getBaseTotalPaid() - (float) $order->getBaseTotalRefunded();
-        if ((float) $creditmemo->getBaseGrandTotal() > $refundable + 0.0001) {
-            throw new Mage_Core_Exception(Mage::helper('sales')->__('Refund amount exceeds the order\'s refundable balance'));
         }
         // A free order opts out through the flag.
         if ((float) $creditmemo->getBaseGrandTotal() <= 0 && !$creditmemo->getAllowZeroGrandTotal()) {

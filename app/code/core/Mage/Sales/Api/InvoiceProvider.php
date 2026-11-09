@@ -157,16 +157,18 @@ class InvoiceProvider extends \Maho\ApiPlatform\Provider
     }
 
     /**
-     * Load the order $orderId. A customer reads only their own orders, an admin or an API user the orders of the
-     * stores of the token. The operation's `security:` expression has already checked the permission.
+     * Load the order $orderId. A customer reads only the orders that the storefront shows them, an admin or an API
+     * user the orders of the stores of the token. The operation's `security:` expression has already checked the
+     * permission.
      */
     private function loadAndAuthorizeOrder(int $orderId, string $operationName): \Mage_Sales_Model_Order
     {
-        $isBackend = !str_contains($operationName, 'my_') && ($this->isAdmin() || $this->isApiUser());
-        $order = \Mage::getService('sales/order')->requireById($orderId, $isBackend ? null : (int) $this->getAuthenticatedCustomerId());
-        if ($isBackend) {
-            $this->assertStoreAllowed($order->getStoreId(), $this->requireUser(), 'order');
+        $service = \Mage::getService('sales/order');
+        if (str_contains($operationName, 'my_') || (!$this->isAdmin() && !$this->isApiUser())) {
+            return $service->requireVisibleToCustomer($orderId, $this->getAuthenticatedCustomerId());
         }
+        $order = $service->requireById($orderId);
+        $this->assertStoreAllowed($order->getStoreId(), $this->requireUser(), 'order');
 
         return $order;
     }

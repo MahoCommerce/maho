@@ -203,11 +203,13 @@ The checkout sub-resources mirror the guest-cart flow so a logged-in customer ca
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
 | GET | `/orders` | Admin/API | List orders (paginated) |
-| GET | `/orders/{id}` | Customer/Admin/API | Get order by ID (customers see only their own) |
+| GET | `/orders/{id}` | Customer/Admin/API | Get order by ID (customers see only their own, see below) |
 | GET | `/orders/{incrementId}/details` | Order token | Read a guest order via the per-order one-time `X-Order-Token` header |
 | POST | `/orders` | None | Place an order from a customer or guest cart |
 | POST | `/carts/{id}/place-order` | Customer/Admin/API | Place an order from the authenticated customer cart |
 | POST | `/guest-carts/{id}/place-order` | None | Place an order from a guest cart |
+
+**Orders of a customer token:** a customer reads the orders that the storefront shows under **My Orders**. An order in a state that the storefront hides (`pending_payment` in a new store) is not in `/customers/me/orders`, and `/orders/{id}`, its invoices, their PDFs and `POST /orders/{id}/cancel` (and the GraphQL `cancelOrder` mutation) answer `404`, as for an order of another customer. An admin or an API user token reads and cancels every order.
 
 **Customer fields of a guest order** <span class="version-badge">v27.1+</span>: the place-order body of a guest takes `customerCustomAttributes`, the values of the custom attributes of the **Checkout Registration** form (`{attribute_code: value}`), and must send each required one. The order keeps them in `customerCustomAttributes`. A customer order takes the values of the customer account and refuses the field with a 422. The GraphQL `placeOrder` mutation takes the same argument.
 

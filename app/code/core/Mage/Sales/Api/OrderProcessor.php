@@ -64,24 +64,26 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
 
     /**
      * Resolve the target order from the request: numeric {id} in the REST URI,
-     * or orderId / incrementId in the GraphQL/body args. A plain customer caller
-     * sees only their own orders; admin and orders/write service tokens are
-     * trusted (gated upstream by the operation security expression).
+     * or orderId / incrementId in the GraphQL/body args. A customer finds only
+     * the orders that the storefront shows them; admin and orders/write service
+     * tokens are trusted (gated upstream by the operation security expression).
      */
     private function resolveManagedOrder(array $context, array $uriVariables): \Mage_Sales_Model_Order
     {
         $args = $context['args']['input'] ?? [];
         $orderId = (int) ($uriVariables['id'] ?? $args['orderId'] ?? 0);
         $incrementId = $args['incrementId'] ?? null;
-        $isBackend = $this->isAdmin() || $this->isApiUser();
-        $customerId = $isBackend ? null : (int) $this->getAuthenticatedCustomerId();
+        $byId = $orderId > 0 || !is_string($incrementId);
 
-        $order = $orderId > 0 || !is_string($incrementId)
-            ? $this->orderService->requireById($orderId, $customerId)
-            : $this->orderService->requireByIncrementId($incrementId, $customerId);
-        if ($isBackend) {
-            $this->assertStoreAllowed($order->getStoreId(), $this->requireUser(), 'order');
+        if (!$this->isAdmin() && !$this->isApiUser()) {
+            $customerId = $this->getAuthenticatedCustomerId();
+            return $byId
+                ? $this->orderService->requireVisibleToCustomer($orderId, $customerId)
+                : $this->orderService->requireVisibleToCustomerByIncrementId($incrementId, $customerId);
         }
+
+        $order = $byId ? $this->orderService->requireById($orderId) : $this->orderService->requireByIncrementId($incrementId);
+        $this->assertStoreAllowed($order->getStoreId(), $this->requireUser(), 'order');
 
         return $order;
     }
