@@ -8,6 +8,8 @@ admin_pages: [cms_page/edit, cms_block/edit]
 A slide of a slideshow can show a different image on a small screen. For example, a wide banner
 shows on a computer, and a tall version of the same banner shows on a phone.
 
+![The same slide on a computer, with the wide default image, and on a phone, with the tall Mobile image](images/slideshow-images-storefront.webp)
+
 Each alternative image has a **breakpoint**. The breakpoint is the widest screen, in pixels, that
 shows the alternative image. A screen that is wider than every breakpoint shows the default image of
 the slide.
@@ -19,6 +21,8 @@ the slide.
 3. Select the image in the media library.
 4. In **Breakpoint**, select a preset from the list, or type a width in pixels, such as `900`.
 5. Click **Insert Slideshow**, then save the page or the block.
+
+![A slide with a Mobile image and a Tablet image, and the Breakpoint menu with the width of each preset](images/slideshow-images-breakpoint.webp)
 
 A slide can have more than one alternative image, for example one for **Mobile** and one for
 **Tablet**. Two images of the same slide cannot have the same width. The editor puts the narrowest
