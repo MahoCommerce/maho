@@ -246,3 +246,24 @@ describe('flush', function () {
         'cli' => fn() => expect(cacheViaCli(new CacheFlush()))->toBe(Command::SUCCESS),
     ]);
 });
+
+describe('flush system', function () {
+    it('cleans the cache before the schema step of migrate, and runs no script on an up-to-date store', function () {
+        cachePrepare(CACHE_PARITY_TYPE, true);
+        $cleanedFirst = null;
+
+        $scripts = Mage::getService('core/cache')->flushSystem(function () use (&$cleanedFirst): void {
+            $cleanedFirst = Mage::app()->getCache()->load('cache_parity_entry') === false;
+        });
+
+        expect($cleanedFirst)->toBeTrue()
+            ->and($scripts)->toBe(['schema' => 0, 'data' => 0]);
+    });
+
+    it('runs the same flush from the admin button', function () {
+        cachePrepare(CACHE_PARITY_TYPE, true);
+
+        expect(cacheViaAdmin('flushSystem'))->toBe(['The Maho cache has been flushed and updates applied.'])
+            ->and(Mage::app()->getCache()->load('cache_parity_entry'))->toBeFalse();
+    });
+});

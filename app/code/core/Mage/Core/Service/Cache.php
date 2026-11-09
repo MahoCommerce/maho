@@ -86,6 +86,46 @@ class Mage_Core_Service_Cache
     }
 
     /**
+     * Clean the cache, call $applySchema, run the pending setup scripts, and save the configuration cache again.
+     * The configuration cache stays off until the scripts ran, so they read the configuration of the files.
+     *
+     * @param (Closure(): void)|null $applySchema the declarative schema step of `./maho migrate`
+     * @return array{schema: int, data: int} the number of setup scripts that ran, by type
+     */
+    public function flushSystem(?Closure $applySchema = null): array
+    {
+        $cache = Mage::app()->getCache();
+        $cache->banUse('config');
+        Mage::getConfig()->reinit();
+        Mage::getConfig()->getCacheSaveLock(30, true);
+        try {
+            Mage::app()->cleanCache();
+            if ($applySchema !== null) {
+                $applySchema();
+            }
+
+            $scripts = ['schema' => 0, 'data' => 0];
+            foreach (Mage_Core_Model_Resource_Setup::getAllPendingUpdates() as $updates) {
+                foreach ($updates as $update) {
+                    $update['type'] === 'data' ? $scripts['data']++ : $scripts['schema']++;
+                }
+            }
+            Mage_Core_Model_Resource_Setup::applyAllUpdates();
+            Mage_Core_Model_Resource_Setup::applyAllDataUpdates();
+
+            // saveCache() does nothing while the configuration cache is off
+            $cache->unbanUse('config');
+            Mage::getConfig()->saveCache();
+        } finally {
+            $cache->unbanUse('config');
+            Mage::getConfig()->releaseCacheSaveLock();
+        }
+
+        Mage::dispatchEvent('adminhtml_cache_flush_system');
+        return $scripts;
+    }
+
+    /**
      * Delete the minified CSS and JS files.
      */
     public function flushMinified(): void

@@ -57,19 +57,7 @@ class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
     #[Maho\Config\Route('/admin/cache/flushSystem')]
     public function flushSystemAction(): void
     {
-        Mage::app()->getCache()->banUse('config');
-        Mage::getConfig()->reinit();
-        Mage::getConfig()->getCacheSaveLock(30, true);
-        try {
-            Mage::app()->cleanCache();
-            Mage_Core_Model_Resource_Setup::applyAllUpdates();
-            Mage_Core_Model_Resource_Setup::applyAllDataUpdates();
-            Mage::app()->getCache()->unbanUse('config');
-            Mage::getConfig()->saveCache();
-        } finally {
-            Mage::getConfig()->releaseCacheSaveLock();
-        }
-        Mage::dispatchEvent('adminhtml_cache_flush_system');
+        $this->cacheService()->flushSystem();
         $this->_getSession()->addSuccess(Mage::helper('adminhtml')->__('The Maho cache has been flushed and updates applied.'));
         $this->_redirect('*/*');
     }
