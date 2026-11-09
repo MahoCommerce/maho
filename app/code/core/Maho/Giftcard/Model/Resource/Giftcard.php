@@ -114,6 +114,19 @@ class Maho_Giftcard_Model_Resource_Giftcard extends Mage_Core_Model_Resource_Db_
             );
         }
 
+        // Read all the IDs: a WHERE with an ID out of the column range makes PostgreSQL fail the query and the transaction
+        $adapter = $this->_getReadAdapter();
+        $known = array_map(intval(...), $adapter->fetchCol(
+            $adapter->select()->from($this->getTable('core/website'), ['website_id'])->where('website_id > 0'),
+        ));
+        $errors = new Mage_Core_Exception_Input();
+        foreach ($ids as $websiteId) {
+            if (!in_array((int) $websiteId, $known, true)) {
+                $errors->addError('website_ids', Mage::helper('giftcard')->__('Unknown website ID: %s.', $websiteId));
+            }
+        }
+        $errors->throwIfErrors();
+
         // The balance is denominated in one currency, so all websites must share it
         $currencies = [];
         foreach ($ids as $websiteId) {
