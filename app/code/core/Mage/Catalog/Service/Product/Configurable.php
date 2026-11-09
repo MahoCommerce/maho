@@ -86,15 +86,23 @@ class Mage_Catalog_Service_Product_Configurable
     }
 
     /**
-     * @throws Mage_Core_Exception_NoSuchEntity when $childId is not a child of $product
+     * Remove the link between $product and the child $childId. A child without a value for a super attribute has a
+     * link, but it is not in getChildIds(), so the save keeps its link and this method deletes it.
+     *
+     * @throws Mage_Core_Exception_NoSuchEntity when $childId has no link to $product
      */
     public function removeChild(Product $product, int $childId): void
     {
-        $childIds = $this->getChildIds($product);
-        if (!in_array($childId, $childIds, true)) {
+        /** @var Mage_Catalog_Model_Product_Type_Configurable $typeInstance */
+        $typeInstance = $product->getTypeInstance(true);
+        $linkedIds = array_map(intval(...), array_values($typeInstance->getChildrenIds((int) $product->getId(), false)[0] ?? []));
+        if (!in_array($childId, $linkedIds, true)) {
             throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('catalog')->__('Child product not found'));
         }
-        $this->save($product, array_diff($childIds, [$childId]), [], null);
+        $this->save($product, array_diff($this->getChildIds($product), [$childId]), [], null);
+        /** @var Mage_Catalog_Model_Resource_Product_Type_Configurable $resource */
+        $resource = Mage::getResourceSingleton('catalog/product_type_configurable');
+        $resource->deleteProducts((int) $product->getId(), [$childId]);
     }
 
     /**

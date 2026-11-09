@@ -12,7 +12,8 @@ uses(Tests\MahoBackendTestCase::class);
 describe('Product Option File Extension Security Validation', function () {
     beforeEach(function () {
         $this->option = Mage::getModel('catalog/product_option');
-        $this->option->setType(Mage_Catalog_Model_Product_Option::OPTION_TYPE_FILE);
+        $this->option->setType(Mage_Catalog_Model_Product_Option::OPTION_TYPE_FILE)
+            ->setTitle('Test File Option');
 
         // Use reflection to access protected method
         $this->reflection = new ReflectionClass($this->option);
@@ -67,7 +68,7 @@ describe('Product Option File Extension Security Validation', function () {
             $this->option->setFileExtension('php,exe');
 
             expect(fn() => $this->option->save())
-                ->toThrow(Mage_Core_Exception::class);
+                ->toThrow(Mage_Core_Exception::class, 'The following file extensions are not allowed for security reasons: php, exe');
         });
 
         it('skips validation for non-file type options', function () {

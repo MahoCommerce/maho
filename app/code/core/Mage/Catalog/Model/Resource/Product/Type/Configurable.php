@@ -47,11 +47,7 @@ class Mage_Catalog_Model_Resource_Product_Type_Configurable extends Mage_Core_Mo
         }
 
         if (!empty($delete)) {
-            $where = [
-                'parent_id = ?'     => $mainProductId,
-                'product_id IN(?)'  => $delete,
-            ];
-            $this->_getWriteAdapter()->delete($this->getMainTable(), $where);
+            $this->deleteProducts((int) $mainProductId, $delete);
         }
         if (!empty($insert)) {
             $data = [];
@@ -69,6 +65,19 @@ class Mage_Catalog_Model_Resource_Product_Type_Configurable extends Mage_Core_Mo
             ->processRelations($mainProductId, $productIds);
 
         return $this;
+    }
+
+    /**
+     * Delete the links between the configurable product $parentId and the children $childIds.
+     *
+     * @param array<int|string> $childIds
+     */
+    public function deleteProducts(int $parentId, array $childIds): void
+    {
+        $this->_getWriteAdapter()->delete($this->getMainTable(), [
+            'parent_id = ?'    => $parentId,
+            'product_id IN(?)' => $childIds,
+        ]);
     }
 
     /**
