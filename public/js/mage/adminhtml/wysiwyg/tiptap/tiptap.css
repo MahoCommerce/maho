@@ -73,9 +73,9 @@
         gap: 0.125rem;
     }
 
-    /* Fullscreen stays at the end of the first row, also when the other groups wrap */
+    /* Source and Fullscreen stay together at the end of the first row, also when the other groups wrap */
     &:has(> .toolbar-group > button[data-command="toggleFullscreen"]) {
-        padding-right: calc(var(--tt-btn-size) + 0.5rem);
+        padding-right: calc(2 * var(--tt-btn-size) + 0.625rem);
     }
 
     .toolbar-group:has(> button[data-command="toggleFullscreen"]) {

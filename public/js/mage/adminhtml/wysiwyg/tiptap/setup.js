@@ -857,9 +857,8 @@ class tiptapWysiwygSetup {
             blockDropdown(this, 'accordion'),
             ...blockButtons(this, ['Insert Image', 'Insert Slideshow', 'Insert Widget', 'Insert Variable']),
             { type: 'spacer' },
+            // Source and Fullscreen share the last group, which CSS pins to the end of the first row
             { type: 'button', title: 'Source', icon: 'source', onClick: () => this.toggle() || this.loadCodeEditor().then((codeEditor) => codeEditor?.view.focus()), data: { source: '' } },
-            // Fullscreen has a group of its own: CSS pins that group to the end of the first row
-            { type: 'group' },
             // The command focuses the editor without a scroll. The focus() of a toolbar chain scrolls to the selection
             { type: 'button', title: 'Fullscreen Page Builder', icon: 'fullscreen-maximize', onClick: () => this.editor.commands.toggleFullscreen(), data: { command: 'toggleFullscreen', args: '[]' }, enabled: !this.textarea.closest('dialog') },
         ]);
