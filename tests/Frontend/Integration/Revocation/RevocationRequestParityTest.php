@@ -165,6 +165,8 @@ beforeEach(function () {
 
 afterEach(function () {
     Mage::getSingleton('customer/session')->logout();
+    // A refused form keeps its values in the session for the next form, which is not the form of another test
+    Mage::getSingleton('core/session')->getRevocationFormData(true);
     Mage::register('isSecureArea', true, true);
     foreach (array_reverse($GLOBALS['revocationParityCreated']) as $model) {
         $model->delete();
