@@ -12,8 +12,6 @@ declare(strict_types=1);
 
 class Mage_Core_Model_Design_Breakpoints
 {
-    public const CONFIG_PATH = 'design/breakpoints';
-
     /** The code and the label of each preset, from the narrowest to the widest. */
     public const PRESETS = [
         'mobile' => 'Mobile',
@@ -25,6 +23,9 @@ class Mage_Core_Model_Design_Breakpoints
 
     /** A media query that matches no device. */
     public const NO_MATCH = 'not all';
+
+    /** @var array<int, array<string, int|null>> */
+    protected array $widths = [];
 
     /**
      * Read a width in pixels: a whole number from MIN_WIDTH to MAX_WIDTH, or null.
@@ -40,21 +41,35 @@ class Mage_Core_Model_Design_Breakpoints
     }
 
     /**
-     * The width of each preset in $store. A preset with a value that is not valid has the width null.
+     * The width of each preset in the theme of $store, from the <breakpoints> node of theme.xml. A
+     * theme without a valid value takes the value of its parent theme. A preset that no theme of the
+     * chain gives has the width null.
      *
      * @return array<string, int|null>
      */
     public function getWidths(Mage_Core_Model_Store|int|string|null $store = null): array
     {
+        $storeId = (int) Mage::app()->getStore($store)->getId();
+        if (isset($this->widths[$storeId])) {
+            return $this->widths[$storeId];
+        }
+
+        $nodes = $this->getThemeNodes($storeId);
         $widths = [];
         foreach (array_keys(self::PRESETS) as $code) {
-            $widths[$code] = self::toWidth(Mage::getStoreConfig(self::CONFIG_PATH . '/' . $code, $store));
+            $widths[$code] = null;
+            foreach ($nodes as $node) {
+                $widths[$code] = self::toWidth((string) $node->{$code});
+                if ($widths[$code] !== null) {
+                    break;
+                }
+            }
         }
-        return $widths;
+        return $this->widths[$storeId] = $widths;
     }
 
     /**
-     * The media query of the preset $code, as `(max-width: 767px)`. An unknown preset gets a query
+     * The media query of the preset $code, as `(max-width: 770px)`. An unknown preset gets a query
      * that matches no device, so the browser shows the default image of the <picture>.
      */
     public function getMediaQuery(string $code, Mage_Core_Model_Store|int|string|null $store = null): string
@@ -77,5 +92,13 @@ class Mage_Core_Model_Design_Breakpoints
             }
         }
         return $presets;
+    }
+
+    /**
+     * @return list<\Maho\Simplexml\Element>
+     */
+    protected function getThemeNodes(int $storeId): array
+    {
+        return Mage::getSingleton('core/design_config')->getThemeNodes('breakpoints', $storeId);
     }
 }

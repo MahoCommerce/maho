@@ -527,8 +527,8 @@
         }
     }
 
-    /* app.js moves .col-right inside .col-wrapper below 1000px */
-    @media (min-width: 771px) and (max-width: 1000px) {
+    /* app.js moves .col-right inside .col-wrapper up to the tablet breakpoint of theme.xml */
+    @media (min-width: 771px) and (max-width: 1023px) {
         .col3-layout .main {
             grid-template-columns: minmax(0, 1fr);
             grid-template-areas:

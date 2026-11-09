@@ -1,5 +1,5 @@
 ---
-description: Give a slide of a content slideshow a different image on a phone or a tablet, with the breakpoint presets of the store or a custom width in pixels.
+description: Give a slide of a content slideshow a different image on a phone or a tablet, with the breakpoint presets of the theme or a custom width in pixels.
 admin_pages: [cms_page/edit, cms_block/edit]
 ---
 
@@ -35,34 +35,32 @@ breakpoint first, because the browser uses the first image that matches the scre
 | A preset, such as **Mobile** | The name of the preset | The slide uses the new width |
 | A width that you type, such as `900` | The width in pixels | The slide keeps its width |
 
-After a preset, the field shows the current width of the preset, such as **767 px**. Use a preset
-for most slides. The presets follow the theme of the store, so a new theme needs a change in one
-place only. Type a width for a slide that must change at a width of its own.
+After a preset, the field shows the width of the preset, such as **770 px**. Use a preset for most
+slides. The presets come from the theme of the store, so the images change at the same widths as the
+layout of the theme. Type a width for a slide that must change at a width of its own.
 
-## Change the presets
+## The widths of the presets
 
-Go to **System > Configuration > Design > Breakpoints**. The default values are:
+The theme of the store view gives the width of each preset. You cannot change them in the admin.
 
-| Preset | Default width |
-|--------|---------------|
-| Mobile | 767 |
-| Tablet | 1023 |
+| Theme | Mobile | Tablet |
+|-------|--------|--------|
+| Maho default and the industry themes | 770 | 1023 |
+| Legacy | 770 | 979 |
 
-Each value is a whole number from 1 to 9999. **Tablet** must be wider than **Mobile**. You can set a
-different value for each website or store view (see [Scope](scope.md)). The store checks the order in
-each website and store view that a change reaches. If a change puts the presets of a store view out
-of order, the store does not save it and names that store view.
+A theme of your own takes the widths of its parent theme. A developer can change them in the
+`theme.xml` of the theme (see [Breakpoints](../developer/theme-development.md#breakpoints)).
 
 !!! warning "A slide with a preset and a custom width"
-    The editor sorts the images of a slide when you save the slideshow. If you later change a preset
-    to a width on the other side of a custom width of the same slide, the order of the images is
-    wrong. Open the slideshow and click **Insert Slideshow** again to sort the images.
+    The editor sorts the images of a slide when you save the slideshow. If the store later uses a
+    theme with a preset on the other side of a custom width of the same slide, the order of the
+    images is wrong. Open the slideshow and click **Insert Slideshow** again to sort the images.
 
-    The editor sorts the images with the presets of one store view. If a page or a block shows in
-    more than one store view, and the store views have different presets, a custom width can be on
-    a different side of a preset in each store view. Then no order is correct for all of them. In
-    this case, use only presets or only custom widths in the slide, or make one page or block for
-    each store view.
+    The editor sorts the images with the presets of one store view: the store view of the page or
+    the block, or the default store view. If a page or a block shows in more than one store view,
+    and the store views have themes with different presets, a custom width can be on a different
+    side of a preset in each store view. Then no order is correct for all of them. In this case, use
+    only presets or only custom widths in the slide, or make one page or block for each store view.
 
 ## In the source view
 

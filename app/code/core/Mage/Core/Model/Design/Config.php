@@ -58,6 +58,39 @@ class Mage_Core_Model_Design_Config extends \Maho\Simplexml\Config
     }
 
     /**
+     * The $name nodes of theme.xml for the skin theme of the store view and for its parents, child
+     * first, up to and with base/default. As in the design fallback, when the theme declares no
+     * parent, only the default theme of the store view and then the default theme of the package
+     * come before base/default. A design change, a user agent exception or the custom design of a
+     * category or a product does not change the theme here.
+     *
+     * @return list<\Maho\Simplexml\Element>
+     */
+    public function getThemeNodes(string $name, int $storeId): array
+    {
+        $area = Mage_Core_Model_Design_Package::DEFAULT_AREA;
+        $package = (string) Mage::getStoreConfig('design/package/name', $storeId) ?: Mage_Core_Model_Design_Package::DEFAULT_PACKAGE;
+        $theme = (string) Mage::getStoreConfig('design/theme/skin', $storeId)
+            ?: (string) Mage::getStoreConfig('design/theme/default', $storeId)
+            ?: Mage_Core_Model_Design_Package::DEFAULT_THEME;
+
+        $steps = [
+            ...Mage::getModel('core/design_fallback', ['config' => $this])->setStore($storeId)->getFallbackScheme($area, $package, $theme),
+            ['_package' => Mage_Core_Model_Design_Package::BASE_PACKAGE, '_theme' => Mage_Core_Model_Design_Package::DEFAULT_THEME],
+        ];
+        $nodes = [];
+        foreach ($steps as $step) {
+            $package = $step['_package'] ?? $package;
+            $theme = $step['_theme'] ?? $theme;
+            $node = $this->getNode("{$area}/{$package}/{$theme}/{$name}");
+            if ($node) {
+                $nodes[] = $node;
+            }
+        }
+        return $nodes;
+    }
+
+    /**
      * Load cache
      *
      * @return bool

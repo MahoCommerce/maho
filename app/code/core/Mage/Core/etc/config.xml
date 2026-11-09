@@ -338,10 +338,6 @@ SPDX-License-Identifier: AFL-3.0
             <tokens>
                 <dark_mode>1</dark_mode>
             </tokens>
-            <breakpoints>
-                <mobile>767</mobile>
-                <tablet>1023</tablet>
-            </breakpoints>
             <pagination>
                 <list_allow_all>1</list_allow_all>
                 <pagination_frame>5</pagination_frame>

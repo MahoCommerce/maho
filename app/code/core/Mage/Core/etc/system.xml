@@ -669,38 +669,6 @@ SPDX-License-Identifier: AFL-3.0
                         </custom_css>
                     </fields>
                 </tokens>
-                <breakpoints translate="label comment">
-                    <label>Breakpoints</label>
-                    <comment>The screen widths that content can name, such as the mobile image of a slideshow slide. Content that names a breakpoint follows a change here.</comment>
-                    <sort_order>4</sort_order>
-                    <show_in_default>1</show_in_default>
-                    <show_in_website>1</show_in_website>
-                    <show_in_store>1</show_in_store>
-                    <fields>
-                        <mobile translate="label comment">
-                            <label>Mobile</label>
-                            <comment>The widest screen, in pixels, that gets the mobile image.</comment>
-                            <frontend_type>text</frontend_type>
-                            <backend_model>adminhtml/system_config_backend_design_breakpoint</backend_model>
-                            <validate>required-entry validate-digits validate-digits-range digits-range-1-9999</validate>
-                            <sort_order>10</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                        </mobile>
-                        <tablet translate="label comment">
-                            <label>Tablet</label>
-                            <comment>The widest screen, in pixels, that gets the tablet image. Make it wider than Mobile.</comment>
-                            <frontend_type>text</frontend_type>
-                            <backend_model>adminhtml/system_config_backend_design_breakpoint</backend_model>
-                            <validate>required-entry validate-digits validate-digits-range digits-range-1-9999</validate>
-                            <sort_order>20</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                        </tablet>
-                    </fields>
-                </breakpoints>
                 <pagination translate="label">
                     <label>Pagination</label>
                     <sort_order>500</sort_order>

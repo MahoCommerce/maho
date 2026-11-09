@@ -51,6 +51,15 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
     }
 
     /**
+     * The breakpoint presets of the theme as JSON, such as `{"mobile":770,"tablet":1023}`. app.js
+     * reads them, so its layout changes at the same widths as the CSS and the content images.
+     */
+    public function getBreakpointsJson(): string
+    {
+        return Mage::helper('core')->jsonEncode(Mage::getSingleton('core/design_breakpoints')->getWidths());
+    }
+
+    /**
      * Add the web fonts the active skin identity declares in its etc/theme.xml.
      *
      * Keyed on the skin theme: an identity is skin-only, so a layout file inside
