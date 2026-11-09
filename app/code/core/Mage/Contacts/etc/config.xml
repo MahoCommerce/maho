@@ -73,7 +73,6 @@ SPDX-License-Identifier: AFL-3.0
             </contacts>
             <api>
                 <enabled>1</enabled>
-                <honeypot_enabled>1</honeypot_enabled>
             </api>
             <abuse>
                 <honeypot_enabled>1</honeypot_enabled>

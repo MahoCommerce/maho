@@ -683,15 +683,16 @@ The API, the footer form and the newsletter page of the customer account use the
 {
   "id": "contact",
   "enabled": true,
-  "captchaProvider": "turnstile",
-  "captchaSiteKey": "0x4AAA...",
+  "captchaProvider": "altcha",
+  "captchaSiteKey": null,
+  "captchaChallengeUrl": "https://example.com/captcha/index/challenge",
   "honeypotField": "_h_a4b2c1d3"
 }
 ```
 
-`captchaProvider` is one of `none`, `turnstile`, `recaptcha_v3` (or anything an installed third-party module registers). `captchaSiteKey` is `null` when the provider is `none`. Frontends use these two fields to load the matching widget client-side; for richer per-provider config the helper-based event flow described under [CAPTCHA](captcha.md) is used instead.
+The CAPTCHA fields come from the CAPTCHA module of the store, through the `api_captcha_config` event (see [CAPTCHA](captcha.md)). `captchaProvider` is `none` when no module is active, `altcha` for the built-in `Maho_Captcha`, or the name that a third-party module gives. `captchaSiteKey` and `captchaChallengeUrl` are `null` when the provider does not use them. When a provider is active, `POST /contact` needs the solved token in `captchaToken`. The storefront form and the API use the same CAPTCHA setup.
 
-The `honeypotField` value is **deterministic per install** (derived from the encryption key) and **opaque** to the frontend, render it as a hidden input and don't expose its value, e.g. `<input type="text" name="{honeypotField}" style="display:none" tabindex="-1" autocomplete="off" />`. If a request body arrives with a non-empty value in that field, the API silently treats it as spam (returns success without sending the email). When honeypot is disabled in admin, `honeypotField` is `null` and the frontend can skip it.
+The `honeypotField` value is **deterministic per install** (derived from the encryption key) and **opaque** to the frontend, render it as a hidden input and don't expose its value, e.g. `<input type="text" name="{honeypotField}" style="display:none" tabindex="-1" autocomplete="off" />`. If a request body arrives with a non-empty value in that field, the API silently treats it as spam (returns success without sending the email). One switch controls the honeypot of the storefront form and of the API: System > Configuration > General > Contacts > Abuse Protection > Honeypot Field. When it is off, `honeypotField` is `null` and the frontend can skip it.
 
 `POST /contact` and the storefront contact form use the same rules. A field that is not valid gives a 422, with one entry for each field in `details.errors` (`name`, `email`, `comment`, `captchaToken`). A client or an email address over its limit gets a 429 with a `Retry-After` header. The email limit (`system/rate_limit/contact`) counts the messages of the storefront form and of the API together. A disabled contact API gives a 404.
 

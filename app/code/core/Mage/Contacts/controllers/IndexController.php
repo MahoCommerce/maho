@@ -61,7 +61,6 @@ class Mage_Contacts_IndexController extends Mage_Core_Controller_Front_Action
                 $post,
                 Mage_Contacts_Model_Channel::Web,
                 (int) Mage::app()->getStore()->getId(),
-                $this->getRequest()->getClientIp(),
             );
             $session->addSuccess($this->__('Your inquiry was submitted and will be responded to as soon as possible. Thank you for contacting us.'));
         } catch (Mage_Core_Exception_Input $e) {

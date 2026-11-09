@@ -26,9 +26,11 @@ class ContactFormProvider extends \Maho\ApiPlatform\Provider
 
         $dto = new ContactForm();
         $dto->enabled = $service->isEnabled($channel, $storeId);
-        $dto->captchaProvider = $service->getCaptchaProvider($channel, $storeId);
-        $dto->captchaSiteKey = $service->getCaptchaSiteKey($channel, $storeId);
-        $dto->honeypotField = $service->isHoneypotEnabled($channel, $storeId)
+        $captcha = \Mage::helper('apiplatform')->getCaptchaConfig();
+        $dto->captchaProvider = empty($captcha['enabled']) ? 'none' : (string) ($captcha['provider'] ?? 'none');
+        $dto->captchaSiteKey = isset($captcha['siteKey']) ? (string) $captcha['siteKey'] : null;
+        $dto->captchaChallengeUrl = isset($captcha['challengeUrl']) ? (string) $captcha['challengeUrl'] : null;
+        $dto->honeypotField = $service->isHoneypotEnabled($storeId)
             ? \Mage::helper('core')->getHoneypotFieldName()
             : null;
 

@@ -28,7 +28,6 @@ class ContactFormProcessor extends \Maho\ApiPlatform\Processor
             $this->parseRequestBody($request),
             \Mage_Contacts_Model_Channel::Api,
             StoreContext::getStoreId(),
-            $request?->getClientIp(),
         );
 
         $dto = new ContactForm();

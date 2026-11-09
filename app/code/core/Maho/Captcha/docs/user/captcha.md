@@ -46,6 +46,10 @@ Out of the box, the captcha guards the most-abused forms in a typical store:
 - Wishlist sharing
 - EU revocation form
 
+**API**
+
+- Contact form (`POST /contact`), for a headless storefront. `GET /contact/config` gives the frontend the challenge URL.
+
 **Admin**
 
 - Admin login

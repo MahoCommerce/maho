@@ -15,7 +15,7 @@
 </div>
 <form action="<?= $this->getFormAction() ?>" id="contactForm" method="post" class="scaffold-form" autocomplete="off">
     <?= $this->getBlockHtml('formkey') ?>
-    <?php if (Mage::getService('contacts/message')->isHoneypotEnabled(Mage_Contacts_Model_Channel::Web)): ?>
+    <?php if (Mage::getService('contacts/message')->isHoneypotEnabled()): ?>
         <?= Mage::helper('core')->getHoneypotFieldHtml() ?>
     <?php endif ?>
     <div class="fieldset">

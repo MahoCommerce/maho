@@ -123,8 +123,8 @@ return [
         'childProductIds', 'extensions', 'id', 'superAttributes',
     ],
     'ContactForm' => [
-        'captchaProvider', 'captchaSiteKey', 'enabled', 'extensions', 'honeypotField', 'id', 'message',
-        'success',
+        'captchaChallengeUrl', 'captchaProvider', 'captchaSiteKey', 'enabled', 'extensions', 'honeypotField', 'id',
+        'message', 'success',
     ],
     'Country' => [
         'availableRegions', 'extensions', 'id', 'iso2Code', 'iso3Code', 'name',

@@ -17,32 +17,19 @@ class Mage_Contacts_Service_Message
     public const XML_PATH_ENABLED = 'contacts/contacts/enabled';
     public const XML_PATH_API_ENABLED = 'contacts/api/enabled';
     public const XML_PATH_HONEYPOT_ENABLED = 'contacts/abuse/honeypot_enabled';
-    public const XML_PATH_API_HONEYPOT_ENABLED = 'contacts/api/honeypot_enabled';
     public const XML_PATH_IP_RATE_LIMIT = 'contacts/abuse/ip_rate_limit_per_hour';
     public const XML_PATH_RECIPIENT_RATE_LIMIT = 'contacts/abuse/recipient_rate_limit_per_hour';
     public const XML_PATH_EMAIL_RATE_LIMIT = 'system/rate_limit/contact';
-    public const XML_PATH_API_CAPTCHA_PROVIDER = 'contacts/api/captcha_provider';
-    public const XML_PATH_API_CAPTCHA_SITE_KEY = 'contacts/api/captcha_site_key';
-    public const XML_PATH_API_CAPTCHA_SECRET = 'contacts/api/captcha_secret_key';
     public const XML_PATH_EMAIL_SENDER = 'contacts/email/sender_email_identity';
     public const XML_PATH_EMAIL_RECIPIENT = 'contacts/email/recipient_email';
     public const XML_PATH_EMAIL_TEMPLATE = 'contacts/email/email_template';
     public const XML_PATH_AUTO_REPLY_ENABLED = 'contacts/auto_reply/enabled';
     public const XML_PATH_AUTO_REPLY_EMAIL_TEMPLATE = 'contacts/auto_reply/email_template';
 
-    public const CAPTCHA_NONE = 'none';
-
     /** The longest value of each field. The service cuts a longer value. A field of a custom form gets the length of comment. */
     public const MAX_LENGTHS = ['name' => 255, 'email' => 255, 'comment' => 5000, 'telephone' => 50];
 
     public const RATE_LIMIT_WINDOW = 3600;
-
-    private const CAPTCHA_VERIFY_URLS = [
-        'turnstile' => 'https://challenges.cloudflare.com/turnstile/v0/siteverify',
-        'recaptcha_v3' => 'https://www.google.com/recaptcha/api/siteverify',
-    ];
-
-    private const RECAPTCHA_MIN_SCORE = 0.5;
 
     /** Fields for the transport, the abuse checks and the aliases of the API. The email does not show them. */
     private const CONTROL_FIELDS = ['form_key', 'captchaToken', 'maho_captcha', 'message', 'phone'];
@@ -55,36 +42,9 @@ class Mage_Contacts_Service_Message
         }, $storeId);
     }
 
-    public function isHoneypotEnabled(Channel $channel, ?int $storeId = null): bool
+    public function isHoneypotEnabled(?int $storeId = null): bool
     {
-        return Mage::getStoreConfigFlag(match ($channel) {
-            Channel::Web => self::XML_PATH_HONEYPOT_ENABLED,
-            Channel::Api => self::XML_PATH_API_HONEYPOT_ENABLED,
-        }, $storeId);
-    }
-
-    /**
-     * Return the CAPTCHA provider that send() checks: none, turnstile or recaptcha_v3.
-     * The web channel has none, because Maho_Captcha checks the storefront form before the controller runs.
-     */
-    public function getCaptchaProvider(Channel $channel, ?int $storeId = null): string
-    {
-        if ($channel === Channel::Web) {
-            return self::CAPTCHA_NONE;
-        }
-        return (string) Mage::getStoreConfig(self::XML_PATH_API_CAPTCHA_PROVIDER, $storeId) ?: self::CAPTCHA_NONE;
-    }
-
-    /**
-     * Return the public key that the CAPTCHA widget of the client uses, or null when the channel has no CAPTCHA provider.
-     */
-    public function getCaptchaSiteKey(Channel $channel, ?int $storeId = null): ?string
-    {
-        if ($this->getCaptchaProvider($channel, $storeId) === self::CAPTCHA_NONE) {
-            return null;
-        }
-        $siteKey = Mage::getStoreConfig(self::XML_PATH_API_CAPTCHA_SITE_KEY, $storeId);
-        return $siteKey === null ? null : (string) $siteKey;
+        return Mage::getStoreConfigFlag(self::XML_PATH_HONEYPOT_ENABLED, $storeId);
     }
 
     /**
@@ -95,27 +55,25 @@ class Mage_Contacts_Service_Message
      * A field of a custom form goes to the email template as data.<field>.
      *
      * @param array<array-key, mixed> $fields the fields that the client sent: the form POST or the JSON body
-     * @param string|null $clientIp the address of the client, for the CAPTCHA provider
      * @throws Mage_Core_Exception_NoSuchEntity when the channel is disabled
-     * @throws Mage_Core_Exception_Input with one error for each invalid field
+     * @throws Mage_Core_Exception_Input with one error for each invalid field, or when the CAPTCHA refuses the token
      * @throws Mage_Core_Exception_TooManyRequests when the client or the email address is over its limit
-     * @throws RuntimeException when the CAPTCHA provider does not answer or the email to the store fails
+     * @throws RuntimeException when the email to the store fails
      */
-    public function send(array $fields, Channel $channel, int $storeId, ?string $clientIp = null): void
+    public function send(array $fields, Channel $channel, int $storeId): void
     {
         if (!$this->isEnabled($channel, $storeId)) {
             throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('contacts')->__('Contact form is not available'));
         }
-        if ($this->isHoneypotEnabled($channel, $storeId) && Mage::helper('core')->isHoneypotTriggered($fields)) {
+        if ($this->isHoneypotEnabled($storeId) && Mage::helper('core')->isHoneypotTriggered($fields)) {
             return;
         }
 
         $message = $this->readMessage($fields);
-        $captchaProvider = $this->getCaptchaProvider($channel, $storeId);
-        $captchaToken = self::stringValue($fields['captchaToken'] ?? null);
-
-        $this->validate($message, $captchaProvider, $captchaToken);
-        $this->verifyCaptcha($captchaProvider, $captchaToken, $storeId, $clientIp);
+        $this->validate($message);
+        if ($channel === Channel::Api) {
+            $this->verifyApiCaptcha($fields);
+        }
         $this->checkRateLimits($channel, $storeId, (string) $message->getData('email'));
 
         $this->sendToStore($message, $storeId);
@@ -173,7 +131,7 @@ class Mage_Contacts_Service_Message
     /**
      * @throws Mage_Core_Exception_Input
      */
-    private function validate(\Maho\DataObject $message, string $captchaProvider, string $captchaToken): void
+    private function validate(\Maho\DataObject $message): void
     {
         $helper = Mage::helper('contacts');
         $core = Mage::helper('core');
@@ -189,51 +147,22 @@ class Mage_Contacts_Service_Message
         if (!$core->isValidNotBlank($message->getData('comment'))) {
             $errors->addError('comment', $helper->__('Message is required'));
         }
-        if ($captchaProvider !== self::CAPTCHA_NONE && $captchaToken === '') {
-            $errors->addError('captcha_token', $helper->__('CAPTCHA verification is required'));
-        }
 
         $errors->throwIfErrors();
     }
 
     /**
-     * @throws Mage_Core_Exception_Input when the provider refuses the token
-     * @throws RuntimeException when the provider does not answer
+     * Ask the CAPTCHA module of the store to check the token in $fields. Maho_Captcha checks the storefront form
+     * before the controller runs, and it observes this event for the API.
+     *
+     * @param array<array-key, mixed> $fields
+     * @throws Mage_Core_Exception_Input when the CAPTCHA module refuses the token
      */
-    private function verifyCaptcha(
-        string $provider,
-        #[\SensitiveParameter]
-        string $token,
-        int $storeId,
-        ?string $clientIp,
-    ): void {
-        if ($provider === self::CAPTCHA_NONE) {
-            return;
-        }
-        $secret = (string) Mage::getStoreConfig(self::XML_PATH_API_CAPTCHA_SECRET, $storeId);
-        if ($secret === '') {
-            Mage::log('Contact form: CAPTCHA secret key not configured', Mage::LOG_WARNING);
-            return;
-        }
-        $verifyUrl = self::CAPTCHA_VERIFY_URLS[$provider] ?? null;
-        if ($verifyUrl === null) {
-            return;
-        }
-
-        try {
-            $result = \Maho\Http\Client::create(['timeout' => 5])->request('POST', $verifyUrl, [
-                'body' => ['secret' => $secret, 'response' => $token, 'remoteip' => $clientIp],
-            ])->toArray(false);
-        } catch (Exception $e) {
-            // Fail closed: a client that can stop the provider must not get past the CAPTCHA
-            throw new RuntimeException('The CAPTCHA provider of the contact form did not answer.', 0, $e);
-        }
-
-        $passed = !empty($result['success'])
-            && !($provider === 'recaptcha_v3' && isset($result['score']) && $result['score'] < self::RECAPTCHA_MIN_SCORE);
-        if (!$passed) {
-            throw new Mage_Core_Exception_Input()
-                ->addError('captcha_token', Mage::helper('contacts')->__('CAPTCHA verification failed. Please try again.'));
+    private function verifyApiCaptcha(array $fields): void
+    {
+        $error = Mage::helper('apiplatform')->verifyCaptcha($fields);
+        if ($error !== null) {
+            throw new Mage_Core_Exception_Input()->addError('captcha_token', $error);
         }
     }
 

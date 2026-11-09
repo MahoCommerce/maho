@@ -62,6 +62,18 @@ class ContactParitySpyService extends Mage_Contacts_Service_Message
 }
 
 /**
+ * A CAPTCHA module that refuses every API token, as Maho_Captcha does for a wrong token.
+ */
+class ContactParityCaptchaHelper extends Maho_ApiPlatform_Helper_Data
+{
+    #[\Override]
+    public function verifyCaptcha(array $data): ?string
+    {
+        return 'Incorrect CAPTCHA.';
+    }
+}
+
+/**
  * Post $fields to the storefront form, as the browser does.
  *
  * @return array{accepted: bool, errors: list<string>}
@@ -158,8 +170,6 @@ beforeEach(function () {
     $store->setConfig(Mage_Contacts_Service_Message::XML_PATH_ENABLED, '1');
     $store->setConfig(Mage_Contacts_Service_Message::XML_PATH_API_ENABLED, '1');
     $store->setConfig(Mage_Contacts_Service_Message::XML_PATH_HONEYPOT_ENABLED, '1');
-    $store->setConfig(Mage_Contacts_Service_Message::XML_PATH_API_HONEYPOT_ENABLED, '1');
-    $store->setConfig(Mage_Contacts_Service_Message::XML_PATH_API_CAPTCHA_PROVIDER, 'none');
     $store->setConfig(Mage_Contacts_Service_Message::XML_PATH_EMAIL_RATE_LIMIT, '3');
     $store->setConfig(Mage_Contacts_Service_Message::XML_PATH_IP_RATE_LIMIT, '10');
     $store->setConfig(Mage_Contacts_Service_Message::XML_PATH_RECIPIENT_RATE_LIMIT, '3');
@@ -292,23 +302,28 @@ it('refuses a message of the web channel when the storefront form is disabled', 
         ->toThrow(Mage_Core_Exception_NoSuchEntity::class);
 });
 
-describe('the switches that each transport keeps (see #1348)', function () {
-    it('checks the CAPTCHA provider of the contact API on the API only', function () {
-        Mage::app()->getStore()->setConfig(Mage_Contacts_Service_Message::XML_PATH_API_CAPTCHA_PROVIDER, 'turnstile');
+describe('the abuse checks', function () {
+    afterEach(fn() => Mage::unregister('_helper/apiplatform'));
+
+    it('asks the CAPTCHA module of the store on the API, and leaves the form to its predispatch observer', function () {
+        Mage::unregister('_helper/apiplatform');
+        Mage::register('_helper/apiplatform', new ContactParityCaptchaHelper());
         $fields = contactFields();
 
         $api = contactViaApi($fields);
         expect($api['status'])->toBe(422)
             ->and($api['fields'])->toBe(['captchaToken'])
-            ->and(contactViaWeb($fields)['accepted'])->toBeTrue();
+            ->and($api['errors'])->toBe(['Incorrect CAPTCHA.'])
+            ->and(contactViaWeb($fields)['accepted'])->toBeTrue()
+            ->and($this->spy->sentToStore())->toHaveCount(1);
     });
 
-    it('reads the honeypot switch of each transport', function () {
+    it('reads one honeypot switch for both transports', function () {
         Mage::app()->getStore()->setConfig(Mage_Contacts_Service_Message::XML_PATH_HONEYPOT_ENABLED, '0');
         $fields = contactFields([Mage::helper('core')->getHoneypotFieldName() => 'I am a bot']);
 
         expect(contactViaWeb($fields)['accepted'])->toBeTrue()
             ->and(contactViaApi($fields)['accepted'])->toBeTrue()
-            ->and($this->spy->sentToStore())->toHaveCount(1);
+            ->and($this->spy->sentToStore())->toHaveCount(2);
     });
 });
