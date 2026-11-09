@@ -1272,8 +1272,8 @@ class Mage_Sales_Service_Order
      * Create a credit memo for an order, or for its invoice $invoice. Email it when $sendEmail is true, and put the
      * comment in the email when $notifyCustomer is true.
      *
-     * The money rules stay in one place: the refund never exceeds the order's refundable balance,
-     * and a memo that refunds nothing is not a refund.
+     * A memo that refunds nothing is not a refund. The credit memo model refuses a refund above the refundable balance
+     * of the order.
      *
      * @param array<string, mixed> $data Credit memo data for prepareCreditmemo().
      * @param array<int, bool>|null $backToStockItemIds Order item ids to return to stock, see prepareCreditmemo().
@@ -1344,12 +1344,6 @@ class Mage_Sales_Service_Order
         // nothing, but the order counts the credit memo as refunded online.
         if (!$offlineRefund && !$creditmemo->getInvoice()) {
             throw new Mage_Core_Exception(Mage::helper('sales')->__('Cannot refund online: the credit memo has no invoice. Refund it offline.'));
-        }
-        // Cap the refund at what the order can still refund, so an inflated
-        // adjustment cannot over-refund or mint excess store credit.
-        $refundable = (float) $order->getBaseTotalPaid() - (float) $order->getBaseTotalRefunded();
-        if ((float) $creditmemo->getBaseGrandTotal() > $refundable + 0.0001) {
-            throw new Mage_Core_Exception(Mage::helper('sales')->__('Refund amount exceeds the order\'s refundable balance'));
         }
         // A free order opts out through the flag.
         if ((float) $creditmemo->getBaseGrandTotal() <= 0 && !$creditmemo->getAllowZeroGrandTotal()) {

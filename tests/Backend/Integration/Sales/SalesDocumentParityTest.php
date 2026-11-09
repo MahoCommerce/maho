@@ -249,4 +249,23 @@ describe('credit memos', function (): void {
         expect($admin['errors'])->toBe([$message])
             ->and($api)->toMatchArray(['status' => 409, 'errors' => [$message]]);
     });
+
+    it('refuses a refund above the refundable balance on both transports', function (): void {
+        $this->orders[] = $order = salesParityOrder([
+            'total_paid' => 10, 'base_total_paid' => 10, 'total_invoiced' => 10, 'base_total_invoiced' => 10,
+            'store_to_base_rate' => 1, 'store_to_order_rate' => 1,
+        ]);
+        $order->getItemsCollection()->getFirstItem()->setQtyInvoiced(2)->save();
+        $message = "Refund amount exceeds the order's refundable balance";
+
+        $admin = AdminApiParity::admin(Mage_Adminhtml_Sales_Order_CreditmemoController::class, 'save', [
+            'order_id' => $order->getId(),
+            'creditmemo' => ['adjustment_positive' => 50, 'do_offline' => 1],
+        ]);
+        $api = salesParityApi(CreditMemoProcessor::class, 'order_creditmemo_create', ['orderId' => $order->getId()], ['adjustmentPositive' => 50]);
+
+        expect($admin['errors'])->toBe([$message])
+            ->and($api)->toMatchArray(['status' => 422, 'errors' => [$message]])
+            ->and(Mage::getModel('sales/order')->load($order->getId())->getCreditmemosCollection()->getSize())->toBe(0);
+    });
 });
