@@ -81,7 +81,7 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
             $pageSize = max(1, min((int) ($context['args']['pageSize'] ?? 20), 100));
             $status = $context['args']['status'] ?? null;
 
-            $result = $this->orderService->getListForCustomer((int) $customerId, $page, $pageSize, $status);
+            $result = $this->orderService->getListVisibleToCustomer((int) $customerId, $page, $pageSize, $status);
 
             $orders = [];
             foreach ($result['orders'] as $order) {
@@ -104,13 +104,11 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
             return null;
         }
 
-        // Ownership is not checked here: the operation's
-        // `is_owner(object, 'customerId')` expression does the denying post-read.
-
-        // Store allowlist enforcement for backend tokens; customer tokens
-        // are identity-bound by the ownership expression and stay untouched.
         if ($this->isAdmin() || $this->isApiUser()) {
             $this->assertStoreAllowed($order->getStoreId(), $this->requireUser(), 'order');
+        } elseif (!$this->orderService->isVisibleToCustomer($order, $this->getAuthenticatedCustomerId())) {
+            // The same answer as a missing order, so that an order id is not an oracle
+            return null;
         }
 
         return $this->mapToDto($order);
@@ -131,7 +129,7 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
         ['page' => $page, 'pageSize' => $pageSize] = $this->extractPagination($context, 10, 100);
         $status = $this->stringFilter($context['filters'] ?? [], 'status');
 
-        $result = $this->orderService->getListForCustomer($customerId, $page, $pageSize, $status);
+        $result = $this->orderService->getListVisibleToCustomer($customerId, $page, $pageSize, $status);
 
         $orders = [];
         foreach ($result['orders'] as $order) {

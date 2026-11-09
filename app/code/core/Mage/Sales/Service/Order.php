@@ -15,6 +15,7 @@ use Mage_Sales_Model_Order as Order;
 use Mage_Sales_Model_Order_Creditmemo as Creditmemo;
 use Mage_Sales_Model_Order_Invoice as Invoice;
 use Mage_Sales_Model_Order_Shipment as Shipment;
+use Mage_Sales_Model_Resource_Order_Collection as OrderCollection;
 
 /**
  * Places orders from carts, finds orders, and cancels, holds, invoices, ships and refunds them, for the admin,
@@ -252,7 +253,39 @@ class Mage_Sales_Service_Order
     public function isVisibleToCustomer(Order $order, ?int $customerId): bool
     {
         return $order->getId() && $this->isOwner($order, $customerId)
-            && in_array($order->getState(), Mage::getSingleton('sales/order_config')->getVisibleOnFrontStates(), true);
+            && in_array($order->getState(), $this->getVisibleOnFrontStates(), true);
+    }
+
+    /**
+     * Load the order $orderId when the customer $customerId may see it. See isVisibleToCustomer().
+     *
+     * @throws Mage_Core_Exception_NoSuchEntity
+     */
+    public function requireVisibleToCustomer(int $orderId, ?int $customerId): Order
+    {
+        $order = $orderId > 0 ? $this->getById($orderId) : null;
+        if (!$order || !$this->isVisibleToCustomer($order, $customerId)) {
+            throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('sales')->__('Order not found'));
+        }
+        return $order;
+    }
+
+    /**
+     * Keep in $collection only the orders that the customer $customerId may see. See isVisibleToCustomer().
+     */
+    public function addVisibleToCustomerFilter(OrderCollection $collection, ?int $customerId): OrderCollection
+    {
+        return $collection
+            ->addFieldToFilter('main_table.customer_id', $customerId > 0 ? $customerId : -1)
+            ->addFieldToFilter('main_table.state', ['in' => $this->getVisibleOnFrontStates()]);
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function getVisibleOnFrontStates(): array
+    {
+        return Mage::getSingleton('sales/order_config')->getVisibleOnFrontStates();
     }
 
     /**
@@ -494,7 +527,8 @@ class Mage_Sales_Service_Order
     }
 
     /**
-     * Get customer orders with billing address joined (no N+1 queries).
+     * Get every order of a customer with billing address joined (no N+1 queries), for the admin.
+     * getListVisibleToCustomer() gets the orders that the customer sees.
      *
      * @param int $customerId Customer ID
      * @param int $page Page number
@@ -511,6 +545,26 @@ class Mage_Sales_Service_Order
         ?string $since = null,
     ): array {
         $collection = $this->buildOrderCollection($customerId, ['status' => $status, 'since' => $since]);
+
+        return $this->paginateAndPreload($collection, $page, $pageSize);
+    }
+
+    /**
+     * Get the orders that the customer $customerId may see, as getListForCustomer() does. See isVisibleToCustomer().
+     *
+     * @return array{orders: array, total: int}
+     */
+    public function getListVisibleToCustomer(
+        int $customerId,
+        int $page = 1,
+        int $pageSize = 20,
+        ?string $status = null,
+        ?string $since = null,
+    ): array {
+        $collection = $this->addVisibleToCustomerFilter(
+            $this->buildOrderCollection(null, ['status' => $status, 'since' => $since]),
+            $customerId,
+        );
 
         return $this->paginateAndPreload($collection, $page, $pageSize);
     }

@@ -46,6 +46,13 @@ too, but the payment is not confirmed. Check the payment before you ship either 
 To see them, go to **Sales > Orders** and filter the **Status** column. A Processing order can
 already have a shipment for some items: open it and check the **Shipments** tab.
 
+## Which orders the customer sees
+
+A customer sees their orders in **My Account > My Orders** on the storefront, except a Pending
+Payment order: its payment is not confirmed. The API gives the customer the same orders. The list
+of the customer leaves out a Pending Payment order, and a read of it, or of its invoices, answers
+that the order does not exist. An administrator and an API user see every order.
+
 ## What the store refuses
 
 The admin and the API apply the same rules to an order and to its documents:
